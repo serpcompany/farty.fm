@@ -254,7 +254,8 @@ private struct RecordingRow: View {
                     "Pitch",
                     "\(analysis.referenceNoteLabel) · confidence \(analysis.pitchConfidence.formatted(.percent.precision(.fractionLength(0)))) · voiced \(analysis.pitchedFrameRatio.formatted(.percent.precision(.fractionLength(0))))"
                 )
-                Text("v\(analysis.version) · \(analysis.audioRevision)")
+                analysisLine("Stable pitch bounds", pitchBounds(analysis))
+                Text("schema v\(analysis.version) · \(analysis.algorithmVersion) · \(analysis.audioRevision)")
                     .font(.caption2.monospaced())
                     .foregroundStyle(.secondary)
             }
@@ -270,5 +271,13 @@ private struct RecordingRow: View {
                 .multilineTextAlignment(.trailing)
         }
         .font(.caption)
+    }
+
+    private func pitchBounds(_ analysis: RecordingAnalysis) -> String {
+        guard let low = analysis.stablePitchLowMIDINote,
+              let high = analysis.stablePitchHighMIDINote else {
+            return "none"
+        }
+        return "MIDI \(low.formatted(.number.precision(.fractionLength(1))))…\(high.formatted(.number.precision(.fractionLength(1))))"
     }
 }

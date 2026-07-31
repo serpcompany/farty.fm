@@ -4,7 +4,7 @@
 
 ## Question
 
-Can an independent, on-device post-save process extract and preserve the characteristics needed for Melody Fit and fart-only rendering—usable duration, relative level, brightness, and a confidence-gated reference pitch—without coupling capture to analysis or decoding the Recording again on every launch?
+Can an independent, on-device post-save process extract and preserve the characteristics needed for Melody Fit and fart-only rendering—usable duration, relative level, brightness, and a confidence-gated pitch profile—without coupling capture to analysis or decoding the Recording again on every launch?
 
 This proof extends the already-approved Recorder proof. Saving still completes by moving the approved `.m4a` file into `Application Support/Recordings`. Only after that move succeeds does a separate analysis task decode the saved Recording. The result is versioned JSON in the separate `Application Support/RecordingAnalysis` directory.
 
@@ -45,3 +45,25 @@ Each Recording shows the full relevant state: usable region, RMS and peak dBFS, 
 7. Use **Forget preserved analysis** and confirm the audio remains playable while its analysis state becomes missing.
 
 The decision is ready only after the product owner confirms that these preserved characteristics are credible enough to drive the next Melody Fit and rendering proof.
+
+## Approved Fixture Library review
+
+Run the exact on-device analyzer logic across all 23 approved Recordings:
+
+```sh
+zsh Tools/run-fixture-analysis
+```
+
+The command extracts the committed Fixture Library from
+`prototype/internal-fixture-library`, writes
+`Evidence/recording-analysis-corpus.json`, and opens a terminal review loop.
+Use `p` to play or stop the selected Recording, then compare what you hear with
+its usable region, level, brightness, confidence-gated reference pitch, and
+stable detected pitch bounds. The extracted audio lives only in a temporary
+directory and is removed when the review exits.
+
+For a non-interactive evidence refresh:
+
+```sh
+zsh Tools/run-fixture-analysis --batch
+```

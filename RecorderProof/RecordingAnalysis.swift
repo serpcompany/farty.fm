@@ -2,9 +2,11 @@ import AVFAudio
 import Foundation
 
 struct RecordingAnalysis: Codable, Sendable {
-    static let schemaVersion = 1
+    static let schemaVersion = 2
+    static let algorithmVersion = "windowed-yin-v2"
 
     let version: Int
+    let algorithmVersion: String
     let recordingID: String
     let audioRevision: String
     let analyzedAt: Date
@@ -16,6 +18,8 @@ struct RecordingAnalysis: Codable, Sendable {
     let brightness: Double
     let referenceHz: Double?
     let referenceMIDINote: Int?
+    let stablePitchLowMIDINote: Double?
+    let stablePitchHighMIDINote: Double?
     let pitchConfidence: Double
     let pitchedFrameRatio: Double
 
@@ -48,6 +52,8 @@ struct RecordingCharacteristics: Sendable {
     let brightness: Double
     let referenceHz: Double?
     let referenceMIDINote: Int?
+    let stablePitchLowMIDINote: Double?
+    let stablePitchHighMIDINote: Double?
     let pitchConfidence: Double
     let pitchedFrameRatio: Double
 }
@@ -83,6 +89,8 @@ enum RecordingAnalyzer {
             brightness: brightness,
             referenceHz: pitch.referenceHz,
             referenceMIDINote: pitch.referenceMIDINote,
+            stablePitchLowMIDINote: pitch.stablePitchLowMIDINote,
+            stablePitchHighMIDINote: pitch.stablePitchHighMIDINote,
             pitchConfidence: pitch.confidence,
             pitchedFrameRatio: pitch.pitchedFrameRatio
         )
@@ -109,7 +117,14 @@ enum RecordingAnalyzer {
     private static func pitchProfile(
         samples: [Float],
         sampleRate: Double
-    ) -> (referenceHz: Double?, referenceMIDINote: Int?, confidence: Double, pitchedFrameRatio: Double) {
+    ) -> (
+        referenceHz: Double?,
+        referenceMIDINote: Int?,
+        stablePitchLowMIDINote: Double?,
+        stablePitchHighMIDINote: Double?,
+        confidence: Double,
+        pitchedFrameRatio: Double
+    ) {
         let downsampleFactor = max(1, Int(ceil(sampleRate / 11_025)))
         let downsampledRate = sampleRate / Double(downsampleFactor)
         let downsampled = stride(from: 0, to: samples.count, by: downsampleFactor).map { start -> Float in
@@ -121,7 +136,7 @@ enum RecordingAnalyzer {
         let frameSize = 1024
         let hopSize = 512
         guard downsampled.count >= frameSize else {
-            return (nil, nil, 0, 0)
+            return (nil, nil, nil, nil, 0, 0)
         }
 
         var frames: [(hz: Double, clarity: Double)] = []
@@ -141,7 +156,7 @@ enum RecordingAnalyzer {
         }
 
         guard consideredFrameCount > 0, !frames.isEmpty else {
-            return (nil, nil, 0, 0)
+            return (nil, nil, nil, nil, 0, 0)
         }
 
         let midiValues = frames.map { hzToMIDI($0.hz) }
@@ -151,7 +166,7 @@ enum RecordingAnalyzer {
             .map(\.0)
 
         guard !stableFrames.isEmpty else {
-            return (nil, nil, 0, Double(frames.count) / Double(consideredFrameCount))
+            return (nil, nil, nil, nil, 0, Double(frames.count) / Double(consideredFrameCount))
         }
 
         let stableMidis = stableFrames.map { hzToMIDI($0.hz) }
@@ -163,12 +178,14 @@ enum RecordingAnalyzer {
         let confidence = max(0, min(1, averageClarity * pitchedRatio * stability))
 
         guard confidence >= 0.2 else {
-            return (nil, nil, confidence, pitchedRatio)
+            return (nil, nil, nil, nil, confidence, pitchedRatio)
         }
 
         return (
             stableFrames.map(\.hz).reduce(0, +) / Double(stableFrames.count),
             Int(referenceMIDI.rounded()),
+            stableMidis.min(),
+            stableMidis.max(),
             confidence,
             pitchedRatio
         )
@@ -274,6 +291,7 @@ struct RecordingAnalysisService: Sendable {
         guard let data = try? Data(contentsOf: analysisURL(for: recording)),
               let analysis = try? decoder.decode(RecordingAnalysis.self, from: data),
               analysis.version == RecordingAnalysis.schemaVersion,
+              analysis.algorithmVersion == RecordingAnalysis.algorithmVersion,
               analysis.audioRevision == (try? audioRevision(for: recording.url)) else {
             return nil
         }
@@ -311,6 +329,7 @@ struct RecordingAnalysisService: Sendable {
         )
         let analysis = RecordingAnalysis(
             version: RecordingAnalysis.schemaVersion,
+            algorithmVersion: RecordingAnalysis.algorithmVersion,
             recordingID: recording.id,
             audioRevision: try audioRevision(for: recording.url),
             analyzedAt: .now,
@@ -322,6 +341,8 @@ struct RecordingAnalysisService: Sendable {
             brightness: characteristics.brightness,
             referenceHz: characteristics.referenceHz,
             referenceMIDINote: characteristics.referenceMIDINote,
+            stablePitchLowMIDINote: characteristics.stablePitchLowMIDINote,
+            stablePitchHighMIDINote: characteristics.stablePitchHighMIDINote,
             pitchConfidence: characteristics.pitchConfidence,
             pitchedFrameRatio: characteristics.pitchedFrameRatio
         )
