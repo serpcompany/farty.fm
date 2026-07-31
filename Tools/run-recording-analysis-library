@@ -1,0 +1,16 @@
+#!/bin/zsh
+set -euo pipefail
+
+repository_root="$(git rev-parse --show-toplevel)"
+analysis_scratch="$(mktemp -d "${TMPDIR:-/tmp}/pedos-analysis-library.XXXXXX")"
+trap 'rm -rf "$analysis_scratch"' EXIT
+
+git -C "$repository_root" archive prototype/internal-fixture-library FixtureLibrary |
+  tar -x -C "$analysis_scratch"
+
+swift run \
+  --package-path "$repository_root/RecordingAnalysisKit" \
+  recording-analysis \
+  "$analysis_scratch/FixtureLibrary/approved-recordings.json" \
+  "$analysis_scratch/FixtureLibrary" \
+  "$repository_root/Evidence/recording-analysis-library.json"

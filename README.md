@@ -2,6 +2,20 @@
 
 > THROWAWAY PROTOTYPE — this branch is evidence for the Wayfinder decision, not production code.
 
+## Current proof
+
+The current task is the reusable analysis API in `RecordingAnalysisKit/`. It
+reports duration, optional pitch evidence, named dBFS level measurements, and
+detected sound start/end. Run:
+
+```sh
+swift test --package-path RecordingAnalysisKit
+zsh Tools/run-recording-analysis-library
+```
+
+The later comparative-rendering section is retained as superseded throwaway
+history. It is not a product-owner acceptance task.
+
 ## Question
 
 Can an independent, on-device post-save process extract and preserve the characteristics needed for Melody Fit and fart-only rendering—usable duration, relative level, brightness, and a confidence-gated pitch profile—without coupling capture to analysis or decoding the Recording again on every launch?
