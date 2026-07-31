@@ -1,0 +1,7 @@
+{
+  "name": "pedos-end-to-end-prototype",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 4173"
+  }
+}
