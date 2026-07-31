@@ -21,5 +21,9 @@ let package = Package(
             name: "MelodyRenderProof",
             dependencies: ["MelodyRenderKit", "RecordingAnalysisKit"]
         ),
+        .testTarget(
+            name: "MelodyRenderKitTests",
+            dependencies: ["MelodyRenderKit", "RecordingAnalysisKit"]
+        ),
     ]
 )

@@ -153,12 +153,16 @@ public struct RenderEvidence: Codable, Sendable {
 
 public enum MelodyRenderError: LocalizedError {
     case noCandidates
+    case invalidTempo
+    case invalidEventDuration(Int)
     case noAudio(String)
     case cannotCreateBuffer
 
     public var errorDescription: String? {
         switch self {
         case .noCandidates: "No Recording candidates were supplied."
+        case .invalidTempo: "The melody tempo must be finite and greater than zero."
+        case .invalidEventDuration(let index): "Melody event \(index) must have a finite duration greater than zero."
         case .noAudio(let id): "Recording \(id) could not be decoded."
         case .cannotCreateBuffer: "The output audio buffer could not be created."
         }
@@ -204,6 +208,10 @@ public enum MelodyFitPlanner {
 
     public static func plan(melody: CuratedMelody, sourceSet: SourceSet) throws -> ([NoteAssignment], MelodyFitFacts) {
         guard !sourceSet.candidates.isEmpty else { throw MelodyRenderError.noCandidates }
+        guard melody.bpm.isFinite, melody.bpm > 0 else { throw MelodyRenderError.invalidTempo }
+        if let invalidEventIndex = melody.events.firstIndex(where: { !$0.beats.isFinite || $0.beats <= 0 }) {
+            throw MelodyRenderError.invalidEventDuration(invalidEventIndex)
+        }
         let sourcePitches = sourceSet.candidates.compactMap { $0.analysis.pitch.referenceMIDINote }
         let melodyNotes = melody.events.compactMap(\.midiNote)
         let sourceCenter = median(sourcePitches) ?? median(melodyNotes) ?? 60
