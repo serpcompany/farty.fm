@@ -1,6 +1,41 @@
-# Post-save Recording Analysis proof
+# Curated Melody Fit and rendering proof
 
 > THROWAWAY PROTOTYPE — this branch is evidence for the Wayfinder decision, not production code.
+
+## Question
+
+Which locally testable Melody Fit and fart-only rendering approach can produce at least three recognizable,
+rights-safe curated melodies from the approved Fixture Library while supporting `choose-individual`, `use-all`,
+and `recommend-best-fit` source modes?
+
+This branch builds on the separately approved `RecordingAnalysisKit` boundary. It does not restore the earlier,
+superseded blind comparison from the Recording Analysis decision.
+
+## Run the listening proof
+
+```sh
+zsh Tools/run-curated-melody-proof
+```
+
+The command extracts the approved Fixture Library into a temporary directory, analyzes it with the approved API,
+exports nine WAV/JSON pairs under `Evidence/curated-melody-listening/`, and opens a terminal review loop. Use `p`
+to play or stop, `n`/`b` to move, and `q` to quit.
+
+For a non-interactive rebuild:
+
+```sh
+zsh Tools/run-curated-melody-proof --batch
+```
+
+The proof deliberately exposes facts instead of collapsing them into an unexplained Melody Fit score: selected and
+used Recording IDs, pitch-backed assignments, mean/maximum resampling shift, source-duration repetition, and warnings.
+The renderer is deterministic linear resampling with ping-pong extension, per-note envelopes, dBFS gain matching, and
+peak limiting. It adds no non-fart audio.
+
+This ticket is ready only when the product owner says which outputs are recognizable and approves one source mode and
+artifact level as the Song Creator baseline.
+
+## Upstream Recording Analysis proof
 
 ## Current proof
 

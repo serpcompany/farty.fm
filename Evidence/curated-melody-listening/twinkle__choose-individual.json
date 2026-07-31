@@ -1,0 +1,310 @@
+{
+  "assignments" : [
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 0,
+      "recordingID" : "059",
+      "renderedMIDINote" : 60,
+      "semitoneShift" : -8.52852188590876,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 60
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 1,
+      "recordingID" : "059",
+      "renderedMIDINote" : 60,
+      "semitoneShift" : -8.52852188590876,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 60
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 2,
+      "recordingID" : "059",
+      "renderedMIDINote" : 67,
+      "semitoneShift" : -1.5285218859087593,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 67
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 3,
+      "recordingID" : "059",
+      "renderedMIDINote" : 67,
+      "semitoneShift" : -1.5285218859087593,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 67
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 4,
+      "recordingID" : "059",
+      "renderedMIDINote" : 69,
+      "semitoneShift" : 0.47147811409124074,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 69
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 5,
+      "recordingID" : "059",
+      "renderedMIDINote" : 69,
+      "semitoneShift" : 0.47147811409124074,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 69
+    },
+    {
+      "durationSeconds" : 1,
+      "eventIndex" : 6,
+      "recordingID" : "059",
+      "renderedMIDINote" : 67,
+      "semitoneShift" : -1.5285218859087593,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 67
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 7,
+      "recordingID" : "059",
+      "renderedMIDINote" : 65,
+      "semitoneShift" : -3.5285218859087593,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 65
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 8,
+      "recordingID" : "059",
+      "renderedMIDINote" : 65,
+      "semitoneShift" : -3.5285218859087593,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 65
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 9,
+      "recordingID" : "059",
+      "renderedMIDINote" : 64,
+      "semitoneShift" : -4.528521885908759,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 10,
+      "recordingID" : "059",
+      "renderedMIDINote" : 64,
+      "semitoneShift" : -4.528521885908759,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 11,
+      "recordingID" : "059",
+      "renderedMIDINote" : 62,
+      "semitoneShift" : -6.528521885908759,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 12,
+      "recordingID" : "059",
+      "renderedMIDINote" : 62,
+      "semitoneShift" : -6.528521885908759,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 1,
+      "eventIndex" : 13,
+      "recordingID" : "059",
+      "renderedMIDINote" : 60,
+      "semitoneShift" : -8.52852188590876,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 60
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 15,
+      "recordingID" : "059",
+      "renderedMIDINote" : 67,
+      "semitoneShift" : -1.5285218859087593,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 67
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 16,
+      "recordingID" : "059",
+      "renderedMIDINote" : 67,
+      "semitoneShift" : -1.5285218859087593,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 67
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 17,
+      "recordingID" : "059",
+      "renderedMIDINote" : 65,
+      "semitoneShift" : -3.5285218859087593,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 65
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 18,
+      "recordingID" : "059",
+      "renderedMIDINote" : 65,
+      "semitoneShift" : -3.5285218859087593,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 65
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 19,
+      "recordingID" : "059",
+      "renderedMIDINote" : 64,
+      "semitoneShift" : -4.528521885908759,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.5,
+      "eventIndex" : 20,
+      "recordingID" : "059",
+      "renderedMIDINote" : 64,
+      "semitoneShift" : -4.528521885908759,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 1,
+      "eventIndex" : 21,
+      "recordingID" : "059",
+      "renderedMIDINote" : 62,
+      "semitoneShift" : -6.528521885908759,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    }
+  ],
+  "fit" : {
+    "maximumAbsoluteSemitoneShift" : 8.52852188590876,
+    "meanAbsoluteSemitoneShift" : 4.0945177171642335,
+    "noteAssignmentCount" : 21,
+    "pitchedAssignmentCount" : 21,
+    "repeatedOrPaddedNoteCount" : 0,
+    "selectedPitchAvailableCount" : 1,
+    "selectedRecordingIDs" : [
+      "059"
+    ],
+    "usedRecordingIDs" : [
+      "059"
+    ],
+    "warnings" : [
+
+    ]
+  },
+  "individualRecordingID" : "059",
+  "melody" : {
+    "bpm" : 120,
+    "events" : [
+      {
+        "beats" : 1,
+        "midiNote" : 60
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 60
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 67
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 67
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 69
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 69
+      },
+      {
+        "beats" : 2,
+        "midiNote" : 67
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 65
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 65
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 2,
+        "midiNote" : 60
+      },
+      {
+        "beats" : 0.5
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 67
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 67
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 65
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 65
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 2,
+        "midiNote" : 62
+      }
+    ],
+    "id" : "twinkle",
+    "provenance" : "The eighteenth-century 'Ah! vous dirai-je, Maman' melody. Direct note-plan encoding.",
+    "title" : "Twinkle, Twinkle, Little Star"
+  },
+  "outputFilename" : "twinkle__choose-individual.wav",
+  "renderer" : "deterministic-resample-pingpong-v1",
+  "schemaVersion" : 1,
+  "sourceMode" : "choose-individual"
+}

@@ -1,0 +1,405 @@
+{
+  "assignments" : [
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 0,
+      "recordingID" : "021",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : 3.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 1,
+      "recordingID" : "021",
+      "renderedMIDINote" : 50,
+      "semitoneShift" : 1.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 2,
+      "recordingID" : "021",
+      "renderedMIDINote" : 48,
+      "semitoneShift" : -0.1313166731985973,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 60
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 3,
+      "recordingID" : "021",
+      "renderedMIDINote" : 50,
+      "semitoneShift" : 1.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 4,
+      "recordingID" : "021",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : 3.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 5,
+      "recordingID" : "021",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : 3.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 6,
+      "recordingID" : "021",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : 3.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 8,
+      "recordingID" : "021",
+      "renderedMIDINote" : 50,
+      "semitoneShift" : 1.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 9,
+      "recordingID" : "021",
+      "renderedMIDINote" : 50,
+      "semitoneShift" : 1.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 10,
+      "recordingID" : "021",
+      "renderedMIDINote" : 50,
+      "semitoneShift" : 1.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 12,
+      "recordingID" : "086",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : -3.654730496454256,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 13,
+      "recordingID" : "086",
+      "renderedMIDINote" : 55,
+      "semitoneShift" : -0.6547304964542562,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 67
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 14,
+      "recordingID" : "086",
+      "renderedMIDINote" : 55,
+      "semitoneShift" : -0.6547304964542562,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 67
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 16,
+      "recordingID" : "086",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : -3.654730496454256,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 17,
+      "recordingID" : "021",
+      "renderedMIDINote" : 50,
+      "semitoneShift" : 1.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 18,
+      "recordingID" : "021",
+      "renderedMIDINote" : 48,
+      "semitoneShift" : -0.1313166731985973,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 60
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 19,
+      "recordingID" : "021",
+      "renderedMIDINote" : 50,
+      "semitoneShift" : 1.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 20,
+      "recordingID" : "086",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : -3.654730496454256,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 21,
+      "recordingID" : "090",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : -3.08763266430401,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 22,
+      "recordingID" : "086",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : -3.654730496454256,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 23,
+      "recordingID" : "090",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : -3.08763266430401,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 24,
+      "recordingID" : "021",
+      "renderedMIDINote" : 50,
+      "semitoneShift" : 1.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 25,
+      "recordingID" : "021",
+      "renderedMIDINote" : 50,
+      "semitoneShift" : 1.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 26,
+      "recordingID" : "084",
+      "renderedMIDINote" : 52,
+      "semitoneShift" : -3.549782237015492,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 64
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 27,
+      "recordingID" : "021",
+      "renderedMIDINote" : 50,
+      "semitoneShift" : 1.8686833268014027,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 62
+    },
+    {
+      "durationSeconds" : 0.45454545454545453,
+      "eventIndex" : 28,
+      "recordingID" : "021",
+      "renderedMIDINote" : 48,
+      "semitoneShift" : -0.1313166731985973,
+      "sourcePitchAvailable" : true,
+      "targetMIDINote" : 60
+    }
+  ],
+  "fit" : {
+    "maximumAbsoluteSemitoneShift" : 3.8686833268014027,
+    "meanAbsoluteSemitoneShift" : 2.3157287361217107,
+    "noteAssignmentCount" : 26,
+    "pitchedAssignmentCount" : 26,
+    "repeatedOrPaddedNoteCount" : 23,
+    "selectedPitchAvailableCount" : 7,
+    "selectedRecordingIDs" : [
+      "002",
+      "009",
+      "013",
+      "016",
+      "017",
+      "018",
+      "019",
+      "021",
+      "022",
+      "032",
+      "052",
+      "055",
+      "059",
+      "065",
+      "067",
+      "069",
+      "080",
+      "081",
+      "084",
+      "086",
+      "090",
+      "091",
+      "094"
+    ],
+    "usedRecordingIDs" : [
+      "021",
+      "084",
+      "086",
+      "090"
+    ],
+    "warnings" : [
+      "At least one source region is shorter than its note and requires ping-pong repetition or padding."
+    ]
+  },
+  "melody" : {
+    "bpm" : 132,
+    "events" : [
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 60
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 67
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 67
+      },
+      {
+        "beats" : 0.5
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 60
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 64
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 62
+      },
+      {
+        "beats" : 1,
+        "midiNote" : 60
+      }
+    ],
+    "id" : "mary-lamb",
+    "provenance" : "Traditional melody; published in the nineteenth century. Direct note-plan encoding.",
+    "title" : "Mary Had a Little Lamb"
+  },
+  "outputFilename" : "mary-lamb__use-all.wav",
+  "renderer" : "deterministic-resample-pingpong-v1",
+  "schemaVersion" : 1,
+  "sourceMode" : "use-all"
+}

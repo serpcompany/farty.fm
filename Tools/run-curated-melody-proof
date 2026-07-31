@@ -1,0 +1,20 @@
+#!/bin/zsh
+set -euo pipefail
+
+repository_root="$(git rev-parse --show-toplevel)"
+fixture_scratch="$(mktemp -d "${TMPDIR:-/tmp}/pedos-curated-melody.XXXXXX")"
+trap 'rm -rf "$fixture_scratch"' EXIT
+
+git -C "$repository_root" archive prototype/internal-fixture-library FixtureLibrary |
+  tar -x -C "$fixture_scratch"
+
+output_directory="$repository_root/Evidence/curated-melody-listening"
+mkdir -p "$output_directory"
+
+swift run \
+  --package-path "$repository_root/MelodyRenderProof" \
+  melody-render-proof \
+  "$fixture_scratch/FixtureLibrary/approved-recordings.json" \
+  "$fixture_scratch/FixtureLibrary" \
+  "$output_directory" \
+  "$@"
