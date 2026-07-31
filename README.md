@@ -17,6 +17,11 @@ open PedosRecorderProof.xcodeproj
 
 Choose your iPhone and press Run. Xcode may ask you to choose your development team for device signing.
 
+The iOS Simulator can exercise capture, preview, save, relaunch persistence,
+replay, and deletion. Its automated microphone permission callback is bypassed
+because that callback can remain pending after simulator privacy access is
+pre-granted; physical-device builds still use the real system permission flow.
+
 ## Human review checklist
 
 Run these checks on a physical iPhone:

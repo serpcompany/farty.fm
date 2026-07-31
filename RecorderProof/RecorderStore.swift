@@ -55,14 +55,12 @@ final class RecorderStore: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDeleg
 
     func startRecording() async {
         guard case .idle = phase else { return }
+        print("[RecorderProof] start requested")
         stopPlayback()
         errorMessage = nil
 
-        let granted = await withCheckedContinuation { continuation in
-            AVAudioApplication.requestRecordPermission { permissionGranted in
-                continuation.resume(returning: permissionGranted)
-            }
-        }
+        let granted = await hasRecordPermission()
+        print("[RecorderProof] permission result: \(granted)")
 
         guard granted else {
             errorMessage = "Microphone permission is required. Enable it in Settings, then try again."
@@ -71,8 +69,10 @@ final class RecorderStore: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDeleg
 
         do {
             let session = AVAudioSession.sharedInstance()
+            print("[RecorderProof] configuring audio session")
             try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
             try session.setActive(true)
+            print("[RecorderProof] audio session active")
 
             let draftURL = FileManager.default.temporaryDirectory
                 .appending(path: "pedos-draft-\(UUID().uuidString).m4a")
@@ -91,7 +91,9 @@ final class RecorderStore: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDeleg
 
             audioRecorder = recorder
             phase = .recording(startedAt: .now)
+            print("[RecorderProof] recording started")
         } catch {
+            print("[RecorderProof] recording start failed: \(error)")
             audioRecorder = nil
             deactivateAudioSession()
             errorMessage = "Recording could not start: \(error.localizedDescription)"
@@ -191,6 +193,29 @@ final class RecorderStore: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDeleg
             stopPlayback()
             errorMessage = "Playback failed: \(error.localizedDescription)"
         }
+    }
+
+    private func hasRecordPermission() async -> Bool {
+#if targetEnvironment(simulator)
+        // Simulator privacy callbacks can remain pending under UI automation even
+        // after `simctl privacy grant`. Device builds still use the real prompt.
+        return true
+#else
+        switch AVAudioApplication.shared.recordPermission {
+        case .granted:
+            return true
+        case .denied:
+            return false
+        case .undetermined:
+            return await withCheckedContinuation { continuation in
+                AVAudioApplication.requestRecordPermission { permissionGranted in
+                    continuation.resume(returning: permissionGranted)
+                }
+            }
+        @unknown default:
+            return false
+        }
+#endif
     }
 
     private func stopPlayback() {
