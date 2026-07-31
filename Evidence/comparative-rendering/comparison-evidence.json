@@ -1,0 +1,1357 @@
+{
+  "blindFiles" : [
+    "blind-1.wav",
+    "blind-2.wav",
+    "blind-3.wav"
+  ],
+  "contourSemitones" : [
+    0,
+    2,
+    4,
+    0,
+    0,
+    2,
+    4,
+    0,
+    4,
+    5,
+    7,
+    4,
+    5,
+    7,
+    7,
+    9,
+    7,
+    5,
+    4,
+    0,
+    7,
+    9,
+    7,
+    5,
+    4,
+    0
+  ],
+  "evidenceVersion" : 1,
+  "generatedAt" : "2026-07-31T10:15:13Z",
+  "noteDurationSeconds" : 0.34,
+  "plans" : [
+    {
+      "baseMIDINote" : 56,
+      "events" : [
+        {
+          "gain" : 0.855858560449284,
+          "index" : 0,
+          "pitchShiftSemitones" : 0.07779713764040252,
+          "recordingID" : "013",
+          "soundEndSeconds" : 1.34,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 55.9222028623596,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 1,
+          "pitchShiftSemitones" : 1.7421190337544132,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 2
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 2,
+          "pitchShiftSemitones" : 3.7421190337544132,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 0.855858560449284,
+          "index" : 3,
+          "pitchShiftSemitones" : 0.07779713764040252,
+          "recordingID" : "013",
+          "soundEndSeconds" : 1.34,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 55.9222028623596,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 0.855858560449284,
+          "index" : 4,
+          "pitchShiftSemitones" : 0.07779713764040252,
+          "recordingID" : "013",
+          "soundEndSeconds" : 1.34,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 55.9222028623596,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 5,
+          "pitchShiftSemitones" : 1.7421190337544132,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 2
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 6,
+          "pitchShiftSemitones" : 3.7421190337544132,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 0.855858560449284,
+          "index" : 7,
+          "pitchShiftSemitones" : 0.07779713764040252,
+          "recordingID" : "013",
+          "soundEndSeconds" : 1.34,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 55.9222028623596,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 8,
+          "pitchShiftSemitones" : 3.7421190337544132,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 9,
+          "pitchShiftSemitones" : 4.742119033754413,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 1.1252896692172365,
+          "index" : 10,
+          "pitchShiftSemitones" : -5.528521885908759,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.56,
+          "soundStartSeconds" : 0.28,
+          "sourceMIDINote" : 68.52852188590876,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 11,
+          "pitchShiftSemitones" : 3.7421190337544132,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 12,
+          "pitchShiftSemitones" : 4.742119033754413,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 1.1252896692172365,
+          "index" : 13,
+          "pitchShiftSemitones" : -5.528521885908759,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.56,
+          "soundStartSeconds" : 0.28,
+          "sourceMIDINote" : 68.52852188590876,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1.1252896692172365,
+          "index" : 14,
+          "pitchShiftSemitones" : -5.528521885908759,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.56,
+          "soundStartSeconds" : 0.28,
+          "sourceMIDINote" : 68.52852188590876,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1.1252896692172365,
+          "index" : 15,
+          "pitchShiftSemitones" : -3.5285218859087593,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.56,
+          "soundStartSeconds" : 0.28,
+          "sourceMIDINote" : 68.52852188590876,
+          "targetOffsetSemitones" : 9
+        },
+        {
+          "gain" : 1.1252896692172365,
+          "index" : 16,
+          "pitchShiftSemitones" : -5.528521885908759,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.56,
+          "soundStartSeconds" : 0.28,
+          "sourceMIDINote" : 68.52852188590876,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 17,
+          "pitchShiftSemitones" : 4.742119033754413,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 18,
+          "pitchShiftSemitones" : 3.7421190337544132,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 0.855858560449284,
+          "index" : 19,
+          "pitchShiftSemitones" : 0.07779713764040252,
+          "recordingID" : "013",
+          "soundEndSeconds" : 1.34,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 55.9222028623596,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 1.1252896692172365,
+          "index" : 20,
+          "pitchShiftSemitones" : -5.528521885908759,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.56,
+          "soundStartSeconds" : 0.28,
+          "sourceMIDINote" : 68.52852188590876,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1.1252896692172365,
+          "index" : 21,
+          "pitchShiftSemitones" : -3.5285218859087593,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.56,
+          "soundStartSeconds" : 0.28,
+          "sourceMIDINote" : 68.52852188590876,
+          "targetOffsetSemitones" : 9
+        },
+        {
+          "gain" : 1.1252896692172365,
+          "index" : 22,
+          "pitchShiftSemitones" : -5.528521885908759,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.56,
+          "soundStartSeconds" : 0.28,
+          "sourceMIDINote" : 68.52852188590876,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 23,
+          "pitchShiftSemitones" : 4.742119033754413,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 0.7452630625227615,
+          "index" : 24,
+          "pitchShiftSemitones" : 3.7421190337544132,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.64,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 56.25788096624559,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 0.855858560449284,
+          "index" : 25,
+          "pitchShiftSemitones" : 0.07779713764040252,
+          "recordingID" : "013",
+          "soundEndSeconds" : 1.34,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 55.9222028623596,
+          "targetOffsetSemitones" : 0
+        }
+      ],
+      "method" : "paper-yin-v1",
+      "outputFilename" : "blind-1.wav"
+    },
+    {
+      "baseMIDINote" : 56,
+      "events" : [
+        {
+          "gain" : 1,
+          "index" : 0,
+          "pitchShiftSemitones" : 0,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 1,
+          "index" : 1,
+          "pitchShiftSemitones" : 2,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 2
+        },
+        {
+          "gain" : 1,
+          "index" : 2,
+          "pitchShiftSemitones" : 4,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 1,
+          "index" : 3,
+          "pitchShiftSemitones" : 0,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 1,
+          "index" : 4,
+          "pitchShiftSemitones" : 0,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 1,
+          "index" : 5,
+          "pitchShiftSemitones" : 2,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 2
+        },
+        {
+          "gain" : 1,
+          "index" : 6,
+          "pitchShiftSemitones" : 4,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 1,
+          "index" : 7,
+          "pitchShiftSemitones" : 0,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 1,
+          "index" : 8,
+          "pitchShiftSemitones" : 4,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 1,
+          "index" : 9,
+          "pitchShiftSemitones" : 5,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 1,
+          "index" : 10,
+          "pitchShiftSemitones" : 7,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1,
+          "index" : 11,
+          "pitchShiftSemitones" : 4,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 1,
+          "index" : 12,
+          "pitchShiftSemitones" : 5,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 1,
+          "index" : 13,
+          "pitchShiftSemitones" : 7,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1,
+          "index" : 14,
+          "pitchShiftSemitones" : 7,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1,
+          "index" : 15,
+          "pitchShiftSemitones" : 9,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 9
+        },
+        {
+          "gain" : 1,
+          "index" : 16,
+          "pitchShiftSemitones" : 7,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1,
+          "index" : 17,
+          "pitchShiftSemitones" : 5,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 1,
+          "index" : 18,
+          "pitchShiftSemitones" : 4,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 1,
+          "index" : 19,
+          "pitchShiftSemitones" : 0,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 1,
+          "index" : 20,
+          "pitchShiftSemitones" : 7,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1,
+          "index" : 21,
+          "pitchShiftSemitones" : 9,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 9
+        },
+        {
+          "gain" : 1,
+          "index" : 22,
+          "pitchShiftSemitones" : 7,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1,
+          "index" : 23,
+          "pitchShiftSemitones" : 5,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 1,
+          "index" : 24,
+          "pitchShiftSemitones" : 4,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 1,
+          "index" : 25,
+          "pitchShiftSemitones" : 0,
+          "recordingID" : "002",
+          "soundEndSeconds" : 4.212979166666667,
+          "soundStartSeconds" : 0,
+          "targetOffsetSemitones" : 0
+        }
+      ],
+      "method" : "duration-only-control",
+      "outputFilename" : "blind-2.wav"
+    },
+    {
+      "baseMIDINote" : 56,
+      "events" : [
+        {
+          "gain" : 1.463967961558249,
+          "index" : 0,
+          "pitchShiftSemitones" : 0.01761917877266228,
+          "recordingID" : "084",
+          "soundEndSeconds" : 0.6385487528344671,
+          "soundStartSeconds" : 0.17414965986394557,
+          "sourceMIDINote" : 55.98238082122734,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 1,
+          "pitchShiftSemitones" : 0.45654382763711965,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 2
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 2,
+          "pitchShiftSemitones" : 2.4565438276371196,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 1.463967961558249,
+          "index" : 3,
+          "pitchShiftSemitones" : 0.01761917877266228,
+          "recordingID" : "084",
+          "soundEndSeconds" : 0.6385487528344671,
+          "soundStartSeconds" : 0.17414965986394557,
+          "sourceMIDINote" : 55.98238082122734,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 1.463967961558249,
+          "index" : 4,
+          "pitchShiftSemitones" : 0.01761917877266228,
+          "recordingID" : "084",
+          "soundEndSeconds" : 0.6385487528344671,
+          "soundStartSeconds" : 0.17414965986394557,
+          "sourceMIDINote" : 55.98238082122734,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 5,
+          "pitchShiftSemitones" : 0.45654382763711965,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 2
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 6,
+          "pitchShiftSemitones" : 2.4565438276371196,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 1.463967961558249,
+          "index" : 7,
+          "pitchShiftSemitones" : 0.01761917877266228,
+          "recordingID" : "084",
+          "soundEndSeconds" : 0.6385487528344671,
+          "soundStartSeconds" : 0.17414965986394557,
+          "sourceMIDINote" : 55.98238082122734,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 8,
+          "pitchShiftSemitones" : 2.4565438276371196,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 9,
+          "pitchShiftSemitones" : 3.4565438276371196,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 1.1240722517032202,
+          "index" : 10,
+          "pitchShiftSemitones" : -5.4362657600923825,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.555736961451247,
+          "soundStartSeconds" : 0.2786394557823129,
+          "sourceMIDINote" : 68.43626576009238,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 11,
+          "pitchShiftSemitones" : 2.4565438276371196,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 12,
+          "pitchShiftSemitones" : 3.4565438276371196,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 1.1240722517032202,
+          "index" : 13,
+          "pitchShiftSemitones" : -5.4362657600923825,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.555736961451247,
+          "soundStartSeconds" : 0.2786394557823129,
+          "sourceMIDINote" : 68.43626576009238,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1.1240722517032202,
+          "index" : 14,
+          "pitchShiftSemitones" : -5.4362657600923825,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.555736961451247,
+          "soundStartSeconds" : 0.2786394557823129,
+          "sourceMIDINote" : 68.43626576009238,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1.1240722517032202,
+          "index" : 15,
+          "pitchShiftSemitones" : -3.4362657600923825,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.555736961451247,
+          "soundStartSeconds" : 0.2786394557823129,
+          "sourceMIDINote" : 68.43626576009238,
+          "targetOffsetSemitones" : 9
+        },
+        {
+          "gain" : 1.1240722517032202,
+          "index" : 16,
+          "pitchShiftSemitones" : -5.4362657600923825,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.555736961451247,
+          "soundStartSeconds" : 0.2786394557823129,
+          "sourceMIDINote" : 68.43626576009238,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 17,
+          "pitchShiftSemitones" : 3.4565438276371196,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 18,
+          "pitchShiftSemitones" : 2.4565438276371196,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 1.463967961558249,
+          "index" : 19,
+          "pitchShiftSemitones" : 0.01761917877266228,
+          "recordingID" : "084",
+          "soundEndSeconds" : 0.6385487528344671,
+          "soundStartSeconds" : 0.17414965986394557,
+          "sourceMIDINote" : 55.98238082122734,
+          "targetOffsetSemitones" : 0
+        },
+        {
+          "gain" : 1.1240722517032202,
+          "index" : 20,
+          "pitchShiftSemitones" : -5.4362657600923825,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.555736961451247,
+          "soundStartSeconds" : 0.2786394557823129,
+          "sourceMIDINote" : 68.43626576009238,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 1.1240722517032202,
+          "index" : 21,
+          "pitchShiftSemitones" : -3.4362657600923825,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.555736961451247,
+          "soundStartSeconds" : 0.2786394557823129,
+          "sourceMIDINote" : 68.43626576009238,
+          "targetOffsetSemitones" : 9
+        },
+        {
+          "gain" : 1.1240722517032202,
+          "index" : 22,
+          "pitchShiftSemitones" : -5.4362657600923825,
+          "recordingID" : "059",
+          "soundEndSeconds" : 1.555736961451247,
+          "soundStartSeconds" : 0.2786394557823129,
+          "sourceMIDINote" : 68.43626576009238,
+          "targetOffsetSemitones" : 7
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 23,
+          "pitchShiftSemitones" : 3.4565438276371196,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 5
+        },
+        {
+          "gain" : 0.7377419357900574,
+          "index" : 24,
+          "pitchShiftSemitones" : 2.4565438276371196,
+          "recordingID" : "094",
+          "soundEndSeconds" : 0.626938775510204,
+          "soundStartSeconds" : 0,
+          "sourceMIDINote" : 57.54345617236288,
+          "targetOffsetSemitones" : 4
+        },
+        {
+          "gain" : 1.463967961558249,
+          "index" : 25,
+          "pitchShiftSemitones" : 0.01761917877266228,
+          "recordingID" : "084",
+          "soundEndSeconds" : 0.6385487528344671,
+          "soundStartSeconds" : 0.17414965986394557,
+          "sourceMIDINote" : 55.98238082122734,
+          "targetOffsetSemitones" : 0
+        }
+      ],
+      "method" : "windowed-yin-v2",
+      "outputFilename" : "blind-3.wav"
+    }
+  ],
+  "recordings" : [
+    {
+      "filename" : "002__frenkfurth__wav-fart-vegan-026-wav__650671.mp3",
+      "id" : "002",
+      "paperYINV1" : {
+        "durationSeconds" : 4.212979166666667,
+        "peakDBFS" : -6.884125980251658,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.14821646859471108,
+        "rmsDBFS" : -27.205927443003546,
+        "soundEndSeconds" : 4.12,
+        "soundStartSeconds" : 0.16
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 4.212979166666667,
+        "peakDBFS" : -6.884125980251658,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.10972713046505707,
+        "rmsDBFS" : -27.12389805768598,
+        "soundEndSeconds" : 4.042666666666666,
+        "soundStartSeconds" : 0.16
+      }
+    },
+    {
+      "filename" : "009__under7dude__fart-4__163380.mp3",
+      "id" : "009",
+      "paperYINV1" : {
+        "durationSeconds" : 1.6022083333333332,
+        "peakDBFS" : -0.00026507636037961915,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.03281191144605622,
+        "rmsDBFS" : -14.30047160494951,
+        "soundEndSeconds" : 1.56,
+        "soundStartSeconds" : 0.06
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 1.6022083333333332,
+        "peakDBFS" : -0.00026507636037961915,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.02589186276798865,
+        "rmsDBFS" : -14.251156015953871,
+        "soundEndSeconds" : 1.5573333333333332,
+        "soundStartSeconds" : 0.07466666666666667
+      }
+    },
+    {
+      "filename" : "013__deleted-user-1391979__bad-chili-fart-wav__94989.mp3",
+      "id" : "013",
+      "paperYINV1" : {
+        "durationSeconds" : 1.3937414965986394,
+        "peakDBFS" : -0.10614471114289635,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.2919789074233592,
+        "referenceHz" : 206.72130685225085,
+        "referenceMIDINote" : 55.9222028623596,
+        "rmsDBFS" : -16.64803997831416,
+        "soundEndSeconds" : 1.34,
+        "soundStartSeconds" : 0
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 1.3937414965986394,
+        "peakDBFS" : -0.10614471114289635,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.319090813405704,
+        "referenceHz" : 212.30040440542126,
+        "referenceMIDINote" : 56.38324314777086,
+        "rmsDBFS" : -16.63207719468449,
+        "soundEndSeconds" : 1.3467573696145125,
+        "soundStartSeconds" : 0.011609977324263039
+      }
+    },
+    {
+      "filename" : "016__tv-ling__perfect-fart-mp3__523467.mp3",
+      "id" : "016",
+      "paperYINV1" : {
+        "durationSeconds" : 0.32497916666666665,
+        "peakDBFS" : -0.4234016350448142,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -13.411858391496793,
+        "soundEndSeconds" : 0.32497916666666665,
+        "soundStartSeconds" : 0
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 0.32497916666666665,
+        "peakDBFS" : -0.4234016350448142,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.17012755827903023,
+        "rmsDBFS" : -13.266919725835077,
+        "soundEndSeconds" : 0.32497916666666665,
+        "soundStartSeconds" : 0.010666666666666666
+      }
+    },
+    {
+      "filename" : "017__breviceps__fart-3__446000.mp3",
+      "id" : "017",
+      "paperYINV1" : {
+        "durationSeconds" : 0.8975056689342403,
+        "peakDBFS" : -11.161163454441239,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.19236425353719339,
+        "rmsDBFS" : -26.313502156435767,
+        "soundEndSeconds" : 0.8975056689342403,
+        "soundStartSeconds" : 0
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 0.8975056689342403,
+        "peakDBFS" : -11.161163454441239,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.27725702998950985,
+        "referenceHz" : 76.75258969708041,
+        "referenceMIDINote" : 38.769405724963846,
+        "rmsDBFS" : -26.240295867729557,
+        "soundEndSeconds" : 0.8823582766439909,
+        "soundStartSeconds" : 0
+      }
+    },
+    {
+      "filename" : "018__sadiquecat__short-fart__787755.mp3",
+      "id" : "018",
+      "paperYINV1" : {
+        "durationSeconds" : 1.0666666666666667,
+        "peakDBFS" : -0.7680213737248826,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -12.476747456415326,
+        "soundEndSeconds" : 0.26,
+        "soundStartSeconds" : 0.12
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 1.0666666666666667,
+        "peakDBFS" : -0.7680213737248826,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -11.70991441677687,
+        "soundEndSeconds" : 0.24533333333333335,
+        "soundStartSeconds" : 0.128
+      }
+    },
+    {
+      "filename" : "019__fartcto__fart-short__789839.mp3",
+      "id" : "019",
+      "paperYINV1" : {
+        "durationSeconds" : 0.38,
+        "peakDBFS" : -9.231302891300517,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -26.690455118860598,
+        "soundEndSeconds" : 0.28,
+        "soundStartSeconds" : 0
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 0.38,
+        "peakDBFS" : -9.231302891300517,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.5008143894824384,
+        "referenceHz" : 92.77310924369749,
+        "referenceMIDINote" : 42.05130089799514,
+        "rmsDBFS" : -26.128944523342696,
+        "soundEndSeconds" : 0.256,
+        "soundStartSeconds" : 0.010666666666666666
+      }
+    },
+    {
+      "filename" : "021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3",
+      "id" : "021",
+      "paperYINV1" : {
+        "durationSeconds" : 0.607437641723356,
+        "peakDBFS" : -15.5135973873434,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.9522691560669923,
+        "referenceHz" : 131.8087896853246,
+        "referenceMIDINote" : 48.1313166731986,
+        "rmsDBFS" : -28.88805310929238,
+        "soundEndSeconds" : 0.38,
+        "soundStartSeconds" : 0
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 0.607437641723356,
+        "peakDBFS" : -15.5135973873434,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.8197003699169985,
+        "referenceHz" : 132.18571024279296,
+        "referenceMIDINote" : 48.18075241117489,
+        "rmsDBFS" : -28.792038024143416,
+        "soundEndSeconds" : 0.37151927437641724,
+        "soundStartSeconds" : 0
+      }
+    },
+    {
+      "filename" : "022__smokevhstapes__fart-wav__177050.mp3",
+      "id" : "022",
+      "paperYINV1" : {
+        "durationSeconds" : 2,
+        "peakDBFS" : -14.17929409944469,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -34.335398117022535,
+        "soundEndSeconds" : 2,
+        "soundStartSeconds" : 0
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 2,
+        "peakDBFS" : -14.17929409944469,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.0959228095704139,
+        "rmsDBFS" : -32.05487506884675,
+        "soundEndSeconds" : 1.3583673469387756,
+        "soundStartSeconds" : 0.2089795918367347
+      }
+    },
+    {
+      "filename" : "032__maker666__wetbeerfart-wav__381948.mp3",
+      "id" : "032",
+      "paperYINV1" : {
+        "durationSeconds" : 2.79,
+        "peakDBFS" : -11.662568059408496,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -21.91410988063424,
+        "soundEndSeconds" : 1.7,
+        "soundStartSeconds" : 0.02
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 2.79,
+        "peakDBFS" : -11.662568059408496,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.11310344765663388,
+        "rmsDBFS" : -21.740569183358925,
+        "soundEndSeconds" : 1.6950566893424037,
+        "soundStartSeconds" : 0.08126984126984127
+      }
+    },
+    {
+      "filename" : "052__adam-n__fart-12__324515.wav",
+      "id" : "052",
+      "paperYINV1" : {
+        "durationSeconds" : 0.8164172335600907,
+        "peakDBFS" : -3.0740643396764207,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -23.803736364112275,
+        "soundEndSeconds" : 0.62,
+        "soundStartSeconds" : 0.16
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 0.8164172335600907,
+        "peakDBFS" : -3.0740643396764207,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -22.545664179097574,
+        "soundEndSeconds" : 0.4992290249433107,
+        "soundStartSeconds" : 0.16253968253968254
+      }
+    },
+    {
+      "filename" : "055__adam-n__fart-1__324518.wav",
+      "id" : "055",
+      "paperYINV1" : {
+        "durationSeconds" : 0.8527437641723355,
+        "peakDBFS" : -3.0424011214511593,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -23.35992458782592,
+        "soundEndSeconds" : 0.36,
+        "soundStartSeconds" : 0.22
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 0.8527437641723355,
+        "peakDBFS" : -3.0424011214511593,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -22.96092152432354,
+        "soundEndSeconds" : 0.35990929705215424,
+        "soundStartSeconds" : 0.23219954648526078
+      }
+    },
+    {
+      "filename" : "059__adam-n__fart-8__324527.wav",
+      "id" : "059",
+      "paperYINV1" : {
+        "durationSeconds" : 1.6721315192743764,
+        "peakDBFS" : -3.26689263239976,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.9820732466495443,
+        "referenceHz" : 428.17889324343264,
+        "referenceMIDINote" : 68.52852188590876,
+        "rmsDBFS" : -19.025286636493412,
+        "soundEndSeconds" : 1.56,
+        "soundStartSeconds" : 0.28
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 1.6721315192743764,
+        "peakDBFS" : -3.26689263239976,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.676255311572968,
+        "referenceHz" : 425.9032297830375,
+        "referenceMIDINote" : 68.43626576009238,
+        "rmsDBFS" : -19.01588454330036,
+        "soundEndSeconds" : 1.555736961451247,
+        "soundStartSeconds" : 0.2786394557823129
+      }
+    },
+    {
+      "filename" : "065__reino93__fart-7__324626.wav",
+      "id" : "065",
+      "paperYINV1" : {
+        "durationSeconds" : 2.3219954648526078,
+        "peakDBFS" : 0,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -15.024315729717268,
+        "soundEndSeconds" : 1.68,
+        "soundStartSeconds" : 0.6
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 2.3219954648526078,
+        "peakDBFS" : 0,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -15.02328797463865,
+        "soundEndSeconds" : 1.6718367346938776,
+        "soundStartSeconds" : 0.592108843537415
+      }
+    },
+    {
+      "filename" : "067__reino93__fart-9__324628.wav",
+      "id" : "067",
+      "paperYINV1" : {
+        "durationSeconds" : 2.2291156462585033,
+        "peakDBFS" : 0,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -17.95647677390193,
+        "soundEndSeconds" : 2.02,
+        "soundStartSeconds" : 0.82
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 2.2291156462585033,
+        "peakDBFS" : 0,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -11.631879308531982,
+        "soundEndSeconds" : 1.1029478458049886,
+        "soundStartSeconds" : 0.8243083900226758
+      }
+    },
+    {
+      "filename" : "069__reino93__fart-11__324630.wav",
+      "id" : "069",
+      "paperYINV1" : {
+        "durationSeconds" : 1.6718367346938776,
+        "peakDBFS" : -0.00026507636037961915,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -17.701581535125055,
+        "soundEndSeconds" : 1.44,
+        "soundStartSeconds" : 0.6
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 1.6718367346938776,
+        "peakDBFS" : -0.00026507636037961915,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.040077318374791,
+        "rmsDBFS" : -17.740407349607953,
+        "soundEndSeconds" : 1.439637188208617,
+        "soundStartSeconds" : 0.592108843537415
+      }
+    },
+    {
+      "filename" : "080__under7dude__fart-3__163381.wav",
+      "id" : "080",
+      "paperYINV1" : {
+        "durationSeconds" : 2.5541950113378684,
+        "peakDBFS" : 0,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.016349064923610244,
+        "rmsDBFS" : -10.26761531174114,
+        "soundEndSeconds" : 2.5,
+        "soundStartSeconds" : 0.02
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 2.5541950113378684,
+        "peakDBFS" : 0,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.014601862512508786,
+        "rmsDBFS" : -10.255248139872059,
+        "soundEndSeconds" : 2.4961451247165534,
+        "soundStartSeconds" : 0.023219954648526078
+      }
+    },
+    {
+      "filename" : "081__under7dude__fart-2__163382.wav",
+      "id" : "081",
+      "paperYINV1" : {
+        "durationSeconds" : 0.33668934240362813,
+        "peakDBFS" : 0,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -9.467598380820185,
+        "soundEndSeconds" : 0.18,
+        "soundStartSeconds" : 0.04
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 0.33668934240362813,
+        "peakDBFS" : 0,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0,
+        "rmsDBFS" : -9.072198197856377,
+        "soundEndSeconds" : 0.16253968253968254,
+        "soundStartSeconds" : 0.034829931972789115
+      }
+    },
+    {
+      "filename" : "084__walter-odington__grim-fart__26216.wav",
+      "id" : "084",
+      "paperYINV1" : {
+        "durationSeconds" : 2.583219954648526,
+        "peakDBFS" : -4.466536624936986,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.3165444693516412,
+        "referenceHz" : 204.21229516204377,
+        "referenceMIDINote" : 55.710794477971874,
+        "rmsDBFS" : -21.6175263089854,
+        "soundEndSeconds" : 0.68,
+        "soundStartSeconds" : 0.18
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 2.583219954648526,
+        "peakDBFS" : -4.466536624936986,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.39341636871552144,
+        "referenceHz" : 207.4411235812911,
+        "referenceMIDINote" : 55.98238082122734,
+        "rmsDBFS" : -21.310631448781983,
+        "soundEndSeconds" : 0.6385487528344671,
+        "soundStartSeconds" : 0.17414965986394557
+      }
+    },
+    {
+      "filename" : "086__walter-odington__little-parp__26793.wav",
+      "id" : "086",
+      "paperYINV1" : {
+        "durationSeconds" : 0.430952380952381,
+        "peakDBFS" : -1.7197671640498025,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.6179639567634161,
+        "referenceHz" : 203.55204727149038,
+        "referenceMIDINote" : 55.654730496454256,
+        "rmsDBFS" : -14.713341392326795,
+        "soundEndSeconds" : 0.2,
+        "soundStartSeconds" : 0
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 0.430952380952381,
+        "peakDBFS" : -1.7197671640498025,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.7443409947984226,
+        "referenceHz" : 206.2368881118881,
+        "referenceMIDINote" : 55.881586518515775,
+        "rmsDBFS" : -14.115674963073293,
+        "soundEndSeconds" : 0.1857596371882086,
+        "soundStartSeconds" : 0.011609977324263039
+      }
+    },
+    {
+      "filename" : "090__carlosramon__17-pet__186119.wav",
+      "id" : "090",
+      "paperYINV1" : {
+        "durationSeconds" : 0.5887528344671202,
+        "peakDBFS" : -1.1571129092716488,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.2672250292920924,
+        "referenceHz" : 196.10846595199376,
+        "referenceMIDINote" : 55.00977952677637,
+        "rmsDBFS" : -14.870862191970586,
+        "soundEndSeconds" : 0.44,
+        "soundStartSeconds" : 0.06
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 0.5887528344671202,
+        "peakDBFS" : -1.1571129092716488,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.49202803915020665,
+        "referenceHz" : 200.26736099653525,
+        "referenceMIDINote" : 55.37308548281477,
+        "rmsDBFS" : -14.639870443007714,
+        "soundEndSeconds" : 0.4179591836734694,
+        "soundStartSeconds" : 0.058049886621315196
+      }
+    },
+    {
+      "filename" : "091__efpstudio__funny-fart__185226.wav",
+      "id" : "091",
+      "paperYINV1" : {
+        "durationSeconds" : 1.6356689342403627,
+        "peakDBFS" : -2.17717328125132,
+        "pitchAvailable" : false,
+        "pitchEvidence" : 0.17685903694921207,
+        "rmsDBFS" : -16.592473445511693,
+        "soundEndSeconds" : 1.28,
+        "soundStartSeconds" : 0.46
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 1.6356689342403627,
+        "peakDBFS" : -2.17717328125132,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.21966869142666612,
+        "referenceHz" : 92.25388489703303,
+        "referenceMIDINote" : 41.95413656456507,
+        "rmsDBFS" : -16.614826188235583,
+        "soundEndSeconds" : 1.2887074829931973,
+        "soundStartSeconds" : 0.46439909297052157
+      }
+    },
+    {
+      "filename" : "094__manicciola__fart__121783.wav",
+      "id" : "094",
+      "paperYINV1" : {
+        "durationSeconds" : 4.75,
+        "peakDBFS" : -1.7168596451286886,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.2433207518319971,
+        "referenceHz" : 210.7686465404721,
+        "referenceMIDINote" : 56.25788096624559,
+        "rmsDBFS" : -15.446191936477494,
+        "soundEndSeconds" : 0.64,
+        "soundStartSeconds" : 0
+      },
+      "windowedYINV2" : {
+        "durationSeconds" : 4.75,
+        "peakDBFS" : -1.7168596451286886,
+        "pitchAvailable" : true,
+        "pitchEvidence" : 0.23036003138570615,
+        "referenceHz" : 227.01561549030743,
+        "referenceMIDINote" : 57.54345617236288,
+        "rmsDBFS" : -15.358089419054437,
+        "soundEndSeconds" : 0.626938775510204,
+        "soundStartSeconds" : 0
+      }
+    }
+  ]
+}

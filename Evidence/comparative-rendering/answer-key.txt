@@ -1,0 +1,3 @@
+blind-1.wav: paper-yin-v1
+blind-2.wav: duration-only-control
+blind-3.wav: windowed-yin-v2
