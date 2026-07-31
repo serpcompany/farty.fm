@@ -13,10 +13,13 @@ swift test --package-path RecordingAnalysisKit
 zsh Tools/run-recording-analysis-library
 ```
 
-The later comparative-rendering section is retained as superseded throwaway
-history. It is not a product-owner acceptance task.
+## Earlier candidate evidence
 
-## Question
+The material below predates `RecordingAnalysisKit` and is retained only as
+historical candidate evidence. Its brightness field, thresholds, review flow,
+and `windowed-yin-v2` outputs are not part of the approved reusable API.
+
+### Earlier question
 
 Can an independent, on-device post-save process extract and preserve the characteristics needed for Melody Fit and fart-only rendering—usable duration, relative level, brightness, and a confidence-gated pitch profile—without coupling capture to analysis or decoding the Recording again on every launch?
 
@@ -81,31 +84,3 @@ For a non-interactive evidence refresh:
 ```sh
 zsh Tools/run-fixture-analysis --batch
 ```
-
-## Comparative rendering proof
-
-The first corpus run only proves that `windowed-yin-v2` executes. It does not
-prove that its observations improve a Created Melody. Run the throwaway logic
-comparison:
-
-```sh
-zsh Tools/run-comparative-rendering
-```
-
-The command exports three deliberately blind renders under
-`Evidence/comparative-rendering/` using the same fixed pitch contour:
-
-- the existing `windowed-yin-v2` candidate;
-- a second, paper-shaped YIN interpretation with a stricter periodicity gate;
-- a duration-only control that uses one unanalysed Recording, relative pitch
-  shifts, no sound-boundary detection, and no gain matching.
-
-Listen to `blind-1.wav`, `blind-2.wav`, and `blind-3.wav` before opening
-`answer-key.txt`. The comparison is not approval of the challenger, its
-thresholds, the note contour, looping, or the renderer. It asks the smaller
-question: does either analysis-assisted plan sound more melody-shaped and
-consistently levelled than the control while retaining fart character?
-
-`comparison-evidence.json` surfaces the full relevant state for every note:
-source Recording, detected source pitch, applied shift, gain, and detected
-sound boundaries. The original Fixture Library files remain unchanged.
