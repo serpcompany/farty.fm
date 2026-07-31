@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pedos Fixture Library review</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17211b;
+      --muted: #647067;
+      --paper: #f5f1e8;
+      --card: #fffdf7;
+      --line: #d9d2c4;
+      --accent: #237a4b;
+      --accent-soft: #e1f1e7;
+      --warn: #9b5a00;
+      --warn-soft: #fff0d6;
+      --danger: #a13838;
+      --danger-soft: #fae5e2;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 15px/1.45 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input, select, textarea { font: inherit; }
+    header {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--paper) 94%, transparent);
+      backdrop-filter: blur(12px);
+    }
+    .header-inner, main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .header-inner { padding: 18px 0 14px; }
+    h1 { margin: 0 0 4px; font-size: clamp(23px, 3vw, 34px); }
+    h2 { margin: 0; font-size: 18px; }
+    p { margin: 0; }
+    .subtle, .source { color: var(--muted); }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .summary > div {
+      min-height: 58px;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+    }
+    .summary strong { display: block; font-size: 20px; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 12px;
+    }
+    .toolbar button, .toolbar select {
+      min-height: 38px;
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--ink);
+    }
+    .toolbar button { cursor: pointer; }
+    .toolbar button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+    .toolbar button:disabled { cursor: not-allowed; opacity: .45; }
+    .reject-button {
+      min-height: 34px;
+      padding: 6px 10px;
+      border: 1px solid var(--danger);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--danger);
+      cursor: pointer;
+    }
+    .reject-button.restore {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    main { padding: 20px 0 72px; }
+    .instructions {
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+    }
+    .instructions ol { margin: 8px 0 0 20px; padding: 0; }
+    .instructions li + li { margin-top: 4px; }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+    .card {
+      display: grid;
+      gap: 11px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+    }
+    .card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+    .card.flagged { border-left: 5px solid var(--danger); }
+    .card.unavailable { border-left: 5px solid var(--warn); }
+    .title-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .identifier {
+      flex: 0 0 auto;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 750;
+    }
+    .description { min-height: 42px; }
+    audio { width: 100%; height: 36px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+    .badge {
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: #eee9dd;
+      font-size: 12px;
+    }
+    .badge.warn { background: var(--warn-soft); color: var(--warn); }
+    .badge.danger { background: var(--danger-soft); color: var(--danger); }
+    .qa {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .qa label, .include-row {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      min-height: 34px;
+    }
+    .qa select {
+      width: 100%;
+      min-height: 35px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: white;
+    }
+    .include-row {
+      justify-content: space-between;
+      padding-top: 4px;
+      border-top: 1px solid var(--line);
+      font-weight: 700;
+    }
+    textarea {
+      width: 100%;
+      min-height: 58px;
+      resize: vertical;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: white;
+    }
+    a { color: #1769aa; }
+    .hidden { display: none; }
+    .status-good { color: var(--accent); }
+    .status-warn { color: var(--warn); }
+    dialog {
+      width: min(760px, calc(100% - 32px));
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+    }
+    dialog::backdrop { background: rgb(0 0 0 / .4); }
+    dialog pre {
+      overflow: auto;
+      max-height: 55vh;
+      padding: 12px;
+      border-radius: 8px;
+      background: #eee9dd;
+      white-space: pre-wrap;
+    }
+    @media (max-width: 820px) {
+      .summary, .grid { grid-template-columns: 1fr; }
+      .qa { grid-template-columns: 1fr; }
+      header { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>Fixture Library manual QA</h1>
+      <p class="subtle">Keep every qualifying Recording from both preserved candidate passes.</p>
+      <div class="summary">
+        <div><span class="subtle">Approved for Fixture Library</span><strong id="selected-count">0</strong></div>
+        <div><span class="subtle">Still in review queue</span><strong id="queue-count">0</strong></div>
+        <div><span class="subtle">Not approved</span><strong id="rejected-count">0 / 89</strong></div>
+      </div>
+      <div class="toolbar">
+        <select id="filter" aria-label="Filter candidates">
+          <option value="batch2">Second-pass review queue</option>
+          <option value="queue">All pending decisions</option>
+          <option value="all">All 89 candidates</option>
+          <option value="recommended">No known source warning</option>
+          <option value="flagged">Known content warning</option>
+          <option value="unavailable">Source unavailable</option>
+          <option value="selected">Approved only</option>
+          <option value="rejected">Not approved</option>
+        </select>
+        <button id="clear" type="button">Clear saved review</button>
+        <button id="export" class="primary" type="button" disabled>Export approved Recordings</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="instructions">
+      <h2>Acceptance pass</h2>
+      <ol>
+        <li>Listen to the entire file. Approve it only if it contains exactly one real fart and no speech or other fart events.</li>
+        <li>Approval also means it is a usable quality recording: audible, playable throughout, and free of severe clipping or corruption.</li>
+        <li>Source and permission status are recorded separately and do not block your audio QA decision. New second-pass files have CC0 evidence preserved by FSD50K.</li>
+        <li>Keep every Recording that passes QA. There is no fixed cap; test scenarios can choose smaller or larger subsets later.</li>
+      </ol>
+      <p class="subtle" style="margin-top:8px">Duration is shown only as file metadata. Recording Analysis and its metrics are a separate Wayfinder decision.</p>
+    </section>
+    <section id="candidate-grid" class="grid" aria-live="polite"></section>
+  </main>
+
+  <dialog id="export-dialog">
+    <h2>Approved Fixture Library</h2>
+    <p class="subtle">Download this JSON or copy it and paste it into the Wayfinder conversation.</p>
+    <pre id="export-preview"></pre>
+    <div class="toolbar">
+      <button id="copy-export" type="button">Copy JSON</button>
+      <button id="download-export" class="primary" type="button">Download JSON</button>
+      <button id="close-dialog" type="button">Close</button>
+    </div>
+  </dialog>
+
+  <script>
+    const AUDIO_ROOT = "prototypes/pedos-app-v1/test-data/fart-samples/";
+    const STORAGE_KEY = "pedos-fixture-library-review-v1";
+    const candidates = [
+      {id:"001",file:"001__the-sample-workshop__5286-jel-note-fart5286-jel-note-fart-pr-tmc-c7108__733050.mp3",title:"5286 JEL note fart",description:"Source page is no longer available.",license:"Unverified",source:"https://freesound.org/people/the-sample-workshop/sounds/733050/",duration:1.756,pitch:3973.4,loudness:-28.5,brightness:.848,sourceUnavailable:true},
+      {id:"002",file:"002__frenkfurth__wav-fart-vegan-026-wav__650671.mp3",title:"WAV Fart Vegan 026",description:"“First person farts made by myself.”",license:"CC0",source:"https://freesound.org/people/frenkfurth/sounds/650671/",duration:4.213,pitch:763.1,loudness:-24.8,brightness:.490},
+      {id:"003",file:"003__dsisstudios__medium-fart-06-wav__640798.mp3",title:"Medium Fart 06",description:"“A wet sounding fart.”",license:"CC0",source:"https://freesound.org/people/DSISStudios/sounds/640798/",duration:2.927,pitch:331.5,loudness:-26.5,brightness:.309},
+      {id:"005",file:"005__frenkfurth__wav-fart-vegan-083__777445.mp3",title:"WAV Fart Vegan 083",description:"Described by its creator as a morning fart.",license:"CC0",source:"https://freesound.org/people/frenkfurth/sounds/777445/",duration:4.394,pitch:387.8,loudness:-23.6,brightness:.343},
+      {id:"006",file:"006__blubberfreak__blubberfreak-fart-17__732930.mp3",title:"Blubberfreak Fart 17",description:"Creator describes it as their own, “basically real” fart.",license:"CC0",source:"https://freesound.org/people/Blubberfreak/sounds/732930/",duration:1.640,pitch:237.5,loudness:-34.9,brightness:.236},
+      {id:"007",file:"007__zott820__juicy-fart5__183551.mp3",title:"Juicy Fart 5",description:"Creator says this was made with their mouth.",license:"CC0",source:"https://freesound.org/people/Zott820/sounds/183551/",duration:3.471,pitch:1322.1,loudness:-19.6,brightness:.609,warning:"Mouth imitation; reject"},
+      {id:"008",file:"008__bassimat__fart-002__840752.mp3",title:"Fart 002",description:"Creator says this was made by blowing air on an arm.",license:"CC0",source:"https://freesound.org/people/bassimat/sounds/840752/",duration:2.863,pitch:1219.7,loudness:-21.0,brightness:.592,warning:"Arm imitation; reject"},
+      {id:"009",file:"009__under7dude__fart-4__163380.mp3",title:"Fart 4",description:"Described by its creator as a fart.",license:"CC0",source:"https://freesound.org/people/Under7dude/sounds/163380/",duration:1.602,pitch:453.1,loudness:-14.6,brightness:.377},
+      {id:"010",file:"010__samsterbirdies__fart-sound__558741.mp3",title:"Fart sound",description:"Creator says this was made with their mouth.",license:"CC0",source:"https://freesound.org/people/SamsterBirdies/sounds/558741/",duration:.557,pitch:989.7,loudness:-19.5,brightness:.546,warning:"Mouth imitation; reject"},
+      {id:"011",file:"011__ezcah__chair-fart__266450.mp3",title:"Chair Fart",description:"Described as a fart done in a semi-hard couch.",license:"CC0",source:"https://freesound.org/people/Ezcah/sounds/266450/",duration:2.742,pitch:1252.9,loudness:-23.9,brightness:.597},
+      {id:"012",file:"012__frenkfurth__fart-sound-55__663627.mp3",title:"Fart Sound 55",description:"Described as a fart recorded on a Zoom H1n.",license:"CC0",source:"https://freesound.org/people/frenkfurth/sounds/663627/",duration:2.034,pitch:446.2,loudness:-22.3,brightness:.373},
+      {id:"013",file:"013__deleted-user-1391979__bad-chili-fart-wav__94989.mp3",title:"Bad Chili Fart",description:"FSD50K preserves the original Freesound metadata: uploader DoubleDeanArt, CC0, and a Fart label.",license:"CC0",source:"https://freesound.org/people/deleted-user-1391979/sounds/94989/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/94989.wav",evidence:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/metadata/eval_clips_info_FSD50K.json",duration:1.394,pitch:1270.4,loudness:-16.8,brightness:.600,sourceUnavailable:true,provenanceAndPermissionVerified:true},
+      {id:"014",file:"014__teddyferguson__fart-mp3__610067.mp3",title:"Fart",description:"Described by its creator as “another fart.”",license:"CC0",source:"https://freesound.org/people/TeddyFerguson/sounds/610067/",duration:2.392,pitch:417.3,loudness:-30.0,brightness:.359},
+      {id:"016",file:"016__tv-ling__perfect-fart-mp3__523467.mp3",title:"Perfect Fart",description:"The indexed Freesound record and preserved attribution identify TV_LING’s file as CC0.",license:"CC0",source:"https://freesound.org/people/TV_LING/sounds/523467/",evidence:"https://freesound.org/people/TV_LING/sounds/523467/?page=5",duration:.325,pitch:708.6,loudness:-13.4,brightness:.474,sourceUnavailable:true,provenanceAndPermissionVerified:true},
+      {id:"017",file:"017__breviceps__fart-3__446000.mp3",title:"Fart 3",description:"Described by its creator as a fart.",license:"CC0",source:"https://freesound.org/people/Breviceps/sounds/446000/",duration:.898,pitch:454.0,loudness:-26.3,brightness:.377},
+      {id:"018",file:"018__sadiquecat__short-fart__787755.mp3",title:"Short fart",description:"Described as a fart recorded on a Samsung A51 phone.",license:"CC0",source:"https://freesound.org/people/Sadiquecat/sounds/787755/",duration:1.067,pitch:359.7,loudness:-21.3,brightness:.326},
+      {id:"019",file:"019__fartcto__fart-short__789839.mp3",title:"Fart Short",description:"Described as a short fart sound.",license:"CC0",source:"https://freesound.org/people/FartCTO/sounds/789839/",duration:.380,pitch:384.0,loudness:-27.0,brightness:.341},
+      {id:"021",file:"021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3",title:"Short Buzzing Fart",description:"Described as a short, buzzing fart.",license:"CC BY 4.0",source:"https://freesound.org/people/designerschoice/sounds/807507/",duration:.607,pitch:457.7,loudness:-29.9,brightness:.379},
+      {id:"022",file:"022__smokevhstapes__fart-wav__177050.mp3",title:"Fart",description:"Generic source description; listen carefully for authenticity.",license:"CC0",source:"https://freesound.org/people/smokevhstapes/sounds/177050/",duration:2.000,pitch:764.9,loudness:-34.3,brightness:.490},
+      {id:"023",file:"023__the-fart__fart-attack__436834.mp3",title:"Fart Attack",description:"Source page is no longer available; long duration warrants extra review.",license:"Unverified",source:"https://freesound.org/people/the-fart/sounds/436834/",duration:8.799,pitch:312.7,loudness:-27.1,brightness:.296,sourceUnavailable:true},
+      {id:"024",file:"024__the-fart__cloudy-fart-melody__436832.mp3",title:"Cloudy Fart Melody",description:"Filename identifies this as a melody, not one Recording.",license:"Unverified",source:"https://freesound.org/people/the-fart/sounds/436832/",duration:9.380,pitch:1358.1,loudness:-16.9,brightness:.615,sourceUnavailable:true,warning:"Melody; reject"},
+      {id:"025",file:"025__the-fart__cloud-fart__436835.mp3",title:"Cloud Fart",description:"Source page is no longer available; long duration warrants extra review.",license:"Unverified",source:"https://freesound.org/people/the-fart/sounds/436835/",duration:7.505,pitch:454.2,loudness:-19.6,brightness:.377,sourceUnavailable:true},
+      {id:"027",file:"027__bipolarbad__apathetic-farts__731027.mp3",title:"Apathetic Farts",description:"Creator describes multiple farts.",license:"CC0",source:"https://freesound.org/people/BipolarBad/sounds/731027/",duration:5.840,pitch:625.1,loudness:-22.7,brightness:.446,warning:"Multiple farts; reject"},
+      {id:"028",file:"028__bipolarbad__farting-on-the-toilet__746292.mp3",title:"Farting On The Toilet",description:"Creator explicitly describes “some farts.”",license:"CC0",source:"https://freesound.org/people/BipolarBad/sounds/746292/",duration:5.004,pitch:1050.4,loudness:-24.3,brightness:.559,warning:"Multiple farts; reject"},
+      {id:"029",file:"029__jadevelloza__fart-owi-wav__655352.mp3",title:"Fart OWI",description:"Described as a quiet fart.",license:"CC0",source:"https://freesound.org/people/jadevelloza/sounds/655352/",duration:.500,pitch:641.5,loudness:-30.6,brightness:.452},
+      {id:"031",file:"031__edwardbloxy__hand-mouth-air-fart__509804.mp3",title:"Hand & Mouth Air Fart",description:"Creator says this was made using a hand and mouth.",license:"CC0",source:"https://freesound.org/people/EdwardBloxy/sounds/509804/",duration:3.324,pitch:1205.3,loudness:-24.9,brightness:.589,warning:"Hand/mouth imitation; reject"},
+      {id:"032",file:"032__maker666__wetbeerfart-wav__381948.mp3",title:"Wet Beer Fart",description:"Described as “drinking and farting.”",license:"CC0",source:"https://freesound.org/people/maker666/sounds/381948/",duration:2.790,pitch:896.7,loudness:-24.1,brightness:.525},
+      {id:"034",file:"034__huw2k8__fart-2-wav__459938.mp3",title:"Fart 2",description:"Generic source description; listen carefully for authenticity.",license:"CC0",source:"https://freesound.org/people/huw2k8/sounds/459938/",duration:.997,pitch:2324.3,loudness:-24.1,brightness:.732},
+      {id:"035",file:"035__chartertechfilms__fart-gilbert-mp3__519498.mp3",title:"Fart – Gilbert",description:"Generic source description; long duration warrants extra review.",license:"CC0",source:"https://freesound.org/people/chartertechfilms/sounds/519498/",duration:7.707,pitch:794.8,loudness:-35.4,brightness:.499},
+      {id:"037",file:"037__brainy9__retro-fart-wav__243996.mp3",title:"Retro fart",description:"Made for a game-jam entry; authenticity is unclear.",license:"CC0",source:"https://freesound.org/people/brainy9/sounds/243996/",duration:4.800,pitch:252.5,loudness:-20.8,brightness:.250},
+      {id:"040",file:"040__deleted-user-2104797__fart-4-wav__324524.mp3",title:"Fart 4",description:"Source page and uploader account are no longer available.",license:"Unverified",source:"https://freesound.org/people/deleted-user-2104797/sounds/324524/",duration:2.254,pitch:670.0,loudness:-36.9,brightness:.461,sourceUnavailable:true},
+      {id:"041",file:"041__kengiac__fart2-ogg__556642.mp3",title:"Fart 2",description:"Described as a funny fart; long duration warrants extra review.",license:"CC0",source:"https://freesound.org/people/kengiac/sounds/556642/",duration:7.958,pitch:739.6,loudness:-27.0,brightness:.483},
+      {id:"042",file:"042__kengiac__fart1-ogg__556641.mp3",title:"Fart 1",description:"Described as a big fart.",license:"CC0",source:"https://freesound.org/people/kengiac/sounds/556641/",duration:3.278,pitch:1565.8,loudness:-23.0,brightness:.646},
+      {id:"043",file:"043__darkmorfius__homemade-fart__137008.mp3",title:"Homemade fart",description:"Creator explicitly identifies this as their own fart.",license:"CC0",source:"https://freesound.org/people/Darkmorfius/sounds/137008/",duration:3.392,pitch:1141.3,loudness:-14.7,brightness:.577},
+      {id:"044",file:"044__walter-odington__fart-wav__69500.mp3",title:"Fart",description:"Source page is no longer available.",license:"Unverified",source:"https://freesound.org/people/walter-odington/sounds/69500/",duration:2.043,pitch:561.8,loudness:-14.9,brightness:.423,sourceUnavailable:true},
+      {id:"046",file:"046__freesound__100-long-fart-wav__50288.mp3",title:"100 long fart",description:"Forty people making a directed fart sound together.",license:"CC0",source:"https://freesound.org/people/freesound/sounds/50288/",duration:4.162,pitch:681.7,loudness:-47.1,brightness:.465,warning:"Group vocal imitation; reject"},
+      {id:"048",file:"048__nayahnaidoo__fart-owi-wav__656043.mp3",title:"Fart OWI",description:"Described as a simple fart.",license:"CC0",source:"https://freesound.org/people/nayahnaidoo/sounds/656043/",duration:1.813,pitch:836.2,loudness:-38.9,brightness:.510},
+      {id:"049",file:"049__magmadiverrr__extremely-bitcrunched-fart__659989.mp3",title:"Extremely bitcrunched fart",description:"Described as a recorded fart processed with bitcrushing.",license:"CC0",source:"https://freesound.org/people/magmadiverrr/sounds/659989/",duration:.747,pitch:456.2,loudness:-13.8,brightness:.378},
+      {id:"050",file:"050__wkg-518__fart-mp3__616782.mp3",title:"Fart",description:"Creator explicitly identifies this as a real fart.",license:"CC0",source:"https://freesound.org/people/WKG-518/sounds/616782/",duration:1.585,pitch:647.7,loudness:-23.7,brightness:.454},
+      {id:"051",file:"051__1uparcade__fart-sound-1__316978.wav",title:"Fart Sound 1",description:"Uploader describes an accidentally recorded poot from a friend.",license:"CC0",source:"https://freesound.org/people/1UpArcade/sounds/316978/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/316978.wav",duration:0.499478,batch:2,provenanceAndPermissionVerified:true},
+      {id:"052",file:"052__adam-n__fart-12__324515.wav",title:"Fart 12",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Adam_N/sounds/324515/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324515.wav",duration:0.816417,batch:2,provenanceAndPermissionVerified:true},
+      {id:"053",file:"053__adam-n__fart-11__324516.wav",title:"Fart 11",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Adam_N/sounds/324516/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324516.wav",duration:0.813356,batch:2,provenanceAndPermissionVerified:true},
+      {id:"054",file:"054__adam-n__fart-10__324517.wav",title:"Fart 10",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Adam_N/sounds/324517/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324517.wav",duration:1.043946,batch:2,provenanceAndPermissionVerified:true},
+      {id:"055",file:"055__adam-n__fart-1__324518.wav",title:"Fart 1",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Adam_N/sounds/324518/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324518.wav",duration:0.852744,batch:2,provenanceAndPermissionVerified:true},
+      {id:"056",file:"056__adam-n__fart-14__324521.wav",title:"Fart 14",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Adam_N/sounds/324521/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324521.wav",duration:0.820680,batch:2,provenanceAndPermissionVerified:true},
+      {id:"057",file:"057__adam-n__fart-13__324522.wav",title:"Fart 13",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Adam_N/sounds/324522/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324522.wav",duration:1.420340,batch:2,provenanceAndPermissionVerified:true},
+      {id:"058",file:"058__adam-n__fart-5__324523.wav",title:"Fart 5",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Adam_N/sounds/324523/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324523.wav",duration:3.021633,batch:2,provenanceAndPermissionVerified:true},
+      {id:"059",file:"059__adam-n__fart-8__324527.wav",title:"Fart 8",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Adam_N/sounds/324527/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324527.wav",duration:1.672132,batch:2,provenanceAndPermissionVerified:true},
+      {id:"060",file:"060__adam-n__fart-9__324528.wav",title:"Fart 9",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Adam_N/sounds/324528/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324528.wav",duration:1.539025,batch:2,provenanceAndPermissionVerified:true},
+      {id:"061",file:"061__reino93__real-fart-1__324620.wav",title:"RealFart1",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324620/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324620.wav",duration:1.346757,batch:2,provenanceAndPermissionVerified:true},
+      {id:"062",file:"062__reino93__fart-3__324622.wav",title:"Fart3",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324622/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324622.wav",duration:1.486077,batch:2,provenanceAndPermissionVerified:true},
+      {id:"063",file:"063__reino93__fart-4__324623.wav",title:"Fart4",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324623/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324623.wav",duration:2.321995,batch:2,provenanceAndPermissionVerified:true},
+      {id:"064",file:"064__reino93__fart-5__324624.wav",title:"Fart5",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324624/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324624.wav",duration:3.343673,batch:2,provenanceAndPermissionVerified:true},
+      {id:"065",file:"065__reino93__fart-7__324626.wav",title:"Fart7",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324626/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324626.wav",duration:2.321995,batch:2,provenanceAndPermissionVerified:true},
+      {id:"066",file:"066__reino93__fart-8__324627.wav",title:"Fart8",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324627/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324627.wav",duration:1.393197,batch:2,provenanceAndPermissionVerified:true},
+      {id:"067",file:"067__reino93__fart-9__324628.wav",title:"Fart9",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324628/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324628.wav",duration:2.229116,batch:2,provenanceAndPermissionVerified:true},
+      {id:"068",file:"068__reino93__fart-10__324629.wav",title:"Fart10",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324629/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324629.wav",duration:1.207438,batch:2,provenanceAndPermissionVerified:true},
+      {id:"069",file:"069__reino93__fart-11__324630.wav",title:"Fart11",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324630/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324630.wav",duration:1.671837,batch:2,provenanceAndPermissionVerified:true},
+      {id:"070",file:"070__reino93__fart-12__324631.wav",title:"Fart12",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324631/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324631.wav",duration:1.671837,batch:2,provenanceAndPermissionVerified:true},
+      {id:"071",file:"071__reino93__fart-13__324632.wav",title:"Fart13",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324632/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324632.wav",duration:2.461315,batch:2,provenanceAndPermissionVerified:true},
+      {id:"072",file:"072__reino93__fart-14__324633.wav",title:"Fart14",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324633/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324633.wav",duration:5.804989,batch:2,provenanceAndPermissionVerified:true},
+      {id:"073",file:"073__reino93__fart-15__324634.wav",title:"Fart15",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324634/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324634.wav",duration:2.832834,batch:2,provenanceAndPermissionVerified:true},
+      {id:"074",file:"074__reino93__fart-16__324635.wav",title:"Fart16",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324635/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324635.wav",duration:1.857596,batch:2,provenanceAndPermissionVerified:true},
+      {id:"075",file:"075__reino93__fart-17__324636.wav",title:"Fart17",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324636/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324636.wav",duration:1.253878,batch:2,provenanceAndPermissionVerified:true},
+      {id:"076",file:"076__reino93__fart-18__324637.wav",title:"Fart18",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324637/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324637.wav",duration:1.625397,batch:2,provenanceAndPermissionVerified:true},
+      {id:"077",file:"077__reino93__fart-19__324638.wav",title:"Fart19",description:"Uploader explicitly describes this as a real fart.",license:"CC0",source:"https://freesound.org/people/Reino93/sounds/324638/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/324638.wav",duration:3.947392,batch:2,provenanceAndPermissionVerified:true},
+      {id:"078",file:"078__under7dude__fart-1__163378.wav",title:"Fart 1",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Under7dude/sounds/163378/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/163378.wav",duration:2.356848,batch:2,provenanceAndPermissionVerified:true},
+      {id:"079",file:"079__under7dude__fart-5__163379.wav",title:"Fart 5",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Under7dude/sounds/163379/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/163379.wav",duration:1.346757,batch:2,provenanceAndPermissionVerified:true},
+      {id:"080",file:"080__under7dude__fart-3__163381.wav",title:"Fart 3",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Under7dude/sounds/163381/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/163381.wav",duration:2.554195,batch:2,provenanceAndPermissionVerified:true},
+      {id:"081",file:"081__under7dude__fart-2__163382.wav",title:"Fart 2",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Under7dude/sounds/163382/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/163382.wav",duration:0.336689,batch:2,provenanceAndPermissionVerified:true},
+      {id:"082",file:"082__under7dude__fart-7__163385.wav",title:"fart_7",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Under7dude/sounds/163385/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/163385.wav",duration:2.356848,batch:2,provenanceAndPermissionVerified:true},
+      {id:"083",file:"083__under7dude__fart-6__163386.wav",title:"Fart 6",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Under7dude/sounds/163386/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/163386.wav",duration:0.638549,batch:2,provenanceAndPermissionVerified:true},
+      {id:"084",file:"084__walter-odington__grim-fart__26216.wav",title:"grim fart",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Walter_Odington/sounds/26216/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/26216.wav",duration:2.583220,batch:2,provenanceAndPermissionVerified:true},
+      {id:"085",file:"085__junkfood2121__fart-01__242004.wav",title:"Fart 01",description:"Uploader describes this as a real, legitimate fart.",license:"CC0",source:"https://freesound.org/people/junkfood2121/sounds/242004/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/242004.wav",duration:1.977642,batch:2,provenanceAndPermissionVerified:true},
+      {id:"086",file:"086__walter-odington__little-parp__26793.wav",title:"little parp",description:"Uploader describes this as a fart.",license:"CC0",source:"https://freesound.org/people/Walter_Odington/sounds/26793/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/26793.wav",duration:0.430952,batch:2,provenanceAndPermissionVerified:true},
+      {id:"087",file:"087__yurgenmctoot__flautust-01__126017.wav",title:"flautust01",description:"Uploader says this was recorded after eating curry.",license:"CC0",source:"https://freesound.org/people/YurgenMcToot/sounds/126017/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/126017.wav",duration:2.925714,batch:2,provenanceAndPermissionVerified:true},
+      {id:"088",file:"088__yurgenmctoot__flautust-02__126018.wav",title:"flautust02",description:"Uploader says this was recorded after eating curry.",license:"CC0",source:"https://freesound.org/people/YurgenMcToot/sounds/126018/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/126018.wav",duration:1.409524,batch:2,provenanceAndPermissionVerified:true},
+      {id:"089",file:"089__yurgenmctoot__flautust-03__126019.wav",title:"flautust03",description:"Uploader says this was recorded after eating curry.",license:"CC0",source:"https://freesound.org/people/YurgenMcToot/sounds/126019/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/126019.wav",duration:5.260952,batch:2,provenanceAndPermissionVerified:true},
+      {id:"090",file:"090__carlosramon__17-pet__186119.wav",title:"17 pet",description:"Uploader says this fart was recorded in a bathroom with a Zoom H2.",license:"CC0",source:"https://freesound.org/people/carlosramon/sounds/186119/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/186119.wav",duration:0.588753,batch:2,provenanceAndPermissionVerified:true},
+      {id:"091",file:"091__efpstudio__funny-fart__185226.wav",title:"funny fart",description:"Uploader identifies this as their fart recorded with an AT4033a microphone.",license:"CC0",source:"https://freesound.org/people/efpstudio/sounds/185226/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/185226.wav",duration:1.635669,batch:2,provenanceAndPermissionVerified:true},
+      {id:"092",file:"092__leosalom__fart__234284.wav",title:"FART",description:"Uploader says this was recorded in their bathroom with a Zoom H2N.",license:"CC0",source:"https://freesound.org/people/leosalom/sounds/234284/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/234284.wav",duration:0.998685,batch:2,provenanceAndPermissionVerified:true},
+      {id:"093",file:"093__lutello__fart-2012-09-14__186025.wav",title:"fart 2012-09-14",description:"Uploader calls this a personal fart contribution recorded with a Zoom H2n.",license:"CC0",source:"https://freesound.org/people/lutello/sounds/186025/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/186025.wav",duration:0.946644,batch:2,provenanceAndPermissionVerified:true},
+      {id:"094",file:"094__manicciola__fart__121783.wav",title:"FART",description:"Uploader describes this as a fart recorded with a Zoom H1.",license:"CC0",source:"https://freesound.org/people/Manicciola/sounds/121783/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/121783.wav",duration:4.750000,batch:2,provenanceAndPermissionVerified:true},
+      {id:"095",file:"095__mackaffee__fart__326143.wav",title:"fart",description:"Uploader describes this as a fart recorded with Audacity.",license:"CC0",source:"https://freesound.org/people/MacKaffee/sounds/326143/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/326143.wav",duration:0.580499,batch:2,provenanceAndPermissionVerified:true},
+      {id:"096",file:"096__noplo__fart__205967.wav",title:"Fart",description:"Uploader identifies this as their own recorded fart.",license:"CC0",source:"https://freesound.org/people/NoPLo/sounds/205967/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/205967.wav",duration:6.208005,batch:2,provenanceAndPermissionVerified:true},
+      {id:"097",file:"097__bernd666__fart-5__113763.wav",title:"fart 5",description:"Uploader describes this as human body gas.",license:"CC0",source:"https://freesound.org/people/bernd666/sounds/113763/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/113763.wav",duration:0.862041,batch:2,provenanceAndPermissionVerified:true},
+      {id:"098",file:"098__sorce__fart-bum-trumpet-poop__431621.wav",title:"fart,bum,trumpet,poop",description:"Uploader attributes this fart to gluten intolerance and documents Sennheiser 8060 and MixPre-3 capture.",license:"CC0",source:"https://freesound.org/people/sorce/sounds/431621/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/431621.wav",duration:4.462834,batch:2,provenanceAndPermissionVerified:true},
+      {id:"099",file:"099__smokenweewalt__fart-2__190484.wav",title:"FART 2",description:"Uploader says this was recorded with an iPhone 4 and their butt.",license:"CC0",source:"https://freesound.org/people/smokenweewALT/sounds/190484/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/dev/190484.wav",duration:1.776327,batch:2,provenanceAndPermissionVerified:true},
+      {id:"100",file:"100__dsisstudios__short-fart-01__241000.wav",title:"Short Fart_01",description:"Uploader describes this as a quick fart.",license:"CC0",source:"https://freesound.org/people/DSISStudios/sounds/241000/",archive:"https://huggingface.co/datasets/Fhrozen/FSD50k/blob/main/clips/eval/241000.wav",duration:1.200000,batch:2,provenanceAndPermissionVerified:true}
+    ];
+
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    const state = Object.fromEntries(candidates.map(candidate => {
+      const prior = saved[candidate.id] || {};
+      const legacyApproved = prior.oneFart && prior.playable && !prior.rejected;
+      const decision = prior.decision || (prior.rejected ? "rejected" : legacyApproved ? "approved" : "pending");
+      return [
+        candidate.id,
+        {
+          decision,
+          notes: prior.notes || ""
+        }
+      ];
+    }));
+
+    const grid = document.querySelector("#candidate-grid");
+    const filter = document.querySelector("#filter");
+    const exportButton = document.querySelector("#export");
+
+    const esc = value => String(value).replace(/[&<>"']/g, character => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+    })[character]);
+
+    function durationBin(duration) {
+      if (duration < 1) return "short";
+      if (duration <= 3) return "medium";
+      return "long";
+    }
+
+    function approved(candidate) {
+      return state[candidate.id].decision === "approved";
+    }
+
+    function persist() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function render() {
+      const mode = filter.value;
+      grid.innerHTML = "";
+      for (const candidate of candidates) {
+        const item = state[candidate.id];
+        const visible =
+          (mode === "batch2" && candidate.batch === 2 && item.decision === "pending") ||
+          (mode === "queue" && item.decision === "pending") ||
+          mode === "all" ||
+          (mode === "recommended" && item.decision === "pending" && !candidate.warning && !candidate.sourceUnavailable) ||
+          (mode === "flagged" && item.decision === "pending" && candidate.warning) ||
+          (mode === "unavailable" && item.decision === "pending" && candidate.sourceUnavailable) ||
+          (mode === "selected" && approved(candidate)) ||
+          (mode === "rejected" && item.decision === "rejected");
+        if (!visible) continue;
+
+        const card = document.createElement("article");
+        card.className = [
+          "card",
+          approved(candidate) ? "selected" : "",
+          candidate.warning ? "flagged" : "",
+          candidate.sourceUnavailable ? "unavailable" : ""
+        ].filter(Boolean).join(" ");
+        card.dataset.id = candidate.id;
+        card.innerHTML = `
+          <div class="title-row">
+            <div>
+              <h2>${esc(candidate.title)}</h2>
+              <a class="source" href="${esc(candidate.source)}" target="_blank" rel="noreferrer">Freesound source · ${esc(candidate.license)}</a>
+              ${candidate.archive ? ` · <a class="source" href="${esc(candidate.archive)}" target="_blank" rel="noreferrer">FSD50K archived audio</a>` : ""}
+              ${candidate.evidence ? ` · <a class="source" href="${esc(candidate.evidence)}" target="_blank" rel="noreferrer">Permission evidence</a>` : ""}
+            </div>
+            <span class="identifier">${candidate.id}</span>
+          </div>
+          <p class="description">${esc(candidate.description)}</p>
+          ${candidate.warning ? `<p class="badge danger">${esc(candidate.warning)}</p>` : ""}
+          ${candidate.sourceUnavailable && !candidate.provenanceAndPermissionVerified ? `<p class="badge warn">Source unavailable: audio QA is allowed, but provenance and permission still need separate resolution</p>` : ""}
+          <audio controls preload="none" src="${esc(AUDIO_ROOT + candidate.file)}"></audio>
+          <div class="badges">
+            <span class="badge">${candidate.duration.toFixed(2)}s · ${durationBin(candidate.duration)}</span>
+            ${candidate.batch === 2 ? `<span class="badge">Second-pass candidate · CC0 verified in FSD50K metadata</span>` : ""}
+          </div>
+          <textarea data-field="notes" placeholder="QA notes">${esc(item.notes)}</textarea>
+          ${approved(candidate) ? `<p class="status-good"><strong>Approved for Fixture Library</strong></p>` : ""}
+          <div class="toolbar">
+            <button
+              class="${approved(candidate) ? "" : "primary"}"
+              data-action="${approved(candidate) ? "pending" : "approve"}"
+              type="button"
+            >${approved(candidate) ? "Return to review queue" : "Approve for Fixture Library"}</button>
+            <button
+              class="reject-button ${item.decision === "rejected" ? "restore" : ""}"
+              data-action="${item.decision === "rejected" ? "pending" : "reject"}"
+              type="button"
+            >${item.decision === "rejected" ? "Restore to review queue" : "Mark not approved"}</button>
+          </div>
+        `;
+        grid.append(card);
+      }
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const selected = candidates.filter(approved);
+      const rejected = candidates.filter(candidate => state[candidate.id].decision === "rejected");
+      const queue = candidates.filter(candidate => state[candidate.id].decision === "pending");
+      document.querySelector("#selected-count").textContent = `${selected.length}`;
+      document.querySelector("#queue-count").textContent = `${queue.length}`;
+      document.querySelector("#rejected-count").textContent = `${rejected.length} / ${candidates.length}`;
+      const ready = selected.length > 0;
+      exportButton.disabled = !ready;
+      exportButton.title = ready ? "" : "Approve at least one fully qualified Recording.";
+    }
+
+    grid.addEventListener("input", event => {
+      const field = event.target.dataset.field;
+      if (!field) return;
+      const card = event.target.closest(".card");
+      const candidate = candidates.find(item => item.id === card.dataset.id);
+      state[candidate.id][field] = event.target.value;
+      persist();
+    });
+
+    grid.addEventListener("click", event => {
+      const action = event.target.dataset.action;
+      if (!["approve", "reject", "pending"].includes(action)) return;
+      const card = event.target.closest(".card");
+      const item = state[card.dataset.id];
+      item.decision = action === "approve" ? "approved" : action === "reject" ? "rejected" : "pending";
+      persist();
+      render();
+    });
+
+    filter.addEventListener("change", render);
+
+    document.querySelector("#clear").addEventListener("click", () => {
+      if (!confirm("Clear every saved approval, rejection, and note?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    });
+
+    function exportPayload() {
+      return {
+        schemaVersion: 1,
+        decision: {
+          selectionPolicy: "Keep every Recording that passes manual QA; no fixed cap.",
+          approvedAt: new Date().toISOString(),
+          reviewer: "product-owner"
+        },
+        recordings: candidates
+          .filter(approved)
+          .map(candidate => ({
+            id: candidate.id,
+            filename: candidate.file,
+            source: candidate.source,
+            permission: candidate.license,
+            archiveSource: candidate.archive || null,
+            permissionEvidence: candidate.evidence || candidate.source,
+            candidateBatch: candidate.batch || 1,
+            qa: {
+              decision: "approved",
+              approvalMeaning: "Exactly one real fart and a usable-quality Recording.",
+              provenanceAndPermissionVerified: candidate.provenanceAndPermissionVerified ?? !candidate.sourceUnavailable,
+              notes: state[candidate.id].notes
+            },
+            durationSeconds: candidate.duration
+          }))
+      };
+    }
+
+    exportButton.addEventListener("click", () => {
+      document.querySelector("#export-preview").textContent = JSON.stringify(exportPayload(), null, 2);
+      document.querySelector("#export-dialog").showModal();
+    });
+    document.querySelector("#close-dialog").addEventListener("click", () => document.querySelector("#export-dialog").close());
+    document.querySelector("#copy-export").addEventListener("click", async event => {
+      await navigator.clipboard.writeText(JSON.stringify(exportPayload(), null, 2));
+      event.target.textContent = "Copied";
+    });
+    document.querySelector("#download-export").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(exportPayload(), null, 2)], {type:"application/json"});
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "fixture-library-approved-recordings.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+
+    render();
+  </script>
+</body>
+</html>
