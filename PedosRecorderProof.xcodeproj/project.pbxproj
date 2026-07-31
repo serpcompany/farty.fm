@@ -7,14 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0C3B2685D956D5F77DD14C61 /* PedosRecorderProofApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D98E5415FF75AAA2FD90A70 /* PedosRecorderProofApp.swift */; };
+		3826C179D6B27F183A40C856 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4BD5C5AB533616A5FD384C /* ContentView.swift */; };
 		433B475F9A48793A58B71956 /* RecorderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F00751FE3F3EBD0A79B393A /* RecorderStore.swift */; };
+		59F215874E70DFEDB6D2963A /* RecorderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F00751FE3F3EBD0A79B393A /* RecorderStore.swift */; };
+		754C4DFF25604035F394CF2C /* FixtureLibrary in Resources */ = {isa = PBXBuildFile; fileRef = 9414C50E0025BF9C0E9761A1 /* FixtureLibrary */; };
+		8CD8AB5C509CE3A668B7AB84 /* FixtureLibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75446BE5DB4541831C3A1052 /* FixtureLibraryStore.swift */; };
 		95B6709D9225100AFC1C3F83 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4BD5C5AB533616A5FD384C /* ContentView.swift */; };
 		D7C6106C48D4616D8755C63E /* PedosRecorderProofApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D98E5415FF75AAA2FD90A70 /* PedosRecorderProofApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		2D98E5415FF75AAA2FD90A70 /* PedosRecorderProofApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PedosRecorderProofApp.swift; sourceTree = "<group>"; };
+		48A44043E8D9FA4C95109332 /* PedosInternalFixtureProof.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PedosInternalFixtureProof.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		75446BE5DB4541831C3A1052 /* FixtureLibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixtureLibraryStore.swift; sourceTree = "<group>"; };
 		7F00751FE3F3EBD0A79B393A /* RecorderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecorderStore.swift; sourceTree = "<group>"; };
+		9414C50E0025BF9C0E9761A1 /* FixtureLibrary */ = {isa = PBXFileReference; lastKnownFileType = folder; path = FixtureLibrary; sourceTree = SOURCE_ROOT; };
 		CC12C7529CE7DED44024E0AC /* PedosRecorderProof.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PedosRecorderProof.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD4BD5C5AB533616A5FD384C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -23,6 +31,7 @@
 		6D0391BA3DF726AF8EFE0BA4 = {
 			isa = PBXGroup;
 			children = (
+				9414C50E0025BF9C0E9761A1 /* FixtureLibrary */,
 				C992DC75234328588C434F12 /* RecorderProof */,
 				6F6F4B0E212229A7557F17E9 /* Products */,
 			);
@@ -31,6 +40,7 @@
 		6F6F4B0E212229A7557F17E9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				48A44043E8D9FA4C95109332 /* PedosInternalFixtureProof.app */,
 				CC12C7529CE7DED44024E0AC /* PedosRecorderProof.app */,
 			);
 			name = Products;
@@ -40,6 +50,7 @@
 			isa = PBXGroup;
 			children = (
 				DD4BD5C5AB533616A5FD384C /* ContentView.swift */,
+				75446BE5DB4541831C3A1052 /* FixtureLibraryStore.swift */,
 				2D98E5415FF75AAA2FD90A70 /* PedosRecorderProofApp.swift */,
 				7F00751FE3F3EBD0A79B393A /* RecorderStore.swift */,
 			);
@@ -66,6 +77,24 @@
 			productReference = CC12C7529CE7DED44024E0AC /* PedosRecorderProof.app */;
 			productType = "com.apple.product-type.application";
 		};
+		ACBB2E073C6726F9B3E0A3A9 /* PedosInternalFixtureProof */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8020229EF861D02A3BEADFD4 /* Build configuration list for PBXNativeTarget "PedosInternalFixtureProof" */;
+			buildPhases = (
+				BDE2699524AC9D23F8B1A357 /* Sources */,
+				8A532353050A66E53DB3D17F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PedosInternalFixtureProof;
+			packageProductDependencies = (
+			);
+			productName = PedosInternalFixtureProof;
+			productReference = 48A44043E8D9FA4C95109332 /* PedosInternalFixtureProof.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -76,6 +105,9 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					16EC1808945426AE4871051B = {
+						ProvisioningStyle = Automatic;
+					};
+					ACBB2E073C6726F9B3E0A3A9 = {
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -94,10 +126,22 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				ACBB2E073C6726F9B3E0A3A9 /* PedosInternalFixtureProof */,
 				16EC1808945426AE4871051B /* PedosRecorderProof */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8A532353050A66E53DB3D17F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				754C4DFF25604035F394CF2C /* FixtureLibrary in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		80C24161EFAE446522A23C25 /* Sources */ = {
@@ -107,6 +151,17 @@
 				95B6709D9225100AFC1C3F83 /* ContentView.swift in Sources */,
 				D7C6106C48D4616D8755C63E /* PedosRecorderProofApp.swift in Sources */,
 				433B475F9A48793A58B71956 /* RecorderStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BDE2699524AC9D23F8B1A357 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3826C179D6B27F183A40C856 /* ContentView.swift in Sources */,
+				8CD8AB5C509CE3A668B7AB84 /* FixtureLibraryStore.swift in Sources */,
+				0C3B2685D956D5F77DD14C61 /* PedosRecorderProofApp.swift in Sources */,
+				59F215874E70DFEDB6D2963A /* RecorderStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +313,30 @@
 			};
 			name = Release;
 		};
+		8C5E23CA1C1403AF71E00586 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Pedos Internal Fixtures";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pedos needs microphone access to capture your Recording.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = (
+					UIInterfaceOrientationPortrait,
+				);
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.serpcompany.PedosInternalFixtureProof;
+				PRODUCT_NAME = PedosInternalFixtureProof;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) INTERNAL_FIXTURE_LIBRARY";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		AAB9E60A2B9A1DF24F68A048 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -280,9 +359,42 @@
 			};
 			name = Debug;
 		};
+		CF3C7CF8EE63BCF1B7E0FAEC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Pedos Internal Fixtures";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pedos needs microphone access to capture your Recording.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = (
+					UIInterfaceOrientationPortrait,
+				);
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.serpcompany.PedosInternalFixtureProof;
+				PRODUCT_NAME = PedosInternalFixtureProof;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) INTERNAL_FIXTURE_LIBRARY";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		8020229EF861D02A3BEADFD4 /* Build configuration list for PBXNativeTarget "PedosInternalFixtureProof" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CF3C7CF8EE63BCF1B7E0FAEC /* Debug */,
+				8C5E23CA1C1403AF71E00586 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		956ACA6F6862DF660CB90EA8 /* Build configuration list for PBXProject "PedosRecorderProof" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

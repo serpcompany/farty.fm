@@ -13,7 +13,9 @@ targets:
     type: application
     platform: iOS
     sources:
-      - RecorderProof
+      - path: RecorderProof
+        excludes:
+          - FixtureLibraryStore.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.serpcompany.PedosRecorderProof
@@ -23,5 +25,26 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone:
           - UIInterfaceOrientationPortrait
         SUPPORTS_MACCATALYST: NO
+    scheme:
+      testTargets: []
+  PedosInternalFixtureProof:
+    type: application
+    platform: iOS
+    sources:
+      - RecorderProof
+      - path: FixtureLibrary
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.serpcompany.PedosInternalFixtureProof
+        PRODUCT_NAME: PedosInternalFixtureProof
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Pedos Internal Fixtures
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: Pedos needs microphone access to capture your Recording.
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone:
+          - UIInterfaceOrientationPortrait
+        SUPPORTS_MACCATALYST: NO
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) INTERNAL_FIXTURE_LIBRARY"
     scheme:
       testTargets: []

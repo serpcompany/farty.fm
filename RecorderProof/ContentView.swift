@@ -3,10 +3,16 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     let recorder: RecorderStore
+#if INTERNAL_FIXTURE_LIBRARY
+    let fixtureLibrary: FixtureLibraryStore
+#endif
 
     var body: some View {
         NavigationStack {
             List {
+#if INTERNAL_FIXTURE_LIBRARY
+                fixtureLibrarySection
+#endif
                 captureSection
                 stateSection
                 recordingsSection
@@ -32,6 +38,59 @@ struct ContentView: View {
             }
         }
     }
+
+#if INTERNAL_FIXTURE_LIBRARY
+    @ViewBuilder
+    private var fixtureLibrarySection: some View {
+        Section {
+            LabeledContent("Installed", value: "\(fixtureLibrary.recordings.count) of \(fixtureLibrary.expectedCount)")
+            LabeledContent("Storage") {
+                Text("Application Support/FixtureLibrary")
+                    .multilineTextAlignment(.trailing)
+            }
+
+            Button("Seed or refresh Fixture Library") {
+                fixtureLibrary.seed()
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(fixtureLibrary.isSeeding)
+            .accessibilityIdentifier("seed-fixture-library")
+
+            if let statusMessage = fixtureLibrary.statusMessage {
+                Text(statusMessage)
+                    .font(.footnote)
+                    .foregroundStyle(fixtureLibrary.statusIsError ? Color.red : Color.secondary)
+            }
+
+            ForEach(fixtureLibrary.recordings) { recording in
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Recording \(recording.fixtureID)")
+                            .font(.headline)
+                        Text("\(recording.duration, format: .number.precision(.fractionLength(2))) seconds")
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button {
+                        fixtureLibrary.togglePlayback(of: recording)
+                    } label: {
+                        Image(systemName: fixtureLibrary.playingID == recording.id ? "stop.fill" : "play.fill")
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityLabel(
+                        fixtureLibrary.playingID == recording.id
+                            ? "Stop Fixture Recording \(recording.fixtureID)"
+                            : "Play Fixture Recording \(recording.fixtureID)"
+                    )
+                }
+            }
+        } header: {
+            Text("Internal Tester — Fixture Library")
+        } footer: {
+            Text("This capability and its bundled audio exist only in the internal fixture target.")
+        }
+    }
+#endif
 
     @ViewBuilder
     private var captureSection: some View {

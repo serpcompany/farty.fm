@@ -1,36 +1,41 @@
-# Recorder and local persistence proof
+# Internal Fixture Library loading proof
 
 > THROWAWAY PROTOTYPE — this branch is evidence for the Wayfinder decision, not production code.
 
 ## Question
 
-Does a minimal native iPhone approach using `AVAudioRecorder` plus sandboxed files reliably support the complete independent Recorder loop: capture one fart, preview it before saving, save it locally, rebuild the Recording shelf after relaunch, replay it, and delete it—without coupling capture or persistence to Recording Analysis?
+Can an Internal Tester repeatably install and verify the approved 23-Recording
+Fixture Library on a physical iPhone while keeping the capability and bundled
+audio absent from regular-user builds?
 
-The prototype deliberately excludes Recording Analysis, Siri, auto-start, accounts, cloud storage, media editing, and creator features.
+The prototype preserves the approved Recorder proof as its base. It adds a
+separate `PedosInternalFixtureProof` target that alone contains:
 
-## Run
+- the explicit “Seed or refresh Fixture Library” control;
+- the approved manifest and its exact 23 audio files;
+- atomic replacement into `Application Support/FixtureLibrary`;
+- count, decode, and on-device playback verification.
 
-```sh
-xcodegen generate
-open PedosRecorderProof.xcodeproj
-```
+The regular `PedosRecorderProof` target excludes both the seeder implementation
+and Fixture Library resources.
 
-Choose your iPhone and press Run. Xcode may ask you to choose your development team for device signing.
+## Run on the Internal Tester’s iPhone
 
-The iOS Simulator can exercise capture, preview, save, relaunch persistence,
-replay, and deletion. Its automated microphone permission callback is bypassed
-because that callback can remain pending after simulator privacy access is
-pre-granted; physical-device builds still use the real system permission flow.
+1. Run `xcodegen generate`.
+2. Open `PedosRecorderProof.xcodeproj`.
+3. Select the `PedosInternalFixtureProof` scheme and the physical iPhone.
+4. Press Run. If prompted, select the development team used for device signing.
+5. Tap **Seed or refresh Fixture Library**.
 
-## Human review checklist
+For repeatable CLI verification, launch the internal app with
+`--seed-fixture-library`; the internal target seeds immediately and logs the
+verified installed count.
 
-Run these checks on a physical iPhone:
+## Verification checklist
 
-1. Grant microphone permission, capture exactly one fart, stop, preview it, and save it.
-2. Force-quit and relaunch. Confirm the Recording remains and replays.
-3. Capture another Recording, preview it, then discard it. Relaunch and confirm it never appears.
-4. Delete a saved Recording. Relaunch and confirm it stays deleted.
-5. Deny microphone permission once and confirm the app reports the failure without pretending to record.
-6. Repeat capture/save/replay at least three times and note any silent, truncated, missing, duplicated, or undeletable Recording.
-
-The prototype exposes its current phase, draft filename, persistent directory, and saved count in a state panel so unexpected transitions are visible during review.
+1. Confirm the status says **Installed and verified 23 approved Recordings**.
+2. Play several entries, including one MP3 and one WAV Recording.
+3. Force-quit and relaunch; confirm the installed count remains 23 and playback still works.
+4. Tap **Seed or refresh Fixture Library** again; confirm the count remains exactly 23.
+5. Build `PedosRecorderProof`; inspect its app bundle and confirm it contains no
+   `FixtureLibrary` directory or `approved-recordings.json`.
