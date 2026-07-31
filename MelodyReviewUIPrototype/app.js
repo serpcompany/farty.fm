@@ -3,9 +3,9 @@ const evidenceRoot = "../Evidence/curated-melody-listening";
 const melodyOrder = ["mary-lamb", "twinkle", "ode-to-joy"];
 const modeOrder = ["choose-individual", "use-all", "recommend-best-fit"];
 const modeLabels = {
-  "choose-individual": "Choose individual",
-  "use-all": "Use all",
-  "recommend-best-fit": "Recommend best fit",
+  "choose-individual": "One source (control)",
+  "use-all": "Full-corpus rotation",
+  "recommend-best-fit": "Balanced best-fit five",
 };
 const filenames = melodyOrder.flatMap((melody) =>
   modeOrder.map((mode) => `${melody}__${mode}.json`),
@@ -64,7 +64,7 @@ function warning() {
   return `
     <div class="provenance-warning">
       <span class="warning-icon">⚠</span>
-      <div><strong>Renderer evidence only</strong>The note plans were manually encoded without an authoritative score or licensing trail. Evaluate interaction and sound quality here—not catalog provenance or release readiness.</div>
+      <div><strong>Diversity renderer evidence only</strong>The source strategies are intentionally different, but the note plans remain manually encoded without an authoritative score or licensing trail. Evaluate sound behavior here—not catalog provenance or release readiness.</div>
     </div>`;
 }
 
@@ -125,9 +125,9 @@ function matrixCell(candidate) {
     <div class="cell-id">${esc(modeLabels[candidate.sourceMode])}</div>
     ${audioFor(candidate)}
     <div class="metric-strip">
-      <div class="metric"><b>${fit.usedRecordingIDs.length}</b><span>sources used</span></div>
+      <div class="metric"><b>${fit.usedRecordingIDs.length}/${fit.selectedRecordingIDs.length}</b><span>sources used</span></div>
       <div class="metric"><b>${fit.meanAbsoluteSemitoneShift.toFixed(1)}</b><span>mean semitones</span></div>
-      <div class="metric"><b>${fit.repeatedOrPaddedNoteCount}/${fit.noteAssignmentCount}</b><span>extended notes</span></div>
+      <div class="metric"><b>${fit.consecutiveSourceReuseCount}</b><span>consecutive reuse</span></div>
     </div>
     <div class="matrix-ratings">
       <label>Recognizable ${compactRating(candidate, "recognizable")}</label>
@@ -149,7 +149,7 @@ function renderMatrix() {
       <header class="matrix-header">
         <div class="eyebrow">Pedos / comparative review board</div>
         <h1>Nine renders. One baseline policy.</h1>
-        <p>Scan across a melody to hear how source selection changes it. Rate each render, then choose the strongest policy per row.</p>
+        <p>Compare a one-source control, a full-corpus rotation, and a balanced five-source ensemble. Rate each render, then choose the strongest policy per row.</p>
       </header>
       <main class="matrix-content">
         <div class="matrix-toolbar">${warning()}${statePanel()}</div>
@@ -191,7 +191,7 @@ function renderStudio() {
               <div class="fact"><b>${fit.selectedRecordingIDs.length}</b><span>eligible recordings</span></div>
               <div class="fact"><b>${fit.usedRecordingIDs.length}</b><span>actually used</span></div>
               <div class="fact"><b>${fit.meanAbsoluteSemitoneShift.toFixed(1)}</b><span>mean semitone shift</span></div>
-              <div class="fact"><b>${fit.repeatedOrPaddedNoteCount}/${fit.noteAssignmentCount}</b><span>notes extended</span></div>
+              <div class="fact"><b>${fit.consecutiveSourceReuseCount}</b><span>consecutive reuse</span></div>
             </div>
             ${warning()}
           </section>

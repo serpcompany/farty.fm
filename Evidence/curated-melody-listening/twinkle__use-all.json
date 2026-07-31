@@ -1,4 +1,5 @@
 {
+  "assignmentPolicy" : "deterministic-full-corpus-rotation",
   "assignments" : [
     {
       "durationSeconds" : 0.5,
@@ -12,190 +13,191 @@
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 1,
-      "recordingID" : "021",
+      "recordingID" : "022",
       "renderedMIDINote" : 48,
-      "semitoneShift" : -0.1313166731985973,
-      "sourcePitchAvailable" : true,
+      "semitoneShift" : -7.654730496454256,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 60
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 2,
-      "recordingID" : "086",
+      "recordingID" : "032",
       "renderedMIDINote" : 55,
       "semitoneShift" : -0.6547304964542562,
-      "sourcePitchAvailable" : true,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 67
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 3,
-      "recordingID" : "086",
+      "recordingID" : "052",
       "renderedMIDINote" : 55,
       "semitoneShift" : -0.6547304964542562,
-      "sourcePitchAvailable" : true,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 67
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 4,
-      "recordingID" : "086",
+      "recordingID" : "055",
       "renderedMIDINote" : 57,
       "semitoneShift" : 1.3452695035457438,
-      "sourcePitchAvailable" : true,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 69
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 5,
-      "recordingID" : "086",
+      "recordingID" : "059",
       "renderedMIDINote" : 57,
-      "semitoneShift" : 1.3452695035457438,
+      "semitoneShift" : -11.52852188590876,
       "sourcePitchAvailable" : true,
       "targetMIDINote" : 69
     },
     {
       "durationSeconds" : 1,
       "eventIndex" : 6,
-      "recordingID" : "086",
+      "recordingID" : "065",
       "renderedMIDINote" : 55,
       "semitoneShift" : -0.6547304964542562,
-      "sourcePitchAvailable" : true,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 67
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 7,
-      "recordingID" : "090",
+      "recordingID" : "067",
       "renderedMIDINote" : 53,
-      "semitoneShift" : -2.08763266430401,
-      "sourcePitchAvailable" : true,
+      "semitoneShift" : -2.654730496454256,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 65
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 8,
-      "recordingID" : "086",
+      "recordingID" : "069",
       "renderedMIDINote" : 53,
       "semitoneShift" : -2.654730496454256,
-      "sourcePitchAvailable" : true,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 65
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 9,
-      "recordingID" : "021",
+      "recordingID" : "080",
       "renderedMIDINote" : 52,
-      "semitoneShift" : 3.8686833268014027,
-      "sourcePitchAvailable" : true,
+      "semitoneShift" : -3.654730496454256,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 64
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 10,
-      "recordingID" : "021",
+      "recordingID" : "081",
       "renderedMIDINote" : 52,
-      "semitoneShift" : 3.8686833268014027,
-      "sourcePitchAvailable" : true,
+      "semitoneShift" : -3.654730496454256,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 64
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 11,
-      "recordingID" : "021",
+      "recordingID" : "084",
       "renderedMIDINote" : 50,
-      "semitoneShift" : 1.8686833268014027,
+      "semitoneShift" : -5.549782237015492,
       "sourcePitchAvailable" : true,
       "targetMIDINote" : 62
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 12,
-      "recordingID" : "021",
+      "recordingID" : "086",
       "renderedMIDINote" : 50,
-      "semitoneShift" : 1.8686833268014027,
+      "semitoneShift" : -5.654730496454256,
       "sourcePitchAvailable" : true,
       "targetMIDINote" : 62
     },
     {
       "durationSeconds" : 1,
       "eventIndex" : 13,
-      "recordingID" : "021",
+      "recordingID" : "090",
       "renderedMIDINote" : 48,
-      "semitoneShift" : -0.1313166731985973,
+      "semitoneShift" : -7.08763266430401,
       "sourcePitchAvailable" : true,
       "targetMIDINote" : 60
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 15,
-      "recordingID" : "090",
+      "recordingID" : "091",
       "renderedMIDINote" : 55,
-      "semitoneShift" : -0.08763266430401018,
-      "sourcePitchAvailable" : true,
+      "semitoneShift" : -0.6547304964542562,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 67
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 16,
-      "recordingID" : "084",
+      "recordingID" : "094",
       "renderedMIDINote" : 55,
-      "semitoneShift" : -0.5497822370154921,
+      "semitoneShift" : -1.2578809662455868,
       "sourcePitchAvailable" : true,
       "targetMIDINote" : 67
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 17,
-      "recordingID" : "086",
+      "recordingID" : "002",
       "renderedMIDINote" : 53,
       "semitoneShift" : -2.654730496454256,
-      "sourcePitchAvailable" : true,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 65
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 18,
-      "recordingID" : "090",
+      "recordingID" : "009",
       "renderedMIDINote" : 53,
-      "semitoneShift" : -2.08763266430401,
-      "sourcePitchAvailable" : true,
+      "semitoneShift" : -2.654730496454256,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 65
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 19,
-      "recordingID" : "021",
+      "recordingID" : "013",
       "renderedMIDINote" : 52,
-      "semitoneShift" : 3.8686833268014027,
+      "semitoneShift" : -3.9222028623595975,
       "sourcePitchAvailable" : true,
       "targetMIDINote" : 64
     },
     {
       "durationSeconds" : 0.5,
       "eventIndex" : 20,
-      "recordingID" : "021",
+      "recordingID" : "016",
       "renderedMIDINote" : 52,
-      "semitoneShift" : 3.8686833268014027,
-      "sourcePitchAvailable" : true,
+      "semitoneShift" : -3.654730496454256,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 64
     },
     {
       "durationSeconds" : 1,
       "eventIndex" : 21,
-      "recordingID" : "021",
+      "recordingID" : "017",
       "renderedMIDINote" : 50,
-      "semitoneShift" : 1.8686833268014027,
-      "sourcePitchAvailable" : true,
+      "semitoneShift" : -5.654730496454256,
+      "sourcePitchAvailable" : false,
       "targetMIDINote" : 62
     }
   ],
   "fit" : {
-    "maximumAbsoluteSemitoneShift" : 3.8686833268014027,
-    "meanAbsoluteSemitoneShift" : 1.7262669060236144,
+    "consecutiveSourceReuseCount" : 0,
+    "maximumAbsoluteSemitoneShift" : 11.52852188590876,
+    "meanAbsoluteSemitoneShift" : 3.523277797282732,
     "noteAssignmentCount" : 21,
-    "pitchedAssignmentCount" : 21,
-    "repeatedOrPaddedNoteCount" : 18,
+    "pitchedAssignmentCount" : 7,
+    "repeatedOrPaddedNoteCount" : 6,
     "selectedPitchAvailableCount" : 7,
     "selectedRecordingIDs" : [
       "002",
@@ -222,13 +224,32 @@
       "091",
       "094"
     ],
+    "sourceCoverageRatio" : 0.9130434782608695,
     "usedRecordingIDs" : [
+      "002",
+      "009",
+      "013",
+      "016",
+      "017",
       "021",
+      "022",
+      "032",
+      "052",
+      "055",
+      "059",
+      "065",
+      "067",
+      "069",
+      "080",
+      "081",
       "084",
       "086",
-      "090"
+      "090",
+      "091",
+      "094"
     ],
     "warnings" : [
+      "Some note assignments use relative spectral shifting because source pitch is unavailable.",
       "At least one source region is shorter than its note and requires ping-pong repetition or padding."
     ]
   },
@@ -328,7 +349,7 @@
     "title" : "Twinkle, Twinkle, Little Star"
   },
   "outputFilename" : "twinkle__use-all.wav",
-  "renderer" : "deterministic-resample-pingpong-v1",
-  "schemaVersion" : 1,
+  "renderer" : "deterministic-diversity-resample-pingpong-v2",
+  "schemaVersion" : 2,
   "sourceMode" : "use-all"
 }

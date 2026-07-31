@@ -100,6 +100,14 @@ public enum SourceMode: String, Codable, CaseIterable, Sendable {
     case chooseIndividual = "choose-individual"
     case useAll = "use-all"
     case recommendBestFit = "recommend-best-fit"
+
+    public var assignmentPolicy: String {
+        switch self {
+        case .chooseIndividual: "single-source-control"
+        case .useAll: "deterministic-full-corpus-rotation"
+        case .recommendBestFit: "balanced-five-source-pitch-fit"
+        }
+    }
 }
 
 public struct SourceSet: Sendable {
@@ -126,12 +134,15 @@ public struct MelodyFitFacts: Codable, Sendable {
     public let meanAbsoluteSemitoneShift: Double
     public let maximumAbsoluteSemitoneShift: Double
     public let repeatedOrPaddedNoteCount: Int
+    public let sourceCoverageRatio: Double
+    public let consecutiveSourceReuseCount: Int
     public let warnings: [String]
 }
 
 public struct RenderEvidence: Codable, Sendable {
     public let schemaVersion: Int
     public let renderer: String
+    public let assignmentPolicy: String
     public let melody: CuratedMelody
     public let sourceMode: SourceMode
     public let individualRecordingID: String?
@@ -201,14 +212,24 @@ public enum MelodyFitPlanner {
         var useCounts: [String: Int] = [:]
         var assignments: [NoteAssignment] = []
         var repeatedOrPadded = 0
+        var noteOrdinal = 0
+        let rotationOffset = melody.id.unicodeScalars.reduce(0) { $0 + Int($1.value) } % sourceSet.candidates.count
 
         for (index, event) in melody.events.enumerated() {
             guard let target = event.midiNote else { continue }
             let renderedTarget = target + octaveTranspose
-            let candidate = sourceSet.candidates.min {
-                assignmentCost($0, target: renderedTarget, useCount: useCounts[$0.id, default: 0])
-                    < assignmentCost($1, target: renderedTarget, useCount: useCounts[$1.id, default: 0])
-            }!
+            let candidate: RecordingCandidate
+            switch sourceSet.mode {
+            case .chooseIndividual:
+                candidate = sourceSet.candidates[0]
+            case .useAll:
+                candidate = sourceSet.candidates[(rotationOffset + noteOrdinal) % sourceSet.candidates.count]
+            case .recommendBestFit:
+                let minimumUseCount = sourceSet.candidates.map { useCounts[$0.id, default: 0] }.min() ?? 0
+                candidate = sourceSet.candidates
+                    .filter { useCounts[$0.id, default: 0] == minimumUseCount }
+                    .min { assignmentCost($0, target: renderedTarget) < assignmentCost($1, target: renderedTarget) }!
+            }
             let sourcePitch = candidate.analysis.pitch.referenceMIDINote
             let assumedPitch = sourcePitch ?? sourceCenter
             let shift = renderedTarget - assumedPitch
@@ -218,6 +239,7 @@ public enum MelodyFitPlanner {
                 repeatedOrPadded += 1
             }
             useCounts[candidate.id, default: 0] += 1
+            noteOrdinal += 1
             assignments.append(
                 NoteAssignment(
                     eventIndex: index,
@@ -233,6 +255,10 @@ public enum MelodyFitPlanner {
 
         let absoluteShifts = assignments.map { abs($0.semitoneShift) }
         let pitchedCount = assignments.filter(\.sourcePitchAvailable).count
+        let usedRecordingIDs = Array(Set(assignments.map(\.recordingID))).sorted()
+        let consecutiveReuseCount = zip(assignments, assignments.dropFirst())
+            .filter { pair in pair.0.recordingID == pair.1.recordingID }
+            .count
         var warnings: [String] = []
         if pitchedCount < assignments.count {
             warnings.append("Some note assignments use relative spectral shifting because source pitch is unavailable.")
@@ -246,13 +272,15 @@ public enum MelodyFitPlanner {
 
         let facts = MelodyFitFacts(
             selectedRecordingIDs: sourceSet.candidates.map(\.id),
-            usedRecordingIDs: Array(Set(assignments.map(\.recordingID))).sorted(),
+            usedRecordingIDs: usedRecordingIDs,
             selectedPitchAvailableCount: sourceSet.candidates.filter { $0.analysis.pitch.isAvailable }.count,
             pitchedAssignmentCount: pitchedCount,
             noteAssignmentCount: assignments.count,
             meanAbsoluteSemitoneShift: absoluteShifts.isEmpty ? 0 : absoluteShifts.reduce(0, +) / Double(absoluteShifts.count),
             maximumAbsoluteSemitoneShift: absoluteShifts.max() ?? 0,
             repeatedOrPaddedNoteCount: repeatedOrPadded,
+            sourceCoverageRatio: Double(usedRecordingIDs.count) / Double(sourceSet.candidates.count),
+            consecutiveSourceReuseCount: consecutiveReuseCount,
             warnings: warnings
         )
         return (assignments, facts)
@@ -273,13 +301,12 @@ public enum MelodyFitPlanner {
         return octaveDistance + (1 - candidate.analysis.pitch.periodicityEvidence) * 4
     }
 
-    private static func assignmentCost(_ candidate: RecordingCandidate, target: Double, useCount: Int) -> Double {
+    private static func assignmentCost(_ candidate: RecordingCandidate, target: Double) -> Double {
         guard let pitch = candidate.analysis.pitch.referenceMIDINote else {
-            return 30 + Double(useCount) * 0.2
+            return 30
         }
         return abs(target - pitch)
             + (1 - candidate.analysis.pitch.periodicityEvidence) * 3
-            + Double(useCount) * 0.12
     }
 
     private static func nearestOctaveShift(target: Double, source: Double) -> Double {
@@ -297,7 +324,7 @@ public enum MelodyFitPlanner {
 }
 
 public enum FartOnlyRenderer {
-    public static let algorithmID = "deterministic-resample-pingpong-v1"
+    public static let algorithmID = "deterministic-diversity-resample-pingpong-v2"
     public static let sampleRate = 44_100.0
 
     public static func render(
@@ -339,8 +366,9 @@ public enum FartOnlyRenderer {
         }
         try writeWAV(samples: output, url: outputURL)
         return RenderEvidence(
-            schemaVersion: 1,
+            schemaVersion: 2,
             renderer: algorithmID,
+            assignmentPolicy: sourceSet.mode.assignmentPolicy,
             melody: melody,
             sourceMode: sourceSet.mode,
             individualRecordingID: sourceSet.mode == .chooseIndividual ? sourceSet.candidates.first?.id : nil,

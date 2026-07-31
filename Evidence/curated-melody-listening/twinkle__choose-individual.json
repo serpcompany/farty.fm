@@ -1,4 +1,5 @@
 {
+  "assignmentPolicy" : "single-source-control",
   "assignments" : [
     {
       "durationSeconds" : 0.5,
@@ -191,6 +192,7 @@
     }
   ],
   "fit" : {
+    "consecutiveSourceReuseCount" : 20,
     "maximumAbsoluteSemitoneShift" : 8.52852188590876,
     "meanAbsoluteSemitoneShift" : 4.0945177171642335,
     "noteAssignmentCount" : 21,
@@ -200,6 +202,7 @@
     "selectedRecordingIDs" : [
       "059"
     ],
+    "sourceCoverageRatio" : 1,
     "usedRecordingIDs" : [
       "059"
     ],
@@ -304,7 +307,7 @@
     "title" : "Twinkle, Twinkle, Little Star"
   },
   "outputFilename" : "twinkle__choose-individual.wav",
-  "renderer" : "deterministic-resample-pingpong-v1",
-  "schemaVersion" : 1,
+  "renderer" : "deterministic-diversity-resample-pingpong-v2",
+  "schemaVersion" : 2,
   "sourceMode" : "choose-individual"
 }

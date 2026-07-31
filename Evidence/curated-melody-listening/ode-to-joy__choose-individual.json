@@ -1,4 +1,5 @@
 {
+  "assignmentPolicy" : "single-source-control",
   "assignments" : [
     {
       "durationSeconds" : 0.45454545454545453,
@@ -272,6 +273,7 @@
     }
   ],
   "fit" : {
+    "consecutiveSourceReuseCount" : 29,
     "maximumAbsoluteSemitoneShift" : 6.868683326801403,
     "meanAbsoluteSemitoneShift" : 3.187876662747508,
     "noteAssignmentCount" : 30,
@@ -281,6 +283,7 @@
     "selectedRecordingIDs" : [
       "021"
     ],
+    "sourceCoverageRatio" : 1,
     "usedRecordingIDs" : [
       "021"
     ],
@@ -421,7 +424,7 @@
     "title" : "Ode to Joy"
   },
   "outputFilename" : "ode-to-joy__choose-individual.wav",
-  "renderer" : "deterministic-resample-pingpong-v1",
-  "schemaVersion" : 1,
+  "renderer" : "deterministic-diversity-resample-pingpong-v2",
+  "schemaVersion" : 2,
   "sourceMode" : "choose-individual"
 }

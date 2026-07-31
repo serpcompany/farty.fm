@@ -1,4 +1,5 @@
 {
+  "assignmentPolicy" : "single-source-control",
   "assignments" : [
     {
       "durationSeconds" : 0.45454545454545453,
@@ -236,6 +237,7 @@
     }
   ],
   "fit" : {
+    "consecutiveSourceReuseCount" : 25,
     "maximumAbsoluteSemitoneShift" : 6.868683326801403,
     "meanAbsoluteSemitoneShift" : 2.8989871744626177,
     "noteAssignmentCount" : 26,
@@ -245,6 +247,7 @@
     "selectedRecordingIDs" : [
       "021"
     ],
+    "sourceCoverageRatio" : 1,
     "usedRecordingIDs" : [
       "021"
     ],
@@ -375,7 +378,7 @@
     "title" : "Mary Had a Little Lamb"
   },
   "outputFilename" : "mary-lamb__choose-individual.wav",
-  "renderer" : "deterministic-resample-pingpong-v1",
-  "schemaVersion" : 1,
+  "renderer" : "deterministic-diversity-resample-pingpong-v2",
+  "schemaVersion" : 2,
   "sourceMode" : "choose-individual"
 }
