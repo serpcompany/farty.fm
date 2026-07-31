@@ -3,7 +3,7 @@ import Foundation
 import Observation
 
 struct Recording: Identifiable {
-    let id: UUID
+    let id: String
     let url: URL
     let createdAt: Date
     let duration: TimeInterval
@@ -34,14 +34,30 @@ final class RecorderStore: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDeleg
     private(set) var phase: CapturePhase = .idle
     private(set) var recordings: [Recording] = []
     private(set) var playingURL: URL?
+    private(set) var analysisByRecordingID: [String: RecordingAnalysisStatus] = [:]
+    private(set) var analysisExecutionsThisLaunch = 0
     var errorMessage: String?
 
     private var audioRecorder: AVAudioRecorder?
     private var audioPlayer: AVAudioPlayer?
+    private let analysisService = RecordingAnalysisService()
+
+    private let proofCaseFilenames = [
+        "017__breviceps__fart-3__446000.mp3",
+        "044__walter-odington__fart-wav__69500.mp3",
+        "023__the-fart__fart-attack__436834.mp3"
+    ]
 
     override init() {
         super.init()
         reloadRecordings()
+
+        if CommandLine.arguments.contains("--install-analysis-cases") {
+            installProofCases()
+        }
+        if CommandLine.arguments.contains("--analyze-missing") {
+            analyzeMissing()
+        }
     }
 
     var persistentDirectory: URL {
@@ -136,6 +152,9 @@ final class RecorderStore: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDeleg
             try FileManager.default.moveItem(at: draft.url, to: destination)
             phase = .idle
             reloadRecordings()
+            if let saved = recordings.first(where: { $0.url == destination }) {
+                analyze(saved)
+            }
         } catch {
             errorMessage = "The Recording could not be saved: \(error.localizedDescription)"
         }
@@ -159,9 +178,76 @@ final class RecorderStore: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDeleg
 
         do {
             try FileManager.default.removeItem(at: recording.url)
+            analysisService.deleteAnalysis(for: recording)
             reloadRecordings()
         } catch {
             errorMessage = "The Recording could not be deleted: \(error.localizedDescription)"
+        }
+    }
+
+    func analysisStatus(for recording: Recording) -> RecordingAnalysisStatus {
+        analysisByRecordingID[recording.id] ?? .missing
+    }
+
+    func analyze(_ recording: Recording) {
+        if case .analyzing = analysisStatus(for: recording) {
+            return
+        }
+
+        analysisByRecordingID[recording.id] = .analyzing
+        let service = analysisService
+
+        Task {
+            do {
+                let analysis = try await Task.detached(priority: .userInitiated) {
+                    try service.analyze(recording)
+                }.value
+                analysisExecutionsThisLaunch += 1
+                analysisByRecordingID[recording.id] = .ready(analysis, source: .fresh)
+            } catch {
+                analysisByRecordingID[recording.id] = .failed(error.localizedDescription)
+            }
+        }
+    }
+
+    func analyzeMissing() {
+        for recording in recordings {
+            if case .missing = analysisStatus(for: recording) {
+                analyze(recording)
+            }
+        }
+    }
+
+    func installProofCases() {
+        do {
+            try FileManager.default.createDirectory(
+                at: persistentDirectory,
+                withIntermediateDirectories: true
+            )
+
+            for filename in proofCaseFilenames {
+                let sourceName = String(filename.dropLast(4))
+                guard let source = Bundle.main.url(forResource: sourceName, withExtension: "mp3") else {
+                    throw RecorderProofError.missingProofCase(filename)
+                }
+                let destination = persistentDirectory.appending(path: filename)
+                if !FileManager.default.fileExists(atPath: destination.path) {
+                    try FileManager.default.copyItem(at: source, to: destination)
+                }
+            }
+
+            reloadRecordings()
+        } catch {
+            errorMessage = "Proof cases could not be installed: \(error.localizedDescription)"
+        }
+    }
+
+    func forgetAllAnalysis() {
+        do {
+            try analysisService.deleteAll()
+            reloadRecordings()
+        } catch {
+            errorMessage = "Recording Analysis could not be cleared: \(error.localizedDescription)"
         }
     }
 
@@ -239,7 +325,7 @@ final class RecorderStore: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDeleg
             )
 
             recordings = urls
-                .filter { $0.pathExtension.lowercased() == "m4a" }
+                .filter { ["m4a", "mp3", "wav"].contains($0.pathExtension.lowercased()) }
                 .compactMap { url in
                     let values = try? url.resourceValues(forKeys: keys)
                     guard values?.isRegularFile == true,
@@ -247,15 +333,25 @@ final class RecorderStore: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDeleg
                         return nil
                     }
                     return Recording(
-                        id: UUID(uuidString: url.deletingPathExtension().lastPathComponent) ?? UUID(),
+                        id: url.deletingPathExtension().lastPathComponent,
                         url: url,
                         createdAt: values?.creationDate ?? .distantPast,
                         duration: player.duration
                     )
                 }
                 .sorted { $0.createdAt > $1.createdAt }
+
+            analysisByRecordingID = Dictionary(
+                uniqueKeysWithValues: recordings.map { recording in
+                    let status = analysisService.preservedAnalysis(for: recording)
+                        .map { RecordingAnalysisStatus.ready($0, source: .preserved) }
+                        ?? .missing
+                    return (recording.id, status)
+                }
+            )
         } catch {
             recordings = []
+            analysisByRecordingID = [:]
             errorMessage = "The Recording shelf could not be loaded: \(error.localizedDescription)"
         }
     }
@@ -292,11 +388,13 @@ final class RecorderStore: NSObject, AVAudioRecorderDelegate, AVAudioPlayerDeleg
 private enum RecorderProofError: LocalizedError {
     case couldNotStart
     case couldNotPlay
+    case missingProofCase(String)
 
     var errorDescription: String? {
         switch self {
         case .couldNotStart: "The audio recorder refused to start."
         case .couldNotPlay: "The audio player refused to start."
+        case let .missingProofCase(filename): "Bundled proof case is missing: \(filename)"
         }
     }
 }

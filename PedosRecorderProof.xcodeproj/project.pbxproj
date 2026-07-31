@@ -8,21 +8,41 @@
 
 /* Begin PBXBuildFile section */
 		433B475F9A48793A58B71956 /* RecorderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F00751FE3F3EBD0A79B393A /* RecorderStore.swift */; };
+		54A80A1D7B5C884128C6E1FB /* 017__breviceps__fart-3__446000.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FE6810C477920A669D260727 /* 017__breviceps__fart-3__446000.mp3 */; };
+		5A5886F1E0940F277C8E16F1 /* RecordingAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1AFB6CC73211DD8569B41F /* RecordingAnalysis.swift */; };
+		75B0DD43916AC7AB32C51058 /* 023__the-fart__fart-attack__436834.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AACEF7CDAA386844309A14D0 /* 023__the-fart__fart-attack__436834.mp3 */; };
+		7827D4471FB9ACF4D6C908A1 /* 044__walter-odington__fart-wav__69500.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F5F7BB86D060A0200A0FF6A2 /* 044__walter-odington__fart-wav__69500.mp3 */; };
 		95B6709D9225100AFC1C3F83 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4BD5C5AB533616A5FD384C /* ContentView.swift */; };
 		D7C6106C48D4616D8755C63E /* PedosRecorderProofApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D98E5415FF75AAA2FD90A70 /* PedosRecorderProofApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		2D98E5415FF75AAA2FD90A70 /* PedosRecorderProofApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PedosRecorderProofApp.swift; sourceTree = "<group>"; };
+		2E1AFB6CC73211DD8569B41F /* RecordingAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingAnalysis.swift; sourceTree = "<group>"; };
 		7F00751FE3F3EBD0A79B393A /* RecorderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecorderStore.swift; sourceTree = "<group>"; };
+		AACEF7CDAA386844309A14D0 /* 023__the-fart__fart-attack__436834.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "023__the-fart__fart-attack__436834.mp3"; sourceTree = "<group>"; };
 		CC12C7529CE7DED44024E0AC /* PedosRecorderProof.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PedosRecorderProof.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD4BD5C5AB533616A5FD384C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F5F7BB86D060A0200A0FF6A2 /* 044__walter-odington__fart-wav__69500.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "044__walter-odington__fart-wav__69500.mp3"; sourceTree = "<group>"; };
+		FE6810C477920A669D260727 /* 017__breviceps__fart-3__446000.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "017__breviceps__fart-3__446000.mp3"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		6364EDC2C4E66EF0C2593B3C /* fart-samples */ = {
+			isa = PBXGroup;
+			children = (
+				FE6810C477920A669D260727 /* 017__breviceps__fart-3__446000.mp3 */,
+				AACEF7CDAA386844309A14D0 /* 023__the-fart__fart-attack__436834.mp3 */,
+				F5F7BB86D060A0200A0FF6A2 /* 044__walter-odington__fart-wav__69500.mp3 */,
+			);
+			name = "fart-samples";
+			path = "docs/research/prototypes/pedos-app-v1/test-data/fart-samples";
+			sourceTree = "<group>";
+		};
 		6D0391BA3DF726AF8EFE0BA4 = {
 			isa = PBXGroup;
 			children = (
+				6364EDC2C4E66EF0C2593B3C /* fart-samples */,
 				C992DC75234328588C434F12 /* RecorderProof */,
 				6F6F4B0E212229A7557F17E9 /* Products */,
 			);
@@ -42,6 +62,7 @@
 				DD4BD5C5AB533616A5FD384C /* ContentView.swift */,
 				2D98E5415FF75AAA2FD90A70 /* PedosRecorderProofApp.swift */,
 				7F00751FE3F3EBD0A79B393A /* RecorderStore.swift */,
+				2E1AFB6CC73211DD8569B41F /* RecordingAnalysis.swift */,
 			);
 			path = RecorderProof;
 			sourceTree = "<group>";
@@ -54,6 +75,7 @@
 			buildConfigurationList = BD8DA5DD3860D170389D1C1E /* Build configuration list for PBXNativeTarget "PedosRecorderProof" */;
 			buildPhases = (
 				80C24161EFAE446522A23C25 /* Sources */,
+				8AEBE216D4EAA194EF160E10 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -74,11 +96,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-					16EC1808945426AE4871051B = {
-						ProvisioningStyle = Automatic;
-					};
-				};
 			};
 			buildConfigurationList = 956ACA6F6862DF660CB90EA8 /* Build configuration list for PBXProject "PedosRecorderProof" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -99,6 +116,19 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		8AEBE216D4EAA194EF160E10 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				54A80A1D7B5C884128C6E1FB /* 017__breviceps__fart-3__446000.mp3 in Resources */,
+				75B0DD43916AC7AB32C51058 /* 023__the-fart__fart-attack__436834.mp3 in Resources */,
+				7827D4471FB9ACF4D6C908A1 /* 044__walter-odington__fart-wav__69500.mp3 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		80C24161EFAE446522A23C25 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -107,6 +137,7 @@
 				95B6709D9225100AFC1C3F83 /* ContentView.swift in Sources */,
 				D7C6106C48D4616D8755C63E /* PedosRecorderProofApp.swift in Sources */,
 				433B475F9A48793A58B71956 /* RecorderStore.swift in Sources */,
+				5A5886F1E0940F277C8E16F1 /* RecordingAnalysis.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,7 +150,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Recorder Proof";
+				INFOPLIST_KEY_CFBundleDisplayName = "Analysis Proof";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pedos needs microphone access to capture your Recording.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = (
 					UIInterfaceOrientationPortrait,
@@ -128,7 +159,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.serpcompany.PedosRecorderProof;
+				PRODUCT_BUNDLE_IDENTIFIER = com.serpcompany.PedosRecordingAnalysisProof;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -168,7 +199,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -233,7 +263,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -264,7 +293,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Recorder Proof";
+				INFOPLIST_KEY_CFBundleDisplayName = "Analysis Proof";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Pedos needs microphone access to capture your Recording.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = (
 					UIInterfaceOrientationPortrait,
@@ -273,7 +302,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.serpcompany.PedosRecorderProof;
+				PRODUCT_BUNDLE_IDENTIFIER = com.serpcompany.PedosRecordingAnalysisProof;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";

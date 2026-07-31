@@ -1,36 +1,47 @@
-# Recorder and local persistence proof
+# Post-save Recording Analysis proof
 
 > THROWAWAY PROTOTYPE — this branch is evidence for the Wayfinder decision, not production code.
 
 ## Question
 
-Does a minimal native iPhone approach using `AVAudioRecorder` plus sandboxed files reliably support the complete independent Recorder loop: capture one fart, preview it before saving, save it locally, rebuild the Recording shelf after relaunch, replay it, and delete it—without coupling capture or persistence to Recording Analysis?
+Can an independent, on-device post-save process extract and preserve the characteristics needed for Melody Fit and fart-only rendering—usable duration, relative level, brightness, and a confidence-gated reference pitch—without coupling capture to analysis or decoding the Recording again on every launch?
 
-The prototype deliberately excludes Recording Analysis, Siri, auto-start, accounts, cloud storage, media editing, and creator features.
+This proof extends the already-approved Recorder proof. Saving still completes by moving the approved `.m4a` file into `Application Support/Recordings`. Only after that move succeeds does a separate analysis task decode the saved Recording. The result is versioned JSON in the separate `Application Support/RecordingAnalysis` directory.
+
+The analysis record is reused while the audio file's size and modification date match. A schema-version change or audio revision mismatch makes it missing rather than silently trusting stale characteristics.
+
+The archived first attempt is evidence, not the current decision. It taught two lessons this proof carries forward:
+
+- spectral brightness must not masquerade as fundamental pitch;
+- noisy Recordings need an explicit pitch-confidence result, including “not confidently pitched.”
 
 ## Run
 
 ```sh
-xcodegen generate
 open PedosRecorderProof.xcodeproj
 ```
 
-Choose your iPhone and press Run. Xcode may ask you to choose your development team for device signing.
+Choose an iPhone Simulator or physical iPhone and press Run.
 
-The iOS Simulator can exercise capture, preview, save, relaunch persistence,
-replay, and deletion. Its automated microphone permission callback is bypassed
-because that callback can remain pending after simulator privacy access is
-pre-granted; physical-device builds still use the real system permission flow.
+For repeatable Simulator automation, the prototype also accepts
+`--install-analysis-cases --analyze-missing` as launch arguments.
+
+## Prototype controls
+
+- **Install 3 controlled analysis cases** copies three bundled audio cases into the prototype's Recording shelf. They are proof inputs only, not a regular-user starter library or the Fixture Library capability.
+- **Analyze every missing Recording** runs the on-device analysis once per missing item.
+- **Forget preserved analysis** deletes only the prototype's analysis JSON so the same audio can be analyzed again.
+
+Each Recording shows the full relevant state: usable region, RMS and peak dBFS, brightness, reference note or “not confidently pitched,” pitch confidence, voiced-frame ratio, schema version, and audio revision.
 
 ## Human review checklist
 
-Run these checks on a physical iPhone:
+1. Install the controlled cases and play all three so the measurements can be compared with the actual sounds.
+2. Analyze every missing Recording. Confirm the UI remains responsive and every case reaches either a measured result or an explicit failure.
+3. Treat pitch as usable only when the displayed confidence and what you hear agree. A noisy case returning “not confidently pitched” is a valid result.
+4. Terminate the app and relaunch it. Confirm each result says **preserved JSON**, **Fresh analyses this launch** remains `0`, and no audible or visible playback/capture behavior changed.
+5. Capture, preview, and save a new Recording. Confirm it appears on the shelf immediately, then gains a separate **fresh analysis** result.
+6. Delete a Recording, relaunch, and confirm its audio and analysis record are both gone.
+7. Use **Forget preserved analysis** and confirm the audio remains playable while its analysis state becomes missing.
 
-1. Grant microphone permission, capture exactly one fart, stop, preview it, and save it.
-2. Force-quit and relaunch. Confirm the Recording remains and replays.
-3. Capture another Recording, preview it, then discard it. Relaunch and confirm it never appears.
-4. Delete a saved Recording. Relaunch and confirm it stays deleted.
-5. Deny microphone permission once and confirm the app reports the failure without pretending to record.
-6. Repeat capture/save/replay at least three times and note any silent, truncated, missing, duplicated, or undeletable Recording.
-
-The prototype exposes its current phase, draft filename, persistent directory, and saved count in a state panel so unexpected transitions are visible during review.
+The decision is ready only after the product owner confirms that these preserved characteristics are credible enough to drive the next Melody Fit and rendering proof.
