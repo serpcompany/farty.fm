@@ -1,0 +1,146 @@
+[
+  {
+    "filename": "fart-8.wav",
+    "path": "/home/user/workspace/test-data/fart-samples/fart-8.wav",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -14.8,
+    "duration": 0.695011,
+    "brightness": 0.22
+  },
+  {
+    "filename": "fart-6.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/fart-6.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -26.2,
+    "duration": 0.496375,
+    "brightness": 0.69
+  },
+  {
+    "filename": "quick-fart.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/quick-fart.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -31.7,
+    "duration": 2.063673,
+    "brightness": 0.01
+  },
+  {
+    "filename": "wet-fart.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/wet-fart.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -26.7,
+    "duration": 2.063673,
+    "brightness": 0.15
+  },
+  {
+    "filename": "trumpet-fart.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/trumpet-fart.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -34.4,
+    "duration": 2.063673,
+    "brightness": 0.26
+  },
+  {
+    "filename": "fart-7.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/fart-7.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -21.6,
+    "duration": 0.600875,
+    "brightness": 0.36
+  },
+  {
+    "filename": "rigid-fart.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/rigid-fart.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -25.1,
+    "duration": 2.063673,
+    "brightness": 0.14
+  },
+  {
+    "filename": "fart-1.wav",
+    "path": "/home/user/workspace/test-data/fart-samples/fart-1.wav",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -21.4,
+    "duration": 0.844626,
+    "brightness": 0.79
+  },
+  {
+    "filename": "long-fart.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/long-fart.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -23.2,
+    "duration": 2.66449,
+    "brightness": 0.7
+  },
+  {
+    "filename": "silly-farts.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/silly-farts.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -14.5,
+    "duration": 4.052969,
+    "brightness": 0.28
+  },
+  {
+    "filename": "fart-4.wav",
+    "path": "/home/user/workspace/test-data/fart-samples/fart-4.wav",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -15.8,
+    "duration": 0.50068,
+    "brightness": 1
+  },
+  {
+    "filename": "bean-fart.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/bean-fart.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -14.8,
+    "duration": 7.000816,
+    "brightness": 0
+  },
+  {
+    "filename": "fart-5.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/fart-5.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -21.9,
+    "duration": 0.627,
+    "brightness": 0.9
+  },
+  {
+    "filename": "fart-2.wav",
+    "path": "/home/user/workspace/test-data/fart-samples/fart-2.wav",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -16.7,
+    "duration": 0.172041,
+    "brightness": 1
+  },
+  {
+    "filename": "fart-3.wav",
+    "path": "/home/user/workspace/test-data/fart-samples/fart-3.wav",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -19.5,
+    "duration": 0.397914,
+    "brightness": 1
+  },
+  {
+    "filename": "string-cheese-fart.mp3",
+    "path": "/home/user/workspace/test-data/fart-samples/string-cheese-fart.mp3",
+    "pitch": null,
+    "midiNote": null,
+    "loudness": -25.3,
+    "duration": 2.66449,
+    "brightness": 1
+  }
+]
