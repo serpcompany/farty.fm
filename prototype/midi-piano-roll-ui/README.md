@@ -9,7 +9,13 @@ This is deliberately disposable UI code on `codex/midi-piano-roll-prototype`. It
 - `?variant=C` — a one-note-at-a-time assignment flow for users who do not understand piano rolls
 - `?variant=D` — the selected A+B hybrid: auto-map first, then a functional arranger
 
-All variants share in-memory state. Drag a source clip onto a note on desktop, or tap a clip and then a note on mobile. **Auto Map** restores a complete suggested mapping. Note and song audition use tracked local sample audio and small `playbackRate` changes matching the displayed cent offsets.
+All variants share in-memory state. Press and drag a source clip onto a note on
+desktop or touch screens; dragging an arranged note onto another swaps their
+recordings. A floating source card, highlighted drop target, and edge
+auto-scroll keep mobile dragging visible. Tap assignment remains an
+accessibility fallback. **Auto Map** restores a complete suggested mapping.
+Note and song audition use tracked local sample audio and small `playbackRate`
+changes matching the displayed cent offsets.
 
 Variant D is the working editor experiment. It supports four song templates
 (`Ode to Joy`, `Mary Had a Little Lamb`, `Twinkle Twinkle Little Star`, and

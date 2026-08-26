@@ -122,6 +122,8 @@ const app = document.querySelector("#app");
 let sequenceTimer = null;
 let activeAudios = [];
 let customNoteCounter = 0;
+let pointerDrag = null;
+let suppressClickUntil = 0;
 
 const variants = {
   A: { name: "Guided auto-fill", description: "Recommended: song first, smart fill, optional swaps" },
@@ -271,7 +273,7 @@ function clipTray({ horizontal = true, title = "Your recordings" } = {}) {
   return `
     <section class="clip-tray ${horizontal ? "horizontal" : "vertical"}">
       <div class="section-heading">
-        <div><span class="overline">Tap, then tap a note · or drag</span><h2>${title}</h2></div>
+        <div><span class="overline">Press and drag onto a note</span><h2>${title}</h2></div>
         <span class="tray-count">${clips.length} ready</span>
       </div>
       <div class="clip-list">${clips.map((clip) => clipCard(clip, { horizontal })).join("")}</div>
@@ -729,6 +731,114 @@ function swapAssignments(sourceNoteId, targetNoteId) {
   render();
 }
 
+function pointerPayload(source) {
+  const noteId = source.dataset.dragNoteId;
+  if (noteId) {
+    const note = noteById(noteId);
+    const clip = clipById(assignmentFor(note)?.clipId);
+    return clip ? { type: "note", noteId, label: `${note.pitch} · ${clip.name}`, color: clip.color } : null;
+  }
+  const clipId = source.dataset.clipId;
+  const clip = clipById(clipId);
+  return clip ? { type: "clip", clipId, label: clip.name, color: clip.color } : null;
+}
+
+function movePointerGhost(x, y) {
+  if (!pointerDrag?.ghost) return;
+  pointerDrag.ghost.style.transform = `translate3d(${x + 14}px, ${y + 14}px, 0)`;
+}
+
+function pointerDropTarget(event) {
+  const direct = event.target.closest?.("[data-drop-note]");
+  if (direct) return direct;
+  return document.elementFromPoint(event.clientX, event.clientY)?.closest?.("[data-drop-note]") ?? null;
+}
+
+function updatePointerTarget(target) {
+  if (pointerDrag?.target === target) return;
+  pointerDrag?.target?.classList.remove("pointer-drop-target");
+  if (pointerDrag) pointerDrag.target = target;
+  target?.classList.add("pointer-drop-target");
+}
+
+function edgeAutoScroll(event) {
+  const edge = 76;
+  if (event.clientY < edge) window.scrollBy(0, -22);
+  if (event.clientY > window.innerHeight - edge) window.scrollBy(0, 22);
+  const roll = document.querySelector(".variant-d .roll-scroll");
+  if (!roll) return;
+  const bounds = roll.getBoundingClientRect();
+  if (event.clientY < bounds.top || event.clientY > bounds.bottom) return;
+  if (event.clientX < Math.max(bounds.left, edge)) roll.scrollLeft -= 22;
+  if (event.clientX > Math.min(bounds.right, window.innerWidth - edge)) roll.scrollLeft += 22;
+}
+
+function beginPointerDrag(event) {
+  if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
+  const source = event.target.closest("[data-drag-note-id], [data-clip-id]");
+  if (!source) return;
+  const payload = pointerPayload(source);
+  if (!payload) return;
+  pointerDrag = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    active: false,
+    source,
+    payload,
+    target: null,
+    ghost: null,
+  };
+}
+
+function continuePointerDrag(event) {
+  if (!pointerDrag || event.pointerId !== pointerDrag.pointerId) return;
+  const distance = Math.hypot(event.clientX - pointerDrag.startX, event.clientY - pointerDrag.startY);
+  if (!pointerDrag.active && distance < 8) return;
+  if (!pointerDrag.active) {
+    pointerDrag.active = true;
+    pointerDrag.ghost = document.createElement("div");
+    pointerDrag.ghost.className = "pointer-drag-ghost";
+    pointerDrag.ghost.style.setProperty("--drag-color", pointerDrag.payload.color);
+    pointerDrag.ghost.innerHTML = `<span>⠿</span><b>${esc(pointerDrag.payload.label)}</b>`;
+    document.body.append(pointerDrag.ghost);
+    document.body.classList.add("pointer-drag-active");
+    pointerDrag.source.classList.add("pointer-drag-source");
+  }
+  event.preventDefault();
+  movePointerGhost(event.clientX, event.clientY);
+  updatePointerTarget(pointerDropTarget(event));
+  edgeAutoScroll(event);
+}
+
+function finishPointerDrag(event) {
+  if (!pointerDrag || event.pointerId !== pointerDrag.pointerId) return;
+  const completed = pointerDrag.active;
+  const target = pointerDrag.target ?? pointerDropTarget(event);
+  const payload = pointerDrag.payload;
+  pointerDrag.target?.classList.remove("pointer-drop-target");
+  pointerDrag.source.classList.remove("pointer-drag-source");
+  pointerDrag.ghost?.remove();
+  document.body.classList.remove("pointer-drag-active");
+  pointerDrag = null;
+  if (!completed) return;
+  event.preventDefault();
+  event.stopPropagation();
+  suppressClickUntil = Date.now() + 400;
+  if (!target) return;
+  if (payload.type === "note") swapAssignments(payload.noteId, target.dataset.dropNote);
+  else assignClip(target.dataset.dropNote, payload.clipId);
+}
+
+function cancelPointerDrag() {
+  if (!pointerDrag) return;
+  pointerDrag.target?.classList.remove("pointer-drop-target");
+  pointerDrag.source.classList.remove("pointer-drag-source");
+  pointerDrag.ghost?.remove();
+  document.body.classList.remove("pointer-drag-active");
+  pointerDrag = null;
+}
+
 function stopPlayback({ renderAfter = true } = {}) {
   if (sequenceTimer) clearTimeout(sequenceTimer);
   sequenceTimer = null;
@@ -780,6 +890,11 @@ function focusRelative(delta) {
 }
 
 document.addEventListener("click", (event) => {
+  if (Date.now() < suppressClickUntil) {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
   const button = event.target.closest("button");
   if (!button) return;
   if (button.dataset.variantStep) return switchVariant(Number(button.dataset.variantStep));
@@ -902,5 +1017,10 @@ document.addEventListener("keydown", (event) => {
   event.preventDefault();
   switchVariant(event.key === "ArrowRight" ? 1 : -1);
 });
+
+document.addEventListener("pointerdown", beginPointerDrag);
+document.addEventListener("pointermove", continuePointerDrag, { passive: false });
+document.addEventListener("pointerup", finishPointerDrag, { passive: false });
+document.addEventListener("pointercancel", cancelPointerDrag);
 
 render();

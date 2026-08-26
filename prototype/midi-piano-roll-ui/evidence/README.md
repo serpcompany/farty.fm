@@ -29,3 +29,18 @@ arranger. It was checked at `430 × 932` and `1440 × 1000`:
 
 Screenshots: `variant-d-arranger-desktop.png` and
 `variant-d-arranger-mobile.png`.
+
+## Touch drag iteration
+
+The arranger now uses Pointer Events in addition to desktop HTML drag/drop:
+
+- the original touch sequence initially left the first E4 mapped to Smooth 016;
+- after the repair, the same pointer down/move/up sequence maps Round 013 to E4;
+- touch dragging note 1 onto note 3 swaps the two assigned recordings;
+- a floating recording card and orange drop target remain visible during drag;
+- dragging near the viewport edge advances vertical scroll;
+- movement beyond eight pixels suppresses the release click, while ordinary
+  tap assignment remains available;
+- the existing desktop `dragstart` / `drop` path still maps the source clip.
+
+Screenshot: `variant-d-touch-drag.png`.

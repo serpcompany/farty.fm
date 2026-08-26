@@ -87,6 +87,14 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px 
 .note-block.is-playing { animation: notePulse .55s ease infinite alternate; border-color: var(--orange); z-index: 2; }
 .playhead-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; right: 4px; top: 4px; background: var(--orange); box-shadow: 0 0 0 4px rgba(255, 107, 53, .2); }
 .drag-over { outline: 3px solid var(--orange) !important; outline-offset: -3px; background: var(--orange-soft) !important; }
+.clip-card, .lane-label, .note-block { touch-action: pan-y; }
+.pointer-drag-active { user-select: none; cursor: grabbing; }
+.pointer-drag-active [data-drop-note] { outline: 1px dashed rgba(255, 107, 53, .48); outline-offset: -2px; }
+.pointer-drag-source { opacity: .48 !important; }
+.pointer-drop-target { outline: 4px solid var(--orange) !important; outline-offset: -4px !important; background: var(--orange-soft) !important; }
+.pointer-drag-ghost { position: fixed; z-index: 500; top: 0; left: 0; pointer-events: none; min-width: 128px; max-width: 210px; display: flex; align-items: center; gap: 8px; padding: 10px 13px; border: 2px solid var(--drag-color); border-radius: 12px; color: var(--ink); background: rgba(255,255,255,.96); box-shadow: 0 14px 38px rgba(35,28,24,.28); font-size: 10px; will-change: transform; }
+.pointer-drag-ghost span { color: var(--drag-color); font-size: 18px; }
+.pointer-drag-ghost b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @keyframes notePulse { to { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(255, 107, 53, .22), inset 4px 0 0 var(--note-color); } }
 
 .note-inspector { padding: 14px; border: 1px solid var(--line); background: white; border-radius: 16px; }
