@@ -7,31 +7,63 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		259584EFD571BFEE2D8E2CD7 /* 016__tv-ling__perfect-fart-mp3__523467.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 01DAB09090A3096A93C1D37F /* 016__tv-ling__perfect-fart-mp3__523467.mp3 */; };
+		3785C81610E88D5B91063980 /* 019__fartcto__fart-short__789839.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 42C01546954DA04C9D6C00DE /* 019__fartcto__fart-short__789839.mp3 */; };
 		433B475F9A48793A58B71956 /* RecorderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F00751FE3F3EBD0A79B393A /* RecorderStore.swift */; };
 		54A80A1D7B5C884128C6E1FB /* 017__breviceps__fart-3__446000.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FE6810C477920A669D260727 /* 017__breviceps__fart-3__446000.mp3 */; };
 		5A5886F1E0940F277C8E16F1 /* RecordingAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1AFB6CC73211DD8569B41F /* RecordingAnalysis.swift */; };
+		6BBD7C62AD8C9DFC4311D6C1 /* 021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 11FEAD7E0D88ED10AD54A50A /* 021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3 */; };
+		6F0981E0D1926E85B5BCC9F0 /* ArrangerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50C91893ED6252413319336 /* ArrangerModel.swift */; };
+		714169BE27054B73D4A74985 /* PedosMIDIArrangerPrototypeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971945A6AAC8FE54FDE02D49 /* PedosMIDIArrangerPrototypeApp.swift */; };
 		75B0DD43916AC7AB32C51058 /* 023__the-fart__fart-attack__436834.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = AACEF7CDAA386844309A14D0 /* 023__the-fart__fart-attack__436834.mp3 */; };
 		7827D4471FB9ACF4D6C908A1 /* 044__walter-odington__fart-wav__69500.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F5F7BB86D060A0200A0FF6A2 /* 044__walter-odington__fart-wav__69500.mp3 */; };
+		8132036A0AFDABC6859D644D /* 018__sadiquecat__short-fart__787755.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7784A5564813DA4C110012BE /* 018__sadiquecat__short-fart__787755.mp3 */; };
 		95B6709D9225100AFC1C3F83 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD4BD5C5AB533616A5FD384C /* ContentView.swift */; };
+		A043715700492E976DCC084A /* ArrangerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DA5739ECDED66ED2C536821 /* ArrangerView.swift */; };
 		D7C6106C48D4616D8755C63E /* PedosRecorderProofApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D98E5415FF75AAA2FD90A70 /* PedosRecorderProofApp.swift */; };
+		F37768F419BB99E3AAD53D1F /* 013__deleted-user-1391979__bad-chili-fart-wav__94989.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8C0A4A3D9A6B3D816EF09032 /* 013__deleted-user-1391979__bad-chili-fart-wav__94989.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		01DAB09090A3096A93C1D37F /* 016__tv-ling__perfect-fart-mp3__523467.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "016__tv-ling__perfect-fart-mp3__523467.mp3"; sourceTree = "<group>"; };
+		11FEAD7E0D88ED10AD54A50A /* 021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3"; sourceTree = "<group>"; };
 		2D98E5415FF75AAA2FD90A70 /* PedosRecorderProofApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PedosRecorderProofApp.swift; sourceTree = "<group>"; };
 		2E1AFB6CC73211DD8569B41F /* RecordingAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingAnalysis.swift; sourceTree = "<group>"; };
+		42C01546954DA04C9D6C00DE /* 019__fartcto__fart-short__789839.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "019__fartcto__fart-short__789839.mp3"; sourceTree = "<group>"; };
+		5DA5739ECDED66ED2C536821 /* ArrangerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrangerView.swift; sourceTree = "<group>"; };
+		7784A5564813DA4C110012BE /* 018__sadiquecat__short-fart__787755.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "018__sadiquecat__short-fart__787755.mp3"; sourceTree = "<group>"; };
 		7F00751FE3F3EBD0A79B393A /* RecorderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecorderStore.swift; sourceTree = "<group>"; };
+		8C0A4A3D9A6B3D816EF09032 /* 013__deleted-user-1391979__bad-chili-fart-wav__94989.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "013__deleted-user-1391979__bad-chili-fart-wav__94989.mp3"; sourceTree = "<group>"; };
+		971945A6AAC8FE54FDE02D49 /* PedosMIDIArrangerPrototypeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PedosMIDIArrangerPrototypeApp.swift; sourceTree = "<group>"; };
 		AACEF7CDAA386844309A14D0 /* 023__the-fart__fart-attack__436834.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "023__the-fart__fart-attack__436834.mp3"; sourceTree = "<group>"; };
+		C50C91893ED6252413319336 /* ArrangerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrangerModel.swift; sourceTree = "<group>"; };
 		CC12C7529CE7DED44024E0AC /* PedosRecorderProof.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PedosRecorderProof.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD4BD5C5AB533616A5FD384C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		F5F7BB86D060A0200A0FF6A2 /* 044__walter-odington__fart-wav__69500.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "044__walter-odington__fart-wav__69500.mp3"; sourceTree = "<group>"; };
+		F7D86D5E5B71179146E5E2E7 /* PedosMIDIArrangerPrototype.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PedosMIDIArrangerPrototype.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE6810C477920A669D260727 /* 017__breviceps__fart-3__446000.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "017__breviceps__fart-3__446000.mp3"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		296513B1F6CE167A38D9F395 /* NativeMIDIArrangerPrototype */ = {
+			isa = PBXGroup;
+			children = (
+				C50C91893ED6252413319336 /* ArrangerModel.swift */,
+				5DA5739ECDED66ED2C536821 /* ArrangerView.swift */,
+				971945A6AAC8FE54FDE02D49 /* PedosMIDIArrangerPrototypeApp.swift */,
+			);
+			path = NativeMIDIArrangerPrototype;
+			sourceTree = "<group>";
+		};
 		6364EDC2C4E66EF0C2593B3C /* fart-samples */ = {
 			isa = PBXGroup;
 			children = (
+				8C0A4A3D9A6B3D816EF09032 /* 013__deleted-user-1391979__bad-chili-fart-wav__94989.mp3 */,
+				01DAB09090A3096A93C1D37F /* 016__tv-ling__perfect-fart-mp3__523467.mp3 */,
 				FE6810C477920A669D260727 /* 017__breviceps__fart-3__446000.mp3 */,
+				7784A5564813DA4C110012BE /* 018__sadiquecat__short-fart__787755.mp3 */,
+				42C01546954DA04C9D6C00DE /* 019__fartcto__fart-short__789839.mp3 */,
+				11FEAD7E0D88ED10AD54A50A /* 021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3 */,
 				AACEF7CDAA386844309A14D0 /* 023__the-fart__fart-attack__436834.mp3 */,
 				F5F7BB86D060A0200A0FF6A2 /* 044__walter-odington__fart-wav__69500.mp3 */,
 			);
@@ -43,6 +75,7 @@
 			isa = PBXGroup;
 			children = (
 				6364EDC2C4E66EF0C2593B3C /* fart-samples */,
+				296513B1F6CE167A38D9F395 /* NativeMIDIArrangerPrototype */,
 				C992DC75234328588C434F12 /* RecorderProof */,
 				6F6F4B0E212229A7557F17E9 /* Products */,
 			);
@@ -51,6 +84,7 @@
 		6F6F4B0E212229A7557F17E9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				F7D86D5E5B71179146E5E2E7 /* PedosMIDIArrangerPrototype.app */,
 				CC12C7529CE7DED44024E0AC /* PedosRecorderProof.app */,
 			);
 			name = Products;
@@ -88,6 +122,24 @@
 			productReference = CC12C7529CE7DED44024E0AC /* PedosRecorderProof.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E82D488199A6050779B06D57 /* PedosMIDIArrangerPrototype */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C17FE84126319489485DD22B /* Build configuration list for PBXNativeTarget "PedosMIDIArrangerPrototype" */;
+			buildPhases = (
+				D099CE66F3D7E88CB6EA5129 /* Sources */,
+				68A7D5E1356CB79955E27ECE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PedosMIDIArrangerPrototype;
+			packageProductDependencies = (
+			);
+			productName = PedosMIDIArrangerPrototype;
+			productReference = F7D86D5E5B71179146E5E2E7 /* PedosMIDIArrangerPrototype.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -111,12 +163,25 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				E82D488199A6050779B06D57 /* PedosMIDIArrangerPrototype */,
 				16EC1808945426AE4871051B /* PedosRecorderProof */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		68A7D5E1356CB79955E27ECE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F37768F419BB99E3AAD53D1F /* 013__deleted-user-1391979__bad-chili-fart-wav__94989.mp3 in Resources */,
+				259584EFD571BFEE2D8E2CD7 /* 016__tv-ling__perfect-fart-mp3__523467.mp3 in Resources */,
+				8132036A0AFDABC6859D644D /* 018__sadiquecat__short-fart__787755.mp3 in Resources */,
+				3785C81610E88D5B91063980 /* 019__fartcto__fart-short__789839.mp3 in Resources */,
+				6BBD7C62AD8C9DFC4311D6C1 /* 021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8AEBE216D4EAA194EF160E10 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -138,6 +203,16 @@
 				D7C6106C48D4616D8755C63E /* PedosRecorderProofApp.swift in Sources */,
 				433B475F9A48793A58B71956 /* RecorderStore.swift in Sources */,
 				5A5886F1E0940F277C8E16F1 /* RecordingAnalysis.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D099CE66F3D7E88CB6EA5129 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F0981E0D1926E85B5BCC9F0 /* ArrangerModel.swift in Sources */,
+				A043715700492E976DCC084A /* ArrangerView.swift in Sources */,
+				714169BE27054B73D4A74985 /* PedosMIDIArrangerPrototypeApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,6 +305,28 @@
 			};
 			name = Debug;
 		};
+		793B465A5E44E9D7ADBCD392 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Pedos Song Maker";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = (
+					UIInterfaceOrientationPortrait,
+				);
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.serpcompany.PedosMIDIArrangerPrototype;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		86517EC44D775D25E9521DFB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -309,6 +406,28 @@
 			};
 			name = Debug;
 		};
+		E67814190A3EA33A155E628C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Pedos Song Maker";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = (
+					UIInterfaceOrientationPortrait,
+				);
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.serpcompany.PedosMIDIArrangerPrototype;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -326,6 +445,15 @@
 			buildConfigurations = (
 				AAB9E60A2B9A1DF24F68A048 /* Debug */,
 				2F49F271F7DE66C30998937B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C17FE84126319489485DD22B /* Build configuration list for PBXNativeTarget "PedosMIDIArrangerPrototype" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E67814190A3EA33A155E628C /* Debug */,
+				793B465A5E44E9D7ADBCD392 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

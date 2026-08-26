@@ -29,3 +29,29 @@ targets:
         SUPPORTS_MACCATALYST: false
     scheme:
       testTargets: []
+  PedosMIDIArrangerPrototype:
+    type: application
+    platform: iOS
+    sources:
+      - path: NativeMIDIArrangerPrototype
+      - path: docs/research/prototypes/pedos-app-v1/test-data/fart-samples/013__deleted-user-1391979__bad-chili-fart-wav__94989.mp3
+        buildPhase: resources
+      - path: docs/research/prototypes/pedos-app-v1/test-data/fart-samples/019__fartcto__fart-short__789839.mp3
+        buildPhase: resources
+      - path: docs/research/prototypes/pedos-app-v1/test-data/fart-samples/016__tv-ling__perfect-fart-mp3__523467.mp3
+        buildPhase: resources
+      - path: docs/research/prototypes/pedos-app-v1/test-data/fart-samples/018__sadiquecat__short-fart__787755.mp3
+        buildPhase: resources
+      - path: docs/research/prototypes/pedos-app-v1/test-data/fart-samples/021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.serpcompany.PedosMIDIArrangerPrototype
+        GENERATE_INFOPLIST_FILE: true
+        INFOPLIST_KEY_CFBundleDisplayName: "Pedos Song Maker"
+        INFOPLIST_KEY_UILaunchScreen_Generation: true
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone:
+          - UIInterfaceOrientationPortrait
+        SUPPORTS_MACCATALYST: false
+    scheme:
+      testTargets: []

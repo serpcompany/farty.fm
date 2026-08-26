@@ -28,6 +28,22 @@ song openings. This validates the interaction only. It does not establish a
 licensed MIDI catalog, production audio quality, source clearance, or release
 architecture.
 
+## Native iPhone version
+
+The accepted Arrange interaction is also implemented as the real SwiftUI app
+target `PedosMIDIArrangerPrototype` under `NativeMIDIArrangerPrototype/`.
+
+```sh
+xcodegen generate
+open PedosRecorderProof.xcodeproj
+```
+
+Select the `PedosMIDIArrangerPrototype` scheme and an iPhone Simulator. The
+native target includes the same four songs, bundled recording preview,
+Auto Map, add/duplicate/delete/reorder controls, undo/redo, native
+`Transferable` drag/drop, and an in-app SwiftUI drag gesture for deterministic
+source-to-note and note-to-note movement.
+
 Run from the repository root:
 
 ```sh
