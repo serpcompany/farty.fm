@@ -1,0 +1,15 @@
+#!/bin/zsh
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+port="${1:-4179}"
+url="http://127.0.0.1:${port}/prototype/midi-piano-roll-ui/?variant=A"
+
+cd "$repo_root"
+if command -v open >/dev/null 2>&1; then
+  (sleep 0.6; open "$url") &
+fi
+echo "Pedos MIDI Piano Roll — throwaway UI prototype"
+echo "$url"
+echo "Press Ctrl-C to stop."
+python3 -m http.server "$port" --bind 127.0.0.1
