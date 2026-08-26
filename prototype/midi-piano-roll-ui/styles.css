@@ -242,12 +242,64 @@ input[type="range"] { accent-color: var(--orange); width: 100%; }
 .focus-nav .next-button { margin-left: auto; border-color: var(--orange); background: var(--orange); color: white; }
 .focus-nav button:disabled { opacity: .35; }
 
+/* Variant D — accepted A+B synthesis: guided start plus a practical arranger. */
+.arranger-shell { min-height: 100vh; padding-bottom: 92px; background: #f1eee9; }
+.arranger-topbar { height: 62px; padding: 0 clamp(18px, 4vw, 54px); display: flex; justify-content: space-between; align-items: center; color: white; background: #282522; }
+.arranger-topbar > div { display: flex; align-items: baseline; gap: 8px; }
+.arranger-topbar b { color: var(--orange); font-size: 20px; }
+.arranger-topbar div span { color: #c9c3bd; font-size: 12px; }
+.arranger-main { padding: 14px clamp(18px, 4vw, 54px) 74px; }
+.arranger-main > .prototype-question { margin: 0 0 14px; }
+.arranger-start { display: grid; grid-template-columns: minmax(220px, 300px) minmax(260px, 1fr) auto; align-items: center; gap: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 17px; background: white; }
+.song-picker { display: grid; gap: 5px; }
+.song-picker select, .arranger-controls select { width: 100%; min-height: 38px; border: 1px solid #d8d1c8; border-radius: 9px; padding: 0 9px; color: var(--ink); background: #faf8f5; font-size: 10px; font-weight: 750; }
+.arranger-song-summary { min-width: 0; display: flex; align-items: center; gap: 11px; }
+.arranger-song-summary .song-art { width: 48px; height: 48px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 13px; color: white; background: linear-gradient(145deg, #ff713b, #ff9d52); font-size: 22px; }
+.arranger-song-summary h1 { overflow: hidden; margin: 2px 0; text-overflow: ellipsis; white-space: nowrap; font-size: 19px; }
+.arranger-song-summary p { margin: 0; color: var(--muted); font-size: 9px; }
+.arranger-toolbar { display: grid; gap: 8px; }
+.arranger-primary, .arranger-edit-tools { display: flex; gap: 7px; justify-content: flex-end; }
+.arranger-primary .play-button, .arranger-primary .smart-fill { min-width: 126px; }
+.arranger-edit-tools button, .arranger-note-actions button { min-height: 34px; border: 1px solid var(--line); border-radius: 9px; padding: 0 10px; color: #5c554f; background: #faf8f5; font-size: 9px; font-weight: 800; }
+.arranger-edit-tools button:disabled, .arranger-note-actions button:disabled { opacity: .35; cursor: default; }
+.arranger-edit-tools .add-note { border-color: #ffc3a8; color: var(--orange-dark); background: var(--orange-soft); }
+.arranger-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 14px; margin-top: 14px; }
+.arranger-roll-card, .arranger-inspector, .arranger-side > .clip-tray { border: 1px solid var(--line); border-radius: 16px; background: white; }
+.arranger-roll-card { min-width: 0; padding: 16px; }
+.arranger-side { min-width: 0; display: grid; align-content: start; gap: 12px; }
+.arranger-inspector { padding: 14px; }
+.arranger-inspector-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.arranger-inspector-heading h2 { margin: 2px 0 0; font-size: 17px; }
+.arranger-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 11px; }
+.arranger-controls label { display: grid; gap: 4px; }
+.arranger-controls small, .arranger-source-line small { color: var(--muted); font-size: 7px; text-transform: uppercase; letter-spacing: .08em; }
+.arranger-correction { grid-column: 1 / -1; padding: 8px; border-radius: 9px; background: #f6f3ef; }
+.arranger-correction small { display: flex; justify-content: space-between; }
+.arranger-source-line { display: grid; grid-template-columns: 14px minmax(90px, 1fr) auto; gap: 8px; align-items: center; margin-top: 9px; padding: 9px; border-radius: 10px; background: #f6f3ef; }
+.arranger-source-line div { min-width: 0; display: grid; }
+.arranger-source-line b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+.arranger-source-line > span:last-child { color: var(--muted); font-size: 8px; text-align: right; }
+.arranger-note-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.arranger-note-actions .danger { margin-left: auto; color: #a8402c; background: #fff1ed; }
+.arranger-side > .clip-tray { margin: 0; padding: 14px; }
+.arranger-side .clip-tray.vertical .clip-list { max-height: 360px; overflow-y: auto; }
+.arranger-main > .state-disclosure, .arranger-main > .prototype-boundary { margin-left: 0; margin-right: 0; }
+.arranger-shell > .app-tabs { position: fixed; z-index: 40; height: 62px; }
+
+@media (max-width: 1080px) {
+  .arranger-start { grid-template-columns: minmax(210px, .8fr) 1.2fr; }
+  .arranger-toolbar { grid-column: 1 / -1; grid-template-columns: 1fr auto; }
+  .arranger-primary { justify-content: flex-start; }
+}
+
 @media (max-width: 860px) {
   .workbench-heading { display: grid; }
   .workbench-heading .song-header { padding-bottom: 0; }
   .workbench-grid { grid-template-columns: 1fr; }
   .workbench-rail { grid-template-columns: minmax(0, 1.4fr) 1fr; }
   .workbench-rail .state-disclosure { grid-column: 1 / -1; }
+  .arranger-workspace { grid-template-columns: 1fr; }
+  .arranger-side { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 560px) {
@@ -268,6 +320,19 @@ input[type="range"] { accent-color: var(--orange); width: 100%; }
   .mini-inspector { grid-template-columns: 1fr 1fr; }
   .mini-inspector .audition-button { min-height: 38px; }
   .focus-metadata > span { min-width: 70px; }
+  .arranger-topbar { padding: 0 14px; }
+  .arranger-main { padding: 10px 12px 78px; }
+  .arranger-start { grid-template-columns: 1fr; padding: 12px; }
+  .arranger-toolbar { grid-column: auto; grid-template-columns: 1fr; }
+  .arranger-primary, .arranger-edit-tools { justify-content: stretch; }
+  .arranger-primary > *, .arranger-edit-tools > * { flex: 1; }
+  .arranger-edit-tools button span { display: none; }
+  .arranger-side { grid-template-columns: 1fr; }
+  .arranger-controls { grid-template-columns: repeat(3, 1fr); }
+  .arranger-source-line { grid-template-columns: 14px 1fr; }
+  .arranger-source-line > span:last-child { grid-column: 2; text-align: left; }
+  .arranger-note-actions button { flex: 1 1 30%; }
+  .arranger-note-actions .danger { margin-left: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

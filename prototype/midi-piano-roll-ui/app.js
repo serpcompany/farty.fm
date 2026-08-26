@@ -62,56 +62,72 @@ const clips = [
   },
 ];
 
-// Public-domain composition; UI-prototype transcription, not a catalog or provenance artifact.
-const score = [
-  ["E4", 64, 1, "strong", "smooth", 12],
-  ["E4", 64, 1, "light", "smooth", -8],
-  ["F4", 65, 1, "medium", "pop", 18],
-  ["G4", 67, 1, "strong", "long", -26],
-  ["G4", 67, 1, "medium", "long", 9],
-  ["F4", 65, 1, "light", "pop", -15],
-  ["E4", 64, 1, "medium", "smooth", 20],
-  ["D4", 62, 1, "medium", "bright", -11],
-  ["C4", 60, 1, "strong", "round", 16],
-  ["C4", 60, 1, "light", "round", -6],
-  ["D4", 62, 1, "medium", "bright", 14],
-  ["E4", 64, 1, "strong", "smooth", -19],
-  ["E4", 64, 1.5, "medium", "smooth", 7],
-  ["D4", 62, 0.5, "light", "bright", -17],
-  ["D4", 62, 2, "strong", "bright", 4],
-].map(([pitch, midi, beats, accent, suggestedClip, correction], index) => ({
-  id: `note-${index + 1}`,
-  index,
-  pitch,
-  midi,
-  beats,
-  accent,
-  bar: Math.floor(index / 4) + 1,
-  suggestedClip,
-  suggestedCorrection: correction,
-}));
+// Public-domain compositions; prototype transcriptions, not catalog/provenance artifacts.
+const pitchMIDIs = { C4: 60, D4: 62, E4: 64, F4: 65, G4: 67, A4: 69 };
+const clipForPitch = { C4: "round", D4: "bright", E4: "smooth", F4: "pop", G4: "long", A4: "long" };
+const correctionPattern = [12, -8, 18, -26, 9, -15, 20, -11, 16, -6, 14, -19, 7, -17, 4, -9, 11, -13];
+
+const songs = {
+  ode: {
+    title: "Ode to Joy", composer: "Beethoven", tempo: 112, difficulty: "Easy · 5 pitches",
+    events: [["E4",1,"strong"],["E4",1,"light"],["F4",1,"medium"],["G4",1,"strong"],["G4",1,"medium"],["F4",1,"light"],["E4",1,"medium"],["D4",1,"medium"],["C4",1,"strong"],["C4",1,"light"],["D4",1,"medium"],["E4",1,"strong"],["E4",1.5,"medium"],["D4",.5,"light"],["D4",2,"strong"]],
+  },
+  mary: {
+    title: "Mary Had a Little Lamb", composer: "Traditional", tempo: 118, difficulty: "Easy · 4 pitches",
+    events: [["E4",1,"strong"],["D4",1,"medium"],["C4",1,"medium"],["D4",1,"light"],["E4",1,"strong"],["E4",1,"medium"],["E4",2,"medium"],["D4",1,"strong"],["D4",1,"medium"],["D4",2,"medium"],["E4",1,"strong"],["G4",1,"medium"],["G4",2,"medium"]],
+  },
+  twinkle: {
+    title: "Twinkle Twinkle Little Star", composer: "Traditional", tempo: 104, difficulty: "Easy · 6 pitches",
+    events: [["C4",1,"strong"],["C4",1,"light"],["G4",1,"medium"],["G4",1,"light"],["A4",1,"strong"],["A4",1,"light"],["G4",2,"medium"],["F4",1,"strong"],["F4",1,"light"],["E4",1,"medium"],["E4",1,"light"],["D4",1,"strong"],["D4",1,"light"],["C4",2,"medium"]],
+  },
+  jingle: {
+    title: "Jingle Bells", composer: "James Lord Pierpont", tempo: 126, difficulty: "Medium · 5 pitches",
+    events: [["E4",1,"strong"],["E4",1,"light"],["E4",2,"medium"],["E4",1,"strong"],["E4",1,"light"],["E4",2,"medium"],["E4",1,"strong"],["G4",1,"medium"],["C4",1.5,"medium"],["D4",.5,"light"],["E4",2,"strong"]],
+  },
+};
+
+function buildScore(songId, rawEvents = songs[songId].events) {
+  return rawEvents.map(([pitch, beats, accent], index) => ({
+    id: `${songId}-note-${index + 1}`,
+    index,
+    pitch,
+    midi: pitchMIDIs[pitch],
+    beats,
+    accent,
+    bar: Math.floor(index / 4) + 1,
+    suggestedClip: clipForPitch[pitch],
+    suggestedCorrection: correctionPattern[index % correctionPattern.length],
+  }));
+}
+
+let score = buildScore("ode");
 
 const state = {
   assignments: Object.fromEntries(score.map((note) => [note.id, {
     clipId: note.suggestedClip,
     correction: note.suggestedCorrection,
   }])),
-  selectedClipId: "smooth",
-  focusedNoteId: "note-1",
+  selectedClipId: null,
+  focusedNoteId: score[0].id,
   playingIndex: null,
   playing: false,
-  tempo: 112,
+  songId: "ode",
+  tempo: songs.ode.tempo,
   inspectorOpen: true,
+  history: [],
+  future: [],
 };
 
 const app = document.querySelector("#app");
 let sequenceTimer = null;
 let activeAudios = [];
+let customNoteCounter = 0;
 
 const variants = {
   A: { name: "Guided auto-fill", description: "Recommended: song first, smart fill, optional swaps" },
   B: { name: "Clip lanes", description: "A compact, visual mini-DAW" },
   C: { name: "Note focus", description: "One decision at a time, no grid literacy needed" },
+  D: { name: "Arrange", description: "A+B hybrid: auto-map first, then make it yours" },
 };
 
 function esc(value) {
@@ -134,7 +150,7 @@ function assignmentFor(note) {
 
 function currentVariant() {
   const key = new URLSearchParams(location.search).get("variant")?.toUpperCase();
-  return variants[key] ? key : "A";
+  return variants[key] ? key : "D";
 }
 
 function assignedCount() {
@@ -166,13 +182,14 @@ function contextStrip() {
 }
 
 function songHeader({ compact = false } = {}) {
+  const song = songs[state.songId];
   return `
     <section class="song-header ${compact ? "compact" : ""}">
       <div class="song-art" aria-hidden="true"><span>♫</span></div>
       <div class="song-copy">
         <span class="overline">Built-in test melody</span>
-        <h1>Ode to Joy <span>opening</span></h1>
-        <p>Beethoven · public-domain composition · ${score.length} MIDI notes · ${state.tempo} BPM</p>
+        <h1>${esc(song.title)} <span>opening</span></h1>
+        <p>${esc(song.composer)} · public-domain prototype · ${score.length} MIDI notes · ${state.tempo} BPM</p>
       </div>
       <button class="icon-button" data-action="restart" aria-label="Restart playback">↺</button>
     </section>`;
@@ -196,7 +213,9 @@ function noteBlock(note, { lane = false, focus = false } = {}) {
     <button
       class="note-block ${clip ? "assigned" : "empty"} ${selected ? "selected" : ""} ${playing ? "is-playing" : ""} ${lane ? "lane-note" : ""} ${focus ? "focus-note" : ""}"
       style="${style}"
+      draggable="${clip ? "true" : "false"}"
       data-note-id="${note.id}"
+      data-drag-note-id="${clip ? note.id : ""}"
       data-drop-note="${note.id}"
       aria-label="${note.pitch}, ${clip ? `${clip.name}, ${correctionLabel(assignment.correction)}` : "unassigned"}"
     >
@@ -207,15 +226,15 @@ function noteBlock(note, { lane = false, focus = false } = {}) {
 }
 
 function keyboardRows(innerBuilder) {
-  const rows = ["G4", "F4", "E4", "D4", "C4"];
+  const rows = ["A4", "G4", "F4", "E4", "D4", "C4"];
   return `
-    <div class="piano-roll" aria-label="Ode to Joy piano roll">
+    <div class="piano-roll" aria-label="${esc(songs[state.songId].title)} piano roll">
       ${rows.map((pitch) => `
         <div class="pitch-row ${pitch.includes("#") ? "black" : ""}">
           <span class="piano-key">${pitch}</span>
           <div class="pitch-track">${innerBuilder(pitch)}</div>
         </div>`).join("")}
-      <div class="beat-ruler"><span></span>${Array.from({ length: 16 }, (_, i) => `<i>${i % 4 === 0 ? i / 4 + 1 : ""}</i>`).join("")}</div>
+      <div class="beat-ruler" style="grid-template-columns:42px repeat(${Math.max(1, score.length)},1fr)"><span></span>${Array.from({ length: score.length }, (_, i) => `<i>${i % 4 === 0 ? i / 4 + 1 : ""}</i>`).join("")}</div>
     </div>`;
 }
 
@@ -307,7 +326,8 @@ function bottomTabs(active = "Create") {
 function stateDisclosure() {
   const payload = {
     variant: currentVariant(),
-    song: "Ode to Joy — opening",
+    songId: state.songId,
+    song: `${songs[state.songId].title} — opening`,
     tempo: state.tempo,
     selectedClipId: state.selectedClipId,
     focusedNoteId: state.focusedNoteId,
@@ -409,7 +429,7 @@ function renderVariantC() {
       <main class="phone-shell focus-shell">
         <header class="focus-header"><button class="back-button" aria-label="Back">‹</button><div><span>Song Maker</span><b>Review the mapping</b></div><span class="focus-count">${note.index + 1}/${score.length}</span></header>
         ${contextStrip()}
-        <section class="focus-song-strip">${playButton("Hear all")}<div><b>Ode to Joy</b><span>Public-domain composition · opening</span></div>${smartFillButton("Reset")}</section>
+        <section class="focus-song-strip">${playButton("Hear all")}<div><b>${esc(songs[state.songId].title)}</b><span>Public-domain prototype · opening</span></div>${smartFillButton("Reset")}</section>
         ${noteStepper()}
         <section class="focus-stage">
           <span class="overline">MIDI asks for</span>
@@ -438,6 +458,85 @@ function renderVariantC() {
     </div>`;
 }
 
+function songPicker() {
+  return `
+    <label class="song-picker">
+      <span class="overline">Start from a song</span>
+      <select data-song-picker aria-label="Choose a song">
+        ${Object.entries(songs).map(([id, song]) => `<option value="${id}" ${id === state.songId ? "selected" : ""}>${esc(song.title)} — ${song.difficulty}</option>`).join("")}
+      </select>
+    </label>`;
+}
+
+function arrangerToolbar() {
+  return `
+    <section class="arranger-toolbar" aria-label="Arrangement tools">
+      <div class="arranger-primary">${smartFillButton("Auto Map")}${playButton("Preview song")}</div>
+      <div class="arranger-edit-tools">
+        <button data-action="undo" ${state.history.length ? "" : "disabled"} title="Undo">↶ <span>Undo</span></button>
+        <button data-action="redo" ${state.future.length ? "" : "disabled"} title="Redo">↷ <span>Redo</span></button>
+        <button data-action="add-note" class="add-note">＋ <span>Add note</span></button>
+      </div>
+    </section>`;
+}
+
+function arrangerInspector() {
+  const note = noteById(state.focusedNoteId) ?? score[0];
+  if (!note) return `<section class="arranger-inspector empty"><b>Add a note to begin.</b></section>`;
+  const assignment = assignmentFor(note);
+  const clip = assignment ? clipById(assignment.clipId) : null;
+  return `
+    <section class="arranger-inspector">
+      <div class="arranger-inspector-heading">
+        <div><span class="overline">Selected note ${note.index + 1}</span><h2>${note.pitch} · ${durationLabel(note.beats)}</h2></div>
+        <button class="audition-button" data-action="audition-note" ${clip ? "" : "disabled"}>▶ Hear note</button>
+      </div>
+      <div class="arranger-controls">
+        <label><small>Pitch</small><select data-note-pitch="${note.id}">${Object.keys(pitchMIDIs).map((pitch) => `<option ${pitch === note.pitch ? "selected" : ""}>${pitch}</option>`).join("")}</select></label>
+        <label><small>Length</small><select data-note-duration="${note.id}">${[.5,1,1.5,2].map((beats) => `<option value="${beats}" ${beats === note.beats ? "selected" : ""}>${beats} beat${beats === 1 ? "" : "s"}</option>`).join("")}</select></label>
+        <label><small>Accent</small><select data-note-accent="${note.id}">${["light","medium","strong"].map((accent) => `<option ${accent === note.accent ? "selected" : ""}>${accent}</option>`).join("")}</select></label>
+        <label class="arranger-correction"><small>Pitch correction <b>${assignment ? correctionLabel(assignment.correction) : "—"}</b></small><input type="range" min="-50" max="50" step="1" value="${assignment?.correction ?? 0}" data-correction-for="${note.id}" ${assignment ? "" : "disabled"}></label>
+      </div>
+      <div class="arranger-source-line" style="--clip-color:${clip?.color ?? "#ddd"}"><span class="source-dot"></span><div><small>Source recording</small><b>${clip?.name ?? "No recording assigned"}</b></div><span>${clip ? `${clip.natural} · ${clip.tone}` : "Drop or tap a recording below"}</span></div>
+      <div class="arranger-note-actions">
+        <button data-action="move-left" ${note.index === 0 ? "disabled" : ""}>← Move</button>
+        <button data-action="move-right" ${note.index === score.length - 1 ? "disabled" : ""}>Move →</button>
+        <button data-action="duplicate-note">Duplicate</button>
+        <button data-action="clear-note" ${assignment ? "" : "disabled"}>Remove clip</button>
+        <button data-action="delete-note" class="danger">Delete note</button>
+      </div>
+    </section>`;
+}
+
+function renderVariantD() {
+  const song = songs[state.songId];
+  app.innerHTML = `
+    <div class="variant-d arranger-shell">
+      <header class="arranger-topbar"><div><b>Pedos</b><span>Song Maker</span></div><span class="prototype-badge">Working prototype</span></header>
+      <main class="arranger-main">
+        ${contextStrip()}
+        <section class="arranger-start">
+          ${songPicker()}
+          <div class="arranger-song-summary"><span class="song-art">♫</span><div><span class="overline">Current arrangement</span><h1>${esc(song.title)}</h1><p>${esc(song.composer)} · ${score.length} notes · ${state.tempo} BPM · ${assignedCount()}/${score.length} mapped</p></div></div>
+          ${arrangerToolbar()}
+        </section>
+        <section class="arranger-workspace">
+          <section class="arranger-roll-card">
+            <div class="section-heading"><div><span class="overline">Drag a recording onto a note · drag notes to swap clips</span><h2>Arrangement</h2></div><span class="tray-count">Changes stay in memory</span></div>
+            <div class="roll-scroll">${linearPianoRoll()}</div>
+          </section>
+          <aside class="arranger-side">
+            ${arrangerInspector()}
+            ${clipTray({ horizontal: false, title: "Your recordings" })}
+          </aside>
+        </section>
+        ${stateDisclosure()}
+        <section class="prototype-boundary"><b>Prototype boundary</b><span>Editing is functional and in-memory. Rendering quality, MIDI import, saving, and catalog clearance are separate implementation gates.</span></section>
+      </main>
+      ${bottomTabs("Create")}
+    </div>`;
+}
+
 function renderSwitcher() {
   const key = currentVariant();
   document.body.insertAdjacentHTML("beforeend", `
@@ -454,6 +553,7 @@ function render() {
   if (key === "A") renderVariantA();
   if (key === "B") renderVariantB();
   if (key === "C") renderVariantC();
+  if (key === "D") renderVariantD();
   renderSwitcher();
 }
 
@@ -466,10 +566,79 @@ function switchVariant(step) {
   render();
 }
 
+function snapshotArrangement() {
+  return structuredClone({
+    songId: state.songId,
+    tempo: state.tempo,
+    score,
+    assignments: state.assignments,
+    focusedNoteId: state.focusedNoteId,
+    selectedClipId: state.selectedClipId,
+  });
+}
+
+function restoreArrangement(snapshot) {
+  state.songId = snapshot.songId;
+  state.tempo = snapshot.tempo;
+  score = structuredClone(snapshot.score);
+  state.assignments = structuredClone(snapshot.assignments);
+  state.focusedNoteId = snapshot.focusedNoteId;
+  state.selectedClipId = snapshot.selectedClipId;
+  normalizeScore();
+}
+
+function remember() {
+  state.history.push(snapshotArrangement());
+  if (state.history.length > 30) state.history.shift();
+  state.future = [];
+}
+
+function normalizeScore() {
+  score.forEach((note, index) => {
+    note.index = index;
+    note.bar = Math.floor(index / 4) + 1;
+  });
+  if (!noteById(state.focusedNoteId)) state.focusedNoteId = score[0]?.id ?? null;
+}
+
+function loadSong(songId) {
+  if (!songs[songId] || songId === state.songId) return;
+  remember();
+  stopPlayback({ renderAfter: false });
+  state.songId = songId;
+  state.tempo = songs[songId].tempo;
+  score = buildScore(songId);
+  state.assignments = Object.fromEntries(score.map((note) => [note.id, {
+    clipId: note.suggestedClip,
+    correction: note.suggestedCorrection,
+  }]));
+  state.focusedNoteId = score[0]?.id ?? null;
+  state.selectedClipId = null;
+  normalizeScore();
+  render();
+}
+
+function undo() {
+  const previous = state.history.pop();
+  if (!previous) return;
+  state.future.push(snapshotArrangement());
+  restoreArrangement(previous);
+  render();
+}
+
+function redo() {
+  const next = state.future.pop();
+  if (!next) return;
+  state.history.push(snapshotArrangement());
+  restoreArrangement(next);
+  render();
+}
+
 function assignClip(noteId, clipId) {
   const note = noteById(noteId);
   const clip = clipById(clipId);
   if (!note || !clip) return;
+  remember();
   state.assignments[noteId] = {
     clipId,
     correction: clip.id === note.suggestedClip ? note.suggestedCorrection : 0,
@@ -480,9 +649,83 @@ function assignClip(noteId, clipId) {
 }
 
 function smartFill() {
+  remember();
   score.forEach((note) => {
     state.assignments[note.id] = { clipId: note.suggestedClip, correction: note.suggestedCorrection };
   });
+  render();
+}
+
+function addNote() {
+  remember();
+  customNoteCounter += 1;
+  const prior = noteById(state.focusedNoteId) ?? score.at(-1);
+  const pitch = prior?.pitch ?? "C4";
+  const note = {
+    id: `${state.songId}-custom-${customNoteCounter}`,
+    index: score.length,
+    pitch,
+    midi: pitchMIDIs[pitch],
+    beats: 1,
+    accent: "medium",
+    bar: Math.floor(score.length / 4) + 1,
+    suggestedClip: clipForPitch[pitch],
+    suggestedCorrection: 0,
+  };
+  score.push(note);
+  const clipId = state.selectedClipId ?? clipForPitch[pitch];
+  state.assignments[note.id] = { clipId, correction: 0 };
+  state.focusedNoteId = note.id;
+  normalizeScore();
+  render();
+}
+
+function duplicateFocusedNote() {
+  const note = noteById(state.focusedNoteId);
+  if (!note) return;
+  remember();
+  customNoteCounter += 1;
+  const copy = { ...note, id: `${state.songId}-custom-${customNoteCounter}` };
+  score.splice(note.index + 1, 0, copy);
+  if (state.assignments[note.id]) state.assignments[copy.id] = { ...state.assignments[note.id] };
+  state.focusedNoteId = copy.id;
+  normalizeScore();
+  render();
+}
+
+function deleteFocusedNote() {
+  const note = noteById(state.focusedNoteId);
+  if (!note) return;
+  remember();
+  score.splice(note.index, 1);
+  delete state.assignments[note.id];
+  state.focusedNoteId = score[Math.min(note.index, score.length - 1)]?.id ?? null;
+  normalizeScore();
+  render();
+}
+
+function moveFocusedNote(delta) {
+  const note = noteById(state.focusedNoteId);
+  if (!note) return;
+  const targetIndex = note.index + delta;
+  if (targetIndex < 0 || targetIndex >= score.length) return;
+  remember();
+  score.splice(note.index, 1);
+  score.splice(targetIndex, 0, note);
+  normalizeScore();
+  render();
+}
+
+function swapAssignments(sourceNoteId, targetNoteId) {
+  if (sourceNoteId === targetNoteId || !noteById(sourceNoteId) || !noteById(targetNoteId)) return;
+  remember();
+  const source = state.assignments[sourceNoteId];
+  const target = state.assignments[targetNoteId];
+  if (target) state.assignments[sourceNoteId] = target;
+  else delete state.assignments[sourceNoteId];
+  if (source) state.assignments[targetNoteId] = source;
+  else delete state.assignments[targetNoteId];
+  state.focusedNoteId = targetNoteId;
   render();
 }
 
@@ -541,7 +784,7 @@ document.addEventListener("click", (event) => {
   if (!button) return;
   if (button.dataset.variantStep) return switchVariant(Number(button.dataset.variantStep));
   if (button.dataset.clipId) {
-    state.selectedClipId = button.dataset.clipId;
+    state.selectedClipId = state.selectedClipId === button.dataset.clipId ? null : button.dataset.clipId;
     if (currentVariant() === "C") assignClip(state.focusedNoteId, button.dataset.clipId);
     else render();
     return;
@@ -570,12 +813,39 @@ document.addEventListener("click", (event) => {
     return;
   }
   if (action === "clear-note") {
+    remember();
     delete state.assignments[state.focusedNoteId];
     render();
     return;
   }
+  if (action === "add-note") return addNote();
+  if (action === "duplicate-note") return duplicateFocusedNote();
+  if (action === "delete-note") return deleteFocusedNote();
+  if (action === "move-left") return moveFocusedNote(-1);
+  if (action === "move-right") return moveFocusedNote(1);
+  if (action === "undo") return undo();
+  if (action === "redo") return redo();
   if (action === "previous-note") return focusRelative(-1);
   if (action === "next-note") return focusRelative(1);
+});
+
+document.addEventListener("change", (event) => {
+  if (event.target.dataset.songPicker !== undefined) return loadSong(event.target.value);
+  const pitchNoteId = event.target.dataset.notePitch;
+  const durationNoteId = event.target.dataset.noteDuration;
+  const accentNoteId = event.target.dataset.noteAccent;
+  const noteId = pitchNoteId ?? durationNoteId ?? accentNoteId;
+  const note = noteById(noteId);
+  if (!note) return;
+  remember();
+  if (pitchNoteId) {
+    note.pitch = event.target.value;
+    note.midi = pitchMIDIs[note.pitch];
+    note.suggestedClip = clipForPitch[note.pitch];
+  }
+  if (durationNoteId) note.beats = Number(event.target.value);
+  if (accentNoteId) note.accent = event.target.value;
+  render();
 });
 
 document.addEventListener("input", (event) => {
@@ -590,6 +860,13 @@ document.addEventListener("input", (event) => {
 });
 
 document.addEventListener("dragstart", (event) => {
+  const noteSource = event.target.closest("[data-drag-note-id]");
+  if (noteSource?.dataset.dragNoteId) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", `note:${noteSource.dataset.dragNoteId}`);
+    document.body.classList.add("is-dragging");
+    return;
+  }
   const source = event.target.closest("[data-clip-id]");
   if (!source) return;
   event.dataTransfer.effectAllowed = "copy";
@@ -614,7 +891,9 @@ document.addEventListener("drop", (event) => {
   if (!target) return;
   event.preventDefault();
   document.body.classList.remove("is-dragging");
-  assignClip(target.dataset.dropNote, event.dataTransfer.getData("text/plain"));
+  const payload = event.dataTransfer.getData("text/plain");
+  if (payload.startsWith("note:")) swapAssignments(payload.slice(5), target.dataset.dropNote);
+  else assignClip(target.dataset.dropNote, payload);
 });
 
 document.addEventListener("keydown", (event) => {
