@@ -7,7 +7,7 @@ struct PedosMIDIArrangerPrototypeApp: App {
     var body: some Scene {
         WindowGroup {
             ArrangerRootView(model: model)
-                .tint(.orange)
+                .tint(StudioPalette.accent)
         }
     }
 }
