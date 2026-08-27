@@ -51,3 +51,24 @@ interactions on the running app:
 
 This is interaction and interface evidence only. It does not approve melody
 sound quality, MIDI/catalog provenance, persistence, or production integration.
+
+## Minimal piano-roll iteration
+
+Owner feedback rejected the studio redesign as still too complicated. The next
+iteration removes nearly all visible editor chrome:
+
+- the top bar contains only song, Map, play, and overflow;
+- undo, redo, and Add MIDI Note live in overflow;
+- recordings are one thin draggable palette with no separate instructions;
+- the responsive six-lane piano roll consumes all remaining iPhone height;
+- every MIDI target has an orange dashed/highlighted slot behind its clip, and
+  an unassigned slot reads `+ Drop`;
+- selected-note tools are a single compact bottom strip; detailed controls stay
+  in the optional sheet; and
+- enlarged invisible slot hit areas make source drops forgiving without making
+  the visible notes larger.
+
+Final Simulator verification rebuilt successfully, source-to-note drag changed
+note 1 to `Round 013, 0 cents`, and note-to-note drag still swapped corrections.
+
+Screenshot: `native-minimal-piano-roll.jpg`.

@@ -299,7 +299,7 @@ final class ArrangerModel {
     func updateCustomDrag(_ payload: ArrangerDragPayload, location: CGPoint) {
         activeDragPayload = payload
         activeDragLocation = location
-        targetedEventID = noteFrames.first(where: { $0.value.insetBy(dx: -5, dy: -5).contains(location) })?.key
+        targetedEventID = noteFrames.first(where: { $0.value.insetBy(dx: -14, dy: -14).contains(location) })?.key
     }
 
     func finishCustomDrag() {

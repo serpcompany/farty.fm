@@ -14,7 +14,6 @@ enum StudioPalette {
 private enum StudioMetrics {
     static let screenPadding: CGFloat = 14
     static let pitchLabelWidth: CGFloat = 42
-    static let rowHeight: CGFloat = 52
     static let minimumBeatWidth: CGFloat = 58
 }
 
@@ -63,6 +62,7 @@ private struct StudioWorkspace: View {
 
                 SelectedNoteDock(model: model, openInspector: openInspector)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .coordinateSpace(.named("arranger-drag"))
         .onPreferenceChange(NoteFramePreferenceKey.self, perform: model.updateNoteFrames)
@@ -87,83 +87,57 @@ private struct StudioHeader: View {
     @Bindable var model: ArrangerModel
 
     var body: some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 9) {
-                SongMenu(model: model)
+        HStack(spacing: 8) {
+            SongMenu(model: model)
 
-                Spacer(minLength: 2)
+            Spacer(minLength: 0)
 
-                HeaderIconButton(
-                    title: "Undo",
-                    systemImage: "arrow.uturn.backward",
-                    isEnabled: model.canUndo,
-                    identifier: "undo",
-                    action: model.undo
-                )
-
-                HeaderIconButton(
-                    title: "Redo",
-                    systemImage: "arrow.uturn.forward",
-                    isEnabled: model.canRedo,
-                    identifier: "redo",
-                    action: model.redo
-                )
-
-                Button(action: model.togglePreview) {
-                    Image(systemName: model.isPlaying ? "stop.fill" : "play.fill")
-                        .font(.headline.weight(.bold))
-                        .frame(width: 44, height: 44)
-                        .background(StudioPalette.accent.gradient, in: Circle())
-                        .foregroundStyle(.white)
-                        .shadow(color: StudioPalette.accent.opacity(0.32), radius: 10, y: 4)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(model.isPlaying ? "Stop preview" : "Preview song")
-                .accessibilityIdentifier("preview-song")
+            Button(action: model.autoMap) {
+                Label("Map", systemImage: "wand.and.stars")
+                    .font(.caption.weight(.bold))
+                    .padding(.horizontal, 10)
+                    .frame(height: 38)
+                    .background(StudioPalette.raised, in: Capsule())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Auto Map")
+            .accessibilityHint("Matches a recording to every MIDI note")
+            .accessibilityIdentifier("auto-map")
 
-            HStack(spacing: 9) {
-                Button(action: model.autoMap) {
-                    Label("Auto Map", systemImage: "wand.and.stars")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 36)
-                        .background(
-                            LinearGradient(
-                                colors: [StudioPalette.accent.opacity(0.24), StudioPalette.accentSecondary.opacity(0.12)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ),
-                            in: Capsule()
-                        )
-                        .overlay(Capsule().strokeBorder(StudioPalette.accent.opacity(0.7)))
-                }
-                .buttonStyle(.plain)
-                .accessibilityHint("Matches a recording to every MIDI note")
-                .accessibilityIdentifier("auto-map")
-
-                Button(action: model.addNote) {
-                    Label("Add Note", systemImage: "plus")
-                        .font(.subheadline.weight(.semibold))
-                        .padding(.horizontal, 15)
-                        .frame(height: 36)
-                        .background(StudioPalette.raised, in: Capsule())
-                        .overlay(Capsule().strokeBorder(StudioPalette.gridStrong))
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("add-note")
+            Button(action: model.togglePreview) {
+                Image(systemName: model.isPlaying ? "stop.fill" : "play.fill")
+                    .font(.headline.weight(.bold))
+                    .frame(width: 42, height: 42)
+                    .background(StudioPalette.accent, in: Circle())
+                    .foregroundStyle(.white)
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(model.isPlaying ? "Stop preview" : "Preview song")
+            .accessibilityIdentifier("preview-song")
 
-            Label(model.statusMessage, systemImage: "waveform.path")
-                .font(.caption)
-                .foregroundStyle(StudioPalette.mutedText)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityIdentifier("arranger-status")
+            Menu {
+                Button("Undo", systemImage: "arrow.uturn.backward", action: model.undo)
+                    .disabled(!model.canUndo)
+                Button("Redo", systemImage: "arrow.uturn.forward", action: model.redo)
+                    .disabled(!model.canRedo)
+                Divider()
+                Button("Add MIDI note", systemImage: "plus", action: model.addNote)
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.headline)
+                    .frame(width: 34, height: 38)
+            }
+            .accessibilityLabel("Arrangement actions")
+            .accessibilityIdentifier("add-note")
         }
         .padding(.horizontal, StudioMetrics.screenPadding)
-        .padding(.top, 8)
-        .padding(.bottom, 10)
+        .padding(.vertical, 7)
+        .overlay(alignment: .bottomLeading) {
+            Text(model.statusMessage)
+                .font(.system(size: 1))
+                .opacity(0.001)
+                .accessibilityIdentifier("arranger-status")
+        }
     }
 }
 
@@ -183,19 +157,13 @@ private struct SongMenu: View {
                 }
             }
         } label: {
-            HStack(spacing: 9) {
-                Image(systemName: "music.note.list")
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(StudioPalette.accentSecondary)
-                    .frame(width: 34, height: 34)
-                    .background(StudioPalette.raised, in: .rect(cornerRadius: 10))
-
+            HStack(spacing: 6) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(model.selectedSong.title)
-                        .font(.headline)
+                        .font(.subheadline.weight(.semibold))
                         .lineLimit(1)
                     Text("\(Int(model.selectedSong.tempo)) BPM · \(model.events.count) notes")
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(StudioPalette.mutedText)
                         .lineLimit(1)
                 }
@@ -204,7 +172,7 @@ private struct SongMenu: View {
                     .font(.caption2.weight(.bold))
                     .foregroundStyle(StudioPalette.mutedText)
             }
-            .contentShape(Rectangle())
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Song, \(model.selectedSong.title)")
@@ -240,33 +208,18 @@ private struct RecordingShelf: View {
     @Bindable var model: ArrangerModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Label("Your sounds", systemImage: "waveform.badge.mic")
-                    .font(.subheadline.weight(.semibold))
-
-                Spacer()
-
-                Label("Drag to a note", systemImage: "hand.draw")
-                    .font(.caption)
-                    .foregroundStyle(StudioPalette.mutedText)
+        ScrollView(.horizontal) {
+            LazyHStack(spacing: 7) {
+                ForEach(ArrangerModel.clips) { clip in
+                    RecordingClipButton(model: model, clip: clip)
+                }
             }
             .padding(.horizontal, StudioMetrics.screenPadding)
-
-            ScrollView(.horizontal) {
-                LazyHStack(spacing: 9) {
-                    ForEach(ArrangerModel.clips) { clip in
-                        RecordingClipButton(model: model, clip: clip)
-                    }
-                }
-                .padding(.horizontal, StudioMetrics.screenPadding)
-            }
-            .frame(height: 80)
-            .scrollIndicators(.hidden)
-            .scrollBounceBehavior(.basedOnSize)
         }
-        .padding(.vertical, 10)
-        .background(StudioPalette.surface.opacity(0.72))
+        .frame(height: 64)
+        .scrollIndicators(.hidden)
+        .scrollBounceBehavior(.basedOnSize)
+        .background(StudioPalette.surface.opacity(0.52))
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Recording shelf")
     }
@@ -312,41 +265,27 @@ private struct RecordingClipCard: View {
     var body: some View {
         let color = Color(hex: clip.colorHex)
 
-        VStack(alignment: .leading, spacing: 7) {
-            HStack(alignment: .center, spacing: 7) {
-                MiniWaveform(color: color, seed: clip.naturalPitch.midi)
-
-                Text(clip.naturalPitch.rawValue)
-                    .font(.caption2.weight(.bold).monospaced())
-                    .foregroundStyle(color)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(color.opacity(0.14), in: Capsule())
-            }
-
+        HStack(spacing: 8) {
+            MiniWaveform(color: color, seed: clip.naturalPitch.midi)
             VStack(alignment: .leading, spacing: 1) {
                 Text(clip.name)
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
-                Text(clip.detail)
+                Text(clip.naturalPitch.rawValue)
                     .font(.caption2)
-                    .foregroundStyle(StudioPalette.mutedText)
+                    .foregroundStyle(color)
                     .lineLimit(1)
             }
         }
-        .frame(width: 124, alignment: .leading)
-        .padding(10)
-        .background(
-            LinearGradient(
-                colors: [color.opacity(0.16), StudioPalette.raised],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .overlay(.white.opacity(0.035), in: .rect(cornerRadius: 14))
-        .compositingGroup()
-        .clipShape(.rect(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(color.opacity(0.38)))
+        .frame(width: 112, height: 48, alignment: .leading)
+        .padding(.horizontal, 9)
+        .background(StudioPalette.raised, in: .rect(cornerRadius: 9))
+        .overlay(alignment: .leading) {
+            Rectangle()
+                .fill(color)
+                .frame(width: 3)
+        }
+        .clipShape(.rect(cornerRadius: 9))
     }
 }
 
@@ -377,62 +316,46 @@ private struct PianoRollStage: View {
     @Bindable var model: ArrangerModel
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("ARRANGEMENT")
-                        .font(.caption2.weight(.bold))
-                        .tracking(1.1)
-                        .foregroundStyle(StudioPalette.accentSecondary)
-                    Text(model.selectedSong.composer)
-                        .font(.caption)
-                        .foregroundStyle(StudioPalette.mutedText)
-                }
-
-                Spacer()
-
-                Text("\(model.assignedCount)/\(model.events.count) mapped")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(StudioPalette.mutedText)
-            }
-            .padding(.horizontal, 13)
-            .padding(.vertical, 9)
+        GeometryReader { geometry in
+            let rowHeight = max(
+                44,
+                (geometry.size.height - 24) / CGFloat(NotePitch.allCases.count)
+            )
 
             HStack(spacing: 0) {
-                PitchLabels()
+                PitchLabels(mapped: model.assignedCount, total: model.events.count, rowHeight: rowHeight)
 
                 ScrollView(.horizontal) {
                     VStack(spacing: 0) {
                         TimelineRuler(events: model.events)
 
                         ForEach(NotePitch.allCases.reversed(), id: \.self) { pitch in
-                            PitchTimelineRow(model: model, pitch: pitch)
+                            PitchTimelineRow(model: model, pitch: pitch, rowHeight: rowHeight)
                         }
                     }
                 }
                 .scrollIndicators(.visible)
                 .scrollBounceBehavior(.basedOnSize)
             }
-            .background(StudioPalette.background.opacity(0.75))
-            .compositingGroup()
-            .clipShape(.rect(cornerRadius: 15))
-            .overlay(RoundedRectangle(cornerRadius: 15).strokeBorder(StudioPalette.gridStrong))
-            .padding(.horizontal, 8)
-            .padding(.bottom, 8)
-            .accessibilityElement(children: .contain)
-            .accessibilityLabel("Piano roll with \(model.events.count) notes")
-            .accessibilityIdentifier("piano-roll")
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(StudioPalette.background)
+            .overlay(Rectangle().strokeBorder(StudioPalette.gridStrong, lineWidth: 0.5))
         }
-        .background(StudioPalette.surface)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Piano roll with \(model.events.count) notes")
+        .accessibilityIdentifier("piano-roll")
     }
 }
 
 private struct PitchLabels: View {
+    let mapped: Int
+    let total: Int
+    let rowHeight: CGFloat
+
     var body: some View {
         VStack(spacing: 0) {
-            Text("NOTE")
+            Text("\(mapped)/\(total)")
                 .font(.caption2.weight(.bold))
-                .tracking(0.6)
                 .foregroundStyle(StudioPalette.mutedText)
                 .frame(width: StudioMetrics.pitchLabelWidth, height: 24)
                 .background(StudioPalette.raised)
@@ -441,7 +364,7 @@ private struct PitchLabels: View {
                 Text(pitch.rawValue)
                     .font(.caption2.weight(.bold).monospaced())
                     .foregroundStyle(.white.opacity(0.78))
-                    .frame(width: StudioMetrics.pitchLabelWidth, height: StudioMetrics.rowHeight)
+                    .frame(width: StudioMetrics.pitchLabelWidth, height: rowHeight)
                     .background(StudioPalette.raised.opacity(pitch.midi.isMultiple(of: 2) ? 0.72 : 0.92))
                     .overlay(alignment: .bottom) {
                         Rectangle()
@@ -474,12 +397,13 @@ private struct TimelineRuler: View {
 private struct PitchTimelineRow: View {
     @Bindable var model: ArrangerModel
     let pitch: NotePitch
+    let rowHeight: CGFloat
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(Array(model.events.enumerated()), id: \.element.id) { index, event in
                 TimelineCell(model: model, event: event, index: index, rowPitch: pitch)
-                    .frame(width: cellWidth(for: event), height: StudioMetrics.rowHeight)
+                    .frame(width: cellWidth(for: event), height: rowHeight)
             }
         }
     }
@@ -506,8 +430,19 @@ private struct TimelineCell: View {
             }
             .overlay {
                 if event.pitch == rowPitch {
-                    NoteBlock(model: model, event: event, index: index)
+                    RoundedRectangle(cornerRadius: 7)
+                        .fill(StudioPalette.accent.opacity(0.07))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 7)
+                                .stroke(
+                                    StudioPalette.accent.opacity(event.clipID == nil ? 0.9 : 0.42),
+                                    style: StrokeStyle(lineWidth: 1, dash: [4, 3])
+                                )
+                        }
                         .padding(3)
+
+                    NoteBlock(model: model, event: event, index: index)
+                        .padding(6)
                 }
             }
     }
@@ -536,31 +471,23 @@ private struct NoteBlock: View {
         Button {
             model.select(eventID: event.id)
         } label: {
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 3) {
-                    Text(event.pitch.rawValue)
-                        .font(.caption2.weight(.heavy).monospaced())
-                    Spacer(minLength: 0)
-                    if event.correctionCents != 0 {
-                        Text(compactCorrectionText)
-                            .font(.caption2.weight(.bold).monospacedDigit())
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                    }
-                }
-
-                Text(clip?.name.components(separatedBy: " ").first ?? "Drop sound")
-                    .font(.caption2.weight(.medium))
+            HStack(spacing: 3) {
+                Text(clip?.name.components(separatedBy: " ").first ?? "+ Drop")
+                    .font(.caption2.weight(.semibold))
                     .lineLimit(1)
                     .minimumScaleFactor(0.72)
+                Spacer(minLength: 0)
+                if event.correctionCents != 0, clip != nil {
+                    Text(compactCorrectionText)
+                        .font(.system(size: 7, weight: .bold, design: .monospaced))
+                }
             }
-            .padding(.horizontal, 7)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .foregroundStyle(clip == nil ? Color.white : Color.black.opacity(0.78))
+            .padding(.horizontal, 6)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .foregroundStyle(clip == nil ? StudioPalette.accentSecondary : Color.black.opacity(0.78))
             .background(noteBackground)
             .overlay(selectionBorder)
             .scaleEffect(isPlaying ? 1.045 : 1)
-            .shadow(color: noteColor.opacity(isSelected ? 0.38 : 0.12), radius: isSelected ? 7 : 2, y: 2)
             .animation(.snappy(duration: 0.18), value: isPlaying)
             .animation(.snappy(duration: 0.18), value: isDropTarget)
         }
@@ -603,21 +530,15 @@ private struct NoteBlock: View {
     }
 
     private var noteBackground: some View {
-        LinearGradient(
-            colors: clip == nil
-                ? [Color.white.opacity(0.10), Color.white.opacity(0.055)]
-                : [noteColor.opacity(isDropTarget ? 1 : 0.94), noteColor.opacity(0.68)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .clipShape(.rect(cornerRadius: 10))
+        RoundedRectangle(cornerRadius: 6)
+            .fill(clip == nil ? StudioPalette.accent.opacity(0.06) : noteColor.opacity(isDropTarget ? 1 : 0.86))
     }
 
     private var selectionBorder: some View {
-        RoundedRectangle(cornerRadius: 10)
+        RoundedRectangle(cornerRadius: 6)
             .strokeBorder(
-                isDropTarget ? Color.white : (isSelected ? StudioPalette.accentSecondary : noteColor.opacity(0.72)),
-                lineWidth: isDropTarget ? 3 : (isSelected ? 2 : 1)
+                isDropTarget ? Color.white : (isSelected ? StudioPalette.accentSecondary : .clear),
+                lineWidth: isDropTarget ? 2 : (isSelected ? 2 : 0)
             )
     }
 
@@ -647,17 +568,14 @@ private struct SelectedNoteDock: View {
 
             if let event = model.selectedEvent,
                let index = model.events.firstIndex(where: { $0.id == event.id }) {
-                HStack(spacing: 10) {
-                    SelectedPitchBadge(event: event, clip: model.clip(id: event.clipID))
+                HStack(spacing: 9) {
+                    Text(event.pitch.rawValue)
+                        .font(.headline.weight(.heavy).monospaced())
+                        .foregroundStyle(StudioPalette.accentSecondary)
 
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text("Note \(index + 1) · \(beatsLabel(event.beats))")
-                            .font(.caption)
-                            .foregroundStyle(StudioPalette.mutedText)
-                        Text(model.clip(id: event.clipID)?.name ?? "No recording")
-                            .font(.subheadline.weight(.semibold))
-                            .lineLimit(1)
-                    }
+                    Text(model.clip(id: event.clipID)?.name ?? "Drop a sound")
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(1)
 
                     Spacer(minLength: 0)
 
@@ -669,11 +587,10 @@ private struct SelectedNoteDock: View {
                     )
 
                     Button(action: openInspector) {
-                        Label("Edit", systemImage: "slider.horizontal.3")
+                        Image(systemName: "slider.horizontal.3")
                             .font(.subheadline.weight(.semibold))
-                            .padding(.horizontal, 13)
-                            .frame(height: 38)
-                            .background(StudioPalette.accent, in: Capsule())
+                            .frame(width: 38, height: 38)
+                            .background(StudioPalette.accent, in: Circle())
                             .foregroundStyle(.white)
                     }
                     .buttonStyle(.plain)
@@ -699,7 +616,7 @@ private struct SelectedNoteDock: View {
                     .accessibilityIdentifier("note-actions")
                 }
                 .padding(.horizontal, StudioMetrics.screenPadding)
-                .padding(.vertical, 10)
+                .padding(.vertical, 7)
             } else {
                 Label("Tap a note to edit it", systemImage: "hand.tap")
                     .font(.subheadline)
@@ -707,7 +624,7 @@ private struct SelectedNoteDock: View {
                     .frame(maxWidth: .infinity, minHeight: 62)
             }
         }
-        .background(.ultraThinMaterial)
+        .background(StudioPalette.surface)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Selected note tools")
     }
