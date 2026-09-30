@@ -1,6 +1,6 @@
 # Screen inventory
 
-Phase 2 of the SERP UI runbook. Approved by the owner in #47 (2026-09-29). The flows are in `app-map.md`, and the clickable version is in `prototype/`.
+Phase 2 of the SERP UI runbook. Approved by the owner in #47 (2026-09-29). The flows are in `app-map.md`, and the clickable version is in `prototype/` (its AI segment is post-MVP).
 
 Reference apps for feel (in place of screenshots): Apple Voice Memos for recording, and Apple Music's library for lists.
 

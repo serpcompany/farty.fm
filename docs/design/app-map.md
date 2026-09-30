@@ -33,13 +33,13 @@ Stock SwiftUI components from the latest iOS (Liquid Glass), with no custom comp
 - `NavigationStack` with large titles
 - `List`
 - `.searchable`
-- a segmented `Picker`
+- a segmented `Picker` (post-MVP, for Songs | AI)
 - sheets with detents
 - `confirmationDialog` and alerts
 - `ProgressView`
 - SF Symbols
 
-Use system colors, with red only for recording. This is why the minimum iOS is 26 (ADR 0001). The prototype is a grayscale stand-in for structure only.
+Use system colors, with red only for recording. This is why the minimum iOS is 26 (ADR 0001). The prototype is a grayscale stand-in for structure only; its Songs | AI segment and AI melodies are post-MVP.
 
 ## Hierarchy and pattern notes
 
@@ -57,7 +57,6 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 
 ## Decided in the #47 review
 
-- **AI Song Creator is post-MVP** (owner, 2026-09-29). The groundwork is kept on #21 and #22.
 
 - **Layouts and flows:** approved by the owner on 2026-09-29. The real app builds them with stock SwiftUI and native iOS controls (see Visual direction). The HTML prototype is a structure reference only.
 
@@ -66,6 +65,10 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 - **Unlock rule:** a Song unlocks when each of its distinct pitches has its **own** Melodic Recording within 3 semitones: one different fart per pitch, and no fart stretched across the tune. A Pitch Coverage bar (a `ProgressView`) shows how many are covered ("3 of 4 notes covered"). With the 23 test farts, 6 of 12 Songs unlock once all 9 Melodic ones are collected. The first unlock comes at the 4th to 8th Melodic fart depending on order (the 6th in the prototype's order). Stars were dropped. #43 validates the rule, and decides whether ADR 0004's short-note limit is also part of unlocking.
 - **Locked Songs can't be played.** There's no "Try anyway"; you unlock a Song to use it.
 - **Native SwiftUI:** see Visual direction.
+
+## Decided after the #47 review
+
+- **AI Song Creator is post-MVP** (owner in chat, 2026-09-29). The groundwork is kept on #21 and #22.
 
 ## Still open
 
