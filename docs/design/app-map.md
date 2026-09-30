@@ -22,7 +22,7 @@ Capture-first, as approved in #2, with the owner's changes from the #47 review: 
 - **Unlock moment:** Result → "You unlocked Twinkle, Twinkle" → Try it → Song Creator
 - **Replay or delete a Recording:** Recordings → tap row to play → swipe or long-press → Delete → confirm
 - **Make a Song:** Compose → Songs → an Unlocked Song → Song Creator (plays automatically) → Save → Melodies
-- **See what a locked Song needs:** Compose → Songs → a locked Song → "Needs a fart near D3 and F3" sheet → Record (goes to the Record tab)
+- **See what a locked Song needs:** Compose → Songs → a locked Song → "Needs a fart near D3 and F3" sheet → Record (goes to the Record tab). Locked Songs can't be played.
 - **Make an AI melody:** Compose → AI → pick a mood → Compose (plays) → Try again or Save → Melodies
 - **Manage Created Melodies:** Melodies → tap to play → long-press → Rename or Delete
 
@@ -59,11 +59,12 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 
 - **Tabs:** Record (one big red button, opens first), Recordings (renamed from Shelf), Compose (renamed from Create), Melodies.
 - **Record flow and Recordings screen:** approved as prototyped.
-- **Unlock rule:** stars were dropped. A Song unlocks once every note can be reached within 5 semitones of a Melodic Recording, and a progress bar shows how many notes have a fart within 1 semitone ("3 of 5 notes matched"). #43 validates the thresholds.
+- **Unlock rule:** a Song unlocks when every note has its **own** Melodic Recording within 3 semitones: one different fart per note, and no fart stretched across the tune. The progress bar shows how many notes are covered ("3 of 4 notes covered"). With the 23 test farts, the first Song (Mary, 4 notes) unlocks at the 6th Melodic fart, and 6 of 12 unlock with all 9. Stars were dropped. #43 validates the rule on more subsets.
+- **Locked Songs can't be played.** There's no "Try anyway"; you unlock a Song to use it.
 - **Native SwiftUI:** see Visual direction.
 
 ## Still open
 
-1. **Locked Songs:** keep the small "Try anyway" (with a "may sound off" warning), or no playing until unlocked? The prototype keeps it.
-2. **Choosing Recordings:** Auto-map picks the best farts on its own, with no manual picking in the MVP.
+1. **Early payoff:** the first unlock comes late. Proposed: add a few 3-note starter Songs (Hot Cross Buns and similar) through the batch import (#39), and let AI Song Creator work from 3 Melodic farts.
+2. **Choosing Recordings:** Auto-map picks the farts itself, with no manual picking in the MVP.
 3. **Naming Recordings:** default "Recording 1, 2, …", with no renaming in the MVP.

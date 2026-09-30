@@ -121,9 +121,9 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Segmented control (Songs | AI)
 - Search field
 - Sort menu (Closest to unlocking | A–Z)
-- **Unlocked** section: rows with the title, a progress bar and "3 of 5 notes matched"
-- **Locked** section: rows with the title, Pitch Coverage ("3 of 5 notes reachable") and the nearest missing note
-- (The unlock rule is open question 4 in `app-map.md`, decided in #43.)
+- **Unlocked** section: rows with the title and "Ready"
+- **Locked** section: rows with the title, a progress bar ("3 of 5 notes covered"), a lock and the nearest missing note
+- (Unlock rule: one different Melodic Recording per note, within 3 semitones. See `app-map.md`.)
 **PRIMARY ACTION:** Open an Unlocked Song.
 **SECONDARY ACTIONS:** Open a locked Song to see what's missing; search; sort.
 **STATES:**
@@ -143,8 +143,8 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - "3 of 5 pitches"
 - Pitch strip with the notes you have and the notes you need
 - "Needs a fart near D3 and F3"
-- Record button
-- (Open question) "Try anyway"
+- Record button (goes to the Record tab)
+- No way to play it until it's unlocked
 **PRIMARY ACTION:** Record.
 **SECONDARY ACTIONS:** Close.
 **STATES:** Default.

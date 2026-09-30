@@ -20,17 +20,15 @@
       ],
     },
   };
-  const RULES = {
-    stars: { label: "Unlock + progress (proposed)", desc: "Unlocked when every note can be reached within 5 semitones of one of your Melodic Recordings. The progress bar shows how many notes have a fart within 1 semitone (for example 3 of 5 notes matched)." },
-    strict: { label: "All pitches within 3", desc: "The current #43 starting point. A Song unlocks only when every note has a Melodic Recording within 3 semitones." },
-  };
+  const RULE = "A Song unlocks when every note has its own Melodic Recording within 3 semitones: one different fart per note, and no fart stretched across the tune. The progress bar shows how many notes are covered.";
+  const MAX_SHIFT = 3;
 
   let S;
   let nextId = 100;
   function reset(start) {
     const st = STARTS[start];
     S = {
-      start, rule: S?.rule || "stars", tab: "record", seg: "songs", recording: false, push: null, modal: null, alert: null, toast: null,
+      start, tab: "record", seg: "songs", recording: false, push: null, modal: null, alert: null, toast: null,
       recs: st.recs.map((id, i) => ({ key: "r" + i, id, n: i + 1 })),
       story: st.recs.length ? Math.min(st.recs.length, D.story.length) : 0,
       melodies: st.melodies.map((m) => ({ ...m })),
@@ -44,32 +42,28 @@
 
   // ---------------------------------------------------------------- Melody Fit preview
   const melodic = (recs = S.recs) => recs.map((r) => REC[r.id]).filter((r) => r.melodic).map((r) => r.midi);
+  // One different Melodic Recording per note, each within MAX_SHIFT semitones, under the best
+  // transposition (maximum bipartite matching, Kuhn's algorithm).
   function fit(song, recs) {
-    const mids = melodic(recs), ps = song.pitches, total = ps.length;
-    if (!mids.length) return { unlocked: false, have: 0, total, stars: 0, missing: [], none: true };
-    const dist = (p) => Math.min(...mids.map((r) => Math.abs(p - r)));
+    const mel = recs.map((r) => REC[r.id]).filter((r) => r.melodic);
+    const ps = song.pitches, total = ps.length;
+    if (!mel.length) return { unlocked: false, have: 0, total, missing: [], used: [], none: true };
     let best = null;
     for (let t = -36; t <= 24; t++) {
-      const d = ps.map((p) => dist(p + t));
-      if (S.rule === "stars") {
-        const playable = d.every((x) => x <= 5), matched = d.filter((x) => x <= 1).length, reach = d.filter((x) => x <= 5).length;
-        const score = playable ? 1000 + matched * 10 - d.reduce((a, b) => a + b, 0) / 100 : reach * 10 - d.reduce((a, b) => a + b, 0) / 100;
-        if (!best || score > best.score) best = { score, t, d, playable, matched, reach };
-      } else {
-        const have = d.filter((x) => x <= 3).length, score = have * 10 - d.reduce((a, b) => a + b, 0) / 100;
-        if (!best || score > best.score) best = { score, t, d, have };
-      }
+      const adj = ps.map((p) => mel.map((r, j) => [j, Math.abs(p + t - r.midi)]).filter(([, d]) => d <= MAX_SHIFT).sort((a, b) => a[1] - b[1]).map(([j]) => j));
+      const owner = new Array(mel.length).fill(-1);
+      const tryNote = (i, seen) => adj[i].some((j) => !seen[j] && (seen[j] = true) && (owner[j] < 0 || tryNote(owner[j], seen)) && ((owner[j] = i), true));
+      let have = 0;
+      for (let i = 0; i < ps.length; i++) if (tryNote(i, [])) have++;
+      if (!best || have > best.have) best = { have, t, owner };
+      if (have === total) break;
     }
-    if (S.rule === "stars") {
-      const stars = !best.playable ? 0 : best.matched === total ? 3 : best.matched >= total / 2 ? 2 : 1;
-      const miss = ps.map((p, i) => [p + best.t, best.d[i]]).filter(([, x]) => (best.playable ? x > 1 : x > 5)).map(([m]) => m);
-      return { unlocked: best.playable, have: best.playable ? best.matched : best.reach, total, stars, missing: miss };
-    }
-    const miss = ps.map((p, i) => [p + best.t, best.d[i]]).filter(([, x]) => x > 3).map(([m]) => m);
-    return { unlocked: best.have === total, have: best.have, total, stars: best.have === total ? 1 : 0, missing: miss };
+    const noteOf = new Map(best.owner.map((i, j) => [i, j]).filter(([i]) => i >= 0));
+    const missing = ps.map((p, i) => (noteOf.has(i) ? null : p + best.t)).filter((x) => x !== null);
+    return { unlocked: best.have === total, have: best.have, total, missing, used: [...noteOf.values()].map((j) => mel[j].id) };
   }
   const bar = (f) => `<span class="pbar" role="img" aria-label="${f.have} of ${f.total}"><i style="width:${Math.round((100 * f.have) / f.total)}%"></i></span>`;
-  const progressText = (f) => S.rule === "stars" ? (f.unlocked ? `${f.have} of ${f.total} notes matched` : `${f.have} of ${f.total} notes reachable`) : `${f.have} of ${f.total} pitches`;
+  const progressText = (f) => (f.unlocked ? `All ${f.total} notes covered` : `${f.have} of ${f.total} notes covered`);
   const needText = (f) => f.none ? "Record a fart with a clear note to start" : f.missing.length ? "Needs a fart near " + [...new Set(f.missing.map(noteName))].slice(0, 3).join(", ") : "";
 
   // ---------------------------------------------------------------- audio
@@ -132,11 +126,11 @@
     const q = S.search.trim().toLowerCase();
     let items = D.songs.filter((s) => s.title.toLowerCase().includes(q)).map((s) => ({ s, f: fit(s, S.recs) }));
     if (S.sort === "az") items.sort((a, b) => a.s.title.localeCompare(b.s.title));
-    else items.sort((a, b) => (b.f.unlocked - a.f.unlocked) || (b.f.stars - a.f.stars) || (b.f.have / b.f.total - a.f.have / a.f.total));
+    else items.sort((a, b) => (b.f.unlocked - a.f.unlocked) || (b.f.have / b.f.total - a.f.have / a.f.total) || (a.f.total - b.f.total));
     const un = items.filter((x) => x.f.unlocked), lo = items.filter((x) => !x.f.unlocked);
     const row = ({ s, f }) => `<button class="row" data-a="song" data-id="${s.id}">
         <div class="grow"><div class="title">${s.title}</div><div class="sub">${progressText(f)}${!f.unlocked ? " · " + needText(f).replace("Needs a fart", "needs") : ""}</div></div>
-        ${f.unlocked ? bar(f) : `<span class="badge soft">🔒</span>`}<span class="chev">›</span></button>`;
+        ${f.unlocked ? `<span class="badge soft">Ready</span>` : `${bar(f)}<span aria-label="Locked">🔒</span>`}<span class="chev">›</span></button>`;
     const noMel = !melodic().length;
     return `<div class="search"><input id="search" placeholder="Search Songs" value="${S.search.replace(/"/g, "&quot;")}" aria-label="Search Songs"><select id="sort" aria-label="Sort"><option value="closest" ${S.sort === "closest" ? "selected" : ""}>Closest to unlock</option><option value="az" ${S.sort === "az" ? "selected" : ""}>A–Z</option></select></div>
       ${noMel ? `<div class="empty" style="margin-top:12px">Record a few farts with a clear note to start unlocking Songs.</div>` : ""}
@@ -167,12 +161,12 @@
 
   function songCreator() {
     const s = SONG[S.push], key = "song-" + s.id;
-    const used = S.recs.map((r) => REC[r.id]).filter((r) => r.melodic).slice(0, s.pitches.length).map((r) => r.id);
+    const used = fit(s, S.recs).used;
     return `<div class="navbar"><button class="back" data-a="back">‹ Compose</button></div>
       <div class="largetitle" style="font-size:26px">${s.title}</div>
       <div class="meta">${s.source}</div>
       ${S.making ? `<div class="empty" style="margin-top:14px"><div class="spinner" style="margin:0 auto 10px"></div>Making your melody…</div>` : `
-      <div class="player"><button class="play" data-a="playsong" aria-label="Play">${S.playing === key ? "■" : "▶"}</button><div><div class="title">${S.playing === key ? "Playing" : "Ready"}</div><div class="meta">${used.length} of your Recordings${used.length ? "" : " (try-anyway preview)"}</div></div></div>
+      <div class="player"><button class="play" data-a="playsong" aria-label="Play">${S.playing === key ? "■" : "▶"}</button><div><div class="title">${S.playing === key ? "Playing" : "Ready"}</div><div class="meta">${used.length} of your Recordings, one per note</div></div></div>
       <canvas class="notes" id="notes"></canvas>
       <div class="section">Recordings used</div>
       <div class="chips">${used.map((id) => `<button class="chip" data-a="playraw" data-id="${id}">${REC[id].melodic ? noteName(REC[id].midi) : id}</button>`).join("")}</div>
@@ -228,8 +222,7 @@
         <div class="title" style="font-size:20px">${s.title} 🔒</div><div class="meta">${progressText(f)}</div>
         ${strip(havePcs(), need)}<div class="striplabel"><span>■ you have</span><span>▢ needed</span></div>
         <p style="margin:0 0 14px">${needText(f)}.</p>
-        <button class="primary" data-a="record">Record</button>
-        <div style="text-align:center"><button class="linkbtn" data-a="tryanyway" data-id="${s.id}">Try anyway (may sound off)</button></div></div></div>`;
+        <button class="primary" data-a="record">Record</button></div></div>`;
     }
     return "";
   }
@@ -339,7 +332,7 @@
         S.story++;
         const after = Object.fromEntries(D.songs.map((s) => [s.id, fit(s, S.recs)]));
         const unlocked = D.songs.filter((s) => !before[s.id].unlocked && after[s.id].unlocked).map((s) => s.id);
-        const upgraded = D.songs.filter((s) => before[s.id].unlocked && after[s.id].have > before[s.id].have).map((s) => [s.id, after[s.id]]);
+        const upgraded = D.songs.filter((s) => !after[s.id].unlocked && after[s.id].have > before[s.id].have).map((s) => [s.id, after[s.id]]).sort((a, b) => b[1].have / b[1].total - a[1].have / a[1].total);
         const locked = D.songs.filter((s) => !after[s.id].unlocked).map((s) => ({ id: s.id, f: after[s.id] })).sort((a, b) => b.f.have / b.f.total - a.f.have / a.f.total);
         S.result = { id: S.draft, busy: true, unlocked, upgraded, closest: locked[0] };
         S.modal = "result"; render();
@@ -353,7 +346,6 @@
       delrec: () => { stop(); S.recs = S.recs.filter((r) => r.key !== el.dataset.k); S.alert = null; toast("Recording deleted"); },
       song: () => { const s = SONG[el.dataset.id]; fit(s, S.recs).unlocked ? openSong(s.id) : ((S.lockedSong = s.id), (S.modal = "locked"), render()); },
       closesheet: () => { S.modal = null; render(); },
-      tryanyway: () => { S.modal = null; openSong(el.dataset.id); },
       back: () => { stop(); S.push = null; render(); },
       playsong: () => play("song-" + S.push, SONG[S.push].audio),
       playraw: () => play("raw-" + el.dataset.id, REC[el.dataset.id].audio),
@@ -387,11 +379,9 @@
   // ---------------------------------------------------------------- evaluator panel
   function renderPanel() {
     document.getElementById("starts").innerHTML = Object.entries(STARTS).map(([k, v]) => `<button data-start="${k}" aria-pressed="${S.start === k}">${v.label}</button>`).join("");
-    document.getElementById("rules").innerHTML = Object.entries(RULES).map(([k, v]) => `<button data-rule="${k}" aria-pressed="${S.rule === k}">${v.label}</button>`).join("");
-    document.getElementById("ruledesc").textContent = RULES[S.rule].desc;
+    document.getElementById("ruledesc").textContent = RULE;
   }
   document.getElementById("starts").addEventListener("click", (e) => { const b = e.target.closest("[data-start]"); if (b) reset(b.dataset.start); });
-  document.getElementById("rules").addEventListener("click", (e) => { const b = e.target.closest("[data-rule]"); if (b) { S.rule = b.dataset.rule; render(); } });
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawNotes);
 
   reset("new");
