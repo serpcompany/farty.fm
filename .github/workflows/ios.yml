@@ -16,15 +16,17 @@ permissions:
   contents: read
 
 jobs:
-  build-and-test:
-    name: build-and-test
+  ios-build-and-test:
+    name: ios-build-and-test
     runs-on: macos-26
     timeout-minutes: 30
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
       XCODEGEN_VERSION: 2.44.1
       XCODEGEN_SHA256: a2e905fb68446e9bb4008cdfe2e13e3f176d0cbcca828b71770f8e53fca91b73
-      DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5
+      DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5,arch=arm64
+      # Stream xcodebuild output through the pipe instead of buffering it until exit.
+      NSUnbufferedIO: "YES"
     defaults:
       run:
         working-directory: ios
@@ -46,6 +48,8 @@ jobs:
         run: scripts/check-bundle-identifiers.sh
 
       - name: Build and run unit and UI tests
+        # Fails the step on a hang, so the result bundle below still uploads.
+        timeout-minutes: 20
         run: |
           set -o pipefail
           xcodebuild test \
