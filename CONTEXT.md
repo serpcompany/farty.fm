@@ -47,11 +47,11 @@ A Song whose needed pitches are all covered by the user's Melodic Recordings.
 _Avoid_: Available song, playable song
 
 **Arrangement**:
-Which Recording plays each note of a melody. The app proposes one with Auto-map, and the user can change it.
+Which Recording plays each note of a melody.
 _Avoid_: Mapping, mix, assignment
 
 **Auto-map**:
-The app's proposed Arrangement for a Song, choosing the closest-pitched Melodic Recording for each note.
+The Arrangement the app chooses on its own, favoring the closest-pitched Melodic Recording for each note.
 _Avoid_: Smart choose, AI pick, best fit
 
 **Created Melody**:
