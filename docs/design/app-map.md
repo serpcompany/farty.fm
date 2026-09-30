@@ -4,14 +4,15 @@ Phase 1 of the SERP UI runbook. Approved by the owner in #47 (2026-09-29). Uses 
 
 ## Main areas
 
-Capture-first, as approved in #2, with the owner's changes from the #47 review: Record is its own tab and opens first, "Shelf" is renamed "Recordings", and "Create" is renamed "Compose".
+Capture-first, as approved in #2, with the owner's changes from the #47 review: Record is its own tab and opens first, "Shelf" is renamed "Recordings", and "Create" is renamed "Compose". Since #60, Record sits in the center of five tabs, and Profile is on the far right.
 
 | Tab | Name on screen | What it holds |
 | --- | --- | --- |
-| 1 | **Record** | One big red button. Tap to start: recording fills the screen, with Stop and a timer. Opens on launch, and again whenever the app comes back to the foreground (unless Review or Result is open). |
-| 2 | **Recordings** | Every Recording, with its note, and the strip of collected notes |
-| 3 | **Compose** | Song Creator: the Song Catalog with Pitch Coverage and unlocks. (AI Song Creator is post-MVP.) |
+| 1 | **Recordings** | Every Recording, with its note, and the strip of collected notes |
+| 2 | **Compose** | Song Creator: the Song Catalog with Pitch Coverage and unlocks. (AI Song Creator is post-MVP.) |
+| 3 (center) | **Record** | One big red button. Tap to start: recording fills the screen, with Stop and a timer. Opens on launch, and again whenever the app comes back to the foreground (unless Review or Result is open). |
 | 4 | **Toots** | Toots: Songs played by your Recordings, each with its own screen |
+| 5 | **Profile** | Stats from what's on the phone (Recordings, Melodic Recordings, notes collected, Songs unlocked, Toots), where the Songs come from, and the app version. No account or sign-in (ADR 0001). |
 - **Debug builds only:** a "Load Fixture Library" action under a debug menu. It never appears in Release builds.
 
 ## Flows
@@ -26,6 +27,7 @@ Capture-first, as approved in #2, with the owner's changes from the #47 review: 
 - **Make an AI melody (post-MVP):** Compose → AI → pick a mood → Compose (plays) → Try again or Save → Toots
 - **Manage Toots:** Toots → tap a row's play button to play → or tap the row to open the Toot → Rename or Delete from its menu (or long-press the row)
 - **Check the sound:** Song Creator or a Toot → tap a Recording to hear it alone and see its notes → tap a note to hear just that note as rendered
+- **See your stats:** Profile → Recordings, Melodic Recordings, notes collected, Songs unlocked ("6 of 12") and Toots
 
 ## Visual direction
 
@@ -44,7 +46,7 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 
 ## Hierarchy and pattern notes
 
-- **Tabs (root):** Record, Recordings, Compose, Toots.
+- **Tabs (root), left to right:** Recordings, Compose, Record (center), Toots, Profile. Record opens first.
 - **In-place switch (post-MVP):** when AI Song Creator returns, Compose gets a segmented control, Songs | AI. They are two ways to create, so they share one tab rather than two. In the MVP, Compose is the Songs list only.
 - **Pushed screens:** Song Creator is pushed from the Songs list, and a Toot's screen from the Toots tab.
 - **Full-screen cover:** Recording → Review → Result is one short task, and it covers the tabs. (Apple's HIG says not to disable or hide tab bar buttons, and a modal may cover them.)
@@ -78,6 +80,11 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 - **Recordings used** in Song Creator is a list: each Recording with the color of its notes, its name, waveform and length, the note it plays, and a play button.
 - **A Toot's screen:** tapping a Toot opens Song Creator's layout without Save, with Rename and Delete in its menu. A Toot keeps which Recording played each pitch; one deleted later shows as "Recording deleted", and the Toot still plays.
 - **Checking the sound:** tapping a Recording plays it alone and highlights its notes; tapping a note plays just that note from the Toot's own audio and says what it is ("F3 · Recording 21 (G3), shifted −2.1 semitones · 1.4 s").
+
+## Decided in the #57 tap-through (2026-09-30)
+
+- **Record in the center:** the tabs are Recordings · Compose · **Record** · Toots · Profile. Record's place is for thumb reach; Apple's HIG doesn't require it, and the owner chose it. The tab bar is the stock `TabView`, with no custom bar or raised button (#60).
+- **Profile:** a new tab on the far right for the user's own data and stats, all local. In the MVP it's a stock `List` with the stats, a line crediting where the Songs come from (PDMX and the Mutopia Project), and the app version. Accounts, the fart health analyzer (#24), gamification beyond these counts (#20) and settings are out of scope.
 
 ## Still open
 

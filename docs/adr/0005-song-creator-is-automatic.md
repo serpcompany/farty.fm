@@ -5,3 +5,5 @@ A piano roll for dragging Recordings onto notes was planned for two reasons: to 
 This all sits inside the capture-first structure first approved in #2 (tag `archive/prototype/end-to-end-mvp-interaction`, variant A) and refined in #47: four tabs, Record (opens first), Recordings, Compose and Melodies. See `docs/design/app-map.md`.
 
 Update 2026-09-30: the owner renamed the Melodies tab to Toots, and a saved result is a Toot (`CONTEXT.md`, #52).
+
+Update 2026-09-30: there are now five tabs, left to right: Recordings, Compose, Record (in the center, and still opening first), Toots and Profile (#60).

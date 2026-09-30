@@ -574,6 +574,41 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertEqual(arrangement.caption(of: last, in: mary, recording: nil), "F3 · Recording deleted · 1.4 s")
     }
 
+    // MARK: Profile
+
+    func testProfileStatsForANewUser() {
+        let model = makeModel()
+        XCTAssertEqual(
+            model.profileStats,
+            ProfileStats(recordings: 0, melodicRecordings: 0, notesCollected: 0, unlockedSongs: 0, songs: 12, toots: 0)
+        )
+    }
+
+    func testProfileStatsCountWhatsOnThePhone() {
+        let model = makeModel(start: allFixtureIDs, toots: ["mary", "ode"])
+        XCTAssertEqual(
+            model.profileStats,
+            ProfileStats(recordings: 23, melodicRecordings: 9, notesCollected: 6, unlockedSongs: 6, songs: 12, toots: 2)
+        )
+    }
+
+    func testProfileStatsFollowPitchCoverage() async {
+        // The 8th story take (086) unlocks Mary, as on the Compose tab; deleting it locks her again.
+        let model = makeModel(start: Array(SampleFixture.prototypeStory.prefix(7)))
+        let before = model.profileStats
+        XCTAssertEqual(before.unlockedSongs, 0)
+        await recordTake(model)
+        await model.saveDraft()
+        XCTAssertEqual(model.profileStats.recordings, before.recordings + 1)
+        XCTAssertEqual(model.profileStats.unlockedSongs, 1)
+        XCTAssertEqual(
+            model.profileStats.unlockedSongs,
+            Song.prototypeCatalog.filter { model.coverage(of: $0).isUnlocked }.count
+        )
+        model.delete(model.recordings.last!.id)
+        XCTAssertEqual(model.profileStats, before)
+    }
+
     // MARK: Background
 
     func testGoingToTheBackgroundStopsPlayback() async throws {
@@ -594,7 +629,7 @@ final class SampleAppModelTests: XCTestCase {
 
     func testComingBackLandsOnRecordUnlessTheRecordFlowIsOpen() async throws {
         let model = makeModel()
-        for tab in [AppTab.record, .recordings, .compose, .toots] {
+        for tab in AppTab.allCases {
             XCTAssertEqual(model.tabOnReturn(from: tab), .record)
         }
         await model.startRecording()

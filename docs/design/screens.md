@@ -40,7 +40,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 **SCREEN NAME:** Record
 **PURPOSE:** Capture one fart, instantly.
-**HOW USER GETS HERE:** Tab 1 (Record). Opens on launch, and whenever the app comes back to the foreground, unless Review or Result is open.
+**HOW USER GETS HERE:** Tab 3 (Record), in the center of the tab bar. Opens on launch, and whenever the app comes back to the foreground, unless Review or Result is open.
 **WHAT'S ON THE SCREEN:**
 - **Idle:** one big red button and nothing else
 - **Recording:** full screen over the tabs: the button as a Stop square with a pulse, and a timer
@@ -61,7 +61,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 **SCREEN NAME:** Recordings
 **PURPOSE:** See and play every Recording and the notes you've collected.
-**HOW USER GETS HERE:** Tab 2 (Recordings), or Done after saving.
+**HOW USER GETS HERE:** Tab 1 (Recordings), or Done after saving.
 **WHAT'S ON THE SCREEN:**
 - Large title "Recordings"
 - **Pitch strip:** a one-octave keyboard (C to B) that lights up each pitch class you've collected, with the count ("7 Melodic Recordings across 6 notes"). Repeats matter because each Song pitch needs its own fart.
@@ -125,7 +125,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 **SCREEN NAME:** Compose — Songs
 **PURPOSE:** Pick a Song to make, and see what's close to unlocking.
-**HOW USER GETS HERE:** Tab 3 (Compose). In the MVP this is the whole tab.
+**HOW USER GETS HERE:** Tab 2 (Compose). In the MVP this is the whole tab.
 **WHAT'S ON THE SCREEN:**
 - (Post-MVP: a segmented control, Songs | AI, above the list)
 - Search field
@@ -191,7 +191,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **SCREEN NAME:** Compose — AI (post-MVP)
 **STATUS:** Deferred past the MVP (#21, #22). Kept here for when it returns.
 **PURPOSE:** Get a brand-new melody made only from your farts.
-**HOW USER GETS HERE:** Tab 3 (Compose), with the AI segment selected.
+**HOW USER GETS HERE:** Tab 2 (Compose), with the AI segment selected.
 **WHAT'S ON THE SCREEN:**
 - Segmented control
 - Mood chips (Happy, Silly, Spooky, Epic)
@@ -253,3 +253,27 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **WHAT'S ON THE SCREEN:** A text field, Cancel and Save.
 **NAVIGATION TYPE:** Alert with a text field.
 **PLATFORM NOTE:** Apple default.
+
+---
+
+**SCREEN NAME:** Profile
+**PURPOSE:** See what you've collected and made.
+**HOW USER GETS HERE:** Tab 5 (Profile), on the far right.
+**WHAT'S ON THE SCREEN:**
+- Large title "Profile", on a stock `List`
+- **Stats**, counted from what's on the phone:
+  - Recordings
+  - Melodic Recordings
+  - Notes collected (the distinct notes on the Recordings tab's pitch strip)
+  - Songs unlocked ("6 of 12": Unlocked Songs, by Pitch Coverage)
+  - Toots
+- **About:**
+  - Songs: "From public-domain scores in PDMX and the Mutopia Project"
+  - Version ("0.1.0 (1)")
+**PRIMARY ACTION:** None; it's for reading.
+**SECONDARY ACTIONS:** None.
+**STATES:**
+- New user: every count is 0 ("0 of 12" Songs), with "Record your first fart on the Record tab. Collect notes to unlock Songs." under the stats
+- Populated
+**NAVIGATION TYPE:** Tab.
+**NOTES:** Local only: no account or sign-in (ADR 0001). Added by the owner in the #57 tap-through (#60). Out of scope: the fart health analyzer (#24), gamification beyond these counts (#20) and settings.
