@@ -1,0 +1,173 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pedos Screen Prototype</title>
+<style>
+/* Layout: an iPhone-sized grayscale wireframe on the left, a quiet evaluator panel on the right
+   (stacked below on phones). Structure only; color and type come later (runbook phase 8). */
+:root {
+  --page: #e9eae7;
+  --panel: #f6f6f4;
+  --ink: #1c1c1e;
+  --muted: #6e6e73;
+  --faint: #aeaeb2;
+  --line: #d8d8dc;
+  --fill: #efeff2;
+  --screen: #ffffff;
+  --record: #d7362b;
+  --sys: system-ui, -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page: #121213; --panel: #1b1b1d; --ink: #f2f2f4; --muted: #a1a1a8; --faint: #636368; --line: #333337; --fill: #2a2a2e; --screen: #1c1c1e; --record: #ff5a4f; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --page: #121213; --panel: #1b1b1d; --ink: #f2f2f4; --muted: #a1a1a8; --faint: #636368; --line: #333337; --fill: #2a2a2e; --screen: #1c1c1e; --record: #ff5a4f; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.4 var(--sys); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.wrap { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; align-items: flex-start; padding-inline: 16px; padding-block: 24px 48px; }
+
+/* ---------- phone ---------- */
+.phone { width: 390px; max-width: 100%; height: 844px; background: var(--screen); border: 10px solid var(--ink); border-radius: 54px; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgb(0 0 0 / .18); }
+.status { height: 44px; flex: none; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; font-weight: 600; font-size: 14px; }
+.content { flex: 1; overflow-y: auto; padding: 0 16px 16px; }
+.navbar { display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
+.navbar .back { background: none; border: 0; color: var(--ink); padding: 0; font-size: 16px; }
+.largetitle { font-size: 32px; font-weight: 700; letter-spacing: -.01em; margin: 2px 0 12px; }
+.recbtn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--screen); display: grid; place-items: center; }
+.recbtn i { width: 14px; height: 14px; border-radius: 50%; background: var(--record); display: block; }
+.tabbar { flex: none; height: 82px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, 1fr); padding-bottom: 22px; background: var(--screen); }
+.tabbar button { background: none; border: 0; display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11px; color: var(--faint); }
+.tabbar button[aria-current="page"] { color: var(--ink); font-weight: 600; }
+.tabbar svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.homeind { position: absolute; bottom: 7px; left: 50%; translate: -50% 0; width: 134px; height: 5px; border-radius: 3px; background: var(--ink); }
+
+.hero { display: grid; justify-items: center; gap: 8px; padding: 18px 0 20px; border: 1px solid var(--line); border-radius: 18px; margin-bottom: 14px; }
+.bigrec { width: 84px; height: 84px; border-radius: 50%; border: 3px solid var(--line); background: var(--screen); display: grid; place-items: center; }
+.bigrec i { width: 60px; height: 60px; border-radius: 50%; background: var(--record); display: block; }
+.hint { color: var(--muted); font-size: 13px; text-align: center; margin: 0; }
+
+.strip { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin: 6px 0 4px; }
+.strip span { height: 34px; border-radius: 5px; border: 1px solid var(--line); display: grid; place-items: end center; font-size: 9px; padding-bottom: 3px; color: var(--faint); }
+.strip span.sharp { background: var(--fill); }
+.strip span.have { background: var(--ink); color: var(--screen); border-color: var(--ink); }
+.strip span.need { border: 2px dashed var(--ink); color: var(--ink); font-weight: 700; }
+.striplabel { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+
+.section { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 18px 0 6px; }
+.list { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.row { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-bottom: 1px solid var(--line); background: var(--screen); width: 100%; text-align: left; border-left: 0; border-right: 0; border-top: 0; }
+.row:last-child { border-bottom: 0; }
+.row.playing { background: var(--fill); }
+.row .grow { flex: 1; min-width: 0; }
+.row .title { font-weight: 600; }
+.row .sub { color: var(--muted); font-size: 13px; }
+.play { width: 34px; height: 34px; flex: none; border-radius: 50%; border: 1.5px solid var(--ink); background: none; display: grid; place-items: center; font-size: 12px; }
+.badge { font: 600 12px var(--mono); padding: 3px 7px; border-radius: 6px; border: 1px solid var(--ink); white-space: nowrap; }
+.badge.soft { border-color: var(--line); color: var(--muted); font-family: var(--sys); font-weight: 500; }
+.more { background: none; border: 0; color: var(--muted); font-size: 20px; padding: 0 4px; }
+.chev { color: var(--faint); }
+.stars { letter-spacing: 1px; font-size: 14px; }
+.empty { text-align: center; color: var(--muted); padding: 34px 18px; border: 1px dashed var(--line); border-radius: 12px; }
+
+.segment { display: grid; grid-template-columns: 1fr 1fr; background: var(--fill); border-radius: 9px; padding: 2px; margin-bottom: 12px; }
+.segment button { border: 0; background: none; border-radius: 7px; padding: 6px; font-size: 14px; }
+.segment button[aria-pressed="true"] { background: var(--screen); font-weight: 600; box-shadow: 0 1px 3px rgb(0 0 0 / .15); }
+.search { display: flex; gap: 8px; }
+.search input { flex: 1; min-width: 0; border: 0; background: var(--fill); border-radius: 10px; padding: 8px 12px; font: inherit; color: inherit; }
+.search select { border: 0; background: var(--fill); border-radius: 10px; padding: 0 8px; font: inherit; color: inherit; font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
+.chip { border: 1px solid var(--line); background: var(--screen); border-radius: 999px; padding: 6px 12px; font-size: 14px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--screen); border-color: var(--ink); }
+
+.primary { width: 100%; border: 0; border-radius: 14px; background: var(--ink); color: var(--screen); padding: 14px; font-weight: 600; font-size: 16px; }
+.secondary { width: 100%; border: 1px solid var(--line); border-radius: 14px; background: var(--screen); padding: 13px; font-weight: 600; }
+.linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 14px; padding: 8px; }
+.btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+canvas.notes { width: 100%; height: 170px; border: 1px solid var(--line); border-radius: 12px; display: block; margin: 10px 0; }
+.meta { color: var(--muted); font-size: 13px; }
+.player { display: flex; align-items: center; gap: 14px; margin: 12px 0 4px; }
+.player .play { width: 54px; height: 54px; font-size: 18px; }
+.spinner { width: 34px; height: 34px; border: 3px solid var(--line); border-top-color: var(--ink); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { rotate: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+
+/* covers, sheets, alerts, toast */
+.cover { position: absolute; inset: 0; background: var(--screen); z-index: 20; display: flex; flex-direction: column; padding: 54px 20px 40px; }
+.cover .center { flex: 1; display: grid; place-content: center; justify-items: center; gap: 14px; text-align: center; }
+.timer { font: 600 44px var(--mono); font-variant-numeric: tabular-nums; }
+.meter { display: flex; align-items: center; gap: 3px; height: 70px; }
+.meter i { width: 5px; background: var(--ink); border-radius: 3px; display: block; transition: height .08s; }
+.stop { width: 78px; height: 78px; border-radius: 50%; border: 3px solid var(--line); background: var(--screen); display: grid; place-items: center; }
+.stop i { width: 30px; height: 30px; border-radius: 6px; background: var(--record); display: block; }
+.bignote { font: 700 64px var(--mono); line-height: 1; }
+.card { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; text-align: left; width: 100%; }
+.scrim { position: absolute; inset: 0; background: rgb(0 0 0 / .35); z-index: 30; display: flex; align-items: flex-end; }
+.sheet { background: var(--screen); width: 100%; border-radius: 16px 16px 0 0; padding: 10px 20px 34px; }
+.grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 12px; }
+.alertwrap { position: absolute; inset: 0; background: rgb(0 0 0 / .35); z-index: 40; display: grid; place-items: center; }
+.alert { width: 270px; background: var(--panel); border-radius: 14px; text-align: center; overflow: hidden; }
+.alert .body { padding: 18px 16px 14px; }
+.alert h3 { margin: 0 0 4px; font-size: 17px; }
+.alert p { margin: 0; font-size: 13px; }
+.alert input { width: 100%; margin-top: 10px; border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; font: inherit; color: inherit; background: var(--screen); }
+.alert .acts { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
+.alert .acts.stack { grid-template-columns: 1fr; }
+.alert .acts button { background: none; border: 0; padding: 11px; font-size: 16px; border-left: 1px solid var(--line); }
+.alert .acts.stack button { border-left: 0; border-top: 1px solid var(--line); }
+.alert .acts button:first-child { border-left: 0; }
+.alert .acts .strong { font-weight: 600; }
+.alert .acts .danger { color: var(--record); }
+.toast { position: absolute; bottom: 100px; left: 50%; translate: -50% 0; background: var(--ink); color: var(--screen); padding: 9px 16px; border-radius: 999px; font-size: 14px; z-index: 50; white-space: nowrap; }
+
+/* ---------- evaluator panel ---------- */
+.panel { width: 360px; max-width: 100%; display: grid; gap: 18px; align-content: start; }
+.panel h1 { font-size: 22px; margin: 0; text-wrap: balance; }
+.panel p { margin: 0; color: var(--muted); }
+.panel .group { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; }
+.panel .group h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin: 0; color: var(--muted); }
+.panel .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.panel .opts button { border: 1px solid var(--line); background: var(--screen); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
+.panel .opts button[aria-pressed="true"] { background: var(--ink); color: var(--screen); border-color: var(--ink); }
+.panel ol { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 14px; }
+.panel small { color: var(--muted); font-size: 12px; }
+@media (max-width: 500px) {
+  .wrap { padding-block: 12px 40px; }
+  .phone { width: 100%; height: 88dvh; min-height: 640px; border-width: 1px; border-color: var(--line); border-radius: 22px; box-shadow: none; }
+  .homeind { display: none; }
+}
+</style>
+
+<div class="wrap">
+  <div class="phone" id="phone" aria-label="Pedos prototype"></div>
+  <aside class="panel">
+    <div>
+      <h1>Pedos screen prototype</h1>
+      <p>Structure only, in grayscale. Tap through it like the app. Recordings and Songs play real audio from the Fixture Library.</p>
+    </div>
+    <div class="group">
+      <h2>Start as</h2>
+      <div class="opts" id="starts"></div>
+      <small>"Record" in the prototype brings in the next fixture fart, in a set order, so you can watch unlocks happen.</small>
+    </div>
+    <div class="group">
+      <h2>Unlock rule</h2>
+      <div class="opts" id="rules"></div>
+      <small id="ruledesc"></small>
+    </div>
+    <div class="group">
+      <h2>Questions for you</h2>
+      <ol>
+        <li><b>Structure:</b> three tabs (Shelf, Create, Melodies) with Record on every screen. Good?</li>
+        <li><b>Unlock rule:</b> try both above. Stars keeps you collecting; the strict rule unlocks nearly everything after 2–4 farts.</li>
+        <li><b>Locked Songs:</b> the "what's missing" sheet has a small "Try anyway". Keep it, or no playing until unlocked?</li>
+        <li><b>Choosing Recordings:</b> Auto-map picks the best farts itself, so there's no manual picking. OK?</li>
+      </ol>
+    </div>
+    <small>Song audio and the note view always use the full 23-Recording render. AI audio doesn't exist yet (decided in #21).</small>
+  </aside>
+</div>
+
+<audio id="audio" preload="auto"></audio>
+<script src="data.js"></script>
+<script src="app.js"></script>

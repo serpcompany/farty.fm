@@ -1,0 +1,221 @@
+# Screen inventory
+
+Phase 2 of the SERP UI runbook. Draft for owner review in #47. The flows are in `app-map.md`, and the clickable version is in `prototype/`.
+
+Reference apps for feel (in place of screenshots): Apple Voice Memos for recording, and Apple Music's library for lists.
+
+---
+
+**SCREEN NAME:** Welcome
+**PURPOSE:** Say what Pedos does and ask for the microphone before the first recording.
+**HOW USER GETS HERE:** First launch only.
+**WHAT'S ON THE SCREEN:**
+- App name
+- One-line promise: "Record your farts. Turn them into songs."
+- Three short points:
+  - one fart per Recording
+  - each fart has a note
+  - collect notes to unlock Songs
+- "Allow microphone" button
+**PRIMARY ACTION:** Allow microphone.
+**SECONDARY ACTIONS:** Not now.
+**STATES:** Default.
+**NAVIGATION TYPE:** Sheet (not dismissible by swipe).
+**PLATFORM NOTE:** Apple default. The system permission prompt follows the button.
+
+---
+
+**SCREEN NAME:** Microphone off
+**PURPOSE:** Explain why recording can't start, and how to fix it.
+**HOW USER GETS HERE:** Record, when microphone permission is denied.
+**WHAT'S ON THE SCREEN:**
+- Message: "Pedos needs the microphone to record."
+- "Open Settings" button
+**PRIMARY ACTION:** Open Settings.
+**SECONDARY ACTIONS:** Cancel.
+**STATES:** Default.
+**NAVIGATION TYPE:** Alert.
+
+---
+
+**SCREEN NAME:** Shelf
+**PURPOSE:** Home. Record, and see and play every Recording.
+**HOW USER GETS HERE:** Tab 1, launch.
+**WHAT'S ON THE SCREEN:**
+- Large title "Shelf" and the Record button (top right)
+- A big Record button
+- **Pitch strip:** a one-octave keyboard (C to B) that lights up each pitch class you've collected, with the count ("5 notes collected")
+- A list of Recordings. Each row has:
+  - a play button
+  - the name ("Recording 7")
+  - a pitch badge ("G♯3", or "noise-like" when the Recording has no steady pitch)
+  - its length
+  - "first fart used" when a second fart was cut off
+**PRIMARY ACTION:** Record.
+**SECONDARY ACTIONS:** Play a Recording; swipe to delete (with confirmation).
+**STATES:**
+- Empty ("No Recordings yet. Tap Record.")
+- Analyzing (the badge shows a spinner)
+- Playing (the row is highlighted)
+- Populated
+**NAVIGATION TYPE:** Tab.
+**NOTES:** Tapping a row plays it, starting at the fart itself rather than the silence before it.
+
+---
+
+**SCREEN NAME:** Recording
+**PURPOSE:** Capture one fart.
+**HOW USER GETS HERE:** Any Record button.
+**WHAT'S ON THE SCREEN:**
+- Live level meter
+- Timer
+- Hint: "One fart per Recording"
+- Big Stop button
+**PRIMARY ACTION:** Stop.
+**SECONDARY ACTIONS:** Cancel (discards).
+**STATES:** Recording.
+**NAVIGATION TYPE:** Full-screen cover, step 1 of the record task.
+**PATTERN CHOICE:** A full-screen cover, so a stray swipe can't end a recording.
+
+---
+
+**SCREEN NAME:** Review
+**PURPOSE:** Hear the take before keeping it.
+**HOW USER GETS HERE:** Stop.
+**WHAT'S ON THE SCREEN:**
+- Waveform
+- Play/Stop button
+- Length
+- Save and Discard buttons
+**PRIMARY ACTION:** Save.
+**SECONDARY ACTIONS:** Discard, Play.
+**STATES:** Default, Playing.
+**NAVIGATION TYPE:** Full-screen cover, step 2.
+
+---
+
+**SCREEN NAME:** Result
+**PURPOSE:** The payoff: what note did I just make, and what did it unlock?
+**HOW USER GETS HERE:** Save. Saving is instant; the analysis runs right after it.
+**WHAT'S ON THE SCREEN:**
+- **Analyzing:** a short "Finding your note…" state
+- **Result for a Melodic Recording:** the big note ("G♯3") and its place on the pitch strip
+- **Result for a Noise-like Recording:** "No steady note this time. It's saved, but it can't play melody notes."
+- Progress: "Ode to Joy: 4 of 5 pitches"
+- Unlocks: "You unlocked Twinkle, Twinkle", with a "Try it" button
+- Done button
+**PRIMARY ACTION:** Done (or Try it when something was unlocked).
+**SECONDARY ACTIONS:** Record another.
+**STATES:**
+- Analyzing
+- Melodic, no unlock
+- Melodic with an unlock
+- Noise-like
+- Second fart cut off ("We kept the first fart")
+**NAVIGATION TYPE:** Full-screen cover, step 3.
+
+---
+
+**SCREEN NAME:** Create — Songs
+**PURPOSE:** Pick a Song to make, and see what's close to unlocking.
+**HOW USER GETS HERE:** Tab 2, with the Songs segment selected.
+**WHAT'S ON THE SCREEN:**
+- Segmented control (Songs | AI)
+- Search field
+- Sort menu (Closest to unlocking | A–Z)
+- **Unlocked** section: rows with the title and 1–3 stars, plus "3 of 5 notes matched"
+- **Locked** section: rows with the title, Pitch Coverage ("3 of 5 notes reachable") and the nearest missing note
+- (The unlock rule is open question 4 in `app-map.md`, decided in #43.)
+**PRIMARY ACTION:** Open an Unlocked Song.
+**SECONDARY ACTIONS:** Open a locked Song to see what's missing; search; sort.
+**STATES:**
+- No Melodic Recordings yet ("Record a few farts to start unlocking Songs")
+- Some unlocked
+- None unlocked
+- No search results
+**NAVIGATION TYPE:** Tab + in-place segment.
+
+---
+
+**SCREEN NAME:** Locked Song
+**PURPOSE:** Show exactly which notes would unlock this Song.
+**HOW USER GETS HERE:** Tap a locked Song.
+**WHAT'S ON THE SCREEN:**
+- Title
+- "3 of 5 pitches"
+- Pitch strip with the notes you have and the notes you need
+- "Needs a fart near D3 and F3"
+- Record button
+- (Open question) "Try anyway"
+**PRIMARY ACTION:** Record.
+**SECONDARY ACTIONS:** Close.
+**STATES:** Default.
+**NAVIGATION TYPE:** Sheet (medium detent).
+
+---
+
+**SCREEN NAME:** Song Creator
+**PURPOSE:** Hear a Song played by your Recordings, and keep it.
+**HOW USER GETS HERE:** Tap an Unlocked Song.
+**WHAT'S ON THE SCREEN:**
+- Song title
+- Source and license line ("Public domain score · PDMX")
+- Play/Stop button
+- A read-only note view (dots over time, colored by Recording) with a playhead
+- The Recordings used, as small chips
+- Save button
+**PRIMARY ACTION:** Save.
+**SECONDARY ACTIONS:** Play/Stop; tap a Recording chip to hear that fart alone.
+**STATES:**
+- Making ("Making your melody…", about 1–2 s)
+- Ready (auto-plays once)
+- Playing
+- Saved (a toast: "Saved to Melodies")
+**NAVIGATION TYPE:** Push.
+**NOTES:** Not an editor. Nothing on this screen changes the Arrangement.
+
+---
+
+**SCREEN NAME:** Create — AI
+**PURPOSE:** Get a brand-new melody made only from your farts.
+**HOW USER GETS HERE:** Tab 2, with the AI segment selected.
+**WHAT'S ON THE SCREEN:**
+- Segmented control
+- Mood chips (Happy, Silly, Spooky, Epic)
+- Length (Short | Long)
+- Compose button
+- After composing:
+  - Play/Stop
+  - the note view
+  - Try again and Save buttons
+**PRIMARY ACTION:** Compose, then Save.
+**SECONDARY ACTIONS:** Try again.
+**STATES:**
+- Needs more ("AI needs at least 3 Melodic Recordings. You have 2.")
+- Ready
+- Composing
+- Playing
+- Saved
+**NAVIGATION TYPE:** Tab + in-place segment.
+**NOTES:** The AI approach is decided in #21. This screen only fixes the interaction.
+
+---
+
+**SCREEN NAME:** Melodies
+**PURPOSE:** Everything you've made.
+**HOW USER GETS HERE:** Tab 3, or after Save.
+**WHAT'S ON THE SCREEN:**
+- Rows with a play button, title, origin ("Twinkle, Twinkle" or "AI · Happy"), date and length
+**PRIMARY ACTION:** Play.
+**SECONDARY ACTIONS:** Long-press for Rename or Delete (with confirmation).
+**STATES:** Empty ("Nothing yet. Make one in Create."), Populated, Playing.
+**NAVIGATION TYPE:** Tab.
+
+---
+
+**SCREEN NAME:** Rename
+**PURPOSE:** Give a Created Melody a name.
+**HOW USER GETS HERE:** Long-press a melody, then Rename.
+**WHAT'S ON THE SCREEN:** A text field, Cancel and Save.
+**NAVIGATION TYPE:** Alert with a text field.
+**PLATFORM NOTE:** Apple default.
