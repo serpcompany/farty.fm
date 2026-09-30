@@ -51,8 +51,12 @@ class ComposeUITests: PedosUITestCase {
         XCTAssertEqual(app.buttons["Frère Jacques"].value as? String, "Locked. 6 of 7 notes covered. Needs D♯3")
         attachScreenshot("Compose, Songs")
 
+        // Compose has a large title like the other tabs; search appears when the list is pulled down.
+        let title = app.navigationBars["Compose"].staticTexts["Compose"]
+        XCTAssertGreaterThan(title.frame.height, 30, "Compose's title isn't large")
         let search = app.searchFields["Search Songs"]
-        XCTAssertTrue(search.exists, "No search field")
+        if !search.isHittable { app.collectionViews.firstMatch.swipeDown() }
+        XCTAssertTrue(search.waitForExistence(timeout: 5), "No search field")
         search.tap()
         search.typeText("jingle")
         XCTAssertTrue(app.buttons["Jingle Bells"].waitForExistence(timeout: 5))
@@ -100,7 +104,7 @@ class ComposeUITests: PedosUITestCase {
         )
         // Locked Songs can't be played: no Song Creator, no play button.
         XCTAssertFalse(app.buttons["song-creator-play"].exists)
-        XCTAssertFalse(app.staticTexts["Making your melody…"].exists)
+        XCTAssertFalse(app.staticTexts["Making your Toot…"].exists)
         attachScreenshot("Locked Song")
 
         app.buttons["locked-song-record"].tap()
@@ -109,66 +113,126 @@ class ComposeUITests: PedosUITestCase {
         XCTAssertFalse(app.staticTexts["locked-song-needs"].exists, "The sheet stayed open")
     }
 
-    /// An Unlocked Song opens Song Creator, which makes the melody, plays it once, and saves it.
-    func testUnlockedSongPlaysAndSavesToMelodies() {
-        // A 4 s simulated render keeps "Making your melody…" up long enough to check.
+    /// An Unlocked Song opens Song Creator, which makes the Toot, plays it once, and saves it.
+    func testUnlockedSongPlaysAndSavesToToots() {
+        // A 4 s simulated render keeps "Making your Toot…" up long enough to check.
         let app = launch(start: "all", makingSeconds: 4)
         app.tabBars.buttons["Compose"].tap()
-        let mary = app.buttons["Mary Had a Little Lamb"]
-        XCTAssertTrue(mary.waitForExistence(timeout: 5))
-        mary.tap()
-        XCTAssertTrue(app.navigationBars["Mary Had a Little Lamb"].waitForExistence(timeout: 5), "No Song Creator")
-        XCTAssertTrue(app.staticTexts["Making your melody…"].waitForExistence(timeout: 3), "No making state")
+        let ode = app.buttons["Ode to Joy"]
+        XCTAssertTrue(ode.waitForExistence(timeout: 5))
+        ode.tap()
+        XCTAssertTrue(app.navigationBars["Ode to Joy"].waitForExistence(timeout: 5), "No Song Creator")
+        XCTAssertTrue(app.staticTexts["Making your Toot…"].waitForExistence(timeout: 3), "No making state")
         attachScreenshot("Song Creator, making")
 
         // Ready: it plays once by itself.
         let play = app.buttons["song-creator-play"]
-        XCTAssertTrue(play.waitForExistence(timeout: 10), "The melody wasn't made")
+        XCTAssertTrue(play.waitForExistence(timeout: 10), "The Toot wasn't made")
         XCTAssertEqual(play.label, "Stop", "It didn't start playing")
         XCTAssertTrue(app.staticTexts["Playing"].exists)
         XCTAssertTrue(app.staticTexts["Public domain score · PDMX"].exists)
-        XCTAssertTrue(app.staticTexts["4 of your Recordings, one per note"].exists)
-        XCTAssertEqual(app.descendants(matching: .any)["note-view"].value as? String, "26 notes, played by 4 Recordings")
-        // Mary's four pitches are played by Recordings 3, 8, 21 and 23 (fixtures 013, 021, 090, 094).
-        let chips = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'chip '"))
-        XCTAssertEqual(Set(chips.allElementsBoundByIndex.map(\.label)), ["Recording 3", "Recording 8", "Recording 21", "Recording 23"])
+        XCTAssertTrue(app.staticTexts["5 of your Recordings, one per note"].exists)
+        XCTAssertEqual(notes(in: app).count, 30, "each note is its own element")
+        // With every fixture, the list shows the Recordings the stand-in render plays, lowest
+        // pitch first: fixtures 090, 084, 013, 086 and 094.
+        XCTAssertEqual(
+            app.staticTexts["simulated-toot"].label,
+            "Simulated Toot: the design prototype's render of this Song, with these Recordings."
+        )
+        XCTAssertEqual(recordingRows(in: app), ["Recording 21", "Recording 19", "Recording 3", "Recording 20", "Recording 23"])
         attachScreenshot("Song Creator, playing")
 
-        // A chip plays that fart alone.
-        let chip = app.buttons["chip Recording 8"]
-        chip.tap()
-        XCTAssertTrue((chip.value as? String)?.contains("playing") ?? false, "The chip didn't play its Recording")
+        // A row plays that fart alone. Recording 3 (fixture 013) is the longest, 1.1 s.
+        let row = app.buttons["Recording 3"]
+        row.tap()
+        XCTAssertTrue((row.value as? String)?.contains("playing") ?? false, "The row didn't play its Recording")
         XCTAssertEqual(play.label, "Play")
 
-        app.buttons["Save to Melodies"].tap()
-        let saved = app.buttons["Saved to Melodies"]
+        app.buttons["Save to Toots"].tap()
+        let saved = app.buttons["Saved to Toots"]
         XCTAssertTrue(saved.waitForExistence(timeout: 5), "Not saved")
         XCTAssertFalse(saved.isEnabled, "It can be saved twice")
         attachScreenshot("Song Creator, saved")
 
-        // The Created Melody is on the Melodies tab, and plays.
-        app.tabBars.buttons["Melodies"].tap()
-        let melody = app.buttons["Mary Had a Little Lamb"]
-        XCTAssertTrue(melody.waitForExistence(timeout: 5), "The Created Melody isn't on Melodies")
-        XCTAssertTrue((melody.value as? String)?.hasPrefix("Today · 0:12") ?? false, "\(String(describing: melody.value))")
-        melody.tap()
-        XCTAssertTrue((melody.value as? String)?.hasSuffix("playing") ?? false, "The Created Melody didn't play")
-        attachScreenshot("Melodies, playing")
+        // The Toot is on the Toots tab, and plays.
+        app.tabBars.buttons["Toots"].tap()
+        let toot = app.buttons["Ode to Joy"]
+        XCTAssertTrue(toot.waitForExistence(timeout: 5), "The Toot isn't on the Toots tab")
+        XCTAssertEqual(toot.value as? String, "Ode to Joy · Today · 0:18")
+        app.buttons["play Ode to Joy"].tap()
+        XCTAssertTrue((toot.value as? String)?.hasSuffix("playing") ?? false, "The Toot didn't play")
+        attachScreenshot("Toots, playing")
     }
 
-    func testCouldNotMakeMelodyThenTryAgain() {
-        let app = launch(start: "all", failures: ["couldNotMakeMelody"])
+    /// Tapping a note plays just that note as rendered, selects it, says what it is, and
+    /// highlights the Recording that plays it.
+    func testTappingANotePlaysItAndHighlightsItsRecording() {
+        let app = launch(start: "all")
+        openSongCreator("Mary Had a Little Lamb", in: app)
+        let play = app.buttons["song-creator-play"]
+        XCTAssertEqual(play.label, "Stop", "Mary isn't playing")
+
+        // Mary's last note lasts 1.4 s: fixture 090 (Recording 21, G3) moved to F3.
+        let note = app.descendants(matching: .any)["note 26"]
+        XCTAssertTrue(note.exists)
+        XCTAssertEqual(note.label, "F3 at 10.0 s, Recording 21")
+        note.tap()
+        XCTAssertTrue((note.value as? String)?.contains("playing") ?? false, "The note didn't play")
+        XCTAssertTrue((note.value as? String)?.contains("selected") ?? false, "The note isn't selected")
+        XCTAssertEqual(play.label, "Play", "The whole Toot kept playing")
+        XCTAssertEqual(app.staticTexts["note-caption"].label, "F3 · Recording 21 (G3), shifted −2.1 semitones · 1.4 s")
+        XCTAssertTrue((app.buttons["Recording 21"].value as? String)?.contains("highlighted") ?? false, "Its Recording isn't highlighted")
+        XCTAssertFalse((app.buttons["Recording 23"].value as? String)?.contains("highlighted") ?? true)
+        attachScreenshot("Song Creator, note selected")
+    }
+
+    /// Tapping a Recording plays it alone and highlights the notes it plays.
+    func testTappingARecordingHighlightsItsNotes() {
+        let app = launch(start: "all")
+        openSongCreator("Mary Had a Little Lamb", in: app)
+        // Recording 21 (fixture 090) is the first row, so the note view stays on screen.
+        app.buttons["Recording 21"].tap()
+        let highlighted = notes(in: app).filter { ($0.value as? String)?.contains("highlighted") ?? false }
+        XCTAssertFalse(highlighted.isEmpty, "No notes highlighted")
+        XCTAssertTrue(highlighted.allSatisfy { $0.label.hasSuffix("Recording 21") }, "Other Recordings' notes are highlighted")
+        XCTAssertEqual(highlighted.count, notes(in: app).filter { $0.label.hasSuffix("Recording 21") }.count, "Not all its notes are highlighted")
+        XCTAssertTrue((app.buttons["Recording 21"].value as? String)?.contains("highlighted") ?? false)
+        attachScreenshot("Song Creator, Recording highlighted")
+        XCTAssertFalse(app.staticTexts["note-caption"].exists, "A note is selected")
+    }
+
+    private func openSongCreator(_ title: String, in app: XCUIApplication) {
+        app.tabBars.buttons["Compose"].tap()
+        let song = app.buttons[title]
+        XCTAssertTrue(song.waitForExistence(timeout: 5))
+        song.tap()
+        XCTAssertTrue(app.buttons["song-creator-play"].waitForExistence(timeout: 10), "\(title) wasn't made")
+    }
+
+    private func notes(in app: XCUIApplication) -> [XCUIElement] {
+        app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'note '")).allElementsBoundByIndex
+    }
+
+    func testCouldNotMakeTootThenTryAgain() {
+        let app = launch(start: "all", failures: ["couldNotMakeToot"])
         app.tabBars.buttons["Compose"].tap()
         let mary = app.buttons["Mary Had a Little Lamb"]
         XCTAssertTrue(mary.waitForExistence(timeout: 5))
         mary.tap()
-        XCTAssertTrue(app.staticTexts["Couldn't make this melody"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.buttons["Save to Melodies"].exists)
+        XCTAssertTrue(app.staticTexts["Couldn't make this Toot"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Save to Toots"].exists)
         attachScreenshot("Song Creator, couldn't make")
 
         app.buttons["Try again"].tap()
         XCTAssertTrue(app.buttons["song-creator-play"].waitForExistence(timeout: 5), "Try again didn't make it")
-        XCTAssertTrue(app.buttons["Save to Melodies"].exists)
+        XCTAssertTrue(app.buttons["Save to Toots"].exists)
+    }
+
+    /// Song Creator's Recordings used, top to bottom.
+    private func recordingRows(in app: XCUIApplication) -> [String] {
+        app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'Recording '")).allElementsBoundByIndex
+            .sorted { $0.frame.minY < $1.frame.minY }
+            .map(\.identifier)
     }
 
     /// The Song titles of the rows on screen, top to bottom.

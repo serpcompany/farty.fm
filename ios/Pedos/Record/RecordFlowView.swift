@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// The full-screen cover after a take: Review, then Result, with their error states.
+/// The full-screen cover over the tabs from the start of a take: Recording, then Review and
+/// Result, with their error states.
 struct RecordFlowView: View {
     let model: any AppModel
     /// Done: close and show the Recordings tab.
@@ -43,7 +44,9 @@ struct RecordFlowView: View {
                 )
             }
         case nil:
-            EmptyView()
+            if model.capture != .idle {
+                RecordingView(model: model)
+            }
         }
     }
 }

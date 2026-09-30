@@ -21,31 +21,38 @@ struct SongListing: Hashable, Sendable {
     var isEmpty: Bool { unlocked.isEmpty && locked.isEmpty }
 
     /// - Parameters:
-    ///   - rows: every Song with its Pitch Coverage, in catalog order.
+    ///   - rows: Songs with their Pitch Coverage, already in the order to show (`sorted(_:by:)`).
     ///   - query: matches anywhere in the title, ignoring case and accents; empty matches all.
-    init(_ rows: [Row], matching query: String, order: SongOrder) {
+    init(sorted rows: [Row], matching query: String) {
         let query = query.trimmingCharacters(in: .whitespaces)
-        var rows = query.isEmpty ? rows : rows.filter { $0.song.title.localizedStandardContains(query) }
+        let rows = query.isEmpty ? rows : rows.filter { $0.song.title.localizedStandardContains(query) }
+        unlocked = rows.filter(\.coverage.isUnlocked)
+        locked = rows.filter { !$0.coverage.isUnlocked }
+    }
+
+    /// Sorts and filters `rows`, given in catalog order.
+    init(_ rows: [Row], matching query: String, order: SongOrder) {
+        self.init(sorted: Self.sorted(rows, by: order), matching: query)
+    }
+
+    /// `rows`, given in catalog order, sorted by `order`. Ties keep catalog order.
+    static func sorted(_ rows: [Row], by order: SongOrder) -> [Row] {
         switch order {
         case .closestToUnlocking:
-            // Sorting the catalog order stably keeps ties in catalog order.
-            rows = rows.enumerated().sorted { a, b in
+            rows.enumerated().sorted { a, b in
                 let (x, y) = (a.element.coverage, b.element.coverage)
                 if x.fraction != y.fraction { return x.fraction > y.fraction }
                 if x.total != y.total { return x.total < y.total }
                 return a.offset < b.offset
             }.map(\.element)
         case .alphabetical:
-            rows.sort { $0.song.title.localizedStandardCompare($1.song.title) == .orderedAscending }
+            rows.enumerated().sorted { a, b in
+                switch a.element.song.title.localizedStandardCompare(b.element.song.title) {
+                case .orderedAscending: true
+                case .orderedDescending: false
+                case .orderedSame: a.offset < b.offset
+                }
+            }.map(\.element)
         }
-        unlocked = rows.filter(\.coverage.isUnlocked)
-        locked = rows.filter { !$0.coverage.isUnlocked }
-    }
-}
-
-extension AppModel {
-    /// The Song Catalog as the Compose tab lists it.
-    func songListing(matching query: String, order: SongOrder) -> SongListing {
-        SongListing(songs.map { SongListing.Row(song: $0, coverage: coverage(of: $0)) }, matching: query, order: order)
     }
 }

@@ -237,4 +237,23 @@ extension SampleFixture {
     /// unlock Songs step by step.
     static let prototypeStory: [String] = ["069", "021", "090", "052", "094", "059", "019", "086", "017", "084", "013", "002"]
 }
+
+extension Song {
+    /// How the design prototype rendered each Song (`song-<id>.mp3`): its transposition,
+    /// and the Fixture Library Recording that plays each pitch, by pitch in the score's key.
+    static let prototypeRenders: [Song.ID: StandInRender] = [
+        "twinkle": StandInRender(transposition: -18, fixtureForPitch: [69: "021", 71: "090", 73: "084", 74: "013", 76: "094", 78: "086"]),
+        "mary": StandInRender(transposition: -19, fixtureForPitch: [72: "090", 74: "084", 76: "086", 79: "094"]),
+        "jingle": StandInRender(transposition: -8, fixtureForPitch: [60: "021", 62: "090", 64: "084", 65: "086", 67: "094"]),
+        "birthday": StandInRender(transposition: -14, fixtureForPitch: [62: "021", 64: "019", 66: "090", 67: "086", 69: "013", 71: "084", 72: "094", 74: "059"]),
+        "frere": StandInRender(transposition: -6, fixtureForPitch: [50: "019", 55: "021", 57: "013", 59: "090", 60: "086", 62: "084", 64: "094"]),
+        "saints": StandInRender(transposition: -9, fixtureForPitch: [60: "021", 62: "090", 64: "086", 65: "084", 67: "094"]),
+        "row": StandInRender(transposition: -16, fixtureForPitch: [67: "021", 69: "084", 71: "090", 72: "086", 74: "094", 79: "059"]),
+        "ode": StandInRender(transposition: -14, fixtureForPitch: [67: "090", 69: "084", 71: "013", 72: "086", 74: "094"]),
+        "merryxmas": StandInRender(transposition: -14, fixtureForPitch: [62: "019", 64: "021", 66: "084", 67: "090", 69: "086", 71: "094", 72: "059", 74: "013"]),
+        "amazing": StandInRender(transposition: -14, fixtureForPitch: [62: "021", 64: "084", 67: "090", 69: "013", 71: "086", 74: "094"]),
+        "furelise": StandInRender(transposition: -18, fixtureForPitch: [68: "019", 69: "021", 71: "090", 72: "084", 74: "013", 75: "086", 76: "094"]),
+        "auld": StandInRender(transposition: -10, fixtureForPitch: [60: "021", 62: "084", 65: "090", 67: "086", 69: "094", 72: "013", 74: "059"]),
+    ]
+}
 #endif

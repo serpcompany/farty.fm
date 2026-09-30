@@ -9,7 +9,9 @@ Catalog until #38.
 
 The prototype's notes are the melody lab's render of each catalog score, moved into the
 Recordings' range. They're moved back into the score's key here, and checked against the
-Song's distinct pitches, so the notes and the pitches can't disagree.
+Song's distinct pitches, so the notes and the pitches can't disagree. Debug builds also get
+which Fixture Library Recording the render used for each pitch (`r` in data.js), so the sample
+model can show the render's own Recordings while it plays that render.
 
 Run from anywhere:
     ios/scripts/generate-sample-data.py           # rewrite the Swift file
@@ -46,6 +48,24 @@ def score_notes(song):
     return notes
 
 
+def render_shift(song):
+    """How many semitones the render moved the Song's notes."""
+    return min(n["m"] for n in song["notes"]) - song["pitches"][0]
+
+
+def render_fixtures(song):
+    """The Fixture Library Recording the render used for each of the Song's pitches (score key)."""
+    shift = render_shift(song)
+    fixtures = {}
+    for n in song["notes"]:
+        pitch = n["m"] - shift
+        if fixtures.setdefault(pitch, n["r"]) != n["r"]:
+            sys.exit(f"error: Song {song['id']} render plays pitch {pitch} with more than one Recording")
+    if len(set(fixtures.values())) != len(fixtures):
+        sys.exit(f"error: Song {song['id']} render plays two pitches with one Recording")
+    return fixtures
+
+
 def load():
     text = SOURCE.read_text(encoding="utf-8").strip()
     prefix = "window.PROTO = "
@@ -65,7 +85,10 @@ def render(data):
     for fixture_id in story:
         if fixture_id not in ids:
             sys.exit(f"error: story names unknown Recording {fixture_id}")
+    melodic = {r["id"] for r in recordings if r["melodic"]}
     for s in songs:
+        if not set(render_fixtures(s).values()) <= melodic:
+            sys.exit(f"error: Song {s['id']} render uses a Recording that isn't Melodic")
         if s["pitches"] != sorted(set(s["pitches"])):
             sys.exit(f"error: Song {s['id']} pitches aren't distinct and sorted")
         if not (AUDIO / f"song-{s['id']}.mp3").is_file():
@@ -120,6 +143,21 @@ def render(data):
         "    /// The order simulated recordings arrive in: a noise-like one first, then pitches that",
         "    /// unlock Songs step by step.",
         f"    static let prototypeStory: [String] = [{', '.join(swift_string(i) for i in story)}]",
+        "}",
+        "",
+        "extension Song {",
+        "    /// How the design prototype rendered each Song (`song-<id>.mp3`): its transposition,",
+        "    /// and the Fixture Library Recording that plays each pitch, by pitch in the score's key.",
+        "    static let prototypeRenders: [Song.ID: StandInRender] = [",
+    ]
+    for s in songs:
+        fixtures = render_fixtures(s)
+        pairs = ", ".join(f"{pitch}: {swift_string(fixtures[pitch])}" for pitch in sorted(fixtures))
+        lines.append(
+            f"        {swift_string(s['id'])}: StandInRender(transposition: {render_shift(s)}, fixtureForPitch: [{pairs}]),"
+        )
+    lines += [
+        "    ]",
         "}",
         "#endif",
         "",

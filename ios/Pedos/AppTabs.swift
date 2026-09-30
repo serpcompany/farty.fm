@@ -1,10 +1,15 @@
 import SwiftUI
 
 /// The four tabs from `docs/design/app-map.md`: Record opens first, followed by Recordings,
-/// Compose and Melodies. While recording, the other tabs are disabled.
+/// Compose and Toots. Recording, Review and Result cover the tabs, full screen.
+///
+/// The app comes back to the foreground on the Record tab, unless Recording, Review or Result is
+/// open. Playback stops in the background.
 struct AppTabs: View {
     let model: any AppModel
     @State private var selection = AppTab.record
+    @State private var wasInBackground = false
+    @Environment(\.scenePhase) private var scenePhase
     /// The Songs pushed on the Compose tab.
     @State private var composePath: [Song.ID] = []
 
@@ -17,25 +22,34 @@ struct AppTabs: View {
             Tab("Recordings", systemImage: "waveform", value: .recordings) {
                 RecordingsTab(model: model)
             }
-            .disabled(model.isRecording)
 
             Tab("Compose", systemImage: "music.note", value: .compose) {
                 ComposeTab(model: model, path: $composePath, onRecord: { selection = .record })
             }
-            .disabled(model.isRecording)
 
-            Tab("Melodies", systemImage: "music.note.list", value: .melodies) {
-                MelodiesTab(model: model)
+            Tab("Toots", systemImage: "music.note.list", value: .toots) {
+                TootsTab(model: model)
             }
-            .disabled(model.isRecording)
         }
         .onChange(of: selection) {
             model.stopPlayback()
         }
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .background:
+                wasInBackground = true
+                model.stopPlayback()
+            case .active where wasInBackground:
+                wasInBackground = false
+                if !model.showsRecordFlow { selection = .record }
+            default:
+                break
+            }
+        }
         .sheet(isPresented: Binding(get: { model.isShowingWelcome }, set: { if !$0 { model.skipWelcome() } })) {
             WelcomeSheet(model: model)
         }
-        .fullScreenCover(isPresented: Binding(get: { model.flow != nil }, set: { if !$0 { model.finishFlow() } })) {
+        .fullScreenCover(isPresented: Binding(get: { model.showsRecordFlow }, set: { if !$0 { model.finishFlow() } })) {
             RecordFlowView(
                 model: model,
                 onDone: { selection = .recordings },
@@ -53,12 +67,12 @@ enum AppTab: Hashable {
     case record
     case recordings
     case compose
-    case melodies
+    case toots
 }
 
 #if DEBUG
 #Preview("Tabs") {
-    AppTabs(model: SampleAppModel.preview(start: .all, melodies: ["mary"]))
+    AppTabs(model: SampleAppModel.preview(start: .all, toots: ["mary"]))
 }
 
 #Preview("Tabs, first launch") {

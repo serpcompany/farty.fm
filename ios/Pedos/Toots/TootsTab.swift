@@ -1,18 +1,20 @@
 import SwiftUI
 
-/// Every Created Melody, newest first. Tap a row to play it; long-press to rename or delete it.
-struct MelodiesTab: View {
+/// Every Toot, newest first. Tap a row's play button to play it, or the row to open it; long-press
+/// to rename or delete it.
+struct TootsTab: View {
     let model: any AppModel
 
-    @State private var renaming: CreatedMelody?
+    @State private var renaming: Toot?
     @State private var newTitle = ""
-    @State private var pendingDelete: CreatedMelody?
-    @State private var missingAudio: CreatedMelody?
+    @State private var pendingDelete: Toot?
+    @State private var missingAudio: Toot?
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         NavigationStack {
             Group {
-                if model.melodies.isEmpty {
+                if model.toots.isEmpty {
                     ContentUnavailableView(
                         "Nothing yet",
                         systemImage: "music.note.list",
@@ -22,58 +24,71 @@ struct MelodiesTab: View {
                     list
                 }
             }
-            .navigationTitle("Melodies")
+            .navigationTitle("Toots")
             .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(for: Toot.ID.self) { id in
+                if let toot = model.toot(id) {
+                    TootDetailView(model: model, opened: toot)
+                }
+            }
             // Each alert sits on its own view: two on one view get in each other's way.
-            .alert("This melody's audio is missing", isPresented: isPresented($missingAudio), presenting: missingAudio) { melody in
+            .alert("This Toot's audio is missing", isPresented: isPresented($missingAudio), presenting: missingAudio) { toot in
                 Button("Cancel", role: .cancel) {}
                 Button("Delete", role: .destructive) {
-                    withAnimation { model.deleteMelody(melody.id) }
+                    withAnimation { model.deleteToot(toot.id) }
                 }
             } message: { _ in
                 Text("It can't be played. You can delete it and make it again in Compose.")
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // The app comes back on the Record tab, so nothing is left open here.
+            if phase == .background {
+                renaming = nil
+                pendingDelete = nil
+                missingAudio = nil
             }
         }
     }
 
     private var list: some View {
         List {
-            ForEach(model.melodies.reversed()) { melody in
-                MelodyRow(melody: melody, isPlaying: model.nowPlaying == .melody(melody.id)) {
-                    if melody.isAudioMissing {
-                        missingAudio = melody
+            ForEach(model.toots.reversed()) { toot in
+                TootRow(toot: toot, songTitle: model.song(toot.songID)?.title ?? "", isPlaying: model.nowPlaying == .toot(toot.id)) {
+                    if toot.isAudioMissing {
+                        missingAudio = toot
                     } else {
-                        model.togglePlayback(of: .melody(melody.id))
+                        model.togglePlayback(of: .toot(toot.id))
                     }
                 }
                 .swipeActions {
-                    Button { pendingDelete = melody } label: { Label("Delete", systemImage: "trash") }
+                    Button { pendingDelete = toot } label: { Label("Delete", systemImage: "trash") }
                         .tint(.red)
                 }
                 .contextMenu {
                     Button {
-                        newTitle = melody.title
-                        renaming = melody
+                        newTitle = toot.title
+                        renaming = toot
                     } label: {
                         Label("Rename", systemImage: "pencil")
                     }
-                    Button(role: .destructive) { pendingDelete = melody } label: { Label("Delete", systemImage: "trash") }
+                    Button(role: .destructive) { pendingDelete = toot } label: { Label("Delete", systemImage: "trash") }
                 }
             }
         }
-        .alert("Rename", isPresented: isPresented($renaming), presenting: renaming) { melody in
+        .alert("Rename", isPresented: isPresented($renaming), presenting: renaming) { toot in
             TextField("Name", text: $newTitle)
             Button("Cancel", role: .cancel) {}
-            Button("Save") { model.renameMelody(melody.id, to: newTitle) }
+            Button("Save") { model.renameToot(toot.id, to: newTitle) }
         }
         .confirmationDialog(
             pendingDelete.map { "Delete \($0.title)?" } ?? "",
             isPresented: isPresented($pendingDelete),
             titleVisibility: .visible,
             presenting: pendingDelete
-        ) { melody in
-            Button("Delete Melody", role: .destructive) {
-                withAnimation { model.deleteMelody(melody.id) }
+        ) { toot in
+            Button("Delete Toot", role: .destructive) {
+                withAnimation { model.deleteToot(toot.id) }
             }
         } message: { _ in
             Text("This can't be undone.")
@@ -86,43 +101,48 @@ struct MelodiesTab: View {
     }
 }
 
-/// A Created Melody's row: play state, title, and its origin, date and length.
-private struct MelodyRow: View {
-    let melody: CreatedMelody
+/// A Toot's row: a play button, then the title and the Song it came from, its date and length,
+/// which open the Toot's screen.
+private struct TootRow: View {
+    let toot: Toot
+    let songTitle: String
     let isPlaying: Bool
     let play: () -> Void
 
     var body: some View {
-        Button(action: play) {
-            HStack(spacing: 12) {
-                Image(systemName: melody.isAudioMissing ? "exclamationmark.triangle" : isPlaying ? "stop.circle.fill" : "play.circle")
+        HStack(spacing: 12) {
+            Button(action: play) {
+                Image(systemName: toot.isAudioMissing ? "exclamationmark.triangle" : isPlaying ? "stop.circle.fill" : "play.circle")
                     .font(.title2)
-                    .foregroundStyle(melody.isAudioMissing ? AnyShapeStyle(.secondary) : AnyShapeStyle(.tint))
+                    .foregroundStyle(toot.isAudioMissing ? AnyShapeStyle(.secondary) : AnyShapeStyle(.tint))
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            // Only the icon plays; the rest of the row opens the Toot.
+            .buttonStyle(.borderless)
+            .accessibilityLabel(toot.isAudioMissing ? "Audio missing" : isPlaying ? "Stop" : "Play")
+            .accessibilityIdentifier("play \(toot.title)")
+            NavigationLink(value: toot.id) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(melody.title)
+                    Text(toot.title)
                     Text(details)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
-                Spacer(minLength: 8)
             }
-            .contentShape(Rectangle())
+            .accessibilityLabel(toot.title)
+            .accessibilityValue(isPlaying ? "\(details), playing" : details)
+            .accessibilityIdentifier(toot.title)
         }
-        .buttonStyle(.plain)
         .listRowBackground(isPlaying ? Color(.systemFill) : nil)
-        .accessibilityLabel(melody.title)
-        .accessibilityValue(isPlaying ? "\(details), playing" : details)
-        .accessibilityHint(melody.isAudioMissing ? "Its audio is missing" : isPlaying ? "Stops playing" : "Plays the melody")
-        .accessibilityIdentifier(melody.title)
     }
 
-    /// "Today · 0:12", with the Song's title first once the melody is renamed, or "Audio missing".
+    /// "Mary Had a Little Lamb · Today · 0:12", or "… · Audio missing".
     private var details: String {
-        let origin = melody.title == melody.origin ? [] : [melody.origin]
-        let rest = melody.isAudioMissing
+        let rest = toot.isAudioMissing
             ? ["Audio missing"]
-            : [Self.dateFormatter.string(from: melody.createdAt), formattedMelodyLength(melody.seconds)]
-        return (origin + rest).joined(separator: " · ")
+            : [Self.dateFormatter.string(from: toot.createdAt), formattedTootLength(toot.seconds)]
+        return ([songTitle] + rest).joined(separator: " · ")
     }
 
     /// "Today", "Yesterday", or a date.
@@ -136,15 +156,15 @@ private struct MelodyRow: View {
 }
 
 #if DEBUG
-#Preview("Melodies") {
-    MelodiesTab(model: SampleAppModel.preview(start: .all, melodies: ["twinkle", "mary"]))
+#Preview("Toots") {
+    TootsTab(model: SampleAppModel.preview(start: .all, toots: ["twinkle", "mary"]))
 }
 
-#Preview("Melodies, empty") {
-    MelodiesTab(model: SampleAppModel.preview())
+#Preview("Toots, empty") {
+    TootsTab(model: SampleAppModel.preview())
 }
 
-#Preview("Melodies, audio missing") {
-    MelodiesTab(model: SampleAppModel.preview(start: .all, melodies: ["mary", "ode"], failures: .melodyAudioMissing))
+#Preview("Toots, audio missing") {
+    TootsTab(model: SampleAppModel.preview(start: .all, toots: ["mary", "ode"], failures: .tootAudioMissing))
 }
 #endif

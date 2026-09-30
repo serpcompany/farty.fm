@@ -29,14 +29,14 @@ class PedosUITestCase: XCTestCase {
     /// Launches Pedos.
     /// - Parameters:
     ///   - start: `new`, `few`, `all`, or how many story takes are already saved.
-    ///   - melodies: Songs already saved as Created Melodies, oldest first.
+    ///   - toots: Songs already saved as Toots, oldest first.
     ///   - microphone: a simulated permission (`granted`, `denied`, `undetermined`), or nil for
     ///     the real one.
     ///   - failures: failures to simulate once each.
     @discardableResult
     func launch(
         start: String = "new",
-        melodies: [String] = [],
+        toots: [String] = [],
         microphone: String? = "granted",
         failures: [String] = [],
         welcomeSeen: Bool = true,
@@ -46,7 +46,7 @@ class PedosUITestCase: XCTestCase {
     ) -> XCUIApplication {
         app.launchArguments = [
             "-PedosSampleStart", start,
-            "-PedosSampleMelodies", melodies.joined(separator: ","),
+            "-PedosSampleToots", toots.joined(separator: ","),
             "-welcomeSeen", welcomeSeen ? "YES" : "NO",
             "-PedosAnalysisSeconds", String(analysisSeconds),
             "-PedosMakingSeconds", String(makingSeconds),
@@ -67,7 +67,7 @@ class PedosUITestCase: XCTestCase {
         XCTAssertTrue(app.buttons["Stop"].waitForExistence(timeout: 5), "Recording didn't start")
         waitForTimerToCount(in: app)
         if let screenshot { attachScreenshot(screenshot) }
-        app.buttons["record-button"].tap()
+        app.buttons["stop-button"].tap()
     }
 
     /// Waits until the recording timer shows at least a second.

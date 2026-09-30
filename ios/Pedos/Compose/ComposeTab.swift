@@ -12,13 +12,14 @@ struct ComposeTab: View {
     @State private var query = ""
     @State private var order = SongOrder.closestToUnlocking
     @State private var lockedSong: Song?
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         NavigationStack(path: $path) {
             list
                 .navigationTitle("Compose")
                 .navigationBarTitleDisplayMode(.large)
-                .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search Songs")
+                .searchable(text: $query, prompt: "Search Songs")
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu {
@@ -43,6 +44,10 @@ struct ComposeTab: View {
                 lockedSong = nil
                 onRecord()
             }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // The app comes back on the Record tab, so the sheet doesn't stay open.
+            if phase == .background { lockedSong = nil }
         }
     }
 

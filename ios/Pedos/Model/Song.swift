@@ -23,4 +23,10 @@ struct Song: Identifiable, Hashable, Sendable {
 
     /// Where the last note ends, in beats.
     var beats: Double { notes.map { $0.start + $0.length }.max() ?? 0 }
+
+    /// When a note starts and how long it lasts in the Song's audio, in seconds, at its tempo.
+    func seconds(of note: Note) -> (start: Double, length: Double) {
+        let beat = 60 / Double(bpm)
+        return (note.start * beat, note.length * beat)
+    }
 }

@@ -14,7 +14,7 @@ extension SampleAppModel {
 
     static func preview(
         start: PreviewStart = .new,
-        melodies: [Song.ID] = [],
+        toots: [Song.ID] = [],
         failures: Failures = [],
         showsWelcome: Bool = false,
         analysisDelay: Duration = .zero,
@@ -32,8 +32,9 @@ extension SampleAppModel {
             story: SampleFixture.prototypeStory,
             songs: Song.prototypeCatalog,
             initialFixtureIDs: initialFixtureIDs,
-            initialMelodySongIDs: melodies,
+            initialTootSongIDs: toots,
             songAudio: \.prototypeAudioURL,
+            renders: Song.prototypeRenders,
             microphone: SimulatedMicrophone(permission: .granted),
             defaults: defaults,
             failures: failures,

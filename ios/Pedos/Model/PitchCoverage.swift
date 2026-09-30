@@ -98,6 +98,8 @@ enum PitchCoverage {
 struct CoverageResult: Hashable, Sendable {
     let covered: Int
     let total: Int
+    /// The transposition, in semitones, that covers the most pitches.
+    let transposition: Int
     /// The transposed pitches still needed, as MIDI note numbers.
     let missing: [Int]
     /// The Melodic Recordings that cover a pitch.
@@ -126,9 +128,11 @@ struct CoverageResult: Hashable, Sendable {
         return (names.prefix(limit) + ["\(names.count - limit) more"]).formatted(.list(type: .and))
     }
 
-    /// Auto-map's Arrangement for an Unlocked Song; nil while it's locked.
-    var arrangement: Arrangement? {
-        isUnlocked ? Arrangement(recordingForPitch: recordingForPitch) : nil
+    /// Pitch Coverage's matching as an Arrangement: each pitch of an Unlocked Song played by the
+    /// Recording that covers it. Nil while the Song is locked. It isn't Auto-map, which picks the
+    /// closest Recordings (#17).
+    var matchedArrangement: Arrangement? {
+        isUnlocked ? Arrangement(recordingForPitch: recordingForPitch, transposition: transposition) : nil
     }
 }
 
@@ -144,6 +148,7 @@ extension CoverageResult {
         self.init(
             covered: match.covered,
             total: match.total,
+            transposition: match.transposition,
             missing: match.missing,
             used: match.used.map { melodic[$0].id },
             recordingForPitch: recordingForPitch,
@@ -152,22 +157,49 @@ extension CoverageResult {
     }
 }
 
-/// Remembers each Song's Pitch Coverage until the Melodic Recordings change, so a Song Catalog of
-/// hundreds of Songs isn't matched again for every row on every redraw.
+/// Every Song's Pitch Coverage, matched once per change to the Melodic Recordings. Searching,
+/// sorting and redrawing read the stored results and never match a Song again.
 struct CoverageCache {
-    private var melodic: [Recording] = []
-    private var results: [Song.ID: CoverageResult] = [:]
+    let songs: [Song]
+    /// The Melodic Recordings the stored results were matched with; nil before the first match.
+    private var melodic: [Recording]?
+    /// Every Song with its coverage, in catalog order.
+    private var rows: [SongListing.Row] = []
+    private var rowOfSong: [Song.ID: Int] = [:]
+    /// `rows` sorted each way, once asked for.
+    private var sorted: [SongOrder: [SongListing.Row]] = [:]
+    /// How many times the whole Song Catalog was matched.
+    private(set) var catalogMatches = 0
 
+    init(songs: [Song]) {
+        self.songs = songs
+    }
+
+    /// A Song's Pitch Coverage by the Melodic ones among `recordings`.
     mutating func coverage(of song: Song, recordings: [Recording]) -> CoverageResult {
+        update(recordings)
+        if let row = rowOfSong[song.id] { return rows[row].coverage }
+        return CoverageResult(song: song, recordings: melodic ?? [])
+    }
+
+    /// The Songs matching `query`, in `order`, split into Unlocked and locked Songs.
+    mutating func listing(recordings: [Recording], matching query: String, order: SongOrder) -> SongListing {
+        update(recordings)
+        let ordered = sorted[order] ?? SongListing.sorted(rows, by: order)
+        sorted[order] = ordered
+        return SongListing(sorted: ordered, matching: query)
+    }
+
+    /// Matches every Song again if the Melodic Recordings changed. Checking costs one comparison
+    /// per Melodic Recording.
+    private mutating func update(_ recordings: [Recording]) {
         let melodic = recordings.filter(\.isMelodic)
-        if melodic != self.melodic {
-            self.melodic = melodic
-            results.removeAll()
-        }
-        if let result = results[song.id] { return result }
-        let result = CoverageResult(song: song, recordings: melodic)
-        results[song.id] = result
-        return result
+        guard melodic != self.melodic else { return }
+        self.melodic = melodic
+        rows = songs.map { SongListing.Row(song: $0, coverage: CoverageResult(song: $0, recordings: melodic)) }
+        catalogMatches += 1
+        rowOfSong = Dictionary(rows.enumerated().map { ($1.id, $0) }, uniquingKeysWith: { first, _ in first })
+        sorted = [:]
     }
 }
 

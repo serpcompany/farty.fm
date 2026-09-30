@@ -5,13 +5,13 @@ import Foundation
 /// by hand (Xcode: Product › Scheme › Edit Scheme › Arguments). For example:
 ///
 ///     -PedosSampleStart all          new (default) | few | all | a count of story takes
-///     -PedosSampleMelodies mary,ode  Songs already saved as Created Melodies, oldest first
+///     -PedosSampleToots mary,ode     Songs already saved as Toots, oldest first
 ///     -PedosSampleFailure saveFailed couldNotStart, interrupted, nothingHeard, saveFailed,
-///                                    analysisFailed, couldNotMakeMelody, melodyAudioMissing
+///                                    analysisFailed, couldNotMakeToot, tootAudioMissing
 ///                                    (comma-separated, each happens once)
 ///     -PedosMicrophone denied        granted | denied | undetermined: skip the system prompt
 ///     -PedosAnalysisSeconds 2        how long the simulated analysis takes
-///     -PedosMakingSeconds 3          how long making a melody takes
+///     -PedosMakingSeconds 3          how long making a Toot takes
 ///     -welcomeSeen YES               skip (or with NO, show) the Welcome sheet
 @MainActor
 struct SampleLaunchOptions {
@@ -23,9 +23,10 @@ struct SampleLaunchOptions {
             story: SampleFixture.prototypeStory,
             songs: Song.prototypeCatalog,
             initialFixtureIDs: initialFixtureIDs,
-            initialMelodySongIDs: (defaults.string(forKey: "PedosSampleMelodies") ?? "")
+            initialTootSongIDs: (defaults.string(forKey: "PedosSampleToots") ?? "")
                 .split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) },
             songAudio: \.prototypeAudioURL,
+            renders: Song.prototypeRenders,
             microphone: microphone,
             defaults: defaults,
             failures: failures,
@@ -67,8 +68,8 @@ struct SampleLaunchOptions {
             case "nothingHeard": failures.insert(.nothingHeard)
             case "saveFailed": failures.insert(.saveFailed)
             case "analysisFailed": failures.insert(.analysisFailed)
-            case "couldNotMakeMelody": failures.insert(.couldNotMakeMelody)
-            case "melodyAudioMissing": failures.insert(.melodyAudioMissing)
+            case "couldNotMakeToot": failures.insert(.couldNotMakeToot)
+            case "tootAudioMissing": failures.insert(.tootAudioMissing)
             default: break
             }
         }
