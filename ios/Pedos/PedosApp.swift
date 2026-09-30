@@ -4,7 +4,7 @@ import SwiftUI
 struct PedosApp: App {
     var body: some Scene {
         WindowGroup {
-            CaptureDock()
+            AppTabs()
         }
     }
 }

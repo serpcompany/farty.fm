@@ -1,42 +1,42 @@
 import SwiftUI
 
-/// The Capture Dock (ADR 0005): a stable tab bar that opens on Record, so capture is
-/// always one tap away, followed by the Recording shelf, composing and Created Melodies.
+/// The four tabs from `docs/design/app-map.md`: Record opens first, followed by
+/// Recordings, Compose and Melodies.
 ///
-/// Every area is a placeholder until its slice lands.
-struct CaptureDock: View {
+/// Each tab is a placeholder until its slice lands.
+struct AppTabs: View {
     var body: some View {
         TabView {
             Tab("Record", systemImage: "record.circle") {
-                RecordArea()
+                RecordTab()
             }
 
             Tab("Recordings", systemImage: "waveform") {
-                DockArea(title: "Recordings") {
+                TitledTab(title: "Recordings") {
                     ContentUnavailableView(
                         "No Recordings yet",
                         systemImage: "waveform",
-                        description: Text("Tap Record to capture one fart per Recording.")
+                        description: Text("Go to the Record tab and tap the red button.")
                     )
                 }
             }
 
             Tab("Compose", systemImage: "music.note") {
-                DockArea(title: "Compose") {
+                TitledTab(title: "Compose") {
                     ContentUnavailableView(
-                        "Nothing to compose with yet",
+                        "No Melodic Recordings yet",
                         systemImage: "music.note",
-                        description: Text("Song Creator and AI Song Creator play melodies using only your Recordings.")
+                        description: Text("Record a few farts with a clear note to start unlocking Songs.")
                     )
                 }
             }
 
             Tab("Melodies", systemImage: "music.note.list") {
-                DockArea(title: "Created Melodies") {
+                TitledTab(title: "Melodies") {
                     ContentUnavailableView(
-                        "No Created Melodies yet",
+                        "Nothing yet",
                         systemImage: "music.note.list",
-                        description: Text("Compose one from your Recordings.")
+                        description: Text("Make one in Compose.")
                     )
                 }
             }
@@ -44,8 +44,8 @@ struct CaptureDock: View {
     }
 }
 
-/// The Record area: one big record button and nothing else.
-private struct RecordArea: View {
+/// The Record tab: one big red record button and nothing else.
+private struct RecordTab: View {
     var body: some View {
         Button {
             // The record slice starts capturing a Recording here.
@@ -59,8 +59,8 @@ private struct RecordArea: View {
     }
 }
 
-/// A dock area with a large navigation title.
-private struct DockArea<Content: View>: View {
+/// A tab with a large navigation title.
+private struct TitledTab<Content: View>: View {
     let title: String
     @ViewBuilder let content: Content
 
@@ -74,5 +74,5 @@ private struct DockArea<Content: View>: View {
 }
 
 #Preview {
-    CaptureDock()
+    AppTabs()
 }
