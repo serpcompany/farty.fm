@@ -1,11 +1,13 @@
 name: iOS
 
-# Pull requests cover every push to a PR branch; pushes to main cover merges.
-# Branch pushes without a PR are not built, so each commit runs on macOS once.
+# Draft PRs are not built: a PR runs when it is opened or marked ready for review, and on
+# each push while it is ready. Pushes to main cover merges. Branch pushes without a PR are
+# not built, so each commit runs on macOS once.
 on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 concurrency:
@@ -18,6 +20,7 @@ permissions:
 jobs:
   ios-build-and-test:
     name: ios-build-and-test
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: macos-26
     timeout-minutes: 40
     env:

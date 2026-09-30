@@ -48,15 +48,18 @@ The MVP plan is the pinned **MVP roadmap** issue (#45). All roadmap issues are i
 Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/git-workflow.md). In short:
 
 1. Claim the issue, then branch from `main` as `issue-<n>-<short-slug>`. Name the branch correctly before opening a PR: renaming a PR's head branch closes the PR.
-2. Open a small PR into `main`:
+2. Open a small **draft** PR into `main`. CI doesn't run on drafts.
    - The title is a Conventional Commit written for the user, for example `feat: show each Recording's pitch on the Recordings tab`.
    - The body starts with `Closes #<n>` and says what changed and what's deliberately not included.
    - It reports evidence level by level: build, automated tests, UI tests, installed artifact, owner acceptance. A lower level never proves a higher one.
    - For audio, report measurements on the actual output (the `tools/melody-lab/evaluate.py` checks or their Swift equivalents), not a description. For UI, attach a screenshot or recording from the simulator or device.
-3. Review loop:
-   - A fresh review agent, which didn't write the change, posts findings as PR review comments anchored to lines, each marked **blocking** or **suggestion**.
+3. Keep test rounds few until launch. The full suite runs once, in CI, before merge.
+   - **Owner first.** As soon as the screens work, give the owner a build to tap through. Fold their changes in before screenshots and review.
+   - **Targeted local tests.** Authors run only the tests their change touches (`-only-testing`), in light mode. The full suite and the dark-mode runs are left to CI and to the final screenshots.
+   - **Screenshots once**, at the end, in light and dark.
+4. One review:
+   - A fresh review agent, which didn't write the change, reads the diff and posts findings as PR review comments anchored to lines, each marked **blocking** or **suggestion**. It trusts CI for the full suite and runs a single test only to confirm a suspected bug.
    - The author replies on every comment: fixed (with the commit) or declined (with the reason). Blocking findings are fixed or explicitly waived by the owner.
-   - After pushing fixes, a new fresh reviewer checks that earlier findings were resolved and reviews the new changes. Repeat until a review has no blocking findings. After three rounds of disagreement, the owner decides.
-   - Record the outcome in the PR, for example "Review: 2 rounds, clean". A clean review is not owner acceptance.
-4. CI must pass and the owner must accept the change.
-5. Update the branch from `main`, let CI run again, then squash-merge and delete the branch. Agents merge only when the owner has approved it. Merge one PR at a time; after each merge, update the next open PR from `main` and wait for its checks before merging it.
+   - Check blocking fixes by reading the fix's diff. Run another fresh review only when the fixes are large. After three rounds of disagreement, the owner decides.
+   - Record the outcome in the PR, for example "Review: 1 round, blocking fixes checked". A clean review is not owner acceptance.
+5. Update the branch from `main`, then mark the PR ready for review, which runs CI on the whole suite. When CI passes and the owner has accepted the change, squash-merge and delete the branch. Agents merge only when the owner has approved it. Merge one PR at a time; after each merge, update the next open PR from `main` and wait for its checks before merging it.
