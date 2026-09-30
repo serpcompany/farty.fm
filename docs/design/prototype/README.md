@@ -1,0 +1,7 @@
+# Pedos screen prototype
+
+A grayscale, clickable prototype of every MVP screen, for structure approval in #47. The real audio comes from the Fixture Library through the melody lab.
+
+- **Run it:** open `index.html` through any local web server, for example `python3 -m http.server` in this folder.
+- **Rebuild the data and audio:** run `tools/melody-lab/build.py`, then run `tools/melody-lab/.venv/bin/python docs/design/prototype/build_data.py` from the repo root.
+- **Evaluator panel:** switches the starting state (new user, 3 Recordings, all 23) and the unlock rule.
