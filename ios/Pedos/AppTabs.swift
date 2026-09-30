@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// The four tabs from `docs/design/app-map.md`: Record opens first, followed by Recordings,
-/// Compose and Toots. Recording, Review and Result cover the tabs, full screen.
+/// The five tabs from `docs/design/app-map.md`, left to right: Recordings, Compose, Record (in
+/// the center, for thumb reach), Toots and Profile. Record opens first. Recording, Review and
+/// Result cover the tabs, full screen.
 ///
 /// The app comes back to the foreground on the Record tab, unless Recording, Review or Result is
 /// open. Playback stops in the background.
@@ -15,10 +16,6 @@ struct AppTabs: View {
 
     var body: some View {
         TabView(selection: $selection) {
-            Tab("Record", systemImage: "record.circle", value: .record) {
-                RecordTab(model: model)
-            }
-
             Tab("Recordings", systemImage: "waveform", value: .recordings) {
                 RecordingsTab(model: model)
             }
@@ -27,8 +24,16 @@ struct AppTabs: View {
                 ComposeTab(model: model, path: $composePath, onRecord: { selection = .record })
             }
 
+            Tab("Record", systemImage: "record.circle", value: .record) {
+                RecordTab(model: model)
+            }
+
             Tab("Toots", systemImage: "music.note.list", value: .toots) {
                 TootsTab(model: model)
+            }
+
+            Tab("Profile", systemImage: "person.crop.circle", value: .profile) {
+                ProfileTab(model: model)
             }
         }
         .onChange(of: selection) {
@@ -63,11 +68,12 @@ struct AppTabs: View {
     }
 }
 
-enum AppTab: Hashable {
-    case record
+enum AppTab: Hashable, CaseIterable {
     case recordings
     case compose
+    case record
     case toots
+    case profile
 }
 
 extension AppModel {
