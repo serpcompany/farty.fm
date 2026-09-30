@@ -21,7 +21,7 @@
     },
   };
   const RULES = {
-    stars: { label: "Unlock + stars (proposed)", desc: "Unlocked when every note can be reached within 5 semitones of one of your Melodic Recordings. Stars count notes with a fart within 1 semitone: ★ playable, ★★ half matched, ★★★ all matched." },
+    stars: { label: "Unlock + progress (proposed)", desc: "Unlocked when every note can be reached within 5 semitones of one of your Melodic Recordings. The progress bar shows how many notes have a fart within 1 semitone (for example 3 of 5 notes matched)." },
     strict: { label: "All pitches within 3", desc: "The current #43 starting point. A Song unlocks only when every note has a Melodic Recording within 3 semitones." },
   };
 
@@ -68,7 +68,7 @@
     const miss = ps.map((p, i) => [p + best.t, best.d[i]]).filter(([, x]) => x > 3).map(([m]) => m);
     return { unlocked: best.have === total, have: best.have, total, stars: best.have === total ? 1 : 0, missing: miss };
   }
-  const starText = (n) => "★".repeat(n) + "☆".repeat(3 - n);
+  const bar = (f) => `<span class="pbar" role="img" aria-label="${f.have} of ${f.total}"><i style="width:${Math.round((100 * f.have) / f.total)}%"></i></span>`;
   const progressText = (f) => S.rule === "stars" ? (f.unlocked ? `${f.have} of ${f.total} notes matched` : `${f.have} of ${f.total} notes reachable`) : `${f.have} of ${f.total} pitches`;
   const needText = (f) => f.none ? "Record a fart with a clear note to start" : f.missing.length ? "Needs a fart near " + [...new Set(f.missing.map(noteName))].slice(0, 3).join(", ") : "";
 
@@ -136,7 +136,7 @@
     const un = items.filter((x) => x.f.unlocked), lo = items.filter((x) => !x.f.unlocked);
     const row = ({ s, f }) => `<button class="row" data-a="song" data-id="${s.id}">
         <div class="grow"><div class="title">${s.title}</div><div class="sub">${progressText(f)}${!f.unlocked ? " · " + needText(f).replace("Needs a fart", "needs") : ""}</div></div>
-        ${f.unlocked ? (S.rule === "stars" ? `<span class="stars">${starText(f.stars)}</span>` : `<span class="badge soft">Ready</span>`) : `<span class="badge soft">🔒</span>`}<span class="chev">›</span></button>`;
+        ${f.unlocked ? bar(f) : `<span class="badge soft">🔒</span>`}<span class="chev">›</span></button>`;
     const noMel = !melodic().length;
     return `<div class="search"><input id="search" placeholder="Search Songs" value="${S.search.replace(/"/g, "&quot;")}" aria-label="Search Songs"><select id="sort" aria-label="Sort"><option value="closest" ${S.sort === "closest" ? "selected" : ""}>Closest to unlock</option><option value="az" ${S.sort === "az" ? "selected" : ""}>A–Z</option></select></div>
       ${noMel ? `<div class="empty" style="margin-top:12px">Record a few farts with a clear note to start unlocking Songs.</div>` : ""}
@@ -160,7 +160,7 @@
   }
 
   function create() {
-    return `<div class="navbar"></div><div class="largetitle">Create</div>
+    return `<div class="navbar"></div><div class="largetitle">Compose</div>
       <div class="segment" role="group" aria-label="Creation area"><button data-a="seg" data-v="songs" aria-pressed="${S.seg === "songs"}">Songs</button><button data-a="seg" data-v="ai" aria-pressed="${S.seg === "ai"}">AI</button></div>
       ${S.seg === "songs" ? songsList() : aiPane()}`;
   }
@@ -168,7 +168,7 @@
   function songCreator() {
     const s = SONG[S.push], key = "song-" + s.id;
     const used = S.recs.map((r) => REC[r.id]).filter((r) => r.melodic).slice(0, s.pitches.length).map((r) => r.id);
-    return `<div class="navbar"><button class="back" data-a="back">‹ Create</button></div>
+    return `<div class="navbar"><button class="back" data-a="back">‹ Compose</button></div>
       <div class="largetitle" style="font-size:26px">${s.title}</div>
       <div class="meta">${s.source}</div>
       ${S.making ? `<div class="empty" style="margin-top:14px"><div class="spinner" style="margin:0 auto 10px"></div>Making your melody…</div>` : `
@@ -187,7 +187,7 @@
         <button class="more" data-a="melmenu" data-id="${m.id}" aria-label="More">⋯</button></div>`;
     }).join("");
     return `<div class="navbar"></div><div class="largetitle">Melodies</div>
-      ${S.melodies.length ? `<div class="list">${rows}</div>` : `<div class="empty">Nothing yet.<br>Make one in Create.</div>`}`;
+      ${S.melodies.length ? `<div class="list">${rows}</div>` : `<div class="empty">Nothing yet.<br>Make one in Compose.</div>`}`;
   }
 
   // ---------------------------------------------------------------- overlays
@@ -213,7 +213,7 @@
       const news = r.unlocked.length > 2
         ? `<div class="card"><b>🔓 You unlocked ${r.unlocked.length} Songs</b><div class="meta">${r.unlocked.map((id) => SONG[id].title).join(" · ")}</div></div>`
         : r.unlocked.map((id) => `<div class="card"><b>🔓 You unlocked ${SONG[id].title}</b></div>`).join("");
-      const ups = r.upgraded.slice(0, 2).map(([id, st]) => `<div class="card">${SONG[id].title} is now <span class="stars">${starText(st)}</span></div>`).join("");
+      const ups = r.upgraded.slice(0, 2).map(([id, f]) => `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span>${SONG[id].title}</span>${bar(f)}</div><div class="meta">${progressText(f)}</div></div>`).join("");
       const near = !r.unlocked.length && !r.upgraded.length && r.closest && melodic().length ? `<div class="card">${SONG[r.closest.id].title}: ${progressText(r.closest.f)}</div>` : "";
       return `<div class="cover"><div class="center" style="align-content:center;gap:12px">
         ${d.melodic ? `<div class="meta">Your note</div><div class="bignote">${noteName(d.midi)}</div>${strip(havePcs(), new Set([((Math.round(d.midi) % 12) + 12) % 12]))}` : `<div class="bignote" style="font-size:40px">~</div><div class="title">No steady note this time</div><p class="hint">It's saved, but it can't play melody notes.</p>`}
@@ -251,7 +251,7 @@
     const scroll = phone.querySelector(".content")?.scrollTop || 0;
     phone.innerHTML = `<div class="status"><span>9:41</span><span>▪▪▪ ◔</span></div>
       <div class="content">${body}</div>
-      <nav class="tabbar" aria-label="Tabs">${[["record", "Record"], ["recordings", "Recordings"], ["create", "Create"], ["melodies", "Melodies"]].map(([k, l]) => `<button data-a="tab" data-v="${k}" aria-current="${S.tab === k ? "page" : "false"}">${icon[k]}${l}</button>`).join("")}</nav>
+      <nav class="tabbar" aria-label="Tabs">${[["record", "Record"], ["recordings", "Recordings"], ["create", "Compose"], ["melodies", "Melodies"]].map(([k, l]) => `<button data-a="tab" data-v="${k}" aria-current="${S.tab === k ? "page" : "false"}">${icon[k]}${l}</button>`).join("")}</nav>
       <div class="homeind"></div>${overlay()}${alertBox()}${S.toast ? `<div class="toast">${S.toast}</div>` : ""}`;
     const c = phone.querySelector(".content"); if (c && !S.resetScroll) c.scrollTop = scroll; S.resetScroll = false;
     const search = document.getElementById("search");
@@ -339,7 +339,7 @@
         S.story++;
         const after = Object.fromEntries(D.songs.map((s) => [s.id, fit(s, S.recs)]));
         const unlocked = D.songs.filter((s) => !before[s.id].unlocked && after[s.id].unlocked).map((s) => s.id);
-        const upgraded = D.songs.filter((s) => before[s.id].unlocked && after[s.id].stars > before[s.id].stars).map((s) => [s.id, after[s.id].stars]);
+        const upgraded = D.songs.filter((s) => before[s.id].unlocked && after[s.id].have > before[s.id].have).map((s) => [s.id, after[s.id]]);
         const locked = D.songs.filter((s) => !after[s.id].unlocked).map((s) => ({ id: s.id, f: after[s.id] })).sort((a, b) => b.f.have / b.f.total - a.f.have / a.f.total);
         S.result = { id: S.draft, busy: true, unlocked, upgraded, closest: locked[0] };
         S.modal = "result"; render();

@@ -114,14 +114,14 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 ---
 
-**SCREEN NAME:** Create — Songs
+**SCREEN NAME:** Compose — Songs
 **PURPOSE:** Pick a Song to make, and see what's close to unlocking.
 **HOW USER GETS HERE:** Tab 2, with the Songs segment selected.
 **WHAT'S ON THE SCREEN:**
 - Segmented control (Songs | AI)
 - Search field
 - Sort menu (Closest to unlocking | A–Z)
-- **Unlocked** section: rows with the title and 1–3 stars, plus "3 of 5 notes matched"
+- **Unlocked** section: rows with the title, a progress bar and "3 of 5 notes matched"
 - **Locked** section: rows with the title, Pitch Coverage ("3 of 5 notes reachable") and the nearest missing note
 - (The unlock rule is open question 4 in `app-map.md`, decided in #43.)
 **PRIMARY ACTION:** Open an Unlocked Song.
@@ -174,7 +174,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 ---
 
-**SCREEN NAME:** Create — AI
+**SCREEN NAME:** Compose — AI
 **PURPOSE:** Get a brand-new melody made only from your farts.
 **HOW USER GETS HERE:** Tab 2, with the AI segment selected.
 **WHAT'S ON THE SCREEN:**
@@ -206,7 +206,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Rows with a play button, title, origin ("Twinkle, Twinkle" or "AI · Happy"), date and length
 **PRIMARY ACTION:** Play.
 **SECONDARY ACTIONS:** Long-press for Rename or Delete (with confirmation).
-**STATES:** Empty ("Nothing yet. Make one in Create."), Populated, Playing.
+**STATES:** Empty ("Nothing yet. Make one in Compose."), Populated, Playing.
 **NAVIGATION TYPE:** Tab.
 
 ---

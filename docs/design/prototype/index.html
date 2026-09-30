@@ -71,7 +71,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .badge.soft { border-color: var(--line); color: var(--muted); font-family: var(--sys); font-weight: 500; }
 .more { background: none; border: 0; color: var(--muted); font-size: 20px; padding: 0 4px; }
 .chev { color: var(--faint); }
-.stars { letter-spacing: 1px; font-size: 14px; }
+.pbar { width: 64px; height: 6px; border-radius: 3px; background: var(--fill); overflow: hidden; flex: none; }
+.pbar i { display: block; height: 100%; background: var(--ink); border-radius: 3px; }
 .empty { text-align: center; color: var(--muted); padding: 34px 18px; border: 1px dashed var(--line); border-radius: 12px; }
 
 .segment { display: grid; grid-template-columns: 1fr 1fr; background: var(--fill); border-radius: 9px; padding: 2px; margin-bottom: 12px; }
@@ -162,8 +163,8 @@ canvas.notes { width: 100%; height: 170px; border: 1px solid var(--line); border
     <div class="group">
       <h2>Questions for you</h2>
       <ol>
-        <li><b>Structure (updated):</b> four tabs: Record (one big red button, opens first), Recordings, Create, Melodies. Good?</li>
-        <li><b>Unlock rule:</b> try both above. Stars keeps you collecting; the strict rule unlocks nearly everything after 2–4 farts.</li>
+        <li><b>Structure (updated):</b> four tabs: Record (one big red button, opens first), Recordings, Compose, Melodies. Record flow and Recordings approved.</li>
+        <li><b>Unlock rule:</b> stars replaced by a progress bar ("3 of 5 notes matched"). A Song unlocks once your farts can play it; the bar keeps filling as you collect closer notes.</li>
         <li><b>Locked Songs:</b> the "what's missing" sheet has a small "Try anyway". Keep it, or no playing until unlocked?</li>
         <li><b>Choosing Recordings:</b> Auto-map picks the best farts itself, so there's no manual picking. OK?</li>
       </ol>
