@@ -19,7 +19,7 @@ jobs:
   ios-build-and-test:
     name: ios-build-and-test
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
       XCODEGEN_VERSION: 2.44.1
@@ -51,8 +51,12 @@ jobs:
         run: scripts/check-bundle-identifiers.sh
 
       - name: Build and run unit and UI tests
-        # Fails the step on a hang, so the result bundle below still uploads.
-        timeout-minutes: 20
+        # Fails the step on a hang, so the result bundle below still uploads. Getting the
+        # simulator for testing has taken 10 minutes on a slow runner.
+        timeout-minutes: 30
+        env:
+          # The dark-mode UI test runs are for screenshots, which are taken locally.
+          TEST_RUNNER_PEDOS_UI_TESTS_LIGHT_ONLY: "1"
         run: |
           set -o pipefail
           xcodebuild test \

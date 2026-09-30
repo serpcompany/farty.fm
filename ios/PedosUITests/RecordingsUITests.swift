@@ -19,27 +19,16 @@ class RecordingsUITests: PedosUITestCase {
         attachScreenshot("Recordings, all 23")
 
         // Recording 17 is the longest take (2 s): tapping it plays it and highlights the row.
+        // Playing lasts only 2 s, so the screenshot shows it but AudioPlayerTests checks it.
         let row = app.buttons["Recording 17"]
         XCTAssertTrue(row.value.map { "\($0)".contains("first fart used") } ?? false)
         row.tap()
         attachScreenshot("Recordings, playing")
-        XCTAssertTrue(row.waitForValue(containing: "playing", timeout: 2), "The row isn't playing")
-        XCTAssertTrue(row.waitForValue(notContaining: "playing", timeout: 5), "The row didn't stop playing at the end")
+        let finished = XCTNSPredicateExpectation(predicate: NSPredicate(format: "NOT (value CONTAINS 'playing')"), object: row)
+        XCTAssertEqual(XCTWaiter().wait(for: [finished], timeout: 5), .completed, "The row didn't stop playing at the end")
     }
 }
 
 final class RecordingsDarkUITests: RecordingsUITests {
     override class var appearance: XCUIDevice.Appearance { .dark }
-}
-
-private extension XCUIElement {
-    func waitForValue(containing text: String, timeout: TimeInterval) -> Bool {
-        let predicate = NSPredicate(format: "value CONTAINS %@", text)
-        return XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: self)], timeout: timeout) == .completed
-    }
-
-    func waitForValue(notContaining text: String, timeout: TimeInterval) -> Bool {
-        let predicate = NSPredicate(format: "NOT (value CONTAINS %@)", text)
-        return XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: self)], timeout: timeout) == .completed
-    }
 }

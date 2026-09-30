@@ -31,7 +31,8 @@ and attach a screenshot of every screen and state to the result bundle; export t
 `xcrun xcresulttool export attachments --path <result>.xcresult --output-path <dir>`.
 
 CI ([`.github/workflows/ios.yml`](../.github/workflows/ios.yml)) runs the same steps, plus
-`scripts/generate-sample-data.py --check`, on every pull request and every push to `main`.
+`scripts/generate-sample-data.py --check`, on every pull request and every push to `main`. It
+skips the dark-mode UI test runs, which exist for screenshots.
 
 ## Sample data
 

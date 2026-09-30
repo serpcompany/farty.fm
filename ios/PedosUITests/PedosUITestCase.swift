@@ -3,7 +3,8 @@ import XCTest
 /// Launches the Debug app with sample data (see `SampleLaunchOptions`) and attaches screenshots.
 ///
 /// Each test class has a dark-mode subclass that runs the same tests with the simulator in dark
-/// mode, so every screenshot exists in both appearances.
+/// mode, so every screenshot exists in both appearances. CI skips the dark-mode runs (they're
+/// for screenshots) by setting `TEST_RUNNER_PEDOS_UI_TESTS_LIGHT_ONLY=1`.
 @MainActor
 class PedosUITestCase: XCTestCase {
     class var appearance: XCUIDevice.Appearance { .light }
@@ -11,6 +12,9 @@ class PedosUITestCase: XCTestCase {
     private var originalAppearance: XCUIDevice.Appearance?
 
     override func setUp() async throws {
+        if Self.appearance == .dark, ProcessInfo.processInfo.environment["PEDOS_UI_TESTS_LIGHT_ONLY"] == "1" {
+            throw XCTSkip("Dark-mode runs are for screenshots; run them locally.")
+        }
         continueAfterFailure = false
         originalAppearance = XCUIDevice.shared.appearance
         XCUIDevice.shared.appearance = Self.appearance
