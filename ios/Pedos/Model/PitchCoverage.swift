@@ -1,0 +1,161 @@
+/// Pitch Coverage: how many of a Song's distinct pitches are covered, each by its own Melodic
+/// Recording close enough to it (see `CONTEXT.md` and `docs/design/app-map.md`).
+///
+/// The approved rule, ported from the #47 prototype's `fit()`: under the best transposition of
+/// the Song, every distinct pitch needs a *different* Melodic Recording within 3 semitones of it.
+/// A Song is unlocked when every distinct pitch is covered. #43 validates the thresholds.
+enum PitchCoverage {
+    /// The furthest a Recording may be shifted to reach a note, in semitones (ADR 0004).
+    static let maximumShift = 3.0
+    /// The transpositions tried, in semitones, in order. The first that covers the most pitches wins.
+    static let transpositions = -36...24
+
+    /// A Song's Pitch Coverage for a set of Recording Pitches.
+    struct Match: Hashable, Sendable {
+        /// How many of the Song's distinct pitches have their own Recording.
+        let covered: Int
+        /// How many distinct pitches the Song has.
+        let total: Int
+        /// The transposition in semitones that covers the most pitches.
+        let transposition: Int
+        /// The transposed pitches (MIDI note numbers) that no Recording covers, lowest first.
+        let missing: [Int]
+        /// Indices into the Recording Pitches that cover a pitch, in index order.
+        let used: [Int]
+    }
+
+    /// Matches Recording Pitches (MIDI note numbers of Melodic Recordings) to a Song's distinct
+    /// pitches: one Recording per pitch, within `maximumShift`, under the best transposition.
+    ///
+    /// Uses maximum bipartite matching (Kuhn's algorithm), trying closer Recordings first.
+    static func match(songPitches: [Int], recordingPitches: [Double]) -> Match {
+        guard !recordingPitches.isEmpty else {
+            return Match(covered: 0, total: songPitches.count, transposition: 0, missing: [], used: [])
+        }
+
+        var best: (covered: Int, transposition: Int, owner: [Int])?
+        for transposition in transpositions {
+            let candidates = songPitches.map { pitch in
+                recordingPitches.indices
+                    .map { (index: $0, distance: abs(Double(pitch + transposition) - recordingPitches[$0])) }
+                    .filter { $0.distance <= maximumShift }
+                    .sorted { ($0.distance, $0.index) < ($1.distance, $1.index) }
+                    .map(\.index)
+            }
+            // owner[recording] is the song pitch index the Recording covers, or -1.
+            var owner = Array(repeating: -1, count: recordingPitches.count)
+            var covered = 0
+            for note in songPitches.indices {
+                var seen = Array(repeating: false, count: recordingPitches.count)
+                if assign(note, candidates: candidates, owner: &owner, seen: &seen) {
+                    covered += 1
+                }
+            }
+            if best == nil || covered > best!.covered {
+                best = (covered, transposition, owner)
+            }
+            if covered == songPitches.count { break }
+        }
+
+        let (covered, transposition, owner) = best!
+        let coveredNotes = Set(owner.filter { $0 >= 0 })
+        return Match(
+            covered: covered,
+            total: songPitches.count,
+            transposition: transposition,
+            missing: songPitches.indices.filter { !coveredNotes.contains($0) }.map { songPitches[$0] + transposition },
+            used: owner.indices.filter { owner[$0] >= 0 }
+        )
+    }
+
+    /// Tries to give song pitch `note` a Recording, moving earlier assignments along if needed.
+    private static func assign(_ note: Int, candidates: [[Int]], owner: inout [Int], seen: inout [Bool]) -> Bool {
+        for recording in candidates[note] where !seen[recording] {
+            seen[recording] = true
+            if owner[recording] < 0 || assign(owner[recording], candidates: candidates, owner: &owner, seen: &seen) {
+                owner[recording] = note
+                return true
+            }
+        }
+        return false
+    }
+}
+
+/// A Song's Pitch Coverage by a user's Recordings.
+struct CoverageResult: Hashable, Sendable {
+    let covered: Int
+    let total: Int
+    /// The transposed pitches still needed, as MIDI note numbers.
+    let missing: [Int]
+    /// The Melodic Recordings that cover a pitch.
+    let used: [Recording.ID]
+    /// False when there are no Melodic Recordings at all.
+    let hasMelodicRecordings: Bool
+
+    /// An Unlocked Song: every distinct pitch has its own Melodic Recording.
+    var isUnlocked: Bool { covered == total }
+
+    /// Covered pitches as a fraction, for the Pitch Coverage bar.
+    var fraction: Double { total == 0 ? 0 : Double(covered) / Double(total) }
+
+    /// "3 of 4 notes covered", or "All 4 notes covered" when unlocked.
+    var summary: String { isUnlocked ? "All \(total) notes covered" : "\(covered) of \(total) notes covered" }
+}
+
+extension CoverageResult {
+    /// The Pitch Coverage of `song` by the Melodic ones among `recordings`.
+    init(song: Song, recordings: [Recording]) {
+        let melodic = recordings.filter(\.isMelodic)
+        let match = PitchCoverage.match(songPitches: song.pitches, recordingPitches: melodic.compactMap(\.pitch))
+        self.init(
+            covered: match.covered,
+            total: match.total,
+            missing: match.missing,
+            used: match.used.map { melodic[$0].id },
+            hasMelodicRecordings: !melodic.isEmpty
+        )
+    }
+}
+
+/// How the Song Catalog's Pitch Coverage changed when a Recording was added: what the Result
+/// screen shows.
+struct CoverageChanges: Hashable, Sendable {
+    struct Entry: Hashable, Sendable {
+        let song: Song
+        let coverage: CoverageResult
+    }
+
+    /// Songs that just became Unlocked Songs, in catalog order.
+    let unlocked: [Song]
+    /// Songs still locked that gained a covered pitch, closest to unlocking first.
+    let improved: [Entry]
+    /// The locked Song closest to unlocking, if any Song is still locked.
+    let closest: Entry?
+
+    /// Compares every Song's Pitch Coverage before and after `recordings` changed.
+    init(songs: [Song], before: [Recording], after: [Recording]) {
+        let old = songs.map { CoverageResult(song: $0, recordings: before) }
+        let new = songs.map { CoverageResult(song: $0, recordings: after) }
+        let closestFirst: (Entry, Entry) -> Bool = { $0.coverage.fraction > $1.coverage.fraction }
+
+        unlocked = songs.indices.filter { !old[$0].isUnlocked && new[$0].isUnlocked }.map { songs[$0] }
+        improved = songs.indices
+            .filter { !new[$0].isUnlocked && new[$0].covered > old[$0].covered }
+            .map { Entry(song: songs[$0], coverage: new[$0]) }
+            .stableSorted(by: closestFirst)
+        closest = songs.indices
+            .filter { !new[$0].isUnlocked }
+            .map { Entry(song: songs[$0], coverage: new[$0]) }
+            .stableSorted(by: closestFirst)
+            .first
+    }
+}
+
+private extension Array {
+    /// Sorts keeping equal elements in their original order, like JavaScript's `sort`.
+    func stableSorted(by areInIncreasingOrder: (Element, Element) -> Bool) -> [Element] {
+        enumerated()
+            .sorted { areInIncreasingOrder($0.element, $1.element) || (!areInIncreasingOrder($1.element, $0.element) && $0.offset < $1.offset) }
+            .map(\.element)
+    }
+}

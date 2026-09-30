@@ -1,0 +1,35 @@
+import XCTest
+
+/// The Recordings tab: empty, and with all 23 Fixture Library Recordings.
+class RecordingsUITests: PedosUITestCase {
+    func testEmptyRecordings() {
+        let app = launch(start: "new")
+        app.tabBars.buttons["Recordings"].tap()
+        XCTAssertTrue(app.staticTexts["No Recordings yet"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Go to the Record tab and tap the red button."].exists)
+        attachScreenshot("Recordings, empty")
+    }
+
+    func testAllRecordingsAndPlayback() {
+        let app = launch(start: "all")
+        app.tabBars.buttons["Recordings"].tap()
+        XCTAssertTrue(app.staticTexts["9 Melodic Recordings across 6 notes"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["23 Recordings"].exists)
+        XCTAssertEqual(app.descendants(matching: .any)["pitch-strip"].label, "Notes collected: C, E, F♯, G, G♯, and B")
+        attachScreenshot("Recordings, all 23")
+
+        // Recording 17 is the longest take (2 s): tapping it plays it and highlights the row
+        // until it ends. The row is marked playing as soon as it's tapped.
+        let row = app.buttons["Recording 17"]
+        XCTAssertTrue(row.value.map { "\($0)".contains("first fart used") } ?? false)
+        row.tap()
+        XCTAssertTrue(row.value.map { "\($0)".contains("playing") } ?? false, "The row isn't playing")
+        attachScreenshot("Recordings, playing")
+        let finished = XCTNSPredicateExpectation(predicate: NSPredicate(format: "NOT (value CONTAINS 'playing')"), object: row)
+        XCTAssertEqual(XCTWaiter().wait(for: [finished], timeout: 5), .completed, "The row didn't stop playing at the end")
+    }
+}
+
+final class RecordingsDarkUITests: RecordingsUITests {
+    override class var appearance: XCUIDevice.Appearance { .dark }
+}

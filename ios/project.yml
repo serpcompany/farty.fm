@@ -24,6 +24,13 @@ targets:
     platform: iOS
     sources:
       - path: Pedos
+      # The Fixture Library's trimmed audio from the design prototype, for playing sample
+      # Recordings. Debug builds only: Release excludes it below (the Fixture Library never
+      # ships to regular users), and scripts/check-bundle-identifiers.sh checks the Release app.
+      - path: ../docs/design/prototype/audio
+        includes:
+          - "rec-*.mp3"
+        buildPhase: resources
     settings:
       base:
         PRODUCT_NAME: Pedos
@@ -36,6 +43,7 @@ targets:
           PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos.debug
         Release:
           PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos
+          EXCLUDED_SOURCE_FILE_NAMES: "rec-*.mp3"
 
   PedosTests:
     type: bundle.unit-test

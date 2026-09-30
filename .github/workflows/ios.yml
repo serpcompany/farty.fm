@@ -19,12 +19,14 @@ jobs:
   ios-build-and-test:
     name: ios-build-and-test
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
       XCODEGEN_VERSION: 2.44.1
       XCODEGEN_SHA256: a2e905fb68446e9bb4008cdfe2e13e3f176d0cbcca828b71770f8e53fca91b73
-      DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5,arch=arm64
+      # The simulator the tests run on. It boots in the background while the app builds.
+      SIMULATOR_NAME: iPhone 17 Pro
+      SIMULATOR_RUNTIME: com.apple.CoreSimulator.SimRuntime.iOS-26-5
       # Stream xcodebuild output through the pipe instead of buffering it until exit.
       NSUnbufferedIO: "YES"
     defaults:
@@ -32,6 +34,19 @@ jobs:
         working-directory: ios
     steps:
       - uses: actions/checkout@v7
+
+      - name: Start booting the simulator
+        run: |
+          udid=$(xcrun simctl list devices available --json |
+            jq -r --arg runtime "$SIMULATOR_RUNTIME" --arg name "$SIMULATOR_NAME" \
+              '.devices[$runtime][]? | select(.name == $name) | .udid' | head -n 1)
+          if [ -z "$udid" ]; then
+            echo "::error::No $SIMULATOR_NAME simulator on $SIMULATOR_RUNTIME"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "SIMULATOR_UDID=$udid" >> "$GITHUB_ENV"
+          nohup xcrun simctl boot "$udid" > "$RUNNER_TEMP/simulator-boot.log" 2>&1 &
 
       - name: Install XcodeGen
         run: |
@@ -44,18 +59,29 @@ jobs:
       - name: Generate the Xcode project
         run: xcodegen generate
 
-      - name: Check bundle identifiers
+      - name: Check the generated sample data is current
+        run: scripts/generate-sample-data.py --check
+
+      - name: Check bundle identifiers and that Release has no fixture audio
         run: scripts/check-bundle-identifiers.sh
 
+      - name: Wait for the simulator to boot
+        timeout-minutes: 15
+        run: xcrun simctl bootstatus "$SIMULATOR_UDID" -b
+
       - name: Build and run unit and UI tests
-        # Fails the step on a hang, so the result bundle below still uploads.
-        timeout-minutes: 20
+        # Fails the step on a hang, so the result bundle below still uploads. Getting the
+        # simulator ready for testing has taken 10 minutes on a slow runner.
+        timeout-minutes: 30
+        env:
+          # The dark-mode UI test runs are for screenshots, which are taken locally.
+          TEST_RUNNER_PEDOS_UI_TESTS_LIGHT_ONLY: "1"
         run: |
           set -o pipefail
           xcodebuild test \
             -project Pedos.xcodeproj \
             -scheme Pedos \
-            -destination "$DESTINATION" \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
             -resultBundlePath "$RUNNER_TEMP/Pedos.xcresult" \
             | xcbeautify --renderer github-actions
 

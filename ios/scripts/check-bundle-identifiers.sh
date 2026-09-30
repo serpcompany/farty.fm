@@ -3,6 +3,9 @@
 # product identifier, Debug and the test bundles have their own, and Info.plist
 # takes the identifier from the build setting.
 #
+# It also builds Release for the simulator and checks that the app contains no
+# audio: the Fixture Library's sample audio is for Debug builds only.
+#
 # Run after `xcodegen generate`: ios/scripts/check-bundle-identifiers.sh
 set -eu
 
@@ -36,7 +39,22 @@ check "PedosUITests" com.serp.pedos.uitests "$(bundle_identifier PedosUITests De
 check "Info.plist CFBundleIdentifier" '$(PRODUCT_BUNDLE_IDENTIFIER)' \
   "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' Pedos/Info.plist)"
 
+# The Fixture Library never ships to regular users (AGENTS.md).
+derived=$(mktemp -d "${TMPDIR:-/tmp}/pedos-release.XXXXXX")
+trap 'rm -rf "$derived"' EXIT
+echo "Building Release for the simulator to check its contents..."
+xcodebuild build -project "$project" -scheme Pedos -configuration Release \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath "$derived" \
+  CODE_SIGNING_ALLOWED=NO -quiet
+release_app="$derived/Build/Products/Release-iphonesimulator/Pedos.app"
+check "Release app built" yes "$([ -x "$release_app/Pedos" ] && echo yes)"
+check "Release app audio files" none "$(
+  find "$release_app" -type f \( -iname '*.mp3' -o -iname '*.wav' -o -iname '*.m4a' \
+    -o -iname '*.caf' -o -iname '*.aif' -o -iname '*.aiff' \) -exec basename {} \; |
+    sort | tr '\n' ' ' | sed 's/ $//' | grep . || echo none
+)"
+
 if [ "$failures" -ne 0 ]; then
-  echo "$failures bundle identifier check(s) failed" >&2
+  echo "$failures build check(s) failed" >&2
   exit 1
 fi
