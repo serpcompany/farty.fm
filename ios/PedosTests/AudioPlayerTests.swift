@@ -37,18 +37,27 @@ final class AudioPlayerTests: XCTestCase {
     }
 
     func testASegmentPlaysForItsLengthThenStops() async throws {
-        // Mary's last note: 1.43 s from 10 s into its 12.5 s render.
+        // Mary's 7th note: 0.71 s from 2.1 s into its 12.5 s render, so the file itself would
+        // play on for another 10 s.
         let mary = try XCTUnwrap(Song.prototypeCatalog.first { $0.id == "mary" })
-        let (start, length) = mary.seconds(of: mary.notes[25])
+        let (start, length) = mary.seconds(of: mary.notes[6])
+        XCTAssertEqual(length, 60 / 84, accuracy: 1e-9)
         let player = AudioPlayer()
-        let item = PlaybackItem.note(UUID(), index: 25)
+        let item = PlaybackItem.note(UUID(), index: 6)
         player.play(item, url: try XCTUnwrap(mary.prototypeAudioURL), segment: Segment(start: start, length: length))
         XCTAssertEqual(player.nowPlaying, item)
 
-        let played = try await waitUntilStopped(player, within: .seconds(6))
+        // Time it from when the audio actually started: activating the audio session first can
+        // take a while on a slow machine.
+        for _ in 0..<250 where player.startedAt == nil {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        let startedAt = try XCTUnwrap(player.startedAt, "The segment never started")
+        _ = try await waitUntilStopped(player, within: .seconds(8))
+        let played = Date.now.timeIntervalSince(startedAt)
         XCTAssertNil(player.nowPlaying, "The segment never ended")
-        XCTAssertGreaterThan(played, .seconds(length - 0.1), "It ended before the note did")
-        XCTAssertLessThan(played, .seconds(length + 0.5), "It played past the note, toward the end of the file")
+        XCTAssertGreaterThan(played, length - 0.1, "It ended before the note did")
+        XCTAssertLessThan(played, length + 1.5, "It played on past the note")
     }
 
     func testTogglingThePlayingItemStopsIt() async throws {

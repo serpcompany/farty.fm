@@ -77,11 +77,15 @@ class ComposeUITests: PedosUITestCase {
         attachScreenshot("Compose, sort menu")
         app.buttons["A–Z"].tap()
         let alphabetical = unlocked.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
-        let sorted = XCTNSPredicateExpectation(
-            predicate: NSPredicate { _, _ in Array(self.songRows(in: app).prefix(6)) == alphabetical },
-            object: nil
-        )
-        XCTAssertEqual(XCTWaiter().wait(for: [sorted], timeout: 5), .completed, "Not sorted A–Z: \(songRows(in: app))")
+        // Reading the rows is slow on a slow machine, so this polls rather than using a
+        // predicate expectation.
+        let deadline = Date.now.addingTimeInterval(15)
+        var rows = songRows(in: app)
+        while Array(rows.prefix(6)) != alphabetical, Date.now < deadline {
+            Thread.sleep(forTimeInterval: 0.5)
+            rows = songRows(in: app)
+        }
+        XCTAssertEqual(Array(rows.prefix(6)), alphabetical, "Not sorted A–Z")
     }
 
     /// A locked Song opens its sheet, which names every missing note and has no way to play it.
