@@ -8,23 +8,24 @@ Capture-first, as approved in #2, with the owner's changes from the #47 review: 
 
 | Tab | Name on screen | What it holds |
 | --- | --- | --- |
-| 1 | **Record** | One big red button. Tap to start, tap again to stop. Opens on launch. |
+| 1 | **Record** | One big red button. Tap to start: recording fills the screen, with Stop and a timer. Opens on launch, and again whenever the app comes back to the foreground (unless Review or Result is open). |
 | 2 | **Recordings** | Every Recording, with its note, and the strip of collected notes |
 | 3 | **Compose** | Song Creator: the Song Catalog with Pitch Coverage and unlocks. (AI Song Creator is post-MVP.) |
-| 4 | **Melodies** | Created Melodies |
+| 4 | **Toots** | Toots: Songs played by your Recordings, each with its own screen |
 - **Debug builds only:** a "Load Fixture Library" action under a debug menu. It never appears in Release builds.
 
 ## Flows
 
 - **First launch:** Launch → Welcome → Allow microphone → Record tab
 - **Microphone denied:** Record → "Pedos needs the microphone" → Open Settings
-- **Record a fart:** Record tab → tap the big button (it becomes Stop, with a timer) → tap again → Review (play back, Save / Discard) → Save → Analyzing → Result (Recording Pitch or "noise-like", plus any unlock progress) → Done → Recordings
+- **Record a fart:** Record tab → tap the big button (recording fills the screen: Stop, with a timer) → tap Stop → Review (play back, Save / Discard) → Save → Analyzing → Result (Recording Pitch or "noise-like", plus any unlock progress) → Done → Recordings
 - **Unlock moment:** Result → "You unlocked Twinkle, Twinkle" → Try it → Song Creator
 - **Replay or delete a Recording:** Recordings → tap row to play → swipe or long-press → Delete → confirm
-- **Make a Song:** Compose → Songs → an Unlocked Song → Song Creator (plays automatically) → Save → Melodies
+- **Make a Toot:** Compose → Songs → an Unlocked Song → Song Creator (plays automatically) → Save → Toots
 - **See what a locked Song needs:** Compose → Songs → a locked Song → "Needs a fart near D3 and F3" sheet → Record (goes to the Record tab). Locked Songs can't be played.
-- **Make an AI melody (post-MVP):** Compose → AI → pick a mood → Compose (plays) → Try again or Save → Melodies
-- **Manage Created Melodies:** Melodies → tap to play → long-press → Rename or Delete
+- **Make an AI melody (post-MVP):** Compose → AI → pick a mood → Compose (plays) → Try again or Save → Toots
+- **Manage Toots:** Toots → tap a row's play button to play → or tap the row to open the Toot → Rename or Delete from its menu (or long-press the row)
+- **Check the sound:** Song Creator or a Toot → tap a Recording to hear it alone and see its notes → tap a note to hear just that note as rendered
 
 ## Visual direction
 
@@ -43,17 +44,16 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 
 ## Hierarchy and pattern notes
 
-- **Tabs (root):** Record, Recordings, Compose, Melodies.
+- **Tabs (root):** Record, Recordings, Compose, Toots.
 - **In-place switch (post-MVP):** when AI Song Creator returns, Compose gets a segmented control, Songs | AI. They are two ways to create, so they share one tab rather than two. In the MVP, Compose is the Songs list only.
-- **Pushed screen:** Song Creator is pushed from the Songs list.
-- **In place:** recording happens on the Record tab itself; the other tabs are disabled while recording.
-- **Full-screen cover:** Review → Result is one short task.
+- **Pushed screens:** Song Creator is pushed from the Songs list, and a Toot's screen from the Toots tab.
+- **Full-screen cover:** Recording → Review → Result is one short task, and it covers the tabs. (Apple's HIG says not to disable or hide tab bar buttons, and a modal may cover them.)
 - **Sheets:**
   - Welcome / microphone explainer on first launch
   - a locked Song's "what's missing"
   - Rename
 - **Alerts:** delete confirmations.
-- **Toasts:** "Saved to Melodies".
+- **Saved:** the Save button turns into a disabled "Saved to Toots" (SwiftUI has no stock toast).
 
 ## Decided in the #47 review
 
@@ -69,6 +69,15 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 ## Decided after the #47 review
 
 - **AI Song Creator is post-MVP** (owner in chat, 2026-09-29). The groundwork is kept on #21 and #22.
+
+## Decided in the #52 tap-through (2026-09-30)
+
+- **Toots:** the Melodies tab is now **Toots**, and a saved result is a Toot (`CONTEXT.md`).
+- **Back to Record:** the app lands on the Record tab whenever it comes back to the foreground, unless Review or Result is open. Playback stops in the background.
+- **Recording is full screen:** it covers the tabs instead of disabling them.
+- **Recordings used** in Song Creator is a list: each Recording with the color of its notes, its name, waveform and length, the note it plays, and a play button.
+- **A Toot's screen:** tapping a Toot opens Song Creator's layout without Save, with Rename and Delete in its menu. A Toot keeps which Recording played each pitch; one deleted later shows as "Recording deleted", and the Toot still plays.
+- **Checking the sound:** tapping a Recording plays it alone and highlights its notes; tapping a note plays just that note from the Toot's own audio and says what it is ("F3 · Recording 21 (G3), shifted −2.1 semitones · 1.4 s").
 
 ## Still open
 
