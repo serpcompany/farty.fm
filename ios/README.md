@@ -14,15 +14,19 @@ xcodegen generate       # writes Pedos.xcodeproj; rerun after adding or removing
 
 ## Build and test
 
+Any available iPhone simulator on iOS 26 or later works. List them, then pass one by its UDID
+(or by its exact name):
+
 ```sh
+xcrun simctl list devices available
 cd ios
 xcodebuild test -project Pedos.xcodeproj -scheme Pedos \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+  -destination 'platform=iOS Simulator,id=<udid>'
 scripts/check-bundle-identifiers.sh
 ```
 
 The `Pedos` scheme runs the unit tests (`PedosTests`) and the UI tests (`PedosUITests`). The UI
-test attaches a screenshot of each Capture Dock area to the result bundle; export them with
+test attaches a screenshot of each tab to the result bundle; export them with
 `xcrun xcresulttool export attachments --path <result>.xcresult --output-path <dir>`.
 
 CI ([`.github/workflows/ios.yml`](../.github/workflows/ios.yml)) runs the same steps on every pull
