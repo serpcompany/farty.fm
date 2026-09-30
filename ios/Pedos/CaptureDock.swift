@@ -1,15 +1,16 @@
 import SwiftUI
 
-/// The approved Capture Dock layout (ADR 0005): a stable dock with three peer areas,
-/// and a record control that is one tap away from each of them.
+/// The Capture Dock (ADR 0005): a stable tab bar that opens on Record, so capture is
+/// always one tap away, followed by the Recording shelf, creation and Created Melodies.
 ///
-/// The areas are placeholders until their slices land.
+/// Every area is a placeholder until its slice lands.
 struct CaptureDock: View {
-    @State private var isShowingRecorder = false
-
     var body: some View {
         TabView {
-            DockArea(title: "Recordings", record: showRecorder) {
+            RecordArea()
+                .tabItem { Label("Record", systemImage: "record.circle") }
+
+            DockArea(title: "Recordings") {
                 ContentUnavailableView(
                     "No Recordings yet",
                     systemImage: "waveform",
@@ -18,7 +19,7 @@ struct CaptureDock: View {
             }
             .tabItem { Label("Recordings", systemImage: "waveform") }
 
-            DockArea(title: "Create", record: showRecorder) {
+            DockArea(title: "Create") {
                 ContentUnavailableView(
                     "Nothing to create with yet",
                     systemImage: "music.note",
@@ -27,7 +28,7 @@ struct CaptureDock: View {
             }
             .tabItem { Label("Create", systemImage: "music.note") }
 
-            DockArea(title: "Created Melodies", record: showRecorder) {
+            DockArea(title: "Created Melodies") {
                 ContentUnavailableView(
                     "No Created Melodies yet",
                     systemImage: "music.note.list",
@@ -36,35 +37,33 @@ struct CaptureDock: View {
             }
             .tabItem { Label("Melodies", systemImage: "music.note.list") }
         }
-        .sheet(isPresented: $isShowingRecorder) {
-            RecordSheet()
-        }
-    }
-
-    private func showRecorder() {
-        isShowingRecorder = true
     }
 }
 
-/// One area of the Capture Dock, with the record control pinned to its bottom edge.
+/// The Record area: one big record button and nothing else.
+private struct RecordArea: View {
+    var body: some View {
+        Button {
+            // The record slice starts capturing a Recording here.
+        } label: {
+            Circle()
+                .fill(.red)
+                .frame(width: 180, height: 180)
+        }
+        .accessibilityLabel("Record")
+        .accessibilityIdentifier("record-button")
+    }
+}
+
+/// A titled dock area.
 private struct DockArea<Content: View>: View {
     let title: String
-    let record: () -> Void
     @ViewBuilder let content: Content
 
     var body: some View {
         NavigationStack {
             content
                 .navigationTitle(title)
-                .safeAreaInset(edge: .bottom) {
-                    Button(action: record) {
-                        Label("Record", systemImage: "record.circle")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .padding()
-                }
         }
     }
 }
