@@ -1,37 +1,79 @@
 # Pedos
 
-Pedos is an audio-creation product that turns a person's fart recordings into recordings they can replay and songs they can create.
+Pedos is an iPhone app that turns a person's fart recordings into recordings they can replay and melodies they can create.
 
-## Language
+## Recordings
 
 **Recording**:
-A single fart audio clip captured and saved by a user for playback or use as source material in a melody. One Recording must not contain multiple fart events.
-_Avoid_: Sample, sound, track
+A single fart audio clip captured and saved by a user. One Recording must not contain multiple fart events.
+_Avoid_: Sample, sound, track, clip
 
 **Recording Analysis**:
-Preserved characteristics derived from a saved Recording by a separate analysis process, such as its usable pitch and duration qualities. Capture and local persistence do not depend on a particular analysis method.
+The characteristics derived once from a saved Recording and preserved with it, such as its single clean gesture and its pitch. Saving and playback never wait on it.
 _Avoid_: Live analysis, reanalysis
 
+**Melodic Recording**:
+A Recording whose pitch is steady enough to carry melody notes.
+_Avoid_: Pitched fart, tonal fart, good Recording
+
+**Noise-like Recording**:
+A Recording with no steady pitch. It can still be placed on a note, but it can't tell the listener which note.
+_Avoid_: Bad Recording, unpitched fart
+
+**Recording Pitch**:
+The note a Melodic Recording naturally sounds. A Recording has a pitch; it never has a key.
+_Avoid_: Key, tone
+
+## Songs and melodies
+
+**Song**:
+A known melody in the Song Catalog, taken from a cited public-domain score.
+_Avoid_: Track, tune, curated melody
+
+**Song Catalog**:
+The set of Songs shipped with the app, each with its preserved source and license.
+_Avoid_: Melody pool, song library, melody library
+
 **Melody Fit**:
-The compatibility between a set of Recordings and a target melody, accounting for how much the Recordings would need to be altered to render the melody acceptably.
+How well a set of Melodic Recordings can play a particular Song, judged by how far each Recording would have to be moved to reach the notes it plays.
 _Avoid_: Song match, quality score
 
-**Internal Tester**:
-A developer-side evaluator who can exercise the app with controlled test material and capabilities that regular users never see.
-_Avoid_: Admin, regular user
+**Pitch Coverage**:
+How many of the pitches a Song needs the user's Melodic Recordings can reach, shown as "3 of 5 pitches".
+_Avoid_: Progress, completion
 
-**Fixture Library**:
-A curated collection of fart recordings available only to Internal Testers for repeatable on-device evaluation.
-_Avoid_: Sample library, starter recordings, user library
+**Unlocked Song**:
+A Song whose needed pitches are all covered by the user's Melodic Recordings.
+_Avoid_: Available song, playable song
+
+**Arrangement**:
+Which Recording plays each note of a melody. The app proposes one with Auto-map, and the user can change it.
+_Avoid_: Mapping, mix, assignment
+
+**Auto-map**:
+The app's proposed Arrangement for a Song, choosing the closest-pitched Melodic Recording for each note.
+_Avoid_: Smart choose, AI pick, best fit
+
+**Created Melody**:
+A playable fart-only melody the user made with Song Creator or AI Song Creator. It is not a conventional song or a music release.
+_Avoid_: Created Song, generated song, track, output
+
+## Creation areas
 
 **Song Creator**:
-The creation area that renders a known melody chosen from a curated library using only supplied Recordings as audio material.
+The creation area that plays a Song using only the user's Recordings as sound.
 _Avoid_: Musical Fruit, standard song creator
 
 **AI Song Creator**:
-The creation area where AI composes a new melody plan that is rendered using only supplied Recordings as audio material. It does not add vocals, conventional instruments, or produced backing tracks.
+The creation area where AI composes a new melody that is played using only the user's Recordings. It adds no vocals, instruments, or backing tracks.
 _Avoid_: Pedos AI, AI music
 
-**Created Melody**:
-A playable fart-only melody produced by Song Creator or AI Song Creator. It is not a conventional song, original track, or professional music release.
-_Avoid_: Created Song, generated song, track, output
+## Testing
+
+**Internal Tester**:
+A developer-side evaluator who can use controlled test material and capabilities that regular users never see.
+_Avoid_: Admin, regular user
+
+**Fixture Library**:
+The curated set of real fart Recordings available only to Internal Testers and development tools for repeatable evaluation.
+_Avoid_: Sample library, starter recordings, user library

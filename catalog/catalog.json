@@ -1,0 +1,320 @@
+[
+ {
+  "id": "twinkle",
+  "title": "Twinkle, Twinkle, Little Star",
+  "file": "midi/pdmx-twinkle.mid",
+  "sha256": "0a07d37f8e1d1666fddd1765c9ed05970cee9d43d208611e35f416ff4e52e6cb",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/10/QmeA6P4Ea636UwD91Ja2AsRkEhxDz5JibGD2dAaKPzBkxH.mid",
+   "musescore_score_id": "1065651",
+   "musescore_url": "https://musescore.com/score/1065651",
+   "score_title": "Twinkle Twinkle Little Star - Main Theme",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.59",
+   "n_ratings": "65"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 110,
+   "max_beats": 32
+  }
+ },
+ {
+  "id": "mary",
+  "title": "Mary Had a Little Lamb",
+  "file": "midi/pdmx-mary.mid",
+  "sha256": "63d2d7463c79533974348dafcd941192174ba0716db0685757704edeba9f4b40",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/5/29/QmfKRvXoMB8oAj8CtdwoFLMaiERBJLSSHse7setmvaeYSH.mid",
+   "musescore_score_id": "5002871",
+   "musescore_url": "https://musescore.com/score/5002871",
+   "score_title": "Mary had a little lamb",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 84
+  }
+ },
+ {
+  "id": "jingle",
+  "title": "Jingle Bells",
+  "file": "midi/pdmx-jingle.mid",
+  "sha256": "43530d0c4d9e61594e36079015e40ec35cf522d1079cc1ce29bb1a457fdd12a6",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/32/QmaMV3wUm2WygxdebDyBzKb8kD53dmT3WwV5c4crc55FZX.mid",
+   "musescore_score_id": "1448011",
+   "musescore_url": "https://musescore.com/score/1448011",
+   "score_title": "Jingle Bells - Leadsheet",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 120,
+   "start_beat": 64,
+   "max_beats": 32
+  }
+ },
+ {
+  "id": "birthday",
+  "title": "Happy Birthday",
+  "file": "midi/pdmx-birthday.mid",
+  "sha256": "fea74a6196ba2524eba98abb60b6c60a6d3ed9325c6dc5d95ffdd54482b07128",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/49/QmbVDLKjmtAqCoc1TNjgtASz7Bi8gXfSt8i6Mmowhjqi1C.mid",
+   "musescore_score_id": "95546",
+   "musescore_url": "https://musescore.com/score/95546",
+   "score_title": "Happy Birthday",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 100
+  }
+ },
+ {
+  "id": "frere",
+  "title": "Frère Jacques",
+  "file": "midi/pdmx-frere.mid",
+  "sha256": "39c9a325c909df6068b8e182bccd201c182f4408f0f1989fe04733de3723e4d9",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/32/QmQMhNXZKTpVwrmfQ9HyY8QyyGkNRHUKCWFr1MKuWB8Ngu.mid",
+   "musescore_score_id": "1722896",
+   "musescore_url": "https://musescore.com/score/1722896",
+   "score_title": "Frere Jacques",
+   "composer": "French Traditional",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 110,
+   "max_beats": 32
+  }
+ },
+ {
+  "id": "saints",
+  "title": "When the Saints Go Marching In",
+  "file": "midi/pdmx-saints.mid",
+  "sha256": "71ca3fce104bf7c82d998184342174a6bef5de4344395385c8ea2c4eaee320b5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/43/QmQSGztG8eTXW2udzFsGMb2DtBffpaguTTgenoq6WDPs8e.mid",
+   "musescore_score_id": "2030696",
+   "musescore_url": "https://musescore.com/score/2030696",
+   "score_title": "When The Saints Go Marching In",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.33",
+   "n_ratings": "3"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 150,
+   "max_beats": 32
+  }
+ },
+ {
+  "id": "row",
+  "title": "Row, Row, Row Your Boat",
+  "file": "midi/pdmx-row.mid",
+  "sha256": "f385c528ba593105f4cb20b5270e0b2e9aace1a1ca646b48bde8eca65d6a22a5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/14/23/QmWhyQKnEU8xgcB4Tpaa12xZ5AiFmL4xeyoCtwt876ciiX.mid",
+   "musescore_score_id": "127109",
+   "musescore_url": "https://musescore.com/score/127109",
+   "score_title": "Row Row Row Your Boat",
+   "composer": "Prof Bell / Traditional",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.72",
+   "n_ratings": "26"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 120
+  }
+ },
+ {
+  "id": "ode",
+  "title": "Ode to Joy",
+  "file": "midi/pdmx-ode.mid",
+  "sha256": "b2c0ff8a15e023c7c7eb22c88275834a70ecc75ee111b7a316a2e6c4520174c6",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/56/QmZznKh1acKLzwvctXfGpZ2h9uYbZyGCNjAAfPNbc6SzrR.mid",
+   "musescore_score_id": "32952",
+   "musescore_url": "https://musescore.com/score/32952",
+   "score_title": "Ode an die Freude",
+   "composer": "Ludwig van Beethoven",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.44",
+   "n_ratings": "6"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 110,
+   "max_beats": 32
+  }
+ },
+ {
+  "id": "merryxmas",
+  "title": "We Wish You a Merry Christmas",
+  "file": "midi/pdmx-merryxmas.mid",
+  "sha256": "050552977817d9710c21e1e604652ce4fc283b61956aa8f405279a5e33436d7b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/43/QmRSYgs3jvLQMTdwaDaGV4EAJKyndRhoxFQppHXwfjKWCE.mid",
+   "musescore_score_id": "151013",
+   "musescore_url": "https://musescore.com/score/151013",
+   "score_title": "We wish you a merry Christmas",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 140,
+   "max_beats": 48
+  }
+ },
+ {
+  "id": "amazing",
+  "title": "Amazing Grace",
+  "file": "midi/pdmx-amazing.mid",
+  "sha256": "022d9e2f42831c7d0a929112ea481369ba1278b62dd865f3dd6f5da3d8ffc7de",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/29/QmRKCnZEDj8RBq1nfemE4xXxanev8teMdrFohgwv4c3gyp.mid",
+   "musescore_score_id": "28992",
+   "musescore_url": "https://musescore.com/score/28992",
+   "score_title": "Amazing Grace",
+   "composer": "John Newton",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 100,
+   "beats_per_bar": 3,
+   "max_beats": 24
+  }
+ },
+ {
+  "id": "furelise",
+  "title": "Für Elise",
+  "file": "midi/pdmx-furelise.mid",
+  "sha256": "074cf409f8f6abf1bfe4130134033cc516e27545123efe3795bac1efabf3d137",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/8/QmP9oEvzGLgupYF7PtV9QRNQ86mEsT35cBs47FcpVMJ4s2.mid",
+   "musescore_score_id": "111078",
+   "musescore_url": "https://musescore.com/score/111078",
+   "score_title": "Für Elise",
+   "composer": "L.V. Betthoven",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.88",
+   "n_ratings": "6"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 110,
+   "max_beats": 24
+  }
+ },
+ {
+  "id": "auld",
+  "title": "Auld Lang Syne",
+  "file": "midi/pdmx-auld.mid",
+  "sha256": "e37fc4db53a40454fe94cdfb5f849d6c31401fb2127142ae52ae1a544da7a719",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/21/QmTgrTW7qVmPtrQRLNzCWsUPapirMav2Nfg4GTBGY6j4cn.mid",
+   "musescore_score_id": "5785873",
+   "musescore_url": "https://musescore.com/score/5785873",
+   "score_title": "Auld Lang Syne - Anonymous (Traditional)",
+   "composer": "Scotch Air",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.8",
+   "n_ratings": "52"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 100,
+   "beats_per_bar": 4,
+   "max_beats": 32
+  }
+ },
+ {
+  "id": "ode-mutopia",
+  "title": "Ode to Joy (Mutopia SATB)",
+  "file": "midi/mutopia-528-ode.mid",
+  "sha256": "fb1604c08c865b275b464d74e5a7c526ff1a8acccdf9853cb92f0778daaed14b",
+  "source": {
+   "repository": "Mutopia Project",
+   "mutopia_id": "528",
+   "url": "https://www.mutopiaproject.org/ftp/BeethovenLv/ode/ode.mid",
+   "license": "Public Domain (Mutopia)",
+   "license_url": "https://www.mutopiaproject.org/legal.html"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 110,
+   "max_beats": 32
+  }
+ }
+]

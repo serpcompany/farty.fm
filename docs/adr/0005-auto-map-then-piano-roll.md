@@ -1,0 +1,3 @@
+# Song Creator starts from Auto-map and is edited in a piano roll
+
+Fully automatic creation leaves the user nothing to do, and a full DAW is too much. Song Creator proposes an Arrangement with Auto-map. The user then refines it in a minimal, Ableton-style piano roll: the Song's notes appear as highlighted slots, and the user drags Recordings onto them, swaps them, or clears them. Every edit re-renders through the same engine. This sits inside the approved Capture Dock structure: capture is always one tap away, with a stable dock for the Recording shelf, creation, and Created Melodies (tag `archive/prototype/end-to-end-mvp-interaction`, variant A). Visual polish is decided in the build issues, not here.

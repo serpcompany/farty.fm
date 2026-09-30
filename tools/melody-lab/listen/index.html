@@ -1,0 +1,389 @@
+<meta charset="utf-8">
+<title>Pedos Melody Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,CASL,MONO@-15..0,300..900,0..1,0..1&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a small listening instrument. Song rail on the left (chips on phones), one player with a
+   piano roll in the middle, the Recording shelf underneath. */
+:root {
+  --bg: #edf0ea;
+  --surface: #f9faf6;
+  --fg: #1b221e;
+  --muted: #5a665f;
+  --line: #d3d9d0;
+  --grid: #e3e8e0;
+  --accent: #8a5a00;
+  --accent-ink: #fffaf0;
+  --good: #2f7d4f;
+  --warn: #a4501a;
+  --display: "Recursive", "Avenir Next", system-ui, sans-serif;
+  --body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Recursive", ui-monospace, "SF Mono", Menlo, monospace;
+  --r1: #c2413b; --r2: #d88a12; --r3: #2f8f6b; --r4: #2c6fa8; --r5: #7a4fa0;
+  --r6: #b0487f; --r7: #5f7f1c; --r8: #1f8a9c; --r9: #8c6a3f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121714; --surface: #1a201c; --fg: #e4eae5; --muted: #9aa69e; --line: #2c352f; --grid: #222a25;
+    --accent: #e3b341; --accent-ink: #1a1405; --good: #6cc38f; --warn: #e79a61;
+    --r1: #ec6a60; --r2: #f0ab3c; --r3: #52c197; --r4: #62a3dd; --r5: #a987d1;
+    --r6: #e07bb1; --r7: #9cc24f; --r8: #4cc0d1; --r9: #c9a375;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121714; --surface: #1a201c; --fg: #e4eae5; --muted: #9aa69e; --line: #2c352f; --grid: #222a25;
+  --accent: #e3b341; --accent-ink: #1a1405; --good: #6cc38f; --warn: #e79a61;
+  --r1: #ec6a60; --r2: #f0ab3c; --r3: #52c197; --r4: #62a3dd; --r5: #a987d1;
+  --r6: #e07bb1; --r7: #9cc24f; --r8: #4cc0d1; --r9: #c9a375;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.55 var(--body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 850; font-variation-settings: "CASL" 1; letter-spacing: -0.01em; line-height: 1.05; }
+h2 { font-size: 1.25rem; font-weight: 750; font-variation-settings: "CASL" 0.6; }
+.lede { max-width: 66ch; color: var(--muted); margin: 10px 0 0; }
+.eyebrow { font: 600 11px/1 var(--mono); font-variation-settings: "MONO" 1; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.mono { font-family: var(--mono); font-variation-settings: "MONO" 1; font-variant-numeric: tabular-nums; }
+a { color: inherit; text-decoration-color: var(--line); text-underline-offset: 3px; }
+a:hover { text-decoration-color: currentColor; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.stage { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 20px; align-items: start; }
+.songs { display: grid; gap: 2px; }
+.songs button { text-align: left; background: none; border: 0; border-radius: 8px; padding: 8px 12px; color: var(--muted); }
+.songs button:hover { background: var(--surface); color: var(--fg); }
+.songs button[aria-pressed="true"] { background: var(--fg); color: var(--bg); font-weight: 600; }
+
+.player { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 16px; min-width: 0; }
+.player-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; }
+.player-head h2 { font-size: 1.6rem; }
+.src { font-size: 13px; color: var(--muted); }
+.variants { display: flex; flex-wrap: wrap; gap: 6px; }
+.variants button { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 6px 14px; font-size: 14px; }
+.variants button[aria-pressed="true"] { border-color: var(--fg); background: var(--fg); color: var(--bg); }
+.variants button .tag { font: 600 10px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; margin-left: 6px; color: var(--accent); }
+.variants button[aria-pressed="true"] .tag { color: inherit; opacity: 0.75; }
+.vdesc { margin: 0; color: var(--muted); max-width: 70ch; font-size: 14px; }
+.controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.play { display: inline-flex; align-items: center; gap: 10px; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 10px 20px 10px 16px; font-weight: 600; }
+.play svg { width: 16px; height: 16px; fill: currentColor; }
+.time { color: var(--muted); font-size: 13px; }
+.roll-box { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+canvas { display: block; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.metric { background: var(--surface); padding: 10px 14px; display: grid; gap: 2px; }
+.metric b { font: 700 1.35rem/1.1 var(--mono); font-variation-settings: "MONO" 1; font-variant-numeric: tabular-nums; }
+.metric span { font-size: 12px; color: var(--muted); }
+.metric.good b { color: var(--good); }
+.metric.warn b { color: var(--warn); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 5px 10px 5px 8px; font-size: 13px; }
+.chip i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.chip:hover { border-color: var(--muted); }
+
+.shelf { display: grid; gap: 12px; }
+.shelf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.rec { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; align-items: center; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.rec:hover { border-color: var(--muted); }
+.rec .id { font: 700 15px/1 var(--mono); font-variation-settings: "MONO" 1; }
+.rec .kind { justify-self: start; font: 600 10px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: var(--grid); color: var(--muted); }
+.rec .kind.melodic { background: var(--fg); color: var(--bg); }
+.rec .detail { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+.rec.playing, .chip.playing { outline: 2px solid var(--accent); }
+
+.how { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; }
+.how div { display: grid; gap: 4px; align-content: start; }
+.how h3 { font-size: 1rem; font-weight: 700; }
+.how p { margin: 0; color: var(--muted); font-size: 14px; }
+footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
+
+@media (max-width: 760px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .songs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .songs button { border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; font-size: 13px; }
+  .player { padding: 14px; }
+  .wrap { padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Pedos · Song Creator engine proof</div>
+    <h1>Pedos Melody Lab</h1>
+    <p class="lede">Every note below is one of the 23 approved Fixture Library Recordings, trimmed to a single puff and nudged onto the melody's pitch. No synthesizer, no looping, no instruments. Pick a song, play it, and switch versions to compare.</p>
+  </header>
+
+  <section class="stage">
+    <nav class="songs" id="songs" aria-label="Songs"></nav>
+    <div class="player">
+      <div class="player-head">
+        <div>
+          <h2 id="song-title">Song</h2>
+          <div class="src" id="song-src"></div>
+        </div>
+      </div>
+      <div class="variants" id="variants" role="group" aria-label="Version"></div>
+      <p class="vdesc" id="vdesc"></p>
+      <div class="controls">
+        <button class="play" id="play" type="button"><svg viewBox="0 0 16 16" id="play-icon"><path d="M3 1.5v13l11-6.5z"/></svg><span id="play-label">Play</span></button>
+        <span class="time mono" id="time">0:00</span>
+        <span class="time">Space bar plays and stops</span>
+      </div>
+      <div class="roll-box"><canvas id="roll" height="260"></canvas></div>
+      <div class="metrics" id="metrics"></div>
+      <div>
+        <div class="eyebrow" style="margin-bottom:8px">Recordings in this version · tap to hear one alone</div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shelf">
+    <div>
+      <h2>The Recording shelf</h2>
+      <p class="lede" id="shelf-lede"></p>
+    </div>
+    <div class="shelf-grid" id="shelf"></div>
+  </section>
+
+  <section class="how">
+    <div><h3>Melodies with a paper trail</h3><p>Each tune is a MIDI file from PDMX, a published dataset of public-domain MuseScore scores with per-score license checks. The importer keeps the top line and reports anything it drops. No note is typed in by hand.</p></div>
+    <div><h3>One puff per note</h3><p>Every Recording is cut to its first clean gesture: it starts at the attack, not the silence before it, and ends before any second "brrt". That is what keeps a quarter note from sounding like four sixteenths.</p></div>
+    <div><h3>Closest fart for each pitch</h3><p>Like a multi-sampled instrument: the engine picks a key, then gives each melody pitch the Recording whose natural pitch is nearest, so shifts stay small and the same note always sounds the same.</p></div>
+    <div><h3>Checked by ear and by machine</h3><p>A pitch tracker reads every render back note by note. A note counts as on pitch within 50 cents. Recordings that can't hold a pitch on short notes are kept off them.</p></div>
+  </section>
+
+  <footer id="footer"></footer>
+</div>
+
+<audio id="audio" preload="auto"></audio>
+<script src="data.js"></script>
+<script>
+(() => {
+  const D = window.PEDOS;
+  const $ = (id) => document.getElementById(id);
+  const audio = $("audio");
+  const VARIANTS = [
+    { key: "tuned", label: "Tuned", tag: "pick", desc: "All 23 Recordings available. Each note is held steady on its pitch by following the fart's own pitch wobble and correcting it." },
+    { key: "natural", label: "Natural pitch", desc: "Same Recordings and notes, but each fart keeps its natural wobble and slide. More character, a bit less in tune." },
+    { key: "small", label: "Only 6 Recordings", desc: "What a new user with just six Recordings would get (" + D.small_library.join(", ") + "). Only two of those carry a pitch, so the engine leans on them." },
+    { key: "before", label: "Before", desc: "The failing approach for contrast: raw files started on each beat with no trimming and no pitch matching. This is roughly what earlier attempts sounded like." },
+  ];
+  const recById = Object.fromEntries(D.recordings.map((r) => [r.id, r]));
+  const melodicIds = D.recordings.filter((r) => r.melodic).map((r) => r.id);
+  const colorVar = (id) => {
+    const i = melodicIds.indexOf(id);
+    return i >= 0 ? `--r${(i % 9) + 1}` : "--muted";
+  };
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const NOTE = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+  const noteName = (m) => NOTE[m % 12] + (Math.floor(m / 12) - 1);
+
+  let state = { song: D.songs[0].id, variant: "tuned" };
+  try { const s = JSON.parse(localStorage.getItem("pedos-lab") || "{}"); if (s.song && D.songs.some((x) => x.id === s.song)) state = { ...state, ...s }; } catch (e) {}
+  const save = () => { try { localStorage.setItem("pedos-lab", JSON.stringify(state)); } catch (e) {} };
+
+  // ---------------------------------------------------------------- song list + variants
+  const songsEl = $("songs");
+  D.songs.forEach((s) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.id = "song-" + s.id; b.textContent = s.title;
+    b.addEventListener("click", () => { state.song = s.id; select(); });
+    songsEl.append(b);
+  });
+  const varEl = $("variants");
+  VARIANTS.forEach((v) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.id = "variant-" + v.key;
+    b.innerHTML = v.label + (v.tag ? `<span class="tag">${v.tag}</span>` : "");
+    b.addEventListener("click", () => { state.variant = v.key; select(true); });
+    varEl.append(b);
+  });
+
+  const song = () => D.songs.find((s) => s.id === state.song);
+  const variant = () => song().variants[state.variant];
+  const notesFor = () => (song().variants[state.variant].notes || song().variants.tuned.notes);
+
+  function select(keepPlaying) {
+    const wasPlaying = keepPlaying && !audio.paused;
+    const at = audio.currentTime || 0;
+    save();
+    const s = song(), v = variant(), vd = VARIANTS.find((x) => x.key === state.variant);
+    songsEl.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.id === "song-" + s.id));
+    varEl.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.id === "variant-" + state.variant));
+    $("song-title").textContent = s.title;
+    const src = s.source;
+    $("song-src").innerHTML = src.musescore_url
+      ? `Score: <a href="${src.musescore_url}" target="_blank" rel="noopener">MuseScore #${src.musescore_score_id}</a> via <a href="https://doi.org/${src.dataset_doi}" target="_blank" rel="noopener">PDMX</a> · <a href="${src.license_url}" target="_blank" rel="noopener">${src.license === "publicdomain" ? "Public domain" : src.license}</a> · ${s.bpm} bpm`
+      : `Score: Mutopia #${src.mutopia_id} · ${src.license}`;
+    $("vdesc").textContent = vd.desc;
+    audio.src = v.audio;
+    if (wasPlaying) { audio.currentTime = Math.min(at, 30); audio.play().catch(() => {}); } else { setPlaying(false); }
+    renderMetrics(); renderLegend(); sizeRoll(); draw();
+  }
+
+  function renderMetrics() {
+    const v = variant(), el = $("metrics");
+    if (!v.metrics) {
+      el.innerHTML = `<div class="metric warn"><b>not checked</b><span>This version has no pitch plan to check against</span></div>`;
+      return;
+    }
+    const m = v.metrics;
+    const cells = [
+      [`${m.within_50c_pct}%`, "notes on pitch (±50 cents)", m.within_50c_pct >= 90 ? "good" : "warn"],
+      [`${m.onsets_on_time_pct}%`, "notes starting on the beat (±50 ms)", m.onsets_on_time_pct >= 90 ? "good" : "warn"],
+      [`${m.notes_with_retrigger}`, "notes with a second 'brrt' inside", m.notes_with_retrigger === 0 ? "good" : "warn"],
+      [`${m.distinct_recordings}`, "different Recordings used", ""],
+      [`${v.transpose > 0 ? "+" : ""}${v.transpose}`, "semitones moved to fit the farts", ""],
+    ];
+    el.innerHTML = cells.map(([b, s, c]) => `<div class="metric ${c}"><b>${b}</b><span>${s}</span></div>`).join("");
+  }
+
+  function renderLegend() {
+    const v = variant(), el = $("legend");
+    el.innerHTML = "";
+    let ids;
+    if (v.notes) {
+      const count = {};
+      v.notes.forEach((n) => (count[n.rec] = (count[n.rec] || 0) + 1));
+      ids = Object.keys(count).sort();
+      ids.forEach((id) => {
+        const r = recById[id];
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "chip"; b.dataset.rec = id;
+        b.innerHTML = `<i style="background:var(${colorVar(id)})"></i><span class="mono">${id}</span><span>${r.note ? r.note.replace(/[+-]\d+$/, "") : ""} · ${count[id]} notes</span>`;
+        b.addEventListener("click", () => playRec(id, b));
+        el.append(b);
+      });
+    } else {
+      el.innerHTML = `<span class="src">All 23 Recordings, rotated in order, each started at the top of the file.</span>`;
+    }
+  }
+
+  // ---------------------------------------------------------------- piano roll
+  const canvas = $("roll"), ctx = canvas.getContext("2d");
+  let geom = null;
+  function sizeRoll() {
+    const s = song(), notes = notesFor();
+    const beats = Math.max(...notes.map((n) => n.start + n.dur));
+    const lo = Math.min(...notes.map((n) => n.midi)) - 2, hi = Math.max(...notes.map((n) => n.midi)) + 2;
+    const box = canvas.parentElement.clientWidth;
+    const width = Math.max(box, Math.ceil(beats * 26) + 56);
+    const rowH = Math.max(10, Math.min(18, Math.floor(240 / (hi - lo + 1))));
+    const height = (hi - lo + 1) * rowH + 22;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr; canvas.height = height * dpr;
+    canvas.style.width = width + "px"; canvas.style.height = height + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    geom = { beats, lo, hi, rowH, width, height, left: 44, pxb: (width - 52) / beats, spb: 60 / s.bpm, bar: s.beats_per_bar };
+  }
+  function draw() {
+    if (!geom) return;
+    const g = geom, notes = notesFor(), v = variant();
+    const y = (m) => (g.hi - m) * g.rowH + 4;
+    const x = (b) => g.left + b * g.pxb;
+    ctx.clearRect(0, 0, g.width, g.height);
+    ctx.fillStyle = css("--bg"); ctx.fillRect(0, 0, g.width, g.height);
+    for (let m = g.lo; m <= g.hi; m++) {
+      if ([1, 3, 6, 8, 10].includes(m % 12)) { ctx.fillStyle = css("--grid"); ctx.fillRect(g.left, y(m), g.width - g.left, g.rowH); }
+      if (m % 12 === 0 || m === g.lo || m === g.hi) {
+        ctx.fillStyle = css("--muted"); ctx.font = "10px " + css("--mono");
+        ctx.fillText(noteName(m), 6, y(m) + g.rowH - 3);
+      }
+    }
+    for (let b = 0; b <= g.beats; b++) {
+      ctx.fillStyle = css("--line");
+      ctx.globalAlpha = b % g.bar === 0 ? 1 : 0.45;
+      ctx.fillRect(Math.round(x(b)), 4, 1, g.height - 26);
+    }
+    ctx.globalAlpha = 1;
+    const now = audio.currentTime / g.spb;
+    notes.forEach((n) => {
+      const w = Math.max(3, n.dur * g.pxb - 2);
+      const active = !audio.paused && now >= n.start && now < n.start + n.dur;
+      ctx.fillStyle = v.notes ? css(colorVar(n.rec)) : css("--muted");
+      ctx.globalAlpha = v.notes ? (active ? 1 : 0.82) : 0.35;
+      ctx.beginPath(); ctx.roundRect(x(n.start) + 1, y(n.midi) + 1, w, g.rowH - 2, 3); ctx.fill();
+      if (active) { ctx.strokeStyle = css("--fg"); ctx.lineWidth = 1.5; ctx.stroke(); }
+      ctx.globalAlpha = 1;
+      if (v.notes && w > 26 && g.rowH >= 12) {
+        ctx.fillStyle = "#fff"; ctx.font = "600 9px " + css("--mono");
+        ctx.fillText(n.rec, x(n.start) + 4, y(n.midi) + g.rowH - 4);
+      }
+    });
+    ctx.fillStyle = css("--muted"); ctx.font = "10px " + css("--mono");
+    for (let b = 0; b < g.beats; b += g.bar) ctx.fillText(String(b / g.bar + 1), x(b) + 3, g.height - 6);
+    if (audio.currentTime > 0) {
+      ctx.fillStyle = css("--accent");
+      ctx.fillRect(x(now), 0, 2, g.height - 18);
+    }
+  }
+
+  // ---------------------------------------------------------------- playback
+  let recAudio = null, raf = 0;
+  function setPlaying(p) {
+    $("play-label").textContent = p ? "Stop" : "Play";
+    $("play-icon").innerHTML = p ? '<rect x="3" y="3" width="10" height="10" rx="1"/>' : '<path d="M3 1.5v13l11-6.5z"/>';
+  }
+  function tick() {
+    const t = audio.currentTime;
+    $("time").textContent = `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+    draw();
+    if (!audio.paused) raf = requestAnimationFrame(tick);
+  }
+  function stopRec() { if (recAudio) { recAudio.pause(); recAudio = null; } document.querySelectorAll(".playing").forEach((e) => e.classList.remove("playing")); }
+  function toggle() {
+    stopRec();
+    if (audio.paused) { if (audio.ended) audio.currentTime = 0; audio.play().catch(() => {}); } else { audio.pause(); audio.currentTime = 0; }
+  }
+  function playRec(id, el) {
+    audio.pause();
+    const same = el.classList.contains("playing");
+    stopRec();
+    if (same) return;
+    recAudio = new Audio(recById[id].audio);
+    el.classList.add("playing");
+    recAudio.addEventListener("ended", stopRec);
+    recAudio.play().catch(() => {});
+  }
+  audio.addEventListener("play", () => { setPlaying(true); cancelAnimationFrame(raf); tick(); });
+  audio.addEventListener("pause", () => { setPlaying(false); draw(); });
+  audio.addEventListener("ended", () => { setPlaying(false); draw(); });
+  $("play").addEventListener("click", toggle);
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && !["INPUT", "TEXTAREA", "BUTTON"].includes(e.target.tagName)) { e.preventDefault(); toggle(); }
+  });
+  canvas.addEventListener("click", (e) => {
+    const r = canvas.getBoundingClientRect();
+    const beat = (e.clientX - r.left - geom.left) / geom.pxb;
+    if (beat >= 0) { audio.currentTime = beat * geom.spb; if (audio.paused) audio.play().catch(() => {}); }
+  });
+
+  // ---------------------------------------------------------------- shelf
+  const shelf = $("shelf");
+  $("shelf-lede").textContent = `${melodicIds.length} of ${D.recordings.length} approved Recordings hold a pitch steady enough to play melody notes; the engine puts the tune on those. The other ${D.recordings.length - melodicIds.length} are noisier puffs. They are still real farts, but on their own they can't say which note they are.`;
+  D.recordings.forEach((r) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "rec"; b.dataset.rec = r.id;
+    b.innerHTML = `<span class="id" style="color:var(${colorVar(r.id)})">${r.id}</span>` +
+      `<span class="kind ${r.melodic ? "melodic" : ""}">${r.melodic ? "melodic · " + r.note.replace(/[+-]\d+$/, "") : "noise-like"}</span>` +
+      `<span class="detail mono">${r.segment_s.toFixed(2)} s puff${r.melodic ? ` · notes ≥ ${r.shortest_note_s} s` : ""} · ${r.license}</span>`;
+    b.addEventListener("click", () => playRec(r.id, b));
+    shelf.append(b);
+  });
+  $("footer").innerHTML = `Recordings: approved Fixture Library (22 CC0, 1 CC BY 4.0), sources on <a href="https://freesound.org" target="_blank" rel="noopener">Freesound</a>. Melodies: PDMX (Long et al., ICASSP 2025, <a href="https://doi.org/10.5281/zenodo.15571083" target="_blank" rel="noopener">doi:10.5281/zenodo.15571083</a>), each score marked public domain with no license conflict. Pitch figures come from an automatic pitch tracker and are a floor, not a verdict; your ears decide.`;
+
+  const redraw = () => { sizeRoll(); draw(); };
+  window.addEventListener("resize", redraw);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (document.fonts) document.fonts.ready.then(draw);
+  select();
+})();
+</script>

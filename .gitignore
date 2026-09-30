@@ -1,0 +1,14 @@
+# Xcode / SwiftPM
+.derivedData/
+DerivedData/
+.build/
+.swiftpm/
+xcuserdata/
+*.xcuserstate
+
+# Python
+.venv/
+__pycache__/
+
+# Generated output
+out/

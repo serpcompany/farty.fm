@@ -25,14 +25,12 @@ When a skill says “fetch the relevant ticket,” run:
 
 `gh issue view <number> --comments`
 
-## Wayfinding operations
+## Plan structure
 
-The map is a single issue with child issues as tickets.
+The MVP plan is the **TestFlight MVP** milestone. Its issues are vertical slices in build order, each ending in something the product owner can hear or tap.
 
-- **Map**: An issue labelled `wayfinder:map`, holding Notes, Decisions-so-far, and Fog.
-- **Child ticket**: A GitHub sub-issue linked to the map. If sub-issues aren’t enabled, add it to the map’s task list and put `Part of #<map>` at the top of the child.
-- **Child labels**: `wayfinder:research`, `wayfinder:prototype`, `wayfinder:grilling`, or `wayfinder:task`.
-- **Blocking**: Prefer GitHub’s native issue dependencies. Fall back to a `Blocked by: #<n>` line when dependencies aren’t available.
-- **Frontier**: The first open, unblocked, unassigned child in map order.
+- **Labels**: `slice` for build work, `decision` for an open question that blocks build work, `later` for ideas deferred past the MVP (no milestone).
+- **Blocking**: a `Blocked by: #<n>` line near the top of the issue body.
+- **Next up**: the lowest-numbered open, unblocked, unassigned `slice` in the milestone.
 - **Claim**: `gh issue edit <n> --add-assignee @me`.
-- **Resolve**: Comment with the answer, close the child, and append a context pointer to the map’s Decisions-so-far.
+- **Done**: close with a comment that says what was verified (numbers for audio, a screenshot or recording for UI), then link the PR.
