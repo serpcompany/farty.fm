@@ -6,7 +6,7 @@ Issues for this repo live in GitHub Issues. Use the `gh` CLI for all operations;
 
 ## Conventions
 
-- **Create an issue**: `gh issue create --title "..." --body-file <file> --label <slice|decision|later>`. Add `--milestone "TestFlight MVP"` for roadmap work; `later` issues have no milestone. A roadmap issue must also be placed in the roadmap (see below).
+- **Create an issue**: `gh issue create --title "..." --body-file <file> --label <slice|decision|later>`, plus `--label tools` for tools-track work. Add `--milestone "TestFlight MVP"` for roadmap work; `later` issues have no milestone. A roadmap issue must also be placed in the roadmap (see below).
 - **Read an issue**: `gh issue view <number> --json title,body,labels,assignees,comments`.
 - **List issues**: `gh issue list --state open --limit 200 --json number,title,labels,assignees`, with `--label` and `--milestone` filters as needed. Without `--limit`, `gh` silently stops at 30.
 - **Comment on an issue**: `gh issue comment <number> --body "..."`.
@@ -31,13 +31,13 @@ When a skill says "fetch the relevant ticket," run `gh issue view <number> --jso
 
 The MVP plan is the pinned **MVP roadmap** issue (#45). All roadmap issues are in the **TestFlight MVP** milestone.
 
-- **Labels**: `slice` for build work, `decision` for an open question that blocks build work, `later` for ideas deferred past the MVP.
+- **Labels**: `slice` for build work, `decision` for an open question that blocks build work, `later` for ideas deferred past the MVP, and `tools` for tools-track work (combined with `slice` or `decision`).
 - **Order**: `gh api --paginate repos/serpcompany/pedos-app/issues/<n>/sub_issues --jq '.[] | [.number, .state, .title] | @tsv'`, starting from #45. Read it depth-first: a sub-issue that has its own sub-issues is replaced by its children, in their order, before moving on to its next sibling.
 - **Blocking**: GitHub's built-in dependencies, not text in the body. Read them with `gh api repos/serpcompany/pedos-app/issues/<n>/dependencies/blocked_by --jq '.[] | [.number, .state] | @tsv'`. A parent's blockers also block its children.
 - **Next up**: the first leaf, in depth-first order, that is open, has no open blockers, has no assignee, and has no open PR. Check for a PR with `gh pr list --state open --limit 200 --json number,headRefName --jq '.[] | select(.headRefName | startswith("issue-<n>-")) | .number'`.
 - **Claim before branching**: `gh issue edit <n> --add-assignee @me`.
 - **`decision` issues**: an agent prepares the options the issue asks for (usually a listening page) and asks the owner to choose. Then one PR with `Closes #<n>` adds the candidates, the listening page and an ADR recording the choice.
-- **Tracks and parallel sessions**: issues labeled `tools` are the **tools** track (`tools/`, `catalog/`, `fixtures/golden/`); everything else is the **app** track. Run at most one session per track. A session takes the next-up leaf on its own track, and skips leaves on the other track.
+- **Tracks and parallel sessions**: issues labeled `tools` are the **tools** track (typically `tools/`, `catalog/` and `fixtures/golden/`); everything else is the **app** track. An app issue may still add a small script in `tools/` when it needs one. Run at most one session per track. A session takes the next-up leaf on its own track, and skips leaves on the other track.
 - **Adding a roadmap issue**: add it under #45 (or its parent) at the right position and link its blockers. These endpoints take numeric issue ids (`gh api repos/serpcompany/pedos-app/issues/<number> --jq .id`), not issue numbers:
   - `gh api -X POST repos/serpcompany/pedos-app/issues/<parent-number>/sub_issues -F sub_issue_id=<new-id>` appends the new issue.
   - `gh api -X PATCH repos/serpcompany/pedos-app/issues/<parent-number>/sub_issues/priority -F sub_issue_id=<new-id> -F after_id=<sibling-id>` moves it after a sibling.
