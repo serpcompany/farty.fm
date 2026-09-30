@@ -140,8 +140,8 @@
     ],
     "sample_rate": 44100
   },
-  "pitch_estimate_midi": 58.7259,
-  "recording_pitch_midi": 58.7259,
+  "pitch_estimate_midi": 58.72592059366017,
+  "recording_pitch_midi": 58.72592059366017,
   "recording_pitch_note": "B3-27",
   "rms_db": -15.654,
   "shortest_note_s": 0.12

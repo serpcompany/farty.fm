@@ -429,6 +429,51 @@
       "target_midi": 49
     }
   ],
+  "per_pitch": [
+    {
+      "recording": "021",
+      "shift_semitones": -4.22592059366017,
+      "song_pitch": 50,
+      "target_midi": 44
+    },
+    {
+      "recording": "021",
+      "shift_semitones": 0.7740794063398297,
+      "song_pitch": 55,
+      "target_midi": 49
+    },
+    {
+      "recording": "021",
+      "shift_semitones": 2.7740794063398297,
+      "song_pitch": 57,
+      "target_midi": 51
+    },
+    {
+      "recording": "090",
+      "shift_semitones": -2.1259205936601617,
+      "song_pitch": 59,
+      "target_midi": 53
+    },
+    {
+      "recording": "090",
+      "shift_semitones": -1.1259205936601617,
+      "song_pitch": 60,
+      "target_midi": 54
+    },
+    {
+      "recording": "090",
+      "shift_semitones": 0.8740794063398383,
+      "song_pitch": 62,
+      "target_midi": 56
+    },
+    {
+      "recording": "090",
+      "shift_semitones": 2.8740794063398383,
+      "song_pitch": 64,
+      "target_midi": 58
+    }
+  ],
+  "plan_cost": 84.74584388159514,
   "render_settings": {
     "bpm": 110,
     "tune": 1.0,
