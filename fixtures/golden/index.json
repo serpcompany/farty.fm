@@ -1,0 +1,206 @@
+{
+  "environment": {
+    "librosa": "1.0.0",
+    "libsndfile": "1.2.2",
+    "mido": "1.3.3",
+    "numpy": "2.5.3",
+    "python": "3.12.7",
+    "scipy": "1.18.1",
+    "soundfile": "0.14.0",
+    "soxr": "1.1.0"
+  },
+  "format_version": 1,
+  "generator": "tools/melody-lab/export_golden.py",
+  "hop": 256,
+  "libraries": {
+    "full": [
+      "002",
+      "009",
+      "013",
+      "016",
+      "017",
+      "018",
+      "019",
+      "021",
+      "022",
+      "032",
+      "052",
+      "055",
+      "059",
+      "065",
+      "067",
+      "069",
+      "080",
+      "081",
+      "084",
+      "086",
+      "090",
+      "091",
+      "094"
+    ],
+    "small": [
+      "002",
+      "009",
+      "016",
+      "021",
+      "069",
+      "090"
+    ]
+  },
+  "melodic_recordings": [
+    "013",
+    "017",
+    "019",
+    "021",
+    "059",
+    "084",
+    "086",
+    "090",
+    "094"
+  ],
+  "recordings": [
+    "002",
+    "009",
+    "013",
+    "016",
+    "017",
+    "018",
+    "019",
+    "021",
+    "022",
+    "032",
+    "052",
+    "055",
+    "059",
+    "065",
+    "067",
+    "069",
+    "080",
+    "081",
+    "084",
+    "086",
+    "090",
+    "091",
+    "094"
+  ],
+  "sample_rate": 44100,
+  "songs": [
+    {
+      "id": "twinkle",
+      "notes": 28,
+      "title": "Twinkle, Twinkle, Little Star",
+      "transpose": {
+        "full": -18,
+        "small": -21
+      }
+    },
+    {
+      "id": "mary",
+      "notes": 26,
+      "title": "Mary Had a Little Lamb",
+      "transpose": {
+        "full": -19,
+        "small": -26
+      }
+    },
+    {
+      "id": "jingle",
+      "notes": 26,
+      "title": "Jingle Bells",
+      "transpose": {
+        "full": -8,
+        "small": -10
+      }
+    },
+    {
+      "id": "birthday",
+      "notes": 26,
+      "title": "Happy Birthday",
+      "transpose": {
+        "full": -14,
+        "small": -17
+      }
+    },
+    {
+      "id": "frere",
+      "notes": 32,
+      "title": "Frère Jacques",
+      "transpose": {
+        "full": -6,
+        "small": -6
+      }
+    },
+    {
+      "id": "saints",
+      "notes": 31,
+      "title": "When the Saints Go Marching In",
+      "transpose": {
+        "full": -9,
+        "small": -13
+      }
+    },
+    {
+      "id": "row",
+      "notes": 27,
+      "title": "Row, Row, Row Your Boat",
+      "transpose": {
+        "full": -16,
+        "small": -19
+      }
+    },
+    {
+      "id": "ode",
+      "notes": 30,
+      "title": "Ode to Joy",
+      "transpose": {
+        "full": -14,
+        "small": -18
+      }
+    },
+    {
+      "id": "merryxmas",
+      "notes": 53,
+      "title": "We Wish You a Merry Christmas",
+      "transpose": {
+        "full": -14,
+        "small": -17
+      }
+    },
+    {
+      "id": "amazing",
+      "notes": 16,
+      "title": "Amazing Grace",
+      "transpose": {
+        "full": -14,
+        "small": -17
+      }
+    },
+    {
+      "id": "furelise",
+      "notes": 32,
+      "title": "Für Elise",
+      "transpose": {
+        "full": -18,
+        "small": -21
+      }
+    },
+    {
+      "id": "auld",
+      "notes": 29,
+      "title": "Auld Lang Syne",
+      "transpose": {
+        "full": -10,
+        "small": -17
+      }
+    },
+    {
+      "id": "ode-mutopia",
+      "notes": 30,
+      "title": "Ode to Joy (Mutopia SATB)",
+      "transpose": {
+        "full": -14,
+        "small": -18
+      }
+    }
+  ]
+}
