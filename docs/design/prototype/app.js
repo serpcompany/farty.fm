@@ -192,11 +192,12 @@
       <div class="card">🔓 Collect notes to unlock Songs</div><div style="height:18px"></div>
       <button class="primary" data-a="allowmic">Allow microphone</button><div style="text-align:center"><button class="linkbtn" data-a="notnow">Not now</button></div></div></div>`;
     if (m === "recording") return `<div class="cover"><div style="display:flex;justify-content:space-between"><button class="linkbtn" data-a="cancelrec" style="padding:0">Cancel</button><span></span></div>
+      <div class="card" style="text-align:center;font-size:13px">Prototype: your microphone isn't used. When you tap Stop you'll get a real test fart from the Fixture Library.</div>
       <div class="center"><div class="meter" id="meter">${Array.from({ length: 24 }, () => "<i></i>").join("")}</div><div class="timer" id="timer">0:00</div><p class="hint">One fart per Recording</p></div>
       <div style="display:grid;justify-items:center"><button class="stop" data-a="stoprec" aria-label="Stop"><i></i></button></div></div>`;
     if (m === "review") {
       const d = REC[S.draft], key = "draft";
-      return `<div class="cover"><div class="center"><div class="meta">New Recording · ${d.seconds.toFixed(1)} s</div>
+      return `<div class="cover"><div class="card" style="text-align:center;font-size:13px">Prototype: this is test fart #${d.id} from the Fixture Library, not your microphone.</div><div class="center"><div class="meta">New Recording · ${d.seconds.toFixed(1)} s</div>
         <div class="meter">${Array.from({ length: 30 }, (_, i) => `<i style="height:${10 + Math.round(55 * Math.abs(Math.sin(i * 1.7 + d.seconds)))}px"></i>`).join("")}</div>
         <button class="play" style="width:64px;height:64px;font-size:20px" data-a="playdraft">${S.playing === key ? "■" : "▶"}</button></div>
         <div class="btnrow"><button class="secondary" data-a="discard">Discard</button><button class="primary" data-a="save">Save</button></div></div>`;
