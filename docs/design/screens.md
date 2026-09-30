@@ -1,6 +1,6 @@
 # Screen inventory
 
-Phase 2 of the SERP UI runbook. Draft for owner review in #47. The flows are in `app-map.md`, and the clickable version is in `prototype/`.
+Phase 2 of the SERP UI runbook. Approved by the owner in #47 (2026-09-29). The flows are in `app-map.md`, and the clickable version is in `prototype/`.
 
 Reference apps for feel (in place of screenshots): Apple Voice Memos for recording, and Apple Music's library for lists.
 
@@ -40,13 +40,17 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 **SCREEN NAME:** Record
 **PURPOSE:** Capture one fart, instantly.
-**HOW USER GETS HERE:** Tab 1. Opens on launch.
+**HOW USER GETS HERE:** Tab 1 (Record). Opens on launch.
 **WHAT'S ON THE SCREEN:**
 - **Idle:** one big red button and nothing else
 - **Recording:** the button turns into a Stop square with a pulse, and a timer appears
 **PRIMARY ACTION:** Tap to record, tap again to stop.
 **SECONDARY ACTIONS:** None.
-**STATES:** Idle, Recording, Microphone off (alert).
+**STATES:**
+- Idle
+- Recording
+- Microphone off (alert)
+- **Error:** couldn't start recording, or recording interrupted (a call or another app took the microphone): "Recording stopped. Nothing was saved." with Try again
 **NAVIGATION TYPE:** Tab.
 **PATTERN CHOICE:** Recording happens in place, not in a separate screen. The other tabs are disabled while recording.
 **NOTES:** The owner asked for "just one big red button" (#47 review).
@@ -55,10 +59,10 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 **SCREEN NAME:** Recordings
 **PURPOSE:** See and play every Recording and the notes you've collected.
-**HOW USER GETS HERE:** Tab 2, or Done after saving.
+**HOW USER GETS HERE:** Tab 2 (Recordings), or Done after saving.
 **WHAT'S ON THE SCREEN:**
 - Large title "Recordings"
-- **Pitch strip:** a one-octave keyboard (C to B) that lights up each pitch class you've collected, with the count ("5 of 12 notes collected")
+- **Pitch strip:** a one-octave keyboard (C to B) that lights up each pitch class you've collected, with the count ("7 Melodic Recordings across 6 notes"). Repeats matter because each Song pitch needs its own fart.
 - A list of Recordings. Each row has:
   - a play button
   - the name ("Recording 7")
@@ -99,7 +103,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - **Analyzing:** a short "Finding your note…" state
 - **Result for a Melodic Recording:** the big note ("G♯3") and its place on the pitch strip
 - **Result for a Noise-like Recording:** "No steady note this time. It's saved, but it can't play melody notes."
-- Progress: "Ode to Joy: 4 of 5 pitches"
+- Pitch Coverage changes: "Ode to Joy: 4 of 5 notes covered"
 - Unlocks: "You unlocked Twinkle, Twinkle", with a "Try it" button
 - Done button
 **PRIMARY ACTION:** Done (or Try it when something was unlocked).
@@ -110,13 +114,15 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Melodic with an unlock
 - Noise-like
 - Second fart cut off ("We kept the first fart")
+- **Error, save failed** (for example, storage full): "Couldn't save this Recording", with Try again and Discard
+- **Error, analysis failed:** "Saved, but we couldn't find its note", with Retry. The Recording stays on the Recordings tab as "not analyzed".
 **NAVIGATION TYPE:** Full-screen cover, step 3.
 
 ---
 
 **SCREEN NAME:** Compose — Songs
 **PURPOSE:** Pick a Song to make, and see what's close to unlocking.
-**HOW USER GETS HERE:** Tab 2, with the Songs segment selected.
+**HOW USER GETS HERE:** Tab 3 (Compose), with the Songs segment selected.
 **WHAT'S ON THE SCREEN:**
 - Segmented control (Songs | AI)
 - Search field
@@ -141,8 +147,8 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **WHAT'S ON THE SCREEN:**
 - Title
 - "3 of 5 pitches"
-- Pitch strip with the notes you have and the notes you need
-- "Needs a fart near D3 and F3"
+- The notes still needed, with octave ("Needs a fart near D3 and F3")
+- Pitch strip marking the needed pitch classes (it shows note names only, so the text above carries the octave)
 - Record button (goes to the Record tab)
 - No way to play it until it's unlocked
 **PRIMARY ACTION:** Record.
@@ -169,6 +175,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Ready (auto-plays once)
 - Playing
 - Saved (a toast: "Saved to Melodies")
+- **Error:** couldn't make the melody, for example a Recording file is missing: "Couldn't make this melody", with Try again
 **NAVIGATION TYPE:** Push.
 **NOTES:** Not an editor. Nothing on this screen changes the Arrangement.
 
@@ -176,7 +183,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 **SCREEN NAME:** Compose — AI
 **PURPOSE:** Get a brand-new melody made only from your farts.
-**HOW USER GETS HERE:** Tab 2, with the AI segment selected.
+**HOW USER GETS HERE:** Tab 3 (Compose), with the AI segment selected.
 **WHAT'S ON THE SCREEN:**
 - Segmented control
 - Mood chips (Happy, Silly, Spooky, Epic)
@@ -194,6 +201,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Composing
 - Playing
 - Saved
+- **Error:** composing failed: "Couldn't compose a melody", with Try again
 **NAVIGATION TYPE:** Tab + in-place segment.
 **NOTES:** The AI approach is decided in #21. This screen only fixes the interaction.
 
@@ -201,12 +209,16 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 **SCREEN NAME:** Melodies
 **PURPOSE:** Everything you've made.
-**HOW USER GETS HERE:** Tab 3, or after Save.
+**HOW USER GETS HERE:** Tab 4 (Melodies), or after Save.
 **WHAT'S ON THE SCREEN:**
 - Rows with a play button, title, origin ("Twinkle, Twinkle" or "AI · Happy"), date and length
 **PRIMARY ACTION:** Play.
 **SECONDARY ACTIONS:** Long-press for Rename or Delete (with confirmation).
-**STATES:** Empty ("Nothing yet. Make one in Compose."), Populated, Playing.
+**STATES:**
+- Empty ("Nothing yet. Make one in Compose.")
+- Populated
+- Playing
+- **Error:** audio missing or unreadable: "This melody's audio is missing", offering Delete
 **NAVIGATION TYPE:** Tab.
 
 ---

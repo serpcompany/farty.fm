@@ -1,6 +1,6 @@
 # App map
 
-Phase 1 of the SERP UI runbook. Draft for owner review in #47. Uses the vocabulary in `CONTEXT.md`.
+Phase 1 of the SERP UI runbook. Approved by the owner in #47 (2026-09-29). Uses the vocabulary in `CONTEXT.md`.
 
 ## Main areas
 
@@ -61,7 +61,7 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 
 - **Tabs:** Record (one big red button, opens first), Recordings (renamed from Shelf), Compose (renamed from Create), Melodies.
 - **Record flow and Recordings screen:** approved as prototyped.
-- **Unlock rule:** a Song unlocks when every note has its **own** Melodic Recording within 3 semitones: one different fart per note, and no fart stretched across the tune. The progress bar shows how many notes are covered ("3 of 4 notes covered"). With the 23 test farts, the first Song (Mary, 4 notes) unlocks at the 6th Melodic fart, and 6 of 12 unlock with all 9. Stars were dropped. #43 validates the rule on more subsets.
+- **Unlock rule:** a Song unlocks when each of its distinct pitches has its **own** Melodic Recording within 3 semitones: one different fart per pitch, and no fart stretched across the tune. A Pitch Coverage bar (a `ProgressView`) shows how many are covered ("3 of 4 notes covered"). With the 23 test farts, 6 of 12 Songs unlock once all 9 Melodic ones are collected. The first unlock comes at the 4th to 8th Melodic fart depending on order (the 6th in the prototype's order). Stars were dropped. #43 validates the rule, and decides whether ADR 0004's short-note limit is also part of unlocking.
 - **Locked Songs can't be played.** There's no "Try anyway"; you unlock a Song to use it.
 - **Native SwiftUI:** see Visual direction.
 

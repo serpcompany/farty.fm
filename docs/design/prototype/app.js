@@ -4,6 +4,7 @@
   const SONG = Object.fromEntries(D.songs.map((s) => [s.id, s]));
   const NAMES = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
   const SHARP = new Set([1, 3, 6, 8, 10]);
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const noteName = (m) => NAMES[((Math.round(m) % 12) + 12) % 12] + (Math.floor(Math.round(m) / 12) - 1);
   const phone = document.getElementById("phone");
   const audio = document.getElementById("audio");
@@ -91,7 +92,7 @@
   };
   const recName = (r) => `Recording ${r.n}`;
   function strip(haveSet, needSet = new Set()) {
-    return `<div class="strip" aria-hidden="true">${NAMES.map((n, i) => `<span class="${SHARP.has(i) ? "sharp" : ""} ${haveSet.has(i) ? "have" : ""} ${needSet.has(i) && !haveSet.has(i) ? "need" : ""}">${n}</span>`).join("")}</div>`;
+    return `<div class="strip" aria-hidden="true">${NAMES.map((n, i) => `<span class="${SHARP.has(i) ? "sharp" : ""} ${needSet.has(i) ? "need" : haveSet.has(i) ? "have" : ""}">${n}</span>`).join("")}</div>`;
   }
   const havePcs = () => new Set(melodic().map((m) => ((Math.round(m) % 12) + 12) % 12));
 
@@ -118,7 +119,7 @@
     return `<div class="navbar"></div>
       <div class="largetitle">Recordings</div>
       ${strip(pcs)}
-      <div class="striplabel"><span>${pcs.size} of 12 notes collected</span><span>${S.recs.length} Recording${S.recs.length === 1 ? "" : "s"}</span></div>
+      <div class="striplabel"><span>${melodic().length} Melodic Recording${melodic().length === 1 ? "" : "s"} across ${pcs.size} note${pcs.size === 1 ? "" : "s"}</span><span>${S.recs.length} Recording${S.recs.length === 1 ? "" : "s"}</span></div>
       ${S.recs.length ? `<div class="list">${rows}</div>` : `<div class="empty">No Recordings yet.<br>Go to the Record tab and tap the red button.</div>`}`;
   }
 
@@ -132,11 +133,11 @@
         <div class="grow"><div class="title">${s.title}</div><div class="sub">${progressText(f)}${!f.unlocked ? " · " + needText(f).replace("Needs a fart", "needs") : ""}</div></div>
         ${f.unlocked ? `<span class="badge soft">Ready</span>` : `${bar(f)}<span aria-label="Locked">🔒</span>`}<span class="chev">›</span></button>`;
     const noMel = !melodic().length;
-    return `<div class="search"><input id="search" placeholder="Search Songs" value="${S.search.replace(/"/g, "&quot;")}" aria-label="Search Songs"><select id="sort" aria-label="Sort"><option value="closest" ${S.sort === "closest" ? "selected" : ""}>Closest to unlock</option><option value="az" ${S.sort === "az" ? "selected" : ""}>A–Z</option></select></div>
+    return `<div class="search"><input id="search" placeholder="Search Songs" value="${esc(S.search)}" aria-label="Search Songs"><select id="sort" aria-label="Sort"><option value="closest" ${S.sort === "closest" ? "selected" : ""}>Closest to unlock</option><option value="az" ${S.sort === "az" ? "selected" : ""}>A–Z</option></select></div>
       ${noMel ? `<div class="empty" style="margin-top:12px">Record a few farts with a clear note to start unlocking Songs.</div>` : ""}
       ${un.length ? `<div class="section">Unlocked · ${un.length}</div><div class="list">${un.map(row).join("")}</div>` : ""}
       ${lo.length ? `<div class="section">Locked · ${lo.length}</div><div class="list">${lo.map(row).join("")}</div>` : ""}
-      ${!items.length ? `<div class="empty" style="margin-top:12px">No Songs match "${S.search}".</div>` : ""}`;
+      ${!items.length ? `<div class="empty" style="margin-top:12px">No Songs match "${esc(S.search)}".</div>` : ""}`;
   }
 
   function aiPane() {
@@ -176,8 +177,8 @@
   function melodies() {
     const rows = S.melodies.map((m) => {
       const key = "mel-" + m.id;
-      return `<div class="row ${S.playing === key ? "playing" : ""}"><button class="play" data-a="playmel" data-id="${m.id}" aria-label="Play ${m.title}">${S.playing === key ? "■" : "▶"}</button>
-        <div class="grow"><div class="title">${m.title}</div><div class="sub">${m.origin} · ${m.when}</div></div>
+      return `<div class="row ${S.playing === key ? "playing" : ""}"><button class="play" data-a="playmel" data-id="${m.id}" aria-label="Play ${esc(m.title)}">${S.playing === key ? "■" : "▶"}</button>
+        <div class="grow"><div class="title">${esc(m.title)}</div><div class="sub">${esc(m.origin)} · ${m.when}</div></div>
         <button class="more" data-a="melmenu" data-id="${m.id}" aria-label="More">⋯</button></div>`;
     }).join("");
     return `<div class="navbar"></div><div class="largetitle">Melodies</div>
@@ -233,8 +234,8 @@
     if (a.type === "mic") return `<div class="alertwrap"><div class="alert"><div class="body"><h3>“Pedos” Would Like to Access the Microphone</h3><p>Pedos records your farts so it can turn them into songs.</p></div><div class="acts"><button data-a="micno">Don’t Allow</button><button class="strong" data-a="micyes">Allow</button></div></div></div>`;
     if (a.type === "micoff") return `<div class="alertwrap"><div class="alert"><div class="body"><h3>Microphone is off</h3><p>Pedos needs the microphone to record. Turn it on in Settings.</p></div><div class="acts"><button data-a="closealert">Cancel</button><button class="strong" data-a="settings">Open Settings</button></div></div></div>`;
     if (a.type === "recmenu") return `<div class="alertwrap"><div class="alert"><div class="body"><h3>${recName(S.recs.find((r) => r.key === a.key))}</h3></div><div class="acts stack"><button class="danger" data-a="delrec" data-k="${a.key}">Delete Recording</button><button data-a="closealert">Cancel</button></div></div></div>`;
-    if (a.type === "melmenu") { const m = S.melodies.find((x) => x.id === a.id); return `<div class="alertwrap"><div class="alert"><div class="body"><h3>${m.title}</h3></div><div class="acts stack"><button data-a="rename" data-id="${m.id}">Rename</button><button class="danger" data-a="delmel" data-id="${m.id}">Delete</button><button data-a="closealert">Cancel</button></div></div></div>`; }
-    if (a.type === "rename") { const m = S.melodies.find((x) => x.id === a.id); return `<div class="alertwrap"><div class="alert"><div class="body"><h3>Rename</h3><input id="renamefield" value="${m.title.replace(/"/g, "&quot;")}" aria-label="Name"></div><div class="acts"><button data-a="closealert">Cancel</button><button class="strong" data-a="dorename" data-id="${m.id}">Save</button></div></div></div>`; }
+    if (a.type === "melmenu") { const m = S.melodies.find((x) => x.id === a.id); return `<div class="alertwrap"><div class="alert"><div class="body"><h3>${esc(m.title)}</h3></div><div class="acts stack"><button data-a="rename" data-id="${m.id}">Rename</button><button class="danger" data-a="delmel" data-id="${m.id}">Delete</button><button data-a="closealert">Cancel</button></div></div></div>`; }
+    if (a.type === "rename") { const m = S.melodies.find((x) => x.id === a.id); return `<div class="alertwrap"><div class="alert"><div class="body"><h3>Rename</h3><input id="renamefield" value="${esc(m.title)}" aria-label="Name"></div><div class="acts"><button data-a="closealert">Cancel</button><button class="strong" data-a="dorename" data-id="${m.id}">Save</button></div></div></div>`; }
     return "";
   }
 
