@@ -10,7 +10,7 @@ Capture-first, as approved in #2, with the owner's changes from the #47 review: 
 | --- | --- | --- |
 | 1 | **Record** | One big red button. Tap to start, tap again to stop. Opens on launch. |
 | 2 | **Recordings** | Every Recording, with its note, and the strip of collected notes |
-| 3 | **Compose** | Song Creator (the Song Catalog with Pitch Coverage and unlocks) and AI Song Creator |
+| 3 | **Compose** | Song Creator: the Song Catalog with Pitch Coverage and unlocks. (AI Song Creator is post-MVP.) |
 | 4 | **Melodies** | Created Melodies |
 - **Debug builds only:** a "Load Fixture Library" action under a debug menu. It never appears in Release builds.
 
@@ -23,7 +23,7 @@ Capture-first, as approved in #2, with the owner's changes from the #47 review: 
 - **Replay or delete a Recording:** Recordings → tap row to play → swipe or long-press → Delete → confirm
 - **Make a Song:** Compose → Songs → an Unlocked Song → Song Creator (plays automatically) → Save → Melodies
 - **See what a locked Song needs:** Compose → Songs → a locked Song → "Needs a fart near D3 and F3" sheet → Record (goes to the Record tab). Locked Songs can't be played.
-- **Make an AI melody:** Compose → AI → pick a mood → Compose (plays) → Try again or Save → Melodies
+- **Make an AI melody (post-MVP):** Compose → AI → pick a mood → Compose (plays) → Try again or Save → Melodies
 - **Manage Created Melodies:** Melodies → tap to play → long-press → Rename or Delete
 
 ## Visual direction
@@ -33,18 +33,18 @@ Stock SwiftUI components from the latest iOS (Liquid Glass), with no custom comp
 - `NavigationStack` with large titles
 - `List`
 - `.searchable`
-- a segmented `Picker`
+- a segmented `Picker` (post-MVP, for Songs | AI)
 - sheets with detents
 - `confirmationDialog` and alerts
 - `ProgressView`
 - SF Symbols
 
-Use system colors, with red only for recording. This is why the minimum iOS is 26 (ADR 0001). The prototype is a grayscale stand-in for structure only.
+Use system colors, with red only for recording. This is why the minimum iOS is 26 (ADR 0001). The prototype is a grayscale stand-in for structure only; its Songs | AI segment and AI melodies are post-MVP.
 
 ## Hierarchy and pattern notes
 
 - **Tabs (root):** Record, Recordings, Compose, Melodies.
-- **In-place switch:** Compose has a segmented control, Songs | AI. They are two ways to create, so they share one tab rather than two.
+- **In-place switch (post-MVP):** when AI Song Creator returns, Compose gets a segmented control, Songs | AI. They are two ways to create, so they share one tab rather than two. In the MVP, Compose is the Songs list only.
 - **Pushed screen:** Song Creator is pushed from the Songs list.
 - **In place:** recording happens on the Record tab itself; the other tabs are disabled while recording.
 - **Full-screen cover:** Review → Result is one short task.
@@ -57,6 +57,7 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 
 ## Decided in the #47 review
 
+
 - **Layouts and flows:** approved by the owner on 2026-09-29. The real app builds them with stock SwiftUI and native iOS controls (see Visual direction). The HTML prototype is a structure reference only.
 
 - **Tabs:** Record (one big red button, opens first), Recordings (renamed from Shelf), Compose (renamed from Create), Melodies.
@@ -65,8 +66,12 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 - **Locked Songs can't be played.** There's no "Try anyway"; you unlock a Song to use it.
 - **Native SwiftUI:** see Visual direction.
 
+## Decided after the #47 review
+
+- **AI Song Creator is post-MVP** (owner in chat, 2026-09-29). The groundwork is kept on #21 and #22.
+
 ## Still open
 
-1. **Early payoff:** the first unlock comes late. Proposed: add a few 3-note starter Songs (Hot Cross Buns and similar) through the batch import (#39), and let AI Song Creator work from 3 Melodic farts.
+1. **Early payoff:** the first unlock comes late. Proposed: add a few 3-note starter Songs (Hot Cross Buns and similar) through the batch import (#39). Letting AI Song Creator work from 3 Melodic farts was the other idea; it's post-MVP with AI.
 2. **Choosing Recordings:** Auto-map picks the farts itself, with no manual picking in the MVP.
 3. **Naming Recordings:** default "Recording 1, 2, …", with no renaming in the MVP.
