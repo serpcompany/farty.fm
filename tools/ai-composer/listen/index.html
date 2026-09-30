@@ -1,0 +1,298 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Song Creator candidates</title>
+<style>
+:root {
+  --bg: #edf0ea; --surface: #f9faf6; --fg: #1b221e; --muted: #5a665f; --line: #d3d9d0; --grid: #e3e8e0;
+  --accent: #8a5a00; --accent-ink: #fffaf0; --good: #2f7d4f; --warn: #a4501a;
+  --body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --r1: #c2413b; --r2: #d88a12; --r3: #2f8f6b; --r4: #2c6fa8; --r5: #7a4fa0; --r6: #b0487f; --r7: #5f7f1c; --r8: #1f8a9c; --r9: #8c6a3f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121714; --surface: #1a201c; --fg: #e4eae5; --muted: #9aa69e; --line: #2c352f; --grid: #222a25;
+    --accent: #e3b341; --accent-ink: #1a1405; --good: #6cc38f; --warn: #e79a61;
+    --r1: #ec6a60; --r2: #f0ab3c; --r3: #52c197; --r4: #62a3dd; --r5: #a987d1; --r6: #e07bb1; --r7: #9cc24f; --r8: #4cc0d1; --r9: #c9a375;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121714; --surface: #1a201c; --fg: #e4eae5; --muted: #9aa69e; --line: #2c352f; --grid: #222a25;
+  --accent: #e3b341; --accent-ink: #1a1405; --good: #6cc38f; --warn: #e79a61;
+  --r1: #ec6a60; --r2: #f0ab3c; --r3: #52c197; --r4: #62a3dd; --r5: #a987d1; --r6: #e07bb1; --r7: #9cc24f; --r8: #4cc0d1; --r9: #c9a375;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 64px; display: grid; gap: 24px; }
+h1, h2 { margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(1.6rem, 4vw, 2.3rem); line-height: 1.1; }
+h2 { font-size: 1.2rem; }
+p { margin: 0; }
+.lede { color: var(--muted); max-width: 70ch; margin-top: 8px; }
+.eyebrow { font: 600 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.controls { display: grid; gap: 10px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.row > .label { font-size: 13px; color: var(--muted); min-width: 72px; }
+.seg button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: 14px; }
+.seg button[aria-pressed="true"] { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+label.check { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; }
+
+.table-box { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 7px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+th:first-child, td:first-child { text-align: left; }
+thead th { color: var(--muted); font-weight: 600; }
+tbody tr:last-child td { border-bottom: 0; }
+
+.group { display: grid; gap: 12px; }
+.group-head { display: grid; gap: 4px; }
+.group-head p { color: var(--muted); font-size: 14px; max-width: 80ch; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 10px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 8px; min-width: 0; }
+.card.playing { outline: 2px solid var(--accent); }
+.card-head { display: flex; align-items: center; gap: 10px; }
+.play { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; }
+.play svg { width: 14px; height: 14px; fill: currentColor; }
+.title { font-weight: 650; }
+.sub { font-size: 12px; color: var(--muted); }
+.tag { margin-left: auto; font: 700 11px/1 var(--mono); padding: 5px 7px; border-radius: 5px; background: var(--grid); color: var(--muted); }
+.roll { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+.m { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 12px; }
+.m b { color: var(--fg); font-family: var(--mono); font-weight: 650; }
+.m b.good { color: var(--good); }
+.m b.warn { color: var(--warn); }
+.plan { font: 12px/1.4 var(--mono); color: var(--muted); }
+.fail { color: var(--warn); font-size: 14px; }
+
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+summary { cursor: pointer; font-weight: 650; }
+.pal { display: grid; gap: 10px; margin-top: 12px; }
+.pal-row { display: grid; gap: 6px; }
+.pal-row .k { font-size: 13px; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 4px 9px 4px 7px; font-size: 13px; }
+.chip i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.chip.playing { outline: 2px solid var(--accent); }
+footer { font-size: 12px; color: var(--muted); display: grid; gap: 6px; max-width: 90ch; }
+[data-blind="true"] .reveal { display: none; }
+@media (max-width: 640px) { .wrap { padding: 20px 16px 48px; } }
+</style>
+
+<div class="wrap" id="app">
+  <header>
+    <div class="eyebrow">Pedos · decision #21</div>
+    <h1>How should AI Song Creator compose?</h1>
+    <p class="lede">Three ways to write a new melody that only your farts can play. Every note is one of the Melodic Recordings: each pitch gets its own Recording, moved at most 3 semitones, and the approved engine renders it (trim, resample, fade, gain, mix; nothing else). Play them, then pick the one that sounds most like a tune.</p>
+  </header>
+
+  <section class="controls" aria-label="Filters">
+    <div class="row"><span class="label">Library</span><div class="seg row" id="f-input"></div></div>
+    <div class="row"><span class="label">Mood</span><div class="seg row" id="f-mood"></div></div>
+    <div class="row"><span class="label">Group by</span><div class="seg row" id="f-group"></div></div>
+    <div class="row"><span class="label"></span><label class="check"><input type="checkbox" id="f-blind"> Blind: hide which option is which</label></div>
+  </section>
+
+  <section class="group">
+    <div class="group-head"><h2>Measured on every render</h2>
+      <p>The melody lab's checks read each render back: notes within ±50 cents, onsets within ±50 ms, second attacks inside a note. The last columns describe the shape of the melodies, not whether they're good. That's for your ear.</p></div>
+    <div class="table-box"><table id="summary"></table></div>
+  </section>
+
+  <main id="groups" class="group" style="gap:28px"></main>
+
+  <details>
+    <summary>The instrument: which Recording plays which pitch</summary>
+    <div class="pal" id="palettes"></div>
+  </details>
+
+  <footer id="footer"></footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+const D = window.AICOMPOSE;
+const MOODS = ["happy", "silly", "spooky", "epic"];
+const BLIND = { A: "Option 2", B: "Option 3", C: "Option 1" };  // fixed, so the owner can say "option 1"
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const state = { input: "all9", mood: "all", group: "cand", blind: false };
+try { Object.assign(state, JSON.parse(localStorage.getItem("aicompose") || "{}")); } catch (e) {}
+const save = () => { try { localStorage.setItem("aicompose", JSON.stringify(state)); } catch (e) {} };
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) k === "class" ? (n.className = v) : k.startsWith("on") ? n.addEventListener(k.slice(2), v) : n.setAttribute(k, v);
+  for (const k of kids.flat()) if (k != null) n.append(k);
+  return n;
+};
+const candName = c => state.blind ? BLIND[c] : `${c} · ${D.candidates[c].name}`;
+const candTag = c => state.blind ? BLIND[c].replace("Option ", "#") : c;
+const candOrder = () => Object.keys(D.candidates).sort((a, b) => state.blind ? BLIND[a].localeCompare(BLIND[b]) : a.localeCompare(b));
+
+function seg(id, options, key) {
+  const box = document.getElementById(id);
+  box.replaceChildren(...options.map(([v, label]) => el("button", { type: "button", "aria-pressed": String(state[key] === v), onclick: () => { state[key] = v; save(); draw(); } }, label)));
+}
+
+// ---- audio: one player for the whole page
+const audio = new Audio();
+let current = null;  // {btn, card, roll, bpm, x0, pxPerBeat}
+const PLAY = '<svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg>';
+const STOP = '<svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="1"/></svg>';
+function stop() {
+  audio.pause();
+  if (!current) return;
+  current.btn.innerHTML = PLAY; current.btn.setAttribute("aria-label", "Play"); current.card.classList.remove("playing");
+  if (current.head) { current.head.setAttribute("x1", -10); current.head.setAttribute("x2", -10); }
+  current = null;
+}
+function play(src, cur) {
+  const again = current && current.btn === cur.btn;
+  stop();
+  if (again) return;
+  current = cur;
+  cur.btn.innerHTML = STOP; cur.btn.setAttribute("aria-label", "Stop"); cur.card.classList.add("playing");
+  audio.src = src; audio.currentTime = 0; audio.play();
+  requestAnimationFrame(tick);
+}
+audio.addEventListener("ended", stop);
+function moveHead() {
+  if (!current || !current.head) return;
+  const x = current.x0 + audio.currentTime * current.bpm / 60 * current.pxPerBeat;
+  current.head.setAttribute("x1", x); current.head.setAttribute("x2", x);
+}
+function tick() {
+  if (!current || audio.paused) return;
+  moveHead();
+  requestAnimationFrame(tick);
+}
+audio.addEventListener("timeupdate", moveHead);
+
+// ---- note view: rows are the palette's pitches, colour is the Recording
+function roll(r, pal) {
+  const NS = "http://www.w3.org/2000/svg";
+  const s = (tag, a) => { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); return n; };
+  const rows = pal.pitches.length, beats = r.bars * r.beats_per_bar;
+  const x0 = 34, pxPerBeat = r.bars > 4 ? 10 : 18, rowH = rows > 4 ? 12 : 16, W = x0 + beats * pxPerBeat + 4, H = rows * rowH + 4;
+  const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, class: "roll", role: "img", "aria-label": "Notes: " + r.notes.map(n => n.name).join(" ") });
+  pal.pitches.forEach((p, i) => {
+    const y = 2 + (rows - 1 - i) * rowH;
+    if (i === pal.home) svg.append(s("rect", { x: x0, y, width: beats * pxPerBeat, height: rowH, fill: "var(--grid)" }));
+    const t = s("text", { x: 2, y: y + rowH * 0.75, "font-size": 9, fill: "var(--muted)", "font-family": "var(--mono)" });
+    t.textContent = p.name + (i === pal.home ? "*" : "");
+    svg.append(t);
+  });
+  for (let b = 0; b <= r.bars; b++) svg.append(s("line", { x1: x0 + b * r.beats_per_bar * pxPerBeat, x2: x0 + b * r.beats_per_bar * pxPerBeat, y1: 2, y2: H - 2, stroke: "var(--line)", "stroke-width": 1 }));
+  for (const n of r.notes) {
+    const y = 2 + (rows - 1 - n.i) * rowH;
+    const rect = s("rect", { x: x0 + n.start * pxPerBeat + 0.5, y: y + 1.5, width: Math.max(2, n.dur * pxPerBeat - 1.5), height: rowH - 3, rx: 2, fill: `var(--r${1 + n.i % 9})` });
+    const tt = s("title", {}); tt.textContent = `${n.name} · Recording ${n.rec} · ${n.cents == null ? "unreadable" : (n.cents > 0 ? "+" : "") + n.cents + " cents"}`;
+    rect.append(tt); svg.append(rect);
+  }
+  const head = s("line", { x1: -10, x2: -10, y1: 0, y2: H, stroke: "var(--accent)", "stroke-width": 1.5 });
+  svg.append(head);
+  return { svg, head, x0, pxPerBeat };
+}
+
+function card(r, showCand) {
+  const pal = D.palettes[r.input][r.mood];
+  const title = `${cap(r.mood)} · ${cap(r.length)} · Try ${r.seed}`;
+  const tag = showCand ? el("span", { class: "tag" }, candTag(r.cand)) : null;
+  if (!r.ok) return el("article", { class: "card" }, el("div", { class: "card-head" }, el("div", {}, el("div", { class: "title" }, title)), tag), el("p", { class: "fail" }, "Couldn't compose: " + r.error));
+  const m = r.metrics, st = r.stats;
+  const cls = (v, good) => good ? "good" : "warn";
+  const btn = el("button", { class: "play", type: "button", "aria-label": "Play" }); btn.innerHTML = PLAY;
+  const c = el("article", { class: "card" });
+  const rl = roll(r, pal);
+  btn.addEventListener("click", () => play(r.audio, { btn, card: c, head: rl.head, x0: rl.x0, pxPerBeat: rl.pxPerBeat, bpm: r.bpm }));
+  const plan = r.info.plan ? Object.entries(r.info.plan).filter(([k]) => r.length === "long" || !k.startsWith("b_")).map(([, v]) => v).join(" · ") : null;
+  c.append(
+    el("div", { class: "card-head" }, btn, el("div", {}, el("div", { class: "title" }, title), el("div", { class: "sub" }, `${pal.key} · ${r.bpm} bpm · ${st.seconds} s`)), tag),
+    rl.svg,
+    el("div", { class: "m" },
+      el("span", {}, "On pitch ", el("b", { class: cls(0, m.within_50c_pct >= 94) }, m.within_50c_pct + "%")),
+      el("span", {}, "On time ", el("b", { class: cls(0, m.onsets_on_time_pct >= 90) }, m.onsets_on_time_pct + "%")),
+      el("span", {}, "Re-attacks ", el("b", { class: cls(0, m.notes_with_retrigger === 0) }, String(m.notes_with_retrigger))),
+      el("span", {}, el("b", {}, String(m.notes)), " notes")),
+    el("div", { class: "m" },
+      el("span", {}, "Ends on home ", el("b", {}, st.ends_on_home ? "yes" : "no")),
+      el("span", {}, "Steps ", el("b", {}, st.stepwise_pct + "%")),
+      el("span", {}, "Pitches ", el("b", {}, String(st.distinct_pitches))),
+      r.info.legalized ? el("span", {}, "Moved ", el("b", {}, String(r.info.legalized))) : null,
+      r.info.llm_seconds != null ? el("span", { class: "reveal" }, "Model ", el("b", {}, r.info.llm_seconds + " s")) : null),
+  );
+  if (plan) c.append(el("div", { class: "plan reveal" }, "Plan: " + plan));
+  return c;
+}
+
+function summaryTable() {
+  const t = document.getElementById("summary");
+  const cols = [["Option", null], ["On pitch avg", s => s.within_50c_mean + "%"], ["min", s => s.within_50c_min + "%"], ["On time avg", s => s.onsets_on_time_mean + "%"], ["min", s => s.onsets_on_time_min + "%"],
+    ["Re-attacks", s => s.retriggers_total], ["Notes", s => s.notes_total], ["Moved", s => s.legalized_total], ["Ends on home", s => `${s.ends_on_home} of ${s.renders - s.failed}`], ["Steps avg", s => s.stepwise_mean + "%"], ["Failed", s => s.failed]];
+  const head = el("tr", {}, cols.map(([h]) => el("th", {}, h)));
+  const rows = candOrder().map(c => {
+    const s = D.summary[c][state.input];
+    return el("tr", {}, cols.map(([h, f], i) => el("td", { class: i ? "mono" : "" }, i ? String(s.within_50c_mean == null && i < 10 ? "-" : f(s)) : candName(c))));
+  });
+  t.replaceChildren(el("thead", {}, head), el("tbody", {}, rows));
+}
+
+function draw() {
+  document.getElementById("app").dataset.blind = String(state.blind);
+  document.getElementById("f-blind").checked = state.blind;
+  seg("f-input", D.inputs.map(i => [i.id, i.id === "all9" ? "All 9 Melodic" : "Only 3 (021, 090, 094)"]), "input");
+  seg("f-mood", [["all", "All"], ...MOODS.map(m => [m, cap(m)])], "mood");
+  seg("f-group", [["cand", "Option"], ["mood", "Mood"]], "group");
+  stop();
+  summaryTable();
+  const rs = D.renders.filter(r => r.input === state.input && (state.mood === "all" || r.mood === state.mood));
+  const groups = document.getElementById("groups");
+  groups.replaceChildren();
+  if (state.group === "cand") {
+    for (const c of candOrder()) {
+      const list = rs.filter(r => r.cand === c);
+      groups.append(el("section", { class: "group" },
+        el("div", { class: "group-head" }, el("h2", {}, candName(c)), el("p", { class: "reveal" }, D.candidates[c].desc)),
+        el("div", { class: "cards" }, list.map(r => card(r, false)))));
+    }
+  } else {
+    for (const mood of MOODS.filter(m => state.mood === "all" || m === state.mood)) {
+      const list = rs.filter(r => r.mood === mood).sort((a, b) => (a.length + a.seed).localeCompare(b.length + b.seed) || candOrder().indexOf(a.cand) - candOrder().indexOf(b.cand));
+      const pal = D.palettes[state.input][mood];
+      groups.append(el("section", { class: "group" },
+        el("div", { class: "group-head" }, el("h2", {}, cap(mood)), el("p", {}, `${pal.key}, home ${pal.pitches[pal.home].name}. Tags: ${candOrder().map(c => candTag(c) + " = " + candName(c)).join(", ")}.`)),
+        el("div", { class: "cards" }, list.map(r => card(r, true)))));
+    }
+  }
+  drawPalettes();
+}
+
+function drawPalettes() {
+  const box = document.getElementById("palettes");
+  box.replaceChildren(el("p", { class: "lede", style: "margin:0" }, "Each mood picks a key whose pitches the Recordings can reach (one Recording per pitch, at most 3 semitones away), within one octave. * marks home. Tap a pitch to hear its Recording alone, unshifted."));
+  for (const mood of MOODS) {
+    const pal = D.palettes[state.input][mood];
+    box.append(el("div", { class: "pal-row" }, el("div", { class: "k" }, `${cap(mood)}: ${pal.key}`),
+      el("div", { class: "chips" }, pal.pitches.map((p, i) => {
+        const rec = D.recordings[p.rec];
+        const b = el("button", { type: "button", class: "chip" }, el("i", { style: `background:var(--r${1 + i % 9})` }),
+          `${p.name}${i === pal.home ? "*" : ""} (${p.degree}) · ${p.rec} ${p.shift > 0 ? "+" : ""}${p.shift}`);
+        b.addEventListener("click", () => play(rec.audio, { btn: el("span"), card: b, head: null, bpm: 0 }));
+        return b;
+      }))));
+  }
+}
+
+document.getElementById("f-blind").addEventListener("change", e => { state.blind = e.target.checked; save(); draw(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") stop(); });
+const f = document.getElementById("footer");
+f.append(
+  el("p", { class: "reveal" }, "Determinism: " + Object.entries(D.determinism).map(([c, v]) => `${c}: ${v}.`).join(" ")),
+  el("p", {}, `Tempo per mood: ${Object.entries(D.settings.bpm).map(([k, v]) => `${k} ${v}`).join(", ")} bpm. Rebuild with tools/ai-composer/build.py.`));
+draw();
+</script>
