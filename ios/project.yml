@@ -1,0 +1,81 @@
+name: Pedos
+
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: en
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # Portrait iPhone only (ADR 0001).
+    TARGETED_DEVICE_FAMILY: "1"
+    SUPPORTS_MACCATALYST: NO
+    SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+    SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+targets:
+  Pedos:
+    type: application
+    platform: iOS
+    sources:
+      - path: Pedos
+    settings:
+      base:
+        PRODUCT_NAME: Pedos
+        INFOPLIST_FILE: Pedos/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+      # SERP native app build identity: only Release carries the product identifier.
+      # scripts/check-bundle-identifiers.sh keeps these values honest.
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos.debug
+        Release:
+          PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos
+
+  PedosTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: PedosTests
+    dependencies:
+      - target: Pedos
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+  PedosUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: PedosUITests
+    dependencies:
+      - target: Pedos
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos.uitests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  Pedos:
+    build:
+      targets:
+        Pedos: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - PedosTests
+        - PedosUITests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

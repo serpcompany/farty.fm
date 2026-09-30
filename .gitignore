@@ -5,6 +5,10 @@ DerivedData/
 .swiftpm/
 xcuserdata/
 *.xcuserstate
+*.xcresult/
+
+# XcodeGen output: generate it from ios/project.yml
+ios/*.xcodeproj/
 
 # Python
 .venv/
