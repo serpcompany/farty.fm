@@ -37,6 +37,9 @@ class Source:
     pitch_confidence: float  # 0..1
     rms_db: float
     min_note_s: float = 0.0  # shortest note this Recording reads back on-pitch
+    start: int = 0  # gesture start, in samples of the decoded original file
+    end: int = 0  # gesture end (exclusive), in samples of the decoded original file
+    pitch_estimate: float | None = None  # ref_midi before audition() (kept when audition rejects it)
 
     @property
     def pitched(self):
@@ -116,6 +119,9 @@ def analyze_recording(rid, y):
         ref_midi=ref_midi,
         pitch_confidence=round(conf, 2),
         rms_db=float(20 * np.log10(np.sqrt(np.mean(body**2)) + 1e-9)),
+        start=start,
+        end=end,
+        pitch_estimate=ref_midi,
     )
     if src.pitched:
         src.min_note_s = audition(src)
@@ -169,14 +175,15 @@ def shift_cost(s):
     return a**1.5 + (4 * (a - 7) if a > 7 else 0)
 
 
-def plan(melody, sources, variety=False, transpose=None):
+def plan(melody, sources, variety=False, transpose=None, with_cost=False):
     """Choose a key (transposition) and a Recording for each note.
 
     Key-zone mapping, like a multi-sampled instrument: each distinct melody pitch is played
     by the pitched Recording whose natural pitch is closest, so shifts stay small and the same
     note always sounds the same. A one-to-one assignment maximises how many different
     Recordings are used. `variety=True` rotates between the closest few Recordings on
-    repeated notes instead.
+    repeated notes instead. `with_cost=True` also returns the chosen assignment's total cost
+    (used by the golden export).
     """
     pitched = [s for s in sources if s.pitched]
     if not pitched:
@@ -217,7 +224,7 @@ def plan(melody, sources, variety=False, transpose=None):
             counters[n.pitch] = k + 1
             src = near[k % len(near)]
         out.append(Assignment(i, src.id, target, round(target - src.ref_midi, 2)))
-    return best_t, out
+    return (best_t, out, float(best_cost)) if with_cost else (best_t, out)
 
 
 # ---------------------------------------------------------------- Rendering
