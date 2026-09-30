@@ -39,11 +39,11 @@ How well a set of Melodic Recordings can play a particular Song, judged by how f
 _Avoid_: Song match, quality score
 
 **Pitch Coverage**:
-How many of the pitches a Song needs the user's Melodic Recordings can reach, shown as "3 of 5 pitches".
+How many of a Song's distinct pitches are covered, each by its own Melodic Recording close enough to it, shown as "3 of 4 notes covered".
 _Avoid_: Progress, completion
 
 **Unlocked Song**:
-A Song whose needed pitches are all covered by the user's Melodic Recordings.
+A Song whose Pitch Coverage is complete: every distinct pitch has its own Melodic Recording.
 _Avoid_: Available song, playable song
 
 **Arrangement**:
@@ -51,7 +51,7 @@ Which Recording plays each note of a melody.
 _Avoid_: Mapping, mix, assignment
 
 **Auto-map**:
-The Arrangement the app chooses on its own, favoring the closest-pitched Melodic Recording for each note.
+The Arrangement the app chooses on its own, giving each distinct pitch its own Melodic Recording, as close in pitch as possible.
 _Avoid_: Smart choose, AI pick, best fit
 
 **Created Melody**:
