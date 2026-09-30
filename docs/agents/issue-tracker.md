@@ -49,7 +49,7 @@ Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob
 
 1. Claim the issue, then branch from `main` as `issue-<n>-<short-slug>`. Name the branch correctly before opening a PR: renaming a PR's head branch closes the PR.
 2. Open a small PR into `main`:
-   - The title is a Conventional Commit written for the user, for example `feat: show each Recording's pitch on the shelf`.
+   - The title is a Conventional Commit written for the user, for example `feat: show each Recording's pitch on the Recordings tab`.
    - The body starts with `Closes #<n>` and says what changed and what's deliberately not included.
    - It reports evidence level by level: build, automated tests, UI tests, installed artifact, owner acceptance. A lower level never proves a higher one.
    - For audio, report measurements on the actual output (the `tools/melody-lab/evaluate.py` checks or their Swift equivalents), not a description. For UI, attach a screenshot or recording from the simulator or device.
