@@ -12,6 +12,8 @@ struct TootLayout<Details: View>: View {
     let tootID: UUID
     /// What Play plays: the whole Toot.
     let item: PlaybackItem
+    /// The Toot's audio is gone: Play and the notes can't play, and the Recordings still can.
+    var isAudioMissing = false
     /// More lines under "N of your Recordings, one per note".
     @ViewBuilder let details: Details
 
@@ -32,16 +34,17 @@ struct TootLayout<Details: View>: View {
                         focus = nil
                         model.togglePlayback(of: item)
                     } label: {
-                        Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle.fill")
+                        Image(systemName: isAudioMissing ? "exclamationmark.circle.fill" : isPlaying ? "stop.circle.fill" : "play.circle.fill")
                             .font(.system(size: 56))
                             .symbolRenderingMode(.hierarchical)
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(.tint)
-                    .accessibilityLabel(isPlaying ? "Stop" : "Play")
+                    .foregroundStyle(isAudioMissing ? AnyShapeStyle(.secondary) : AnyShapeStyle(.tint))
+                    .disabled(isAudioMissing)
+                    .accessibilityLabel(isAudioMissing ? "Audio missing" : isPlaying ? "Stop" : "Play")
                     .accessibilityIdentifier("song-creator-play")
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(isPlaying ? "Playing" : "Ready")
+                        Text(isAudioMissing ? "Audio missing" : isPlaying ? "Playing" : "Ready")
                             .font(.headline)
                         Text("\(song.pitches.count) of your Recordings, one per note")
                             .font(.subheadline)
@@ -130,6 +133,7 @@ struct TootLayout<Details: View>: View {
 
     /// Selects the note and plays just it, as rendered. It stops whatever was playing.
     private func tapNote(_ index: Int) {
+        guard !isAudioMissing else { return }
         focus = .note(index)
         model.togglePlayback(of: .note(tootID, index: index))
     }

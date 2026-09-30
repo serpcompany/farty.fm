@@ -1,7 +1,8 @@
 import XCTest
 @testable import Pedos
 
-/// The Compose tab's Song list, missing-note text, Auto-map's Arrangement and the coverage cache.
+/// The Compose tab's Song list, missing-note text, Pitch Coverage's matching as an Arrangement,
+/// note timing and shifts, and the coverage cache.
 final class SongListingTests: XCTestCase {
     private let songs = Song.prototypeCatalog
     private let fixtures = SampleFixture.prototypeLibrary

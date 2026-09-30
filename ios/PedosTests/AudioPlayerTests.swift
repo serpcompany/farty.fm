@@ -55,9 +55,13 @@ final class AudioPlayerTests: XCTestCase {
         let startedAt = try XCTUnwrap(player.startedAt, "The segment never started")
         _ = try await waitUntilStopped(player, within: .seconds(8))
         let played = Date.now.timeIntervalSince(startedAt)
+        // In the log, so the allowance can be checked against slow runners.
+        print("Segment of \(length) s played for \(played) s")
         XCTAssertNil(player.nowPlaying, "The segment never ended")
         XCTAssertGreaterThan(played, length - 0.1, "It ended before the note did")
-        XCTAssertLessThan(played, length + 1.5, "It played on past the note")
+        // The next note starts right at this one's end: running into it by more than a timer's
+        // overshoot, a hop to the main actor and the 20 ms poll fails.
+        XCTAssertLessThan(played, length + 0.3, "It played on into the next note")
     }
 
     func testTogglingThePlayingItemStopsIt() async throws {

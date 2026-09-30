@@ -12,21 +12,42 @@ final class ForegroundUITests: PedosUITestCase {
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
     }
 
-    func testComingBackLandsOnRecordAndPlaybackStopped() {
+    /// Stopping playback in the background is checked by `SampleAppModelTests`
+    /// (`testGoingToTheBackgroundStopsPlayback`): here, switching back to Record would stop it anyway.
+    func testComingBackLandsOnRecord() {
         let app = launch(start: "all", toots: ["ode"])
         app.tabBars.buttons["Toots"].tap()
-        let ode = app.buttons["Ode to Joy"]
-        XCTAssertTrue(ode.waitForExistence(timeout: 5))
-        app.buttons["play Ode to Joy"].tap()
-        XCTAssertTrue((ode.value as? String)?.hasSuffix("playing") ?? false, "The 18 s Toot didn't start")
+        XCTAssertTrue(app.buttons["Ode to Joy"].waitForExistence(timeout: 5))
 
         leaveAndComeBack(app)
         XCTAssertTrue(app.buttons["record-button"].waitForExistence(timeout: 5), "Didn't come back on Record")
         XCTAssertTrue(app.tabBars.buttons["Record"].isSelected)
+        XCTAssertTrue(app.buttons["record-button"].isHittable)
+    }
 
+    /// A Delete confirmation on a Toot's screen doesn't survive a trip to the background.
+    func testComingBackClosesATootsDeleteConfirmation() {
+        let app = launch(start: "all", toots: ["mary"])
         app.tabBars.buttons["Toots"].tap()
-        XCTAssertTrue(ode.waitForExistence(timeout: 5))
-        XCTAssertFalse((ode.value as? String)?.contains("playing") ?? true, "Playback didn't stop in the background")
+        let mary = app.buttons["Mary Had a Little Lamb"]
+        XCTAssertTrue(mary.waitForExistence(timeout: 5))
+        mary.tap()
+        app.buttons["toot-menu"].tap()
+        XCTAssertTrue(app.buttons["Delete"].waitForExistence(timeout: 5))
+        app.buttons["Delete"].tap()
+        XCTAssertTrue(app.buttons["Delete Toot"].waitForExistence(timeout: 5), "No delete confirmation")
+
+        leaveAndComeBack(app)
+        XCTAssertTrue(app.buttons["record-button"].waitForExistence(timeout: 5), "Didn't come back on Record")
+        XCTAssertTrue(app.tabBars.buttons["Record"].isSelected)
+        XCTAssertFalse(app.buttons["Delete Toot"].waitForExistence(timeout: 2), "The Delete confirmation stayed open")
+        XCTAssertTrue(app.buttons["record-button"].isHittable, "Something covers the Record tab")
+
+        // The Toot is still there: its screen is still open on the Toots tab, and so is its row.
+        app.tabBars.buttons["Toots"].tap()
+        XCTAssertTrue(app.navigationBars["Mary Had a Little Lamb"].waitForExistence(timeout: 5))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(mary.waitForExistence(timeout: 5), "The Toot was deleted")
     }
 
     func testComingBackClosesALockedSongSheet() {

@@ -4,27 +4,38 @@ import SwiftUI
 /// Recording played which notes. Rename and Delete are in the toolbar menu.
 struct TootDetailView: View {
     let model: any AppModel
-    /// The Toot when it was opened; the screen follows the model's copy while it exists, and keeps
-    /// this one on screen while it closes after Delete.
+    /// The Toot when it was opened. The screen follows the model's copy while it exists, and keeps
+    /// the last one it saw on screen while it closes after Delete.
     let opened: Toot
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @State private var isRenaming = false
     @State private var newTitle = ""
     @State private var isConfirmingDelete = false
+    /// The model's copy as last seen, renamed or not.
+    @State private var lastSeen: Toot?
 
-    private var toot: Toot { model.toot(opened.id) ?? opened }
+    private var toot: Toot { model.toot(opened.id) ?? lastSeen ?? opened }
 
     var body: some View {
         if let song = model.song(toot.songID) {
-            TootLayout(model: model, song: song, arrangement: toot.arrangement, tootID: toot.id, item: .toot(toot.id)) {
+            TootLayout(
+                model: model,
+                song: song,
+                arrangement: toot.arrangement,
+                tootID: toot.id,
+                item: .toot(toot.id),
+                isAudioMissing: toot.isAudioMissing
+            ) {
                 Text(song.source)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 if toot.isAudioMissing {
-                    Label("This Toot's audio is missing", systemImage: "exclamationmark.triangle")
+                    Text("This Toot's audio is missing. You can delete it and make it again in Compose.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("toot-audio-missing")
                 }
             }
             .navigationTitle(toot.title)
@@ -64,6 +75,16 @@ struct TootDetailView: View {
                 Text("This can't be undone.")
             }
             .onDisappear { model.stopPlayback() }
+            .onChange(of: model.toot(opened.id)) { _, current in
+                if let current { lastSeen = current }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                // The app comes back on the Record tab, so nothing is left open here.
+                if phase == .background {
+                    isRenaming = false
+                    isConfirmingDelete = false
+                }
+            }
         }
     }
 }

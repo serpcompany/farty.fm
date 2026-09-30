@@ -26,10 +26,10 @@ struct TootsTab: View {
             }
             .navigationTitle("Toots")
             .navigationBarTitleDisplayMode(.large)
-            .navigationDestination(for: Toot.ID.self) { id in
-                if let toot = model.toot(id) {
-                    TootDetailView(model: model, opened: toot)
-                }
+            // The Toot itself is pushed, so its screen keeps showing it while it closes after
+            // Delete; the screen follows the model's copy for renames.
+            .navigationDestination(for: Toot.self) { toot in
+                TootDetailView(model: model, opened: toot)
             }
             // Each alert sits on its own view: two on one view get in each other's way.
             .alert("This Toot's audio is missing", isPresented: isPresented($missingAudio), presenting: missingAudio) { toot in
@@ -122,7 +122,7 @@ private struct TootRow: View {
             .buttonStyle(.borderless)
             .accessibilityLabel(toot.isAudioMissing ? "Audio missing" : isPlaying ? "Stop" : "Play")
             .accessibilityIdentifier("play \(toot.title)")
-            NavigationLink(value: toot.id) {
+            NavigationLink(value: toot) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(toot.title)
                     Text(details)

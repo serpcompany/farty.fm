@@ -149,6 +149,26 @@ class TootsUITests: PedosUITestCase {
         XCTAssertEqual(play.label, "Stop", "The Toot didn't play")
     }
 
+    /// A Toot whose audio is missing says so on its screen, and Play and its notes can't play.
+    func testATootWithMissingAudioCantPlay() {
+        let app = launch(start: "all", toots: ["ode"], failures: ["tootAudioMissing"])
+        app.tabBars.buttons["Toots"].tap()
+        let ode = app.buttons["Ode to Joy"]
+        XCTAssertTrue(ode.waitForExistence(timeout: 5))
+        ode.tap()
+        XCTAssertTrue(app.navigationBars["Ode to Joy"].waitForExistence(timeout: 5), "The Toot didn't open")
+        let play = app.buttons["song-creator-play"]
+        XCTAssertEqual(play.label, "Audio missing")
+        XCTAssertFalse(play.isEnabled, "Play is enabled without audio")
+        XCTAssertTrue(app.staticTexts["toot-audio-missing"].exists)
+
+        let note = app.descendants(matching: .any)["note 1"]
+        note.tap()
+        XCTAssertFalse(app.staticTexts["note-caption"].exists, "A note was selected")
+        XCTAssertFalse((note.value as? String)?.contains("playing") ?? true, "A note played")
+        attachScreenshot("Toot, audio missing")
+    }
+
     /// The Toot titles on screen, top to bottom.
     private func tootRows(in app: XCUIApplication) -> [String] {
         app.collectionViews.buttons.allElementsBoundByIndex

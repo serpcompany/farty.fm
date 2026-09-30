@@ -573,4 +573,37 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertEqual(arrangement.caption(of: last, in: mary, recording: recording(last)), "F3 · Recording 21 (G3), shifted −2.1 semitones · 1.4 s")
         XCTAssertEqual(arrangement.caption(of: last, in: mary, recording: nil), "F3 · Recording deleted · 1.4 s")
     }
+
+    // MARK: Background
+
+    func testGoingToTheBackgroundStopsPlayback() async throws {
+        let model = makeModel(start: allFixtureIDs, toots: ["ode"])
+        model.togglePlayback(of: .toot(model.toots[0].id))
+        XCTAssertEqual(model.nowPlaying, .toot(model.toots[0].id))
+        model.didEnterBackground()
+        XCTAssertNil(model.nowPlaying)
+
+        // Also while Review is open, where coming back doesn't switch tabs.
+        let take = await recordTake(model)
+        let draft = try XCTUnwrap(take)
+        model.togglePlayback(of: .draft(draft.id))
+        XCTAssertEqual(model.nowPlaying, .draft(draft.id))
+        model.didEnterBackground()
+        XCTAssertNil(model.nowPlaying)
+    }
+
+    func testComingBackLandsOnRecordUnlessTheRecordFlowIsOpen() async throws {
+        let model = makeModel()
+        for tab in [AppTab.record, .recordings, .compose, .toots] {
+            XCTAssertEqual(model.tabOnReturn(from: tab), .record)
+        }
+        await model.startRecording()
+        XCTAssertEqual(model.tabOnReturn(from: .record), .record, "recording starts on Record")
+        clock += 1
+        await model.stopRecording()
+        XCTAssertNotNil(model.flow, "Review is open")
+        XCTAssertEqual(model.tabOnReturn(from: .recordings), .recordings, "Review stays where it is")
+        model.discardDraft()
+        XCTAssertEqual(model.tabOnReturn(from: .recordings), .record)
+    }
 }

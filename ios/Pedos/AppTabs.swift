@@ -38,10 +38,10 @@ struct AppTabs: View {
             switch phase {
             case .background:
                 wasInBackground = true
-                model.stopPlayback()
+                model.didEnterBackground()
             case .active where wasInBackground:
                 wasInBackground = false
-                if !model.showsRecordFlow { selection = .record }
+                selection = model.tabOnReturn(from: selection)
             default:
                 break
             }
@@ -68,6 +68,19 @@ enum AppTab: Hashable {
     case recordings
     case compose
     case toots
+}
+
+extension AppModel {
+    /// The app went to the background: nothing keeps playing.
+    func didEnterBackground() {
+        stopPlayback()
+    }
+
+    /// The tab to show when the app comes back to the foreground: Record, unless Recording,
+    /// Review or Result is open, which stay where they are.
+    func tabOnReturn(from tab: AppTab) -> AppTab {
+        showsRecordFlow ? tab : .record
+    }
 }
 
 #if DEBUG
