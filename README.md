@@ -2,7 +2,7 @@
 
 An iPhone app that turns fart Recordings into recognizable melodies, using only the Recordings themselves as sound.
 
-- **Plan:** GitHub issues in the [TestFlight MVP milestone](https://github.com/serpcompany/pedos-app/milestones).
+- **Plan:** the pinned [MVP roadmap](https://github.com/serpcompany/pedos-app/issues/45) issue, in build order.
 - **Vocabulary:** [`CONTEXT.md`](CONTEXT.md). **Decisions:** [`docs/adr/`](docs/adr/).
 
 | Path | What it is |
