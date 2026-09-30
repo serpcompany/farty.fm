@@ -21,7 +21,7 @@
       ],
     },
   };
-  const RULE = "A Song unlocks when every note has its own Melodic Recording within 3 semitones: one different fart per note, and no fart stretched across the tune. The progress bar shows how many notes are covered.";
+  const RULE = "A Song unlocks when each of its distinct pitches has its own Melodic Recording within 3 semitones: one different fart per pitch, and no fart stretched across the tune. The bar shows how many pitches are covered.";
   const MAX_SHIFT = 3;
 
   let S;
@@ -43,7 +43,7 @@
 
   // ---------------------------------------------------------------- Melody Fit preview
   const melodic = (recs = S.recs) => recs.map((r) => REC[r.id]).filter((r) => r.melodic).map((r) => r.midi);
-  // One different Melodic Recording per note, each within MAX_SHIFT semitones, under the best
+  // One different Melodic Recording per distinct pitch, each within MAX_SHIFT semitones, under the best
   // transposition (maximum bipartite matching, Kuhn's algorithm).
   function fit(song, recs) {
     const mel = recs.map((r) => REC[r.id]).filter((r) => r.melodic);
@@ -65,7 +65,11 @@
   }
   const bar = (f) => `<span class="pbar" role="img" aria-label="${f.have} of ${f.total}"><i style="width:${Math.round((100 * f.have) / f.total)}%"></i></span>`;
   const progressText = (f) => (f.unlocked ? `All ${f.total} notes covered` : `${f.have} of ${f.total} notes covered`);
-  const needText = (f) => f.none ? "Record a fart with a clear note to start" : f.missing.length ? "Needs a fart near " + [...new Set(f.missing.map(noteName))].slice(0, 3).join(", ") : "";
+  const needText = (f, max = 3) => {
+    if (f.none) return "Record a fart with a clear note to start";
+    const names = [...new Set(f.missing.map(noteName))];
+    return names.length ? "Needs a fart near " + names.slice(0, max).join(", ") + (names.length > max ? ` and ${names.length - max} more` : "") : "";
+  };
 
   // ---------------------------------------------------------------- audio
   let raf = 0;
@@ -91,8 +95,8 @@
     melodies: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/></svg>',
   };
   const recName = (r) => `Recording ${r.n}`;
-  function strip(haveSet, needSet = new Set()) {
-    return `<div class="strip" aria-hidden="true">${NAMES.map((n, i) => `<span class="${SHARP.has(i) ? "sharp" : ""} ${needSet.has(i) ? "need" : haveSet.has(i) ? "have" : ""}">${n}</span>`).join("")}</div>`;
+  function strip(haveSet, needSet = new Set(), nowSet = new Set()) {
+    return `<div class="strip" aria-hidden="true">${NAMES.map((n, i) => `<span class="${SHARP.has(i) ? "sharp" : ""} ${needSet.has(i) ? "need" : haveSet.has(i) ? "have" : ""} ${nowSet.has(i) ? "now" : ""}">${n}</span>`).join("")}</div>`;
   }
   const havePcs = () => new Set(melodic().map((m) => ((Math.round(m) % 12) + 12) % 12));
 
@@ -167,7 +171,7 @@
       <div class="largetitle" style="font-size:26px">${s.title}</div>
       <div class="meta">${s.source}</div>
       ${S.making ? `<div class="empty" style="margin-top:14px"><div class="spinner" style="margin:0 auto 10px"></div>Making your melody…</div>` : `
-      <div class="player"><button class="play" data-a="playsong" aria-label="Play">${S.playing === key ? "■" : "▶"}</button><div><div class="title">${S.playing === key ? "Playing" : "Ready"}</div><div class="meta">${used.length} of your Recordings, one per note</div></div></div>
+      <div class="player"><button class="play" data-a="playsong" aria-label="Play">${S.playing === key ? "■" : "▶"}</button><div><div class="title">${S.playing === key ? "Playing" : "Ready"}</div><div class="meta">${used.length} of your Recordings, one per pitch</div></div></div>
       <canvas class="notes" id="notes"></canvas>
       <div class="section">Recordings used</div>
       <div class="chips">${used.map((id) => `<button class="chip" data-a="playraw" data-id="${id}">${REC[id].melodic ? noteName(REC[id].midi) : id}</button>`).join("")}</div>
@@ -211,7 +215,7 @@
       const ups = r.upgraded.slice(0, 2).map(([id, f]) => `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span>${SONG[id].title}</span>${bar(f)}</div><div class="meta">${progressText(f)}</div></div>`).join("");
       const near = !r.unlocked.length && !r.upgraded.length && r.closest && melodic().length ? `<div class="card">${SONG[r.closest.id].title}: ${progressText(r.closest.f)}</div>` : "";
       return `<div class="cover"><div class="center" style="align-content:center;gap:12px">
-        ${d.melodic ? `<div class="meta">Your note</div><div class="bignote">${noteName(d.midi)}</div>${strip(havePcs(), new Set([((Math.round(d.midi) % 12) + 12) % 12]))}` : `<div class="bignote" style="font-size:40px">~</div><div class="title">No steady note this time</div><p class="hint">It's saved, but it can't play melody notes.</p>`}
+        ${d.melodic ? `<div class="meta">Your note</div><div class="bignote">${noteName(d.midi)}</div>${strip(havePcs(), new Set(), new Set([((Math.round(d.midi) % 12) + 12) % 12]))}` : `<div class="bignote" style="font-size:40px">~</div><div class="title">No steady note this time</div><p class="hint">It's saved, but it can't play melody notes.</p>`}
         ${d.cut ? `<p class="hint">We heard more than one fart and kept the first.</p>` : ""}
         <div style="display:grid;gap:8px;width:100%">${news}${ups}${near}</div></div>
         ${r.unlocked.length ? `<div class="btnrow"><button class="secondary" data-a="done">Done</button><button class="primary" data-a="tryit" data-id="${r.unlocked[0]}">Try it</button></div>` : `<div class="btnrow"><button class="secondary" data-a="again">Record another</button><button class="primary" data-a="done">Done</button></div>`}</div>`;
@@ -222,7 +226,7 @@
       return `<div class="scrim" data-a="closesheet"><div class="sheet" data-stop="1"><div class="grabber"></div>
         <div class="title" style="font-size:20px">${s.title} 🔒</div><div class="meta">${progressText(f)}</div>
         ${strip(havePcs(), need)}<div class="striplabel"><span>■ you have</span><span>▢ needed</span></div>
-        <p style="margin:0 0 14px">${needText(f)}.</p>
+        <p style="margin:0 0 14px">${needText(f, 99)}.</p>
         <button class="primary" data-a="record">Record</button></div></div>`;
     }
     return "";

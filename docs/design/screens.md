@@ -50,7 +50,9 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Idle
 - Recording
 - Microphone off (alert)
-- **Error:** couldn't start recording, or recording interrupted (a call or another app took the microphone): "Recording stopped. Nothing was saved." with Try again
+- **Error, couldn't start:** "Couldn't start recording", with Try again
+- **Error, interrupted** (a call or another app took the microphone): "Recording stopped. Nothing was saved.", with Try again
+- **Nothing heard:** an empty or too-short take goes straight back to Idle with "Didn't catch that. Try again." and nothing to save
 **NAVIGATION TYPE:** Tab.
 **PATTERN CHOICE:** Recording happens in place, not in a separate screen. The other tabs are disabled while recording.
 **NOTES:** The owner asked for "just one big red button" (#47 review).
@@ -74,6 +76,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **STATES:**
 - Empty ("No Recordings yet. Go to the Record tab and tap the red button.")
 - Analyzing (the badge shows a spinner)
+- Not analyzed (analysis failed; the badge offers Retry)
 - Playing (the row is highlighted)
 - Populated
 **NAVIGATION TYPE:** Tab.
@@ -129,11 +132,11 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Sort menu (Closest to unlocking | A–Z)
 - **Unlocked** section: rows with the title and "Ready"
 - **Locked** section: rows with the title, a progress bar ("3 of 5 notes covered"), a lock and the nearest missing note
-- (Unlock rule: one different Melodic Recording per note, within 3 semitones. See `app-map.md`.)
+- (Unlock rule: one different Melodic Recording per distinct pitch, within 3 semitones. See `app-map.md`.)
 **PRIMARY ACTION:** Open an Unlocked Song.
 **SECONDARY ACTIONS:** Open a locked Song to see what's missing; search; sort.
 **STATES:**
-- No Melodic Recordings yet ("Record a few farts to start unlocking Songs")
+- No Melodic Recordings yet ("Record a few farts with a clear note to start unlocking Songs")
 - Some unlocked
 - None unlocked
 - No search results
@@ -146,7 +149,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **HOW USER GETS HERE:** Tap a locked Song.
 **WHAT'S ON THE SCREEN:**
 - Title
-- "3 of 5 pitches"
+- "3 of 5 notes covered"
 - The notes still needed, with octave ("Needs a fart near D3 and F3")
 - Pitch strip marking the needed pitch classes (it shows note names only, so the text above carries the octave)
 - Record button (goes to the Record tab)
