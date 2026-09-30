@@ -51,7 +51,7 @@ Which Recording plays each note of a melody.
 _Avoid_: Mapping, mix, assignment
 
 **Auto-map**:
-How the app chooses the Arrangement for a melody: the closest-pitched Melodic Recording for each note.
+The Arrangement the app chooses on its own, favoring the closest-pitched Melodic Recording for each note.
 _Avoid_: Smart choose, AI pick, best fit
 
 **Created Melody**:
