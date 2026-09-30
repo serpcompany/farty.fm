@@ -57,6 +57,8 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 
 ## Decided in the #47 review
 
+- **Layouts and flows:** approved by the owner on 2026-09-29. The real app builds them with stock SwiftUI and native iOS controls (see Visual direction). The HTML prototype is a structure reference only.
+
 - **Tabs:** Record (one big red button, opens first), Recordings (renamed from Shelf), Compose (renamed from Create), Melodies.
 - **Record flow and Recordings screen:** approved as prototyped.
 - **Unlock rule:** a Song unlocks when every note has its **own** Melodic Recording within 3 semitones: one different fart per note, and no fart stretched across the tune. The progress bar shows how many notes are covered ("3 of 4 notes covered"). With the 23 test farts, the first Song (Mary, 4 notes) unlocks at the 6th Melodic fart, and 6 of 12 unlock with all 9. Stars were dropped. #43 validates the rule on more subsets.
