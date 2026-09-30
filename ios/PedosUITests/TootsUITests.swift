@@ -23,8 +23,7 @@ class TootsUITests: PedosUITestCase {
         attachScreenshot("Toots")
 
         // Long-press, Rename: an alert with a text field.
-        mary.press(forDuration: 1)
-        XCTAssertTrue(app.buttons["Rename"].waitForExistence(timeout: 5), "No Rename in the menu")
+        openContextMenu(on: mary, showing: app.buttons["Rename"], in: app)
         attachScreenshot("Toots, menu")
         app.buttons["Rename"].tap()
         let alert = app.alerts["Rename"]
@@ -40,8 +39,7 @@ class TootsUITests: PedosUITestCase {
         XCTAssertFalse(mary.exists)
 
         // Long-press, Delete, with confirmation.
-        renamed.press(forDuration: 1)
-        XCTAssertTrue(app.buttons["Delete"].waitForExistence(timeout: 5))
+        openContextMenu(on: renamed, showing: app.buttons["Delete"], in: app)
         app.buttons["Delete"].tap()
         XCTAssertTrue(app.staticTexts["Delete Mary Had a Little Lamb Remix?"].waitForExistence(timeout: 5), "No delete confirmation")
         attachScreenshot("Toots, delete confirmation")
@@ -167,6 +165,20 @@ class TootsUITests: PedosUITestCase {
         XCTAssertFalse(app.staticTexts["note-caption"].exists, "A note was selected")
         XCTAssertFalse((note.value as? String)?.contains("playing") ?? true, "A note played")
         attachScreenshot("Toot, audio missing")
+    }
+
+    /// Long-presses a Toot's row until its menu shows `item`. On a slow runner a press can land
+    /// as a tap, which opens the Toot, so it goes back and presses once more.
+    private func openContextMenu(on row: XCUIElement, showing item: XCUIElement, in app: XCUIApplication) {
+        for _ in 1...2 {
+            row.press(forDuration: 1.5)
+            if item.waitForExistence(timeout: 8) { return }
+            if !app.navigationBars["Toots"].exists {
+                app.navigationBars.buttons.element(boundBy: 0).tap()
+                XCTAssertTrue(app.navigationBars["Toots"].waitForExistence(timeout: 5))
+            }
+        }
+        XCTFail("The row's menu didn't open")
     }
 
     /// The Toot titles on screen, top to bottom.
