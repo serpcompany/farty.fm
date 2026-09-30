@@ -1,10 +1,17 @@
 import SwiftUI
 
 /// The four tabs from `docs/design/app-map.md`: Record opens first, followed by Recordings,
-/// Compose and Melodies. While recording, the other tabs are disabled.
+/// Compose and Toots. Recording, Review and Result cover the tabs, full screen.
+///
+/// The app comes back to the foreground on the Record tab, unless Recording, Review or Result is
+/// open. Playback stops in the background.
 struct AppTabs: View {
     let model: any AppModel
     @State private var selection = AppTab.record
+    @State private var wasInBackground = false
+    @Environment(\.scenePhase) private var scenePhase
+    /// The Songs pushed on the Compose tab.
+    @State private var composePath: [Song.ID] = []
 
     var body: some View {
         TabView(selection: $selection) {
@@ -15,46 +22,42 @@ struct AppTabs: View {
             Tab("Recordings", systemImage: "waveform", value: .recordings) {
                 RecordingsTab(model: model)
             }
-            .disabled(model.isRecording)
 
             Tab("Compose", systemImage: "music.note", value: .compose) {
-                // #52 builds Compose. Until then this stays neutral, because Try it on the
-                // Result screen lands here right after a Song unlocks.
-                TitledTab(title: "Compose") {
-                    ContentUnavailableView(
-                        "Songs are coming soon",
-                        systemImage: "music.note",
-                        description: Text("Your Unlocked Songs will play here.")
-                    )
-                }
+                ComposeTab(model: model, path: $composePath, onRecord: { selection = .record })
             }
-            .disabled(model.isRecording)
 
-            Tab("Melodies", systemImage: "music.note.list", value: .melodies) {
-                // #52 builds Melodies.
-                TitledTab(title: "Melodies") {
-                    ContentUnavailableView(
-                        "Nothing yet",
-                        systemImage: "music.note.list",
-                        description: Text("Make one in Compose.")
-                    )
-                }
+            Tab("Toots", systemImage: "music.note.list", value: .toots) {
+                TootsTab(model: model)
             }
-            .disabled(model.isRecording)
         }
         .onChange(of: selection) {
             model.stopPlayback()
         }
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .background:
+                wasInBackground = true
+                model.didEnterBackground()
+            case .active where wasInBackground:
+                wasInBackground = false
+                selection = model.tabOnReturn(from: selection)
+            default:
+                break
+            }
+        }
         .sheet(isPresented: Binding(get: { model.isShowingWelcome }, set: { if !$0 { model.skipWelcome() } })) {
             WelcomeSheet(model: model)
         }
-        .fullScreenCover(isPresented: Binding(get: { model.flow != nil }, set: { if !$0 { model.finishFlow() } })) {
+        .fullScreenCover(isPresented: Binding(get: { model.showsRecordFlow }, set: { if !$0 { model.finishFlow() } })) {
             RecordFlowView(
                 model: model,
                 onDone: { selection = .recordings },
                 onRecordAnother: { selection = .record },
-                // #52 opens the Song in Song Creator.
-                onTry: { _ in selection = .compose }
+                onTry: { song in
+                    composePath = [song.id]
+                    selection = .compose
+                }
             )
         }
     }
@@ -64,19 +67,28 @@ enum AppTab: Hashable {
     case record
     case recordings
     case compose
-    case melodies
+    case toots
 }
 
-/// A tab with a large navigation title.
-private struct TitledTab<Content: View>: View {
-    let title: String
-    @ViewBuilder let content: Content
+extension AppModel {
+    /// The app went to the background: nothing keeps playing.
+    func didEnterBackground() {
+        stopPlayback()
+    }
 
-    var body: some View {
-        NavigationStack {
-            content
-                .navigationTitle(title)
-                .navigationBarTitleDisplayMode(.large)
-        }
+    /// The tab to show when the app comes back to the foreground: Record, unless Recording,
+    /// Review or Result is open, which stay where they are.
+    func tabOnReturn(from tab: AppTab) -> AppTab {
+        showsRecordFlow ? tab : .record
     }
 }
+
+#if DEBUG
+#Preview("Tabs") {
+    AppTabs(model: SampleAppModel.preview(start: .all, toots: ["mary"]))
+}
+
+#Preview("Tabs, first launch") {
+    AppTabs(model: SampleAppModel.preview(showsWelcome: true))
+}
+#endif

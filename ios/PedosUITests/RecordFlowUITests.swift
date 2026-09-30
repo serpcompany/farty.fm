@@ -9,17 +9,13 @@ class RecordFlowUITests: PedosUITestCase {
         XCTAssertTrue(app.buttons["record-button"].waitForExistence(timeout: 5))
         attachScreenshot("Record")
 
-        // Record: the button turns into Stop with a timer, and the other tabs are disabled.
+        // Record: recording goes full screen over the tabs, with Stop and a timer.
         app.buttons["record-button"].tap()
         XCTAssertTrue(app.buttons["Stop"].waitForExistence(timeout: 5))
         waitForTimerToCount(in: app)
+        XCTAssertFalse(app.tabBars.buttons["Recordings"].isHittable, "The tabs show while recording")
         attachScreenshot("Recording")
-        for tab in ["Recordings", "Compose", "Melodies"] {
-            app.tabBars.buttons[tab].tap()
-            XCTAssertTrue(app.tabBars.buttons["Record"].isSelected, "\(tab) opened while recording")
-            XCTAssertTrue(app.buttons["Stop"].exists, "Recording stopped when tapping \(tab)")
-        }
-        app.buttons["record-button"].tap()
+        app.buttons["stop-button"].tap()
 
         // Review: play, Save and Discard.
         XCTAssertTrue(app.navigationBars["New Recording"].waitForExistence(timeout: 5), "Review didn't open")
@@ -104,9 +100,22 @@ class RecordFlowUITests: PedosUITestCase {
         XCTAssertTrue(app.buttons["Done"].exists)
         attachScreenshot("Result, unlocked")
 
+        // Try it opens the Song in Song Creator, on the Compose tab.
         app.buttons["Try it"].tap()
-        XCTAssertTrue(app.navigationBars["Compose"].waitForExistence(timeout: 5), "Try it didn't open Compose")
+        XCTAssertTrue(app.navigationBars["Mary Had a Little Lamb"].waitForExistence(timeout: 5), "Try it didn't open Mary")
         XCTAssertTrue(app.tabBars.buttons["Compose"].isSelected)
+        XCTAssertTrue(app.buttons["song-creator-play"].waitForExistence(timeout: 5), "Mary wasn't made")
+        // The stand-in render of Mary uses fixture 084, which isn't among these 8 takes, so Song
+        // Creator shows Pitch Coverage's matching and says the audio doesn't follow it.
+        XCTAssertEqual(
+            app.staticTexts["simulated-toot"].label,
+            "Simulated Toot: the design prototype's render of this Song, not made from these Recordings."
+        )
+
+        // Back goes to the Songs list, where Mary is unlocked.
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.staticTexts["Unlocked · 1"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Mary Had a Little Lamb"].label.contains("Ready"))
     }
 }
 

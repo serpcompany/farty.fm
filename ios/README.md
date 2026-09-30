@@ -36,20 +36,28 @@ skips the dark-mode UI test runs, which exist for screenshots.
 
 ## Sample data
 
-Until the real recorder, store and analysis land, `SampleAppModel` drives the screens. Recording
-is simulated: each take is the next Fixture Library Recording in the design prototype's story
-order, with its reference analysis.
+Until the real recorder, store, analysis and rendering land, `SampleAppModel` drives the screens.
+Recording is simulated: each take is the next Fixture Library Recording in the design prototype's
+story order, with its reference analysis. Song Creator is simulated too: making a Toot of an
+Unlocked Song returns the prototype's render of that Song (#17 renders it from your Recordings).
+When you have every Recording that render used (always, with all 23), Song Creator shows the
+render's own Recordings; otherwise it shows Pitch Coverage's matching and says the audio
+doesn't follow it.
 
 - `Pedos/Sample/SampleData.generated.swift` is generated from `docs/design/prototype/data.js` by
-  `scripts/generate-sample-data.py`. Rerun it when the prototype data changes; CI runs it with
-  `--check`.
-- Debug builds bundle the prototype's trimmed fixture audio (`docs/design/prototype/audio/rec-*.mp3`)
-  for playback. Release builds exclude it and start empty; `scripts/check-bundle-identifiers.sh`
-  builds Release and fails if the app contains any audio.
+  `scripts/generate-sample-data.py`: the Songs with their pitches and notes, the Fixture
+  Library's analysis, and (Debug only) which fixture plays each pitch in each Song's render.
+  Rerun it when the prototype data changes; CI runs it with `--check`.
+- Debug builds bundle the prototype's audio from `docs/design/prototype/audio/`: the trimmed
+  fixtures (`rec-*.mp3`) and its render of each Song (`song-*.mp3`). Release builds exclude both,
+  start empty, and can't record or make Toots; `scripts/check-bundle-identifiers.sh` builds
+  Release and fails if the app contains any audio.
 - Debug launch arguments set up states by hand (Xcode: Product > Scheme > Edit Scheme >
-  Arguments), for example `-PedosSampleStart all` for all 23 Recordings or
-  `-PedosSampleFailure saveFailed` for an error state. `Pedos/Sample/SampleLaunchOptions.swift`
-  lists them all.
+  Arguments), for example `-PedosSampleStart all` for all 23 Recordings,
+  `-PedosSampleToots mary,ode` for two Toots, or `-PedosSampleFailure saveFailed`
+  for an error state. `Pedos/Sample/SampleLaunchOptions.swift` lists them all.
+- SwiftUI previews (Debug only) use `SampleAppModel.preview(…)` from
+  `Pedos/Sample/SamplePreviews.swift`.
 
 ## Bundle identifiers
 

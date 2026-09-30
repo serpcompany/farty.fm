@@ -45,3 +45,9 @@ struct WelcomeSheet: View {
         .interactiveDismissDisabled()
     }
 }
+
+#if DEBUG
+#Preview {
+    WelcomeSheet(model: SampleAppModel.preview(showsWelcome: true))
+}
+#endif

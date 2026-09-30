@@ -126,7 +126,7 @@ final class PitchCoverageTests: XCTestCase {
             recording(.notAnalyzed),
             melodic,
         ]
-        let song = Song(id: "one", title: "One note", pitches: [72], source: "", bpm: 100)
+        let song = Song(id: "one", title: "One note", pitches: [72], source: "", bpm: 100, notes: [])
         let coverage = CoverageResult(song: song, recordings: recordings)
         XCTAssertTrue(coverage.isUnlocked)
         XCTAssertEqual(coverage.summary, "All 1 notes covered")

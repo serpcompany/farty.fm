@@ -4,6 +4,7 @@ import SwiftUI
 struct RecordingsTab: View {
     let model: any AppModel
     @State private var pendingDelete: Recording?
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         NavigationStack {
@@ -20,6 +21,10 @@ struct RecordingsTab: View {
             }
             .navigationTitle("Recordings")
             .navigationBarTitleDisplayMode(.large)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // The app comes back on the Record tab, so the confirmation doesn't stay open.
+            if phase == .background { pendingDelete = nil }
         }
     }
 
@@ -80,93 +85,12 @@ struct RecordingsTab: View {
     }
 }
 
-/// A Recording's row: play state, name, length, "first fart used", and its pitch badge.
-private struct RecordingRow: View {
-    let recording: Recording
-    let isPlaying: Bool
-    let play: () -> Void
-    let retry: () -> Void
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Button(action: play) {
-                HStack(spacing: 12) {
-                    Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle")
-                        .font(.title2)
-                        .foregroundStyle(.tint)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(recording.name)
-                        Text(details)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer(minLength: 8)
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(recording.name)
-            .accessibilityValue(accessibilityValue)
-            .accessibilityHint(isPlaying ? "Stops playing" : "Plays the Recording")
-            .accessibilityIdentifier(recording.name)
-            badge
-        }
-        .listRowBackground(isPlaying ? Color(.systemFill) : nil)
-    }
-
-    /// "1.1 s · first fart used".
-    private var details: String {
-        var text = formattedLength(recording.seconds)
-        if case .analyzed(let analysis) = recording.analysis, analysis.firstFartUsed {
-            text += " · first fart used"
-        }
-        return text
-    }
-
-    @ViewBuilder
-    private var badge: some View {
-        switch recording.analysis {
-        case .analyzing:
-            ProgressView()
-                .accessibilityLabel("Analyzing")
-                .accessibilityIdentifier("analyzing-\(recording.number)")
-        case .notAnalyzed:
-            HStack(spacing: 8) {
-                Text("not analyzed")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Button("Retry", action: retry)
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                    .accessibilityLabel("Retry analyzing \(recording.name)")
-            }
-        case .analyzed(let analysis):
-            if let pitch = analysis.pitch {
-                Text(Pitch.name(pitch))
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(.fill.tertiary, in: .capsule)
-                    .accessibilityHidden(true)
-            } else {
-                Text("noise-like")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .accessibilityHidden(true)
-            }
-        }
-    }
-
-    private var accessibilityValue: String {
-        var parts = [formattedLength(recording.seconds)]
-        switch recording.analysis {
-        case .analyzing: parts.append("analyzing")
-        case .notAnalyzed: parts.append("not analyzed")
-        case .analyzed(let analysis):
-            parts.append(analysis.pitch.map(Pitch.name) ?? "noise-like")
-            if analysis.firstFartUsed { parts.append("first fart used") }
-        }
-        if isPlaying { parts.append("playing") }
-        return parts.joined(separator: ", ")
-    }
+#if DEBUG
+#Preview("Recordings") {
+    RecordingsTab(model: SampleAppModel.preview(start: .all))
 }
+
+#Preview("Recordings, empty") {
+    RecordingsTab(model: SampleAppModel.preview())
+}
+#endif

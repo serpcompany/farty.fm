@@ -10,12 +10,12 @@ final class AppTabsUITests: PedosUITestCase {
         XCTAssertTrue(recordButton.waitForExistence(timeout: 5), "Pedos did not open on Record")
         XCTAssertEqual(
             app.tabBars.buttons.allElementsBoundByIndex.map { $0.label },
-            ["Record", "Recordings", "Compose", "Melodies"]
+            ["Record", "Recordings", "Compose", "Toots"]
         )
         XCTAssertTrue(recordTab.isSelected, "The Record tab is not selected on launch")
         XCTAssertTrue(recordButton.isHittable, "The record button can't be tapped")
 
-        for tab in ["Recordings", "Compose", "Melodies"] {
+        for tab in ["Recordings", "Compose", "Toots"] {
             app.tabBars.buttons[tab].tap()
             XCTAssertTrue(app.navigationBars[tab].waitForExistence(timeout: 5), "\(tab) is not showing")
             XCTAssertFalse(recordButton.exists, "\(tab) shows a record button; only the Record tab should")

@@ -1,6 +1,6 @@
 # Pedos
 
-Pedos is an iPhone app that turns a person's fart recordings into recordings they can replay and melodies they can create.
+Pedos is an iPhone app that turns a person's fart recordings into recordings they can replay and Toots they can make: Songs played by their farts.
 
 ## Recordings
 
@@ -24,7 +24,7 @@ _Avoid_: Bad Recording, unpitched fart
 The note a Melodic Recording naturally sounds. A Recording has a pitch; it never has a key.
 _Avoid_: Key, tone
 
-## Songs and melodies
+## Songs and Toots
 
 **Song**:
 A known melody in the Song Catalog, taken from a cited public-domain score.
@@ -54,9 +54,9 @@ _Avoid_: Mapping, mix, assignment
 The Arrangement the app chooses on its own, giving each distinct pitch its own Melodic Recording, as close in pitch as possible.
 _Avoid_: Smart choose, AI pick, best fit
 
-**Created Melody**:
-A playable fart-only melody the user made with Song Creator or AI Song Creator. It is not a conventional song or a music release.
-_Avoid_: Created Song, generated song, track, output
+**Toot**:
+A saved result: a Song played with the user's Recordings, made in Song Creator. It keeps which Recording played each pitch. It is not a conventional song or a music release.
+_Avoid_: Created Melody, Melody, Created Song, generated song, track, output
 
 ## Creation areas
 

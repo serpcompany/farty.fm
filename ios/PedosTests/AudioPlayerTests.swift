@@ -23,9 +23,45 @@ final class AudioPlayerTests: XCTestCase {
         player.play(item, url: try XCTUnwrap(longestTake.audioURL))
         XCTAssertEqual(player.nowPlaying, item)
 
+        // The start time, for a playhead, is set once the audio actually starts.
+        for _ in 0..<50 where player.startedAt == nil {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        let startedAt = try XCTUnwrap(player.startedAt, "Playback never started")
+        XCTAssertLessThan(abs(startedAt.timeIntervalSinceNow), 1)
+
         let played = try await waitUntilStopped(player, within: .seconds(6))
         XCTAssertNil(player.nowPlaying, "Playback never ended")
+        XCTAssertNil(player.startedAt)
         XCTAssertGreaterThan(played, .seconds(1.5), "Playback ended before the take did, so it didn't play")
+    }
+
+    func testASegmentPlaysForItsLengthThenStops() async throws {
+        // Mary's 7th note: 0.71 s from 2.1 s into its 12.5 s render, so the file itself would
+        // play on for another 10 s.
+        let mary = try XCTUnwrap(Song.prototypeCatalog.first { $0.id == "mary" })
+        let (start, length) = mary.seconds(of: mary.notes[6])
+        XCTAssertEqual(length, 60 / 84, accuracy: 1e-9)
+        let player = AudioPlayer()
+        let item = PlaybackItem.note(UUID(), index: 6)
+        player.play(item, url: try XCTUnwrap(mary.prototypeAudioURL), segment: Segment(start: start, length: length))
+        XCTAssertEqual(player.nowPlaying, item)
+
+        // Time it from when the audio actually started: activating the audio session first can
+        // take a while on a slow machine.
+        for _ in 0..<250 where player.startedAt == nil {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        let startedAt = try XCTUnwrap(player.startedAt, "The segment never started")
+        _ = try await waitUntilStopped(player, within: .seconds(8))
+        let played = Date.now.timeIntervalSince(startedAt)
+        // In the log, so the allowance can be checked against slow runners.
+        print("Segment of \(length) s played for \(played) s")
+        XCTAssertNil(player.nowPlaying, "The segment never ended")
+        XCTAssertGreaterThan(played, length - 0.1, "It ended before the note did")
+        // The next note starts right at this one's end: running into it by more than a timer's
+        // overshoot, a hop to the main actor and the 20 ms poll fails.
+        XCTAssertLessThan(played, length + 0.3, "It played on into the next note")
     }
 
     func testTogglingThePlayingItemStopsIt() async throws {

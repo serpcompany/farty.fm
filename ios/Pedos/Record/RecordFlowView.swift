@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// The full-screen cover after a take: Review, then Result, with their error states.
+/// The full-screen cover over the tabs from the start of a take: Recording, then Review and
+/// Result, with their error states.
 struct RecordFlowView: View {
     let model: any AppModel
     /// Done: close and show the Recordings tab.
@@ -43,7 +44,9 @@ struct RecordFlowView: View {
                 )
             }
         case nil:
-            EmptyView()
+            if model.capture != .idle {
+                RecordingView(model: model)
+            }
         }
     }
 }
@@ -122,3 +125,52 @@ private struct AnalysisFailedView: View {
         }
     }
 }
+
+#if DEBUG
+/// Review and Result, each reached by recording the next story take with the sample model.
+private struct RecordFlowPreview: View {
+    let model: SampleAppModel
+    /// Saves the take after Review opens.
+    var saves = true
+
+    var body: some View {
+        RecordFlowView(model: model, onDone: {}, onRecordAnother: {}, onTry: { _ in })
+            .task {
+                await model.previewTake()
+                if saves { await model.saveDraft() }
+            }
+    }
+}
+
+#Preview("Review") {
+    RecordFlowPreview(model: .preview(), saves: false)
+}
+
+#Preview("Save failed") {
+    RecordFlowPreview(model: .preview(failures: .saveFailed))
+}
+
+#Preview("Result, analyzing") {
+    RecordFlowPreview(model: .preview(analysisDelay: .seconds(3600)))
+}
+
+#Preview("Result, noise-like") {
+    RecordFlowPreview(model: .preview())
+}
+
+#Preview("Result, Melodic") {
+    RecordFlowPreview(model: .preview(start: .takes(1)))
+}
+
+#Preview("Result, first fart kept") {
+    RecordFlowPreview(model: .preview(start: .takes(5)))
+}
+
+#Preview("Result, unlocked") {
+    RecordFlowPreview(model: .preview(start: .takes(7)))
+}
+
+#Preview("Analysis failed") {
+    RecordFlowPreview(model: .preview(failures: .analysisFailed))
+}
+#endif

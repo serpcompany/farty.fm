@@ -20,24 +20,35 @@ final class SampleAppModelTests: XCTestCase {
 
     private func makeModel(
         start: [String] = [],
+        toots: [Song.ID] = [],
         microphone: MicrophoneAccess = SimulatedMicrophone(permission: .granted),
         failures: SampleAppModel.Failures = [],
         fixtures: [SampleFixture] = SampleFixture.prototypeLibrary,
-        story: [String] = SampleFixture.prototypeStory
+        story: [String] = SampleFixture.prototypeStory,
+        songAudio: @escaping (Song) -> URL? = \.prototypeAudioURL,
+        renders: [Song.ID: StandInRender] = Song.prototypeRenders
     ) -> SampleAppModel {
         SampleAppModel(
             fixtures: fixtures,
             story: story,
             songs: Song.prototypeCatalog,
             initialFixtureIDs: start,
+            initialTootSongIDs: toots,
+            songAudio: songAudio,
+            renders: renders,
             microphone: microphone,
             defaults: defaults,
             failures: failures,
             now: { [unowned self] in clock },
             analysisDelay: .zero,
-            interruptionDelay: .zero
+            interruptionDelay: .zero,
+            makingDelay: .zero
         )
     }
+
+    private var allFixtureIDs: [String] { SampleFixture.prototypeLibrary.map(\.id) }
+
+    private func song(_ id: Song.ID) -> Song { Song.prototypeCatalog.first { $0.id == id }! }
 
     /// Records for one second and stops, returning the draft under Review.
     @discardableResult
@@ -334,11 +345,265 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertTrue(SampleFixture.prototypeStory.allSatisfy { id in library.contains { $0.id == id } })
     }
 
+    func testEverySongHasPlayableStandInAudioInDebugBuilds() throws {
+        for song in Song.prototypeCatalog {
+            let url = try XCTUnwrap(song.prototypeAudioURL, "no bundled audio for \(song.id)")
+            let player = try AVAudioPlayer(contentsOf: url)
+            let notesEnd = song.beats * 60 / Double(song.bpm)
+            // The render holds the last note a little past the score's end.
+            XCTAssertEqual(player.duration, notesEnd, accuracy: 1.5, song.id)
+            XCTAssertGreaterThan(player.duration, notesEnd, song.id)
+        }
+    }
+
     func testEveryFixtureHasPlayableAudioInDebugBuilds() throws {
         for fixture in SampleFixture.prototypeLibrary {
             let url = try XCTUnwrap(fixture.audioURL, "no bundled audio for \(fixture.id)")
             let player = try AVAudioPlayer(contentsOf: url)
             XCTAssertEqual(player.duration, fixture.seconds, accuracy: 0.1, fixture.id)
         }
+    }
+
+    // MARK: Compose
+
+    func testCoverageFollowsTheRecordings() async {
+        let model = makeModel(start: Array(SampleFixture.prototypeStory.prefix(7)))
+        let mary = song("mary")
+        XCTAssertEqual(model.coverage(of: mary).summary, "3 of 4 notes covered")
+        await recordTake(model)
+        await model.saveDraft()
+        XCTAssertTrue(model.coverage(of: mary).isUnlocked, "the 8th take (086) unlocks Mary")
+        model.delete(model.recordings.last!.id)
+        XCTAssertFalse(model.coverage(of: mary).isUnlocked, "deleting it locks Mary again")
+    }
+
+    func testSongListingHasSixUnlockedSongsWithAllRecordings() {
+        let model = makeModel(start: allFixtureIDs)
+        let listing = model.songListing(matching: "", order: .closestToUnlocking)
+        XCTAssertEqual(listing.unlocked.map(\.song.id), ["mary", "jingle", "saints", "ode", "twinkle", "row"])
+        XCTAssertEqual(listing.locked.count, 6)
+    }
+
+    /// The Recording the user has for a Fixture Library id (the oldest, if there are several).
+    private func recording(ofFixture fixtureID: String, in model: SampleAppModel) -> Recording.ID? {
+        let index = SampleFixture.prototypeLibrary.firstIndex { $0.id == fixtureID }!
+        return model.recordings.first { $0.number == index + 1 }?.id
+    }
+
+    func testWithEveryFixtureATootShowsTheRecordingsItsStandInWasRenderedWith() async throws {
+        // With all 23 fixtures (recording n is library fixture n), every Unlocked Song's
+        // Arrangement is its render's: the list, the note colors and the sound agree.
+        let model = makeModel(start: allFixtureIDs)
+        let unlocked = Song.prototypeCatalog.filter { model.coverage(of: $0).isUnlocked }
+        XCTAssertEqual(unlocked.count, 6)
+        for song in unlocked {
+            let draft = try await model.makeToot(of: song)
+            let render = try XCTUnwrap(Song.prototypeRenders[song.id])
+            XCTAssertEqual(draft.arrangement.recordingForPitch.keys.sorted(), song.pitches, song.id)
+            XCTAssertEqual(draft.arrangement.transposition, render.transposition, song.id)
+            for (pitch, fixtureID) in render.fixtureForPitch {
+                XCTAssertEqual(draft.arrangement.recordingForPitch[pitch], recording(ofFixture: fixtureID, in: model), "\(song.id) pitch \(pitch)")
+            }
+            XCTAssertEqual(model.simulatedSource(ofToot: draft.id), "the design prototype's render of this Song, with these Recordings")
+        }
+    }
+
+    func testMakingAnUnlockedSongReturnsItsStandInAudio() async throws {
+        let model = makeModel(start: allFixtureIDs)
+        let mary = song("mary")
+        let draft = try await model.makeToot(of: mary)
+        XCTAssertEqual(draft.song, mary)
+        XCTAssertEqual(draft.audioURL, mary.prototypeAudioURL)
+        XCTAssertEqual(draft.seconds, 12.46, accuracy: 0.05, "the length of the prototype's render")
+        // Mary's render plays fixtures 090, 084, 086 and 094, lowest pitch first.
+        XCTAssertEqual(draft.arrangement.recordings.compactMap { model.recording($0)?.name }, ["Recording 21", "Recording 19", "Recording 20", "Recording 23"])
+        XCTAssertTrue(model.toots.isEmpty, "nothing is saved until Save")
+
+        model.togglePlayback(of: .tootDraft(draft.id))
+        XCTAssertEqual(model.nowPlaying, .tootDraft(draft.id))
+        model.stopPlayback()
+    }
+
+    func testWithoutARenderFixtureATootShowsPitchCoveragesMatchingAndSaysSo() async throws {
+        // After the 8-take story Mary is unlocked, but its render's fixture 084 isn't there.
+        let model = makeModel(start: Array(SampleFixture.prototypeStory.prefix(8)))
+        let mary = song("mary")
+        let draft = try await model.makeToot(of: mary)
+        XCTAssertEqual(draft.arrangement, model.coverage(of: mary).matchedArrangement)
+        XCTAssertEqual(model.simulatedSource(ofToot: draft.id), "the design prototype's render of this Song, not made from these Recordings")
+    }
+
+    func testLockedSongsCantBeMade() async {
+        let model = makeModel(start: allFixtureIDs)
+        do {
+            _ = try await model.makeToot(of: song("birthday"))
+            XCTFail("Happy Birthday is locked")
+        } catch {
+            XCTAssertEqual(error as? TootError, .locked)
+        }
+    }
+
+    func testCouldNotMakeTootHappensOnceThenTryAgainWorks() async throws {
+        let model = makeModel(start: allFixtureIDs, failures: .couldNotMakeToot)
+        do {
+            _ = try await model.makeToot(of: song("mary"))
+            XCTFail("the simulated failure didn't happen")
+        } catch {
+            XCTAssertEqual(error as? TootError, .couldNotMake)
+        }
+        _ = try await model.makeToot(of: song("mary"))
+    }
+
+    func testWithoutSongAudioTootsCantBeMade() async {
+        // Release builds carry no stand-in audio, so Song Creator reports it can't make one.
+        let model = makeModel(start: allFixtureIDs, songAudio: { _ in nil }, renders: [:])
+        do {
+            _ = try await model.makeToot(of: song("mary"))
+            XCTFail("made a Toot without audio")
+        } catch {
+            XCTAssertEqual(error as? TootError, .couldNotMake)
+        }
+    }
+
+    func testSavingAddsATootOnce() async throws {
+        let model = makeModel(start: allFixtureIDs)
+        let draft = try await model.makeToot(of: song("ode"))
+        model.saveToot(draft)
+        model.saveToot(draft)
+        XCTAssertEqual(model.toots.count, 1, "saving twice keeps one")
+        let toot = try XCTUnwrap(model.toot(draft.id))
+        XCTAssertEqual(toot.title, "Ode to Joy")
+        XCTAssertEqual(toot.songID, "ode")
+        XCTAssertEqual(toot.createdAt, clock)
+        XCTAssertEqual(toot.seconds, draft.seconds)
+        XCTAssertFalse(toot.isAudioMissing)
+
+        model.togglePlayback(of: .toot(toot.id))
+        XCTAssertEqual(model.nowPlaying, .toot(toot.id))
+        model.stopPlayback()
+    }
+
+    func testTootsAtLaunchAreOldestFirst() {
+        let model = makeModel(start: allFixtureIDs, toots: ["twinkle", "mary", "nonexistent"])
+        XCTAssertEqual(model.toots.map(\.title), ["Twinkle, Twinkle, Little Star", "Mary Had a Little Lamb"])
+        XCTAssertEqual(model.toots.map(\.songID), ["twinkle", "mary"])
+        XCTAssertEqual(model.toots.map { $0.seconds.rounded() }, [18, 12])
+    }
+
+    func testRenameTrimsAndIgnoresABlankTitle() {
+        let model = makeModel(toots: ["mary"])
+        let id = model.toots[0].id
+        model.renameToot(id, to: "  Lamb Toots \n")
+        XCTAssertEqual(model.toots[0].title, "Lamb Toots")
+        XCTAssertEqual(model.toots[0].songID, "mary", "renaming keeps the Song")
+        model.renameToot(id, to: "   ")
+        XCTAssertEqual(model.toots[0].title, "Lamb Toots")
+    }
+
+    func testDeletingATootStopsItPlaying() {
+        let model = makeModel(toots: ["mary", "ode"])
+        let mary = model.toots[0].id
+        model.togglePlayback(of: .toot(mary))
+        XCTAssertEqual(model.nowPlaying, .toot(mary))
+        model.deleteToot(mary)
+        XCTAssertNil(model.nowPlaying)
+        XCTAssertEqual(model.toots.map(\.title), ["Ode to Joy"])
+    }
+
+    func testMissingTootAudioIsCheckedOnceAndNothingPlays() {
+        let model = makeModel(toots: ["mary", "ode"], failures: .tootAudioMissing)
+        XCTAssertEqual(model.toots.map(\.isAudioMissing), [true, false], "the first Toot lost its audio")
+        XCTAssertTrue(Toot.isAudioMissing(at: model.toots[0].audioURL))
+        model.togglePlayback(of: .toot(model.toots[0].id))
+        XCTAssertNil(model.nowPlaying)
+    }
+
+    // MARK: A Toot's Arrangement and its notes
+
+    func testATootKeepsItsArrangementFromWhenItWasMade() async throws {
+        let model = makeModel(start: allFixtureIDs)
+        let draft = try await model.makeToot(of: song("mary"))
+        model.saveToot(draft)
+        let saved = try XCTUnwrap(model.toot(draft.id))
+        XCTAssertEqual(saved.arrangement, draft.arrangement)
+
+        // Deleting a Recording it used doesn't change it, and the Toot still plays.
+        let used = try XCTUnwrap(draft.arrangement.recordingForPitch[74])
+        XCTAssertEqual(model.recording(used)?.name, "Recording 19")
+        model.delete(used)
+        XCTAssertNil(model.recording(used))
+        XCTAssertEqual(model.toot(draft.id)?.arrangement, draft.arrangement, "the Arrangement was recomputed")
+        model.togglePlayback(of: .toot(draft.id))
+        XCTAssertEqual(model.nowPlaying, .toot(draft.id), "a Toot plays its own audio")
+        model.stopPlayback()
+    }
+
+    func testTootsAtLaunchKeepTheRecordingsTheirRenderUsed() throws {
+        let model = makeModel(start: allFixtureIDs, toots: ["mary"])
+        let toot = try XCTUnwrap(model.toots.first)
+        XCTAssertEqual(toot.arrangement.transposition, -19)
+        XCTAssertEqual(toot.arrangement.recordings.compactMap { model.recording($0)?.name }, ["Recording 21", "Recording 19", "Recording 20", "Recording 23"])
+    }
+
+    func testANotePlaysAsASegmentOfTheTootsAudio() async throws {
+        let model = makeModel(start: allFixtureIDs)
+        let draft = try await model.makeToot(of: song("mary"))
+        model.togglePlayback(of: .tootDraft(draft.id))
+        model.togglePlayback(of: .note(draft.id, index: 25))
+        XCTAssertEqual(model.nowPlaying, .note(draft.id, index: 25), "a note replaces the whole Toot")
+        model.togglePlayback(of: .note(draft.id, index: 25))
+        XCTAssertNil(model.nowPlaying, "tapping the playing note stops it")
+        model.togglePlayback(of: .note(draft.id, index: 99))
+        XCTAssertNil(model.nowPlaying, "a note that doesn't exist plays nothing")
+    }
+
+    func testTheCaptionOfASelectedNote() async throws {
+        let model = makeModel(start: allFixtureIDs)
+        let mary = song("mary")
+        let draft = try await model.makeToot(of: mary)
+        let arrangement = draft.arrangement
+        let recording = { (note: Song.Note) in arrangement.recording(playing: note).flatMap { model.recording($0) } }
+
+        // The render plays Mary's first note, A3, with fixture 086 (G♯3, 55.83) moved up 1.17.
+        let first = mary.notes[0]
+        XCTAssertEqual(try XCTUnwrap(arrangement.shift(of: first, by: try XCTUnwrap(recording(first)))), 57 - 55.83, accuracy: 1e-9)
+        XCTAssertEqual(arrangement.caption(of: first, in: mary, recording: recording(first)), "A3 · Recording 20 (G♯3), shifted +1.2 semitones · 0.4 s")
+        // Its last note, F3, with fixture 090 (G3, 55.13) moved down 2.13.
+        let last = mary.notes[25]
+        XCTAssertEqual(arrangement.caption(of: last, in: mary, recording: recording(last)), "F3 · Recording 21 (G3), shifted −2.1 semitones · 1.4 s")
+        XCTAssertEqual(arrangement.caption(of: last, in: mary, recording: nil), "F3 · Recording deleted · 1.4 s")
+    }
+
+    // MARK: Background
+
+    func testGoingToTheBackgroundStopsPlayback() async throws {
+        let model = makeModel(start: allFixtureIDs, toots: ["ode"])
+        model.togglePlayback(of: .toot(model.toots[0].id))
+        XCTAssertEqual(model.nowPlaying, .toot(model.toots[0].id))
+        model.didEnterBackground()
+        XCTAssertNil(model.nowPlaying)
+
+        // Also while Review is open, where coming back doesn't switch tabs.
+        let take = await recordTake(model)
+        let draft = try XCTUnwrap(take)
+        model.togglePlayback(of: .draft(draft.id))
+        XCTAssertEqual(model.nowPlaying, .draft(draft.id))
+        model.didEnterBackground()
+        XCTAssertNil(model.nowPlaying)
+    }
+
+    func testComingBackLandsOnRecordUnlessTheRecordFlowIsOpen() async throws {
+        let model = makeModel()
+        for tab in [AppTab.record, .recordings, .compose, .toots] {
+            XCTAssertEqual(model.tabOnReturn(from: tab), .record)
+        }
+        await model.startRecording()
+        XCTAssertEqual(model.tabOnReturn(from: .record), .record, "recording starts on Record")
+        clock += 1
+        await model.stopRecording()
+        XCTAssertNotNil(model.flow, "Review is open")
+        XCTAssertEqual(model.tabOnReturn(from: .recordings), .recordings, "Review stays where it is")
+        model.discardDraft()
+        XCTAssertEqual(model.tabOnReturn(from: .recordings), .record)
     }
 }

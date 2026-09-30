@@ -29,22 +29,27 @@ class PedosUITestCase: XCTestCase {
     /// Launches Pedos.
     /// - Parameters:
     ///   - start: `new`, `few`, `all`, or how many story takes are already saved.
+    ///   - toots: Songs already saved as Toots, oldest first.
     ///   - microphone: a simulated permission (`granted`, `denied`, `undetermined`), or nil for
     ///     the real one.
     ///   - failures: failures to simulate once each.
     @discardableResult
     func launch(
         start: String = "new",
+        toots: [String] = [],
         microphone: String? = "granted",
         failures: [String] = [],
         welcomeSeen: Bool = true,
         analysisSeconds: Double = 1.5,
+        makingSeconds: Double = 0.5,
         app: XCUIApplication = XCUIApplication()
     ) -> XCUIApplication {
         app.launchArguments = [
             "-PedosSampleStart", start,
+            "-PedosSampleToots", toots.joined(separator: ","),
             "-welcomeSeen", welcomeSeen ? "YES" : "NO",
             "-PedosAnalysisSeconds", String(analysisSeconds),
+            "-PedosMakingSeconds", String(makingSeconds),
         ]
         if let microphone {
             app.launchArguments += ["-PedosMicrophone", microphone]
@@ -62,7 +67,7 @@ class PedosUITestCase: XCTestCase {
         XCTAssertTrue(app.buttons["Stop"].waitForExistence(timeout: 5), "Recording didn't start")
         waitForTimerToCount(in: app)
         if let screenshot { attachScreenshot(screenshot) }
-        app.buttons["record-button"].tap()
+        app.buttons["stop-button"].tap()
     }
 
     /// Waits until the recording timer shows at least a second.
@@ -77,6 +82,14 @@ class PedosUITestCase: XCTestCase {
     func saveTake(in app: XCUIApplication) {
         XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 5), "Review didn't open")
         app.buttons["Save"].tap()
+    }
+
+    /// Scrolls the screen up until `element` exists, for rows a lazy list hasn't made yet.
+    func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
+        for _ in 0..<5 where !element.exists {
+            app.swipeUp()
+        }
+        XCTAssertTrue(element.exists, "Couldn't find \(element)")
     }
 
     /// Attaches a screenshot of the whole screen, system alerts included.

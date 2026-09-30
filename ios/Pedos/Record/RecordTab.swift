@@ -1,8 +1,8 @@
 import SwiftUI
 import UIKit
 
-/// The Record tab: one big red button. Tap to record; it turns into Stop with a timer and a
-/// pulse; tap again to stop. Recording happens in place.
+/// The Record tab: one big red button. Tap to record: recording goes full screen over the tabs
+/// (`RecordingView`), where the same button is Stop.
 struct RecordTab: View {
     let model: any AppModel
     @Environment(\.openURL) private var openURL
@@ -11,14 +11,8 @@ struct RecordTab: View {
         VStack(spacing: 28) {
             // Balances the status line below, so the button stays centered.
             Color.clear.frame(height: 40)
-            RecordButton(isRecording: model.isRecording) {
-                Task {
-                    if model.isRecording {
-                        await model.stopRecording()
-                    } else {
-                        await model.startRecording()
-                    }
-                }
+            RecordButton(isRecording: false) {
+                Task { await model.startRecording() }
             }
             status.frame(height: 40)
         }
@@ -48,13 +42,7 @@ struct RecordTab: View {
 
     @ViewBuilder
     private var status: some View {
-        if case .recording(let startedAt) = model.capture {
-            TimelineView(.periodic(from: startedAt, by: 1)) { context in
-                Text(Duration.seconds(max(0, context.date.timeIntervalSince(startedAt))).formatted(.time(pattern: .minuteSecond)))
-                    .font(.largeTitle.monospacedDigit())
-                    .accessibilityIdentifier("recording-timer")
-            }
-        } else if model.recordProblem == .nothingHeard {
+        if model.recordProblem == .nothingHeard {
             Text("Didn't catch that. Try again.")
                 .foregroundStyle(.secondary)
                 .accessibilityIdentifier("nothing-heard")
@@ -83,6 +71,37 @@ private extension RecordProblem {
         case .couldNotStart: nil
         case .interrupted: "Nothing was saved."
         case .nothingHeard: "Try again."
+        }
+    }
+}
+
+/// Recording, full screen over the tabs: the big button as Stop, with its pulse and the timer.
+/// Stop goes on to Review in the same cover.
+struct RecordingView: View {
+    let model: any AppModel
+
+    var body: some View {
+        VStack(spacing: 28) {
+            // Balances the timer below, so the button stays where it was on the Record tab.
+            Color.clear.frame(height: 40)
+            RecordButton(isRecording: true) {
+                Task { await model.stopRecording() }
+            }
+            // Stopping finishes the take before Review opens; a second tap does nothing.
+            .disabled(!model.isRecording)
+            timer.frame(height: 40)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var timer: some View {
+        if case .recording(let startedAt) = model.capture {
+            TimelineView(.periodic(from: startedAt, by: 1)) { context in
+                Text(Duration.seconds(max(0, context.date.timeIntervalSince(startedAt))).formatted(.time(pattern: .minuteSecond)))
+                    .font(.largeTitle.monospacedDigit())
+                    .accessibilityIdentifier("recording-timer")
+            }
         }
     }
 }
@@ -118,6 +137,25 @@ private struct RecordButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(isRecording ? "Stop" : "Record")
-        .accessibilityIdentifier("record-button")
+        // The Record tab stays under the Recording cover, so Stop has its own identifier.
+        .accessibilityIdentifier(isRecording ? "stop-button" : "record-button")
     }
 }
+
+#if DEBUG
+#Preview("Record") {
+    RecordTab(model: SampleAppModel.preview())
+}
+
+#Preview("Recording") {
+    let model = SampleAppModel.preview()
+    RecordingView(model: model)
+        .task { await model.startRecording() }
+}
+
+#Preview("Couldn't start recording") {
+    let model = SampleAppModel.preview(failures: .couldNotStart)
+    RecordTab(model: model)
+        .task { await model.startRecording() }
+}
+#endif

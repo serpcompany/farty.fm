@@ -2,13 +2,19 @@ import Foundation
 import Observation
 
 /// Everything the screens read and do. `SampleAppModel` implements it with sample data until the
-/// real recorder, store and analysis replace it (#12, #14, #32, #37).
+/// real recorder, store, analysis and rendering replace it (#12, #14, #17, #32, #37).
 @MainActor
 protocol AppModel: AnyObject, Observable {
     /// Every saved Recording, oldest first.
     var recordings: [Recording] { get }
     /// The Song Catalog.
     var songs: [Song] { get }
+    /// A Song's Pitch Coverage by the Melodic Recordings.
+    func coverage(of song: Song) -> CoverageResult
+    /// The Songs matching a search, in `order`, split into Unlocked and locked Songs. Models match
+    /// the Song Catalog once per change to the Melodic Recordings (`CoverageCache`), so searching
+    /// and redrawing don't match it again.
+    func songListing(matching query: String, order: SongOrder) -> SongListing
 
     // MARK: First launch
 
@@ -51,6 +57,8 @@ protocol AppModel: AnyObject, Observable {
     // MARK: Playback
 
     var nowPlaying: PlaybackItem? { get }
+    /// When `nowPlaying` started playing, for a playhead; nil until it has started.
+    var playbackStartedAt: Date? { get }
     /// Plays the item, or stops it when it's already playing.
     func togglePlayback(of item: PlaybackItem)
     func stopPlayback()
@@ -58,12 +66,36 @@ protocol AppModel: AnyObject, Observable {
     // MARK: Recordings
 
     func delete(_ id: Recording.ID)
+
+    // MARK: Compose
+
+    /// Song Creator: makes a Toot of an Unlocked Song, played only by the user's Recordings.
+    /// Throws `TootError`.
+    func makeToot(of song: Song) async throws -> TootDraft
+    /// Saves a made Toot to the Toots tab, with the same id. Saving it again does nothing.
+    func saveToot(_ draft: TootDraft)
+
+    #if DEBUG
+    /// Where a simulated Toot's audio came from, for Song Creator to say so; nil for a real one.
+    func simulatedSource(ofToot id: TootDraft.ID) -> String?
+    #endif
+
+    // MARK: Toots
+
+    /// Every saved Toot, oldest first.
+    var toots: [Toot] { get }
+    /// Renames a Toot; a blank title changes nothing.
+    func renameToot(_ id: Toot.ID, to title: String)
+    func deleteToot(_ id: Toot.ID)
 }
 
 extension AppModel {
     var isRecording: Bool {
         if case .recording = capture { true } else { false }
     }
+
+    /// Recording, Review or Result is on screen, full screen over the tabs.
+    var showsRecordFlow: Bool { capture != .idle || flow != nil }
 
     var melodicRecordings: [Recording] { recordings.filter(\.isMelodic) }
 
@@ -72,10 +104,13 @@ extension AppModel {
 
     func recording(_ id: Recording.ID) -> Recording? { recordings.first { $0.id == id } }
 
-    func coverage(of song: Song) -> CoverageResult { CoverageResult(song: song, recordings: recordings) }
+    func song(_ id: Song.ID) -> Song? { songs.first { $0.id == id } }
+
+    func toot(_ id: Toot.ID) -> Toot? { toots.first { $0.id == id } }
 
     #if DEBUG
     func simulatedSource(ofDraft id: Draft.ID) -> String? { nil }
+    func simulatedSource(ofToot id: TootDraft.ID) -> String? { nil }
     #endif
 }
 
@@ -116,4 +151,9 @@ struct RecordResult: Hashable, Sendable {
 enum PlaybackItem: Hashable, Sendable {
     case draft(Draft.ID)
     case recording(Recording.ID)
+    /// A Toot Song Creator made, saved or not.
+    case tootDraft(TootDraft.ID)
+    case toot(Toot.ID)
+    /// One note of a made or saved Toot (by its id), as rendered: a segment of its own audio.
+    case note(UUID, index: Int)
 }

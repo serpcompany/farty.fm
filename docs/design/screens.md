@@ -40,10 +40,10 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 **SCREEN NAME:** Record
 **PURPOSE:** Capture one fart, instantly.
-**HOW USER GETS HERE:** Tab 1 (Record). Opens on launch.
+**HOW USER GETS HERE:** Tab 1 (Record). Opens on launch, and whenever the app comes back to the foreground, unless Review or Result is open.
 **WHAT'S ON THE SCREEN:**
 - **Idle:** one big red button and nothing else
-- **Recording:** the button turns into a Stop square with a pulse, and a timer appears
+- **Recording:** full screen over the tabs: the button as a Stop square with a pulse, and a timer
 **PRIMARY ACTION:** Tap to record, tap again to stop.
 **SECONDARY ACTIONS:** None.
 **STATES:**
@@ -54,7 +54,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - **Error, interrupted** (a call or another app took the microphone): "Recording stopped. Nothing was saved.", with Try again
 - **Nothing heard:** an empty or too-short take goes straight back to Idle with "Didn't catch that. Try again." and nothing to save
 **NAVIGATION TYPE:** Tab.
-**PATTERN CHOICE:** Recording happens in place, not in a separate screen. The other tabs are disabled while recording.
+**PATTERN CHOICE:** Recording fills the screen over the tabs, and Stop goes on to Review in the same full-screen cover. Apple's HIG says not to disable tab bar buttons; a modal may cover them.
 **NOTES:** The owner asked for "just one big red button" (#47 review).
 
 ---
@@ -169,16 +169,20 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Source and license line ("Public domain score · PDMX")
 - Play/Stop button
 - A read-only note view (dots over time, colored by Recording) with a playhead
-- The Recordings used, as small chips
-- Save button
+- The Recordings used, as a list: each with the color of its notes, its name, waveform and length, the note it plays in the Song, and a play button
+- Save button, pinned at the bottom
 **PRIMARY ACTION:** Save.
-**SECONDARY ACTIONS:** Play/Stop; tap a Recording chip to hear that fart alone.
+**SECONDARY ACTIONS:**
+- Play/Stop
+- tap a Recording to hear that fart alone; its notes are highlighted
+- tap a note to hear just that note as rendered (from the Toot's own audio); it's selected, its Recording is highlighted, and a line says what it is: "F3 · Recording 21 (G3), shifted −2.1 semitones · 1.4 s"
 **STATES:**
-- Making ("Making your melody…", about 1–2 s)
+- Making ("Making your Toot…", about 1–2 s)
 - Ready (auto-plays once)
 - Playing
-- Saved (a toast: "Saved to Melodies")
-- **Error:** couldn't make the melody, for example a Recording file is missing: "Couldn't make this melody", with Try again
+- Note selected
+- Saved (the Save button reads "Saved to Toots")
+- **Error:** couldn't make the Toot, for example a Recording file is missing: "Couldn't make this Toot", with Try again
 **NAVIGATION TYPE:** Push.
 **NOTES:** Not an editor. Nothing on this screen changes the Arrangement.
 
@@ -211,25 +215,41 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 ---
 
-**SCREEN NAME:** Melodies
+**SCREEN NAME:** Toots
 **PURPOSE:** Everything you've made.
-**HOW USER GETS HERE:** Tab 4 (Melodies), or after Save.
+**HOW USER GETS HERE:** Tab 4 (Toots), or after Save.
 **WHAT'S ON THE SCREEN:**
 - Rows with a play button, title, origin (the Song's title; "AI · Happy" once AI Song Creator returns), date and length
-**PRIMARY ACTION:** Play.
-**SECONDARY ACTIONS:** Long-press for Rename or Delete (with confirmation).
+**PRIMARY ACTION:** Play (the row's play button).
+**SECONDARY ACTIONS:** Tap the row to open the Toot. Long-press for Rename or Delete (with confirmation).
 **STATES:**
 - Empty ("Nothing yet. Make one in Compose.")
 - Populated
 - Playing
-- **Error:** audio missing or unreadable: "This melody's audio is missing", offering Delete
+- **Error:** audio missing or unreadable: "This Toot's audio is missing", offering Delete
 **NAVIGATION TYPE:** Tab.
+**NOTES:** Renamed from "Melodies" by the owner (#52).
+
+---
+
+**SCREEN NAME:** Toot
+**PURPOSE:** See and hear which Recording played which notes.
+**HOW USER GETS HERE:** Tap a row on the Toots tab.
+**WHAT'S ON THE SCREEN:** Song Creator's layout without Save:
+- the Toot's title, and its origin (the Song's title and source line)
+- Play/Stop and the note view with its playhead
+- the Recordings used, as in Song Creator; a Recording deleted since shows as "Recording deleted", with the note it played and no play button
+**PRIMARY ACTION:** Play.
+**SECONDARY ACTIONS:** Tap a Recording or a note, as in Song Creator. Rename and Delete in the toolbar menu; Delete goes back to the list.
+**STATES:** Default, Playing, Note selected, Recording deleted.
+**NAVIGATION TYPE:** Push.
+**NOTES:** A Toot keeps its Arrangement from when it was made, and plays its own audio.
 
 ---
 
 **SCREEN NAME:** Rename
-**PURPOSE:** Give a Created Melody a name.
-**HOW USER GETS HERE:** Long-press a melody, then Rename.
+**PURPOSE:** Give a Toot a name.
+**HOW USER GETS HERE:** Long-press a Toot, or its screen's menu, then Rename.
 **WHAT'S ON THE SCREEN:** A text field, Cancel and Save.
 **NAVIGATION TYPE:** Alert with a text field.
 **PLATFORM NOTE:** Apple default.
