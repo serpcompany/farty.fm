@@ -2,7 +2,7 @@ name: Pedos
 
 options:
   deploymentTarget:
-    iOS: "17.0"
+    iOS: "26.0"
   developmentLanguage: en
   createIntermediateGroups: true
 

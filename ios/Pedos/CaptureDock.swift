@@ -1,41 +1,45 @@
 import SwiftUI
 
 /// The Capture Dock (ADR 0005): a stable tab bar that opens on Record, so capture is
-/// always one tap away, followed by the Recording shelf, creation and Created Melodies.
+/// always one tap away, followed by the Recording shelf, composing and Created Melodies.
 ///
 /// Every area is a placeholder until its slice lands.
 struct CaptureDock: View {
     var body: some View {
         TabView {
-            RecordArea()
-                .tabItem { Label("Record", systemImage: "record.circle") }
-
-            DockArea(title: "Recordings") {
-                ContentUnavailableView(
-                    "No Recordings yet",
-                    systemImage: "waveform",
-                    description: Text("Tap Record to capture one fart per Recording.")
-                )
+            Tab("Record", systemImage: "record.circle") {
+                RecordArea()
             }
-            .tabItem { Label("Recordings", systemImage: "waveform") }
 
-            DockArea(title: "Create") {
-                ContentUnavailableView(
-                    "Nothing to create with yet",
-                    systemImage: "music.note",
-                    description: Text("Song Creator and AI Song Creator play melodies using only your Recordings.")
-                )
+            Tab("Recordings", systemImage: "waveform") {
+                DockArea(title: "Recordings") {
+                    ContentUnavailableView(
+                        "No Recordings yet",
+                        systemImage: "waveform",
+                        description: Text("Tap Record to capture one fart per Recording.")
+                    )
+                }
             }
-            .tabItem { Label("Create", systemImage: "music.note") }
 
-            DockArea(title: "Created Melodies") {
-                ContentUnavailableView(
-                    "No Created Melodies yet",
-                    systemImage: "music.note.list",
-                    description: Text("Create one from your Recordings.")
-                )
+            Tab("Compose", systemImage: "music.note") {
+                DockArea(title: "Compose") {
+                    ContentUnavailableView(
+                        "Nothing to compose with yet",
+                        systemImage: "music.note",
+                        description: Text("Song Creator and AI Song Creator play melodies using only your Recordings.")
+                    )
+                }
             }
-            .tabItem { Label("Melodies", systemImage: "music.note.list") }
+
+            Tab("Melodies", systemImage: "music.note.list") {
+                DockArea(title: "Created Melodies") {
+                    ContentUnavailableView(
+                        "No Created Melodies yet",
+                        systemImage: "music.note.list",
+                        description: Text("Compose one from your Recordings.")
+                    )
+                }
+            }
         }
     }
 }
@@ -55,7 +59,7 @@ private struct RecordArea: View {
     }
 }
 
-/// A titled dock area.
+/// A dock area with a large navigation title.
 private struct DockArea<Content: View>: View {
     let title: String
     @ViewBuilder let content: Content
@@ -64,6 +68,7 @@ private struct DockArea<Content: View>: View {
         NavigationStack {
             content
                 .navigationTitle(title)
+                .navigationBarTitleDisplayMode(.large)
         }
     }
 }

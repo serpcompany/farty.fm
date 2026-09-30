@@ -18,7 +18,7 @@ final class CaptureDockUITests: XCTestCase {
 
         let areas = [
             (tab: "Recordings", title: "Recordings"),
-            (tab: "Create", title: "Create"),
+            (tab: "Compose", title: "Compose"),
             (tab: "Melodies", title: "Created Melodies"),
         ]
         for area in areas {

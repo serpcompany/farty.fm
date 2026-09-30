@@ -1,6 +1,6 @@
 # Pedos iPhone app
 
-SwiftUI app for iOS 17+, portrait iPhone only. The Xcode project is generated from
+SwiftUI app for iOS 26+, portrait iPhone only. The Xcode project is generated from
 [`project.yml`](project.yml) with [XcodeGen](https://github.com/yonaskolb/XcodeGen) and is not
 committed.
 
