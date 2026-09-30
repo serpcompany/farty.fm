@@ -3,20 +3,204 @@
 
 extension Song {
     /// The design prototype's Songs (#47), with each Song's distinct pitches as MIDI note
-    /// numbers. They stand in for the Song Catalog until #38 bundles it.
+    /// numbers and its notes (start and length in beats). They stand in for the Song Catalog
+    /// until #38 bundles it.
     static let prototypeCatalog: [Song] = [
-        Song(id: "twinkle", title: "Twinkle, Twinkle, Little Star", pitches: [69, 71, 73, 74, 76, 78], source: "Public domain score · PDMX", bpm: 110),
-        Song(id: "mary", title: "Mary Had a Little Lamb", pitches: [72, 74, 76, 79], source: "Public domain score · PDMX", bpm: 84),
-        Song(id: "jingle", title: "Jingle Bells", pitches: [60, 62, 64, 65, 67], source: "Public domain score · PDMX", bpm: 120),
-        Song(id: "birthday", title: "Happy Birthday", pitches: [62, 64, 66, 67, 69, 71, 72, 74], source: "Public domain score · PDMX", bpm: 100),
-        Song(id: "frere", title: "Frère Jacques", pitches: [50, 55, 57, 59, 60, 62, 64], source: "Public domain score · PDMX", bpm: 110),
-        Song(id: "saints", title: "When the Saints Go Marching In", pitches: [60, 62, 64, 65, 67], source: "Public domain score · PDMX", bpm: 150),
-        Song(id: "row", title: "Row, Row, Row Your Boat", pitches: [67, 69, 71, 72, 74, 79], source: "Public domain score · PDMX", bpm: 120),
-        Song(id: "ode", title: "Ode to Joy", pitches: [67, 69, 71, 72, 74], source: "Public domain score · PDMX", bpm: 110),
-        Song(id: "merryxmas", title: "We Wish You a Merry Christmas", pitches: [62, 64, 66, 67, 69, 71, 72, 74], source: "Public domain score · PDMX", bpm: 140),
-        Song(id: "amazing", title: "Amazing Grace", pitches: [62, 64, 67, 69, 71, 74], source: "Public domain score · PDMX", bpm: 100),
-        Song(id: "furelise", title: "Für Elise", pitches: [68, 69, 71, 72, 74, 75, 76], source: "Public domain score · PDMX", bpm: 110),
-        Song(id: "auld", title: "Auld Lang Syne", pitches: [60, 62, 65, 67, 69, 72, 74], source: "Public domain score · PDMX", bpm: 100),
+        Song(
+            id: "twinkle", title: "Twinkle, Twinkle, Little Star", pitches: [69, 71, 73, 74, 76, 78],
+            source: "Public domain score · PDMX", bpm: 110,
+            notes: [
+                Note(start: 0.0, length: 1.0, pitch: 69), Note(start: 1.0, length: 1.0, pitch: 69), Note(start: 2.0, length: 1.0, pitch: 76),
+                Note(start: 3.0, length: 1.0, pitch: 76), Note(start: 4.0, length: 1.0, pitch: 78), Note(start: 5.0, length: 1.0, pitch: 78),
+                Note(start: 6.0, length: 2.0, pitch: 76), Note(start: 8.0, length: 1.0, pitch: 74), Note(start: 9.0, length: 1.0, pitch: 74),
+                Note(start: 10.0, length: 1.0, pitch: 73), Note(start: 11.0, length: 1.0, pitch: 73), Note(start: 12.0, length: 1.0, pitch: 71),
+                Note(start: 13.0, length: 1.0, pitch: 71), Note(start: 14.0, length: 2.0, pitch: 69), Note(start: 16.0, length: 1.0, pitch: 76),
+                Note(start: 17.0, length: 1.0, pitch: 76), Note(start: 18.0, length: 1.0, pitch: 74), Note(start: 19.0, length: 1.0, pitch: 74),
+                Note(start: 20.0, length: 1.0, pitch: 73), Note(start: 21.0, length: 1.0, pitch: 73), Note(start: 22.0, length: 2.0, pitch: 71),
+                Note(start: 24.0, length: 1.0, pitch: 76), Note(start: 25.0, length: 1.0, pitch: 76), Note(start: 26.0, length: 1.0, pitch: 74),
+                Note(start: 27.0, length: 1.0, pitch: 74), Note(start: 28.0, length: 1.0, pitch: 73), Note(start: 29.0, length: 1.0, pitch: 73),
+                Note(start: 30.0, length: 2.0, pitch: 71),
+            ]
+        ),
+        Song(
+            id: "mary", title: "Mary Had a Little Lamb", pitches: [72, 74, 76, 79],
+            source: "Public domain score · PDMX", bpm: 84,
+            notes: [
+                Note(start: 0.0, length: 0.5, pitch: 76), Note(start: 0.5, length: 0.5, pitch: 74), Note(start: 1.0, length: 0.5, pitch: 72),
+                Note(start: 1.5, length: 0.5, pitch: 74), Note(start: 2.0, length: 0.5, pitch: 76), Note(start: 2.5, length: 0.5, pitch: 76),
+                Note(start: 3.0, length: 1.0, pitch: 76), Note(start: 4.0, length: 0.5, pitch: 74), Note(start: 4.5, length: 0.5, pitch: 74),
+                Note(start: 5.0, length: 1.0, pitch: 74), Note(start: 6.0, length: 0.5, pitch: 76), Note(start: 6.5, length: 0.5, pitch: 79),
+                Note(start: 7.0, length: 1.0, pitch: 79), Note(start: 8.0, length: 0.5, pitch: 76), Note(start: 8.5, length: 0.5, pitch: 74),
+                Note(start: 9.0, length: 0.5, pitch: 72), Note(start: 9.5, length: 0.5, pitch: 74), Note(start: 10.0, length: 0.5, pitch: 76),
+                Note(start: 10.5, length: 0.5, pitch: 76), Note(start: 11.0, length: 0.5, pitch: 76), Note(start: 11.5, length: 0.5, pitch: 72),
+                Note(start: 12.0, length: 0.5, pitch: 74), Note(start: 12.5, length: 0.5, pitch: 74), Note(start: 13.0, length: 0.5, pitch: 76),
+                Note(start: 13.5, length: 0.5, pitch: 74), Note(start: 14.0, length: 2.0, pitch: 72),
+            ]
+        ),
+        Song(
+            id: "jingle", title: "Jingle Bells", pitches: [60, 62, 64, 65, 67],
+            source: "Public domain score · PDMX", bpm: 120,
+            notes: [
+                Note(start: 0.0, length: 1.0, pitch: 64), Note(start: 1.0, length: 1.0, pitch: 64), Note(start: 2.0, length: 2.0, pitch: 64),
+                Note(start: 4.0, length: 1.0, pitch: 64), Note(start: 5.0, length: 1.0, pitch: 64), Note(start: 6.0, length: 2.0, pitch: 64),
+                Note(start: 8.0, length: 1.0, pitch: 64), Note(start: 9.0, length: 1.0, pitch: 67), Note(start: 10.0, length: 1.3333333333333333, pitch: 60),
+                Note(start: 11.333333333333329, length: 0.6666666666666666, pitch: 62), Note(start: 12.0, length: 4.0, pitch: 64), Note(start: 16.0, length: 1.0, pitch: 65),
+                Note(start: 17.0, length: 1.0, pitch: 65), Note(start: 18.0, length: 1.3333333333333333, pitch: 65), Note(start: 19.33333333333333, length: 0.6666666666666666, pitch: 65),
+                Note(start: 20.0, length: 1.0, pitch: 65), Note(start: 21.0, length: 1.0, pitch: 64), Note(start: 22.0, length: 1.0, pitch: 64),
+                Note(start: 23.0, length: 0.5, pitch: 64), Note(start: 23.5, length: 0.5, pitch: 64), Note(start: 24.0, length: 1.0, pitch: 64),
+                Note(start: 25.0, length: 1.0, pitch: 62), Note(start: 26.0, length: 1.0, pitch: 62), Note(start: 27.0, length: 1.0, pitch: 64),
+                Note(start: 28.0, length: 2.0, pitch: 62), Note(start: 30.0, length: 2.0, pitch: 67),
+            ]
+        ),
+        Song(
+            id: "birthday", title: "Happy Birthday", pitches: [62, 64, 66, 67, 69, 71, 72, 74],
+            source: "Public domain score · PDMX", bpm: 100,
+            notes: [
+                Note(start: 0.0, length: 0.75, pitch: 62), Note(start: 0.75, length: 0.25, pitch: 62), Note(start: 3.0, length: 1.0, pitch: 64),
+                Note(start: 4.0, length: 1.0, pitch: 62), Note(start: 5.0, length: 1.0, pitch: 67), Note(start: 6.0, length: 2.0, pitch: 66),
+                Note(start: 8.0, length: 0.375, pitch: 62), Note(start: 8.375, length: 0.125, pitch: 62), Note(start: 9.0, length: 1.0, pitch: 64),
+                Note(start: 10.0, length: 1.0, pitch: 62), Note(start: 11.0, length: 1.0, pitch: 69), Note(start: 12.0, length: 2.0, pitch: 67),
+                Note(start: 14.0, length: 0.75, pitch: 62), Note(start: 14.75, length: 0.25, pitch: 62), Note(start: 15.0, length: 1.0, pitch: 74),
+                Note(start: 16.0, length: 1.0, pitch: 71), Note(start: 17.0, length: 0.75, pitch: 67), Note(start: 17.75, length: 0.25, pitch: 67),
+                Note(start: 18.0, length: 1.0, pitch: 66), Note(start: 19.0, length: 1.0, pitch: 64), Note(start: 20.0, length: 0.75, pitch: 72),
+                Note(start: 20.75, length: 0.25, pitch: 72), Note(start: 21.0, length: 1.0, pitch: 71), Note(start: 22.0, length: 1.0, pitch: 67),
+                Note(start: 23.0, length: 1.0, pitch: 69), Note(start: 24.0, length: 2.0, pitch: 67),
+            ]
+        ),
+        Song(
+            id: "frere", title: "Frère Jacques", pitches: [50, 55, 57, 59, 60, 62, 64],
+            source: "Public domain score · PDMX", bpm: 110,
+            notes: [
+                Note(start: 0.0, length: 1.0, pitch: 55), Note(start: 1.0, length: 1.0, pitch: 57), Note(start: 2.0, length: 1.0, pitch: 59),
+                Note(start: 3.0, length: 1.0, pitch: 55), Note(start: 4.0, length: 1.0, pitch: 55), Note(start: 5.0, length: 1.0, pitch: 57),
+                Note(start: 6.0, length: 1.0, pitch: 59), Note(start: 7.0, length: 1.0, pitch: 55), Note(start: 8.0, length: 1.0, pitch: 59),
+                Note(start: 9.0, length: 1.0, pitch: 60), Note(start: 10.0, length: 2.0, pitch: 62), Note(start: 12.0, length: 1.0, pitch: 59),
+                Note(start: 13.0, length: 1.0, pitch: 60), Note(start: 14.0, length: 2.0, pitch: 62), Note(start: 16.0, length: 0.5, pitch: 62),
+                Note(start: 16.5, length: 0.5, pitch: 64), Note(start: 17.0, length: 0.5, pitch: 62), Note(start: 17.5, length: 0.5, pitch: 60),
+                Note(start: 18.0, length: 1.0, pitch: 59), Note(start: 19.0, length: 1.0, pitch: 55), Note(start: 20.0, length: 0.5, pitch: 62),
+                Note(start: 20.5, length: 0.5, pitch: 64), Note(start: 21.0, length: 0.5, pitch: 62), Note(start: 21.5, length: 0.5, pitch: 60),
+                Note(start: 22.0, length: 1.0, pitch: 59), Note(start: 23.0, length: 1.0, pitch: 55), Note(start: 24.0, length: 1.0, pitch: 55),
+                Note(start: 25.0, length: 1.0, pitch: 50), Note(start: 26.0, length: 2.0, pitch: 55), Note(start: 28.0, length: 1.0, pitch: 55),
+                Note(start: 29.0, length: 1.0, pitch: 50), Note(start: 30.0, length: 2.0, pitch: 55),
+            ]
+        ),
+        Song(
+            id: "saints", title: "When the Saints Go Marching In", pitches: [60, 62, 64, 65, 67],
+            source: "Public domain score · PDMX", bpm: 150,
+            notes: [
+                Note(start: 0.5, length: 0.5, pitch: 60), Note(start: 1.0, length: 0.5, pitch: 64), Note(start: 1.5, length: 0.5, pitch: 65),
+                Note(start: 2.0, length: 2.5, pitch: 67), Note(start: 4.5, length: 0.5, pitch: 60), Note(start: 5.0, length: 0.5, pitch: 64),
+                Note(start: 5.5, length: 0.5, pitch: 65), Note(start: 6.0, length: 2.5, pitch: 67), Note(start: 8.5, length: 0.5, pitch: 60),
+                Note(start: 9.0, length: 0.5, pitch: 64), Note(start: 9.5, length: 0.5, pitch: 65), Note(start: 10.0, length: 1.0, pitch: 67),
+                Note(start: 11.0, length: 1.0, pitch: 64), Note(start: 12.0, length: 1.0, pitch: 60), Note(start: 13.0, length: 1.0, pitch: 64),
+                Note(start: 14.0, length: 3.0, pitch: 62), Note(start: 17.0, length: 0.5, pitch: 64), Note(start: 17.5, length: 0.5, pitch: 62),
+                Note(start: 18.0, length: 1.5, pitch: 60), Note(start: 19.5, length: 0.5, pitch: 60), Note(start: 20.0, length: 1.0, pitch: 64),
+                Note(start: 21.0, length: 1.0, pitch: 67), Note(start: 22.0, length: 0.5, pitch: 67), Note(start: 22.5, length: 1.0, pitch: 65),
+                Note(start: 25.0, length: 0.5, pitch: 64), Note(start: 25.5, length: 0.5, pitch: 65), Note(start: 26.0, length: 1.0, pitch: 67),
+                Note(start: 27.0, length: 1.0, pitch: 64), Note(start: 28.0, length: 1.0, pitch: 62), Note(start: 29.0, length: 1.0, pitch: 62),
+                Note(start: 30.0, length: 2.5, pitch: 60),
+            ]
+        ),
+        Song(
+            id: "row", title: "Row, Row, Row Your Boat", pitches: [67, 69, 71, 72, 74, 79],
+            source: "Public domain score · PDMX", bpm: 120,
+            notes: [
+                Note(start: 0.0, length: 1.5, pitch: 67), Note(start: 1.5, length: 1.5, pitch: 67), Note(start: 3.0, length: 1.0, pitch: 67),
+                Note(start: 4.0, length: 0.5, pitch: 69), Note(start: 4.5, length: 1.5, pitch: 71), Note(start: 6.0, length: 1.0, pitch: 71),
+                Note(start: 7.0, length: 0.5, pitch: 69), Note(start: 7.5, length: 1.0, pitch: 71), Note(start: 8.5, length: 0.5, pitch: 72),
+                Note(start: 9.0, length: 3.0, pitch: 74), Note(start: 12.0, length: 0.5, pitch: 79), Note(start: 12.5, length: 0.5, pitch: 79),
+                Note(start: 13.0, length: 0.5, pitch: 79), Note(start: 13.5, length: 0.5, pitch: 74), Note(start: 14.0, length: 0.5, pitch: 74),
+                Note(start: 14.5, length: 0.5, pitch: 74), Note(start: 15.0, length: 0.5, pitch: 71), Note(start: 15.5, length: 0.5, pitch: 71),
+                Note(start: 16.0, length: 0.5, pitch: 71), Note(start: 16.5, length: 0.5, pitch: 67), Note(start: 17.0, length: 0.5, pitch: 67),
+                Note(start: 17.5, length: 0.5, pitch: 67), Note(start: 18.0, length: 1.0, pitch: 74), Note(start: 19.0, length: 0.5, pitch: 72),
+                Note(start: 19.5, length: 1.0, pitch: 71), Note(start: 20.5, length: 0.5, pitch: 69), Note(start: 21.0, length: 3.0, pitch: 67),
+            ]
+        ),
+        Song(
+            id: "ode", title: "Ode to Joy", pitches: [67, 69, 71, 72, 74],
+            source: "Public domain score · PDMX", bpm: 110,
+            notes: [
+                Note(start: 0.0, length: 1.0, pitch: 71), Note(start: 1.0, length: 1.0, pitch: 71), Note(start: 2.0, length: 1.0, pitch: 72),
+                Note(start: 3.0, length: 1.0, pitch: 74), Note(start: 4.0, length: 1.0, pitch: 74), Note(start: 5.0, length: 1.0, pitch: 72),
+                Note(start: 6.0, length: 1.0, pitch: 71), Note(start: 7.0, length: 1.0, pitch: 69), Note(start: 8.0, length: 1.0, pitch: 67),
+                Note(start: 9.0, length: 1.0, pitch: 67), Note(start: 10.0, length: 1.0, pitch: 69), Note(start: 11.0, length: 1.0, pitch: 71),
+                Note(start: 12.0, length: 1.5, pitch: 71), Note(start: 13.5, length: 0.5, pitch: 69), Note(start: 14.0, length: 2.0, pitch: 69),
+                Note(start: 16.0, length: 1.0, pitch: 71), Note(start: 17.0, length: 1.0, pitch: 71), Note(start: 18.0, length: 1.0, pitch: 72),
+                Note(start: 19.0, length: 1.0, pitch: 74), Note(start: 20.0, length: 1.0, pitch: 74), Note(start: 21.0, length: 1.0, pitch: 72),
+                Note(start: 22.0, length: 1.0, pitch: 71), Note(start: 23.0, length: 1.0, pitch: 69), Note(start: 24.0, length: 1.0, pitch: 67),
+                Note(start: 25.0, length: 1.0, pitch: 67), Note(start: 26.0, length: 1.0, pitch: 69), Note(start: 27.0, length: 1.0, pitch: 71),
+                Note(start: 28.0, length: 1.5, pitch: 69), Note(start: 29.5, length: 0.5, pitch: 67), Note(start: 30.0, length: 2.0, pitch: 67),
+            ]
+        ),
+        Song(
+            id: "merryxmas", title: "We Wish You a Merry Christmas", pitches: [62, 64, 66, 67, 69, 71, 72, 74],
+            source: "Public domain score · PDMX", bpm: 140,
+            notes: [
+                Note(start: 0.0, length: 1.0, pitch: 62), Note(start: 3.0, length: 1.0, pitch: 67), Note(start: 4.0, length: 0.5, pitch: 67),
+                Note(start: 4.5, length: 0.5, pitch: 69), Note(start: 5.0, length: 0.5, pitch: 67), Note(start: 5.5, length: 0.5, pitch: 66),
+                Note(start: 6.0, length: 1.0, pitch: 64), Note(start: 7.0, length: 1.0, pitch: 64), Note(start: 8.0, length: 1.0, pitch: 64),
+                Note(start: 9.0, length: 1.0, pitch: 69), Note(start: 10.0, length: 0.5, pitch: 69), Note(start: 10.5, length: 0.5, pitch: 71),
+                Note(start: 11.0, length: 0.5, pitch: 69), Note(start: 11.5, length: 0.5, pitch: 67), Note(start: 12.0, length: 1.0, pitch: 66),
+                Note(start: 13.0, length: 1.0, pitch: 62), Note(start: 14.0, length: 1.0, pitch: 62), Note(start: 15.0, length: 1.0, pitch: 71),
+                Note(start: 16.0, length: 0.5, pitch: 71), Note(start: 16.5, length: 0.5, pitch: 72), Note(start: 17.0, length: 0.5, pitch: 71),
+                Note(start: 17.5, length: 0.5, pitch: 69), Note(start: 18.0, length: 1.0, pitch: 67), Note(start: 19.0, length: 1.0, pitch: 64),
+                Note(start: 20.0, length: 0.5, pitch: 62), Note(start: 20.5, length: 0.5, pitch: 62), Note(start: 21.0, length: 1.0, pitch: 64),
+                Note(start: 22.0, length: 1.0, pitch: 69), Note(start: 23.0, length: 1.0, pitch: 66), Note(start: 24.0, length: 1.0, pitch: 67),
+                Note(start: 26.0, length: 1.0, pitch: 62), Note(start: 27.0, length: 1.0, pitch: 67), Note(start: 28.0, length: 1.0, pitch: 67),
+                Note(start: 29.0, length: 1.0, pitch: 67), Note(start: 30.0, length: 2.0, pitch: 66), Note(start: 32.0, length: 1.0, pitch: 66),
+                Note(start: 33.0, length: 1.0, pitch: 67), Note(start: 34.0, length: 1.0, pitch: 66), Note(start: 35.0, length: 1.0, pitch: 64),
+                Note(start: 36.0, length: 1.0, pitch: 62), Note(start: 38.0, length: 1.0, pitch: 69), Note(start: 39.0, length: 1.0, pitch: 71),
+                Note(start: 40.0, length: 0.5, pitch: 69), Note(start: 40.5, length: 0.5, pitch: 69), Note(start: 41.0, length: 0.5, pitch: 67),
+                Note(start: 41.5, length: 0.5, pitch: 67), Note(start: 42.0, length: 1.0, pitch: 74), Note(start: 43.0, length: 1.0, pitch: 62),
+                Note(start: 44.0, length: 0.5, pitch: 62), Note(start: 44.5, length: 0.5, pitch: 62), Note(start: 45.0, length: 1.0, pitch: 64),
+                Note(start: 46.0, length: 1.0, pitch: 69), Note(start: 47.0, length: 1.0, pitch: 66),
+            ]
+        ),
+        Song(
+            id: "amazing", title: "Amazing Grace", pitches: [62, 64, 67, 69, 71, 74],
+            source: "Public domain score · PDMX", bpm: 100,
+            notes: [
+                Note(start: 0.0, length: 1.0, pitch: 62), Note(start: 1.0, length: 2.0, pitch: 67), Note(start: 3.0, length: 0.5, pitch: 71),
+                Note(start: 3.5, length: 0.5, pitch: 67), Note(start: 4.0, length: 2.0, pitch: 71), Note(start: 6.0, length: 1.0, pitch: 69),
+                Note(start: 7.0, length: 2.0, pitch: 67), Note(start: 9.0, length: 1.0, pitch: 64), Note(start: 10.0, length: 2.0, pitch: 62),
+                Note(start: 12.0, length: 1.0, pitch: 62), Note(start: 13.0, length: 2.0, pitch: 67), Note(start: 15.0, length: 0.5, pitch: 71),
+                Note(start: 15.5, length: 0.5, pitch: 67), Note(start: 16.0, length: 2.0, pitch: 71), Note(start: 18.0, length: 1.0, pitch: 69),
+                Note(start: 19.0, length: 5.0, pitch: 74),
+            ]
+        ),
+        Song(
+            id: "furelise", title: "Für Elise", pitches: [68, 69, 71, 72, 74, 75, 76],
+            source: "Public domain score · PDMX", bpm: 110,
+            notes: [
+                Note(start: 0.0, length: 0.5, pitch: 76), Note(start: 0.5, length: 0.5, pitch: 75), Note(start: 1.0, length: 0.5, pitch: 76),
+                Note(start: 1.5, length: 0.5, pitch: 75), Note(start: 2.0, length: 0.5, pitch: 76), Note(start: 2.5, length: 0.5, pitch: 75),
+                Note(start: 3.0, length: 0.5, pitch: 76), Note(start: 3.5, length: 0.5, pitch: 75), Note(start: 4.0, length: 0.5, pitch: 76),
+                Note(start: 4.5, length: 0.5, pitch: 71), Note(start: 5.0, length: 0.5, pitch: 74), Note(start: 5.5, length: 0.5, pitch: 72),
+                Note(start: 6.0, length: 2.5, pitch: 69), Note(start: 8.5, length: 0.5, pitch: 69), Note(start: 9.0, length: 2.0, pitch: 71),
+                Note(start: 11.0, length: 0.5, pitch: 68), Note(start: 11.5, length: 0.5, pitch: 71), Note(start: 12.0, length: 3.0, pitch: 72),
+                Note(start: 15.0, length: 0.5, pitch: 76), Note(start: 15.5, length: 0.5, pitch: 75), Note(start: 16.0, length: 0.5, pitch: 76),
+                Note(start: 16.5, length: 0.5, pitch: 75), Note(start: 17.0, length: 0.5, pitch: 76), Note(start: 17.5, length: 0.5, pitch: 75),
+                Note(start: 18.0, length: 0.5, pitch: 76), Note(start: 18.5, length: 0.5, pitch: 75), Note(start: 19.0, length: 0.5, pitch: 76),
+                Note(start: 19.5, length: 0.5, pitch: 71), Note(start: 20.0, length: 0.5, pitch: 74), Note(start: 20.5, length: 0.5, pitch: 72),
+                Note(start: 21.0, length: 2.5, pitch: 69), Note(start: 23.5, length: 0.5, pitch: 69),
+            ]
+        ),
+        Song(
+            id: "auld", title: "Auld Lang Syne", pitches: [60, 62, 65, 67, 69, 72, 74],
+            source: "Public domain score · PDMX", bpm: 100,
+            notes: [
+                Note(start: 1.0, length: 1.5, pitch: 65), Note(start: 2.5, length: 0.5, pitch: 65), Note(start: 3.0, length: 1.0, pitch: 65),
+                Note(start: 4.0, length: 1.0, pitch: 69), Note(start: 5.0, length: 1.5, pitch: 67), Note(start: 6.5, length: 0.5, pitch: 65),
+                Note(start: 7.0, length: 1.0, pitch: 67), Note(start: 8.0, length: 0.5, pitch: 69), Note(start: 8.5, length: 0.5, pitch: 67),
+                Note(start: 9.0, length: 1.5, pitch: 65), Note(start: 10.5, length: 0.5, pitch: 65), Note(start: 11.0, length: 1.0, pitch: 69),
+                Note(start: 12.0, length: 1.0, pitch: 72), Note(start: 13.0, length: 3.0, pitch: 74), Note(start: 16.0, length: 1.0, pitch: 74),
+                Note(start: 17.0, length: 1.5, pitch: 72), Note(start: 18.5, length: 0.5, pitch: 69), Note(start: 19.0, length: 1.0, pitch: 69),
+                Note(start: 20.0, length: 1.0, pitch: 65), Note(start: 21.0, length: 1.5, pitch: 67), Note(start: 22.5, length: 0.5, pitch: 65),
+                Note(start: 23.0, length: 1.0, pitch: 67), Note(start: 24.0, length: 0.5, pitch: 69), Note(start: 24.5, length: 0.5, pitch: 67),
+                Note(start: 25.0, length: 1.5, pitch: 65), Note(start: 26.5, length: 0.5, pitch: 62), Note(start: 27.0, length: 1.0, pitch: 62),
+                Note(start: 28.0, length: 1.0, pitch: 60), Note(start: 29.0, length: 3.0, pitch: 65),
+            ]
+        ),
     ]
 }
 

@@ -170,3 +170,13 @@ private struct RecordingRow: View {
         return parts.joined(separator: ", ")
     }
 }
+
+#if DEBUG
+#Preview("Recordings") {
+    RecordingsTab(model: SampleAppModel.preview(start: .all))
+}
+
+#Preview("Recordings, empty") {
+    RecordingsTab(model: SampleAppModel.preview())
+}
+#endif

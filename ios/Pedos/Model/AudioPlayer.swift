@@ -7,6 +7,8 @@ import Observation
 final class AudioPlayer {
     /// The item playing now, cleared when it finishes.
     private(set) var nowPlaying: PlaybackItem?
+    /// When `nowPlaying` actually started playing; nil until then.
+    private(set) var startedAt: Date?
 
     @ObservationIgnored private let engine = PlaybackEngine()
     /// The last engine operation; each new one waits for it, so they run in order.
@@ -25,9 +27,14 @@ final class AudioPlayer {
         guard let url else { return stop() }
         // The engine replaces what's playing without letting the session go in between.
         nowPlaying = item
+        startedAt = nil
         let observer = FinishObserver { [weak self] in self?.finished(item) }
         enqueue { [weak self] engine in
-            if await !engine.play(url, observer: observer) { await self?.finished(item) }
+            if await engine.play(url, observer: observer) {
+                await self?.started(item)
+            } else {
+                await self?.finished(item)
+            }
         }
     }
 
@@ -35,7 +42,12 @@ final class AudioPlayer {
     func stop() {
         guard nowPlaying != nil else { return }
         nowPlaying = nil
+        startedAt = nil
         enqueue { engine in await engine.stop() }
+    }
+
+    private func started(_ item: PlaybackItem) {
+        if nowPlaying == item { startedAt = .now }
     }
 
     private func finished(_ item: PlaybackItem) {

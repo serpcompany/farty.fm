@@ -23,3 +23,11 @@ enum Waveform {
         return peaks.map { max($0 / loudest, 0.05) }
     }
 }
+
+enum AudioLength {
+    /// An audio file's length in seconds, or nil when it can't be read.
+    static func seconds(of url: URL) -> Double? {
+        guard let file = try? AVAudioFile(forReading: url), file.fileFormat.sampleRate > 0 else { return nil }
+        return Double(file.length) / file.fileFormat.sampleRate
+    }
+}

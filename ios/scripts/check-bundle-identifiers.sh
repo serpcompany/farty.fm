@@ -4,7 +4,8 @@
 # takes the identifier from the build setting.
 #
 # It also builds Release for the simulator and checks that the app contains no
-# audio: the Fixture Library's sample audio is for Debug builds only.
+# audio: the design prototype's audio (the Fixture Library's Recordings and its
+# renders of each Song) is for Debug builds only.
 #
 # Run after `xcodegen generate`: ios/scripts/check-bundle-identifiers.sh
 set -eu
@@ -39,7 +40,8 @@ check "PedosUITests" com.serp.pedos.uitests "$(bundle_identifier PedosUITests De
 check "Info.plist CFBundleIdentifier" '$(PRODUCT_BUNDLE_IDENTIFIER)' \
   "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' Pedos/Info.plist)"
 
-# The Fixture Library never ships to regular users (AGENTS.md).
+# The Fixture Library never ships to regular users (AGENTS.md), and neither do
+# the prototype's Song renders, which are made from it.
 derived=$(mktemp -d "${TMPDIR:-/tmp}/pedos-release.XXXXXX")
 trap 'rm -rf "$derived"' EXIT
 echo "Building Release for the simulator to check its contents..."

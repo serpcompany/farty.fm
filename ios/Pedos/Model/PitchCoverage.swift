@@ -22,6 +22,8 @@ enum PitchCoverage {
         let missing: [Int]
         /// Indices into the Recording Pitches that cover a pitch, in index order.
         let used: [Int]
+        /// For each of the Song's pitches, the index of the Recording Pitch that covers it.
+        let coveredBy: [Int?]
     }
 
     /// Matches Recording Pitches (MIDI note numbers of Melodic Recordings) to a Song's distinct
@@ -30,7 +32,14 @@ enum PitchCoverage {
     /// Uses maximum bipartite matching (Kuhn's algorithm), trying closer Recordings first.
     static func match(songPitches: [Int], recordingPitches: [Double]) -> Match {
         guard !recordingPitches.isEmpty else {
-            return Match(covered: 0, total: songPitches.count, transposition: 0, missing: [], used: [])
+            return Match(
+                covered: 0,
+                total: songPitches.count,
+                transposition: 0,
+                missing: [],
+                used: [],
+                coveredBy: Array(repeating: nil, count: songPitches.count)
+            )
         }
 
         var best: (covered: Int, transposition: Int, owner: [Int])?
@@ -58,13 +67,17 @@ enum PitchCoverage {
         }
 
         let (covered, transposition, owner) = best!
-        let coveredNotes = Set(owner.filter { $0 >= 0 })
+        var coveredBy = [Int?](repeating: nil, count: songPitches.count)
+        for recording in owner.indices where owner[recording] >= 0 {
+            coveredBy[owner[recording]] = recording
+        }
         return Match(
             covered: covered,
             total: songPitches.count,
             transposition: transposition,
-            missing: songPitches.indices.filter { !coveredNotes.contains($0) }.map { songPitches[$0] + transposition },
-            used: owner.indices.filter { owner[$0] >= 0 }
+            missing: songPitches.indices.filter { coveredBy[$0] == nil }.map { songPitches[$0] + transposition },
+            used: owner.indices.filter { owner[$0] >= 0 },
+            coveredBy: coveredBy
         )
     }
 
@@ -89,6 +102,9 @@ struct CoverageResult: Hashable, Sendable {
     let missing: [Int]
     /// The Melodic Recordings that cover a pitch.
     let used: [Recording.ID]
+    /// The Melodic Recording that covers each covered pitch, keyed by the Song's pitch (MIDI, in
+    /// the score's key).
+    let recordingForPitch: [Int: Recording.ID]
     /// False when there are no Melodic Recordings at all.
     let hasMelodicRecordings: Bool
 
@@ -100,6 +116,20 @@ struct CoverageResult: Hashable, Sendable {
 
     /// "3 of 4 notes covered", or "All 4 notes covered" when unlocked.
     var summary: String { isUnlocked ? "All \(total) notes covered" : "\(covered) of \(total) notes covered" }
+
+    /// The notes still needed, with their octave: "D3 and F3", or with a `limit` of 3,
+    /// "D3, F3, A3, and 2 more". Nil when nothing is missing.
+    func missingNotes(limit: Int? = nil) -> String? {
+        let names = missing.map { Pitch.name(Double($0)) }
+        guard !names.isEmpty else { return nil }
+        guard let limit, names.count > limit else { return names.formatted(.list(type: .and)) }
+        return (names.prefix(limit) + ["\(names.count - limit) more"]).formatted(.list(type: .and))
+    }
+
+    /// Auto-map's Arrangement for an Unlocked Song; nil while it's locked.
+    var arrangement: Arrangement? {
+        isUnlocked ? Arrangement(recordingForPitch: recordingForPitch) : nil
+    }
 }
 
 extension CoverageResult {
@@ -107,13 +137,37 @@ extension CoverageResult {
     init(song: Song, recordings: [Recording]) {
         let melodic = recordings.filter(\.isMelodic)
         let match = PitchCoverage.match(songPitches: song.pitches, recordingPitches: melodic.compactMap(\.pitch))
+        var recordingForPitch: [Int: Recording.ID] = [:]
+        for (pitch, recording) in zip(song.pitches, match.coveredBy) {
+            if let recording { recordingForPitch[pitch] = melodic[recording].id }
+        }
         self.init(
             covered: match.covered,
             total: match.total,
             missing: match.missing,
             used: match.used.map { melodic[$0].id },
+            recordingForPitch: recordingForPitch,
             hasMelodicRecordings: !melodic.isEmpty
         )
+    }
+}
+
+/// Remembers each Song's Pitch Coverage until the Melodic Recordings change, so a Song Catalog of
+/// hundreds of Songs isn't matched again for every row on every redraw.
+struct CoverageCache {
+    private var melodic: [Recording] = []
+    private var results: [Song.ID: CoverageResult] = [:]
+
+    mutating func coverage(of song: Song, recordings: [Recording]) -> CoverageResult {
+        let melodic = recordings.filter(\.isMelodic)
+        if melodic != self.melodic {
+            self.melodic = melodic
+            results.removeAll()
+        }
+        if let result = results[song.id] { return result }
+        let result = CoverageResult(song: song, recordings: melodic)
+        results[song.id] = result
+        return result
     }
 }
 

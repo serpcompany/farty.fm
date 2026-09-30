@@ -29,22 +29,27 @@ class PedosUITestCase: XCTestCase {
     /// Launches Pedos.
     /// - Parameters:
     ///   - start: `new`, `few`, `all`, or how many story takes are already saved.
+    ///   - melodies: Songs already saved as Created Melodies, oldest first.
     ///   - microphone: a simulated permission (`granted`, `denied`, `undetermined`), or nil for
     ///     the real one.
     ///   - failures: failures to simulate once each.
     @discardableResult
     func launch(
         start: String = "new",
+        melodies: [String] = [],
         microphone: String? = "granted",
         failures: [String] = [],
         welcomeSeen: Bool = true,
         analysisSeconds: Double = 1.5,
+        makingSeconds: Double = 0.5,
         app: XCUIApplication = XCUIApplication()
     ) -> XCUIApplication {
         app.launchArguments = [
             "-PedosSampleStart", start,
+            "-PedosSampleMelodies", melodies.joined(separator: ","),
             "-welcomeSeen", welcomeSeen ? "YES" : "NO",
             "-PedosAnalysisSeconds", String(analysisSeconds),
+            "-PedosMakingSeconds", String(makingSeconds),
         ]
         if let microphone {
             app.launchArguments += ["-PedosMicrophone", microphone]
@@ -77,6 +82,14 @@ class PedosUITestCase: XCTestCase {
     func saveTake(in app: XCUIApplication) {
         XCTAssertTrue(app.buttons["Save"].waitForExistence(timeout: 5), "Review didn't open")
         app.buttons["Save"].tap()
+    }
+
+    /// Scrolls the screen up until `element` exists, for rows a lazy list hasn't made yet.
+    func scrollTo(_ element: XCUIElement, in app: XCUIApplication) {
+        for _ in 0..<5 where !element.exists {
+            app.swipeUp()
+        }
+        XCTAssertTrue(element.exists, "Couldn't find \(element)")
     }
 
     /// Attaches a screenshot of the whole screen, system alerts included.

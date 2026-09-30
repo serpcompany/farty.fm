@@ -20,24 +20,33 @@ final class SampleAppModelTests: XCTestCase {
 
     private func makeModel(
         start: [String] = [],
+        melodies: [Song.ID] = [],
         microphone: MicrophoneAccess = SimulatedMicrophone(permission: .granted),
         failures: SampleAppModel.Failures = [],
         fixtures: [SampleFixture] = SampleFixture.prototypeLibrary,
-        story: [String] = SampleFixture.prototypeStory
+        story: [String] = SampleFixture.prototypeStory,
+        songAudio: @escaping (Song) -> URL? = \.prototypeAudioURL
     ) -> SampleAppModel {
         SampleAppModel(
             fixtures: fixtures,
             story: story,
             songs: Song.prototypeCatalog,
             initialFixtureIDs: start,
+            initialMelodySongIDs: melodies,
+            songAudio: songAudio,
             microphone: microphone,
             defaults: defaults,
             failures: failures,
             now: { [unowned self] in clock },
             analysisDelay: .zero,
-            interruptionDelay: .zero
+            interruptionDelay: .zero,
+            makingDelay: .zero
         )
     }
+
+    private var allFixtureIDs: [String] { SampleFixture.prototypeLibrary.map(\.id) }
+
+    private func song(_ id: Song.ID) -> Song { Song.prototypeCatalog.first { $0.id == id }! }
 
     /// Records for one second and stops, returning the draft under Review.
     @discardableResult
@@ -334,11 +343,142 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertTrue(SampleFixture.prototypeStory.allSatisfy { id in library.contains { $0.id == id } })
     }
 
+    func testEverySongHasPlayableStandInAudioInDebugBuilds() throws {
+        for song in Song.prototypeCatalog {
+            let url = try XCTUnwrap(song.prototypeAudioURL, "no bundled audio for \(song.id)")
+            let player = try AVAudioPlayer(contentsOf: url)
+            let notesEnd = song.beats * 60 / Double(song.bpm)
+            // The render holds the last note a little past the score's end.
+            XCTAssertEqual(player.duration, notesEnd, accuracy: 1.5, song.id)
+            XCTAssertGreaterThan(player.duration, notesEnd, song.id)
+        }
+    }
+
     func testEveryFixtureHasPlayableAudioInDebugBuilds() throws {
         for fixture in SampleFixture.prototypeLibrary {
             let url = try XCTUnwrap(fixture.audioURL, "no bundled audio for \(fixture.id)")
             let player = try AVAudioPlayer(contentsOf: url)
             XCTAssertEqual(player.duration, fixture.seconds, accuracy: 0.1, fixture.id)
         }
+    }
+
+    // MARK: Compose
+
+    func testCoverageFollowsTheRecordings() async {
+        let model = makeModel(start: Array(SampleFixture.prototypeStory.prefix(7)))
+        let mary = song("mary")
+        XCTAssertEqual(model.coverage(of: mary).summary, "3 of 4 notes covered")
+        await recordTake(model)
+        await model.saveDraft()
+        XCTAssertTrue(model.coverage(of: mary).isUnlocked, "the 8th take (086) unlocks Mary")
+        model.delete(model.recordings.last!.id)
+        XCTAssertFalse(model.coverage(of: mary).isUnlocked, "deleting it locks Mary again")
+    }
+
+    func testSongListingHasSixUnlockedSongsWithAllRecordings() {
+        let model = makeModel(start: allFixtureIDs)
+        let listing = model.songListing(matching: "", order: .closestToUnlocking)
+        XCTAssertEqual(listing.unlocked.map(\.song.id), ["mary", "jingle", "saints", "ode", "twinkle", "row"])
+        XCTAssertEqual(listing.locked.count, 6)
+    }
+
+    func testMakingAnUnlockedSongReturnsItsStandInAudioWithAutoMap() async throws {
+        let model = makeModel(start: allFixtureIDs)
+        let mary = song("mary")
+        let draft = try await model.makeMelody(of: mary)
+        XCTAssertEqual(draft.song, mary)
+        XCTAssertEqual(draft.audioURL, mary.prototypeAudioURL)
+        XCTAssertEqual(draft.seconds, 12.46, accuracy: 0.05, "the length of the prototype's render")
+        XCTAssertEqual(draft.arrangement, model.coverage(of: mary).arrangement)
+        XCTAssertEqual(draft.arrangement.recordings.compactMap { model.recording($0)?.name }, ["Recording 8", "Recording 3", "Recording 21", "Recording 23"])
+        XCTAssertEqual(model.simulatedSource(ofMelody: draft.id), "the design prototype's render of this Song")
+        XCTAssertTrue(model.melodies.isEmpty, "nothing is saved until Save")
+
+        model.togglePlayback(of: .melodyDraft(draft.id))
+        XCTAssertEqual(model.nowPlaying, .melodyDraft(draft.id))
+        model.stopPlayback()
+    }
+
+    func testLockedSongsCantBeMade() async {
+        let model = makeModel(start: allFixtureIDs)
+        do {
+            _ = try await model.makeMelody(of: song("birthday"))
+            XCTFail("Happy Birthday is locked")
+        } catch {
+            XCTAssertEqual(error as? MelodyError, .locked)
+        }
+    }
+
+    func testCouldNotMakeMelodyHappensOnceThenTryAgainWorks() async throws {
+        let model = makeModel(start: allFixtureIDs, failures: .couldNotMakeMelody)
+        do {
+            _ = try await model.makeMelody(of: song("mary"))
+            XCTFail("the simulated failure didn't happen")
+        } catch {
+            XCTAssertEqual(error as? MelodyError, .couldNotMake)
+        }
+        _ = try await model.makeMelody(of: song("mary"))
+    }
+
+    func testWithoutSongAudioMelodiesCantBeMade() async {
+        // Release builds carry no stand-in audio, so Song Creator reports it can't make one.
+        let model = makeModel(start: allFixtureIDs, songAudio: { _ in nil })
+        do {
+            _ = try await model.makeMelody(of: song("mary"))
+            XCTFail("made a melody without audio")
+        } catch {
+            XCTAssertEqual(error as? MelodyError, .couldNotMake)
+        }
+    }
+
+    func testSavingAddsACreatedMelodyOnce() async throws {
+        let model = makeModel(start: allFixtureIDs)
+        let draft = try await model.makeMelody(of: song("ode"))
+        model.saveMelody(draft)
+        model.saveMelody(draft)
+        XCTAssertEqual(model.melodies.count, 1, "saving twice keeps one")
+        let melody = try XCTUnwrap(model.melody(draft.id))
+        XCTAssertEqual(melody.title, "Ode to Joy")
+        XCTAssertEqual(melody.origin, "Ode to Joy")
+        XCTAssertEqual(melody.createdAt, clock)
+        XCTAssertEqual(melody.seconds, draft.seconds)
+        XCTAssertFalse(melody.isAudioMissing)
+
+        model.togglePlayback(of: .melody(melody.id))
+        XCTAssertEqual(model.nowPlaying, .melody(melody.id))
+        model.stopPlayback()
+    }
+
+    func testMelodiesAtLaunchAreOldestFirst() {
+        let model = makeModel(start: allFixtureIDs, melodies: ["twinkle", "mary", "nonexistent"])
+        XCTAssertEqual(model.melodies.map(\.title), ["Twinkle, Twinkle, Little Star", "Mary Had a Little Lamb"])
+        XCTAssertEqual(model.melodies.map { $0.seconds.rounded() }, [18, 12])
+    }
+
+    func testRenameTrimsAndIgnoresABlankTitle() {
+        let model = makeModel(melodies: ["mary"])
+        let id = model.melodies[0].id
+        model.renameMelody(id, to: "  Lamb Toots \n")
+        XCTAssertEqual(model.melodies[0].title, "Lamb Toots")
+        XCTAssertEqual(model.melodies[0].origin, "Mary Had a Little Lamb")
+        model.renameMelody(id, to: "   ")
+        XCTAssertEqual(model.melodies[0].title, "Lamb Toots")
+    }
+
+    func testDeletingAMelodyStopsItPlaying() {
+        let model = makeModel(melodies: ["mary", "ode"])
+        let mary = model.melodies[0].id
+        model.togglePlayback(of: .melody(mary))
+        XCTAssertEqual(model.nowPlaying, .melody(mary))
+        model.deleteMelody(mary)
+        XCTAssertNil(model.nowPlaying)
+        XCTAssertEqual(model.melodies.map(\.title), ["Ode to Joy"])
+    }
+
+    func testMissingMelodyAudioIsReportedAndNothingPlays() {
+        let model = makeModel(melodies: ["mary", "ode"], failures: .melodyAudioMissing)
+        XCTAssertEqual(model.melodies.map(\.isAudioMissing), [true, false], "the first Created Melody lost its audio")
+        model.togglePlayback(of: .melody(model.melodies[0].id))
+        XCTAssertNil(model.nowPlaying)
     }
 }

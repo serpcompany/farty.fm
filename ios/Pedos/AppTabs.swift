@@ -5,6 +5,8 @@ import SwiftUI
 struct AppTabs: View {
     let model: any AppModel
     @State private var selection = AppTab.record
+    /// The Songs pushed on the Compose tab.
+    @State private var composePath: [Song.ID] = []
 
     var body: some View {
         TabView(selection: $selection) {
@@ -18,27 +20,12 @@ struct AppTabs: View {
             .disabled(model.isRecording)
 
             Tab("Compose", systemImage: "music.note", value: .compose) {
-                // #52 builds Compose. Until then this stays neutral, because Try it on the
-                // Result screen lands here right after a Song unlocks.
-                TitledTab(title: "Compose") {
-                    ContentUnavailableView(
-                        "Songs are coming soon",
-                        systemImage: "music.note",
-                        description: Text("Your Unlocked Songs will play here.")
-                    )
-                }
+                ComposeTab(model: model, path: $composePath, onRecord: { selection = .record })
             }
             .disabled(model.isRecording)
 
             Tab("Melodies", systemImage: "music.note.list", value: .melodies) {
-                // #52 builds Melodies.
-                TitledTab(title: "Melodies") {
-                    ContentUnavailableView(
-                        "Nothing yet",
-                        systemImage: "music.note.list",
-                        description: Text("Make one in Compose.")
-                    )
-                }
+                MelodiesTab(model: model)
             }
             .disabled(model.isRecording)
         }
@@ -53,8 +40,10 @@ struct AppTabs: View {
                 model: model,
                 onDone: { selection = .recordings },
                 onRecordAnother: { selection = .record },
-                // #52 opens the Song in Song Creator.
-                onTry: { _ in selection = .compose }
+                onTry: { song in
+                    composePath = [song.id]
+                    selection = .compose
+                }
             )
         }
     }
@@ -67,16 +56,12 @@ enum AppTab: Hashable {
     case melodies
 }
 
-/// A tab with a large navigation title.
-private struct TitledTab<Content: View>: View {
-    let title: String
-    @ViewBuilder let content: Content
-
-    var body: some View {
-        NavigationStack {
-            content
-                .navigationTitle(title)
-                .navigationBarTitleDisplayMode(.large)
-        }
-    }
+#if DEBUG
+#Preview("Tabs") {
+    AppTabs(model: SampleAppModel.preview(start: .all, melodies: ["mary"]))
 }
+
+#Preview("Tabs, first launch") {
+    AppTabs(model: SampleAppModel.preview(showsWelcome: true))
+}
+#endif

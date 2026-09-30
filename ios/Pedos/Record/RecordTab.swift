@@ -121,3 +121,21 @@ private struct RecordButton: View {
         .accessibilityIdentifier("record-button")
     }
 }
+
+#if DEBUG
+#Preview("Record") {
+    RecordTab(model: SampleAppModel.preview())
+}
+
+#Preview("Recording") {
+    let model = SampleAppModel.preview()
+    RecordTab(model: model)
+        .task { await model.startRecording() }
+}
+
+#Preview("Couldn't start recording") {
+    let model = SampleAppModel.preview(failures: .couldNotStart)
+    RecordTab(model: model)
+        .task { await model.startRecording() }
+}
+#endif

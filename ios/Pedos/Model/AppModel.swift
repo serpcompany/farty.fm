@@ -2,13 +2,16 @@ import Foundation
 import Observation
 
 /// Everything the screens read and do. `SampleAppModel` implements it with sample data until the
-/// real recorder, store and analysis replace it (#12, #14, #32, #37).
+/// real recorder, store, analysis and rendering replace it (#12, #14, #17, #32, #37).
 @MainActor
 protocol AppModel: AnyObject, Observable {
     /// Every saved Recording, oldest first.
     var recordings: [Recording] { get }
     /// The Song Catalog.
     var songs: [Song] { get }
+    /// A Song's Pitch Coverage by the Melodic Recordings. Models remember it (`CoverageCache`),
+    /// because the Compose tab asks for every Song on every redraw.
+    func coverage(of song: Song) -> CoverageResult
 
     // MARK: First launch
 
@@ -51,6 +54,8 @@ protocol AppModel: AnyObject, Observable {
     // MARK: Playback
 
     var nowPlaying: PlaybackItem? { get }
+    /// When `nowPlaying` started playing, for a playhead; nil until it has started.
+    var playbackStartedAt: Date? { get }
     /// Plays the item, or stops it when it's already playing.
     func togglePlayback(of item: PlaybackItem)
     func stopPlayback()
@@ -58,6 +63,28 @@ protocol AppModel: AnyObject, Observable {
     // MARK: Recordings
 
     func delete(_ id: Recording.ID)
+
+    // MARK: Compose
+
+    /// Song Creator: makes a melody of an Unlocked Song, played only by the user's Recordings,
+    /// with Auto-map's Arrangement. Throws `MelodyError`.
+    func makeMelody(of song: Song) async throws -> MelodyDraft
+    /// Saves a made melody to Melodies as a Created Melody with the same id. Saving it again
+    /// does nothing.
+    func saveMelody(_ draft: MelodyDraft)
+
+    #if DEBUG
+    /// Where a simulated melody's audio came from, for Song Creator to say so; nil for a real one.
+    func simulatedSource(ofMelody id: MelodyDraft.ID) -> String?
+    #endif
+
+    // MARK: Melodies
+
+    /// Every Created Melody, oldest first.
+    var melodies: [CreatedMelody] { get }
+    /// Renames a Created Melody; a blank title changes nothing.
+    func renameMelody(_ id: CreatedMelody.ID, to title: String)
+    func deleteMelody(_ id: CreatedMelody.ID)
 }
 
 extension AppModel {
@@ -72,10 +99,13 @@ extension AppModel {
 
     func recording(_ id: Recording.ID) -> Recording? { recordings.first { $0.id == id } }
 
-    func coverage(of song: Song) -> CoverageResult { CoverageResult(song: song, recordings: recordings) }
+    func song(_ id: Song.ID) -> Song? { songs.first { $0.id == id } }
+
+    func melody(_ id: CreatedMelody.ID) -> CreatedMelody? { melodies.first { $0.id == id } }
 
     #if DEBUG
     func simulatedSource(ofDraft id: Draft.ID) -> String? { nil }
+    func simulatedSource(ofMelody id: MelodyDraft.ID) -> String? { nil }
     #endif
 }
 
@@ -116,4 +146,7 @@ struct RecordResult: Hashable, Sendable {
 enum PlaybackItem: Hashable, Sendable {
     case draft(Draft.ID)
     case recording(Recording.ID)
+    /// A melody Song Creator made.
+    case melodyDraft(MelodyDraft.ID)
+    case melody(CreatedMelody.ID)
 }

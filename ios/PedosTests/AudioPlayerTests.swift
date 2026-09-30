@@ -23,8 +23,16 @@ final class AudioPlayerTests: XCTestCase {
         player.play(item, url: try XCTUnwrap(longestTake.audioURL))
         XCTAssertEqual(player.nowPlaying, item)
 
+        // The start time, for a playhead, is set once the audio actually starts.
+        for _ in 0..<50 where player.startedAt == nil {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        let startedAt = try XCTUnwrap(player.startedAt, "Playback never started")
+        XCTAssertLessThan(abs(startedAt.timeIntervalSinceNow), 1)
+
         let played = try await waitUntilStopped(player, within: .seconds(6))
         XCTAssertNil(player.nowPlaying, "Playback never ended")
+        XCTAssertNil(player.startedAt)
         XCTAssertGreaterThan(played, .seconds(1.5), "Playback ended before the take did, so it didn't play")
     }
 

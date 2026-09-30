@@ -104,9 +104,16 @@ class RecordFlowUITests: PedosUITestCase {
         XCTAssertTrue(app.buttons["Done"].exists)
         attachScreenshot("Result, unlocked")
 
+        // Try it opens the Song in Song Creator, on the Compose tab.
         app.buttons["Try it"].tap()
-        XCTAssertTrue(app.navigationBars["Compose"].waitForExistence(timeout: 5), "Try it didn't open Compose")
+        XCTAssertTrue(app.navigationBars["Mary Had a Little Lamb"].waitForExistence(timeout: 5), "Try it didn't open Mary")
         XCTAssertTrue(app.tabBars.buttons["Compose"].isSelected)
+        XCTAssertTrue(app.buttons["song-creator-play"].waitForExistence(timeout: 5), "Mary wasn't made")
+
+        // Back goes to the Songs list, where Mary is unlocked.
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.staticTexts["Unlocked · 1"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Mary Had a Little Lamb"].label.contains("Ready"))
     }
 }
 
