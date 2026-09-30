@@ -20,6 +20,7 @@ Inputs: `../../fixtures/recordings/` (Fixture Library) and `../../catalog/` (Son
 | `build.py` | Renders all versions and writes the listening page (`listen/index.html` + data + audio) |
 | `run_all.py` | Prints the checks for every Song; the quickest regression check |
 | `export_golden.py` | Writes the reference results (Recording Analysis, imported Songs, Arrangements, metrics) as deterministic JSON to `fixtures/golden/`; see its README |
+| `golden_cost.py` | Recomputes `plan()`'s cost for a given Arrangement from the golden data (how Auto-map tests check a tie-aware match); checks every golden Arrangement |
 | `plot_env.py` | Plots each Recording's loudness envelope with its detected gesture boundaries |
 
 The render path is only: trim, variable-rate resample, fade, gain, mix. No oscillators, resonators, loops, or granular re-triggering.

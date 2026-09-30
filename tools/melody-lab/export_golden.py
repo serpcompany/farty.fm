@@ -24,6 +24,7 @@ import numpy as np
 import soundfile as sf
 
 import engine
+import golden_cost
 from build import SMALL_LIBRARY
 from evaluate import evaluate
 from melody import load_catalog
@@ -239,6 +240,7 @@ def main():
         },
     )
     print(f"{len(melodic)} of {len(lib)} Recordings are Melodic: {' '.join(melodic)}")
+    golden_cost.main()  # fails if golden_cost.py no longer matches plan()'s cost terms
 
 
 if __name__ == "__main__":

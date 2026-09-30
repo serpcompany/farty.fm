@@ -91,12 +91,16 @@ The reference planner has exact ties. `013`, `084` and `086` have exactly the sa
 
 - `transpose` is identical;
 - every `per_pitch[].shift_semitones` is within 1e-9;
-- `plan_cost` is within 1e-9;
-- each note's `target_midi` is identical, and its `recording` is identical, except that Recordings in the same tie group are interchangeable. The cost check catches a swap that isn't really a tie, for example one that puts a Recording on a note too short for it.
+- the cost **recomputed from the Arrangement under test** is within 1e-9 of `plan_cost` (see below);
+- each note's `target_midi` is identical, and its `recording` is identical, except that Recordings in the same tie group are interchangeable. Every note of one Song pitch uses the same Recording.
 
-Checked against the reference itself: I fed `plan()` only these golden inputs, for all 13 Songs on both libraries, and every Arrangement matched. I also shuffled the library order 30 times per Song. It still matched every time, while exact Recording ids matched in only 5 to 20 of the 30 orders per Song on the full library. The `small` library has no ties. The smallest cost gap between the chosen transposition and the next best is 0.19 (`row`, full library), so transposition ties aren't a concern.
+Recompute the cost from the Arrangement under test, never take the solver's own total. Use its transposition, its Recording for each distinct Song pitch, the golden inputs, and `plan()`'s terms: weight × shift cost, 8 per note too short for its Recording, and 2 × the reuse layer. [`tools/melody-lab/golden_cost.py`](../../tools/melody-lab/golden_cost.py) does this in `arrangement_cost()`, and a Swift test can port it.
 
-#43 will add a deterministic tie-break to `plan()` (the lowest Recording id wins) and re-export these files. After that, Recording ids can be compared exactly.
+The solver's total only sums the matrix cells it picked. A port could pick the right cells and then map a tied cell to the wrong Recording, for example by looking Recordings up by Recording Pitch so that every tied pitch lands on `013`. It would still report the golden total. Recomputed, that Arrangement costs 6 to 146 more than golden on every full-library Song, because it reuses `013` and puts it on notes shorter than its 0.35 s. So the cost check catches any swap that isn't really a tie. Across all 279 ways to assign `013`, `084` and `086` to the tied pitches of the 13 full-library Arrangements, exactly the 38 true ties recompute to `plan_cost`. The recomputed cost differs from the solver's total by at most 6e-14 (summation order).
+
+Checked against the reference itself: I fed `plan()` only these golden inputs, for all 13 Songs on both libraries, and every Arrangement matched. I also shuffled the library order 30 times per Song. It still matched every time, while exact Recording ids matched in only 5 to 20 of the 30 orders per Song on the full library. The `small` library has no ties. The smallest cost gap between the chosen transposition and the next best is 0.19 (`row`, full library), so transposition ties aren't a concern. `export_golden.py` runs `golden_cost.py` after every export, so the two can't drift apart.
+
+#43 will add a deterministic tie-break and re-export these files. The tie-break is a rule on the result, so any solver can follow it: among the lowest-cost Arrangements (costs within 1e-9), pick the one whose `per_pitch` Recording ids, read in ascending Song pitch order, are lexicographically smallest. Sorting the library before the solver isn't enough, because a different solver can break the same tie differently. Ports can keep using the tie-aware comparison above either way. It stays correct after #43, and it doesn't depend on how a solver breaks ties.
 
 ### Near-threshold Recordings
 
@@ -110,6 +114,7 @@ A few Recordings sit close to a decision threshold, so a tiny difference in a Sw
   Moving the dip threshold by ±0.5 dB changes nothing.
 - **Pitch confidence (#35)** threshold is 0.1: `002` and `022` are at 0.09 (Noise-like), and `017` is at 0.13 (Melodic).
 - **Audition (#36)** passes within 40 cents: `017` reads back exactly 40.0 cents off at 0.35 s. A port that reads it slightly worse gets 0.6 s.
+- **Renderer (#41)** requires at least 94% of notes within ±50 cents. `saints` on the full library is exactly at that bar: 29 of 31 notes (94%). Its note 10 reads +47.6 cents (`heard_cents` 48), just inside the limit and between two pYIN bins. A correct renderer, or an evaluator with a continuous pitch estimate, could read it above 50 and land at 90%. Treat `saints` note 10 as tolerance-edge. Note 25, at +52.6 cents, could flip the other way. No other note in the 26 Arrangements reads within 6 cents of ±50.
 
 ### Metrics
 
@@ -117,4 +122,4 @@ The metrics are the reference renderer's result on its own render, not an exact 
 
 ## The planner will change (#43)
 
-[ADR 0004](../../docs/adr/0004-fart-only-rendering.md) now says Auto-map gives each distinct pitch its own Melodic Recording, shifted by at most 3 semitones. The reference `plan()` doesn't do that yet: it reuses Recordings and allows shifts up to 12 semitones (for example `merryxmas` on the full library shifts by up to 9.4, and every `small` Arrangement uses only 2 Recordings). #43 changes `plan()`, adds the tie-break, and re-exports these files. Until then, `arrangements/` reflects the current planner, and Swift planner tests written against it must be updated with that re-export. `recordings/` and `songs/` don't depend on the planner.
+[ADR 0004](../../docs/adr/0004-fart-only-rendering.md) now says Auto-map gives each distinct pitch its own Melodic Recording, shifted by at most 3 semitones. The reference `plan()` doesn't do that yet: it reuses Recordings and allows shifts up to 12 semitones (for example `merryxmas` on the full library shifts by up to 9.4, and every `small` Arrangement uses only 2 Recordings). #43 changes `plan()`, adds the tie-break, and re-exports these files. If it changes the cost terms, `golden_cost.py` must change with them; the export fails until they agree. Until then, `arrangements/` reflects the current planner, and Swift planner tests written against it must be updated with that re-export. `recordings/` and `songs/` don't depend on the planner.
