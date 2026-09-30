@@ -125,9 +125,9 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 **SCREEN NAME:** Compose — Songs
 **PURPOSE:** Pick a Song to make, and see what's close to unlocking.
-**HOW USER GETS HERE:** Tab 3 (Compose), with the Songs segment selected.
+**HOW USER GETS HERE:** Tab 3 (Compose). In the MVP this is the whole tab.
 **WHAT'S ON THE SCREEN:**
-- Segmented control (Songs | AI)
+- (Post-MVP: a segmented control, Songs | AI, above the list)
 - Search field
 - Sort menu (Closest to unlocking | A–Z)
 - **Unlocked** section: rows with the title and "Ready"
@@ -140,7 +140,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Some unlocked
 - None unlocked
 - No search results
-**NAVIGATION TYPE:** Tab + in-place segment.
+**NAVIGATION TYPE:** Tab.
 
 ---
 
@@ -184,7 +184,8 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 ---
 
-**SCREEN NAME:** Compose — AI
+**SCREEN NAME:** Compose — AI (post-MVP)
+**STATUS:** Deferred past the MVP (#21, #22). Kept here for when it returns.
 **PURPOSE:** Get a brand-new melody made only from your farts.
 **HOW USER GETS HERE:** Tab 3 (Compose), with the AI segment selected.
 **WHAT'S ON THE SCREEN:**
@@ -214,7 +215,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **PURPOSE:** Everything you've made.
 **HOW USER GETS HERE:** Tab 4 (Melodies), or after Save.
 **WHAT'S ON THE SCREEN:**
-- Rows with a play button, title, origin ("Twinkle, Twinkle" or "AI · Happy"), date and length
+- Rows with a play button, title, origin (the Song's title; "AI · Happy" once AI Song Creator returns), date and length
 **PRIMARY ACTION:** Play.
 **SECONDARY ACTIONS:** Long-press for Rename or Delete (with confirmation).
 **STATES:**
