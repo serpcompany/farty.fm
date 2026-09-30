@@ -18,12 +18,13 @@ struct AppTabs: View {
             .disabled(model.isRecording)
 
             Tab("Compose", systemImage: "music.note", value: .compose) {
-                // #52 builds Compose.
+                // #52 builds Compose. Until then this stays neutral, because Try it on the
+                // Result screen lands here right after a Song unlocks.
                 TitledTab(title: "Compose") {
                     ContentUnavailableView(
-                        "No Melodic Recordings yet",
+                        "Songs are coming soon",
                         systemImage: "music.note",
-                        description: Text("Record a few farts with a clear note to start unlocking Songs.")
+                        description: Text("Your Unlocked Songs will play here.")
                     )
                 }
             }

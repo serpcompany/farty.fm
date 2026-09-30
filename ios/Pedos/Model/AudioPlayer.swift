@@ -22,8 +22,8 @@ final class AudioPlayer {
     }
 
     func play(_ item: PlaybackItem, url: URL?) {
-        stop()
-        guard let url else { return }
+        guard let url else { return stop() }
+        // The engine replaces what's playing without letting the session go in between.
         nowPlaying = item
         let observer = FinishObserver { [weak self] in self?.finished(item) }
         enqueue { [weak self] engine in
@@ -31,6 +31,7 @@ final class AudioPlayer {
         }
     }
 
+    /// Stops playing and lets the audio session go, so other apps' audio resumes.
     func stop() {
         guard nowPlaying != nil else { return }
         nowPlaying = nil
@@ -38,7 +39,7 @@ final class AudioPlayer {
     }
 
     private func finished(_ item: PlaybackItem) {
-        if nowPlaying == item { nowPlaying = nil }
+        if nowPlaying == item { stop() }
     }
 
     private func enqueue(_ operation: @escaping @Sendable (PlaybackEngine) async -> Void) {
@@ -53,13 +54,18 @@ final class AudioPlayer {
 
 /// Owns the AVAudioPlayer off the main actor: activating the audio session and preparing a
 /// player can block, and Xcode flags it as a hang risk on the main thread.
+///
+/// The audio session is only active while something plays: it uses `.playback` (so other apps'
+/// audio pauses), and deactivating with `.notifyOthersOnDeactivation` lets that audio resume.
+/// The recorder (#12) owns the session category for recording (`.playAndRecord`) and has to
+/// take this over, so playback and recording don't fight over the session.
 private actor PlaybackEngine {
     private var player: AVAudioPlayer?
     private var observer: FinishObserver?
 
     /// Starts playing `url`, telling `observer` when it ends. Returns false if it can't play.
     func play(_ url: URL, observer: FinishObserver) -> Bool {
-        stop()
+        release()
         let session = AVAudioSession.sharedInstance()
         try? session.setCategory(.playback)
         try? session.setActive(true)
@@ -71,7 +77,13 @@ private actor PlaybackEngine {
         return true
     }
 
+    /// Stops playing and deactivates the session, telling other apps they can resume.
     func stop() {
+        release()
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
+
+    private func release() {
         player?.stop()
         player = nil
         observer = nil

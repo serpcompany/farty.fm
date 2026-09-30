@@ -44,9 +44,14 @@ final class SampleAppModelTests: XCTestCase {
     private func recordTake(_ model: SampleAppModel, seconds: TimeInterval = 1) async -> Draft? {
         await model.startRecording()
         clock += seconds
-        model.stopRecording()
+        await model.stopRecording()
         if case .review(let draft) = model.flow { return draft }
         return nil
+    }
+
+    /// The Fixture Library id a take under Review stands in for.
+    private func fixtureID(_ model: SampleAppModel, _ draft: Draft?) -> String? {
+        draft.flatMap { model.fixtureID(ofDraft: $0.id) }
     }
 
     private func result(_ model: SampleAppModel) -> RecordResult? {
@@ -98,7 +103,7 @@ final class SampleAppModelTests: XCTestCase {
         var taken: [String] = []
         for _ in SampleFixture.prototypeLibrary {
             let draft = await recordTake(model)
-            taken.append(draft?.sampleFixtureID ?? "none")
+            taken.append(fixtureID(model, draft) ?? "none")
             await model.saveDraft()
             model.finishFlow()
         }
@@ -110,7 +115,7 @@ final class SampleAppModelTests: XCTestCase {
 
         // With every fixture saved, takes repeat the story.
         let again = await recordTake(model)
-        XCTAssertEqual(again?.sampleFixtureID, SampleFixture.prototypeStory[23 % 12])
+        XCTAssertEqual(fixtureID(model, again), SampleFixture.prototypeStory[23 % 12])
     }
 
     func testStartingPointsContinueTheStory() async {
@@ -118,7 +123,7 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertEqual(model.recordings.map(\.name), ["Recording 1", "Recording 2", "Recording 3"])
         XCTAssertEqual(model.melodicRecordings.count, 2)
         let draft = await recordTake(model)
-        XCTAssertEqual(draft?.sampleFixtureID, "052")
+        XCTAssertEqual(fixtureID(model, draft), "052")
     }
 
     func testRecordingShowsTheTakeInReview() async {
@@ -126,9 +131,10 @@ final class SampleAppModelTests: XCTestCase {
         await model.startRecording()
         XCTAssertEqual(model.capture, .recording(startedAt: clock))
         clock += 2
-        model.stopRecording()
+        await model.stopRecording()
         guard case .review(let draft) = model.flow else { return XCTFail("no Review: \(String(describing: model.flow))") }
-        XCTAssertEqual(draft.sampleFixtureID, "069")
+        XCTAssertEqual(model.fixtureID(ofDraft: draft.id), "069")
+        XCTAssertEqual(model.simulatedSource(ofDraft: draft.id), "Fixture Library Recording 069")
         XCTAssertEqual(draft.seconds, 1.08)
         XCTAssertNotNil(draft.audioURL)
         XCTAssertEqual(draft.waveform.count, 40)
@@ -146,7 +152,7 @@ final class SampleAppModelTests: XCTestCase {
 
         let draft = await recordTake(model)
         XCTAssertNil(model.recordProblem, "starting again clears the message")
-        XCTAssertEqual(draft?.sampleFixtureID, "069")
+        XCTAssertEqual(fixtureID(model, draft), "069")
     }
 
     func testSimulatedEmptyTakeIsNothingHeard() async {
@@ -179,7 +185,7 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertNil(model.flow, "nothing was saved")
 
         let draft = await recordTake(model)
-        XCTAssertEqual(draft?.sampleFixtureID, "069")
+        XCTAssertEqual(fixtureID(model, draft), "069")
     }
 
     // MARK: Review and Result
@@ -198,7 +204,7 @@ final class SampleAppModelTests: XCTestCase {
         model.finishFlow()
         XCTAssertNil(model.flow)
         let melodic = await recordTake(model)
-        XCTAssertEqual(melodic?.sampleFixtureID, "021")
+        XCTAssertEqual(fixtureID(model, melodic), "021")
         await model.saveDraft()
         let second = try XCTUnwrap(self.result(model))
         XCTAssertEqual(model.recording(second.recordingID)?.pitch, 48.23)
@@ -236,7 +242,7 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertNil(model.flow)
         XCTAssertTrue(model.recordings.isEmpty)
         let next = await recordTake(model)
-        XCTAssertEqual(next?.sampleFixtureID, "069", "a discarded take comes around again")
+        XCTAssertEqual(fixtureID(model, next), "069", "a discarded take comes around again")
     }
 
     func testSaveFailedKeepsTheDraftUntilTryAgain() async throws {
@@ -296,7 +302,7 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertEqual(model.melodicRecordings.map(\.id), [last.id])
 
         let draft = await recordTake(model)
-        XCTAssertEqual(draft?.sampleFixtureID, "021", "a deleted fixture comes around again")
+        XCTAssertEqual(fixtureID(model, draft), "021", "a deleted fixture comes around again")
         await model.saveDraft()
         XCTAssertEqual(model.recordings.last?.name, "Recording 4")
     }

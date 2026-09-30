@@ -46,8 +46,6 @@ struct Draft: Identifiable, Hashable, Sendable {
     let audioURL: URL?
     /// Loudness bars for the Review waveform, each 0...1.
     let waveform: [Float]
-    /// The Fixture Library Recording a sample take stands in for; nil for a real take.
-    let sampleFixtureID: String?
 }
 
 /// Formats a length in seconds the way rows and Review show it: "1.1 s".

@@ -12,10 +12,12 @@ struct RecordTab: View {
             // Balances the status line below, so the button stays centered.
             Color.clear.frame(height: 40)
             RecordButton(isRecording: model.isRecording) {
-                if model.isRecording {
-                    model.stopRecording()
-                } else {
-                    Task { await model.startRecording() }
+                Task {
+                    if model.isRecording {
+                        await model.stopRecording()
+                    } else {
+                        await model.startRecording()
+                    }
                 }
             }
             status.frame(height: 40)

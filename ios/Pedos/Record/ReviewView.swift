@@ -29,13 +29,15 @@ struct ReviewView: View {
             .accessibilityLabel(isPlaying ? "Stop" : "Play")
             .accessibilityIdentifier("review-play")
             Spacer()
-            if let fixtureID = draft.sampleFixtureID {
-                Text("Sample take: Fixture Library Recording \(fixtureID), not your microphone.")
+            #if DEBUG
+            if let source = model.simulatedSource(ofDraft: draft.id) {
+                Text("Simulated take: \(source), not your microphone.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
             }
+            #endif
         }
         .navigationTitle("New Recording")
         .safeAreaInset(edge: .bottom) {

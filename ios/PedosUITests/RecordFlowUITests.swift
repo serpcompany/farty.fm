@@ -4,7 +4,8 @@ import XCTest
 class RecordFlowUITests: PedosUITestCase {
     /// Takes 1 (069, Noise-like) and 2 (021, Melodic C3), then deletes take 2.
     func testRecordReviewSaveResultRecordingsAndDelete() {
-        let app = launch(start: "new")
+        // A 4 s simulated analysis keeps "Finding your note…" up long enough to check.
+        let app = launch(start: "new", analysisSeconds: 4)
         XCTAssertTrue(app.buttons["record-button"].waitForExistence(timeout: 5))
         attachScreenshot("Record")
 
@@ -35,7 +36,7 @@ class RecordFlowUITests: PedosUITestCase {
         app.buttons["Save"].tap()
         XCTAssertTrue(app.staticTexts["Finding your note…"].waitForExistence(timeout: 5), "No Analyzing state")
         attachScreenshot("Result, analyzing")
-        XCTAssertTrue(app.staticTexts["No steady note this time"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["No steady note this time"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["It's saved, but it can't play melody notes."].exists)
         XCTAssertTrue(app.navigationBars["Recording 1"].exists)
         attachScreenshot("Result, noise-like")
@@ -46,7 +47,7 @@ class RecordFlowUITests: PedosUITestCase {
         XCTAssertTrue(app.tabBars.buttons["Record"].isSelected)
         recordTake(in: app)
         saveTake(in: app)
-        XCTAssertTrue(app.staticTexts["result-note"].waitForExistence(timeout: 5), "No Result for a Melodic Recording")
+        XCTAssertTrue(app.staticTexts["result-note"].waitForExistence(timeout: 10), "No Result for a Melodic Recording")
         XCTAssertEqual(app.staticTexts["result-note"].label, "C3")
         XCTAssertTrue(app.staticTexts["Your note"].exists)
         XCTAssertEqual(app.descendants(matching: .any)["pitch-strip"].label, "Notes collected: C. New: C")

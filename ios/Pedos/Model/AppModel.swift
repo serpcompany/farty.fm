@@ -26,8 +26,9 @@ protocol AppModel: AnyObject, Observable {
     var recordProblem: RecordProblem? { get }
     /// Starts recording, asking for the microphone first if it hasn't been asked yet.
     func startRecording() async
-    /// Stops recording and opens Review, or reports that nothing was heard.
-    func stopRecording()
+    /// Stops recording, finishes the take off the main actor, then opens Review, or reports
+    /// that nothing was heard.
+    func stopRecording() async
     func dismissRecordProblem()
 
     // MARK: Review and Result
@@ -41,6 +42,11 @@ protocol AppModel: AnyObject, Observable {
     func retryAnalysis(of id: Recording.ID) async
     /// Closes the Review → Result cover.
     func finishFlow()
+
+    #if DEBUG
+    /// Where a simulated take came from, for Review to say so; nil for a real take.
+    func simulatedSource(ofDraft id: Draft.ID) -> String?
+    #endif
 
     // MARK: Playback
 
@@ -67,11 +73,17 @@ extension AppModel {
     func recording(_ id: Recording.ID) -> Recording? { recordings.first { $0.id == id } }
 
     func coverage(of song: Song) -> CoverageResult { CoverageResult(song: song, recordings: recordings) }
+
+    #if DEBUG
+    func simulatedSource(ofDraft id: Draft.ID) -> String? { nil }
+    #endif
 }
 
 enum CaptureState: Hashable, Sendable {
     case idle
     case recording(startedAt: Date)
+    /// Stopped, and the take is being finished before Review opens.
+    case finishing
 }
 
 /// Why recording didn't produce a take.

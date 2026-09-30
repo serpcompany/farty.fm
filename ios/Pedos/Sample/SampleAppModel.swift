@@ -37,6 +37,8 @@ final class SampleAppModel: AppModel {
     @ObservationIgnored private let story: [String]
     /// Which fixture each Recording stands in for.
     @ObservationIgnored private var fixtureOfRecording: [Recording.ID: SampleFixture] = [:]
+    /// Which fixture each unsaved take stands in for.
+    @ObservationIgnored private var fixtureOfDraft: [Draft.ID: SampleFixture] = [:]
     /// How many takes were saved, which picks the story fixture once every fixture is used.
     @ObservationIgnored private var savedTakes: Int
     @ObservationIgnored private var pendingFailures: Failures
@@ -139,23 +141,26 @@ final class SampleAppModel: AppModel {
         }
     }
 
-    func stopRecording() {
+    func stopRecording() async {
         guard case .recording(let startedAt) = capture else { return }
         interruption?.cancel()
-        capture = .idle
+        capture = .finishing
 
         let longEnough = now().timeIntervalSince(startedAt) >= Self.minimumTakeSeconds
         guard longEnough, pendingFailures.remove(.nothingHeard) == nil, let fixture = nextFixture() else {
+            capture = .idle
             recordProblem = .nothingHeard
             return
         }
-        flow = .review(Draft(
-            id: UUID(),
-            seconds: fixture.seconds,
-            audioURL: fixture.audioURL,
-            waveform: Waveform.levels(of: fixture.audioURL, count: 40),
-            sampleFixtureID: fixture.id
-        ))
+        // Decoding the whole file for the waveform can block, so it runs off the main actor.
+        let audioURL = fixture.audioURL
+        let waveform = await Task.detached(priority: .userInitiated) {
+            Waveform.levels(of: audioURL, count: 40)
+        }.value
+        let draft = Draft(id: UUID(), seconds: fixture.seconds, audioURL: audioURL, waveform: waveform)
+        fixtureOfDraft[draft.id] = fixture
+        capture = .idle
+        flow = .review(draft)
     }
 
     /// A call or another app took the microphone: the take is lost.
@@ -187,12 +192,11 @@ final class SampleAppModel: AppModel {
         default: return
         }
         stopPlayback()
-        guard pendingFailures.remove(.saveFailed) == nil,
-              let fixture = fixtures.first(where: { $0.id == draft.sampleFixtureID })
-        else {
+        guard pendingFailures.remove(.saveFailed) == nil, let fixture = fixtureOfDraft[draft.id] else {
             flow = .saveFailed(draft)
             return
         }
+        fixtureOfDraft[draft.id] = nil
 
         let recording = Recording(
             id: UUID(),
@@ -210,6 +214,7 @@ final class SampleAppModel: AppModel {
 
     func discardDraft() {
         stopPlayback()
+        fixtureOfDraft.removeAll()
         flow = nil
     }
 
@@ -250,8 +255,20 @@ final class SampleAppModel: AppModel {
 
     func finishFlow() {
         stopPlayback()
+        fixtureOfDraft.removeAll()
         flow = nil
     }
+
+    /// The Fixture Library id an unsaved take stands in for.
+    func fixtureID(ofDraft id: Draft.ID) -> String? {
+        fixtureOfDraft[id]?.id
+    }
+
+    #if DEBUG
+    func simulatedSource(ofDraft id: Draft.ID) -> String? {
+        fixtureID(ofDraft: id).map { "Fixture Library Recording \($0)" }
+    }
+    #endif
 
     // MARK: Playback
 

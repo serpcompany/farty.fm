@@ -49,7 +49,8 @@ class RecordErrorUITests: PedosUITestCase {
     }
 
     func testAnalysisFailedThenRetryFromRecordings() {
-        let app = launch(start: "few", failures: ["analysisFailed"], analysisSeconds: 3)
+        // A 4 s simulated analysis keeps the spinner up long enough to check.
+        let app = launch(start: "few", failures: ["analysisFailed"], analysisSeconds: 4)
         recordTake(in: app)
         saveTake(in: app)
         XCTAssertTrue(app.staticTexts["Saved, but we couldn't find its note"].waitForExistence(timeout: 10))
