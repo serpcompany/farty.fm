@@ -1,0 +1,68 @@
+name: iOS
+
+# Pull requests cover every push to a PR branch; pushes to main cover merges.
+# Branch pushes without a PR are not built, so each commit runs on macOS once.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  ios-build-and-test:
+    name: ios-build-and-test
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      XCODEGEN_VERSION: 2.44.1
+      XCODEGEN_SHA256: a2e905fb68446e9bb4008cdfe2e13e3f176d0cbcca828b71770f8e53fca91b73
+      DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5,arch=arm64
+      # Stream xcodebuild output through the pipe instead of buffering it until exit.
+      NSUnbufferedIO: "YES"
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install XcodeGen
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/xcodegen.zip" \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
+          echo "$XCODEGEN_SHA256  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+
+      - name: Generate the Xcode project
+        run: xcodegen generate
+
+      - name: Check bundle identifiers
+        run: scripts/check-bundle-identifiers.sh
+
+      - name: Build and run unit and UI tests
+        # Fails the step on a hang, so the result bundle below still uploads.
+        timeout-minutes: 20
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Pedos.xcodeproj \
+            -scheme Pedos \
+            -destination "$DESTINATION" \
+            -resultBundlePath "$RUNNER_TEMP/Pedos.xcresult" \
+            | xcbeautify --renderer github-actions
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Pedos.xcresult
+          path: ${{ runner.temp }}/Pedos.xcresult
+          retention-days: 7
