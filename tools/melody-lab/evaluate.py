@@ -1,4 +1,4 @@
-"""Objective checks on a rendered Created Melody.
+"""Objective checks on a rendered Toot.
 
 If an automatic pitch tracker can read the melody back out of the audio, note by note, a
 listener almost certainly can too. These checks are necessary, not sufficient: the final
