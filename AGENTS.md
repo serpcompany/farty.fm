@@ -17,5 +17,5 @@ These rules come from a long first attempt that produced a lot of process and li
 - **Fart-only sound.** Rendering may only trim, resample, fade, adjust gain, and mix Recordings (ADR 0004). No oscillators, resonators, loops, or granular re-triggering.
 - **Songs need sources.** Never type melody notes by hand. Add Songs through `catalog/` with a cited score and license (ADR 0003).
 - **Match the reference.** `tools/melody-lab/` is the reference engine. When Swift behavior differs from it, either fix the Swift code or change the reference deliberately and re-verify it.
-- **Keep the UI simple.** Minimal, Ableton-like editing. Remove anything that isn't needed.
+- **Keep the UI simple.** Remove anything that isn't needed.
 - **Fixtures are internal.** The Fixture Library (`fixtures/recordings/`) never ships in regular-user builds.
