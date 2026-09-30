@@ -4,35 +4,35 @@ Phase 1 of the SERP UI runbook. Draft for owner review in #47. Uses the vocabula
 
 ## Main areas
 
-The approved Capture Dock (#2): a tab bar with three peer areas, and recording one tap away from all of them.
+Capture-first, as approved in #2, with the owner's changes from the #47 review: Record is its own tab and opens first, and "Shelf" is renamed "Recordings".
 
 | Tab | Name on screen | What it holds |
 | --- | --- | --- |
-| 1 | **Shelf** | The Recording shelf, collected pitches, and the big Record button |
-| 2 | **Create** | Song Creator (the Song Catalog with Pitch Coverage and unlocks) and AI Song Creator |
-| 3 | **Melodies** | Created Melodies |
-
-- **Record** is a red button in the top-right of every tab, plus the big button at the top of the Shelf.
+| 1 | **Record** | One big red button. Tap to start, tap again to stop. Opens on launch. |
+| 2 | **Recordings** | Every Recording, with its note, and the strip of collected notes |
+| 3 | **Create** | Song Creator (the Song Catalog with Pitch Coverage and unlocks) and AI Song Creator |
+| 4 | **Melodies** | Created Melodies |
 - **Debug builds only:** a "Load Fixture Library" action under a debug menu. It never appears in Release builds.
 
 ## Flows
 
-- **First launch:** Launch → Welcome → Allow microphone → Shelf (empty)
+- **First launch:** Launch → Welcome → Allow microphone → Record tab
 - **Microphone denied:** Record → "Pedos needs the microphone" → Open Settings
-- **Record a fart:** any tab → Record → Recording (live level, timer) → Stop → Review (play back, Save / Discard) → Save → Analyzing → Result (Recording Pitch or "noise-like", plus any unlock progress) → Done → Shelf
+- **Record a fart:** Record tab → tap the big button (it becomes Stop, with a timer) → tap again → Review (play back, Save / Discard) → Save → Analyzing → Result (Recording Pitch or "noise-like", plus any unlock progress) → Done → Recordings
 - **Unlock moment:** Result → "You unlocked Twinkle, Twinkle" → Try it → Song Creator
-- **Replay or delete a Recording:** Shelf → tap row to play → swipe or long-press → Delete → confirm
+- **Replay or delete a Recording:** Recordings → tap row to play → swipe or long-press → Delete → confirm
 - **Make a Song:** Create → Songs → an Unlocked Song → Song Creator (plays automatically) → Save → Melodies
-- **See what a locked Song needs:** Create → Songs → a locked Song → "Needs a fart near D3 and F3" sheet → Record
+- **See what a locked Song needs:** Create → Songs → a locked Song → "Needs a fart near D3 and F3" sheet → Record (goes to the Record tab)
 - **Make an AI melody:** Create → AI → pick a mood → Compose (plays) → Try again or Save → Melodies
 - **Manage Created Melodies:** Melodies → tap to play → long-press → Rename or Delete
 
 ## Hierarchy and pattern notes
 
-- **Tabs (root):** Shelf, Create, Melodies.
+- **Tabs (root):** Record, Recordings, Create, Melodies.
 - **In-place switch:** Create has a segmented control, Songs | AI. They are two ways to create, so they share one tab rather than two.
 - **Pushed screen:** Song Creator is pushed from the Songs list.
-- **Full-screen cover:** Recording → Review → Result is one short task and must not be dismissed by accident mid-recording.
+- **In place:** recording happens on the Record tab itself; the other tabs are disabled while recording.
+- **Full-screen cover:** Review → Result is one short task.
 - **Sheets:**
   - Welcome / microphone explainer on first launch
   - a locked Song's "what's missing"

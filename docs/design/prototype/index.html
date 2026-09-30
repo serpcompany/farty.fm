@@ -36,12 +36,16 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .largetitle { font-size: 32px; font-weight: 700; letter-spacing: -.01em; margin: 2px 0 12px; }
 .recbtn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--screen); display: grid; place-items: center; }
 .recbtn i { width: 14px; height: 14px; border-radius: 50%; background: var(--record); display: block; }
-.tabbar { flex: none; height: 82px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, 1fr); padding-bottom: 22px; background: var(--screen); }
+.tabbar { flex: none; height: 82px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, 1fr); padding-bottom: 22px; background: var(--screen); }
 .tabbar button { background: none; border: 0; display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11px; color: var(--faint); }
 .tabbar button[aria-current="page"] { color: var(--ink); font-weight: 600; }
 .tabbar svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 1.8; }
 .homeind { position: absolute; bottom: 7px; left: 50%; translate: -50% 0; width: 134px; height: 5px; border-radius: 3px; background: var(--ink); }
 
+.recordpane { height: 100%; min-height: 560px; display: grid; place-content: center; justify-items: center; gap: 22px; text-align: center; }
+.hugerec { width: 190px; height: 190px; border-radius: 50%; border: 6px solid var(--line); background: var(--screen); display: grid; place-items: center; transition: box-shadow .09s; }
+.hugerec i { width: 150px; height: 150px; border-radius: 50%; background: var(--record); display: block; transition: all .2s; }
+.hugerec.on i { width: 64px; height: 64px; border-radius: 12px; }
 .hero { display: grid; justify-items: center; gap: 8px; padding: 18px 0 20px; border: 1px solid var(--line); border-radius: 18px; margin-bottom: 14px; }
 .bigrec { width: 84px; height: 84px; border-radius: 50%; border: 3px solid var(--line); background: var(--screen); display: grid; place-items: center; }
 .bigrec i { width: 60px; height: 60px; border-radius: 50%; background: var(--record); display: block; }
@@ -158,7 +162,7 @@ canvas.notes { width: 100%; height: 170px; border: 1px solid var(--line); border
     <div class="group">
       <h2>Questions for you</h2>
       <ol>
-        <li><b>Structure:</b> three tabs (Shelf, Create, Melodies) with Record on every screen. Good?</li>
+        <li><b>Structure (updated):</b> four tabs: Record (one big red button, opens first), Recordings, Create, Melodies. Good?</li>
         <li><b>Unlock rule:</b> try both above. Stars keeps you collecting; the strict rule unlocks nearly everything after 2–4 farts.</li>
         <li><b>Locked Songs:</b> the "what's missing" sheet has a small "Try anyway". Keep it, or no playing until unlocked?</li>
         <li><b>Choosing Recordings:</b> Auto-map picks the best farts itself, so there's no manual picking. OK?</li>

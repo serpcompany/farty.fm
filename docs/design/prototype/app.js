@@ -30,7 +30,7 @@
   function reset(start) {
     const st = STARTS[start];
     S = {
-      start, rule: S?.rule || "stars", tab: "shelf", seg: "songs", push: null, modal: null, alert: null, toast: null,
+      start, rule: S?.rule || "stars", tab: "record", seg: "songs", recording: false, push: null, modal: null, alert: null, toast: null,
       recs: st.recs.map((id, i) => ({ key: "r" + i, id, n: i + 1 })),
       story: st.recs.length ? Math.min(st.recs.length, D.story.length) : 0,
       melodies: st.melodies.map((m) => ({ ...m })),
@@ -90,18 +90,27 @@
 
   // ---------------------------------------------------------------- pieces
   const icon = {
-    shelf: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M4 15h16"/></svg>',
+    record: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5" fill="currentColor"/></svg>',
+    recordings: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M4 15h16"/></svg>',
     create: '<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>',
     melodies: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/></svg>',
   };
-  const recBtn = () => `<button class="recbtn" data-a="record" aria-label="Record"><i></i></button>`;
   const recName = (r) => `Recording ${r.n}`;
   function strip(haveSet, needSet = new Set()) {
     return `<div class="strip" aria-hidden="true">${NAMES.map((n, i) => `<span class="${SHARP.has(i) ? "sharp" : ""} ${haveSet.has(i) ? "have" : ""} ${needSet.has(i) && !haveSet.has(i) ? "need" : ""}">${n}</span>`).join("")}</div>`;
   }
   const havePcs = () => new Set(melodic().map((m) => ((Math.round(m) % 12) + 12) % 12));
 
-  function shelf() {
+  function recordTab() {
+    const on = S.recording;
+    return `<div class="recordpane">
+      <button class="hugerec ${on ? "on" : ""}" data-a="${on ? "stoprec" : "record"}" aria-label="${on ? "Stop" : "Record"}"><i></i></button>
+      <div class="timer" id="timer" ${on ? "" : "hidden"}>0:00</div>
+      ${on ? `<p class="hint">Prototype: your microphone isn't used. Tap again to stop, and you'll get a real test fart.</p>` : ""}
+    </div>`;
+  }
+
+  function recordings() {
     const pcs = havePcs();
     const rows = [...S.recs].reverse().map((r) => {
       const d = REC[r.id], key = "rec-" + r.key;
@@ -112,12 +121,11 @@
         <button class="more" data-a="recmenu" data-k="${r.key}" aria-label="More">⋯</button>
       </div>`;
     }).join("");
-    return `<div class="navbar"><span></span>${recBtn()}</div>
-      <div class="largetitle">Shelf</div>
-      <div class="hero"><button class="bigrec" data-a="record" aria-label="Record"><i></i></button><p class="hint">Record · one fart per Recording</p></div>
+    return `<div class="navbar"></div>
+      <div class="largetitle">Recordings</div>
       ${strip(pcs)}
-      <div class="striplabel"><span>${pcs.size} of 12 notes collected</span><span>${S.recs.length} Recordings</span></div>
-      ${S.recs.length ? `<div class="list">${rows}</div>` : `<div class="empty">No Recordings yet.<br>Tap Record to catch your first one.</div>`}`;
+      <div class="striplabel"><span>${pcs.size} of 12 notes collected</span><span>${S.recs.length} Recording${S.recs.length === 1 ? "" : "s"}</span></div>
+      ${S.recs.length ? `<div class="list">${rows}</div>` : `<div class="empty">No Recordings yet.<br>Go to the Record tab and tap the red button.</div>`}`;
   }
 
   function songsList() {
@@ -152,7 +160,7 @@
   }
 
   function create() {
-    return `<div class="navbar"><span></span>${recBtn()}</div><div class="largetitle">Create</div>
+    return `<div class="navbar"></div><div class="largetitle">Create</div>
       <div class="segment" role="group" aria-label="Creation area"><button data-a="seg" data-v="songs" aria-pressed="${S.seg === "songs"}">Songs</button><button data-a="seg" data-v="ai" aria-pressed="${S.seg === "ai"}">AI</button></div>
       ${S.seg === "songs" ? songsList() : aiPane()}`;
   }
@@ -160,7 +168,7 @@
   function songCreator() {
     const s = SONG[S.push], key = "song-" + s.id;
     const used = S.recs.map((r) => REC[r.id]).filter((r) => r.melodic).slice(0, s.pitches.length).map((r) => r.id);
-    return `<div class="navbar"><button class="back" data-a="back">‹ Create</button>${recBtn()}</div>
+    return `<div class="navbar"><button class="back" data-a="back">‹ Create</button></div>
       <div class="largetitle" style="font-size:26px">${s.title}</div>
       <div class="meta">${s.source}</div>
       ${S.making ? `<div class="empty" style="margin-top:14px"><div class="spinner" style="margin:0 auto 10px"></div>Making your melody…</div>` : `
@@ -178,7 +186,7 @@
         <div class="grow"><div class="title">${m.title}</div><div class="sub">${m.origin} · ${m.when}</div></div>
         <button class="more" data-a="melmenu" data-id="${m.id}" aria-label="More">⋯</button></div>`;
     }).join("");
-    return `<div class="navbar"><span></span>${recBtn()}</div><div class="largetitle">Melodies</div>
+    return `<div class="navbar"></div><div class="largetitle">Melodies</div>
       ${S.melodies.length ? `<div class="list">${rows}</div>` : `<div class="empty">Nothing yet.<br>Make one in Create.</div>`}`;
   }
 
@@ -191,10 +199,6 @@
       <div class="card">♪ Each fart has a note</div><div style="height:8px"></div>
       <div class="card">🔓 Collect notes to unlock Songs</div><div style="height:18px"></div>
       <button class="primary" data-a="allowmic">Allow microphone</button><div style="text-align:center"><button class="linkbtn" data-a="notnow">Not now</button></div></div></div>`;
-    if (m === "recording") return `<div class="cover"><div style="display:flex;justify-content:space-between"><button class="linkbtn" data-a="cancelrec" style="padding:0">Cancel</button><span></span></div>
-      <div class="card" style="text-align:center;font-size:13px">Prototype: your microphone isn't used. When you tap Stop you'll get a real test fart from the Fixture Library.</div>
-      <div class="center"><div class="meter" id="meter">${Array.from({ length: 24 }, () => "<i></i>").join("")}</div><div class="timer" id="timer">0:00</div><p class="hint">One fart per Recording</p></div>
-      <div style="display:grid;justify-items:center"><button class="stop" data-a="stoprec" aria-label="Stop"><i></i></button></div></div>`;
     if (m === "review") {
       const d = REC[S.draft], key = "draft";
       return `<div class="cover"><div class="card" style="text-align:center;font-size:13px">Prototype: this is test fart #${d.id} from the Fixture Library, not your microphone.</div><div class="center"><div class="meta">New Recording · ${d.seconds.toFixed(1)} s</div>
@@ -243,11 +247,11 @@
 
   // ---------------------------------------------------------------- render
   function render() {
-    const body = S.push ? songCreator() : S.tab === "shelf" ? shelf() : S.tab === "create" ? create() : melodies();
+    const body = S.push ? songCreator() : S.tab === "record" ? recordTab() : S.tab === "recordings" ? recordings() : S.tab === "create" ? create() : melodies();
     const scroll = phone.querySelector(".content")?.scrollTop || 0;
     phone.innerHTML = `<div class="status"><span>9:41</span><span>▪▪▪ ◔</span></div>
       <div class="content">${body}</div>
-      <nav class="tabbar" aria-label="Tabs">${[["shelf", "Shelf"], ["create", "Create"], ["melodies", "Melodies"]].map(([k, l]) => `<button data-a="tab" data-v="${k}" aria-current="${S.tab === k ? "page" : "false"}">${icon[k]}${l}</button>`).join("")}</nav>
+      <nav class="tabbar" aria-label="Tabs">${[["record", "Record"], ["recordings", "Recordings"], ["create", "Create"], ["melodies", "Melodies"]].map(([k, l]) => `<button data-a="tab" data-v="${k}" aria-current="${S.tab === k ? "page" : "false"}">${icon[k]}${l}</button>`).join("")}</nav>
       <div class="homeind"></div>${overlay()}${alertBox()}${S.toast ? `<div class="toast">${S.toast}</div>` : ""}`;
     const c = phone.querySelector(".content"); if (c && !S.resetScroll) c.scrollTop = scroll; S.resetScroll = false;
     const search = document.getElementById("search");
@@ -292,14 +296,14 @@
     if (S.mic === null) { S.alert = { type: "mic", then: "record" }; return render(); }
     if (S.mic === false) { S.alert = { type: "micoff" }; return render(); }
     stop();
-    S.modal = "recording"; render();
+    S.modal = null; S.push = null; S.tab = "record"; S.recording = true; render();
     recStart = performance.now();
     clearInterval(recTimer);
     recTimer = setInterval(() => {
       const t = (performance.now() - recStart) / 1000, el = document.getElementById("timer");
       if (!el) return clearInterval(recTimer);
       el.textContent = `0:${String(Math.floor(t)).padStart(2, "0")}`;
-      document.querySelectorAll("#meter i").forEach((i) => (i.style.height = 8 + Math.random() * 60 + "px"));
+      const b = document.querySelector(".hugerec.on"); if (b) b.style.boxShadow = `0 0 0 ${6 + Math.random() * 18}px color-mix(in srgb, var(--record) 25%, transparent)`;
     }, 90);
   }
   function nextStoryId() {
@@ -316,17 +320,16 @@
     if (el.dataset.a === "closesheet" && e.target.closest("[data-stop]")) return;
     const a = el.dataset.a;
     const act = {
-      tab: () => { stop(); S.tab = el.dataset.v; S.push = null; S.resetScroll = true; render(); },
+      tab: () => { stop(); if (S.recording) return; S.tab = el.dataset.v; S.push = null; S.resetScroll = true; render(); },
       seg: () => { S.seg = el.dataset.v; render(); },
-      record: () => { S.modal = null; startRecording(); },
+      record: () => { if (S.tab === "record") return startRecording(); S.modal = null; S.push = null; S.tab = "record"; render(); },
       allowmic: () => { S.modal = null; S.alert = { type: "mic" }; render(); },
       notnow: () => { S.modal = null; render(); },
       micyes: () => { const then = S.alert?.then; S.mic = true; S.alert = null; S.firstRun = false; then ? startRecording() : render(); },
       micno: () => { S.mic = false; S.alert = null; render(); },
       settings: () => { S.mic = true; S.alert = null; toast("Microphone on (pretend Settings)"); },
       closealert: () => { S.alert = null; render(); },
-      cancelrec: () => { clearInterval(recTimer); S.modal = null; render(); },
-      stoprec: () => { clearInterval(recTimer); S.draft = nextStoryId(); S.modal = "review"; render(); },
+      stoprec: () => { clearInterval(recTimer); S.recording = false; S.draft = nextStoryId(); S.modal = "review"; render(); },
       playdraft: () => play("draft", REC[S.draft].audio),
       discard: () => { stop(); S.modal = null; S.draft = null; toast("Discarded"); },
       save: () => {
@@ -342,8 +345,8 @@
         S.modal = "result"; render();
         setTimeout(() => { S.result.busy = false; render(); }, 900);
       },
-      done: () => { S.modal = null; S.tab = "shelf"; S.push = null; render(); },
-      again: () => { S.modal = null; startRecording(); },
+      done: () => { S.modal = null; S.tab = "recordings"; S.push = null; render(); },
+      again: () => { S.modal = null; S.tab = "record"; render(); },
       tryit: () => { S.modal = null; S.tab = "create"; S.seg = "songs"; openSong(el.dataset.id); },
       playrec: () => { const r = S.recs.find((x) => x.key === el.dataset.k); play("rec-" + r.key, REC[r.id].audio); },
       recmenu: () => { S.alert = { type: "recmenu", key: el.dataset.k }; render(); },

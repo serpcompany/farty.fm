@@ -38,50 +38,48 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 
 ---
 
-**SCREEN NAME:** Shelf
-**PURPOSE:** Home. Record, and see and play every Recording.
-**HOW USER GETS HERE:** Tab 1, launch.
+**SCREEN NAME:** Record
+**PURPOSE:** Capture one fart, instantly.
+**HOW USER GETS HERE:** Tab 1. Opens on launch.
 **WHAT'S ON THE SCREEN:**
-- Large title "Shelf" and the Record button (top right)
-- A big Record button
-- **Pitch strip:** a one-octave keyboard (C to B) that lights up each pitch class you've collected, with the count ("5 notes collected")
+- **Idle:** one big red button and nothing else
+- **Recording:** the button turns into a Stop square with a pulse, and a timer appears
+**PRIMARY ACTION:** Tap to record, tap again to stop.
+**SECONDARY ACTIONS:** None.
+**STATES:** Idle, Recording, Microphone off (alert).
+**NAVIGATION TYPE:** Tab.
+**PATTERN CHOICE:** Recording happens in place, not in a separate screen. The other tabs are disabled while recording.
+**NOTES:** The owner asked for "just one big red button" (#47 review).
+
+---
+
+**SCREEN NAME:** Recordings
+**PURPOSE:** See and play every Recording and the notes you've collected.
+**HOW USER GETS HERE:** Tab 2, or Done after saving.
+**WHAT'S ON THE SCREEN:**
+- Large title "Recordings"
+- **Pitch strip:** a one-octave keyboard (C to B) that lights up each pitch class you've collected, with the count ("5 of 12 notes collected")
 - A list of Recordings. Each row has:
   - a play button
   - the name ("Recording 7")
   - a pitch badge ("G♯3", or "noise-like" when the Recording has no steady pitch)
   - its length
   - "first fart used" when a second fart was cut off
-**PRIMARY ACTION:** Record.
-**SECONDARY ACTIONS:** Play a Recording; swipe to delete (with confirmation).
+**PRIMARY ACTION:** Play a Recording.
+**SECONDARY ACTIONS:** Swipe to delete (with confirmation).
 **STATES:**
-- Empty ("No Recordings yet. Tap Record.")
+- Empty ("No Recordings yet. Go to the Record tab and tap the red button.")
 - Analyzing (the badge shows a spinner)
 - Playing (the row is highlighted)
 - Populated
 **NAVIGATION TYPE:** Tab.
-**NOTES:** Tapping a row plays it, starting at the fart itself rather than the silence before it.
-
----
-
-**SCREEN NAME:** Recording
-**PURPOSE:** Capture one fart.
-**HOW USER GETS HERE:** Any Record button.
-**WHAT'S ON THE SCREEN:**
-- Live level meter
-- Timer
-- Hint: "One fart per Recording"
-- Big Stop button
-**PRIMARY ACTION:** Stop.
-**SECONDARY ACTIONS:** Cancel (discards).
-**STATES:** Recording.
-**NAVIGATION TYPE:** Full-screen cover, step 1 of the record task.
-**PATTERN CHOICE:** A full-screen cover, so a stray swipe can't end a recording.
+**NOTES:** Renamed from "Shelf", which the owner found confusing. Tapping a row plays it, starting at the fart itself rather than the silence before it.
 
 ---
 
 **SCREEN NAME:** Review
 **PURPOSE:** Hear the take before keeping it.
-**HOW USER GETS HERE:** Stop.
+**HOW USER GETS HERE:** Tap the Record button again to stop.
 **WHAT'S ON THE SCREEN:**
 - Waveform
 - Play/Stop button
