@@ -26,11 +26,29 @@ scripts/check-bundle-identifiers.sh
 ```
 
 The `Pedos` scheme runs the unit tests (`PedosTests`) and the UI tests (`PedosUITests`). The UI
-test attaches a screenshot of each tab to the result bundle; export them with
+tests for each screen run in light mode and again in dark mode (the `…DarkUITests` subclasses),
+and attach a screenshot of every screen and state to the result bundle; export them with
 `xcrun xcresulttool export attachments --path <result>.xcresult --output-path <dir>`.
 
-CI ([`.github/workflows/ios.yml`](../.github/workflows/ios.yml)) runs the same steps on every pull
-request and every push to `main`.
+CI ([`.github/workflows/ios.yml`](../.github/workflows/ios.yml)) runs the same steps, plus
+`scripts/generate-sample-data.py --check`, on every pull request and every push to `main`.
+
+## Sample data
+
+Until the real recorder, store and analysis land, `SampleAppModel` drives the screens. Recording
+is simulated: each take is the next Fixture Library Recording in the design prototype's story
+order, with its reference analysis.
+
+- `Pedos/Sample/SampleData.generated.swift` is generated from `docs/design/prototype/data.js` by
+  `scripts/generate-sample-data.py`. Rerun it when the prototype data changes; CI runs it with
+  `--check`.
+- Debug builds bundle the prototype's trimmed fixture audio (`docs/design/prototype/audio/rec-*.mp3`)
+  for playback. Release builds exclude it and start empty; `scripts/check-bundle-identifiers.sh`
+  builds Release and fails if the app contains any audio.
+- Debug launch arguments set up states by hand (Xcode: Product > Scheme > Edit Scheme >
+  Arguments), for example `-PedosSampleStart all` for all 23 Recordings or
+  `-PedosSampleFailure saveFailed` for an error state. `Pedos/Sample/SampleLaunchOptions.swift`
+  lists them all.
 
 ## Bundle identifiers
 

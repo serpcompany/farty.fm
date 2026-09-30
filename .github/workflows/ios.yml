@@ -44,7 +44,10 @@ jobs:
       - name: Generate the Xcode project
         run: xcodegen generate
 
-      - name: Check bundle identifiers
+      - name: Check the generated sample data is current
+        run: scripts/generate-sample-data.py --check
+
+      - name: Check bundle identifiers and that Release has no fixture audio
         run: scripts/check-bundle-identifiers.sh
 
       - name: Build and run unit and UI tests

@@ -1,27 +1,24 @@
 import SwiftUI
 
-/// The four tabs from `docs/design/app-map.md`: Record opens first, followed by
-/// Recordings, Compose and Melodies.
-///
-/// Each tab is a placeholder until its slice lands.
+/// The four tabs from `docs/design/app-map.md`: Record opens first, followed by Recordings,
+/// Compose and Melodies. While recording, the other tabs are disabled.
 struct AppTabs: View {
+    let model: any AppModel
+    @State private var selection = AppTab.record
+
     var body: some View {
-        TabView {
-            Tab("Record", systemImage: "record.circle") {
-                RecordTab()
+        TabView(selection: $selection) {
+            Tab("Record", systemImage: "record.circle", value: .record) {
+                RecordTab(model: model)
             }
 
-            Tab("Recordings", systemImage: "waveform") {
-                TitledTab(title: "Recordings") {
-                    ContentUnavailableView(
-                        "No Recordings yet",
-                        systemImage: "waveform",
-                        description: Text("Go to the Record tab and tap the red button.")
-                    )
-                }
+            Tab("Recordings", systemImage: "waveform", value: .recordings) {
+                RecordingsTab(model: model)
             }
+            .disabled(model.isRecording)
 
-            Tab("Compose", systemImage: "music.note") {
+            Tab("Compose", systemImage: "music.note", value: .compose) {
+                // #52 builds Compose.
                 TitledTab(title: "Compose") {
                     ContentUnavailableView(
                         "No Melodic Recordings yet",
@@ -30,8 +27,10 @@ struct AppTabs: View {
                     )
                 }
             }
+            .disabled(model.isRecording)
 
-            Tab("Melodies", systemImage: "music.note.list") {
+            Tab("Melodies", systemImage: "music.note.list", value: .melodies) {
+                // #52 builds Melodies.
                 TitledTab(title: "Melodies") {
                     ContentUnavailableView(
                         "Nothing yet",
@@ -40,23 +39,31 @@ struct AppTabs: View {
                     )
                 }
             }
+            .disabled(model.isRecording)
+        }
+        .onChange(of: selection) {
+            model.stopPlayback()
+        }
+        .sheet(isPresented: Binding(get: { model.isShowingWelcome }, set: { if !$0 { model.skipWelcome() } })) {
+            WelcomeSheet(model: model)
+        }
+        .fullScreenCover(isPresented: Binding(get: { model.flow != nil }, set: { if !$0 { model.finishFlow() } })) {
+            RecordFlowView(
+                model: model,
+                onDone: { selection = .recordings },
+                onRecordAnother: { selection = .record },
+                // #52 opens the Song in Song Creator.
+                onTry: { _ in selection = .compose }
+            )
         }
     }
 }
 
-/// The Record tab: one big red record button and nothing else.
-private struct RecordTab: View {
-    var body: some View {
-        Button {
-            // The record slice starts capturing a Recording here.
-        } label: {
-            Circle()
-                .fill(.red)
-                .frame(width: 180, height: 180)
-        }
-        .accessibilityLabel("Record")
-        .accessibilityIdentifier("record-button")
-    }
+enum AppTab: Hashable {
+    case record
+    case recordings
+    case compose
+    case melodies
 }
 
 /// A tab with a large navigation title.
@@ -71,8 +78,4 @@ private struct TitledTab<Content: View>: View {
                 .navigationBarTitleDisplayMode(.large)
         }
     }
-}
-
-#Preview {
-    AppTabs()
 }
