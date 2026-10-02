@@ -9,7 +9,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "0.1.0"
+    # release-please bumps the version; CI sets the build number when it uploads to TestFlight.
+    MARKETING_VERSION: "0.1.0" # x-release-please-version
     CURRENT_PROJECT_VERSION: "1"
     # Portrait iPhone only (ADR 0001).
     TARGETED_DEVICE_FAMILY: "1"
@@ -39,6 +40,8 @@ targets:
         PRODUCT_NAME: Pedos
         INFOPLIST_FILE: Pedos/Info.plist
         GENERATE_INFOPLIST_FILE: NO
+        # A placeholder icon until the real one (TestFlight requires an icon).
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       # SERP native app build identity: only Release carries the product identifier.
       # scripts/check-bundle-identifiers.sh keeps these values honest.
       configs:

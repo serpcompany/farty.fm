@@ -1,0 +1,83 @@
+name: TestFlight
+
+# Uploads the Release app to TestFlight on every push to main, and by hand from any branch
+# (Actions > TestFlight > Run workflow). A pull request that changes this pipeline uploads
+# too, so the change is proven by an upload. ios/scripts/upload-testflight.sh does the work.
+#
+# Needs repository secrets ASC_KEY_P8 (the .p8 file's contents), ASC_KEY_ID and
+# ASC_ISSUER_ID for an App Store Connect API key with the Admin role, and the repository
+# variable APPLE_TEAM_ID.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - .github/workflows/testflight.yml
+      - ios/scripts/upload-testflight.sh
+  workflow_dispatch:
+
+# One upload at a time; a newer push waits rather than cancelling one mid-upload.
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  testflight:
+    name: testflight
+    runs-on: macos-26
+    timeout-minutes: 40
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      XCODEGEN_VERSION: 2.44.1
+      XCODEGEN_SHA256: a2e905fb68446e9bb4008cdfe2e13e3f176d0cbcca828b71770f8e53fca91b73
+      # The run number increases with every run of this workflow; the attempt keeps a
+      # re-run from reusing an uploaded build number.
+      BUILD_NUMBER: ${{ github.run_number }}.${{ github.run_attempt }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      NSUnbufferedIO: "YES"
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install XcodeGen
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/xcodegen.zip" \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
+          echo "$XCODEGEN_SHA256  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+
+      - name: Generate the Xcode project
+        run: xcodegen generate
+
+      - name: Write the App Store Connect API key
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          for name in APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
+            eval "value=\${$name:-}"
+            [ -n "$value" ] || { echo "::error::$name is not set; see the comment at the top of testflight.yml"; exit 1; }
+          done
+          mkdir -p "$RUNNER_TEMP/keys"
+          key="$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8"
+          printf '%s\n' "$ASC_KEY_P8" > "$key"
+          chmod 600 "$key"
+          echo "ASC_KEY_PATH=$key" >> "$GITHUB_ENV"
+
+      - name: Archive, sign and upload to TestFlight
+        env:
+          OUTPUT_DIR: ${{ runner.temp }}/testflight
+        run: |
+          scripts/upload-testflight.sh
+          echo "Uploaded Pedos build $BUILD_NUMBER; it shows in TestFlight once App Store Connect processes it." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the API key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/keys"

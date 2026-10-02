@@ -73,3 +73,21 @@ Per the SERP native app build identity standard, only Release carries the produc
 
 `PedosTests` checks the Debug host at run time; `scripts/check-bundle-identifiers.sh` checks every
 configuration's build settings.
+
+## TestFlight
+
+[`.github/workflows/testflight.yml`](../.github/workflows/testflight.yml) uploads the Release app
+to TestFlight on every push to `main`, and by hand from any branch (Actions > TestFlight > Run
+workflow). [`scripts/upload-testflight.sh`](scripts/upload-testflight.sh) does the work: it
+archives unsigned, checks the archive (bundle identifier, build number, icon, no audio), signs it
+with cloud signing, checks the signature, and uploads it.
+
+- **Version:** `MARKETING_VERSION` in `project.yml`, which release-please bumps when its release PR
+  merges. **Build number:** `<run number>.<attempt>` of the TestFlight workflow.
+- **Setup (owner, once):** an App Store Connect app record for `com.serp.pedos`, an App Store
+  Connect API key with the Admin role (cloud signing needs it), repository secrets `ASC_KEY_P8`
+  (the `.p8` file), `ASC_KEY_ID` and `ASC_ISSUER_ID`, and the repository variable `APPLE_TEAM_ID`.
+- **Release builds have no sample data**, so until the real recorder lands (#12), the TestFlight
+  app shows empty tabs and can't record.
+- `scripts/upload-testflight.sh --archive-only` (with `BUILD_NUMBER` set) builds and checks the
+  archive locally without a key.
