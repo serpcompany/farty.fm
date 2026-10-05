@@ -57,8 +57,10 @@ final class SampleAppModel: AppModel {
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let now: () -> Date
     @ObservationIgnored private let player = AudioPlayer()
-    /// Where Song Creator writes the Toots it makes.
+    /// Where Song Creator writes the Toots it makes, before they're saved.
     @ObservationIgnored private let tootFolder: URL
+    /// Where saved Toots are kept.
+    @ObservationIgnored private let tootStore: TootStore
     /// Making a Toot takes at least this long, so its "Making" state can be seen (UI tests).
     @ObservationIgnored private let minimumMakingTime: Duration
     /// Toots Song Creator made, saved or not, for playback.
@@ -69,7 +71,8 @@ final class SampleAppModel: AppModel {
     ///   - source: where takes come from and Recordings are kept.
     ///   - initialTootSongIDs: Songs to make and save as Toots at launch, oldest first (sample
     ///     data); a locked Song is skipped.
-    ///   - tootFolder: where Song Creator writes the Toots it makes.
+    ///   - tootFolder: where Song Creator writes the Toots it makes, before they're saved.
+    ///   - tootStore: where saved Toots are kept; they're loaded from it at launch.
     ///   - failures: Song Creator failures to simulate, each once.
     ///   - minimumMakingTime: making a Toot takes at least this long.
     init(
@@ -77,6 +80,7 @@ final class SampleAppModel: AppModel {
         songs: [Song],
         initialTootSongIDs: [Song.ID] = [],
         tootFolder: URL = SampleAppModel.temporaryTootFolder,
+        tootStore: TootStore = .temporary(),
         microphone: any MicrophoneAccess,
         defaults: UserDefaults,
         failures: Failures = [],
@@ -90,10 +94,12 @@ final class SampleAppModel: AppModel {
         self.pendingFailures = failures
         self.now = now
         self.tootFolder = tootFolder
+        self.tootStore = tootStore
         self.minimumMakingTime = minimumMakingTime
         self.coverageCache = CoverageCache(songs: songs)
         self.isShowingWelcome = !defaults.bool(forKey: Self.welcomeSeenKey)
         self.recordings = source.savedRecordings()
+        self.toots = (try? tootStore.load()) ?? []
         #if INTERNAL
         self.bundledFixtures = source.canLoadFixtures ? FixtureLibrary.bundled() : []
         #endif
@@ -133,6 +139,7 @@ final class SampleAppModel: AppModel {
         initialFixtureIDs: [String] = [],
         initialTootSongIDs: [Song.ID] = [],
         tootFolder: URL = SampleAppModel.temporaryTootFolder,
+        tootStore: TootStore = .temporary(),
         microphone: any MicrophoneAccess,
         defaults: UserDefaults,
         failures: Failures = [],
@@ -153,6 +160,7 @@ final class SampleAppModel: AppModel {
             songs: songs,
             initialTootSongIDs: initialTootSongIDs,
             tootFolder: tootFolder,
+            tootStore: tootStore,
             microphone: microphone,
             defaults: defaults,
             failures: failures,
@@ -482,12 +490,9 @@ final class SampleAppModel: AppModel {
         addToot(id: draft.id, song: draft.song, arrangement: draft.arrangement, seconds: draft.seconds, audioURL: draft.audioURL)
     }
 
+    /// Saves a Toot to the store, which keeps its own copy of the audio, and lists it.
     private func addToot(id: UUID, song: Song, arrangement: Arrangement, seconds: Double, audioURL: URL) {
-        var audioURL = audioURL
-        if pendingFailures.remove(.tootAudioMissing) != nil {
-            audioURL = URL.temporaryDirectory.appending(path: "missing-\(id.uuidString).m4a")
-        }
-        toots.append(Toot(
+        let made = Toot(
             id: id,
             title: song.title,
             songID: song.id,
@@ -495,8 +500,15 @@ final class SampleAppModel: AppModel {
             seconds: seconds,
             audioURL: audioURL,
             arrangement: arrangement,
-            isAudioMissing: Toot.isAudioMissing(at: audioURL)
-        ))
+            isAudioMissing: false
+        )
+        // If the store can't keep it, it's listed until the app quits.
+        var toot = (try? tootStore.save(made)) ?? made
+        if pendingFailures.remove(.tootAudioMissing) != nil {
+            try? FileManager.default.removeItem(at: toot.audioURL)
+            toot = toot.keeping(audioURL: toot.audioURL)
+        }
+        toots.append(toot)
     }
 
     // MARK: Toots
@@ -505,11 +517,13 @@ final class SampleAppModel: AppModel {
         let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty, let index = toots.firstIndex(where: { $0.id == id }) else { return }
         toots[index].title = title
+        try? tootStore.rename(id, to: title)
     }
 
     func deleteToot(_ id: Toot.ID) {
         if nowPlaying == .toot(id) { stopPlayback() }
         toots.removeAll { $0.id == id }
+        try? tootStore.delete(id)
     }
 }
 

@@ -30,6 +30,10 @@ Every build makes real Toots from the user's own Recordings:
 - **Song Creator** renders the Song with `RecordingAnalysisKit.Renderer` (`TootRenderer`), off the
   main actor, from each Recording's file cut at its stored analysis, and writes mono 44.1 kHz
   AAC. In the simulator a Toot takes under 0.1 s to make.
+- **Saved Toots** are kept in `Application Support/Toots` (`TootStore`): `<id>.m4a`, the Toot's own
+  copy of its audio, and `<id>.json` with its title, Song, date, length and Arrangement. Deleting a
+  Recording the Toot used doesn't change how it sounds. Rename and delete write through to the
+  store. The Debug sample model keeps Toots in a new temporary folder each launch.
 - `PedosTests/TootRenderTests` measures the app's Toot files with the render checks
   (`RenderChecking`, `evaluate.py` in Swift, a test-only library the app doesn't link).
 - `RecordingAnalysisKit` is optimized in Debug builds too (`Package.swift`); unoptimized, a
