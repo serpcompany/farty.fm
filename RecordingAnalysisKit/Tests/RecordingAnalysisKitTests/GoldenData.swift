@@ -98,5 +98,8 @@ enum Golden {
 
 /// Formats a table row with fixed-width columns.
 func row(_ cells: Any...) -> String {
-    cells.map { "\($0)".padding(toLength: 10, withPad: " ", startingAt: 0) }.joined(separator: " ")
+    cells.map { cell in
+        let s = "\(cell)"
+        return s + String(repeating: " ", count: max(0, 10 - s.count))
+    }.joined(separator: " ")
 }
