@@ -7,6 +7,12 @@ struct WelcomeSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer(minLength: 24)
+            Image("WelcomeIcon")
+                .resizable()
+                .frame(width: 88, height: 88)
+                .clipShape(.rect(cornerRadius: 20, style: .continuous))
+                .accessibilityHidden(true)
+                .padding(.bottom, 16)
             Text("Pedos")
                 .font(.largeTitle.bold())
             Text("Record your farts. Turn them into songs.")
