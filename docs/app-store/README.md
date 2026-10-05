@@ -58,3 +58,16 @@ From the Release build, Song Creator (with its "Save to Toots" button) can be us
 
 Checked: every image is exactly 1320 × 2868, RGB with no alpha, and shows no clipped text, debug
 text or "Simulated" notes.
+
+## Promo screenshots
+
+`promo/` holds the ad-style set (6.9-inch, 1320×2868): a headline over a colored background, with the real screen in an iPhone frame. It was made with the [app-store-screenshots](https://www.skills.sh/parthjadhav/app-store-screenshots/app-store-screenshots) skill (installed in `.claude/skills/`, not committed). `promo/app-store-screenshots.json` is the editor's project file.
+
+To re-export, for example from the final Release build:
+
+1. Copy the skill's `template/` into a scratch folder and run `bun install`.
+2. Copy `promo/app-store-screenshots.json` there.
+3. Copy the plain screenshots into `public/screenshots/apple/iphone/en/` as `01.png` to `06.png`, in this folder's order (`01-record` … `06-toots`). Add the app icon as `public/app-icon.png`.
+4. Run `bun dev`, open http://localhost:3000, and click **Export bundle**. It exports every iPhone size Apple accepts.
+
+The promo set shows Toots, which only QA builds can make until #16 and #17, so retake it from the Release build before submitting.
