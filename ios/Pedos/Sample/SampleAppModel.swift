@@ -352,6 +352,9 @@ final class SampleAppModel: AppModel {
     }
 
     func finishFlow() {
+        // The cover calls this again when it has finished closing; by then Song Creator may
+        // already be playing the Toot that "Try it" opened.
+        guard flow != nil else { return }
         stopPlayback()
         if let draft = flowDraft { source.discard(take(of: draft)) }
         flow = nil
@@ -466,6 +469,8 @@ final class SampleAppModel: AppModel {
             }
         }.value
         try? await Task.sleep(until: started + minimumMakingTime)
+        // Song Creator left before the Toot was made: it makes it again when it's back.
+        try Task.checkCancellation()
         guard case .success(let output) = rendered else { throw TootError.couldNotMake }
         let draft = TootDraft(id: id, song: song, arrangement: arrangement, seconds: output.seconds, audioURL: url, notes: output.notes)
         tootDrafts[draft.id] = draft

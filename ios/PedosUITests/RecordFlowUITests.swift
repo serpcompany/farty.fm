@@ -105,6 +105,7 @@ class RecordFlowUITests: PedosUITestCase {
         XCTAssertTrue(app.navigationBars["Mary Had a Little Lamb"].waitForExistence(timeout: 5), "Try it didn't open Mary")
         XCTAssertTrue(app.tabBars.buttons["Compose"].isSelected)
         XCTAssertTrue(app.buttons["song-creator-play"].waitForExistence(timeout: 5), "Mary wasn't made")
+        XCTAssertEqual(app.buttons["song-creator-play"].label, "Stop", "Mary didn't start playing")
         // Made from these takes: fixtures 021, 090, 059 and 094, lowest pitch first.
         let rows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'Recording '")).allElementsBoundByIndex
             .sorted { $0.frame.minY < $1.frame.minY }.map(\.identifier)

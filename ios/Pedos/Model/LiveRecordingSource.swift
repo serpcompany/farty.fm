@@ -77,6 +77,7 @@ final class LiveRecordingSource: RecordingSource {
             let testTake = testTakes[testTakesUsed % testTakes.count]
             testTakesUsed += 1
             let draft = store.newDraftURL()
+            try? FileManager.default.createDirectory(at: store.draftFolder, withIntermediateDirectories: true)
             guard (try? FileManager.default.copyItem(at: testTake, to: draft)) != nil,
                   let seconds = AudioLength.seconds(of: draft)
             else { return nil }

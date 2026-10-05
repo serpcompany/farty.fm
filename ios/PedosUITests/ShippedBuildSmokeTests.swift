@@ -17,27 +17,30 @@ final class ShippedBuildSmokeTests: XCTestCase {
     }
 
     /// Launches the app; each take is a copy of the next of these Fixture Library Recordings.
-    private func launchShippedApp(takes: [String] = ["090"]) throws -> XCUIApplication {
+    /// `freshStore`: in Debug, keep Recordings in a new empty folder (QA and Release ignore it;
+    /// CI's simulators start empty).
+    private func launchShippedApp(takes: [String] = ["090"], freshStore: Bool = false) throws -> XCUIApplication {
         let files = try takes.map { id in
             try XCTUnwrap(Bundle(for: Self.self).path(forResource: "test-take-\(id)", ofType: "m4a"), "Test take \(id) isn't bundled")
         }
         let app = XCUIApplication()
         app.launchArguments = ["-PedosLive", "YES", "-PedosTestTake", files.joined(separator: ","), "-welcomeSeen", "YES"]
+        if freshStore { app.launchArguments += ["-PedosFreshStore", "YES"] }
         app.launch()
         return app
     }
 
     /// Records a take, saves it, and waits for its Result; returns the Recording's name.
-    private func recordAndSave(in app: XCUIApplication) throws -> String {
+    private func recordAndSave(_ take: Int, in app: XCUIApplication) throws -> String {
         app.buttons["record-button"].tap()
         waitForRecordingToStart(in: app)
         let timer = app.staticTexts["recording-timer"]
         let counted = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != '0:00'"), object: timer)
         XCTAssertEqual(XCTWaiter().wait(for: [counted], timeout: 5), .completed, "The timer didn't count")
         app.buttons["stop-button"].tap()
-        XCTAssertTrue(app.navigationBars["New Recording"].waitForExistence(timeout: 10), "Review didn't open")
+        XCTAssertTrue(app.navigationBars["New Recording"].waitForExistence(timeout: 10), "Review didn't open for take \(take)")
         app.buttons["Save"].tap()
-        XCTAssertTrue(app.staticTexts["result-note"].waitForExistence(timeout: 30), "No pitch on the Result screen")
+        XCTAssertTrue(app.staticTexts["result-note"].waitForExistence(timeout: 30), "No pitch on the Result screen for take \(take)")
         return try XCTUnwrap(
             app.navigationBars.matching(NSPredicate(format: "identifier BEGINSWITH 'Recording '")).firstMatch.identifier as String?
         )
@@ -47,11 +50,11 @@ final class ShippedBuildSmokeTests: XCTestCase {
     /// which unlocks Mary Had a Little Lamb; then make the Toot from them, rendered by the real
     /// engine, save it, and play it from the Toots tab. Then the Recordings are deleted again.
     func testRecordFourFartsThenMakeAToot() throws {
-        let app = try launchShippedApp(takes: ["090", "084", "086", "094"])
+        let app = try launchShippedApp(takes: ["090", "084", "086", "094"], freshStore: true)
         XCTAssertTrue(app.buttons["record-button"].waitForExistence(timeout: 10), "The Record tab didn't open")
         var names: [String] = []
         for take in 1...4 {
-            names.append(try recordAndSave(in: app))
+            names.append(try recordAndSave(take, in: app))
             if take < 4 {
                 app.buttons["Record another"].tap()
                 XCTAssertTrue(app.buttons["record-button"].waitForExistence(timeout: 5))
