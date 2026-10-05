@@ -13,10 +13,18 @@ enum Golden {
     static let goldenDir = repoRoot.appending(path: "fixtures/golden")
 
     struct Index: Decodable {
+        struct SongEntry: Decodable {
+            let id: String
+            /// Whether the Song is Unlocked with each library. A locked Song's Arrangement file
+            /// has no notes or render.
+            let unlocked: [String: Bool]
+        }
         let recordings: [String]
         let melodicRecordings: [String]
         let sampleRate: Int
         let hop: Int
+        let songs: [SongEntry]
+        let libraries: [String: [String]]
     }
 
     struct Recording: Decodable, Sendable {
@@ -63,6 +71,76 @@ enum Golden {
     static let recordings: [Recording] = index.recordings.map { id in
         let data = try! Data(contentsOf: goldenDir.appending(path: "recordings/\(id).json"))
         return try! decoder().decode(Recording.self, from: data)
+    }
+
+    /// A catalog Song as the reference imported it (`songs/<id>.json`).
+    struct Song: Decodable, Sendable {
+        struct Note: Decodable, Sendable {
+            let start: Double
+            let dur: Double
+            let pitch: Int
+        }
+        let id: String
+        let bpm: Double
+        let beatsPerBar: Double
+        let lengthBeats: Double
+        let notes: [Note]
+    }
+
+    /// The reference's Arrangement and render checks for one Song and library
+    /// (`arrangements/<library>/<song>.json`).
+    struct Arrangement: Decodable, Sendable {
+        struct Note: Decodable, Sendable {
+            struct Render: Decodable, Sendable {
+                let startS: Double
+                let lenS: Double
+                let gainDb: Double
+            }
+            let index: Int
+            let targetMidi: Int
+            let recording: String
+            let shiftSemitones: Double
+            let heardCents: Double?
+            let render: Render
+        }
+        struct Metrics: Decodable, Sendable {
+            let notes: Int
+            let pitchReadablePct: Int
+            let within50cPct: Int
+            let medianAbsCents: Double?
+            let onsetsOnTimePct: Int
+            let notesWithRetrigger: Int
+
+            /// `.convertFromSnakeCase` turns `within_50c_pct` into `within50CPct`.
+            private enum CodingKeys: String, CodingKey {
+                case notes, pitchReadablePct, medianAbsCents, onsetsOnTimePct, notesWithRetrigger
+                case within50cPct = "within50CPct"
+            }
+        }
+        struct RenderSettings: Decodable, Sendable {
+            let bpm: Double
+            let tune: Double
+        }
+        let library: String
+        let song: String
+        let notes: [Note]
+        let metrics: Metrics
+        let renderSettings: RenderSettings
+    }
+
+    static func song(_ id: String) -> Song {
+        let data = try! Data(contentsOf: goldenDir.appending(path: "songs/\(id).json"))
+        return try! decoder().decode(Song.self, from: data)
+    }
+
+    /// `library` is `full` or `small`.
+    static func arrangement(_ library: String, _ song: String) -> Arrangement {
+        let data = try! Data(contentsOf: goldenDir.appending(path: "arrangements/\(library)/\(song).json"))
+        return try! decoder().decode(Arrangement.self, from: data)
+    }
+
+    static func recording(_ id: String) -> Recording {
+        recordings.first { $0.id == id }!
     }
 
     static func fileURL(_ recording: Recording) -> URL {

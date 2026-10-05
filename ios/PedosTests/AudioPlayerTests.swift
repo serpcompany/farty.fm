@@ -48,10 +48,11 @@ final class AudioPlayerTests: XCTestCase {
         XCTAssertEqual(player.nowPlaying, item)
 
         // Time it from when the audio actually started: activating the audio session first can
-        // take a while on a slow machine.
-        for _ in 0..<250 where player.startedAt == nil {
+        // take several seconds on a cold CI simulator (it took over 5 s twice).
+        for _ in 0..<1000 where player.startedAt == nil && player.nowPlaying == item {
             try await Task.sleep(for: .milliseconds(20))
         }
+        XCTAssertEqual(player.nowPlaying, item, "The segment couldn't play")
         let startedAt = try XCTUnwrap(player.startedAt, "The segment never started")
         _ = try await waitUntilStopped(player, within: .seconds(8))
         let played = Date.now.timeIntervalSince(startedAt)
