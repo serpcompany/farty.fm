@@ -4,6 +4,18 @@ SwiftUI app for iOS 26+, portrait iPhone only. The Xcode project is generated fr
 [`project.yml`](project.yml) with [XcodeGen](https://github.com/yonaskolb/XcodeGen) and is not
 committed.
 
+## Builds
+
+| Build | For | Recordings | Fixture Library | Bundle identifier |
+| --- | --- | --- | --- | --- |
+| **Debug** | development, previews, UI tests | sample data (`FixtureRecordingSource`), or real with `-PedosLive YES` | bundled, with "Load the Fixture Library" | `com.serp.pedos.debug` |
+| **QA** | TestFlight until launch (internal testing only) | real | bundled, with "Load the Fixture Library" on the Profile tab | `com.serp.pedos` |
+| **Release** | the App Store | real | none: no files, no loader code | `com.serp.pedos` |
+
+Debug and QA compile with `INTERNAL`, which gates everything internal: the Fixture Library loader,
+the prototype's stand-in Song audio for Toots (until rendering, #17), and the "Simulated" notes.
+`scripts/check-release-build.sh` builds Release and fails if it contains any audio or loader code.
+
 ## Generate
 
 ```sh
@@ -44,7 +56,8 @@ at the same time.
 
 Every other UI test runs the Debug build on sample data. `ShippedBuildSmokeTests` runs the real
 loop instead: record, save, see the pitch, replay, relaunch, delete. The `PedosShipped` scheme
-runs it on the **Release** build, and the TestFlight workflow uploads only if it passes:
+runs it on the **QA** build (what TestFlight gets), and the TestFlight workflow uploads only if it
+passes:
 
 ```sh
 xcodebuild test -project Pedos.xcodeproj -scheme PedosShipped \
@@ -61,11 +74,14 @@ microphone is checked by hand, on a phone, from a TestFlight build.
 
 `SampleAppModel` drives the screens, and a `RecordingSource` supplies the Recordings:
 
-- **Release builds record for real** (`LiveRecordingSource`): the microphone records mono 44.1 kHz
+- **QA and Release builds record for real** (`LiveRecordingSource`): the microphone records mono 44.1 kHz
   AAC to a draft file, Save moves it into `Application Support/Recordings` (`RecordingStore`), and
   Recording Analysis runs after the save. Its result is kept next to the Recording
   (`<id>.analysis.json`) and runs again when the analysis version changes (ADR 0002). Replay plays
   just the fart the analysis found, without the dead air before or after it; the file is never cut.
+  In QA builds, "Load the Fixture Library" (Profile tab) writes each of the 23 fixtures the way the
+  recorder writes a take and saves it, so they're stored, analyzed and played like real farts.
+  Loading again adds only the missing ones.
 - **Debug builds use the Fixture Library** (`FixtureRecordingSource`) for the screens' UI tests and
   previews, unless launched with `-PedosLive YES`, which records for real as Release does.
 
@@ -83,9 +99,8 @@ doesn't follow it.
   Library's analysis, and (Debug only) which fixture plays each pitch in each Song's render.
   Rerun it when the prototype data changes; CI runs it with `--check`.
 - Debug builds bundle the prototype's audio from `docs/design/prototype/audio/`: the trimmed
-  fixtures (`rec-*.mp3`) and its render of each Song (`song-*.mp3`). Release builds exclude both,
-  so they can't make Toots until rendering (#17). `scripts/check-bundle-identifiers.sh` checks
-  that Release excludes both, and `scripts/upload-testflight.sh` fails if an archive contains any audio.
+  fixtures (`rec-*.mp3`) and its render of each Song (`song-*.mp3`). QA builds keep the Song
+  renders, and Release builds exclude both, so Release can't make Toots until rendering (#17).
 - Debug launch arguments set up states by hand (Xcode: Product > Scheme > Edit Scheme >
   Arguments), for example `-PedosSampleStart all` for all 23 Recordings,
   `-PedosSampleToots mary,ode` for two Toots, or `-PedosSampleFailure saveFailed`
@@ -95,11 +110,11 @@ doesn't follow it.
 
 ## Bundle identifiers
 
-Per the SERP native app build identity standard, only Release carries the product identifier:
+Per the SERP Apple app build identity standard, only Release and QA carry the product identifier:
 
 | Build | Bundle identifier |
 | --- | --- |
-| Release | `com.serp.pedos` |
+| Release and QA | `com.serp.pedos` |
 | Debug (and the unit-test host) | `com.serp.pedos.debug` |
 | Unit tests | `com.serp.pedos.tests` |
 | UI tests | `com.serp.pedos.uitests` |
@@ -109,19 +124,22 @@ configuration's build settings.
 
 ## TestFlight
 
-[`.github/workflows/testflight.yml`](../.github/workflows/testflight.yml) uploads the Release app
+[`.github/workflows/testflight.yml`](../.github/workflows/testflight.yml) uploads the **QA** app
 to TestFlight on every push to `main`, and by hand from any branch (Actions > TestFlight > Run
 workflow, or `gh workflow run testflight.yml --ref <branch>`), which is how a branch build reaches
 the owner's phone and how a change to the pipeline is proven before merge. [`scripts/upload-testflight.sh`](scripts/upload-testflight.sh) does the work: it
-archives unsigned, checks the archive (bundle identifier, build number, icon, no audio), signs it
-with cloud signing, checks the signature, and uploads it.
+archives unsigned, checks the archive (bundle identifier, build number, icon, and its audio:
+exactly the 23 fixtures and the stand-in Songs for QA, none for Release), signs it with cloud
+signing, checks the signature, and uploads it. QA builds are marked internal testing only
+(`testFlightInternalTestingOnly`), so App Store Connect won't let them reach external testers or the
+App Store. `CONFIGURATION=Release` uploads the App Store build instead, for the release (#23).
 
 - **Version:** `MARKETING_VERSION` in `project.yml`, which release-please bumps when its release PR
   merges. **Build number:** `<run number>.<attempt>` of the TestFlight workflow.
 - **Setup (owner, once):** an App Store Connect app record for `com.serp.pedos`, an App Store
   Connect API key with the Admin role (cloud signing needs it), repository secrets `ASC_KEY_P8`
   (the `.p8` file), `ASC_KEY_ID` and `ASC_ISSUER_ID`, and the repository variable `APPLE_TEAM_ID`.
-- **Before uploading**, the workflow runs `ShippedBuildSmokeTests` on the Release build (see
+- **Before uploading**, the workflow runs `ShippedBuildSmokeTests` on the QA build (see
   "Testing the build that ships") and uploads nothing if it fails.
 - `scripts/upload-testflight.sh --archive-only` (with `BUILD_NUMBER` set) builds and checks the
   archive locally without a key.

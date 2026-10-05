@@ -1,9 +1,9 @@
 import XCTest
 
 /// The core loop on the app as it ships: real recording, saving, Recording Analysis, playback,
-/// relaunch and delete, with no sample data. TestFlight uploads only if this passes on the
-/// Release build (`.github/workflows/testflight.yml`); the full suite runs it on Debug too
-/// (`-PedosLive YES`).
+/// relaunch and delete, with no sample data. TestFlight uploads only if this passes on the build
+/// it uploads, QA until launch (`.github/workflows/testflight.yml`); the test sets run it on
+/// Debug too (`-PedosLive YES`).
 ///
 /// CI machines have no microphone, so each take is a copy of `test-take-090.m4a`: Fixture Library
 /// Recording 090 (CC0, freesound.org/s/186119) as the recorder writes it, mono 44.1 kHz AAC.

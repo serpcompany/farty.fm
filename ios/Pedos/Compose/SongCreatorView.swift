@@ -65,7 +65,7 @@ struct SongCreatorView: View {
     private func ready(_ draft: TootDraft) -> some View {
         let isSaved = model.toot(draft.id) != nil
         return TootLayout(model: model, song: song, arrangement: draft.arrangement, tootID: draft.id, item: .tootDraft(draft.id)) {
-            #if DEBUG
+            #if INTERNAL
             if let source = model.simulatedSource(ofToot: draft.id) {
                 Text("Simulated Toot: \(source).")
                     .font(.footnote)

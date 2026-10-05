@@ -1,12 +1,12 @@
 #!/bin/sh
-# Checks the SERP native app build identity for Pedos: only Release carries the
+# Checks the SERP Apple app build identity for Pedos: only Release and QA carry the
 # product identifier, Debug and the test bundles have their own, and Info.plist
 # takes the identifier from the build setting.
 #
-# It also checks that Release excludes the design prototype's audio (the Fixture
-# Library's Recordings and its renders of each Song), which is for Debug builds
-# only. The built app is checked too, before every TestFlight upload:
-# scripts/upload-testflight.sh fails if the archive contains any audio.
+# It also checks which bundled audio each build excludes: Release excludes all of
+# it (the Fixture Library, the prototype's sample takes and its Song renders), and
+# QA excludes the sample takes. scripts/check-release-build.sh checks the built
+# Release app, and scripts/upload-testflight.sh checks every archive.
 #
 # Run after `xcodegen generate`: ios/scripts/check-bundle-identifiers.sh
 set -eu
@@ -23,6 +23,7 @@ fi
 # Every target's build settings, read once per configuration: each xcodebuild call takes most
 # of a minute on CI.
 debug_settings=$(xcodebuild -project "$project" -alltargets -configuration Debug -showBuildSettings)
+qa_settings=$(xcodebuild -project "$project" -alltargets -configuration QA -showBuildSettings)
 release_settings=$(xcodebuild -project "$project" -alltargets -configuration Release -showBuildSettings)
 
 setting() { # settings target name
@@ -32,7 +33,11 @@ setting() { # settings target name
 }
 
 bundle_identifier() { # target configuration
-  if [ "$2" = Release ]; then settings=$release_settings; else settings=$debug_settings; fi
+  case "$2" in
+    Release) settings=$release_settings ;;
+    QA) settings=$qa_settings ;;
+    *) settings=$debug_settings ;;
+  esac
   setting "$settings" "$1" PRODUCT_BUNDLE_IDENTIFIER
 }
 
@@ -46,6 +51,7 @@ check() { # description expected actual
 }
 
 check "Pedos (Release)" com.serp.pedos "$(bundle_identifier Pedos Release)"
+check "Pedos (QA)" com.serp.pedos "$(bundle_identifier Pedos QA)"
 check "Pedos (Debug)" com.serp.pedos.debug "$(bundle_identifier Pedos Debug)"
 check "PedosTests" com.serp.pedos.tests "$(bundle_identifier PedosTests Debug)"
 check "PedosUITests" com.serp.pedos.uitests "$(bundle_identifier PedosUITests Debug)"
@@ -54,8 +60,9 @@ check "Info.plist CFBundleIdentifier" '$(PRODUCT_BUNDLE_IDENTIFIER)' \
 
 # The Fixture Library never ships to regular users (AGENTS.md), and neither do
 # the prototype's Song renders, which are made from it.
-check "Release excludes the prototype audio" "rec-*.mp3 song-*.mp3" \
+check "Release excludes all bundled audio" "rec-*.mp3 song-*.mp3 [0-9][0-9][0-9]__*" \
   "$(setting "$release_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
+check "QA excludes the sample takes" "rec-*.mp3" "$(setting "$qa_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
 check "Debug keeps the prototype audio" "" "$(setting "$debug_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
 
 if [ "$failures" -ne 0 ]; then

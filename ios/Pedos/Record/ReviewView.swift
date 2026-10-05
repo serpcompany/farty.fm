@@ -29,7 +29,7 @@ struct ReviewView: View {
             .accessibilityLabel(isPlaying ? "Stop" : "Play")
             .accessibilityIdentifier("review-play")
             Spacer()
-            #if DEBUG
+            #if INTERNAL
             if let source = model.simulatedSource(ofDraft: draft.id) {
                 Text("Simulated take: \(source), not your microphone.")
                     .font(.footnote)

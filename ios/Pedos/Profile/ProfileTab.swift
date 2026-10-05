@@ -9,6 +9,11 @@ struct ProfileTab: View {
         NavigationStack {
             List {
                 stats
+                #if INTERNAL
+                if let library = model.fixtureLibrary {
+                    fixtureLibrarySection(library)
+                }
+                #endif
                 about
             }
             .navigationTitle("Profile")
@@ -47,6 +52,33 @@ struct ProfileTab: View {
             stat("Version", Bundle.main.appVersion, id: "app-version")
         }
     }
+
+    #if INTERNAL
+    /// Internal builds only (Debug and QA): add the 23 Fixture Library Recordings as your own.
+    private func fixtureLibrarySection(_ library: FixtureLibraryStatus) -> some View {
+        Section {
+            Button {
+                Task { await model.loadFixtureLibrary() }
+            } label: {
+                HStack {
+                    Text(library.isLoading ? "Loading the Fixture Library…" : library.isComplete ? "Fixture Library loaded" : "Load the Fixture Library")
+                    Spacer()
+                    if library.isLoading {
+                        ProgressView()
+                    }
+                    Text("\(library.loaded) of \(library.total)")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .disabled(library.isLoading || library.isComplete)
+            .accessibilityIdentifier("load-fixture-library")
+        } header: {
+            Text("Internal build")
+        } footer: {
+            Text("Adds the \(library.total) test farts as your own Recordings, analyzed like real ones. Loading again adds only the missing ones.")
+        }
+    }
+    #endif
 
     private func stat(_ title: String, _ value: String, id: String) -> some View {
         LabeledContent(title, value: value)

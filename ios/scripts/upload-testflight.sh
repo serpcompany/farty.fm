@@ -1,5 +1,9 @@
 #!/bin/sh
-# Archives the Release app, signs it for App Store Connect and uploads it to TestFlight.
+# Archives the app, signs it for App Store Connect and uploads it to TestFlight.
+#
+# Until launch, TestFlight gets the QA build: the Release app plus the Fixture Library and its
+# loader, uploaded for internal testing only, so App Store Connect won't let it reach external
+# testers or the App Store. CONFIGURATION=Release uploads the App Store build instead.
 #
 # The archive is built unsigned. Export signs it with cloud signing: Xcode creates the
 # distribution certificate and profile through the App Store Connect API, so the runner
@@ -10,6 +14,7 @@
 #   BUILD_NUMBER   CFBundleVersion; must be higher than the last upload of this version
 #   APPLE_TEAM_ID  the Apple Developer team that owns com.serp.pedos
 #   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH (the AuthKey_<ASC_KEY_ID>.p8 file)
+#   CONFIGURATION  QA (default) or Release
 #   OUTPUT_DIR     optional; where the archive and the .ipa go
 #
 # CI runs it (.github/workflows/testflight.yml). Run after `xcodegen generate`:
@@ -22,6 +27,8 @@ project=Pedos.xcodeproj
 bundle_id=com.serp.pedos
 archive_only=no
 [ "${1:-}" = "--archive-only" ] && archive_only=yes
+configuration=${CONFIGURATION:-QA}
+case "$configuration" in QA | Release) ;; *) echo "error: CONFIGURATION is QA or Release" >&2; exit 1 ;; esac
 
 fail() {
   echo "error: $*" >&2
@@ -45,8 +52,8 @@ mkdir -p "$out"
 archive="$out/Pedos.xcarchive"
 echo "Output: $out"
 
-echo "Archiving Release $BUILD_NUMBER (unsigned)..."
-xcodebuild archive -project "$project" -scheme Pedos -configuration Release \
+echo "Archiving $configuration $BUILD_NUMBER (unsigned)..."
+xcodebuild archive -project "$project" -scheme Pedos -configuration "$configuration" \
   -destination 'generic/platform=iOS' -archivePath "$archive" \
   CURRENT_PROJECT_VERSION="$BUILD_NUMBER" CODE_SIGNING_ALLOWED=NO -quiet
 
@@ -62,11 +69,25 @@ plist_value() { /usr/libexec/PlistBuddy -c "Print :$1" "$app/Info.plist" 2>/dev/
 # iPhone only (ADR 0001); App Store Connect holds an iPad app to iPad's orientation rules.
 [ "$(plist_value UIDeviceFamily)" = "$(printf 'Array {\n    1\n}')" ] ||
   fail "the app is not iPhone only: UIDeviceFamily is $(plist_value UIDeviceFamily | tr -s '\n ' ' ')"
-# The Fixture Library never ships to regular users (AGENTS.md).
-audio=$(find "$app" -type f \( -iname '*.mp3' -o -iname '*.wav' -o -iname '*.m4a' \
-  -o -iname '*.caf' -o -iname '*.aif' -o -iname '*.aiff' \) -exec basename {} \;)
-[ -z "$audio" ] || fail "the Release app contains audio: $audio"
-echo "ok    archive: $bundle_id $(plist_value CFBundleShortVersionString) ($BUILD_NUMBER), iPhone only, icon, no audio"
+# The Fixture Library never ships to regular users (AGENTS.md): Release carries no audio, and
+# QA carries exactly the Fixture Library and the stand-in Song renders, never the sample takes.
+audio_count() { # pattern
+  find "$app" -type f -name "$1" | wc -l | tr -d ' '
+}
+all_audio=$(find "$app" -type f \( -iname '*.mp3' -o -iname '*.wav' -o -iname '*.m4a' \
+  -o -iname '*.caf' -o -iname '*.aif' -o -iname '*.aiff' \) | wc -l | tr -d ' ')
+if [ "$configuration" = Release ]; then
+  [ "$all_audio" -eq 0 ] || fail "the Release app contains $all_audio audio files"
+  contents="no audio"
+else
+  fixtures=$(audio_count '[0-9][0-9][0-9]__*')
+  songs=$(audio_count 'song-*.mp3')
+  [ "$(audio_count 'rec-*.mp3')" -eq 0 ] || fail "the QA app contains the sample takes"
+  [ "$fixtures" -eq 23 ] || fail "the QA app has $fixtures Fixture Library files, not 23"
+  [ "$all_audio" -eq $((fixtures + songs)) ] || fail "the QA app contains unexpected audio"
+  contents="$fixtures fixtures, $songs stand-in Songs"
+fi
+echo "ok    archive: $configuration $bundle_id $(plist_value CFBundleShortVersionString) ($BUILD_NUMBER), iPhone only, icon, $contents"
 
 [ "$archive_only" = yes ] && exit 0
 
@@ -82,6 +103,7 @@ cat >"$out/ExportOptions.plist" <<EOF
   <key>teamID</key><string>$APPLE_TEAM_ID</string>
   <key>manageAppVersionAndBuildNumber</key><false/>
   <key>uploadSymbols</key><true/>
+  <key>testFlightInternalTestingOnly</key><$( [ "$configuration" = QA ] && echo true || echo false )/>
 </dict>
 </plist>
 EOF
@@ -102,6 +124,14 @@ entitlement() { printf '%s' "$entitlements" | plutil -extract "$1" raw -o - - 2>
 [ "$(entitlement application-identifier)" = "$APPLE_TEAM_ID.$bundle_id" ] ||
   fail "application-identifier is '$(entitlement application-identifier)', not $APPLE_TEAM_ID.$bundle_id"
 [ "$(entitlement get-task-allow)" != true ] || fail "the app is signed for development"
+# QA builds carry the Fixture Library under the product identifier, so App Store Connect must
+# keep them to internal testers: export marks the app with TFInternalTestingOnly.
+internal_only=$(/usr/libexec/PlistBuddy -c "Print :TFInternalTestingOnly" "$signed_app/Info.plist" 2>/dev/null || echo false)
+if [ "$configuration" = QA ]; then
+  [ "$internal_only" = true ] || fail "the QA app isn't marked internal testing only"
+else
+  [ "$internal_only" != true ] || fail "the Release app is marked internal testing only"
+fi
 echo "ok    signed: $(codesign -dvv "$signed_app" 2>&1 | sed -n 's/^Authority=\(Apple Distribution.*\)/\1/p' | head -n 1)"
 
 echo "Uploading to App Store Connect..."

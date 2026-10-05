@@ -23,7 +23,24 @@ protocol RecordingSource: AnyObject {
     func delete(_ id: Recording.ID)
     /// The Fixture Library id a Recording or take stands in for; nil for real ones.
     func fixtureID(of id: UUID) -> String?
+
+    #if INTERNAL
+    /// Whether "Load the Fixture Library" can add fixtures as Recordings (not with sample data).
+    var canLoadFixtures: Bool { get }
+    /// Saves a Fixture Library file as the next Recording, as if it had just been recorded.
+    func loadFixture(_ fixture: FixtureLibrary.Fixture) async throws -> Recording
+    #endif
 }
+
+#if INTERNAL
+extension RecordingSource {
+    var canLoadFixtures: Bool { false }
+
+    func loadFixture(_ fixture: FixtureLibrary.Fixture) async throws -> Recording {
+        throw CocoaError(.featureUnsupported)
+    }
+}
+#endif
 
 /// A finished take, before it's saved or discarded.
 struct Take: Identifiable, Hashable, Sendable {
