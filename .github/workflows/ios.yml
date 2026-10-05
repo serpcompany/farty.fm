@@ -21,23 +21,36 @@ permissions:
   contents: read
 
 jobs:
-  # Its own job, so it runs alongside the app's tests instead of competing with the simulator.
-  recording-analysis:
-    name: recording-analysis
+  # Checks that don't need the simulator run in their own job, alongside the app's tests, so they
+  # add no time (each xcodebuild call alone takes most of two minutes on the hosted runner).
+  checks:
+    name: checks
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: macos-26
     timeout-minutes: 15
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
-    defaults:
-      run:
-        working-directory: RecordingAnalysisKit
+      XCODEGEN_VERSION: 2.44.1
+      XCODEGEN_SHA256: a2e905fb68446e9bb4008cdfe2e13e3f176d0cbcca828b71770f8e53fca91b73
     steps:
       - uses: actions/checkout@v7
 
       - name: Test Recording Analysis against the reference engine
         # Every Fixture Library Recording, against fixtures/golden/.
+        working-directory: RecordingAnalysisKit
         run: swift test -c release
+
+      - name: Install XcodeGen
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/xcodegen.zip" \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
+          echo "$XCODEGEN_SHA256  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+
+      - name: Check bundle identifiers and that Release excludes the fixture audio
+        working-directory: ios
+        run: xcodegen generate && scripts/check-bundle-identifiers.sh
 
   ios-build-and-test:
     name: ios-build-and-test
@@ -91,9 +104,6 @@ jobs:
 
       - name: Check the generated sample data is current
         run: scripts/generate-sample-data.py --check
-
-      - name: Check bundle identifiers and that Release excludes the fixture audio
-        run: scripts/check-bundle-identifiers.sh
 
       - name: Wait for the simulator to boot
         timeout-minutes: 15
