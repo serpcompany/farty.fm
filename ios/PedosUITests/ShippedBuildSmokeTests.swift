@@ -17,15 +17,12 @@ final class ShippedBuildSmokeTests: XCTestCase {
     }
 
     /// Launches the app; each take is a copy of the next of these Fixture Library Recordings.
-    /// `freshStore`: in Debug, keep Recordings in a new empty folder (QA and Release ignore it;
-    /// CI's simulators start empty).
-    private func launchShippedApp(takes: [String] = ["090"], freshStore: Bool = false) throws -> XCUIApplication {
+    private func launchShippedApp(takes: [String] = ["090"]) throws -> XCUIApplication {
         let files = try takes.map { id in
             try XCTUnwrap(Bundle(for: Self.self).path(forResource: "test-take-\(id)", ofType: "m4a"), "Test take \(id) isn't bundled")
         }
         let app = XCUIApplication()
         app.launchArguments = ["-PedosLive", "YES", "-PedosTestTake", files.joined(separator: ","), "-welcomeSeen", "YES"]
-        if freshStore { app.launchArguments += ["-PedosFreshStore", "YES"] }
         app.launch()
         return app
     }
@@ -48,10 +45,16 @@ final class ShippedBuildSmokeTests: XCTestCase {
 
     /// Record four farts (Fixture Library 090, 084, 086 and 094, as the recorder writes them),
     /// which unlocks Mary Had a Little Lamb; then make the Toot from them, rendered by the real
-    /// engine, save it, and play it from the Toots tab. Then the Recordings are deleted again.
-    func testRecordFourFartsThenMakeAToot() throws {
-        let app = try launchShippedApp(takes: ["090", "084", "086", "094"], freshStore: true)
+    /// engine, save it, and play it from the Toots tab. It's still there after a relaunch, and
+    /// still plays after its Recordings are deleted; then it's deleted too.
+    func testRecordFourFartsThenMakeATootThatLasts() throws {
+        // Four takes, two relaunches and five deletes take about 2 minutes on this Mac.
+        executionTimeAllowance = 360
+        let takes = ["090", "084", "086", "094"]
+        var app = try launchShippedApp(takes: takes)
         XCTAssertTrue(app.buttons["record-button"].waitForExistence(timeout: 10), "The Record tab didn't open")
+        deleteEveryRecordingAndToot(in: app)
+        app.tabBars.buttons["Record"].tap()
         var names: [String] = []
         for take in 1...4 {
             names.append(try recordAndSave(take, in: app))
@@ -83,17 +86,54 @@ final class ShippedBuildSmokeTests: XCTestCase {
         XCTAssertTrue((toot.value as? String)?.hasSuffix("playing") ?? false, "The Toot didn't play")
         attachScreenshot("Toots, playing")
 
-        // Leave the device as it was.
+        // Quit and open the app again: the Toot is still there.
+        app.terminate()
+        app = try launchShippedApp(takes: takes)
+        app.tabBars.buttons["Toots"].tap()
+        let kept = app.buttons["Mary Had a Little Lamb"]
+        XCTAssertTrue(kept.waitForExistence(timeout: 10), "The Toot didn't survive a relaunch")
+        XCTAssertEqual(kept.value as? String, "Mary Had a Little Lamb · Today · 0:12")
+
+        // Deleting the Recordings it used doesn't break it: it plays its own copy of the audio.
         app.tabBars.buttons["Recordings"].tap()
-        for name in names {
-            let row = app.buttons[name]
-            XCTAssertTrue(row.waitForExistence(timeout: 5), "\(name) isn't on the Recordings tab")
-            row.swipeLeft()
-            XCTAssertTrue(app.buttons["Delete"].waitForExistence(timeout: 5))
-            app.buttons["Delete"].tap()
-            XCTAssertTrue(app.buttons["Delete Recording"].waitForExistence(timeout: 5))
-            app.buttons["Delete Recording"].tap()
-            XCTAssertTrue(row.waitForNonExistence(timeout: 5), "\(name) wasn't deleted")
+        for name in names { delete(app.buttons[name], confirming: "Delete Recording", in: app) }
+        app.tabBars.buttons["Toots"].tap()
+        XCTAssertTrue(kept.waitForExistence(timeout: 5))
+        app.buttons["play Mary Had a Little Lamb"].tap()
+        XCTAssertTrue((kept.value as? String)?.hasSuffix("playing") ?? false, "The Toot didn't play without its Recordings")
+        attachScreenshot("Toots, after relaunch")
+
+        // Delete it, with a confirmation; it stays deleted.
+        delete(kept, confirming: "Delete Toot", in: app)
+        XCTAssertTrue(app.staticTexts["Nothing yet"].waitForExistence(timeout: 5))
+        app.terminate()
+        app = try launchShippedApp(takes: takes)
+        app.tabBars.buttons["Toots"].tap()
+        XCTAssertTrue(app.staticTexts["Nothing yet"].waitForExistence(timeout: 10), "The deleted Toot came back")
+    }
+
+    /// Swipes `row` to Delete, and confirms with `confirmation`.
+    private func delete(_ row: XCUIElement, confirming confirmation: String, in app: XCUIApplication) {
+        XCTAssertTrue(row.waitForExistence(timeout: 5), "\(row) isn't there")
+        row.swipeLeft()
+        XCTAssertTrue(app.buttons["Delete"].waitForExistence(timeout: 5), "No Delete")
+        app.buttons["Delete"].tap()
+        XCTAssertTrue(app.buttons[confirmation].waitForExistence(timeout: 5), "No delete confirmation")
+        app.buttons[confirmation].tap()
+        XCTAssertTrue(row.waitForNonExistence(timeout: 5), "\(row) wasn't deleted")
+    }
+
+    /// Deletes what an earlier, interrupted run left (CI's simulators start empty).
+    private func deleteEveryRecordingAndToot(in app: XCUIApplication) {
+        let tabs: [(tab: String, confirmation: String, rows: XCUIElementQuery)] = [
+            ("Toots", "Delete Toot", app.collectionViews.buttons.matching(NSPredicate(format: "NOT (identifier BEGINSWITH 'play ')"))),
+            ("Recordings", "Delete Recording", app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'Recording '"))),
+        ]
+        for (tab, confirmation, rows) in tabs {
+            app.tabBars.buttons[tab].tap()
+            while rows.firstMatch.waitForExistence(timeout: 2) {
+                delete(app.buttons[rows.firstMatch.identifier], confirming: confirmation, in: app)
+            }
         }
     }
 
