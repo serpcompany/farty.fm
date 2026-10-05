@@ -23,7 +23,8 @@ Two options. The home-screen name stays **Pedos** either way (`CFBundleDisplayNa
 Either way, App Store Connect will refuse a name another app already uses; check that it's free
 when you create or rename the app record.
 
-**Owner decides:** which name, and the first App Store version number (see below).
+**Owner decided on #75:** the name and subtitle are already set in App Store Connect, and the first
+App Store version is **1.0.0**.
 
 ## Subtitle (30 characters max)
 
@@ -123,9 +124,10 @@ and "soundboard" (Pedos has no prank or soundboard feature), "tuner" (it isn't o
 App Store Connect doesn't offer "What's New" for an app's first version, so this text isn't used at
 launch. Keep it for the first update, and edit it to describe what changed.
 
-**Version number (owner decides).** The build's version is `MARKETING_VERSION: "0.1.0"` in
-`ios/project.yml`, which release-please manages, so the first App Store version won't be "1.0"
-unless someone bumps it. The owner picks the number before the first upload.
+**Version number: 1.0.0** (owner decision on #75). The build's version is `MARKETING_VERSION` in
+`ios/project.yml`, which release-please manages. A commit on `main` with the footer
+`Release-As: 1.0.0` makes its next release PR 1.0.0; merging that PR sets the version for the
+Release upload.
 
 ```text
 First release. Record your farts, find each one's note, and unlock songs played only by your farts.
@@ -144,16 +146,29 @@ for "songs" browses.
 ## Copyright
 
 ```text
-2026 <copyright holder>
+2026 SERP
 ```
 
 Apple's format is the year followed by the person or entity that owns the rights, with no URL
-(App Store Connect adds the ©). **Owner provides:** the legal name of the account holder (team
-W3GXL2NQQP).
+(App Store Connect adds the ©). Owner decision on #75: SERP.
 
 ## Price
 
-**Free**, with no in-app purchases. The Paid Apps agreement isn't needed.
+**$0.99** (US; App Store Connect sets the other storefronts from it), with no in-app purchases.
+A paid app needs the **Paid Apps Agreement** active in App Store Connect (Business), with
+banking and tax details. That's the owner's to do.
+
+## Availability
+
+Every storefront **except the EU** at launch (owner decision on #75). Selling in the EU needs a
+Digital Services Act trader status, which can be added later.
+
+## Support and privacy URLs
+
+- Support URL: https://serpcompany.github.io/pedos-app/support/
+- Privacy Policy URL: https://serpcompany.github.io/pedos-app/privacy/
+
+Both are built from `support.md` and `privacy-policy.md` by `.github/workflows/pages.yml`.
 
 ## Review notes for Apple
 

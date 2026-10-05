@@ -25,8 +25,8 @@ These drafts describe the app as it must be at submission, not today's Release b
   `app-privacy.md`.
 - **The first App Store version number.** The build is `0.1.0` (managed by release-please); the
   owner picks the number to upload, and "What's New" isn't used for a first version.
-- **Placeholders to fill:** `<support email>`, `<privacy policy URL>` and `<date published>` in the
-  hosted pages, and `<copyright holder>` in `metadata.md`.
+- **Hosted pages:** `privacy-policy.md` and `support.md` are published to
+  https://serpcompany.github.io/pedos-app/ by `.github/workflows/pages.yml` on every change to `main`.
 
 ## Screenshots
 

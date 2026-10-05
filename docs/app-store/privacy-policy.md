@@ -1,6 +1,6 @@
 # Pedos Privacy Policy
 
-_Last updated: <date published>_
+_Last updated: October 6, 2026_
 
 Pedos is an iPhone app that records your farts, finds the note of each one, and plays songs with
 them. This policy explains what happens to your data. The short version: **it stays on your
@@ -49,4 +49,4 @@ first.
 
 ## Contact
 
-Questions about privacy: <support email>
+Questions about privacy: [devin@serp.co](mailto:devin@serp.co)

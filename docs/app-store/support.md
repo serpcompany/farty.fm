@@ -3,7 +3,7 @@
 Pedos records your farts, finds the note of each one, and plays songs with them, using only your
 recordings as sound.
 
-**Contact:** <support email>. Please include your iPhone model, iOS version and the Pedos version
+**Contact:** [devin@serp.co](mailto:devin@serp.co). Please include your iPhone model, iOS version and the Pedos version
 (Profile tab, under About).
 
 ## How it works
@@ -42,4 +42,4 @@ backups turned on. We never receive them, so we can't recover them. Deleting the
 Every song comes from a public-domain score in the PDMX dataset.
 
 **Does Pedos collect my data?**
-No. See the [privacy policy](<privacy policy URL>).
+No. See the [privacy policy](https://serpcompany.github.io/pedos-app/privacy/).
