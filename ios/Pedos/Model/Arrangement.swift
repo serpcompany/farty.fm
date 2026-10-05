@@ -1,11 +1,8 @@
 import Foundation
 
 /// An Arrangement: which Recording plays each of a Song's distinct pitches, and so each of its
-/// notes (see `CONTEXT.md`).
-///
-/// Auto-map, which chooses the Arrangement in the app, comes with the Swift engine (#17). Until
-/// then the sample model shows either the Recordings the design prototype's render used, or the
-/// ones Pitch Coverage's matching gave each pitch (`CoverageResult.matchedArrangement`).
+/// notes (see `CONTEXT.md`). Auto-map chooses it (`CoverageResult.matchedArrangement`), and
+/// Song Creator renders the Toot with it.
 struct Arrangement: Hashable, Sendable {
     /// The Recording that plays each of the Song's distinct pitches (MIDI, in the score's key).
     let recordingForPitch: [Int: Recording.ID]

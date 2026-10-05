@@ -15,25 +15,12 @@ struct PedosApp: App {
     private static func makeModel() -> SampleAppModel {
         SampleLaunchOptions(defaults: .standard).makeModel()
     }
-    #elseif QA
-    /// QA builds (TestFlight until launch) record for real, like Release, and can also load the
-    /// Fixture Library (Profile tab) and make Toots from the prototype's stand-in Song audio.
-    private static func makeModel() -> SampleAppModel {
-        SampleAppModel(
-            source: LiveRecordingSource(analyzer: .reference, testTake: LiveRecordingSource.testTake(in: .standard)),
-            songs: Song.prototypeCatalog,
-            songAudio: \.prototypeAudioURL,
-            renders: Song.prototypeRenders,
-            microphone: SystemMicrophone(),
-            defaults: .standard
-        )
-    }
     #else
-    /// Release builds record for real. They carry no fixtures or prototype Song audio, so they
-    /// can't make Toots until rendering (#17).
+    /// QA and Release builds record for real and make Toots from the user's own Recordings. QA
+    /// builds (TestFlight until launch) can also load the Fixture Library (Profile tab).
     private static func makeModel() -> SampleAppModel {
         SampleAppModel(
-            source: LiveRecordingSource(analyzer: .reference, testTake: LiveRecordingSource.testTake(in: .standard)),
+            source: LiveRecordingSource(analyzer: .reference, testTakes: LiveRecordingSource.testTakes(in: .standard)),
             songs: Song.prototypeCatalog,
             microphone: SystemMicrophone(),
             defaults: .standard

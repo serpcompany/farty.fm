@@ -8,7 +8,7 @@ class ProfileUITests: PedosUITestCase {
         XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 5), "Profile is not showing")
     }
 
-    /// What a row reads, for example "Songs unlocked, 6 of 12".
+    /// What a row reads, for example "Songs unlocked, 7 of 12".
     private func row(_ id: String, in app: XCUIApplication) -> String {
         let row = app.staticTexts[id]
         XCTAssertTrue(row.waitForExistence(timeout: 5), "No \(id) row")
@@ -38,7 +38,7 @@ class ProfileUITests: PedosUITestCase {
         XCTAssertEqual(row("stat-recordings", in: app), "Recordings, 23")
         XCTAssertEqual(row("stat-melodic", in: app), "Melodic Recordings, 9")
         XCTAssertEqual(row("stat-notes", in: app), "Notes collected, 7")
-        XCTAssertEqual(row("stat-songs", in: app), "Songs unlocked, 6 of 12")
+        XCTAssertEqual(row("stat-songs", in: app), "Songs unlocked, 12 of 12")
         XCTAssertEqual(row("stat-toots", in: app), "Toots, 2")
         XCTAssertFalse(app.staticTexts["profile-new-user"].exists, "The new-user hint shows with Recordings")
         attachScreenshot("profile-all")

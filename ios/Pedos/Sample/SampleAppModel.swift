@@ -3,9 +3,9 @@ import Observation
 
 /// The app model: it runs every screen's states. Recordings come from a `RecordingSource`: the
 /// microphone, files and Recording Analysis (`LiveRecordingSource`), or in Debug builds the
-/// Fixture Library (`FixtureRecordingSource`). Song Creator is still simulated: making a Toot
-/// returns the design prototype's render of the Song, which only Debug builds carry, so Release
-/// builds can't make Toots until rendering (#17).
+/// Fixture Library (`FixtureRecordingSource`). Pitch Coverage and Auto-map come from
+/// `RecordingAnalysisKit.AutoMap`, and Song Creator renders each Toot from the Recordings' own
+/// audio (`TootRenderer`), in every build.
 @MainActor
 @Observable
 final class SampleAppModel: AppModel {
@@ -57,35 +57,31 @@ final class SampleAppModel: AppModel {
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let now: () -> Date
     @ObservationIgnored private let player = AudioPlayer()
-    /// The audio that stands in for Song Creator's render of a Song, when the build has any.
-    @ObservationIgnored private let songAudio: (Song) -> URL?
-    /// How that audio was rendered, by Song.
-    @ObservationIgnored private let renders: [Song.ID: StandInRender]
-    /// How long making a Toot takes.
-    @ObservationIgnored private let makingDelay: Duration
+    /// Where Song Creator writes the Toots it makes.
+    @ObservationIgnored private let tootFolder: URL
+    /// Making a Toot takes at least this long, so its "Making" state can be seen (UI tests).
+    @ObservationIgnored private let minimumMakingTime: Duration
     /// Toots Song Creator made, saved or not, for playback.
     @ObservationIgnored private var tootDrafts: [TootDraft.ID: TootDraft] = [:]
-    /// Toots whose Arrangement is the one their stand-in audio was rendered with.
-    @ObservationIgnored private var tootsPlayingTheirArrangement: Set<TootDraft.ID> = []
     @ObservationIgnored private var coverageCache: CoverageCache
 
     /// - Parameters:
     ///   - source: where takes come from and Recordings are kept.
-    ///   - initialTootSongIDs: Songs already saved as Toots at launch, oldest first.
-    ///   - songAudio: the audio a made Toot of each Song plays; nil where there's none.
-    ///   - renders: how that audio was rendered, by Song.
+    ///   - initialTootSongIDs: Songs to make and save as Toots at launch, oldest first (sample
+    ///     data); a locked Song is skipped.
+    ///   - tootFolder: where Song Creator writes the Toots it makes.
     ///   - failures: Song Creator failures to simulate, each once.
+    ///   - minimumMakingTime: making a Toot takes at least this long.
     init(
         source: any RecordingSource,
         songs: [Song],
         initialTootSongIDs: [Song.ID] = [],
-        songAudio: @escaping (Song) -> URL? = { _ in nil },
-        renders: [Song.ID: StandInRender] = [:],
+        tootFolder: URL = SampleAppModel.temporaryTootFolder,
         microphone: any MicrophoneAccess,
         defaults: UserDefaults,
         failures: Failures = [],
         now: @escaping () -> Date = Date.init,
-        makingDelay: Duration = .milliseconds(1200)
+        minimumMakingTime: Duration = .zero
     ) {
         self.source = source
         self.songs = songs
@@ -93,9 +89,8 @@ final class SampleAppModel: AppModel {
         self.defaults = defaults
         self.pendingFailures = failures
         self.now = now
-        self.songAudio = songAudio
-        self.renders = renders
-        self.makingDelay = makingDelay
+        self.tootFolder = tootFolder
+        self.minimumMakingTime = minimumMakingTime
         self.coverageCache = CoverageCache(songs: songs)
         self.isShowingWelcome = !defaults.bool(forKey: Self.welcomeSeenKey)
         self.recordings = source.savedRecordings()
@@ -103,19 +98,27 @@ final class SampleAppModel: AppModel {
         self.bundledFixtures = source.canLoadFixtures ? FixtureLibrary.bundled() : []
         #endif
 
+        // Sample data: made right away, so the Toots are there from the first frame.
         for songID in initialTootSongIDs {
             guard let song = songs.first(where: { $0.id == songID }),
-                  let url = songAudio(song),
-                  let seconds = AudioLength.seconds(of: url)
+                  let arrangement = coverage(of: song).matchedArrangement
             else { continue }
-            let arrangement = renderArrangement(of: song) ?? coverage(of: song).matchedArrangement ?? .empty
-            addToot(id: UUID(), song: song, arrangement: arrangement, seconds: seconds, audioURL: url)
+            let id = UUID()
+            let url = tootFolder.appending(path: "\(id.uuidString).m4a")
+            try? FileManager.default.createDirectory(at: tootFolder, withIntermediateDirectories: true)
+            guard let output = try? TootRenderer.render(song, arrangement: arrangement, recordings: recordings, to: url) else { continue }
+            addToot(id: id, song: song, arrangement: arrangement, seconds: output.seconds, audioURL: url)
         }
 
         // Recordings saved before an analysis update, or before analysis finished, are analyzed now.
         for recording in recordings where recording.analysis == .analyzing {
             Task { await analyze(recording.id) }
         }
+    }
+
+    /// A new folder in the temporary directory, for Toots that aren't kept.
+    static var temporaryTootFolder: URL {
+        URL.temporaryDirectory.appending(path: "Toots-\(UUID().uuidString)", directoryHint: .isDirectory)
     }
 
     /// The sample model: takes come from the Fixture Library (see `FixtureRecordingSource`).
@@ -129,15 +132,14 @@ final class SampleAppModel: AppModel {
         songs: [Song],
         initialFixtureIDs: [String] = [],
         initialTootSongIDs: [Song.ID] = [],
-        songAudio: @escaping (Song) -> URL? = { _ in nil },
-        renders: [Song.ID: StandInRender] = [:],
+        tootFolder: URL = SampleAppModel.temporaryTootFolder,
         microphone: any MicrophoneAccess,
         defaults: UserDefaults,
         failures: Failures = [],
         now: @escaping () -> Date = Date.init,
         analysisDelay: Duration = .milliseconds(900),
         interruptionDelay: Duration = .milliseconds(1500),
-        makingDelay: Duration = .milliseconds(1200)
+        minimumMakingTime: Duration = .zero
     ) {
         self.init(
             source: FixtureRecordingSource(
@@ -150,13 +152,12 @@ final class SampleAppModel: AppModel {
             ),
             songs: songs,
             initialTootSongIDs: initialTootSongIDs,
-            songAudio: songAudio,
-            renders: renders,
+            tootFolder: tootFolder,
             microphone: microphone,
             defaults: defaults,
             failures: failures,
             now: now,
-            makingDelay: makingDelay
+            minimumMakingTime: minimumMakingTime
         )
     }
 
@@ -351,6 +352,9 @@ final class SampleAppModel: AppModel {
     }
 
     func finishFlow() {
+        // The cover calls this again when it has finished closing; by then Song Creator may
+        // already be playing the Toot that "Try it" opened.
+        guard flow != nil else { return }
         stopPlayback()
         if let draft = flowDraft { source.discard(take(of: draft)) }
         flow = nil
@@ -448,39 +452,29 @@ final class SampleAppModel: AppModel {
 
     // MARK: Compose
 
-    /// Simulates Song Creator: after `makingDelay`, returns the stand-in audio for the Song.
-    ///
-    /// When the user has every Recording the stand-in was rendered with, the Toot's Arrangement
-    /// is that render's, so what Song Creator shows is what plays. Otherwise it's Pitch
-    /// Coverage's matching, and `simulatedSource(ofToot:)` says the audio doesn't follow it.
+    /// Song Creator: renders the Song with Auto-map's Arrangement, from the Recordings' own audio
+    /// (`TootRenderer`), off the main actor, into a new file in `tootFolder`.
     func makeToot(of song: Song) async throws -> TootDraft {
-        try await Task.sleep(for: makingDelay)
-        guard let matched = coverage(of: song).matchedArrangement else { throw TootError.locked }
-        guard pendingFailures.remove(.couldNotMakeToot) == nil, let url = songAudio(song) else {
-            throw TootError.couldNotMake
-        }
-        // Reading the file can block, so it runs off the main actor.
-        let seconds = await Task.detached(priority: .userInitiated) { AudioLength.seconds(of: url) }.value
-        guard let seconds else { throw TootError.couldNotMake }
-        let rendered = renderArrangement(of: song)
-        let draft = TootDraft(id: UUID(), song: song, arrangement: rendered ?? matched, seconds: seconds, audioURL: url)
-        tootDrafts[draft.id] = draft
-        if rendered != nil { tootsPlayingTheirArrangement.insert(draft.id) }
-        return draft
-    }
-
-    /// The Arrangement the stand-in audio of `song` was rendered with, played by the user's
-    /// Recordings of those fixtures (the oldest of each), or nil if one of them is missing.
-    private func renderArrangement(of song: Song) -> Arrangement? {
-        guard let render = renders[song.id] else { return nil }
-        var recordingForPitch: [Int: Recording.ID] = [:]
-        for (pitch, fixtureID) in render.fixtureForPitch {
-            guard let recording = recordings.first(where: { $0.isMelodic && source.fixtureID(of: $0.id) == fixtureID }) else {
-                return nil
+        let started = ContinuousClock.now
+        guard let arrangement = coverage(of: song).matchedArrangement else { throw TootError.locked }
+        let used = arrangement.recordings.compactMap { recording($0) }
+        let id = UUID()
+        let url = tootFolder.appending(path: "\(id.uuidString).m4a")
+        let failed = pendingFailures.remove(.couldNotMakeToot) != nil
+        let rendered = await Task.detached(priority: .userInitiated) { [tootFolder] in
+            Result {
+                if failed { throw TootError.couldNotMake }
+                try FileManager.default.createDirectory(at: tootFolder, withIntermediateDirectories: true)
+                return try TootRenderer.render(song, arrangement: arrangement, recordings: used, to: url)
             }
-            recordingForPitch[pitch] = recording.id
-        }
-        return Arrangement(recordingForPitch: recordingForPitch, transposition: render.transposition)
+        }.value
+        try? await Task.sleep(until: started + minimumMakingTime)
+        // Song Creator left before the Toot was made: it makes it again when it's back.
+        try Task.checkCancellation()
+        guard case .success(let output) = rendered else { throw TootError.couldNotMake }
+        let draft = TootDraft(id: id, song: song, arrangement: arrangement, seconds: output.seconds, audioURL: url, notes: output.notes)
+        tootDrafts[draft.id] = draft
+        return draft
     }
 
     func saveToot(_ draft: TootDraft) {
@@ -491,7 +485,7 @@ final class SampleAppModel: AppModel {
     private func addToot(id: UUID, song: Song, arrangement: Arrangement, seconds: Double, audioURL: URL) {
         var audioURL = audioURL
         if pendingFailures.remove(.tootAudioMissing) != nil {
-            audioURL = URL.temporaryDirectory.appending(path: "missing-\(id.uuidString).mp3")
+            audioURL = URL.temporaryDirectory.appending(path: "missing-\(id.uuidString).m4a")
         }
         toots.append(Toot(
             id: id,
@@ -504,15 +498,6 @@ final class SampleAppModel: AppModel {
             isAudioMissing: Toot.isAudioMissing(at: audioURL)
         ))
     }
-
-    #if INTERNAL
-    func simulatedSource(ofToot id: TootDraft.ID) -> String? {
-        guard tootDrafts[id] != nil else { return nil }
-        return tootsPlayingTheirArrangement.contains(id)
-            ? "the design prototype's render of this Song, with these Recordings"
-            : "the design prototype's render of this Song, not made from these Recordings"
-    }
-    #endif
 
     // MARK: Toots
 
@@ -528,33 +513,45 @@ final class SampleAppModel: AppModel {
     }
 }
 
-/// How a stand-in Song audio was rendered: its transposition, and the Fixture Library Recording
-/// that plays each pitch (by pitch in the score's key).
-struct StandInRender: Hashable, Sendable {
-    let transposition: Int
-    let fixtureForPitch: [Int: String]
-}
-
 /// A Fixture Library Recording with its reference analysis, standing in for a take.
 struct SampleFixture: Identifiable, Hashable, Sendable {
     /// The Fixture Library id, for example "069".
     let id: String
+    /// The fixture's file name in `fixtures/recordings/`, bundled in Debug and QA builds.
+    let file: String
+    /// The file's length in seconds.
+    let seconds: Double
+    /// The single clean gesture, in samples at 44.1 kHz.
+    let gestureSamples: Range<Int>
+    let firstFartUsed: Bool
     /// The Recording Pitch as a MIDI note number, or nil when Noise-like.
     let pitch: Double?
-    let seconds: Double
-    let firstFartUsed: Bool
+    /// The shortest note it plays on pitch, in seconds; nil when Noise-like.
+    let shortestNoteSeconds: Double?
 
-    var analysis: RecordingAnalysis { RecordingAnalysis(pitch: pitch, firstFartUsed: firstFartUsed) }
+    /// The reference engine's analysis of the fixture file (`fixtures/golden/recordings/`).
+    var analysis: RecordingAnalysis {
+        RecordingAnalysis(
+            pitch: pitch,
+            firstFartUsed: firstFartUsed,
+            startSeconds: Double(gestureSamples.lowerBound) / 44_100,
+            endSeconds: Double(gestureSamples.upperBound) / 44_100,
+            shortestNoteSeconds: shortestNoteSeconds
+        )
+    }
 
-    /// The trimmed fixture audio from the prototype, bundled in Debug builds only.
-    var audioURL: URL? { Bundle.main.url(forResource: "rec-\(id)", withExtension: "mp3") }
+    /// The Fixture Library file itself, bundled in Debug and QA builds only.
+    var audioURL: URL? { Bundle.main.url(forResource: file, withExtension: nil) }
 }
 
-#if INTERNAL
-extension Song {
-    /// The design prototype's render of this Song with the whole Fixture Library, bundled in Debug
-    /// and QA builds only. It stands in for Song Creator's own render until #17. It came from the
-    /// reference planner before the 3-semitone rule (#43), and `prototypeRenders` says how.
-    var prototypeAudioURL: URL? { Bundle.main.url(forResource: "song-\(id)", withExtension: "mp3") }
+extension UUID {
+    /// The id of a Recording loaded from the Fixture Library: the fixture's id in the last group
+    /// ("…-000000000069"), and which copy of it in the group before. Auto-map breaks ties between
+    /// equally good Arrangements by Recording id, so the same fixtures always get the same
+    /// Arrangement: the reference engine's (`fixtures/golden/`).
+    init(fixtureID: String, copy: Int = 0) {
+        let prefix = String(format: "00000000-0000-0000-%04X-000000000", copy % 0x10000)
+        let isFixtureID = fixtureID.count == 3 && fixtureID.allSatisfy(\.isASCII) && fixtureID.allSatisfy(\.isNumber)
+        self = (isFixtureID ? UUID(uuidString: prefix + fixtureID) : nil) ?? UUID()
+    }
 }
-#endif

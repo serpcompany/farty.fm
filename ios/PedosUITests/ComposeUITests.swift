@@ -30,7 +30,7 @@ class ComposeUITests: PedosUITestCase {
         // Mary needs 4 notes and has 2: the closest to unlocking, first.
         let mary = app.buttons["Mary Had a Little Lamb"]
         XCTAssertTrue(mary.exists)
-        XCTAssertEqual(mary.value as? String, "Locked. 2 of 4 notes covered. Needs C3 and D3")
+        XCTAssertEqual(mary.value as? String, "Locked. 2 of 4 notes covered. Needs D3 and E3")
         let birthday = app.buttons["Happy Birthday"]
         scrollTo(birthday, in: app)
         XCTAssertTrue((birthday.value as? String)?.hasSuffix("and 3 more") ?? false, "\(String(describing: birthday.value))")
@@ -38,17 +38,20 @@ class ComposeUITests: PedosUITestCase {
         attachScreenshot("Compose, none unlocked")
     }
 
-    /// All 23 Recordings: 6 Unlocked Songs first, then 6 locked ones. Search and sort.
+    /// The first 8 story takes: 7 Unlocked Songs first, then 5 locked ones. Search and sort.
     func testSongsSearchAndSort() {
-        let app = launch(start: "all")
+        let app = launch(start: "8")
         app.tabBars.buttons["Compose"].tap()
-        XCTAssertTrue(app.staticTexts["Unlocked · 6"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Locked · 6"].exists)
+        XCTAssertTrue(app.staticTexts["Unlocked · 7"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Locked · 5"].exists)
         let unlocked = ["Mary Had a Little Lamb", "Jingle Bells", "When the Saints Go Marching In", "Ode to Joy",
-                        "Twinkle, Twinkle, Little Star", "Row, Row, Row Your Boat"]
-        XCTAssertEqual(songRows(in: app).prefix(6), ArraySlice(unlocked), "Unlocked Songs aren't first, fewest notes first")
+                        "Twinkle, Twinkle, Little Star", "Row, Row, Row Your Boat", "Amazing Grace"]
+        XCTAssertEqual(songRows(in: app).prefix(7), ArraySlice(unlocked), "Unlocked Songs aren't first, fewest notes first")
         XCTAssertTrue(app.buttons["Mary Had a Little Lamb"].label.contains("Ready"))
-        XCTAssertEqual(app.buttons["Frère Jacques"].value as? String, "Locked. 6 of 7 notes covered. Needs D♯3")
+        let frere = app.buttons["Frère Jacques"]
+        scrollTo(frere, in: app)
+        XCTAssertEqual(frere.value as? String, "Locked. 6 of 7 notes covered. Needs D♯3")
+        app.swipeDown()
         attachScreenshot("Compose, Songs")
 
         // Compose has a large title like the other tabs; search appears when the list is pulled down.
@@ -81,30 +84,30 @@ class ComposeUITests: PedosUITestCase {
         // predicate expectation.
         let deadline = Date.now.addingTimeInterval(15)
         var rows = songRows(in: app)
-        while Array(rows.prefix(6)) != alphabetical, Date.now < deadline {
+        while Array(rows.prefix(7)) != alphabetical, Date.now < deadline {
             Thread.sleep(forTimeInterval: 0.5)
             rows = songRows(in: app)
         }
-        XCTAssertEqual(Array(rows.prefix(6)), alphabetical, "Not sorted A–Z")
+        XCTAssertEqual(Array(rows.prefix(7)), alphabetical, "Not sorted A–Z")
     }
 
     /// A locked Song opens its sheet, which names every missing note and has no way to play it.
     func testLockedSongShowsMissingNotesAndCannotPlay() {
-        let app = launch(start: "all")
+        let app = launch(start: "8")
         app.tabBars.buttons["Compose"].tap()
         let birthday = app.buttons["Happy Birthday"]
-        XCTAssertTrue(app.staticTexts["Unlocked · 6"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Unlocked · 7"].waitForExistence(timeout: 5))
         scrollTo(birthday, in: app)
-        XCTAssertEqual(birthday.value as? String, "Locked. 6 of 8 notes covered. Needs D3 and E3")
+        XCTAssertEqual(birthday.value as? String, "Locked. 6 of 8 notes covered. Needs B2 and E3")
         birthday.tap()
 
         XCTAssertTrue(app.staticTexts["locked-song-needs"].waitForExistence(timeout: 5), "No locked Song sheet")
-        XCTAssertEqual(app.staticTexts["locked-song-needs"].label, "Needs a fart near D3 and E3.")
+        XCTAssertEqual(app.staticTexts["locked-song-needs"].label, "Needs a fart near B2 and E3.")
         XCTAssertTrue(app.navigationBars["Happy Birthday"].exists)
         XCTAssertTrue(app.staticTexts["6 of 8 notes covered"].exists)
         XCTAssertEqual(
             app.descendants(matching: .any)["pitch-strip"].label,
-            "Notes collected: C, E, F♯, G, G♯, and B. Needed: D and E"
+            "Notes collected: C, F♯, G, G♯, and B. Needed: E and B"
         )
         // Locked Songs can't be played: no Song Creator, no play button.
         XCTAssertFalse(app.buttons["song-creator-play"].exists)
@@ -119,7 +122,7 @@ class ComposeUITests: PedosUITestCase {
 
     /// An Unlocked Song opens Song Creator, which makes the Toot, plays it once, and saves it.
     func testUnlockedSongPlaysAndSavesToToots() {
-        // A 4 s simulated render keeps "Making your Toot…" up long enough to check.
+        // Making takes at least 4 s here, which keeps "Making your Toot…" up long enough to check.
         let app = launch(start: "all", makingSeconds: 4)
         app.tabBars.buttons["Compose"].tap()
         let ode = app.buttons["Ode to Joy"]
@@ -137,12 +140,8 @@ class ComposeUITests: PedosUITestCase {
         XCTAssertTrue(app.staticTexts["Public domain score · PDMX"].exists)
         XCTAssertTrue(app.staticTexts["5 of your Recordings, one per note"].exists)
         XCTAssertEqual(notes(in: app).count, 30, "each note is its own element")
-        // With every fixture, the list shows the Recordings the stand-in render plays, lowest
-        // pitch first: fixtures 090, 084, 013, 086 and 094.
-        XCTAssertEqual(
-            app.staticTexts["simulated-toot"].label,
-            "Simulated Toot: the design prototype's render of this Song, with these Recordings."
-        )
+        // The Recordings Auto-map chose, lowest pitch first: fixtures 090, 084, 013, 086 and 094,
+        // the reference engine's Arrangement.
         XCTAssertEqual(recordingRows(in: app), ["Recording 21", "Recording 19", "Recording 3", "Recording 20", "Recording 23"])
         attachScreenshot("Song Creator, playing")
 
@@ -176,7 +175,7 @@ class ComposeUITests: PedosUITestCase {
         let play = app.buttons["song-creator-play"]
         XCTAssertEqual(play.label, "Stop", "Mary isn't playing")
 
-        // Mary's last note lasts 1.4 s: fixture 090 (Recording 21, G3) moved to F3.
+        // Mary's last note lasts 1.4 s: fixture 090 (Recording 21, G3) moved to F3, as Auto-map chose.
         let note = app.descendants(matching: .any)["note 26"]
         XCTAssertTrue(note.exists)
         XCTAssertEqual(note.label, "F3 at 10.0 s, Recording 21")

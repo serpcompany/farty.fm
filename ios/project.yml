@@ -37,15 +37,8 @@ targets:
     platform: iOS
     sources:
       - path: Pedos
-      # The design prototype's audio: the Fixture Library's trimmed Recordings, for the sample
-      # model (Debug), and its renders of each Song, which stand in for Song Creator's own render
-      # until #17 (Debug and QA).
-      - path: ../docs/design/prototype/audio
-        includes:
-          - "rec-*.mp3"
-          - "song-*.mp3"
-        buildPhase: resources
-      # The Fixture Library itself, for "Load the Fixture Library" (Debug and QA).
+      # The Fixture Library, for the sample model (Debug) and "Load the Fixture Library" (Debug
+      # and QA). Release excludes it.
       - path: ../fixtures/recordings
         includes:
           - "*.mp3"
@@ -65,7 +58,7 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       # SERP Apple app build identity: only Release and QA carry the product identifier. The
       # Fixture Library never ships to regular users (AGENTS.md): Release excludes every fixture
-      # file, and `INTERNAL` code (the loader, the stand-in Toots) compiles only into Debug and
+      # file, and `INTERNAL` code (the loader, the sample data) compiles only into Debug and
       # QA. scripts/check-bundle-identifiers.sh and scripts/check-release-build.sh check this.
       configs:
         Debug:
@@ -74,10 +67,9 @@ targets:
         QA:
           PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: "QA INTERNAL"
-          EXCLUDED_SOURCE_FILE_NAMES: "rec-*.mp3"
         Release:
           PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos
-          EXCLUDED_SOURCE_FILE_NAMES: "rec-*.mp3 song-*.mp3 [0-9][0-9][0-9]__*"
+          EXCLUDED_SOURCE_FILE_NAMES: "[0-9][0-9][0-9]__*"
 
   PedosTests:
     type: bundle.unit-test
@@ -86,6 +78,9 @@ targets:
       - path: PedosTests
     dependencies:
       - target: Pedos
+      # The render checks, to measure the Toots the app writes (not linked by the app).
+      - package: RecordingAnalysisKit
+        product: RenderChecking
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos.tests

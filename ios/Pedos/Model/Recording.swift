@@ -48,6 +48,9 @@ struct RecordingAnalysis: Hashable, Sendable {
     /// no dead air before or after it. Nil end: the end of the file.
     var startSeconds: Double = 0
     var endSeconds: Double? = nil
+    /// The shortest note a Melodic Recording plays on pitch, in seconds: Auto-map keeps it off
+    /// notes too short for it.
+    var shortestNoteSeconds: Double? = nil
 
     var isMelodic: Bool { pitch != nil }
 }

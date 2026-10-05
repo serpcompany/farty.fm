@@ -74,7 +74,7 @@ plutil -lint "$app/PrivacyInfo.xcprivacy" >/dev/null 2>&1 || fail "the app has n
 plutil -convert xml1 -o - "$app/PrivacyInfo.xcprivacy" | grep -q NSPrivacyAccessedAPICategoryUserDefaults ||
   fail "the privacy manifest doesn't declare the app's UserDefaults use"
 # The Fixture Library never ships to regular users (AGENTS.md): Release carries no audio, and
-# QA carries exactly the Fixture Library and the stand-in Song renders, never the sample takes.
+# QA carries exactly the Fixture Library.
 audio_count() { # pattern
   find "$app" -type f -name "$1" | wc -l | tr -d ' '
 }
@@ -85,11 +85,9 @@ if [ "$configuration" = Release ]; then
   contents="no audio"
 else
   fixtures=$(audio_count '[0-9][0-9][0-9]__*')
-  songs=$(audio_count 'song-*.mp3')
-  [ "$(audio_count 'rec-*.mp3')" -eq 0 ] || fail "the QA app contains the sample takes"
   [ "$fixtures" -eq 23 ] || fail "the QA app has $fixtures Fixture Library files, not 23"
-  [ "$all_audio" -eq $((fixtures + songs)) ] || fail "the QA app contains unexpected audio"
-  contents="$fixtures fixtures, $songs stand-in Songs"
+  [ "$all_audio" -eq "$fixtures" ] || fail "the QA app contains unexpected audio"
+  contents="$fixtures fixtures"
 fi
 echo "ok    archive: $configuration $bundle_id $(plist_value CFBundleShortVersionString) ($BUILD_NUMBER), iPhone only, icon, $contents"
 

@@ -18,7 +18,7 @@ extension SampleAppModel {
         failures: Failures = [],
         showsWelcome: Bool = false,
         analysisDelay: Duration = .zero,
-        makingDelay: Duration = .milliseconds(600)
+        minimumMakingTime: Duration = .zero
     ) -> SampleAppModel {
         let defaults = UserDefaults(suiteName: "PedosPreviews") ?? .standard
         defaults.set(!showsWelcome, forKey: welcomeSeenKey)
@@ -33,13 +33,11 @@ extension SampleAppModel {
             songs: Song.prototypeCatalog,
             initialFixtureIDs: initialFixtureIDs,
             initialTootSongIDs: toots,
-            songAudio: \.prototypeAudioURL,
-            renders: Song.prototypeRenders,
             microphone: SimulatedMicrophone(permission: .granted),
             defaults: defaults,
             failures: failures,
             analysisDelay: analysisDelay,
-            makingDelay: makingDelay
+            minimumMakingTime: minimumMakingTime
         )
     }
 

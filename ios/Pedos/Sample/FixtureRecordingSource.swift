@@ -18,6 +18,8 @@ final class FixtureRecordingSource: RecordingSource {
     private var savedTakes: Int
     private var interruption: Task<Void, Never>?
     private let initialRecordings: [Recording]
+    /// How many Recordings of each fixture were saved, for their ids (`UUID(fixtureID:copy:)`).
+    private var copies: [String: Int] = [:]
 
     /// - Parameters:
     ///   - fixtures: the Recordings simulated takes come from.
@@ -43,7 +45,7 @@ final class FixtureRecordingSource: RecordingSource {
         for fixtureID in initialFixtureIDs {
             guard let fixture = fixtures.first(where: { $0.id == fixtureID }) else { continue }
             let recording = Recording(
-                id: UUID(),
+                id: UUID(fixtureID: fixture.id, copy: copies[fixture.id, default: 0]),
                 number: recordings.count + 1,
                 seconds: fixture.seconds,
                 analysis: .analyzed(fixture.analysis),
@@ -52,6 +54,7 @@ final class FixtureRecordingSource: RecordingSource {
             recordings.append(recording)
             fixtureOf[recording.id] = fixture
             numbers[recording.id] = recording.number
+            copies[fixture.id, default: 0] += 1
         }
         initialRecordings = recordings
     }
@@ -89,7 +92,7 @@ final class FixtureRecordingSource: RecordingSource {
         }
         fixtureOf[take.id] = nil
         let recording = Recording(
-            id: UUID(),
+            id: nextRecordingID(of: fixture),
             number: (numbers.values.max() ?? 0) + 1,
             seconds: take.seconds,
             analysis: .analyzing,
@@ -124,6 +127,11 @@ final class FixtureRecordingSource: RecordingSource {
     }
 
     /// The next fixture in story order that isn't already a saved Recording.
+    private func nextRecordingID(of fixture: SampleFixture) -> UUID {
+        defer { copies[fixture.id, default: 0] += 1 }
+        return UUID(fixtureID: fixture.id, copy: copies[fixture.id, default: 0])
+    }
+
     private func nextFixture() -> SampleFixture? {
         let saved = Set(numbers.keys.compactMap { fixtureOf[$0]?.id })
         let id = (story + fixtures.map(\.id)).first { !saved.contains($0) }

@@ -1,7 +1,7 @@
 import AVFAudio
 
 /// The sample rate every analysis stage works at, like the reference engine (`SR`).
-let analysisSampleRate = 44_100
+package let analysisSampleRate = 44_100
 
 /// Decodes a Recording the way the reference loads it (`librosa.load(sr=44100, mono=True)`):
 /// channels averaged to mono, then resampled to 44.1 kHz if the file has another rate.

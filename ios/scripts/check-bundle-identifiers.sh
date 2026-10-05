@@ -58,12 +58,11 @@ check "PedosUITests" com.serp.pedos.uitests "$(bundle_identifier PedosUITests De
 check "Info.plist CFBundleIdentifier" '$(PRODUCT_BUNDLE_IDENTIFIER)' \
   "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' Pedos/Info.plist)"
 
-# The Fixture Library never ships to regular users (AGENTS.md), and neither do
-# the prototype's Song renders, which are made from it.
-check "Release excludes all bundled audio" "rec-*.mp3 song-*.mp3 [0-9][0-9][0-9]__*" \
+# The Fixture Library never ships to regular users (AGENTS.md).
+check "Release excludes the Fixture Library" "[0-9][0-9][0-9]__*" \
   "$(setting "$release_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
-check "QA excludes the sample takes" "rec-*.mp3" "$(setting "$qa_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
-check "Debug keeps the prototype audio" "" "$(setting "$debug_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
+check "QA keeps the Fixture Library" "" "$(setting "$qa_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
+check "Debug keeps the Fixture Library" "" "$(setting "$debug_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures build check(s) failed" >&2
