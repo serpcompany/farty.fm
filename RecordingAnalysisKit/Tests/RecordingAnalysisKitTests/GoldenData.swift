@@ -15,6 +15,9 @@ enum Golden {
     struct Index: Decodable {
         struct SongEntry: Decodable {
             let id: String
+            /// Whether the Song is Unlocked with each library. A locked Song's Arrangement file
+            /// has no notes or render.
+            let unlocked: [String: Bool]
         }
         let recordings: [String]
         let melodicRecordings: [String]
