@@ -49,4 +49,4 @@ first.
 
 ## Contact
 
-Questions about privacy: [devin@serp.co](mailto:devin@serp.co)
+Questions about privacy: [privacy@serp.co](mailto:privacy@serp.co)
