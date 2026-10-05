@@ -19,7 +19,7 @@ Any available iPhone simulator on iOS 26 or later works. List them, then pass on
 ```sh
 xcrun simctl list devices available
 cd ios
-scripts/run-tests.sh quick <udid>   # what a pull request must pass, about 5 minutes
+scripts/run-tests.sh quick <udid>   # what a pull request must pass (about 2 minutes locally)
 scripts/run-tests.sh full <udid>    # every unit and UI test
 scripts/check-bundle-identifiers.sh
 ```
