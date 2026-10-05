@@ -1,67 +1,94 @@
 """Recompute plan()'s cost for a given Arrangement, from the golden data alone.
 
-An Auto-map test compares golden `plan_cost` with the cost of the Arrangement under test,
-computed by this function (or a port of it). It never uses the solver's own total: the
-solver's total only sums the matrix cells it picked, so a port that picks the right cells
-but then maps a tied cell to the wrong Recording (say, every tied pitch to 013) would still
-report the golden cost. Recomputing from the returned Recording ids charges that mistake
-(reuse and too-short penalties) and rejects it.
+An Auto-map or Pitch Coverage test compares the golden `uncovered`, `octave_moves` and
+`plan_cost` with what this function (or a port of it) computes for the Arrangement under
+test. It never uses the solver's own total: the solver's total only sums the matrix cells it
+picked, so a port that picks the right cells but then maps a tied cell to the wrong Recording
+(say, every tied pitch to 013) would still report the golden cost. Recomputing from the
+returned Recording ids charges that mistake and rejects it.
 
     .venv/bin/python golden_cost.py    # recomputes every golden Arrangement and compares
 """
 import json
-from collections import Counter
 
-from engine import GAP_S, ROOT, shift_cost
+from engine import GAP_S, ROOT, SR, move_cost, too_short_cost
 
 GOLDEN = ROOT / "fixtures/golden"
 
 
 def arrangement_cost(song, recordings, transpose, recording_for_pitch):
-    """The cost plan() gives this Arrangement.
+    """(uncovered pitches, Octave Moves, cost) of this Arrangement, as plan() ranks it.
 
     song:                a songs/<id>.json object
     recordings:          {id: recordings/<id>.json object}
     transpose:           the Arrangement's transposition
-    recording_for_pitch: {Song pitch: Recording id}, one entry per distinct Song pitch
+    recording_for_pitch: {Song pitch: Recording id, or None when uncovered}, one entry per
+                         distinct Song pitch
 
-    Same terms as plan()'s cost matrix, per distinct pitch in ascending order:
-    total note length in beats x shift_cost(shift), plus 8 per note too short for the
-    Recording to hold, plus 2 x how many lower pitches already use that Recording.
+    Per covered pitch, in ascending pitch order: the pitch's total note length in beats x
+    move_cost(shift), plus too_short_cost() over its notes. A Recording plays at most one pitch,
+    and only moves the unlock rule allows count.
     """
     pitches = sorted({n["pitch"] for n in song["notes"]})
-    assert sorted(recording_for_pitch) == pitches, "one Recording per distinct Song pitch"
+    assert sorted(recording_for_pitch) == pitches, "one entry per distinct Song pitch"
+    used = [r for r in recording_for_pitch.values() if r is not None]
+    assert len(used) == len(set(used)), "a Recording plays at most one pitch"
     spb = 60 / song["bpm"]
-    total, uses = 0.0, Counter()
+    uncovered = octaves = 0
+    cost = 0.0
     for p in pitches:
         rid = recording_for_pitch[p]
+        if rid is None:
+            uncovered += 1
+            continue
         rec = recordings[rid]
         assert rec["melodic"], f"{rid} is Noise-like"
+        shift = p + transpose - rec["recording_pitch_midi"]
+        move = move_cost(shift)
+        assert move is not None, f"{rid} can't play {p + transpose} (shift {shift:.2f})"
         notes = [n for n in song["notes"] if n["pitch"] == p]
         weight = sum(n["dur"] for n in notes)
-        too_short = sum(1 for n in notes if n["dur"] * spb - GAP_S < rec["shortest_note_s"])
-        total += weight * shift_cost(p + transpose - rec["recording_pitch_midi"]) + 8.0 * too_short + 2.0 * uses[rid]
-        uses[rid] += 1
-    return total
+        seconds = (rec["gesture"]["end_sample"] - rec["gesture"]["start_sample"]) / SR
+        note_seconds = [n["dur"] * spb - GAP_S for n in notes]
+        octaves += move[1]
+        cost += weight * move[0] + too_short_cost(note_seconds, seconds, rec["shortest_note_s"], shift)
+    return uncovered, octaves, cost
 
 
 def load(rel):
     return json.loads((GOLDEN / rel).read_text())
 
 
+def check(fit, song, recordings):
+    """Recompute one golden fit (an arrangement file or a coverage.json entry); return the error."""
+    if "per_pitch" in fit:
+        per_pitch = {x["song_pitch"]: x["recording"] for x in fit["per_pitch"]}
+    else:
+        per_pitch = {int(p): r for p, r in fit["recording_for_pitch"].items()}
+    uncovered, octaves, cost = arrangement_cost(song, recordings, fit["transpose"], per_pitch)
+    assert uncovered == fit["pitch_coverage"]["total"] - fit["pitch_coverage"]["covered"], fit
+    assert fit["unlocked"] == (uncovered == 0), fit
+    assert octaves == fit["octave_moves"], fit
+    assert abs(cost - fit["plan_cost"]) <= 1e-9, (fit, cost)
+    return abs(cost - fit["plan_cost"])
+
+
 def main():
     index = load("index.json")
     recordings = {r: load(f"recordings/{r}.json") for r in index["recordings"]}
-    worst = 0.0
+    songs = {s["id"]: load(f"songs/{s['id']}.json") for s in index["songs"]}
+    worst, n = 0.0, 0
     for library in index["libraries"]:
         for s in index["songs"]:
             a = load(f"arrangements/{library}/{s['id']}.json")
-            per_pitch = {p["song_pitch"]: p["recording"] for p in a["per_pitch"]}
-            assert all(per_pitch[n["song_pitch"]] == n["recording"] for n in a["notes"])
-            cost = arrangement_cost(load(f"songs/{s['id']}.json"), recordings, a["transpose"], per_pitch)
-            worst = max(worst, abs(cost - a["plan_cost"]))
-            assert abs(cost - a["plan_cost"]) <= 1e-9, (library, s["id"], cost, a["plan_cost"])
-    print(f"all golden Arrangements: recomputed cost within {worst:.1e} of plan_cost")
+            if a["unlocked"]:
+                per_pitch = {x["song_pitch"]: x["recording"] for x in a["per_pitch"]}
+                assert all(per_pitch[x["song_pitch"]] == x["recording"] for x in a["notes"])
+            worst, n = max(worst, check(a, songs[s["id"]], recordings)), n + 1
+    for subset in load("coverage.json")["subsets"]:
+        for fit in subset["songs"]:
+            worst, n = max(worst, check(fit, songs[fit["song"]], recordings)), n + 1
+    print(f"all {n} golden fits: recomputed cost within {worst:.1e} of plan_cost")
 
 
 if __name__ == "__main__":

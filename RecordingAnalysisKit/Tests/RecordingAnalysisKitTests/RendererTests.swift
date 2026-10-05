@@ -6,7 +6,10 @@ import Testing
 /// #41: renders every golden Arrangement from the fixture audio and checks the output with the
 /// ported `evaluate.py`, no worse than the reference on its own render.
 @Suite struct RendererTests {
-    static let cases = ["full", "small"].flatMap { library in Golden.index.songs.map { "\(library)/\($0.id)" } }
+    /// Every Unlocked Song's Arrangement: locked ones have nothing to render.
+    static let cases = ["full", "small"].flatMap { library in
+        Golden.index.songs.filter { $0.unlocked[library] == true }.map { "\(library)/\($0.id)" }
+    }
 
     /// From the golden gesture, pitch contour, Recording Pitch and Arrangement (the stage
     /// before the renderer), with the fixture audio decoded by this package.
@@ -45,7 +48,7 @@ import Testing
         }
         let exportDir = ProcessInfo.processInfo.environment["PEDOS_RENDER_EXPORT_DIR"].map { URL(fileURLWithPath: $0) }
         var lines: [String] = []
-        for entry in Golden.index.songs {
+        for entry in Golden.index.songs where entry.unlocked["full"] == true {
             let name = "full/\(entry.id)"
             let arrangement = Golden.arrangement("full", entry.id)
             let (output, metrics) = renderAndCheck(song: Golden.song(entry.id), arrangement: arrangement, sources: sources)

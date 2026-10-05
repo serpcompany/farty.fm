@@ -1,6 +1,6 @@
 {
   "library": "full",
-  "max_abs_shift_semitones": 8.27,
+  "max_abs_shift_semitones": 9.97,
   "metrics": {
     "distinct_recordings": 7,
     "median_abs_cents": 2.6,
@@ -8,8 +8,8 @@
     "notes_with_retrigger": 0,
     "onsets_on_time_pct": 100,
     "pitch_readable_pct": 100,
-    "within_50c_any_octave_pct": 100,
-    "within_50c_pct": 100
+    "within_50c_any_octave_pct": 94,
+    "within_50c_pct": 94
   },
   "notes": [
     {
@@ -143,11 +143,11 @@
       "target_midi": 53
     },
     {
-      "heard_cents": -12,
+      "heard_cents": 3,
       "index": 10,
-      "recording": "013",
+      "recording": "084",
       "render": {
-        "gain_db": -7.5,
+        "gain_db": 0.4,
         "len_s": 0.248,
         "start_s": 2.727
       },
@@ -156,11 +156,11 @@
       "target_midi": 56
     },
     {
-      "heard_cents": 3,
+      "heard_cents": -67,
       "index": 11,
-      "recording": "084",
+      "recording": "013",
       "render": {
-        "gain_db": 0.7,
+        "gain_db": -7.6,
         "len_s": 0.248,
         "start_s": 3.0
       },
@@ -208,15 +208,15 @@
       "target_midi": 53
     },
     {
-      "heard_cents": 3,
+      "heard_cents": -47,
       "index": 15,
-      "recording": "019",
+      "recording": "017",
       "render": {
-        "gain_db": 7.9,
-        "len_s": 0.231,
+        "gain_db": 6.5,
+        "len_s": 0.248,
         "start_s": 6.0
       },
-      "shift_semitones": 8.27,
+      "shift_semitones": 9.97,
       "song_pitch": 68,
       "target_midi": 50
     },
@@ -236,10 +236,10 @@
     {
       "heard_cents": 3,
       "index": 17,
-      "recording": "084",
+      "recording": "013",
       "render": {
-        "gain_db": 1.4,
-        "len_s": 0.69,
+        "gain_db": -6.4,
+        "len_s": 1.234,
         "start_s": 6.545
       },
       "shift_semitones": -1.83,
@@ -377,11 +377,11 @@
       "target_midi": 53
     },
     {
-      "heard_cents": -7,
+      "heard_cents": 3,
       "index": 28,
-      "recording": "013",
+      "recording": "084",
       "render": {
-        "gain_db": -7.5,
+        "gain_db": 0.4,
         "len_s": 0.248,
         "start_s": 10.909
       },
@@ -390,11 +390,11 @@
       "target_midi": 56
     },
     {
-      "heard_cents": 3,
+      "heard_cents": -67,
       "index": 29,
-      "recording": "084",
+      "recording": "013",
       "render": {
-        "gain_db": 0.7,
+        "gain_db": -7.6,
         "len_s": 0.248,
         "start_s": 11.182
       },
@@ -429,56 +429,68 @@
       "target_midi": 51
     }
   ],
+  "octave_moves": 1,
   "per_pitch": [
     {
-      "recording": "019",
-      "shift_semitones": 8.274079406339823,
+      "octave_move": true,
+      "recording": "017",
+      "shift_semitones": 9.974079406339833,
       "song_pitch": 68,
       "target_midi": 50
     },
     {
+      "octave_move": false,
       "recording": "021",
       "shift_semitones": 2.7740794063398297,
       "song_pitch": 69,
       "target_midi": 51
     },
     {
+      "octave_move": false,
       "recording": "090",
       "shift_semitones": -2.1259205936601617,
       "song_pitch": 71,
       "target_midi": 53
     },
     {
-      "recording": "084",
+      "octave_move": false,
+      "recording": "013",
       "shift_semitones": -1.8259205936601859,
       "song_pitch": 72,
       "target_midi": 54
     },
     {
-      "recording": "013",
+      "octave_move": false,
+      "recording": "084",
       "shift_semitones": 0.1740794063398141,
       "song_pitch": 74,
       "target_midi": 56
     },
     {
+      "octave_move": false,
       "recording": "086",
       "shift_semitones": 1.1740794063398141,
       "song_pitch": 75,
       "target_midi": 57
     },
     {
+      "octave_move": false,
       "recording": "094",
       "shift_semitones": -0.7259205936601703,
       "song_pitch": 76,
       "target_midi": 58
     }
   ],
-  "plan_cost": 87.14252235510058,
+  "pitch_coverage": {
+    "covered": 7,
+    "total": 7
+  },
+  "plan_cost": 207.8633612491563,
   "render_settings": {
     "bpm": 110,
-    "tune": 1.0,
-    "variety": false
+    "tune": 1.0
   },
   "song": "furelise",
-  "transpose": -18
+  "transpose": -18,
+  "unlocked": true
 }
