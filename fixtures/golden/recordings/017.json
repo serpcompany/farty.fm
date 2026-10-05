@@ -183,5 +183,6 @@
   "recording_pitch_midi": 40.02592059366017,
   "recording_pitch_note": "E2+3",
   "rms_db": -26.3038,
+  "settle_s": 0.16253968253968254,
   "shortest_note_s": 0.35
 }

@@ -215,5 +215,6 @@
   "recording_pitch_midi": null,
   "recording_pitch_note": null,
   "rms_db": -18.7888,
+  "settle_s": null,
   "shortest_note_s": null
 }
