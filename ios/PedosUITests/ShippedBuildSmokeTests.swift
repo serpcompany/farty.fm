@@ -32,10 +32,18 @@ final class ShippedBuildSmokeTests: XCTestCase {
         add(attachment)
     }
 
-    /// Answers the microphone prompt, which appears the first time the app records.
-    private func allowMicrophoneIfAsked() {
+    /// Waits until recording has started, answering the microphone prompt if it appears (the
+    /// first time the app records). On a slow machine the prompt can take several seconds.
+    private func waitForRecordingToStart(in app: XCUIApplication) {
         let allow = XCUIApplication(bundleIdentifier: "com.apple.springboard").alerts.buttons["Allow"]
-        if allow.waitForExistence(timeout: 3) { allow.tap() }
+        let stop = app.buttons["stop-button"]
+        let deadline = Date.now.addingTimeInterval(30)
+        while Date.now < deadline {
+            if stop.exists { return }
+            if allow.exists { allow.tap() }
+            _ = stop.waitForExistence(timeout: 1)
+        }
+        XCTFail("Recording didn't start")
     }
 
     func testRecordSaveHearThePitchReplayRelaunchAndDelete() throws {
@@ -44,8 +52,7 @@ final class ShippedBuildSmokeTests: XCTestCase {
 
         // Record, then stop after the timer has counted.
         app.buttons["record-button"].tap()
-        allowMicrophoneIfAsked()
-        XCTAssertTrue(app.buttons["stop-button"].waitForExistence(timeout: 10), "Recording didn't start")
+        waitForRecordingToStart(in: app)
         let timer = app.staticTexts["recording-timer"]
         let counted = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != '0:00'"), object: timer)
         XCTAssertEqual(XCTWaiter().wait(for: [counted], timeout: 5), .completed, "The timer didn't count")
