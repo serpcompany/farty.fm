@@ -7,6 +7,8 @@ import XCTest
 final class FixtureLibraryUITests: XCTestCase {
     override func setUp() async throws {
         continueAfterFailure = false
+        // Loading and analyzing 23 Recordings takes about 30 s on a Debug build, longer on CI.
+        executionTimeAllowance = 300
     }
 
     private func attachScreenshot(_ name: String) {

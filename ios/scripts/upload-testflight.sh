@@ -124,6 +124,14 @@ entitlement() { printf '%s' "$entitlements" | plutil -extract "$1" raw -o - - 2>
 [ "$(entitlement application-identifier)" = "$APPLE_TEAM_ID.$bundle_id" ] ||
   fail "application-identifier is '$(entitlement application-identifier)', not $APPLE_TEAM_ID.$bundle_id"
 [ "$(entitlement get-task-allow)" != true ] || fail "the app is signed for development"
+# QA builds carry the Fixture Library under the product identifier, so App Store Connect must
+# keep them to internal testers: export marks the app with TFInternalTestingOnly.
+internal_only=$(/usr/libexec/PlistBuddy -c "Print :TFInternalTestingOnly" "$signed_app/Info.plist" 2>/dev/null || echo false)
+if [ "$configuration" = QA ]; then
+  [ "$internal_only" = true ] || fail "the QA app isn't marked internal testing only"
+else
+  [ "$internal_only" != true ] || fail "the Release app is marked internal testing only"
+fi
 echo "ok    signed: $(codesign -dvv "$signed_app" 2>&1 | sed -n 's/^Authority=\(Apple Distribution.*\)/\1/p' | head -n 1)"
 
 echo "Uploading to App Store Connect..."

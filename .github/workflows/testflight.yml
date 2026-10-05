@@ -15,6 +15,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      configuration:
+        description: QA (internal testing, with the Fixture Library) or Release (the App Store build)
+        type: choice
+        options: [QA, Release]
+        default: QA
 
 # One upload at a time per branch; a newer push waits rather than cancelling one mid-upload.
 # Per branch, so a run from another branch never replaces a waiting main upload. Build numbers
@@ -41,6 +47,8 @@ jobs:
       # The run number increases with every run of this workflow; the attempt keeps a
       # re-run from reusing an uploaded build number.
       BUILD_NUMBER: ${{ github.run_number }}.${{ github.run_attempt }}
+      # Pushes to main upload QA until launch; a manual run can upload Release.
+      CONFIGURATION: ${{ inputs.configuration || 'QA' }}
       APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
@@ -79,13 +87,14 @@ jobs:
         timeout-minutes: 15
         run: xcrun simctl bootstatus "$SIMULATOR_UDID" -b
 
-      - name: Test the QA build (record, save, pitch, replay, relaunch, delete)
+      - name: Test the ${{ env.CONFIGURATION }} build (record, save, pitch, replay, relaunch, delete)
         timeout-minutes: 30
         run: |
           set -o pipefail
           xcodebuild test \
             -project Pedos.xcodeproj \
             -scheme PedosShipped \
+            -configuration "$CONFIGURATION" \
             -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
             -only-testing:PedosUITests/ShippedBuildSmokeTests \
             -resultBundlePath "$RUNNER_TEMP/PedosShipped.xcresult" \
