@@ -64,6 +64,27 @@ public enum Renderer {
             self.lengthSeconds = lengthSeconds
             self.isDownbeat = isDownbeat
         }
+
+        /// A note of a Song as the catalog writes it, in beats. Converts to seconds and finds
+        /// downbeats exactly like the reference, so notes land on the same samples.
+        ///
+        /// - Parameters:
+        ///   - startBeats: The note's start in beats from the start of the Song.
+        ///   - lengthBeats: The note's written length in beats.
+        ///   - bpm: The tempo the Song is played at.
+        ///   - beatsPerBar: The Song's beats per bar; a note starting a bar is a downbeat.
+        public init(source: Source, targetMIDI: Double, startBeats: Double, lengthBeats: Double, bpm: Double, beatsPerBar: Double) {
+            let secondsPerBeat = 60 / bpm
+            let bar = startBeats / beatsPerBar
+            self.init(source: source, targetMIDI: targetMIDI, startSeconds: startBeats * secondsPerBeat,
+                      lengthSeconds: lengthBeats * secondsPerBeat,
+                      isDownbeat: abs(bar - bar.rounded(.toNearestOrEven)) < 1e-6)
+        }
+    }
+
+    /// The length of a Song in seconds, for `render(_:songSeconds:)`.
+    public static func songSeconds(lengthBeats: Double, bpm: Double) -> Double {
+        lengthBeats * (60 / bpm)
     }
 
     /// Where and how loud a note was placed.
@@ -85,7 +106,7 @@ public enum Renderer {
     ///
     /// - Parameters:
     ///   - notes: The Song's notes with the Recording that plays each one.
-    ///   - songSeconds: The Song's length (length in beats × 60 / bpm). The output is one second
+    ///   - songSeconds: The Song's length, `songSeconds(lengthBeats:bpm:)`. The output is one second
     ///     longer.
     public static func render(_ notes: [Note], songSeconds: Double) -> Output {
         let sr = Double(sampleRate)
@@ -168,17 +189,24 @@ public enum Renderer {
 }
 
 extension RecordingAnalyzer {
-    public enum RenderSourceError: Error {
+    public enum RenderSourceError: Error, Equatable {
         /// Only Melodic Recordings can play notes.
         case noiseLike
+        /// The analysis is from an older version: re-analyze the Recording first, so the
+        /// gesture, Recording Pitch and recomputed contour all come from the same analysis.
+        case staleAnalysis(version: Int)
     }
 
     /// What the renderer needs from a Melodic Recording: its gesture, cut from the file at the
     /// stored analysis's bounds, and the gesture's pitch contour. The contour isn't stored in
     /// `RecordingAnalysis`, so this recomputes it with the same pYIN pass the analysis uses.
+    /// Throws `staleAnalysis` if `analysis` is older than `RecordingAnalysis.currentVersion`.
     ///
     /// Synchronous and CPU-bound: call it off the main actor.
     public static func renderSource(fileAt url: URL, analysis: RecordingAnalysis) throws -> Renderer.Source {
+        guard analysis.version == RecordingAnalysis.currentVersion else {
+            throw RenderSourceError.staleAnalysis(version: analysis.version)
+        }
         guard let recordingPitch = analysis.recordingPitchMIDI else { throw RenderSourceError.noiseLike }
         let y = try AudioDecoder.decodeMono(fileAt: url)
         let sr = Double(analysisSampleRate)

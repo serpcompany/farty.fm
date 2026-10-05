@@ -8,75 +8,40 @@ import Testing
 @Suite struct RendererTests {
     static let cases = ["full", "small"].flatMap { library in Golden.index.songs.map { "\(library)/\($0.id)" } }
 
-    /// Notes whose golden read-back sits within a pYIN bin of ±50 cents (fixtures/golden/README.md).
-    /// saints note 10 reads +47.6 cents in the reference; a correct renderer can read it just
-    /// over 50, so it is accepted up to ±60 (one 10-cent pYIN bin further).
-    static let toleranceEdge: [String: Set<Int>] = ["full/saints": [10]]
-    static let toleranceEdgeCents = 60.0
-
     /// From the golden gesture, pitch contour, Recording Pitch and Arrangement (the stage
     /// before the renderer), with the fixture audio decoded by this package.
     @Test(arguments: cases)
     func goldenArrangementPassesTheRenderChecks(_ name: String) throws {
         let parts = name.split(separator: "/").map(String.init)
-        let (library, songID) = (parts[0], parts[1])
-        let arrangement = Golden.arrangement(library, songID)
-        let song = Golden.song(songID)
+        let arrangement = Golden.arrangement(parts[0], parts[1])
         let sources = try Dictionary(uniqueKeysWithValues: Set(arrangement.notes.map(\.recording)).map { id in
             let golden = Golden.recording(id)
             return (id, Renderer.Source(gesture: try gestureBody(golden), pitchContourHz: goldenContourHz(golden),
                                         recordingPitchMIDI: golden.recordingPitchMidi!))
         })
-
-        let (output, metrics) = renderAndCheck(song: song, arrangement: arrangement, sources: sources)
-        let golden = arrangement.metrics
-        #expect(metrics.notes == golden.notes)
-
-        // The placement matches the reference's own render values exactly.
-        var maxGainDiff = 0.0
-        for (placed, ref) in zip(output.notes, arrangement.notes) {
-            #expect(rounded(Double(placed.startSample) / RenderChecks.sr, 3) == ref.render.startS, "\(name) note \(ref.index): start")
-            #expect(rounded(Double(placed.lengthSamples) / RenderChecks.sr, 3) == ref.render.lenS, "\(name) note \(ref.index): length")
-            #expect(placed.shiftSemitones == ref.shiftSemitones, "\(name) note \(ref.index): shift")
-            maxGainDiff = max(maxGainDiff, abs(rounded(placed.gainDB, 1) - ref.render.gainDb))
-        }
-        #expect(maxGainDiff <= 0.1 + 1e-9, "\(name): gain differs by \(maxGainDiff) dB")
-
-        // Each note reads back like the reference render did (`heard_cents`): exactly, or at
-        // most one 10-cent pYIN bin away.
-        var sameCents = 0
-        for (mine, ref) in zip(metrics.cents, arrangement.notes) {
-            if mine.map({ $0.rounded(.toNearestOrEven) }) == ref.heardCents { sameCents += 1 }
-            #expect((mine == nil) == (ref.heardCents == nil), "\(name) note \(ref.index): readable")
-            if let mine, let theirs = ref.heardCents {
-                #expect(abs(mine - theirs) <= 10.5, "\(name) note \(ref.index): \(mine) cents, reference \(theirs)")
-            }
-        }
-
-        let edge = Self.toleranceEdge[name] ?? []
-        let within = metrics.within50cPct(edge: edge, edgeCents: Self.toleranceEdgeCents)
-        #expect(within >= golden.within50cPct, "\(name): \(within)% of notes within ±50 cents, golden \(golden.within50cPct)%")
-        #expect(metrics.onsetsOnTimePct >= golden.onsetsOnTimePct, "\(name): \(metrics.onsetsOnTimePct)% onsets on time, golden \(golden.onsetsOnTimePct)%")
-        #expect(metrics.notesWithRetrigger <= golden.notesWithRetrigger, "\(name): \(metrics.notesWithRetrigger) notes with a re-attack")
-        if library == "full" {
-            // The issue's bars, on the rounded percentage like evaluate.py.
-            #expect(within >= 94 && metrics.onsetsOnTimePct >= 95 && metrics.notesWithRetrigger == 0, "\(name): below the bar")
-        }
-
-        let edgeNote = edge.map { i in
-            " (note \(i) \(metrics.cents[i].map { String(format: "%+.1f", $0) } ?? "unread") cents, reference \(arrangement.notes[i].heardCents.map { String(format: "%+.0f", $0) } ?? "unread"); strict ±50: \(metrics.within50cPct())%)"
-        }.joined()
-        print("Render \(name): notes \(metrics.notes); within ±50c \(within)% (golden \(golden.within50cPct)%)\(edgeNote); onsets on time \(metrics.onsetsOnTimePct)% (golden \(golden.onsetsOnTimePct)%); re-attacks \(metrics.notesWithRetrigger) (golden \(golden.notesWithRetrigger)); readable \(metrics.pitchReadablePct)%; median |cents| \(metrics.medianAbsCents.map { String(format: "%.1f", $0) } ?? "-") (golden \(golden.medianAbsCents.map { "\($0)" } ?? "-")); read-back = reference on \(sameCents)/\(arrangement.notes.count) notes; max gain diff \(String(format: "%.2f", maxGainDiff)) dB")
+        let (output, metrics) = renderAndCheck(song: Golden.song(parts[1]), arrangement: arrangement, sources: sources)
+        print("Render \(name): " + checkAgainstGolden(name, arrangement: arrangement, output: output, metrics: metrics))
     }
 
     /// The app's path, public API only: analyze each fixture file, build its render source from
-    /// the stored analysis, and render the full-library Arrangements. Set
-    /// `PEDOS_RENDER_EXPORT_DIR` to also write twinkle, mary and ode there as .wav for listening.
+    /// the stored analysis, and render the full-library Arrangements, with the same checks as
+    /// the golden-input test. Set `PEDOS_RENDER_EXPORT_DIR` to also write twinkle, mary and ode
+    /// there as .wav for listening.
     @Test func publicAPIRendersTheFullLibraryArrangements() throws {
         var sources: [String: Renderer.Source] = [:]
         for id in Golden.index.melodicRecordings {
             let url = Golden.fileURL(Golden.recording(id))
-            sources[id] = try RecordingAnalyzer.renderSource(fileAt: url, analysis: try RecordingAnalyzer.analyze(fileAt: url))
+            let analysis = try RecordingAnalyzer.analyze(fileAt: url)
+            let source = try RecordingAnalyzer.renderSource(fileAt: url, analysis: analysis)
+            // The source is exactly the gesture and contour the analysis computed.
+            let y = try AudioDecoder.decodeMono(fileAt: url)
+            let gesture = Trimming.noteSegment(y)
+            let body = y[gesture.start..<gesture.end].map(Double.init)
+            #expect(source.gesture == body, "\(id): gesture")
+            #expect(source.pitchContourHz.elementsEqual(RecordingPitch.analyze(body).f0) { $0 == $1 || ($0.isNaN && $1.isNaN) },
+                    "\(id): contour")
+            #expect(source.recordingPitchMIDI == analysis.recordingPitchMIDI, "\(id): Recording Pitch")
+            sources[id] = source
         }
         let exportDir = ProcessInfo.processInfo.environment["PEDOS_RENDER_EXPORT_DIR"].map { URL(fileURLWithPath: $0) }
         var lines: [String] = []
@@ -84,10 +49,7 @@ import Testing
             let name = "full/\(entry.id)"
             let arrangement = Golden.arrangement("full", entry.id)
             let (output, metrics) = renderAndCheck(song: Golden.song(entry.id), arrangement: arrangement, sources: sources)
-            let within = metrics.within50cPct(edge: Self.toleranceEdge[name] ?? [], edgeCents: Self.toleranceEdgeCents)
-            #expect(within >= 94 && metrics.onsetsOnTimePct >= 95 && metrics.notesWithRetrigger == 0,
-                    "\(name) via the public API: \(within)% within ±50 cents, \(metrics.onsetsOnTimePct)% on time, \(metrics.notesWithRetrigger) re-attacks")
-            lines.append("\(name): within ±50c \(within)% (strict \(metrics.within50cPct())%), onsets \(metrics.onsetsOnTimePct)%, re-attacks \(metrics.notesWithRetrigger)")
+            lines.append("\(name): " + checkAgainstGolden(name, arrangement: arrangement, output: output, metrics: metrics))
             if let exportDir, ["twinkle", "mary", "ode"].contains(entry.id) {
                 try FileManager.default.createDirectory(at: exportDir, withIntermediateDirectories: true)
                 let url = exportDir.appending(path: "\(entry.id)-full.wav")
@@ -96,6 +58,32 @@ import Testing
             }
         }
         print("Render via the public API:\n" + lines.joined(separator: "\n"))
+    }
+
+    /// A stored analysis from an older version must be re-analyzed before rendering, so the
+    /// recomputed contour never pairs with an older gesture or Recording Pitch.
+    @Test func renderSourceRefusesAStaleAnalysis() throws {
+        let url = Golden.fileURL(Golden.recording("021"))
+        let a = try RecordingAnalyzer.analyze(fileAt: url)
+        let stale = RecordingAnalysis(
+            version: a.version - 1, gestureStartSeconds: a.gestureStartSeconds, gestureEndSeconds: a.gestureEndSeconds,
+            cutAtReattack: a.cutAtReattack, pitchEstimateMIDI: a.pitchEstimateMIDI, pitchConfidence: a.pitchConfidence,
+            recordingPitchMIDI: a.recordingPitchMIDI, shortestNoteSeconds: a.shortestNoteSeconds)
+        #expect(throws: RecordingAnalyzer.RenderSourceError.staleAnalysis(version: a.version - 1)) {
+            try RecordingAnalyzer.renderSource(fileAt: url, analysis: stale)
+        }
+    }
+
+    /// Beats to seconds and downbeats, the reference's way: 3/4 at 90 bpm.
+    @Test func notesInBeatsLandLikeTheReference() {
+        let source = Renderer.Source(gesture: [], pitchContourHz: [], recordingPitchMIDI: 60)
+        let spb = 60.0 / 90
+        for (start, downbeat) in [(0.0, true), (1.0, false), (2.5, false), (3.0, true), (6.0, true), (7.5, false)] {
+            let note = Renderer.Note(source: source, targetMIDI: 60, startBeats: start, lengthBeats: 1.5, bpm: 90, beatsPerBar: 3)
+            #expect(note.isDownbeat == downbeat, "beat \(start)")
+            #expect(note.startSeconds == start * spb && note.lengthSeconds == 1.5 * spb)
+        }
+        #expect(Renderer.songSeconds(lengthBeats: 24, bpm: 90) == 24 * spb)
     }
 
     /// Fart-only: with silent Recordings the renderer outputs exact silence, so nothing in it
@@ -149,33 +137,80 @@ import Testing
     }
 }
 
+/// Notes whose golden read-back sits within a pYIN bin of ±50 cents (fixtures/golden/README.md).
+/// saints note 10 reads +47.6 cents in the reference; a correct renderer can read it just over
+/// 50, so it is accepted up to ±60 (one 10-cent pYIN bin further).
+let toleranceEdge: [String: Set<Int>] = ["full/saints": [10]]
+let toleranceEdgeCents = 60.0
+
+/// Checks a render of a golden Arrangement against the reference's render of it: the same
+/// starts, lengths and shifts, gains within 0.1 dB, each note read back within one pYIN bin, and
+/// within ±50 cents, onsets on time and re-attacks no worse than the golden metrics (plus the
+/// issue's bars on the full library). Returns a summary line.
+func checkAgainstGolden(_ name: String, arrangement: Golden.Arrangement, output: Renderer.Output,
+                        metrics: RenderChecks.Metrics) -> String {
+    let golden = arrangement.metrics
+    #expect(metrics.notes == golden.notes)
+
+    var maxGainDiff = 0.0
+    for (placed, ref) in zip(output.notes, arrangement.notes) {
+        #expect(rounded(Double(placed.startSample) / RenderChecks.sr, 3) == ref.render.startS, "\(name) note \(ref.index): start")
+        #expect(rounded(Double(placed.lengthSamples) / RenderChecks.sr, 3) == ref.render.lenS, "\(name) note \(ref.index): length")
+        #expect(placed.shiftSemitones == ref.shiftSemitones, "\(name) note \(ref.index): shift")
+        maxGainDiff = max(maxGainDiff, abs(rounded(placed.gainDB, 1) - ref.render.gainDb))
+    }
+    #expect(maxGainDiff <= 0.1 + 1e-9, "\(name): gain differs by \(maxGainDiff) dB")
+
+    // Each note reads back like the reference render did (`heard_cents`): exactly, or at most
+    // one 10-cent pYIN bin away.
+    var sameCents = 0
+    for (mine, ref) in zip(metrics.cents, arrangement.notes) {
+        if mine.map({ $0.rounded(.toNearestOrEven) }) == ref.heardCents { sameCents += 1 }
+        #expect((mine == nil) == (ref.heardCents == nil), "\(name) note \(ref.index): readable")
+        if let mine, let theirs = ref.heardCents {
+            #expect(abs(mine - theirs) <= 10.5, "\(name) note \(ref.index): \(mine) cents, reference \(theirs)")
+        }
+    }
+
+    let edge = toleranceEdge[name] ?? []
+    let within = metrics.within50cPct(edge: edge, edgeCents: toleranceEdgeCents)
+    #expect(within >= golden.within50cPct, "\(name): \(within)% of notes within ±50 cents, golden \(golden.within50cPct)%")
+    #expect(metrics.onsetsOnTimePct >= golden.onsetsOnTimePct,
+            "\(name): \(metrics.onsetsOnTimePct)% onsets on time, golden \(golden.onsetsOnTimePct)%")
+    #expect(metrics.notesWithRetrigger <= golden.notesWithRetrigger, "\(name): \(metrics.notesWithRetrigger) notes with a re-attack")
+    if arrangement.library == "full" {
+        // The issue's bars, on the rounded percentage like evaluate.py.
+        #expect(within >= 94 && metrics.onsetsOnTimePct >= 95 && metrics.notesWithRetrigger == 0, "\(name): below the bar")
+    }
+
+    let edgeNote = edge.map { i in
+        " (note \(i) \(metrics.cents[i].map { String(format: "%+.1f", $0) } ?? "unread") cents, reference \(arrangement.notes[i].heardCents.map { String(format: "%+.0f", $0) } ?? "unread"); strict ±50: \(metrics.within50cPct())%)"
+    }.joined()
+    return "notes \(metrics.notes); within ±50c \(within)% (golden \(golden.within50cPct)%)\(edgeNote); onsets on time \(metrics.onsetsOnTimePct)% (golden \(golden.onsetsOnTimePct)%); re-attacks \(metrics.notesWithRetrigger) (golden \(golden.notesWithRetrigger)); readable \(metrics.pitchReadablePct)%; median |cents| \(metrics.medianAbsCents.map { String(format: "%.1f", $0) } ?? "-") (golden \(golden.medianAbsCents.map { "\($0)" } ?? "-")); read-back = reference on \(sameCents)/\(arrangement.notes.count) notes; max gain diff \(String(format: "%.2f", maxGainDiff)) dB"
+}
+
 /// Renders a golden Arrangement of `song` with `sources` (by Recording id) and runs the checks.
 func renderAndCheck(song: Golden.Song, arrangement: Golden.Arrangement, sources: [String: Renderer.Source])
     -> (Renderer.Output, RenderChecks.Metrics)
 {
-    let output = Renderer.render(renderNotes(song: song, arrangement: arrangement, sources: sources),
-                                 songSeconds: song.lengthBeats * secondsPerBeat(arrangement))
-    let spb = secondsPerBeat(arrangement)
-    let checks = zip(arrangement.notes, output.notes).map { ref, placed in
-        let note = song.notes[ref.index]
+    let notes = renderNotes(song: song, arrangement: arrangement, sources: sources)
+    let output = Renderer.render(notes, songSeconds: Renderer.songSeconds(lengthBeats: song.lengthBeats, bpm: arrangement.renderSettings.bpm))
+    let checks = zip(notes, output.notes).map { note, placed in
         // evaluate.py uses the placed length rounded to 1 ms (`len_s`).
-        let heard = min(rounded(Double(placed.lengthSamples) / RenderChecks.sr, 3), note.dur * spb)
-        return RenderChecks.NoteToCheck(startSeconds: note.start * spb, heardSeconds: heard, targetMIDI: Double(ref.targetMidi))
+        let heard = min(rounded(Double(placed.lengthSamples) / RenderChecks.sr, 3), note.lengthSeconds)
+        return RenderChecks.NoteToCheck(startSeconds: note.startSeconds, heardSeconds: heard, targetMIDI: note.targetMIDI)
     }
     return (output, RenderChecks.evaluate(output.samples.map(Double.init), notes: checks))
 }
 
+/// The golden Arrangement as renderer notes, through the package's beats-to-seconds API.
 func renderNotes(song: Golden.Song, arrangement: Golden.Arrangement, sources: [String: Renderer.Source]) -> [Renderer.Note] {
-    let spb = secondsPerBeat(arrangement)
-    return arrangement.notes.map { ref in
+    arrangement.notes.map { ref in
         let note = song.notes[ref.index]
-        let bar = note.start / song.beatsPerBar
-        return Renderer.Note(source: sources[ref.recording]!, targetMIDI: Double(ref.targetMidi), startSeconds: note.start * spb,
-                             lengthSeconds: note.dur * spb, isDownbeat: abs(bar - bar.rounded(.toNearestOrEven)) < 1e-6)
+        return Renderer.Note(source: sources[ref.recording]!, targetMIDI: Double(ref.targetMidi), startBeats: note.start,
+                             lengthBeats: note.dur, bpm: arrangement.renderSettings.bpm, beatsPerBar: song.beatsPerBar)
     }
 }
-
-func secondsPerBeat(_ arrangement: Golden.Arrangement) -> Double { 60 / arrangement.renderSettings.bpm }
 
 func rounded(_ x: Double, _ decimals: Int) -> Double {
     let scale = pow(10.0, Double(decimals))

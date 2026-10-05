@@ -74,7 +74,7 @@ struct TimingTests {
             }
         }
         let notes = renderNotes(song: song, arrangement: arrangement, sources: sources)
-        let seconds = song.lengthBeats * secondsPerBeat(arrangement)
+        let seconds = Renderer.songSeconds(lengthBeats: song.lengthBeats, bpm: arrangement.renderSettings.bpm)
         var best = Duration.seconds(1000)
         var samples = 0
         for _ in 0..<5 {
