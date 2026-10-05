@@ -1,8 +1,11 @@
 name: iOS
 
+# Apple's recommended split (WWDC22 "Author fast and reliable tests for Xcode Cloud"): pull
+# requests run a quick set of tests that gates the merge, and every push to main (each merge)
+# runs the full set, which doesn't block anyone. scripts/run-tests.sh defines both sets.
+#
 # Draft PRs are not built: a PR runs when it is opened or marked ready for review, and on
-# each push while it is ready. Pushes to main cover merges. Branch pushes without a PR are
-# not built, so each commit runs on macOS once.
+# each push while it is ready. Branch pushes without a PR are not built.
 on:
   push:
     branches: [main]
@@ -30,6 +33,10 @@ jobs:
       # The simulator the tests run on. It boots in the background while the app builds.
       SIMULATOR_NAME: iPhone 17 Pro
       SIMULATOR_RUNTIME: com.apple.CoreSimulator.SimRuntime.iOS-26-5
+      # UI tests run on this many clones of the simulator at once.
+      TEST_WORKERS: 3
+      # Pull requests run the quick set; main runs everything (scripts/run-tests.sh).
+      TEST_SET: ${{ github.event_name == 'pull_request' && 'quick' || 'full' }}
       # Stream xcodebuild output through the pipe instead of buffering it until exit.
       NSUnbufferedIO: "YES"
     defaults:
@@ -70,27 +77,20 @@ jobs:
         working-directory: RecordingAnalysisKit
         run: swift test -c release
 
-      - name: Check bundle identifiers and that Release has no fixture audio
+      - name: Check bundle identifiers and that Release excludes the fixture audio
         run: scripts/check-bundle-identifiers.sh
 
       - name: Wait for the simulator to boot
         timeout-minutes: 15
         run: xcrun simctl bootstatus "$SIMULATOR_UDID" -b
 
-      - name: Build and run unit and UI tests
+      - name: Build and run the ${{ env.TEST_SET }} test set
         # Fails the step on a hang, so the result bundle below still uploads. Getting the
         # simulator ready for testing has taken 10 minutes on a slow runner.
         timeout-minutes: 30
-        env:
-          # The dark-mode UI test runs are for screenshots, which are taken locally.
-          TEST_RUNNER_PEDOS_UI_TESTS_LIGHT_ONLY: "1"
         run: |
           set -o pipefail
-          xcodebuild test \
-            -project Pedos.xcodeproj \
-            -scheme Pedos \
-            -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
-            -resultBundlePath "$RUNNER_TEMP/Pedos.xcresult" \
+          scripts/run-tests.sh "$TEST_SET" "$SIMULATOR_UDID" "$RUNNER_TEMP/Pedos.xcresult" \
             | xcbeautify --renderer github-actions
 
       - name: Upload test results

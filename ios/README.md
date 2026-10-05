@@ -20,8 +20,8 @@ Any available iPhone simulator on iOS 26 or later works. List them, then pass on
 ```sh
 xcrun simctl list devices available
 cd ios
-xcodebuild test -project Pedos.xcodeproj -scheme Pedos \
-  -destination 'platform=iOS Simulator,id=<udid>'
+scripts/run-tests.sh quick <udid>   # what a pull request must pass, about 5 minutes
+scripts/run-tests.sh full <udid>    # every unit and UI test
 scripts/check-bundle-identifiers.sh
 ```
 
@@ -30,10 +30,14 @@ tests for each screen run in light mode and again in dark mode (the `…DarkUITe
 and attach a screenshot of every screen and state to the result bundle; export them with
 `xcrun xcresulttool export attachments --path <result>.xcresult --output-path <dir>`.
 
-CI ([`.github/workflows/ios.yml`](../.github/workflows/ios.yml)) runs the same steps, plus
-`scripts/generate-sample-data.py --check`, on every pull request that is ready for review (draft
-PRs are skipped) and every push to `main`. It skips the dark-mode UI test runs, which exist for
-screenshots.
+`scripts/run-tests.sh` runs the UI tests on three simulators at once and skips the dark-mode runs,
+which exist for screenshots (set `TEST_RUNNER_PEDOS_UI_TESTS_LIGHT_ONLY=0` to include them).
+
+CI ([`.github/workflows/ios.yml`](../.github/workflows/ios.yml)) splits the tests the way Apple
+recommends: a pull request that's ready for review runs the **quick** set, which gates the merge
+(draft PRs are skipped). Every push to `main` runs the **full** set, which doesn't block anyone.
+Both also run `scripts/generate-sample-data.py --check`, the bundle identifier check and the
+Recording Analysis golden tests (`swift test` in `RecordingAnalysisKit/`).
 
 ### Testing the build that ships
 
@@ -79,8 +83,8 @@ doesn't follow it.
   Rerun it when the prototype data changes; CI runs it with `--check`.
 - Debug builds bundle the prototype's audio from `docs/design/prototype/audio/`: the trimmed
   fixtures (`rec-*.mp3`) and its render of each Song (`song-*.mp3`). Release builds exclude both,
-  so they can't make Toots until rendering (#17); `scripts/check-bundle-identifiers.sh` builds
-  Release and fails if the app contains any audio.
+  so they can't make Toots until rendering (#17). `scripts/check-bundle-identifiers.sh` checks
+  that Release excludes both, and `scripts/upload-testflight.sh` fails if an archive contains any audio.
 - Debug launch arguments set up states by hand (Xcode: Product > Scheme > Edit Scheme >
   Arguments), for example `-PedosSampleStart all` for all 23 Recordings,
   `-PedosSampleToots mary,ode` for two Toots, or `-PedosSampleFailure saveFailed`
