@@ -56,6 +56,33 @@ struct TimingTests {
         print("Timing (release), analyze(fileAt:) on all 23 fixtures: \(ms(total)) in total; slowest \(slowest.id) (\(String(format: "%.2f", slowest.seconds)) s file) \(ms(slowest.duration))")
         #expect(slowest.duration < .seconds(1))
     }
+
+    /// #41: rendering the longest Song, `merryxmas` on the full library (53 notes, 20.6 s), from
+    /// sources already in memory. Also times building those sources from the files with the
+    /// public API (decode, cut the gesture, recompute the contour), which a render needs first.
+    @Test func renderATwentySecondSong() throws {
+        let arrangement = Golden.arrangement("full", "merryxmas")
+        let song = Golden.song("merryxmas")
+        let clock = ContinuousClock()
+        var sources: [String: Renderer.Source] = [:]
+        let analyses = try Dictionary(uniqueKeysWithValues: Set(arrangement.notes.map(\.recording)).map { id in
+            (id, try RecordingAnalyzer.analyze(fileAt: Golden.fileURL(Golden.recording(id))))
+        })
+        let sourceTime = try clock.measure {
+            for (id, analysis) in analyses {
+                sources[id] = try RecordingAnalyzer.renderSource(fileAt: Golden.fileURL(Golden.recording(id)), analysis: analysis)
+            }
+        }
+        let notes = renderNotes(song: song, arrangement: arrangement, sources: sources)
+        let seconds = song.lengthBeats * secondsPerBeat(arrangement)
+        var best = Duration.seconds(1000)
+        var samples = 0
+        for _ in 0..<5 {
+            best = min(best, clock.measure { samples = Renderer.render(notes, songSeconds: seconds).samples.count })
+        }
+        print("Timing (release), render merryxmas (full library, \(notes.count) notes, \(String(format: "%.1f", Double(samples) / 44_100)) s of audio): \(ms(best)) (best of 5); render sources for its \(sources.count) Recordings: \(ms(sourceTime))")
+        #expect(best < .seconds(1))
+    }
 }
 
 #if DEBUG

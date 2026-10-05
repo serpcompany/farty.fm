@@ -24,6 +24,8 @@ struct PYIN: Sendable {
     static let frameLength = 2048
     static let hopLength = 256
     static let fmin = 45.0
+    /// The highest pitch Recording Analysis looks for. The render checks (`evaluate.py`) read
+    /// renders back with a 1200 Hz ceiling instead: `PYIN(fmax: 1200)`.
     static let fmax = 900.0
 
     let minPeriod: Int
@@ -48,13 +50,13 @@ struct PYIN: Sendable {
 
     static let tiny = Double.leastNormalMagnitude
 
-    init() {
+    init(fmax: Double = PYIN.fmax) {
         let sr = Self.sampleRate
-        minPeriod = Int((sr / Self.fmax).rounded(.down))
+        minPeriod = Int((sr / fmax).rounded(.down))
         maxPeriod = min(Int((sr / Self.fmin).rounded(.up)), Self.frameLength - 1)
         let binsPerSemitone = Int((1.0 / 0.1).rounded(.up))
         binsPerOctave = Double(12 * binsPerSemitone)
-        pitchBins = Int((binsPerOctave * log2(Self.fmax / Self.fmin)).rounded(.down)) + 1
+        pitchBins = Int((binsPerOctave * log2(fmax / Self.fmin)).rounded(.down)) + 1
 
         // Prior over thresholds: np.diff(scipy.stats.beta.cdf(np.linspace(0, 1, 101), 2, 18)).
         // For integer shape parameters the regularized incomplete beta function has a closed
