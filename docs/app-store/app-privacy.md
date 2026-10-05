@@ -79,7 +79,7 @@ the exact wording in App Store Connect may differ slightly.
 | Cartoon or fantasy violence / realistic violence / prolonged graphic violence / guns or other weapons | None | |
 | Simulated gambling / gambling / contests / loot boxes | None / No | Unlocking Songs is collecting notes, with no chance, purchases or prizes. |
 
-**Suggested rating: 9+**, weighing both parts of the answer (the humor is frequent, but mild), the result of "Infrequent or Mild" crude humor with everything else
+**Rating: 9+** (owner decision on #75: as young as honestly possible), weighing both parts of the answer (the humor is frequent, but mild), the result of "Infrequent or Mild" crude humor with everything else
 "None". The conservative alternative is "Frequent or Intense" (13+), if the owner would rather not
 argue that a fart app's humor is mild; it costs younger users, the audience most likely to enjoy
 the app.
