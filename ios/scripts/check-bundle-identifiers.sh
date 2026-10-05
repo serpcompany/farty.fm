@@ -20,9 +20,20 @@ if [ ! -d "$project" ]; then
   exit 1
 fi
 
+# Every target's build settings, read once per configuration: each xcodebuild call takes most
+# of a minute on CI.
+debug_settings=$(xcodebuild -project "$project" -alltargets -configuration Debug -showBuildSettings)
+release_settings=$(xcodebuild -project "$project" -alltargets -configuration Release -showBuildSettings)
+
+setting() { # settings target name
+  printf '%s\n' "$1" | awk -v target="$2" -v name="$3" '
+    /^Build settings for action build and target / { current = $NF; sub(/:$/, "", current) }
+    current == target && $1 == name && $2 == "=" { sub(/^[^=]*= /, ""); print; exit }'
+}
+
 bundle_identifier() { # target configuration
-  xcodebuild -project "$project" -target "$1" -configuration "$2" -showBuildSettings |
-    awk -F ' = ' '$1 ~ /^ *PRODUCT_BUNDLE_IDENTIFIER$/ { print $2; exit }'
+  if [ "$2" = Release ]; then settings=$release_settings; else settings=$debug_settings; fi
+  setting "$settings" "$1" PRODUCT_BUNDLE_IDENTIFIER
 }
 
 check() { # description expected actual
@@ -43,12 +54,9 @@ check "Info.plist CFBundleIdentifier" '$(PRODUCT_BUNDLE_IDENTIFIER)' \
 
 # The Fixture Library never ships to regular users (AGENTS.md), and neither do
 # the prototype's Song renders, which are made from it.
-excluded() { # configuration
-  xcodebuild -project "$project" -target Pedos -configuration "$1" -showBuildSettings |
-    awk -F ' = ' '$1 ~ /^ *EXCLUDED_SOURCE_FILE_NAMES$/ { print $2; exit }'
-}
-check "Release excludes the prototype audio" "rec-*.mp3 song-*.mp3" "$(excluded Release)"
-check "Debug keeps the prototype audio" "" "$(excluded Debug)"
+check "Release excludes the prototype audio" "rec-*.mp3 song-*.mp3" \
+  "$(setting "$release_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
+check "Debug keeps the prototype audio" "" "$(setting "$debug_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures build check(s) failed" >&2
