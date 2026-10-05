@@ -101,7 +101,9 @@ final class LiveRecordingSourceTests: XCTestCase {
 
         XCTAssertEqual(recording.number, 1)
         XCTAssertEqual(recording.pitch, 55.1)
+        // Replay plays the fart the analysis found, without the dead air around it.
         XCTAssertEqual(recording.replaySegment?.start, 0.05)
+        XCTAssertEqual(try XCTUnwrap(recording.replaySegment?.length), 0.45, accuracy: 1e-9)
         guard case .result(let result) = model.flow else { return XCTFail("No Result: \(String(describing: model.flow))") }
         XCTAssertEqual(result.recordingID, recording.id)
         XCTAssertEqual(try store.load().map(\.id), [recording.id], "The take wasn't saved as a file")

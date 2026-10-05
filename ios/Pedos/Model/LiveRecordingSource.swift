@@ -141,7 +141,12 @@ struct SavedAnalysis: Codable, Hashable, Sendable {
     let shortestNoteSeconds: Double?
 
     var analysis: RecordingAnalysis {
-        RecordingAnalysis(pitch: recordingPitchMIDI, firstFartUsed: cutAtReattack, startSeconds: gestureStartSeconds)
+        RecordingAnalysis(
+            pitch: recordingPitchMIDI,
+            firstFartUsed: cutAtReattack,
+            startSeconds: gestureStartSeconds,
+            endSeconds: gestureEndSeconds
+        )
     }
 }
 

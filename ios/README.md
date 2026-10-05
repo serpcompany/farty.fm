@@ -59,8 +59,8 @@ microphone is checked by hand, on a phone, from a TestFlight build.
 - **Release builds record for real** (`LiveRecordingSource`): the microphone records mono 44.1 kHz
   AAC to a draft file, Save moves it into `Application Support/Recordings` (`RecordingStore`), and
   Recording Analysis runs after the save. Its result is kept next to the Recording
-  (`<id>.analysis.json`) and runs again when the analysis version changes (ADR 0002). Replay starts
-  where the fart starts.
+  (`<id>.analysis.json`) and runs again when the analysis version changes (ADR 0002). Replay plays
+  just the fart the analysis found, without the dead air before or after it; the file is never cut.
 - **Debug builds use the Fixture Library** (`FixtureRecordingSource`) for the screens' UI tests and
   previews, unless launched with `-PedosLive YES`, which records for real as Release does.
 
