@@ -1,4 +1,3 @@
-import AVFAudio
 import Foundation
 
 /// Saved Recordings as plain files (ADR 0002). Each Recording is `<id>.m4a` in one folder, with
@@ -54,14 +53,13 @@ struct RecordingStore: Sendable {
         try? fileManager.removeItem(at: detailsURL(of: id))
     }
 
-    /// Every saved Recording, oldest (lowest number) first. An audio file without details, which
-    /// only an interrupted save or a hand-copied file leaves, gets the next number and its own
-    /// length; details without audio are removed.
+    /// Every saved Recording, oldest (lowest number) first. Details without audio, which an
+    /// interrupted save or delete leaves, are removed.
     func load() throws -> [StoredRecording] {
         let fileManager = FileManager.default
         guard fileManager.fileExists(atPath: folder.path(percentEncoded: false)) else { return [] }
         let files = try fileManager.contentsOfDirectory(
-            at: folder, includingPropertiesForKeys: [.creationDateKey], options: [.skipsHiddenFiles]
+            at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]
         )
         let audioIDs = Set(files.filter { $0.pathExtension == "m4a" }.compactMap(Self.id(of:)))
 
@@ -72,24 +70,11 @@ struct RecordingStore: Sendable {
                 try? fileManager.removeItem(at: file)
                 continue
             }
-            if let details = try? JSONDecoder.recordings.decode(Details.self, from: Data(contentsOf: file)) {
+            if let details = try? JSONDecoder().decode(Details.self, from: Data(contentsOf: file)) {
                 recordings.append(recording(id, details))
             }
         }
 
-        let described = Set(recordings.map(\.id))
-        for id in audioIDs.subtracting(described).sorted(by: { $0.uuidString < $1.uuidString }) {
-            let audio = audioURL(of: id)
-            guard let file = try? AVAudioFile(forReading: audio), file.fileFormat.sampleRate > 0 else { continue }
-            let savedAt = (try? audio.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .now
-            let details = Details(
-                number: (recordings.map(\.number).max() ?? 0) + 1,
-                seconds: Double(file.length) / file.fileFormat.sampleRate,
-                savedAt: savedAt
-            )
-            try? write(details, of: id)
-            recordings.append(recording(id, details))
-        }
         return recordings.sorted { $0.number < $1.number }
     }
 
@@ -101,7 +86,7 @@ struct RecordingStore: Sendable {
     }
 
     private func write(_ details: Details, of id: UUID) throws {
-        try JSONEncoder.recordings.encode(details).write(to: detailsURL(of: id), options: .atomic)
+        try JSONEncoder().encode(details).write(to: detailsURL(of: id), options: .atomic)
     }
 
     private func audioURL(of id: StoredRecording.ID) -> URL {
@@ -133,21 +118,4 @@ private struct Details: Codable {
     let number: Int
     let seconds: Double
     let savedAt: Date
-}
-
-private extension JSONEncoder {
-    static var recordings: JSONEncoder {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .secondsSince1970 // Exact, so a reload equals what was saved.
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return encoder
-    }
-}
-
-private extension JSONDecoder {
-    static var recordings: JSONDecoder {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .secondsSince1970
-        return decoder
-    }
 }

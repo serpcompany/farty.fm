@@ -1,4 +1,3 @@
-import AVFAudio
 import XCTest
 @testable import Pedos
 
@@ -77,19 +76,18 @@ final class RecordingStoreTests: XCTestCase {
     }
 
     func testRecordingsSurviveARelaunch() throws {
-        let savedAt = Date(timeIntervalSince1970: 1_790_000_000)
-        let first = try store.save(draftAt: try makeDraft(), seconds: 0.8, savedAt: savedAt)
-        let second = try store.save(draftAt: try makeDraft(), seconds: 1.9, savedAt: savedAt.addingTimeInterval(60))
+        // Saved now, to the sub-millisecond, so the dates must survive the round trip exactly.
+        let first = try store.save(draftAt: try makeDraft(), seconds: 0.8)
+        let second = try store.save(draftAt: try makeDraft(), seconds: 1.9)
 
         // A relaunch: a new store on the same folder, with the drafts folder emptied.
         try FileManager.default.removeItem(at: store.draftFolder)
         let relaunched = RecordingStore(folder: store.folder, draftFolder: store.draftFolder)
 
         XCTAssertEqual(try relaunched.load(), [first, second])
-        XCTAssertEqual(try relaunched.load().map(\.savedAt), [savedAt, savedAt.addingTimeInterval(60)])
     }
 
-    func testNumbersContinueFromTheHighestAndAreNotReused() throws {
+    func testNumbersContinueFromTheHighest() throws {
         let one = try store.save(draftAt: try makeDraft(), seconds: 1)
         let two = try store.save(draftAt: try makeDraft(), seconds: 1)
         let three = try store.save(draftAt: try makeDraft(), seconds: 1)
@@ -116,35 +114,5 @@ final class RecordingStoreTests: XCTestCase {
         XCTAssertEqual(try store.load(), [])
         let leftovers = try FileManager.default.contentsOfDirectory(atPath: store.folder.path(percentEncoded: false))
         XCTAssertEqual(leftovers, [])
-    }
-
-    /// An audio file with no details (a save interrupted between the two files can't do this,
-    /// but a hand-copied file can) is kept, numbered next, with its length read from the audio.
-    func testAudioWithoutDetailsIsKeptAndMeasured() throws {
-        let saved = try store.save(draftAt: try makeDraft(), seconds: 1)
-        let id = UUID()
-        let audio = store.folder.appending(path: "\(id.uuidString).m4a")
-        try writeSilence(seconds: 0.5, to: audio)
-
-        let loaded = try store.load()
-        XCTAssertEqual(loaded.map(\.id), [saved.id, id])
-        XCTAssertEqual(loaded[1].number, 2)
-        XCTAssertEqual(loaded[1].seconds, 0.5, accuracy: 0.05)
-        // Its details are written, so the number stays put.
-        XCTAssertEqual(try store.load(), loaded)
-    }
-
-    /// Half a second of mono 44.1 kHz AAC, the format the recorder writes.
-    private func writeSilence(seconds: Double, to url: URL) throws {
-        let settings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 44_100,
-            AVNumberOfChannelsKey: 1,
-        ]
-        let file = try AVAudioFile(forWriting: url, settings: settings)
-        let frames = AVAudioFrameCount(seconds * 44_100)
-        let buffer = try XCTUnwrap(AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: frames))
-        buffer.frameLength = frames
-        try file.write(from: buffer)
     }
 }
