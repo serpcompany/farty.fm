@@ -1,8 +1,9 @@
 name: TestFlight
 
 # Uploads the Release app to TestFlight on every push to main, and by hand from any branch
-# (Actions > TestFlight > Run workflow). A pull request that changes this pipeline uploads
-# too, so the change is proven by an upload. ios/scripts/upload-testflight.sh does the work.
+# (Actions > TestFlight > Run workflow, or `gh workflow run testflight.yml --ref <branch>`),
+# which is also how a change to this pipeline is proven before merge.
+# ios/scripts/upload-testflight.sh does the work.
 #
 # Needs repository secrets ASC_KEY_P8 (the .p8 file's contents), ASC_KEY_ID and
 # ASC_ISSUER_ID for an App Store Connect API key with the Admin role, and the repository
@@ -10,15 +11,13 @@ name: TestFlight
 on:
   push:
     branches: [main]
-  pull_request:
-    paths:
-      - .github/workflows/testflight.yml
-      - ios/scripts/upload-testflight.sh
   workflow_dispatch:
 
-# One upload at a time; a newer push waits rather than cancelling one mid-upload.
+# One upload at a time per branch; a newer push waits rather than cancelling one mid-upload.
+# Per branch, so a run from another branch never replaces a waiting main upload. Build numbers
+# are unique per run, so uploads from different branches can't collide.
 concurrency:
-  group: testflight
+  group: testflight-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:

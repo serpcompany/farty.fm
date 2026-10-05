@@ -78,7 +78,8 @@ configuration's build settings.
 
 [`.github/workflows/testflight.yml`](../.github/workflows/testflight.yml) uploads the Release app
 to TestFlight on every push to `main`, and by hand from any branch (Actions > TestFlight > Run
-workflow). [`scripts/upload-testflight.sh`](scripts/upload-testflight.sh) does the work: it
+workflow, or `gh workflow run testflight.yml --ref <branch>`), which is how a branch build reaches
+the owner's phone and how a change to the pipeline is proven before merge. [`scripts/upload-testflight.sh`](scripts/upload-testflight.sh) does the work: it
 archives unsigned, checks the archive (bundle identifier, build number, icon, no audio), signs it
 with cloud signing, checks the signature, and uploads it.
 
