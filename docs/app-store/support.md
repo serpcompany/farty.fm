@@ -25,7 +25,7 @@ Some farts are just noise, with no clear pitch. The recording is still saved, bu
 melody notes. Try again: longer, steadier farts are more likely to hold a note.
 
 **It says "Didn't catch that".**
-The take was empty or too short. Try again a little closer to the phone.
+The take was empty: Stop was tapped right away. Tap Record, then Stop after the fart.
 
 **It says "We heard more than one".**
 Pedos keeps the first fart in a recording. Record one fart at a time.
@@ -39,7 +39,7 @@ They stay on your iPhone, inside the app, and are part of your iPhone's own back
 backups turned on. We never receive them, so we can't recover them. Deleting the app deletes them.
 
 **Where do the songs come from?**
-Every song comes from a public-domain score, from the PDMX dataset and the Mutopia Project.
+Every song comes from a public-domain score in the PDMX dataset.
 
 **Does Pedos collect my data?**
 No. See the [privacy policy](<privacy policy URL>).

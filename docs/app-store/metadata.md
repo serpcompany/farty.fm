@@ -23,7 +23,7 @@ Two options. The home-screen name stays **Pedos** either way (`CFBundleDisplayNa
 Either way, App Store Connect will refuse a name another app already uses; check that it's free
 when you create or rename the app record.
 
-**Owner decides:** which name.
+**Owner decides:** which name, and the first App Store version number (see below).
 
 ## Subtitle (30 characters max)
 
@@ -33,6 +33,16 @@ Turn your farts into songs
 
 26 characters. The name and subtitle are indexed for search, so the keywords below don't repeat
 "fart", "songs" or "Pedos".
+
+**If the name is `Pedos: Fart Songs`**, this subtitle repeats "fart" and "songs" and wastes 26
+characters on words the name already indexes. Use this one instead:
+
+```text
+Find the melody in every toot
+```
+
+29 characters. It adds "melody" and "toot", so for this pairing use the second keyword list below,
+which drops those two words and adds "laugh" and "gross".
 
 ## Promotional text (170 characters max)
 
@@ -47,7 +57,7 @@ Record a fart and Pedos finds its note. Collect notes to unlock songs like Twink
 ```text
 Pedos turns your farts into music.
 
-Record a fart and Pedos finds its note. Some farts hold a steady pitch, like G3 or B♭2. Others are just noise. Every fart is saved, and every one with a clear note joins your collection.
+Record a fart and Pedos finds its note. Some farts hold a steady pitch, like G3 or A♯2. Others are just noise. Every fart is saved, and every one with a clear note joins your collection.
 
 Collect enough different notes and songs unlock, like Mary Had a Little Lamb, Twinkle, Twinkle, Little Star, Ode to Joy and Jingle Bells. A song needs a different fart for each of its notes, so finding new notes is the game.
 
@@ -63,7 +73,7 @@ HOW IT WORKS
 • Profile: your recordings, notes collected, songs unlocked and Toots.
 
 SONGS WITH SOURCES
-Every song comes from a public-domain score, from the PDMX dataset and the Mutopia Project.
+Every song comes from a public-domain score in the PDMX dataset.
 
 PRIVATE BY DESIGN
 Your recordings stay on your iPhone. There's no account, no sign-in, no ads and no tracking, and Pedos doesn't send your recordings anywhere.
@@ -73,7 +83,7 @@ Your recordings stay on your iPhone. There's no account, no sign-in, no ads and 
 
 Claims checked against the code and docs:
 
-- "finds its note", "noise-like", "G3 or B♭2": Recording Analysis (`RecordingAnalysisKit/`); the
+- "finds its note", "noise-like", "G3 or A♯2": Recording Analysis (`RecordingAnalysisKit/`); the
   Result screen shows "Your note" or "No steady note this time".
 - "a different fart for each of its notes": the unlock rule in `docs/design/app-map.md`.
 - "nothing else", "no synthesizer": ADR 0004. **Only true once the Release build renders Toots
@@ -81,8 +91,10 @@ Claims checked against the code and docs:
 - "Keep the ones you like as Toots", "ready to play, rename or delete": true in today's app, but
   Toots are kept in memory only and are lost when the app quits. **Toots must survive a relaunch
   before submission**, or this line must change.
-- "public-domain score, from the PDMX dataset and the Mutopia Project": ADR 0003 and
-  `catalog/catalog.json`; the same credit is on the Profile tab.
+- "public-domain score in the PDMX dataset": all 12 shipped Songs are from PDMX (ADR 0003,
+  `catalog/catalog.json`; each Song shows "Public domain score · PDMX"). The one Mutopia entry,
+  `ode-mutopia`, is in the catalog but doesn't ship, so Mutopia isn't credited. The Profile tab's
+  credit line still names both; that wording is a separate small app change.
 - "no account, no sign-in, no ads and no tracking", "doesn't send your recordings anywhere": see
   `app-privacy.md` (no network code in the app).
 - No number of songs is given, because the Song Catalog is meant to grow (it has 12 today).
@@ -95,11 +107,25 @@ Comma-separated, no spaces after commas.
 toot,music,melody,funny,sound,recorder,pitch,note,silly,humor,gas,poot,tune,noise,comedy,flatulence
 ```
 
-99 characters. Left out on purpose: "fart" and "songs" (already in the name and subtitle), "prank"
+99 characters. For the `Pedos: Fart Songs` name with the second subtitle, use this list instead
+("melody", "toot" and "tune" are out; "laugh" and "gross" are in):
+
+```text
+music,funny,sound,recorder,pitch,note,silly,humor,gas,poot,noise,comedy,flatulence,laugh,gross
+```
+
+94 characters. Left out on purpose: "fart" and "songs" (already in the name and subtitle), "prank"
 and "soundboard" (Pedos has no prank or soundboard feature), "tuner" (it isn't one), "kids"
 (it suggests the Kids category, which has its own rules), and competitors' names (guideline 2.3.7).
 
-## What's New (version 1.0)
+## What's New (for the first update)
+
+App Store Connect doesn't offer "What's New" for an app's first version, so this text isn't used at
+launch. Keep it for the first update, and edit it to describe what changed.
+
+**Version number (owner decides).** The build's version is `MARKETING_VERSION: "0.1.0"` in
+`ios/project.yml`, which release-please manages, so the first App Store version won't be "1.0"
+unless someone bumps it. The owner picks the number before the first upload.
 
 ```text
 First release. Record your farts, find each one's note, and unlock songs played only by your farts.
@@ -127,7 +153,7 @@ W3GXL2NQQP).
 
 ## Price
 
-**Free** (Tier 0), with no in-app purchases. The Paid Apps agreement isn't needed.
+**Free**, with no in-app purchases. The Paid Apps agreement isn't needed.
 
 ## Review notes for Apple
 
@@ -143,7 +169,7 @@ How to try it:
 
 Privacy: recordings stay on the device, in the app's own storage. There is no account or sign-in, and the app makes no network requests: nothing is collected, sent or tracked.
 
-The melodies come from public-domain scores (the PDMX dataset and the Mutopia Project); each song's source and license are recorded in the app's catalog.
+The melodies come from public-domain scores (the PDMX dataset); each song's source and license are recorded in the app's catalog.
 ```
 
 **Owner checks before submitting:** step 4 follows from the unlock rule (one recording per

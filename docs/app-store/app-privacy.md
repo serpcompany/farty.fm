@@ -15,7 +15,7 @@ contacts, photos, HealthKit, pasteboard, `ShareLink`, `UIActivityViewController`
 | Finding | Where |
 | --- | --- |
 | **No network code at all.** No `URLSession`, `URLRequest`, `Network` framework or web views. The only URL the app opens is `UIApplication.openSettingsURLString`, the system Settings app, from the "Pedos needs the microphone" alert. | `Record/RecordTab.swift` |
-| **No third-party code.** The only package is the local `RecordingAnalysisKit` (`ios/project.yml`); it imports Foundation, AVFAudio and Accelerate only. The app imports Foundation, SwiftUI, AVFAudio, Accelerate, Observation and UIKit. | `ios/project.yml`, `RecordingAnalysisKit/Package.swift` |
+| **No third-party code.** The only package is the local `RecordingAnalysisKit` (`ios/project.yml`); it imports Foundation and AVFAudio, plus Accelerate in `PYIN.swift` only. The app target imports Foundation, SwiftUI, AVFAudio, Observation, UIKit and RecordingAnalysisKit. | `ios/project.yml`, `RecordingAnalysisKit/Package.swift` |
 | **No accounts, analytics, ads, tracking or identifiers.** None of the APIs above appear. | |
 | **Microphone audio is recorded and kept on the device.** `AVAudioRecorder` writes mono 44.1 kHz AAC to a draft in the app's temporary folder; Save moves it to `Application Support/Recordings/<id>.m4a`, with `<id>.json` (number, length, save date) and `<id>.analysis.json` (Recording Analysis: the fart's span and pitch) beside it. Discard deletes the draft; Delete removes the files. | `Model/LiveRecordingSource.swift`, `Model/RecordingStore.swift` (ADR 0002) |
 | **Recording Analysis runs on the phone**, in Swift, with no server. | `RecordingAnalysisKit/` |
@@ -69,7 +69,7 @@ the exact wording in App Store Connect may differ slightly.
 | User-generated content | No | Recordings are made by the user but stay on their phone; nobody else can see or hear them. |
 | Messaging and chat | No | None. |
 | Advertising | No | None. |
-| **Profanity or crude humor** | **Infrequent or Mild** | Fart humor is the whole premise, but it's mild toilet humor: no words of profanity anywhere, no insults, nothing sexual. |
+| **Profanity or crude humor** | **Infrequent or Mild** | Fart humor is the whole premise, but it's mild toilet humor: no words of profanity anywhere, no insults, nothing sexual. Apple's levels are "Infrequent or Mild" versus "Frequent or Intense". The humor is frequent (it's the name, every screen and every line of the listing) but mild, and the rating follows intensity, so "Infrequent or Mild" still applies. |
 | Horror or fear themes | None | |
 | Alcohol, tobacco or drug use or references | None | |
 | Mature or suggestive themes | None | |
@@ -79,7 +79,7 @@ the exact wording in App Store Connect may differ slightly.
 | Cartoon or fantasy violence / realistic violence / prolonged graphic violence / guns or other weapons | None | |
 | Simulated gambling / gambling / contests / loot boxes | None / No | Unlocking Songs is collecting notes, with no chance, purchases or prizes. |
 
-**Suggested rating: 9+**, the result of "Infrequent or Mild" crude humor with everything else
+**Suggested rating: 9+**, weighing both parts of the answer (the humor is frequent, but mild), the result of "Infrequent or Mild" crude humor with everything else
 "None". The conservative alternative is "Frequent or Intense" (13+), if the owner would rather not
 argue that a fart app's humor is mild; it costs younger users, the audience most likely to enjoy
 the app.
@@ -93,16 +93,18 @@ App Store Connect asks: "Does your app contain, show, or access third-party cont
 
 **Suggested answer: Yes, and yes, we have the necessary rights.**
 
-- **The Songs are third-party melodies, all public domain.** Every Song comes from a cited score
-  in PDMX (Long et al., ICASSP 2025, doi:10.5281/zenodo.15571083), checked per score as public
-  domain (Public Domain Mark 1.0), or from the Mutopia Project (public domain). Each entry in
-  `catalog/catalog.json` records the source ID, URL, license, file hash and retrieval date
+- **The Songs are third-party melodies, all public domain.** All 12 shipped Songs come from a
+  cited score in PDMX (Long et al., ICASSP 2025, doi:10.5281/zenodo.15571083), checked per score as
+  public domain (Public Domain Mark 1.0). (The one Mutopia entry, `ode-mutopia`, is in the catalog
+  but doesn't ship.) Each entry in `catalog/catalog.json` records the source ID, URL, license, file hash and retrieval date
   (ADR 0003). The app credits them on the Profile tab and on each Song ("Public domain score ·
   PDMX").
 - **Happy Birthday** is in the catalog, and the score used is marked public domain in PDMX. Its
-  copyright was long disputed: a 2015 US ruling (Marya v. Warner/Chappell) and the 2016 settlement
-  put it in the public domain in the US. It's the one Song worth a second look by the owner for
-  other countries.
+  copyright was long disputed, but the dispute (Marya v. Warner/Chappell, a 2015 US ruling and a
+  2016 settlement) was about the **lyrics**. Pedos plays the melody only, with no lyrics. The
+  melody is from "Good Morning to All" (1893), whose composer, Mildred Hill, died in 1916, so it's
+  public domain everywhere, including countries with life+70 copyright terms. No second look is
+  needed for other countries.
 - **No third-party audio ships.** Every sound comes from the user's own recordings (ADR 0004). The
   Fixture Library (`fixtures/recordings/`) and the design prototype's audio are excluded from
   Release builds, and `ios/scripts/check-release-build.sh` fails the build if any audio or loader

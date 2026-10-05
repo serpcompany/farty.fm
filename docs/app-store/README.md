@@ -11,6 +11,7 @@ marked "Owner decides" or "Owner provides", and presses Submit for Review.
 | [`privacy-policy.md`](privacy-policy.md) | A short privacy policy to host at a public URL |
 | [`support.md`](support.md) | A short support page to host at a public URL |
 | [`screenshots/`](screenshots/) | Six 6.9-inch iPhone screenshots |
+| [`promo/`](promo/) | Five ad-style promo screenshots (headline over a colored background) and the editor's project file |
 
 ## Before submitting
 
@@ -22,6 +23,8 @@ These drafts describe the app as it must be at submission, not today's Release b
   "Keep the ones you like as Toots".
 - **A privacy manifest** (`PrivacyInfo.xcprivacy`) for the app's use of `UserDefaults`; see
   `app-privacy.md`.
+- **The first App Store version number.** The build is `0.1.0` (managed by release-please); the
+  owner picks the number to upload, and "What's New" isn't used for a first version.
 - **Placeholders to fill:** `<support email>`, `<privacy policy URL>` and `<date published>` in the
   hosted pages, and `<copyright holder>` in `metadata.md`.
 
@@ -67,7 +70,8 @@ To re-export, for example from the final Release build:
 
 1. Copy the skill's `template/` into a scratch folder and run `bun install`.
 2. Copy `promo/app-store-screenshots.json` there.
-3. Copy the plain screenshots into `public/screenshots/apple/iphone/en/` as `01.png` to `06.png`, in this folder's order (`01-record` … `06-toots`). Add the app icon as `public/app-icon.png`.
-4. Run `bun dev`, open http://localhost:3000, and click **Export bundle**. It exports every iPhone size Apple accepts.
+3. Copy the plain screenshots into `public/screenshots/apple/iphone/en/` as `01.png` to `06.png`, in this folder's order (`01-record` … `06-toots`). Only `02.png` to `06.png` are used by the project file; `01.png` isn't. Copy the app icon from `ios/Pedos/Assets.xcassets/AppIcon.appiconset/AppIcon.png` to `public/app-icon.png`.
+4. Run `bun dev`, open http://localhost:3000, and click **Export bundle**. It downloads a zip of every iPhone size Apple accepts.
+5. Unzip it and copy the 6.9-inch (1320×2868) PNGs from `ios/iphone/1320x2868/en/` back into `promo/`, under the existing names (`01-hero`, `02-two-devices`, `03-device-top`, `04-device-bottom`, `05-no-device`). Check each with `magick identify` (1320×2868, RGB). The editor auto-saves edits to its own `app-store-screenshots.json`; copy that back to `promo/` too if anything changed.
 
 The promo set shows Toots, which only QA builds can make until #16 and #17, so retake it from the Release build before submitting.
