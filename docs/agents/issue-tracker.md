@@ -53,13 +53,16 @@ Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob
    - The body starts with `Closes #<n>` and says what changed and what's deliberately not included.
    - It reports evidence level by level: build, automated tests, UI tests, installed artifact, owner acceptance. A lower level never proves a higher one.
    - For audio, report measurements on the actual output (the `tools/melody-lab/evaluate.py` checks or their Swift equivalents), not a description. For UI, attach a screenshot or recording from the simulator or device.
-3. Keep test rounds few until launch. The full suite runs once, in CI, before merge.
+3. Keep test rounds few until launch. Tests run in two sets, as Apple recommends (`ios/scripts/run-tests.sh`):
+   - **Quick set, before merge:** the unit tests, the Recording Analysis golden tests, the shipped-build test (record, save, pitch, replay, relaunch and delete, here on the Debug build) and the core record-flow UI tests. CI runs it once, when the PR is marked ready. It takes about 11 minutes there, down from 22 for the old full run.
+   - **The Release build** is first built after merge, by the TestFlight workflow, which runs the shipped-build test on it before uploading. A Release-only problem therefore shows up as a failed TestFlight run on `main`. To check one before merge, run `gh workflow run testflight.yml --ref <branch>`, which uploads only if the test passes.
+   - **Full set, after merge:** every UI test, on every push to `main`. It doesn't block PRs. If it fails, fixing `main` comes before anything else.
    - **Owner first.** As soon as the screens work, give the owner a build to tap through. Fold their changes in before screenshots and review.
-   - **Targeted local tests.** Authors run only the tests their change touches (`-only-testing`), in light mode. The full suite and the dark-mode runs are left to CI and to the final screenshots.
+   - **Targeted local tests.** Authors run only the tests their change touches (`-only-testing`), in light mode. If a change touches a screen, also run that screen's UI tests, because the quick set doesn't cover every screen. The dark-mode runs are left to the final screenshots.
    - **Screenshots once**, at the end, in light and dark.
 4. One review:
-   - A fresh review agent, which didn't write the change, reads the diff and posts findings as PR review comments anchored to lines, each marked **blocking** or **suggestion**. It trusts CI for the full suite and runs a single test only to confirm a suspected bug.
+   - A fresh review agent, which didn't write the change, reads the diff and posts findings as PR review comments anchored to lines, each marked **blocking** or **suggestion**. It trusts CI for the tests and runs a single test only to confirm a suspected bug.
    - The author replies on every comment: fixed (with the commit) or declined (with the reason). Blocking findings are fixed or explicitly waived by the owner.
    - Check blocking fixes by reading the fix's diff. Run another fresh review only when the fixes are large. After three rounds of disagreement, the owner decides.
    - Record the outcome in the PR, for example "Review: 1 round, blocking fixes checked". A clean review is not owner acceptance.
-5. Update the branch from `main`, then mark the PR ready for review, which runs CI on the whole suite. When CI passes and the owner has accepted the change, squash-merge and delete the branch. Agents merge only when the owner has approved it. Merge one PR at a time; after each merge, update the next open PR from `main` and wait for its checks before merging it.
+5. Update the branch from `main`, then mark the PR ready for review, which runs the quick set in CI. When CI passes and the owner has accepted the change, squash-merge and delete the branch. Agents merge only when the owner has approved it. Merge one PR at a time; after each merge, update the next open PR from `main` and wait for its checks before merging it.

@@ -3,9 +3,10 @@
 # product identifier, Debug and the test bundles have their own, and Info.plist
 # takes the identifier from the build setting.
 #
-# It also builds Release for the simulator and checks that the app contains no
-# audio: the design prototype's audio (the Fixture Library's Recordings and its
-# renders of each Song) is for Debug builds only.
+# It also checks that Release excludes the design prototype's audio (the Fixture
+# Library's Recordings and its renders of each Song), which is for Debug builds
+# only. The built app is checked too, before every TestFlight upload:
+# scripts/upload-testflight.sh fails if the archive contains any audio.
 #
 # Run after `xcodegen generate`: ios/scripts/check-bundle-identifiers.sh
 set -eu
@@ -19,9 +20,20 @@ if [ ! -d "$project" ]; then
   exit 1
 fi
 
+# Every target's build settings, read once per configuration: each xcodebuild call takes most
+# of a minute on CI.
+debug_settings=$(xcodebuild -project "$project" -alltargets -configuration Debug -showBuildSettings)
+release_settings=$(xcodebuild -project "$project" -alltargets -configuration Release -showBuildSettings)
+
+setting() { # settings target name
+  printf '%s\n' "$1" | awk -v target="$2" -v name="$3" '
+    /^Build settings for action build and target / { current = $NF; sub(/:$/, "", current) }
+    current == target && $1 == name && $2 == "=" { sub(/^[^=]*= /, ""); print; exit }'
+}
+
 bundle_identifier() { # target configuration
-  xcodebuild -project "$project" -target "$1" -configuration "$2" -showBuildSettings |
-    awk -F ' = ' '$1 ~ /^ *PRODUCT_BUNDLE_IDENTIFIER$/ { print $2; exit }'
+  if [ "$2" = Release ]; then settings=$release_settings; else settings=$debug_settings; fi
+  setting "$settings" "$1" PRODUCT_BUNDLE_IDENTIFIER
 }
 
 check() { # description expected actual
@@ -42,19 +54,9 @@ check "Info.plist CFBundleIdentifier" '$(PRODUCT_BUNDLE_IDENTIFIER)' \
 
 # The Fixture Library never ships to regular users (AGENTS.md), and neither do
 # the prototype's Song renders, which are made from it.
-derived=$(mktemp -d "${TMPDIR:-/tmp}/pedos-release.XXXXXX")
-trap 'rm -rf "$derived"' EXIT
-echo "Building Release for the simulator to check its contents..."
-xcodebuild build -project "$project" -scheme Pedos -configuration Release \
-  -destination 'generic/platform=iOS Simulator' -derivedDataPath "$derived" \
-  CODE_SIGNING_ALLOWED=NO -quiet
-release_app="$derived/Build/Products/Release-iphonesimulator/Pedos.app"
-check "Release app built" yes "$([ -x "$release_app/Pedos" ] && echo yes)"
-check "Release app audio files" none "$(
-  find "$release_app" -type f \( -iname '*.mp3' -o -iname '*.wav' -o -iname '*.m4a' \
-    -o -iname '*.caf' -o -iname '*.aif' -o -iname '*.aiff' \) -exec basename {} \; |
-    sort | tr '\n' ' ' | sed 's/ $//' | grep . || echo none
-)"
+check "Release excludes the prototype audio" "rec-*.mp3 song-*.mp3" \
+  "$(setting "$release_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
+check "Debug keeps the prototype audio" "" "$(setting "$debug_settings" Pedos EXCLUDED_SOURCE_FILE_NAMES)"
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures build check(s) failed" >&2

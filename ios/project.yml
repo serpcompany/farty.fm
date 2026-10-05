@@ -32,8 +32,8 @@ targets:
       # The design prototype's audio: the Fixture Library's trimmed Recordings, for playing
       # sample Recordings, and its renders of each Song, which stand in for Song Creator's own
       # render until #17. Debug builds only: Release excludes them below (the Fixture Library
-      # never ships to regular users), and scripts/check-bundle-identifiers.sh checks the
-      # Release app.
+      # never ships to regular users). scripts/check-bundle-identifiers.sh checks the exclusion,
+      # and scripts/upload-testflight.sh checks every archive.
       - path: ../docs/design/prototype/audio
         includes:
           - "rec-*.mp3"
