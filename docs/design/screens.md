@@ -132,7 +132,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Sort menu (Closest to unlocking | A–Z)
 - **Unlocked** section: rows with the title and "Ready"
 - **Locked** section: rows with the title, a progress bar ("3 of 5 notes covered"), a lock and the nearest missing note
-- (Unlock rule: one different Melodic Recording per distinct pitch, within 3 semitones. See `app-map.md`.)
+- (Unlock rule: one different Melodic Recording per distinct pitch, within 3 semitones, or an octave away with an Octave Move where the Song needs it. See ADR 0006.)
 **PRIMARY ACTION:** Open an Unlocked Song.
 **SECONDARY ACTIONS:** Open a locked Song to see what's missing; search; sort.
 **STATES:**
@@ -151,7 +151,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Title
 - "3 of 5 notes covered"
 - The notes still needed, with octave ("Needs a fart near D3 and F3")
-- Pitch strip marking the needed pitch classes (it shows note names only, so the text above carries the octave)
+- Piano roll fitted to the Song's range, with octave labels: notes you have filled, notes still needed dashed (ADR 0006)
 - Record button (goes to the Record tab)
 - No way to play it until it's unlocked
 **PRIMARY ACTION:** Record.
