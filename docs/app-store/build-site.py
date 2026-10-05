@@ -5,6 +5,7 @@ Run by .github/workflows/pages.yml, which publishes the output to
 https://serpcompany.github.io/pedos-app/. Usage: build-site.py <output folder>
 """
 import pathlib
+import shutil
 import sys
 
 import markdown
@@ -17,14 +18,18 @@ TEMPLATE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
+<link rel="icon" type="image/png" href="{root}assets/icon-64.png">
+<link rel="apple-touch-icon" href="{root}assets/icon-180.png">
 <style>
   :root {{ color-scheme: light dark; }}
   body {{ font: 17px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
          max-width: 40rem; margin: 0 auto; padding: 2rem 1rem; }}
   a {{ color: #0a84ff; }}
+  .logo {{ display: block; width: 72px; height: 72px; border-radius: 16px; }}
 </style>
 </head>
 <body>
+<a href="{root}"><img class="logo" src="{root}assets/icon-180.png" alt="Pedos"></a>
 {body}
 </body>
 </html>
@@ -38,10 +43,12 @@ def main() -> None:
         title = text.splitlines()[0].lstrip("# ").strip()
         page = out / slug / "index.html"
         page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(TEMPLATE.format(title=title, body=markdown.markdown(text)))
+        page.write_text(TEMPLATE.format(title=title, root="../", body=markdown.markdown(text)))
+    shutil.copytree(HERE / "site-assets", out / "assets", dirs_exist_ok=True)
     (out / "index.html").write_text(
         TEMPLATE.format(
             title="Pedos",
+            root="",
             body='<h1>Pedos</h1><p><a href="support/">Support</a> · <a href="privacy/">Privacy Policy</a></p>',
         )
     )
