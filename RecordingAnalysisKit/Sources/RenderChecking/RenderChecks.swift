@@ -1,53 +1,72 @@
 import Accelerate
 import Foundation
-@testable import RecordingAnalysisKit
+import RecordingAnalysisKit
 
 /// The objective checks on a rendered Song: a port of `tools/melody-lab/evaluate.py`.
 ///
 /// If an automatic pitch tracker can read the melody back out of the audio note by note, a
 /// listener almost certainly can too. Necessary, not sufficient: the owner's ears decide.
-enum RenderChecks {
-    struct NoteToCheck {
-        var startSeconds: Double
+///
+/// A library of its own, for tests only: the package's tests and the app's unit tests link it,
+/// and the app doesn't.
+public enum RenderChecks {
+    public struct NoteToCheck: Sendable {
+        public var startSeconds: Double
         /// `min(len_s, note length)`: how long the note actually sounds.
-        var heardSeconds: Double
-        var targetMIDI: Double
+        public var heardSeconds: Double
+        public var targetMIDI: Double
+
+        public init(startSeconds: Double, heardSeconds: Double, targetMIDI: Double) {
+            self.startSeconds = startSeconds
+            self.heardSeconds = heardSeconds
+            self.targetMIDI = targetMIDI
+        }
     }
 
-    struct Metrics {
-        var notes: Int
+    /// The bar a render must clear (ADR 0004, #41): at least 94% of notes within ±50 cents, at
+    /// least 95% of onsets within ±50 ms, and no note with a second attack.
+    public static let minimumWithin50cPct = 94
+    public static let minimumOnsetsOnTimePct = 95
+
+    public struct Metrics: Sendable {
+        public var notes: Int
         /// Read-back error per note in cents, nil if fewer than 2 voiced frames.
-        var cents: [Double?]
-        var onTime: [Bool]
-        var retrigger: [Bool]
+        public var cents: [Double?]
+        public var onTime: [Bool]
+        public var retrigger: [Bool]
 
         /// `round(100 × k / n)`, half to even like numpy, as `evaluate.py` reports it.
-        static func pct(_ k: Int, _ n: Int) -> Int {
+        public static func pct(_ k: Int, _ n: Int) -> Int {
             Int((100 * Double(k) / Double(n)).rounded(.toNearestOrEven))
         }
 
-        var pitchReadablePct: Int { Self.pct(cents.count { $0 != nil }, notes) }
+        public var pitchReadablePct: Int { Self.pct(cents.count { $0 != nil }, notes) }
         /// `within_50c_pct`; `edge` lists notes accepted up to ±`edgeCents` instead of ±50.
-        func within50cPct(edge: Set<Int> = [], edgeCents: Double = 50) -> Int {
+        public func within50cPct(edge: Set<Int> = [], edgeCents: Double = 50) -> Int {
             Self.pct(cents.indices.count { i in
                 guard let c = cents[i] else { return false }
                 return abs(c) <= (edge.contains(i) ? edgeCents : 50)
             }, notes)
         }
-        var onsetsOnTimePct: Int { Self.pct(onTime.count { $0 }, notes) }
-        var notesWithRetrigger: Int { retrigger.count { $0 } }
-        var medianAbsCents: Double? {
+        public var onsetsOnTimePct: Int { Self.pct(onTime.count { $0 }, notes) }
+        public var notesWithRetrigger: Int { retrigger.count { $0 } }
+        /// Clears the bar, on the rounded percentages like `evaluate.py`.
+        public var passes: Bool {
+            within50cPct() >= RenderChecks.minimumWithin50cPct && onsetsOnTimePct >= RenderChecks.minimumOnsetsOnTimePct
+                && notesWithRetrigger == 0
+        }
+        public var medianAbsCents: Double? {
             let a = cents.compactMap { $0.map(abs) }
             return a.isEmpty ? nil : RecordingPitch.median(a)
         }
     }
 
-    static let sr = Double(analysisSampleRate)
+    public static let sr = Double(analysisSampleRate)
     static let hop = 256
     /// `evaluate.py` reads renders back with fmax 1200 Hz (analysis uses 900).
     static let pyin = PYIN(fmax: 1200)
 
-    static func evaluate(_ audio: [Double], notes: [NoteToCheck]) -> Metrics {
+    public static func evaluate(_ audio: [Double], notes: [NoteToCheck]) -> Metrics {
         let tracked = pyin(audio)
         let onsets = onsetTimes(audio)
         var metrics = Metrics(notes: notes.count, cents: [], onTime: [], retrigger: [])
@@ -70,7 +89,7 @@ enum RenderChecks {
     /// A second audible attack inside one note, with the trimming's definition: on a 50 ms
     /// level, a dip of more than 6 dB below the running maximum, then a rise of more than 4 dB,
     /// more than 60 ms after the attack.
-    static func hasReattack(_ segment: [Double]) -> Bool {
+    package static func hasReattack(_ segment: [Double]) -> Bool {
         let hop = Int(0.005 * sr)
         if segment.count < 20 * hop { return false }
         let db = Trimming.levelDB(segment.map(Float.init), frameLength: 10 * hop, hop: hop)
@@ -92,7 +111,7 @@ enum RenderChecks {
     /// Onset times in seconds: spectral flux of the log-power mel spectrogram (2048-point
     /// STFT, 128 Slaney mel bands, 80 dB range), normalized to 0...1, then librosa's greedy
     /// peak picking with its default 30 ms / 100 ms windows and delta 0.07.
-    static func onsetTimes(_ y: [Double]) -> [Double] {
+    package static func onsetTimes(_ y: [Double]) -> [Double] {
         let envelope = onsetStrength(y)
         let lo = envelope.min() ?? 0
         let shifted = envelope.map { $0 - lo }

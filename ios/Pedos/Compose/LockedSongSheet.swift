@@ -56,7 +56,7 @@ struct LockedSongSheet: View {
 
 #if DEBUG
 #Preview("Locked Song") {
-    let model = SampleAppModel.preview(start: .all)
+    let model = SampleAppModel.preview(start: .takes(8))
     Color.clear.sheet(isPresented: .constant(true)) {
         LockedSongSheet(model: model, song: model.song("birthday")!, onRecord: {})
     }

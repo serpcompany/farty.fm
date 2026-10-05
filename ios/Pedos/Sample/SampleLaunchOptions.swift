@@ -5,17 +5,17 @@ import Foundation
 /// by hand (Xcode: Product › Scheme › Edit Scheme › Arguments). For example:
 ///
 ///     -PedosSampleStart all          new (default) | few | all | a count of story takes
-///     -PedosSampleToots mary,ode     Songs already saved as Toots, oldest first
+///     -PedosSampleToots mary,ode     Songs made and saved as Toots at launch, oldest first
 ///     -PedosSampleFailure saveFailed couldNotStart, interrupted, nothingHeard, saveFailed,
 ///                                    analysisFailed, couldNotMakeToot, tootAudioMissing
 ///                                    (comma-separated, each happens once)
 ///     -PedosMicrophone denied        granted | denied | undetermined: skip the system prompt
 ///     -PedosAnalysisSeconds 2        how long the simulated analysis takes
-///     -PedosMakingSeconds 3          how long making a Toot takes
+///     -PedosMakingSeconds 3          the least time making a Toot takes
 ///     -welcomeSeen YES               skip (or with NO, show) the Welcome sheet
 ///     -PedosLive YES                 record for real, as Release builds do, instead of the
-///                                    Fixture Library (with -PedosTestTake <path>, each take is
-///                                    a copy of that file)
+///                                    Fixture Library (with -PedosTestTake <paths>, each take is
+///                                    a copy of the next of those files)
 ///     -PedosFreshStore YES           with -PedosLive: keep Recordings in a new empty folder for
 ///                                    this launch, not the app's own
 @MainActor
@@ -25,15 +25,13 @@ struct SampleLaunchOptions {
     func makeModel() -> SampleAppModel {
         if defaults.bool(forKey: "PedosLive") {
             return SampleAppModel(
-                source: LiveRecordingSource(store: store, analyzer: .reference, testTake: LiveRecordingSource.testTake(in: defaults)),
+                source: LiveRecordingSource(store: store, analyzer: .reference, testTakes: LiveRecordingSource.testTakes(in: defaults)),
                 songs: Song.prototypeCatalog,
                 initialTootSongIDs: tootSongIDs,
-                songAudio: \.prototypeAudioURL,
-                renders: Song.prototypeRenders,
                 microphone: microphone,
                 defaults: defaults,
                 failures: failures,
-                makingDelay: seconds("PedosMakingSeconds", default: 1.2)
+                minimumMakingTime: seconds("PedosMakingSeconds", default: 0)
             )
         }
         return SampleAppModel(
@@ -42,16 +40,13 @@ struct SampleLaunchOptions {
             songs: Song.prototypeCatalog,
             initialFixtureIDs: initialFixtureIDs,
             initialTootSongIDs: tootSongIDs,
-            songAudio: \.prototypeAudioURL,
-            renders: Song.prototypeRenders,
             microphone: microphone,
             defaults: defaults,
             failures: failures,
             analysisDelay: seconds("PedosAnalysisSeconds", default: 0.9),
-            makingDelay: seconds("PedosMakingSeconds", default: 1.2)
+            minimumMakingTime: seconds("PedosMakingSeconds", default: 0)
         )
     }
-
     /// The app's own Recordings, or with -PedosFreshStore a new empty folder for this launch.
     private var store: RecordingStore {
         guard defaults.bool(forKey: "PedosFreshStore") else { return .standard }

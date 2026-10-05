@@ -16,6 +16,7 @@ final class SampleAppModelTests: XCTestCase {
 
     override func tearDown() async throws {
         defaults.removePersistentDomain(forName: suiteName)
+        try? FileManager.default.removeItem(at: tootFolder)
     }
 
     private func makeModel(
@@ -24,9 +25,7 @@ final class SampleAppModelTests: XCTestCase {
         microphone: MicrophoneAccess = SimulatedMicrophone(permission: .granted),
         failures: SampleAppModel.Failures = [],
         fixtures: [SampleFixture] = SampleFixture.prototypeLibrary,
-        story: [String] = SampleFixture.prototypeStory,
-        songAudio: @escaping (Song) -> URL? = \.prototypeAudioURL,
-        renders: [Song.ID: StandInRender] = Song.prototypeRenders
+        story: [String] = SampleFixture.prototypeStory
     ) -> SampleAppModel {
         SampleAppModel(
             fixtures: fixtures,
@@ -34,21 +33,32 @@ final class SampleAppModelTests: XCTestCase {
             songs: Song.prototypeCatalog,
             initialFixtureIDs: start,
             initialTootSongIDs: toots,
-            songAudio: songAudio,
-            renders: renders,
+            tootFolder: tootFolder,
             microphone: microphone,
             defaults: defaults,
             failures: failures,
             now: { [unowned self] in clock },
             analysisDelay: .zero,
-            interruptionDelay: .zero,
-            makingDelay: .zero
+            interruptionDelay: .zero
         )
     }
+
+    /// A model whose Toots at launch have been made.
+    private func makeModelWithToots(
+        start: [String] = SampleFixture.prototypeLibrary.map(\.id),
+        toots: [Song.ID],
+        failures: SampleAppModel.Failures = []
+    ) async -> SampleAppModel {
+        makeModel(start: start, toots: toots, failures: failures)
+    }
+
+    private var tootFolder: URL { URL.temporaryDirectory.appending(path: suiteName, directoryHint: .isDirectory) }
 
     private var allFixtureIDs: [String] { SampleFixture.prototypeLibrary.map(\.id) }
 
     private func song(_ id: Song.ID) -> Song { Song.prototypeCatalog.first { $0.id == id }! }
+
+    private func fixture(_ id: String) -> SampleFixture { SampleFixture.prototypeLibrary.first { $0.id == id }! }
 
     /// Records for one second and stops, returning the draft under Review.
     @discardableResult
@@ -148,7 +158,7 @@ final class SampleAppModelTests: XCTestCase {
         guard case .review(let draft) = model.flow else { return XCTFail("no Review: \(String(describing: model.flow))") }
         XCTAssertEqual(model.fixtureID(ofDraft: draft.id), "069")
         XCTAssertEqual(model.simulatedSource(ofDraft: draft.id), "Fixture Library Recording 069")
-        XCTAssertEqual(draft.seconds, 1.08)
+        XCTAssertEqual(draft.seconds, 1.67, accuracy: 0.01, "fixture 069's whole file")
         XCTAssertNotNil(draft.audioURL)
         XCTAssertEqual(draft.waveform.count, 40)
         XCTAssertEqual(draft.waveform.max(), 1)
@@ -210,7 +220,8 @@ final class SampleAppModelTests: XCTestCase {
         let result = try XCTUnwrap(result(model))
         let recording = try XCTUnwrap(model.recording(result.recordingID))
         XCTAssertEqual(recording.name, "Recording 1")
-        XCTAssertEqual(recording.analysis, .analyzed(RecordingAnalysis(pitch: nil, firstFartUsed: false)))
+        XCTAssertEqual(recording.analysis, .analyzed(fixture("069").analysis))
+        XCTAssertNil(recording.pitch)
         XCTAssertTrue(result.changes.unlocked.isEmpty)
         XCTAssertTrue(result.changes.improved.isEmpty, "a Noise-like Recording covers nothing")
 
@@ -220,7 +231,7 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertEqual(fixtureID(model, melodic), "021")
         await model.saveDraft()
         let second = try XCTUnwrap(self.result(model))
-        XCTAssertEqual(model.recording(second.recordingID)?.pitch, 48.23)
+        XCTAssertEqual(try XCTUnwrap(model.recording(second.recordingID)?.pitch), 48.23, accuracy: 0.005)
         XCTAssertFalse(second.changes.improved.isEmpty, "the first Melodic Recording covers a pitch of every Song")
     }
 
@@ -229,10 +240,12 @@ final class SampleAppModelTests: XCTestCase {
         await recordTake(model)
         await model.saveDraft()
         let recording = model.recordings.last
-        XCTAssertEqual(recording?.analysis, .analyzed(RecordingAnalysis(pitch: nil, firstFartUsed: true)), "052 had a second fart cut")
+        XCTAssertEqual(recording?.analysis, .analyzed(fixture("052").analysis))
+        guard case .analyzed(let analysis) = recording?.analysis else { return XCTFail("not analyzed") }
+        XCTAssertTrue(analysis.firstFartUsed, "052 had a second fart cut")
     }
 
-    func testStoryUnlocksMaryAtTheSixthMelodicRecording() async throws {
+    func testStoryUnlocksMaryAtTheFourthMelodicRecording() async throws {
         let model = makeModel()
         var unlocks: [Int: [String]] = [:]
         for _ in SampleFixture.prototypeStory {
@@ -244,8 +257,12 @@ final class SampleAppModelTests: XCTestCase {
             }
             model.finishFlow()
         }
-        XCTAssertEqual(unlocks, [6: ["mary"], 8: ["jingle", "saints", "ode"], 9: ["twinkle", "row"]])
-        XCTAssertEqual(Song.prototypeCatalog.filter { model.coverage(of: $0).isUnlocked }.count, 6)
+        // As the reference engine's `melody_fit()` unlocks them, by Melodic Recordings collected.
+        XCTAssertEqual(unlocks, [
+            4: ["mary"], 5: ["jingle", "saints", "ode"], 6: ["twinkle", "row", "amazing"],
+            7: ["frere", "furelise", "auld"], 8: ["birthday", "merryxmas"],
+        ])
+        XCTAssertEqual(Song.prototypeCatalog.filter { model.coverage(of: $0).isUnlocked }.count, 12)
     }
 
     func testDiscardKeepsNothing() async {
@@ -289,7 +306,7 @@ final class SampleAppModelTests: XCTestCase {
 
         await model.retryAnalysis(of: recording.id)
         XCTAssertEqual(result(model)?.recordingID, recording.id)
-        XCTAssertEqual(model.recordings.first?.analysis, .analyzed(RecordingAnalysis(pitch: nil, firstFartUsed: false)))
+        XCTAssertEqual(model.recordings.first?.analysis, .analyzed(fixture("069").analysis))
     }
 
     func testRetryFromTheRecordingsTabAnalyzesInPlace() async throws {
@@ -302,7 +319,7 @@ final class SampleAppModelTests: XCTestCase {
 
         await model.retryAnalysis(of: recording.id)
         XCTAssertNil(model.flow, "retrying from the list doesn't open Result")
-        XCTAssertEqual(model.recordings.first?.analysis, .analyzed(RecordingAnalysis(pitch: nil, firstFartUsed: false)))
+        XCTAssertEqual(model.recordings.first?.analysis, .analyzed(fixture("069").analysis))
     }
 
     // MARK: Recordings
@@ -325,7 +342,7 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertEqual(model.recordings.count, 23)
         XCTAssertEqual(model.melodicRecordings.count, 9)
         XCTAssertEqual(model.recordings.filter { if case .analyzed(let a) = $0.analysis { a.firstFartUsed } else { false } }.count, 10)
-        XCTAssertEqual(Song.prototypeCatalog.filter { model.coverage(of: $0).isUnlocked }.map(\.id), ["twinkle", "mary", "jingle", "saints", "row", "ode"])
+        XCTAssertEqual(Song.prototypeCatalog.filter { model.coverage(of: $0).isUnlocked }.count, 12)
     }
 
     func testWithoutFixturesTheModelStartsEmptyAndCannotRecord() async {
@@ -347,17 +364,6 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertTrue(SampleFixture.prototypeStory.allSatisfy { id in library.contains { $0.id == id } })
     }
 
-    func testEverySongHasPlayableStandInAudioInDebugBuilds() throws {
-        for song in Song.prototypeCatalog {
-            let url = try XCTUnwrap(song.prototypeAudioURL, "no bundled audio for \(song.id)")
-            let player = try AVAudioPlayer(contentsOf: url)
-            let notesEnd = song.beats * 60 / Double(song.bpm)
-            // The render holds the last note a little past the score's end.
-            XCTAssertEqual(player.duration, notesEnd, accuracy: 1.5, song.id)
-            XCTAssertGreaterThan(player.duration, notesEnd, song.id)
-        }
-    }
-
     func testEveryFixtureHasPlayableAudioInDebugBuilds() throws {
         for fixture in SampleFixture.prototypeLibrary {
             let url = try XCTUnwrap(fixture.audioURL, "no bundled audio for \(fixture.id)")
@@ -369,21 +375,21 @@ final class SampleAppModelTests: XCTestCase {
     // MARK: Compose
 
     func testCoverageFollowsTheRecordings() async {
-        let model = makeModel(start: Array(SampleFixture.prototypeStory.prefix(7)))
+        let model = makeModel(start: Array(SampleFixture.prototypeStory.prefix(5)))
         let mary = song("mary")
         XCTAssertEqual(model.coverage(of: mary).summary, "3 of 4 notes covered")
         await recordTake(model)
         await model.saveDraft()
-        XCTAssertTrue(model.coverage(of: mary).isUnlocked, "the 8th take (086) unlocks Mary")
+        XCTAssertTrue(model.coverage(of: mary).isUnlocked, "the 6th take (059) unlocks Mary")
         model.delete(model.recordings.last!.id)
         XCTAssertFalse(model.coverage(of: mary).isUnlocked, "deleting it locks Mary again")
     }
 
-    func testSongListingHasSixUnlockedSongsWithAllRecordings() {
+    func testEverySongIsUnlockedWithAllRecordings() {
         let model = makeModel(start: allFixtureIDs)
         let listing = model.songListing(matching: "", order: .closestToUnlocking)
-        XCTAssertEqual(listing.unlocked.map(\.song.id), ["mary", "jingle", "saints", "ode", "twinkle", "row"])
-        XCTAssertEqual(listing.locked.count, 6)
+        XCTAssertEqual(listing.unlocked.count, 12)
+        XCTAssertTrue(listing.locked.isEmpty)
     }
 
     /// The Recording the user has for a Fixture Library id (the oldest, if there are several).
@@ -392,32 +398,16 @@ final class SampleAppModelTests: XCTestCase {
         return model.recordings.first { $0.number == index + 1 }?.id
     }
 
-    func testWithEveryFixtureATootShowsTheRecordingsItsStandInWasRenderedWith() async throws {
-        // With all 23 fixtures (recording n is library fixture n), every Unlocked Song's
-        // Arrangement is its render's: the list, the note colors and the sound agree.
-        let model = makeModel(start: allFixtureIDs)
-        let unlocked = Song.prototypeCatalog.filter { model.coverage(of: $0).isUnlocked }
-        XCTAssertEqual(unlocked.count, 6)
-        for song in unlocked {
-            let draft = try await model.makeToot(of: song)
-            let render = try XCTUnwrap(Song.prototypeRenders[song.id])
-            XCTAssertEqual(draft.arrangement.recordingForPitch.keys.sorted(), song.pitches, song.id)
-            XCTAssertEqual(draft.arrangement.transposition, render.transposition, song.id)
-            for (pitch, fixtureID) in render.fixtureForPitch {
-                XCTAssertEqual(draft.arrangement.recordingForPitch[pitch], recording(ofFixture: fixtureID, in: model), "\(song.id) pitch \(pitch)")
-            }
-            XCTAssertEqual(model.simulatedSource(ofToot: draft.id), "the design prototype's render of this Song, with these Recordings")
-        }
-    }
-
-    func testMakingAnUnlockedSongReturnsItsStandInAudio() async throws {
+    func testMakingAnUnlockedSongRendersItWithAutoMap() async throws {
         let model = makeModel(start: allFixtureIDs)
         let mary = song("mary")
         let draft = try await model.makeToot(of: mary)
         XCTAssertEqual(draft.song, mary)
-        XCTAssertEqual(draft.audioURL, mary.prototypeAudioURL)
-        XCTAssertEqual(draft.seconds, 12.46, accuracy: 0.05, "the length of the prototype's render")
-        // Mary's render plays fixtures 090, 084, 086 and 094, lowest pitch first.
+        XCTAssertEqual(draft.arrangement, model.coverage(of: mary).matchedArrangement)
+        XCTAssertEqual(draft.audioURL.deletingLastPathComponent().standardizedFileURL, tootFolder.standardizedFileURL)
+        XCTAssertFalse(Toot.isAudioMissing(at: draft.audioURL))
+        XCTAssertEqual(draft.seconds, 16 * 60 / 84 + 1, accuracy: 0.001, "16 beats at 84 bpm, and a second to ring")
+        // Auto-map plays Mary with fixtures 090, 084, 086 and 094, lowest pitch first.
         XCTAssertEqual(draft.arrangement.recordings.compactMap { model.recording($0)?.name }, ["Recording 21", "Recording 19", "Recording 20", "Recording 23"])
         XCTAssertTrue(model.toots.isEmpty, "nothing is saved until Save")
 
@@ -426,17 +416,8 @@ final class SampleAppModelTests: XCTestCase {
         model.stopPlayback()
     }
 
-    func testWithoutARenderFixtureATootShowsPitchCoveragesMatchingAndSaysSo() async throws {
-        // After the 8-take story Mary is unlocked, but its render's fixture 084 isn't there.
-        let model = makeModel(start: Array(SampleFixture.prototypeStory.prefix(8)))
-        let mary = song("mary")
-        let draft = try await model.makeToot(of: mary)
-        XCTAssertEqual(draft.arrangement, model.coverage(of: mary).matchedArrangement)
-        XCTAssertEqual(model.simulatedSource(ofToot: draft.id), "the design prototype's render of this Song, not made from these Recordings")
-    }
-
     func testLockedSongsCantBeMade() async {
-        let model = makeModel(start: allFixtureIDs)
+        let model = makeModel(start: Array(SampleFixture.prototypeStory.prefix(8)))
         do {
             _ = try await model.makeToot(of: song("birthday"))
             XCTFail("Happy Birthday is locked")
@@ -456,9 +437,13 @@ final class SampleAppModelTests: XCTestCase {
         _ = try await model.makeToot(of: song("mary"))
     }
 
-    func testWithoutSongAudioTootsCantBeMade() async {
-        // Release builds carry no stand-in audio, so Song Creator reports it can't make one.
-        let model = makeModel(start: allFixtureIDs, songAudio: { _ in nil }, renders: [:])
+    func testWithoutTheRecordingsAudioTootsCantBeMade() async {
+        // A Recording whose file is gone can't play its notes.
+        let missing = SampleFixture.prototypeLibrary.map {
+            SampleFixture(id: $0.id, file: "missing-\($0.file)", seconds: $0.seconds, gestureSamples: $0.gestureSamples,
+                          firstFartUsed: $0.firstFartUsed, pitch: $0.pitch, shortestNoteSeconds: $0.shortestNoteSeconds)
+        }
+        let model = makeModel(start: allFixtureIDs, fixtures: missing)
         do {
             _ = try await model.makeToot(of: song("mary"))
             XCTFail("made a Toot without audio")
@@ -485,15 +470,15 @@ final class SampleAppModelTests: XCTestCase {
         model.stopPlayback()
     }
 
-    func testTootsAtLaunchAreOldestFirst() {
-        let model = makeModel(start: allFixtureIDs, toots: ["twinkle", "mary", "nonexistent"])
+    func testTootsAtLaunchAreOldestFirst() async {
+        let model = await makeModelWithToots(toots: ["twinkle", "mary", "nonexistent"])
         XCTAssertEqual(model.toots.map(\.title), ["Twinkle, Twinkle, Little Star", "Mary Had a Little Lamb"])
         XCTAssertEqual(model.toots.map(\.songID), ["twinkle", "mary"])
         XCTAssertEqual(model.toots.map { $0.seconds.rounded() }, [18, 12])
     }
 
-    func testRenameTrimsAndIgnoresABlankTitle() {
-        let model = makeModel(toots: ["mary"])
+    func testRenameTrimsAndIgnoresABlankTitle() async {
+        let model = await makeModelWithToots(toots: ["mary"])
         let id = model.toots[0].id
         model.renameToot(id, to: "  Lamb Toots \n")
         XCTAssertEqual(model.toots[0].title, "Lamb Toots")
@@ -502,8 +487,8 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertEqual(model.toots[0].title, "Lamb Toots")
     }
 
-    func testDeletingATootStopsItPlaying() {
-        let model = makeModel(toots: ["mary", "ode"])
+    func testDeletingATootStopsItPlaying() async {
+        let model = await makeModelWithToots(toots: ["mary", "ode"])
         let mary = model.toots[0].id
         model.togglePlayback(of: .toot(mary))
         XCTAssertEqual(model.nowPlaying, .toot(mary))
@@ -512,8 +497,8 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertEqual(model.toots.map(\.title), ["Ode to Joy"])
     }
 
-    func testMissingTootAudioIsCheckedOnceAndNothingPlays() {
-        let model = makeModel(toots: ["mary", "ode"], failures: .tootAudioMissing)
+    func testMissingTootAudioIsCheckedOnceAndNothingPlays() async {
+        let model = await makeModelWithToots(toots: ["mary", "ode"], failures: .tootAudioMissing)
         XCTAssertEqual(model.toots.map(\.isAudioMissing), [true, false], "the first Toot lost its audio")
         XCTAssertTrue(Toot.isAudioMissing(at: model.toots[0].audioURL))
         model.togglePlayback(of: .toot(model.toots[0].id))
@@ -540,8 +525,8 @@ final class SampleAppModelTests: XCTestCase {
         model.stopPlayback()
     }
 
-    func testTootsAtLaunchKeepTheRecordingsTheirRenderUsed() throws {
-        let model = makeModel(start: allFixtureIDs, toots: ["mary"])
+    func testTootsAtLaunchKeepTheRecordingsTheirRenderUsed() async throws {
+        let model = await makeModelWithToots(toots: ["mary"])
         let toot = try XCTUnwrap(model.toots.first)
         XCTAssertEqual(toot.arrangement.transposition, -19)
         XCTAssertEqual(toot.arrangement.recordings.compactMap { model.recording($0)?.name }, ["Recording 21", "Recording 19", "Recording 20", "Recording 23"])
@@ -566,9 +551,9 @@ final class SampleAppModelTests: XCTestCase {
         let arrangement = draft.arrangement
         let recording = { (note: Song.Note) in arrangement.recording(playing: note).flatMap { model.recording($0) } }
 
-        // The render plays Mary's first note, A3, with fixture 086 (G♯3, 55.83) moved up 1.17.
+        // Auto-map plays Mary's first note, A3, with fixture 086 (G♯3) moved up 1.17.
         let first = mary.notes[0]
-        XCTAssertEqual(try XCTUnwrap(arrangement.shift(of: first, by: try XCTUnwrap(recording(first)))), 57 - 55.83, accuracy: 1e-9)
+        XCTAssertEqual(try XCTUnwrap(arrangement.shift(of: first, by: try XCTUnwrap(recording(first)))), 57 - fixture("086").pitch!, accuracy: 1e-9)
         XCTAssertEqual(arrangement.caption(of: first, in: mary, recording: recording(first)), "A3 · Recording 20 (G♯3), shifted +1.2 semitones · 0.4 s")
         // Its last note, F3, with fixture 090 (G3, 55.13) moved down 2.13.
         let last = mary.notes[25]
@@ -586,17 +571,17 @@ final class SampleAppModelTests: XCTestCase {
         )
     }
 
-    func testProfileStatsCountWhatsOnThePhone() {
-        let model = makeModel(start: allFixtureIDs, toots: ["mary", "ode"])
+    func testProfileStatsCountWhatsOnThePhone() async {
+        let model = await makeModelWithToots(toots: ["mary", "ode"])
         XCTAssertEqual(
             model.profileStats,
-            ProfileStats(recordings: 23, melodicRecordings: 9, notesCollected: 7, unlockedSongs: 6, songs: 12, toots: 2)
+            ProfileStats(recordings: 23, melodicRecordings: 9, notesCollected: 7, unlockedSongs: 12, songs: 12, toots: 2)
         )
     }
 
     func testProfileStatsFollowPitchCoverage() async {
-        // The 8th story take (086) unlocks Mary, as on the Compose tab; deleting it locks her again.
-        let model = makeModel(start: Array(SampleFixture.prototypeStory.prefix(7)))
+        // The 6th story take (059) unlocks Mary, as on the Compose tab; deleting it locks her again.
+        let model = makeModel(start: Array(SampleFixture.prototypeStory.prefix(5)))
         let before = model.profileStats
         XCTAssertEqual(before.unlockedSongs, 0)
         await recordTake(model)
@@ -614,7 +599,7 @@ final class SampleAppModelTests: XCTestCase {
     // MARK: Background
 
     func testGoingToTheBackgroundStopsPlayback() async throws {
-        let model = makeModel(start: allFixtureIDs, toots: ["ode"])
+        let model = await makeModelWithToots(toots: ["ode"])
         model.togglePlayback(of: .toot(model.toots[0].id))
         XCTAssertEqual(model.nowPlaying, .toot(model.toots[0].id))
         model.didEnterBackground()

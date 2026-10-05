@@ -9,6 +9,8 @@ struct TootDraft: Identifiable, Hashable, Sendable {
     /// Length in seconds.
     let seconds: Double
     let audioURL: URL
+    /// Where each of the Song's notes sits in the audio, as rendered.
+    let notes: [TootRenderer.Note]
 }
 
 /// A Toot: a Song played with the user's Recordings, saved from Song Creator (see `CONTEXT.md`).

@@ -1,15 +1,18 @@
 import XCTest
 @testable import Pedos
 
-/// The Compose tab's Song list, missing-note text, Pitch Coverage's matching as an Arrangement,
-/// note timing and shifts, and the coverage cache.
+/// The Compose tab's Song list, missing-note text, Auto-map's Arrangement, note timing and
+/// shifts, and the coverage cache.
 final class SongListingTests: XCTestCase {
     private let songs = Song.prototypeCatalog
     private let fixtures = SampleFixture.prototypeLibrary
 
     private func recordings(_ ids: [String]) -> [Recording] {
         ids.compactMap { id in fixtures.first { $0.id == id } }.enumerated().map { index, fixture in
-            Recording(id: UUID(), number: index + 1, seconds: fixture.seconds, analysis: .analyzed(fixture.analysis), audioURL: nil)
+            Recording(
+                id: UUID(fixtureID: fixture.id), number: index + 1, seconds: fixture.seconds,
+                analysis: .analyzed(fixture.analysis), audioURL: nil
+            )
         }
     }
 
@@ -19,6 +22,9 @@ final class SongListingTests: XCTestCase {
 
     private var all: [Recording] { recordings(fixtures.map(\.id)) }
 
+    /// The first 8 story takes (6 Melodic): 7 Unlocked Songs and 5 locked ones.
+    private var eight: [Recording] { recordings(Array(SampleFixture.prototypeStory.prefix(8))) }
+
     // MARK: Song notes
 
     func testEverySongsNotesPlayExactlyItsPitches() {
@@ -27,6 +33,7 @@ final class SongListingTests: XCTestCase {
             XCTAssertEqual(Set(song.notes.map(\.pitch)).sorted(), song.pitches, song.id)
             XCTAssertEqual(song.notes.map(\.start), song.notes.map(\.start).sorted(), "\(song.id) notes aren't in time order")
             XCTAssertTrue(song.notes.allSatisfy { $0.length > 0 }, song.id)
+            XCTAssertTrue([3, 4, 6].contains(song.beatsPerBar), song.id)
         }
         let twinkle = songs[0]
         XCTAssertEqual(twinkle.notes.count, 28)
@@ -56,31 +63,37 @@ final class SongListingTests: XCTestCase {
     // MARK: Listing
 
     func testClosestToUnlockingPutsUnlockedSongsFirstThenTheHighestCoverage() {
-        let listing = listing(all)
-        XCTAssertEqual(listing.unlocked.map(\.song.id), ["mary", "jingle", "saints", "ode", "twinkle", "row"], "fewest notes first")
-        XCTAssertEqual(listing.locked.map(\.song.id), ["frere", "furelise", "auld", "amazing", "birthday", "merryxmas"])
+        let listing = listing(eight)
+        XCTAssertEqual(listing.unlocked.map(\.song.id), ["mary", "jingle", "saints", "ode", "twinkle", "row", "amazing"], "fewest notes first")
+        XCTAssertEqual(listing.locked.map(\.song.id), ["frere", "furelise", "auld", "birthday", "merryxmas"])
         XCTAssertTrue(listing.unlocked.allSatisfy(\.coverage.isUnlocked))
         XCTAssertFalse(listing.locked.contains { $0.coverage.isUnlocked })
     }
 
     func testAlphabeticalSortsWithinEachSection() {
-        let listing = listing(all, order: .alphabetical)
+        let listing = listing(eight, order: .alphabetical)
         XCTAssertEqual(listing.unlocked.map(\.song.title), [
-            "Jingle Bells", "Mary Had a Little Lamb", "Ode to Joy", "Row, Row, Row Your Boat",
+            "Amazing Grace", "Jingle Bells", "Mary Had a Little Lamb", "Ode to Joy", "Row, Row, Row Your Boat",
             "Twinkle, Twinkle, Little Star", "When the Saints Go Marching In",
         ])
         XCTAssertEqual(listing.locked.map(\.song.title), [
-            "Amazing Grace", "Auld Lang Syne", "Frère Jacques", "Für Elise", "Happy Birthday", "We Wish You a Merry Christmas",
+            "Auld Lang Syne", "Frère Jacques", "Für Elise", "Happy Birthday", "We Wish You a Merry Christmas",
         ])
     }
 
     func testSearchMatchesAnywhereInTheTitleIgnoringCaseAndAccents() {
-        XCTAssertEqual(listing(all, query: "JINGLE").unlocked.map(\.song.id), ["jingle"])
-        XCTAssertEqual(listing(all, query: "fur").locked.map(\.song.id), ["furelise"])
-        XCTAssertEqual(listing(all, query: "frere").locked.map(\.song.id), ["frere"])
-        XCTAssertEqual(listing(all, query: "little").unlocked.map(\.song.id), ["mary", "twinkle"])
-        XCTAssertEqual(listing(all, query: "  ").unlocked.count, 6, "a blank search matches every Song")
-        XCTAssertTrue(listing(all, query: "zzz").isEmpty)
+        XCTAssertEqual(listing(eight, query: "JINGLE").unlocked.map(\.song.id), ["jingle"])
+        XCTAssertEqual(listing(eight, query: "fur").locked.map(\.song.id), ["furelise"])
+        XCTAssertEqual(listing(eight, query: "frere").locked.map(\.song.id), ["frere"])
+        XCTAssertEqual(listing(eight, query: "little").unlocked.map(\.song.id), ["mary", "twinkle"])
+        XCTAssertEqual(listing(eight, query: "  ").unlocked.count, 7, "a blank search matches every Song")
+        XCTAssertTrue(listing(eight, query: "zzz").isEmpty)
+    }
+
+    func testEverySongUnlocksWithTheWholeFixtureLibrary() {
+        let listing = listing(all)
+        XCTAssertEqual(listing.unlocked.count, 12)
+        XCTAssertTrue(listing.locked.isEmpty)
     }
 
     func testWithoutMelodicRecordingsEverySongIsLockedFewestNotesFirst() {
@@ -94,13 +107,16 @@ final class SongListingTests: XCTestCase {
     func testTheListScalesToHundredsOfSongs() {
         let catalog = (0..<500).map { index in
             let song = songs[index % songs.count]
-            return Song(id: "\(song.id)-\(index)", title: "\(song.title) \(index)", pitches: song.pitches, source: song.source, bpm: song.bpm, notes: song.notes)
+            return Song(
+                id: "\(song.id)-\(index)", title: "\(song.title) \(index)", pitches: song.pitches, source: song.source,
+                bpm: song.bpm, beatsPerBar: song.beatsPerBar, notes: song.notes
+            )
         }
-        let recordings = all
+        let recordings = eight
         var cache = CoverageCache(songs: catalog)
         let listing = cache.listing(recordings: recordings, matching: "", order: .closestToUnlocking)
         XCTAssertEqual(listing.unlocked.count + listing.locked.count, 500)
-        XCTAssertEqual(listing.unlocked.count, 252, "41 rounds of 6 Unlocked Songs, then 6 of the next 8 Songs")
+        XCTAssertEqual(listing.unlocked.count, 293, "41 rounds of 7 Unlocked Songs, then 6 of the next 8 Songs")
         // A search keystroke filters the stored, sorted results.
         measure {
             _ = cache.listing(recordings: recordings, matching: "star", order: .closestToUnlocking)
@@ -115,49 +131,49 @@ final class SongListingTests: XCTestCase {
         let coverage = { (id: String, recordings: [Recording]) in
             CoverageResult(song: self.songs.first { $0.id == id }!, recordings: recordings)
         }
-        XCTAssertEqual(coverage("birthday", all).missingNotes(), "D3 and E3")
-        XCTAssertEqual(coverage("frere", all).missingNotes(), "D♯3")
-        XCTAssertNil(coverage("mary", all).missingNotes(), "nothing is missing from an Unlocked Song")
+        XCTAssertEqual(coverage("birthday", eight).missingNotes(), "B2 and E3")
+        XCTAssertEqual(coverage("frere", eight).missingNotes(), "D♯3")
+        XCTAssertNil(coverage("mary", eight).missingNotes(), "nothing is missing from an Unlocked Song")
 
         // Two Melodic Recordings: Happy Birthday still needs 6 notes.
         let few = recordings(Array(SampleFixture.prototypeStory.prefix(3)))
-        XCTAssertEqual(coverage("birthday", few).missingNotes(), "F2, G2, A2, C3, D3, and D♯3")
-        XCTAssertEqual(coverage("birthday", few).missingNotes(limit: 3), "F2, G2, A2, and 3 more")
-        XCTAssertEqual(coverage("mary", few).missingNotes(limit: 3), "C3 and D3", "no \"more\" within the limit")
+        XCTAssertEqual(coverage("birthday", few).missingNotes(), "A♯2, D3, D♯3, F3, G♯3, and A♯3")
+        XCTAssertEqual(coverage("birthday", few).missingNotes(limit: 3), "A♯2, D3, D♯3, and 3 more")
+        XCTAssertEqual(coverage("mary", few).missingNotes(limit: 3), "D3 and E3", "no \"more\" within the limit")
     }
 
-    // MARK: Pitch Coverage's matching as an Arrangement
+    // MARK: Auto-map's Arrangement
 
-    func testPitchCoveragesMatchingGivesEachPitchItsOwnRecordingWithinThreeSemitones() throws {
-        let recordings = all
-        for song in songs {
-            let coverage = CoverageResult(song: song, recordings: recordings)
-            guard coverage.isUnlocked else {
-                XCTAssertNil(coverage.matchedArrangement, "\(song.id) is locked, so it has no Arrangement")
-                continue
-            }
-            let arrangement = try XCTUnwrap(coverage.matchedArrangement, song.id)
-            XCTAssertEqual(arrangement.recordingForPitch.keys.sorted(), song.pitches, song.id)
-            XCTAssertEqual(Set(arrangement.recordings).count, song.pitches.count, "\(song.id): one different Recording per pitch")
-            XCTAssertEqual(Set(arrangement.recordings), Set(coverage.used), song.id)
-            XCTAssertTrue(song.notes.allSatisfy { arrangement.recording(playing: $0) != nil }, "\(song.id): a note has no Recording")
+    func testAutoMapGivesEachPitchItsOwnRecordingWithinThreeSemitonesOrAnOctaveMove() throws {
+        for recordings in [eight, all] {
+            for song in songs {
+                let coverage = CoverageResult(song: song, recordings: recordings)
+                guard coverage.isUnlocked else {
+                    XCTAssertNil(coverage.matchedArrangement, "\(song.id) is locked, so it has no Arrangement")
+                    continue
+                }
+                let arrangement = try XCTUnwrap(coverage.matchedArrangement, song.id)
+                XCTAssertEqual(arrangement.recordingForPitch.keys.sorted(), song.pitches, song.id)
+                XCTAssertEqual(Set(arrangement.recordings).count, song.pitches.count, "\(song.id): one different Recording per pitch")
+                XCTAssertTrue(song.notes.allSatisfy { arrangement.recording(playing: $0) != nil }, "\(song.id): a note has no Recording")
 
-            // Under one transposition, every Recording is within 3 semitones of the pitch it plays.
-            let match = PitchCoverage.match(songPitches: song.pitches, recordingPitches: recordings.compactMap(\.pitch))
-            for pitch in song.pitches {
-                let recording = try XCTUnwrap(recordings.first { $0.id == arrangement.recordingForPitch[pitch] })
-                XCTAssertLessThanOrEqual(abs(Double(pitch + match.transposition) - recording.pitch!), PitchCoverage.maximumShift, song.id)
+                // Every Recording is within 3 semitones of the pitch it plays, or of the same
+                // note an octave away.
+                for pitch in song.pitches {
+                    let recording = try XCTUnwrap(recordings.first { $0.id == arrangement.recordingForPitch[pitch] })
+                    let shift = abs(Double(arrangement.soundingPitch(pitch)) - recording.pitch!)
+                    XCTAssertTrue(shift <= 3 || abs(shift - 12) <= 3, "\(song.id): shift \(shift)")
+                }
             }
         }
     }
 
-    func testMarysMatchedArrangementIsFourFixturesLowestPitchFirst() throws {
-        let recordings = all
-        let mary = songs[1]
-        let arrangement = try XCTUnwrap(CoverageResult(song: mary, recordings: recordings).matchedArrangement)
-        let fixtureOf = { (id: Recording.ID) in self.fixtures[recordings.firstIndex { $0.id == id }!].id }
-        // Mary's pitches, lowest first, are played by 021 (C3), 013 (G♯3), 090 (G3) and 094 (B3).
-        XCTAssertEqual(arrangement.recordings.map(fixtureOf), ["021", "013", "090", "094"])
+    func testMarysArrangementIsFourFixturesLowestPitchFirst() throws {
+        let arrangement = try XCTUnwrap(CoverageResult(song: songs[1], recordings: all).matchedArrangement)
+        // Mary's pitches, lowest first, are played by 090 (G3), 084, 086 (both G♯3) and 094 (B3),
+        // moved by −19 semitones: the reference's golden Arrangement.
+        XCTAssertEqual(arrangement.recordings.map { String($0.uuidString.suffix(3)) }, ["090", "084", "086", "094"])
+        XCTAssertEqual(arrangement.transposition, -19)
     }
 
     // MARK: Coverage cache
@@ -166,27 +182,27 @@ final class SongListingTests: XCTestCase {
         var cache = CoverageCache(songs: songs)
         let story = recordings(SampleFixture.prototypeStory)
         for query in ["", "m", "ma", "mar", "mary", "ode"] {
-            _ = cache.listing(recordings: Array(story.prefix(7)), matching: query, order: .closestToUnlocking)
+            _ = cache.listing(recordings: Array(story.prefix(5)), matching: query, order: .closestToUnlocking)
         }
-        _ = cache.listing(recordings: Array(story.prefix(7)), matching: "", order: .alphabetical)
-        _ = cache.coverage(of: songs[1], recordings: Array(story.prefix(7)))
+        _ = cache.listing(recordings: Array(story.prefix(5)), matching: "", order: .alphabetical)
+        _ = cache.coverage(of: songs[1], recordings: Array(story.prefix(5)))
         XCTAssertEqual(cache.catalogMatches, 1, "searching, sorting and looking up matched the catalog again")
 
         // A Noise-like Recording changes nothing; a Melodic one matches the catalog once more.
-        _ = cache.listing(recordings: Array(story.prefix(7)) + recordings(["002"]), matching: "", order: .closestToUnlocking)
+        _ = cache.listing(recordings: Array(story.prefix(5)) + recordings(["002"]), matching: "", order: .closestToUnlocking)
         XCTAssertEqual(cache.catalogMatches, 1)
-        let listing = cache.listing(recordings: Array(story.prefix(8)), matching: "", order: .closestToUnlocking)
+        let listing = cache.listing(recordings: Array(story.prefix(6)), matching: "", order: .closestToUnlocking)
         XCTAssertEqual(cache.catalogMatches, 2)
-        XCTAssertEqual(listing.unlocked.map(\.song.id), ["mary"], "the 8th take unlocks Mary")
+        XCTAssertEqual(listing.unlocked.map(\.song.id), ["mary"], "the 6th take unlocks Mary")
     }
 
     func testCoverageCacheRecomputesWhenTheMelodicRecordingsChange() {
         var cache = CoverageCache(songs: songs)
         let mary = songs[1]
         let story = recordings(SampleFixture.prototypeStory)
-        let beforeMary = Array(story.prefix(7))
+        let beforeMary = Array(story.prefix(5))
         XCTAssertFalse(cache.coverage(of: mary, recordings: beforeMary).isUnlocked)
-        XCTAssertTrue(cache.coverage(of: mary, recordings: Array(story.prefix(8))).isUnlocked, "the 8th take unlocks Mary")
+        XCTAssertTrue(cache.coverage(of: mary, recordings: Array(story.prefix(6))).isUnlocked, "the 6th take unlocks Mary")
 
         // Noise-like Recordings don't change Pitch Coverage.
         let noise = recordings(["002"])

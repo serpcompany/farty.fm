@@ -95,7 +95,7 @@ final class LiveRecordingSourceTests: XCTestCase {
 
     func testRecordSaveAndSeeThePitch() async throws {
         let analysis = Analysis()
-        let model = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(), testTake: testTake))
+        let model = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(), testTakes: [testTake]))
 
         let recording = try await recordAndSave(model)
 
@@ -112,10 +112,10 @@ final class LiveRecordingSourceTests: XCTestCase {
 
     func testRecordingsAndTheirAnalysisSurviveARelaunch() async throws {
         let analysis = Analysis()
-        let first = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(), testTake: testTake))
+        let first = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(), testTakes: [testTake]))
         let saved = try await recordAndSave(first)
 
-        let relaunched = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(), testTake: testTake))
+        let relaunched = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(), testTakes: [testTake]))
 
         XCTAssertEqual(relaunched.recordings, [saved])
         XCTAssertEqual(analysis.runs.withLock { $0 }, 1, "A kept analysis ran again")
@@ -123,10 +123,10 @@ final class LiveRecordingSourceTests: XCTestCase {
 
     func testANewAnalysisVersionAnalyzesAgain() async throws {
         let analysis = Analysis()
-        let first = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(version: 1), testTake: testTake))
+        let first = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(version: 1), testTakes: [testTake]))
         let saved = try await recordAndSave(first)
 
-        let updated = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(version: 2), testTake: testTake))
+        let updated = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(version: 2), testTakes: [testTake]))
         XCTAssertEqual(updated.recordings.first?.analysis, .analyzing)
         for _ in 0..<100 where updated.recordings.first?.analysis == .analyzing {
             try await Task.sleep(for: .milliseconds(20))
@@ -140,7 +140,7 @@ final class LiveRecordingSourceTests: XCTestCase {
     func testAFailedAnalysisKeepsTheRecording() async throws {
         let analysis = Analysis()
         analysis.fails.withLock { $0 = true }
-        let model = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(), testTake: testTake))
+        let model = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(), testTakes: [testTake]))
 
         let recording = try await recordAndSave(model)
 
@@ -155,7 +155,7 @@ final class LiveRecordingSourceTests: XCTestCase {
 
     func testDeleteRemovesTheRecordingAndItsAnalysis() async throws {
         let analysis = Analysis()
-        let model = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(), testTake: testTake))
+        let model = makeModel(LiveRecordingSource(store: store, analyzer: analysis.analyzer(), testTakes: [testTake]))
         let recording = try await recordAndSave(model)
         model.finishFlow()
 
@@ -167,7 +167,7 @@ final class LiveRecordingSourceTests: XCTestCase {
     }
 
     func testDiscardDeletesTheTake() async throws {
-        let model = makeModel(LiveRecordingSource(store: store, analyzer: Analysis().analyzer(), testTake: testTake))
+        let model = makeModel(LiveRecordingSource(store: store, analyzer: Analysis().analyzer(), testTakes: [testTake]))
         await model.startRecording()
         clock += 1
         await model.stopRecording()
@@ -181,7 +181,7 @@ final class LiveRecordingSourceTests: XCTestCase {
     }
 
     func testATooShortTakeIsNothingHeard() async throws {
-        let model = makeModel(LiveRecordingSource(store: store, analyzer: Analysis().analyzer(), testTake: testTake))
+        let model = makeModel(LiveRecordingSource(store: store, analyzer: Analysis().analyzer(), testTakes: [testTake]))
         await model.startRecording()
         clock += 0.2
         await model.stopRecording()
@@ -192,7 +192,7 @@ final class LiveRecordingSourceTests: XCTestCase {
     }
 
     func testASecondSaveTapDoesNothing() async throws {
-        let model = makeModel(LiveRecordingSource(store: store, analyzer: Analysis().analyzer(), testTake: testTake))
+        let model = makeModel(LiveRecordingSource(store: store, analyzer: Analysis().analyzer(), testTakes: [testTake]))
         await model.startRecording()
         clock += 1
         await model.stopRecording()

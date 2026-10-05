@@ -37,14 +37,15 @@ final class AudioPlayerTests: XCTestCase {
     }
 
     func testASegmentPlaysForItsLengthThenStops() async throws {
-        // Mary's 7th note: 0.71 s from 2.1 s into its 12.5 s render, so the file itself would
-        // play on for another 10 s.
+        // Mary's 7th note is 0.71 s long. Played 1 s into fixture 094's 4.75 s file, the file
+        // itself would play on for another 3 s.
         let mary = try XCTUnwrap(Song.prototypeCatalog.first { $0.id == "mary" })
-        let (start, length) = mary.seconds(of: mary.notes[6])
+        let length = mary.seconds(of: mary.notes[6]).length
         XCTAssertEqual(length, 60 / 84, accuracy: 1e-9)
         let player = AudioPlayer()
         let item = PlaybackItem.note(UUID(), index: 6)
-        player.play(item, url: try XCTUnwrap(mary.prototypeAudioURL), segment: Segment(start: start, length: length))
+        let file = try XCTUnwrap(SampleFixture.prototypeLibrary.first { $0.id == "094" }?.audioURL)
+        player.play(item, url: file, segment: Segment(start: 1, length: length))
         XCTAssertEqual(player.nowPlaying, item)
 
         // Time it from when the audio actually started: activating the audio session first can

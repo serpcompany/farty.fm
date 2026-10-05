@@ -10,7 +10,7 @@ struct Gesture: Equatable, Sendable {
 }
 
 /// Automatic trimming: `note_segment()` of the reference engine.
-enum Trimming {
+package enum Trimming {
     /// Finds the single-attack part of a Recording that can act as one note.
     ///
     /// - Start: on a 5 ms RMS envelope, the first frame within 12 dB of the peak, minus 8 ms,
@@ -55,7 +55,7 @@ enum Trimming {
 
     /// `20 * log10(librosa.feature.rms(y, frame_length, hop_length) + 1e-9)`: centered frames
     /// (frame `i` is centered on sample `i * hop`), zero-padded at both ends, `1 + n / hop` frames.
-    static func levelDB(_ y: [Float], frameLength: Int, hop: Int) -> [Double] {
+    package static func levelDB(_ y: [Float], frameLength: Int, hop: Int) -> [Double] {
         let half = frameLength / 2
         let count = 1 + y.count / hop
         var out = [Double](repeating: 0, count: count)

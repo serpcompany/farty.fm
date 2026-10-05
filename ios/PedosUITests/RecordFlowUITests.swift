@@ -19,10 +19,10 @@ class RecordFlowUITests: PedosUITestCase {
 
         // Review: play, Save and Discard.
         XCTAssertTrue(app.navigationBars["New Recording"].waitForExistence(timeout: 5), "Review didn't open")
-        XCTAssertTrue(app.staticTexts["Length 1.1 s"].exists)
+        XCTAssertTrue(app.staticTexts["Length 1.7 s"].exists)
         XCTAssertTrue(app.buttons["Discard"].exists)
         attachScreenshot("Review")
-        // Playing lasts only as long as the 1.1 s take, so this checks the button, not the
+        // Playing lasts only as long as the 1.7 s take, so this checks the button, not the
         // state; AudioPlayerTests checks that playback starts and ends.
         app.buttons["review-play"].tap()
         attachScreenshot("Review, playing")
@@ -90,9 +90,9 @@ class RecordFlowUITests: PedosUITestCase {
         XCTAssertTrue(app.buttons["Recording 6"].value.map { "\($0)".contains("first fart used") } ?? false)
     }
 
-    /// Take 8 (086) is the 6th Melodic Recording in story order, and unlocks Mary Had a Little Lamb.
-    func testSixthMelodicRecordingUnlocksMary() {
-        let app = launch(start: "7")
+    /// Take 6 (059) is the 4th Melodic Recording in story order, and unlocks Mary Had a Little Lamb.
+    func testFourthMelodicRecordingUnlocksMary() {
+        let app = launch(start: "5")
         recordTake(in: app)
         saveTake(in: app)
         XCTAssertTrue(app.staticTexts["You unlocked Mary Had a Little Lamb"].waitForExistence(timeout: 5), "Mary didn't unlock")
@@ -105,12 +105,10 @@ class RecordFlowUITests: PedosUITestCase {
         XCTAssertTrue(app.navigationBars["Mary Had a Little Lamb"].waitForExistence(timeout: 5), "Try it didn't open Mary")
         XCTAssertTrue(app.tabBars.buttons["Compose"].isSelected)
         XCTAssertTrue(app.buttons["song-creator-play"].waitForExistence(timeout: 5), "Mary wasn't made")
-        // The stand-in render of Mary uses fixture 084, which isn't among these 8 takes, so Song
-        // Creator shows Pitch Coverage's matching and says the audio doesn't follow it.
-        XCTAssertEqual(
-            app.staticTexts["simulated-toot"].label,
-            "Simulated Toot: the design prototype's render of this Song, not made from these Recordings."
-        )
+        // Made from these takes: fixtures 021, 090, 059 and 094, lowest pitch first.
+        let rows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'Recording '")).allElementsBoundByIndex
+            .sorted { $0.frame.minY < $1.frame.minY }.map(\.identifier)
+        XCTAssertEqual(rows, ["Recording 2", "Recording 3", "Recording 6", "Recording 5"])
 
         // Back goes to the Songs list, where Mary is unlocked.
         app.navigationBars.buttons.element(boundBy: 0).tap()
