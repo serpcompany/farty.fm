@@ -64,7 +64,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **HOW USER GETS HERE:** Tab 1 (Recordings), or Done after saving.
 **WHAT'S ON THE SCREEN:**
 - Large title "Recordings"
-- The counts above the list: "9 Melodic Recordings across 7 notes" and "24 Recordings". Notes count with their octave, so G3 and G4 are two notes. Repeats matter because each Song pitch needs its own fart. (No pitch strip or piano roll here: the owner chose rows only in #72.)
+- The counts above the list: "9 Melodic Recordings across 7 notes" and "23 Recordings". Notes count with their octave, so G3 and G4 are two notes. Repeats matter because each Song pitch needs its own fart. (No pitch strip or piano roll here: the owner chose rows only in #72.)
 - A list of Recordings, newest first. Each row has:
   - a big play button
   - the name ("Recording 7")
@@ -264,7 +264,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - **Stats**, counted from what's on the phone:
   - Recordings
   - Melodic Recordings
-  - Notes collected (distinct pitch classes, C to B, without octave; the Recordings tab counts notes with their octave since #72)
+  - Notes collected (distinct notes with their octave, as on the Recordings tab: G2 and G3 are two notes)
   - Songs unlocked ("6 of 12": Unlocked Songs, by Pitch Coverage)
   - Toots
 - **About:**

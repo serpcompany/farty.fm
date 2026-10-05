@@ -48,13 +48,20 @@ struct RecordingsTab: View {
                     }
                 }
             } header: {
-                HStack {
-                    Text(melodicSummary)
-                    Spacer()
-                    Text(count(model.recordings.count, "Recording"))
+                // Side by side when they fit; stacked at large text sizes.
+                ViewThatFits(in: .horizontal) {
+                    HStack {
+                        Text(melodicSummary)
+                        Spacer()
+                        Text(count(model.recordings.count, "Recording"))
+                    }
+                    .lineLimit(1)
+                    VStack(alignment: .leading) {
+                        Text(melodicSummary)
+                        Text(count(model.recordings.count, "Recording"))
+                    }
                 }
                 .font(.footnote)
-                .lineLimit(1)
                 .textCase(nil)
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("pitch-summary")
