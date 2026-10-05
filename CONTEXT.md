@@ -21,7 +21,7 @@ A Recording with no steady pitch. It can still be placed on a note, but it can't
 _Avoid_: Bad Recording, unpitched fart
 
 **Recording Pitch**:
-The note a Melodic Recording naturally sounds. A Recording has a pitch; it never has a key.
+The note a Melodic Recording naturally sounds, octave included: G2 and G3 are different Recording Pitches. A Recording has a pitch; it never has a key.
 _Avoid_: Key, tone
 
 ## Songs and Toots
@@ -39,7 +39,7 @@ How well a set of Melodic Recordings can play a particular Song, judged by how f
 _Avoid_: Song match, quality score
 
 **Pitch Coverage**:
-How many of a Song's distinct pitches are covered, each by its own Melodic Recording close enough to it, shown as "3 of 4 notes covered".
+How many of a Song's distinct pitches are covered, each by its own Melodic Recording within 3 semitones of it or close enough for an Octave Move, shown as "3 of 4 notes covered".
 _Avoid_: Progress, completion
 
 **Unlocked Song**:
@@ -50,8 +50,12 @@ _Avoid_: Available song, playable song
 Which Recording plays each note of a melody.
 _Avoid_: Mapping, mix, assignment
 
+**Octave Move**:
+A Melodic Recording playing a note about an octave from its Recording Pitch: resampled 12 semitones up or down, plus at most 3. Used only where a Song can't be covered without it.
+_Avoid_: Octave folding, octave jump
+
 **Auto-map**:
-The Arrangement the app chooses on its own, giving each distinct pitch its own Melodic Recording, as close in pitch as possible.
+The Arrangement the app chooses on its own, giving each distinct pitch its own Melodic Recording, with as few Octave Moves as possible and then as close in pitch as possible.
 _Avoid_: Smart choose, AI pick, best fit
 
 **Toot**:

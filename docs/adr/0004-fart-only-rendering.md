@@ -4,6 +4,8 @@ Earlier renderers failed audibly in three ways. They looped short clips, which t
 
 Auto-map works like a multi-sampled instrument. It picks a transposition for the Song, then gives each needed pitch its own Melodic Recording, shifted by at most 3 semitones, and keeps Recordings off notes too short for them to hold pitch. The owner rejected stretching one fart across many notes as "kinda lame" (decisions recorded on #47). So Songs unlock only when this one-fart-per-note assignment exists, and a larger shift is never used. The reference planner in `tools/melody-lab/` still reuses Recordings and allows shifts up to 12 semitones. #43 updates it to this rule, and until then its renders (including the #47 prototype's audio) don't follow it. The Python melody lab (`tools/melody-lab/`) is the reference implementation. The Swift engine must match its planning decisions and pass the same checks: notes on pitch within ±50 cents, onsets within ±50 ms, and no second attack inside a note.
 
+Update 2026-10-05: a Recording may also play a pitch an octave away, resampled by 12 semitones plus at most 3, where a Song needs it (an Octave Move, ADR 0006). That replaces "a larger shift is never used". Everything else here stands.
+
 ## Consequences
 
 Only some Recordings are Melodic (9 of the 23 in the Fixture Library). Noise-like Recordings can't carry a recognizable melody by themselves. This is why Pitch Coverage and Unlocked Songs are part of the product.
