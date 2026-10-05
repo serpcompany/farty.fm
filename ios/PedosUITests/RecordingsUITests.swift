@@ -13,14 +13,18 @@ class RecordingsUITests: PedosUITestCase {
     func testAllRecordingsAndPlayback() {
         let app = launch(start: "all")
         app.tabBars.buttons["Recordings"].tap()
-        XCTAssertTrue(app.staticTexts["9 Melodic Recordings across 6 notes"].waitForExistence(timeout: 5))
+        // Notes count with their octave: E2, F♯2, C3, G3, G♯3, B3 and G4.
+        XCTAssertTrue(app.staticTexts["9 Melodic Recordings across 7 notes"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["23 Recordings"].exists)
-        XCTAssertEqual(app.descendants(matching: .any)["pitch-strip"].label, "Notes collected: C, E, F♯, G, G♯, and B")
+        XCTAssertFalse(app.descendants(matching: .any)["pitch-strip"].exists, "The Recordings tab still shows the pitch strip")
+        XCTAssertTrue(app.buttons["Recording 23"].value.map { "\($0)".contains("B3") } ?? false)
+        XCTAssertTrue(app.buttons["Recording 22"].value.map { "\($0)".contains("noise-like") } ?? false)
         attachScreenshot("Recordings, all 23")
 
         // Recording 17 is the longest take (2 s): tapping it plays it and highlights the row
         // until it ends. The row is marked playing as soon as it's tapped.
         let row = app.buttons["Recording 17"]
+        scrollTo(row, in: app)
         XCTAssertTrue(row.value.map { "\($0)".contains("first fart used") } ?? false)
         row.tap()
         XCTAssertTrue(row.value.map { "\($0)".contains("playing") } ?? false, "The row isn't playing")

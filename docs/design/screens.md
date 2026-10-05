@@ -64,19 +64,19 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **HOW USER GETS HERE:** Tab 1 (Recordings), or Done after saving.
 **WHAT'S ON THE SCREEN:**
 - Large title "Recordings"
-- **Pitch strip:** a one-octave keyboard (C to B) that lights up each pitch class you've collected, with the count ("7 Melodic Recordings across 6 notes"). Repeats matter because each Song pitch needs its own fart.
-- A list of Recordings. Each row has:
-  - a play button
+- The counts above the list: "9 Melodic Recordings across 7 notes" and "24 Recordings". Notes count with their octave, so G3 and G4 are two notes. Repeats matter because each Song pitch needs its own fart. (No pitch strip or piano roll here: the owner chose rows only in #72.)
+- A list of Recordings, newest first. Each row has:
+  - a big play button
   - the name ("Recording 7")
-  - a pitch badge ("G♯3", or "noise-like" when the Recording has no steady pitch)
-  - its length
-  - "first fart used" when a second fart was cut off
+  - the note in a pill, with its octave ("G♯3"), or a quiet "noise-like" when the Recording has no steady pitch
+  - a full-width waveform of just the fart replay plays (`replaySegment`), not the silence around it; the whole file until it's analyzed
+  - "First fart used" when a second fart was cut off
 **PRIMARY ACTION:** Play a Recording.
 **SECONDARY ACTIONS:** Swipe to delete (with confirmation).
 **STATES:**
 - Empty ("No Recordings yet. Go to the Record tab and tap the red button.")
-- Analyzing (the badge shows a spinner)
-- Not analyzed (analysis failed; the badge offers Retry)
+- Analyzing (a spinner under the name)
+- Not analyzed (analysis failed; "not analyzed" with Retry under the name)
 - Playing (the row is highlighted)
 - Populated
 **NAVIGATION TYPE:** Tab.
@@ -264,7 +264,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - **Stats**, counted from what's on the phone:
   - Recordings
   - Melodic Recordings
-  - Notes collected (the distinct notes on the Recordings tab's pitch strip)
+  - Notes collected (distinct pitch classes, C to B, without octave; the Recordings tab counts notes with their octave since #72)
   - Songs unlocked ("6 of 12": Unlocked Songs, by Pitch Coverage)
   - Toots
 - **About:**

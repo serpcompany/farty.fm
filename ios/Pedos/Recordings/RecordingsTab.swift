@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Every Recording, with its note, and the strip of collected notes. Tap a row to play it.
+/// Every Recording, newest first, with its note and waveform, and how many notes you've
+/// collected. Tap a row to play it.
 struct RecordingsTab: View {
     let model: any AppModel
     @State private var pendingDelete: Recording?
@@ -31,21 +32,8 @@ struct RecordingsTab: View {
     private var list: some View {
         List {
             Section {
-                PitchStrip(collected: model.collectedPitchClasses)
-                    .listRowSeparator(.hidden)
-            } footer: {
-                HStack {
-                    Text(melodicSummary)
-                    Spacer()
-                    Text(count(model.recordings.count, "Recording"))
-                }
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier("pitch-summary")
-            }
-
-            Section {
                 ForEach(model.recordings.reversed()) { recording in
-                    RecordingRow(
+                    RecordingsRow(
                         recording: recording,
                         isPlaying: model.nowPlaying == .recording(recording.id),
                         play: { model.togglePlayback(of: .recording(recording.id)) },
@@ -59,6 +47,17 @@ struct RecordingsTab: View {
                         Button(role: .destructive) { pendingDelete = recording } label: { Label("Delete", systemImage: "trash") }
                     }
                 }
+            } header: {
+                HStack {
+                    Text(melodicSummary)
+                    Spacer()
+                    Text(count(model.recordings.count, "Recording"))
+                }
+                .font(.footnote)
+                .lineLimit(1)
+                .textCase(nil)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("pitch-summary")
             }
         }
         .confirmationDialog(
@@ -75,9 +74,9 @@ struct RecordingsTab: View {
         }
     }
 
-    /// "7 Melodic Recordings across 6 notes".
+    /// "9 Melodic Recordings across 7 notes": notes with their octave, so G3 and G4 are two.
     private var melodicSummary: String {
-        "\(count(model.melodicRecordings.count, "Melodic Recording")) across \(count(model.collectedPitchClasses.count, "note"))"
+        "\(count(model.melodicRecordings.count, "Melodic Recording")) across \(count(model.collectedNotes.count, "note"))"
     }
 
     private func count(_ number: Int, _ noun: String) -> String {

@@ -8,7 +8,7 @@ Capture-first, as approved in #2, with the owner's changes from the #47 review: 
 
 | Tab | Name on screen | What it holds |
 | --- | --- | --- |
-| 1 | **Recordings** | Every Recording, with its note, and the strip of collected notes |
+| 1 | **Recordings** | Every Recording, with its note and waveform, and how many notes you've collected |
 | 2 | **Compose** | Song Creator: the Song Catalog with Pitch Coverage and unlocks. (AI Song Creator is post-MVP.) |
 | 3 (center) | **Record** | One big red button. Tap to start: recording fills the screen, with Stop and a timer. Opens on launch, and again whenever the app comes back to the foreground (unless Review or Result is open). |
 | 4 | **Toots** | Toots: Songs played by your Recordings, each with its own screen |
