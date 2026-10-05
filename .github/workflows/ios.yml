@@ -43,7 +43,8 @@ jobs:
     name: ios-build-and-test
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: macos-26
-    timeout-minutes: 40
+    # Leaves room after the test step's own 30 minutes for the result bundle to upload.
+    timeout-minutes: 45
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
       XCODEGEN_VERSION: 2.44.1

@@ -14,8 +14,7 @@ xcodegen generate       # writes Pedos.xcodeproj; rerun after adding or removing
 
 ## Build and test
 
-Any available iPhone simulator on iOS 26 or later works. List them, then pass one by its UDID
-(or by its exact name):
+Any available iPhone simulator on iOS 26 or later works. List them, then pass one by its UDID:
 
 ```sh
 xcrun simctl list devices available
