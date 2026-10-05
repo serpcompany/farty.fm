@@ -14,7 +14,7 @@ from melody import load_catalog
 
 OUT = Path(__file__).parent / "out/listen"
 AUDIO = OUT / "audio"
-SMALL_LIBRARY = ["002", "009", "016", "021", "069", "090"]  # a plausible new user's first six
+SMALL_LIBRARY = ["002", "009", "016", "021", "069", "090"]  # a plausible new user's first six (golden data)
 
 
 def encode(y, name):
@@ -31,7 +31,6 @@ def encode(y, name):
 def main():
     AUDIO.mkdir(parents=True, exist_ok=True)
     lib = engine.load_library()
-    small = [s for s in lib if s.id in SMALL_LIBRARY]
     manifest = {r["id"]: r for r in json.loads(engine.MANIFEST.read_text())["recordings"]}
 
     recordings = []
@@ -53,8 +52,12 @@ def main():
     for c, m in load_catalog():
         if c["id"] == "ode-mutopia":
             continue
+        fit = engine.melody_fit(m, lib)
+        if not fit.unlocked:  # locked Songs can't be played
+            print(c["id"], f"locked: {fit.covered} of {fit.total} notes covered")
+            continue
         variants = {}
-        for key, sources, tune in (("tuned", lib, 1.0), ("natural", lib, 0.0), ("small", small, 1.0)):
+        for key, sources, tune in (("tuned", lib, 1.0), ("natural", lib, 0.0)):
             T, asg = engine.plan(m, sources)
             y, ev = engine.render(m, sources, asg, tune=tune, bpm=m.bpm)
             r = evaluate(y, m, ev, m.bpm)
@@ -88,7 +91,7 @@ def main():
             }
         )
 
-    data = {"recordings": recordings, "songs": songs, "small_library": SMALL_LIBRARY}
+    data = {"recordings": recordings, "songs": songs}
     shutil.copy(Path(__file__).parent / "listen/index.html", OUT / "index.html")
     (OUT / "data.js").write_text("window.PEDOS = " + json.dumps(data, ensure_ascii=False) + ";\n")
 

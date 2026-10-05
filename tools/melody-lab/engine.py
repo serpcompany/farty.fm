@@ -159,6 +159,31 @@ def load_library(ids=None):
 
 # ---------------------------------------------------------------- Melody Fit planning
 
+MAX_SHIFT = 3.0  # semitones a Recording may be moved from its Recording Pitch (ADR 0004) ...
+OCTAVE = 12.0  # ... or from the same note an octave up or down, with an Octave Move (ADR 0006)
+OCTAVE_MOVE_COST = 6.0  # per beat, on top of the remaining shift: more than any real-pitch move (3^1.5 = 5.2)
+TOO_SHORT_COST = 8.0  # per note that sounds too briefly for the Recording to settle on its pitch ...
+TOO_SHORT_COST_PER_S = 400.0  # ... plus this per second it falls short (4 per 10 ms)
+TIE = 1e-9  # Arrangement costs this close are equal
+TRANSPOSITIONS = range(-36, 25)
+
+
+def too_short_cost(note_seconds, recording_seconds, shortest_note_s, shift):
+    """Cost of the notes a Recording plays too briefly to settle on its pitch.
+
+    A note sounds for its own length (minus the gap before the next note) or for the
+    Recording's length after resampling `shift` semitones, whichever is shorter: an Octave
+    Move up halves a Recording's length. Below the Recording's shortest note (`audition()`),
+    each note costs TOO_SHORT_COST plus TOO_SHORT_COST_PER_S per second it falls short.
+    """
+    played = recording_seconds * 2 ** (-shift / 12)
+    cost = 0.0
+    for a in note_seconds:
+        sounds = min(a, played)
+        if sounds < shortest_note_s:
+            cost += TOO_SHORT_COST + TOO_SHORT_COST_PER_S * (shortest_note_s - sounds)
+    return cost
+
 
 @dataclass
 class Assignment:
@@ -168,63 +193,171 @@ class Assignment:
     shift_semitones: float
 
 
-def shift_cost(s):
-    a = abs(s)
-    if a > 12:  # beyond an octave the fart stops sounding like itself
-        return 1e6
-    return a**1.5 + (4 * (a - 7) if a > 7 else 0)
+def move_cost(shift, octave_moves=True):
+    """Cost per beat of playing a note `shift` semitones from the Recording Pitch, and
+    whether that is an Octave Move. None when the unlock rule doesn't allow it."""
+    a = abs(shift)
+    if a <= MAX_SHIFT:
+        return a**1.5, False
+    if octave_moves and abs(a - OCTAVE) <= MAX_SHIFT:
+        return OCTAVE_MOVE_COST + abs(a - OCTAVE) ** 1.5, True
+    return None
 
 
-def plan(melody, sources, variety=False, transpose=None, with_cost=False):
-    """Choose a key (transposition) and a Recording for each note.
+@dataclass
+class Fit:
+    """Melody Fit: which Melodic Recording plays each distinct Song pitch, and its cost.
 
-    Key-zone mapping, like a multi-sampled instrument: each distinct melody pitch is played
-    by the pitched Recording whose natural pitch is closest, so shifts stay small and the same
-    note always sounds the same. A one-to-one assignment maximises how many different
-    Recordings are used. `variety=True` rotates between the closest few Recordings on
-    repeated notes instead. `with_cost=True` also returns the chosen assignment's total cost
-    (used by the golden export).
+    Arrangements compare by (uncovered pitches, Octave Moves, cost), smallest first: as much
+    Pitch Coverage as possible, then as few Octave Moves as that allows, then the closest
+    shifts. Costs within TIE are equal; then the Recording ids read in ascending Song pitch
+    order (uncovered last) decide, then the lower transposition."""
+
+    transpose: int
+    recording_for_pitch: dict  # Song pitch -> Recording id, or None when no Recording covers it
+    octave_moves: int
+    cost: float  # over covered pitches: beats x move_cost + too_short_cost of its notes
+
+    @property
+    def covered(self):
+        return sum(r is not None for r in self.recording_for_pitch.values())
+
+    @property
+    def total(self):
+        return len(self.recording_for_pitch)
+
+    @property
+    def unlocked(self):
+        return self.covered == self.total
+
+    @property
+    def missing(self):
+        """The notes (MIDI, after transposition) that no Recording covers."""
+        return [p + self.transpose for p, r in sorted(self.recording_for_pitch.items()) if r is None]
+
+
+def melody_fit(melody, sources, transpose=None, octave_moves=True):
+    """Pitch Coverage and Auto-map in one search (ADR 0004, ADR 0006).
+
+    Like a multi-sampled instrument: each distinct Song pitch gets its own Melodic Recording
+    (one to one, never reused), moved at most 3 semitones, or with an Octave Move at most 3
+    semitones from the same note an octave away. Every transposition from -36 to +24 is
+    tried. A Song is unlocked when every pitch is covered under the best transposition.
+    `octave_moves=False` gives ADR 0004's rule without Octave Moves, for comparison.
     """
-    pitched = [s for s in sources if s.pitched]
-    if not pitched:
-        raise ValueError("no Recording has a usable pitch")
+    pitched = sorted((s for s in sources if s.pitched), key=lambda s: s.id)
     pitches = sorted({n.pitch for n in melody.notes})
-    weight = {p: sum(n.dur for n in melody.notes if n.pitch == p) for p in pitches}
     spb = 60 / melody.bpm
-    too_short = {  # notes at pitch p shorter than what Recording s can carry
-        (p, s.id): sum(1 for n in melody.notes if n.pitch == p and n.dur * spb - GAP_S < s.min_note_s)
-        for p in pitches
-        for s in pitched
-    }
+    weight = {p: sum(n.dur for n in melody.notes if n.pitch == p) for p in pitches}
+    note_seconds = {p: [n.dur * spb - GAP_S for n in melody.notes if n.pitch == p] for p in pitches}
 
-    def solve(t):
-        cols = pitched * (1 + len(pitches) // len(pitched))  # allow reuse when needed
-        reuse = np.repeat(np.arange(1 + len(pitches) // len(pitched)), len(pitched))
-        C = np.array(
-            [
-                [weight[p] * shift_cost(p + t - s.ref_midi) + 8.0 * too_short[p, s.id] + 2.0 * r for s, r in zip(cols, reuse)]
-                for p in pitches
-            ]
-        )
-        rows, cidx = linear_sum_assignment(C)
-        return C[rows, cidx].sum(), {pitches[i]: cols[j] for i, j in zip(rows, cidx)}
+    def cells(t):  # cells[i][j]: (Octave Move?, cost) of pitch i on Recording j, or None
+        out = []
+        for p in pitches:
+            row = []
+            for s in pitched:
+                shift = p + t - s.ref_midi
+                m = move_cost(shift, octave_moves)
+                if m is None:
+                    row.append(None)
+                else:
+                    row.append((m[1], weight[p] * m[0] + too_short_cost(note_seconds[p], s.seconds, s.min_note_s, shift)))
+            out.append(row)
+        return out
 
-    candidates = [transpose] if transpose is not None else range(-36, 25)
-    best_t, (best_cost, zone) = min(((t, solve(t)) for t in candidates), key=lambda x: x[1][0])
+    def key(table, choice):  # exact (uncovered, Octave Moves, cost), summed in pitch order
+        uncovered = octaves = 0
+        cost = 0.0
+        for row, j in zip(table, choice):
+            if j is None:
+                uncovered += 1
+            else:
+                octaves += row[j][0]
+                cost += row[j][1]
+        return uncovered, octaves, cost
 
+    def solve(table, fixed=()):
+        """Best choice for the pitches after `fixed` (Recording indexes or None, in pitch
+        order), as one assignment problem: penalties larger than any cost make it minimise
+        uncovered pitches first, then Octave Moves, then cost."""
+        rows = table[len(fixed) :]
+        cols = [j for j in range(len(pitched)) if j not in fixed]
+        bound = sum(max((c[1] for c in row if c is not None), default=0.0) for row in rows)
+        octave_penalty = 1.0 + bound
+        uncovered_penalty = (len(rows) + 1) * octave_penalty
+        C = np.full((len(rows), len(cols) + len(rows)), np.inf)
+        for i, row in enumerate(rows):
+            for k, j in enumerate(cols):
+                if row[j] is not None:
+                    C[i, k] = row[j][1] + (octave_penalty if row[j][0] else 0.0)
+            C[i, len(cols) + i] = uncovered_penalty  # this pitch stays uncovered
+        choice = list(fixed)
+        if rows:
+            r, c = linear_sum_assignment(C)
+            picked = dict(zip(r, c))
+            choice += [cols[picked[i]] if picked[i] < len(cols) else None for i in range(len(rows))]
+        return key(table, choice), choice
+
+    tables = {t: cells(t) for t in ([transpose] if transpose is not None else TRANSPOSITIONS)}
+    best = {t: solve(table)[0] for t, table in tables.items()}
+    top = min(k[:2] for k in best.values())
+    low = min(k[2] for k in best.values() if k[:2] == top)
+
+    def optimal(k):
+        return k[:2] == top and k[2] <= low + TIE
+
+    def smallest_ids(table):  # the lexicographically smallest optimal choice, uncovered last
+        fixed = []
+        for i in range(len(pitches)):
+            for j in sorted(set(range(len(pitched))) - set(fixed), key=lambda j: pitched[j].id) + [None]:
+                if j is not None and table[i][j] is None:
+                    continue
+                if optimal(solve(table, fixed + [j])[0]):
+                    fixed.append(j)
+                    break
+        return fixed
+
+    fits = []
+    for t, k in best.items():
+        if optimal(k):
+            choice = smallest_ids(tables[t])
+            ids = tuple(pitched[j].id if j is not None else "￿" for j in choice)
+            fits.append((ids, t, choice))
+    _, t, choice = min(fits)
+    _, octaves, cost = key(tables[t], choice)
+    return Fit(
+        transpose=t,
+        recording_for_pitch={p: (pitched[j].id if j is not None else None) for p, j in zip(pitches, choice)},
+        octave_moves=octaves,
+        cost=float(cost),
+    )
+
+
+class SongLocked(ValueError):
+    """The Recordings don't cover every pitch of the Song, so it can't be played."""
+
+    def __init__(self, fit):
+        super().__init__(f"{fit.covered} of {fit.total} notes covered")
+        self.fit = fit
+
+
+def plan(melody, sources, transpose=None, with_cost=False):
+    """Choose a key (transposition) and a Recording for each note of an Unlocked Song.
+
+    Every note of a Song pitch uses that pitch's Recording, so the same note always sounds
+    the same. Raises SongLocked when the Song isn't unlocked. `with_cost=True` also returns
+    the Arrangement's cost (used by the golden export).
+    """
+    fit = melody_fit(melody, sources, transpose)
+    if not fit.unlocked:
+        raise SongLocked(fit)
+    ref = {s.id: s.ref_midi for s in sources}
     out = []
-    counters = {}
     for i, n in enumerate(melody.notes):
-        target = n.pitch + best_t
-        src = zone[n.pitch]
-        if variety:
-            fits = [s for s in pitched if s.min_note_s <= n.dur * spb - GAP_S and abs(target - s.ref_midi) <= 7]
-            near = sorted(fits, key=lambda s: shift_cost(target - s.ref_midi))[:3] or [src]
-            k = counters.get(n.pitch, 0)
-            counters[n.pitch] = k + 1
-            src = near[k % len(near)]
-        out.append(Assignment(i, src.id, target, round(target - src.ref_midi, 2)))
-    return (best_t, out, float(best_cost)) if with_cost else (best_t, out)
+        target = n.pitch + fit.transpose
+        rid = fit.recording_for_pitch[n.pitch]
+        out.append(Assignment(i, rid, target, round(target - ref[rid], 2)))
+    return (fit.transpose, out, fit.cost) if with_cost else (fit.transpose, out)
 
 
 # ---------------------------------------------------------------- Rendering

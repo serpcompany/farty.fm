@@ -155,7 +155,7 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
   <section class="how">
     <div><h3>Melodies with a paper trail</h3><p>Each tune is a MIDI file from PDMX, a published dataset of public-domain MuseScore scores with per-score license checks. The importer keeps the top line and reports anything it drops. No note is typed in by hand.</p></div>
     <div><h3>One puff per note</h3><p>Every Recording is cut to its first clean gesture: it starts at the attack, not the silence before it, and ends before any second "brrt". That is what keeps a quarter note from sounding like four sixteenths.</p></div>
-    <div><h3>Closest fart for each pitch</h3><p>Like a multi-sampled instrument: the engine picks a key, then gives each melody pitch the Recording whose natural pitch is nearest, so shifts stay small and the same note always sounds the same.</p></div>
+    <div><h3>Closest fart for each pitch</h3><p>Like a multi-sampled instrument: the engine picks a key, then gives each melody pitch its own Recording, within 3 semitones of its natural pitch, or an octave away only where the Song needs it. The same note always sounds the same.</p></div>
     <div><h3>Checked by ear and by machine</h3><p>A pitch tracker reads every render back note by note. A note counts as on pitch within 50 cents. Recordings that can't hold a pitch on short notes are kept off them.</p></div>
   </section>
 
@@ -172,7 +172,6 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
   const VARIANTS = [
     { key: "tuned", label: "Tuned", tag: "pick", desc: "All 23 Recordings available. Each note is held steady on its pitch by following the fart's own pitch wobble and correcting it." },
     { key: "natural", label: "Natural pitch", desc: "Same Recordings and notes, but each fart keeps its natural wobble and slide. More character, a bit less in tune." },
-    { key: "small", label: "Only 6 Recordings", desc: "What a new user with just six Recordings would get (" + D.small_library.join(", ") + "). Only two of those carry a pitch, so the engine leans on them." },
     { key: "before", label: "Before", desc: "The failing approach for contrast: raw files started on each beat with no trimming and no pitch matching. This is roughly what earlier attempts sounded like." },
   ];
   const recById = Object.fromEntries(D.recordings.map((r) => [r.id, r]));

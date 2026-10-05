@@ -15,7 +15,7 @@ Inputs: `../../fixtures/recordings/` (Fixture Library) and `../../catalog/` (Son
 | File | Role |
 | --- | --- |
 | `melody.py` | MIDI → monophonic melody plan (sustain-aware skyline; reports everything dropped) |
-| `engine.py` | Recording Analysis (single-gesture segment, pitch contour, self-audition), Melody Fit planning (key choice + key-zone assignment), rendering |
+| `engine.py` | Recording Analysis (single-gesture segment, pitch contour, self-audition), Melody Fit (Pitch Coverage, unlocks and Auto-map: key choice and one Recording per pitch), rendering |
 | `evaluate.py` | Reads each render back with a pitch tracker: notes on pitch, onsets on time, re-attacks inside a note |
 | `build.py` | Renders all versions and writes the listening page (`listen/index.html` + data + audio) |
 | `run_all.py` | Prints the checks for every Song; the quickest regression check |
