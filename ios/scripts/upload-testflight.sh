@@ -69,6 +69,10 @@ plist_value() { /usr/libexec/PlistBuddy -c "Print :$1" "$app/Info.plist" 2>/dev/
 # iPhone only (ADR 0001); App Store Connect holds an iPad app to iPad's orientation rules.
 [ "$(plist_value UIDeviceFamily)" = "$(printf 'Array {\n    1\n}')" ] ||
   fail "the app is not iPhone only: UIDeviceFamily is $(plist_value UIDeviceFamily | tr -s '\n ' ' ')"
+# App Store Connect flags uploads without a privacy manifest (ITMS-91053).
+plutil -lint "$app/PrivacyInfo.xcprivacy" >/dev/null 2>&1 || fail "the app has no valid PrivacyInfo.xcprivacy"
+plutil -convert xml1 -o - "$app/PrivacyInfo.xcprivacy" | grep -q NSPrivacyAccessedAPICategoryUserDefaults ||
+  fail "the privacy manifest doesn't declare the app's UserDefaults use"
 # The Fixture Library never ships to regular users (AGENTS.md): Release carries no audio, and
 # QA carries exactly the Fixture Library and the stand-in Song renders, never the sample takes.
 audio_count() { # pattern
