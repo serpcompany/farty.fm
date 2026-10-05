@@ -49,8 +49,8 @@ xcodebuild test -project Pedos.xcodeproj -scheme PedosShipped \
 
 Simulators in CI have no microphone, so the test launches the app with `-PedosTestTake <file>`,
 and each take is a copy of that file: Fixture Library Recording 090 as the recorder writes it
-(`PedosUITests/Resources/test-take-090.m4a`). Everything after the microphone is real. On an
-iPhone, run the same test with `-destination 'id=<iPhone UDID>'` to use the real microphone.
+(`PedosUITests/Resources/test-take-090.m4a`). Everything after the microphone is real. The real
+microphone is checked by hand, on a phone, from a TestFlight build.
 
 ## Recording
 

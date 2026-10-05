@@ -25,6 +25,8 @@ final class SampleAppModel: AppModel {
 
     /// Takes shorter than this count as nothing heard.
     static let minimumTakeSeconds = 0.5
+    /// Recording stops by itself after this long, which keeps analysis quick and small.
+    static let maximumTakeSeconds = 30.0
     /// The UserDefaults key that remembers Welcome was shown.
     static let welcomeSeenKey = "welcomeSeen"
 
@@ -39,6 +41,11 @@ final class SampleAppModel: AppModel {
     var playbackStartedAt: Date? { player.startedAt }
 
     @ObservationIgnored private let source: any RecordingSource
+    /// A start or a save is under way, so a second tap does nothing.
+    @ObservationIgnored private var isStarting = false
+    @ObservationIgnored private var isSaving = false
+    /// Stops a take at `maximumTakeSeconds`.
+    @ObservationIgnored private var takeLimit: Task<Void, Never>?
     /// Song Creator failures to simulate (recording failures are the source's).
     @ObservationIgnored private var pendingFailures: Failures
     @ObservationIgnored private let microphone: any MicrophoneAccess
@@ -164,7 +171,9 @@ final class SampleAppModel: AppModel {
     // MARK: Record tab
 
     func startRecording() async {
-        guard capture == .idle, flow == nil else { return }
+        guard capture == .idle, flow == nil, !isStarting else { return }
+        isStarting = true
+        defer { isStarting = false }
         recordProblem = nil
         // Playback lets go of the audio session before the recorder takes it.
         await player.stopAndWait()
@@ -187,10 +196,16 @@ final class SampleAppModel: AppModel {
             return
         }
         capture = .recording(startedAt: now())
+        takeLimit = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(Self.maximumTakeSeconds))
+            guard !Task.isCancelled else { return }
+            await self?.stopRecording()
+        }
     }
 
     func stopRecording() async {
         guard case .recording(let startedAt) = capture else { return }
+        takeLimit?.cancel()
         capture = .finishing
 
         let longEnough = now().timeIntervalSince(startedAt) >= Self.minimumTakeSeconds
@@ -217,6 +232,7 @@ final class SampleAppModel: AppModel {
     /// A call or another app took the microphone: the take is lost.
     func interruptRecording() {
         guard case .recording = capture else { return }
+        takeLimit?.cancel()
         capture = .idle
         recordProblem = .interrupted
         Task { await source.cancelTake() }
@@ -234,14 +250,18 @@ final class SampleAppModel: AppModel {
         case .review(let reviewed), .saveFailed(let reviewed): draft = reviewed
         default: return
         }
+        guard !isSaving else { return }
+        isSaving = true
         stopPlayback()
         let recording: Recording
         do {
             recording = try await source.save(take(of: draft))
         } catch {
+            isSaving = false
             flow = .saveFailed(draft)
             return
         }
+        isSaving = false
         recordings.append(recording)
         flow = .analyzing(recording.id)
         await analyze(recording.id)

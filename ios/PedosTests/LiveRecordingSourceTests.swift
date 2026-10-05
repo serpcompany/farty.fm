@@ -83,7 +83,10 @@ final class LiveRecordingSourceTests: XCTestCase {
         await model.startRecording()
         clock += 1
         await model.stopRecording()
-        guard case .review(let draft) = model.flow else { throw XCTSkip("No Review: \(String(describing: model.flow))") }
+        guard case .review(let draft) = model.flow else {
+            XCTFail("No Review: \(String(describing: model.flow))")
+            throw CocoaError(.featureUnsupported)
+        }
         XCTAssertEqual(draft.seconds, try XCTUnwrap(AudioLength.seconds(of: testTake)), accuracy: 0.01)
         XCTAssertFalse(draft.waveform.isEmpty)
         await model.saveDraft()
@@ -184,5 +187,20 @@ final class LiveRecordingSourceTests: XCTestCase {
         XCTAssertEqual(model.recordProblem, .nothingHeard)
         XCTAssertNil(model.flow)
         XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: store.draftFolder.path(percentEncoded: false)), [])
+    }
+
+    func testASecondSaveTapDoesNothing() async throws {
+        let model = makeModel(LiveRecordingSource(store: store, analyzer: Analysis().analyzer(), testTake: testTake))
+        await model.startRecording()
+        clock += 1
+        await model.stopRecording()
+
+        async let first: Void = model.saveDraft()
+        async let second: Void = model.saveDraft()
+        _ = await (first, second)
+
+        XCTAssertEqual(model.recordings.count, 1)
+        XCTAssertEqual(try store.load().count, 1)
+        guard case .result = model.flow else { return XCTFail("No Result: \(String(describing: model.flow))") }
     }
 }
