@@ -21,6 +21,24 @@ permissions:
   contents: read
 
 jobs:
+  # Its own job, so it runs alongside the app's tests instead of competing with the simulator.
+  recording-analysis:
+    name: recording-analysis
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: macos-26
+    timeout-minutes: 15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    defaults:
+      run:
+        working-directory: RecordingAnalysisKit
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Test Recording Analysis against the reference engine
+        # Every Fixture Library Recording, against fixtures/golden/.
+        run: swift test -c release
+
   ios-build-and-test:
     name: ios-build-and-test
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
@@ -33,8 +51,9 @@ jobs:
       # The simulator the tests run on. It boots in the background while the app builds.
       SIMULATOR_NAME: iPhone 17 Pro
       SIMULATOR_RUNTIME: com.apple.CoreSimulator.SimRuntime.iOS-26-5
-      # UI tests run on this many clones of the simulator at once.
-      TEST_WORKERS: 3
+      # One simulator: the hosted runner (3 cores, 7 GB) slows to a crawl with clones, and a
+      # third clone failed to launch. Local runs use 3 (scripts/run-tests.sh).
+      TEST_WORKERS: 1
       # Pull requests run the quick set; main runs everything (scripts/run-tests.sh).
       TEST_SET: ${{ github.event_name == 'pull_request' && 'quick' || 'full' }}
       # Stream xcodebuild output through the pipe instead of buffering it until exit.
@@ -71,11 +90,6 @@ jobs:
 
       - name: Check the generated sample data is current
         run: scripts/generate-sample-data.py --check
-
-      - name: Test Recording Analysis against the reference engine
-        # Every Fixture Library Recording, against fixtures/golden/ (RecordingAnalysisKit/).
-        working-directory: RecordingAnalysisKit
-        run: swift test -c release
 
       - name: Check bundle identifiers and that Release excludes the fixture audio
         run: scripts/check-bundle-identifiers.sh

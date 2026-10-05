@@ -30,14 +30,16 @@ tests for each screen run in light mode and again in dark mode (the `…DarkUITe
 and attach a screenshot of every screen and state to the result bundle; export them with
 `xcrun xcresulttool export attachments --path <result>.xcresult --output-path <dir>`.
 
-`scripts/run-tests.sh` runs the UI tests on three simulators at once and skips the dark-mode runs,
+`scripts/run-tests.sh` runs the tests on three simulators at once (CI uses one: its machine is too
+small for more) and skips the dark-mode runs,
 which exist for screenshots (set `TEST_RUNNER_PEDOS_UI_TESTS_LIGHT_ONLY=0` to include them).
 
 CI ([`.github/workflows/ios.yml`](../.github/workflows/ios.yml)) splits the tests the way Apple
 recommends: a pull request that's ready for review runs the **quick** set, which gates the merge
 (draft PRs are skipped). Every push to `main` runs the **full** set, which doesn't block anyone.
-Both also run `scripts/generate-sample-data.py --check`, the bundle identifier check and the
-Recording Analysis golden tests (`swift test` in `RecordingAnalysisKit/`).
+Both also run `scripts/generate-sample-data.py --check` and the bundle identifier check, and a
+second job runs the Recording Analysis golden tests (`swift test` in `RecordingAnalysisKit/`) at the
+same time.
 
 ### Testing the build that ships
 

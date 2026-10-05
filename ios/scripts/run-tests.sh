@@ -9,7 +9,8 @@
 # The dark-mode UI test runs exist for screenshots, so they're skipped unless
 # TEST_RUNNER_PEDOS_UI_TESTS_LIGHT_ONLY=0.
 #
-# UI tests run on parallel clones of the simulator. Run after `xcodegen generate`:
+# Tests run on TEST_WORKERS clones of the simulator at once (3 by default; CI uses 1 because
+# its machine is too small for clones). Run after `xcodegen generate`:
 #   ios/scripts/run-tests.sh quick|full <simulator UDID> [result bundle path]
 set -eu
 
@@ -34,10 +35,14 @@ set -- \
   -project Pedos.xcodeproj \
   -scheme Pedos \
   -destination "platform=iOS Simulator,id=$udid" \
-  -parallel-testing-enabled YES \
-  -parallel-testing-worker-count "${TEST_WORKERS:-3}" \
   -test-timeouts-enabled YES \
   -default-test-execution-time-allowance 120
+workers=${TEST_WORKERS:-3}
+if [ "$workers" -gt 1 ]; then
+  set -- "$@" -parallel-testing-enabled YES -parallel-testing-worker-count "$workers"
+else
+  set -- "$@" -parallel-testing-enabled NO
+fi
 if [ -n "$result" ]; then set -- "$@" -resultBundlePath "$result"; fi
 for test in $only; do set -- "$@" "$test"; done
 xcodebuild test "$@"
