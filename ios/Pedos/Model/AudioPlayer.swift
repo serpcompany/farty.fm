@@ -39,6 +39,12 @@ final class AudioPlayer {
         }
     }
 
+    /// Stops playing and waits until the audio session is let go, so the recorder can take it.
+    func stopAndWait() async {
+        stop()
+        await lastOperation?.value
+    }
+
     /// Stops playing and lets the audio session go, so other apps' audio resumes.
     func stop() {
         guard nowPlaying != nil else { return }

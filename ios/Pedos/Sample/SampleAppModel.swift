@@ -1,13 +1,11 @@
 import Foundation
 import Observation
 
-/// The app model with sample data: recording is simulated, and each take is the next Fixture
-/// Library Recording in the prototype's story order, with its reference analysis. Song Creator is
-/// simulated too: making a Toot returns the design prototype's render of the Song.
-///
-/// Debug builds start it with the Fixture Library (`SampleFixture.prototypeLibrary`) and the
-/// prototype's Song audio. Release builds carry neither, so they start empty, can't record until
-/// the real recorder (#12) replaces this model, and can't make Toots until rendering (#17).
+/// The app model: it runs every screen's states. Recordings come from a `RecordingSource`: the
+/// microphone, files and Recording Analysis (`LiveRecordingSource`), or in Debug builds the
+/// Fixture Library (`FixtureRecordingSource`). Song Creator is still simulated: making a Toot
+/// returns the design prototype's render of the Song, which only Debug builds carry, so Release
+/// builds can't make Toots until rendering (#17).
 @MainActor
 @Observable
 final class SampleAppModel: AppModel {
@@ -40,21 +38,12 @@ final class SampleAppModel: AppModel {
     var nowPlaying: PlaybackItem? { player.nowPlaying }
     var playbackStartedAt: Date? { player.startedAt }
 
-    @ObservationIgnored private let fixtures: [SampleFixture]
-    @ObservationIgnored private let story: [String]
-    /// Which fixture each Recording stands in for.
-    @ObservationIgnored private var fixtureOfRecording: [Recording.ID: SampleFixture] = [:]
-    /// Which fixture each unsaved take stands in for.
-    @ObservationIgnored private var fixtureOfDraft: [Draft.ID: SampleFixture] = [:]
-    /// How many takes were saved, which picks the story fixture once every fixture is used.
-    @ObservationIgnored private var savedTakes: Int
+    @ObservationIgnored private let source: any RecordingSource
+    /// Song Creator failures to simulate (recording failures are the source's).
     @ObservationIgnored private var pendingFailures: Failures
     @ObservationIgnored private let microphone: any MicrophoneAccess
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let now: () -> Date
-    @ObservationIgnored private let analysisDelay: Duration
-    @ObservationIgnored private let interruptionDelay: Duration
-    @ObservationIgnored private var interruption: Task<Void, Never>?
     @ObservationIgnored private let player = AudioPlayer()
     /// The audio that stands in for Song Creator's render of a Song, when the build has any.
     @ObservationIgnored private let songAudio: (Song) -> URL?
@@ -69,14 +58,57 @@ final class SampleAppModel: AppModel {
     @ObservationIgnored private var coverageCache: CoverageCache
 
     /// - Parameters:
-    ///   - fixtures: the Recordings simulated takes come from.
-    ///   - story: fixture ids in the order takes arrive; the rest follow in `fixtures` order.
-    ///   - initialFixtureIDs: fixtures already saved (and analyzed) at launch, oldest first.
+    ///   - source: where takes come from and Recordings are kept.
     ///   - initialTootSongIDs: Songs already saved as Toots at launch, oldest first.
     ///   - songAudio: the audio a made Toot of each Song plays; nil where there's none.
     ///   - renders: how that audio was rendered, by Song.
-    ///   - failures: failures to simulate, each once.
+    ///   - failures: Song Creator failures to simulate, each once.
     init(
+        source: any RecordingSource,
+        songs: [Song],
+        initialTootSongIDs: [Song.ID] = [],
+        songAudio: @escaping (Song) -> URL? = { _ in nil },
+        renders: [Song.ID: StandInRender] = [:],
+        microphone: any MicrophoneAccess,
+        defaults: UserDefaults,
+        failures: Failures = [],
+        now: @escaping () -> Date = Date.init,
+        makingDelay: Duration = .milliseconds(1200)
+    ) {
+        self.source = source
+        self.songs = songs
+        self.microphone = microphone
+        self.defaults = defaults
+        self.pendingFailures = failures
+        self.now = now
+        self.songAudio = songAudio
+        self.renders = renders
+        self.makingDelay = makingDelay
+        self.coverageCache = CoverageCache(songs: songs)
+        self.isShowingWelcome = !defaults.bool(forKey: Self.welcomeSeenKey)
+        self.recordings = source.savedRecordings()
+
+        for songID in initialTootSongIDs {
+            guard let song = songs.first(where: { $0.id == songID }),
+                  let url = songAudio(song),
+                  let seconds = AudioLength.seconds(of: url)
+            else { continue }
+            let arrangement = renderArrangement(of: song) ?? coverage(of: song).matchedArrangement ?? .empty
+            addToot(id: UUID(), song: song, arrangement: arrangement, seconds: seconds, audioURL: url)
+        }
+
+        // Recordings saved before an analysis update, or before analysis finished, are analyzed now.
+        for recording in recordings where recording.analysis == .analyzing {
+            Task { await analyze(recording.id) }
+        }
+    }
+
+    /// The sample model: takes come from the Fixture Library (see `FixtureRecordingSource`).
+    ///   - fixtures: the Recordings simulated takes come from.
+    ///   - story: fixture ids in the order takes arrive; the rest follow in `fixtures` order.
+    ///   - initialFixtureIDs: fixtures already saved (and analyzed) at launch, oldest first.
+    ///   - failures: failures to simulate, each once.
+    convenience init(
         fixtures: [SampleFixture],
         story: [String],
         songs: [Song],
@@ -92,43 +124,25 @@ final class SampleAppModel: AppModel {
         interruptionDelay: Duration = .milliseconds(1500),
         makingDelay: Duration = .milliseconds(1200)
     ) {
-        self.fixtures = fixtures
-        self.story = story
-        self.songs = songs
-        self.microphone = microphone
-        self.defaults = defaults
-        self.pendingFailures = failures
-        self.now = now
-        self.analysisDelay = analysisDelay
-        self.interruptionDelay = interruptionDelay
-        self.songAudio = songAudio
-        self.renders = renders
-        self.makingDelay = makingDelay
-        self.coverageCache = CoverageCache(songs: songs)
-        self.isShowingWelcome = !defaults.bool(forKey: Self.welcomeSeenKey)
-        self.savedTakes = min(initialFixtureIDs.count, story.count)
-
-        for fixtureID in initialFixtureIDs {
-            guard let fixture = fixtures.first(where: { $0.id == fixtureID }) else { continue }
-            let recording = Recording(
-                id: UUID(),
-                number: recordings.count + 1,
-                seconds: fixture.seconds,
-                analysis: .analyzed(fixture.analysis),
-                audioURL: fixture.audioURL
-            )
-            recordings.append(recording)
-            fixtureOfRecording[recording.id] = fixture
-        }
-
-        for songID in initialTootSongIDs {
-            guard let song = songs.first(where: { $0.id == songID }),
-                  let url = songAudio(song),
-                  let seconds = AudioLength.seconds(of: url)
-            else { continue }
-            let arrangement = renderArrangement(of: song) ?? coverage(of: song).matchedArrangement ?? .empty
-            addToot(id: UUID(), song: song, arrangement: arrangement, seconds: seconds, audioURL: url)
-        }
+        self.init(
+            source: FixtureRecordingSource(
+                fixtures: fixtures,
+                story: story,
+                initialFixtureIDs: initialFixtureIDs,
+                failures: failures,
+                analysisDelay: analysisDelay,
+                interruptionDelay: interruptionDelay
+            ),
+            songs: songs,
+            initialTootSongIDs: initialTootSongIDs,
+            songAudio: songAudio,
+            renders: renders,
+            microphone: microphone,
+            defaults: defaults,
+            failures: failures,
+            now: now,
+            makingDelay: makingDelay
+        )
     }
 
     // MARK: First launch
@@ -152,7 +166,8 @@ final class SampleAppModel: AppModel {
     func startRecording() async {
         guard capture == .idle, flow == nil else { return }
         recordProblem = nil
-        stopPlayback()
+        // Playback lets go of the audio session before the recorder takes it.
+        await player.stopAndWait()
 
         switch microphone.permission {
         case .granted:
@@ -165,60 +180,50 @@ final class SampleAppModel: AppModel {
             guard await microphone.requestPermission() else { return }
         }
 
-        guard pendingFailures.remove(.couldNotStart) == nil, nextFixture() != nil else {
+        do {
+            try await source.startTake { [weak self] in self?.interruptRecording() }
+        } catch {
             recordProblem = .couldNotStart
             return
         }
         capture = .recording(startedAt: now())
-        if pendingFailures.remove(.interrupted) != nil {
-            interruption = Task { [interruptionDelay] in
-                try? await Task.sleep(for: interruptionDelay)
-                guard !Task.isCancelled else { return }
-                self.interruptRecording()
-            }
-        }
     }
 
     func stopRecording() async {
         guard case .recording(let startedAt) = capture else { return }
-        interruption?.cancel()
         capture = .finishing
 
         let longEnough = now().timeIntervalSince(startedAt) >= Self.minimumTakeSeconds
-        guard longEnough, pendingFailures.remove(.nothingHeard) == nil, let fixture = nextFixture() else {
+        guard longEnough else {
+            await source.cancelTake()
+            capture = .idle
+            recordProblem = .nothingHeard
+            return
+        }
+        guard let take = await source.stopTake() else {
             capture = .idle
             recordProblem = .nothingHeard
             return
         }
         // Decoding the whole file for the waveform can block, so it runs off the main actor.
-        let audioURL = fixture.audioURL
+        let audioURL = take.audioURL
         let waveform = await Task.detached(priority: .userInitiated) {
-            Waveform.levels(of: audioURL, count: 40)
+            audioURL.map { Waveform.levels(of: $0, count: 40) } ?? []
         }.value
-        let draft = Draft(id: UUID(), seconds: fixture.seconds, audioURL: audioURL, waveform: waveform)
-        fixtureOfDraft[draft.id] = fixture
         capture = .idle
-        flow = .review(draft)
+        flow = .review(Draft(id: take.id, seconds: take.seconds, audioURL: take.audioURL, waveform: waveform))
     }
 
     /// A call or another app took the microphone: the take is lost.
     func interruptRecording() {
         guard case .recording = capture else { return }
-        interruption?.cancel()
         capture = .idle
         recordProblem = .interrupted
+        Task { await source.cancelTake() }
     }
 
     func dismissRecordProblem() {
         recordProblem = nil
-    }
-
-    /// The next fixture in story order that isn't already a Recording.
-    private func nextFixture() -> SampleFixture? {
-        let saved = Set(fixtureOfRecording.values.map(\.id))
-        let id = (story + fixtures.map(\.id)).first { !saved.contains($0) }
-            ?? (story.isEmpty ? nil : story[savedTakes % story.count])
-        return fixtures.first { $0.id == id }
     }
 
     // MARK: Review and Result
@@ -230,29 +235,21 @@ final class SampleAppModel: AppModel {
         default: return
         }
         stopPlayback()
-        guard pendingFailures.remove(.saveFailed) == nil, let fixture = fixtureOfDraft[draft.id] else {
+        let recording: Recording
+        do {
+            recording = try await source.save(take(of: draft))
+        } catch {
             flow = .saveFailed(draft)
             return
         }
-        fixtureOfDraft[draft.id] = nil
-
-        let recording = Recording(
-            id: UUID(),
-            number: (recordings.map(\.number).max() ?? 0) + 1,
-            seconds: draft.seconds,
-            analysis: .analyzing,
-            audioURL: draft.audioURL
-        )
         recordings.append(recording)
-        fixtureOfRecording[recording.id] = fixture
-        savedTakes += 1
         flow = .analyzing(recording.id)
         await analyze(recording.id)
     }
 
     func discardDraft() {
         stopPlayback()
-        fixtureOfDraft.removeAll()
+        if let draft = flowDraft { source.discard(take(of: draft)) }
         flow = nil
     }
 
@@ -267,22 +264,24 @@ final class SampleAppModel: AppModel {
         await analyze(id)
     }
 
-    /// Simulates Recording Analysis with the fixture's reference result, and shows the Result
-    /// when the cover is waiting for it.
+    /// Runs Recording Analysis, and shows the Result when the cover is waiting for it.
     private func analyze(_ id: Recording.ID) async {
-        try? await Task.sleep(for: analysisDelay)
-        guard let index = recordings.firstIndex(where: { $0.id == id }),
-              let fixture = fixtureOfRecording[id]
-        else { return }
+        let result: RecordingAnalysis?
+        do {
+            result = try await source.analyze(id)
+        } catch {
+            result = nil
+        }
+        guard let index = recordings.firstIndex(where: { $0.id == id }) else { return }
 
         let showsResult = flow == .analyzing(id)
-        if pendingFailures.remove(.analysisFailed) != nil {
+        guard let result else {
             recordings[index].analysis = .notAnalyzed
             if showsResult { flow = .analysisFailed(id) }
             return
         }
         let before = recordings
-        recordings[index].analysis = .analyzed(fixture.analysis)
+        recordings[index].analysis = .analyzed(result)
         if showsResult {
             flow = .result(RecordResult(
                 recordingID: id,
@@ -293,13 +292,25 @@ final class SampleAppModel: AppModel {
 
     func finishFlow() {
         stopPlayback()
-        fixtureOfDraft.removeAll()
+        if let draft = flowDraft { source.discard(take(of: draft)) }
         flow = nil
+    }
+
+    /// The take under Review, or whose save failed.
+    private var flowDraft: Draft? {
+        switch flow {
+        case .review(let draft), .saveFailed(let draft): draft
+        default: nil
+        }
+    }
+
+    private func take(of draft: Draft) -> Take {
+        Take(id: draft.id, seconds: draft.seconds, audioURL: draft.audioURL)
     }
 
     /// The Fixture Library id an unsaved take stands in for.
     func fixtureID(ofDraft id: Draft.ID) -> String? {
-        fixtureOfDraft[id]?.id
+        source.fixtureID(of: id)
     }
 
     #if DEBUG
@@ -322,6 +333,8 @@ final class SampleAppModel: AppModel {
         if case .note(let id, let index) = item {
             let (url, segment) = noteAudio(of: id, index: index)
             player.toggle(item, url: url, segment: segment)
+        } else if case .recording(let id) = item, let recording = recording(id) {
+            player.toggle(item, url: recording.audioURL, segment: recording.replaySegment)
         } else {
             player.toggle(item, url: audioURL(of: item))
         }
@@ -370,7 +383,7 @@ final class SampleAppModel: AppModel {
     func delete(_ id: Recording.ID) {
         if nowPlaying == .recording(id) { stopPlayback() }
         recordings.removeAll { $0.id == id }
-        fixtureOfRecording[id] = nil
+        source.delete(id)
     }
 
     // MARK: Compose
@@ -402,7 +415,7 @@ final class SampleAppModel: AppModel {
         guard let render = renders[song.id] else { return nil }
         var recordingForPitch: [Int: Recording.ID] = [:]
         for (pitch, fixtureID) in render.fixtureForPitch {
-            guard let recording = recordings.first(where: { $0.isMelodic && fixtureOfRecording[$0.id]?.id == fixtureID }) else {
+            guard let recording = recordings.first(where: { $0.isMelodic && source.fixtureID(of: $0.id) == fixtureID }) else {
                 return nil
             }
             recordingForPitch[pitch] = recording.id

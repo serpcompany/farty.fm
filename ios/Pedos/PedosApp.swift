@@ -16,11 +16,11 @@ struct PedosApp: App {
         SampleLaunchOptions(defaults: .standard).makeModel()
     }
     #else
-    /// Release builds carry no fixtures: they start empty.
+    /// Release builds record for real. They carry no fixtures or prototype Song audio, so they
+    /// can't make Toots until rendering (#17).
     private static func makeModel() -> SampleAppModel {
         SampleAppModel(
-            fixtures: [],
-            story: [],
+            source: LiveRecordingSource(analyzer: .reference, testTake: LiveRecordingSource.testTake(in: .standard)),
             songs: Song.prototypeCatalog,
             microphone: SystemMicrophone(),
             defaults: .standard

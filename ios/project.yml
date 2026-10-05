@@ -95,3 +95,16 @@ schemes:
       config: Debug
     archive:
       config: Release
+
+  # The app as it ships: ShippedBuildSmokeTests against the Release build. TestFlight uploads
+  # only if it passes (.github/workflows/testflight.yml). The unit tests need a Debug build
+  # (@testable), so they aren't in this scheme.
+  PedosShipped:
+    build:
+      targets:
+        Pedos: all
+        PedosUITests: [test]
+    test:
+      config: Release
+      targets:
+        - PedosUITests
