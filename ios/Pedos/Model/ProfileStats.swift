@@ -6,8 +6,8 @@ struct ProfileStats: Hashable, Sendable {
     let recordings: Int
     /// The Melodic Recordings among them.
     let melodicRecordings: Int
-    /// The distinct notes (pitch classes, C to B) the Melodic Recordings sound, as on the
-    /// Recordings tab's pitch strip.
+    /// The distinct notes the Melodic Recordings sound, octave included (G2 and G3 are two notes),
+    /// as on the Recordings tab.
     let notesCollected: Int
     /// Unlocked Songs: Songs whose Pitch Coverage is complete.
     let unlockedSongs: Int
@@ -24,7 +24,7 @@ extension AppModel {
         ProfileStats(
             recordings: recordings.count,
             melodicRecordings: melodicRecordings.count,
-            notesCollected: collectedPitchClasses.count,
+            notesCollected: collectedNotes.count,
             unlockedSongs: songListing(matching: "", order: .closestToUnlocking).unlocked.count,
             songs: songs.count,
             toots: toots.count

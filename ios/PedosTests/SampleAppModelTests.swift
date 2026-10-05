@@ -590,7 +590,7 @@ final class SampleAppModelTests: XCTestCase {
         let model = makeModel(start: allFixtureIDs, toots: ["mary", "ode"])
         XCTAssertEqual(
             model.profileStats,
-            ProfileStats(recordings: 23, melodicRecordings: 9, notesCollected: 6, unlockedSongs: 6, songs: 12, toots: 2)
+            ProfileStats(recordings: 23, melodicRecordings: 9, notesCollected: 7, unlockedSongs: 6, songs: 12, toots: 2)
         )
     }
 
