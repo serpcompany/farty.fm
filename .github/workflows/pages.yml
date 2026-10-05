@@ -9,6 +9,7 @@ on:
       - docs/app-store/privacy-policy.md
       - docs/app-store/support.md
       - docs/app-store/build-site.py
+      - docs/app-store/site-assets/**
       - .github/workflows/pages.yml
   workflow_dispatch:
 
