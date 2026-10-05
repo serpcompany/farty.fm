@@ -6,6 +6,14 @@ options:
   developmentLanguage: en
   createIntermediateGroups: true
 
+# Three builds: Debug (development, sample data), QA (what TestFlight gets until launch: the
+# Release app plus the Fixture Library and its loader, uploaded for internal testing only), and
+# Release (the App Store app, with no fixtures).
+configs:
+  Debug: debug
+  QA: release
+  Release: release
+
 packages:
   # Recording Analysis, ported from tools/melody-lab/ (swift test in RecordingAnalysisKit/).
   RecordingAnalysisKit:
@@ -29,15 +37,19 @@ targets:
     platform: iOS
     sources:
       - path: Pedos
-      # The design prototype's audio: the Fixture Library's trimmed Recordings, for playing
-      # sample Recordings, and its renders of each Song, which stand in for Song Creator's own
-      # render until #17. Debug builds only: Release excludes them below (the Fixture Library
-      # never ships to regular users). scripts/check-bundle-identifiers.sh checks the exclusion,
-      # and scripts/upload-testflight.sh checks every archive.
+      # The design prototype's audio: the Fixture Library's trimmed Recordings, for the sample
+      # model (Debug), and its renders of each Song, which stand in for Song Creator's own render
+      # until #17 (Debug and QA).
       - path: ../docs/design/prototype/audio
         includes:
           - "rec-*.mp3"
           - "song-*.mp3"
+        buildPhase: resources
+      # The Fixture Library itself, for "Load the Fixture Library" (Debug and QA).
+      - path: ../fixtures/recordings
+        includes:
+          - "*.mp3"
+          - "*.wav"
         buildPhase: resources
     dependencies:
       - package: RecordingAnalysisKit
@@ -51,14 +63,21 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         # A placeholder icon until the real one (TestFlight requires an icon).
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-      # SERP native app build identity: only Release carries the product identifier.
-      # scripts/check-bundle-identifiers.sh keeps these values honest.
+      # SERP Apple app build identity: only Release and QA carry the product identifier. The
+      # Fixture Library never ships to regular users (AGENTS.md): Release excludes every fixture
+      # file, and `INTERNAL` code (the loader, the stand-in Toots) compiles only into Debug and
+      # QA. scripts/check-bundle-identifiers.sh and scripts/check-release-build.sh check this.
       configs:
         Debug:
           PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos.debug
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "DEBUG INTERNAL"
+        QA:
+          PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "QA INTERNAL"
+          EXCLUDED_SOURCE_FILE_NAMES: "rec-*.mp3"
         Release:
           PRODUCT_BUNDLE_IDENTIFIER: com.serp.pedos
-          EXCLUDED_SOURCE_FILE_NAMES: "rec-*.mp3 song-*.mp3"
+          EXCLUDED_SOURCE_FILE_NAMES: "rec-*.mp3 song-*.mp3 [0-9][0-9][0-9]__*"
 
   PedosTests:
     type: bundle.unit-test
@@ -103,15 +122,16 @@ schemes:
     archive:
       config: Release
 
-  # The app as it ships: ShippedBuildSmokeTests against the Release build. TestFlight uploads
-  # only if it passes (.github/workflows/testflight.yml). The unit tests need a Debug build
-  # (@testable), so they aren't in this scheme.
+  # The app TestFlight gets: ShippedBuildSmokeTests against the QA build (the Release app plus
+  # the Fixture Library loader). TestFlight uploads only if it passes
+  # (.github/workflows/testflight.yml). The unit tests need a Debug build (@testable), so they
+  # aren't in this scheme.
   PedosShipped:
     build:
       targets:
         Pedos: all
         PedosUITests: [test]
     test:
-      config: Release
+      config: QA
       targets:
         - PedosUITests

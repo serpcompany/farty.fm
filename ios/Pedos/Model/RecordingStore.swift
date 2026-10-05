@@ -25,11 +25,14 @@ struct RecordingStore: Sendable {
 
     /// Saves a draft: moves its file into `folder` as a new Recording, numbered after the highest
     /// number saved so far (a deleted number is not reused unless it was the highest).
-    func save(draftAt draft: URL, seconds: Double, savedAt date: Date = .now) throws -> StoredRecording {
+    /// `fixtureID` marks a Recording loaded from the Fixture Library (internal builds).
+    func save(draftAt draft: URL, seconds: Double, savedAt date: Date = .now, fixtureID: String? = nil) throws -> StoredRecording {
         let fileManager = FileManager.default
         try fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
         let id = UUID()
-        let details = Details(number: (try load().map(\.number).max() ?? 0) + 1, seconds: seconds, savedAt: date)
+        let details = Details(
+            number: (try load().map(\.number).max() ?? 0) + 1, seconds: seconds, savedAt: date, fixtureID: fixtureID
+        )
         // The details first: if the app dies before the move, `load` drops them as an orphan.
         try write(details, of: id)
         do {
@@ -94,7 +97,7 @@ struct RecordingStore: Sendable {
     private func recording(_ id: UUID, _ details: Details) -> StoredRecording {
         StoredRecording(
             id: id, number: details.number, seconds: details.seconds, savedAt: details.savedAt,
-            audioURL: audioURL(of: id)
+            audioURL: audioURL(of: id), fixtureID: details.fixtureID
         )
     }
 
@@ -129,6 +132,8 @@ struct StoredRecording: Identifiable, Hashable, Sendable {
     let seconds: Double
     let savedAt: Date
     let audioURL: URL
+    /// The Fixture Library Recording this was loaded from (internal builds), or nil for a real one.
+    var fixtureID: String? = nil
 }
 
 /// What `<id>.json` holds.
@@ -136,4 +141,5 @@ private struct Details: Codable {
     let number: Int
     let seconds: Double
     let savedAt: Date
+    var fixtureID: String? = nil
 }

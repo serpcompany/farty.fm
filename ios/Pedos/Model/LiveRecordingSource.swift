@@ -20,6 +20,8 @@ final class LiveRecordingSource: RecordingSource {
     private let testTake: URL?
     private var testTakeStarted = false
     private var interruptionObserver: (any NSObjectProtocol)?
+    /// Recordings loaded from the Fixture Library (internal builds), by Recording.
+    private var fixtureOfRecording: [UUID: String] = [:]
 
     /// The file UI tests ask for with the `-PedosTestTake <path>` launch argument, in any build.
     static func testTake(in defaults: UserDefaults) -> URL? {
@@ -34,6 +36,9 @@ final class LiveRecordingSource: RecordingSource {
 
     func savedRecordings() -> [Recording] {
         let stored = (try? store.load()) ?? []
+        for saved in stored {
+            if let fixtureID = saved.fixtureID { fixtureOfRecording[saved.id] = fixtureID }
+        }
         return stored.map { saved in
             let kept = store.analysis(of: saved.id, as: SavedAnalysis.self)
             return Recording(
@@ -114,9 +119,32 @@ final class LiveRecordingSource: RecordingSource {
 
     func delete(_ id: Recording.ID) {
         try? store.delete(id)
+        fixtureOfRecording[id] = nil
     }
 
-    func fixtureID(of id: UUID) -> String? { nil }
+    func fixtureID(of id: UUID) -> String? { fixtureOfRecording[id] }
+
+    #if INTERNAL
+    var canLoadFixtures: Bool { true }
+
+    func loadFixture(_ fixture: FixtureLibrary.Fixture) async throws -> Recording {
+        let store = store
+        let saved = try await Task.detached(priority: .userInitiated) {
+            let draft = store.newDraftURL()
+            try FileManager.default.createDirectory(at: store.draftFolder, withIntermediateDirectories: true)
+            do {
+                try FixtureLibrary.writeAsTake(fixture.url, to: draft)
+                guard let seconds = AudioLength.seconds(of: draft) else { throw CocoaError(.fileReadCorruptFile) }
+                return try store.save(draftAt: draft, seconds: seconds, fixtureID: fixture.id)
+            } catch {
+                store.discard(draftAt: draft)
+                throw error
+            }
+        }.value
+        fixtureOfRecording[saved.id] = fixture.id
+        return Recording(id: saved.id, number: saved.number, seconds: saved.seconds, analysis: .analyzing, audioURL: saved.audioURL)
+    }
+    #endif
 
     private func stopObservingInterruptions() {
         if let interruptionObserver { NotificationCenter.default.removeObserver(interruptionObserver) }

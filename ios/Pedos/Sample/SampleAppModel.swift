@@ -46,6 +46,11 @@ final class SampleAppModel: AppModel {
     @ObservationIgnored private var isSaving = false
     /// Stops a take at `maximumTakeSeconds`.
     @ObservationIgnored private var takeLimit: Task<Void, Never>?
+    #if INTERNAL
+    private var isLoadingFixtures = false
+    /// The Fixture Library files this build carries, when the source can load them.
+    @ObservationIgnored private let bundledFixtures: [FixtureLibrary.Fixture]
+    #endif
     /// Song Creator failures to simulate (recording failures are the source's).
     @ObservationIgnored private var pendingFailures: Failures
     @ObservationIgnored private let microphone: any MicrophoneAccess
@@ -94,6 +99,9 @@ final class SampleAppModel: AppModel {
         self.coverageCache = CoverageCache(songs: songs)
         self.isShowingWelcome = !defaults.bool(forKey: Self.welcomeSeenKey)
         self.recordings = source.savedRecordings()
+        #if INTERNAL
+        self.bundledFixtures = source.canLoadFixtures ? FixtureLibrary.bundled() : []
+        #endif
 
         for songID in initialTootSongIDs {
             guard let song = songs.first(where: { $0.id == songID }),
@@ -167,6 +175,38 @@ final class SampleAppModel: AppModel {
         defaults.set(true, forKey: Self.welcomeSeenKey)
         isShowingWelcome = false
     }
+
+    #if INTERNAL
+    // MARK: Internal builds
+
+    var fixtureLibrary: FixtureLibraryStatus? {
+        guard !bundledFixtures.isEmpty else { return nil }
+        let loaded = loadedFixtureIDs
+        return FixtureLibraryStatus(
+            loaded: bundledFixtures.filter { loaded.contains($0.id) }.count,
+            total: bundledFixtures.count,
+            isLoading: isLoadingFixtures
+        )
+    }
+
+    func loadFixtureLibrary() async {
+        guard !bundledFixtures.isEmpty, !isLoadingFixtures else { return }
+        isLoadingFixtures = true
+        defer { isLoadingFixtures = false }
+        let loaded = loadedFixtureIDs
+        var added: [Recording.ID] = []
+        for fixture in bundledFixtures where !loaded.contains(fixture.id) {
+            guard let recording = try? await source.loadFixture(fixture) else { continue }
+            recordings.append(recording)
+            added.append(recording.id)
+        }
+        for id in added { await analyze(id) }
+    }
+
+    private var loadedFixtureIDs: Set<String> {
+        Set(recordings.compactMap { source.fixtureID(of: $0.id) })
+    }
+    #endif
 
     // MARK: Record tab
 
@@ -333,7 +373,7 @@ final class SampleAppModel: AppModel {
         source.fixtureID(of: id)
     }
 
-    #if DEBUG
+    #if INTERNAL
     func simulatedSource(ofDraft id: Draft.ID) -> String? {
         fixtureID(ofDraft: id).map { "Fixture Library Recording \($0)" }
     }
@@ -465,7 +505,7 @@ final class SampleAppModel: AppModel {
         ))
     }
 
-    #if DEBUG
+    #if INTERNAL
     func simulatedSource(ofToot id: TootDraft.ID) -> String? {
         guard tootDrafts[id] != nil else { return nil }
         return tootsPlayingTheirArrangement.contains(id)
@@ -510,10 +550,10 @@ struct SampleFixture: Identifiable, Hashable, Sendable {
     var audioURL: URL? { Bundle.main.url(forResource: "rec-\(id)", withExtension: "mp3") }
 }
 
-#if DEBUG
+#if INTERNAL
 extension Song {
     /// The design prototype's render of this Song with the whole Fixture Library, bundled in Debug
-    /// builds only. It stands in for Song Creator's own render until #17. It came from the
+    /// and QA builds only. It stands in for Song Creator's own render until #17. It came from the
     /// reference planner before the 3-semitone rule (#43), and `prototypeRenders` says how.
     var prototypeAudioURL: URL? { Bundle.main.url(forResource: "song-\(id)", withExtension: "mp3") }
 }

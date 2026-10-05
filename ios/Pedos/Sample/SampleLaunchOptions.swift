@@ -16,6 +16,8 @@ import Foundation
 ///     -PedosLive YES                 record for real, as Release builds do, instead of the
 ///                                    Fixture Library (with -PedosTestTake <path>, each take is
 ///                                    a copy of that file)
+///     -PedosFreshStore YES           with -PedosLive: keep Recordings in a new empty folder for
+///                                    this launch, not the app's own
 @MainActor
 struct SampleLaunchOptions {
     let defaults: UserDefaults
@@ -23,7 +25,7 @@ struct SampleLaunchOptions {
     func makeModel() -> SampleAppModel {
         if defaults.bool(forKey: "PedosLive") {
             return SampleAppModel(
-                source: LiveRecordingSource(analyzer: .reference, testTake: LiveRecordingSource.testTake(in: defaults)),
+                source: LiveRecordingSource(store: store, analyzer: .reference, testTake: LiveRecordingSource.testTake(in: defaults)),
                 songs: Song.prototypeCatalog,
                 initialTootSongIDs: tootSongIDs,
                 songAudio: \.prototypeAudioURL,
@@ -48,6 +50,13 @@ struct SampleLaunchOptions {
             analysisDelay: seconds("PedosAnalysisSeconds", default: 0.9),
             makingDelay: seconds("PedosMakingSeconds", default: 1.2)
         )
+    }
+
+    /// The app's own Recordings, or with -PedosFreshStore a new empty folder for this launch.
+    private var store: RecordingStore {
+        guard defaults.bool(forKey: "PedosFreshStore") else { return .standard }
+        let root = URL.temporaryDirectory.appending(path: "PedosFreshStore-\(UUID().uuidString)", directoryHint: .isDirectory)
+        return RecordingStore(folder: root.appending(path: "Recordings", directoryHint: .isDirectory), draftFolder: root)
     }
 
     private var tootSongIDs: [Song.ID] {

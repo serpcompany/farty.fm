@@ -49,7 +49,7 @@ protocol AppModel: AnyObject, Observable {
     /// Closes the Review → Result cover.
     func finishFlow()
 
-    #if DEBUG
+    #if INTERNAL
     /// Where a simulated take came from, for Review to say so; nil for a real take.
     func simulatedSource(ofDraft id: Draft.ID) -> String?
     #endif
@@ -75,7 +75,7 @@ protocol AppModel: AnyObject, Observable {
     /// Saves a made Toot to the Toots tab, with the same id. Saving it again does nothing.
     func saveToot(_ draft: TootDraft)
 
-    #if DEBUG
+    #if INTERNAL
     /// Where a simulated Toot's audio came from, for Song Creator to say so; nil for a real one.
     func simulatedSource(ofToot id: TootDraft.ID) -> String?
     #endif
@@ -87,6 +87,15 @@ protocol AppModel: AnyObject, Observable {
     /// Renames a Toot; a blank title changes nothing.
     func renameToot(_ id: Toot.ID, to title: String)
     func deleteToot(_ id: Toot.ID)
+
+    #if INTERNAL
+    // MARK: Internal builds
+
+    /// "Load the Fixture Library" on the Profile tab; nil when the model can't (sample data).
+    var fixtureLibrary: FixtureLibraryStatus? { get }
+    /// Adds every Fixture Library Recording not already loaded, then analyzes them.
+    func loadFixtureLibrary() async
+    #endif
 }
 
 extension AppModel {
@@ -111,7 +120,9 @@ extension AppModel {
 
     func toot(_ id: Toot.ID) -> Toot? { toots.first { $0.id == id } }
 
-    #if DEBUG
+    #if INTERNAL
+    var fixtureLibrary: FixtureLibraryStatus? { nil }
+    func loadFixtureLibrary() async {}
     func simulatedSource(ofDraft id: Draft.ID) -> String? { nil }
     func simulatedSource(ofToot id: TootDraft.ID) -> String? { nil }
     #endif
