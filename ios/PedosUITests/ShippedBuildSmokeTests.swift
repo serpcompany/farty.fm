@@ -25,6 +25,13 @@ final class ShippedBuildSmokeTests: XCTestCase {
         return app
     }
 
+    private func attachScreenshot(_ name: String) {
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
     /// Answers the microphone prompt, which appears the first time the app records.
     private func allowMicrophoneIfAsked() {
         let allow = XCUIApplication(bundleIdentifier: "com.apple.springboard").alerts.buttons["Allow"]
@@ -50,6 +57,7 @@ final class ShippedBuildSmokeTests: XCTestCase {
         let note = app.staticTexts["result-note"]
         XCTAssertTrue(note.waitForExistence(timeout: 30), "No pitch on the Result screen")
         XCTAssertEqual(note.label, "G3")
+        attachScreenshot("Result")
         let name = try XCTUnwrap(
             app.navigationBars.matching(NSPredicate(format: "identifier BEGINSWITH 'Recording '")).firstMatch.identifier
                 as String?
@@ -64,6 +72,7 @@ final class ShippedBuildSmokeTests: XCTestCase {
         XCTAssertTrue("\(row.value ?? "")".contains("G3"), "\(name) doesn't show its pitch: \(row.value ?? "")")
         row.tap()
         XCTAssertTrue("\(row.value ?? "")".contains("playing"), "\(name) didn't play")
+        attachScreenshot("Recordings, playing")
 
         // It's still there, with its pitch, after the app is quit and opened again.
         app.terminate()

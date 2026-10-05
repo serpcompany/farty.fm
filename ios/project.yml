@@ -6,6 +6,11 @@ options:
   developmentLanguage: en
   createIntermediateGroups: true
 
+packages:
+  # Recording Analysis, ported from tools/melody-lab/ (swift test in RecordingAnalysisKit/).
+  RecordingAnalysisKit:
+    path: ../RecordingAnalysisKit
+
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -34,6 +39,8 @@ targets:
           - "rec-*.mp3"
           - "song-*.mp3"
         buildPhase: resources
+    dependencies:
+      - package: RecordingAnalysisKit
     settings:
       base:
         PRODUCT_NAME: Pedos

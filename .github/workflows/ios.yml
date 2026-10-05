@@ -65,6 +65,11 @@ jobs:
       - name: Check the generated sample data is current
         run: scripts/generate-sample-data.py --check
 
+      - name: Test Recording Analysis against the reference engine
+        # Every Fixture Library Recording, against fixtures/golden/ (RecordingAnalysisKit/).
+        working-directory: RecordingAnalysisKit
+        run: swift test -c release
+
       - name: Check bundle identifiers and that Release has no fixture audio
         run: scripts/check-bundle-identifiers.sh
 
