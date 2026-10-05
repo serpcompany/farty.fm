@@ -195,7 +195,10 @@ class Assignment:
 
 def move_cost(shift, octave_moves=True):
     """Cost per beat of playing a note `shift` semitones from the Recording Pitch, and
-    whether that is an Octave Move. None when the unlock rule doesn't allow it."""
+    whether that is an Octave Move. None when the unlock rule doesn't allow it.
+
+    Octave Moves go up or down on equal terms. Allowing only up, or down only as a last
+    resort, unlocked fewer Songs or passed the render checks less often (ADR 0006)."""
     a = abs(shift)
     if a <= MAX_SHIFT:
         return a**1.5, False
