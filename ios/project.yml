@@ -6,6 +6,11 @@ options:
   developmentLanguage: en
   createIntermediateGroups: true
 
+packages:
+  # Recording Analysis, ported from tools/melody-lab/ (swift test in RecordingAnalysisKit/).
+  RecordingAnalysisKit:
+    path: ../RecordingAnalysisKit
+
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -34,6 +39,8 @@ targets:
           - "rec-*.mp3"
           - "song-*.mp3"
         buildPhase: resources
+    dependencies:
+      - package: RecordingAnalysisKit
     settings:
       base:
         PRODUCT_NAME: Pedos
@@ -95,3 +102,16 @@ schemes:
       config: Debug
     archive:
       config: Release
+
+  # The app as it ships: ShippedBuildSmokeTests against the Release build. TestFlight uploads
+  # only if it passes (.github/workflows/testflight.yml). The unit tests need a Debug build
+  # (@testable), so they aren't in this scheme.
+  PedosShipped:
+    build:
+      targets:
+        Pedos: all
+        PedosUITests: [test]
+    test:
+      config: Release
+      targets:
+        - PedosUITests

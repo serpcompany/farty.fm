@@ -35,11 +35,39 @@ CI ([`.github/workflows/ios.yml`](../.github/workflows/ios.yml)) runs the same s
 PRs are skipped) and every push to `main`. It skips the dark-mode UI test runs, which exist for
 screenshots.
 
+### Testing the build that ships
+
+Every other UI test runs the Debug build on sample data. `ShippedBuildSmokeTests` runs the real
+loop instead: record, save, see the pitch, replay, relaunch, delete. The `PedosShipped` scheme
+runs it on the **Release** build, and the TestFlight workflow uploads only if it passes:
+
+```sh
+xcodebuild test -project Pedos.xcodeproj -scheme PedosShipped \
+  -destination 'platform=iOS Simulator,id=<udid>' \
+  -only-testing:PedosUITests/ShippedBuildSmokeTests
+```
+
+Simulators in CI have no microphone, so the test launches the app with `-PedosTestTake <file>`,
+and each take is a copy of that file: Fixture Library Recording 090 as the recorder writes it
+(`PedosUITests/Resources/test-take-090.m4a`). Everything after the microphone is real. The real
+microphone is checked by hand, on a phone, from a TestFlight build.
+
+## Recording
+
+`SampleAppModel` drives the screens, and a `RecordingSource` supplies the Recordings:
+
+- **Release builds record for real** (`LiveRecordingSource`): the microphone records mono 44.1 kHz
+  AAC to a draft file, Save moves it into `Application Support/Recordings` (`RecordingStore`), and
+  Recording Analysis runs after the save. Its result is kept next to the Recording
+  (`<id>.analysis.json`) and runs again when the analysis version changes (ADR 0002). Replay plays
+  just the fart the analysis found, without the dead air before or after it; the file is never cut.
+- **Debug builds use the Fixture Library** (`FixtureRecordingSource`) for the screens' UI tests and
+  previews, unless launched with `-PedosLive YES`, which records for real as Release does.
+
 ## Sample data
 
-Until the real recorder, store, analysis and rendering land, `SampleAppModel` drives the screens.
-Recording is simulated: each take is the next Fixture Library Recording in the design prototype's
-story order, with its reference analysis. Song Creator is simulated too: making a Toot of an
+In Debug builds, recording is simulated: each take is the next Fixture Library Recording in the
+design prototype's story order, with its reference analysis. Song Creator is simulated too: making a Toot of an
 Unlocked Song returns the prototype's render of that Song (#17 renders it from your Recordings).
 When you have every Recording that render used (always, with all 23), Song Creator shows the
 render's own Recordings; otherwise it shows Pitch Coverage's matching and says the audio
@@ -51,7 +79,7 @@ doesn't follow it.
   Rerun it when the prototype data changes; CI runs it with `--check`.
 - Debug builds bundle the prototype's audio from `docs/design/prototype/audio/`: the trimmed
   fixtures (`rec-*.mp3`) and its render of each Song (`song-*.mp3`). Release builds exclude both,
-  start empty, and can't record or make Toots; `scripts/check-bundle-identifiers.sh` builds
+  so they can't make Toots until rendering (#17); `scripts/check-bundle-identifiers.sh` builds
   Release and fails if the app contains any audio.
 - Debug launch arguments set up states by hand (Xcode: Product > Scheme > Edit Scheme >
   Arguments), for example `-PedosSampleStart all` for all 23 Recordings,
@@ -88,7 +116,7 @@ with cloud signing, checks the signature, and uploads it.
 - **Setup (owner, once):** an App Store Connect app record for `com.serp.pedos`, an App Store
   Connect API key with the Admin role (cloud signing needs it), repository secrets `ASC_KEY_P8`
   (the `.p8` file), `ASC_KEY_ID` and `ASC_ISSUER_ID`, and the repository variable `APPLE_TEAM_ID`.
-- **Release builds have no sample data**, so until the real recorder lands (#12), the TestFlight
-  app shows empty tabs and can't record.
+- **Before uploading**, the workflow runs `ShippedBuildSmokeTests` on the Release build (see
+  "Testing the build that ships") and uploads nothing if it fails.
 - `scripts/upload-testflight.sh --archive-only` (with `BUILD_NUMBER` set) builds and checks the
   archive locally without a key.

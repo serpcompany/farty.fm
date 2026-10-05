@@ -13,18 +13,33 @@ import Foundation
 ///     -PedosAnalysisSeconds 2        how long the simulated analysis takes
 ///     -PedosMakingSeconds 3          how long making a Toot takes
 ///     -welcomeSeen YES               skip (or with NO, show) the Welcome sheet
+///     -PedosLive YES                 record for real, as Release builds do, instead of the
+///                                    Fixture Library (with -PedosTestTake <path>, each take is
+///                                    a copy of that file)
 @MainActor
 struct SampleLaunchOptions {
     let defaults: UserDefaults
 
     func makeModel() -> SampleAppModel {
-        SampleAppModel(
+        if defaults.bool(forKey: "PedosLive") {
+            return SampleAppModel(
+                source: LiveRecordingSource(analyzer: .reference, testTake: LiveRecordingSource.testTake(in: defaults)),
+                songs: Song.prototypeCatalog,
+                initialTootSongIDs: tootSongIDs,
+                songAudio: \.prototypeAudioURL,
+                renders: Song.prototypeRenders,
+                microphone: microphone,
+                defaults: defaults,
+                failures: failures,
+                makingDelay: seconds("PedosMakingSeconds", default: 1.2)
+            )
+        }
+        return SampleAppModel(
             fixtures: SampleFixture.prototypeLibrary,
             story: SampleFixture.prototypeStory,
             songs: Song.prototypeCatalog,
             initialFixtureIDs: initialFixtureIDs,
-            initialTootSongIDs: (defaults.string(forKey: "PedosSampleToots") ?? "")
-                .split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) },
+            initialTootSongIDs: tootSongIDs,
             songAudio: \.prototypeAudioURL,
             renders: Song.prototypeRenders,
             microphone: microphone,
@@ -33,6 +48,11 @@ struct SampleLaunchOptions {
             analysisDelay: seconds("PedosAnalysisSeconds", default: 0.9),
             makingDelay: seconds("PedosMakingSeconds", default: 1.2)
         )
+    }
+
+    private var tootSongIDs: [Song.ID] {
+        (defaults.string(forKey: "PedosSampleToots") ?? "")
+            .split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
     }
 
     private func seconds(_ key: String, default value: Double) -> Duration {

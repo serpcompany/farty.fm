@@ -1,11 +1,11 @@
 import Foundation
 
 /// Saved Recordings as plain files (ADR 0002). Each Recording is `<id>.m4a` in one folder, with
-/// `<id>.json` beside it for its number, length and save date. The list is rebuilt by reading
-/// that folder. A take is recorded to a draft file in a temporary folder until it is saved or
-/// discarded.
+/// `<id>.json` beside it for its number, length and save date, and `<id>.analysis.json` once
+/// Recording Analysis has run. The list is rebuilt by reading that folder. A take is recorded to
+/// a draft file in a temporary folder until it is saved or discarded.
 ///
-/// Nothing here depends on Recording Analysis: saving never waits for it.
+/// Saving never waits for Recording Analysis.
 struct RecordingStore: Sendable {
     /// Where saved Recordings live: `Application Support/Recordings` in the app.
     let folder: URL
@@ -46,15 +46,27 @@ struct RecordingStore: Sendable {
         try? FileManager.default.removeItem(at: draft)
     }
 
-    /// Deletes a saved Recording's audio and details.
+    /// Deletes a saved Recording's audio, details and analysis.
     func delete(_ id: StoredRecording.ID) throws {
         let fileManager = FileManager.default
         try fileManager.removeItem(at: audioURL(of: id))
         try? fileManager.removeItem(at: detailsURL(of: id))
+        try? fileManager.removeItem(at: analysisURL(of: id))
     }
 
-    /// Every saved Recording, oldest (lowest number) first. Details without audio, which an
-    /// interrupted save or delete leaves, are removed.
+    /// Keeps a Recording's analysis next to it.
+    func saveAnalysis<Analysis: Encodable>(_ analysis: Analysis, of id: StoredRecording.ID) throws {
+        try JSONEncoder().encode(analysis).write(to: analysisURL(of: id), options: .atomic)
+    }
+
+    /// A Recording's kept analysis, or nil when there is none or it can't be read as `type`.
+    func analysis<Analysis: Decodable>(of id: StoredRecording.ID, as type: Analysis.Type) -> Analysis? {
+        guard let data = try? Data(contentsOf: analysisURL(of: id)) else { return nil }
+        return try? JSONDecoder().decode(type, from: data)
+    }
+
+    /// Every saved Recording, oldest (lowest number) first. Details or analysis without audio,
+    /// which an interrupted save or delete leaves, are removed.
     func load() throws -> [StoredRecording] {
         let fileManager = FileManager.default
         guard fileManager.fileExists(atPath: folder.path(percentEncoded: false)) else { return [] }
@@ -70,6 +82,7 @@ struct RecordingStore: Sendable {
                 try? fileManager.removeItem(at: file)
                 continue
             }
+            guard file.lastPathComponent == detailsURL(of: id).lastPathComponent else { continue }
             if let details = try? JSONDecoder().decode(Details.self, from: Data(contentsOf: file)) {
                 recordings.append(recording(id, details))
             }
@@ -97,8 +110,13 @@ struct RecordingStore: Sendable {
         folder.appending(path: "\(id.uuidString).json")
     }
 
+    private func analysisURL(of id: StoredRecording.ID) -> URL {
+        folder.appending(path: "\(id.uuidString).analysis.json")
+    }
+
+    /// The Recording a file belongs to: the UUID its name starts with.
     private static func id(of file: URL) -> UUID? {
-        UUID(uuidString: file.deletingPathExtension().lastPathComponent)
+        file.lastPathComponent.split(separator: ".").first.flatMap { UUID(uuidString: String($0)) }
     }
 }
 
@@ -113,7 +131,7 @@ struct StoredRecording: Identifiable, Hashable, Sendable {
     let audioURL: URL
 }
 
-/// What `<id>.json` holds. Recording Analysis results go beside these later (#14).
+/// What `<id>.json` holds.
 private struct Details: Codable {
     let number: Int
     let seconds: Double

@@ -19,6 +19,15 @@ struct Recording: Identifiable, Hashable, Sendable {
     }
 
     var isMelodic: Bool { pitch != nil }
+
+    /// What replay plays: the fart itself, from where it starts to where it ends (before a second
+    /// fart, if there is one), or nil for the whole file. The file itself is never cut.
+    var replaySegment: Segment? {
+        guard case .analyzed(let result) = analysis else { return nil }
+        let end = min(result.endSeconds ?? seconds, seconds)
+        guard result.startSeconds < end, result.startSeconds > 0 || end < seconds else { return nil }
+        return Segment(start: result.startSeconds, length: end - result.startSeconds)
+    }
 }
 
 /// Where a Recording's Recording Analysis stands. Saving never waits for it (ADR 0002).
@@ -35,6 +44,10 @@ struct RecordingAnalysis: Hashable, Sendable {
     let pitch: Double?
     /// More than one fart was heard, so only the first one is used.
     let firstFartUsed: Bool
+    /// Where the fart starts and ends in the file, in seconds: replay plays just that, so there's
+    /// no dead air before or after it. Nil end: the end of the file.
+    var startSeconds: Double = 0
+    var endSeconds: Double? = nil
 
     var isMelodic: Bool { pitch != nil }
 }

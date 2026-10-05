@@ -115,4 +115,27 @@ final class RecordingStoreTests: XCTestCase {
         let leftovers = try FileManager.default.contentsOfDirectory(atPath: store.folder.path(percentEncoded: false))
         XCTAssertEqual(leftovers, [])
     }
+
+    func testAnalysisIsKeptNextToTheRecordingAndDeletedWithIt() throws {
+        struct Analysis: Codable, Equatable { let pitch: Double? }
+        let saved = try store.save(draftAt: try makeDraft(), seconds: 1)
+        XCTAssertNil(store.analysis(of: saved.id, as: Analysis.self))
+
+        try store.saveAnalysis(Analysis(pitch: 55.8), of: saved.id)
+        XCTAssertEqual(store.analysis(of: saved.id, as: Analysis.self), Analysis(pitch: 55.8))
+        XCTAssertEqual(try store.load(), [saved], "An analysis file isn't a Recording")
+
+        try store.delete(saved.id)
+        XCTAssertNil(store.analysis(of: saved.id, as: Analysis.self))
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: store.folder.path(percentEncoded: false)), [])
+    }
+
+    func testAnalysisWithoutAudioIsDropped() throws {
+        let saved = try store.save(draftAt: try makeDraft(), seconds: 1)
+        try store.saveAnalysis(["pitch": 50.0], of: saved.id)
+        try FileManager.default.removeItem(at: saved.audioURL)
+
+        XCTAssertEqual(try store.load(), [])
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: store.folder.path(percentEncoded: false)), [])
+    }
 }
