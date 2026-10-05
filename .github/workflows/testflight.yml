@@ -1,9 +1,10 @@
 name: TestFlight
 
-# Uploads the Release app to TestFlight on every push to main, and by hand from any branch
+# Uploads the QA app (the Release app plus the Fixture Library and its loader, internal testing
+# only) to TestFlight on every push to main, and by hand from any branch
 # (Actions > TestFlight > Run workflow, or `gh workflow run testflight.yml --ref <branch>`),
 # which is also how a change to this pipeline is proven before merge.
-# First it runs ShippedBuildSmokeTests on the Release build (record, save, pitch, replay,
+# First it runs ShippedBuildSmokeTests on the QA build (record, save, pitch, replay,
 # relaunch, delete), and uploads nothing if that fails.
 # ios/scripts/upload-testflight.sh does the upload.
 #
@@ -78,7 +79,7 @@ jobs:
         timeout-minutes: 15
         run: xcrun simctl bootstatus "$SIMULATOR_UDID" -b
 
-      - name: Test the Release build (record, save, pitch, replay, relaunch, delete)
+      - name: Test the QA build (record, save, pitch, replay, relaunch, delete)
         timeout-minutes: 30
         run: |
           set -o pipefail

@@ -126,7 +126,7 @@ def render(data):
         "    ]",
         "}",
         "",
-        "#if DEBUG",
+        "#if INTERNAL",
         "extension SampleFixture {",
         "    /// Every Fixture Library Recording, with the reference analysis the prototype used.",
         "    static let prototypeLibrary: [SampleFixture] = [",

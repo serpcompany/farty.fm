@@ -75,5 +75,5 @@ A developer-side evaluator who can use controlled test material and capabilities
 _Avoid_: Admin, regular user
 
 **Fixture Library**:
-The curated set of real fart Recordings available only to Internal Testers and development tools for repeatable evaluation.
+The curated set of real fart Recordings available only to Internal Testers and development tools for repeatable evaluation. Debug and QA builds (TestFlight until launch) bundle it, and "Load the Fixture Library" adds it as Recordings; Release builds never contain it.
 _Avoid_: Sample library, starter recordings, user library
