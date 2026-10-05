@@ -59,11 +59,14 @@ plist_value() { /usr/libexec/PlistBuddy -c "Print :$1" "$app/Info.plist" 2>/dev/
   fail "build number is $(plist_value CFBundleVersion), not $BUILD_NUMBER"
 [ "$(plist_value CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconName)" = AppIcon ] ||
   fail "the app has no icon"
+# iPhone only (ADR 0001); App Store Connect holds an iPad app to iPad's orientation rules.
+[ "$(plist_value UIDeviceFamily)" = "$(printf 'Array {\n    1\n}')" ] ||
+  fail "the app is not iPhone only: UIDeviceFamily is $(plist_value UIDeviceFamily | tr -s '\n ' ' ')"
 # The Fixture Library never ships to regular users (AGENTS.md).
 audio=$(find "$app" -type f \( -iname '*.mp3' -o -iname '*.wav' -o -iname '*.m4a' \
   -o -iname '*.caf' -o -iname '*.aif' -o -iname '*.aiff' \) -exec basename {} \;)
 [ -z "$audio" ] || fail "the Release app contains audio: $audio"
-echo "ok    archive: $bundle_id $(plist_value CFBundleShortVersionString) ($BUILD_NUMBER), icon, no audio"
+echo "ok    archive: $bundle_id $(plist_value CFBundleShortVersionString) ($BUILD_NUMBER), iPhone only, icon, no audio"
 
 [ "$archive_only" = yes ] && exit 0
 

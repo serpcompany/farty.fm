@@ -12,8 +12,7 @@ settings:
     # release-please bumps the version; CI sets the build number when it uploads to TestFlight.
     MARKETING_VERSION: "0.1.0" # x-release-please-version
     CURRENT_PROJECT_VERSION: "1"
-    # Portrait iPhone only (ADR 0001).
-    TARGETED_DEVICE_FAMILY: "1"
+    # Portrait iPhone only (ADR 0001). The app target sets the device family itself.
     SUPPORTS_MACCATALYST: NO
     SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
     SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
@@ -38,6 +37,9 @@ targets:
     settings:
       base:
         PRODUCT_NAME: Pedos
+        # iPhone only (ADR 0001). Set on the target: XcodeGen's iOS application preset sets
+        # "1,2" here, which overrides a project-level value and makes the app universal.
+        TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_FILE: Pedos/Info.plist
         GENERATE_INFOPLIST_FILE: NO
         # A placeholder icon until the real one (TestFlight requires an icon).
