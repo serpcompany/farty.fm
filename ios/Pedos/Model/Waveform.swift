@@ -1,14 +1,20 @@
 import AVFAudio
 
 enum Waveform {
-    /// Peak loudness of `count` equal slices of an audio file, scaled so the loudest is 1.
-    /// Returns flat bars when the file can't be read.
-    static func levels(of url: URL?, count: Int) -> [Float] {
+    /// Peak loudness of `count` equal slices of an audio file, or of just `segment` of it, scaled
+    /// so the loudest is 1. Returns flat bars when the file can't be read.
+    static func levels(of url: URL?, count: Int, segment: Segment? = nil) -> [Float] {
         let flat = Array(repeating: Float(0.05), count: count)
-        guard let url,
-              let file = try? AVAudioFile(forReading: url),
-              let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: AVAudioFrameCount(file.length)),
-              (try? file.read(into: buffer)) != nil,
+        guard let url, let file = try? AVAudioFile(forReading: url) else { return flat }
+
+        let rate = file.processingFormat.sampleRate
+        let start = segment.map { min(max(AVAudioFramePosition($0.start * rate), 0), file.length) } ?? 0
+        let end = segment.map { min(AVAudioFramePosition(($0.start + $0.length) * rate), file.length) } ?? file.length
+        guard end > start,
+              let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: AVAudioFrameCount(end - start))
+        else { return flat }
+        file.framePosition = start
+        guard (try? file.read(into: buffer, frameCount: AVAudioFrameCount(end - start))) != nil,
               let samples = buffer.floatChannelData?[0]
         else { return flat }
 

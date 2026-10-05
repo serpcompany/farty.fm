@@ -123,6 +123,8 @@ final class SampleAppModelTests: XCTestCase {
         XCTAssertEqual(model.recordings.map(\.number), Array(1...23))
         XCTAssertEqual(model.melodicRecordings.count, 9)
         XCTAssertEqual(model.collectedPitchClasses.count, 6)
+        // With their octave, 7 notes: E2, F♯2, C3, G3, G♯3, B3 and G4 (G3 and G4 are two).
+        XCTAssertEqual(model.collectedNotes.sorted(), [40, 42, 48, 55, 56, 59, 67])
 
         // With every fixture saved, takes repeat the story.
         let again = await recordTake(model)
@@ -588,7 +590,7 @@ final class SampleAppModelTests: XCTestCase {
         let model = makeModel(start: allFixtureIDs, toots: ["mary", "ode"])
         XCTAssertEqual(
             model.profileStats,
-            ProfileStats(recordings: 23, melodicRecordings: 9, notesCollected: 6, unlockedSongs: 6, songs: 12, toots: 2)
+            ProfileStats(recordings: 23, melodicRecordings: 9, notesCollected: 7, unlockedSongs: 6, songs: 12, toots: 2)
         )
     }
 

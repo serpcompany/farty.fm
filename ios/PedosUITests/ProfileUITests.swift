@@ -37,7 +37,7 @@ class ProfileUITests: PedosUITestCase {
 
         XCTAssertEqual(row("stat-recordings", in: app), "Recordings, 23")
         XCTAssertEqual(row("stat-melodic", in: app), "Melodic Recordings, 9")
-        XCTAssertEqual(row("stat-notes", in: app), "Notes collected, 6")
+        XCTAssertEqual(row("stat-notes", in: app), "Notes collected, 7")
         XCTAssertEqual(row("stat-songs", in: app), "Songs unlocked, 6 of 12")
         XCTAssertEqual(row("stat-toots", in: app), "Toots, 2")
         XCTAssertFalse(app.staticTexts["profile-new-user"].exists, "The new-user hint shows with Recordings")

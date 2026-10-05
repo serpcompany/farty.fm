@@ -111,6 +111,9 @@ extension AppModel {
     /// The pitch classes (0 = C … 11 = B) of every Melodic Recording.
     var collectedPitchClasses: Set<Int> { Set(recordings.compactMap(\.pitch).map(Pitch.pitchClass)) }
 
+    /// The notes of every Melodic Recording, octave included (G3, G♯3 and G4 are three notes).
+    var collectedNotes: Set<Int> { Set(recordings.compactMap(\.pitch).map(Pitch.note)) }
+
     func recording(_ id: Recording.ID) -> Recording? { recordings.first { $0.id == id } }
 
     func song(_ id: Song.ID) -> Song? { songs.first { $0.id == id } }

@@ -18,6 +18,11 @@ enum Pitch {
         pitchClass(of: nearestNote(midi))
     }
 
+    /// The nearest note as a MIDI note number, octave included: 55.83 → 56 (G♯3).
+    static func note(_ midi: Double) -> Int {
+        nearestNote(midi)
+    }
+
     /// Rounds half up, like the prototype's `Math.round`.
     private static func nearestNote(_ midi: Double) -> Int {
         Int((midi + 0.5).rounded(.down))
