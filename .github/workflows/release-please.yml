@@ -1,0 +1,21 @@
+name: Release Please
+
+# Keeps a "release: Pedos x.y.z" PR up to date from the Conventional Commits on main. Merging
+# it tags the release and bumps MARKETING_VERSION in ios/project.yml; the push to main then
+# uploads that version to TestFlight (testflight.yml). Nobody types versions by hand.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

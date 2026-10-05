@@ -23,6 +23,7 @@ The melody engine itself is proven in Python (`tools/melody-lab/`). Next comes p
 ## Run it
 
 - **iPhone app (Debug, simulator):** see [`ios/README.md`](ios/README.md). Launch with `-PedosSampleStart all` to start with all 23 sample Recordings.
+- **iPhone app (TestFlight):** every push to `main` uploads a Release build; see [`ios/README.md`](ios/README.md#testflight).
 - **Reference engine:** hear what the app will sound like:
 
   ```sh
