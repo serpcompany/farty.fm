@@ -23,7 +23,7 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     # release-please bumps the version; CI sets the build number when it uploads to TestFlight.
-    MARKETING_VERSION: "1.0.0" # x-release-please-version
+    MARKETING_VERSION: "1.1.0" # x-release-please-version
     CURRENT_PROJECT_VERSION: "1"
     # Portrait iPhone only (ADR 0001). The app target sets the device family itself.
     SUPPORTS_MACCATALYST: NO

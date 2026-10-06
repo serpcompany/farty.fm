@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/serpcompany/pedos-app/compare/v1.0.0...v1.1.0) (2026-10-06)
+
+
+### Features
+
+* record a fart in the browser and see its note ([#100](https://github.com/serpcompany/pedos-app/issues/100)) ([faac0a2](https://github.com/serpcompany/pedos-app/commit/faac0a2cbfd41877364a87435dd2e3586792b65c)), closes [#95](https://github.com/serpcompany/pedos-app/issues/95)
+
 ## [1.0.0](https://github.com/serpcompany/pedos-app/compare/v0.1.0...v1.0.0) (2026-10-05)
 
 
