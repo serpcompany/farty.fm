@@ -5,3 +5,5 @@ The first attempt was an Expo/React Native app with a backend and accounts, and 
 Out of scope for the MVP: Android, iPad layouts, accounts, sharing, and a starter library of Recordings for regular users.
 
 Update 2026-09-30: Created Melodies are now called Toots (`CONTEXT.md`, #52).
+
+Update 2026-10-06: Apple rejected the App Store submission as a fart app, so Pedos is now a web app (ADR 0007). The platform choice above is replaced; local-first and no accounts still hold.

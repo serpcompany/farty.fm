@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pedos-web",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-28",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+  "observability": { "enabled": true },
+  "upload_source_maps": true,
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web" }],
+  "env": {
+    "staging": {
+      "vars": { "SITE_ENV": "staging" },
+      "workers_dev": true,
+      "observability": { "enabled": true },
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-staging" }]
+    },
+    "production": {
+      "vars": { "SITE_ENV": "production" },
+      "workers_dev": true,
+      "observability": { "enabled": true },
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-production" }]
+    }
+  }
+}
