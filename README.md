@@ -1,6 +1,8 @@
 # Pedos
 
-An iPhone app that turns fart Recordings into recognizable melodies, using only the Recordings themselves as sound.
+Turns fart Recordings into recognizable melodies, using only the Recordings themselves as sound.
+
+**Pedos is becoming a web app** (`apps/web/`, ADR 0007). Apple rejected the App Store submission because it won't accept fart apps (#75). The web app is being built slice by slice (#94). The iPhone app below stays on internal TestFlight only.
 
 - **Plan:** the pinned [MVP roadmap](https://github.com/serpcompany/pedos-app/issues/45) issue, in build order.
 - **Vocabulary:** [`CONTEXT.md`](CONTEXT.md). **Decisions:** [`docs/adr/`](docs/adr/).
@@ -22,6 +24,7 @@ The melody engine itself is proven in Python (`tools/melody-lab/`). Next comes p
 
 ## Run it
 
+- **Web app:** `cd apps/web && pnpm install && pnpm dev`; see [`apps/web/AGENTS.md`](apps/web/AGENTS.md).
 - **iPhone app (Debug, simulator):** see [`ios/README.md`](ios/README.md). Launch with `-PedosSampleStart all` to start with all 23 sample Recordings.
 - **iPhone app (TestFlight):** every push to `main` uploads a Release build once it passes the shipped-build test; see [`ios/README.md`](ios/README.md#testflight).
 - **Reference engine:** hear what the app will sound like:

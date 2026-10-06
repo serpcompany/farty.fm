@@ -1,0 +1,345 @@
+'use client'
+
+import {
+  AudioWaveform,
+  CircleAlert,
+  CircleHelp,
+  CirclePlay,
+  CircleStop,
+  Scissors
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { type ReactNode, useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Spinner } from '@/components/ui/spinner'
+import { noteName } from '@/lib/pitch'
+import {
+  firstFartUsed,
+  formattedLength,
+  type Recording,
+  recordingName,
+  recordingPitch
+} from '@/lib/recordings'
+import { type Draft, usePedos } from './pedos-provider'
+import { RecordButton } from './record-button'
+import { Waveform } from './waveform'
+
+/**
+ * The full-screen cover over the tabs from the start of a take: Recording, then Review and
+ * Result, with their error states. Matches the iPhone app's `RecordFlowView`.
+ */
+export function RecordFlow() {
+  const pedos = usePedos()
+  const { flow, capture } = pedos
+
+  if (!flow && (capture.kind === 'recording' || capture.kind === 'finishing')) {
+    return (
+      <Cover>
+        <RecordingStep />
+      </Cover>
+    )
+  }
+  if (!flow) return null
+
+  switch (flow.kind) {
+    case 'review':
+      return (
+        <Cover title="New Recording">
+          <Review draft={flow.draft} />
+        </Cover>
+      )
+    case 'saveFailed':
+      return (
+        <Cover title="New Recording">
+          <SaveFailed />
+        </Cover>
+      )
+    case 'analyzing': {
+      const recording = pedos.recording(flow.id)
+      return (
+        <Cover title={recording ? recordingName(recording) : ''}>
+          <div className="flex flex-1 flex-col items-center justify-center gap-3">
+            <Spinner className="size-8" />
+            <p className="text-muted-foreground">Finding your note…</p>
+          </div>
+        </Cover>
+      )
+    }
+    case 'analysisFailed':
+      return (
+        <Cover title={recordingTitle(pedos.recording(flow.id))}>
+          <AnalysisFailed id={flow.id} />
+        </Cover>
+      )
+    case 'result': {
+      const recording = pedos.recording(flow.id)
+      if (!recording) return null
+      return (
+        <Cover title={recordingName(recording)}>
+          <Result recording={recording} />
+        </Cover>
+      )
+    }
+  }
+}
+
+function recordingTitle(recording: Recording | undefined): string {
+  return recording ? recordingName(recording) : ''
+}
+
+function Cover({ title, children }: { title?: string; children: ReactNode }) {
+  return (
+    <div
+      role="dialog"
+      aria-modal
+      aria-label={title ?? 'Recording'}
+      className="fixed inset-0 z-40 flex flex-col bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+    >
+      <header className="flex h-12 shrink-0 items-center justify-center px-4">
+        {title && <h1 className="font-semibold">{title}</h1>}
+      </header>
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col">{children}</div>
+    </div>
+  )
+}
+
+/** Primary and secondary buttons pinned to the bottom of a flow step. */
+function FlowButtons({ secondary, primary }: { secondary: ReactNode; primary: ReactNode }) {
+  return (
+    <div className="grid grid-cols-2 gap-3 px-5 pb-3">
+      {secondary}
+      {primary}
+    </div>
+  )
+}
+
+function FlowButton({
+  variant,
+  onClick,
+  disabled,
+  children
+}: {
+  variant: 'primary' | 'secondary'
+  onClick: () => void
+  disabled?: boolean
+  children: ReactNode
+}) {
+  return (
+    <Button
+      size="lg"
+      variant={variant === 'primary' ? 'default' : 'secondary'}
+      className="h-12 text-base"
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {children}
+    </Button>
+  )
+}
+
+/** Recording: the big button as Stop, with its pulse and the timer. */
+function RecordingStep() {
+  const pedos = usePedos()
+  const startedAt = pedos.capture.kind === 'recording' ? pedos.capture.startedAt : null
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 250)
+    return () => clearInterval(timer)
+  }, [])
+  const seconds = startedAt ? Math.max(0, Math.floor((now - startedAt) / 1000)) : 0
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-7">
+      <div className="h-10" />
+      <RecordButton
+        isRecording
+        disabled={pedos.capture.kind !== 'recording'}
+        onClick={() => void pedos.stopRecording()}
+      />
+      <p className="h-10 text-4xl tabular-nums" data-testid="recording-timer">
+        {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}
+      </p>
+    </div>
+  )
+}
+
+/** Review: hear the take before keeping it. Save or Discard. */
+function Review({ draft }: { draft: Draft }) {
+  const pedos = usePedos()
+  const isPlaying = pedos.nowPlaying === 'draft'
+  return (
+    <>
+      <div className="flex flex-1 flex-col items-center justify-center gap-7 px-6">
+        <Waveform levels={draft.waveform} isPlaying={isPlaying} className="h-24 w-full" />
+        <p className="text-2xl text-muted-foreground tabular-nums">
+          {formattedLength(draft.seconds)}
+        </p>
+        <Button
+          variant="ghost"
+          aria-label={isPlaying ? 'Stop' : 'Play'}
+          data-testid="review-play"
+          className="size-20 rounded-full p-0 [&_svg:not([class*='size-'])]:size-18"
+          onClick={() => pedos.togglePlayback('draft')}
+        >
+          {isPlaying ? <CircleStop strokeWidth={1.25} /> : <CirclePlay strokeWidth={1.25} />}
+        </Button>
+      </div>
+      <FlowButtons
+        secondary={
+          <FlowButton variant="secondary" onClick={pedos.discardDraft}>
+            Discard
+          </FlowButton>
+        }
+        primary={
+          <FlowButton
+            variant="primary"
+            disabled={pedos.isSaving}
+            onClick={() => void pedos.saveDraft()}
+          >
+            Save
+          </FlowButton>
+        }
+      />
+    </>
+  )
+}
+
+/** "Couldn't save this Recording", with Try again and Discard. */
+function SaveFailed() {
+  const pedos = usePedos()
+  return (
+    <>
+      <Empty className="flex-1">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <CircleAlert />
+          </EmptyMedia>
+          <EmptyTitle>Couldn't save this Recording</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
+      <FlowButtons
+        secondary={
+          <FlowButton variant="secondary" onClick={pedos.discardDraft}>
+            Discard
+          </FlowButton>
+        }
+        primary={
+          <FlowButton variant="primary" onClick={() => void pedos.saveDraft()}>
+            Try again
+          </FlowButton>
+        }
+      />
+    </>
+  )
+}
+
+/** "Saved, but we couldn't find its note", with Retry. The Recording stays listed. */
+function AnalysisFailed({ id }: { id: string }) {
+  const pedos = usePedos()
+  const router = useRouter()
+  return (
+    <>
+      <Empty className="flex-1">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <CircleHelp />
+          </EmptyMedia>
+          <EmptyTitle>Saved, but we couldn't find its note</EmptyTitle>
+          <EmptyDescription>It's on the Recordings tab as not analyzed.</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+      <FlowButtons
+        secondary={
+          <FlowButton
+            variant="secondary"
+            onClick={() => {
+              pedos.finishFlow()
+              router.push('/recordings/')
+            }}
+          >
+            Done
+          </FlowButton>
+        }
+        primary={
+          <FlowButton variant="primary" onClick={() => void pedos.retryAnalysis(id)}>
+            Retry
+          </FlowButton>
+        }
+      />
+    </>
+  )
+}
+
+/** Result: the note you just made, or that it's Noise-like, and replay of just the fart. */
+function Result({ recording }: { recording: Recording }) {
+  const pedos = usePedos()
+  const router = useRouter()
+  const pitch = recordingPitch(recording)
+  const isPlaying = pedos.nowPlaying === recording.id
+
+  return (
+    <>
+      <div className="flex flex-1 flex-col items-center justify-center gap-7 overflow-y-auto px-5 text-center">
+        {pitch !== null ? (
+          <div className="space-y-1">
+            <p className="font-semibold text-muted-foreground">Your note</p>
+            <p className="text-8xl font-bold tracking-tight" data-testid="result-note">
+              {noteName(pitch)}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <AudioWaveform className="size-16 text-muted-foreground" aria-hidden />
+            <p className="text-2xl font-bold" data-testid="result-noise">
+              No steady note this time
+            </p>
+            <p className="text-muted-foreground">It's saved, but it can't play melody notes.</p>
+          </div>
+        )}
+        {firstFartUsed(recording) && (
+          <div className="space-y-1">
+            <p className="flex items-center justify-center gap-2 font-semibold">
+              <Scissors className="size-4" aria-hidden />
+              We kept the first fart
+            </p>
+            <p className="text-sm text-muted-foreground">We heard more than one.</p>
+          </div>
+        )}
+        <Button
+          variant="outline"
+          size="lg"
+          className="h-11"
+          onClick={() => pedos.togglePlayback(recording)}
+        >
+          {isPlaying ? <CircleStop /> : <CirclePlay />}
+          {isPlaying ? 'Stop' : 'Play it'}
+        </Button>
+      </div>
+      <FlowButtons
+        secondary={
+          <FlowButton
+            variant="secondary"
+            onClick={() => {
+              pedos.finishFlow()
+              router.push('/')
+            }}
+          >
+            Record another
+          </FlowButton>
+        }
+        primary={
+          <FlowButton
+            variant="primary"
+            onClick={() => {
+              pedos.finishFlow()
+              router.push('/recordings/')
+            }}
+          >
+            Done
+          </FlowButton>
+        }
+      />
+    </>
+  )
+}
