@@ -13,7 +13,8 @@ Run from `apps/web/`:
 | `pnpm test:e2e` | Record journeys in Chromium with a fixture as a fake microphone |
 | `pnpm lint`, `pnpm typecheck` | Biome, then TypeScript |
 | `pnpm check` | The finish gate: lint, types, tests and build. It never writes files. |
-| `pnpm deploy:staging` | Build and deploy the `pedos-web-staging` Worker (for owner tap-throughs) |
+| `pnpm deploy:staging` | Build and deploy the `pedos-web-staging` Worker by hand. CI does this on every push to `main` (`web-deploy.yml`), so use it only for a pre-merge preview or an emergency. |
+| `scripts/smoke.sh <url> <staging\|production>` | The post-deploy smoke test |
 
 ## Layout
 
