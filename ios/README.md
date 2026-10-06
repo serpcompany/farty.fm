@@ -147,6 +147,8 @@ configuration's build settings.
 
 ## TestFlight
 
+**Stopped on 2026-10-06 (#103).** After the App Store rejection (ADR 0007), the owner ended TestFlight releases, and the workflow was removed. The rest of this section describes how it worked, for the record.
+
 [`.github/workflows/testflight.yml`](../.github/workflows/testflight.yml) uploads the **QA** app
 to TestFlight on every push to `main`, and by hand from any branch (Actions > TestFlight > Run
 workflow, or `gh workflow run testflight.yml --ref <branch>`), which is how a branch build reaches
