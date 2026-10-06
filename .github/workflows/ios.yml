@@ -6,11 +6,27 @@ name: iOS
 #
 # Draft PRs are not built: a PR runs when it is opened or marked ready for review, and on
 # each push while it is ready. Branch pushes without a PR are not built.
+#
+# It runs only when something the iPhone app builds from changes: the app, RecordingAnalysisKit,
+# the Fixture Library and golden data, or the prototype data its sample data is generated from.
+# Web-only changes (apps/web) skip it. The iPhone app isn't released anymore (ADR 0007, #103).
 on:
   push:
     branches: [main]
+    paths:
+      - ios/**
+      - RecordingAnalysisKit/**
+      - fixtures/**
+      - docs/design/prototype/**
+      - .github/workflows/ios.yml
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - ios/**
+      - RecordingAnalysisKit/**
+      - fixtures/**
+      - docs/design/prototype/**
+      - .github/workflows/ios.yml
   workflow_dispatch:
 
 concurrency:
