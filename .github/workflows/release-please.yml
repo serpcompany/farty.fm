@@ -1,8 +1,8 @@
 name: Release Please
 
 # Keeps a "release: Pedos x.y.z" PR up to date from the Conventional Commits on main. Merging
-# it tags the release and bumps MARKETING_VERSION in ios/project.yml; the push to main then
-# uploads that version to TestFlight (testflight.yml). Nobody types versions by hand.
+# it tags the release and bumps MARKETING_VERSION in ios/project.yml. Nobody types versions by
+# hand. TestFlight uploads stopped on 2026-10-06 (#103).
 on:
   push:
     branches: [main]

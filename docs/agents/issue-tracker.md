@@ -54,10 +54,10 @@ Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob
    - It reports evidence level by level: build, automated tests, UI tests, installed artifact, owner acceptance. A lower level never proves a higher one.
    - For audio, report measurements on the actual output (the `tools/melody-lab/evaluate.py` checks or their Swift equivalents), not a description. For UI, attach a screenshot or recording from the simulator or device.
 3. Keep test rounds few until launch. Tests run in two sets, as Apple recommends (`ios/scripts/run-tests.sh`):
-   - **Quick set, before merge:** the unit tests, the Recording Analysis golden tests, the shipped-build test (record, save, pitch, replay, relaunch and delete, here on the Debug build) and the core record-flow UI tests. CI runs it once, when the PR is marked ready. It takes about 11 minutes there, down from 22 for the old full run.
-   - **The Release build** is first built after merge, by the TestFlight workflow, which runs the shipped-build test on it before uploading. A Release-only problem therefore shows up as a failed TestFlight run on `main`. To check one before merge, run `gh workflow run testflight.yml --ref <branch>`, which uploads only if the test passes.
+   - **Quick set, before merge:** the unit tests, the Recording Analysis golden tests, the shipped-build test (record, save, pitch, replay, relaunch and delete, here on the Debug build) and the core record-flow UI tests. CI runs it once, when the PR is marked ready, and only when the PR changes what the iPhone app builds from (the paths in `ios.yml`). It takes about 11 minutes there, down from 22 for the old full run. Web-only PRs run `web.yml` instead.
+   - **The Release build** used to be built after merge by the TestFlight workflow. That workflow was removed on 2026-10-06 (#103), when TestFlight releases stopped.
    - **Full set, after merge:** every UI test, on every push to `main`. It doesn't block PRs. If it fails, fixing `main` comes before anything else.
-   - **Owner first.** As soon as the screens work, give the owner a build to tap through. Fold their changes in before screenshots and review.
+   - **Owner first.** As soon as the screens work, give the owner a build to tap through. For the web app, that's the staging link (`pnpm deploy:staging` before merge; CI deploys Staging after merge). Fold their changes in before screenshots and review.
    - **Targeted local tests.** Authors run only the tests their change touches (`-only-testing`), in light mode. If a change touches a screen, also run that screen's UI tests, because the quick set doesn't cover every screen. The dark-mode runs are left to the final screenshots.
    - **Screenshots once**, at the end, in light and dark.
 4. One review:
