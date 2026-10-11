@@ -16,3 +16,6 @@ __pycache__/
 
 # Generated output
 out/
+
+# Agent logs and verification proof
+tmp/agent/
