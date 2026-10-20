@@ -7,7 +7,10 @@
 // Writes `<song>.wav` (mono 32-bit float, 44.1 kHz: the renderer's exact output, which Web Audio
 // plays as it is) and `<song>.json` (the Song's bpm and transposition, and one event per note) to
 // `tools/melody-lab/out/web/` by default, then prints the render time per Song in Node.
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+//
+// It first deletes the `.wav` and `.json` files already in the out dir, so no stale render is
+// measured again. It exits 1 if a Song that the golden Arrangement unlocks comes out locked.
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { toAnalysis } from '../src/lib/analysis/port'
 import { analyzeRecording } from '../src/lib/analysis/recording-analysis'
@@ -25,6 +28,7 @@ import { decodeFile } from '../src/test-support/decode'
 const ROOT = resolve(__dirname, '../../..')
 const FIXTURES = join(ROOT, 'fixtures/recordings')
 const SONGS = join(ROOT, 'fixtures/golden/songs')
+const GOLDEN_ARRANGEMENTS = join(ROOT, 'fixtures/golden/arrangements/full')
 const RUNS = 5
 
 const outDir = resolve(process.argv[2] ?? join(ROOT, 'tools/melody-lab/out/web'))
@@ -71,8 +75,20 @@ function floatWav(samples: Float32Array, sampleRate: number): Buffer {
 
 const round = (x: number, digits: number) => Number(x.toFixed(digits))
 
+/** Whether the golden Arrangement on the full library unlocks the Song. */
+function goldenUnlocks(id: string): boolean {
+  const golden = JSON.parse(readFileSync(join(GOLDEN_ARRANGEMENTS, `${id}.json`), 'utf8')) as {
+    unlocked: boolean
+  }
+  return golden.unlocked
+}
+
 async function main() {
   mkdirSync(outDir, { recursive: true })
+  // Only the files this script writes: the out dir may be one the caller chose.
+  for (const name of readdirSync(outDir)) {
+    if (/\.(wav|json)$/.test(name)) rmSync(join(outDir, name))
+  }
 
   // The full Fixture Library, through Recording Analysis as the app runs it on a new Recording.
   const files = readdirSync(FIXTURES)
@@ -107,6 +123,7 @@ async function main() {
     .filter(name => name.endsWith('.json'))
     .map(name => name.replace(/\.json$/, ''))
     .sort()
+  const wronglyLocked: string[] = []
   console.log(
     ['song', 'notes', 'T', 'arrange ms', 'render ms', 'worker ms', 'seconds']
       .map(c => c.padEnd(13))
@@ -121,6 +138,7 @@ async function main() {
         `${id.padEnd(13)}locked: ${arrangement.covered} of ${arrangement.total} notes covered, ` +
           `needs ${arrangement.missingNotes.join(' ')}`
       )
+      if (goldenUnlocks(id)) wronglyLocked.push(id)
       continue
     }
     // `render ms` renders from Recordings already cut and tracked; `worker ms` is what the render
@@ -169,6 +187,10 @@ async function main() {
   const perSource = [...sourceMs].map(([id, ms]) => `${id} ${ms.toFixed(0)}`).join(', ')
   console.log(`cut and track each Melodic Recording (ms, median of ${RUNS}): ${perSource}`)
   console.log(`wrote ${outDir}`)
+  if (wronglyLocked.length > 0) {
+    console.error(`locked here, but the golden Arrangement unlocks it: ${wronglyLocked.join(' ')}`)
+    process.exit(1)
+  }
 }
 
 main().catch(error => {

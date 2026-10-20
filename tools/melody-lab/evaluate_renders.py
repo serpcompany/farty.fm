@@ -13,8 +13,11 @@ and checks it:
 - no worse than golden on within_50c_pct, onsets_on_time_pct and notes_with_retrigger.
 
 `furelise` note 15 is a tolerance edge (fixtures/golden/README.md, "Near-threshold
-Recordings"), so it counts as within at +-60 cents. Exits 1 if any render fails. It changes
-nothing in the reference.
+Recordings"), so it counts as within at +-60 cents.
+
+First it checks that `dir` holds exactly one render (`.json` and `.wav`) per golden Arrangement
+that is unlocked (`fixtures/golden/arrangements/full/*.json`), and fails on a missing, extra or
+stale one. Exits 1 if any check fails. It changes nothing in the reference.
 
 With --against-reference it also renders each Song with the reference (`plan`, then
 `render(tune=1.0)` on `load_library()`) and prints the largest sample difference from it, for
@@ -66,6 +69,27 @@ def within_with_edge(song, r):
     return round(100 * (k + counted) / n), edge
 
 
+def render_set_problems(out):
+    """What is wrong with the set of renders in `out`, against the golden unlocked Arrangements."""
+    unlocked = {p.stem for p in GOLDEN.glob("*.json") if json.loads(p.read_text())["unlocked"]}
+    locked = {p.stem for p in GOLDEN.glob("*.json")} - unlocked
+    jsons = {p.stem for p in out.glob("*.json")}
+    wavs = {p.stem for p in out.glob("*.wav")}
+    problems = []
+    for stem in sorted(unlocked - jsons):
+        problems.append(f"{stem}: no render, but golden unlocks it")
+    for stem in sorted((jsons | wavs) - unlocked):
+        why = "golden locks it" if stem in locked else "not a golden Arrangement"
+        problems.append(f"{stem}: rendered, but {why}")
+    for stem in sorted((jsons ^ wavs) & unlocked):
+        problems.append(f"{stem}: {'.wav' if stem in jsons else '.json'} missing")
+    for stem in sorted(jsons & wavs & unlocked):
+        song = json.loads((out / f"{stem}.json").read_text()).get("song")
+        if song != stem:
+            problems.append(f"{stem}.json says it is {song!r}")
+    return sorted(unlocked & jsons & wavs), problems
+
+
 def against_reference(library, melody, audio):
     """How far a render is from the reference's own render of the same Song, sample by sample."""
     _, assignments = plan(melody, library)
@@ -86,11 +110,15 @@ def main():
     out = args.dir
     catalog = {c["id"]: m for c, m in load_catalog()}
     library = load_library() if args.against_reference else None
-    renders = sorted(out.glob("*.json"))
-    if not renders:
-        sys.exit(f"no renders in {out}")
+    renders, set_problems = render_set_problems(out)
+    for problem in set_problems:
+        print(f"FAIL: {problem}")
+    if set_problems:
+        print(f"the renders in {out} are not exactly the golden unlocked Arrangements;"
+              " rerun apps/web's scripts/render-songs.ts")
     failures = []
-    for path in renders:
+    for stem in renders:
+        path = out / f"{stem}.json"
         events = json.loads(path.read_text())
         song = events["song"]
         melody = catalog[song]
@@ -143,7 +171,9 @@ def main():
         if problems:
             failures.append(song)
     print(f"{len(renders) - len(failures)} of {len(renders)} renders pass" + (f"; failing: {' '.join(failures)}" if failures else ""))
-    sys.exit(1 if failures else 0)
+    if set_problems:
+        print(f"FAIL: {len(set_problems)} problem(s) with the set of renders (above)")
+    sys.exit(1 if failures or set_problems else 0)
 
 
 if __name__ == "__main__":
