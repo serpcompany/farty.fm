@@ -16,3 +16,9 @@ __pycache__/
 
 # Generated output
 out/
+
+# Agents' proof files (tmp/agent/) and other scratch output
+tmp/
+
+# Local Worker secrets
+.dev.vars
