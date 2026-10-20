@@ -1,5 +1,6 @@
-Stage: explore
+Stage: ship
 Agents may merge: yes
+Release PRs: agents may merge the launch release PR (owner, 2026-10-21; see #106)
 
 ## Agent skills
 
