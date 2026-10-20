@@ -1,24 +1,72 @@
 import { type DBSchema, type IDBPDatabase, openDB } from 'idb'
 import type { AnalysisState, Recording } from './recordings'
+import type { Toot } from './toot'
 
 /**
- * Recordings live only in this browser, in IndexedDB (ADR 0001's local-first rule, on the web).
- * Metadata and audio are separate stores, so listing Recordings never loads their audio.
+ * Recordings and Toots live only in this browser, in IndexedDB (ADR 0001's local-first rule, on
+ * the web). Metadata and audio are separate stores, so listing them never loads their audio.
  */
 interface PedosDB extends DBSchema {
   recordings: { key: string; value: Recording }
+  /** Each Recording's WAV, by Recording id. */
   audio: { key: string; value: ArrayBuffer }
+  /** Since version 2. */
+  toots: { key: string; value: Toot }
+  /** Each Toot's own WAV, by Toot id. Since version 2. */
+  tootAudio: { key: string; value: ArrayBuffer }
 }
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
 
-function db(): Promise<IDBPDatabase<PedosDB>> {
-  opening ??= openDB<PedosDB>('pedos', 1, {
-    upgrade(database) {
-      database.createObjectStore('recordings', { keyPath: 'id' })
-      database.createObjectStore('audio')
+/** Whether this tab's upgrade waits for Pedos in another tab, which holds an older version open. */
+let waiting = false
+const waits = new EventTarget()
+
+function setWaiting(value: boolean) {
+  if (waiting === value) return
+  waiting = value
+  waits.dispatchEvent(new Event('change'))
+}
+
+/**
+ * Calls `listener` now and on each change with whether the database waits for Pedos in another
+ * tab to close. Returns a function that stops it.
+ */
+export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () => void {
+  const handle = () => listener(waiting)
+  waits.addEventListener('change', handle)
+  handle()
+  return () => waits.removeEventListener('change', handle)
+}
+
+/**
+ * The app's database, upgraded to version 2 (Toots) on first open. Version 1 held Recordings
+ * only; an upgrade keeps them.
+ */
+export function db(): Promise<IDBPDatabase<PedosDB>> {
+  opening ??= openDB<PedosDB>('pedos', 2, {
+    upgrade(database, oldVersion) {
+      if (oldVersion < 1) {
+        database.createObjectStore('recordings', { keyPath: 'id' })
+        database.createObjectStore('audio')
+      }
+      if (oldVersion < 2) {
+        database.createObjectStore('toots', { keyPath: 'id' })
+        database.createObjectStore('tootAudio')
+      }
+    },
+    // An older version is open in another tab, and its code may never close it: the upgrade
+    // waits until that tab closes.
+    blocked() {
+      setWaiting(true)
+    },
+    // A later version opening in another tab waits for this connection: close it, and open
+    // again on the next call.
+    blocking(_version, _blocked, event) {
+      ;(event.target as IDBDatabase).close()
+      opening = null
     }
-  })
+  }).finally(() => setWaiting(false))
   return opening
 }
 

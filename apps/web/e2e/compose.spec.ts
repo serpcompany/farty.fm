@@ -120,16 +120,48 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
   await expect(page.getByTestId('result-progress')).toContainText(
     'You unlocked Mary Had a Little Lamb'
   )
-  // Try it comes with Song Creator (#111): until then, Done alone.
+  // After an unlock, Try it opens the Song in Song Creator, and Done goes to Recordings.
   await expect(page.getByRole('button', { name: 'Record another' })).toHaveCount(0)
-  await page.getByRole('button', { name: 'Done' }).click()
-  await expect(page).toHaveURL(/\/recordings\/$/)
-  await expect(page.getByTestId('recording-row')).toHaveCount(4)
+  await expectTappable(page.getByRole('button', { name: 'Done' }))
+  await expectTappable(page.getByRole('button', { name: 'Try it' }))
+  // Try it starts the sound while it handles the tap, as iPhone Safari needs, so Song Creator
+  // plays the Toot by itself once it's made. A click reaches the window first while capturing
+  // and last while bubbling, so the page's own handlers run in between.
+  await page.evaluate(() => {
+    const counted = window as unknown as { resumesInTaps: number }
+    counted.resumesInTaps = 0
+    let inTap = false
+    addEventListener('click', () => (inTap = true), { capture: true })
+    addEventListener('click', () => (inTap = false))
+    const resume = AudioContext.prototype.resume
+    AudioContext.prototype.resume = function (this: AudioContext) {
+      if (inTap) counted.resumesInTaps += 1
+      return resume.call(this)
+    }
+  })
+  await page.getByRole('button', { name: 'Try it' }).click()
+  expect(
+    await page.evaluate(() => (window as unknown as { resumesInTaps: number }).resumesInTaps)
+  ).toBe(1)
+  await expect(page).toHaveURL(/\/compose\/mary\/$/)
+  await expect(page.getByRole('heading', { name: 'Mary Had a Little Lamb' })).toBeVisible()
+  await expect(page.getByTestId('recording-used')).toHaveCount(4)
 
-  await tab(page, 'Compose').click()
+  // Back returns to Compose, where the Unlocked Song opens Song Creator too.
+  await page.getByRole('link', { name: 'Back to Compose' }).click()
+  await expect(page).toHaveURL(/\/compose\/$/)
   await expect(page.getByRole('heading', { name: 'Unlocked · 1' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Locked · 11' })).toBeVisible()
-  await expect(page.getByTestId('unlocked-songs')).toContainText('Mary Had a Little LambReady')
+  const unlocked = page.getByTestId('unlocked-songs').getByRole('link')
+  await expect(unlocked).toHaveText('Mary Had a Little LambReady')
+  await expectTappable(unlocked)
+  await unlocked.click()
+  await expect(page).toHaveURL(/\/compose\/mary\/$/)
+  await page.getByRole('link', { name: 'Back to Compose' }).click()
+
+  await tab(page, 'Recordings').click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(4)
+  await tab(page, 'Compose').click()
 
   // Search and sort.
   const search = page.getByRole('searchbox', { name: 'Search Songs' })

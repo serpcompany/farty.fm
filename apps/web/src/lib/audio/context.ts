@@ -9,6 +9,18 @@ export function audioContext(): AudioContext {
   return shared
 }
 
+/**
+ * Starts the shared AudioContext inside a tap that opens a screen which plays by itself after an
+ * await, such as Song Creator. iPhone Safari starts a context only while it handles a tap, so the
+ * screen's later play finds it running.
+ */
+export function startAudioInTap(): void {
+  setAudioSession('playback')
+  audioContext()
+    .resume()
+    .catch(() => {})
+}
+
 type AudioSessionType = 'auto' | 'playback' | 'play-and-record'
 
 /**

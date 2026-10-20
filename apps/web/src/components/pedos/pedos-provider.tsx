@@ -11,8 +11,9 @@ import {
   useState
 } from 'react'
 import { analyze } from '@/lib/analysis/client'
-import { play, stopPlayback } from '@/lib/audio/player'
+import { forgetDecoded, play, stopPlayback } from '@/lib/audio/player'
 import { MicrophoneDeniedError, startTake, type Take } from '@/lib/audio/recorder'
+import type { Song } from '@/lib/catalog/song'
 import { songs } from '@/lib/catalog/songs.generated'
 import { nearestNote } from '@/lib/pitch'
 import {
@@ -31,6 +32,9 @@ import {
   recordingPitch,
   replaySegment
 } from '@/lib/recordings'
+import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
+import { makeToot as renderToot } from '@/lib/toot-renderer'
+import * as tootStore from '@/lib/toot-store'
 import { decodeWav, encodeWav, type PcmAudio } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 
@@ -53,8 +57,16 @@ export type Flow =
 
 export type RecordProblem = 'microphoneOff' | 'couldNotStart' | 'interrupted' | 'nothingHeard'
 
-/** What's playing: the draft on Review, or a saved Recording by id. */
+/**
+ * What's playing: the draft on Review, a saved Recording by id, or a Toot or one of its notes
+ * (`tootPlayback`).
+ */
 export type NowPlaying = 'draft' | string | null
+
+/** What `nowPlaying` holds while a Toot plays, or just its `note`th note. */
+export function tootPlayback(tootId: string, note?: number): string {
+  return note === undefined ? `toot:${tootId}` : `toot:${tootId}:note:${note}`
+}
 
 type Pedos = {
   recordings: Recording[] | null
@@ -91,6 +103,23 @@ type Pedos = {
    * Recording is: the Fixture Library in an internal build.
    */
   importRecordings(files: { id: string; wav: ArrayBuffer }[]): Promise<void>
+  /** Saved Toots, newest first; null until they load. */
+  toots: Toot[] | null
+  toot(id: string): Toot | undefined
+  /**
+   * Makes the Toot of an Unlocked Song in the render worker: Song Creator. Throws a `TootError`.
+   */
+  makeToot(song: Song): Promise<TootDraft>
+  /** Keeps a made Toot, once: saving it again does nothing. */
+  saveToot(draft: TootDraft): Promise<void>
+  /** Plays or stops the whole Toot, or just its `note`th note as rendered. */
+  toggleTootPlayback(draft: TootDraft, note?: number): void
+  /** Lets go of a Toot's decoded audio, when its screen closes. */
+  forgetToot(id: string): void
+  /** When what's playing started (`performance.now()`), once it has; null otherwise. */
+  playbackStartedAt: number | null
+  /** The database waits for Pedos in another tab, on an older version, to close. */
+  waitsForOtherTabs: boolean
 }
 
 const PedosContext = createContext<Pedos | null>(null)
@@ -112,6 +141,12 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const [problem, setProblem] = useState<RecordProblem | null>(null)
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [toots, setToots] = useState<Toot[] | null>(null)
+  const [playbackStart, setPlaybackStart] = useState<{ key: string; at: number } | null>(null)
+  const [waitsForOtherTabs, setWaitsForOtherTabs] = useState(false)
+  const savingToots = useRef(new Set<string>())
+  /** Counts Toot plays, so only the latest one sets where the playhead starts. */
+  const tootPlays = useRef(0)
   const take = useRef<{ take: Take; startedAt: number; limit: number } | null>(null)
   // The Recordings as last rendered, to compare Pitch Coverage after an analysis.
   const latest = useRef<Recording[] | null>(null)
@@ -155,6 +190,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  useEffect(() => store.onWaitingForOtherTabs(setWaitsForOtherTabs), [])
+
   useEffect(() => {
     setShowsWelcome(localStorage.getItem(welcomedKey) === null)
     store.loadRecordings().then(loaded => {
@@ -164,6 +201,16 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         if (recording.analysis.state === 'analyzing') void runAnalysis(recording.id)
       }
     })
+    tootStore
+      .loadToots()
+      // A Toot saved before the list loads is newer than any in it, so it stays first.
+      .then(saved =>
+        setToots(current => [
+          ...(current ?? []).filter(toot => !saved.some(s => s.id === toot.id)),
+          ...saved
+        ])
+      )
+      .catch(() => setToots(current => current ?? []))
   }, [runAnalysis])
 
   const finishWelcome = useCallback(() => {
@@ -325,6 +372,60 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     [runAnalysis]
   )
 
+  const makeToot = useCallback(
+    (song: Song) => renderToot(song, recordings ?? [], store.loadAudio),
+    [recordings]
+  )
+
+  const saveToot = useCallback(
+    async (draft: TootDraft) => {
+      if (toots?.some(t => t.id === draft.id) || savingToots.current.has(draft.id)) return
+      savingToots.current.add(draft.id)
+      const toot: Toot = {
+        id: draft.id,
+        title: draft.song.title,
+        songId: draft.song.id,
+        createdAt: Date.now(),
+        seconds: draft.seconds,
+        arrangement: draft.arrangement
+      }
+      try {
+        await tootStore.saveToot(toot, draft.wav)
+        setToots(list => [toot, ...(list ?? [])])
+      } finally {
+        savingToots.current.delete(draft.id)
+      }
+    },
+    [toots]
+  )
+
+  const toggleTootPlayback = useCallback(
+    (draft: TootDraft, note?: number) => {
+      const key = tootPlayback(draft.id, note)
+      if (nowPlaying === key) {
+        stopPlayback()
+        return
+      }
+      const ended = () => setNowPlaying(current => (current === key ? null : current))
+      setNowPlaying(key)
+      // The playhead waits for this play to start, not an earlier one of the same Toot.
+      setPlaybackStart(null)
+      tootPlays.current += 1
+      const thisPlay = tootPlays.current
+      // A note plays as written, from the Toot's own audio: `Song.seconds(of:)` on the iPhone.
+      const written = note === undefined ? null : noteSeconds(draft.song, draft.song.notes[note])
+      const segment = written && { start: written.start, end: written.start + written.length }
+      // The whole Toot and its notes share one decode. Decoding takes the buffer it's given, so it
+      // gets a copy, and the draft keeps its audio to save.
+      void play(`toot-${draft.id}`, async () => draft.wav.slice(0), segment, ended).then(() => {
+        if (thisPlay === tootPlays.current) setPlaybackStart({ key, at: performance.now() })
+      })
+    },
+    [nowPlaying]
+  )
+
+  const forgetToot = useCallback((id: string) => forgetDecoded(`toot-${id}`), [])
+
   const melodicRecordings = (recordings ?? []).filter(r => recordingPitch(r) !== null)
   const collectedNotes = new Set(
     melodicRecordings.flatMap(r => {
@@ -364,7 +465,16 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     togglePlayback,
     stopPlayback,
     deleteRecording,
-    importRecordings
+    importRecordings,
+    toots,
+    toot: id => toots?.find(t => t.id === id),
+    makeToot,
+    saveToot,
+    toggleTootPlayback,
+    forgetToot,
+    playbackStartedAt:
+      playbackStart !== null && playbackStart.key === nowPlaying ? playbackStart.at : null,
+    waitsForOtherTabs
   }
   return <PedosContext value={value}>{children}</PedosContext>
 }
