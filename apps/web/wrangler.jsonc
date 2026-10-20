@@ -15,12 +15,14 @@
     "staging": {
       "vars": { "SITE_ENV": "staging" },
       "workers_dev": true,
+      "preview_urls": false,
       "observability": { "enabled": true },
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-staging" }]
     },
     "production": {
       "vars": { "SITE_ENV": "production" },
       "workers_dev": true,
+      "preview_urls": false,
       "observability": { "enabled": true },
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-production" }]
     }
