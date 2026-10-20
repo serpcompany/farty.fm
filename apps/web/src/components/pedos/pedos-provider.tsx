@@ -6,13 +6,23 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState
 } from 'react'
 import { analyze } from '@/lib/analysis/client'
 import { play, stopPlayback } from '@/lib/audio/player'
 import { MicrophoneDeniedError, startTake, type Take } from '@/lib/audio/recorder'
+import { songs } from '@/lib/catalog/songs.generated'
 import { nearestNote } from '@/lib/pitch'
+import {
+  type CoverageChanges,
+  collectedPitchClasses,
+  coverageChanges,
+  coverageKey,
+  type SongRow,
+  songRows
+} from '@/lib/pitch-coverage'
 import * as store from '@/lib/recording-store'
 import {
   maximumTakeSeconds,
@@ -21,7 +31,7 @@ import {
   recordingPitch,
   replaySegment
 } from '@/lib/recordings'
-import { encodeWav, type PcmAudio } from '@/lib/wav'
+import { decodeWav, encodeWav, type PcmAudio } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 
 /** A just-recorded take that hasn't been saved or discarded yet. */
@@ -39,7 +49,7 @@ export type Flow =
   | { kind: 'saveFailed'; draft: Draft }
   | { kind: 'analyzing'; id: string }
   | { kind: 'analysisFailed'; id: string }
-  | { kind: 'result'; id: string }
+  | { kind: 'result'; id: string; changes: CoverageChanges }
 
 export type RecordProblem = 'microphoneOff' | 'couldNotStart' | 'interrupted' | 'nothingHeard'
 
@@ -53,6 +63,10 @@ type Pedos = {
   melodicRecordings: Recording[]
   /** The notes of every Melodic Recording, octave included (G3, G♯3 and G4 are three notes). */
   collectedNotes: Set<number>
+  /** The pitch classes (0 = C … 11 = B) of every Melodic Recording, for the `PitchStrip`. */
+  collectedPitchClasses: Set<number>
+  /** Every Song with its Pitch Coverage, in catalog order. */
+  songRows: SongRow[]
   showsWelcome: boolean
   capture: Capture
   flow: Flow | null
@@ -72,6 +86,11 @@ type Pedos = {
   togglePlayback(target: 'draft' | Recording): void
   stopPlayback(): void
   deleteRecording(id: string): Promise<void>
+  /**
+   * Adds WAV files as Recordings with these ids, in order, then analyzes each in turn, as a new
+   * Recording is: the Fixture Library in an internal build.
+   */
+  importRecordings(files: { id: string; wav: ArrayBuffer }[]): Promise<void>
 }
 
 const PedosContext = createContext<Pedos | null>(null)
@@ -94,29 +113,47 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>(null)
   const [isSaving, setIsSaving] = useState(false)
   const take = useRef<{ take: Take; startedAt: number; limit: number } | null>(null)
+  // The Recordings as last rendered, to compare Pitch Coverage after an analysis.
+  const latest = useRef<Recording[] | null>(null)
+  useEffect(() => {
+    latest.current = recordings
+  }, [recordings])
 
   const replace = useCallback((updated: Recording) => {
     setRecordings(list => list?.map(r => (r.id === updated.id ? updated : r)) ?? null)
   }, [])
 
+  /** Analyzes a saved Recording: the analyzed Recording, or null when analysis failed. */
   const runAnalysis = useCallback(
-    async (id: string): Promise<boolean> => {
+    async (id: string): Promise<Recording | null> => {
       try {
-        const { samples, sampleRate } = await import('@/lib/wav').then(async wav =>
-          wav.decodeWav(await store.loadAudio(id))
-        )
+        const { samples, sampleRate } = decodeWav(await store.loadAudio(id))
         const analysis = await analyze({ samples, sampleRate })
         const updated = await store.saveAnalysis(id, { state: 'analyzed', analysis })
-        if (updated) replace(updated)
-        return true
+        if (!updated) return null
+        replace(updated)
+        return updated
       } catch {
         const updated = await store.saveAnalysis(id, { state: 'notAnalyzed' })
         if (updated) replace(updated)
-        return false
+        return null
       }
     },
     [replace]
   )
+
+  /**
+   * The Result screen after analysis, with what the Recording changed in the Song Catalog's Pitch
+   * Coverage: the iPhone app's `analyze()` compares the Recordings before and after it.
+   */
+  const resultOf = useCallback((analyzed: Recording): Flow => {
+    const others = (latest.current ?? []).filter(r => r.id !== analyzed.id)
+    return {
+      kind: 'result',
+      id: analyzed.id,
+      changes: coverageChanges(songs, others, [...others, analyzed])
+    }
+  }, [])
 
   useEffect(() => {
     setShowsWelcome(localStorage.getItem(welcomedKey) === null)
@@ -207,12 +244,9 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     setRecordings(list => [...(list ?? []), saved])
     setFlow({ kind: 'analyzing', id: saved.id })
     const analyzed = await runAnalysis(saved.id)
-    setFlow(current =>
-      current?.kind === 'analyzing' && current.id === saved.id
-        ? { kind: analyzed ? 'result' : 'analysisFailed', id: saved.id }
-        : current
-    )
-  }, [flow, isSaving, runAnalysis])
+    const next: Flow = analyzed ? resultOf(analyzed) : { kind: 'analysisFailed', id: saved.id }
+    setFlow(current => (current?.kind === 'analyzing' && current.id === saved.id ? next : current))
+  }, [flow, isSaving, runAnalysis, resultOf])
 
   const discardDraft = useCallback(() => {
     stopPlayback()
@@ -230,13 +264,10 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           : current
       )
       const analyzed = await runAnalysis(id)
-      setFlow(current =>
-        current?.kind === 'analyzing' && current.id === id
-          ? { kind: analyzed ? 'result' : 'analysisFailed', id }
-          : current
-      )
+      const next: Flow = analyzed ? resultOf(analyzed) : { kind: 'analysisFailed', id }
+      setFlow(current => (current?.kind === 'analyzing' && current.id === id ? next : current))
     },
-    [recordings, replace, runAnalysis]
+    [recordings, replace, runAnalysis, resultOf]
   )
 
   const finishFlow = useCallback(() => {
@@ -271,6 +302,29 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     setRecordings(list => list?.filter(r => r.id !== id) ?? null)
   }, [])
 
+  const importRecordings = useCallback(
+    async (files: { id: string; wav: ArrayBuffer }[]) => {
+      const added: Recording[] = []
+      // If a save fails partway, the ones already saved are still analyzed before it throws.
+      try {
+        for (const { id, wav } of files) {
+          const audio = decodeWav(wav)
+          const fields = {
+            seconds: audio.samples.length / audio.sampleRate,
+            sampleRate: audio.sampleRate,
+            waveform: waveformLevels(audio.samples, 40)
+          }
+          const saved = await store.saveRecording(fields, wav, id)
+          added.push(saved)
+          setRecordings(list => [...(list ?? []), saved])
+        }
+      } finally {
+        for (const recording of added) await runAnalysis(recording.id)
+      }
+    },
+    [runAnalysis]
+  )
+
   const melodicRecordings = (recordings ?? []).filter(r => recordingPitch(r) !== null)
   const collectedNotes = new Set(
     melodicRecordings.flatMap(r => {
@@ -279,11 +333,19 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     })
   )
 
+  // The catalog is matched again only when the Melodic Recordings change, as the iPhone app's
+  // `CoverageCache`: `key` holds everything Pitch Coverage reads from `recordings`.
+  const key = coverageKey(recordings ?? [])
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `key` stands for `recordings`.
+  const rows = useMemo(() => songRows(songs, recordings ?? []), [key])
+
   const value: Pedos = {
     recordings,
     recording: id => recordings?.find(r => r.id === id),
     melodicRecordings,
     collectedNotes,
+    collectedPitchClasses: collectedPitchClasses(recordings ?? []),
+    songRows: rows,
     showsWelcome,
     capture,
     flow,
@@ -301,7 +363,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     finishFlow,
     togglePlayback,
     stopPlayback,
-    deleteRecording
+    deleteRecording,
+    importRecordings
   }
   return <PedosContext value={value}>{children}</PedosContext>
 }

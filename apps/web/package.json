@@ -12,8 +12,8 @@
     "test:e2e": "playwright test",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "build:staging": "SITE_ENV=staging opennextjs-cloudflare build",
-    "build:production": "SITE_ENV=production opennextjs-cloudflare build",
+    "build:staging": "tsx scripts/fixture-library.ts copy && SITE_ENV=staging NEXT_PUBLIC_FIXTURE_LIBRARY=1 opennextjs-cloudflare build",
+    "build:production": "tsx scripts/fixture-library.ts remove && SITE_ENV=production NEXT_PUBLIC_FIXTURE_LIBRARY= opennextjs-cloudflare build && tsx scripts/fixture-library.ts check",
     "deploy:staging": "pnpm build:staging && opennextjs-cloudflare deploy --env staging",
     "deploy:production": "pnpm build:production && opennextjs-cloudflare deploy --env production",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts"

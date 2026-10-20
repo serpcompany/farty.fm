@@ -47,3 +47,6 @@ next-env.d.ts
 # playwright
 /e2e/results/
 /e2e/report/
+
+# the Fixture Library, copied into the Staging build only (scripts/fixture-library.ts)
+/public/fixtures/

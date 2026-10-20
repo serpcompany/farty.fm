@@ -11,6 +11,10 @@ export const environmentNoindex = 'noindex, nofollow'
 export const smokeTestHeader = 'x-pedos-smoke-test'
 
 const servedWithoutThePassword = new Set(['/robots.txt'])
+// The Fixture Library's files, which only the Staging build carries (`scripts/fixture-library.ts`
+// serves them under `/fixtures/`), need the password even with the smoke test's header. The path
+// is matched decoded and in any case, so no spelling of it reaches `assets` without the password.
+const fixturesNeedThePassword = /\/fixtures(\/|$)/iu
 
 /** What the entry reads from the Worker's env. */
 export interface EntryEnv {
@@ -66,6 +70,16 @@ function isServedWithoutThePassword(request: Request, url: URL): boolean {
   return request.method === 'GET' || request.method === 'HEAD'
 }
 
+function isTheFixtureLibrary(url: URL): boolean {
+  let path: string
+  try {
+    path = decodeURIComponent(url.pathname)
+  } catch {
+    return true
+  }
+  return fixturesNeedThePassword.test(path.replaceAll('\\', '/'))
+}
+
 function withoutAuthorization(request: Request): Request {
   const headers = new Headers(request.headers)
   headers.delete('Authorization')
@@ -79,7 +93,9 @@ async function stagingAccess(
 ): Promise<StagingAccess> {
   if (isServedWithoutThePassword(request, url)) return { gate: 'exempt' }
   const authorization = request.headers.get('Authorization')
-  if (authorization === null && request.headers.has(smokeTestHeader)) return { gate: 'exempt' }
+  if (authorization === null && request.headers.has(smokeTestHeader) && !isTheFixtureLibrary(url)) {
+    return { gate: 'exempt' }
+  }
   const given = basicAuthPassword(authorization)
   if (password && given !== null && (await passwordMatches(given, password))) {
     return { gate: 'passed', request: withoutAuthorization(request) }
