@@ -39,6 +39,6 @@ Stop the preview: `pkill -f 'preview --env staging --port 4109'`. Leave `tmp/age
 
 ## Finish
 
-`pnpm check` (lint, types, tests, build) on the PR's head commit is the finish gate. CI checks are off until #113, so cite its result in the PR.
+`pnpm check` (lint, types, tests, build) on the PR's head commit is the finish gate. Cite its result in the PR; `web.yml` runs the checks again once the PR is ready.
 
 Which change needs which evidence is in `apps/web/AGENTS.md`. Only the owner's phone proves the microphone, audio and install.

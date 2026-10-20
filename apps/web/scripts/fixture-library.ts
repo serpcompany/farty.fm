@@ -4,12 +4,13 @@
 //
 //   pnpm exec tsx scripts/fixture-library.ts copy    # before the Staging build (build:staging)
 //   pnpm exec tsx scripts/fixture-library.ts remove  # before the Production build
-//   pnpm exec tsx scripts/fixture-library.ts check   # after it: exits 1 on fixture audio or loader
+//   pnpm exec tsx scripts/fixture-library.ts check   # after it: exits 1 on any fixture or loader
 //
 // `copy` decodes each fixture as the tests do and writes it as `<id>.wav`, the mono 16-bit WAV the
 // app keeps every Recording in, with an `index.json`, to `public/fixtures/recordings/` (ignored by
 // git). The browser then adds them as Recordings without decoding MP3 itself. The service worker
 // never caches that path, and the Staging gate covers it.
+import { createHash } from 'node:crypto'
 import {
   existsSync,
   mkdirSync,
@@ -80,12 +81,18 @@ function files(dir: string): string[] {
   })
 }
 
-/** Exits 1 if the Workers build in `.open-next/` carries fixture audio or the loader. */
+const sha256 = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex')
+
+/**
+ * Exits 1 if the Workers build in `.open-next/` carries the Fixture Library: fixture audio, any
+ * file under a `fixtures/` path, a copy of any file in `fixtures/recordings/`, or the loader.
+ */
 function check(): void {
   if (!existsSync(BUILD)) {
     console.error('error: no .open-next/ build to check; run pnpm build:production first')
     process.exit(1)
   }
+  const fixtureFiles = new Map(files(FIXTURES).map(path => [sha256(path), relative(APP, path)]))
   const problems: string[] = []
   for (const path of files(BUILD)) {
     const name = relative(APP, path)
@@ -93,7 +100,13 @@ function check(): void {
       problems.push(`${name}: audio file`)
       continue
     }
+    if (/(^|[/\\])fixtures[/\\]/iu.test(relative(BUILD, path))) {
+      problems.push(`${name}: under a fixtures/ path`)
+      continue
+    }
     if (statSync(path).size > 50e6) continue
+    const copied = fixtureFiles.get(sha256(path))
+    if (copied) problems.push(`${name}: a copy of ${copied}`)
     const text = readFileSync(path, 'latin1')
     for (const needle of LOADER_TEXT) {
       if (text.includes(needle)) problems.push(`${name}: contains "${needle}"`)
@@ -104,7 +117,7 @@ function check(): void {
     for (const problem of problems) console.error(`  ${problem}`)
     process.exit(1)
   }
-  console.log('ok    the build carries no fixture audio and no Fixture Library loader')
+  console.log('ok    the build carries no fixture file, audio or Fixture Library loader')
 }
 
 async function main(): Promise<void> {

@@ -1,19 +1,36 @@
 #!/usr/bin/env bash
 # Post-deploy smoke test: smoke.sh <base-url> <staging|production>
-# Checks the pages and icons answer, the microphone is allowed for the site itself, and the
-# Staging gate (worker.ts): outside Production every request needs the password, static files
-# included, except robots.txt and the smoke test's header, and only a request with the password
-# drops noindex. The Fixture Library, which only Staging carries, needs the password even with the
-# smoke test's header. Production has no gate, is indexable and carries no Fixture Library.
+#
+# <base-url> is the deploy's workers.dev host in CI, or a local preview. The checks send the smoke
+# test's header, which keeps a workers.dev host from redirecting and passes the Staging gate
+# without the password, keeping noindex.
+#
+# It checks that the pages and icons answer and the microphone is allowed for the site itself;
+# that canonicals, robots.txt and the sitemaps name the environment's own host; and the Staging
+# gate (worker.ts): a missing or wrong password is refused, except for robots.txt and the header,
+# only the password drops noindex, and the Fixture Library, which only Staging carries, needs the
+# password even with the header. Production has no gate, is indexable, allows crawling and carries
+# no Fixture Library. On a workers.dev host, a request without the header gets a 308 to the
+# environment's own host. Off localhost it checks that host too, and `www` for Production, unless
+# Bot Fight Mode blocks this machine there.
 set -euo pipefail
 
-base="${1:?usage: smoke.sh <base-url> <staging|production>}"
-env="${2:?usage: smoke.sh <base-url> <staging|production>}"
+usage='usage: smoke.sh <base-url> <staging|production>'
+base="${1:?$usage}"
+env="${2:?$usage}"
 base="${base%/}"
+case "$env" in
+  production) canonical=https://pedos.app ;;
+  staging) canonical=https://staging.pedos.app ;;
+  *)
+    echo "$usage" >&2
+    exit 2
+    ;;
+esac
 failures=0
 seen=''
+tries=5
 
-# The smoke test's header passes the Staging gate without the password, keeping noindex.
 smoke=(-H 'x-pedos-smoke-test: 1')
 # Staging's public password, a plain variable in wrangler.jsonc. The gate ignores the username.
 password=(-u 'pedos:stagingpassword')
@@ -30,25 +47,34 @@ fail() {
   failures=$((failures + 1))
 }
 
-# Retries a check, since a deploy takes a few seconds to reach every location.
+# eventually <message> <check> [args...]: retries a check $tries times, 3 s apart, since a deploy
+# takes a few seconds to reach every location.
 eventually() {
-  local message="$1"
+  local message="$1" try
   shift
-  for _ in 1 2 3 4 5; do
+  seen=''
+  for ((try = 1; try <= tries; try++)); do
     if "$@"; then
       pass "$message"
       return
     fi
-    sleep 3
+    if ((try < tries)); then sleep 3; fi
   done
   fail "$message"
 }
 
-# headers_of <path> [curl options...]: the status line and headers, without carriage returns.
-headers_of() {
-  local path="$1"
+# head_of <url> [curl options...]: the status line and headers, without carriage returns.
+head_of() {
+  local url="$1"
   shift
-  curl -sS -o /dev/null -D - "$@" "$base$path" | tr -d '\r'
+  curl -sS -o /dev/null -D - "$@" "$url" | tr -d '\r'
+}
+
+# body_of <url> [curl options...]: the body, without carriage returns.
+body_of() {
+  local url="$1"
+  shift
+  curl -sS "$@" "$url" | tr -d '\r'
 }
 
 status_in() { head -n 1 <<<"$1" | cut -d ' ' -f 2; }
@@ -65,66 +91,130 @@ answers() {
 # allows_the_microphone [curl options...]
 allows_the_microphone() {
   local headers
-  headers=$(headers_of / "$@")
+  headers=$(head_of "$base/" "$@")
   seen=$(head -n 1 <<<"$headers")
   grep -qi '^permissions-policy: microphone=(self)' <<<"$headers"
 }
 
-# asks_for_the_password <path> [curl options...]: 401, the Basic challenge, and no-store.
-asks_for_the_password() {
-  local path="$1" headers
-  shift
-  headers=$(headers_of "$path" "$@")
+# refuses <url> [curl options...]: 401, the Basic challenge, and no-store.
+refuses() {
+  local headers
+  headers=$(head_of "$@")
   seen=$(head -n 1 <<<"$headers")
   [[ "$(status_in "$headers")" == 401 ]] &&
     grep -qixF "$challenge" <<<"$headers" &&
     grep -qix 'cache-control: no-store' <<<"$headers"
 }
 
-# serves <path> <noindex|indexable> [curl options...]: 200, with or without X-Robots-Tag noindex.
+# serves <url> <noindex|indexable> [curl options...]: 200 with no challenge, and with or without
+# X-Robots-Tag noindex.
 serves() {
-  local path="$1" indexing="$2" headers
+  local url="$1" indexing="$2" headers
   shift 2
-  headers=$(headers_of "$path" "$@")
+  headers=$(head_of "$url" "$@")
   seen="$(head -n 1 <<<"$headers") $(grep -i '^x-robots-tag:' <<<"$headers" || true)"
   [[ "$(status_in "$headers")" == 200 ]] || return 1
-  if [[ "$indexing" == noindex ]]; then
-    grep -qi '^x-robots-tag:.*noindex' <<<"$headers"
+  if grep -qi '^www-authenticate:' <<<"$headers"; then return 1; fi
+  if grep -qi '^x-robots-tag:.*noindex' <<<"$headers"; then
+    [[ "$indexing" == noindex ]]
   else
-    ! grep -qi '^x-robots-tag:.*noindex' <<<"$headers"
+    [[ "$indexing" == indexable ]]
   fi
 }
 
-# never_serves <path> [curl options...]: anything but 200.
+# never_serves <url> [curl options...]: anything but 200.
 never_serves() {
-  local path="$1" headers
-  shift
-  headers=$(headers_of "$path" "$@")
+  local headers
+  headers=$(head_of "$@")
   seen=$(head -n 1 <<<"$headers")
   [[ "$(status_in "$headers")" != 200 ]]
 }
 
-# never_challenges <path> [curl options...]: 200 and no WWW-Authenticate.
-never_challenges() {
-  local path="$1" headers
-  shift
-  headers=$(headers_of "$path" "$@")
-  seen=$(head -n 1 <<<"$headers")
-  [[ "$(status_in "$headers")" == 200 ]] && ! grep -qi '^www-authenticate:' <<<"$headers"
+# redirects <url> <location> [curl options...]: a 308 to <location>.
+redirects() {
+  local url="$1" want="$2" headers
+  shift 2
+  headers=$(head_of "$url" "$@")
+  seen="$(head -n 1 <<<"$headers") $(grep -i '^location:' <<<"$headers" || true)"
+  [[ "$(status_in "$headers")" == 308 ]] && grep -qixF "location: $want" <<<"$headers"
 }
 
-# robots_txt <disallows|allows>: robots.txt answers 200 without the password, and its
-# `User-agent: *` group disallows everything, or doesn't.
+# names_canonical <path> <url> [curl options...]: the page has one canonical link, to <url>.
+names_canonical() {
+  local path="$1" want="$2" links
+  shift 2
+  links=$(body_of "$base$path" "$@" | grep -o '<link rel="canonical"[^>]*>' || true)
+  seen=$(tr '\n' ' ' <<<"$links")
+  [[ "$links" == "<link rel=\"canonical\" href=\"$want\"/>" ]]
+}
+
+robots() { body_of "$base/robots.txt" "${smoke[@]}"; }
+
+# robots.txt answers even with a wrong password, which the smoke test's header doesn't pass.
+robots_needs_no_password() {
+  local status
+  status=$(curl -sS -o /dev/null -w '%{http_code}' "${smoke[@]}" "${wrong_password[@]}" \
+    "$base/robots.txt")
+  seen="$status"
+  [[ "$status" == 200 ]]
+}
+
+lists_the_sitemap_index() {
+  local body
+  body=$(robots)
+  seen=$(grep -i '^sitemap:' <<<"$body" | tr '\n' ' ' || true)
+  grep -qxF "Sitemap: $canonical/sitemap-index.xml" <<<"$body"
+}
+
+# robots_txt <allows|disallows>: the `User-Agent: *` group allows everything, or nothing.
 robots_txt() {
-  local want="$1" body
-  body=$(curl -sS -f "$base/robots.txt" | tr -d '\r' | tr '[:upper:]' '[:lower:]') || return 1
+  local body
+  body=$(robots)
   seen=$(tr '\n' ' ' <<<"$body")
-  if [[ "$want" == disallows ]]; then
-    # `disallow: /` on a line of its own, not a path such as `/api/`.
-    [[ "$body" == *$'user-agent: *\ndisallow: /\n'* || "$body" == *$'user-agent: *\ndisallow: /' ]]
+  if [[ "$1" == allows ]]; then
+    [[ "$body" == *$'User-Agent: *\nAllow: /\n'* ]] && ! grep -qix 'disallow: /' <<<"$body"
   else
-    [[ "$body" != *$'disallow: /\n'* && "$body" != *'disallow: /' ]]
+    [[ "$body" == *$'User-Agent: *\nDisallow: /\n'* ]]
   fi
+}
+
+gives_the_auditor_production_rules() {
+  local body
+  body=$(robots)
+  seen=$(tr '\n' ' ' <<<"$body")
+  [[ "$body" == *$'User-Agent: AhrefsSiteAudit\nAllow: /\n'* ]]
+}
+
+# sitemap_lists <path> <url...>: the sitemap is XML and lists exactly these URLs, in order.
+sitemap_lists() {
+  local path="$1" result locs
+  shift
+  result=$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' "${smoke[@]}" "$base$path")
+  locs=$(body_of "$base$path" "${smoke[@]}" | grep -o '<loc>[^<]*</loc>' |
+    sed -e 's|<loc>||' -e 's|</loc>||' | tr '\n' ' ' || true)
+  seen="$result: $locs"
+  [[ "$result" == '200 application/xml'* && "$locs" == "$* " ]]
+}
+
+# blocked <url>: Bot Fight Mode challenged this machine there, or Cloudflare refused it.
+blocked() {
+  local headers
+  headers=$(head_of "$1" || true)
+  grep -qi '^cf-mitigated: *challenge' <<<"$headers" || [[ "$(status_in "$headers")" == 403 ]]
+}
+
+# on_the_host <url> <message> <check> [args...]: runs a check on a branded host, or skips it with
+# a warning when Bot Fight Mode blocks this machine there.
+on_the_host() {
+  local url="$1" message="$2"
+  shift 2
+  if blocked "$url"; then
+    echo "skip $message: Bot Fight Mode blocked this machine"
+    echo "::warning::Bot Fight Mode blocked this machine at $url, so the check that $message" \
+      "didn't run. Run apps/web/scripts/smoke.sh from a machine it doesn't block to check it."
+    return
+  fi
+  eventually "$message" "$@"
 }
 
 for page in / /recordings/; do
@@ -135,32 +225,75 @@ for icon in /icon.png /apple-icon.png "$static_file"; do
 done
 eventually 'Permissions-Policy allows the microphone for the site' \
   allows_the_microphone "${smoke[@]}"
+eventually 'robots.txt answers without the password' robots_needs_no_password
+eventually "robots.txt lists the sitemap index on $canonical" lists_the_sitemap_index
+eventually "the sitemap index lists the pages sitemap on $canonical" \
+  sitemap_lists /sitemap-index.xml "$canonical/sitemap-pages.xml"
+eventually "the pages sitemap lists the public pages on $canonical" \
+  sitemap_lists /sitemap-pages.xml "$canonical" "$canonical/privacy/" "$canonical/support/"
 
 if [[ "$env" == production ]]; then
-  eventually 'Production is indexable' serves / indexable
+  eventually 'Production is indexable' serves "$base/" indexable "${smoke[@]}"
   for path in / "$static_file"; do
-    eventually "Production asks for no password on $path" never_challenges "$path"
     eventually "Production asks for no password on $path, even given a wrong one" \
-      never_challenges "$path" "${wrong_password[@]}"
+      serves "$base$path" indexable "${smoke[@]}" "${wrong_password[@]}"
   done
+  eventually "the home page's canonical is $canonical" \
+    names_canonical / "$canonical" "${smoke[@]}"
+  eventually "the Privacy page's canonical is $canonical/privacy/" \
+    names_canonical /privacy/ "$canonical/privacy/" "${smoke[@]}"
   eventually "Production's robots.txt allows crawling" robots_txt allows
-  eventually 'Production carries no Fixture Library' never_serves "$fixture_index"
+  eventually 'Production carries no Fixture Library' \
+    never_serves "$base$fixture_index" "${smoke[@]}"
 else
   for path in / "$static_file"; do
-    eventually "$path asks for the password" asks_for_the_password "$path"
+    eventually "$path with a wrong password asks for the password, even with the header" \
+      refuses "$base$path" "${smoke[@]}" "${wrong_password[@]}"
     eventually "$path with the password answers, with no noindex" \
-      serves "$path" indexable "${password[@]}"
+      serves "$base$path" indexable "${smoke[@]}" "${password[@]}"
   done
   eventually "the smoke test's header passes without the password, with noindex" \
-    serves / noindex "${smoke[@]}"
-  eventually "the smoke test's header with a wrong password asks for the password" \
-    asks_for_the_password / "${smoke[@]}" "${wrong_password[@]}"
+    serves "$base/" noindex "${smoke[@]}"
+  eventually "the home page's canonical is $canonical" \
+    names_canonical / "$canonical" "${smoke[@]}" "${password[@]}"
+  eventually "the Privacy page's canonical is $canonical/privacy/" \
+    names_canonical /privacy/ "$canonical/privacy/" "${smoke[@]}" "${password[@]}"
   eventually "the Fixture Library asks for the password, even with the smoke test's header" \
-    asks_for_the_password "$fixture_index" "${smoke[@]}"
-  eventually 'a wrong password asks for the password' \
-    asks_for_the_password / "${wrong_password[@]}"
-  eventually 'robots.txt answers without the password, disallowing every crawler' \
-    robots_txt disallows
+    refuses "$base$fixture_index" "${smoke[@]}"
+  eventually "robots.txt disallows every crawler" robots_txt disallows
+  eventually "robots.txt gives AhrefsSiteAudit Production's rules" \
+    gives_the_auditor_production_rules
+fi
+
+local_base='^https?://(localhost|127\.0\.0\.1|\[::1\])(:[0-9]+)?$'
+if [[ "$base" =~ $local_base && "$env" == staging ]]; then
+  # A local preview has no workers.dev redirect, so a request with no password meets the gate.
+  for path in / "$static_file"; do
+    eventually "$path with no password asks for the password" refuses "$base$path"
+  done
+fi
+
+if [[ "$base" =~ ^https://[^/]+\.workers\.dev$ ]]; then
+  # A new deploy's hosts can take a little longer to answer.
+  tries=10
+  for path in /privacy/ /privacy; do
+    eventually "$path on workers.dev, without the header, gets a 308 to $canonical/privacy/" \
+      redirects "$base$path" "$canonical/privacy/"
+  done
+fi
+
+if [[ ! "$base" =~ $local_base ]]; then
+  tries=10
+  if [[ "$env" == production ]]; then
+    on_the_host "$canonical/" "a request at $canonical/ gets 200 with no password and no noindex" \
+      serves "$canonical/" indexable
+    on_the_host https://www.pedos.app/privacy \
+      "https://www.pedos.app/privacy gets a 308 to $canonical/privacy/" \
+      redirects https://www.pedos.app/privacy "$canonical/privacy/"
+  else
+    on_the_host "$canonical/" "a request with no password at $canonical/ gets 401" \
+      refuses "$canonical/"
+  fi
 fi
 
 if ((failures > 0)); then

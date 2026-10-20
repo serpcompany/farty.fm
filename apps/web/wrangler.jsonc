@@ -25,8 +25,11 @@
         "directory": ".open-next/assets",
         "run_worker_first": true
       },
+      // CI's smoke test reaches each deploy on its workers.dev host, with its header. Every other
+      // request there gets a 308 to the environment's own host (src/lib/other-hosts.ts).
       "workers_dev": true,
       "preview_urls": false,
+      "routes": [{ "pattern": "staging.pedos.app", "custom_domain": true }],
       "observability": { "enabled": true },
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-staging" }]
     },
@@ -34,6 +37,11 @@
       "vars": { "SITE_ENV": "production" },
       "workers_dev": true,
       "preview_urls": false,
+      // `www` answers with a 308 to the apex (src/lib/other-hosts.ts).
+      "routes": [
+        { "pattern": "pedos.app", "custom_domain": true },
+        { "pattern": "www.pedos.app", "custom_domain": true }
+      ],
       "observability": { "enabled": true },
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-production" }]
     }
