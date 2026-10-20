@@ -1,0 +1,51 @@
+# The first PDMX batch (#121): well-known public-domain tunes not yet in the catalog.
+# id | catalog title | other titles a score of the same Song may carry (optional, ; separated)
+# A score matches when its title, or its title before " - ", "(", "[" or ":", is one of these.
+
+# Nursery rhymes and children's songs (Hot Cross Buns and Rain, Rain are 3-note starters)
+hot-cross-buns | Hot Cross Buns
+rain-rain | Rain, Rain, Go Away
+london-bridge | London Bridge Is Falling Down | London Bridge
+old-macdonald | Old MacDonald Had a Farm | Old MacDonald
+this-old-man | This Old Man
+itsy-bitsy | The Itsy Bitsy Spider | Itsy Bitsy Spider; Incy Wincy Spider; Eency Weency Spider
+three-blind-mice | Three Blind Mice
+pop-goes-the-weasel | Pop Goes the Weasel
+au-clair | Au Clair de la Lune
+lightly-row | Lightly Row
+aunt-rhody | Go Tell Aunt Rhody
+skip-to-my-lou | Skip to My Lou
+yankee-doodle | Yankee Doodle
+
+# Folk songs and spirituals
+oh-susanna | Oh! Susanna | Oh Susanna
+camptown-races | Camptown Races | De Camptown Races
+clementine | Oh My Darling, Clementine | Clementine; My Darling Clementine
+red-river-valley | Red River Valley
+home-on-the-range | Home on the Range
+michael-row | Michael, Row the Boat Ashore
+swing-low | Swing Low, Sweet Chariot
+shenandoah | Shenandoah
+scarborough-fair | Scarborough Fair
+greensleeves | Greensleeves
+danny-boy | Danny Boy | Londonderry Air
+drunken-sailor | Drunken Sailor | The Drunken Sailor; What Shall We Do with the Drunken Sailor
+simple-gifts | Simple Gifts
+
+# Carols and hymns
+silent-night | Silent Night | Stille Nacht
+joy-to-the-world | Joy to the World
+deck-the-halls | Deck the Halls
+o-christmas-tree | O Christmas Tree | O Tannenbaum
+away-in-a-manger | Away in a Manger
+jolly-old-st-nicholas | Jolly Old Saint Nicholas | Jolly Old St. Nicholas
+we-three-kings | We Three Kings | We Three Kings of Orient Are
+first-noel | The First Noel | First Noel; The First Nowell
+o-come-all-ye-faithful | O Come, All Ye Faithful | Adeste Fideles
+
+# Classical themes
+brahms-lullaby | Brahms' Lullaby | Brahms's Lullaby
+minuet-in-g | Minuet in G | Minuet in G Major
+morning-mood | Morning Mood
+mountain-king | In the Hall of the Mountain King
+can-can | Can-Can | Infernal Galop; Galop Infernal
