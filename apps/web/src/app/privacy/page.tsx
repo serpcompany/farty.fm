@@ -50,8 +50,8 @@ export default function PrivacyPage() {
       <p>
         Opening the site is an ordinary web request, like any website. Pedos runs on Cloudflare,
         which keeps logs of requests to the site, such as the time, the page asked for and the
-        details your browser sends with every request. Pedos reads them only to run the site and
-        fix problems.
+        details your browser sends with every request. Pedos reads them only to run the site and fix
+        problems.
       </p>
 
       <h2>Deleting your data</h2>
