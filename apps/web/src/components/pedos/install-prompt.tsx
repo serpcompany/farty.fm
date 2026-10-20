@@ -32,8 +32,14 @@ export function InstallPrompt() {
     () =>
       onRecordingSaved(() => {
         void keepRecordings()
-        if (localStorage.getItem(offeredKey) !== null || currentInstallRoute() === null) return
-        localStorage.setItem(offeredKey, '1')
+        if (currentInstallRoute() === null) return
+        try {
+          if (localStorage.getItem(offeredKey) !== null) return
+          localStorage.setItem(offeredKey, '1')
+        } catch {
+          // Storage is blocked, so Pedos can't remember the offer. It doesn't offer at all.
+          return
+        }
         setOpen(true)
       }),
     []
