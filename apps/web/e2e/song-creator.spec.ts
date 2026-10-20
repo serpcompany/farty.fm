@@ -133,6 +133,8 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
         await save.click()
       }
       await expect(page.getByRole('button', { name: 'Saved to Toots' })).toBeDisabled()
+      // Without the guard the second tap's write fails on the same id and shows the save error.
+      await expect(page.getByText("Couldn't save this Toot.")).toHaveCount(0)
       if (out && song.id === 'mary') await page.screenshot({ path: join(out, 'mary-saved.png') })
       if (out && song.id === 'merryxmas') {
         // Scrolled to the end, the last Recording sits above Save and the tabs.
