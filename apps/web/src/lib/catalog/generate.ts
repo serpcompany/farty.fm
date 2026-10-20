@@ -9,8 +9,8 @@
  *
  * Node-only: the app imports `songs.generated.ts`, never this file. Run from `apps/web/`:
  *
- *     node src/lib/catalog/generate.ts           # rewrite songs.generated.ts
- *     node src/lib/catalog/generate.ts --check   # fail if it's out of date
+ *     pnpm exec tsx src/lib/catalog/generate.ts           # rewrite songs.generated.ts
+ *     pnpm exec tsx src/lib/catalog/generate.ts --check   # fail if it's out of date
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -150,7 +150,7 @@ function main(): void {
   if (process.argv.includes('--check')) {
     if (readFileSync(outputPath, 'utf8') !== text) {
       console.error(
-        'error: songs.generated.ts is out of date; run node src/lib/catalog/generate.ts'
+        'error: songs.generated.ts is out of date; run pnpm exec tsx src/lib/catalog/generate.ts'
       )
       process.exit(1)
     }
