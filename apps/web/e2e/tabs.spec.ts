@@ -38,6 +38,24 @@ function stops(page: Page): Promise<number> {
   return page.evaluate(() => (window as unknown as { pedosStops: number }).pedosStops)
 }
 
+/** Answers the first Recording Analysis request with an error, as a worker that failed would. */
+async function failFirstAnalysis(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    let failures = 1
+    const post = Worker.prototype.postMessage as (this: Worker, message: unknown) => void
+    Worker.prototype.postMessage = function (this: Worker, message: unknown) {
+      const id = (message as { id?: unknown } | null)?.id
+      if (failures > 0 && typeof id === 'number') {
+        failures -= 1
+        const reply = new MessageEvent('message', { data: { id, error: 'Analysis failed' } })
+        setTimeout(() => this.onmessage?.(reply), 0)
+        return
+      }
+      post.call(this, message)
+    }
+  })
+}
+
 /** Fakes the page going to the background (`hidden`) and coming back (`visible`). */
 async function setVisibility(page: Page, state: 'hidden' | 'visible'): Promise<void> {
   await page.evaluate(state => {
@@ -110,4 +128,39 @@ test('a Recording shows on the Recordings tab with its note, and playback stops 
   await setVisibility(page, 'visible')
   await expect(page).toHaveURL(/:\d+\/$/)
   await expect(tab(page, 'Record')).toHaveAttribute('aria-current', 'page')
+
+  await tab(page, 'Recordings').click()
+  await page.getByRole('button', { name: 'Delete Recording 1' }).click()
+  const dialog = page.getByRole('alertdialog')
+  await expect(dialog.getByRole('heading')).toHaveText('Delete Recording 1?')
+  await expect(dialog.getByText("This can't be undone.")).toBeVisible()
+  await dialog.getByRole('button', { name: 'Delete Recording' }).click()
+  await expect(page.getByText('Go to the Record tab and tap the red button.')).toBeVisible()
+  await page.reload()
+  await expect(page.getByText('No Recordings yet')).toBeVisible()
+})
+
+test('a Recording that could not be analyzed says so, and Retry finds its note', async ({
+  page
+}) => {
+  await failFirstAnalysis(page)
+  await recordAndSave(page, 1.5)
+  await expect(page.getByText("Saved, but we couldn't find its note")).toBeVisible()
+  await page.getByRole('button', { name: 'Done' }).click()
+
+  await expect(page).toHaveURL(/\/recordings\/$/)
+  await expect(page.getByTestId('pitch-summary')).toHaveText(
+    /^0 Melodic Recordings across 0 notes\s*1 Recording$/
+  )
+  await expect(page.getByTestId('recording-row')).toContainText('not analyzed')
+  await expect(
+    page.getByRole('button', { name: /^Recording 1, \d+\.\d s, not analyzed$/ })
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Retry analyzing Recording 1' }).click()
+
+  await expect(page.getByTestId('recording-note')).toHaveText('G3')
+  await expect(page.getByTestId('recording-row')).not.toContainText('not analyzed')
+  await expect(page.getByTestId('pitch-summary')).toHaveText(
+    /^1 Melodic Recording across 1 note\s*1 Recording$/
+  )
 })
