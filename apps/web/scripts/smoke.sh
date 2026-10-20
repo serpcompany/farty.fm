@@ -108,7 +108,8 @@ robots_txt() {
   body=$(curl -sS -f "$base/robots.txt" | tr -d '\r' | tr '[:upper:]' '[:lower:]') || return 1
   seen=$(tr '\n' ' ' <<<"$body")
   if [[ "$want" == disallows ]]; then
-    [[ "$body" == *$'user-agent: *\ndisallow: /'* ]]
+    # `disallow: /` on a line of its own, not a path such as `/api/`.
+    [[ "$body" == *$'user-agent: *\ndisallow: /\n'* || "$body" == *$'user-agent: *\ndisallow: /' ]]
   else
     [[ "$body" != *$'disallow: /\n'* && "$body" != *'disallow: /' ]]
   fi

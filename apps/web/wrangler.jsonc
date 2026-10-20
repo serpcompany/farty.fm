@@ -10,6 +10,9 @@
   },
   "observability": { "enabled": true },
   "upload_source_maps": true,
+  // A deploy without --env never goes public: only Staging and Production have workers.dev hosts.
+  "workers_dev": false,
+  "preview_urls": false,
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web" }],
   "env": {
     "staging": {
