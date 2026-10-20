@@ -8,7 +8,8 @@ name: Web
 #
 # Every push runs, with no paths filter, so a deploy never skips. On a pull request, `changes`
 # skips the checks' steps when nothing the web app builds from changed, and they still report.
-# Draft pull requests skip `e2e`, which runs once the PR is marked ready.
+# Draft pull requests skip `e2e`, which runs once the PR is marked ready. A manual run on `staging`
+# or `main` checks and redeploys that branch's tip, for when no push started a run.
 #
 # Each deploy reads CLOUDFLARE_API_TOKEN from its own environment (staging or production) and the
 # CLOUDFLARE_ACCOUNT_ID variable. With no token the deploy fails, so a green run at the tip always
@@ -18,6 +19,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [staging, main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -173,7 +175,7 @@ jobs:
           path: apps/web/e2e/report
 
   deploy-staging:
-    if: github.event_name == 'push' && github.ref_name == 'staging'
+    if: github.event_name != 'pull_request' && github.ref_name == 'staging'
     needs: [check, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -222,7 +224,7 @@ jobs:
         run: scripts/smoke.sh https://pedos-web-staging.serpcompany.workers.dev staging
 
   deploy-production:
-    if: github.event_name == 'push' && github.ref_name == 'main'
+    if: github.event_name != 'pull_request' && github.ref_name == 'main'
     needs: [check, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 15
