@@ -17,6 +17,13 @@ function ok(body = ''): Response {
   return response
 }
 
+/** A same-origin error, such as a 403 or a 500. */
+function failed(status: number): Response {
+  const response = new Response('Something went wrong', { status })
+  Object.defineProperty(response, 'type', { value: 'basic' })
+  return response
+}
+
 /** What the Staging password answers without credentials. */
 function locked(): Response {
   const response = new Response('Password required', {
@@ -153,6 +160,49 @@ describe('the service worker', () => {
     await expect(worker.request('/recordings/', { mode: 'navigate' })).rejects.toThrow(
       'Failed to fetch'
     )
+    expect(worker.registration.unregistered).toBe(false)
+  })
+
+  it("keeps a later deploy's tabs, new and changed, after one online visit to the start page", async () => {
+    let online = true
+    let deploy: Record<string, string> = {
+      '/': startPage,
+      '/recordings/': '<script src="/_next/static/chunks/recordings-a.js"></script>A recordings'
+    }
+    const worker = startWorker(url => {
+      if (!online) return 'offline'
+      const page = deploy[url.replace(origin, '')]
+      return page === undefined ? ok('file') : ok(page)
+    })
+    await worker.lifecycle('install')
+
+    deploy = {
+      '/': startPage.replace(
+        '<a href="/">Record</a>',
+        '<a href="/">Record</a><a href="/songs/">Songs</a>'
+      ),
+      '/recordings/': '<script src="/_next/static/chunks/recordings-b.js"></script>B recordings',
+      '/songs/': '<script src="/_next/static/chunks/songs-b.js"></script>B songs'
+    }
+    // Pedos opens at the start page, and the tabs open by client-side navigation from there.
+    await worker.request('/', { mode: 'navigate' })
+
+    online = false
+    const offline = async (path: string, mode?: string) =>
+      (await worker.request(path, { mode }))?.text()
+    expect(await offline('/songs/', 'navigate')).toContain('B songs')
+    expect(await offline('/recordings/', 'navigate')).toContain('B recordings')
+    expect(await offline('/_next/static/chunks/songs-b.js')).toBe('file')
+    expect(await offline('/_next/static/chunks/recordings-b.js')).toBe('file')
+  })
+
+  it('stays registered when a page load fails with a 403 or a 500', async () => {
+    for (const status of [403, 500]) {
+      const worker = startWorker(() => failed(status))
+      expect((await worker.request('/', { mode: 'navigate' }))?.status).toBe(status)
+      expect(worker.kept()).toEqual([])
+      expect(worker.registration.unregistered, String(status)).toBe(false)
+    }
   })
 
   it('never keeps a response from the Staging password', async () => {
