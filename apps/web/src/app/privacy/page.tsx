@@ -48,8 +48,10 @@ export default function PrivacyPage() {
         <li>It doesn&apos;t sell or share data, because it doesn&apos;t collect any.</li>
       </ul>
       <p>
-        Opening the site is an ordinary web request, like any website: the host that serves the
-        pages can see that a request was made. Pedos does not use that for anything.
+        Opening the site is an ordinary web request, like any website. Pedos runs on Cloudflare,
+        which keeps logs of requests to the site, such as the time, the page asked for and the
+        details your browser sends with every request. Pedos reads them only to run the site and
+        fix problems.
       </p>
 
       <h2>Deleting your data</h2>
