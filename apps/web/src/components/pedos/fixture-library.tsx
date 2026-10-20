@@ -14,6 +14,7 @@ export function FixtureLibrary() {
   const pedos = usePedos()
   const [index, setIndex] = useState<FixtureIndex | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [didFail, setDidFail] = useState(false)
   const headerId = useId()
 
   useEffect(() => {
@@ -35,9 +36,11 @@ export function FixtureLibrary() {
   const loaded = total - missing.length
   const isComplete = loaded >= total
 
-  // Fixtures are added in id order, skipping the ones already loaded, then analyzed in turn.
+  // Fixtures are added in id order, skipping the ones already loaded, then analyzed in turn. On a
+  // failure the button stays, and tapping it again adds only the ones still missing.
   const load = async () => {
     setIsLoading(true)
+    setDidFail(false)
     try {
       const files = await Promise.all(
         missing.map(async fixture => {
@@ -47,6 +50,8 @@ export function FixtureLibrary() {
         })
       )
       await pedos.importRecordings(files)
+    } catch {
+      setDidFail(true)
     } finally {
       setIsLoading(false)
     }
@@ -76,6 +81,11 @@ export function FixtureLibrary() {
           {loaded} of {total}
         </span>
       </button>
+      {didFail && (
+        <p role="alert" className="px-4 pt-1.5 text-sm text-destructive">
+          The Fixture Library didn’t load. Try again.
+        </p>
+      )}
       <p className="px-4 pt-1.5 text-xs text-muted-foreground">
         Adds the {total} test farts as your own Recordings, analyzed like real ones. Loading again
         adds only the missing ones.

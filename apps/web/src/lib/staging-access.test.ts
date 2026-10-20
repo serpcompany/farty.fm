@@ -1,5 +1,6 @@
 import * as nodeCrypto from 'node:crypto'
 import { describe, expect, test, vi } from 'vitest'
+import { fixtureLibraryPath } from './fixture-library'
 import {
   basicAuthPassword,
   behindStagingAccess,
@@ -203,6 +204,55 @@ describe('behindStagingAccess', () => {
     expect(right.status).toBe(200)
     expect(right.headers.get('X-Robots-Tag')).toBeNull()
   })
+
+  const fixtureFiles = [
+    `${fixtureLibraryPath}index.json`,
+    `${fixtureLibraryPath}090.wav`,
+    '/fixtures/',
+    '/FIXTURES/recordings/090.wav',
+    '/%66ixtures/recordings/index.json',
+    `${staging}//fixtures/recordings/index.json`,
+    '/x/../fixtures/recordings/index.json',
+    '/fixtures%2Frecordings%2Findex.json',
+    '/%E0%A4%A/fixtures'
+  ]
+
+  test("asks for the Fixture Library's password even with the smoke test's header", async () => {
+    for (const path of fixtureFiles) {
+      for (const method of ['GET', 'HEAD']) {
+        const { response, serve } = ask(path, { headers: { [smokeTestHeader]: '1' }, method })
+        const refused = await response
+        expect(refused.status, `${method} ${path}`).toBe(401)
+        expect(refused.headers.get('WWW-Authenticate')).toBe(stagingAccessChallenge)
+        expect(serve).not.toHaveBeenCalled()
+      }
+    }
+  })
+
+  test("serves the Fixture Library with the password, with or without the smoke test's header", async () => {
+    for (const headers of [{}, { [smokeTestHeader]: '1' }] as Record<string, string>[]) {
+      const { response, serve } = ask(`${fixtureLibraryPath}index.json`, {
+        headers: { ...headers, Authorization: basic('pedos:stagingpassword') }
+      })
+      expect((await response).status).toBe(200)
+      expect(serve).toHaveBeenCalledOnce()
+    }
+  })
+
+  test("still serves every other path with the smoke test's header", async () => {
+    for (const path of [
+      '/',
+      '/recordings/',
+      '/compose/',
+      '/welcome-icon.png',
+      '/fixture',
+      '/x-fixtures/'
+    ]) {
+      const { response, serve } = ask(path, { headers: { [smokeTestHeader]: '1' } })
+      expect((await response).status, path).toBe(200)
+      expect(serve).toHaveBeenCalledOnce()
+    }
+  })
 })
 
 describe('servedByTheEntry', () => {
@@ -272,6 +322,20 @@ describe('servedByTheEntry', () => {
     expect(exempt.status).toBe(200)
     expect(exempt.headers.get('Content-Type')).toBe('image/png')
     expect(exempt.headers.get('X-Robots-Tag')).toBe(environmentNoindex)
+  })
+
+  test("never reads the Fixture Library from assets for the smoke test's header alone", async () => {
+    for (const file of ['index.json', '090.wav']) {
+      const path = `${fixtureLibraryPath}${file}`
+      const { response, assets } = entry(stagingEnv, path, { headers: { [smokeTestHeader]: '1' } })
+      expect((await response).status, path).toBe(401)
+      expect(assets).not.toHaveBeenCalled()
+      const withBoth = entry(stagingEnv, path, {
+        headers: { [smokeTestHeader]: '1', Authorization: basic('pedos:stagingpassword') }
+      })
+      expect((await withBoth.response).status, path).toBe(200)
+      expect(withBoth.assets).toHaveBeenCalledOnce()
+    }
   })
 
   test('gates every environment but Production, and fails closed with no password variable', async () => {

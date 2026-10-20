@@ -1,10 +1,10 @@
 'use client'
 
-import { Lock } from 'lucide-react'
+import { Lock, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import type { Song } from '@/lib/catalog/song'
 import { pitchClass } from '@/lib/pitch'
 import {
@@ -45,11 +45,20 @@ export function LockedSongSheet({
         side="bottom"
         className="mx-auto min-h-[50dvh] max-w-md gap-0 rounded-t-2xl pb-[env(safe-area-inset-bottom)]"
         data-testid="locked-song-sheet"
+        showCloseButton={false}
       >
         <SheetHeader className="items-center px-12 pt-4 pb-2">
           <SheetTitle className="text-center font-semibold">{shown?.title}</SheetTitle>
         </SheetHeader>
         {coverage && <Body coverage={coverage} onRecord={onRecord} />}
+        <SheetClose
+          render={
+            <Button variant="ghost" size="icon" className="absolute top-1.5 right-1.5 size-11" />
+          }
+        >
+          <XIcon />
+          <span className="sr-only">Close</span>
+        </SheetClose>
       </SheetContent>
     </Sheet>
   )

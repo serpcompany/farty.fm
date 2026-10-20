@@ -63,7 +63,7 @@ export function ComposeScreen() {
         <h1 className="text-3xl font-bold tracking-tight">Compose</h1>
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon" aria-label="Sort" />}
+            render={<Button variant="ghost" size="icon" className="size-11" aria-label="Sort" />}
             data-testid="sort-songs"
           >
             <ArrowUpDown />
@@ -82,14 +82,14 @@ export function ComposeScreen() {
 
       <div className="relative pb-4">
         <Search
-          className="pointer-events-none absolute top-2.5 left-2.5 size-4 text-muted-foreground"
+          className="pointer-events-none absolute top-3.5 left-3 size-4 text-muted-foreground"
           aria-hidden
         />
         <Input
           type="search"
           placeholder="Search Songs"
           aria-label="Search Songs"
-          className="h-9 rounded-lg bg-muted/60 pl-8 text-base md:text-sm"
+          className="h-11 rounded-lg bg-muted/60 pl-9 text-base md:text-sm"
           value={query}
           onChange={event => setQuery(event.target.value)}
         />

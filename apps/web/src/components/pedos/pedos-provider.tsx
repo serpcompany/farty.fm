@@ -305,18 +305,22 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const importRecordings = useCallback(
     async (files: { id: string; wav: ArrayBuffer }[]) => {
       const added: Recording[] = []
-      for (const { id, wav } of files) {
-        const audio = decodeWav(wav)
-        const fields = {
-          seconds: audio.samples.length / audio.sampleRate,
-          sampleRate: audio.sampleRate,
-          waveform: waveformLevels(audio.samples, 40)
+      // If a save fails partway, the ones already saved are still analyzed before it throws.
+      try {
+        for (const { id, wav } of files) {
+          const audio = decodeWav(wav)
+          const fields = {
+            seconds: audio.samples.length / audio.sampleRate,
+            sampleRate: audio.sampleRate,
+            waveform: waveformLevels(audio.samples, 40)
+          }
+          const saved = await store.saveRecording(fields, wav, id)
+          added.push(saved)
+          setRecordings(list => [...(list ?? []), saved])
         }
-        const saved = await store.saveRecording(fields, wav, id)
-        added.push(saved)
-        setRecordings(list => [...(list ?? []), saved])
+      } finally {
+        for (const recording of added) await runAnalysis(recording.id)
       }
-      for (const recording of added) await runAnalysis(recording.id)
     },
     [runAnalysis]
   )

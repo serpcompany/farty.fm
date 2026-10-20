@@ -3,7 +3,8 @@
 # Checks the pages and icons answer, the microphone is allowed for the site itself, and the
 # Staging gate (worker.ts): outside Production every request needs the password, static files
 # included, except robots.txt and the smoke test's header, and only a request with the password
-# drops noindex. Production has no gate and is indexable.
+# drops noindex. The Fixture Library, which only Staging carries, needs the password even with the
+# smoke test's header. Production has no gate, is indexable and carries no Fixture Library.
 set -euo pipefail
 
 base="${1:?usage: smoke.sh <base-url> <staging|production>}"
@@ -20,6 +21,8 @@ wrong_password=(-u 'pedos:wrong')
 challenge='www-authenticate: Basic realm="pedos staging", charset="UTF-8"'
 # A file Workers serves from `assets` (public/), not through Next as /icon.png is.
 static_file=/welcome-icon.png
+# The Fixture Library's index (scripts/fixture-library.ts), in the Staging build only.
+fixture_index=/fixtures/recordings/index.json
 
 pass() { echo "ok   $1"; }
 fail() {
@@ -92,6 +95,15 @@ serves() {
   fi
 }
 
+# never_serves <path> [curl options...]: anything but 200.
+never_serves() {
+  local path="$1" headers
+  shift
+  headers=$(headers_of "$path" "$@")
+  seen=$(head -n 1 <<<"$headers")
+  [[ "$(status_in "$headers")" != 200 ]]
+}
+
 # never_challenges <path> [curl options...]: 200 and no WWW-Authenticate.
 never_challenges() {
   local path="$1" headers
@@ -132,6 +144,7 @@ if [[ "$env" == production ]]; then
       never_challenges "$path" "${wrong_password[@]}"
   done
   eventually "Production's robots.txt allows crawling" robots_txt allows
+  eventually 'Production carries no Fixture Library' never_serves "$fixture_index"
 else
   for path in / "$static_file"; do
     eventually "$path asks for the password" asks_for_the_password "$path"
@@ -142,6 +155,8 @@ else
     serves / noindex "${smoke[@]}"
   eventually "the smoke test's header with a wrong password asks for the password" \
     asks_for_the_password / "${smoke[@]}" "${wrong_password[@]}"
+  eventually "the Fixture Library asks for the password, even with the smoke test's header" \
+    asks_for_the_password "$fixture_index" "${smoke[@]}"
   eventually 'a wrong password asks for the password' \
     asks_for_the_password / "${wrong_password[@]}"
   eventually 'robots.txt answers without the password, disallowing every crawler' \

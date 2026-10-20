@@ -1,5 +1,5 @@
 import { resolve } from 'node:path'
-import { type BrowserContext, expect, type Page, test } from '@playwright/test'
+import { type BrowserContext, expect, type Locator, type Page, test } from '@playwright/test'
 import { recordAndSave } from './record'
 
 // Compose and the Result screen, with Recordings made through Chromium's fake microphone. A
@@ -75,6 +75,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
     'Record a fart with a clear note to start.'
   )
   await expect(sheet.getByTestId('pitch-strip')).toHaveAccessibleName('No notes collected yet')
+  await expectTappable(sheet.getByRole('button', { name: 'Close' }))
   await sheet.getByRole('button', { name: 'Close' }).click()
   await expect(sheet).toBeHidden()
 
@@ -132,6 +133,8 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
 
   // Search and sort.
   const search = page.getByRole('searchbox', { name: 'Search Songs' })
+  await expectTappable(search)
+  await expectTappable(page.getByRole('button', { name: 'Sort' }))
   await search.fill('LITTLE')
   await expect(page.getByTestId('song-row')).toHaveCount(2)
   await search.fill('zzz')
@@ -145,3 +148,10 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
   )
   await context.close()
 })
+
+/** A control a thumb can hit: at least 44 by 44 CSS pixels, as the iPhone's controls. */
+async function expectTappable(control: Locator) {
+  const box = await control.boundingBox()
+  expect(box?.width ?? 0).toBeGreaterThanOrEqual(44)
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
+}
