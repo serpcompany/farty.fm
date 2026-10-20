@@ -79,5 +79,5 @@ A developer-side evaluator who can use controlled test material and capabilities
 _Avoid_: Admin, regular user
 
 **Fixture Library**:
-The curated set of real fart Recordings available only to Internal Testers and development tools for repeatable evaluation. Staging and local builds can load it, and "Load the Fixture Library" adds it as Recordings; the Production build never contains it.
+The curated set of real fart Recordings available only to Internal Testers and development tools for repeatable evaluation. The web app's tests and development tools read it from the repository, for example as the e2e tests' fake microphone; no web build contains it.
 _Avoid_: Sample library, starter recordings, user library

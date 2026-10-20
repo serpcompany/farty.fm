@@ -18,7 +18,7 @@ Run from `apps/web/`:
 | `pnpm lint`, `pnpm typecheck` | Biome, then TypeScript |
 | `pnpm check` | The finish gate: lint, types, tests and build. It never writes files. |
 | `pnpm build:staging`, `pnpm build:production` | The Workers build for one environment, into `.open-next/` |
-| `pnpm deploy:staging` | Build and deploy the `pedos-web-staging` Worker, for a person in an emergency. CI deploys Staging on every push to `staging` (`web-deploy.yml`). |
+| `pnpm deploy:staging` | Build and deploy the `pedos-web-staging` Worker, for a person in an emergency. Agents never run it. CI deploys Staging on every push to `staging` (`web-deploy.yml`). |
 | `scripts/smoke.sh <url> <staging\|production>` | The post-deploy smoke test |
 
 ## Layout

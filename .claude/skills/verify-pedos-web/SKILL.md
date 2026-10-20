@@ -17,7 +17,7 @@ Use your own port so parallel agents don't collide. The examples use 4109.
 - **Tap-through, on the local Workers build behind the Staging gate:**
   1. `cp .dev.vars.example .dev.vars` (git-ignored; it holds Staging's public password, `stagingpassword`).
   2. `pnpm build:staging`
-  3. `pnpm exec opennextjs-cloudflare preview --env staging --port 4109 > ../../tmp/agent/preview.log 2>&1 &`, and note the PID.
+  3. `mkdir -p ../../tmp/agent && pnpm exec opennextjs-cloudflare preview --env staging --port 4109 >| ../../tmp/agent/preview.log 2>&1 &` (`>|` so a rerun overwrites the log under zsh's `noclobber`).
 
 ## 2. Check it is healthy
 
@@ -35,7 +35,7 @@ Write a throwaway spec, `e2e/shot.spec.ts` (delete it before committing), that d
 
 ## 5. Clean up
 
-`kill <pid>` the preview. Leave `tmp/agent/` for the PR; `.dev.vars` and `tmp/` are git-ignored.
+Stop the preview: `pkill -f 'preview --env staging --port 4109'`. Leave `tmp/agent/` for the PR; `.dev.vars` and `tmp/` are git-ignored.
 
 ## Finish
 
