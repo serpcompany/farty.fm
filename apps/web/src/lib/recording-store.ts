@@ -6,7 +6,7 @@ import type { Toot } from './toot'
  * Recordings and Toots live only in this browser, in IndexedDB (ADR 0001's local-first rule, on
  * the web). Metadata and audio are separate stores, so listing them never loads their audio.
  */
-export interface PedosDB extends DBSchema {
+interface PedosDB extends DBSchema {
   recordings: { key: string; value: Recording }
   /** Each Recording's WAV, by Recording id. */
   audio: { key: string; value: ArrayBuffer }
@@ -17,6 +17,27 @@ export interface PedosDB extends DBSchema {
 }
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
+
+/** Whether this tab's upgrade waits for Pedos in another tab, which holds an older version open. */
+let waiting = false
+const waits = new EventTarget()
+
+function setWaiting(value: boolean) {
+  if (waiting === value) return
+  waiting = value
+  waits.dispatchEvent(new Event('change'))
+}
+
+/**
+ * Calls `listener` now and on each change with whether the database waits for Pedos in another
+ * tab to close. Returns a function that stops it.
+ */
+export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () => void {
+  const handle = () => listener(waiting)
+  waits.addEventListener('change', handle)
+  handle()
+  return () => waits.removeEventListener('change', handle)
+}
 
 /**
  * The app's database, upgraded to version 2 (Toots) on first open. Version 1 held Recordings
@@ -34,13 +55,18 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
         database.createObjectStore('tootAudio')
       }
     },
+    // An older version is open in another tab, and its code may never close it: the upgrade
+    // waits until that tab closes.
+    blocked() {
+      setWaiting(true)
+    },
     // A later version opening in another tab waits for this connection: close it, and open
     // again on the next call.
     blocking(_version, _blocked, event) {
       ;(event.target as IDBDatabase).close()
       opening = null
     }
-  })
+  }).finally(() => setWaiting(false))
   return opening
 }
 

@@ -118,6 +118,8 @@ type Pedos = {
   forgetToot(id: string): void
   /** When what's playing started (`performance.now()`), once it has; null otherwise. */
   playbackStartedAt: number | null
+  /** The database waits for Pedos in another tab, on an older version, to close. */
+  waitsForOtherTabs: boolean
 }
 
 const PedosContext = createContext<Pedos | null>(null)
@@ -141,6 +143,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const [isSaving, setIsSaving] = useState(false)
   const [toots, setToots] = useState<Toot[] | null>(null)
   const [playbackStart, setPlaybackStart] = useState<{ key: string; at: number } | null>(null)
+  const [waitsForOtherTabs, setWaitsForOtherTabs] = useState(false)
   const savingToots = useRef(new Set<string>())
   /** Counts Toot plays, so only the latest one sets where the playhead starts. */
   const tootPlays = useRef(0)
@@ -186,6 +189,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       changes: coverageChanges(songs, others, [...others, analyzed])
     }
   }, [])
+
+  useEffect(() => store.onWaitingForOtherTabs(setWaitsForOtherTabs), [])
 
   useEffect(() => {
     setShowsWelcome(localStorage.getItem(welcomedKey) === null)
@@ -468,7 +473,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     toggleTootPlayback,
     forgetToot,
     playbackStartedAt:
-      playbackStart !== null && playbackStart.key === nowPlaying ? playbackStart.at : null
+      playbackStart !== null && playbackStart.key === nowPlaying ? playbackStart.at : null,
+    waitsForOtherTabs
   }
   return <PedosContext value={value}>{children}</PedosContext>
 }

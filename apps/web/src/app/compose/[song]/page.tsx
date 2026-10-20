@@ -4,8 +4,10 @@ import { SongCreator } from '@/components/pedos/song-creator'
 import { songs } from '@/lib/catalog/songs.generated'
 
 // Song Creator, one page per Song in the catalog, inside the Compose tab: `/compose/<song>/`.
-// The Worker renders a Song's page on its first request (it has no cache for prerendered pages);
-// any other id is not found.
+// Each is prerendered, so the service worker can keep it for offline use (`/shell.json`); any
+// other id is not found.
+
+export const dynamicParams = false
 
 export function generateStaticParams() {
   return songs.map(song => ({ song: song.id }))

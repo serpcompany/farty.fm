@@ -75,3 +75,50 @@ test('upgrades a database from before Toots and keeps its Recordings', async ({ 
     audioBytes: wav.byteLength
   })
 })
+
+test('asks you to close Pedos in your other tabs while one holds the old database open', async ({
+  page,
+  context
+}) => {
+  // An older Pedos in another tab: version 1 open, and code that never closes it.
+  const old = await context.newPage()
+  await old.goto('/robots.txt')
+  await old.evaluate(async () => {
+    localStorage.setItem('pedos.welcomed', '1')
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('pedos', 1)
+      request.onupgradeneeded = () => {
+        request.result.createObjectStore('recordings', { keyPath: 'id' })
+        request.result.createObjectStore('audio')
+      }
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    ;(window as unknown as { old: IDBDatabase }).old = db
+  })
+
+  await page.goto('/recordings/')
+  const waiting = page.getByText('Close Pedos in your other tabs to carry on.')
+  await expect(waiting).toBeVisible()
+  await expect(page.getByText('No Recordings yet')).toHaveCount(0)
+
+  await old.evaluate(() => (window as unknown as { old: IDBDatabase }).old.close())
+  await expect(waiting).toHaveCount(0)
+  await expect(page.getByText('No Recordings yet')).toBeVisible()
+
+  // And the other way: a later version opening in another tab isn't kept waiting by this one.
+  const blocked = await old.evaluate(
+    () =>
+      new Promise<boolean>((resolve, reject) => {
+        let wasBlocked = false
+        const request = indexedDB.open('pedos', 3)
+        request.onblocked = () => (wasBlocked = true)
+        request.onsuccess = () => {
+          request.result.close()
+          resolve(wasBlocked)
+        }
+        request.onerror = () => reject(request.error)
+      })
+  )
+  expect(blocked).toBe(false)
+})

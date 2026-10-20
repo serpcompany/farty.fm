@@ -5,11 +5,11 @@ import { songs } from '../src/lib/catalog/songs.generated'
 
 // Song Creator on the Staging build, with the whole Fixture Library loaded: every Song is
 // unlocked. Each Song opens from Compose, is made and starts playing, plays one tapped note, and
-// is saved; the Toots are then read back from IndexedDB.
+// is saved; the Toots are then read back from IndexedDB. Then a direct load, a failed render, a
+// locked and an unknown Song, and a Song opened offline.
 //
 // With E2E_EVIDENCE_DIR set, the test also writes each Toot's WAV, the time each took to make,
-// and screenshots there, for `evaluate_renders.py` and the PR. E2E_CPU_THROTTLE slows the page's
-// CPU by that factor, as Chrome's DevTools does, to time a slower phone.
+// and screenshots there, for `evaluate_renders.py` and the PR.
 
 /** Every start of an `AudioBufferSourceNode`, as the page's init script records it. */
 type Start = { duration: number; peak: number; args: number[] }
@@ -21,11 +21,12 @@ declare global {
   interface Window {
     __starts: Start[]
     __tap: Tap
+    /** How many times the page resumed an AudioContext while it handled a click. */
+    __resumesInTaps: number
   }
 }
 
 const evidence = process.env.E2E_EVIDENCE_DIR ? resolve(process.env.E2E_EVIDENCE_DIR) : null
-const throttle = Number(process.env.E2E_CPU_THROTTLE ?? 1)
 
 test.beforeEach(async ({ request }) => {
   // `next dev` never shows the loader, even with fixtures left in public/ by a Staging build.
@@ -38,6 +39,10 @@ test.beforeEach(async ({ request }) => {
   )
 })
 
+// The service worker would answer a blocked worker script from its cache. The offline test, at
+// the end, has it.
+test.use({ serviceWorkers: 'block' })
+
 test('plays each Song with your farts, plays a tapped note, and saves it as a Toot', async ({
   page
 }, testInfo) => {
@@ -45,36 +50,9 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
   const out = evidence && join(evidence, testInfo.project.name)
   if (out) mkdirSync(out, { recursive: true })
 
-  await page.addInitScript(() => {
-    localStorage.setItem('pedos.welcomed', '1')
-    // What the page hears: each sound it starts, with its length and loudest sample.
-    window.__starts = []
-    const start = AudioBufferSourceNode.prototype.start
-    AudioBufferSourceNode.prototype.start = function (this: AudioBufferSourceNode, ...args) {
-      let peak = 0
-      for (const sample of this.buffer?.getChannelData(0) ?? [])
-        peak = Math.max(peak, Math.abs(sample))
-      window.__starts.push({ duration: this.buffer?.duration ?? 0, peak, args: args as number[] })
-      return start.apply(this, args)
-    }
-  })
-  if (throttle > 1) {
-    const cdp = await page.context().newCDPSession(page)
-    await cdp.send('Emulation.setCPUThrottlingRate', { rate: throttle })
-  }
+  await listenToThePage(page)
   await page.goto('/profile/')
-  const library = page.getByTestId('fixture-library')
-  await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
-  await expect(library.getByRole('button', { name: 'Fixture Library loaded' })).toBeDisabled({
-    timeout: 90_000
-  })
-  await page
-    .getByRole('navigation', { name: 'Tabs' })
-    .getByRole('link', { name: 'Compose', exact: true })
-    .click()
-  await expect(page.getByRole('heading', { name: 'Unlocked · 12' })).toBeVisible({
-    timeout: 60_000
-  })
+  await loadTheFixtureLibrary(page)
   if (out) await page.screenshot({ path: join(out, 'compose.png') })
 
   const timings: { song: string; tapToReadyMs: number; makingMs: number }[] = []
@@ -88,8 +66,11 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
 
       // From the tap to the made Toot, timed in the page.
       await watchTap(page)
+      await page.evaluate(() => (window.__resumesInTaps = 0))
       await link.click()
       await expect(page).toHaveURL(new RegExp(`/compose/${song.id}/$`))
+      // The tap itself starts the sound, as iPhone Safari needs, so the Toot can play once made.
+      expect(await page.evaluate(() => window.__resumesInTaps)).toBe(1)
       await expect(page.getByRole('heading', { name: song.title, exact: true })).toBeVisible()
       const state = page.getByTestId('song-creator-state')
       await expect(state).toBeVisible({ timeout: 60_000 })
@@ -141,8 +122,16 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       const lowest = song.notes.filter(n => n.pitch === song.pitches[0]).length
       await expect(noteView.getByRole('button', { name: /, highlighted/ })).toHaveCount(lowest)
 
-      // Save turns into a disabled "Saved to Toots".
-      await save.click()
+      // Save turns into a disabled "Saved to Toots". Two taps, before it can turn, still make one
+      // Toot (checked below).
+      if (song === songs[0]) {
+        await save.evaluate(button => {
+          ;(button as HTMLButtonElement).click()
+          ;(button as HTMLButtonElement).click()
+        })
+      } else {
+        await save.click()
+      }
       await expect(page.getByRole('button', { name: 'Saved to Toots' })).toBeDisabled()
       if (out && song.id === 'mary') await page.screenshot({ path: join(out, 'mary-saved.png') })
       if (out && song.id === 'merryxmas') {
@@ -156,6 +145,9 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       await expect(page).toHaveURL(/\/compose\/$/)
     })
   }
+  // Back went back each time, so the page before Compose is one system Back away.
+  await page.goBack()
+  await expect(page).toHaveURL(/\/profile\/$/)
 
   // The Toots in IndexedDB: one per Song, each with its audio as a 44.1 kHz mono 16-bit WAV.
   const toots = await page.evaluate(async () => {
@@ -188,13 +180,136 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
     if (out) writeFileSync(join(out, `${toot.songId}.wav`), wav)
   }
 
-  const label = `${testInfo.project.name}${throttle > 1 ? `, CPU ${throttle}× slower` : ''}`
-  console.log(`[${label}] time to Toot (ms):`, JSON.stringify(timings))
-  if (out) {
-    const name = throttle > 1 ? `timings-cpu${throttle}x.json` : 'timings.json'
-    writeFileSync(join(out, name), `${JSON.stringify(timings, null, 2)}\n`)
-  }
+  console.log(`[${testInfo.project.name}] time to Toot (ms):`, JSON.stringify(timings))
+  if (out) writeFileSync(join(out, 'timings.json'), `${JSON.stringify(timings, null, 2)}\n`)
+
+  await test.step('a direct load waits on Ready until a tap', async () => {
+    // A new tab that was never tapped, as a phone opens a link. Chromium gives every page that
+    // Playwright loads the activation of a tap, so this tab says it has none.
+    const fresh = await page.context().newPage()
+    await listenToThePage(fresh)
+    await fresh.addInitScript(() =>
+      Object.defineProperty(UserActivation.prototype, 'hasBeenActive', { get: () => false })
+    )
+    await fresh.goto('/profile/')
+    await fresh.goto('/compose/mary/')
+    const state = fresh.getByTestId('song-creator-state')
+    await expect(state).toHaveText('Ready', { timeout: 60_000 })
+    // Long enough for a play to have started: the Toot was made in under a second above.
+    await fresh.waitForTimeout(1500)
+    await expect(state).toHaveText('Ready')
+    expect(await fresh.evaluate(() => window.__starts.length)).toBe(0)
+    await fresh.getByTestId('song-creator-play').click()
+    await expect(state).toHaveText('Playing')
+    // Back, with no Compose before it here, opens Compose in its place.
+    await fresh.getByRole('link', { name: 'Back to Compose' }).click()
+    await expect(fresh).toHaveURL(/\/compose\/$/)
+    await fresh.goBack()
+    await expect(fresh).toHaveURL(/\/profile\/$/)
+    await fresh.close()
+  })
+
+  await test.step("a failed render says it couldn't, and Try again makes it", async () => {
+    // Both workers' scripts fail to load; the Recordings are already analyzed.
+    const workers = '**/_next/static/chunks/turbopack-worker-*'
+    await page.route(workers, route => route.abort())
+    await page.goto('/compose/mary/')
+    await expect(page.getByText("Couldn't make this Toot.")).toBeVisible({ timeout: 60_000 })
+    const tryAgain = page.getByRole('button', { name: 'Try again' })
+    await expectTappable(tryAgain)
+    await page.unroute(workers)
+    await tryAgain.click()
+    await expect(page.getByTestId('song-creator-state')).toHaveText('Ready', { timeout: 60_000 })
+  })
 })
+
+test('a locked Song says how to unlock it, and an unknown Song is not found', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
+  await page.goto('/compose/mary/')
+  await expect(page.getByRole('heading', { name: 'Mary Had a Little Lamb' })).toBeVisible()
+  await expect(
+    page.getByText('This Song is locked. Record the notes it needs to unlock it.')
+  ).toBeVisible()
+  await expect(page.getByTestId('song-creator-state')).toHaveCount(0)
+
+  const response = await page.goto('/compose/not-a-song/')
+  expect(response?.status()).toBe(404)
+  await expect(page.getByText('Page not found')).toBeVisible()
+})
+
+test.describe('installed', () => {
+  test.use({ serviceWorkers: 'allow' })
+
+  test('the installed app opens a Ready Song offline, and makes its Toot', async ({
+    page,
+    context
+  }) => {
+    test.setTimeout(240_000)
+    await listenToThePage(page)
+    await page.goto('/profile/')
+    await page.waitForFunction(async () => {
+      await navigator.serviceWorker.ready
+      return navigator.serviceWorker.controller !== null
+    })
+    await loadTheFixtureLibrary(page)
+
+    await context.setOffline(true)
+    await page.getByTestId('unlocked-songs').locator('[data-song="mary"]').getByRole('link').click()
+    await expect(page).toHaveURL(/\/compose\/mary\/$/)
+    await expect(page.getByRole('heading', { name: 'Mary Had a Little Lamb' })).toBeVisible()
+    await expect(page.getByTestId('song-creator-state')).toBeVisible({ timeout: 60_000 })
+    await page.getByTestId('song-creator-play').click()
+    await expect(page.getByTestId('song-creator-state')).toHaveText('Playing')
+    await context.setOffline(false)
+  })
+})
+
+/**
+ * Records, in the page, each sound it starts (`__starts`) and each AudioContext resume inside a
+ * click (`__resumesInTaps`), and skips the Welcome.
+ */
+async function listenToThePage(page: Page) {
+  await page.addInitScript(() => {
+    localStorage.setItem('pedos.welcomed', '1')
+    // What the page hears: each sound it starts, with its length and loudest sample.
+    window.__starts = []
+    const start = AudioBufferSourceNode.prototype.start
+    AudioBufferSourceNode.prototype.start = function (this: AudioBufferSourceNode, ...args) {
+      let peak = 0
+      for (const sample of this.buffer?.getChannelData(0) ?? [])
+        peak = Math.max(peak, Math.abs(sample))
+      window.__starts.push({ duration: this.buffer?.duration ?? 0, peak, args: args as number[] })
+      return start.apply(this, args)
+    }
+    // A click reaches the window first while capturing and last while bubbling, so the page's
+    // own handlers run in between.
+    window.__resumesInTaps = 0
+    let inTap = false
+    addEventListener('click', () => (inTap = true), { capture: true })
+    addEventListener('click', () => (inTap = false))
+    const resume = AudioContext.prototype.resume
+    AudioContext.prototype.resume = function (this: AudioContext) {
+      if (inTap) window.__resumesInTaps += 1
+      return resume.call(this)
+    }
+  })
+}
+
+/** Loads the Fixture Library from Profile, then opens Compose with all 12 Songs unlocked. */
+async function loadTheFixtureLibrary(page: Page) {
+  const library = page.getByTestId('fixture-library')
+  await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
+  await expect(library.getByRole('button', { name: 'Fixture Library loaded' })).toBeDisabled({
+    timeout: 90_000
+  })
+  await page
+    .getByRole('navigation', { name: 'Tabs' })
+    .getByRole('link', { name: 'Compose', exact: true })
+    .click()
+  await expect(page.getByRole('heading', { name: 'Unlocked · 12' })).toBeVisible({
+    timeout: 60_000
+  })
+}
 
 /**
  * Notes, in the page, when the next tap happens, when "Making your Toot…" shows and when Song

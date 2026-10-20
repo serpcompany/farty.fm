@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Progress as CoverageBar } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
+import { startAudioInTap } from '@/lib/audio/context'
 import { noteName, pitchClass } from '@/lib/pitch'
 import {
   type CoverageChanges,
@@ -337,7 +338,11 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
           primary={
             <FlowButton
               variant="primary"
-              onClick={() => finish(`/compose/${changes.unlocked[0].id}/`)}
+              onClick={() => {
+                // Song Creator plays the Toot once it's made: the tap starts the sound it needs.
+                startAudioInTap()
+                finish(`/compose/${changes.unlocked[0].id}/`)
+              }}
             >
               Try it
             </FlowButton>

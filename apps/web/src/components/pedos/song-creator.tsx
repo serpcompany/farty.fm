@@ -2,6 +2,7 @@
 
 import { Check, ChevronLeft, Play, Square, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useEffectEvent, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
@@ -16,6 +17,7 @@ import { decodeWav } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
+import { previousPage } from './previous-page'
 import { Waveform } from './waveform'
 
 type Phase =
@@ -31,6 +33,7 @@ type Phase =
  */
 export function SongCreator({ song }: { song: Song }) {
   const pedos = usePedos()
+  const router = useRouter()
   const [phase, setPhase] = useState<Phase>({ kind: 'making' })
   /** Bumped by Try again, to make the Toot again. */
   const [attempt, setAttempt] = useState(0)
@@ -76,8 +79,16 @@ export function SongCreator({ song }: { song: Song }) {
   return (
     <div className="flex flex-1 flex-col">
       <header className="grid grid-cols-[2.75rem_1fr_2.75rem] items-center gap-2 px-2 pt-2 pb-3">
+        {/* Back to the Compose it came from, or in its place, so the system Back never opens
+            this Toot again. */}
         <Link
           href="/compose/"
+          replace
+          onClick={event => {
+            if (previousPage()?.replace(/\/$/, '') !== '/compose') return
+            event.preventDefault()
+            router.back()
+          }}
           aria-label="Back to Compose"
           className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'size-11')}
         >

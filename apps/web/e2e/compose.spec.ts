@@ -124,7 +124,25 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
   await expect(page.getByRole('button', { name: 'Record another' })).toHaveCount(0)
   await expectTappable(page.getByRole('button', { name: 'Done' }))
   await expectTappable(page.getByRole('button', { name: 'Try it' }))
+  // Try it starts the sound while it handles the tap, as iPhone Safari needs, so Song Creator
+  // plays the Toot by itself once it's made. A click reaches the window first while capturing
+  // and last while bubbling, so the page's own handlers run in between.
+  await page.evaluate(() => {
+    const counted = window as unknown as { resumesInTaps: number }
+    counted.resumesInTaps = 0
+    let inTap = false
+    addEventListener('click', () => (inTap = true), { capture: true })
+    addEventListener('click', () => (inTap = false))
+    const resume = AudioContext.prototype.resume
+    AudioContext.prototype.resume = function (this: AudioContext) {
+      if (inTap) counted.resumesInTaps += 1
+      return resume.call(this)
+    }
+  })
   await page.getByRole('button', { name: 'Try it' }).click()
+  expect(
+    await page.evaluate(() => (window as unknown as { resumesInTaps: number }).resumesInTaps)
+  ).toBe(1)
   await expect(page).toHaveURL(/\/compose\/mary\/$/)
   await expect(page.getByRole('heading', { name: 'Mary Had a Little Lamb' })).toBeVisible()
   await expect(page.getByTestId('recording-used')).toHaveCount(4)

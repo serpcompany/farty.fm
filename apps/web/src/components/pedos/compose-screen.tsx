@@ -16,6 +16,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
+import { startAudioInTap } from '@/lib/audio/context'
 import type { Song } from '@/lib/catalog/song'
 import {
   coverageFraction,
@@ -181,6 +182,8 @@ function UnlockedSongRow({ song }: { song: Song }) {
     <li data-testid="song-row" data-song={song.id}>
       <Link
         href={`/compose/${song.id}/`}
+        // Song Creator plays the Toot once it's made: the tap starts the sound it needs.
+        onClick={startAudioInTap}
         className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset active:bg-muted"
       >
         <span>{song.title}</span>

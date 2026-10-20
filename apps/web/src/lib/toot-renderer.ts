@@ -70,17 +70,12 @@ export async function makeToot(
   } catch (error) {
     throw new TootError('couldNotMake', { cause: error })
   }
-  const { samples, sampleRate, notes } = rendered
+  const { samples, sampleRate } = rendered
   return {
     id: crypto.randomUUID(),
     song,
     arrangement: tootArrangement(arrangement),
     seconds: samples.length / sampleRate,
-    wav: encodeWav({ samples, sampleRate }),
-    notes: notes.map(n => ({
-      startSeconds: n.startSample / sampleRate,
-      lengthSeconds: n.lengthSamples / sampleRate,
-      targetMidi: n.targetMidi
-    }))
+    wav: encodeWav({ samples, sampleRate })
   }
 }

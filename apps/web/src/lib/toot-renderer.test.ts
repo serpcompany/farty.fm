@@ -77,9 +77,6 @@ describe('makeToot', () => {
     // The Toot's audio is that render as a 16-bit WAV, byte for byte.
     expect(new Uint8Array(draft.wav)).toEqual(new Uint8Array(encodeWav(engine)))
     expect(draft.seconds).toBe(engine.samples.length / 44100)
-    expect(draft.notes.map(n => n.startSeconds)).toEqual(
-      engine.notes.map(n => n.startSample / 44100)
-    )
 
     // On the golden Arrangement.
     const golden = goldenArrangement('full', song.id)
@@ -90,7 +87,6 @@ describe('makeToot', () => {
       )
     }
     expect(draft.song).toBe(song)
-    expect(draft.notes).toHaveLength(song.notes.length)
   })
 
   it('is locked without the Recordings to unlock the Song', async () => {

@@ -16,14 +16,6 @@ export type TootArrangement = {
   recordingForPitch: Record<number, string>
 }
 
-/** One note as rendered: where it sounds in the Toot's audio, and the note it plays. */
-export type TootNote = {
-  startSeconds: number
-  lengthSeconds: number
-  /** The note it plays, as a MIDI note number. */
-  targetMidi: number
-}
-
 /**
  * A Toot just made in Song Creator, not saved yet: its audio is a mono 16-bit WAV at the
  * renderer's rate. As the iPhone app's `TootDraft`.
@@ -34,7 +26,6 @@ export type TootDraft = {
   arrangement: TootArrangement
   seconds: number
   wav: ArrayBuffer
-  notes: TootNote[]
 }
 
 /**
