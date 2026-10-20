@@ -1,3 +1,6 @@
+Stage: explore
+Agents may merge: yes
+
 ## Agent skills
 
 ### Issue tracker
