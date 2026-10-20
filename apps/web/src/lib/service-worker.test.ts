@@ -196,6 +196,23 @@ describe('the service worker', () => {
     expect(await offline('/_next/static/chunks/recordings-b.js')).toBe('file')
   })
 
+  it('tries the refresh again on the next start page when the connection drops part way', async () => {
+    let dropped = true
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      if (path === '/') return ok(startPage)
+      if (path === '/recordings/') return dropped ? 'offline' : ok('B recordings')
+      return ok('file')
+    })
+    await worker.request('/', { mode: 'navigate' })
+    expect(worker.kept()).not.toContain('/recordings/')
+
+    // Back online a moment later, well inside the refresh interval.
+    dropped = false
+    await worker.request('/', { mode: 'navigate' })
+    expect(worker.kept()).toContain('/recordings/')
+  })
+
   it('stays registered when a page load fails with a 403 or a 500', async () => {
     for (const status of [403, 500]) {
       const worker = startWorker(() => failed(status))

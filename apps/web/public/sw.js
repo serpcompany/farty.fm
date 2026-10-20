@@ -98,17 +98,30 @@ async function keep(url, response) {
 async function refreshShell(startPage) {
   if (Date.now() - lastRefresh < refreshEvery) return
   lastRefresh = Date.now()
-  await precacheShell(await startPage.text())
+  let complete = false
+  try {
+    complete = await precacheShell(await startPage.text())
+  } finally {
+    // A connection lost part way leaves the cache partly refreshed, so the next start page tries
+    // again instead of waiting.
+    if (!complete) lastRefresh = 0
+  }
 }
 
 // The start page, the pages it links to (the tabs), and the files they load, so Pedos opens
 // offline right after it's installed, before any of them is fetched again. `startHtml` is the
-// start page already fetched, if any.
+// start page already fetched, if any. Resolves to false when the network failed for any of them.
 async function precacheShell(startHtml) {
+  let complete = true
+  const get = path =>
+    fetchAndKeep(path).catch(() => {
+      complete = false
+      return null
+    })
   const pages = new Set(['/'])
   const files = new Set()
   for (const page of pages) {
-    const html = page === '/' && startHtml !== undefined ? startHtml : await fetchAndKeep(page)
+    const html = page === '/' && startHtml !== undefined ? startHtml : await get(page)
     if (html === null) continue
     for (const [, path] of html.matchAll(/<a\b[^>]*\bhref="(\/[^"?#]*)"/g)) {
       if (page === '/' && !shellFile.test(path) && !path.startsWith('/_next/')) pages.add(path)
@@ -119,16 +132,14 @@ async function precacheShell(startHtml) {
       }
     }
   }
-  await Promise.all([...files].map(fetchAndKeep))
+  await Promise.all([...files].map(get))
+  return complete
 }
 
+// Throws when the network fails. Resolves to null for a response that isn't kept.
 async function fetchAndKeep(path) {
-  try {
-    const response = await fetch(path, { cache: 'no-cache' })
-    if (!keepable(response)) return null
-    await keep(new URL(path, self.location.origin).href, response.clone())
-    return await response.text()
-  } catch {
-    return null
-  }
+  const response = await fetch(path, { cache: 'no-cache' })
+  if (!keepable(response)) return null
+  await keep(new URL(path, self.location.origin).href, response.clone())
+  return await response.text()
 }
