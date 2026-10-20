@@ -101,7 +101,7 @@ describe('the renderer places every note as the reference does', () => {
         songGain = Math.max(songGain, Math.abs(mine.gainDb - g.render.gain_db))
       }
       // gain_db is written to 0.1 dB, so it can't agree closer than 0.05.
-      expect(songGain, id).toBeLessThanOrEqual(0.1)
+      expect(songGain, id).toBeLessThanOrEqual(0.05 + 1e-9)
       worstGain = Math.max(worstGain, songGain)
 
       let peak = 0
@@ -240,5 +240,57 @@ describe('fart-only rendering (ADR 0004)', () => {
     expect(out.notes[0].lengthSamples).toBe(Math.trunc(0.06 * SR))
     expect(out.samples[0]).toBe(0) // the fade-in starts at silence
     expect(out.samples[out.notes[0].lengthSamples - 1]).toBe(0) // and the fade-out ends there
+  })
+})
+
+// Two Swift behaviors kept where the reference would fail. No golden Song reaches them, so these
+// use synthetic note placements.
+describe('where the reference would fail', () => {
+  it('clips a note that runs past the end of the mix', () => {
+    // At its own pitch with an empty contour, the note is the Recording trimmed, faded and scaled.
+    const own = sources.get('013') as RenderSource
+    const source = {
+      ...own,
+      pitchContourHz: new Float64Array(own.pitchContourHz.length).fill(Number.NaN)
+    }
+    const note = {
+      source,
+      targetMidi: own.recordingPitchMidi,
+      startSeconds: 1.9,
+      lengthSeconds: 0.5,
+      downbeat: false
+    }
+    const out = render([note], 1)
+    const length = 2 * SR
+    const placed = out.notes[0]
+    expect(out.samples).toHaveLength(length)
+    expect(placed.startSample + placed.lengthSamples).toBeGreaterThan(length)
+
+    const segment = source.gesture.slice(0, placed.lengthSamples)
+    applyFades(segment)
+    const gain = 10 ** (placed.gainDb / 20)
+    const expected = new Float64Array(length)
+    for (let i = placed.startSample; i < length; i++) {
+      expected[i] += segment[i - placed.startSample] * gain
+    }
+    expect(expected[length - 1]).not.toBe(0) // the note still plays in the last sample
+    expect(out.samples).toEqual(limit(expected))
+  })
+
+  it('clamps the fades on a segment shorter than the 3 ms fade-in', () => {
+    // 50 samples: the fade-in covers all 50 (not 132), and the fade-out a third of them, 16.
+    const n = 50
+    const segment = new Float64Array(n).fill(1)
+    applyFades(segment)
+    const fadeOut = 16
+    const expected = Array.from({ length: n }, (_, i) => {
+      const fadeIn = i / (n - 1)
+      const j = i - (n - fadeOut)
+      const ramp = j < 0 ? 1 : 1 - j / (fadeOut - 1)
+      return fadeIn * ramp * ramp
+    })
+    for (let i = 0; i < n; i++) expect(segment[i], `sample ${i}`).toBeCloseTo(expected[i], 12)
+    expect(segment[0]).toBe(0)
+    expect(segment[n - 1]).toBe(0)
   })
 })
