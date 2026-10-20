@@ -12,11 +12,13 @@ import {
 import { analyze } from '@/lib/analysis/client'
 import { play, stopPlayback } from '@/lib/audio/player'
 import { MicrophoneDeniedError, startTake, type Take } from '@/lib/audio/recorder'
+import { nearestNote } from '@/lib/pitch'
 import * as store from '@/lib/recording-store'
 import {
   maximumTakeSeconds,
   minimumTakeSeconds,
   type Recording,
+  recordingPitch,
   replaySegment
 } from '@/lib/recordings'
 import { encodeWav, type PcmAudio } from '@/lib/wav'
@@ -47,12 +49,18 @@ export type NowPlaying = 'draft' | string | null
 type Pedos = {
   recordings: Recording[] | null
   recording(id: string): Recording | undefined
+  /** The Recordings with a Recording Pitch. */
+  melodicRecordings: Recording[]
+  /** The notes of every Melodic Recording, octave included (G3, G♯3 and G4 are three notes). */
+  collectedNotes: Set<number>
   showsWelcome: boolean
   capture: Capture
   flow: Flow | null
   problem: RecordProblem | null
   nowPlaying: NowPlaying
   isSaving: boolean
+  /** Recording, Review or Result is on screen, full screen over the tabs. */
+  showsRecordFlow: boolean
   finishWelcome(): void
   startRecording(): Promise<void>
   stopRecording(): Promise<void>
@@ -62,6 +70,7 @@ type Pedos = {
   retryAnalysis(id: string): Promise<void>
   finishFlow(): void
   togglePlayback(target: 'draft' | Recording): void
+  stopPlayback(): void
   deleteRecording(id: string): Promise<void>
 }
 
@@ -264,15 +273,26 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     setRecordings(list => list?.filter(r => r.id !== id) ?? null)
   }, [])
 
+  const melodicRecordings = (recordings ?? []).filter(r => recordingPitch(r) !== null)
+  const collectedNotes = new Set(
+    melodicRecordings.flatMap(r => {
+      const pitch = recordingPitch(r)
+      return pitch === null ? [] : [nearestNote(pitch)]
+    })
+  )
+
   const value: Pedos = {
     recordings,
     recording: id => recordings?.find(r => r.id === id),
+    melodicRecordings,
+    collectedNotes,
     showsWelcome,
     capture,
     flow,
     problem,
     nowPlaying,
     isSaving,
+    showsRecordFlow: capture.kind !== 'idle' || flow !== null,
     finishWelcome,
     startRecording,
     stopRecording,
@@ -282,6 +302,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     retryAnalysis,
     finishFlow,
     togglePlayback,
+    stopPlayback,
     deleteRecording
   }
   return <PedosContext value={value}>{children}</PedosContext>

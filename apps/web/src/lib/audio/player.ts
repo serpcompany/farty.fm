@@ -5,11 +5,18 @@ const decoded = new Map<string, AudioBuffer>()
 
 let current: { source: AudioBufferSourceNode; onEnded: () => void } | null = null
 
+/**
+ * Counts every play and stop. A sound still loading when another starts, or when playback stops,
+ * sees the count change and never starts.
+ */
+let requests = 0
+
 export type Segment = { start: number; end: number }
 
 /**
  * Plays `wav` (or just `segment` of it, in seconds) and calls `onEnded` when it finishes or is
- * stopped. Starting another sound stops this one, like the iPhone app's single player.
+ * stopped, or when another sound or a stop comes first while it loads. Starting another sound
+ * stops this one, like the iPhone app's single player.
  */
 export async function play(
   key: string,
@@ -18,6 +25,7 @@ export async function play(
   onEnded: () => void
 ): Promise<void> {
   stopPlayback()
+  const request = requests
   const context = audioContext()
   setAudioSession('playback')
   await context.resume()
@@ -25,6 +33,10 @@ export async function play(
   if (!buffer) {
     buffer = await context.decodeAudioData(await wav())
     decoded.set(key, buffer)
+  }
+  if (request !== requests) {
+    onEnded()
+    return
   }
   const source = context.createBufferSource()
   source.buffer = buffer
@@ -44,6 +56,7 @@ export async function play(
 }
 
 export function stopPlayback(): void {
+  requests += 1
   if (!current) return
   const { source } = current
   current = null
