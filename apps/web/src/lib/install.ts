@@ -9,6 +9,12 @@ export type InstallRoute = 'prompt' | 'share-sheet'
 
 type BeforeInstallPromptEvent = Event & { prompt(): Promise<void> }
 
+// In-app browsers that name their app in the user agent. Some of them, such as the Google app's,
+// also send "Safari/", but none can add to the Home Screen. In-app browsers built on
+// SFSafariViewController send Safari's exact user agent, so they can't be told apart.
+const inAppBrowser =
+  /GSA\/|FBAN|FBAV|Instagram|Line\/|Twitter|LinkedInApp|Snapchat|musical_ly|BytedanceWebview/
+
 export function installRouteFor(browser: {
   userAgent: string
   maxTouchPoints: number
@@ -22,9 +28,8 @@ export function installRouteFor(browser: {
   const apple =
     /iPhone|iPad|iPod/.test(userAgent) ||
     (/Macintosh/.test(userAgent) && browser.maxTouchPoints > 1)
-  // In-app browsers (Instagram, TikTok, Facebook) can't add to the Home Screen, and they leave
-  // "Safari/" out of their user agent. Safari, and Chrome and Firefox on iOS, include it.
-  return apple && /Safari\//.test(userAgent) ? 'share-sheet' : null
+  // Safari, and Chrome and Firefox on iOS, send "Safari/". Most in-app browsers leave it out.
+  return apple && /Safari\//.test(userAgent) && !inAppBrowser.test(userAgent) ? 'share-sheet' : null
 }
 
 let deferredPrompt: BeforeInstallPromptEvent | null = null
@@ -92,7 +97,9 @@ export async function keepRecordings(): Promise<boolean> {
 
 /** Registers `public/sw.js`, which lets Pedos open offline. */
 export function registerServiceWorker(): void {
-  if (!('serviceWorker' in navigator)) return
+  // Only a build registers it. On `next dev` it would outlive the session on a localhost port
+  // that other apps use too, and answer for them whenever their dev server is down.
+  if (process.env.NODE_ENV !== 'production' || !('serviceWorker' in navigator)) return
   // updateViaCache 'none': every update check fetches sw.js from the network.
   navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).catch(() => {
     // Pedos still works online without it. It just can't open offline.

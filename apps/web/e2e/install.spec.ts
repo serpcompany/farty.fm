@@ -44,7 +44,7 @@ test('the manifest names Pedos, opens it full screen, and has its icons', async 
 test('the service worker opens the app shell offline', async ({ page, context }) => {
   test.skip(
     process.env.E2E_SERVER !== 'preview' && !process.env.E2E_BASE_URL,
-    'next dev renames its chunks as it compiles, so only a build can open offline'
+    'Only a build registers the service worker'
   )
   await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
   await page.goto('/')
