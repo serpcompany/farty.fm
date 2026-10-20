@@ -48,18 +48,18 @@ The plan is the pinned Web MVP roadmap issue (#106). All roadmap issues are in t
 
 Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/git-workflow.md), and [Verification cadence](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification-cadence.md) for merging and deploys. Pedos's own steps:
 
-1. Branch from `staging` as `issue-<n>-<short-slug>`. Name the branch correctly before opening a PR: renaming a PR's head branch closes the PR. `main` changes only by promotion from `staging` (#113), never by a PR from a work branch.
+1. Branch from `staging` as `issue-<n>-<short-slug>`. Name the branch correctly before opening a PR: renaming a PR's head branch closes the PR. `main` changes only by promotion from `staging` and by its release PR (`docs/agents/web.md`, Promotion and releases), never by a PR from a work branch.
 2. Open a small **draft** PR into `staging`.
    - The title is a Conventional Commit written for the user, for example `feat: show each Recording's pitch on the Recordings tab`.
    - The body starts with `Closes #<n>` and says what changed and what's deliberately not included.
    - It reports evidence level by level (see `apps/web/AGENTS.md`, Evidence). A lower level never proves a higher one.
    - For audio, report measurements on the actual output (the `tools/melody-lab/evaluate.py` checks or their equivalents), not a description. For UI, attach phone-size screenshots from the tap-through.
 3. Keep test rounds few until launch. The web app's cadence:
-   - **`pnpm check`** in `apps/web` on the PR's head commit: lint, types, unit tests and build. The Playwright journeys (`pnpm test:e2e`) belong to `web.yml` too. CI checks are off until #113, so the author runs `pnpm check` and cites the result in the PR, plus the journeys when the change touches a screen.
+   - **`pnpm check`** in `apps/web` on the PR's head commit: lint, types, unit tests and build. The Playwright journeys (`pnpm test:e2e`) belong to `web.yml` too. The author runs `pnpm check` and cites the result in the PR, plus the journeys when the change touches a screen, and `web.yml` runs them all again once the PR is ready.
    - **Tap through yourself** before review: at phone size, on the local Workers build behind the Staging gate (the `verify-pedos-web` skill). The owner isn't asked to. After the merge, CI deploys Staging from `staging`'s tip, with a smoke test.
    - Never run `pnpm deploy:*`; CI deploys Staging.
 4. One review. Follow the git workflow's review loop: a fresh review agent that didn't write the change posts findings as PR review comments marked **blocking** or **suggestion**, and the author replies on each. Record the outcome in the PR. A clean review is not owner acceptance.
-5. Update the branch from `staging`, then mark the PR ready. Until launch, agents merge every PR once a fresh review has no open blocking finding and the cited local `pnpm check` on the head is green. Squash-merge and delete the branch.
+5. Update the branch from `staging`, then mark the PR ready. Until launch, agents merge every PR once a fresh review has no open blocking finding and the cited local `pnpm check` on the head and the required checks are green. Squash-merge and delete the branch.
 
 ## iOS history
 
