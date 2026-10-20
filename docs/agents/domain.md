@@ -18,6 +18,7 @@ This is a single-context repository:
 ├── catalog/                # Song Catalog: cited MIDI scores and provenance
 ├── fixtures/recordings/    # Fixture Library (internal only)
 ├── tools/melody-lab/       # Python reference engine and listening page
+├── tools/catalog/          # batch import of Songs from PDMX, with its gates and reports
 ├── docs/
 │   ├── adr/
 │   ├── agents/
