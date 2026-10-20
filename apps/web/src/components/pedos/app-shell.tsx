@@ -96,7 +96,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </ul>
       </nav>
       <RecordFlow />
-      {pedos.showsWelcome && <Welcome />}
+      {/* Only on the tabs, so the privacy, support and 404 pages are always readable. */}
+      {pedos.showsWelcome && tab !== null && <Welcome />}
     </div>
   )
 }
