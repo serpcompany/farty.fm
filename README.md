@@ -2,14 +2,16 @@
 
 Turns fart Recordings into recognizable melodies, using only the Recordings themselves as sound.
 
-**Pedos is becoming a web app** (`apps/web/`, ADR 0007). Apple rejected the App Store submission because it won't accept fart apps (#75). The web app is being built slice by slice (#94). The iPhone app below is no longer built or released: TestFlight releases stopped on 2026-10-06 (#103).
+**Pedos is becoming a web app** (`apps/web/`, ADR 0007). Apple rejected the App Store submission because it won't accept fart apps (#75). The web app is being built slice by slice (#106). The iPhone app below is no longer built or released: TestFlight releases stopped on 2026-10-06 (#103).
 
-- **Plan:** the pinned [MVP roadmap](https://github.com/serpcompany/pedos-app/issues/45) issue, in build order.
+- **Plan:** the pinned [Web MVP roadmap](https://github.com/serpcompany/pedos-app/issues/106) issue, in build order.
 - **Vocabulary:** [`CONTEXT.md`](CONTEXT.md). **Decisions:** [`docs/adr/`](docs/adr/).
 
 ## Where it stands
 
-**v0.1.0 was a proof of concept** on sample data. Since then, the app records for real: TestFlight builds record your farts, save them, and find each one's pitch with Recording Analysis ported to Swift (`RecordingAnalysisKit/`, which matches the reference engine on all 23 Fixture Library Recordings). Debug builds still use the Fixture Library for the screens' UI tests.
+**The web app** (`apps/web/`) runs on Cloudflare Workers. Staging is https://pedos-web-staging.serpcompany.workers.dev (password `stagingpassword`, any username). It has the five tabs, recording and its note, the Recordings list, the Song Catalog and install from the browser. Agent docs: [`apps/web/AGENTS.md`](apps/web/AGENTS.md) and [`docs/agents/web.md`](docs/agents/web.md).
+
+**The iPhone app (history).** **v0.1.0 was a proof of concept** on sample data. Since then, the app records for real: TestFlight builds record your farts, save them, and find each one's pitch with Recording Analysis ported to Swift (`RecordingAnalysisKit/`, which matches the reference engine on all 23 Fixture Library Recordings). Debug builds still use the Fixture Library for the screens' UI tests.
 
 | Works now | Still simulated |
 | --- | --- |
@@ -38,7 +40,8 @@ The melody engine itself is proven in Python (`tools/melody-lab/`). Next comes p
 
 | Path | What it is |
 | --- | --- |
-| `ios/` | The SwiftUI iPhone app (XcodeGen project, unit and UI tests) |
+| `apps/web/` | The Pedos web app (Next.js on Cloudflare Workers) |
+| `ios/` | The SwiftUI iPhone app (no longer released) (XcodeGen project, unit and UI tests) |
 | `catalog/` | Song Catalog: cited public-domain scores and their provenance |
 | `fixtures/recordings/` | Fixture Library: 23 approved real fart Recordings (internal use only) |
 | `fixtures/golden/` | The reference engine's results, which the Swift port must match |
@@ -47,6 +50,7 @@ The melody engine itself is proven in Python (`tools/melody-lab/`). Next comes p
 | `docs/adr/` | Architecture decisions |
 | `docs/design/` | App map, screen inventory and the approved clickable prototype |
 | `docs/evidence/` | Screenshots attached to each merged screen PR |
-| `docs/agents/` | How agents pick issues and follow the git workflow |
+| `docs/agents/` | How agents pick issues, follow the git workflow and work on the web app |
+| `docs/app-store/` | Archive of the rejected App Store submission |
 
 Earlier attempts are archived as `archive/*` git tags.

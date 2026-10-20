@@ -8,7 +8,7 @@ This replaces ADR 0001's platform choice, a native SwiftUI app distributed throu
 
 ## Why
 
-The routes the owner weighed (#94):
+The routes the owner weighed (#106):
 
 | Route | Reach | Why not |
 |---|---|---|
@@ -25,4 +25,4 @@ The routes the owner weighed (#94):
 - The engine is ported again, this time to plain TypeScript: no Web Audio processing, so the same code runs in a browser Web Worker and in Vitest. The port is checked against `fixtures/golden/`, like the Swift port. ADRs 0002 to 0006 apply to it unchanged.
 - The browser records raw PCM with its voice processing off (no echo cancellation, noise suppression or gain control), because those would bend a fart's pitch and level. Recordings are kept as 16-bit WAV.
 - Safari mutes Web Audio when the iPhone's silent switch is on, unless the page sets Safari's Audio Session to playback. The app does.
-- A browser may clear a site's storage. Asking for persistent storage and Add to Home Screen come in #98.
+- A browser may clear a site's storage. Asking for persistent storage and Add to Home Screen come in #109 and #112.

@@ -1,6 +1,6 @@
 # Pedos
 
-Pedos is an iPhone app that turns a person's fart recordings into recordings they can replay and Toots they can make: Songs played by their farts.
+Pedos is a web app (installable from the browser) that turns a person's fart recordings into recordings they can replay and Toots they can make: Songs played by their farts.
 
 ## Recordings
 
@@ -79,5 +79,5 @@ A developer-side evaluator who can use controlled test material and capabilities
 _Avoid_: Admin, regular user
 
 **Fixture Library**:
-The curated set of real fart Recordings available only to Internal Testers and development tools for repeatable evaluation. Debug and QA builds (TestFlight until launch) bundle it, and "Load the Fixture Library" adds it as Recordings; Release builds never contain it.
+The curated set of real fart Recordings available only to Internal Testers and development tools for repeatable evaluation. Staging and local builds can load it, and "Load the Fixture Library" adds it as Recordings; the Production build never contains it.
 _Avoid_: Sample library, starter recordings, user library
