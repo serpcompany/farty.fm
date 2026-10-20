@@ -22,6 +22,7 @@ Run from `apps/web/`:
 ## Layout
 
 - `src/lib/analysis/`: Recording Analysis, ported from `RecordingAnalysisKit`. Plain TypeScript with no DOM or Web Audio, so it runs in the Web Worker (`worker.ts`) and in Vitest alike.
+- `src/lib/engine/`: Auto-map and the fart-only renderer, ported from `AutoMap.swift` and `Renderer.swift` and matched to the reference. Plain TypeScript, so it renders in its Web Worker (`worker.ts`) and in Vitest alike. `pnpm exec tsx scripts/render-songs.ts` renders every Song for `tools/melody-lab/evaluate_renders.py`.
 - `src/lib/audio/`: the microphone (an AudioWorklet, with the browser's voice processing off) and playback.
 - `src/lib/recording-store.ts`: Recordings in IndexedDB. Nothing leaves the browser.
 - `src/components/pedos/`: the screens, matching the iPhone app's. `src/components/ui/` stays stock shadcn.

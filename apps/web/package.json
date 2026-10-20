@@ -43,6 +43,7 @@
     "happy-dom": "^20.14.5",
     "mpg123-decoder": "^1.0.3",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.3",
     "wrangler": "^4.147.0"
