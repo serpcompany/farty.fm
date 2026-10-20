@@ -2,6 +2,8 @@
 
 The Pedos web app (ADR 0007). Read the repository's `AGENTS.md` first: its working rules apply here.
 
+Environments, deploys and CI: read the working guide, [`docs/agents/web.md`](../../docs/agents/web.md).
+
 ## Commands
 
 Run from `apps/web/`:
@@ -13,12 +15,14 @@ Run from `apps/web/`:
 | `pnpm test:e2e` | Record journeys in Chromium with a fixture as a fake microphone |
 | `pnpm lint`, `pnpm typecheck` | Biome, then TypeScript |
 | `pnpm check` | The finish gate: lint, types, tests and build. It never writes files. |
-| `pnpm deploy:staging` | Build and deploy the `pedos-web-staging` Worker by hand. CI does this on every push to `main` (`web-deploy.yml`), so use it only for a pre-merge preview or an emergency. |
+| `pnpm build:staging`, `pnpm build:production` | The Workers build for one environment, into `.open-next/` |
+| `pnpm deploy:staging` | Build and deploy the `pedos-web-staging` Worker, for a person in an emergency. CI deploys Staging on every push to `staging` (`web-deploy.yml`). |
 | `scripts/smoke.sh <url> <staging\|production>` | The post-deploy smoke test |
 
 ## Layout
 
 - `src/lib/analysis/`: Recording Analysis, ported from `RecordingAnalysisKit`. Plain TypeScript with no DOM or Web Audio, so it runs in the Web Worker (`worker.ts`) and in Vitest alike.
+- `src/lib/engine/`: Auto-map and the fart-only renderer, ported from `AutoMap.swift` and `Renderer.swift` and matched to the reference. Plain TypeScript, so it renders in its Web Worker (`worker.ts`) and in Vitest alike. `pnpm exec tsx scripts/render-songs.ts` renders every Song for `tools/melody-lab/evaluate_renders.py`.
 - `src/lib/audio/`: the microphone (an AudioWorklet, with the browser's voice processing off) and playback.
 - `src/lib/recording-store.ts`: Recordings in IndexedDB. Nothing leaves the browser.
 - `src/components/pedos/`: the screens, matching the iPhone app's. `src/components/ui/` stays stock shadcn.
