@@ -4,7 +4,7 @@ The Pedos web app (ADR 0007). Read the repository's `AGENTS.md` first: its worki
 
 **Design.** The iPhone app is the approved design. No mockup round. Where `docs/design/` or an ADR differs from the Swift code, the Swift code wins.
 
-**Before you touch environments, deploys, the Staging gate, CI or the e2e setup, read [`docs/agents/web.md`](../../docs/agents/web.md).** It holds the environment table, how Staging deploys, the password gate, how to run the Workers build locally, the detail behind each exception below, and the gotchas learned in slice 1.
+**Before you touch environments, deploys, the Staging gate, CI or the e2e setup, read [`docs/agents/web.md`](../../docs/agents/web.md).** It holds the environment table, how each environment deploys, promotion and releases, the password gate, how to run the Workers build locally, the detail behind each exception below, and the gotchas learned in slice 1.
 
 ## Commands
 
@@ -18,8 +18,8 @@ Run from `apps/web/`:
 | `pnpm lint`, `pnpm typecheck` | Biome, then TypeScript |
 | `pnpm check` | The finish gate: lint, types, tests and build. It never writes files. |
 | `pnpm build:staging`, `pnpm build:production` | The Workers build for one environment, into `.open-next/` |
-| `pnpm deploy:staging` | Build and deploy the `pedos-web-staging` Worker, for a person in an emergency. Agents never run it. CI deploys Staging on every push to `staging` (`web-deploy.yml`). |
-| `scripts/smoke.sh <url> <staging\|production>` | The post-deploy smoke test |
+| `pnpm deploy:staging`, `pnpm deploy:production` | Build and deploy that environment's Worker, for a person in an emergency. Agents never run them. CI deploys Staging on every push to `staging`, and Production on every push to `main`, once the checks pass (`web.yml`). |
+| `scripts/smoke.sh <url> <staging\|production>` | The post-deploy smoke test, also run against a local preview |
 
 ## Layout
 
@@ -33,9 +33,7 @@ Run from `apps/web/`:
 
 SERP's [web stack](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/web-stack/README.md) is the default. These are the exceptions, with detail in [`docs/agents/web.md`](../../docs/agents/web.md#exceptions-to-serps-standards):
 
-- **CI checks are off until #113.** Authors run `pnpm check` on the PR's head and cite it ([detail](../../docs/agents/web.md#exceptions-to-serps-standards)).
 - **Agents tap through, on the local Workers build,** not on a PR preview or by the owner. Before launch, agents merge every PR once a fresh review has no open blocking finding and the cited check is green ([detail](../../docs/agents/web.md#exceptions-to-serps-standards)).
-- **Hosts.** Staging stays on `*.workers.dev` until #113 ([detail](../../docs/agents/web.md#exceptions-to-serps-standards)).
 - **Errors and analytics, until #126.** No Sentry, GTM or analytics at launch ([detail](../../docs/agents/web.md#exceptions-to-serps-standards)).
 - **No mockups.** See Design, above.
 
@@ -46,8 +44,8 @@ What a PR shows, by kind of change (see [Verification cadence](https://github.co
 - **Preview evidence** (any user-visible change): the author's tap-through on the local Workers build behind the Staging gate, at phone size.
 - **UI evidence:** the Playwright journeys (`pnpm test:e2e`, with `E2E_SERVER=preview` on the Workers build) and phone-size screenshots.
 - **Device evidence:** the owner's phone, for the microphone, audio and install. Agents can't prove these, so a PR that changes them says so and doesn't claim them.
-- **Deploy evidence:** `scripts/smoke.sh` against the running build, and against Staging after CI deploys it.
-- **Finish gate:** `pnpm check` on the PR's head commit.
+- **Deploy evidence:** `scripts/smoke.sh` against the running build, and against each environment after CI deploys it.
+- **Finish gate:** `pnpm check` on the PR's head commit, cited in the PR, and `web.yml`'s required checks on it.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
