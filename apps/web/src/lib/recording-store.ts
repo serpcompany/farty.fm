@@ -22,6 +22,15 @@ function db(): Promise<IDBPDatabase<PedosDB>> {
   return opening
 }
 
+const saved = new EventTarget()
+
+/** Calls `listener` after each new Recording is saved. Returns a function that stops it. */
+export function onRecordingSaved(listener: (recording: Recording) => void): () => void {
+  const handle = (event: Event) => listener((event as CustomEvent<Recording>).detail)
+  saved.addEventListener('recording-saved', handle)
+  return () => saved.removeEventListener('recording-saved', handle)
+}
+
 /** Every Recording, oldest first. */
 export async function loadRecordings(): Promise<Recording[]> {
   const all = await (await db()).getAll('recordings')
@@ -48,6 +57,7 @@ export async function saveRecording(
     tx.objectStore('audio').add(wav, recording.id),
     tx.done
   ])
+  saved.dispatchEvent(new CustomEvent('recording-saved', { detail: recording }))
   return recording
 }
 

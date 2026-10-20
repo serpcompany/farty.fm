@@ -3,13 +3,24 @@ import { audioContext, setAudioSession } from './context'
 /** Decoded audio by Recording id, so replaying doesn't decode again. */
 const decoded = new Map<string, AudioBuffer>()
 
-let current: { source: AudioBufferSourceNode; onEnded: () => void } | null = null
+let current: AudioBufferSourceNode | null = null
+
+/**
+ * Counts every play and stop. A sound still loading when another starts, or when playback stops,
+ * sees the count change and never starts.
+ */
+let requests = 0
+
+/** Counts every play. Only the latest play reports its end. */
+let plays = 0
 
 export type Segment = { start: number; end: number }
 
 /**
- * Plays `wav` (or just `segment` of it, in seconds) and calls `onEnded` when it finishes or is
- * stopped. Starting another sound stops this one, like the iPhone app's single player.
+ * Plays `wav` (or just `segment` of it, in seconds), like the iPhone app's single player.
+ * `onEnded` runs when the sound finishes, when `stopPlayback` stops it or its load, or when it
+ * can't load. Starting another sound stops this one without calling its `onEnded`: the later play
+ * now owns the player, even when it plays the same Recording.
  */
 export async function play(
   key: string,
@@ -17,35 +28,49 @@ export async function play(
   segment: Segment | null,
   onEnded: () => void
 ): Promise<void> {
+  plays += 1
+  const thisPlay = plays
+  const ended = () => {
+    if (thisPlay === plays) onEnded()
+  }
   stopPlayback()
-  const context = audioContext()
-  setAudioSession('playback')
-  await context.resume()
-  let buffer = decoded.get(key)
-  if (!buffer) {
-    buffer = await context.decodeAudioData(await wav())
-    decoded.set(key, buffer)
-  }
-  const source = context.createBufferSource()
-  source.buffer = buffer
-  source.connect(context.destination)
-  const entry = { source, onEnded }
-  source.onended = () => {
-    if (current === entry) current = null
-    onEnded()
-  }
-  current = entry
-  if (segment) {
-    const start = Math.max(0, Math.min(segment.start, buffer.duration))
-    source.start(0, start, Math.max(0, Math.min(segment.end, buffer.duration) - start))
-  } else {
-    source.start()
+  const request = requests
+  try {
+    const context = audioContext()
+    setAudioSession('playback')
+    await context.resume()
+    let buffer = decoded.get(key)
+    if (!buffer) {
+      buffer = await context.decodeAudioData(await wav())
+      decoded.set(key, buffer)
+    }
+    if (request !== requests) {
+      ended()
+      return
+    }
+    const source = context.createBufferSource()
+    source.buffer = buffer
+    source.connect(context.destination)
+    source.onended = () => {
+      if (current === source) current = null
+      ended()
+    }
+    current = source
+    if (segment) {
+      const start = Math.max(0, Math.min(segment.start, buffer.duration))
+      source.start(0, start, Math.max(0, Math.min(segment.end, buffer.duration) - start))
+    } else {
+      source.start()
+    }
+  } catch {
+    ended()
   }
 }
 
 export function stopPlayback(): void {
+  requests += 1
   if (!current) return
-  const { source } = current
+  const source = current
   current = null
   // onended still fires, which tells the caller playback stopped.
   source.stop()
