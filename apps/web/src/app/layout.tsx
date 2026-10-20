@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { AppShell } from '@/components/pedos/app-shell'
+import { InstallPrompt } from '@/components/pedos/install-prompt'
 import { PedosProvider } from '@/components/pedos/pedos-provider'
 import './globals.css'
 
@@ -22,9 +23,14 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className="h-full antialiased">
+      <head>
+        {/* With credentials, so Chrome can fetch it behind the Staging password (#123). */}
+        <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
+      </head>
       <body className="min-h-full">
         <PedosProvider>
           <AppShell>{children}</AppShell>
+          <InstallPrompt />
         </PedosProvider>
       </body>
     </html>
