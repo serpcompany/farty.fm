@@ -6,14 +6,22 @@ import {
   CircleHelp,
   CirclePlay,
   CircleStop,
+  LockOpen,
   Scissors
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Progress as CoverageBar } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
-import { noteName } from '@/lib/pitch'
+import { noteName, pitchClass } from '@/lib/pitch'
+import {
+  type CoverageChanges,
+  coverageFraction,
+  coverageSummary,
+  type SongRow
+} from '@/lib/pitch-coverage'
 import {
   firstFartUsed,
   formattedLength,
@@ -21,7 +29,9 @@ import {
   recordingName,
   recordingPitch
 } from '@/lib/recordings'
+import { cn } from '@/lib/utils'
 import { type Draft, usePedos } from './pedos-provider'
+import { PitchStrip } from './pitch-strip'
 import { RecordButton } from './record-button'
 import { Waveform } from './waveform'
 
@@ -77,7 +87,7 @@ export function RecordFlow() {
       if (!recording) return null
       return (
         <Cover title={recordingName(recording)}>
-          <Result recording={recording} />
+          <Result recording={recording} changes={flow.changes} />
         </Cover>
       )
     }
@@ -105,9 +115,9 @@ function Cover({ title, children }: { title?: string; children: ReactNode }) {
 }
 
 /** Primary and secondary buttons pinned to the bottom of a flow step. */
-function FlowButtons({ secondary, primary }: { secondary: ReactNode; primary: ReactNode }) {
+function FlowButtons({ secondary, primary }: { secondary?: ReactNode; primary: ReactNode }) {
   return (
-    <div className="grid grid-cols-2 gap-3 px-5 pb-3">
+    <div className={cn('grid gap-3 px-5 pb-3', secondary && 'grid-cols-2')}>
       {secondary}
       {primary}
     </div>
@@ -271,22 +281,30 @@ function AnalysisFailed({ id }: { id: string }) {
   )
 }
 
-/** Result: the note you just made, or that it's Noise-like, and replay of just the fart. */
-function Result({ recording }: { recording: Recording }) {
+/** Result: the note you just made, and what it unlocked. Matches the iPhone app's `ResultView`. */
+function Result({ recording, changes }: { recording: Recording; changes: CoverageChanges }) {
   const pedos = usePedos()
   const router = useRouter()
   const pitch = recordingPitch(recording)
-  const isPlaying = pedos.nowPlaying === recording.id
+  const finish = (href: string) => {
+    pedos.finishFlow()
+    router.push(href)
+  }
 
   return (
     <>
-      <div className="flex flex-1 flex-col items-center justify-center gap-7 overflow-y-auto px-5 text-center">
+      <div className="flex flex-1 flex-col items-center gap-7 overflow-y-auto p-5 text-center">
         {pitch !== null ? (
-          <div className="space-y-1">
+          <div className="flex w-full flex-col items-center gap-1">
             <p className="font-semibold text-muted-foreground">Your note</p>
             <p className="text-8xl font-bold tracking-tight" data-testid="result-note">
               {noteName(pitch)}
             </p>
+            <PitchStrip
+              className="w-full pt-3"
+              collected={pedos.collectedPitchClasses}
+              outlined={pitchClass(pitch)}
+            />
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
@@ -306,40 +324,95 @@ function Result({ recording }: { recording: Recording }) {
             <p className="text-sm text-muted-foreground">We heard more than one.</p>
           </div>
         )}
-        <Button
-          variant="outline"
-          size="lg"
-          className="h-11"
-          onClick={() => pedos.togglePlayback(recording)}
-        >
-          {isPlaying ? <CircleStop /> : <CirclePlay />}
-          {isPlaying ? 'Stop' : 'Play it'}
-        </Button>
+        <Progress changes={changes} hasMelodicRecordings={pedos.melodicRecordings.length > 0} />
       </div>
-      <FlowButtons
-        secondary={
-          <FlowButton
-            variant="secondary"
-            onClick={() => {
-              pedos.finishFlow()
-              router.push('/')
-            }}
-          >
-            Record another
-          </FlowButton>
-        }
-        primary={
-          <FlowButton
-            variant="primary"
-            onClick={() => {
-              pedos.finishFlow()
-              router.push('/recordings/')
-            }}
-          >
-            Done
-          </FlowButton>
-        }
-      />
+      {/* After an unlock, Try it opens the Song in Song Creator: it comes with #111. */}
+      {changes.unlocked.length > 0 ? (
+        <FlowButtons
+          primary={
+            <FlowButton variant="primary" onClick={() => finish('/recordings/')}>
+              Done
+            </FlowButton>
+          }
+        />
+      ) : (
+        <FlowButtons
+          secondary={
+            <FlowButton variant="secondary" onClick={() => finish('/')}>
+              Record another
+            </FlowButton>
+          }
+          primary={
+            <FlowButton variant="primary" onClick={() => finish('/recordings/')}>
+              Done
+            </FlowButton>
+          }
+        />
+      )}
     </>
+  )
+}
+
+/** Unlocks, then Pitch Coverage that went up, or else the Song closest to unlocking. */
+function Progress({
+  changes,
+  hasMelodicRecordings
+}: {
+  changes: CoverageChanges
+  hasMelodicRecordings: boolean
+}) {
+  const { unlocked, improved, closest } = changes
+  const showsClosest =
+    unlocked.length === 0 && improved.length === 0 && closest !== null && hasMelodicRecordings
+  if (unlocked.length === 0 && improved.length === 0 && !showsClosest) return null
+  return (
+    <div className="flex w-full flex-col gap-3 text-left" data-testid="result-progress">
+      {unlocked.length > 2 ? (
+        <Box>
+          <Unlocked>You unlocked {unlocked.length} Songs</Unlocked>
+          <p className="pt-1 text-muted-foreground">{unlocked.map(s => s.title).join(' · ')}</p>
+        </Box>
+      ) : (
+        unlocked.map(song => (
+          <Box key={song.id}>
+            <Unlocked>You unlocked {song.title}</Unlocked>
+          </Box>
+        ))
+      )}
+      {improved.slice(0, 2).map(row => (
+        <CoverageCard key={row.song.id} row={row} />
+      ))}
+      {showsClosest && closest && <CoverageCard row={closest} />}
+    </div>
+  )
+}
+
+function Box({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-xl bg-muted/60 p-4" data-testid="result-card">
+      {children}
+    </div>
+  )
+}
+
+function Unlocked({ children }: { children: ReactNode }) {
+  return (
+    <p className="flex items-center gap-2 font-semibold">
+      <LockOpen className="size-4 shrink-0" aria-hidden />
+      <span>{children}</span>
+    </p>
+  )
+}
+
+/** A Song's Pitch Coverage: its title, a bar, and "3 of 4 notes covered". */
+function CoverageCard({ row }: { row: SongRow }) {
+  return (
+    <Box>
+      <div className="flex flex-col gap-1.5">
+        <p className="font-semibold">{row.song.title}</p>
+        <CoverageBar value={coverageFraction(row.coverage) * 100} aria-hidden />
+        <p className="text-sm text-muted-foreground">{coverageSummary(row.coverage)}</p>
+      </div>
+    </Box>
   )
 }

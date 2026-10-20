@@ -37,17 +37,21 @@ export async function loadRecordings(): Promise<Recording[]> {
   return all.sort((a, b) => a.number - b.number)
 }
 
-/** Saves a new Recording and its WAV audio together, numbered after the highest so far. */
+/**
+ * Saves a new Recording and its WAV audio together, numbered after the highest so far. A new
+ * Recording gets a random id; the Fixture Library gives its own (`fixtureRecordingId`).
+ */
 export async function saveRecording(
   fields: Omit<Recording, 'id' | 'number' | 'createdAt' | 'analysis'>,
-  wav: ArrayBuffer
+  wav: ArrayBuffer,
+  id: string = crypto.randomUUID()
 ): Promise<Recording> {
   const database = await db()
   const tx = database.transaction(['recordings', 'audio'], 'readwrite')
   const existing = await tx.objectStore('recordings').getAll()
   const recording: Recording = {
     ...fields,
-    id: crypto.randomUUID(),
+    id,
     number: existing.reduce((highest, r) => Math.max(highest, r.number), 0) + 1,
     createdAt: Date.now(),
     analysis: { state: 'analyzing' }
