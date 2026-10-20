@@ -50,6 +50,7 @@ jobs:
       - name: Check this is the branch tip
         id: tip
         run: |
+          set -o pipefail
           tip=$(git ls-remote origin refs/heads/staging | cut -f1)
           if [ "$tip" = "$GITHUB_SHA" ]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
