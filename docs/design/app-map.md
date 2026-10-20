@@ -88,6 +88,6 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 
 ## Still open
 
-1. **Early payoff:** the first unlock comes late. Proposed: add a few 3-note starter Songs (Hot Cross Buns and similar) through the batch import (#39). Letting AI Song Creator work from 3 Melodic farts was the other idea; it's post-MVP with AI.
+1. **Early payoff:** the first unlock comes late. Proposed: add a few 3-note starter Songs (Hot Cross Buns and similar) through the batch import (#121). Letting AI Song Creator work from 3 Melodic farts was the other idea; it's post-MVP with AI.
 2. **Choosing Recordings:** Auto-map picks the farts itself, with no manual picking in the MVP.
 3. **Naming Recordings:** default "Recording 1, 2, …", with no renaming in the MVP.

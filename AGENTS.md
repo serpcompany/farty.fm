@@ -5,7 +5,7 @@ Agents may merge: yes
 
 ### Issue tracker
 
-Issues are tracked in this repository's GitHub Issues. The build order is the pinned **MVP roadmap** issue (#45). Pick the next issue and follow the git workflow as described in `docs/agents/issue-tracker.md`.
+Issues are tracked in this repository's GitHub Issues. The build order is the pinned **Web MVP** roadmap issue (#106). Pick the next issue and follow the git workflow as described in `docs/agents/issue-tracker.md`.
 
 ### Domain docs
 
