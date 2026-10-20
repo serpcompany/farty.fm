@@ -1,22 +1,44 @@
 import { type DBSchema, type IDBPDatabase, openDB } from 'idb'
 import type { AnalysisState, Recording } from './recordings'
+import type { Toot } from './toot'
 
 /**
- * Recordings live only in this browser, in IndexedDB (ADR 0001's local-first rule, on the web).
- * Metadata and audio are separate stores, so listing Recordings never loads their audio.
+ * Recordings and Toots live only in this browser, in IndexedDB (ADR 0001's local-first rule, on
+ * the web). Metadata and audio are separate stores, so listing them never loads their audio.
  */
-interface PedosDB extends DBSchema {
+export interface PedosDB extends DBSchema {
   recordings: { key: string; value: Recording }
+  /** Each Recording's WAV, by Recording id. */
   audio: { key: string; value: ArrayBuffer }
+  /** Since version 2. */
+  toots: { key: string; value: Toot }
+  /** Each Toot's own WAV, by Toot id. Since version 2. */
+  tootAudio: { key: string; value: ArrayBuffer }
 }
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
 
-function db(): Promise<IDBPDatabase<PedosDB>> {
-  opening ??= openDB<PedosDB>('pedos', 1, {
-    upgrade(database) {
-      database.createObjectStore('recordings', { keyPath: 'id' })
-      database.createObjectStore('audio')
+/**
+ * The app's database, upgraded to version 2 (Toots) on first open. Version 1 held Recordings
+ * only; an upgrade keeps them.
+ */
+export function db(): Promise<IDBPDatabase<PedosDB>> {
+  opening ??= openDB<PedosDB>('pedos', 2, {
+    upgrade(database, oldVersion) {
+      if (oldVersion < 1) {
+        database.createObjectStore('recordings', { keyPath: 'id' })
+        database.createObjectStore('audio')
+      }
+      if (oldVersion < 2) {
+        database.createObjectStore('toots', { keyPath: 'id' })
+        database.createObjectStore('tootAudio')
+      }
+    },
+    // A later version opening in another tab waits for this connection: close it, and open
+    // again on the next call.
+    blocking(_version, _blocked, event) {
+      ;(event.target as IDBDatabase).close()
+      opening = null
     }
   })
   return opening

@@ -1,6 +1,7 @@
 'use client'
 
-import { ArrowUpDown, Lock, Music2, Search } from 'lucide-react'
+import { ArrowUpDown, ChevronRight, Lock, Music2, Search } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useId, useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -34,9 +35,9 @@ const orders: { value: SongOrder; label: string }[] = [
 ]
 
 /**
- * Compose: the Song Catalog with each Song's Pitch Coverage. Open a locked Song to see which notes
- * it still needs. Matches the iPhone app's `ComposeTab`; opening an Unlocked Song in Song Creator
- * comes with #111.
+ * Compose: the Song Catalog with each Song's Pitch Coverage. Open an Unlocked Song in Song
+ * Creator, or a locked Song to see which notes it still needs. Matches the iPhone app's
+ * `ComposeTab`.
  */
 export function ComposeScreen() {
   const pedos = usePedos()
@@ -174,16 +175,20 @@ function Section({
   )
 }
 
-/** An Unlocked Song: its title and "Ready". */
+/** An Unlocked Song: its title and "Ready". It opens in Song Creator. */
 function UnlockedSongRow({ song }: { song: Song }) {
   return (
-    <li
-      className="flex min-h-11 items-center justify-between gap-3 px-4 py-3"
-      data-testid="song-row"
-      data-song={song.id}
-    >
-      <span>{song.title}</span>
-      <span className="text-muted-foreground">Ready</span>
+    <li data-testid="song-row" data-song={song.id}>
+      <Link
+        href={`/compose/${song.id}/`}
+        className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset active:bg-muted"
+      >
+        <span>{song.title}</span>
+        <span className="flex items-center gap-1 text-muted-foreground">
+          Ready
+          <ChevronRight className="size-4" aria-hidden />
+        </span>
+      </Link>
     </li>
   )
 }

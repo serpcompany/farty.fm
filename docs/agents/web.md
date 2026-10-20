@@ -58,4 +58,6 @@ One line each is in `apps/web/AGENTS.md`. The detail:
 - Safari mutes Web Audio when the silent switch is on unless `navigator.audioSession.type = 'playback'` is set (`context.ts`). The microphone needs `'play-and-record'` while recording.
 - The Welcome icon uses `next/image` with `unoptimized`, because Workers has no image optimizer.
 - 16-bit WAV: encode as `round(x × 32768)`, clamped, and decode as `/32768`, as other decoders do.
+- The Workers build has no incremental cache (`open-next.config.ts`), so it can't serve a page prerendered by `generateStaticParams`. With `dynamicParams = false`, such a page 404s on Workers though `next build` lists it. Leave `dynamicParams` on, as `/compose/[song]/` does: the Worker renders the page on request, and the page calls `notFound()` for an unknown param.
+- `decodeAudioData` detaches the `ArrayBuffer` it's given. Pass it a copy (`wav.slice(0)`) of audio you still need, as Song Creator does with a Toot it hasn't saved.
 - The owner's shell is zsh with `noclobber`. Use `>|` to overwrite files, and `bash -c` for `set -- $words` loops.

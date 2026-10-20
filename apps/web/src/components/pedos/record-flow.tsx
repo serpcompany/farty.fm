@@ -326,12 +326,20 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
         )}
         <Progress changes={changes} hasMelodicRecordings={pedos.melodicRecordings.length > 0} />
       </div>
-      {/* After an unlock, Try it opens the Song in Song Creator: it comes with #111. */}
+      {/* After an unlock, Try it opens the first Song unlocked in Song Creator. */}
       {changes.unlocked.length > 0 ? (
         <FlowButtons
-          primary={
-            <FlowButton variant="primary" onClick={() => finish('/recordings/')}>
+          secondary={
+            <FlowButton variant="secondary" onClick={() => finish('/recordings/')}>
               Done
+            </FlowButton>
+          }
+          primary={
+            <FlowButton
+              variant="primary"
+              onClick={() => finish(`/compose/${changes.unlocked[0].id}/`)}
+            >
+              Try it
             </FlowButton>
           }
         />
