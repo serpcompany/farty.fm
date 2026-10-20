@@ -257,11 +257,9 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         if (flow?.kind !== 'review') return
         const wav = encodeWav(flow.draft.audio)
         // The draft isn't saved yet, so it's decoded fresh each time under a one-off key.
-        void play(`draft-${crypto.randomUUID()}`, async () => wav, null, ended).catch(ended)
+        void play(`draft-${crypto.randomUUID()}`, async () => wav, null, ended)
       } else {
-        void play(target.id, () => store.loadAudio(target.id), replaySegment(target), ended).catch(
-          ended
-        )
+        void play(target.id, () => store.loadAudio(target.id), replaySegment(target), ended)
       }
     },
     [flow, nowPlaying]
