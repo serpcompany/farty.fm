@@ -43,7 +43,8 @@ function startWorker(network: Network) {
       entries.set(url, response)
     },
     async match(url: string, options?: { ignoreSearch?: boolean }) {
-      const bare = (key: string) => (options?.ignoreSearch ? key.split('?')[0] : key)
+      // As the Cache API, a fragment never counts.
+      const bare = (key: string) => (options?.ignoreSearch ? key.split('?')[0] : key.split('#')[0])
       const key = [...entries.keys()].find(k => bare(k) === bare(url))
       return key ? entries.get(key)?.clone() : undefined
     },
@@ -86,7 +87,7 @@ function startWorker(network: Network) {
       }
     }
   }
-  runInNewContext(source, { self, caches, fetch, URL, console })
+  runInNewContext(source, { self, caches, fetch, URL, Response, console })
 
   async function lifecycle(type: 'install' | 'activate') {
     let done: unknown
@@ -141,6 +142,87 @@ describe('the service worker', () => {
       '/icon.png?a1b2',
       '/recordings/'
     ])
+  })
+
+  it("keeps each Song's page from /shell.json, and the files it loads, when it installs", async () => {
+    let online = true
+    const worker = startWorker(url => {
+      if (!online) return 'offline'
+      const path = url.replace(origin, '')
+      if (path === '/') return ok(startPage)
+      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/mary/'] }))
+      if (path === '/compose/mary/') {
+        return ok('<script src="/_next/static/chunks/song.js"></script>Mary')
+      }
+      return ok('file')
+    })
+    await worker.lifecycle('install')
+    expect(worker.kept()).toEqual(
+      expect.arrayContaining(['/compose/mary/', '/_next/static/chunks/song.js'])
+    )
+    // The list itself isn't a page or a shell file.
+    expect(worker.kept()).not.toContain('/shell.json')
+
+    online = false
+    // Compose opens a Song by client-side navigation, which falls back to a page load offline.
+    expect(await (await worker.request('/compose/mary/', { mode: 'navigate' }))?.text()).toContain(
+      'Mary'
+    )
+    expect(await (await worker.request('/_next/static/chunks/song.js'))?.text()).toBe('file')
+  })
+
+  it("keeps the scripts that the scripts load by name, such as the workers' chunks", async () => {
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      if (path === '/') return ok(startPage)
+      if (path === '/_next/static/chunks/page.js') {
+        return ok('new Worker(url, ["static/chunks/render-a.js","static/chunks/render-b.js"])')
+      }
+      return ok('file')
+    })
+    await worker.lifecycle('install')
+    expect(worker.kept()).toEqual(
+      expect.arrayContaining([
+        '/_next/static/chunks/render-a.js',
+        '/_next/static/chunks/render-b.js'
+      ])
+    )
+  })
+
+  it('answers a worker script offline with a copy that has no URL, so each worker keeps its own', async () => {
+    let online = true
+    const worker = startWorker(url => {
+      if (!online) return 'offline'
+      const response = ok(`script for ${url}`)
+      // A browser's response carries the URL it answered, fragment and all.
+      Object.defineProperty(response, 'url', { value: url })
+      return response
+    })
+    const script = '/_next/static/chunks/turbopack-worker.js'
+    await worker.request(`${script}#params=analysis`)
+    expect(worker.kept()).toEqual([script])
+
+    online = false
+    const offline = await worker.request(`${script}#params=render`)
+    expect(offline?.url).toBe('')
+    expect(await offline?.text()).toBe(`script for ${origin}${script}#params=analysis`)
+  })
+
+  it('tries the refresh again when /shell.json fails to load', async () => {
+    let dropped = true
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      if (path === '/') return ok(startPage)
+      if (path === '/shell.json') {
+        return dropped ? 'offline' : ok(JSON.stringify({ pages: ['/compose/mary/'] }))
+      }
+      return ok('file')
+    })
+    await worker.request('/', { mode: 'navigate' })
+    expect(worker.kept()).not.toContain('/compose/mary/')
+    dropped = false
+    await worker.request('/', { mode: 'navigate' })
+    expect(worker.kept()).toContain('/compose/mary/')
   })
 
   it('fetches pages from the network first, and answers from the cache offline', async () => {

@@ -1,7 +1,10 @@
 import { audioContext, setAudioSession } from './context'
 
-/** Decoded audio by Recording id, so replaying doesn't decode again. */
-const decoded = new Map<string, AudioBuffer>()
+/**
+ * Each sound's decode, by key, so replaying doesn't decode again and taps during a decode share it.
+ * Forgetting a key mid-decode drops that decode: when it finishes, nothing keeps its buffer.
+ */
+const decoded = new Map<string, Promise<AudioBuffer>>()
 
 let current: AudioBufferSourceNode | null = null
 
@@ -39,11 +42,17 @@ export async function play(
     const context = audioContext()
     setAudioSession('playback')
     await context.resume()
-    let buffer = decoded.get(key)
-    if (!buffer) {
-      buffer = await context.decodeAudioData(await wav())
-      decoded.set(key, buffer)
+    let decoding = decoded.get(key)
+    if (!decoding) {
+      const started = wav().then(data => context.decodeAudioData(data))
+      decoded.set(key, started)
+      // A failed decode is tried again on the next play.
+      started.catch(() => {
+        if (decoded.get(key) === started) decoded.delete(key)
+      })
+      decoding = started
     }
+    const buffer = await decoding
     if (request !== requests) {
       ended()
       return

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { play, stopPlayback } from './player'
+import { forgetDecoded, play, stopPlayback } from './player'
 
 type FakeSource = { key: string; started: boolean; stopped: boolean; onended: (() => void) | null }
 
@@ -127,10 +127,10 @@ describe('the player', () => {
     await settle()
     const playingA2 = play('row-a', wav('row-a'), null, endedA2)
     await settle()
-    finish('row-a', 1)
-    await playingA2
+    // Both plays of A share its one decode.
+    expect(pending.map(p => p.key)).toEqual(['row-a', 'row-b'])
     finish('row-a')
-    await playingA1
+    await Promise.all([playingA1, playingA2])
     finish('row-b')
     await playingB
 
@@ -142,6 +142,33 @@ describe('the player', () => {
     stopPlayback()
     expect(sources[0]?.stopped).toBe(true)
     expect(endedA2).toHaveBeenCalledOnce()
+  })
+
+  test('a sound forgotten while it decodes is decoded again next time, so its buffer is never kept', async () => {
+    const load = vi.fn(wav('forgotten'))
+    const playing = play('forgotten', load, null, () => {})
+    await settle()
+    stopPlayback()
+    forgetDecoded('forgotten')
+    finish('forgotten')
+    await playing
+    const again = play('forgotten', load, null, () => {})
+    await settle()
+    finish('forgotten')
+    await again
+    expect(load).toHaveBeenCalledTimes(2)
+    expect(sources.map(s => [s.key, s.started])).toEqual([['forgotten', true]])
+  })
+
+  test('a sound plays again from its decode, without loading it again', async () => {
+    const load = vi.fn(wav('kept'))
+    const first = play('kept', load, null, () => {})
+    await settle()
+    finish('kept')
+    await first
+    await play('kept', load, null, () => {})
+    expect(load).toHaveBeenCalledOnce()
+    expect(sources.map(s => s.key)).toEqual(['kept', 'kept'])
   })
 
   test("a sound that can't load says it's over", async () => {

@@ -83,7 +83,12 @@ function keepable(response) {
 async function keep(url, response) {
   try {
     const cache = await caches.open(cacheName)
-    await cache.put(url, response)
+    // Both workers load one script, each with its own chunks in the URL's fragment
+    // (`#params=`), and a worker runs what its script's response URL says. So the copy is kept
+    // with no URL of its own, and a worker started offline keeps the URL it asked for.
+    const bare = new URL(url)
+    bare.hash = ''
+    await cache.put(bare.href, new Response(response.body, response))
     const keys = await cache.keys()
     for (const old of keys.slice(0, Math.max(0, keys.length - maxEntries))) {
       await cache.delete(old)
@@ -108,9 +113,10 @@ async function refreshShell(startPage) {
   }
 }
 
-// The start page, the pages it links to (the tabs), and the files they load, so Pedos opens
-// offline right after it's installed, before any of them is fetched again. `startHtml` is the
-// start page already fetched, if any. Resolves to false when the network failed for any of them.
+// The start page, the pages it links to (the tabs), each Song's page (`/shell.json`), and the
+// files they load, so Pedos opens offline right after it's installed, before any of them is
+// fetched again. `startHtml` is the start page already fetched, if any. Resolves to false when
+// the network failed for any of them.
 async function precacheShell(startHtml) {
   let complete = true
   const get = path =>
@@ -119,6 +125,11 @@ async function precacheShell(startHtml) {
       return null
     })
   const pages = new Set(['/'])
+  try {
+    for (const page of await laterPages()) pages.add(page)
+  } catch {
+    complete = false
+  }
   const files = new Set()
   for (const page of pages) {
     const html = page === '/' && startHtml !== undefined ? startHtml : await get(page)
@@ -132,8 +143,31 @@ async function precacheShell(startHtml) {
       }
     }
   }
-  await Promise.all([...files].map(get))
+  // The scripts load more scripts by name, such as the render and analysis workers' own, which
+  // Song Creator and Record need offline too.
+  const loaded = new Set()
+  for (const text of await Promise.all([...files].map(get))) {
+    for (const [, path] of (text ?? '').matchAll(/"(static\/chunks\/[^"\s\\]+\.js)"/g)) {
+      if (!files.has(`/_next/${path}`)) loaded.add(`/_next/${path}`)
+    }
+  }
+  await Promise.all([...loaded].map(get))
   return complete
+}
+
+// The pages a tab opens that the start page doesn't link to, such as each Song's Song Creator,
+// from `/shell.json`. Throws when the network fails.
+async function laterPages() {
+  const response = await fetch('/shell.json', { cache: 'no-cache' })
+  if (!keepable(response)) return []
+  try {
+    const { pages } = await response.json()
+    return Array.isArray(pages)
+      ? pages.filter(page => typeof page === 'string' && page.startsWith('/'))
+      : []
+  } catch {
+    return []
+  }
 }
 
 // Throws when the network fails. Resolves to null for a response that isn't kept.

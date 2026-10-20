@@ -14,6 +14,7 @@ import { type ReactNode, useEffect, useRef } from 'react'
 import { type Tab, tabOf, tabs } from '@/lib/tabs'
 import { cn } from '@/lib/utils'
 import { usePedos } from './pedos-provider'
+import { useTrackPages } from './previous-page'
 import { RecordFlow } from './record-flow'
 import { Welcome } from './welcome'
 
@@ -39,6 +40,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const tab = tabOf(pathname)
+  useTrackPages()
 
   // Moving within a tab, such as to a Song on Compose, isn't a tab change.
   const shownTab = useRef(tab)
@@ -67,6 +69,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col overflow-x-clip">
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] pb-20">
+        {pedos.waitsForOtherTabs && (
+          <output className="block px-4 pt-4 text-center text-muted-foreground">
+            Close Pedos in your other tabs to carry on.
+          </output>
+        )}
         {children}
       </main>
       <nav

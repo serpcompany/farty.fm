@@ -1,5 +1,11 @@
 import type { Song } from '@/lib/catalog/song'
-import { type AutoMapRecording, arrange, autoMapRecording } from '@/lib/engine/auto-map'
+import {
+  type Arrangement,
+  type AutoMapRecording,
+  arrange,
+  autoMapRecording
+} from '@/lib/engine/auto-map'
+import type { Song as EngineSong } from '@/lib/engine/song'
 import { noteName, pitchClass } from '@/lib/pitch'
 import { type Recording, recordingPitch } from '@/lib/recordings'
 
@@ -38,18 +44,28 @@ function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[]
   )
 }
 
+/** A catalog Song as the engine takes it. */
+export function engineSong(song: Song): EngineSong {
+  return {
+    bpm: song.bpm,
+    beats_per_bar: song.beats_per_bar,
+    length_beats: song.length_beats,
+    notes: [...song.notes]
+  }
+}
+
+/**
+ * The Arrangement Auto-map chooses for `song` with the Melodic ones among `recordings`: the one
+ * `coverageOf` reads, and the one Song Creator renders.
+ */
+export function arrangementOf(song: Song, recordings: readonly Recording[]): Arrangement {
+  return arrange(engineSong(song), autoMapRecordings(recordings))
+}
+
 /** Auto-map of `song` with the Melodic ones among `recordings`. Ties break on Recording ids. */
 export function coverageOf(song: Song, recordings: readonly Recording[]): Coverage {
   const melodic = autoMapRecordings(recordings)
-  const result = arrange(
-    {
-      bpm: song.bpm,
-      beats_per_bar: song.beats_per_bar,
-      length_beats: song.length_beats,
-      notes: [...song.notes]
-    },
-    melodic
-  )
+  const result = arrange(engineSong(song), melodic)
   const recordingForPitch = new Map<number, string>()
   for (const choice of result.pitches) {
     if (choice.recordingId !== null) recordingForPitch.set(choice.songPitch, choice.recordingId)
