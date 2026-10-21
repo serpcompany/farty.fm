@@ -23,7 +23,11 @@ export default defineConfig({
       },
       {
         extends: true,
-        test: { name: 'happy-dom', include: [interactionTests], environment: 'happy-dom' }
+        test: {
+          name: 'happy-dom',
+          include: [interactionTests],
+          environment: 'happy-dom'
+        }
       },
       {
         // The API routes in workerd, with wrangler.jsonc's bindings and compatibility settings: a

@@ -1,23 +1,26 @@
-import { resolve } from 'node:path'
-import { type BrowserContext, expect, type Locator, type Page, test } from '@playwright/test'
-import { newEmail, signInByApi } from './account'
-import { recordAndSave } from './record'
+import { expect, type Locator, type Page, test } from '@playwright/test'
+import {
+  fakeMicrophone,
+  fartAndRecord,
+  fixtureWavs,
+  getUserMediaMs,
+  waitForOpenMicrophone
+} from './fake-microphone'
+import { skipWelcome } from './record'
 
-// Compose and the Result screen, with Recordings made through Chromium's fake microphone. A
-// browser plays its fake microphone's file once, so each take is a new launch of the same profile,
-// which keeps the Recordings in IndexedDB between takes.
+// Compose and the Result screen, with Recordings made through the fake microphone in
+// `fake-microphone.ts`, which plays each fart as the person presses Record. A guest's Recordings
+// last the visit, so the whole journey is one page.
 //
 // Mary Had a Little Lamb unlocks with fixtures 090 (G3), 084 and 086 (both G♯3) and 094 (B3): the
-// reference's golden Arrangement for Mary with the whole Fixture Library. Each take records for
-// about a second longer than its file.
-const takes: [fixture: string, seconds: number][] = [
-  ['090__carlosramon__17-pet__186119.wav', 1.5],
-  ['084__walter-odington__grim-fart__26216.wav', 3.5],
-  ['086__walter-odington__little-parp__26793.wav', 1.5],
-  ['094__manicciola__fart__121783.wav', 5.75]
-]
+// reference's golden Arrangement for Mary with the whole Fixture Library.
 
-test.describe.configure({ mode: 'serial' })
+test.use({ permissions: ['microphone'] })
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(fakeMicrophone, { wavs: fixtureWavs(), delayMs: getUserMediaMs })
+  await page.addInitScript(skipWelcome)
+})
 
 function tab(page: Page, label: string) {
   return page
@@ -25,50 +28,19 @@ function tab(page: Page, label: string) {
     .getByRole('link', { name: label, exact: true })
 }
 
-test('saving farts unlocks Songs on Compose, and the Result says so', async ({
-  playwright,
-  headless,
-  baseURL,
-  httpCredentials,
-  viewport,
-  userAgent,
-  deviceScaleFactor,
-  isMobile,
-  hasTouch
-}, testInfo) => {
-  test.setTimeout(180_000)
-  const profile = testInfo.outputPath('profile')
-  /** A browser on the same profile whose fake microphone plays `fixture`. */
-  const launch = (fixture: string): Promise<BrowserContext> =>
-    playwright.chromium.launchPersistentContext(profile, {
-      headless,
-      baseURL,
-      httpCredentials,
-      viewport,
-      userAgent,
-      deviceScaleFactor,
-      isMobile,
-      hasTouch,
-      // A relaunched profile's service worker answers navigations itself, and its requests then
-      // meet the Staging gate without the test's credentials.
-      serviceWorkers: 'block',
-      // No microphone permission up front, so the first tap opens the microphone and the file
-      // plays from the tap (see `withFakeMicrophone`).
-      args: [
-        '--use-fake-ui-for-media-stream',
-        '--use-fake-device-for-media-stream',
-        `--use-file-for-fake-audio-capture=${resolve(__dirname, '../../../fixtures/recordings', fixture)}%noloop`
-      ]
-    })
+/** Once Record's microphone is open, farts fixture `id` into it and saves the take. */
+async function recordAndSave(page: Page, id: string) {
+  await waitForOpenMicrophone(page)
+  await fartAndRecord(page, id)
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByTestId('result-note')).toBeVisible()
+}
+
+test('saving farts unlocks Songs on Compose, and the Result says so', async ({ page }) => {
+  test.setTimeout(120_000)
 
   // Before any Recording, every Song is locked and Compose says how to start.
-  let context = await launch(takes[0][0])
-  let page = context.pages()[0] ?? (await context.newPage())
-  await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
   await page.goto('/compose/')
-  // Signed in, so the Recordings outlast each relaunch: a guest's last only the visit.
-  await signInByApi(page, newEmail(testInfo, 'compose'))
-  await page.reload()
   await expect(page.getByText('No Melodic Recordings yet')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Locked · 12' })).toBeVisible()
   await expect(page.getByRole('heading', { name: /^Unlocked/ })).toHaveCount(0)
@@ -85,7 +57,8 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
   await expect(sheet).toBeHidden()
 
   // The first take: G3, collected on the Result's pitch strip. Nothing unlocks yet.
-  await recordAndSave(page, takes[0][1])
+  await tab(page, 'Record').click()
+  await recordAndSave(page, '090')
   await expect(page.getByTestId('result-note')).toHaveText('G3')
   await expect(page.getByTestId('pitch-strip')).toHaveAccessibleName('Notes collected: G. New: G')
   await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
@@ -108,19 +81,14 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
   await sheet.getByRole('button', { name: 'Record' }).click()
   await expect(sheet).toBeHidden()
   await expect(page.getByTestId('record-button')).toBeVisible()
-  await context.close()
 
   // Three more takes; the fourth unlocks Mary.
-  for (const [i, [fixture, seconds]] of takes.slice(1).entries()) {
-    context = await launch(fixture)
-    page = context.pages()[0] ?? (await context.newPage())
-    await recordAndSave(page, seconds)
-    await expect(page.getByTestId('result-note')).toBeVisible()
-    if (i < 2) {
-      await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
-      await context.close()
-    }
+  for (const id of ['084', '086']) {
+    await recordAndSave(page, id)
+    await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
+    await page.getByRole('button', { name: 'Record another' }).click()
   }
+  await recordAndSave(page, '094')
 
   await expect(page.getByTestId('result-progress')).toContainText(
     'You unlocked Mary Had a Little Lamb'
@@ -155,6 +123,9 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
   // Back returns to Compose, where the Unlocked Song opens Song Creator too.
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
+  // A reload continues a guest's visit (`visit.ts`), so from here Compose and Recordings read the
+  // four Recordings back from storage.
+  await page.reload()
   await expect(page.getByRole('heading', { name: 'Unlocked · 1' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Locked · 11' })).toBeVisible()
   const unlocked = page.getByTestId('unlocked-songs').getByRole('link')
@@ -183,7 +154,6 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
     'data-song',
     'amazing'
   )
-  await context.close()
 })
 
 /** A control a thumb can hit: at least 44 by 44 CSS pixels, as the iPhone's controls. */

@@ -39,7 +39,7 @@ async function audioOf(response: Response) {
 type Library = {
   cursor: number
   full: boolean
-  recordings: { id: string; number: number }[]
+  recordings: { id: string; number: number; analysis?: unknown }[]
   toots: { id: string; title: string }[]
   deleted: { recordings: string[]; toots: string[] }
 }
@@ -621,5 +621,43 @@ describe('the rows a route keeps', () => {
     expect((await library(a.cookie)).recordings).toMatchObject([
       { id: R1, analysis: { state: 'notAnalyzed' } }
     ])
+  })
+
+  it('keep the settle time (#116), and none when an older browser sends none', async () => {
+    const a = await signUp('A')
+    const R3 = '66666666-6666-4666-8666-666666666666'
+    const analysis = (fields: Record<string, unknown>) => ({
+      state: 'analyzed',
+      analysis: { ...recordingMetadata(R1).analysis.analysis, ...fields }
+    })
+    for (const [id, fields] of [
+      [R1, { settleSeconds: 0.087 }],
+      [R2, {}]
+    ] as const) {
+      const response = await api.put(
+        'recordings',
+        id,
+        uploadBody(recordingMetadata(id, { analysis: analysis(fields) }), wav()),
+        a
+      )
+      expect(response.status).toBe(201)
+    }
+    const kept = new Map((await library(a.cookie)).recordings.map(r => [r.id, r.analysis]))
+    expect(kept.get(R1)).toEqual(analysis({ settleSeconds: 0.087 }))
+    expect(kept.get(R2)).toEqual(analysis({}))
+    expect(kept.get(R2)).not.toHaveProperty('analysis.settleSeconds')
+
+    // Not a number, negative, or longer than any Recording (3600 s).
+    for (const settleSeconds of ['0.1', -0.001, 3600.001]) {
+      const refused = await api.put(
+        'recordings',
+        R3,
+        uploadBody(recordingMetadata(R3, { analysis: analysis({ settleSeconds }) }), wav()),
+        a
+      )
+      expect(refused.status).toBe(400)
+      expect(await refused.json()).toEqual({ error: 'invalid_request' })
+    }
+    expect(await rowsOf('recordings')).toEqual([`${a.id} ${R1}`, `${a.id} ${R2}`])
   })
 })

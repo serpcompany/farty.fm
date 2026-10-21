@@ -9,7 +9,7 @@
     "soundfile": "0.14.0",
     "soxr": "1.1.0"
   },
-  "format_version": 2,
+  "format_version": 3,
   "generator": "tools/melody-lab/export_golden.py",
   "hop": 256,
   "libraries": {
@@ -103,7 +103,7 @@
       "notes": 26,
       "title": "Mary Had a Little Lamb",
       "transpose": {
-        "full": -19,
+        "full": -18,
         "small": -24
       },
       "unlocked": {
@@ -130,7 +130,7 @@
       "title": "Happy Birthday",
       "transpose": {
         "full": -14,
-        "small": -16
+        "small": -18
       },
       "unlocked": {
         "full": true,
@@ -143,7 +143,7 @@
       "title": "Frère Jacques",
       "transpose": {
         "full": -6,
-        "small": -9
+        "small": -2
       },
       "unlocked": {
         "full": true,
@@ -181,7 +181,7 @@
       "notes": 30,
       "title": "Ode to Joy",
       "transpose": {
-        "full": -14,
+        "full": -16,
         "small": -19
       },
       "unlocked": {
@@ -195,7 +195,7 @@
       "title": "We Wish You a Merry Christmas",
       "transpose": {
         "full": -14,
-        "small": -19
+        "small": -21
       },
       "unlocked": {
         "full": true,
@@ -208,7 +208,7 @@
       "title": "Amazing Grace",
       "transpose": {
         "full": -14,
-        "small": -16
+        "small": -19
       },
       "unlocked": {
         "full": true,
@@ -221,7 +221,7 @@
       "title": "Für Elise",
       "transpose": {
         "full": -18,
-        "small": -20
+        "small": -19
       },
       "unlocked": {
         "full": true,
@@ -234,7 +234,7 @@
       "title": "Auld Lang Syne",
       "transpose": {
         "full": -9,
-        "small": -14
+        "small": -19
       },
       "unlocked": {
         "full": true,
@@ -246,7 +246,7 @@
       "notes": 30,
       "title": "Ode to Joy (Mutopia SATB)",
       "transpose": {
-        "full": -14,
+        "full": -16,
         "small": -19
       },
       "unlocked": {

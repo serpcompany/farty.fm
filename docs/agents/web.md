@@ -82,13 +82,35 @@ Give each parallel agent its own port. After the merge, CI redeploys Staging fro
 One line each is in `apps/web/AGENTS.md`. The detail:
 
 - **Agents tap through, not the owner and not a PR preview.** The standard's PR previews need `preview_urls` on, which Pedos turns off. A `tap-through` label that deployed a PR to Staging (#124) is `later`. Before launch the owner is not asked to try, read or merge anything; agents merge every PR once a fresh review has no open blocking finding and the cited `pnpm check` on the head is green (#106).
-- **Errors and analytics, until #126.** The web app launches with no Sentry, GTM or analytics, so the privacy page keeps the iPhone app's promise of no ads, analytics or tracking.
+- **Errors and analytics are Cloudflare's own (#126).** The standard's Sentry and GTM are not used, and nothing is sent to a third party. What remains of the standard holds: errors and analytics stay apart, error reports stop with the switch on Profile (on by default, kept in the browser) or Global Privacy Control, and the privacy page says what each collects and for how long.
+  - **Errors.** `reportError(code, error)` (`src/lib/telemetry/errors.ts`) posts a stable code, the error's type name, the screen, the release (version and commit, from `next.config.ts`), the environment and how long it waited offline to `/api/telemetry/`; never a message, stack, audio, name, email or anything typed. Uncaught errors and rejections are reported too (`src/instrumentation-client.ts`). In Production the browser sends it without cookies (`credentials: 'omit'`); elsewhere it sends the Staging gate's password, which `fetch` counts as a credential too. The route takes at most 30 a minute per `cf-connecting-ip` (the `TELEMETRY_RATE_LIMIT` binding in `wrangler.jsonc`; 429 over it, and none without the binding), only this site's origin, JSON up to 1 KB and a known code with bounded fields (`report.ts`), reads no session, and logs one `client_error` line, which Workers Logs keeps up to 7 days: query `event = client_error` in the Worker's Logs. Offline, up to 20 reports wait in `localStorage` and go once the browser is online. No source maps are uploaded and no stack is sent.
+  - **Analytics.** They come from Cloudflare's automatic Web Analytics, which inserts its own beacon into every page on pedos.app and staging.pedos.app at the edge (owner's decision, [#126](https://github.com/serpcompany/pedos-app/issues/126#issuecomment-6317955308)). The app loads no analytics script, has no analytics token, and the switch and Global Privacy Control don't affect it. Error reports are the only telemetry in the app.
+  - **Testing it.** `/dev/telemetry/` (Staging and local runs; 404 in Production) sends a synthetic crash and handled error. `e2e/telemetry.spec.ts` checks what is sent, offline and opt-out; with `E2E_SITE_ENV=production` and `E2E_BASE_URL` on `opennextjs-cloudflare preview --env production` after `pnpm build:production`, it checks that the triggers' page is gone.
+
+## Google Play
+
+`android/twa-manifest.json` is the Bubblewrap config that wraps `https://pedos.app` as a Trusted Web Activity, package `com.serp.pedos` (the iPhone bundle id), free (#114). The web manifest already has the 512 px and maskable icons it needs. No keystore, password or `.aab` is ever committed.
+
+**The owner, once:**
+
+1. Create SERP's organization Play developer account (D-U-N-S number, $25 fee).
+2. In Play Console, create the app "Pedos" as a free app.
+3. Tell the agent the app exists.
+
+**The agent, after:**
+
+1. Generate the upload keystore at `~/.config/pedos/android-upload.keystore` (alias `upload`) with its password in the owner's keychain, never printed. Run `bubblewrap build` from `android/` for the signed `.aab`, and hand it to the owner to upload. If Bubblewrap doesn't expand `~` in `signingKey.path`, use the absolute path for that build and don't commit it.
+2. Add `apps/web/public/.well-known/assetlinks.json` with the Play app-signing SHA-256 from Play Console (Setup, App signing), plus an `apps/web/scripts/smoke.sh` check that it serves as JSON on Production.
+3. Draft the store listing from `docs/app-store/metadata.md` and take phone-size screenshots.
+4. Data safety: when signed in, Recordings (audio), Toots and the email address are stored with the account on Cloudflare and deleted with it, so the form declares audio as collected. Without an account, nothing personal is collected. Anonymous error reports and usage (#126) are declared too.
+
+Most updates ship by deploying the site, with no new upload. Upload a new `.aab` (raise `appVersionCode`) only when `android/twa-manifest.json` changes.
 
 ## Gotchas learned in slice 1
 
 - `apps/web` isn't `"type": "module"`, so Playwright compiles `e2e/` as CommonJS. Use `__dirname`, not `import.meta`.
 - Biome treats any function named `use…` as a React hook. That's why the fake-microphone helper is `withFakeMicrophone`.
-- Chromium's fake microphone: `--use-file-for-fake-audio-capture=<wav>%noloop` plays the file once. It needs a PCM WAV. Fixtures 090 (G3), 084 (G♯3, two farts) and 069 (Noise-like) are the e2e cases.
+- Chromium's fake microphone: `--use-file-for-fake-audio-capture=<wav>%noloop` plays the file once. It needs a PCM WAV. Fixtures 090 (G3), 084 (G♯3, two farts) and 069 (Noise-like) are the e2e cases. It plays from the moment the stream opens, before the app captures, so a take loses the file's first tens of ms (60 ms on CI). That cost 094, which is loud from 8 ms, its steady note (#141). A spec whose farts must start whole uses `e2e/fake-microphone.ts`, which plays each fart as Record is pressed, and `waitForOpenMicrophone`, which waits for the app's capture processor rather than getUserMedia (#172).
 - Accounts in the journeys (#155): a guest's farts last only the visit, so a spec that relaunches the browser signs in first (`signInByApi` in `e2e/account.ts`, with the code from `/dev/mail/`). Locally every request comes from 127.0.0.1, one client with 10 codes in 10 minutes, so `ownClient` gives each test its own `cf-connecting-ip`, which Miniflare passes through. `skipWelcome` and `recordAndSave` (`e2e/record.ts`) keep the account step out of the way unless a spec asks for it.
 - Through the fake microphone, 4 of 5 Melodic fixtures give a Recording Pitch identical to golden. 094 (low confidence) comes out 20 cents high, still B3. Expect small differences on re-recorded audio. Assert note names, not exact MIDI.
 - V8's `2 ** x` and `Math.log2` differ from numpy by an ulp on some pYIN bins. `analysis/numeric.ts` has correctly rounded `exp2` and `log2`. Use them, or bit-identity breaks.

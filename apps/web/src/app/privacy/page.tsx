@@ -10,13 +10,13 @@ export default function PrivacyPage() {
       <p>
         Pedos records your farts, finds the note of each one, and plays songs with them. This policy
         explains what happens to your data. The short version:{' '}
-        <strong>without an account, nothing is kept.</strong>
+        <strong>without an account, nothing you record is kept.</strong>
       </p>
 
       <h2>Without an account</h2>
       <p>
-        Nothing is kept. Your Recordings and Toots last only until you close Pedos, and they stay in
-        your browser on your device. We never receive them.
+        Nothing you record is kept. Your Recordings and Toots last only until you close Pedos, and
+        they stay in your browser on your device. We never receive them.
       </p>
 
       <h2>With an account</h2>
@@ -38,16 +38,39 @@ export default function PrivacyPage() {
         analyzes each Recording in your browser to find its note.
       </p>
 
+      <h2>Error reports</h2>
+      <p>
+        When something goes wrong, such as a Recording that couldn&apos;t be saved, your browser
+        tells Pedos which problem it was, the kind of error, the screen you were on, the Pedos
+        version and how long the report waited offline. It never includes your farts, their names,
+        your email or anything you type, and it&apos;s sent without cookies. Cloudflare keeps
+        reports in Pedos&apos;s logs for up to 7 days.
+      </p>
+      <p>
+        To stop error reports, turn off Share anonymous error reports on Profile. It&apos;s kept in
+        this browser, so turn it off in each browser you use. Pedos also sends none when your
+        browser sends Global Privacy Control.
+      </p>
+
+      <h2>Page views</h2>
+      <p>
+        Cloudflare Web Analytics counts page views on every page of Pedos: the page, the site you
+        came from, your browser and device type, your country and how fast the page loaded. It uses
+        no cookies and doesn&apos;t include your account, name or email. Cloudflare keeps the full
+        records for 7 days and a sampled summary for 6 months. The switch and Global Privacy Control
+        don&apos;t stop it: they stop error reports.
+      </p>
+
       <h2>What Pedos doesn&apos;t do</h2>
       <ul>
-        <li>It has no ads, analytics or tracking, and contains no third-party code that does.</li>
+        <li>It has no ads, and nothing in it follows you to other sites.</li>
         <li>It doesn&apos;t sell your data.</li>
       </ul>
       <p>
-        Opening the site is an ordinary web request, like any website. Pedos runs on Cloudflare,
-        which keeps logs of requests to the site, such as the time, the page asked for and the
-        details your browser sends with every request. Pedos reads them only to run the site and fix
-        problems.
+        Pedos runs on Cloudflare. Like any website, it logs every request, error reports included:
+        Cloudflare&apos;s request log keeps your IP address, browser and rough location, with the
+        time and the page, for up to 7 days. Pedos reads it only to run the site and fix problems,
+        and briefly uses your IP address to limit how many error reports one device can send.
       </p>
 
       <h2>Deleting your data</h2>
@@ -58,9 +81,9 @@ export default function PrivacyPage() {
 
       <h2>Children</h2>
       <p>
-        Pedos doesn&apos;t ask anyone&apos;s age. Without an account it collects nothing. An account
-        needs only an email address, so please ask a parent or guardian before making one. If a
-        child&apos;s email is on an account, write to us and we&apos;ll delete it.
+        Pedos doesn&apos;t ask anyone&apos;s age. Without an account it never asks for a name or
+        email. An account needs only an email address, so please ask a parent or guardian before
+        making one. If a child&apos;s email is on an account, write to us and we&apos;ll delete it.
       </p>
 
       <h2>Changes</h2>

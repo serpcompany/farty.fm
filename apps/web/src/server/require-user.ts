@@ -5,7 +5,8 @@ import { getSessionUser, type SessionUser } from './session-user'
 
 export type { SessionUser } from './session-user'
 
-// Every route under `src/app/api/` except sign-in's own (`api/auth/`) is a user's library, so each
+// Every route under `src/app/api/` except sign-in's own (`api/auth/`) and the error reports'
+// (`api/telemetry/`, which reads no session) is a user's library, so each
 // method is built with `userRoute`, which calls `requireUser()` before anything else.
 // `src/app/api/every-route.workers.test.ts` fails on a route that answers without a session.
 

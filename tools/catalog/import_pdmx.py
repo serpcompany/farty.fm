@@ -3,27 +3,33 @@
     tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-01.txt
 
 For each title in the titles file it picks the best PDMX score, runs the gates, and tries the
-next best score when one fails, up to --tries scores. A Song that passes is copied to
-catalog/midi/ and added to catalog/catalog.json with its provenance. Every title gets a line in
-the report, written next to the titles file (<titles>.report.md and .json). Nothing edits notes:
-the catalog keeps the score's own MIDI file and only chooses the excerpt and tempo (ADR 0003).
-Imported Songs don't ship until they're on the app's ship list (apps/web/src/lib/catalog/generate.ts).
+next best score when one fails, up to --tries scores. A score is picked for one title at most,
+so no two Songs share a score. A Song that passes is copied to catalog/midi/ and added to
+catalog/catalog.json with its provenance. Every title gets a line in the report, written next to
+the titles file (<titles>.report.md and .json). Nothing edits notes: the catalog keeps the
+score's own MIDI file and only chooses the excerpt and tempo (ADR 0003). Imported Songs don't
+ship until they're on the app's ship list (apps/web/src/lib/catalog/generate.ts).
 
 The rules and thresholds are in pdmx.py. The gates, in order:
 
   license  public domain or CC0, with the URL PDMX records, and no PDMX license conflict
-  hash     the MIDI archive matches Zenodo's md5, and the catalog copy matches the archive's file
+  hash     the MIDI archive matches Zenodo's md5, and the extracted file the gates import and the
+           catalog copy are byte for byte the archive's file
   sanity   the excerpt's note count and range, and the share of notes the importer drops
   render   unlocked with the full Fixture Library, and the renderer's bar on the reference render
            (fixtures/golden/README.md, evaluate_renders.BAR): in50c >= 94%, onTime >= 95%,
            no re-attacks
+
+catalog/ is written only once every passing Song's entry imports to exactly the melody its gates
+judged. If one doesn't, the run stops with ReimportMismatch and leaves catalog/ as it was.
 
 Running it again with the same titles file replaces that file's earlier entries, so a run is
 repeatable. Entries from anywhere else are never changed, and a title already in the catalog fails.
 
 The dataset (doi:10.5281/zenodo.15571083) goes to a cache outside the repository (--cache,
 default ~/.cache/pedos/pdmx): PDMX.csv (225 MB) and mid.tar.gz (214 MB), checked against
-Zenodo's md5 on every run. Only the MIDI files of the scores it tries are extracted.
+Zenodo's md5 on every run. Every run reads the MIDI files of the scores it tries from the
+archive, and keeps an extracted file only while it's byte for byte the archive's.
 
 --listen DIR also renders a spot-check sample of the passing Songs to DIR as WAV, with
 evaluate.py's numbers measured on the written files.
@@ -36,9 +42,11 @@ import csv
 import datetime
 import hashlib
 import json
+import os
 import re
 import sys
 import tarfile
+import tempfile
 import urllib.request
 from pathlib import Path
 
@@ -115,24 +123,33 @@ def read_rows(csv_path):
 
 
 def extract(archive, members, out):
-    """Extract only `members` (the CSV's ./mid/... paths) from the MIDI archive into `out`, once."""
+    """Make `out` hold each of `members` (the CSV's ./mid/... paths) byte for byte as the MIDI
+    archive has it, and return {member: its sha256 in the archive}, leaving out members the archive
+    doesn't have. The archive is read on every run (about 6 s): an extracted file from an earlier
+    run is kept only when its sha256 is the archive file's, and is rewritten whole otherwise, so a
+    file cut short by an interrupted run can't pass the hash gate."""
     for m in members:
         if not MIDI_PATH.fullmatch(m):
             raise ValueError(f"unexpected MIDI path {m!r}")
-    want = {m for m in members if not (out / m).exists()}
+    want, member_sha256 = set(members), {}
     if want:
-        print(f"extracting {len(want)} MIDI files from {archive.name} ...", flush=True)
+        print(f"reading {len(want)} MIDI files from {archive.name} ...", flush=True)
         with tarfile.open(archive, "r|gz") as tar:
             for info in tar:
                 name = "./" + info.name.removeprefix("./")
                 if name in want and info.isfile():
+                    data = tar.extractfile(info).read()
+                    member_sha256[name] = hashlib.sha256(data).hexdigest()
                     dest = out / name
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    dest.write_bytes(tar.extractfile(info).read())
+                    if not dest.is_file() or file_hash(dest, "sha256") != member_sha256[name]:
+                        dest.parent.mkdir(parents=True, exist_ok=True)
+                        part = dest.with_name(dest.name + ".part")
+                        part.write_bytes(data)
+                        part.replace(dest)
                     want.discard(name)
                     if not want:
                         break
-    return sorted(want)  # members the archive doesn't have
+    return member_sha256
 
 
 # ---------------------------------------------------------------- the gates
@@ -155,8 +172,10 @@ def score_meta(path):
     return sorted(tempos.items()), [(at, *m) for at, m in sorted(meters.items())]
 
 
-def gate(title, match, row, midi, archive, library):
-    """Run every gate on one PDMX score, stopping at the first that fails."""
+def gate(title, match, row, midi, member_sha256, archive, library):
+    """Run every gate on one PDMX score, stopping at the first that fails. `midi` is the extracted
+    file and `member_sha256` the archive file's sha256 (extract); the hash gate checks one against
+    the other before anything imports the file."""
     sid = pdmx.score_id(row)
     result = {
         "score_id": sid,
@@ -180,8 +199,10 @@ def gate(title, match, row, midi, archive, library):
 
     if failed("license", pdmx.pick_problems(row)):
         return result
-    result["sha256"] = file_hash(midi, "sha256")
-    if failed("hash", pdmx.hash_problems(archive["md5"], archive["published_md5"], result["sha256"])):
+    result["sha256"] = member_sha256
+    hashes = pdmx.hash_problems(archive["md5"], archive["published_md5"], member_sha256, file_hash(midi, "sha256"),
+                                copy="the extracted file")
+    if failed("hash", hashes):
         return result
 
     try:
@@ -247,6 +268,47 @@ def first_problem(r):
     return None
 
 
+def not_tried(row, gate_name, problem):
+    """The result for a score that fails `gate_name` before any gate runs on it."""
+    sid = pdmx.score_id(row)
+    return {"score_id": sid, "url": f"https://musescore.com/score/{sid}", "score_title": row["title"],
+            "gates": {gate_name: [problem]}, "passed": False}
+
+
+def pick_scores(titles, found, others, tries, try_score, midi_dir):
+    """Try each title's best eligible scores in order, up to `tries`, until one passes
+    (`try_score(title, match, row)` runs the gates). A title already in the catalog (`others`)
+    tries none. A score that passed for an earlier title fails the license gate, which re-checks
+    the picking rules, so no two Songs share a score.
+
+    Returns the report's songs, and the picks as (title, result with its row, extracted MIDI file)."""
+    songs, picks, picked = [], [], {}  # picked: a MIDI path -> the id of the title it passed for
+    for title, cands in zip(titles, found):
+        song = {"id": title.id, "title": title.title, "matched": cands.matched, "eligible": len(cands.eligible),
+                "rejected": cands.rejected, "tried": [], "result": "fail", "reason": None, "picked": None}
+        songs.append(song)
+        new = pdmx.new_title_problems(title, others)
+        if new:
+            song["reason"] = "; ".join(new)
+        elif not cands.eligible:
+            song["reason"] = "no PDMX score matches" if not cands.matched else "no matching PDMX score can be picked"
+        for match, row in [] if new else cands.eligible[:tries]:
+            if row["mid"] in picked:
+                r = not_tried(row, "license", f"already picked for {picked[row['mid']]} in this batch")
+            else:
+                r = try_score(title, match, row)
+            song["tried"].append(r)
+            print(summary_line(title.id, r) + ("" if r["passed"] else f"  {first_problem(r)}"), flush=True)
+            if r["passed"]:
+                picked[row["mid"]] = title.id
+                picks.append((title, {**r, "row": row}, midi_dir / row["mid"]))
+                break
+        if song["tried"] and not song["reason"]:
+            song["reason"] = None if song["tried"][-1]["passed"] else (
+                f"none of the {len(song['tried'])} best scores passed; the best: {first_problem(song['tried'][0])}")
+    return songs, picks
+
+
 # ---------------------------------------------------------------- the catalog and the report
 
 
@@ -279,30 +341,51 @@ def catalog_entry(title, r, retrieved, titles_file):
     }
 
 
-def write_catalog(catalog, titles_file, picks, midi_dir, archive):
-    """Copy the picked scores into catalog/midi/ and replace this titles file's catalog entries."""
-    old = {e["file"] for e in catalog if pdmx.batch_of(e) == titles_file}
-    entries = []
-    for title, r, src in picks:
-        dest = CATALOG.parent / f"midi/pdmx-{title.id}.mid"
-        dest.write_bytes(src.read_bytes())
-        problems = pdmx.hash_problems(archive["md5"], archive["published_md5"], r["sha256"], file_hash(dest, "sha256"))
-        r["gates"]["hash"] = problems or "pass"
-        if problems:
-            r["passed"] = False
-            dest.unlink()
-            continue
-        entries.append(catalog_entry(title, r, archive["downloaded"], titles_file))
-    merged = pdmx.merge_catalog(catalog, titles_file, entries)
-    for stale in old - {e["file"] for e in merged}:
-        (CATALOG.parent / stale).unlink(missing_ok=True)
-    CATALOG.write_text(json.dumps(merged, indent=1, ensure_ascii=False))  # the file's own format
-    # The committed entry must import to exactly the melody the gates judged.
-    imported = {c["id"]: m for c, m in load_catalog(CATALOG)}
-    for title, r, _ in picks:
-        if r["passed"]:
-            notes = [[n.start, n.dur, n.pitch] for n in imported[title.id].notes]
-            assert notes == r["notes"], f"{title.id}: the catalog entry imports differently from what was gated"
+class ReimportMismatch(Exception):
+    """A passing Song's catalog entry imports to a different melody from the one its gates judged."""
+
+
+def write_catalog(path, catalog, titles_file, picks, archive):
+    """Replace this titles file's entries in the catalog at `path` (catalog.json) with the picks,
+    and copy each picked score into midi/ next to it. A pick whose copy isn't byte for byte the
+    archive's file is dropped and fails the hash gate.
+
+    The copies and entries are staged first, and nothing in the catalog changes until every entry
+    imports, through the catalog's own loader, to exactly the melody its gates judged. If one
+    doesn't, this raises ReimportMismatch with the catalog as it was.
+
+    The merged catalog.json is written in the staging directory too, and renamed over the real one
+    only after the copies have moved in. The batch's stale copies are removed after that, so a
+    failure before the rename leaves the old catalog.json with every file it names."""
+    with tempfile.TemporaryDirectory(prefix=".import-", dir=path.parent) as staging:
+        staging = Path(staging)
+        (staging / "midi").mkdir()
+        kept = []
+        for title, r, src in picks:
+            entry = catalog_entry(title, r, archive["downloaded"], titles_file)
+            copy = staging / entry["file"]
+            copy.write_bytes(src.read_bytes())
+            problems = pdmx.hash_problems(archive["md5"], archive["published_md5"], r["sha256"], file_hash(copy, "sha256"))
+            r["gates"]["hash"] = problems or "pass"
+            if problems:
+                r["passed"] = False
+                continue
+            kept.append((title, r, entry))
+        entries = [entry for _, _, entry in kept]
+        (staging / path.name).write_text(json.dumps(entries))
+        imported = {c["id"]: m for c, m in load_catalog(staging / path.name)}
+        for title, r, _ in kept:
+            if [[n.start, n.dur, n.pitch] for n in imported[title.id].notes] != r["notes"]:
+                raise ReimportMismatch(f"{title.id}: the catalog entry imports differently from what was gated; "
+                                       "the catalog is unchanged")
+        merged = pdmx.merge_catalog(catalog, titles_file, entries)
+        old = {e["file"] for e in catalog if pdmx.batch_of(e) == titles_file}
+        (staging / path.name).write_text(json.dumps(merged, indent=1, ensure_ascii=False))  # the file's own format
+        for entry in entries:
+            (staging / entry["file"]).replace(path.parent / entry["file"])
+        os.replace(staging / path.name, path)
+        for stale in old - {e["file"] for e in merged}:
+            (path.parent / stale).unlink(missing_ok=True)
     return entries
 
 
@@ -413,38 +496,18 @@ def main():
 
     found = pdmx.find_candidates(read_rows(dataset["PDMX.csv"]["path"]), titles,
                                  used={e["source"].get("dataset_path") for e in others})
-    to_try = {t.id: c.eligible[: args.tries] for t, c in zip(titles, found)}
     midi_dir = args.cache / "extracted"
-    absent = set(extract(archive["path"], sorted({row["mid"] for rows in to_try.values() for _, row in rows}), midi_dir))
-
+    member_sha256 = extract(archive["path"], sorted({row["mid"] for c in found for _, row in c.eligible[: args.tries]}),
+                            midi_dir)
     library = load_library()
-    songs, picks = [], []
-    for title, cands in zip(titles, found):
-        song = {"id": title.id, "title": title.title, "matched": cands.matched, "eligible": len(cands.eligible),
-                "rejected": cands.rejected, "tried": [], "result": "fail", "reason": None, "picked": None}
-        songs.append(song)
-        new = pdmx.new_title_problems(title, others)
-        if new:
-            song["reason"] = "; ".join(new)
-        elif not cands.eligible:
-            song["reason"] = "no PDMX score matches" if not cands.matched else "no matching PDMX score can be picked"
-        for match, row in [] if new else to_try[title.id]:
-            if row["mid"] in absent:
-                r = {"score_id": pdmx.score_id(row), "url": f"https://musescore.com/score/{pdmx.score_id(row)}",
-                     "score_title": row["title"], "gates": {"hash": [f"{row['mid']} isn't in {archive['path'].name}"]},
-                     "passed": False}
-            else:
-                r = gate(title, match, row, midi_dir / row["mid"], archive, library)
-            song["tried"].append(r)
-            print(summary_line(title.id, r) + ("" if r["passed"] else f"  {first_problem(r)}"), flush=True)
-            if r["passed"]:
-                picks.append((title, {**r, "row": row}, midi_dir / row["mid"]))
-                break
-        if song["tried"] and not song["reason"]:
-            song["reason"] = None if song["tried"][-1]["passed"] else (
-                f"none of the {len(song['tried'])} best scores passed; the best: {first_problem(song['tried'][0])}")
 
-    write_catalog(catalog, titles_file, picks, CATALOG.parent / "midi", archive)
+    def try_score(title, match, row):
+        if row["mid"] not in member_sha256:
+            return not_tried(row, "hash", f"{row['mid']} isn't in {archive['path'].name}")
+        return gate(title, match, row, midi_dir / row["mid"], member_sha256[row["mid"]], archive, library)
+
+    songs, picks = pick_scores(titles, found, others, args.tries, try_score, midi_dir)
+    write_catalog(CATALOG, catalog, titles_file, picks, archive)
     for title, r, _ in picks:
         song = next(s for s in songs if s["id"] == title.id)
         song["tried"][-1] = {k: v for k, v in r.items() if k != "row"}

@@ -1,6 +1,6 @@
 # Golden data from the reference engine
 
-The answers of the approved Python reference engine ([`tools/melody-lab/`](../../tools/melody-lab/)) for the Fixture Library and the Song Catalog. Swift port tests check themselves against these files. Everything except this README is generated; don't edit it by hand.
+The answers of the approved Python reference engine ([`tools/melody-lab/`](../../tools/melody-lab/)) for the Fixture Library and the Song Catalog. The web app's port (`apps/web/src/lib/analysis/` and `src/lib/engine/`) checks itself against these files, and so do the Swift port's tests, except the Swift Auto-map: it is frozen at format 2, before the settle cost (#116), and its tests read their own copy of that format's planner answers in [`RecordingAnalysisKit/Tests/GoldenFormat2/`](../../RecordingAnalysisKit/Tests/GoldenFormat2/). Everything except this README is generated; don't edit it by hand.
 
 Regenerate after any change to the lab, the Fixture Library or the catalog, and commit the result:
 
@@ -46,6 +46,7 @@ Songs: all 13 catalog entries, the ones `run_all.py` renders. This includes `ode
 | `pitch_confidence` | 0 to 1, rounded to 2 decimals by the engine. |
 | `recording_pitch_midi` | Recording Pitch (exact): `pitch_estimate_midi` if the Recording passed audition, else `null`. `recording_pitch_note` is the same as a note name with cents. |
 | `shortest_note_s` | The shortest note the audition reads back within 40 cents: one of 0.12, 0.2, 0.35, 0.6. `null` for Noise-like Recordings. |
+| `settle_s` | When the Recording settles on its pitch (`settle_time()`, #92), in seconds from the gesture start (exact). The whole gesture is played through the render path at its own pitch, as the audition does (`variable_resample`, tune 1), and read back by pYIN (frame 2048, hop 256, 45 to 900 Hz). It is the first frame `i` (time `i × 256 / 44100`) that starts 9 voiced frames in a row within ±50 cents of the Recording Pitch, or the gesture length if there is none. `null` for Noise-like Recordings. |
 | `melodic` | Melodic (`true`) or Noise-like (`false`). |
 | `noise_like_reason` | `no_steady_pitch` (no estimate) or `failed_audition` (an estimate that never read back on pitch), `null` when Melodic. Currently all 14 Noise-like Recordings are `no_steady_pitch`. |
 | `rms_db` | RMS level of the gesture in dB. |
@@ -78,9 +79,9 @@ The contour is `analyze_recording()`'s `f0`, which a port must reproduce step by
 
 ## `coverage.json`
 
-`subsets[]`: each has `recordings` (the subset's ids) and `songs[]`, one per catalog Song: `song`, `unlocked`, `pitch_coverage`, `transpose`, `octave_moves`, `plan_cost` and `recording_for_pitch` (Song pitch as a string, to a Recording id or `null`). It's what a Swift Pitch Coverage test compares with on every subset. Arrangements aren't rendered here.
+`subsets[]`: each has `recordings` (the subset's ids) and `songs[]`, one per catalog Song: `song`, `unlocked`, `pitch_coverage`, `transpose`, `octave_moves`, `plan_cost` and `recording_for_pitch` (Song pitch as a string, to a Recording id or `null`). It's what a port's Pitch Coverage test compares with on every subset. Arrangements aren't rendered here.
 
-## Tolerances for Swift tests
+## Tolerances for port tests
 
 Test each stage on the golden outputs of the stage before it, so that one port's small differences don't fail the next port's test.
 
@@ -89,8 +90,9 @@ Test each stage on the golden outputs of the stage before it, so that one port's
 | Trimming (#34) | the fixture file | `gesture.start_s` and `gesture.end_s` within ±10 ms, and the same `cut_at_reattack` |
 | Recording Pitch (#35) | the golden gesture | `pitch_estimate_midi` within ±30 cents, and a non-null estimate for the same Recordings |
 | Audition (#36) | the golden gesture, `pitch_contour` and `pitch_estimate_midi` | The same `shortest_note_s`, and so the same Melodic set (`melodic`, `recording_pitch_midi`): 9 Melodic, `013 017 019 021 059 084 086 090 094` |
+| Settle time (#92) | the golden gesture, `pitch_contour` and `recording_pitch_midi` | `settle_s` within 2 frames (11.6 ms) |
 | Song import (#38) | the catalog MIDI | Same note count and pitches; `start` and `dur` within 1e-6 beats; the same `bpm` and `beats_per_bar` |
-| Auto-map (#40) and Pitch Coverage (#43) | the golden `recording_pitch_midi`, `shortest_note_s`, `melodic`, gesture length and Song `notes` | The Arrangement matches (next section), for both libraries and every `coverage.json` subset |
+| Auto-map (#40) and Pitch Coverage (#43) | the golden `recording_pitch_midi`, `shortest_note_s`, `settle_s`, `melodic`, gesture length and Song `notes` | The Arrangement matches (next section), for both libraries and every `coverage.json` subset |
 | Renderer (#41) | a golden Arrangement | The same checks as `evaluate.py`, no worse than the golden metrics (see "Metrics" below) |
 
 ### When an Arrangement matches
@@ -105,9 +107,9 @@ The planner breaks every tie with a rule on the result (see "The planner" below)
 
 Recompute the cost from the Arrangement under test, never take the solver's own total. Use its transposition, its Recording for each distinct Song pitch, the golden inputs, and the planner's terms. [`tools/melody-lab/golden_cost.py`](../../tools/melody-lab/golden_cost.py) does this in `arrangement_cost()`, which also checks that no Recording plays two pitches and that every move is allowed, and a Swift test can port it.
 
-Why it matters: `013`, `084` and `086` have exactly the same Recording Pitch (55.825920593660186), so `index.json` lists them as a tie group. A port that looks Recordings up by Recording Pitch could put every tied pitch on `013`. That is no longer one to one, so `arrangement_cost()` rejects it. Across the 65 other ways to place `013`, `084` and `086` on the tied pitches of the 13 full-library Arrangements, 23 are true ties and the rest cost at least 24.7 more. Every true tie has Recording ids that sort after the golden ones, so the tie-break picks golden. A port whose solver breaks ties differently still needs the tie-break to match.
+Why it matters: `013`, `084` and `086` have exactly the same Recording Pitch (55.825920593660186), so `index.json` lists them as a tie group. A port that looks Recordings up by Recording Pitch could put every tied pitch on `013`. That is no longer one to one, so `arrangement_cost()` rejects it. The three settle at different times (`settle_s` 0.18, 0.099 and 0.029 s), so since #92 their costs differ: across the 65 other ways to place `013`, `084` and `086` on the tied pitches of the 13 full-library Arrangements, none is a true tie, and each costs at least 0.6 more. A coverage subset can still produce true ties, and a port whose solver breaks ties differently still needs the tie-break to match.
 
-Checked against the reference itself: shuffling the library order 30 times per Song, on both libraries, gives the identical Arrangement (exact ids) every time. A brute-force search over every transposition and every one-to-one choice agrees with `melody_fit()` on 3,648 fits (the 12 app Songs on random subsets of up to 9 Recordings, with and without Octave Moves). The smallest cost gap between the chosen transposition and the next best one with the same coverage and Octave Moves is 3.2 (`mary`, full library), so transposition ties aren't a concern. `export_golden.py` runs `golden_cost.py` on every golden fit after every export, so the two can't drift apart.
+Checked against the reference itself: shuffling the library order 30 times per Song, on both libraries, gives the identical Arrangement (exact ids) every time. A brute-force search over every transposition and every one-to-one choice agrees with `melody_fit()` on 3,648 fits (the 12 app Songs on random subsets of up to 9 Recordings, with and without Octave Moves). The smallest cost gap between the chosen transposition and the next best one with the same coverage and Octave Moves is 0.086 (`mary`, full library; see "Near-threshold" below), far above the 1e-9 tie tolerance. `export_golden.py` runs `golden_cost.py` on every golden fit after every export, so the two can't drift apart.
 
 ### Near-threshold Recordings
 
@@ -121,7 +123,8 @@ A few Recordings sit close to a decision threshold, so a tiny difference in a Sw
   Moving the dip threshold by ±0.5 dB changes nothing.
 - **Pitch confidence (#35)** threshold is 0.1: `002` and `022` are at 0.09 (Noise-like), and `017` is at 0.13 (Melodic).
 - **Audition (#36)** passes within 40 cents: `017` reads back exactly 40.0 cents off at 0.35 s. A port that reads it slightly worse gets 0.6 s.
-- **Renderer (#41)** requires at least 94% of notes within ±50 cents. `furelise` on the full library is exactly at that bar: 30 of 32 notes (94%). Its note 15, played by `017` with an Octave Move (+9.97 semitones), reads −47 cents, just inside the limit. A correct renderer, or an evaluator with a continuous pitch estimate, could read it beyond 50 and land at 91%. Treat `furelise` note 15 as tolerance-edge. No other note in the 13 unlocked Arrangements reads within 6 cents of ±50.
+- **Renderer (#41)** requires at least 94% of notes within ±50 cents. `furelise` on the full library reads 32 of 32 notes (100%). Its note 15, played by `017` with an Octave Move (+9.97 semitones), reads −47 cents, just inside the limit. A correct renderer, or an evaluator with a continuous pitch estimate, could read it beyond 50 and land at 97%, which still passes. Treat `furelise` note 15 as tolerance-edge. No other note in the 13 unlocked Arrangements reads within 6 cents of ±50.
+- **Mary's transposition (#92)**: on the full library, −18 costs 122.510, −21 costs 122.596 and −19 costs 123.089. A port must use the same cost arithmetic, `settle_s` included, to pick −18. All three render at 100% within ±50 cents.
 - **Too-short notes (#40)**: a note counts as too short when it sounds for less than the Recording's `shortest_note_s`, and the note's length comes from `dur × 60 / bpm − 0.025`, or from the gesture length × 2^(−shift/12). A port that computes these slightly differently can flip a note that sits right at the threshold, which changes `plan_cost` by at least 8. Use the same arithmetic as `too_short_cost()`.
 
 ### Metrics
@@ -137,6 +140,7 @@ The reference planner follows the unlock rule in [ADR 0004](../../docs/adr/0004-
 - **Cost**, per covered pitch, summed in ascending pitch order:
   - weight × move cost. The weight is the summed duration in beats of the notes at that pitch. The move cost per beat is |shift|^1.5 within 3 semitones, or 6 + |shift ∓ 12|^1.5 for an Octave Move, so an Octave Move always costs more than any real-pitch move (3^1.5 = 5.2).
   - for each note at that pitch that sounds for less than the Recording's `shortest_note_s`: 8, plus 400 per second it falls short. A note sounds for `dur × 60 / bpm − 0.025` seconds, or for the Recording's gesture length × 2^(−shift/12) when that's shorter: an Octave Move up halves it.
+  - for each note at that pitch, 20 × the share of its sounding time that comes before the Recording settles (#92): `20 × min(sounds, settle_s × 2^(−shift/12)) / sounds`, with `sounds` as above. A short note on a fart that scoops or glides into its pitch costs up to 20; the same fart on a long note costs little.
 - **Unlocking is pitch-only.** Note length changes the cost, never whether a Song unlocks.
 
-What changed from the planner before #43: no Recording is reused (the reuse penalty of 2 is gone), no shift goes beyond 3 semitones except with an Octave Move (the old shift cost allowed up to 12), the too-short cost grows with how far short a note falls and counts the Recording's own length, and ties are broken by the rule above. `golden_cost.py` must change with any cost term; the export fails until they agree. `recordings/` and `songs/` don't depend on the planner.
+What changed from the planner before #43: no Recording is reused (the reuse penalty of 2 is gone), no shift goes beyond 3 semitones except with an Octave Move (the old shift cost allowed up to 12), the too-short cost grows with how far short a note falls and counts the Recording's own length, and ties are broken by the rule above. #92 added the settle cost. `golden_cost.py` must change with any cost term; the export fails until they agree. `recordings/` and `songs/` don't depend on the planner.

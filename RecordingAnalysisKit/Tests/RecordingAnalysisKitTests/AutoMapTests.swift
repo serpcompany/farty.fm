@@ -161,8 +161,9 @@ struct SplitMix64: RandomNumberGenerator {
     }
 }
 
-/// The golden planner answers (format version 2): `index.json`, `songs/`, `arrangements/` and
-/// `coverage.json`.
+/// The golden planner answers (format version 2): `index.json`, `arrangements/` and
+/// `coverage.json` from the frozen copy in `Tests/GoldenFormat2/` (#116), and `songs/` from
+/// `fixtures/golden/`, which format 3 didn't change.
 enum AutoMapGolden {
     struct Index: Decodable {
         struct SongEntry: Decodable { let id: String }
@@ -262,8 +263,8 @@ enum AutoMapGolden {
         }
     }
 
-    private static func load<T: Decodable>(_ type: T.Type, _ path: String) -> T {
-        let data = try! Data(contentsOf: Golden.goldenDir.appending(path: path))
+    private static func load<T: Decodable>(_ type: T.Type, _ path: String, from dir: URL = Golden.goldenFormat2Dir) -> T {
+        let data = try! Data(contentsOf: dir.appending(path: path))
         return try! Golden.decoder().decode(type, from: data)
     }
 
@@ -275,7 +276,9 @@ enum AutoMapGolden {
 
     static let coverage = load(CoverageFile.self, "coverage.json")
 
-    static let goldenSongs: [String: Song] = Dictionary(uniqueKeysWithValues: index.songs.map { ($0.id, load(Song.self, "songs/\($0.id).json")) })
+    static let goldenSongs: [String: Song] = Dictionary(uniqueKeysWithValues: index.songs.map {
+        ($0.id, load(Song.self, "songs/\($0.id).json", from: Golden.goldenDir))
+    })
 
     static func arrangement(_ library: String, _ song: String) -> Fit {
         Fit(load(Arrangement.self, "arrangements/\(library)/\(song).json"))

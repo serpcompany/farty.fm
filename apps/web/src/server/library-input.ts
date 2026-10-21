@@ -130,7 +130,11 @@ function parseAnalysis(value: unknown): Analysis | null | undefined {
     isNumberOrNull(a.pitchEstimateMidi) &&
     isNumber(a.pitchConfidence) &&
     isNumberOrNull(a.recordingPitchMidi) &&
-    isNumberOrNull(a.shortestNoteSeconds)
+    isNumberOrNull(a.shortestNoteSeconds) &&
+    // A browser on a release before #116 sends none.
+    (a.settleSeconds === undefined ||
+      a.settleSeconds === null ||
+      isNumberIn(a.settleSeconds, 0, MAX_SECONDS))
   if (!valid) return undefined
   return {
     gestureStartSeconds: a.gestureStartSeconds,
@@ -139,7 +143,8 @@ function parseAnalysis(value: unknown): Analysis | null | undefined {
     pitchEstimateMidi: a.pitchEstimateMidi,
     pitchConfidence: a.pitchConfidence,
     recordingPitchMidi: a.recordingPitchMidi,
-    shortestNoteSeconds: a.shortestNoteSeconds
+    shortestNoteSeconds: a.shortestNoteSeconds,
+    ...(a.settleSeconds === undefined ? {} : { settleSeconds: a.settleSeconds })
   } as Analysis
 }
 

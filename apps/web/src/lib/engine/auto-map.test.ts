@@ -25,7 +25,8 @@ import {
   HIGHEST_TRANSPOSITION,
   LOWEST_TRANSPOSITION,
   moveCost,
-  tooShortCost
+  tooShortCost,
+  unsettledCost
 } from './auto-map'
 import type { Song } from './song'
 
@@ -68,13 +69,16 @@ function arrangementCost(song: Song, transpose: number, recordingFor: Map<number
     } else throw new Error(`${id} can't play ${p + transpose} (shift ${shift})`)
     const notes = song.notes.filter(n => n.pitch === p)
     const played = gestureSeconds(r) * exp2(-shift / 12)
+    const settle = (r.settle_s as number) * exp2(-shift / 12)
     let short = 0
+    let unsettled = 0
     for (const n of notes) {
       const sounds = Math.min(n.dur * spb - 0.025, played)
       const shortest = r.shortest_note_s as number
       if (sounds < shortest) short += 8 + 400 * (shortest - sounds)
+      unsettled += (20 * Math.min(sounds, settle)) / Math.max(1e-9, sounds)
     }
-    cost += neumaierSum(notes.map(n => n.dur)) * perBeat + short
+    cost += neumaierSum(notes.map(n => n.dur)) * perBeat + short + unsettled
   }
   return { uncovered, octaves, cost }
 }
@@ -214,7 +218,7 @@ describe('Auto-map ties', () => {
     }
   })
 
-  // No golden Song has two equally good transpositions (the smallest gap is 3.2), so these build
+  // No golden Song has two equally good transpositions (the smallest gap is 0.086), so these build
   // one: a single 60 at 120 bpm.
   const oneNote: Song = {
     bpm: 120,
@@ -226,7 +230,8 @@ describe('Auto-map ties', () => {
     id,
     recordingPitchMidi,
     shortestNoteSeconds: 0.1,
-    gestureSeconds: 2
+    gestureSeconds: 2,
+    settleSeconds: 0
   })
 
   it('breaks a tie between transpositions on the Recording ids first', () => {
@@ -265,10 +270,33 @@ describe('Auto-map inputs and terms', () => {
         pitchEstimateMidi: g.pitch_estimate_midi,
         pitchConfidence: g.pitch_confidence,
         recordingPitchMidi: g.recording_pitch_midi,
-        shortestNoteSeconds: g.shortest_note_s
+        shortestNoteSeconds: g.shortest_note_s,
+        settleSeconds: g.settle_s
       }
       expect(autoMapRecording(g.id, analysis)).toEqual(autoMapInput(g.id))
     }
+  })
+
+  it('reads an analysis stored before the settle time as an unknown settle time', () => {
+    const g = goldenRecording('017')
+    const analysis: Analysis = {
+      gestureStartSeconds: g.gesture.start_sample / SR,
+      gestureEndSeconds: g.gesture.end_sample / SR,
+      cutAtReattack: g.gesture.cut_at_reattack,
+      pitchEstimateMidi: g.pitch_estimate_midi,
+      pitchConfidence: g.pitch_confidence,
+      recordingPitchMidi: g.recording_pitch_midi,
+      shortestNoteSeconds: g.shortest_note_s
+    }
+    expect(autoMapRecording(g.id, analysis)).toEqual({ ...autoMapInput(g.id), settleSeconds: null })
+  })
+
+  it('costs an unknown settle time nothing, like one that is settled at once', () => {
+    const song = goldenSong('birthday')
+    const unknown = inputs(libraries.full).map(r => ({ ...r, settleSeconds: null }))
+    const atOnce = inputs(libraries.full).map(r => ({ ...r, settleSeconds: 0 }))
+    expect(arrange(song, unknown)).toEqual(arrange(song, atOnce))
+    expect(arrange(song, inputs(libraries.full)).cost).toBeGreaterThan(arrange(song, unknown).cost)
   })
 
   it('leaves a Song locked, at the lowest transposition, when no Recording is Melodic', () => {
@@ -305,6 +333,16 @@ describe('Auto-map inputs and terms', () => {
       3 * 8 + 400 * (0.05 + 0.15 + 0.05),
       9
     )
+  })
+
+  it('charges the share of each note played before the Recording settles', () => {
+    // 0.5 s notes on a 1 s gesture that settles at 0.1 s: a fifth of each note is unsettled.
+    expect(unsettledCost([0.5], 1, 0.1, 0)).toBeCloseTo(20 * 0.2, 9)
+    expect(unsettledCost([0.05], 1, 0.1, 0)).toBeCloseTo(20, 9)
+    expect(unsettledCost([2], 1, 0.1, 0)).toBeCloseTo(20 * 0.1, 9)
+    // An Octave Move up halves the settle time and the gesture.
+    expect(unsettledCost([0.5], 1, 0.1, 12)).toBeCloseTo(20 * 0.1, 9)
+    expect(unsettledCost([0.5, 0.05], 1, 0, 0)).toBe(0)
   })
 
   it('orders ids by code point', () => {

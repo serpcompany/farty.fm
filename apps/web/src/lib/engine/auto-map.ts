@@ -6,7 +6,8 @@ import { type Song, secondsPerBeat } from './song'
 
 // Auto-map and Pitch Coverage: a port of `AutoMap.swift`, the iPhone 1.0 planner, which ports the
 // reference engine's `melody_fit()` (`tools/melody-lab/engine.py`) and the unlock rule of ADR 0004
-// and ADR 0006.
+// and ADR 0006. Since #116 it also has the reference's settle cost, which the Swift port, frozen
+// at golden format 2, doesn't.
 //
 // Each distinct Song pitch gets its own Melodic Recording (one to one, never reused), shifted at
 // most 3 semitones, or with an Octave Move (12 semitones up or down, plus at most 3) where the
@@ -29,6 +30,8 @@ const OCTAVE_MOVE_COST = 6
 const TOO_SHORT_COST = 8
 /** ... plus this per second it falls short. */
 const TOO_SHORT_COST_PER_SECOND = 400
+/** Cost of a note played entirely before its Recording settles on pitch; less for part of it. */
+const UNSETTLED_COST = 20
 /** Silence before the next note: a note sounds for its length minus this. */
 const GAP_SECONDS = 0.025
 /** Arrangement costs this close are equal. */
@@ -47,6 +50,11 @@ export interface AutoMapRecording {
   shortestNoteSeconds: number | null
   /** The length of the Recording's single clean gesture, in seconds. */
   gestureSeconds: number
+  /**
+   * When the Recording settles on its pitch, in seconds from the gesture start. Null when not
+   * known (an analysis stored before #116), which costs nothing.
+   */
+  settleSeconds: number | null
 }
 
 /**
@@ -61,7 +69,8 @@ export function autoMapRecording(id: string, analysis: Analysis): AutoMapRecordi
     id,
     recordingPitchMidi: analysis.recordingPitchMidi,
     shortestNoteSeconds: analysis.shortestNoteSeconds,
-    gestureSeconds: samples / sr
+    gestureSeconds: samples / sr,
+    settleSeconds: analysis.settleSeconds ?? null
   }
 }
 
@@ -229,6 +238,28 @@ export function tooShortCost(
   return cost
 }
 
+/**
+ * Cost of the share of each note a Recording plays before it settles on its pitch (#116). A note
+ * sounds as in `tooShortCost`; the Recording settles `settleSeconds` after it starts, also scaled
+ * by resampling. Each note costs `UNSETTLED_COST` × the share of its sounding time before that, so
+ * a short note on a slow-settling fart costs up to 20 and the same fart on a long note costs little.
+ */
+export function unsettledCost(
+  noteSeconds: readonly number[],
+  recordingSeconds: number,
+  settleSeconds: number,
+  shift: number
+): number {
+  const played = recordingSeconds * exp2(-shift / 12)
+  const settle = settleSeconds * exp2(-shift / 12)
+  let cost = 0
+  for (const a of noteSeconds) {
+    const sounds = Math.min(a, played)
+    cost += (UNSETTLED_COST * Math.min(sounds, settle)) / Math.max(1e-9, sounds)
+  }
+  return cost
+}
+
 /** Ids compare by code point, as the reference's Python strings do (and UTF-8 bytes). */
 export function compareIds(a: string, b: string): number {
   let i = 0
@@ -309,7 +340,10 @@ class Table {
         this.isOctaveMove[cell] = move.octaveMove ? 1 : 0
         this.cost[cell] =
           weight[i] * move.cost +
-          tooShortCost(noteSeconds[i], r.gestureSeconds, r.shortestNoteSeconds as number, shift)
+          tooShortCost(noteSeconds[i], r.gestureSeconds, r.shortestNoteSeconds as number, shift) +
+          (r.settleSeconds === null
+            ? 0
+            : unsettledCost(noteSeconds[i], r.gestureSeconds, r.settleSeconds, shift))
       })
     })
   }

@@ -108,6 +108,7 @@ export function autoMapInput(id: string): AutoMapRecording {
     id,
     recordingPitchMidi: r.melodic ? r.recording_pitch_midi : null,
     shortestNoteSeconds: r.melodic ? r.shortest_note_s : null,
-    gestureSeconds: gestureSeconds(r)
+    gestureSeconds: gestureSeconds(r),
+    settleSeconds: r.melodic ? r.settle_s : null
   }
 }

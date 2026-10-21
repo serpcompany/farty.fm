@@ -66,6 +66,14 @@ describe('analyzeRecording', () => {
         .soft(a.pitchEstimateMidi === null, `${id}: estimate`)
         .toBe(golden.pitch_estimate_midi === null)
       expect.soft(a.shortestNoteSeconds, `${id}: shortest note`).toBe(golden.shortest_note_s)
+      if (golden.settle_s === null || a.settleSeconds === null) {
+        expect.soft(a.settleSeconds, `${id}: settle time`).toBe(golden.settle_s)
+      } else {
+        // Within 2 pYIN frames (`fixtures/golden/README.md`).
+        expect
+          .soft(Math.abs(a.settleSeconds - golden.settle_s), `${id}: settle time`)
+          .toBeLessThanOrEqual((2 * 256) / 44_100)
+      }
       expect
         .soft(Math.abs(a.pitchConfidence - golden.pitch_confidence), `${id}: confidence`)
         .toBeLessThan(1e-9)
