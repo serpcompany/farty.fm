@@ -10,42 +10,38 @@ export default function PrivacyPage() {
       <p>
         Pedos records your farts, finds the note of each one, and plays songs with them. This policy
         explains what happens to your data. The short version:{' '}
-        <strong>it stays in your browser.</strong>
+        <strong>without an account, nothing is kept.</strong>
       </p>
 
-      <h2>What Pedos keeps, and where</h2>
+      <h2>Without an account</h2>
+      <p>
+        Nothing is kept. Your Recordings and Toots last only until you close Pedos, and they stay in
+        your browser on your device. We never receive them.
+      </p>
+
+      <h2>With an account</h2>
       <ul>
         <li>
-          <strong>Your Recordings.</strong> When you tap Record, Pedos uses your microphone until
-          you tap Stop. If you save the take, it is kept in your browser&apos;s own storage on your
-          device. If you discard it, it is deleted.
+          Your email, Recordings and Toots (audio included) are stored on Cloudflare, in your
+          account, so you can use them on any device.
         </li>
         <li>
-          <strong>What Pedos works out from them.</strong> Pedos analyzes each saved Recording in
-          your browser to find its note, and keeps that result next to the Recording.
-        </li>
-        <li>
-          <strong>The songs you make (Toots).</strong> They are made in your browser from your
-          Recordings.
-        </li>
-        <li>
-          <strong>One setting:</strong> whether you have already seen the welcome screen.
+          Your email is used for sign-in codes and for Pedos news, which is on by default. You can
+          unsubscribe from any email or on Profile. It&apos;s never sold.
         </li>
       </ul>
+
+      <h2>The microphone</h2>
       <p>
         Pedos only uses the microphone while you are recording, and only after you have allowed it.
-        You can turn microphone access off at any time in your browser&apos;s site settings.
+        You can turn microphone access off at any time in your browser&apos;s site settings. Pedos
+        analyzes each Recording in your browser to find its note.
       </p>
 
       <h2>What Pedos doesn&apos;t do</h2>
       <ul>
-        <li>
-          It doesn&apos;t send your Recordings, or anything else you make, to us or to anyone.
-          Recording, analysis and playback all happen in your browser.
-        </li>
-        <li>It has no accounts or sign-in, and it is free.</li>
         <li>It has no ads, analytics or tracking, and contains no third-party code that does.</li>
-        <li>It doesn&apos;t sell or share data, because it doesn&apos;t collect any.</li>
+        <li>It doesn&apos;t sell your data.</li>
       </ul>
       <p>
         Opening the site is an ordinary web request, like any website. Pedos runs on Cloudflare,
@@ -56,23 +52,26 @@ export default function PrivacyPage() {
 
       <h2>Deleting your data</h2>
       <p>
-        Delete a Recording or a Toot in Pedos, or clear this site&apos;s data in your browser&apos;s
-        settings to remove everything Pedos stored. Because it only exists in your browser, we
-        can&apos;t recover it for you.
+        Delete account on Profile removes your email, Recordings and Toots. Without an account,
+        close Pedos and everything is gone.
       </p>
 
       <h2>Children</h2>
-      <p>Pedos doesn&apos;t collect personal information from anyone, including children.</p>
+      <p>
+        Pedos doesn&apos;t ask anyone&apos;s age. Without an account it collects nothing. An account
+        needs only an email address, so please ask a parent or guardian before making one. If a
+        child&apos;s email is on an account, write to us and we&apos;ll delete it.
+      </p>
 
       <h2>Changes</h2>
       <p>
-        If this policy changes, the new version will be posted here with a new date. If Pedos ever
-        starts sending data off your device, this policy will say so first.
+        If this policy changes, the new version will be posted here with a new date. If we ever
+        change what Pedos keeps, this policy will say so first.
       </p>
 
       <h2>Contact</h2>
       <p>
-        Questions about privacy: <a href="mailto:privacy@serp.co">privacy@serp.co</a>
+        Questions about privacy: <a href="mailto:support@pedos.app">support@pedos.app</a>
       </p>
     </article>
   )
