@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/serpcompany/pedos-app/compare/v1.3.0...v1.4.0) (2026-10-21)
+
+
+### Features
+
+* **web:** rename Pedos to Farty on farty.fm ([#184](https://github.com/serpcompany/pedos-app/issues/184)) ([#186](https://github.com/serpcompany/pedos-app/issues/186)) ([1371c37](https://github.com/serpcompany/pedos-app/commit/1371c373e93618617243172c7ee29ad11ac1480d))
+
 ## [1.3.0](https://github.com/serpcompany/pedos-app/compare/v1.2.0...v1.3.0) (2026-10-21)
 
 
