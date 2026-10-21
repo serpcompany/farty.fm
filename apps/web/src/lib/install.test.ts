@@ -41,7 +41,7 @@ describe('installRouteFor', () => {
     expect(browser(userAgents.iPadSafari)).toBe('share-sheet')
   })
 
-  it("offers nothing where Pedos can't be added to the Home Screen", () => {
+  it("offers nothing where Farty can't be added to the Home Screen", () => {
     expect(browser(userAgents.iPhoneInstagram)).toBeNull()
     // In-app browsers that name their app, even beside "Safari/".
     for (const app of [
@@ -56,7 +56,7 @@ describe('installRouteFor', () => {
     }
     // A Mac: the same user agent as an iPad, but no touch screen.
     expect(browser(userAgents.iPadSafari, { maxTouchPoints: 0 })).toBeNull()
-    // Android before Chrome offers its prompt, or after Pedos is installed.
+    // Android before Chrome offers its prompt, or after Farty is installed.
     expect(browser(userAgents.androidChrome)).toBeNull()
   })
 
@@ -64,7 +64,7 @@ describe('installRouteFor', () => {
     expect(browser(userAgents.androidChrome, { canPrompt: true })).toBe('prompt')
   })
 
-  it('offers nothing once Pedos runs from the Home Screen', () => {
+  it('offers nothing once Farty runs from the Home Screen', () => {
     expect(browser(userAgents.iPhoneSafari, { standalone: true })).toBeNull()
     expect(browser(userAgents.androidChrome, { canPrompt: true, standalone: true })).toBeNull()
   })

@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 import { readDevMailbox } from '@/server/auth'
 
 export const metadata: Metadata = {
-  title: 'Dev mailbox · Pedos',
+  title: 'Dev mailbox · Farty',
   robots: { index: false, follow: false }
 }
 export const dynamic = 'force-dynamic'

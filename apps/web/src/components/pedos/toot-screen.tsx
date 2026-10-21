@@ -100,7 +100,7 @@ export function TootScreen() {
         </p>
       ) : !song ? (
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
-          This Toot's Song isn't in Pedos any more.
+          This Toot's Song isn't in Farty any more.
         </p>
       ) : (
         <TootLayout toot={toot} song={song} isAudioMissing={toot.isAudioMissing}>

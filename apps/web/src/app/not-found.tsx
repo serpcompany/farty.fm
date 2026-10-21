@@ -15,7 +15,7 @@ export default function NotFound() {
         <EmptyDescription>There is no page at this address.</EmptyDescription>
       </EmptyHeader>
       <Link href="/" className={buttonVariants()}>
-        Back to Pedos
+        Back to Farty
       </Link>
     </Empty>
   )

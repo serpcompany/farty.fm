@@ -86,7 +86,7 @@ describe('behindStagingAccess', () => {
     const refused = await response
     expect(refused.status).toBe(401)
     expect(refused.headers.get('WWW-Authenticate')).toBe(stagingAccessChallenge)
-    expect(stagingAccessChallenge).toBe('Basic realm="pedos staging", charset="UTF-8"')
+    expect(stagingAccessChallenge).toBe('Basic realm="farty staging", charset="UTF-8"')
     expect(refused.headers.get('Cache-Control')).toBe('no-store')
     expect(refused.headers.get('X-Robots-Tag')).toBe(environmentNoindex)
     expect(await refused.text()).toBe('Staging asks for a password.\n')

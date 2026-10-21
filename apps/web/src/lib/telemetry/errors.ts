@@ -91,7 +91,7 @@ export function reportError(code: ErrorCode, error?: unknown): void {
       })
       .catch(() => {})
   } catch {
-    // Telemetry never breaks Pedos.
+    // Telemetry never breaks Farty.
   }
 }
 
@@ -160,6 +160,6 @@ export function installErrorReporting(): void {
     window.addEventListener('online', () => void flush())
     void flush()
   } catch {
-    // Telemetry never breaks Pedos.
+    // Telemetry never breaks Farty.
   }
 }

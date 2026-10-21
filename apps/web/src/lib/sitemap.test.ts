@@ -10,8 +10,8 @@ describe('sitemaps', () => {
   })
 
   test.each([
-    ['staging', 'https://staging.pedos.app'],
-    ['production', 'https://pedos.app'],
+    ['staging', 'https://staging.farty.fm'],
+    ['production', 'https://farty.fm'],
     ['', local]
   ])("on %s, the index lists the pages sitemap on the environment's host", async (env, origin) => {
     vi.stubEnv('SITE_ENV', env)
@@ -28,9 +28,9 @@ describe('sitemaps', () => {
     const body = await pagesSitemapResponse(ask('/sitemap-pages.xml')).text()
     const locs = [...body.matchAll(/<loc>([^<]*)<\/loc>/gu)].map(match => match[1])
     expect(locs).toEqual([
-      'https://pedos.app',
-      'https://pedos.app/privacy/',
-      'https://pedos.app/support/'
+      'https://farty.fm',
+      'https://farty.fm/privacy/',
+      'https://farty.fm/support/'
     ])
     expect(body).toMatch(/^<\?xml version="1.0" encoding="UTF-8"\?><urlset xmlns=/u)
   })

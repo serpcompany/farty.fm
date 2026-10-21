@@ -195,7 +195,7 @@ describe('signIn', () => {
     expect(libraryOwner()).toBe('user-b')
   })
 
-  // The code was right and the cookie is set, so a blocked localStorage isn't "Couldn't reach Pedos".
+  // The code was right and the cookie is set, so a blocked localStorage isn't "Couldn't reach Farty".
   it('signs in when localStorage is blocked', async () => {
     vi.stubGlobal('localStorage', blockedStorage())
     vi.stubGlobal(

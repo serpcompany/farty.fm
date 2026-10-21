@@ -12,7 +12,7 @@ function pngSize(png: Buffer): string {
   return `${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`
 }
 
-test('the manifest names Pedos, opens it full screen, and has its icons', async ({ page }) => {
+test('the manifest names Farty, opens it full screen, and has its icons', async ({ page }) => {
   await page.goto('/')
   const link = page.locator('link[rel="manifest"]')
   // Without credentials, Chrome can't fetch it behind the Staging password.
@@ -21,7 +21,7 @@ test('the manifest names Pedos, opens it full screen, and has its icons', async 
   const response = await page.request.get((await link.getAttribute('href')) ?? '')
   expect(response.headers()['content-type']).toContain('application/manifest+json')
   const manifest = await response.json()
-  expect(manifest).toMatchObject({ name: 'Pedos', start_url: '/', display: 'standalone' })
+  expect(manifest).toMatchObject({ name: 'Farty', start_url: '/', display: 'standalone' })
 
   const icons: { src: string; sizes: string; purpose: string }[] = manifest.icons
   for (const purpose of ['any', 'maskable']) {
@@ -79,7 +79,7 @@ test('the service worker opens the app shell offline', async ({ page, context })
 test.describe('on iPhone', () => {
   test.use({ userAgent: iPhoneSafari })
 
-  test('after the first saved Recording, says how to add Pedos to the Home Screen, once', async ({
+  test('after the first saved Recording, says how to add Farty to the Home Screen, once', async ({
     page
   }) => {
     await page.addInitScript(() => {
@@ -91,13 +91,13 @@ test.describe('on iPhone', () => {
         return true
       }
     })
-    const card = page.getByRole('complementary', { name: 'Install Pedos' })
+    const card = page.getByRole('complementary', { name: 'Install Farty' })
 
     await recordAndSave(page, 1.5)
     await expect(page.getByTestId('result-note')).toHaveText('G3')
     // Never over the new Recording's note.
     await expect(card).toBeHidden()
-    // A guest's farts last only the visit, so Pedos doesn't ask the browser to keep them
+    // A guest's farts last only the visit, so Farty doesn't ask the browser to keep them
     // (account.spec.ts checks it asks once signed in).
     expect(await page.evaluate(() => (window as unknown as { keepAsked: boolean }).keepAsked)).toBe(
       false
@@ -105,7 +105,7 @@ test.describe('on iPhone', () => {
 
     await page.getByRole('button', { name: 'Done' }).click()
     await expect(page).toHaveURL(/\/recordings\/$/)
-    await expect(card).toHaveText(/^Install Pedos\s*Tap\s+Share, then Add to Home Screen$/)
+    await expect(card).toHaveText(/^Install Farty\s*Tap\s+Share, then Add to Home Screen$/)
 
     await card.getByRole('button', { name: 'Close' }).click()
     await expect(card).toBeHidden()
@@ -121,7 +121,7 @@ test.describe('on Android', () => {
     await page.addInitScript(() => {
       const prompted = window as unknown as { prompted: boolean }
       prompted.prompted = false
-      // Offered until Pedos's listener takes it, as Chrome offers it once the page is ready.
+      // Offered until Farty's listener takes it, as Chrome offers it once the page is ready.
       const offer = () => {
         const event = Object.assign(new Event('beforeinstallprompt', { cancelable: true }), {
           prompt: async () => {
@@ -136,7 +136,7 @@ test.describe('on Android', () => {
   })
 
   test('after the first saved Recording, offers Chrome’s install prompt', async ({ page }) => {
-    const card = page.getByRole('complementary', { name: 'Install Pedos' })
+    const card = page.getByRole('complementary', { name: 'Install Farty' })
 
     await recordAndSave(page, 1.5)
     await page.getByRole('button', { name: 'Done' }).click()
@@ -147,13 +147,13 @@ test.describe('on Android', () => {
     await expect(card).toBeHidden()
   })
 
-  test('hides the offer once Pedos is installed', async ({ page }) => {
-    const card = page.getByRole('complementary', { name: 'Install Pedos' })
+  test('hides the offer once Farty is installed', async ({ page }) => {
+    const card = page.getByRole('complementary', { name: 'Install Farty' })
 
     await recordAndSave(page, 1.5)
     await page.getByRole('button', { name: 'Done' }).click()
     await expect(card.getByRole('button', { name: 'Install app' })).toBeVisible()
-    // Chrome fires this when Pedos is installed, from its prompt or its own menu.
+    // Chrome fires this when Farty is installed, from its prompt or its own menu.
     await page.evaluate(() => window.dispatchEvent(new Event('appinstalled')))
     await expect(card).toBeHidden()
   })

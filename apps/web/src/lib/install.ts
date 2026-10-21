@@ -1,10 +1,10 @@
 /**
- * Installing Pedos from the browser. Chrome on Android has its own install prompt
- * (`beforeinstallprompt`), which Pedos holds until it offers an Install app button. Safari on
- * iPhone has none, so Pedos says how to use Share, then Add to Home Screen.
+ * Installing Farty from the browser. Chrome on Android has its own install prompt
+ * (`beforeinstallprompt`), which Farty holds until it offers an Install app button. Safari on
+ * iPhone has none, so Farty says how to use Share, then Add to Home Screen.
  */
 
-/** How this browser installs Pedos: Chrome's prompt, or the Share sheet on iPhone and iPad. */
+/** How this browser installs Farty: Chrome's prompt, or the Share sheet on iPhone and iPad. */
 export type InstallRoute = 'prompt' | 'share-sheet'
 
 type BeforeInstallPromptEvent = Event & { prompt(): Promise<void> }
@@ -42,7 +42,7 @@ function changed(): void {
 
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', event => {
-    // Chrome would show its own banner now. Pedos offers to install after the first saved
+    // Chrome would show its own banner now. Farty offers to install after the first saved
     // Recording instead.
     event.preventDefault()
     deferredPrompt = event as BeforeInstallPromptEvent
@@ -55,7 +55,7 @@ if (typeof window !== 'undefined') {
   })
 }
 
-/** How this browser can install Pedos now, or null when it's installed or can't be. */
+/** How this browser can install Farty now, or null when it's installed or can't be. */
 export function currentInstallRoute(): InstallRoute | null {
   if (typeof window === 'undefined' || installed) return null
   return installRouteFor({
@@ -84,7 +84,7 @@ export async function promptInstall(): Promise<void> {
   await event.prompt()
 }
 
-/** Asks the browser to keep Pedos's storage, the Recordings, when the device runs low on space. */
+/** Asks the browser to keep Farty's storage, the Recordings, when the device runs low on space. */
 export async function keepRecordings(): Promise<boolean> {
   const storage = navigator.storage
   if (!storage?.persist) return false
@@ -95,13 +95,13 @@ export async function keepRecordings(): Promise<boolean> {
   }
 }
 
-/** Registers `public/sw.js`, which lets Pedos open offline. */
+/** Registers `public/sw.js`, which lets Farty open offline. */
 export function registerServiceWorker(): void {
   // Only a build registers it. On `next dev` it would outlive the session on a localhost port
   // that other apps use too, and answer for them whenever their dev server is down.
   if (process.env.NODE_ENV !== 'production' || !('serviceWorker' in navigator)) return
   // updateViaCache 'none': every update check fetches sw.js from the network.
   navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).catch(() => {
-    // Pedos still works online without it. It just can't open offline.
+    // Farty still works online without it. It just can't open offline.
   })
 }

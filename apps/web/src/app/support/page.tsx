@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata: Metadata = { title: 'Support · Pedos' }
+export const metadata: Metadata = { title: 'Support · Farty' }
 
 const questions = [
   {
-    q: "Pedos can't use the microphone.",
-    a: "Allow the microphone for this site in your browser's site settings, then reload. Pedos only listens while you are recording."
+    q: "Farty can't use the microphone.",
+    a: "Allow the microphone for this site in your browser's site settings, then reload. Farty only listens while you are recording."
   },
   {
     q: 'It says "No steady note this time".',
@@ -14,11 +14,11 @@ const questions = [
   },
   {
     q: 'It says "Didn’t catch that".',
-    a: 'Pedos heard nothing louder than the room. Hold the phone closer, tap Record, and tap Stop after the fart.'
+    a: 'Farty heard nothing louder than the room. Hold the phone closer, tap Record, and tap Stop after the fart.'
   },
   {
     q: 'It says "We kept the first fart".',
-    a: 'Pedos keeps the first fart in a Recording. Record one fart at a time.'
+    a: 'Farty keeps the first fart in a Recording. Record one fart at a time.'
   },
   {
     q: 'Where are my Recordings? Can you recover them?',
@@ -31,7 +31,7 @@ export default function SupportPage() {
     <article className="flex flex-col gap-3 px-4 pt-4 pb-6 text-sm leading-relaxed [&_a]:underline [&_h2]:pt-3 [&_h2]:text-lg [&_h2]:font-semibold [&_ol]:list-decimal [&_ol]:space-y-1.5 [&_ol]:pl-5">
       <h1 className="text-3xl font-bold tracking-tight">Support</h1>
       <p>
-        Pedos records your farts and finds the note of each one, using only your Recordings as
+        Farty records your farts and finds the note of each one, using only your Recordings as
         sound.
       </p>
       <p>
@@ -46,7 +46,7 @@ export default function SupportPage() {
           One fart per Recording.
         </li>
         <li>
-          <strong>Save.</strong> Pedos finds the fart&apos;s note, like G3, or tells you it is
+          <strong>Save.</strong> Farty finds the fart&apos;s note, like G3, or tells you it is
           noise-like.
         </li>
         <li>
@@ -63,7 +63,7 @@ export default function SupportPage() {
         </div>
       ))}
       <div className="flex flex-col gap-1">
-        <h3 className="font-semibold">Does Pedos collect my data?</h3>
+        <h3 className="font-semibold">Does Farty collect my data?</h3>
         <p>
           No. See the <Link href="/privacy/">privacy policy</Link>.
         </p>

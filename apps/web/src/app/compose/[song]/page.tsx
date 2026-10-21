@@ -18,7 +18,7 @@ export async function generateMetadata({
 }: PageProps<'/compose/[song]'>): Promise<Metadata> {
   const { song: id } = await params
   const song = songs.find(s => s.id === id)
-  return { title: song ? `${song.title} · Pedos` : 'Pedos' }
+  return { title: song ? `${song.title} · Farty` : 'Farty' }
 }
 
 export default async function SongCreatorPage({ params }: PageProps<'/compose/[song]'>) {

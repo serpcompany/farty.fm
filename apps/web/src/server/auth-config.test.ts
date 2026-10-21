@@ -36,7 +36,7 @@ import {
 // same `serveAuthRequest` the route serves. Each test starts from empty tables.
 
 const LOCAL = 'http://localhost:3115'
-const STAGING = 'https://staging.pedos.app'
+const STAGING = 'https://staging.farty.fm'
 const SECRET = 'a-test-secret-that-is-long-enough-0123456789'
 
 let bindings: LocalBindings
@@ -70,7 +70,7 @@ const staging = (sent: Sent, extra: Partial<AuthEnv> = {}): AuthEnv => ({
       return { messageId: 'test' }
     }
   },
-  EMAIL_FROM: 'Pedos <support@pedos.app>',
+  EMAIL_FROM: 'Farty <support@farty.fm>',
   BETTER_AUTH_URL: STAGING,
   BETTER_AUTH_SECRET: SECRET,
   STAGING_SIGNUP_ALLOWLIST: 'member@example.com',
@@ -429,7 +429,7 @@ describe('codes', () => {
     for (const email of emails) {
       const code = await mailedCode(email.to)
       expect(code).toMatch(/^\d{6}$/)
-      expect(email.subject).toBe(`${code} is your Pedos sign-in code`)
+      expect(email.subject).toBe(`${code} is your Farty sign-in code`)
       expect(email.html).toContain(`>${code}</p>`)
     }
   })
@@ -805,9 +805,9 @@ describe('Staging', () => {
     expect((await sendCode(staging(sent), 'other@example.com', { base: STAGING })).status).toBe(200)
     expect(sent).toHaveLength(1)
     expect(sent[0]).toMatchObject({
-      from: { name: 'Pedos', email: 'support@pedos.app' },
+      from: { name: 'Farty', email: 'support@farty.fm' },
       to: 'member@example.com',
-      subject: expect.stringMatching(/^\d{6} is your Pedos sign-in code$/)
+      subject: expect.stringMatching(/^\d{6} is your Farty sign-in code$/)
     })
   })
 
@@ -854,8 +854,8 @@ describe('Production', () => {
       SITE_ENV: 'production',
       DB: bindings.DB,
       EMAIL: { send: async () => ({ messageId: 'test' }) },
-      EMAIL_FROM: 'Pedos <support@pedos.app>',
-      BETTER_AUTH_URL: 'https://pedos.app',
+      EMAIL_FROM: 'Farty <support@farty.fm>',
+      BETTER_AUTH_URL: 'https://farty.fm',
       BETTER_AUTH_SECRET: SECRET
     }
     // scripts/smoke.sh's two sign-in checks, as CI sends them to Production's workers.dev host.
@@ -866,7 +866,7 @@ describe('Production', () => {
     const malformed = post(
       SIGN_IN_ENDPOINT,
       { email: 'not-an-email', otp: '000000' },
-      { base: workersDev, origin: 'https://pedos.app' }
+      { base: workersDev, origin: 'https://farty.fm' }
     )
     const refused = await serveAuthRequest(malformed, env)
     expect(refused.status).toBe(400)
@@ -878,21 +878,21 @@ describe('settings', () => {
   const deployed = {
     DB: {} as D1Database,
     SITE_ENV: 'production',
-    BETTER_AUTH_URL: 'https://pedos.app',
+    BETTER_AUTH_URL: 'https://farty.fm',
     BETTER_AUTH_SECRET: SECRET
   }
 
   it('need the secret, the environment’s own URL and Staging’s allowlist', () => {
     expect(resolveAuthSettings(deployed)).toMatchObject({
       ok: true,
-      settings: { baseURL: 'https://pedos.app', useSecureCookies: true, signupAllowlist: null }
+      settings: { baseURL: 'https://farty.fm', useSecureCookies: true, signupAllowlist: null }
     })
     const reasons = [
       { ...deployed, SITE_ENV: 'preview' },
       { ...deployed, BETTER_AUTH_SECRET: undefined },
       { ...deployed, BETTER_AUTH_SECRET: 'too-short' },
       { ...deployed, BETTER_AUTH_URL: undefined },
-      { ...deployed, BETTER_AUTH_URL: 'https://staging.pedos.app' },
+      { ...deployed, BETTER_AUTH_URL: 'https://staging.farty.fm' },
       { ...deployed, SITE_ENV: 'staging', BETTER_AUTH_URL: STAGING },
       { ...deployed, SITE_ENV: 'staging', BETTER_AUTH_URL: STAGING, STAGING_SIGNUP_ALLOWLIST: 'x' }
     ].map(env => {

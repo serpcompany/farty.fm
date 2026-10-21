@@ -39,7 +39,7 @@ async function fill(cookie: string) {
 }
 
 describe('PATCH /api/account/', () => {
-  it('turns Pedos news by email off and on', async () => {
+  it('turns Farty news by email off and on', async () => {
     const a = await signUp('A')
     const marketingEmail = async () => (await rowsOf(a.id)).users[0].marketingEmail
     expect(await marketingEmail()).toBe(true)

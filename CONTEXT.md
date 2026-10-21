@@ -1,6 +1,8 @@
-# Pedos
+# Farty
 
-Pedos is a web app (installable from the browser) that turns a person's fart recordings into recordings they can replay and Toots they can make: Songs played by their farts.
+Farty is a web app (installable from the browser) that turns a person's fart recordings into recordings they can replay and Toots they can make: Songs played by their farts.
+
+It was called Pedos until 2026-10-22 (ADR 0009). Users only ever see Farty. Internal names keep Pedos: the repository, folders, code identifiers and the `pedos` browser database.
 
 ## Recordings
 
@@ -70,7 +72,7 @@ _Avoid_: Musical Fruit, standard song creator
 
 **AI Song Creator**:
 The creation area where AI composes a new melody that is played using only the user's Recordings. It adds no vocals, instruments, or backing tracks.
-_Avoid_: Pedos AI, AI music
+_Avoid_: Farty AI, AI music
 
 ## Testing
 

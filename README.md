@@ -1,15 +1,17 @@
-# Pedos
+# Farty
 
 Turns fart Recordings into recognizable melodies, using only the Recordings themselves as sound.
 
-**Pedos is becoming a web app** (`apps/web/`, ADR 0007). Apple rejected the App Store submission because it won't accept fart apps (#75). The web app is being built slice by slice (#106). The iPhone app below is no longer built or released: TestFlight releases stopped on 2026-10-06 (#103).
+Farty was called Pedos until 2026-10-22 ([ADR 0009](docs/adr/0009-rename-pedos-to-farty.md)). The repository, folders, Workers and stored data keep the old name.
+
+**Farty is becoming a web app** (`apps/web/`, ADR 0007). Apple rejected the App Store submission because it won't accept fart apps (#75). The web app is being built slice by slice (#106). The iPhone app below is no longer built or released: TestFlight releases stopped on 2026-10-06 (#103).
 
 - **Plan:** the pinned [Web MVP roadmap](https://github.com/serpcompany/pedos-app/issues/106) issue, in build order.
 - **Vocabulary:** [`CONTEXT.md`](CONTEXT.md). **Decisions:** [`docs/adr/`](docs/adr/).
 
 ## Where it stands
 
-**The web app** (`apps/web/`) runs on Cloudflare Workers. Production is https://pedos.app from launch (#122), and Staging is https://staging.pedos.app (password `stagingpassword`, any username). It has the five tabs, recording and its note, the Recordings list, the Song Catalog and install from the browser. Agent docs: [`apps/web/AGENTS.md`](apps/web/AGENTS.md) and [`docs/agents/web.md`](docs/agents/web.md).
+**The web app** (`apps/web/`) runs on Cloudflare Workers. Production is https://farty.fm from launch (#122, #184), and Staging is https://staging.farty.fm (password `stagingpassword`, any username). It has the five tabs, recording and its note, the Recordings list, the Song Catalog and install from the browser. Agent docs: [`apps/web/AGENTS.md`](apps/web/AGENTS.md) and [`docs/agents/web.md`](docs/agents/web.md).
 
 **The iPhone app (history).** **v0.1.0 was a proof of concept** on sample data. Since then, the app records for real: TestFlight builds record your farts, save them, and find each one's pitch with Recording Analysis ported to Swift (`RecordingAnalysisKit/`, which matches the reference engine on all 23 Fixture Library Recordings). Debug builds still use the Fixture Library for the screens' UI tests.
 
@@ -40,7 +42,7 @@ The melody engine itself is proven in Python (`tools/melody-lab/`). Next comes p
 
 | Path | What it is |
 | --- | --- |
-| `apps/web/` | The Pedos web app (Next.js on Cloudflare Workers) |
+| `apps/web/` | The Farty web app (Next.js on Cloudflare Workers) |
 | `ios/` | The SwiftUI iPhone app (no longer released) (XcodeGen project, unit and UI tests) |
 | `catalog/` | Song Catalog: cited public-domain scores and their provenance |
 | `fixtures/recordings/` | Fixture Library: 23 approved real fart Recordings (internal use only) |

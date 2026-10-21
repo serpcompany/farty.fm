@@ -252,7 +252,7 @@ export async function patchToot(
 }
 
 /**
- * `PATCH /api/account/` with `{ marketingEmail }`: turns Pedos news by email on or off. 409 when
+ * `PATCH /api/account/` with `{ marketingEmail }`: turns Farty news by email on or off. 409 when
  * `LIBRARY_HEADER` names another account (`wrong_account`).
  */
 export async function patchAccount(

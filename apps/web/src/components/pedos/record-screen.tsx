@@ -21,7 +21,7 @@ const problems: Record<
 > = {
   microphoneOff: {
     title: 'Microphone is off',
-    message: "Pedos needs the microphone to record. Allow it in your browser's site settings."
+    message: "Farty needs the microphone to record. Allow it in your browser's site settings."
   },
   couldNotStart: { title: "Couldn't start recording" },
   interrupted: { title: 'Recording stopped', message: 'Nothing was saved.' }

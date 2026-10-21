@@ -8,7 +8,7 @@ const MAX_SAMPLE_RATE = 192_000
 const HEADER_BYTES = 44
 
 /**
- * The header of a WAV exactly as Pedos writes one (`encodeWav` in `src/lib/wav.ts`): a 44-byte
+ * The header of a WAV exactly as Farty writes one (`encodeWav` in `src/lib/wav.ts`): a 44-byte
  * header of mono 16-bit PCM, whose RIFF and data sizes match the file, and at least one sample.
  * Null for anything else, so the bucket only ever holds audio the app can play.
  */

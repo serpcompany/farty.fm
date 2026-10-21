@@ -266,7 +266,7 @@ describe('the service worker', () => {
       '/recordings/': '<script src="/_next/static/chunks/recordings-b.js"></script>B recordings',
       '/songs/': '<script src="/_next/static/chunks/songs-b.js"></script>B songs'
     }
-    // Pedos opens at the start page, and the tabs open by client-side navigation from there.
+    // Farty opens at the start page, and the tabs open by client-side navigation from there.
     await worker.request('/', { mode: 'navigate' })
 
     online = false

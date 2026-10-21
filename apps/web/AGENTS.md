@@ -1,6 +1,6 @@
-# Pedos web app
+# Farty web app
 
-The Pedos web app (ADR 0007). Read the repository's `AGENTS.md` first: its working rules apply here.
+The Farty web app (ADR 0007). Read the repository's `AGENTS.md` first: its working rules apply here.
 
 **Design.** The iPhone app is the approved design. No mockup round. Where `docs/design/` or an ADR differs from the Swift code, the Swift code wins.
 
