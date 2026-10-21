@@ -164,10 +164,27 @@ const row =
  * in: the email, Pedos news, Sign out and Delete account. A session that ended: Sign in again.
  */
 function AccountSection() {
-  const { account, openStep, retry, signOut, deleteAccount, setMarketingEmail } = useAccount()
+  const { account, openStep, retry, signOut, deleteAccount, setMarketingEmail, clearDevice } =
+    useAccount()
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   const [confirmsDelete, setConfirmsDelete] = useState(false)
+  /** Some farts haven't reached the account: wait, or sign out anyway. */
+  const [notUploaded, setNotUploaded] = useState(false)
+  const [confirmsClear, setConfirmsClear] = useState(false)
+
+  const [signingOut, setSigningOut] = useState(false)
+
+  const signOutNow = async (anyway: boolean) => {
+    setBusy(true)
+    setSigningOut(true)
+    setProblem(null)
+    const result = await signOut(anyway)
+    setBusy(false)
+    setSigningOut(false)
+    setNotUploaded(result === 'pending')
+    if (result === 'failed') setProblem("Couldn't sign out. Check your connection and try again.")
+  }
 
   /** Runs `action`, one at a time, and says `failure` if it fails. */
   const run = async (action: () => Promise<boolean>, failure: string) => {
@@ -212,12 +229,50 @@ function AccountSection() {
               <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
             </button>
           </li>
+          {account.status === 'expired' && (
+            <li>
+              <button
+                type="button"
+                className={`${row} text-destructive`}
+                onClick={() => setConfirmsClear(true)}
+              >
+                Clear this device
+              </button>
+            </li>
+          )}
         </ul>
         <p className="px-4 pt-1.5 text-xs text-muted-foreground">
           {account.status === 'expired'
             ? 'Your session ended. Your farts stay on this device until you sign in.'
             : 'Without an account, your farts are gone when you close Pedos.'}
         </p>
+        <AlertDialog open={confirmsClear} onOpenChange={open => !busy && setConfirmsClear(open)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Clear this device?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This deletes the Recordings and Toots on this device. The ones saved to your account
+                stay there.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="h-11 text-base" disabled={busy}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                className="h-11 text-base"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true)
+                  await clearDevice()
+                }}
+              >
+                {busy ? <Spinner /> : 'Clear'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </>
     )
   }
@@ -250,11 +305,10 @@ function AccountSection() {
             type="button"
             className={row}
             disabled={busy}
-            onClick={() =>
-              void run(signOut, "Couldn't sign out. Check your connection and try again.")
-            }
+            onClick={() => void signOutNow(false)}
           >
             Sign out
+            {signingOut && !notUploaded && <Spinner />}
           </button>
         </li>
         <li>
@@ -299,6 +353,30 @@ function AccountSection() {
               }}
             >
               {busy ? <Spinner /> : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={notUploaded} onOpenChange={open => !busy && setNotUploaded(open)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Not uploaded yet</AlertDialogTitle>
+            <AlertDialogDescription>
+              Some farts on this device haven't reached your account. Check your connection and
+              wait, or sign out now and lose them.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-11 text-base" disabled={busy}>
+              Wait
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              className="h-11 text-base"
+              disabled={busy}
+              onClick={() => void signOutNow(true)}
+            >
+              {busy ? <Spinner /> : 'Sign out anyway'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -55,6 +55,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "0.31.11",
+    "fake-indexeddb": "^6.2.6",
     "happy-dom": "^20.14.5",
     "mpg123-decoder": "^1.0.3",
     "tailwindcss": "^4",

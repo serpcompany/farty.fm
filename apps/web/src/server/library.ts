@@ -7,9 +7,11 @@ import {
   itemStatus,
   type Kind,
   libraryChanges,
+  purgeTombstones,
   type RecordingRow,
   renameToot,
   setMarketingEmail,
+  TOMBSTONE_RETENTION_MS,
   type TootRow,
   tombstone,
   uploadState
@@ -88,7 +90,9 @@ const gone = () => apiError(410, 'deleted')
 
 /**
  * `GET /api/library/?since=`: what changed since the `cursor` an earlier answer gave (everything
- * without `since`), with the ids of Recordings and Toots deleted since.
+ * without `since`), with the ids of Recordings and Toots deleted since. `full` says the answer
+ * lists every live Recording and Toot: `since` is older than the tombstones are kept, so a browser
+ * drops what it holds from the account that isn't listed.
  */
 export async function getLibrary({ db }: Stores, user: SessionUser, request: Request) {
   const since = new URL(request.url).searchParams.get('since') ?? '0'
@@ -99,6 +103,7 @@ export async function getLibrary({ db }: Stores, user: SessionUser, request: Req
     rows.filter(r => r.deletedAt).map(r => r.id)
   return Response.json({
     cursor: changes.cursor,
+    full: Number(since) < changes.cursor - TOMBSTONE_RETENTION_MS,
     recordings: live(changes.recordings).map(toRecording),
     toots: live(changes.toots).map(toToot),
     deleted: { recordings: deleted(changes.recordings), toots: deleted(changes.toots) }
@@ -106,9 +111,16 @@ export async function getLibrary({ db }: Stores, user: SessionUser, request: Req
 }
 
 /**
+ * The header a browser's upload names its library's account in (`pedos.account`). A library that
+ * isn't the session's account's never uploads to it: a sign-in in another tab can change the
+ * cookie while this tab's uploads are on their way.
+ */
+export const LIBRARY_HEADER = 'x-pedos-library'
+
+/**
  * `PUT /api/{recordings|toots}/{id}/`: keeps a new Recording or Toot and its WAV. 201 once kept,
  * 200 if it already was (an upload that's retried changes nothing), 410 if it was deleted, 409 at
- * the limit.
+ * the limit, or when `LIBRARY_HEADER` names another account (`wrong_account`).
  */
 export async function putItem(
   kind: Kind,
@@ -118,6 +130,8 @@ export async function putItem(
   request: Request
 ): Promise<Response> {
   if (!isItemId(id)) return notFound()
+  const library = request.headers.get(LIBRARY_HEADER)
+  if (library !== null && library !== user.id) return apiError(409, 'wrong_account')
   const { maxAudioBytes, maxItems } = LIMITS[kind]
   const upload = await readUpload(request, maxAudioBytes)
   if (upload instanceof Response) return upload
@@ -165,6 +179,8 @@ export async function putItem(
 /**
  * `DELETE /api/{recordings|toots}/{id}/`: leaves a tombstone, so other browsers delete it too, then
  * deletes the WAV. Deleting a tombstone again deletes the WAV again, so a retry finishes the job.
+ * Each delete also purges the user's tombstones older than `TOMBSTONE_RETENTION_MS`, so they
+ * number at most the deletes of that long.
  */
 export async function deleteItem(
   kind: Kind,
@@ -176,6 +192,7 @@ export async function deleteItem(
   const before = await tombstone(db, kind, user.id, id)
   if (before === null) return notFound()
   await media.delete(audioKey(user.id, kind, id))
+  await purgeTombstones(db, user.id)
   return new Response(null, { status: 204 })
 }
 

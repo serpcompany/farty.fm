@@ -1,4 +1,5 @@
 import { type Account, readSession } from './account'
+import { claimLibrary } from './library-sync'
 import { clearLibrary } from './recording-store'
 
 // Guests keep nothing beyond the visit (owner, 2026-10-21, #150). Without an account, Recordings
@@ -40,14 +41,21 @@ let opening: { account: Promise<Account>; library: Promise<void> } | null = null
 
 /**
  * Starts this page's visit, once: reads the session (which renews it) and, for a guest's new
- * visit, clears the last one's Recordings and Toots. `library` resolves once they can be loaded.
+ * visit, clears the last one's Recordings and Toots. Signed in, the library becomes the account's
+ * (`claimLibrary`): another account's is cleared first. `library` resolves once they can be
+ * loaded.
  */
 export function openVisit(): { account: Promise<Account>; library: Promise<void> } {
   if (!opening) {
     const account = readSession()
-    opening = { account, library: startVisit(account) }
+    opening = { account, library: startVisit(account).then(() => claimOnOpen(account)) }
   }
   return opening
+}
+
+async function claimOnOpen(account: Promise<Account>): Promise<void> {
+  const read = await account
+  if (read.status === 'signedIn') await claimLibrary(read.id).catch(() => false)
 }
 
 async function startVisit(account: Promise<Account>): Promise<void> {

@@ -7,7 +7,7 @@ export type Account =
   /** Not known yet: the session is being read. */
   | { status: 'checking' }
   | { status: 'signedOut' }
-  | { status: 'signedIn'; email: string; marketingEmail: boolean }
+  | { status: 'signedIn'; id: string; email: string; marketingEmail: boolean }
   /**
    * Signed out, in a browser that was signed in: the session ended (it lasts 7 days without an
    * open) or its cookie went. This browser's copy is still the account's, so it stays.
@@ -16,11 +16,13 @@ export type Account =
   /** The session couldn't be read: offline, or sign-in isn't set up here. */
   | { status: 'unreachable' }
 
-type User = { email?: unknown; marketingEmail?: unknown }
+type User = { id?: unknown; email?: unknown; marketingEmail?: unknown }
 
 function signedIn(user: User): Account {
   return {
     status: 'signedIn',
+    // Without one, this browser's library never syncs (`claimLibrary`).
+    id: typeof user.id === 'string' ? user.id : '',
     email: String(user.email ?? ''),
     // News is on unless the account says it's off (the server's default, #150).
     marketingEmail: user.marketingEmail !== false
@@ -45,10 +47,7 @@ export async function readSession(): Promise<Account> {
     })
     if (!response.ok) return { status: 'unreachable' }
     const body = (await response.json()) as { user?: User } | null
-    if (body?.user) {
-      rememberAccount()
-      return signedIn(body.user)
-    }
+    if (body?.user) return signedIn(body.user)
     return hadAccount() ? { status: 'expired' } : { status: 'signedOut' }
   } catch {
     return { status: 'unreachable' }
@@ -58,17 +57,23 @@ export async function readSession(): Promise<Account> {
 }
 
 /**
- * localStorage: this browser has been signed in, so its Recordings and Toots are an account's.
- * Set on sign-in, removed on Sign out and Delete account. Without it, signed out is a guest.
+ * localStorage: the id of the account this browser's Recordings and Toots are, so signed out
+ * they're kept (`expired`) and they upload to no other account. Set when a signed-in browser
+ * claims its library (`claimLibrary` in `library-sync.ts`), removed on Sign out, Delete account
+ * and Clear this device. Without it, signed out is a guest. `1` (`legacyOwner`) is an account's
+ * whose id wasn't kept, before #156.
  */
 const accountKey = 'pedos.account'
+export const legacyOwner = '1'
 
-function rememberAccount(): void {
-  try {
-    localStorage.setItem(accountKey, '1')
-  } catch {
-    // Nothing to remember it in. With localStorage blocked, a guest's farts aren't cleared either.
-  }
+/** The account this browser's library is, or null for a guest's. Throws if storage is blocked. */
+export function libraryOwner(): string | null {
+  return localStorage.getItem(accountKey)
+}
+
+/** Makes this browser's library `accountId`'s. Throws if storage is blocked. */
+export function setLibraryOwner(accountId: string): void {
+  localStorage.setItem(accountKey, accountId)
 }
 
 function hadAccount(): boolean {
@@ -151,7 +156,6 @@ export async function signIn(email: string, code: string): Promise<Result<Accoun
     const response = await post('/api/auth/sign-in/email-otp', { email: email.trim(), otp: code })
     if (!response.ok) return { ok: false, problem: await problemOf(response) }
     const body = (await response.json()) as { user?: User }
-    rememberAccount()
     return { ok: true, value: signedIn(body.user ?? { email }) }
   } catch {
     return { ok: false, problem: 'failed' }

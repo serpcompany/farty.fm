@@ -190,6 +190,85 @@ test("Profile's account: the email, Pedos news, and Sign out, which leaves nothi
   expect(await page.evaluate(() => localStorage.getItem('pedos.account'))).toBeNull()
 })
 
+test("Sign out uploads the farts not uploaded yet, and while it can't, Wait keeps the account", async ({
+  page
+}, testInfo) => {
+  test.setTimeout(120_000)
+  const email = newEmail(testInfo, 'pending')
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, email)
+  // Offline for uploads: the Recording stays in the outbox.
+  await page.route('**/api/recordings/**', route => route.abort('internetdisconnected'))
+  await recordAndSave(page, 1.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+
+  await tab(page, 'Profile').click()
+  await page.getByRole('button', { name: 'Sign out' }).click()
+  const dialog = page.getByRole('alertdialog', { name: 'Not uploaded yet' })
+  await expect(dialog).toContainText(
+    "Some farts on this device haven't reached your account. Check your connection and wait, or sign out now and lose them."
+  )
+  const wait = dialog.getByRole('button', { name: 'Wait' })
+  for (const control of [wait, dialog.getByRole('button', { name: 'Sign out anyway' })]) {
+    await expectTappable(control)
+  }
+  await page.screenshot({ path: testInfo.outputPath('not-uploaded.png') })
+  await wait.click()
+  await expect(dialog).toBeHidden()
+  await expect(page.getByTestId('account-email')).toHaveText(email)
+  expect((await session(page))?.user.email).toBe(email)
+  expect(await recordingsStored(page)).toBe(1)
+
+  // Back online, Sign out uploads it, then signs out and leaves nothing here.
+  await page.unrouteAll()
+  const sent: string[] = []
+  page.on('request', request => sent.push(`${request.method()} ${new URL(request.url()).pathname}`))
+  await page.getByRole('button', { name: 'Sign out' }).click()
+  await expect(page.getByRole('button', { name: 'Save to an account' })).toBeVisible()
+  expect(await recordingsStored(page)).toBe(0)
+  const upload = sent.findIndex(line => /^PUT \/api\/recordings\/[\w-]+\/$/.test(line))
+  expect(upload).toBeGreaterThanOrEqual(0)
+  expect(upload).toBeLessThan(sent.indexOf('POST /api/auth/sign-out'))
+
+  // It's in the account: signed in again, the Recording comes back.
+  await signInByApi(page, email)
+  await page.goto('/recordings/')
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+  await expect(page.getByRole('button', { name: /^Recording 1, \d+\.\d s, G3$/ })).toBeVisible()
+})
+
+test('Sign out anyway signs out and leaves behind the farts not uploaded', async ({
+  page
+}, testInfo) => {
+  test.setTimeout(120_000)
+  const email = newEmail(testInfo, 'anyway')
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, email)
+  await page.route('**/api/recordings/**', route => route.abort('internetdisconnected'))
+  await recordAndSave(page, 1.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+
+  await tab(page, 'Profile').click()
+  await page.getByRole('button', { name: 'Sign out' }).click()
+  await page
+    .getByRole('alertdialog', { name: 'Not uploaded yet' })
+    .getByRole('button', { name: 'Sign out anyway' })
+    .click()
+  await expect(page.getByRole('button', { name: 'Save to an account' })).toBeVisible()
+  expect(await session(page)).toBeNull()
+  expect(await recordingsStored(page)).toBe(0)
+
+  // Signed in again, the account never had it.
+  await page.unrouteAll()
+  await signInByApi(page, email)
+  await page.goto('/recordings/')
+  await expect(page.getByText('No Recordings yet')).toBeVisible()
+})
+
 test('Delete account asks first, then deletes the account and leaves nothing here', async ({
   page
 }, testInfo) => {
@@ -350,7 +429,7 @@ test("a Recording saved while Pedos still reads the session isn't cleared with t
   expect(await recordingsStored(visit)).toBe(1)
 })
 
-test("an account's farts stay when its session ends, and Pedos asks to sign in again", async ({
+test("an account's farts stay when its session ends: Pedos asks to sign in again, or clears them", async ({
   page,
   context
 }, testInfo) => {
@@ -380,6 +459,26 @@ test("an account's farts stay when its session ends, and Pedos asks to sign in a
   const again = reopened.getByRole('button', { name: 'Sign in again' })
   await expectTappable(again)
   await expect(step).toBeHidden()
+
+  // Not their device any more: Clear asks first, then leaves nothing here.
+  const clear = reopened.getByRole('button', { name: 'Clear this device' })
+  await expectTappable(clear)
+  await clear.click()
+  const dialog = reopened.getByRole('alertdialog', { name: 'Clear this device?' })
+  await expect(dialog).toContainText(
+    'This deletes the Recordings and Toots on this device. The ones saved to your account stay there.'
+  )
+  for (const control of ['Cancel', 'Clear']) {
+    await expectTappable(dialog.getByRole('button', { name: control, exact: true }))
+  }
+  await reopened.screenshot({ path: testInfo.outputPath('clear-this-device.png') })
+  await dialog.getByRole('button', { name: 'Cancel' }).click()
+  expect(await recordingsStored(reopened)).toBe(1)
+  await clear.click()
+  await dialog.getByRole('button', { name: 'Clear', exact: true }).click()
+  await expect(reopened.getByRole('button', { name: 'Save to an account' })).toBeVisible()
+  expect(await recordingsStored(reopened)).toBe(0)
+  expect(await reopened.evaluate(() => localStorage.getItem('pedos.account'))).toBeNull()
 })
 
 test("Profile retries an account it couldn't reach, and reads it again back online", async ({

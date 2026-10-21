@@ -20,6 +20,7 @@ import {
 } from '@/lib/audio/recorder'
 import type { Song } from '@/lib/catalog/song'
 import { songs } from '@/lib/catalog/songs.generated'
+import { onLibraryChanged } from '@/lib/library-sync'
 import { nearestNote } from '@/lib/pitch'
 import {
   type CoverageChanges,
@@ -254,6 +255,51 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         setToots(current => current ?? [])
       })
   }, [runAnalysis])
+
+  // What a sync changes shows at once: Recordings and Toots from the account's other browsers,
+  // their renames and deletes (`library-sync.ts`).
+  const playing = useRef(nowPlaying)
+  useEffect(() => {
+    playing.current = nowPlaying
+  }, [nowPlaying])
+  useEffect(
+    () =>
+      onLibraryChanged(change => {
+        if (change.reset) {
+          stopPlayback()
+          void store.loadRecordings().then(setRecordings, () => {})
+          void tootStore.loadToots().then(setToots, () => {})
+          return
+        }
+        const { recordings: added, toots: changed, deleted } = change
+        const gone = [...deleted.recordings, ...deleted.toots.map(id => tootPlayback(id))]
+        const current = playing.current
+        if (current && gone.some(key => current === key || current.startsWith(`${key}:`))) {
+          stopPlayback()
+        }
+        for (const id of deleted.toots) forgetDecoded(`toot-${id}`)
+        setRecordings(list => {
+          if (!list) return list
+          const kept = list.filter(r => !deleted.recordings.includes(r.id))
+          const ids = new Set(kept.map(r => r.id))
+          return [...kept, ...added.filter(r => !ids.has(r.id))].sort((a, b) => a.number - b.number)
+        })
+        setToots(list => {
+          if (!list) return list
+          const kept = list.filter(t => !deleted.toots.includes(t.id))
+          const fresh = new Map(changed.map(t => [t.id, t]))
+          const merged = kept.map(t => {
+            const renamed = fresh.get(t.id)
+            return renamed ? { ...t, title: renamed.title } : t
+          })
+          const ids = new Set(kept.map(t => t.id))
+          return [...merged, ...changed.filter(t => !ids.has(t.id))].sort(
+            (a, b) => b.createdAt - a.createdAt
+          )
+        })
+      }),
+    []
+  )
 
   const finishWelcome = useCallback(() => {
     localStorage.setItem(welcomedKey, '1')

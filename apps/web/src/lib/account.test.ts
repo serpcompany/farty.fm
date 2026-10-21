@@ -2,11 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   clearStepDraft,
   forgetAccount,
+  libraryOwner,
   problemOf,
   readSession,
   readStepDraft,
   type StepOffers,
   saveStepDraft,
+  setLibraryOwner,
   signIn,
   stepOffer,
   stopStepOffers,
@@ -105,9 +107,10 @@ describe('readSession', () => {
   })
 
   it('reads a session as signed in, with news on unless the account turned it off', async () => {
-    answer(Response.json({ session: {}, user: { email: 'a@example.com' } }))
+    answer(Response.json({ session: {}, user: { id: 'user-a', email: 'a@example.com' } }))
     expect(await readSession()).toEqual({
       status: 'signedIn',
+      id: 'user-a',
       email: 'a@example.com',
       marketingEmail: true
     })
@@ -150,9 +153,8 @@ describe('readSession', () => {
   })
 
   // An ended session must not read as a guest's: that would clear the account's farts (visit.ts).
-  it('reads signed out as expired in a browser that was signed in, until it signs out', async () => {
-    answer(Response.json({ session: {}, user: { email: 'a@example.com' } }))
-    await readSession()
+  it("reads signed out as expired where the library is an account's, until it signs out", async () => {
+    setLibraryOwner('user-a')
     answer(Response.json(null))
     expect(await readSession()).toEqual({ status: 'expired' })
     forgetAccount()
@@ -175,14 +177,20 @@ describe('readSession', () => {
 })
 
 describe('signIn', () => {
-  it("remembers that this browser's farts are an account's", async () => {
+  // A sign-in never names whose this browser's library is: `claimLibrary` does, once it has
+  // checked it isn't another account's. A sign-in that wrote it would hand that one over.
+  it("signs in as the account's id, and leaves this browser's library unclaimed", async () => {
     vi.stubGlobal('localStorage', memoryStorage())
+    setLibraryOwner('user-b')
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => Response.json({ user: { email: 'a@example.com' } }))
+      vi.fn(async () => Response.json({ user: { id: 'user-a', email: 'a@example.com' } }))
     )
-    expect(await signIn('a@example.com', '123456')).toMatchObject({ ok: true })
-    expect(localStorage.getItem('pedos.account')).toBe('1')
+    expect(await signIn('a@example.com', '123456')).toMatchObject({
+      ok: true,
+      value: { status: 'signedIn', id: 'user-a' }
+    })
+    expect(libraryOwner()).toBe('user-b')
   })
 
   // The code was right and the cookie is set, so a blocked localStorage isn't "Couldn't reach Pedos".
