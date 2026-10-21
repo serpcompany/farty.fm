@@ -14,7 +14,7 @@ const questions = [
   },
   {
     q: 'It says "Didn’t catch that".',
-    a: 'The take was empty: Stop was tapped right away. Tap Record, then Stop after the fart.'
+    a: 'Pedos heard nothing louder than the room. Hold the phone closer, tap Record, and tap Stop after the fart.'
   },
   {
     q: 'It says "We kept the first fart".',
