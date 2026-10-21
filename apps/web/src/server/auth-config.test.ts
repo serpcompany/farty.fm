@@ -153,6 +153,13 @@ const rows = async <T>(sql: string, ...values: unknown[]) =>
       .all<T>()
   ).results
 
+/** The `auth_site_code_limit` lines logged in this test. */
+const siteLimitLines = () =>
+  vi
+    .mocked(console.warn)
+    .mock.calls.map(([line]) => String(line))
+    .filter(line => line.startsWith('auth_site_code_limit '))
+
 describe('the endpoints', () => {
   it('serves only the four, of every route Better Auth registers', async () => {
     const resolved = resolveAuthSettings(local())
@@ -602,17 +609,81 @@ describe('rate limits, in D1', () => {
     expect(await mailCount('fan@example.com')).toBe(20)
   })
 
-  it('send 300 code emails an hour across the site', async () => {
+  it('spend per email and client, then per email, then site-wide, which counts only codes that go out', async () => {
+    const sent: Sent = []
+    const env = staging(sent)
+    const ask = async (email: string, client: number, times = 1) => {
+      for (let n = 1; n <= times; n++) {
+        const response = await sendCode(env, email, { base: STAGING, ip: `198.51.100.${client}` })
+        expect(await answer(response)).toEqual({ status: 200, body: { success: true } })
+      }
+    }
+    // One client asks 10 times, Better Auth's most: 5 codes go out, and its other 5 requests
+    // spend none of the email's 20...
+    await ask('member@example.com', 1, 10)
+    expect(sent).toHaveLength(5)
+    // ...so three other clients still get the other 15.
+    for (const client of [2, 3, 4]) await ask('member@example.com', client, 5)
+    expect(sent).toHaveLength(20)
+    // Held past the email's 20, and off Staging's allowlist: neither counts site-wide.
+    await ask('member@example.com', 5)
+    await ask('other@example.com', 6)
+    expect(sent).toHaveLength(20)
+    expect(await rows('SELECT count FROM rate_limit WHERE key = ?', SITE_CODES_KEY)).toEqual([
+      { count: 20 }
+    ])
+    expect(siteLimitLines()).toEqual([])
+  })
+
+  it('send 300 code emails an hour across the site, and log each request that holds', async () => {
+    const windowEnds = Date.now() + 30 * 60_000
     await bindings.DB.prepare(
       'INSERT INTO rate_limit (id, key, count, last_request) VALUES (?, ?, ?, ?)'
     )
-      .bind('site', SITE_CODES_KEY, 299, Date.now() + 30 * 60_000)
+      .bind('site', SITE_CODES_KEY, 299, windowEnds)
       .run()
     expect((await sendCode(local(), 'fan1@example.com')).status).toBe(200)
+    expect(siteLimitLines()).toEqual([])
     const held = await sendCode(local(), 'fan2@example.com', { ip: '203.0.113.9' })
     expect(await answer(held)).toEqual({ status: 200, body: { success: true } })
     expect(await mailCount('fan1@example.com')).toBe(1)
     expect(await mailCount('fan2@example.com')).toBe(0)
+    // One line: the limit and the seconds left in its window, with no email, client or key.
+    const lines = siteLimitLines()
+    expect(lines).toHaveLength(1)
+    const fields = JSON.parse(lines[0].slice('auth_site_code_limit '.length))
+    expect(fields).toEqual({ max: 300, windowSeconds: 3600, retryAfterSeconds: expect.any(Number) })
+    expect(fields.retryAfterSeconds).toBeGreaterThan(29 * 60)
+    expect(fields.retryAfterSeconds).toBeLessThanOrEqual(30 * 60)
+    expect(lines[0]).not.toMatch(/fan|example|203\.0\.113|[0-9a-f]{64}/i)
+  })
+
+  it('find each row a spend reads or deletes through an index, never by reading the table', async () => {
+    // The statements consumeSlot runs, as it runs them.
+    const prepared: string[] = []
+    const recording = {
+      prepare(sql: string) {
+        prepared.push(sql)
+        return bindings.DB.prepare(sql)
+      },
+      batch: (statements: D1PreparedStatement[]) => bindings.DB.batch(statements)
+    } as unknown as D1Database
+    expect((await consumeSlot(recording, 'x', Date.now(), { window: 60, max: 1 })).allowed).toBe(
+      true
+    )
+    const plans = await Promise.all(
+      prepared.map(async sql => {
+        const parameters = Math.max(0, ...[...sql.matchAll(/\?(\d+)/g)].map(([, n]) => Number(n)))
+        const plan = await rows<{ detail: string }>(
+          `EXPLAIN QUERY PLAN ${sql}`,
+          ...Array(parameters).fill(0)
+        )
+        return plan.map(step => step.detail)
+      })
+    )
+    expect(prepared[0]).toMatch(/^DELETE FROM rate_limit WHERE last_request <= \?1$/)
+    expect(plans[0]).toEqual([expect.stringMatching(/ USING .*INDEX rate_limit_last_request_idx /)])
+    expect(plans.flat().filter(step => /\bSCAN rate_limit\b/.test(step))).toEqual([])
   })
 
   it('keep no email or IP address in their keys', async () => {
@@ -772,6 +843,32 @@ describe('Staging', () => {
       { base: workersDev, origin: STAGING }
     )
     const refused = await serveAuthRequest(malformed, staging(sent))
+    expect(refused.status).toBe(400)
+    expect(refused.headers.get('content-type')).toMatch(/^application\/json/)
+  })
+})
+
+describe('Production', () => {
+  it('answers the smoke test on workers.dev', async () => {
+    const env: AuthEnv = {
+      SITE_ENV: 'production',
+      DB: bindings.DB,
+      EMAIL: { send: async () => ({ messageId: 'test' }) },
+      EMAIL_FROM: 'Pedos <support@pedos.app>',
+      BETTER_AUTH_URL: 'https://pedos.app',
+      BETTER_AUTH_SECRET: SECRET
+    }
+    // scripts/smoke.sh's two sign-in checks, as CI sends them to Production's workers.dev host.
+    const workersDev = 'https://pedos-web-production.serpcompany.workers.dev'
+    const session = await serveAuthRequest(get(GET_SESSION_ENDPOINT, { base: workersDev }), env)
+    expect(session.headers.get('content-type')).toMatch(/^application\/json/)
+    expect(await answer(session)).toEqual({ status: 200, body: null })
+    const malformed = post(
+      SIGN_IN_ENDPOINT,
+      { email: 'not-an-email', otp: '000000' },
+      { base: workersDev, origin: 'https://pedos.app' }
+    )
+    const refused = await serveAuthRequest(malformed, env)
     expect(refused.status).toBe(400)
     expect(refused.headers.get('content-type')).toMatch(/^application\/json/)
   })

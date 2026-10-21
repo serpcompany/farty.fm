@@ -31,7 +31,8 @@ import { deployment, isLocalHost } from './environment'
  *   keyed by `BETTER_AUTH_SECRET`, so a copy of the database can't be brute-forced into codes.
  * - **Limits** live in D1's `rate_limit` table, keyed by HMACs, never an email or IP address:
  *   Better Auth's per-client limits (`RATE_LIMITS`, a 429) and the hook's own (`LIMITS`): codes per
- *   email and client, per email, site-wide, and sign-in guesses per client an hour.
+ *   email and client, per email, site-wide, and sign-in guesses per client an hour. A request the
+ *   site-wide one holds logs `auth_site_code_limit`.
  * - **No answer says whether an email has an account.** A code request for any valid email answers
  *   `{ success: true }`, sent or not (a per-email or site-wide limit, Staging's sign-up allowlist),
  *   and every wrong guess answers `INVALID_OTP`.
@@ -245,7 +246,9 @@ export type SlotResult = { allowed: boolean; retryAfter: number | null }
  * Spends one slot of `key`'s window, atomically, in `rate_limit`: allowed while fewer than `max`
  * were spent in the window, which starts at the first and lasts `window` seconds. Each row's
  * `last_request` holds when its window ends, and every call first deletes the rows whose window
- * has ended, so no row outlasts its window by more than the time to the next request.
+ * has ended, so no row outlasts its window by more than the time to the next request. Each
+ * statement goes through an index (`rate_limit_last_request_idx`, and the unique one on `key`), so
+ * a call never reads every live row.
  */
 export async function consumeSlot(
   database: D1Database,
@@ -268,6 +271,16 @@ export async function consumeSlot(
   if (spent.results.length > 0) return { allowed: true, retryAfter: null }
   const ends = row.results[0]?.last_request ?? now + window * 1000
   return { allowed: false, retryAfter: Math.max(1, Math.ceil((ends - now) / 1000)) }
+}
+
+/**
+ * The site-wide code limit held a request: one line with the limit and the seconds until its
+ * window ends, never an email, a client or a key. Every held request logs it until then.
+ */
+function logSiteCodeLimit(retryAfter: number | null): void {
+  const { max, window } = LIMITS.codesSiteWide
+  const fields = { max, windowSeconds: window, retryAfterSeconds: retryAfter }
+  console.warn(`auth_site_code_limit ${JSON.stringify(fields)}`)
 }
 
 /** Better Auth's per-client limiter, on `consumeSlot` with HMAC keys. */
@@ -391,20 +404,23 @@ export function createAuth({ db, settings, email }: CreateAuthOptions) {
           }
           const client = clientOf(ctx.request, ctx.context.options)
           const now = Date.now()
-          const spend = async (key: string, rule: SlotRule) =>
-            (await consumeSlot(db.$client, key, now, rule)).allowed
-          // In order, each spent only when the ones before allow it. The site's count is last,
-          // so it counts only codes that go out.
-          const sends =
-            (await spend(
-              await emailClientLimitKey(settings.secret, address, client),
-              LIMITS.codesPerEmailAndClient
-            )) &&
-            (await spend(await emailLimitKey(settings.secret, address), LIMITS.codesPerEmail)) &&
-            settings.signupAllowlist?.has(address) !== false &&
-            (await spend(SITE_CODES_KEY, LIMITS.codesSiteWide))
+          const spend = (key: string, rule: SlotRule) => consumeSlot(db.$client, key, now, rule)
           // Held by a limit or the allowlist, it answers as a sent code would.
-          if (!sends) return ctx.json({ success: true })
+          const held = () => ctx.json({ success: true })
+          // In order, each spent only when the ones before allow it: one client's requests past
+          // its 5 don't spend the email's 20, and the site's count is last, so it counts only
+          // codes that go out. `auth-config.test.ts` pins the order.
+          const perClient = await emailClientLimitKey(settings.secret, address, client)
+          if (!(await spend(perClient, LIMITS.codesPerEmailAndClient)).allowed) return held()
+          const perEmail = await emailLimitKey(settings.secret, address)
+          if (!(await spend(perEmail, LIMITS.codesPerEmail)).allowed) return held()
+          if (settings.signupAllowlist?.has(address) === false) return held()
+          const site = await spend(SITE_CODES_KEY, LIMITS.codesSiteWide)
+          if (!site.allowed) {
+            // Nobody gets a code until the window ends, so say so, with no address or client.
+            logSiteCodeLimit(site.retryAfter)
+            return held()
+          }
           return
         }
         if (ctx.path === SIGN_IN_ENDPOINT) {

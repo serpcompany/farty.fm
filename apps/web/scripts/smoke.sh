@@ -14,10 +14,10 @@
 # environment's own host. Off localhost it checks that host too, and `www` for Production, unless
 # Bot Fight Mode blocks this machine there.
 #
-# Sign-in (#152), off localhost: the dev mailbox (/dev/mail/) is never served, and on Staging the
-# session endpoint answers JSON and a malformed sign-in gets a 400. A local preview's sign-in is the
-# e2e journey's (e2e/sign-in.spec.ts), and Production's waits on its secret
-# (.github/workflows/web-auth-secret.yml).
+# Sign-in (#152), off localhost: the dev mailbox (/dev/mail/) is never served, the session endpoint
+# answers JSON, and a malformed sign-in gets a 400. Both need the environment's BETTER_AUTH_SECRET
+# (.github/workflows/web-auth-secret.yml); without it they get a 503. A local preview's sign-in is
+# the e2e journey's (e2e/sign-in.spec.ts).
 set -euo pipefail
 
 usage='usage: smoke.sh <base-url> <staging|production>'
@@ -301,11 +301,9 @@ fi
 if [[ ! "$base" =~ $local_base ]]; then
   tries=10
   eventually 'the dev mailbox is not served' answers /dev/mail/ 404 '' "${smoke[@]}"
-  if [[ "$env" == staging ]]; then
-    eventually 'the session endpoint answers JSON' \
-      answers /api/auth/get-session 200 application/json "${smoke[@]}"
-    eventually 'a malformed sign-in from the site gets a 400' refuses_a_bad_sign_in
-  fi
+  eventually 'the session endpoint answers JSON' \
+    answers /api/auth/get-session 200 application/json "${smoke[@]}"
+  eventually 'a malformed sign-in from the site gets a 400' refuses_a_bad_sign_in
   if [[ "$env" == production ]]; then
     on_the_host "$canonical/" "a request at $canonical/ gets 200 with no password and no noindex" \
       serves "$canonical/" indexable
