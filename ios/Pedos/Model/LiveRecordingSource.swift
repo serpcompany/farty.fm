@@ -16,22 +16,25 @@ final class LiveRecordingSource: RecordingSource {
     private let store: RecordingStore
     private let analyzer: Analyzer
     private let recorder = Recorder()
-    /// UI tests on a machine without a microphone: each take is a copy of this file.
-    private let testTake: URL?
+    /// UI tests on a machine without a microphone: each take is a copy of the next of these
+    /// files, starting again from the first after the last.
+    private let testTakes: [URL]
+    private var testTakesUsed = 0
     private var testTakeStarted = false
     private var interruptionObserver: (any NSObjectProtocol)?
     /// Recordings loaded from the Fixture Library (internal builds), by Recording.
     private var fixtureOfRecording: [UUID: String] = [:]
 
-    /// The file UI tests ask for with the `-PedosTestTake <path>` launch argument, in any build.
-    static func testTake(in defaults: UserDefaults) -> URL? {
-        defaults.string(forKey: "PedosTestTake").map { URL(filePath: $0) }
+    /// The files UI tests ask for with the `-PedosTestTake <path>[,<path>…]` launch argument,
+    /// in any build.
+    static func testTakes(in defaults: UserDefaults) -> [URL] {
+        (defaults.string(forKey: "PedosTestTake") ?? "").split(separator: ",").map { URL(filePath: String($0)) }
     }
 
-    init(store: RecordingStore = .standard, analyzer: Analyzer, testTake: URL? = nil) {
+    init(store: RecordingStore = .standard, analyzer: Analyzer, testTakes: [URL] = []) {
         self.store = store
         self.analyzer = analyzer
-        self.testTake = testTake
+        self.testTakes = testTakes
     }
 
     func savedRecordings() -> [Recording] {
@@ -52,7 +55,7 @@ final class LiveRecordingSource: RecordingSource {
     }
 
     func startTake(onInterruption: @escaping @MainActor () -> Void) async throws {
-        if testTake != nil {
+        if !testTakes.isEmpty {
             testTakeStarted = true
         } else {
             try await recorder.start(to: store.newDraftURL())
@@ -69,9 +72,12 @@ final class LiveRecordingSource: RecordingSource {
 
     func stopTake() async -> Take? {
         stopObservingInterruptions()
-        if let testTake, testTakeStarted {
+        if testTakeStarted {
             testTakeStarted = false
+            let testTake = testTakes[testTakesUsed % testTakes.count]
+            testTakesUsed += 1
             let draft = store.newDraftURL()
+            try? FileManager.default.createDirectory(at: store.draftFolder, withIntermediateDirectories: true)
             guard (try? FileManager.default.copyItem(at: testTake, to: draft)) != nil,
                   let seconds = AudioLength.seconds(of: draft)
             else { return nil }
@@ -135,7 +141,7 @@ final class LiveRecordingSource: RecordingSource {
             do {
                 try FixtureLibrary.writeAsTake(fixture.url, to: draft)
                 guard let seconds = AudioLength.seconds(of: draft) else { throw CocoaError(.fileReadCorruptFile) }
-                return try store.save(draftAt: draft, seconds: seconds, fixtureID: fixture.id)
+                return try store.save(draftAt: draft, seconds: seconds, id: UUID(fixtureID: fixture.id), fixtureID: fixture.id)
             } catch {
                 store.discard(draftAt: draft)
                 throw error
@@ -173,7 +179,8 @@ struct SavedAnalysis: Codable, Hashable, Sendable {
             pitch: recordingPitchMIDI,
             firstFartUsed: cutAtReattack,
             startSeconds: gestureStartSeconds,
-            endSeconds: gestureEndSeconds
+            endSeconds: gestureEndSeconds,
+            shortestNoteSeconds: shortestNoteSeconds
         )
     }
 }

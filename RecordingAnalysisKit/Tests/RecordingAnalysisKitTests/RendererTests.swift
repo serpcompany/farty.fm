@@ -2,6 +2,7 @@ import AVFAudio
 import Foundation
 import Testing
 @testable import RecordingAnalysisKit
+import RenderChecking
 
 /// #41: renders every golden Arrangement from the fixture audio and checks the output with the
 /// ported `evaluate.py`, no worse than the reference on its own render.
@@ -183,7 +184,8 @@ func checkAgainstGolden(_ name: String, arrangement: Golden.Arrangement, output:
     #expect(metrics.notesWithRetrigger <= golden.notesWithRetrigger, "\(name): \(metrics.notesWithRetrigger) notes with a re-attack")
     if arrangement.library == "full" {
         // The issue's bars, on the rounded percentage like evaluate.py.
-        #expect(within >= 94 && metrics.onsetsOnTimePct >= 95 && metrics.notesWithRetrigger == 0, "\(name): below the bar")
+        #expect(within >= RenderChecks.minimumWithin50cPct && metrics.onsetsOnTimePct >= RenderChecks.minimumOnsetsOnTimePct
+                && metrics.notesWithRetrigger == 0, "\(name): below the bar")
     }
 
     let edgeNote = edge.map { i in

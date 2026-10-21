@@ -10,11 +10,11 @@ import Foundation
 ///
 /// The pitch grid matters: Recording Pitches sit on it (MIDI x.x259), so the port keeps the
 /// reference's bins, its rounding (half to even) and its tie-breaking.
-struct PYIN: Sendable {
-    struct Output: Sendable {
+package struct PYIN: Sendable {
+    package struct Output: Sendable {
         /// Hz per frame, NaN when unvoiced.
-        var f0: [Double]
-        var voiced: [Bool]
+        package var f0: [Double]
+        package var voiced: [Bool]
         var voicedProbability: [Double]
     }
 
@@ -50,7 +50,7 @@ struct PYIN: Sendable {
 
     static let tiny = Double.leastNormalMagnitude
 
-    init(fmax: Double = PYIN.fmax) {
+    package init(fmax: Double = PYIN.fmax) {
         let sr = Self.sampleRate
         minPeriod = Int((sr / fmax).rounded(.down))
         maxPeriod = min(Int((sr / Self.fmin).rounded(.up)), Self.frameLength - 1)
@@ -121,7 +121,7 @@ struct PYIN: Sendable {
         logInitial = log(1.0 / Double(2 * n) + Self.tiny)
     }
 
-    func callAsFunction(_ y: [Double]) -> Output {
+    package func callAsFunction(_ y: [Double]) -> Output {
         let frameLength = Self.frameLength
         let hop = Self.hopLength
         let nFrames = 1 + y.count / hop
@@ -382,7 +382,7 @@ func pairwiseSum(_ a: UnsafeBufferPointer<Double>, _ start: Int, _ n: Int) -> Do
 }
 
 /// librosa.hz_to_midi.
-@inline(__always) func hzToMIDI(_ hz: Double) -> Double {
+@inline(__always) package func hzToMIDI(_ hz: Double) -> Double {
     12 * (log2(hz) - log2(440.0)) + 69
 }
 

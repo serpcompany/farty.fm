@@ -75,11 +75,6 @@ protocol AppModel: AnyObject, Observable {
     /// Saves a made Toot to the Toots tab, with the same id. Saving it again does nothing.
     func saveToot(_ draft: TootDraft)
 
-    #if INTERNAL
-    /// Where a simulated Toot's audio came from, for Song Creator to say so; nil for a real one.
-    func simulatedSource(ofToot id: TootDraft.ID) -> String?
-    #endif
-
     // MARK: Toots
 
     /// Every saved Toot, oldest first.
@@ -124,7 +119,6 @@ extension AppModel {
     var fixtureLibrary: FixtureLibraryStatus? { nil }
     func loadFixtureLibrary() async {}
     func simulatedSource(ofDraft id: Draft.ID) -> String? { nil }
-    func simulatedSource(ofToot id: TootDraft.ID) -> String? { nil }
     #endif
 }
 

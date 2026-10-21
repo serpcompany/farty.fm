@@ -8,6 +8,8 @@ struct Song: Identifiable, Hashable, Sendable {
     let source: String
     /// Tempo in beats per minute.
     let bpm: Int
+    /// Beats per bar: a note that starts a bar is played slightly louder.
+    let beatsPerBar: Int
     /// The melody's notes in time order, from the score.
     let notes: [Note]
 

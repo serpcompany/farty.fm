@@ -125,6 +125,8 @@ class TootsUITests: PedosUITestCase {
     /// A Recording deleted after the Toot was made stays listed as deleted, and the Toot still plays.
     func testADeletedRecordingStaysListedAndTheTootStillPlays() {
         let app = launch(start: "all", toots: ["mary"])
+        app.tabBars.buttons["Toots"].tap()
+        XCTAssertTrue(app.buttons["Mary Had a Little Lamb"].waitForExistence(timeout: 5))
         app.tabBars.buttons["Recordings"].tap()
         let recording = app.buttons["Recording 19"]
         scrollTo(recording, in: app)

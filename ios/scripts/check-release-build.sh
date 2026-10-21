@@ -1,8 +1,8 @@
 #!/bin/sh
 # Builds the Release app (the App Store build) for the simulator and checks that it carries no
-# internal content: no audio files at all (the Fixture Library, the prototype's sample takes and
-# its stand-in Song renders) and no Fixture Library loader code. QA builds, which TestFlight gets
-# until launch, carry both; Release must not (AGENTS.md).
+# internal content: no audio files at all (the Fixture Library) and no Fixture Library loader
+# code. QA builds, which TestFlight gets until launch, carry both; Release must not (AGENTS.md).
+# Release makes Toots only from the user's own Recordings.
 #
 # Run after `xcodegen generate`: ios/scripts/check-release-build.sh
 set -eu

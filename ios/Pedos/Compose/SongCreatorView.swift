@@ -65,15 +65,7 @@ struct SongCreatorView: View {
     private func ready(_ draft: TootDraft) -> some View {
         let isSaved = model.toot(draft.id) != nil
         return TootLayout(model: model, song: song, arrangement: draft.arrangement, tootID: draft.id, item: .tootDraft(draft.id)) {
-            #if INTERNAL
-            if let source = model.simulatedSource(ofToot: draft.id) {
-                Text("Simulated Toot: \(source).")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 2)
-                    .accessibilityIdentifier("simulated-toot")
-            }
-            #endif
+            EmptyView()
         }
         // Pinned under the list, with the system's scroll edge effect behind it.
         .safeAreaBar(edge: .bottom) {
@@ -101,28 +93,21 @@ struct SongCreatorView: View {
 
 #if DEBUG
 #Preview("Song Creator") {
-    let model = SampleAppModel.preview(start: .all, makingDelay: .zero)
-    NavigationStack {
-        SongCreatorView(model: model, song: model.song("mary")!)
-    }
-}
-
-#Preview("Song Creator, not every fixture") {
-    let model = SampleAppModel.preview(start: .takes(8), makingDelay: .zero)
+    let model = SampleAppModel.preview(start: .all, minimumMakingTime: .zero)
     NavigationStack {
         SongCreatorView(model: model, song: model.song("mary")!)
     }
 }
 
 #Preview("Song Creator, making") {
-    let model = SampleAppModel.preview(start: .all, makingDelay: .seconds(3600))
+    let model = SampleAppModel.preview(start: .all, minimumMakingTime: .seconds(3600))
     NavigationStack {
         SongCreatorView(model: model, song: model.song("mary")!)
     }
 }
 
 #Preview("Song Creator, couldn't make") {
-    let model = SampleAppModel.preview(start: .all, failures: .couldNotMakeToot, makingDelay: .zero)
+    let model = SampleAppModel.preview(start: .all, failures: .couldNotMakeToot, minimumMakingTime: .zero)
     NavigationStack {
         SongCreatorView(model: model, song: model.song("mary")!)
     }

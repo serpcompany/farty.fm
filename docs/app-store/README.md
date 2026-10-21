@@ -1,5 +1,7 @@
 # App Store drafts
 
+> **Archive.** Apple rejected this submission on 2026-10-06 (guidelines 4.3(b) and 1.1.1), and Pedos is now a web app (ADR 0007). Nothing here is current or will be resubmitted. Keep it as the record of what was drafted.
+
 Draft materials for submitting Pedos to the App Store (#75). **Nothing here has been submitted or
 entered in App Store Connect, and nothing is hosted.** The owner reviews these, decides what's
 marked "Owner decides" or "Owner provides", and presses Submit for Review.

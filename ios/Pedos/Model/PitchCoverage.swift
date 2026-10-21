@@ -1,109 +1,17 @@
-/// Pitch Coverage: how many of a Song's distinct pitches are covered, each by its own Melodic
-/// Recording close enough to it (see `CONTEXT.md` and `docs/design/app-map.md`).
-///
-/// The approved rule, ported from the #47 prototype's `fit()`: under the best transposition of
-/// the Song, every distinct pitch needs a *different* Melodic Recording within 3 semitones of it.
-/// A Song is unlocked when every distinct pitch is covered. #43 validates the thresholds.
-enum PitchCoverage {
-    /// The furthest a Recording may be shifted to reach a note, in semitones (ADR 0004).
-    static let maximumShift = 3.0
-    /// The transpositions tried, in semitones, in order. The first that covers the most pitches wins.
-    static let transpositions = -36...24
+import Foundation
+import RecordingAnalysisKit
 
-    /// A Song's Pitch Coverage for a set of Recording Pitches.
-    struct Match: Hashable, Sendable {
-        /// How many of the Song's distinct pitches have their own Recording.
-        let covered: Int
-        /// How many distinct pitches the Song has.
-        let total: Int
-        /// The transposition in semitones that covers the most pitches.
-        let transposition: Int
-        /// The transposed pitches (MIDI note numbers) that no Recording covers, lowest first.
-        let missing: [Int]
-        /// Indices into the Recording Pitches that cover a pitch, in index order.
-        let used: [Int]
-        /// For each of the Song's pitches, the index of the Recording Pitch that covers it.
-        let coveredBy: [Int?]
-    }
-
-    /// Matches Recording Pitches (MIDI note numbers of Melodic Recordings) to a Song's distinct
-    /// pitches: one Recording per pitch, within `maximumShift`, under the best transposition.
-    ///
-    /// Uses maximum bipartite matching (Kuhn's algorithm), trying closer Recordings first.
-    static func match(songPitches: [Int], recordingPitches: [Double]) -> Match {
-        guard !recordingPitches.isEmpty else {
-            return Match(
-                covered: 0,
-                total: songPitches.count,
-                transposition: 0,
-                missing: [],
-                used: [],
-                coveredBy: Array(repeating: nil, count: songPitches.count)
-            )
-        }
-
-        var best: (covered: Int, transposition: Int, owner: [Int])?
-        for transposition in transpositions {
-            let candidates = songPitches.map { pitch in
-                recordingPitches.indices
-                    .map { (index: $0, distance: abs(Double(pitch + transposition) - recordingPitches[$0])) }
-                    .filter { $0.distance <= maximumShift }
-                    .sorted { ($0.distance, $0.index) < ($1.distance, $1.index) }
-                    .map(\.index)
-            }
-            // owner[recording] is the song pitch index the Recording covers, or -1.
-            var owner = Array(repeating: -1, count: recordingPitches.count)
-            var covered = 0
-            for note in songPitches.indices {
-                var seen = Array(repeating: false, count: recordingPitches.count)
-                if assign(note, candidates: candidates, owner: &owner, seen: &seen) {
-                    covered += 1
-                }
-            }
-            if best == nil || covered > best!.covered {
-                best = (covered, transposition, owner)
-            }
-            if covered == songPitches.count { break }
-        }
-
-        let (covered, transposition, owner) = best!
-        var coveredBy = [Int?](repeating: nil, count: songPitches.count)
-        for recording in owner.indices where owner[recording] >= 0 {
-            coveredBy[owner[recording]] = recording
-        }
-        return Match(
-            covered: covered,
-            total: songPitches.count,
-            transposition: transposition,
-            missing: songPitches.indices.filter { coveredBy[$0] == nil }.map { songPitches[$0] + transposition },
-            used: owner.indices.filter { owner[$0] >= 0 },
-            coveredBy: coveredBy
-        )
-    }
-
-    /// Tries to give song pitch `note` a Recording, moving earlier assignments along if needed.
-    private static func assign(_ note: Int, candidates: [[Int]], owner: inout [Int], seen: inout [Bool]) -> Bool {
-        for recording in candidates[note] where !seen[recording] {
-            seen[recording] = true
-            if owner[recording] < 0 || assign(owner[recording], candidates: candidates, owner: &owner, seen: &seen) {
-                owner[recording] = note
-                return true
-            }
-        }
-        return false
-    }
-}
-
-/// A Song's Pitch Coverage by a user's Recordings.
+/// A Song's Pitch Coverage by a user's Recordings, and the Arrangement Auto-map chose: each
+/// distinct pitch gets its own Melodic Recording within 3 semitones, or an octave away with an
+/// Octave Move where the Song needs it (ADR 0004, ADR 0006). It comes from
+/// `RecordingAnalysisKit.AutoMap`, the reference engine's `melody_fit()` in Swift.
 struct CoverageResult: Hashable, Sendable {
     let covered: Int
     let total: Int
-    /// The transposition, in semitones, that covers the most pitches.
+    /// The transposition, in semitones, Auto-map chose.
     let transposition: Int
-    /// The transposed pitches still needed, as MIDI note numbers.
+    /// The transposed pitches still needed, as MIDI note numbers, lowest first.
     let missing: [Int]
-    /// The Melodic Recordings that cover a pitch.
-    let used: [Recording.ID]
     /// The Melodic Recording that covers each covered pitch, keyed by the Song's pitch (MIDI, in
     /// the score's key).
     let recordingForPitch: [Int: Recording.ID]
@@ -128,32 +36,63 @@ struct CoverageResult: Hashable, Sendable {
         return (names.prefix(limit) + ["\(names.count - limit) more"]).formatted(.list(type: .and))
     }
 
-    /// Pitch Coverage's matching as an Arrangement: each pitch of an Unlocked Song played by the
-    /// Recording that covers it. Nil while the Song is locked. It isn't Auto-map, which picks the
-    /// closest Recordings (#17).
+    /// Auto-map's Arrangement of an Unlocked Song: the Recording that plays each pitch, and the
+    /// transposition. Nil while the Song is locked.
     var matchedArrangement: Arrangement? {
         isUnlocked ? Arrangement(recordingForPitch: recordingForPitch, transposition: transposition) : nil
     }
 }
 
 extension CoverageResult {
-    /// The Pitch Coverage of `song` by the Melodic ones among `recordings`.
+    /// Auto-map of `song` with the Melodic ones among `recordings`. Ties between equally good
+    /// Arrangements break on each Recording's `uuidString`.
     init(song: Song, recordings: [Recording]) {
-        let melodic = recordings.filter(\.isMelodic)
-        let match = PitchCoverage.match(songPitches: song.pitches, recordingPitches: melodic.compactMap(\.pitch))
+        let melodic = recordings.compactMap(AutoMapInput.init)
+        let idOf = Dictionary(melodic.map { ($0.input.id, $0.id) }, uniquingKeysWith: { first, _ in first })
+        let result = AutoMap.arrange(song.autoMapSong, recordings: melodic.map(\.input))
         var recordingForPitch: [Int: Recording.ID] = [:]
-        for (pitch, recording) in zip(song.pitches, match.coveredBy) {
-            if let recording { recordingForPitch[pitch] = melodic[recording].id }
+        for choice in result.pitches {
+            if let id = choice.recordingID.flatMap({ idOf[$0] }) { recordingForPitch[choice.songPitch] = id }
         }
         self.init(
-            covered: match.covered,
-            total: match.total,
-            transposition: match.transposition,
-            missing: match.missing,
-            used: match.used.map { melodic[$0].id },
+            covered: result.covered,
+            total: result.total,
+            transposition: result.transposition,
+            // Without a Melodic Recording, no transposition is better than another.
+            missing: melodic.isEmpty ? [] : result.missingNotes,
             recordingForPitch: recordingForPitch,
             hasMelodicRecordings: !melodic.isEmpty
         )
+    }
+}
+
+/// A Melodic Recording as Auto-map reads it.
+private struct AutoMapInput {
+    let id: Recording.ID
+    let input: AutoMap.Recording
+
+    init?(_ recording: Recording) {
+        guard case .analyzed(let analysis) = recording.analysis, let pitch = analysis.pitch,
+              let shortestNote = analysis.shortestNoteSeconds
+        else { return nil }
+        // The gesture's length in whole samples, as the reference measures it.
+        let sampleRate = Double(Renderer.sampleRate)
+        let end = analysis.endSeconds ?? recording.seconds
+        let samples = (end * sampleRate).rounded() - (analysis.startSeconds * sampleRate).rounded()
+        id = recording.id
+        input = AutoMap.Recording(
+            id: recording.id.uuidString,
+            recordingPitchMIDI: pitch,
+            shortestNoteSeconds: shortestNote,
+            gestureSeconds: samples / sampleRate
+        )
+    }
+}
+
+extension Song {
+    /// The Song as Auto-map reads it: its tempo and each note's pitch and length.
+    var autoMapSong: AutoMap.Song {
+        AutoMap.Song(bpm: Double(bpm), notes: notes.map { AutoMap.Song.Note(pitch: $0.pitch, lengthBeats: $0.length) })
     }
 }
 

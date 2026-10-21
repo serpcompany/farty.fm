@@ -1,0 +1,3937 @@
+{
+ "titles": "tools/catalog/titles-01.txt",
+ "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-01.txt --tries 5",
+ "dataset": {
+  "PDMX.csv": {
+   "md5": "30392ccf38bb63ce70e7afae70f9c88c",
+   "published_md5": "30392ccf38bb63ce70e7afae70f9c88c",
+   "downloaded": "2026-10-21"
+  },
+  "mid.tar.gz": {
+   "md5": "d920a21b2fcd99a56d9c381b39debbb2",
+   "published_md5": "d920a21b2fcd99a56d9c381b39debbb2",
+   "downloaded": "2026-10-21"
+  }
+ },
+ "library": "23 Recordings, 9 Melodic",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped; render with excerpt <= 32 beats of whole bars and the score's tempo within 72-144 bpm",
+ "bar": {
+  "within_50c_pct": 94,
+  "onsets_on_time_pct": 95,
+  "notes_with_retrigger": 0
+ },
+ "songs": [
+  {
+   "id": "hot-cross-buns",
+   "title": "Hot Cross Buns",
+   "matched": 3,
+   "eligible": 1,
+   "rejected": {
+    "more than 2 tracks": 1,
+    "PDMX flags a license conflict": 1
+   },
+   "tried": [
+    {
+     "score_id": "5922023",
+     "url": "https://musescore.com/score/5922023",
+     "score_title": "Hot Cross Buns SOLO",
+     "match": "song name",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "26",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/0/11/QmabT81EESkyapBMoApv2Uc68pJp8996ANQLQRB189fc8D.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "ea44192d88a651b36e7a466a156bb211caa51962114d2c244230a934fc53842c",
+     "render": {
+      "bpm": 72,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 34
+     },
+     "track_notes": 34,
+     "range_semitones": 4,
+     "distinct_pitches": 3,
+     "pitch_coverage": "3 of 3",
+     "metrics": {
+      "notes": 34,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 3,
+      "transpose": -11,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.73
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5922023"
+  },
+  {
+   "id": "rain-rain",
+   "title": "Rain, Rain, Go Away",
+   "matched": 0,
+   "eligible": 0,
+   "rejected": {},
+   "tried": [],
+   "result": "fail",
+   "reason": "no PDMX score matches",
+   "picked": null
+  },
+  {
+   "id": "london-bridge",
+   "title": "London Bridge Is Falling Down",
+   "matched": 14,
+   "eligible": 13,
+   "rejected": {
+    "PDMX flags a license conflict": 1,
+    "more than 2 tracks": 1
+   },
+   "tried": [
+    {
+     "score_id": "4892500",
+     "url": "https://musescore.com/score/4892500",
+     "score_title": "London Bridge",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "6",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/11/44/QmTtzi9NCx5RezhJnuBM6HAFRz9Zua2WstLibKmaYLWiek.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 91% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "97a04f64ecf4178d4de753de525f6420e02b2a4434c5db78f43f1646570051ed",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32,
+      "beats_per_bar": 4
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 53
+     },
+     "track_notes": 114,
+     "range_semitones": 17,
+     "distinct_pitches": 9,
+     "pitch_coverage": "9 of 9",
+     "metrics": {
+      "notes": 53,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 91,
+      "within_50c_any_octave_pct": 91,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 9,
+      "transpose": -20,
+      "octave_moves": 3,
+      "max_abs_shift_semitones": 11.43
+     }
+    },
+    {
+     "score_id": "4557680",
+     "url": "https://musescore.com/score/4557680",
+     "score_title": "London Bridge",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "5",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/3/46/QmdueujuTtwc5AZv7VJhyGQ8ZDxHghvd7s3vMwA1cUwa4h.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "bd959949c404930ebf772c6126ef1d25efa7627fb6a015fb8c3f6738c7bc523d",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 2,
+      "note_count": 57
+     },
+     "track_notes": 283,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 57,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 98,
+      "within_50c_any_octave_pct": 98,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -14,
+      "octave_moves": 2,
+      "max_abs_shift_semitones": 10.27
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4557680"
+  },
+  {
+   "id": "old-macdonald",
+   "title": "Old MacDonald Had a Farm",
+   "matched": 1,
+   "eligible": 1,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "6236004",
+     "url": "https://musescore.com/score/6236004",
+     "score_title": "Old MacDonald",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "93",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/4/22/QmeGRbC8CS8ofhZDSDUNkiAYKR3eK3VFdDEywFN5KhcPbd.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "4e3da94bb35a4eda0975b7d7d82708236c8dcbd8177c8a2d0b3e2926fbf4e756",
+     "render": {
+      "bpm": 120,
+      "start_beat": 8,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 16
+     },
+     "track_notes": 33,
+     "range_semitones": 4,
+     "distinct_pitches": 3,
+     "pitch_coverage": "3 of 3",
+     "metrics": {
+      "notes": 16,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 17.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 3,
+      "transpose": -5,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 1.17
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "6236004"
+  },
+  {
+   "id": "this-old-man",
+   "title": "This Old Man",
+   "matched": 4,
+   "eligible": 4,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "4599155",
+     "url": "https://musescore.com/score/4599155",
+     "score_title": "This Old Man",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "6",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/6/37/QmNPbSHmXTxa7hkLr64mdyhdibTSzJ5ZGix9gKrad9FjUT.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 87% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "a470aa492643b94434a043a00eaf71d5afe648c0472af92a9d7c60e59cfce09d",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 62
+     },
+     "track_notes": 62,
+     "range_semitones": 9,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 62,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 87,
+      "within_50c_any_octave_pct": 87,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -18,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.77
+     }
+    },
+    {
+     "score_id": "4696532",
+     "url": "https://musescore.com/score/4696532",
+     "score_title": "This old man",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "6",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/5/57/QmfZYZSsZouVC7hYCbURRG3Qcz8D8HtXoWKvgce8JnwK6G.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "1c66fa99793d35ac6447d83e0855479e31938b6c4d40b719e03c4abfa6832b0c",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 32
+     },
+     "track_notes": 32,
+     "range_semitones": 9,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 32,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -9,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4696532"
+  },
+  {
+   "id": "itsy-bitsy",
+   "title": "The Itsy Bitsy Spider",
+   "matched": 4,
+   "eligible": 4,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "4551278",
+     "url": "https://musescore.com/score/4551278",
+     "score_title": "Itsy Bitsy Spider",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "229",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/4/4/Qme5fWGZwE6BWyydh2cvEcRcWdDt1fURnB3ChQGvYN5mrm.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "8e7d939a3b626d368db91afcdacd49f5dd081d4c476d8b0db788218c38eef079",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30.5,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 29
+     },
+     "track_notes": 48,
+     "range_semitones": 12,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 29,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -12,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.17
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4551278"
+  },
+  {
+   "id": "three-blind-mice",
+   "title": "Three Blind Mice",
+   "matched": 3,
+   "eligible": 3,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "4900341",
+     "url": "https://musescore.com/score/4900341",
+     "score_title": "the Three Blind Mice",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "23",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/17/53/QmZXcSvTPtq41vAGYdT8L9DQcPbBYNctYufPfbufFFbi5n.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "eec77fe909d4ab1804133f4323793b87c9e35ee5e6a993d099b54ae7f72afc93",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 24
+     },
+     "track_notes": 48,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 24,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -17,
+      "octave_moves": 3,
+      "max_abs_shift_semitones": 9.97
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4900341"
+  },
+  {
+   "id": "pop-goes-the-weasel",
+   "title": "Pop Goes the Weasel",
+   "matched": 25,
+   "eligible": 23,
+   "rejected": {
+    "PDMX flags a license conflict": 1,
+    "more than 2 tracks": 1
+   },
+   "tried": [
+    {
+     "score_id": "4599872",
+     "url": "https://musescore.com/score/4599872",
+     "score_title": "POP GOES THE WEASEL.",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "51",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/13/7/QmV8c18LNFTpKHoJiccEi4haBP4kMPQPCGjMgXVEXo79VX.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "035cb0149027972b82c79ce4a6b90b7869b4106b20b50318e1a90abd153d3d6b",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 2,
+      "note_count": 35
+     },
+     "track_notes": 159,
+     "range_semitones": 9,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 35,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 97,
+      "within_50c_any_octave_pct": 97,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 97,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -16,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4599872"
+  },
+  {
+   "id": "au-clair",
+   "title": "Au Clair de la Lune",
+   "matched": 4,
+   "eligible": 4,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "6049723",
+     "url": "https://musescore.com/score/6049723",
+     "score_title": "Au clair de la lune",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "155",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/12/6/QmU7vb4U4rfoG9rJxDbeXDXL1DhLd8k5DoMBANdj4QcyxP.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "45eb0ef27fb11eb36248a7d2f8e1f941787188fe02938789d8b2dd9b712fe851",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 22
+     },
+     "track_notes": 44,
+     "range_semitones": 4,
+     "distinct_pitches": 3,
+     "pitch_coverage": "3 of 3",
+     "metrics": {
+      "notes": 22,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 3,
+      "transpose": -5,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 1.17
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "6049723"
+  },
+  {
+   "id": "lightly-row",
+   "title": "Lightly Row",
+   "matched": 5,
+   "eligible": 4,
+   "rejected": {
+    "more than 2 tracks": 1
+   },
+   "tried": [
+    {
+     "score_id": "2959006",
+     "url": "https://musescore.com/score/2959006",
+     "score_title": "Lightly Row",
+     "match": "title",
+     "rating": "4.87",
+     "n_ratings": "5",
+     "n_views": "296",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/15/41/QmXR2bxfj7zhSi9mUHEa2SA63ktfM4kixXs2XjUHtixqwh.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "aa704755e4cb25c2ea99bc5dab24e5392860563bf47a7835a43da046fdc4d988",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32,
+      "beats_per_bar": 4
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 28
+     },
+     "track_notes": 57,
+     "range_semitones": 7,
+     "distinct_pitches": 5,
+     "pitch_coverage": "5 of 5",
+     "metrics": {
+      "notes": 28,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 5,
+      "transpose": -21,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "2959006"
+  },
+  {
+   "id": "aunt-rhody",
+   "title": "Go Tell Aunt Rhody",
+   "matched": 2,
+   "eligible": 2,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "62582",
+     "url": "https://musescore.com/score/62582",
+     "score_title": "Go Tell Aunt Rhody",
+     "match": "title",
+     "rating": "4.71",
+     "n_ratings": "4",
+     "n_views": "897",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/11/46/QmTujpnmHFywCokKDgYC3ZZo1Xes2sdx5ZCSrPctj15fxC.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "a3b89b22caec0d83349b39a67fb0f153c227b4ab8a3eac8dbedd580ff43f2527",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 38
+     },
+     "track_notes": 58,
+     "range_semitones": 9,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 38,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -4,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "62582"
+  },
+  {
+   "id": "skip-to-my-lou",
+   "title": "Skip to My Lou",
+   "matched": 5,
+   "eligible": 5,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "1074466",
+     "url": "https://musescore.com/score/1074466",
+     "score_title": "Skip to my Lou",
+     "match": "title",
+     "rating": "4.83",
+     "n_ratings": "3",
+     "n_views": "616",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/2/23/QmchZ8WjoQo7WUk7ZTCS8DDZRfFAvwyddxZ5mwnrpPXXQu.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "020818825d3d1c8ce516852b21c0588a6edce83f69eafbdc0d274faa94575fa7",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 31
+     },
+     "track_notes": 112,
+     "range_semitones": 8,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 31,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -3,
+      "octave_moves": 1,
+      "max_abs_shift_semitones": 11.97
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "1074466"
+  },
+  {
+   "id": "yankee-doodle",
+   "title": "Yankee Doodle",
+   "matched": 39,
+   "eligible": 39,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "5208037",
+     "url": "https://musescore.com/score/5208037",
+     "score_title": "Yankee Doodle",
+     "match": "title",
+     "rating": "4.92",
+     "n_ratings": "10",
+     "n_views": "1022",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/11/9/QmTa7YTepiTQEhLAhtQAVJjTCEVxC2rQVQ9Sd33k8NZK1p.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "8200905c61976b9d18fe632dc189aec0d62f2b9228c705d08e99540eaed69a1e",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 28
+     },
+     "track_notes": 55,
+     "range_semitones": 10,
+     "distinct_pitches": 7,
+     "pitch_coverage": "7 of 7",
+     "metrics": {
+      "notes": 28,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 7,
+      "transpose": -13,
+      "octave_moves": 1,
+      "max_abs_shift_semitones": 10.97
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5208037"
+  },
+  {
+   "id": "oh-susanna",
+   "title": "Oh! Susanna",
+   "matched": 12,
+   "eligible": 9,
+   "rejected": {
+    "PDMX flags a license conflict": 1,
+    "more than 2 tracks": 2
+   },
+   "tried": [
+    {
+     "score_id": "5206349",
+     "url": "https://musescore.com/score/5206349",
+     "score_title": "Oh! Susanna",
+     "match": "title",
+     "rating": "4.62",
+     "n_ratings": "26",
+     "n_views": "3754",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/14/55/QmWY8qwejrP1LFbKn5yFXZAyCX3abvncsjQJxLCcaeekTt.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "7ff15e45ce5860d51dfc48444c00d3668183e91973b71bacf3063d95232aa5ec",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 29
+     },
+     "track_notes": 54,
+     "range_semitones": 9,
+     "distinct_pitches": 5,
+     "pitch_coverage": "5 of 5",
+     "metrics": {
+      "notes": 29,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 5,
+      "transpose": -11,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5206349"
+  },
+  {
+   "id": "camptown-races",
+   "title": "Camptown Races",
+   "matched": 17,
+   "eligible": 15,
+   "rejected": {
+    "more than 2 tracks": 2
+   },
+   "tried": [
+    {
+     "score_id": "4983393",
+     "url": "https://musescore.com/score/4983393",
+     "score_title": "Camptown Races",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "21",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/15/2/QmX3e4GqmwZTuEbuh4a2Ta5nPLt5EyxV9z5nsM5nPVzwNa.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "562e9cb8c407e2413491784af929d78b49e85aca7359c7c9a9ba6d1386f9890f",
+     "render": {
+      "bpm": 116,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 23
+     },
+     "track_notes": 102,
+     "range_semitones": 9,
+     "distinct_pitches": 5,
+     "pitch_coverage": "5 of 5",
+     "metrics": {
+      "notes": 23,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 5,
+      "transpose": -9,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4983393"
+  },
+  {
+   "id": "clementine",
+   "title": "Oh My Darling, Clementine",
+   "matched": 7,
+   "eligible": 6,
+   "rejected": {
+    "more than 2 tracks": 1
+   },
+   "tried": [
+    {
+     "score_id": "5679152",
+     "url": "https://musescore.com/score/5679152",
+     "score_title": "Oh My Darling Clementine",
+     "match": "title",
+     "rating": "4.83",
+     "n_ratings": "15",
+     "n_views": "591",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/10/36/QmSp7snHaW2LVpt7gtNbuikXopipKcVGgEA2mTMUoHWmQu.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "range 21 semitones (at most 19)"
+      ]
+     },
+     "passed": false,
+     "sha256": "88706241d24411f634662f21aadcd62ca29477440b4b253095d59edf448a0368",
+     "render": {
+      "bpm": 80,
+      "start_beat": 1,
+      "max_beats": 30,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 1,
+      "tracks_with_notes": [
+       0,
+       1,
+       2
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 36
+     },
+     "track_notes": 114,
+     "range_semitones": 21,
+     "distinct_pitches": 10
+    },
+    {
+     "score_id": "5206068",
+     "url": "https://musescore.com/score/5206068",
+     "score_title": "Oh My Darling Clementine",
+     "match": "title",
+     "rating": "4.54",
+     "n_ratings": "56",
+     "n_views": "5090",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/4/5/Qme6kbC9VxbzvXbnxbMC71d7QC2vPdoQvN7kw8emCcrvJB.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 18 chord tones and inner-voice onsets, 24% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "7ce995291bc0db0d40644d9b8f3745d880a67addc003942e62c8a4e5304bcf05",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 18,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 35
+     },
+     "track_notes": 58,
+     "range_semitones": 12,
+     "distinct_pitches": 7
+    },
+    {
+     "score_id": "3457201",
+     "url": "https://musescore.com/score/3457201",
+     "score_title": "Oh My Darling Clementine",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "377",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/2/51/QmcW622H93X9AdSPqpmbexDEHEsZPQdXwWqyE24W3AAkfT.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "range 24 semitones (at most 19)"
+      ]
+     },
+     "passed": false,
+     "sha256": "23915c4392e1b2c68ae706923b1e580e25de803452d8f83a2a09725640de386d",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 36
+     },
+     "track_notes": 71,
+     "range_semitones": 24,
+     "distinct_pitches": 10
+    },
+    {
+     "score_id": "167881",
+     "url": "https://musescore.com/score/167881",
+     "score_title": "My Darling Clementine (with harmonica tabs)",
+     "match": "title head",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "1784",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/17/15/QmZdTVU1KYSxiLD1baCtG5Gjbu3ty2sGycXvMtP1fCxR1a.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "2841df4f260695dc52cc9fba2c6ceb83cd3332d01b04023d2d88568d96fb82f1",
+     "render": {
+      "bpm": 120,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 30
+     },
+     "track_notes": 30,
+     "range_semitones": 12,
+     "distinct_pitches": 7,
+     "pitch_coverage": "7 of 7",
+     "metrics": {
+      "notes": 30,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 7,
+      "transpose": -19,
+      "octave_moves": 1,
+      "max_abs_shift_semitones": 10.27
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "167881"
+  },
+  {
+   "id": "red-river-valley",
+   "title": "Red River Valley",
+   "matched": 14,
+   "eligible": 14,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "6156052",
+     "url": "https://musescore.com/score/6156052",
+     "score_title": "Red River Valley",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "44",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/13/9/QmVa8WqD2qa2r5nvnZxm5uLVXPDXgwTZU8Cee5GuM8KMy7.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 92% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "02918f5e29d0616d9dfde4979b406fc3678b88bb4a8908c5df0e76ea5d973380",
+     "render": {
+      "bpm": 120,
+      "max_beats": 29,
+      "beats_per_bar": 4
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 37
+     },
+     "track_notes": 76,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 37,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 92,
+      "within_50c_any_octave_pct": 95,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -18,
+      "octave_moves": 3,
+      "max_abs_shift_semitones": 12.73
+     }
+    },
+    {
+     "score_id": "4932888",
+     "url": "https://musescore.com/score/4932888",
+     "score_title": "Red River Valley",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "17",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/2/54/Qmcy2x7owkMdHECmziZEPCMPdegH5XGQ8kSQKeDX9oepwb.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "81a6cdf8ef1d3c8f5beabbcca5e5c75010325eb0d563d5dc83251a58ae86efda",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30,
+      "beats_per_bar": 4
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 19
+     },
+     "track_notes": 76,
+     "range_semitones": 12,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 19,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -14,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.17
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4932888"
+  },
+  {
+   "id": "home-on-the-range",
+   "title": "Home on the Range",
+   "matched": 7,
+   "eligible": 6,
+   "rejected": {
+    "more than 2 tracks": 1
+   },
+   "tried": [
+    {
+     "score_id": "4683993",
+     "url": "https://musescore.com/score/4683993",
+     "score_title": "Home on the range",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "55",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/7/24/QmPH6D7q3zg9u5cUJED3F2ar9C6hBqrKrGBGqoNBeHXWx4.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "628235a87a4983e37032624e71abccb06be89771be72a54513a1ede282678ca1",
+     "render": {
+      "bpm": 132,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 28
+     },
+     "track_notes": 76,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 28,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -14,
+      "octave_moves": 2,
+      "max_abs_shift_semitones": 10.27
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4683993"
+  },
+  {
+   "id": "michael-row",
+   "title": "Michael, Row the Boat Ashore",
+   "matched": 3,
+   "eligible": 3,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "5652448",
+     "url": "https://musescore.com/score/5652448",
+     "score_title": "Michael row the boat ashore",
+     "match": "title",
+     "rating": "4.33",
+     "n_ratings": "15",
+     "n_views": "405",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/12/52/QmUx8rFCXn5az3JyawBnRrViiXQGipktKFbj5w8r8NcWaN.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "05b37c22c54f953f3eb6c7fb7a1244182a3483f82233a8c2f639efeab7fb4595",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32,
+      "beats_per_bar": 4
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 23
+     },
+     "track_notes": 46,
+     "range_semitones": 9,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 23,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 96,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -9,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5652448"
+  },
+  {
+   "id": "swing-low",
+   "title": "Swing Low, Sweet Chariot",
+   "matched": 6,
+   "eligible": 3,
+   "rejected": {
+    "PDMX flags a license conflict": 2,
+    "more than 2 tracks": 1
+   },
+   "tried": [
+    {
+     "score_id": "5614569",
+     "url": "https://musescore.com/score/5614569",
+     "score_title": "Swing Low Sweet Chariot",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "136",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/1/57/QmbZaNDzKXjgR2Q5dZ7LnwKMZPcSqAQcoefjjLU9sTYS7M.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "de8f3e21a9326834644fb4dddd717a133f762b32ccbec4256164d0549c4f2a88",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 32
+     },
+     "track_notes": 122,
+     "range_semitones": 14,
+     "distinct_pitches": 7,
+     "pitch_coverage": "7 of 7",
+     "metrics": {
+      "notes": 32,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 7,
+      "transpose": -16,
+      "octave_moves": 2,
+      "max_abs_shift_semitones": 12.73
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5614569"
+  },
+  {
+   "id": "shenandoah",
+   "title": "Shenandoah",
+   "matched": 12,
+   "eligible": 10,
+   "rejected": {
+    "more than 2 tracks": 2
+   },
+   "tried": [
+    {
+     "score_id": "5162419",
+     "url": "https://musescore.com/score/5162419",
+     "score_title": "Shenandoah",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "39",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/9/17/QmReUG33Gfai5HaFYJ1ean6Hk4Xq5VZUrdWZ6uFHxT9fbz.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "9debab040925dbbd4d0395ff2e2090807ddb2c93ff2c53014a9055567693c33c",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 38
+     },
+     "track_notes": 38,
+     "range_semitones": 17,
+     "distinct_pitches": 9,
+     "pitch_coverage": "9 of 9",
+     "metrics": {
+      "notes": 38,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 95,
+      "within_50c_any_octave_pct": 95,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 9,
+      "transpose": -16,
+      "octave_moves": 4,
+      "max_abs_shift_semitones": 10.73
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5162419"
+  },
+  {
+   "id": "scarborough-fair",
+   "title": "Scarborough Fair",
+   "matched": 26,
+   "eligible": 19,
+   "rejected": {
+    "more than 2 tracks": 5,
+    "PDMX flags a license conflict": 3
+   },
+   "tried": [
+    {
+     "score_id": "5020455",
+     "url": "https://musescore.com/score/5020455",
+     "score_title": "Scarborough Fair",
+     "match": "title",
+     "rating": "4.49",
+     "n_ratings": "5",
+     "n_views": "397",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/11/27/QmTJENYHPL17Yj2pnVcVmdeMC43hVHWP9Vb5sC47i579Ya.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "42a744739cd6e80ff7821dad53c86247bd42fb9f7a5c2d2ba283fbed5b50e6da",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 20
+     },
+     "track_notes": 70,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 20,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -16,
+      "octave_moves": 2,
+      "max_abs_shift_semitones": 9.97
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5020455"
+  },
+  {
+   "id": "greensleeves",
+   "title": "Greensleeves",
+   "matched": 86,
+   "eligible": 64,
+   "rejected": {
+    "more than 2 tracks": 19,
+    "PDMX flags a license conflict": 5
+   },
+   "tried": [
+    {
+     "score_id": "388081",
+     "url": "https://musescore.com/score/388081",
+     "score_title": "Greensleeves",
+     "match": "title",
+     "rating": "4.71",
+     "n_ratings": "4",
+     "n_views": "2574",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/5/32/QmfMLyHqSwd3x6LDdmoW4PRcQ4q8W5FjCGJNKencJfYctf.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 50 chord tones and inner-voice onsets, 42% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "ecd4e60e2cc6970adb1fb87e1fb35543f512d741ec445b1412a7da70b142a77f",
+     "render": {
+      "bpm": 120,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 50,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 4,
+      "tempo_changes_ignored": 0,
+      "note_count": 46
+     },
+     "track_notes": 70,
+     "range_semitones": 15,
+     "distinct_pitches": 12
+    },
+    {
+     "score_id": "1951286",
+     "url": "https://musescore.com/score/1951286",
+     "score_title": "Greensleeves",
+     "match": "title",
+     "rating": "4.56",
+     "n_ratings": "4",
+     "n_views": "1685",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/15/51/QmXWWkTSfAgQFZyzWeJPwGMBFsJR14DkAjZYCo8SSCC2gw.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 91% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "ea0f712eba7e78d5fe7b64aacfb3fa5ff8b0deb6765d7f66d34b4d8a86edd07a",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 4,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 22
+     },
+     "track_notes": 110,
+     "range_semitones": 13,
+     "distinct_pitches": 9,
+     "pitch_coverage": "9 of 9",
+     "metrics": {
+      "notes": 22,
+      "pitch_readable_pct": 91,
+      "within_50c_pct": 91,
+      "within_50c_any_octave_pct": 91,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 9,
+      "transpose": -18,
+      "octave_moves": 4,
+      "max_abs_shift_semitones": 9.97
+     }
+    },
+    {
+     "score_id": "2599201",
+     "url": "https://musescore.com/score/2599201",
+     "score_title": "Greensleeves",
+     "match": "title",
+     "rating": "4.39",
+     "n_ratings": "15",
+     "n_views": "2705",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/3/34/QmdNPGyM9Q7jPVVBy7gg5z5VLAZ2Lz3Q4SZWaa5SC52a44.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 92% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "a3646c5e3644c01f88eba025d70353a87d6be672b7251beb71c1a0f9939d1bf2",
+     "render": {
+      "bpm": 120,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 25
+     },
+     "track_notes": 72,
+     "range_semitones": 13,
+     "distinct_pitches": 9,
+     "pitch_coverage": "9 of 9",
+     "metrics": {
+      "notes": 25,
+      "pitch_readable_pct": 92,
+      "within_50c_pct": 92,
+      "within_50c_any_octave_pct": 92,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 9,
+      "transpose": -18,
+      "octave_moves": 4,
+      "max_abs_shift_semitones": 14.43
+     }
+    },
+    {
+     "score_id": "319671",
+     "url": "https://musescore.com/score/319671",
+     "score_title": "Greensleeves",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "1163",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/10/16/QmSDtfBUdhRzkRsAscR8ipi5ZMrvyamfKytHCm5dqpgr5J.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 35 chord tones and inner-voice onsets, 33% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "255536084ffe57caef6f5cc3cadd57c2fc971dae8e67c623b1b2c4aa397aeb91",
+     "render": {
+      "bpm": 120,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 31,
+      "inner_voice_onsets_dropped": 4,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 24
+     },
+     "track_notes": 71,
+     "range_semitones": 10,
+     "distinct_pitches": 8
+    },
+    {
+     "score_id": "1047116",
+     "url": "https://musescore.com/score/1047116",
+     "score_title": "Greensleeves",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "980",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/8/13/QmQcNcL7VBhfrpWRf63ns42ea7jtsfziVJaFmaWkYqyj1A.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 66 chord tones and inner-voice onsets, 48% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "ec00844c0f42b3efed040432ca4e5eb8f304c2aa19c91127a095a426591793e5",
+     "render": {
+      "bpm": 120,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 35,
+      "inner_voice_onsets_dropped": 31,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 25
+     },
+     "track_notes": 72,
+     "range_semitones": 13,
+     "distinct_pitches": 9
+    }
+   ],
+   "result": "fail",
+   "reason": "none of the 5 best scores passed; the best: sanity: the importer dropped 50 chord tones and inner-voice onsets, 42% of the track's notes (at most 10%)",
+   "picked": null
+  },
+  {
+   "id": "danny-boy",
+   "title": "Danny Boy",
+   "matched": 48,
+   "eligible": 34,
+   "rejected": {
+    "more than 2 tracks": 11,
+    "PDMX flags a license conflict": 4
+   },
+   "tried": [
+    {
+     "score_id": "5932938",
+     "url": "https://musescore.com/score/5932938",
+     "score_title": "Danny Boy",
+     "match": "title",
+     "rating": "4.78",
+     "n_ratings": "11",
+     "n_views": "285",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/15/56/QmXzn9pMQ77ExKANBhrWVR3dUSpbj3X3G9dZE3uHXt2gmk.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 215 chord tones and inner-voice onsets, 56% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "e62a7bb0130929181f2c8df8cbf4ac4d1401fc9eff626551de2e59d2155ffb00",
+     "render": {
+      "bpm": 75,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 188,
+      "inner_voice_onsets_dropped": 27,
+      "overlaps_clipped": 1,
+      "tempo_changes_ignored": 0,
+      "note_count": 43
+     },
+     "track_notes": 170,
+     "range_semitones": 12,
+     "distinct_pitches": 8
+    },
+    {
+     "score_id": "6123253",
+     "url": "https://musescore.com/score/6123253",
+     "score_title": "Danny Boy",
+     "match": "title",
+     "rating": "4.57",
+     "n_ratings": "11",
+     "n_views": "1529",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/17/23/QmZhkU7df4ekxqaFHgGkhbYVJK4veYpgxhkpoumbmX4Qsp.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "a50ca4b045d26a123405795f23fdad5fbb713a85b6caa7a9d63fefd01251c6c0",
+     "render": {
+      "bpm": 78,
+      "start_beat": 9.5,
+      "max_beats": 32,
+      "beats_per_bar": 4
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1,
+       2
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 43
+     },
+     "track_notes": 180,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 43,
+      "pitch_readable_pct": 98,
+      "within_50c_pct": 98,
+      "within_50c_any_octave_pct": 98,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -12,
+      "octave_moves": 2,
+      "max_abs_shift_semitones": 9.97
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "6123253"
+  },
+  {
+   "id": "drunken-sailor",
+   "title": "Drunken Sailor",
+   "matched": 58,
+   "eligible": 52,
+   "rejected": {
+    "more than 2 tracks": 6
+   },
+   "tried": [
+    {
+     "score_id": "4803099",
+     "url": "https://musescore.com/score/4803099",
+     "score_title": "What shall we do with the drunken sailor",
+     "match": "title",
+     "rating": "4.88",
+     "n_ratings": "6",
+     "n_views": "663",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/0/8/Qma9jeHeaWbMDfvD9GoVMDGcNukia1Ui222JM1wxqn3m8o.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "66 notes (between 8 and 64)"
+      ]
+     },
+     "passed": false,
+     "sha256": "3ecebc72a53863853a1df36ce12a271f28e6667a0778f4c3ff2cdb5a86e4e51e",
+     "render": {
+      "bpm": 120,
+      "start_beat": 16,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1,
+       2
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 66
+     },
+     "track_notes": 132,
+     "range_semitones": 14,
+     "distinct_pitches": 9
+    },
+    {
+     "score_id": "4843498",
+     "url": "https://musescore.com/score/4843498",
+     "score_title": "What shall we do with the drunken sailor",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "114",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/17/52/QmZx4a9NWppbQ5fR47VFzfKeA1Z1ifvgjgHZCmzisC6K18.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "9b5dcf6bbf4d26f806bf53d1c5257fbf12fda3cdb4e3f76de16e725da40b3310",
+     "render": {
+      "bpm": 144,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 36
+     },
+     "track_notes": 63,
+     "range_semitones": 14,
+     "distinct_pitches": 9,
+     "pitch_coverage": "9 of 9",
+     "metrics": {
+      "notes": 36,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 7.4,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 9,
+      "transpose": -9,
+      "octave_moves": 4,
+      "max_abs_shift_semitones": 14.43
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4843498"
+  },
+  {
+   "id": "simple-gifts",
+   "title": "Simple Gifts",
+   "matched": 24,
+   "eligible": 18,
+   "rejected": {
+    "more than 2 tracks": 5,
+    "PDMX flags a license conflict": 1
+   },
+   "tried": [
+    {
+     "score_id": "4875683",
+     "url": "https://musescore.com/score/4875683",
+     "score_title": "Simple Gifts",
+     "match": "title",
+     "rating": "4.56",
+     "n_ratings": "4",
+     "n_views": "289",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/15/26/QmXj8TvCjLvBoFonR7LfZ81NTCpMmkLvbVrsjPZhTXLESj.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "2f0a9f1ae61ce7f698574bb8a0c4a8a0d2975359ad59b2c1f449f7577809434d",
+     "render": {
+      "bpm": 120,
+      "max_beats": 29,
+      "beats_per_bar": 4
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 41
+     },
+     "track_notes": 194,
+     "range_semitones": 12,
+     "distinct_pitches": 7,
+     "pitch_coverage": "7 of 7",
+     "metrics": {
+      "notes": 41,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 7,
+      "transpose": -9,
+      "octave_moves": 1,
+      "max_abs_shift_semitones": 10.27
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4875683"
+  },
+  {
+   "id": "silent-night",
+   "title": "Silent Night",
+   "matched": 74,
+   "eligible": 32,
+   "rejected": {
+    "PDMX flags a license conflict": 11,
+    "more than 2 tracks": 35
+   },
+   "tried": [
+    {
+     "score_id": "5863192",
+     "url": "https://musescore.com/score/5863192",
+     "score_title": "Silent night",
+     "match": "title",
+     "rating": "4.78",
+     "n_ratings": "220",
+     "n_views": "9649",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/5/55/QmfYhywhYp5v5dLCaVTVfzUNyAMLArwCXovZgaVTSEPDaN.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "range 20 semitones (at most 19)",
+       "the importer dropped 82 chord tones and inner-voice onsets, 53% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "87e028d31e648444305584f8e660fcb0875fadb32aa699d3f1006171d842b0bf",
+     "render": {
+      "bpm": 72,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 77,
+      "inner_voice_onsets_dropped": 5,
+      "overlaps_clipped": 16,
+      "tempo_changes_ignored": 0,
+      "note_count": 27
+     },
+     "track_notes": 74,
+     "range_semitones": 20,
+     "distinct_pitches": 10
+    },
+    {
+     "score_id": "5873941",
+     "url": "https://musescore.com/score/5873941",
+     "score_title": "Silent Night",
+     "match": "title",
+     "rating": "4.66",
+     "n_ratings": "3",
+     "n_views": "328",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/5/37/QmfPBedDvpAXfGuPh8SW54fKD8RSG27PzBFsWR8kYpcFyg.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 36 chord tones and inner-voice onsets, 22% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "c78599bca0b732539604b8245200698ef53c8aff1e37884b12ad272d2bbdee33",
+     "render": {
+      "bpm": 72,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 1,
+      "tracks_with_notes": [
+       0,
+       1,
+       2
+      ],
+      "chord_tones_dropped": 36,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 4,
+      "tempo_changes_ignored": 1,
+      "note_count": 35
+     },
+     "track_notes": 126,
+     "range_semitones": 13,
+     "distinct_pitches": 9
+    },
+    {
+     "score_id": "6407850",
+     "url": "https://musescore.com/score/6407850",
+     "score_title": "Silent Night",
+     "match": "title",
+     "rating": "3.99",
+     "n_ratings": "3",
+     "n_views": "305",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/1/22/QmbGudm6JgoWnHfyAHN6FkUhrVe38XyMkfmzXJLyczWSWh.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "71e013035c893c6447eeb83d39c87f18d12948945e3e83c88852cf7858b2a7b3",
+     "render": {
+      "bpm": 90,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 19
+     },
+     "track_notes": 47,
+     "range_semitones": 10,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 19,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -14,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.17
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "6407850"
+  },
+  {
+   "id": "joy-to-the-world",
+   "title": "Joy to the World",
+   "matched": 50,
+   "eligible": 22,
+   "rejected": {
+    "PDMX flags a license conflict": 10,
+    "more than 2 tracks": 20
+   },
+   "tried": [
+    {
+     "score_id": "5868500",
+     "url": "https://musescore.com/score/5868500",
+     "score_title": "Joy to the World",
+     "match": "title",
+     "rating": "4.84",
+     "n_ratings": "10",
+     "n_views": "198",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/16/19/QmYf6wWUpWm2gMJEDHwq9SipkzcUP91nhsUDhn67aD6uxX.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 142 chord tones and inner-voice onsets, 36% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "a2af40d89bb0de5743c220330c18d510947356322fb41f56346ad1800a699235",
+     "render": {
+      "bpm": 144,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 142,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 14
+     },
+     "track_notes": 249,
+     "range_semitones": 12,
+     "distinct_pitches": 8
+    },
+    {
+     "score_id": "5869145",
+     "url": "https://musescore.com/score/5869145",
+     "score_title": "Joy to the World",
+     "match": "title",
+     "rating": "4.72",
+     "n_ratings": "8",
+     "n_views": "600",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/2/54/QmcyjtjantobX2i3JwmaoJivj1r16RNSeeoZrR5FrGzhmD.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 78 chord tones and inner-voice onsets, 32% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "ace59e7e27fc8e326db41ba95e9ce41afab56f148ffeff0dd781f5a644538e77",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 2,
+      "tracks_with_notes": [
+       0,
+       1,
+       2,
+       3
+      ],
+      "chord_tones_dropped": 78,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 26
+     },
+     "track_notes": 166,
+     "range_semitones": 19,
+     "distinct_pitches": 10
+    },
+    {
+     "score_id": "149624",
+     "url": "https://musescore.com/score/149624",
+     "score_title": "Joy to the World",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "2925",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/3/17/QmdeRHJfGbqXDR9erYonNPRewmgbWyfd4o8F2VLKpwHCkk.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "e96a0f50a07c0cf2deb59ca5e0564571ca815ac8b6adb30c45fb762d9d4adb58",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 2,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 15
+     },
+     "track_notes": 174,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 15,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -28,
+      "octave_moves": 3,
+      "max_abs_shift_semitones": 10.97
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "149624"
+  },
+  {
+   "id": "deck-the-halls",
+   "title": "Deck the Halls",
+   "matched": 37,
+   "eligible": 26,
+   "rejected": {
+    "more than 2 tracks": 9,
+    "PDMX flags a license conflict": 2
+   },
+   "tried": [
+    {
+     "score_id": "4814906",
+     "url": "https://musescore.com/score/4814906",
+     "score_title": "Deck the halls",
+     "match": "title",
+     "rating": "4.83",
+     "n_ratings": "3",
+     "n_views": "499",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/0/36/QmapQgqFGzxWTHF8bDNUAbsMCCZULhFnvJvmEZ9vMRZKpT.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "961ee34347ad945e3a44d28d03da20af4a69f78059579a15fbfe05b080c22378",
+     "render": {
+      "bpm": 144,
+      "start_beat": 4,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 2,
+      "note_count": 17
+     },
+     "track_notes": 68,
+     "range_semitones": 8,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 17,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -6,
+      "octave_moves": 1,
+      "max_abs_shift_semitones": 12.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4814906"
+  },
+  {
+   "id": "o-christmas-tree",
+   "title": "O Christmas Tree",
+   "matched": 20,
+   "eligible": 14,
+   "rejected": {
+    "PDMX flags a license conflict": 3,
+    "more than 2 tracks": 5
+   },
+   "tried": [
+    {
+     "score_id": "5337861",
+     "url": "https://musescore.com/score/5337861",
+     "score_title": "O Christmas Tree",
+     "match": "title",
+     "rating": "4.57",
+     "n_ratings": "11",
+     "n_views": "382",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/11/52/QmTxUroMLpeiXFP5J7G15fRU6SS7rEwh58JKGtZdxm2hpr.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 54 chord tones and inner-voice onsets, 47% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "a03f1761bbdc3a3a6d1963c61b4fcd776a44f591c026fb331924226fe13f7ee1",
+     "render": {
+      "bpm": 100,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 54,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 35
+     },
+     "track_notes": 61,
+     "range_semitones": 14,
+     "distinct_pitches": 8
+    },
+    {
+     "score_id": "33772",
+     "url": "https://musescore.com/score/33772",
+     "score_title": "O Christmas Tree",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "2466",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/8/20/QmQFWNx69mfxjRXLGudBLfb9zQptf282aNvqTAPvuKfR6s.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "0692c0b3e93b2ba4ed2a89df483e24144b411687f4b18df08d67c92c35372b49",
+     "render": {
+      "bpm": 120,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 39
+     },
+     "track_notes": 122,
+     "range_semitones": 14,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 39,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 97,
+      "within_50c_any_octave_pct": 97,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -16,
+      "octave_moves": 2,
+      "max_abs_shift_semitones": 10.97
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "33772"
+  },
+  {
+   "id": "away-in-a-manger",
+   "title": "Away in a Manger",
+   "matched": 23,
+   "eligible": 12,
+   "rejected": {
+    "PDMX flags a license conflict": 5,
+    "more than 2 tracks": 6
+   },
+   "tried": [
+    {
+     "score_id": "34042",
+     "url": "https://musescore.com/score/34042",
+     "score_title": "Away in a Manger",
+     "match": "title",
+     "rating": "4.8",
+     "n_ratings": "33",
+     "n_views": "2244",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/13/21/QmVgS9cYzFWrEHrvGnKFqmg7rd9mfCpX3LgkP6LtqxWSbR.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 43 chord tones and inner-voice onsets, 49% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "6d8f1b601b57c07441141b07963877408d1284d33bd937b1f1a4b1b080228411",
+     "render": {
+      "bpm": 120,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 43,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 29
+     },
+     "track_notes": 44,
+     "range_semitones": 12,
+     "distinct_pitches": 8
+    },
+    {
+     "score_id": "4561641",
+     "url": "https://musescore.com/score/4561641",
+     "score_title": "Away in a Manger",
+     "match": "title",
+     "rating": "3.9",
+     "n_ratings": "8",
+     "n_views": "649",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/9/11/QmRbY9fx5Ak6XsbqYpjFQzDuTTNC2WXA53LruQesyUxuZW.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "range 21 semitones (at most 19)",
+       "the importer dropped 85 chord tones and inner-voice onsets, 56% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "152f847a225991aa38872ce5c5dc4951d17b0b08a2a5db6549bbd14b87d9b1aa",
+     "render": {
+      "bpm": 72,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 75,
+      "inner_voice_onsets_dropped": 10,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 42
+     },
+     "track_notes": 68,
+     "range_semitones": 21,
+     "distinct_pitches": 11
+    },
+    {
+     "score_id": "5864870",
+     "url": "https://musescore.com/score/5864870",
+     "score_title": "Away in a Manger",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "139",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/10/57/QmSZh7wSEdnpKabxmEB52qRdB8Wk5f5wJeep7TkgPqdAK1.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "1a1aee0e05ab013595145d05875970ccca686e9ef9ea69fb38be43314ca60731",
+     "render": {
+      "bpm": 80,
+      "start_beat": 93,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 1,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 20
+     },
+     "track_notes": 86,
+     "range_semitones": 10,
+     "distinct_pitches": 7,
+     "pitch_coverage": "7 of 7",
+     "metrics": {
+      "notes": 20,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 7,
+      "transpose": -7,
+      "octave_moves": 1,
+      "max_abs_shift_semitones": 10.97
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5864870"
+  },
+  {
+   "id": "jolly-old-st-nicholas",
+   "title": "Jolly Old Saint Nicholas",
+   "matched": 9,
+   "eligible": 7,
+   "rejected": {
+    "more than 2 tracks": 2
+   },
+   "tried": [
+    {
+     "score_id": "4714665",
+     "url": "https://musescore.com/score/4714665",
+     "score_title": "Jolly Old St. Nicholas",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "40",
+     "license": "publicdomain",
+     "n_tracks": "2",
+     "dataset_path": "./mid/13/31/QmVmeE2S8xykQi3xroUNdD8bjoRx9JUD5x4rgsVi3Rkepf.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 46 chord tones and inner-voice onsets, 49% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "52173e721a82ad7bc16c9697f8c00127b3214ef56c89009ecc0ab3cf08c8deb4",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 46,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 48
+     },
+     "track_notes": 48,
+     "range_semitones": 9,
+     "distinct_pitches": 5
+    },
+    {
+     "score_id": "5848599",
+     "url": "https://musescore.com/score/5848599",
+     "score_title": "Jolly old St. Nicholas",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "36",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/1/31/Qmbmsr4yAYCoSV821GV4LSY2XiqYRETXA9PpC8wUuGzEwP.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "3327b2d2dbd70f315a21e996b8c4c3d0666273c7fbd9b8a9d48b0904b3204ded",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 24
+     },
+     "track_notes": 48,
+     "range_semitones": 9,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 24,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -11,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5848599"
+  },
+  {
+   "id": "we-three-kings",
+   "title": "We Three Kings",
+   "matched": 20,
+   "eligible": 10,
+   "rejected": {
+    "PDMX flags a license conflict": 3,
+    "more than 2 tracks": 8
+   },
+   "tried": [
+    {
+     "score_id": "5849229",
+     "url": "https://musescore.com/score/5849229",
+     "score_title": "We three kings of orient are",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "50",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/2/26/QmcjFVmQbw4bepz6UJ6voUtHSASfggkWP1dCz7j1LPFQSP.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "f6c9e9bbb9234d577308f05d5bed9b63eeaf03eab0f610bf6ed17a5e2274c387",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 18
+     },
+     "track_notes": 55,
+     "range_semitones": 7,
+     "distinct_pitches": 5,
+     "pitch_coverage": "5 of 5",
+     "metrics": {
+      "notes": 18,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 5,
+      "transpose": -11,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.17
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5849229"
+  },
+  {
+   "id": "first-noel",
+   "title": "The First Noel",
+   "matched": 37,
+   "eligible": 18,
+   "rejected": {
+    "more than 2 tracks": 17,
+    "PDMX flags a license conflict": 7
+   },
+   "tried": [
+    {
+     "score_id": "5874724",
+     "url": "https://musescore.com/score/5874724",
+     "score_title": "The First Noel",
+     "match": "title",
+     "rating": "4.83",
+     "n_ratings": "3",
+     "n_views": "479",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/0/18/QmaErg41h8RxrBDzy9KsoV36ravcjVUfo17Zp24tJooude.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 31 chord tones and inner-voice onsets, 16% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "be798aa11e6cccf9b09e5da51df5b6a04962330e5f434f67fbbc67fb16ddcf34",
+     "render": {
+      "bpm": 76,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 1,
+      "tracks_with_notes": [
+       0,
+       1,
+       2
+      ],
+      "chord_tones_dropped": 30,
+      "inner_voice_onsets_dropped": 1,
+      "overlaps_clipped": 3,
+      "tempo_changes_ignored": 23,
+      "note_count": 37
+     },
+     "track_notes": 165,
+     "range_semitones": 16,
+     "distinct_pitches": 10
+    },
+    {
+     "score_id": "4862281",
+     "url": "https://musescore.com/score/4862281",
+     "score_title": "The First Noel",
+     "match": "title",
+     "rating": "4.71",
+     "n_ratings": "194",
+     "n_views": "13629",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/3/16/QmdDx3BZAJHuqpGjuEmP16TQVEr1H4NC5cqyzvUiWxyP3i.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 31 chord tones and inner-voice onsets, 16% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "51208ae722caf3a0692d2763fd556b825fe890e4a795a100172d0aa17c371b20",
+     "render": {
+      "bpm": 76,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 1,
+      "tracks_with_notes": [
+       0,
+       1,
+       2
+      ],
+      "chord_tones_dropped": 30,
+      "inner_voice_onsets_dropped": 1,
+      "overlaps_clipped": 3,
+      "tempo_changes_ignored": 23,
+      "note_count": 37
+     },
+     "track_notes": 165,
+     "range_semitones": 16,
+     "distinct_pitches": 10
+    },
+    {
+     "score_id": "1997",
+     "url": "https://musescore.com/score/1997",
+     "score_title": "The First Noël",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "1278",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/1/29/QmbKbMonK9qAQDb6nHT1tMQA9rZng9QuNq8nz8sZcagB9z.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 88% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "e0142abadf4dc38e64d9fb762ef3836f654ddc1cbb150938854f05c18a24e0e6",
+     "render": {
+      "bpm": 112,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 34
+     },
+     "track_notes": 72,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 34,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 88,
+      "within_50c_any_octave_pct": 88,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -16,
+      "octave_moves": 3,
+      "max_abs_shift_semitones": 10.97
+     }
+    },
+    {
+     "score_id": "5849192",
+     "url": "https://musescore.com/score/5849192",
+     "score_title": "The first noel",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "105",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/3/11/QmdbbzicWqLfeFARAEPS8Zs1nzzuHtJwEcLooiuBsGJQ2Q.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 88% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "7863905f8708d447bb224b1227ec9da5bf9c6c1ff0cc00e479063972176ea78e",
+     "render": {
+      "bpm": 92,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 34
+     },
+     "track_notes": 71,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 34,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 88,
+      "within_50c_any_octave_pct": 88,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -16,
+      "octave_moves": 3,
+      "max_abs_shift_semitones": 10.97
+     }
+    },
+    {
+     "score_id": "5016920",
+     "url": "https://musescore.com/score/5016920",
+     "score_title": "The First Noel",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "30",
+     "license": "publicdomain",
+     "n_tracks": "2",
+     "dataset_path": "./mid/6/11/QmNbBdPJJgVNL3iRHwxYbCJbg5CPg23tU2opa65mbdiPFx.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "68 notes (between 8 and 64)"
+      ]
+     },
+     "passed": false,
+     "sha256": "73afb478bc9a49fdfc05a1a4e5680076b30c82cfe4dc97f8eab414781b799ab4",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 68
+     },
+     "track_notes": 72,
+     "range_semitones": 12,
+     "distinct_pitches": 8
+    }
+   ],
+   "result": "fail",
+   "reason": "none of the 5 best scores passed; the best: sanity: the importer dropped 31 chord tones and inner-voice onsets, 16% of the track's notes (at most 10%)",
+   "picked": null
+  },
+  {
+   "id": "o-come-all-ye-faithful",
+   "title": "O Come, All Ye Faithful",
+   "matched": 66,
+   "eligible": 20,
+   "rejected": {
+    "more than 2 tracks": 39,
+    "PDMX flags a license conflict": 12
+   },
+   "tried": [
+    {
+     "score_id": "79037",
+     "url": "https://musescore.com/score/79037",
+     "score_title": "Adeste Fideles",
+     "match": "title",
+     "rating": "4.9",
+     "n_ratings": "8",
+     "n_views": "2212",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/7/30/QmPLemSwhs2bqnznpqGrQPnXrdSHfbTyHkzLWvRBERXz3B.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 45 chord tones and inner-voice onsets, 42% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "d57f4fce4ced08413875ac9b8149997fe4882acd6e0f0a28a203eeea16938a3a",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 39,
+      "inner_voice_onsets_dropped": 6,
+      "overlaps_clipped": 1,
+      "tempo_changes_ignored": 0,
+      "note_count": 24
+     },
+     "track_notes": 62,
+     "range_semitones": 10,
+     "distinct_pitches": 7
+    },
+    {
+     "score_id": "1505466",
+     "url": "https://musescore.com/score/1505466",
+     "score_title": "Adeste Fideles",
+     "match": "title",
+     "rating": "4.64",
+     "n_ratings": "14",
+     "n_views": "1232",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/17/43/QmZSA3nybQLabhL9TqnKhMkK6pQD9ULyqxc2jM6jMj2j5J.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "050bed1664bdbc294ef9c25b92326c470deccdf3348c5f8cbec8eafde74c6bee",
+     "render": {
+      "bpm": 120,
+      "start_beat": 4,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 25
+     },
+     "track_notes": 64,
+     "range_semitones": 10,
+     "distinct_pitches": 7,
+     "pitch_coverage": "7 of 7",
+     "metrics": {
+      "notes": 25,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 7,
+      "transpose": -18,
+      "octave_moves": 1,
+      "max_abs_shift_semitones": 10.97
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "1505466"
+  },
+  {
+   "id": "brahms-lullaby",
+   "title": "Brahms' Lullaby",
+   "matched": 1,
+   "eligible": 1,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "4642626",
+     "url": "https://musescore.com/score/4642626",
+     "score_title": "Brahms - Lullaby",
+     "match": "title",
+     "rating": "4.79",
+     "n_ratings": "26",
+     "n_views": "4192",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/8/44/QmQtrLLTSTdKBLNFXqYVT6oyP323GftJfJ391vRNL18rMt.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 88% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "0022781ab265607cdf8ff4871baaed9d6551451f01737b4a1d8ebabef583a7db",
+     "render": {
+      "bpm": 80,
+      "start_beat": 6,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1,
+       2
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 4,
+      "note_count": 33
+     },
+     "track_notes": 280,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 33,
+      "pitch_readable_pct": 97,
+      "within_50c_pct": 88,
+      "within_50c_any_octave_pct": 97,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -18,
+      "octave_moves": 3,
+      "max_abs_shift_semitones": 10.97
+     }
+    }
+   ],
+   "result": "fail",
+   "reason": "none of the 1 best scores passed; the best: render: in50c 88% < 94%",
+   "picked": null
+  },
+  {
+   "id": "minuet-in-g",
+   "title": "Minuet in G",
+   "matched": 12,
+   "eligible": 12,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "5948361",
+     "url": "https://musescore.com/score/5948361",
+     "score_title": "Minuet in G Major",
+     "match": "title",
+     "rating": "4.71",
+     "n_ratings": "4",
+     "n_views": "291",
+     "license": "cc-zero",
+     "n_tracks": "2",
+     "dataset_path": "./mid/9/12/QmRB57nFXEY4k6RvNNgyDb8WT1mgks9AXQJE9u1TVoY4FH.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 85% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "adcac3f862c339efa3acffb333cfd1e7bd6c271b28bcda7661716bd05072e554",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1,
+       2
+      ],
+      "chord_tones_dropped": 4,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 41
+     },
+     "track_notes": 254,
+     "range_semitones": 13,
+     "distinct_pitches": 9,
+     "pitch_coverage": "9 of 9",
+     "metrics": {
+      "notes": 41,
+      "pitch_readable_pct": 98,
+      "within_50c_pct": 85,
+      "within_50c_any_octave_pct": 85,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 9,
+      "transpose": -23,
+      "octave_moves": 5,
+      "max_abs_shift_semitones": 12.43
+     }
+    },
+    {
+     "score_id": "5653587",
+     "url": "https://musescore.com/score/5653587",
+     "score_title": "Minuet in G",
+     "match": "title",
+     "rating": "4.7",
+     "n_ratings": "7",
+     "n_views": "1170",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/12/1/QmU2f2UabUtd63SFi6RsTi7PBYcP3kUtzMWCkEKfzkeqoH.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 85% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "f6bf361a0eda2b23041d7e7db8d1bc2341fa2cec6b90ee88a30c0737b2f2baa5",
+     "render": {
+      "bpm": 108,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 4,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 41
+     },
+     "track_notes": 254,
+     "range_semitones": 13,
+     "distinct_pitches": 9,
+     "pitch_coverage": "9 of 9",
+     "metrics": {
+      "notes": 41,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 85,
+      "within_50c_any_octave_pct": 85,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 9,
+      "transpose": -23,
+      "octave_moves": 5,
+      "max_abs_shift_semitones": 12.83
+     }
+    },
+    {
+     "score_id": "1674431",
+     "url": "https://musescore.com/score/1674431",
+     "score_title": "Minuet in G major",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "3256",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/3/14/QmdCDP9KqthTCu9aghxjGv6gYxhrsFug1Nm6pKGYKrZJnk.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "d5c71150ee923895a6bfc271ae454366a360e7d70a9d7f021d3a77969b02caf9",
+     "render": {
+      "bpm": 144,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 2,
+      "inner_voice_onsets_dropped": 6,
+      "overlaps_clipped": 8,
+      "tempo_changes_ignored": 0,
+      "note_count": 43
+     },
+     "track_notes": 125,
+     "range_semitones": 13,
+     "distinct_pitches": 9,
+     "pitch_coverage": "9 of 9",
+     "metrics": {
+      "notes": 43,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 98,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 7.4,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 9,
+      "transpose": -23,
+      "octave_moves": 5,
+      "max_abs_shift_semitones": 12.83
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "1674431"
+  },
+  {
+   "id": "morning-mood",
+   "title": "Morning Mood",
+   "matched": 1,
+   "eligible": 1,
+   "rejected": {},
+   "tried": [
+    {
+     "score_id": "5886802",
+     "url": "https://musescore.com/score/5886802",
+     "score_title": "Morning Mood - Violin Adaptation",
+     "match": "title head",
+     "rating": "4.69",
+     "n_ratings": "36",
+     "n_views": "2268",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/0/35/QmaoTg2HDUBohMRFjjDrmGJGmo9HzEa76VoKEx4oZnYNH3.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "72 notes (between 8 and 64)",
+       "range 23 semitones (at most 19)"
+      ]
+     },
+     "passed": false,
+     "sha256": "3ffec7e1b88cd5e38299d2560e6703f0eed81832dae359b08e3118d231b62fdb",
+     "render": {
+      "bpm": 80,
+      "max_beats": 30,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 16,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 72
+     },
+     "track_notes": 589,
+     "range_semitones": 23,
+     "distinct_pitches": 18
+    }
+   ],
+   "result": "fail",
+   "reason": "none of the 1 best scores passed; the best: sanity: 72 notes (between 8 and 64); range 23 semitones (at most 19)",
+   "picked": null
+  },
+  {
+   "id": "mountain-king",
+   "title": "In the Hall of the Mountain King",
+   "matched": 19,
+   "eligible": 5,
+   "rejected": {
+    "PDMX flags a license conflict": 4,
+    "more than 2 tracks": 11
+   },
+   "tried": [
+    {
+     "score_id": "4836471",
+     "url": "https://musescore.com/score/4836471",
+     "score_title": "In the Hall of the Mountain King",
+     "match": "title",
+     "rating": "4.78",
+     "n_ratings": "460",
+     "n_views": "103151",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/15/53/QmXXdTmXQW5jKbHEHgHuZFuW57wNrtApiba8WidW76APCp.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "range 30 semitones (at most 19)",
+       "the importer dropped 403 chord tones and inner-voice onsets, 44% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "2f77c41cf55dc068978830777e357ed4c45593731d9bfb0222a9bd7a55d1461d",
+     "render": {
+      "bpm": 75,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 403,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 21,
+      "note_count": 41
+     },
+     "track_notes": 523,
+     "range_semitones": 30,
+     "distinct_pitches": 9
+    },
+    {
+     "score_id": "195515",
+     "url": "https://musescore.com/score/195515",
+     "score_title": "In the Hall of the Mountain King",
+     "match": "title",
+     "rating": "4.64",
+     "n_ratings": "11",
+     "n_views": "5599",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/9/45/QmRTWPHsmohLA5st7zMzdmeth38RCyytHroPkA2pCDLSCA.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "cb88b06a4ce1e510a087b7a2627e16b33e25a3dd1ad3faf205872f1e6e92de69",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 52
+     },
+     "track_notes": 152,
+     "range_semitones": 12,
+     "distinct_pitches": 9,
+     "pitch_coverage": "9 of 9",
+     "metrics": {
+      "notes": 52,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 9,
+      "transpose": -6,
+      "octave_moves": 4,
+      "max_abs_shift_semitones": 14.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "195515"
+  },
+  {
+   "id": "can-can",
+   "title": "Can-Can",
+   "matched": 4,
+   "eligible": 2,
+   "rejected": {
+    "more than 2 tracks": 2
+   },
+   "tried": [
+    {
+     "score_id": "5942150",
+     "url": "https://musescore.com/score/5942150",
+     "score_title": "Can can",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "359",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/1/57/QmbZXPGEUdTSXBqe53jb8yeT8TnKAJSUp5NCSAc8czDZUm.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": [
+       "in50c 75% < 94%"
+      ]
+     },
+     "passed": false,
+     "sha256": "81bad1b32bdf00d71cf3c7652884f12b987ccfae68685dfe539b437ee6e784d7",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 52
+     },
+     "track_notes": 110,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 52,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 75,
+      "within_50c_any_octave_pct": 75,
+      "median_abs_cents": 7.4,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "transpose": -16,
+      "octave_moves": 3,
+      "max_abs_shift_semitones": 10.97
+     }
+    },
+    {
+     "score_id": "5983155",
+     "url": "https://musescore.com/score/5983155",
+     "score_title": "Can-Can - Offenbach",
+     "match": "title head",
+     "rating": "4.14",
+     "n_ratings": "4",
+     "n_views": "325",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/14/25/QmWiYmyGdR57srpmX1LC6NQMGmvqrAhCZzxmkxQ43rKSkJ.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "636ba993f94a80a44ea4a0e452118678f2a6129fb05b6c7f92752fa60d094f79",
+     "render": {
+      "bpm": 120,
+      "start_beat": 8,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 11
+     },
+     "track_notes": 17,
+     "range_semitones": 8,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
+     "metrics": {
+      "notes": 11,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 6,
+      "transpose": -6,
+      "octave_moves": 1,
+      "max_abs_shift_semitones": 12.77
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "5983155"
+  }
+ ]
+}

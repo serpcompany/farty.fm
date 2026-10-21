@@ -51,10 +51,10 @@ final class ForegroundUITests: PedosUITestCase {
     }
 
     func testComingBackClosesALockedSongSheet() {
-        let app = launch(start: "all")
+        let app = launch(start: "8")
         app.tabBars.buttons["Compose"].tap()
         let birthday = app.buttons["Happy Birthday"]
-        XCTAssertTrue(app.staticTexts["Unlocked · 6"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Unlocked · 7"].waitForExistence(timeout: 5))
         scrollTo(birthday, in: app)
         birthday.tap()
         XCTAssertTrue(app.staticTexts["locked-song-needs"].waitForExistence(timeout: 5), "No locked Song sheet")

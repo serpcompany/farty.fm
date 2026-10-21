@@ -25,11 +25,13 @@ struct RecordingStore: Sendable {
 
     /// Saves a draft: moves its file into `folder` as a new Recording, numbered after the highest
     /// number saved so far (a deleted number is not reused unless it was the highest).
-    /// `fixtureID` marks a Recording loaded from the Fixture Library (internal builds).
-    func save(draftAt draft: URL, seconds: Double, savedAt date: Date = .now, fixtureID: String? = nil) throws -> StoredRecording {
+    /// `fixtureID` marks a Recording loaded from the Fixture Library (internal builds), which
+    /// passes its own `id`.
+    func save(
+        draftAt draft: URL, seconds: Double, savedAt date: Date = .now, id: UUID = UUID(), fixtureID: String? = nil
+    ) throws -> StoredRecording {
         let fileManager = FileManager.default
         try fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
-        let id = UUID()
         let details = Details(
             number: (try load().map(\.number).max() ?? 0) + 1, seconds: seconds, savedAt: date, fixtureID: fixtureID
         )

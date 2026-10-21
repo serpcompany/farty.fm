@@ -1,0 +1,51 @@
+import { resolve } from 'node:path'
+import { expect, type Page, test } from '@playwright/test'
+
+/**
+ * An init script: skips Welcome and, unless `offersAccount`, the account step, which offers itself
+ * after the first Result and the first saved Toot (`account.spec.ts`).
+ */
+export function skipWelcome({ offersAccount = false } = {}): void {
+  localStorage.setItem('pedos.welcomed', '1')
+  if (!offersAccount) localStorage.setItem('pedos.accountStep', 'done')
+}
+
+/**
+ * A Fixture Library Recording, played once into Chromium's fake microphone. The fake microphone
+ * plays its file from the moment the stream opens. With permission granted, Record would open it
+ * as soon as it shows, before the tap (#149), so permission isn't granted up front: the first tap
+ * opens the microphone, and the file plays from the tap. `--use-fake-ui-for-media-stream` still
+ * lets it open. `record-warm.spec.ts` covers the open-ahead microphone.
+ */
+export function withFakeMicrophone(fixture: string): void {
+  const file = resolve(__dirname, '../../../fixtures/recordings', fixture)
+  test.use({
+    launchOptions: {
+      args: [
+        '--use-fake-ui-for-media-stream',
+        '--use-fake-device-for-media-stream',
+        // %noloop plays the file once, then silence, like a single take.
+        `--use-file-for-fake-audio-capture=${file}%noloop`
+      ]
+    }
+  })
+}
+
+/**
+ * Skips Welcome, records for `seconds`, stops, and saves the take. The account step stays out of
+ * the way, as if already offered, unless `offersAccount` (`account.spec.ts`).
+ */
+export async function recordAndSave(
+  page: Page,
+  seconds: number,
+  { offersAccount = false } = {}
+): Promise<void> {
+  await page.addInitScript(skipWelcome, { offersAccount })
+  await page.goto('/')
+  await page.getByTestId('record-button').click()
+  await expect(page.getByTestId('recording-timer')).toBeVisible()
+  await page.waitForTimeout(seconds * 1000)
+  await page.getByTestId('stop-button').click()
+  await expect(page.getByRole('heading', { name: 'New Recording' })).toBeVisible()
+  await page.getByRole('button', { name: 'Save' }).click()
+}

@@ -208,11 +208,21 @@ extension RecordingAnalyzer {
             throw RenderSourceError.staleAnalysis(version: analysis.version)
         }
         guard let recordingPitch = analysis.recordingPitchMIDI else { throw RenderSourceError.noiseLike }
+        return try renderSource(fileAt: url, gestureStartSeconds: analysis.gestureStartSeconds,
+                                gestureEndSeconds: analysis.gestureEndSeconds, recordingPitchMIDI: recordingPitch)
+    }
+
+    /// The same from the parts of a stored analysis the renderer uses. The caller makes sure
+    /// they come from an analysis of `RecordingAnalysis.currentVersion`.
+    ///
+    /// Synchronous and CPU-bound: call it off the main actor.
+    public static func renderSource(fileAt url: URL, gestureStartSeconds: Double, gestureEndSeconds: Double,
+                                    recordingPitchMIDI: Double) throws -> Renderer.Source {
         let y = try AudioDecoder.decodeMono(fileAt: url)
         let sr = Double(analysisSampleRate)
-        let start = min(y.count, Int((analysis.gestureStartSeconds * sr).rounded()))
-        let end = min(y.count, max(start, Int((analysis.gestureEndSeconds * sr).rounded())))
+        let start = min(y.count, Int((gestureStartSeconds * sr).rounded()))
+        let end = min(y.count, max(start, Int((gestureEndSeconds * sr).rounded())))
         let gesture = y[start..<end].map(Double.init)
-        return Renderer.Source(gesture: gesture, pitchContourHz: RecordingPitch.contour(gesture), recordingPitchMIDI: recordingPitch)
+        return Renderer.Source(gesture: gesture, pitchContourHz: RecordingPitch.contour(gesture), recordingPitchMIDI: recordingPitchMIDI)
     }
 }

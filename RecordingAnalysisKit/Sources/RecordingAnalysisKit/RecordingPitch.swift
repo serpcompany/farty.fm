@@ -12,7 +12,7 @@ struct PitchAnalysis: Sendable {
     var confidence: Double
 }
 
-enum RecordingPitch {
+package enum RecordingPitch {
     /// Loose on purpose: audition is the real gate.
     static let minimumConfidence = 0.1
     /// Voiced probability a frame needs, on top of pYIN's own voicing decision.
@@ -102,7 +102,7 @@ enum RecordingPitch {
     }
 
     /// `np.median`.
-    static func median(_ x: [Double]) -> Double {
+    package static func median(_ x: [Double]) -> Double {
         let s = x.sorted()
         let n = s.count
         return n % 2 == 1 ? s[n / 2] : (s[n / 2 - 1] + s[n / 2]) / 2
