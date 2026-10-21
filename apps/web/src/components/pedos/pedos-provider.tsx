@@ -154,7 +154,7 @@ type Pedos = {
   forgetToot(id: string): void
   /** When what's playing started (`performance.now()`), once it has; null otherwise. */
   playbackStartedAt: number | null
-  /** The database waits for Pedos in another tab, on an older version, to close. */
+  /** The database waits for Farty in another tab, on an older version, to close. */
   waitsForOtherTabs: boolean
   /** Profile's counts; null until the Recordings and Toots load. */
   profileStats: ProfileStats | null

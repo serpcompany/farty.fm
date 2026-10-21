@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { expect, test } from '@playwright/test'
 
-// A browser that used Pedos before Toots has version 1 of the `pedos` database: Recordings and
+// A browser that used Farty before Toots has version 1 of the `pedos` database: Recordings and
 // their audio only. The app upgrades it to version 3, which adds the Toots (version 2) and the
 // sync's outbox (version 3), keeps every Recording, and queues each one to upload.
 
@@ -85,11 +85,11 @@ test('upgrades a database from before Toots and keeps its Recordings', async ({ 
   })
 })
 
-test('asks you to close Pedos in your other tabs while one holds the old database open', async ({
+test('asks you to close Farty in your other tabs while one holds the old database open', async ({
   page,
   context
 }) => {
-  // An older Pedos in another tab: version 1 open, and code that never closes it.
+  // An older Farty in another tab: version 1 open, and code that never closes it.
   const old = await context.newPage()
   await old.goto('/robots.txt')
   await old.evaluate(async () => {
@@ -107,7 +107,7 @@ test('asks you to close Pedos in your other tabs while one holds the old databas
   })
 
   await page.goto('/recordings/')
-  const waiting = page.getByText('Close Pedos in your other tabs to carry on.')
+  const waiting = page.getByText('Close Farty in your other tabs to carry on.')
   await expect(waiting).toBeVisible()
   await expect(page.getByText('No Recordings yet')).toHaveCount(0)
 

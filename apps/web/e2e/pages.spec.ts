@@ -8,24 +8,24 @@ test('the privacy page covers accounts, news email, guests, error reports, page 
   await expect(
     page.getByText('Your email, Recordings and Toots (audio included) are stored on Cloudflare')
   ).toBeVisible()
-  await expect(page.getByText('Pedos news, which is on by default')).toBeVisible()
+  await expect(page.getByText('Farty news, which is on by default')).toBeVisible()
   await expect(page.getByText('unsubscribe from any email or on Profile')).toBeVisible()
   await expect(page.getByText('never sold')).toBeVisible()
-  await expect(page.getByText('last only until you close Pedos')).toBeVisible()
+  await expect(page.getByText('last only until you close Farty')).toBeVisible()
   await expect(page.getByText('Delete account on Profile removes your email')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Error reports', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Page views' })).toBeVisible()
-  await expect(page.getByText('counts page views on every page of Pedos')).toBeVisible()
+  await expect(page.getByText('counts page views on every page of Farty')).toBeVisible()
   await expect(page.getByText("don't stop it: they stop error reports")).toBeVisible()
   await expect(page.getByText('a sampled summary for 6 months')).toBeVisible()
   await expect(page.getByText('never includes your farts, their names, your email')).toBeVisible()
   await expect(page.getByText('turn off Share anonymous error reports on Profile')).toBeVisible()
   await expect(page.getByText('keeps your IP address, browser and rough location')).toBeVisible()
   await expect(page.getByText('nothing in it follows you to other sites')).toBeVisible()
-  await expect(page.getByText("Pedos doesn't ask anyone's age")).toBeVisible()
-  await expect(page.getByRole('link', { name: 'support@pedos.app' })).toHaveAttribute(
+  await expect(page.getByText("Farty doesn't ask anyone's age")).toBeVisible()
+  await expect(page.getByRole('link', { name: 'support@farty.fm' })).toHaveAttribute(
     'href',
-    'mailto:support@pedos.app'
+    'mailto:support@farty.fm'
   )
 })
 
@@ -46,7 +46,7 @@ test('a made-up URL answers 404 with one noindex tag and a link home', async ({
   await expect(page.getByText('Page not found')).toBeVisible()
   await expect(page.locator('meta[name="robots"]')).toHaveCount(1)
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/)
-  await expect(page.getByRole('link', { name: 'Back to Pedos' })).toHaveAttribute('href', '/')
+  await expect(page.getByRole('link', { name: 'Back to Farty' })).toHaveAttribute('href', '/')
 })
 
 test('Welcome shows on the tabs but never covers the privacy, support or 404 page', async ({

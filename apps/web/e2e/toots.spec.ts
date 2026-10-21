@@ -4,7 +4,7 @@ import { newEmail, signInByApi } from './account'
 
 // The Toots tab, a Toot's screen and Profile, on the Staging build with the Fixture Library
 // loaded, so every Song is unlocked. The first test is the owner's check on a phone: make Toots,
-// quit, open Pedos again and find them, then rename, delete a Recording a Toot uses, and delete
+// quit, open Farty again and find them, then rename, delete a Recording a Toot uses, and delete
 // the Toots. Then a Toot whose audio is gone, Toots that fail to load, an unknown Toot, and a
 // Toot opened offline.
 
@@ -225,7 +225,7 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     await expect(renamed).toHaveText(new RegExp(`^Lamb, in farts${literally(mary.title)} · Today`))
   })
 
-  await test.step('quit, open Pedos again, and the Toots and Recordings are there', async () => {
+  await test.step('quit, open Farty again, and the Toots and Recordings are there', async () => {
     await context.close()
     context = await launch()
     page = context.pages()[0] ?? (await context.newPage())

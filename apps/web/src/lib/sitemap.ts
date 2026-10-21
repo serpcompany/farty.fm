@@ -1,7 +1,7 @@
 import { absoluteUrl, servedOrigin } from './site'
 
 // SERP's XML sitemaps standard: robots.txt lists `/sitemap-index.xml`, which lists the child
-// sitemaps. Pedos has one, of its public pages. Every URL is on the environment's own host, or on
+// sitemaps. Farty has one, of its public pages. Every URL is on the environment's own host, or on
 // the request's for a local run.
 
 /** The public pages. The other tabs show only what a visitor recorded in their own browser. */

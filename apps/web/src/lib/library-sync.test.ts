@@ -13,7 +13,7 @@ import type { Toot } from './toot'
 let account: FakeAccount
 let page: Awaited<ReturnType<typeof openPage>>
 
-/** A page of Pedos: fresh modules, over this browser's database. */
+/** A page of Farty: fresh modules, over this browser's database. */
 async function openPage() {
   vi.resetModules()
   return {
@@ -279,7 +279,7 @@ describe('uploading', () => {
     ['answers 401', () => refuse('PUT', 401, 'unauthorized')],
     ['answers 503', () => refuse('PUT', 503, 'unavailable')],
     ['names another account', () => refuse('PUT', 409, 'wrong_account')]
-  ])('stops, keeping everything queued, when Pedos %s', async (_, fail) => {
+  ])('stops, keeping everything queued, when Farty %s', async (_, fail) => {
     await recorded(1)
     await recorded(2)
     fail()
@@ -291,7 +291,7 @@ describe('uploading', () => {
   it.each([
     ['is offline', () => (account.offline = true)],
     ['names another account', () => refuse('GET', 409, 'wrong_account')]
-  ])('uploads nothing until it has read the account: not when Pedos %s', async (_, fail) => {
+  ])('uploads nothing until it has read the account: not when Farty %s', async (_, fail) => {
     await recorded(1)
     fail()
     expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(1)

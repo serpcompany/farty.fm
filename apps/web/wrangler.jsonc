@@ -53,16 +53,17 @@
       "vars": {
         "SITE_ENV": "staging",
         "STAGING_BASIC_AUTH_PASSWORD": "stagingpassword",
-        "BETTER_AUTH_URL": "https://staging.pedos.app",
-        "EMAIL_FROM": "Pedos <support@pedos.app>",
+        "BETTER_AUTH_URL": "https://staging.farty.fm",
+        "EMAIL_FROM": "Farty <support@farty.fm>",
         "STAGING_SIGNUP_ALLOWLIST": "devin@serp.co"
       },
-      // Cloudflare Email Sending, from support@ only, and on Staging only to test recipients. It
-      // sends once the owner onboards pedos.app to Email Sending (#152's owner steps).
+      // Cloudflare Email Sending, from support@ only, and on Staging only to test recipients. The
+      // hosts, BETTER_AUTH_URL and the sender must match site.ts and SUPPORT_EMAIL
+      // (src/db/deploy-config.test.ts).
       "send_email": [
         {
           "name": "EMAIL",
-          "allowed_sender_addresses": ["support@pedos.app"],
+          "allowed_sender_addresses": ["support@farty.fm"],
           "allowed_destination_addresses": ["devin@serp.co"]
         }
       ],
@@ -76,7 +77,7 @@
       // request there gets a 308 to the environment's own host (src/lib/other-hosts.ts).
       "workers_dev": true,
       "preview_urls": false,
-      "routes": [{ "pattern": "staging.pedos.app", "custom_domain": true }],
+      "routes": [{ "pattern": "staging.farty.fm", "custom_domain": true }],
       "observability": { "enabled": true },
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-staging" }],
       // Changed only by CI: `pnpm db:migrate:staging` runs before each deploy (web.yml).
@@ -103,16 +104,16 @@
       // secret, set by the web-auth-secret.yml workflow.
       "vars": {
         "SITE_ENV": "production",
-        "BETTER_AUTH_URL": "https://pedos.app",
-        "EMAIL_FROM": "Pedos <support@pedos.app>"
+        "BETTER_AUTH_URL": "https://farty.fm",
+        "EMAIL_FROM": "Farty <support@farty.fm>"
       },
-      "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["support@pedos.app"] }],
+      "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["support@farty.fm"] }],
       "workers_dev": true,
       "preview_urls": false,
       // `www` answers with a 308 to the apex (src/lib/other-hosts.ts).
       "routes": [
-        { "pattern": "pedos.app", "custom_domain": true },
-        { "pattern": "www.pedos.app", "custom_domain": true }
+        { "pattern": "farty.fm", "custom_domain": true },
+        { "pattern": "www.farty.fm", "custom_domain": true }
       ],
       "observability": { "enabled": true },
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-production" }],

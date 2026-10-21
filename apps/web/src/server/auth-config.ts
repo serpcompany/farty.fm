@@ -19,7 +19,7 @@ import {
 import { deployment, isLocalHost } from './environment'
 
 /**
- * Sign-in for Pedos (#152; SERP's better-auth standard, with serp.app's `src/server/auth/` as the
+ * Sign-in for Farty (#152; SERP's better-auth standard, with serp.app's `src/server/auth/` as the
  * reference): a 6-digit code by email, and the first sign-in creates the account. No passwords.
  * No Next.js imports, so the tests run this file on a real local D1 (`auth-config.test.ts`).
  *
@@ -311,7 +311,7 @@ export function createAuth({ db, settings, email }: CreateAuthOptions) {
   })
 
   return betterAuth({
-    appName: 'Pedos',
+    appName: 'Farty',
     baseURL: settings.baseURL,
     basePath: AUTH_BASE_PATH,
     secret: settings.secret,
@@ -322,7 +322,7 @@ export function createAuth({ db, settings, email }: CreateAuthOptions) {
     }),
     user: {
       additionalFields: {
-        // Pedos news by email, on by default (#150). Nobody sets it at sign-in.
+        // Farty news by email, on by default (#150). Nobody sets it at sign-in.
         marketingEmail: { type: 'boolean', input: false, required: false, defaultValue: true }
       }
     },

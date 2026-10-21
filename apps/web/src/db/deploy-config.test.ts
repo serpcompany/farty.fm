@@ -3,11 +3,13 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { experimental_readRawConfig, unstable_readConfig } from 'wrangler'
 import { parse } from 'yaml'
+import { siteOrigin } from '../lib/site'
+import { SUPPORT_EMAIL } from '../server/email'
 
-// Each deployed environment's own D1 and R2, and the guards that keep local things local: the dev
-// mailbox exists only at wrangler.jsonc's top level, which is never deployed, and every command that
-// deploys or changes a remote database names its environment with --env. Without --env, Wrangler
-// reads the top level.
+// Each deployed environment's own D1 and R2, its hosts and sender, and the guards that keep local
+// things local: the dev mailbox exists only at wrangler.jsonc's top level, which is never deployed,
+// and every command that deploys or changes a remote database names its environment with --env.
+// Without --env, Wrangler reads the top level.
 
 const path = (relative: string) => fileURLToPath(new URL(relative, import.meta.url))
 const CONFIG = path('../../wrangler.jsonc')
@@ -22,6 +24,9 @@ type Resolved = {
   d1_databases: { database_id?: string }[]
   r2_buckets: unknown[]
   kv_namespaces: { binding: string }[]
+  vars: Record<string, unknown>
+  routes?: unknown[]
+  send_email: { name: string; allowed_sender_addresses?: string[] }[]
 }
 const resolved = (env?: Deployed): Resolved =>
   unstable_readConfig({ config: CONFIG, env }, { hideWarnings: true })
@@ -105,6 +110,24 @@ describe('each deployed environment', () => {
       }
     ])
     expect(config.r2_buckets).toEqual([{ binding: 'MEDIA', bucket_name: `pedos-${env}` }])
+  })
+
+  // site.ts and SUPPORT_EMAIL are the only places a host or the sender is spelled. Sign-in answers
+  // 503 (`auth_url_invalid`) when BETTER_AUTH_URL isn't the served origin, and Email Sending
+  // refuses a sender its binding doesn't allow, so a mismatch would show only after a deploy.
+  it.each(DEPLOYED)('%s serves, signs in and sends on its own host from site.ts', env => {
+    const config = resolved(env)
+    const origin = siteOrigin(env) as string
+    const { hostname } = new URL(origin)
+    expect(config.vars.BETTER_AUTH_URL).toBe(origin)
+    expect(config.routes).toEqual([
+      { pattern: hostname, custom_domain: true },
+      ...(env === 'production' ? [{ pattern: `www.${hostname}`, custom_domain: true }] : [])
+    ])
+    expect(config.vars.EMAIL_FROM).toBe(`Farty <${SUPPORT_EMAIL}>`)
+    expect(config.send_email.map(binding => binding.allowed_sender_addresses)).toEqual([
+      [SUPPORT_EMAIL]
+    ])
   })
 
   it('has a different database from every other environment', () => {

@@ -76,7 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] pb-20">
         {pedos.waitsForOtherTabs && (
           <output className="block px-4 pt-4 text-center text-muted-foreground">
-            Close Pedos in your other tabs to carry on.
+            Close Farty in your other tabs to carry on.
           </output>
         )}
         {children}

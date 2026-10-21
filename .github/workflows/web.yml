@@ -203,7 +203,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: staging
-      url: https://staging.pedos.app
+      url: https://staging.farty.fm
     # A running deploy is never cancelled; a newer queued one replaces an older one.
     concurrency:
       group: deploy-web-staging
@@ -259,7 +259,7 @@ jobs:
     timeout-minutes: 15
     environment:
       name: production
-      url: https://pedos.app
+      url: https://farty.fm
     # A running deploy is never cancelled; a newer queued one replaces an older one.
     concurrency:
       group: deploy-web-production

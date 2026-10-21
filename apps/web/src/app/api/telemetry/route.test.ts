@@ -84,9 +84,9 @@ describe('POST /api/telemetry/', () => {
   it("names the Worker's environment, and takes only its own origin there", async () => {
     vi.stubEnv('SITE_ENV', 'production')
     const own = await POST(
-      new Request('https://pedos.app/api/telemetry/', {
+      new Request('https://farty.fm/api/telemetry/', {
         method: 'POST',
-        headers: { origin: 'https://pedos.app', 'content-type': 'application/json' },
+        headers: { origin: 'https://farty.fm', 'content-type': 'application/json' },
         body: JSON.stringify({ ...report, environment: 'production' })
       })
     )
@@ -96,9 +96,9 @@ describe('POST /api/telemetry/', () => {
       workerEnvironment: 'production'
     })
     const staging = await POST(
-      new Request('https://pedos.app/api/telemetry/', {
+      new Request('https://farty.fm/api/telemetry/', {
         method: 'POST',
-        headers: { origin: 'https://staging.pedos.app', 'content-type': 'application/json' },
+        headers: { origin: 'https://staging.farty.fm', 'content-type': 'application/json' },
         body: JSON.stringify(report)
       })
     )

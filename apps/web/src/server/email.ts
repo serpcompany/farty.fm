@@ -15,8 +15,8 @@ import { type DeploymentEnv, deployment, isLocalHost } from './environment'
  * and a fixed reason: never a recipient, a subject or a code.
  */
 
-/** The one address Pedos sends from and receives at (Email Routing forwards it). */
-export const SUPPORT_EMAIL = 'support@pedos.app'
+/** The one address Farty sends from and receives at (Email Routing forwards it). */
+export const SUPPORT_EMAIL = 'support@farty.fm'
 
 /**
  * A sign-in code: its digits, how long it works and how many guesses it allows. Defined once, for
@@ -60,7 +60,7 @@ export function emailConfig(env: EmailEnv, host: string | null): EmailConfig {
   }
   const mailbox = devMailboxStore(env, host)
   if (!mailbox) return { kind: 'off', reason: 'dev_mailbox_unavailable' }
-  return { kind: 'capture', mailbox, from: { name: 'Pedos', email: SUPPORT_EMAIL } }
+  return { kind: 'capture', mailbox, from: { name: 'Farty', email: SUPPORT_EMAIL } }
 }
 
 /**
@@ -78,7 +78,7 @@ export function devMailboxStore(env: EmailEnv, host: string | null): MailboxStor
   return usable ? (store as MailboxStore) : null
 }
 
-/** `Pedos <support@pedos.app>`: a display name, then the support address in angle brackets. */
+/** `Farty <support@farty.fm>`: a display name, then the support address in angle brackets. */
 const SENDER = /^([^<>"\r\n]+?)\s*<([^<>\s]+)>$/
 
 /** `EMAIL_FROM` as a sender, only when its address is the support address. */
@@ -98,16 +98,16 @@ function sendBinding(value: unknown): SendEmailBinding | null {
 export function signInCodeEmail(code: string): { subject: string; text: string; html: string } {
   const minutes = `${SIGN_IN_CODE_MINUTES} minutes`
   return {
-    subject: `${code} is your Pedos sign-in code`,
+    subject: `${code} is your Farty sign-in code`,
     text: [
-      'Your Pedos sign-in code:',
+      'Your Farty sign-in code:',
       '',
       code,
       '',
       `It works for ${minutes}. If you didn’t ask for it, you can ignore this email.`
     ].join('\n'),
     html: [
-      '<p>Your Pedos sign-in code:</p>',
+      '<p>Your Farty sign-in code:</p>',
       `<p style="font-size:32px;font-weight:700;letter-spacing:6px;font-family:monospace">${code}</p>`,
       `<p>It works for ${minutes}. If you didn’t ask for it, you can ignore this email.</p>`
     ].join('\n')

@@ -7,7 +7,7 @@ import { askForMicrophone } from '@/lib/audio/recorder'
 import { usePedos } from './pedos-provider'
 
 /**
- * Says what Pedos does and asks for the microphone before the first recording. First visit only.
+ * Says what Farty does and asks for the microphone before the first recording. First visit only.
  * Matches the iPhone app's `WelcomeSheet`.
  */
 export function Welcome() {
@@ -38,7 +38,7 @@ export function Welcome() {
           priority
           className="mb-4 rounded-[20px]"
         />
-        <h1 className="text-4xl font-bold tracking-tight">Pedos</h1>
+        <h1 className="text-4xl font-bold tracking-tight">Farty</h1>
         <p className="mt-1 text-xl text-muted-foreground">
           Record your farts. Turn them into songs.
         </p>

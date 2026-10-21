@@ -14,7 +14,7 @@ const messages: Record<SignInProblem, string> = {
   codeExpired: 'That code no longer works. Send a new one.',
   tooManyTries: 'Too many tries. Wait a few minutes, then try again.',
   unavailable: "Accounts aren't available right now.",
-  failed: "Couldn't reach Pedos. Check your connection and try again."
+  failed: "Couldn't reach Farty. Check your connection and try again."
 }
 
 /**
@@ -219,7 +219,7 @@ function Step() {
           )}
 
           <p className="text-center text-xs text-muted-foreground">
-            We'll also send you Pedos news. You can turn it off on Profile.{' '}
+            We'll also send you Farty news. You can turn it off on Profile.{' '}
             <a
               href="/privacy/"
               target="_blank"
@@ -237,7 +237,7 @@ function Step() {
               className="text-center text-sm text-muted-foreground"
               data-testid="account-step-guest"
             >
-              Without an account, your farts are gone when you close Pedos.
+              Without an account, your farts are gone when you close Farty.
             </p>
           )}
           <Button variant="secondary" className="h-12 text-base" onClick={skipStep}>

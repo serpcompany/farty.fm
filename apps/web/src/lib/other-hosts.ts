@@ -6,7 +6,7 @@ import { smokeTestHeader } from './staging-access'
 // (worker.ts) runs this before the Staging gate. Copied from zenbujapanese-monorepo's
 // src/lib/other-hosts.ts.
 
-const wwwHost = 'www.pedos.app'
+const wwwHost = `www.${new URL(productionOrigin).hostname}`
 const workersDevHost = /\.workers\.dev$/u
 // Next's own paths, which it serves as they are.
 const servedAsTheyAre = /^\/(?:_next|\.well-known)(?:\/|$)/u

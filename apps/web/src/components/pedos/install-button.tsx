@@ -10,14 +10,14 @@ import {
   subscribeToInstall
 } from '@/lib/install'
 
-/** How this browser can install Pedos now, or null when it's installed or can't be. */
+/** How this browser can install Farty now, or null when it's installed or can't be. */
 export function useInstallRoute(): InstallRoute | null {
   return useSyncExternalStore(subscribeToInstall, currentInstallRoute, () => null)
 }
 
 /**
- * Installs Pedos: Chrome's Install app button on Android, or how to add Pedos to the Home Screen
- * on iPhone. Renders nothing once Pedos is installed, or where the browser can't install it.
+ * Installs Farty: Chrome's Install app button on Android, or how to add Farty to the Home Screen
+ * on iPhone. Renders nothing once Farty is installed, or where the browser can't install it.
  */
 export function InstallButton() {
   const route = useInstallRoute()

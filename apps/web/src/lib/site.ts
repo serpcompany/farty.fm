@@ -1,8 +1,8 @@
 export type SiteEnv = 'local' | 'staging' | 'production'
 
 /** Each deployed environment's own host, the one its canonicals, robots and sitemaps name. */
-export const productionOrigin = 'https://pedos.app'
-export const stagingOrigin = 'https://staging.pedos.app'
+export const productionOrigin = 'https://farty.fm'
+export const stagingOrigin = 'https://staging.farty.fm'
 
 /** Which deployed environment this build is for. Builds bake it in, so one build serves one. */
 export function siteEnv(): SiteEnv {

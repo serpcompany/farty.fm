@@ -221,7 +221,7 @@ export async function libraryChanges(
   return { cursor: Number(clock[0].now), recordings: recordingRows, toots: tootRows }
 }
 
-/** Turns Pedos news by email on or off. False if the user has no row. */
+/** Turns Farty news by email on or off. False if the user has no row. */
 export async function setMarketingEmail(
   db: Database,
   userId: string,

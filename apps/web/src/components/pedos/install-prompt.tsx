@@ -18,8 +18,8 @@ import { usePedos } from './pedos-provider'
 const offeredKey = 'pedos.installOffered'
 
 /**
- * Offers to install Pedos once, after the first saved Recording, above the tabs. It hides when
- * it's closed or Pedos is installed. It also registers the service worker and, signed in, asks
+ * Offers to install Farty once, after the first saved Recording, above the tabs. It hides when
+ * it's closed or Farty is installed. It also registers the service worker and, signed in, asks
  * the browser to keep the Recordings: a guest's last only for the visit (`visit.ts`).
  */
 export function InstallPrompt() {
@@ -43,7 +43,7 @@ export function InstallPrompt() {
           if (localStorage.getItem(offeredKey) !== null) return
           localStorage.setItem(offeredKey, '1')
         } catch {
-          // Storage is blocked, so Pedos can't remember the offer. It doesn't offer at all.
+          // Storage is blocked, so Farty can't remember the offer. It doesn't offer at all.
           return
         }
         setOpen(true)
@@ -55,7 +55,7 @@ export function InstallPrompt() {
   if (!open || route === null || pedos.flow) return null
   return (
     <aside
-      aria-label="Install Pedos"
+      aria-label="Install Farty"
       className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 mx-auto w-full max-w-md px-3"
     >
       <div className="flex items-center gap-3 rounded-2xl border bg-card p-3 text-card-foreground shadow-lg">
@@ -69,7 +69,7 @@ export function InstallPrompt() {
           className="rounded-[10px]"
         />
         <div className="min-w-0 flex-1">
-          <p className="font-semibold">Install Pedos</p>
+          <p className="font-semibold">Install Farty</p>
           {route === 'share-sheet' && <ShareSheetHint />}
         </div>
         {route === 'prompt' && <Button onClick={() => void promptInstall()}>Install app</Button>}

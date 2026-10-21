@@ -300,7 +300,7 @@ test.describe('before microphone permission is granted', () => {
     expect(ms).toBeLessThan(100)
   })
 
-  test('the microphone opens on the first tap, not when Pedos opens', async ({ page }) => {
+  test('the microphone opens on the first tap, not when Farty opens', async ({ page }) => {
     await page.addInitScript(skipWelcome)
     await page.goto('/')
     await expect(page.getByTestId('record-button')).toBeEnabled()

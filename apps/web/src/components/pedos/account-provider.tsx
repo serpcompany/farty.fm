@@ -26,7 +26,7 @@ import { openVisit } from '@/lib/visit'
 
 /**
  * How a Sign out went: signed out; not yet, since some farts haven't reached the account (Profile
- * asks whether to wait or sign out anyway); or Pedos couldn't be reached.
+ * asks whether to wait or sign out anyway); or Farty couldn't be reached.
  */
 export type SignOut = 'signedOut' | 'pending' | 'failed'
 
@@ -58,7 +58,7 @@ type AccountContext = {
    */
   deleteAccount(): Promise<boolean>
   /**
-   * Turns Pedos news by email on or off. False when it didn't change. When the session is another
+   * Turns Farty news by email on or off. False when it didn't change. When the session is another
    * account's now, changes nothing and reloads as that account.
    */
   setMarketingEmail(on: boolean): Promise<boolean>
@@ -94,7 +94,7 @@ function reopenAsSignedIn(): void {
   window.location.reload()
 }
 
-/** The account of whoever uses Pedos here, and the account step (#155). */
+/** The account of whoever uses Farty here, and the account step (#155). */
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account>({ status: 'checking' })
   const [stepOpen, setStepOpen] = useState(false)
