@@ -42,6 +42,7 @@ import csv
 import datetime
 import hashlib
 import json
+import os
 import re
 import sys
 import tarfile
@@ -351,7 +352,11 @@ def write_catalog(path, catalog, titles_file, picks, archive):
 
     The copies and entries are staged first, and nothing in the catalog changes until every entry
     imports, through the catalog's own loader, to exactly the melody its gates judged. If one
-    doesn't, this raises ReimportMismatch with the catalog as it was."""
+    doesn't, this raises ReimportMismatch with the catalog as it was.
+
+    The merged catalog.json is written in the staging directory too, and renamed over the real one
+    only after the copies have moved in. The batch's stale copies are removed after that, so a
+    failure before the rename leaves the old catalog.json with every file it names."""
     with tempfile.TemporaryDirectory(prefix=".import-", dir=path.parent) as staging:
         staging = Path(staging)
         (staging / "midi").mkdir()
@@ -375,11 +380,12 @@ def write_catalog(path, catalog, titles_file, picks, archive):
                                        "the catalog is unchanged")
         merged = pdmx.merge_catalog(catalog, titles_file, entries)
         old = {e["file"] for e in catalog if pdmx.batch_of(e) == titles_file}
+        (staging / path.name).write_text(json.dumps(merged, indent=1, ensure_ascii=False))  # the file's own format
         for entry in entries:
             (staging / entry["file"]).replace(path.parent / entry["file"])
+        os.replace(staging / path.name, path)
         for stale in old - {e["file"] for e in merged}:
             (path.parent / stale).unlink(missing_ok=True)
-        path.write_text(json.dumps(merged, indent=1, ensure_ascii=False))  # the file's own format
     return entries
 
 

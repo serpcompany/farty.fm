@@ -7,6 +7,7 @@ import contextlib
 import hashlib
 import io
 import json
+import os
 import re
 import sys
 import tarfile
@@ -472,6 +473,42 @@ class WriteCatalog(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.write([self.pick("mary")])
         self.assertEqual(self.files(), before)
+
+    def test_a_disk_full_on_the_final_write_changes_nothing(self):
+        """The second catalog.json write (the merged one) truncates its file, writes half and fails."""
+        writes, real_write_text = [], Path.write_text
+
+        def write_text(p, text, *args, **kwargs):
+            if p.name != "catalog.json":
+                return real_write_text(p, text, *args, **kwargs)
+            writes.append(p)
+            if len(writes) < 2:
+                return real_write_text(p, text, *args, **kwargs)
+            with open(p, "w") as f:
+                f.write(text[:len(text) // 2])
+            raise OSError(28, "No space left on device")
+
+        before = self.files()
+        with mock.patch.object(Path, "write_text", write_text), self.assertRaises(OSError):
+            self.write([self.pick("twinkle")])
+        self.assertEqual(len(writes), 2)
+        self.assertEqual(self.files(), before)  # catalog.json, the stale copy, and no staging left over
+
+    def test_a_failed_rename_keeps_the_old_catalog_and_every_file_it_names(self):
+        real_replace = os.replace  # Path.replace calls it too
+
+        def replace(src, dst):
+            if Path(dst) == self.path:
+                raise OSError("rename failed")
+            return real_replace(src, dst)
+
+        before = self.files()
+        with mock.patch.object(os, "replace", replace), self.assertRaises(OSError):
+            self.write([self.pick("twinkle")])
+        after = self.files()
+        self.assertEqual(after["catalog/catalog.json"], before["catalog/catalog.json"])
+        self.assertEqual(after["catalog/midi/pdmx-gone.mid"], b"gone")
+        self.assertFalse(list(self.path.parent.glob(".import-*")))
 
 
 if __name__ == "__main__":
