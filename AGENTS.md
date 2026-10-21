@@ -1,5 +1,5 @@
-Stage: explore
-Agents may merge: yes
+Stage: ship
+Release PRs: until #122 ends, agents may merge every PR for the web MVP (#106): work PRs, launch fixes, the launch release PR, the `main` → `staging` merge-back, and the PR that removes this line (owner, 2026-10-21, #113 comment 6303110568). Only the owner changes this line.
 
 ## Agent skills
 
