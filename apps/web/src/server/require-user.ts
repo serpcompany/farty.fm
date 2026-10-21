@@ -1,5 +1,6 @@
 import { servedOrigin } from '@/lib/site'
 
+import { AuthUnavailableError } from './auth-config'
 import { getSessionUser, type SessionUser } from './session-user'
 
 export type { SessionUser } from './session-user'
@@ -16,9 +17,18 @@ export function apiError(status: number, error: string): Response {
   return Response.json({ error }, { status })
 }
 
-/** The signed-in user, or the 401 to answer with. */
+/**
+ * The signed-in user, or the answer: 401 when signed out, 503 when sign-in isn't set up here, so a
+ * broken deploy isn't taken for a signed-out person.
+ */
 export async function requireUser(request: Request): Promise<SessionUser | Response> {
-  const user = await getSessionUser(request)
+  let user: SessionUser | null
+  try {
+    user = await getSessionUser(request)
+  } catch (error) {
+    if (error instanceof AuthUnavailableError) return apiError(503, 'auth_unavailable')
+    throw error
+  }
   return user ?? apiError(401, 'signed_out')
 }
 
@@ -37,7 +47,7 @@ type Handle<P> = (user: SessionUser, request: Request, params: P) => Promise<Res
 
 /**
  * A route method behind a signed-in user: `export const PUT = userRoute<{ id: string }>(...)`.
- * It answers 401 without a session, then 403 to a write from another origin, and only then runs
+ * It answers 401 without a session (503 when sign-in isn't set up), then 403 to a write from another origin, and only then runs
  * `handle`. Every answer is `private, no-store`. A thrown error answers 500 and logs only the
  * route, since a failed query's message holds its bound values.
  */

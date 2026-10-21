@@ -11,8 +11,9 @@ vi.mock('@opennextjs/cloudflare', async () => {
   const { env } = await import('cloudflare:test')
   return { getCloudflareContext: () => ({ env }) }
 })
-// Until sign-in (#152) is wired in, tests sign in through a real `session` row
-// (`workers-session.ts`), so deleting a user signs them out here as it will there.
+// The library tests sign in through a real `session` row (`workers-session.ts`), so deleting a
+// user signs them out here as it does with sign-in's cookie. `signed-in.workers.test.ts` unmocks
+// this and signs in through sign-in itself.
 vi.mock('@/server/session-user', () => import('./workers-session'))
 
 beforeEach(async () => {

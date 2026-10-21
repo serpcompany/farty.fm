@@ -32,6 +32,7 @@ Run from `apps/web/`:
 - `src/lib/toot.ts`, `toot-renderer.ts`: a Toot, a Song rendered with the user's Recordings in the render worker, as Song Creator makes it.
 - `src/db/`: the D1 schema (Better Auth's tables, `recordings` and `toots`), `createDatabase()` over any D1 binding (`database.ts`, importable from tests) and `getDb()` for a request (`index.ts`, server-only), through Drizzle. Migrations are in `drizzle/`.
 - `src/app/api/`, `src/server/`: a signed-in user's library (Recordings, Toots and their WAVs in R2) and account. Every route outside `api/auth/` is built with `userRoute` (`require-user.ts`): session, then `Origin` on writes, `private, no-store`. `every-route.workers.test.ts` fails a route that skips it.
+- `src/server/`: sign-in (#152), server-only behind `auth.ts`: Better Auth email codes (`auth-config.ts`), email and the dev mailbox (`email.ts`, `dev-mailbox.ts`, `/dev/mail/`). How it works and where it runs is in [`docs/agents/web.md`](../../docs/agents/web.md#environments-and-deploys).
 - `src/components/pedos/`: the screens, matching the iPhone app's. `src/components/ui/` stays stock shadcn.
 
 ## Where this differs from SERP's standards

@@ -3,7 +3,7 @@ import { and, count, eq, gte, isNull, sql } from 'drizzle-orm'
 import type { Analysis } from '../lib/recordings'
 import type { TootArrangement } from '../lib/toot'
 import type { Database } from './database'
-import { recordings, toots, user } from './schema'
+import { recordings, toots, user, verification } from './schema'
 
 // A user's library in D1: their Recordings and Toots, and their tombstones. Every query here takes
 // the session's user id and filters on it, so one user never reads or changes another's rows.
@@ -213,9 +213,16 @@ export async function setMarketingEmail(
 }
 
 /**
- * Deletes the user's row. The foreign keys' `on delete cascade` deletes their sessions, sign-in
- * methods, Recordings and Toots in the same statement.
+ * Deletes the user's row and any sign-in code still waiting for their email, in one batch. The
+ * foreign keys' `on delete cascade` deletes their sessions, sign-in methods, Recordings and Toots
+ * with the row. A code's row names the email (`sign-in-otp-<lowercased email>`), not the user.
  */
 export async function deleteUser(db: Database, userId: string): Promise<void> {
-  await db.delete(user).where(eq(user.id, userId))
+  const email = sql`(select ${user.email} from ${user} where ${user.id} = ${userId})`
+  await db.batch([
+    db
+      .delete(verification)
+      .where(eq(verification.identifier, sql`'sign-in-otp-' || lower(${email})`)),
+    db.delete(user).where(eq(user.id, userId))
+  ])
 }

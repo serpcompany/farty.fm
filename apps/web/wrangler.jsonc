@@ -36,7 +36,26 @@
     "staging": {
       // The Staging gate's password (worker.ts). It is public, so it is a plain variable, not a
       // secret. Production never has it; local runs set it in .dev.vars.
-      "vars": { "SITE_ENV": "staging", "STAGING_BASIC_AUTH_PASSWORD": "stagingpassword" },
+      // Sign-in (#152, src/server/auth-config.ts): BETTER_AUTH_URL is the canonical origin, and
+      // only STAGING_SIGNUP_ALLOWLIST's emails (comma-separated, each also an allowed destination
+      // below) get codes. BETTER_AUTH_SECRET is a Worker secret, set by the web-auth-secret.yml
+      // workflow.
+      "vars": {
+        "SITE_ENV": "staging",
+        "STAGING_BASIC_AUTH_PASSWORD": "stagingpassword",
+        "BETTER_AUTH_URL": "https://staging.pedos.app",
+        "EMAIL_FROM": "Pedos <support@pedos.app>",
+        "STAGING_SIGNUP_ALLOWLIST": "devin@serp.co"
+      },
+      // Cloudflare Email Sending, from support@ only, and on Staging only to test recipients. It
+      // sends once the owner onboards pedos.app to Email Sending (#152's owner steps).
+      "send_email": [
+        {
+          "name": "EMAIL",
+          "allowed_sender_addresses": ["support@pedos.app"],
+          "allowed_destination_addresses": ["devin@serp.co"]
+        }
+      ],
       // Every request runs the entry first, so the static files are behind the gate too.
       "assets": {
         "binding": "ASSETS",
@@ -63,7 +82,14 @@
       "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-staging" }]
     },
     "production": {
-      "vars": { "SITE_ENV": "production" },
+      // Sign-in (#152): as Staging's, with sign-up open to anyone. BETTER_AUTH_SECRET is a Worker
+      // secret, set by the web-auth-secret.yml workflow.
+      "vars": {
+        "SITE_ENV": "production",
+        "BETTER_AUTH_URL": "https://pedos.app",
+        "EMAIL_FROM": "Pedos <support@pedos.app>"
+      },
+      "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["support@pedos.app"] }],
       "workers_dev": true,
       "preview_urls": false,
       // `www` answers with a 308 to the apex (src/lib/other-hosts.ts).
