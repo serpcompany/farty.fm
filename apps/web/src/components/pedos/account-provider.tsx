@@ -13,7 +13,6 @@ import * as api from '@/lib/account'
 import {
   type Account,
   clearStepDraft,
-  forgetAccount,
   readSession,
   readStepDraft,
   type StepMoment,
@@ -22,8 +21,14 @@ import {
   takeStepOffer
 } from '@/lib/account'
 import { keepRecordings } from '@/lib/install'
-import { clearLibrary } from '@/lib/recording-store'
+import { forgetLibrary, startSync, uploadBeforeSignOut } from '@/lib/library-sync'
 import { openVisit } from '@/lib/visit'
+
+/**
+ * How a Sign out went: signed out; not yet, since some farts haven't reached the account (Profile
+ * asks whether to wait or sign out anyway); or Pedos couldn't be reached.
+ */
+export type SignOut = 'signedOut' | 'pending' | 'failed'
 
 type AccountContext = {
   account: Account
@@ -42,12 +47,26 @@ type AccountContext = {
   skipStep(): void
   /** The step signed in: closes it and carries on. */
   finishSignIn(account: Account): void
-  /** Signs out and clears this browser's copy. False when Pedos couldn't be reached. */
-  signOut(): Promise<boolean>
-  /** Deletes the account, then this browser's copy. False when it didn't. */
+  /**
+   * Uploads what this browser hasn't yet, then signs out and clears this browser's copy. With
+   * `anyway`, signs out without waiting for the upload, and what didn't upload is lost.
+   */
+  signOut(anyway?: boolean): Promise<SignOut>
+  /**
+   * Deletes the account, then this browser's copy. False when it didn't. When the session is
+   * another account's now (a sign-in in another tab), deletes nothing and reloads as that account.
+   */
   deleteAccount(): Promise<boolean>
-  /** Turns Pedos news by email on or off. False when it didn't change. */
+  /**
+   * Turns Pedos news by email on or off. False when it didn't change. When the session is another
+   * account's now, changes nothing and reloads as that account.
+   */
   setMarketingEmail(on: boolean): Promise<boolean>
+  /**
+   * After a session ended: clears this browser's copy, for a device that's no longer the
+   * account's. What reached the account stays there.
+   */
+  clearDevice(): Promise<void>
 }
 
 const Context = createContext<AccountContext | null>(null)
@@ -63,10 +82,16 @@ export function useAccount(): AccountContext {
  * screen keeps the Recordings and Toots it showed.
  */
 async function leave(): Promise<void> {
-  // #156 waits for the outbox to upload here first (the plan's §2).
-  forgetAccount()
-  await clearLibrary().catch(() => {})
+  await forgetLibrary()
   window.location.replace('/profile/')
+}
+
+/**
+ * The session is another account's now (a sign-in in another tab): this page reloads as that
+ * account, which reads the session and claims the library, and nothing is deleted or changed.
+ */
+function reopenAsSignedIn(): void {
+  window.location.reload()
 }
 
 /** The account of whoever uses Pedos here, and the account step (#155). */
@@ -90,6 +115,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       current = false
     }
   }, [])
+
+  // Signed in, this browser's library keeps in step with the account's (#156).
+  const accountId = account.status === 'signedIn' ? account.id : null
+  const accountEmail = account.status === 'signedIn' ? account.email : ''
+  useEffect(() => {
+    if (accountId) return startSync(accountId, accountEmail, openVisit().library)
+  }, [accountId, accountEmail])
 
   const retry = useCallback(() => {
     setAccount({ status: 'checking' })
@@ -137,27 +169,41 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [close]
   )
 
-  const signOut = useCallback(async () => {
-    if (!(await api.signOut())) return false
-    await leave()
-    return true
-  }, [])
+  const signOut = useCallback(
+    async (anyway = false): Promise<SignOut> => {
+      if (!anyway && accountId) {
+        const left = await uploadBeforeSignOut(accountId).catch(() => 1)
+        if (left > 0) return 'pending'
+      }
+      if (!(await api.signOut())) return 'failed'
+      await leave()
+      return 'signedOut'
+    },
+    [accountId]
+  )
 
   const deleteAccount = useCallback(async () => {
-    if (!(await api.deleteAccount())) return false
-    await leave()
-    return true
-  }, [])
+    if (!accountId) return false
+    const result = await api.deleteAccount(accountId)
+    if (result === 'otherAccount') reopenAsSignedIn()
+    else if (result === 'done') await leave()
+    return result !== 'failed'
+  }, [accountId])
 
-  const setMarketingEmail = useCallback(async (on: boolean) => {
-    const changed = await api.setMarketingEmail(on)
-    if (changed) {
-      setAccount(current =>
-        current.status === 'signedIn' ? { ...current, marketingEmail: on } : current
-      )
-    }
-    return changed
-  }, [])
+  const setMarketingEmail = useCallback(
+    async (on: boolean) => {
+      if (!accountId) return false
+      const result = await api.setMarketingEmail(on, accountId)
+      if (result === 'otherAccount') reopenAsSignedIn()
+      else if (result === 'done') {
+        setAccount(current =>
+          current.status === 'signedIn' ? { ...current, marketingEmail: on } : current
+        )
+      }
+      return result !== 'failed'
+    },
+    [accountId]
+  )
 
   const value: AccountContext = {
     account,
@@ -169,7 +215,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     finishSignIn,
     signOut,
     deleteAccount,
-    setMarketingEmail
+    setMarketingEmail,
+    clearDevice: leave
   }
   return <Context value={value}>{children}</Context>
 }

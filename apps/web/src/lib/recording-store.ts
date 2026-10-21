@@ -1,13 +1,32 @@
-import { type DBSchema, type IDBPDatabase, openDB } from 'idb'
+import {
+  type DBSchema,
+  type IDBPDatabase,
+  type IDBPObjectStore,
+  type IDBPTransaction,
+  openDB,
+  type StoreNames
+} from 'idb'
+import { libraryOwner } from './account'
+import { getAudio } from './library-api'
+import {
+  announceQueued,
+  itemKey,
+  type Kind,
+  mergeOutbox,
+  type OutboxEntry,
+  type OutboxOp,
+  queueStamp
+} from './outbox'
 import type { AnalysisState, Recording } from './recordings'
 import type { Toot } from './toot'
 
 /**
  * Recordings and Toots live in this browser, in IndexedDB (ADR 0001's local-first rule, on the
  * web). Metadata and audio are separate stores, so listing them never loads their audio. Without
- * an account they last only for the visit (`visit.ts`).
+ * an account they last only for the visit (`visit.ts`). Signed in, they are the account's working
+ * copy, kept in step with it by `library-sync.ts`.
  */
-interface PedosDB extends DBSchema {
+export interface PedosDB extends DBSchema {
   recordings: { key: string; value: Recording }
   /** Each Recording's WAV, by Recording id. */
   audio: { key: string; value: ArrayBuffer }
@@ -15,7 +34,30 @@ interface PedosDB extends DBSchema {
   toots: { key: string; value: Toot }
   /** Each Toot's own WAV, by Toot id. Since version 2. */
   tootAudio: { key: string; value: ArrayBuffer }
+  /** What the account still needs from this browser (`outbox.ts`). Since version 3. */
+  outbox: { key: string; value: OutboxEntry }
+  /**
+   * Recordings and Toots from the account whose WAV hasn't downloaded yet, by `itemKey`. Since
+   * version 3.
+   */
+  downloads: { key: string; value: { kind: Kind; id: string } }
+  /** `cursor`: the account's `cursor` as of this browser's last read. Since version 3. */
+  meta: { key: string; value: number }
 }
+
+/** Every store: clearing this browser's library clears them all. */
+const allStores = [
+  'recordings',
+  'audio',
+  'toots',
+  'tootAudio',
+  'outbox',
+  'downloads',
+  'meta'
+] as const
+
+/** Where each kind's WAVs are kept. */
+export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
 
@@ -41,12 +83,13 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
 }
 
 /**
- * The app's database, upgraded to version 2 (Toots) on first open. Version 1 held Recordings
- * only; an upgrade keeps them.
+ * The app's database, upgraded to version 3 (the outbox) on first open. Version 1 held Recordings
+ * only, and version 2 added Toots. An upgrade keeps them, and queues each to upload, since none
+ * has been (`queueEverything`).
  */
 export function db(): Promise<IDBPDatabase<PedosDB>> {
-  opening ??= openDB<PedosDB>('pedos', 2, {
-    upgrade(database, oldVersion) {
+  opening ??= openDB<PedosDB>('pedos', 3, {
+    upgrade(database, oldVersion, _newVersion, transaction) {
       if (oldVersion < 1) {
         database.createObjectStore('recordings', { keyPath: 'id' })
         database.createObjectStore('audio')
@@ -54,6 +97,13 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
       if (oldVersion < 2) {
         database.createObjectStore('toots', { keyPath: 'id' })
         database.createObjectStore('tootAudio')
+      }
+      if (oldVersion < 3) {
+        database.createObjectStore('outbox', { keyPath: 'key' })
+        database.createObjectStore('downloads')
+        database.createObjectStore('meta')
+        // A failed write aborts the upgrade, and the open fails with it.
+        if (oldVersion >= 1) queueEverything(transaction).catch(() => {})
       }
     },
     // An older version is open in another tab, and its code may never close it: the upgrade
@@ -69,6 +119,58 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
     }
   }).finally(() => setWaiting(false))
   return opening
+}
+
+/**
+ * Queues an upload of every Recording and Toot an upgrade keeps, oldest first: before version 3
+ * nothing uploaded, so none is on the account yet.
+ */
+async function queueEverything(
+  transaction: IDBPTransaction<PedosDB, StoreNames<PedosDB>[], 'versionchange'>
+): Promise<void> {
+  const outbox = transaction.objectStore('outbox')
+  const [recordings, toots] = await Promise.all([
+    transaction.objectStore('recordings').getAll(),
+    transaction.objectStore('toots').getAll()
+  ])
+  const items = [
+    ...recordings.map(item => ({ kind: 'recordings' as const, item })),
+    ...toots.map(item => ({ kind: 'toots' as const, item }))
+  ]
+  await Promise.all(
+    items.map(({ kind, item }) =>
+      outbox.put({
+        key: itemKey(kind, item.id),
+        kind,
+        id: item.id,
+        op: 'put',
+        sent: false,
+        queuedAt: item.createdAt,
+        version: crypto.randomUUID()
+      })
+    )
+  )
+}
+
+type OutboxStore = IDBPObjectStore<PedosDB, StoreNames<PedosDB>[], 'outbox', 'readwrite'>
+
+/**
+ * Adds `op` on a Recording or Toot to the outbox, in the transaction that makes the change, so the
+ * change and its entry are written together or not at all. A write names `outbox` before its
+ * first request: a store asked for once a request has aborted the transaction throws there and
+ * then, leaving the requests already made, and `tx.done`, unhandled.
+ */
+export async function queue(
+  outbox: OutboxStore,
+  kind: Kind,
+  id: string,
+  op: OutboxOp
+): Promise<void> {
+  const key = itemKey(kind, id)
+  const queued = await outbox.get(key)
+  const next = mergeOutbox(queued, kind, id, op, queueStamp())
+  if (next) await outbox.put(next)
+  else if (queued) await outbox.delete(key)
 }
 
 const saved = new EventTarget()
@@ -87,8 +189,9 @@ export async function loadRecordings(): Promise<Recording[]> {
 }
 
 /**
- * Saves a new Recording and its WAV audio together, numbered after the highest so far. A new
- * Recording gets a random id; the Fixture Library gives its own (`fixtureRecordingId`).
+ * Saves a new Recording and its WAV audio together, numbered after the highest so far, and queues
+ * its upload. A new Recording gets a random id; the Fixture Library gives its own
+ * (`fixtureRecordingId`).
  */
 export async function saveRecording(
   fields: Omit<Recording, 'id' | 'number' | 'createdAt' | 'analysis'>,
@@ -96,7 +199,8 @@ export async function saveRecording(
   id: string = crypto.randomUUID()
 ): Promise<Recording> {
   const database = await db()
-  const tx = database.transaction(['recordings', 'audio'], 'readwrite')
+  const tx = database.transaction(['recordings', 'audio', 'outbox'], 'readwrite')
+  const outbox = tx.objectStore('outbox')
   const existing = await tx.objectStore('recordings').getAll()
   const recording: Recording = {
     ...fields,
@@ -108,6 +212,7 @@ export async function saveRecording(
   await Promise.all([
     tx.objectStore('recordings').add(recording),
     tx.objectStore('audio').add(wav, recording.id),
+    queue(outbox, 'recordings', recording.id, 'put'),
     tx.done
   ])
   saved.dispatchEvent(new CustomEvent('recording-saved', { detail: recording }))
@@ -121,28 +226,104 @@ export async function saveAnalysis(id: string, analysis: AnalysisState): Promise
   if (!recording) return null
   const updated = { ...recording, analysis }
   await Promise.all([tx.store.put(updated), tx.done])
+  // A Recording uploads once its analysis is done.
+  announceQueued()
   return updated
 }
 
+/** A Recording's WAV: this browser's, or the account's, downloaded now if it hasn't been yet. */
 export async function loadAudio(id: string): Promise<ArrayBuffer> {
   const audio = await (await db()).get('audio', id)
-  if (!audio) throw new Error(`No audio for Recording ${id}`)
-  return audio
+  if (audio) return audio
+  const downloaded = await download('recordings', id)
+  if (downloaded instanceof ArrayBuffer) return downloaded
+  throw new Error(`No audio for Recording ${id}`)
 }
 
 export async function deleteRecording(id: string): Promise<void> {
-  const database = await db()
-  const tx = database.transaction(['recordings', 'audio'], 'readwrite')
-  await Promise.all([
-    tx.objectStore('recordings').delete(id),
-    tx.objectStore('audio').delete(id),
-    tx.done
-  ])
+  await deleteItem('recordings', id)
 }
 
-/** Deletes every Recording and Toot in this browser, with their audio, together. */
+/** Deletes a Recording or Toot and its audio, and queues the delete for the account, together. */
+export async function deleteItem(kind: Kind, id: string): Promise<void> {
+  const tx = (await db()).transaction([kind, audioStore[kind], 'downloads', 'outbox'], 'readwrite')
+  const outbox = tx.objectStore('outbox')
+  await Promise.all([
+    tx.objectStore(kind).delete(id),
+    tx.objectStore(audioStore[kind]).delete(id),
+    tx.objectStore('downloads').delete(itemKey(kind, id)),
+    queue(outbox, kind, id, 'delete'),
+    tx.done
+  ])
+  announceQueued()
+}
+
+/** Deletes every Recording and Toot in this browser, with their audio and outbox, together. */
 export async function clearLibrary(): Promise<void> {
-  const stores = ['recordings', 'audio', 'toots', 'tootAudio'] as const
-  const tx = (await db()).transaction(stores, 'readwrite')
-  await Promise.all([...stores.map(name => tx.objectStore(name).clear()), tx.done])
+  const tx = (await db()).transaction(allStores, 'readwrite')
+  await Promise.all([...allStores.map(name => tx.objectStore(name).clear()), tx.done])
+}
+
+/**
+ * What a download found: the WAV, `missing` when the account has none (or the item is gone
+ * here), or `failed` when it couldn't be fetched now.
+ */
+export type Download = ArrayBuffer | 'missing' | 'failed'
+
+const downloading = new Map<string, Promise<Download>>()
+
+/**
+ * Downloads a Recording's or Toot's WAV from the account, as it is kept there, if this browser
+ * still waits for it. One download per item at a time.
+ */
+export function download(kind: Kind, id: string): Promise<Download> {
+  const key = itemKey(kind, id)
+  let running = downloading.get(key)
+  if (!running) {
+    running = fetchDownload(kind, id).finally(() => downloading.delete(key))
+    downloading.set(key, running)
+  }
+  return running
+}
+
+async function fetchDownload(kind: Kind, id: string): Promise<Download> {
+  const key = itemKey(kind, id)
+  const database = await db()
+  if (!(await database.getKey('downloads', key))) {
+    // Another tab may have stored it meanwhile.
+    return (await database.get(audioStore[kind], id)) ?? 'missing'
+  }
+  // Only from the account this library is.
+  let accountId: string | null = null
+  try {
+    accountId = libraryOwner()
+  } catch {
+    // Storage is blocked: a library that never syncs has nothing to download.
+  }
+  if (!accountId) return 'failed'
+  const wav = await getAudio(kind, id, accountId)
+  if (!(wav instanceof ArrayBuffer) && wav.status !== 404) return 'failed'
+  const tx = (await db()).transaction([kind, audioStore[kind], 'downloads'], 'readwrite')
+  // Only for an item still waiting for it: a delete or a sign-out meanwhile wins, and another
+  // tab's download may have stored it.
+  const [item, waits, stored] = await Promise.all([
+    tx.objectStore(kind).getKey(id),
+    tx.objectStore('downloads').getKey(key),
+    tx.objectStore(audioStore[kind]).get(id)
+  ])
+  if (!item || !waits) {
+    await tx.done
+    return (item && stored) || 'missing'
+  }
+  if (!(wav instanceof ArrayBuffer)) {
+    // The account has no audio for it: it's missing here too, from now on.
+    await Promise.all([tx.objectStore('downloads').delete(key), tx.done])
+    return 'missing'
+  }
+  await Promise.all([
+    tx.objectStore(audioStore[kind]).put(wav, id),
+    tx.objectStore('downloads').delete(key),
+    tx.done
+  ])
+  return wav
 }

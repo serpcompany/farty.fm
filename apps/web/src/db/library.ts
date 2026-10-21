@@ -1,4 +1,4 @@
-import { and, count, eq, gte, isNull, sql } from 'drizzle-orm'
+import { and, count, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm'
 
 import type { Analysis } from '../lib/recordings'
 import type { TootArrangement } from '../lib/toot'
@@ -153,6 +153,29 @@ export async function tombstone(
           .where(live)
           .returning({ id: recordings.id })
   return deleted.length === 1 ? 'live' : itemStatus(db, kind, userId, id)
+}
+
+/**
+ * How long a tombstone stays: 30 days. A browser needs one only until its next library read, and a
+ * signed-in browser reads on every open; a session ends after 7 days without one. A browser whose
+ * last read is older than this gets the whole library instead (`full` in `GET /api/library/`), so
+ * any retention is correct and this one only bounds the rows: the deletes of 30 days.
+ */
+export const TOMBSTONE_RETENTION_MS = 30 * 24 * 60 * 60 * 1000
+
+/** Deletes the user's tombstones older than `TOMBSTONE_RETENTION_MS`, by D1's own clock. */
+export async function purgeTombstones(db: Database, userId: string): Promise<void> {
+  const horizon = sql`${d1Now} - ${TOMBSTONE_RETENTION_MS}`
+  const old = (kind: Kind) =>
+    and(
+      eq(tables[kind].userId, userId),
+      isNotNull(tables[kind].deletedAt),
+      lt(tables[kind].updatedAt, horizon)
+    )
+  await db.batch([
+    db.delete(recordings).where(old('recordings')),
+    db.delete(toots).where(old('toots'))
+  ])
 }
 
 /** Renames a live Toot; the last rename to arrive wins. Returns the row's status before. */

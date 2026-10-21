@@ -190,6 +190,85 @@ test("Profile's account: the email, Pedos news, and Sign out, which leaves nothi
   expect(await page.evaluate(() => localStorage.getItem('pedos.account'))).toBeNull()
 })
 
+test("Sign out uploads the farts not uploaded yet, and while it can't, Wait keeps the account", async ({
+  page
+}, testInfo) => {
+  test.setTimeout(120_000)
+  const email = newEmail(testInfo, 'pending')
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, email)
+  // Offline for uploads: the Recording stays in the outbox.
+  await page.route('**/api/recordings/**', route => route.abort('internetdisconnected'))
+  await recordAndSave(page, 1.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+
+  await tab(page, 'Profile').click()
+  await page.getByRole('button', { name: 'Sign out' }).click()
+  const dialog = page.getByRole('alertdialog', { name: 'Not uploaded yet' })
+  await expect(dialog).toContainText(
+    "Some farts on this device haven't reached your account. Check your connection and wait, or sign out now and lose them."
+  )
+  const wait = dialog.getByRole('button', { name: 'Wait' })
+  for (const control of [wait, dialog.getByRole('button', { name: 'Sign out anyway' })]) {
+    await expectTappable(control)
+  }
+  await page.screenshot({ path: testInfo.outputPath('not-uploaded.png') })
+  await wait.click()
+  await expect(dialog).toBeHidden()
+  await expect(page.getByTestId('account-email')).toHaveText(email)
+  expect((await session(page))?.user.email).toBe(email)
+  expect(await recordingsStored(page)).toBe(1)
+
+  // Back online, Sign out uploads it, then signs out and leaves nothing here.
+  await page.unrouteAll()
+  const sent: string[] = []
+  page.on('request', request => sent.push(`${request.method()} ${new URL(request.url()).pathname}`))
+  await page.getByRole('button', { name: 'Sign out' }).click()
+  await expect(page.getByRole('button', { name: 'Save to an account' })).toBeVisible()
+  expect(await recordingsStored(page)).toBe(0)
+  const upload = sent.findIndex(line => /^PUT \/api\/recordings\/[\w-]+\/$/.test(line))
+  expect(upload).toBeGreaterThanOrEqual(0)
+  expect(upload).toBeLessThan(sent.indexOf('POST /api/auth/sign-out'))
+
+  // It's in the account: signed in again, the Recording comes back.
+  await signInByApi(page, email)
+  await page.goto('/recordings/')
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+  await expect(page.getByRole('button', { name: /^Recording 1, \d+\.\d s, G3$/ })).toBeVisible()
+})
+
+test('Sign out anyway signs out and leaves behind the farts not uploaded', async ({
+  page
+}, testInfo) => {
+  test.setTimeout(120_000)
+  const email = newEmail(testInfo, 'anyway')
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, email)
+  await page.route('**/api/recordings/**', route => route.abort('internetdisconnected'))
+  await recordAndSave(page, 1.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+
+  await tab(page, 'Profile').click()
+  await page.getByRole('button', { name: 'Sign out' }).click()
+  await page
+    .getByRole('alertdialog', { name: 'Not uploaded yet' })
+    .getByRole('button', { name: 'Sign out anyway' })
+    .click()
+  await expect(page.getByRole('button', { name: 'Save to an account' })).toBeVisible()
+  expect(await session(page)).toBeNull()
+  expect(await recordingsStored(page)).toBe(0)
+
+  // Signed in again, the account never had it.
+  await page.unrouteAll()
+  await signInByApi(page, email)
+  await page.goto('/recordings/')
+  await expect(page.getByText('No Recordings yet')).toBeVisible()
+})
+
 test('Delete account asks first, then deletes the account and leaves nothing here', async ({
   page
 }, testInfo) => {
@@ -219,6 +298,47 @@ test('Delete account asks first, then deletes the account and leaves nothing her
   expect(await session(page)).toBeNull()
   expect(await recordingsStored(page)).toBe(0)
   expect(await page.evaluate(async () => (await fetch('/api/library/')).status)).toBe(401)
+})
+
+test('Profile left open on one account never changes or deletes the account another tab signed in to', async ({
+  page,
+  context
+}, testInfo) => {
+  test.setTimeout(150_000)
+  const first = newEmail(testInfo, 'first')
+  const second = newEmail(testInfo, 'second')
+  await context.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, first)
+  await page.goto('/profile/')
+  await expect(page.getByTestId('account-email')).toHaveText(first)
+  const other = await context.newPage()
+  await other.goto('/profile/')
+  const signInElsewhere = async (email: string) => {
+    await signInByApi(other, email)
+    await other.reload()
+    await expect(other.getByTestId('account-email')).toHaveText(email)
+  }
+
+  // Pedos news, from the page still showing the first account: nothing changes, and the page
+  // reloads as the account signed in now.
+  await signInElsewhere(second)
+  await page.getByRole('switch', { name: 'Pedos news' }).click()
+  await expect(page.getByTestId('account-email')).toHaveText(second)
+  await expect(page.getByRole('switch', { name: 'Pedos news' })).toBeChecked()
+  expect((await session(page))?.user.marketingEmail).not.toBe(false)
+
+  // Delete account, from the page now showing the second: the first account, signed in now, and
+  // its session stay.
+  await signInElsewhere(first)
+  await page.getByRole('button', { name: 'Delete account' }).click()
+  await page
+    .getByRole('alertdialog', { name: 'Delete your account?' })
+    .getByRole('button', { name: 'Delete' })
+    .click()
+  await expect(page.getByTestId('account-email')).toHaveText(first)
+  expect((await session(page))?.user.email).toBe(first)
+  expect(await page.evaluate(async () => (await fetch('/api/library/')).status)).toBe(200)
 })
 
 test("Profile's Save to an account opens the step, which stays while they read their email", async ({
@@ -350,7 +470,7 @@ test("a Recording saved while Pedos still reads the session isn't cleared with t
   expect(await recordingsStored(visit)).toBe(1)
 })
 
-test("an account's farts stay when its session ends, and Pedos asks to sign in again", async ({
+test("an account's farts stay when its session ends: Pedos asks to sign in again, or clears them", async ({
   page,
   context
 }, testInfo) => {
@@ -380,6 +500,134 @@ test("an account's farts stay when its session ends, and Pedos asks to sign in a
   const again = reopened.getByRole('button', { name: 'Sign in again' })
   await expectTappable(again)
   await expect(step).toBeHidden()
+
+  // Not their device any more: Clear asks first, then leaves nothing here.
+  const clear = reopened.getByRole('button', { name: 'Clear this device' })
+  await expectTappable(clear)
+  await clear.click()
+  const dialog = reopened.getByRole('alertdialog', { name: 'Clear this device?' })
+  await expect(dialog).toContainText(
+    'This deletes the Recordings and Toots on this device. The ones saved to your account stay there.'
+  )
+  for (const control of ['Cancel', 'Clear']) {
+    await expectTappable(dialog.getByRole('button', { name: control, exact: true }))
+  }
+  await reopened.screenshot({ path: testInfo.outputPath('clear-this-device.png') })
+  await dialog.getByRole('button', { name: 'Cancel' }).click()
+  expect(await recordingsStored(reopened)).toBe(1)
+  await clear.click()
+  await dialog.getByRole('button', { name: 'Clear', exact: true }).click()
+  await expect(reopened.getByRole('button', { name: 'Save to an account' })).toBeVisible()
+  expect(await recordingsStored(reopened)).toBe(0)
+  expect(await reopened.evaluate(() => localStorage.getItem('pedos.account'))).toBeNull()
+})
+
+test("signing in to another account mid-visit asks nothing with nothing unsaved, and the first account's farts leave the screen", async ({
+  page,
+  context
+}, testInfo) => {
+  test.setTimeout(120_000)
+  const second = newEmail(testInfo, 'second')
+  const reopened = await expiredWithARecording(page, context, newEmail(testInfo, 'first'))
+  const step = reopened.getByRole('dialog', { name: 'Sign in again' })
+  await expect(step).toBeVisible()
+  await expect(reopened.getByTestId('recording-row')).toHaveCount(1)
+
+  await step.getByLabel('Email').fill(second)
+  await step.getByRole('button', { name: 'Send code' }).click()
+  const code = step.getByLabel('Code')
+  await expect(code).toBeFocused()
+  await expect(step.getByTestId('account-step-unsaved')).toHaveCount(0)
+  await code.fill(await codeFor(reopened, second))
+  await step.getByRole('button', { name: 'Sign in' }).click()
+
+  // Without a reload, the first account's Recording leaves the screen and this device.
+  await expect(step).toBeHidden()
+  await expect(reopened).toHaveURL(/\/recordings\/$/)
+  await expect(reopened.getByTestId('recording-row')).toHaveCount(0)
+  await expect.poll(() => recordingsStored(reopened)).toBe(0)
+  expect((await session(reopened))?.user.email).toBe(second)
+})
+
+test('signing in to another account says first how many farts here it removes, and Go back keeps them', async ({
+  page,
+  context
+}, testInfo) => {
+  test.setTimeout(150_000)
+  const first = newEmail(testInfo, 'first')
+  const second = newEmail(testInfo, 'second')
+  const reopened = await expiredWithARecording(page, context, first)
+  await reopened
+    .getByRole('dialog', { name: 'Sign in again' })
+    .getByRole('button', { name: 'Not now' })
+    .click()
+  // Made while the session has ended: it stays on this device until a sign-in.
+  await recordAndSave(reopened, 1.5)
+  await reopened.getByRole('button', { name: 'Done' }).click()
+  await expect(reopened.getByTestId('recording-row')).toHaveCount(2)
+  expect(await recordingsStored(reopened, 'outbox')).toBe(1)
+
+  await tab(reopened, 'Profile').click()
+  await reopened.getByRole('button', { name: 'Sign in again' }).click()
+  const step = reopened.getByRole('dialog', { name: 'Sign in again' })
+  await step.getByLabel('Email').fill(second)
+  await step.getByRole('button', { name: 'Send code' }).click()
+  const warning = step.getByTestId('account-step-unsaved')
+  await expect(warning.getByRole('alert')).toHaveText(
+    "1 fart on this device hasn't saved to the other account. Signing in here removes it from this device."
+  )
+  const back = warning.getByRole('button', { name: 'Go back' })
+  const anyway = warning.getByRole('button', { name: 'Sign in anyway' })
+  // The warning replaces the form, so focus moves to Go back rather than falling to the page.
+  await expect(back).toBeFocused()
+  for (const control of [back, anyway]) await expectTappable(control)
+  await reopened.screenshot({ path: testInfo.outputPath('unsaved-farts.png') })
+
+  // Go back: the email again, and nothing removed.
+  await back.click()
+  await expect(warning).toHaveCount(0)
+  await expect(step.getByLabel('Email')).toBeFocused()
+  expect(await recordingsStored(reopened)).toBe(2)
+
+  // The account they came from, however it's typed, asks nothing.
+  await step.getByLabel('Email').fill(first.toUpperCase())
+  await step.getByRole('button', { name: 'Send code' }).click()
+  await expect(step.getByLabel('Code')).toBeFocused()
+  await step.getByRole('button', { name: 'Change email' }).click()
+
+  // Sign in anyway: the other account, and this device's farts go.
+  await step.getByLabel('Email').fill(second)
+  await step.getByRole('button', { name: 'Send code' }).click()
+  await anyway.click()
+  const code = step.getByLabel('Code')
+  await expect(code).toBeFocused()
+  await code.fill(await codeFor(reopened, second))
+  await step.getByRole('button', { name: 'Sign in' }).click()
+  await expect(step).toBeHidden()
+  await expect(reopened.getByTestId('stat-recordings')).toHaveText('Recordings0')
+  await expect.poll(() => recordingsStored(reopened)).toBe(0)
+  expect((await session(reopened))?.user.email).toBe(second)
+})
+
+test("Sign out clears Pedos's other tabs too, without a reload", async ({
+  page,
+  context
+}, testInfo) => {
+  test.setTimeout(120_000)
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, newEmail(testInfo, 'tabs'))
+  await recordAndSave(page, 1.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+  const other = await context.newPage()
+  await other.goto('/recordings/')
+  await expect(other.getByTestId('recording-row')).toHaveCount(1)
+
+  await tab(page, 'Profile').click()
+  await page.getByRole('button', { name: 'Sign out' }).click()
+  await expect(page.getByRole('button', { name: 'Save to an account' })).toBeVisible()
+  await expect(other.getByTestId('recording-row')).toHaveCount(0)
 })
 
 test("Profile retries an account it couldn't reach, and reads it again back online", async ({
@@ -459,23 +707,44 @@ function tab(page: Page, label: string) {
     .getByRole('link', { name: label, exact: true })
 }
 
-/** How many Recordings the `pedos` database holds. */
-function recordingsStored(page: Page): Promise<number> {
-  return page.evaluate(async () => {
+/** How many Recordings (or what `store` holds) the `pedos` database holds. */
+function recordingsStored(page: Page, store = 'recordings'): Promise<number> {
+  return page.evaluate(async store => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open('pedos')
       request.onsuccess = () => resolve(request.result)
       request.onerror = () => reject(request.error)
     })
     const count = await new Promise<number>((resolve, reject) => {
-      if (!db.objectStoreNames.contains('recordings')) return resolve(0)
-      const request = db.transaction('recordings').objectStore('recordings').count()
+      if (!db.objectStoreNames.contains(store)) return resolve(0)
+      const request = db.transaction(store).objectStore(store).count()
       request.onsuccess = () => resolve(request.result)
       request.onerror = () => reject(request.error)
     })
     db.close()
     return count
-  })
+  }, store)
+}
+
+/** Waits until everything this browser changed is in the account: its outbox is empty. */
+async function uploaded(page: Page) {
+  await expect.poll(() => recordingsStored(page, 'outbox'), { timeout: 30_000 }).toBe(0)
+}
+
+/**
+ * Signs in to an account, records a fart that uploads, then ends the session and opens Pedos
+ * again on Recordings, where the step asks to sign in again.
+ */
+async function expiredWithARecording(page: Page, context: BrowserContext, email: string) {
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, email)
+  await recordAndSave(page, 1.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+  await uploaded(page)
+  await context.clearCookies()
+  return reopen(context, page)
 }
 
 /** Fakes the page going to the background (`hidden`) and coming back (`visible`). */

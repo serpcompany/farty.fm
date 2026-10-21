@@ -14,6 +14,6 @@ export const PATCH = userRoute<Params>((user, request, { id }) =>
 )
 
 /** Deletes a Toot and its WAV, leaving a tombstone. */
-export const DELETE = userRoute<Params>((user, _request, { id }) =>
-  deleteItem('toots', requestStores(), user, id)
+export const DELETE = userRoute<Params>((user, request, { id }) =>
+  deleteItem('toots', requestStores(), user, id, request)
 )

@@ -18,7 +18,7 @@ describe('clearsOnOpen', () => {
   })
 
   it.each<Account>([
-    { status: 'signedIn', email: 'a@example.com', marketingEmail: true },
+    { status: 'signedIn', id: 'user-a', email: 'a@example.com', marketingEmail: true },
     { status: 'expired' },
     { status: 'unreachable' },
     { status: 'checking' }
@@ -48,7 +48,8 @@ describe('openVisit', () => {
   })
 
   const signedOut = () => Response.json(null)
-  const signedIn = () => Response.json({ session: {}, user: { email: 'a@example.com' } })
+  const signedIn = () =>
+    Response.json({ session: {}, user: { id: 'user-a', email: 'a@example.com' } })
 
   /** Opens Pedos in a new tab (or `tab`, for a reload), with get-session answering `session`. */
   async function open(
@@ -86,6 +87,20 @@ describe('openVisit', () => {
     await open(signedIn)
     expect(await open(signedOut)).toEqual({ status: 'expired' })
     expect(clearLibrary).not.toHaveBeenCalled()
+  })
+
+  // Signed in, the library is the account's before it loads (`claimLibrary`).
+  it("makes a guest's library the account's as a signed-in visit opens", async () => {
+    await open(signedIn)
+    expect(localStorage.getItem('pedos.account')).toBe('user-a')
+    expect(clearLibrary).not.toHaveBeenCalled()
+  })
+
+  it("clears another account's library before a signed-in visit loads it", async () => {
+    localStorage.setItem('pedos.account', 'user-b')
+    await open(signedIn)
+    expect(clearLibrary).toHaveBeenCalledTimes(1)
+    expect(localStorage.getItem('pedos.account')).toBe('user-a')
   })
 
   // Without sessionStorage, Pedos can't tell a reload from a new visit.

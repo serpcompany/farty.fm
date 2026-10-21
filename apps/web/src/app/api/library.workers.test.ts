@@ -38,6 +38,7 @@ async function audioOf(response: Response) {
 
 type Library = {
   cursor: number
+  full: boolean
   recordings: { id: string; number: number }[]
   toots: { id: string; title: string }[]
   deleted: { recordings: string[]; toots: string[] }
@@ -47,6 +48,34 @@ async function library(cookie: string, since?: number): Promise<Library> {
   const response = await api.library({ cookie }, since)
   expect(response.status).toBe(200)
   return response.json()
+}
+
+const DAY = 24 * 60 * 60 * 1000
+const OLD = '44444444-4444-4444-8444-444444444444'
+const RECENT = '55555555-5555-4555-8555-555555555555'
+
+/** A tombstone straight into D1, deleted `age` milliseconds ago by D1's clock. */
+async function deletedAgo(kind: Kind, userId: string, id: string, age: number) {
+  const at = `cast(unixepoch('subsec') * 1000 as integer) - ?3`
+  const sql =
+    kind === 'recordings'
+      ? `insert into recordings (user_id, id, number, created_at, seconds, sample_rate, waveform,
+          analysis, audio_bytes, updated_at, deleted_at)
+         values (?1, ?2, 1, 0, 0.1, 48000, '[]', null, 100, ${at}, ${at})`
+      : `insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
+          audio_bytes, updated_at, deleted_at)
+         values (?1, ?2, '', 'twinkle', 0, 0.1, '{"transposition":0,"recordingForPitch":{}}', 100,
+          ${at}, ${at})`
+  await env.DB.prepare(sql).bind(userId, id, age).run()
+}
+
+/** Every row of `kind`, tombstones included, as "{user id} {id}", sorted. */
+async function rowsOf(kind: Kind): Promise<string[]> {
+  const { results } = await env.DB.prepare(`select user_id, id from ${kind}`).all<{
+    user_id: string
+    id: string
+  }>()
+  return results.map(row => `${row.user_id} ${row.id}`).sort()
 }
 
 /** Lets D1's clock move on, so the next change is after the last cursor. */
@@ -194,6 +223,56 @@ describe('one user never reaches another’s Recordings or Toots', () => {
     expect((await api.audio('recordings', R1, a)).status).toBe(200)
     expect((await library(a.cookie)).deleted.recordings).toEqual([])
     expect((await api.audio('recordings', R1, b)).status).toBe(404)
+  })
+})
+
+describe('every library request names its library’s account', () => {
+  const upload = (cookie: string, library: string) =>
+    api.put('recordings', R1, uploadBody(recordingMetadata(R1), wav()), { cookie, library })
+
+  it('refuses an upload that names another account (409), and keeps nothing', async () => {
+    const a = await signUp('A')
+    const b = await signUp('B')
+
+    const refused = await upload(a.cookie, b.id)
+
+    expect(refused.status).toBe(409)
+    expect(await refused.json()).toEqual({ error: 'wrong_account' })
+    expect(await bucketKeys()).toEqual([])
+    expect((await library(a.cookie)).recordings).toEqual([])
+    expect((await library(b.cookie)).recordings).toEqual([])
+    expect((await upload(a.cookie, a.id)).status).toBe(201)
+  })
+
+  // Another tab's sign-in changed the cookie to B's while A's library still sends what it queued.
+  it('refuses a read, delete, rename or download that names another account, and changes nothing', async () => {
+    const a = await signUp('A')
+    const b = await signUp('B')
+    await upload(b.cookie, b.id)
+    await api.put('toots', T1, uploadBody(tootMetadata(T1), wav()), { cookie: b.cookie })
+    const asA = { cookie: b.cookie, library: a.id }
+
+    for (const refused of [
+      await api.library(asA),
+      await api.delete('recordings', R1, asA),
+      await api.delete('toots', T1, asA),
+      await api.rename(T1, 'Not B’s', asA),
+      await api.audio('recordings', R1, asA)
+    ]) {
+      expect(refused.status).toBe(409)
+      expect(await refused.json()).toEqual({ error: 'wrong_account' })
+    }
+    const kept = await library(b.cookie)
+    expect(kept.recordings).toMatchObject([{ id: R1 }])
+    expect(kept.toots).toMatchObject([{ id: T1, title: 'Twinkle Twinkle Little Star' }])
+    expect(kept.deleted).toEqual({ recordings: [], toots: [] })
+
+    // Naming B's own library, each goes through.
+    const asB = { cookie: b.cookie, library: b.id }
+    expect((await api.library(asB)).status).toBe(200)
+    expect((await api.audio('recordings', R1, asB)).status).toBe(200)
+    expect((await api.rename(T1, 'B’s', asB)).status).toBe(200)
+    expect((await api.delete('recordings', R1, asB)).status).toBe(204)
   })
 })
 
@@ -382,6 +461,35 @@ describe('deletes and GET /api/library/?since=', () => {
 
     expect(unchanged.recordings).toEqual([])
     expect(changed.recordings.map(r => r.id)).toEqual([R2])
+  })
+
+  it('purges tombstones older than 30 days at the next delete, and keeps newer and others’', async () => {
+    const a = await signUp('A')
+    const b = await signUp('B')
+    await deletedAgo('recordings', a.id, OLD, 31 * DAY)
+    await deletedAgo('toots', a.id, OLD, 31 * DAY)
+    await deletedAgo('recordings', a.id, RECENT, 29 * DAY)
+    await deletedAgo('recordings', b.id, OLD, 31 * DAY)
+    await upload('recordings', R1, a.cookie)
+
+    expect((await api.delete('recordings', R1, a)).status).toBe(204)
+
+    expect(await rowsOf('recordings')).toEqual([
+      `${a.id} ${R1}`,
+      `${a.id} ${RECENT}`,
+      `${b.id} ${OLD}`
+    ])
+    expect(await rowsOf('toots')).toEqual([])
+  })
+
+  it('says a read is the whole library when its since is older than tombstones are kept', async () => {
+    const a = await signUp('A')
+    const { cursor, full } = await library(a.cookie)
+
+    expect(full).toBe(true)
+    expect((await library(a.cookie, cursor - 30 * DAY - 1000)).full).toBe(true)
+    expect((await library(a.cookie, cursor - 30 * DAY + 60_000)).full).toBe(false)
+    expect((await library(a.cookie, cursor)).full).toBe(false)
   })
 
   it('refuses a since that is not epoch milliseconds (400)', async () => {

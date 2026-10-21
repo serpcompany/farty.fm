@@ -7,6 +7,7 @@ import { deleteAccount } from '@/server/library'
 import {
   api,
   bucketKeys,
+  ORIGIN,
   recordingMetadata,
   signUp,
   testDb,
@@ -29,6 +30,8 @@ async function rowsOf(userId: string) {
     toots: await db.select().from(toots).where(eq(toots.userId, userId))
   }
 }
+
+const deleteRequest = () => new Request(`${ORIGIN}/api/account/`, { method: 'DELETE' })
 
 async function fill(cookie: string) {
   await api.put('recordings', R1, uploadBody(recordingMetadata(R1), wav()), { cookie })
@@ -60,6 +63,22 @@ describe('PATCH /api/account/', () => {
     expect(responses.map(response => response.status)).toEqual([400, 400, 400, 400])
     expect((await rowsOf(a.id)).users[0].marketingEmail).toBe(true)
   })
+
+  it('refuses a change that names another account (409), and changes nothing', async () => {
+    const a = await signUp('A')
+    const b = await signUp('B')
+
+    // A page still showing B, after A signed in in another tab.
+    const refused = await api.patchAccount({ marketingEmail: false }, { ...a, library: b.id })
+
+    expect(refused.status).toBe(409)
+    expect(await refused.json()).toEqual({ error: 'wrong_account' })
+    expect((await rowsOf(a.id)).users[0].marketingEmail).toBe(true)
+    expect((await rowsOf(b.id)).users[0].marketingEmail).toBe(true)
+    const own = await api.patchAccount({ marketingEmail: false }, { ...a, library: a.id })
+    expect(own.status).toBe(200)
+    expect((await rowsOf(a.id)).users[0].marketingEmail).toBe(false)
+  })
 })
 
 describe('DELETE /api/account/', () => {
@@ -86,6 +105,26 @@ describe('DELETE /api/account/', () => {
     expect(await bucketKeys(`users/${b.id}/`)).toEqual(bKeys)
   })
 
+  it('refuses a delete that names another account (409), and deletes nothing', async () => {
+    const a = await signUp('A')
+    const b = await signUp('B')
+    await fill(a.cookie)
+    await fill(b.cookie)
+    const keys = await bucketKeys()
+    const before = [await rowsOf(a.id), await rowsOf(b.id)]
+
+    // A page still showing B, after A signed in in another tab.
+    const refused = await api.deleteAccount({ ...a, library: b.id })
+
+    expect(refused.status).toBe(409)
+    expect(await refused.json()).toEqual({ error: 'wrong_account' })
+    expect(await bucketKeys()).toEqual(keys)
+    expect(keys).toHaveLength(4)
+    expect([await rowsOf(a.id), await rowsOf(b.id)]).toEqual(before)
+    expect((await api.deleteAccount({ ...a, library: a.id })).status).toBe(204)
+    expect(await rowsOf(a.id)).toEqual({ users: [], sessions: [], recordings: [], toots: [] })
+  })
+
   it('deletes the audio first, so a failure leaves an account to try again with', async () => {
     const a = await signUp('A')
     await fill(a.cookie)
@@ -94,7 +133,9 @@ describe('DELETE /api/account/', () => {
       delete: () => Promise.reject(new Error('R2 is down'))
     } as unknown as R2Bucket
 
-    await expect(deleteAccount({ db: testDb(), media: failing }, { id: a.id })).rejects.toThrow()
+    await expect(
+      deleteAccount({ db: testDb(), media: failing }, { id: a.id }, deleteRequest())
+    ).rejects.toThrow()
 
     expect((await rowsOf(a.id)).users).toHaveLength(1)
     expect((await api.deleteAccount(a)).status).toBe(204)
@@ -120,7 +161,7 @@ describe('DELETE /api/account/', () => {
       delete: (keys: string[]) => env.MEDIA.delete(keys)
     } as unknown as R2Bucket
 
-    await deleteAccount({ db: testDb(), media: racing }, { id: a.id })
+    await deleteAccount({ db: testDb(), media: racing }, { id: a.id }, deleteRequest())
 
     expect(written).toBe(true)
     expect(await bucketKeys()).toEqual([])

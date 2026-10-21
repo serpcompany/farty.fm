@@ -3,8 +3,8 @@ import { resolve } from 'node:path'
 import { expect, test } from '@playwright/test'
 
 // A browser that used Pedos before Toots has version 1 of the `pedos` database: Recordings and
-// their audio only. The app upgrades it to version 2, which adds the Toots, and keeps every
-// Recording.
+// their audio only. The app upgrades it to version 3, which adds the Toots (version 2) and the
+// sync's outbox (version 3), keeps every Recording, and queues each one to upload.
 
 test('upgrades a database from before Toots and keeps its Recordings', async ({ page }) => {
   const wav = readFileSync(
@@ -63,16 +63,25 @@ test('upgrades a database from before Toots and keeps its Recordings', async ({ 
       version: db.version,
       stores: [...db.objectStoreNames].sort(),
       recording: ((await get('recordings')) as { number: number } | undefined)?.number,
-      audioBytes: ((await get('audio')) as ArrayBuffer | undefined)?.byteLength
+      audioBytes: ((await get('audio')) as ArrayBuffer | undefined)?.byteLength,
+      queued: await new Promise<unknown>((resolve, reject) => {
+        const request = db
+          .transaction('outbox')
+          .objectStore('outbox')
+          .get('recordings:before-toots')
+        request.onsuccess = () => resolve((request.result as { op?: string } | undefined)?.op)
+        request.onerror = () => reject(request.error)
+      })
     }
     db.close()
     return result
   })
   expect(stored).toEqual({
-    version: 2,
-    stores: ['audio', 'recordings', 'tootAudio', 'toots'],
+    version: 3,
+    stores: ['audio', 'downloads', 'meta', 'outbox', 'recordings', 'tootAudio', 'toots'],
     recording: 7,
-    audioBytes: wav.byteLength
+    audioBytes: wav.byteLength,
+    queued: 'put'
   })
 })
 
@@ -111,7 +120,7 @@ test('asks you to close Pedos in your other tabs while one holds the old databas
     () =>
       new Promise<boolean>((resolve, reject) => {
         let wasBlocked = false
-        const request = indexedDB.open('pedos', 3)
+        const request = indexedDB.open('pedos', 4)
         request.onblocked = () => (wasBlocked = true)
         request.onsuccess = () => {
           request.result.close()

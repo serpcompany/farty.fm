@@ -5,4 +5,4 @@ import { userRoute } from '@/server/require-user'
 export const PATCH = userRoute((user, request) => patchAccount(requestStores(), user, request))
 
 /** Deletes the account: every WAV, then the user with their sessions, Recordings and Toots. */
-export const DELETE = userRoute(user => deleteAccount(requestStores(), user))
+export const DELETE = userRoute((user, request) => deleteAccount(requestStores(), user, request))
