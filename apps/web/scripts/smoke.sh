@@ -318,6 +318,11 @@ fi
 
 if ((failures > 0)); then
   echo "$failures check(s) failed on $base"
+  if [[ "$env" == production ]]; then
+    echo "If the sign-in checks got a 503, Production has no BETTER_AUTH_SECRET yet. Run, once:"
+    echo "  gh workflow run web-auth-secret.yml --ref main -f environment=production"
+    echo "then re-run this deploy's job."
+  fi
   exit 1
 fi
 echo "All smoke checks passed on $base"
