@@ -29,7 +29,7 @@
   ],
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-local", "remote": false }],
   // The dev mailbox: local runs capture sign-in email here instead of sending it. Top level only,
-  // with no id. Never declare it under "env" (src/db/wrangler-config.test.ts); Wrangler's warning
+  // with no id. Never declare it under "env" (src/db/deploy-config.test.ts); Wrangler's warning
   // that the environments lack it is the intended result.
   "kv_namespaces": [{ "binding": "DEV_MAILBOX" }],
   "env": {
