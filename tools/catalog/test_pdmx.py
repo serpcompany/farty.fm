@@ -1,20 +1,33 @@
-"""Tests for the PDMX import's picking and gate rules (pdmx.py) and its catalog writing.
+"""Tests for the PDMX import's picking and gate rules (pdmx.py), and for the importer's control
+flow (import_pdmx.py) on temporary files, with a stub renderer and no dataset.
 
     tools/melody-lab/.venv/bin/python -I -m unittest discover -s tools/catalog -t tools/catalog
 """
+import contextlib
+import hashlib
+import io
 import json
+import re
 import sys
+import tarfile
+import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest import mock
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path[:0] = [str(HERE), str(ROOT / "tools/melody-lab")]
 
+import import_pdmx  # noqa: E402
 import pdmx  # noqa: E402
 from evaluate_renders import BAR  # noqa: E402
+from melody import load_midi  # noqa: E402
 
 PD = "https://creativecommons.org/publicdomain/mark/1.0/"
+SCORE = ROOT / "catalog/midi/pdmx-twinkle.mid"  # a cited score's MIDI file, for the importer's control flow
+ARCHIVE = {"md5": "m", "published_md5": "m", "downloaded": "2026-10-21"}
 
 
 def row(title, sid="1", rating="0.0", views="0", ratings="0", song_name="NA", tracks="1", conflict="False",
@@ -28,6 +41,20 @@ def row(title, sid="1", rating="0.0", views="0", ratings="0", song_name="NA", tr
 
 def titles(text):
     return pdmx.read_titles(text)
+
+
+def sha256(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def quiet():
+    return contextlib.redirect_stdout(io.StringIO())
+
+
+def temp_dir(test):
+    tmp = tempfile.TemporaryDirectory()
+    test.addCleanup(tmp.cleanup)
+    return Path(tmp.name)
 
 
 class TitlesFile(unittest.TestCase):
@@ -180,14 +207,22 @@ class Gates(unittest.TestCase):
         self.assertEqual(len(pdmx.render_problems({**ok, "onsets_on_time_pct": 94}, BAR)), 1)
         self.assertEqual(pdmx.render_problems({**ok, "notes_with_retrigger": 1}, BAR), ["1 notes re-attack"])
 
-    def test_the_bar_is_the_golden_readme_bar(self):
-        self.assertEqual(BAR, {"within_50c_pct": 94, "onsets_on_time_pct": 95, "notes_with_retrigger": 0})
+    def test_the_bar_is_the_readmes_bar(self):
+        # fixtures/golden/README.md states the renderer's bar on notes; this tool's README states the whole gate.
+        golden = re.search(r"\*\*Renderer \(#41\)\*\* requires at least (\d+)% of notes within ±50 cents",
+                           (ROOT / "fixtures/golden/README.md").read_text())
+        gate = re.search(r"at least (\d+)% of notes within ±50 cents, at least (\d+)% of onsets within ±50 ms, "
+                         r"and no re-attacks", (HERE / "README.md").read_text())
+        self.assertIsNotNone(golden, "fixtures/golden/README.md no longer states the renderer's bar")
+        self.assertIsNotNone(gate, "tools/catalog/README.md no longer states the render gate's bar")
+        self.assertEqual(int(gate[1]), int(golden[1]))
+        self.assertEqual(BAR, {"within_50c_pct": int(golden[1]), "onsets_on_time_pct": int(gate[2]), "notes_with_retrigger": 0})
 
     def test_hash(self):
-        self.assertEqual(pdmx.hash_problems("a", "a", "s"), [])
         self.assertEqual(pdmx.hash_problems("a", "a", "s", "s"), [])
-        self.assertEqual(len(pdmx.hash_problems("a", "b", "s")), 1)
-        self.assertEqual(len(pdmx.hash_problems("a", "a", "s", "t")), 1)
+        self.assertEqual(len(pdmx.hash_problems("a", "b", "s", "s")), 1)
+        self.assertEqual(pdmx.hash_problems("a", "a", "s", "t", copy="the extracted file"),
+                         ["the extracted file's sha256 t is not the archive file's s"])
 
 
 class Catalog(unittest.TestCase):
@@ -199,6 +234,14 @@ class Catalog(unittest.TestCase):
         self.assertEqual(len(pdmx.new_title_problems(titles("mary | Something Else")[0], [self.hand])), 1)
         self.assertEqual(len(pdmx.new_title_problems(titles("lamb | Mary had a little lamb!")[0], [self.hand])), 1)
         self.assertEqual(pdmx.new_title_problems(titles("lamb | Little Lamb")[0], [self.hand]), [])
+
+    def test_a_leading_the_doesnt_make_a_title_new(self):
+        for catalog_title, line in (("The Itsy Bitsy Spider", "itsy | Itsy Bitsy Spider"),
+                                    ("Itsy Bitsy Spider", "itsy | The Itsy Bitsy Spider"),
+                                    ("The Itsy Bitsy Spider", "itsy | Spider Song | Itsy Bitsy Spider")):
+            with self.subTest(catalog_title=catalog_title, line=line):
+                problems = pdmx.new_title_problems(titles(line)[0], [{"id": "spider", "title": catalog_title}])
+                self.assertEqual(problems, [f"the catalog already has {catalog_title!r} (spider)"])
 
     def test_merge_replaces_only_its_own_batch(self):
         new = {"id": "z", "title": "Z", "import": {"titles": "tools/catalog/titles-01.txt"}}
@@ -219,9 +262,6 @@ class Catalog(unittest.TestCase):
 
 class ScoreMeta(unittest.TestCase):
     def test_reads_tempo_and_meter_like_melody_py(self):
-        import import_pdmx
-        from melody import load_midi
-
         for name in ("pdmx-amazing.mid", "pdmx-row.mid", "pdmx-twinkle.mid"):
             path = ROOT / "catalog/midi" / name
             tempos, meters = import_pdmx.score_meta(path)
@@ -234,14 +274,204 @@ class ScoreMeta(unittest.TestCase):
     def test_pickup_meter_matches_the_curated_songs(self):
         # Amazing Grace and Auld Lang Syne open with a 1/4 pickup bar; their curated entries set
         # the real meter by hand, and the rule finds the same one.
-        import import_pdmx
-        from melody import load_midi
-
         for name, beats_per_bar in (("pdmx-amazing.mid", 3), ("pdmx-auld.mid", 4)):
             path = ROOT / "catalog/midi" / name
             first = load_midi(path).notes[0].start
             with self.subTest(name=name):
                 self.assertEqual(pdmx.render_options(*import_pdmx.score_meta(path), first)["beats_per_bar"], beats_per_bar)
+
+
+class Extract(unittest.TestCase):
+    def test_a_cached_file_cut_short_is_read_again_from_the_archive(self):
+        tmp, data = temp_dir(self), SCORE.read_bytes()
+        archive = tmp / "mid.tar.gz"
+        with tarfile.open(archive, "w:gz") as tar:
+            info = tarfile.TarInfo("./mid/1/1/QmA.mid")
+            info.size = len(data)
+            tar.addfile(info, io.BytesIO(data))
+        cached = tmp / "extracted/mid/1/1/QmA.mid"
+        cached.parent.mkdir(parents=True)
+        cached.write_bytes(data[:100])  # what an interrupted run leaves
+        with quiet():
+            got = import_pdmx.extract(archive, ["./mid/1/1/QmA.mid", "./mid/1/1/QmB.mid"], tmp / "extracted")
+        self.assertEqual(got, {"./mid/1/1/QmA.mid": sha256(data)})  # QmB isn't in the archive
+        self.assertEqual(cached.read_bytes(), data)
+        self.assertEqual([p.name for p in cached.parent.iterdir()], ["QmA.mid"])
+
+
+class Gate(unittest.TestCase):
+    """gate() on one score stops at the first gate that fails, and passes only on the renderer's bar."""
+
+    title = titles("twinkle | Twinkle, Twinkle, Little Star")[0]
+
+    def gate(self, midi, member_sha256, pdmx_row=None, archive=ARCHIVE, metrics=None):
+        """Run gate() with a stub fit, plan, render and evaluate that report `metrics`.
+        Returns the result, and whether the render gate was reached."""
+        fit = SimpleNamespace(unlocked=True, covered=1, total=1, missing=[], octave_moves=0)
+        stubs = {
+            "melody_fit": mock.Mock(return_value=fit),
+            "plan": mock.Mock(return_value=(0, [SimpleNamespace(shift_semitones=0.0)])),
+            "render": mock.Mock(return_value=(None, [])),
+            "evaluate": mock.Mock(side_effect=lambda *_: {"per_note": [], **metrics}),
+        }
+        with mock.patch.multiple(import_pdmx, **stubs):
+            r = import_pdmx.gate(self.title, "title", pdmx_row or row("Twinkle Twinkle Little Star"), midi,
+                                 member_sha256, archive, library=[])
+        return r, stubs["melody_fit"].called
+
+    def file(self, data):
+        path = temp_dir(self) / "QmA.mid"
+        path.write_bytes(data)
+        return path
+
+    def test_stops_at_the_license_gate(self):
+        r, rendered = self.gate(Path("not-read.mid"), "s", pdmx_row=row("x", license="cc-by", license_url="x"))
+        self.assertEqual(r["gates"], {"license": ["the license is not public domain or CC0"]})
+        self.assertFalse(r["passed"] or rendered)
+
+    def test_stops_at_the_hash_gate(self):
+        data = SCORE.read_bytes()
+        r, rendered = self.gate(self.file(data), sha256(data), archive={**ARCHIVE, "md5": "x"})
+        self.assertEqual(r["gates"], {"license": "pass", "hash": ["the MIDI archive's md5 x is not Zenodo's m"]})
+        self.assertFalse(r["passed"] or rendered)
+
+    def test_a_cached_file_cut_short_fails_the_hash_gate(self):
+        data = SCORE.read_bytes()
+        r, rendered = self.gate(self.file(data[:100]), sha256(data))
+        self.assertEqual(r["gates"]["hash"],
+                         [f"the extracted file's sha256 {sha256(data[:100])} is not the archive file's {sha256(data)}"])
+        self.assertNotIn("sanity", r["gates"])
+        self.assertFalse(r["passed"] or rendered)
+
+    def test_stops_at_the_sanity_gate(self):
+        data = b"not a MIDI file"
+        r, rendered = self.gate(self.file(data), sha256(data))
+        self.assertEqual(list(r["gates"]), ["license", "hash", "sanity"])
+        self.assertIn("the MIDI file doesn't import", r["gates"]["sanity"][0])
+        self.assertFalse(r["passed"] or rendered)
+
+    def test_passes_only_on_the_bar(self):
+        data = SCORE.read_bytes()
+        on_bar = {"within_50c_pct": 94, "onsets_on_time_pct": 95, "notes_with_retrigger": 0}
+        r, rendered = self.gate(self.file(data), sha256(data), metrics={**on_bar, "within_50c_pct": 93})
+        self.assertTrue(rendered)
+        self.assertEqual(r["gates"], {"license": "pass", "hash": "pass", "sanity": "pass", "render": ["in50c 93% < 94%"]})
+        self.assertFalse(r["passed"])
+        r, _ = self.gate(self.file(data), sha256(data), metrics=on_bar)
+        self.assertEqual(r["gates"], dict.fromkeys(import_pdmx.GATES, "pass"))
+        self.assertTrue(r["passed"])
+        self.assertEqual(r["sha256"], sha256(data))
+
+
+class PickScores(unittest.TestCase):
+    """pick_scores tries each title's scores best first, and picks only a score that passed."""
+
+    rows = [row("Shenandoah", sid="1", rating="5.0"), row("Shenandoah", sid="2", rating="4.0"),
+            row("Shenandoah", sid="3", rating="3.0")]
+
+    def pick(self, text, rows, passing, tries=5, others=()):
+        """Run pick_scores with a stub gate that passes the score ids in `passing`.
+        Returns the songs, the picks as (title id, score id), and the scores the gate ran on."""
+        ts, ran = titles(text), []
+
+        def try_score(title, match, r):
+            sid = pdmx.score_id(r)
+            ran.append((title.id, sid))
+            return {"score_id": sid, "url": "", "score_title": r["title"], "passed": sid in passing,
+                    "gates": {"render": "pass" if sid in passing else ["in50c 50% < 94%"]}}
+
+        with quiet():
+            songs, picks = import_pdmx.pick_scores(ts, pdmx.find_candidates(rows, ts), list(others), tries, try_score,
+                                                   Path("extracted"))
+        return songs, [(t.id, r["score_id"]) for t, r, _ in picks], ran
+
+    def test_tries_the_next_score_until_one_passes(self):
+        songs, picks, ran = self.pick("s | Shenandoah", self.rows, passing={"2", "3"})
+        self.assertEqual(ran, [("s", "1"), ("s", "2")])
+        self.assertEqual(picks, [("s", "2")])
+        self.assertEqual([r["passed"] for r in songs[0]["tried"]], [False, True])
+        self.assertIsNone(songs[0]["reason"])
+
+    def test_picks_nothing_when_no_score_passes(self):
+        songs, picks, ran = self.pick("s | Shenandoah", self.rows, passing=set(), tries=2)
+        self.assertEqual(ran, [("s", "1"), ("s", "2")])
+        self.assertEqual(picks, [])
+        self.assertEqual(songs[0]["reason"], "none of the 2 best scores passed; the best: render: in50c 50% < 94%")
+
+    def test_a_title_already_in_the_catalog_tries_nothing(self):
+        songs, picks, ran = self.pick("s | Shenandoah", self.rows, passing={"1"}, others=[{"id": "x", "title": "The Shenandoah"}])
+        self.assertEqual((picks, ran), ([], []))
+        self.assertEqual(songs[0]["reason"], "the catalog already has 'The Shenandoah' (x)")
+
+    def test_two_titles_never_get_the_same_score(self):
+        rows = [row("Londonderry Air", sid="1", rating="5.0"), row("Londonderry Air", sid="2", rating="4.0")]
+        songs, picks, ran = self.pick("danny | Danny Boy | Londonderry Air\nair | Londonderry Air", rows, passing={"1", "2"})
+        self.assertEqual(picks, [("danny", "1"), ("air", "2")])
+        self.assertEqual(ran, [("danny", "1"), ("air", "2")])
+        self.assertEqual(songs[1]["tried"][0]["gates"], {"license": ["already picked for danny in this batch"]})
+
+
+class WriteCatalog(unittest.TestCase):
+    """write_catalog on a temporary catalog: what it writes and drops, and that a failed check writes nothing."""
+
+    batch = "tools/catalog/titles-09.txt"
+
+    def setUp(self):
+        self.root = temp_dir(self)
+        self.path = self.root / "catalog/catalog.json"
+        (self.root / "catalog/midi").mkdir(parents=True)
+        self.catalog = [{"id": "mary", "title": "Mary Had a Little Lamb", "file": "midi/mary.mid"},
+                        {"id": "gone", "title": "Gone", "file": "midi/pdmx-gone.mid", "import": {"titles": self.batch}}]
+        self.path.write_text(json.dumps(self.catalog, indent=1, ensure_ascii=False))
+        (self.root / "catalog/midi/mary.mid").write_bytes(b"mary")
+        (self.root / "catalog/midi/pdmx-gone.mid").write_bytes(b"gone")
+        self.src = self.root / "extracted/QmA.mid"
+        self.src.parent.mkdir()
+        self.src.write_bytes(SCORE.read_bytes())
+
+    def pick(self, song_id, sha=None):
+        """A pick of the score at self.src, gated as it imports with no render options."""
+        title = titles(f"{song_id} | Twinkle, Twinkle, Little Star")[0]
+        notes = [[n.start, n.dur, n.pitch] for n in load_midi(self.src, title=title.title).notes]
+        r = {"score_id": "1", "sha256": sha or sha256(self.src.read_bytes()), "render": {}, "notes": notes,
+             "gates": dict.fromkeys(import_pdmx.GATES, "pass"), "passed": True,
+             "row": {**row("Twinkle Twinkle Little Star"), "composer_name": "NA"}}
+        return title, r, self.src
+
+    def write(self, picks):
+        return import_pdmx.write_catalog(self.path, self.catalog, self.batch, picks, ARCHIVE)
+
+    def files(self):
+        return {p.relative_to(self.root).as_posix(): p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
+
+    def test_writes_the_picks_and_drops_a_copy_that_fails_the_hash_gate(self):
+        good, bad = self.pick("twinkle"), self.pick("star", sha="0" * 64)
+        self.assertEqual([e["id"] for e in self.write([good, bad])], ["twinkle"])
+        self.assertEqual(good[1]["gates"]["hash"], "pass")
+        self.assertFalse(bad[1]["passed"])
+        self.assertEqual(bad[1]["gates"]["hash"],
+                         [f"the catalog copy's sha256 {sha256(SCORE.read_bytes())} is not the archive file's {'0' * 64}"])
+        files = self.files()
+        self.assertEqual(sorted(files), ["catalog/catalog.json", "catalog/midi/mary.mid", "catalog/midi/pdmx-twinkle.mid",
+                                         "extracted/QmA.mid"])  # the batch's old copy is gone, and nothing is left staged
+        self.assertEqual(files["catalog/midi/pdmx-twinkle.mid"], SCORE.read_bytes())
+        written = json.loads(files["catalog/catalog.json"])
+        self.assertEqual([e["id"] for e in written], ["mary", "twinkle"])
+        self.assertEqual(files["catalog/catalog.json"].decode(), json.dumps(written, indent=1, ensure_ascii=False))
+
+    def test_an_entry_that_imports_differently_changes_nothing(self):
+        title, r, src = self.pick("twinkle")
+        r["notes"] = r["notes"][:-1]
+        before = self.files()
+        with self.assertRaises(import_pdmx.ReimportMismatch):
+            self.write([(title, r, src)])
+        self.assertEqual(self.files(), before)
+
+    def test_an_id_clash_changes_nothing(self):
+        before = self.files()
+        with self.assertRaises(ValueError):
+            self.write([self.pick("mary")])
+        self.assertEqual(self.files(), before)
 
 
 if __name__ == "__main__":
