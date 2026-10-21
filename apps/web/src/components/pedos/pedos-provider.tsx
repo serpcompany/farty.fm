@@ -12,7 +12,12 @@ import {
 } from 'react'
 import { analyze } from '@/lib/analysis/client'
 import { forgetDecoded, play, stopPlayback } from '@/lib/audio/player'
-import { MicrophoneDeniedError, startTake, type Take } from '@/lib/audio/recorder'
+import {
+  MicrophoneDeniedError,
+  MicrophoneReleasedError,
+  startTake,
+  type Take
+} from '@/lib/audio/recorder'
 import type { Song } from '@/lib/catalog/song'
 import { songs } from '@/lib/catalog/songs.generated'
 import { nearestNote } from '@/lib/pitch'
@@ -26,8 +31,8 @@ import {
 } from '@/lib/pitch-coverage'
 import * as store from '@/lib/recording-store'
 import {
+  heardSomething,
   maximumTakeSeconds,
-  minimumTakeSeconds,
   type Recording,
   recordingPitch,
   replaySegment
@@ -178,7 +183,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const savingToots = useRef(new Set<string>())
   /** Counts Toot plays, so only the latest one sets where the playhead starts. */
   const tootPlays = useRef(0)
-  const take = useRef<{ take: Take; startedAt: number; limit: number } | null>(null)
+  const take = useRef<{ take: Take; limit: number } | null>(null)
   // The Recordings as last rendered, to compare Pitch Coverage after an analysis.
   const latest = useRef<Recording[] | null>(null)
   useEffect(() => {
@@ -258,16 +263,10 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     take.current = null
     clearTimeout(current.limit)
     setCapture({ kind: 'finishing' })
-    const longEnough = (performance.now() - current.startedAt) / 1000 >= minimumTakeSeconds
-    if (!longEnough) {
-      current.take.cancel()
-      setCapture({ kind: 'idle' })
-      setProblem('nothingHeard')
-      return
-    }
     const audio = await current.take.stop()
     setCapture({ kind: 'idle' })
-    if (audio.samples.length === 0) {
+    // Judged from the audio, pre-roll included, not from how long the take lasted.
+    if (audio.samples.length === 0 || !heardSomething(audio.samples, audio.sampleRate)) {
       setProblem('nothingHeard')
       return
     }
@@ -295,12 +294,13 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         setCapture({ kind: 'idle' })
         setProblem('interrupted')
       })
-      const startedAt = performance.now()
       const limit = window.setTimeout(() => void stopRecording(), maximumTakeSeconds * 1000)
-      take.current = { take: started, startedAt, limit }
+      take.current = { take: started, limit }
       setCapture({ kind: 'recording', startedAt: Date.now() })
     } catch (error) {
       setCapture({ kind: 'idle' })
+      // The page was hidden, or the Record screen closed, before the microphone opened.
+      if (error instanceof MicrophoneReleasedError) return
       setProblem(error instanceof MicrophoneDeniedError ? 'microphoneOff' : 'couldNotStart')
     }
   }, [capture.kind, flow, stopRecording])

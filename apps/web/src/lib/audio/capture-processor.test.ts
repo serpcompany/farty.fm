@@ -1,0 +1,119 @@
+import { describe, expect, it } from 'vitest'
+import {
+  batchFrames,
+  type CaptureBatch,
+  type CaptureCommand,
+  captureProcessorSource,
+  preRollSeconds
+} from './capture-processor'
+
+type Processor = {
+  port: { onmessage: (event: { data: CaptureCommand }) => void }
+  process(inputs: Float32Array[][]): boolean
+}
+
+const sampleRate = 48_000
+const quantum = 128
+
+/** The shipped worklet source, run against a stand-in for the audio thread. */
+function capture() {
+  const sent: CaptureBatch[] = []
+  class AudioWorkletProcessor {
+    port = { onmessage: (_: unknown) => {}, postMessage: (data: CaptureBatch) => sent.push(data) }
+  }
+  let Registered: (new () => Processor) | undefined
+  const register = (_name: string, processor: new () => Processor) => {
+    Registered = processor
+  }
+  new Function('AudioWorkletProcessor', 'registerProcessor', 'sampleRate', captureProcessorSource)(
+    AudioWorkletProcessor,
+    register,
+    sampleRate
+  )
+  if (!Registered) throw new Error('The source registered no processor')
+  const processor = new Registered()
+  let next = 0
+  return {
+    sent,
+    /** Feeds `frames` of a ramp that counts samples from 1, so each one says where it came from. */
+    feed(frames: number) {
+      for (let done = 0; done < frames; done += quantum) {
+        const channel = Float32Array.from({ length: quantum }, () => ++next)
+        processor.process([[channel]])
+      }
+    },
+    send(command: CaptureCommand) {
+      processor.port.onmessage({ data: command })
+    }
+  }
+}
+
+const preRollFrames = Math.round(preRollSeconds * sampleRate)
+
+describe('capture processor', () => {
+  it('starts a take with the last 300 ms before it, in the first quantum after the tap', () => {
+    const c = capture()
+    c.feed(sampleRate) // a second of open microphone
+    c.send({ type: 'start', take: 1 })
+    expect(c.sent).toHaveLength(0)
+    c.feed(quantum)
+    expect(c.sent).toHaveLength(1)
+    const [first] = c.sent
+    expect(first.take).toBe(1)
+    expect(first.done).toBe(false)
+    expect(first.samples).toHaveLength(preRollFrames + quantum)
+    // Contiguous: the 300 ms before the tap, then the quantum after it.
+    const startsAt = sampleRate - preRollFrames + 1
+    expect(Array.from(first.samples)).toEqual(
+      Array.from({ length: preRollFrames + quantum }, (_, i) => startsAt + i)
+    )
+  })
+
+  it('keeps every sample of a take, in order, through to stop', () => {
+    const c = capture()
+    c.feed(sampleRate)
+    c.send({ type: 'start', take: 2 })
+    c.feed(3 * batchFrames + 5 * quantum)
+    c.send({ type: 'stop', take: 2 })
+    const last = c.sent.at(-1)
+    expect(last?.done).toBe(true)
+    expect(c.sent.slice(1, -1).every(batch => batch.samples.length === batchFrames)).toBe(true)
+    const all = c.sent.flatMap(batch => Array.from(batch.samples))
+    const startsAt = sampleRate - preRollFrames + 1
+    expect(all).toEqual(Array.from({ length: all.length }, (_, i) => startsAt + i))
+    expect(all.at(-1)).toBe(sampleRate + 3 * batchFrames + 5 * quantum)
+  })
+
+  it('starts with what it has when the microphone opened less than 300 ms ago', () => {
+    const c = capture()
+    c.feed(10 * quantum)
+    c.send({ type: 'start', take: 1 })
+    c.feed(quantum)
+    expect(Array.from(c.sent[0].samples)).toEqual(
+      Array.from({ length: 11 * quantum }, (_, i) => i + 1)
+    )
+  })
+
+  it('sends just the pre-roll when stopped before the audio thread ran', () => {
+    const c = capture()
+    c.feed(sampleRate)
+    c.send({ type: 'start', take: 1 })
+    c.send({ type: 'stop', take: 1 })
+    expect(c.sent).toHaveLength(1)
+    expect(c.sent[0].done).toBe(true)
+    expect(c.sent[0].samples).toHaveLength(preRollFrames)
+  })
+
+  it('sends nothing between takes, after a cancel, or for another take', () => {
+    const c = capture()
+    c.feed(sampleRate)
+    expect(c.sent).toHaveLength(0)
+    c.send({ type: 'start', take: 1 })
+    c.feed(quantum)
+    c.send({ type: 'stop', take: 7 })
+    c.send({ type: 'cancel', take: 1 })
+    const before = c.sent.length
+    c.feed(2 * batchFrames)
+    expect(c.sent).toHaveLength(before)
+  })
+})
