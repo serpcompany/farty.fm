@@ -13,6 +13,11 @@
 # no Fixture Library. On a workers.dev host, a request without the header gets a 308 to the
 # environment's own host. Off localhost it checks that host too, and `www` for Production, unless
 # Bot Fight Mode blocks this machine there.
+#
+# Sign-in (#152), off localhost: the dev mailbox (/dev/mail/) is never served, and on Staging the
+# session endpoint answers JSON and a malformed sign-in gets a 400. A local preview's sign-in is the
+# e2e journey's (e2e/sign-in.spec.ts), and Production's waits on its secret
+# (.github/workflows/web-auth-secret.yml).
 set -euo pipefail
 
 usage='usage: smoke.sh <base-url> <staging|production>'
@@ -146,6 +151,17 @@ names_canonical() {
   links=$(body_of "$base$path" "$@" | grep -o '<link rel="canonical"[^>]*>' || true)
   seen=$(tr '\n' ' ' <<<"$links")
   [[ "$links" == "<link rel=\"canonical\" href=\"$want\"/>" ]]
+}
+
+# refuses_a_bad_sign_in: a sign-in with a malformed email, from the site's own origin, gets Better
+# Auth's 400 as JSON, so the request reached Better Auth and was refused there.
+refuses_a_bad_sign_in() {
+  local result
+  result=$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' "${smoke[@]}" \
+    -H "origin: $canonical" -H 'content-type: application/json' \
+    --data '{"email":"not-an-email","otp":"000000"}' "$base/api/auth/sign-in/email-otp")
+  seen="$result"
+  [[ "$result" == '400 application/json'* ]]
 }
 
 robots() { body_of "$base/robots.txt" "${smoke[@]}"; }
@@ -284,6 +300,12 @@ fi
 
 if [[ ! "$base" =~ $local_base ]]; then
   tries=10
+  eventually 'the dev mailbox is not served' answers /dev/mail/ 404 '' "${smoke[@]}"
+  if [[ "$env" == staging ]]; then
+    eventually 'the session endpoint answers JSON' \
+      answers /api/auth/get-session 200 application/json "${smoke[@]}"
+    eventually 'a malformed sign-in from the site gets a 400' refuses_a_bad_sign_in
+  fi
   if [[ "$env" == production ]]; then
     on_the_host "$canonical/" "a request at $canonical/ gets 200 with no password and no noindex" \
       serves "$canonical/" indexable
