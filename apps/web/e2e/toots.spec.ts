@@ -13,6 +13,16 @@ declare global {
     __starts: { duration: number; peak: number; args: number[] }[]
     /** How many times the page went back in its history. */
     __backs: number
+    /** How many sounds the page stopped before they ended. */
+    __stops: number
+    /** How many times the page decoded audio. */
+    __decodes: number
+    /** Each promise rejection nothing handled. */
+    __unhandled: string[]
+    /** How many times the store broken by `breakTheStore` failed. */
+    __broken: number
+    /** Undoes `breakTheStore`. */
+    __mendTheStore?: () => void
   }
 }
 
@@ -193,12 +203,20 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     ]) {
       await expectTappable(control)
     }
-    await name.fill('Lamb, in farts')
+    // The name is trimmed.
+    await name.fill('  Lamb, in farts  ')
     await name.press('Enter')
     await expect(dialog).toBeHidden()
-    await expect(page.getByTestId('toot-row').nth(1).getByRole('link')).toHaveText(
-      new RegExp(`^Lamb, in farts${literally(mary.title)} · Today`)
-    )
+    const renamed = page.getByTestId('toot-row').nth(1).getByRole('link')
+    await expect(renamed).toHaveText(new RegExp(`^Lamb, in farts${literally(mary.title)} · Today`))
+
+    // A name of only spaces changes nothing, here or in the store (checked after the relaunch).
+    await page.getByRole('button', { name: 'More for Lamb, in farts' }).click()
+    await page.getByRole('menuitem', { name: 'Rename' }).click()
+    await name.fill('   ')
+    await dialog.getByRole('button', { name: 'Save' }).click()
+    await expect(dialog).toBeHidden()
+    await expect(renamed).toHaveText(new RegExp(`^Lamb, in farts${literally(mary.title)} · Today`))
   })
 
   await test.step('quit, open Pedos again, and the Toots and Recordings are there', async () => {
@@ -210,6 +228,10 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     await expect(rows).toHaveCount(2)
     await expect(rows.nth(0).getByRole('link')).toContainText(twinkle.title)
     await expect(rows.nth(1).getByRole('link')).toContainText('Lamb, in farts')
+    expect((await database(page)).toots.map(t => t.title).sort()).toEqual([
+      'Lamb, in farts',
+      twinkle.title
+    ])
     await tab(page, 'Profile').click()
     await expect(page.getByTestId('stat-toots')).toHaveText('Toots2')
     await expect(page.getByTestId('stat-recordings')).toHaveText(`Recordings${recordings}`)
@@ -235,13 +257,40 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     expect(whole.peak).toBeGreaterThan(0.05)
   })
 
-  await test.step("Delete, from a Toot's screen: one tap's worth, back to the list", async () => {
+  await test.step('Delete, from the row, while it plays: it stops, and the others keep their audio', async () => {
     await page.getByRole('link', { name: 'Back to Toots' }).click()
-    await page.getByRole('link', { name: new RegExp(`^${literally(twinkle.title)}`) }).click()
-    await expect(page.getByRole('heading', { level: 1, name: twinkle.title })).toBeVisible()
+    await expect(page).toHaveURL(/\/toots\/$/)
+    // Each Toot decodes once, and starting the second stops the first.
+    await page.getByRole('button', { name: 'Play Lamb, in farts' }).click()
+    await lastStart(page)
+    await page.getByRole('button', { name: `Play ${twinkle.title}` }).click()
+    expect((await lastStart(page)).duration).toBeGreaterThan(5)
+    const decodes = await page.evaluate(() => window.__decodes)
+    await page.evaluate(() => (window.__stops = 0))
+
+    await expect(page.getByRole('button', { name: `Stop ${twinkle.title}` })).toBeVisible()
     await page.getByRole('button', { name: `More for ${twinkle.title}` }).click()
     await page.getByRole('menuitem', { name: 'Delete' }).click()
-    const dialog = page.getByRole('alertdialog', { name: `Delete ${twinkle.title}?` })
+    await page
+      .getByRole('alertdialog', { name: `Delete ${twinkle.title}?` })
+      .getByRole('button', { name: 'Delete Toot' })
+      .click()
+    await expect(page.getByTestId('toot-row')).toHaveCount(1)
+    await expect.poll(() => page.evaluate(() => window.__stops)).toBe(1)
+
+    // The Toot left plays from the audio it decoded before.
+    await page.getByRole('button', { name: 'Play Lamb, in farts' }).click()
+    expect((await lastStart(page)).duration).toBeGreaterThan(5)
+    expect(await page.evaluate(() => window.__decodes)).toBe(decodes)
+    await page.getByRole('button', { name: 'Stop Lamb, in farts' }).click()
+  })
+
+  await test.step("Delete, from a Toot's screen: one tap's worth, back to the list, which is empty", async () => {
+    await page.getByRole('link', { name: /^Lamb, in farts/ }).click()
+    await expect(page.getByRole('heading', { level: 1, name: 'Lamb, in farts' })).toBeVisible()
+    await page.getByRole('button', { name: 'More for Lamb, in farts' }).click()
+    await page.getByRole('menuitem', { name: 'Delete' }).click()
+    const dialog = page.getByRole('alertdialog', { name: 'Delete Lamb, in farts?' })
     await expect(dialog).toContainText("This can't be undone.")
     const confirm = dialog.getByRole('button', { name: 'Delete Toot' })
     await expectTappable(confirm)
@@ -254,16 +303,6 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     })
     await expect(page).toHaveURL(/\/toots\/$/)
     expect(await page.evaluate(() => window.__backs)).toBe(1)
-    await expect(page.getByTestId('toot-row')).toHaveCount(1)
-  })
-
-  await test.step('Delete, from the row, leaves nothing', async () => {
-    await page.getByRole('button', { name: 'More for Lamb, in farts' }).click()
-    await page.getByRole('menuitem', { name: 'Delete' }).click()
-    await page
-      .getByRole('alertdialog', { name: 'Delete Lamb, in farts?' })
-      .getByRole('button', { name: 'Delete Toot' })
-      .click()
     await expect(page.getByText('Nothing yet')).toBeVisible()
     await expect(page.getByText('Make one in Compose.')).toBeVisible()
     // Each Toot went with its audio.
@@ -277,7 +316,9 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
   await context.close()
 })
 
-test("a Toot whose audio is gone says so, and can't play", async ({ page }) => {
+test("a Toot whose audio is gone says so, and can't play; one the store fails for a moment is kept", async ({
+  page
+}) => {
   test.setTimeout(180_000)
   await listenToThePage(page.context())
   await page.goto('/profile/')
@@ -286,6 +327,46 @@ test("a Toot whose audio is gone says so, and can't play", async ({ page }) => {
   await makeAToot(page, twinkle.id)
   await tab(page, 'Toots').click()
   await expect(page.getByTestId('toot-row')).toHaveCount(2)
+  const twinkleDetails = page.getByTestId('toot-row').nth(0).getByTestId('toot-details')
+
+  // Audio that can't be read this time isn't missing: the play fails, and the next one plays.
+  await breakTheStore(page, 'get', 'tootAudio')
+  await page.getByRole('button', { name: `Play ${twinkle.title}` }).click()
+  await expect(twinkleDetails).toHaveText(`${twinkle.title} · Couldn't play`)
+  expect(await page.evaluate(() => window.__broken)).toBe(1)
+  await page.getByRole('button', { name: `Play ${twinkle.title}` }).click()
+  await expect(page.getByRole('alertdialog')).toHaveCount(0)
+  await mendTheStore(page)
+  await page.getByRole('button', { name: `Play ${twinkle.title}` }).click()
+  expect((await lastStart(page)).duration).toBeGreaterThan(5)
+  await expect(twinkleDetails).toHaveText(new RegExp(`^${literally(twinkle.title)} · Today`))
+  await page.getByRole('button', { name: `Stop ${twinkle.title}` }).click()
+
+  // And on its screen.
+  await page.getByRole('link', { name: new RegExp(`^${literally(twinkle.title)}`) }).click()
+  const state = page.getByTestId('song-creator-state')
+  await expect(state).toHaveText('Ready')
+  await breakTheStore(page, 'get', 'tootAudio')
+  await page.getByTestId('song-creator-play').click()
+  await expect(state).toHaveText("Couldn't play")
+  await mendTheStore(page)
+  await page.getByTestId('song-creator-play').click()
+  await expect(state).toHaveText('Playing')
+  await page.getByRole('link', { name: 'Back to Toots' }).click()
+  expect((await database(page)).withAudio).toHaveLength(2)
+
+  // A rename the store fails to save shows until a reload, and leaves nothing unhandled.
+  await breakTheStore(page, 'put', 'toots')
+  await page.getByRole('button', { name: `More for ${mary.title}` }).click()
+  await page.getByRole('menuitem', { name: 'Rename' }).click()
+  await page.getByRole('alertdialog').getByRole('textbox', { name: 'Name' }).fill('Not kept')
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByTestId('toot-row').nth(1).getByRole('link')).toContainText('Not kept')
+  await expect.poll(() => page.evaluate(() => window.__broken)).toBe(1)
+  // A rejection nothing handles is reported once its task ends.
+  await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 500)))
+  expect(await page.evaluate(() => window.__unhandled)).toEqual([])
+  await mendTheStore(page)
 
   // Gone while the list shows: a tap finds out.
   await deleteTootAudio(page, twinkle.id)
@@ -294,11 +375,11 @@ test("a Toot whose audio is gone says so, and can't play", async ({ page }) => {
     `${twinkle.title} · Audio missing`
   )
 
-  // Gone when the Toots load.
+  // Gone when the Toots load. The rename that wasn't saved is gone too.
   await deleteTootAudio(page, mary.id)
   await page.reload()
   const row = page.getByTestId('toot-row').nth(1)
-  await expect(row.getByTestId('toot-details')).toHaveText(`${mary.title} · Audio missing`)
+  await expect(row.getByRole('link')).toHaveText(`${mary.title}${mary.title} · Audio missing`)
   await page.evaluate(() => (window.__starts = []))
   const play = page.getByRole('button', { name: `${mary.title}: audio missing` })
   await expectTappable(play)
@@ -397,7 +478,10 @@ function tab(page: Page, label: string) {
     .getByRole('link', { name: label, exact: true })
 }
 
-/** Skips the Welcome, and records each sound the page starts (`__starts`) and each Back. */
+/**
+ * Skips the Welcome, and records each sound the page starts (`__starts`) and stops (`__stops`),
+ * each decode, each Back, and each promise rejection nothing handled.
+ */
 async function listenToThePage(context: BrowserContext) {
   await context.addInitScript(() => {
     localStorage.setItem('pedos.welcomed', '1')
@@ -410,6 +494,23 @@ async function listenToThePage(context: BrowserContext) {
       window.__starts.push({ duration: this.buffer?.duration ?? 0, peak, args: args as number[] })
       return start.apply(this, args)
     }
+    window.__stops = 0
+    const stop = AudioBufferSourceNode.prototype.stop
+    AudioBufferSourceNode.prototype.stop = function (this: AudioBufferSourceNode, ...args) {
+      window.__stops += 1
+      return stop.apply(this, args)
+    }
+    window.__decodes = 0
+    const decode = BaseAudioContext.prototype.decodeAudioData
+    BaseAudioContext.prototype.decodeAudioData = function (
+      this: BaseAudioContext,
+      ...args: Parameters<BaseAudioContext['decodeAudioData']>
+    ) {
+      window.__decodes += 1
+      return decode.apply(this, args)
+    }
+    window.__unhandled = []
+    addEventListener('unhandledrejection', event => window.__unhandled.push(String(event.reason)))
     window.__backs = 0
     const back = History.prototype.back
     History.prototype.back = function (this: History) {
@@ -468,7 +569,12 @@ function database(page: Page) {
         r.onerror = () => reject(r.error)
       })
     const toots = await read<
-      { id: string; songId: string; arrangement: { recordingForPitch: Record<string, string> } }[]
+      {
+        id: string
+        title: string
+        songId: string
+        arrangement: { recordingForPitch: Record<string, string> }
+      }[]
     >('toots', store => store.getAll())
     const withAudio = await read('tootAudio', store => store.getAllKeys())
     const recordings = await read<{ id: string; number: number }[]>('recordings', store =>
@@ -507,6 +613,37 @@ async function deleteTootAudio(page: Page, songId: string): Promise<void> {
     })
     db.close()
   }, id)
+}
+
+/**
+ * Breaks one method of one store for a moment, until `mendTheStore`: a read (`get`) throws, as a
+ * closing database does, and a write (`put`) aborts its transaction, as a full disk does.
+ */
+async function breakTheStore(page: Page, method: 'get' | 'put', store: string) {
+  await page.evaluate(
+    ({ method, store }) => {
+      window.__broken = 0
+      type Method = (this: IDBObjectStore, ...args: unknown[]) => IDBRequest
+      const prototype = IDBObjectStore.prototype as unknown as Record<typeof method, Method>
+      const original = prototype[method]
+      prototype[method] = function (...args) {
+        if (this.name !== store) return original.apply(this, args)
+        window.__broken += 1
+        if (method === 'get') throw new DOMException('Broken for the test', 'UnknownError')
+        const request = original.apply(this, args)
+        this.transaction.abort()
+        return request
+      }
+      window.__mendTheStore = () => {
+        prototype[method] = original
+      }
+    },
+    { method, store }
+  )
+}
+
+async function mendTheStore(page: Page) {
+  await page.evaluate(() => window.__mendTheStore?.())
 }
 
 /** A title or other copy, matched as written inside a pattern. */

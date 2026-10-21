@@ -131,15 +131,17 @@ type Pedos = {
   saveToot(draft: TootDraft): Promise<void>
   /**
    * Plays or stops the whole Toot, or just its `note`th note as rendered: a made Toot from its
-   * draft's audio, a saved one from the store. A saved Toot whose audio won't load is marked
-   * `isAudioMissing`.
+   * draft's audio, a saved one from the store. A saved Toot whose audio is gone is marked
+   * `isAudioMissing`; one whose audio couldn't be read this time is `tootPlayFailed`.
    */
   toggleTootPlayback(toot: TootDraft | Toot, note?: number): void
+  /** The saved Toot whose audio couldn't be read on its last play, until the next play. */
+  tootPlayFailed: string | null
   /** Gives a Toot a new title, trimmed. An empty title changes nothing. */
   renameToot(id: string, title: string): void
   /** Deletes a Toot and its audio, and stops it if it's playing. */
   deleteToot(id: string): void
-  /** Lets go of a Toot's decoded audio, when its screen closes. */
+  /** Lets go of a Toot's decoded audio, and its failed play, when its screen closes. */
   forgetToot(id: string): void
   /** When what's playing started (`performance.now()`), once it has; null otherwise. */
   playbackStartedAt: number | null
@@ -170,6 +172,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const [isSaving, setIsSaving] = useState(false)
   const [toots, setToots] = useState<Toot[] | null>(null)
   const [tootsFailed, setTootsFailed] = useState(false)
+  const [tootPlayFailed, setTootPlayFailed] = useState<string | null>(null)
   const [playbackStart, setPlaybackStart] = useState<{ key: string; at: number } | null>(null)
   const [waitsForOtherTabs, setWaitsForOtherTabs] = useState(false)
   const savingToots = useRef(new Set<string>())
@@ -437,6 +440,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const toggleTootPlayback = useCallback(
     (toot: TootDraft | Toot, note?: number) => {
       const key = tootPlayback(toot.id, note)
+      setTootPlayFailed(null)
       if (nowPlaying === key) {
         stopPlayback()
         return
@@ -460,7 +464,9 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           ? async () => toot.wav.slice(0)
           : () =>
               tootStore.loadTootAudio(toot.id).catch(error => {
-                markAudioMissing(toot.id)
+                // Only audio that's gone offers Delete. Any other error may pass: try again.
+                if (error instanceof tootStore.TootAudioMissing) markAudioMissing(toot.id)
+                else setTootPlayFailed(toot.id)
                 throw error
               })
       void play(`toot-${toot.id}`, audio, segment, ended).then(() => {
@@ -490,7 +496,10 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     [nowPlaying]
   )
 
-  const forgetToot = useCallback((id: string) => forgetDecoded(`toot-${id}`), [])
+  const forgetToot = useCallback((id: string) => {
+    forgetDecoded(`toot-${id}`)
+    setTootPlayFailed(current => (current === id ? null : current))
+  }, [])
 
   const melodicRecordings = (recordings ?? []).filter(r => recordingPitch(r) !== null)
   const collectedNotes = new Set(
@@ -550,6 +559,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     makeToot,
     saveToot,
     toggleTootPlayback,
+    tootPlayFailed,
     renameToot,
     deleteToot,
     forgetToot,

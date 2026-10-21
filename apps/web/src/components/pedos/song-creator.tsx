@@ -239,7 +239,13 @@ export function TootLayout({
         </button>
         <div className="min-w-0">
           <p className="font-semibold" data-testid="song-creator-state">
-            {isAudioMissing ? 'Audio missing' : isPlaying ? 'Playing' : 'Ready'}
+            {isAudioMissing
+              ? 'Audio missing'
+              : isPlaying
+                ? 'Playing'
+                : pedos.tootPlayFailed === toot.id
+                  ? "Couldn't play"
+                  : 'Ready'}
           </p>
           <p className="text-sm text-muted-foreground">
             {song.pitches.length} of your Recordings, one per note

@@ -2,7 +2,7 @@
 
 import { Ellipsis, ListMusic, Pencil, Play, Square, Trash2, TriangleAlert } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,11 +56,15 @@ export function TootsScreen() {
     return () => document.removeEventListener('visibilitychange', visibilityChanged)
   }, [])
 
-  // Leaving the list lets go of the audio its rows decoded. A Toot playing keeps playing into its
-  // screen, as on the iPhone; another tab stops it (`AppShell`).
+  // Leaving the list lets go of the audio its rows decoded, and only then: a delete lets go of
+  // just its own Toot's (`deleteToot`). A Toot playing keeps playing into its screen, as on the
+  // iPhone; another tab stops it (`AppShell`).
   const { toots, forgetToot } = pedos
-  const ids = toots?.map(t => t.id).join(' ') ?? ''
-  useEffect(() => () => ids.split(' ').filter(Boolean).forEach(forgetToot), [ids, forgetToot])
+  const shown = useRef<string[]>([])
+  useEffect(() => {
+    shown.current = toots?.map(t => t.id) ?? []
+  }, [toots])
+  useEffect(() => () => shown.current.forEach(forgetToot), [forgetToot])
 
   if (toots === null) {
     return (
@@ -167,7 +171,9 @@ function TootRow({
   const pedos = usePedos()
   const isPlaying = pedos.nowPlaying === tootPlayback(toot.id)
   const songTitle = songs.find(song => song.id === toot.songId)?.title ?? ''
-  const details = tootDetails(toot, songTitle)
+  // Until the next play: the Toot is kept, and its play button tries again.
+  const details =
+    pedos.tootPlayFailed === toot.id ? `${songTitle} · Couldn't play` : tootDetails(toot, songTitle)
   const Icon = toot.isAudioMissing ? TriangleAlert : isPlaying ? Square : Play
 
   return (

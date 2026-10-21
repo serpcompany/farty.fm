@@ -29,10 +29,18 @@ export async function saveToot(toot: Toot, wav: ArrayBuffer): Promise<void> {
   ])
 }
 
-/** A saved Toot's WAV. Throws when it's gone. */
+/** A saved Toot has no audio: the browser lost it. Any other error reading it may pass. */
+export class TootAudioMissing extends Error {
+  constructor(id: string) {
+    super(`No audio for Toot ${id}`)
+    this.name = 'TootAudioMissing'
+  }
+}
+
+/** A saved Toot's WAV. Throws `TootAudioMissing` when it's gone, or the read's error. */
 export async function loadTootAudio(id: string): Promise<ArrayBuffer> {
   const wav = await (await db()).get('tootAudio', id)
-  if (!wav) throw new Error(`No audio for Toot ${id}`)
+  if (!wav) throw new TootAudioMissing(id)
   return wav
 }
 
@@ -41,8 +49,9 @@ export async function renameToot(id: string, title: string): Promise<void> {
   const tx = (await db()).transaction('toots', 'readwrite')
   // The stored copy, so what loading worked out (`isAudioMissing`) is never written.
   const toot = await tx.store.get(id)
-  if (toot) await tx.store.put({ ...toot, title })
-  await tx.done
+  // Awaited together, so a failed write's aborted transaction is never left unhandled.
+  if (toot) await Promise.all([tx.store.put({ ...toot, title }), tx.done])
+  else await tx.done
 }
 
 /** Deletes a Toot and its audio together. */
