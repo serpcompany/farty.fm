@@ -14,8 +14,9 @@ export function skipWelcome({ offersAccount = false } = {}): void {
  * A Fixture Library Recording, played once into Chromium's fake microphone. The fake microphone
  * plays its file from the moment the stream opens. With permission granted, Record would open it
  * as soon as it shows, before the tap (#149), so permission isn't granted up front: the first tap
- * opens the microphone, and the file plays from the tap. `--use-fake-ui-for-media-stream` still
- * lets it open. `record-warm.spec.ts` covers the open-ahead microphone.
+ * opens the microphone, and the file plays from then, before the app captures, so the take loses
+ * its first tens of ms (60 ms on CI, #141). `--use-fake-ui-for-media-stream` still lets it open.
+ * For a fart that's loud from its start, use `fake-microphone.ts`, as `compose.spec.ts` does.
  */
 export function withFakeMicrophone(fixture: string): void {
   const file = resolve(__dirname, '../../../fixtures/recordings', fixture)
