@@ -40,16 +40,16 @@ export default function PrivacyPage() {
 
       <h2>Error reports and usage</h2>
       <p>
-        These help us find what breaks and see how many people use Pedos. Neither says who you are,
-        and neither uses cookies.
+        These help us find what breaks and see how many people use Pedos. Neither uses cookies or
+        includes your account, name or email.
       </p>
       <ul>
         <li>
           <strong>Error reports.</strong> When something goes wrong, such as a Recording that
           couldn&apos;t be saved, your browser tells Pedos which problem it was, the kind of error,
           the screen you were on, the Pedos version and how long the report waited offline. It never
-          includes your farts, their names, your email or anything you type. Cloudflare keeps
-          reports in Pedos&apos;s logs for up to 7 days.
+          includes your farts, their names, your email or anything you type, and it&apos;s sent
+          without cookies. Cloudflare keeps reports in Pedos&apos;s logs for up to 7 days.
         </li>
         <li>
           <strong>Usage.</strong> On pedos.app, Cloudflare Web Analytics counts visits: the page,
@@ -60,8 +60,7 @@ export default function PrivacyPage() {
       <p>
         To stop both, turn off Share anonymous error reports and usage on Profile. It&apos;s kept in
         this browser, so turn it off in each browser you use. Pedos also sends neither when your
-        browser sends Global Privacy Control. Because neither says who you are, we can&apos;t find
-        one person&apos;s to delete; they go when Cloudflare&apos;s time is up.
+        browser sends Global Privacy Control. Cloudflare deletes both when its time is up.
       </p>
 
       <h2>What Pedos doesn&apos;t do</h2>
@@ -70,10 +69,10 @@ export default function PrivacyPage() {
         <li>It doesn&apos;t sell your data.</li>
       </ul>
       <p>
-        Opening the site is an ordinary web request, like any website. Pedos runs on Cloudflare,
-        which keeps logs of requests to the site, such as the time, the page asked for and the
-        details your browser sends with every request. Pedos reads them only to run the site and fix
-        problems.
+        Pedos runs on Cloudflare. Like any website, it logs every request, error reports included:
+        Cloudflare&apos;s request log keeps your IP address, browser and rough location, with the
+        time and the page, for up to 7 days. Pedos reads it only to run the site and fix problems,
+        and briefly uses your IP address to limit how many error reports one device can send.
       </p>
 
       <h2>Deleting your data</h2>
@@ -84,10 +83,9 @@ export default function PrivacyPage() {
 
       <h2>Children</h2>
       <p>
-        Pedos doesn&apos;t ask anyone&apos;s age. Without an account it collects nothing that says
-        who you are. An account needs only an email address, so please ask a parent or guardian
-        before making one. If a child&apos;s email is on an account, write to us and we&apos;ll
-        delete it.
+        Pedos doesn&apos;t ask anyone&apos;s age. Without an account it never asks for a name or
+        email. An account needs only an email address, so please ask a parent or guardian before
+        making one. If a child&apos;s email is on an account, write to us and we&apos;ll delete it.
       </p>
 
       <h2>Changes</h2>

@@ -2,7 +2,34 @@ import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } fr
 import { POST } from './route'
 
 // The error report route, in Node: what it logs, and everything it refuses. It reads no session,
-// cookie, D1 or R2, so it needs no workerd (every-route.workers.test.ts skips it).
+// cookie, D1 or R2, so it needs no workerd (every-route.workers.test.ts skips it). Its one binding,
+// the rate limit, is a fake here: `null` is no Cloudflare context at all, as in `next dev`.
+
+type Limiter = { limit(options: { key: string }): Promise<{ success: boolean }> }
+const cloudflare = vi.hoisted(() => ({
+  env: {} as { TELEMETRY_RATE_LIMIT?: Limiter } | null
+}))
+vi.mock('@opennextjs/cloudflare', () => ({
+  getCloudflareContext: () => {
+    if (!cloudflare.env) throw new Error('no Cloudflare context')
+    return { env: cloudflare.env }
+  }
+}))
+
+/** Cloudflare's `simple` limit, counted per key: `limit` a window, which never ends here. */
+function fakeLimit(limit: number): Limiter & { keys: string[] } {
+  const counts = new Map<string, number>()
+  const keys: string[] = []
+  return {
+    keys,
+    async limit({ key }) {
+      keys.push(key)
+      const count = (counts.get(key) ?? 0) + 1
+      counts.set(key, count)
+      return { success: count <= limit }
+    }
+  }
+}
 
 const ORIGIN = 'http://localhost:3202'
 const PATH = `${ORIGIN}/api/telemetry/`
@@ -35,6 +62,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  cloudflare.env = {}
   vi.restoreAllMocks()
   vi.unstubAllEnvs()
 })
@@ -125,5 +153,30 @@ describe('POST /api/telemetry/', () => {
     expect(await response.json()).toEqual({ error })
     expect(response.headers.get('cache-control')).toBe('no-store')
     expect(logged).not.toHaveBeenCalled()
+  })
+
+  it('answers a client over 30 a minute 429, and logs nothing for it', async () => {
+    const limiter = fakeLimit(30)
+    cloudflare.env = { TELEMETRY_RATE_LIMIT: limiter }
+    const from = (ip: string) => post(JSON.stringify(report), { 'cf-connecting-ip': ip })
+    for (let i = 0; i < 30; i++) expect((await from('203.0.113.7')).status).toBe(204)
+    expect(logged).toHaveBeenCalledTimes(30)
+
+    const over = await from('203.0.113.7')
+    expect(over.status).toBe(429)
+    expect(await over.json()).toEqual({ error: 'rate_limited' })
+    expect(over.headers.get('cache-control')).toBe('no-store')
+    expect(logged).toHaveBeenCalledTimes(30)
+
+    // Another client has its own count.
+    expect((await from('198.51.100.2')).status).toBe(204)
+    expect(limiter.keys.at(-1)).toBe('198.51.100.2')
+  })
+
+  it('takes every report without the binding, or without a Cloudflare context', async () => {
+    cloudflare.env = {}
+    expect((await post(JSON.stringify(report))).status).toBe(204)
+    cloudflare.env = null
+    expect((await post(JSON.stringify(report))).status).toBe(204)
   })
 })

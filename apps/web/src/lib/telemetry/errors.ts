@@ -38,6 +38,15 @@ function environment(): Environment {
 }
 
 /**
+ * In Production, none: no cookie, so a signed-in user's session never goes with a report. The
+ * browser still sends Origin on a POST, which the route checks. Elsewhere, the Staging gate's
+ * password, which `fetch` counts as a credential too, or the gate refuses the report (401).
+ */
+function credentials(): RequestCredentials {
+  return environment() === 'production' ? 'omit' : 'same-origin'
+}
+
+/**
  * The allowlist, as Sentry's `beforeSend`: the report keeps only the code, the error's type name
  * (`TypeError`, never its message), the screen and the build. Anything else in `error` is dropped.
  */
@@ -102,7 +111,7 @@ async function send({ report, at }: Queued): Promise<'sent' | 'refused' | 'faile
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
-      credentials: 'same-origin',
+      credentials: credentials(),
       keepalive: true
     })
     if (response.ok) return 'sent'

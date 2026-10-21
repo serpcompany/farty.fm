@@ -20,12 +20,18 @@ export function AnalyticsBeacon({ token }: { token: string }) {
   return null
 }
 
+/**
+ * Set once the beacon is stopped on this page. It isn't started again until the next page load: a
+ * second script would start a second beacon beside the first, whose listeners can't be removed.
+ */
+let stoppedThisPage = false
+
 function beaconScript(): HTMLScriptElement | null {
   return document.querySelector(`script[src="${BEACON_SRC}"]`)
 }
 
 function startBeacon(token: string): void {
-  if (beaconScript()) return
+  if (stoppedThisPage || beaconScript()) return
   const script = document.createElement('script')
   script.defer = true
   script.src = BEACON_SRC
@@ -36,9 +42,13 @@ function startBeacon(token: string): void {
 /**
  * Turned off while the beacon runs: its script goes, and so does `window.__cfBeacon`, its settings,
  * which the beacon checks before each send. That check is the beacon's own, not a documented
- * switch, so the next page load is when it's sure to stop.
+ * switch, so the next page load is when it's sure to stop. Turned back on, it starts again on the
+ * next page load.
  */
 function stopBeacon(): void {
-  beaconScript()?.remove()
+  const script = beaconScript()
+  if (!script) return
+  stoppedThisPage = true
+  script.remove()
   delete (window as Window & { __cfBeacon?: unknown }).__cfBeacon
 }

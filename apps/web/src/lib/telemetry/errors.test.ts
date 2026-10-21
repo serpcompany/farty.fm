@@ -60,6 +60,7 @@ describe('reportError', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
     const [path, init] = fetchMock.mock.calls[0] ?? []
     expect(path).toBe('/api/telemetry/')
+    // Behind the Staging gate, with its password.
     expect(init).toMatchObject({ method: 'POST', credentials: 'same-origin', keepalive: true })
     expect(sentBodies()).toEqual([
       {
@@ -71,6 +72,14 @@ describe('reportError', () => {
         delaySeconds: 0
       }
     ])
+  })
+
+  it('sends no cookie in Production, where no gate needs a password', async () => {
+    vi.stubEnv('PEDOS_ENVIRONMENT', 'production')
+    const { reportError } = await load()
+    reportError('toot-make-failed', new TypeError('x'))
+    await settle()
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ credentials: 'omit' })
   })
 
   it('drops a seeded secret wherever it is: message, stack, name, extra fields, the path', async () => {

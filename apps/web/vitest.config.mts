@@ -23,7 +23,20 @@ export default defineConfig({
       },
       {
         extends: true,
-        test: { name: 'happy-dom', include: [interactionTests], environment: 'happy-dom' }
+        test: {
+          name: 'happy-dom',
+          include: [interactionTests],
+          environment: 'happy-dom',
+          // A test that adds a third-party <script> (the Web Analytics beacon) never fetches it.
+          environmentOptions: {
+            happyDOM: {
+              settings: {
+                disableJavaScriptFileLoading: true,
+                handleDisabledFileLoadingAsSuccess: true
+              }
+            }
+          }
+        }
       },
       {
         // The API routes in workerd, with wrangler.jsonc's bindings and compatibility settings: a
