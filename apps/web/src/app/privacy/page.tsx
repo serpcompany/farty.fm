@@ -38,29 +38,27 @@ export default function PrivacyPage() {
         analyzes each Recording in your browser to find its note.
       </p>
 
-      <h2>Error reports and usage</h2>
+      <h2>Error reports</h2>
       <p>
-        These help us find what breaks and see how many people use Pedos. Neither uses cookies or
-        includes your account, name or email.
+        When something goes wrong, such as a Recording that couldn&apos;t be saved, your browser
+        tells Pedos which problem it was, the kind of error, the screen you were on, the Pedos
+        version and how long the report waited offline. It never includes your farts, their names,
+        your email or anything you type, and it&apos;s sent without cookies. Cloudflare keeps
+        reports in Pedos&apos;s logs for up to 7 days.
       </p>
-      <ul>
-        <li>
-          <strong>Error reports.</strong> When something goes wrong, such as a Recording that
-          couldn&apos;t be saved, your browser tells Pedos which problem it was, the kind of error,
-          the screen you were on, the Pedos version and how long the report waited offline. It never
-          includes your farts, their names, your email or anything you type, and it&apos;s sent
-          without cookies. Cloudflare keeps reports in Pedos&apos;s logs for up to 7 days.
-        </li>
-        <li>
-          <strong>Usage.</strong> On pedos.app, Cloudflare Web Analytics counts visits: the page,
-          the site you came from, your browser and device type, your country and how fast the page
-          loaded. Cloudflare keeps the full records for 7 days and a sampled summary for 6 months.
-        </li>
-      </ul>
       <p>
-        To stop both, turn off Share anonymous error reports and usage on Profile. It&apos;s kept in
-        this browser, so turn it off in each browser you use. Pedos also sends neither when your
-        browser sends Global Privacy Control. Cloudflare deletes both when its time is up.
+        To stop error reports, turn off Share anonymous error reports on Profile. It&apos;s kept in
+        this browser, so turn it off in each browser you use. Pedos also sends none when your
+        browser sends Global Privacy Control.
+      </p>
+
+      <h2>Page views</h2>
+      <p>
+        Cloudflare Web Analytics counts page views on every page of Pedos: the page, the site you
+        came from, your browser and device type, your country and how fast the page loaded. It uses
+        no cookies and doesn&apos;t include your account, name or email. Cloudflare keeps the full
+        records for 7 days and a sampled summary for 6 months. The switch and Global Privacy Control
+        don&apos;t stop it: they stop error reports.
       </p>
 
       <h2>What Pedos doesn&apos;t do</h2>

@@ -34,7 +34,7 @@ Run from `apps/web/`:
 - `src/lib/toot.ts`, `toot-renderer.ts`: a Toot, a Song rendered with the user's Recordings in the render worker, as Song Creator makes it.
 - `src/db/`: the D1 schema (Better Auth's tables, `recordings` and `toots`), `createDatabase()` over any D1 binding (`database.ts`, importable from tests) and `getDb()` for a request (`index.ts`, server-only), through Drizzle. Migrations are in `drizzle/`.
 - `src/app/api/`, `src/server/`: a signed-in user's library (Recordings, Toots and their WAVs in R2) and account. Every route outside `api/auth/` and `api/telemetry/` is built with `userRoute` (`require-user.ts`): session, then `Origin` on writes, `private, no-store`. `every-route.workers.test.ts` fails a route that skips it.
-- `src/lib/telemetry/`, `src/app/api/telemetry/`: error reports (`reportError(code, error)`, a stable code and an allowlist, logged by the route) and the Web Analytics beacon, both off with Profile's switch or Global Privacy Control (#126). `/dev/telemetry/` sends a synthetic crash and handled error, except in Production.
+- `src/lib/telemetry/`, `src/app/api/telemetry/`: error reports (`reportError(code, error)`, a stable code and an allowlist, logged by the route), the app's only telemetry, off with Profile's switch or Global Privacy Control (#126). `/dev/telemetry/` sends a synthetic crash and handled error, except in Production.
 - `src/server/`: sign-in (#152), server-only behind `auth.ts`: Better Auth email codes (`auth-config.ts`), email and the dev mailbox (`email.ts`, `dev-mailbox.ts`, `/dev/mail/`). How it works and where it runs is in [`docs/agents/web.md`](../../docs/agents/web.md#environments-and-deploys).
 - `src/components/pedos/`: the screens, matching the iPhone app's. `src/components/ui/` stays stock shadcn.
 
@@ -43,7 +43,7 @@ Run from `apps/web/`:
 SERP's [web stack](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/web-stack/README.md) is the default. These are the exceptions, with detail in [`docs/agents/web.md`](../../docs/agents/web.md#exceptions-to-serps-standards):
 
 - **Agents tap through, on the local Workers build,** not on a PR preview or by the owner. Before launch, agents merge every PR once a fresh review has no open blocking finding and the cited check is green ([detail](../../docs/agents/web.md#exceptions-to-serps-standards)).
-- **Errors and analytics are Cloudflare's own (#126).** No Sentry and no GTM: error reports go to the Worker's logs, and Production has Cloudflare Web Analytics ([detail](../../docs/agents/web.md#exceptions-to-serps-standards)).
+- **Errors and analytics are Cloudflare's own (#126).** No Sentry and no GTM: error reports go to the Worker's logs, and analytics come from Cloudflare's automatic Web Analytics on the zone, which the app doesn't load ([detail](../../docs/agents/web.md#exceptions-to-serps-standards)).
 - **No mockups.** See Design, above.
 
 ## Evidence

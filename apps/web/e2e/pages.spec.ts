@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('the privacy page covers accounts, news email, guests, error reports, usage and deleting', async ({
+test('the privacy page covers accounts, news email, guests, error reports, page views and deleting', async ({
   page
 }) => {
   await page.goto('/privacy/')
@@ -13,9 +13,13 @@ test('the privacy page covers accounts, news email, guests, error reports, usage
   await expect(page.getByText('never sold')).toBeVisible()
   await expect(page.getByText('last only until you close Pedos')).toBeVisible()
   await expect(page.getByText('Delete account on Profile removes your email')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Error reports and usage' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Error reports', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Page views' })).toBeVisible()
+  await expect(page.getByText('counts page views on every page of Pedos')).toBeVisible()
+  await expect(page.getByText("don't stop it: they stop error reports")).toBeVisible()
+  await expect(page.getByText('a sampled summary for 6 months')).toBeVisible()
   await expect(page.getByText('never includes your farts, their names, your email')).toBeVisible()
-  await expect(page.getByText('turn off Share anonymous error reports and usage')).toBeVisible()
+  await expect(page.getByText('turn off Share anonymous error reports on Profile')).toBeVisible()
   await expect(page.getByText('keeps your IP address, browser and rough location')).toBeVisible()
   await expect(page.getByText('nothing in it follows you to other sites')).toBeVisible()
   await expect(page.getByText("Pedos doesn't ask anyone's age")).toBeVisible()
