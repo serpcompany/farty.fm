@@ -165,10 +165,9 @@ Digital Services Act trader status, which can be added later.
 
 ## Support and privacy URLs
 
-- Support URL: https://serpcompany.github.io/farty.fm/support/
-- Privacy Policy URL: https://serpcompany.github.io/farty.fm/privacy/
-
-Both are built from `support.md` and `privacy-policy.md` by `.github/workflows/pages.yml`.
+None now. The GitHub Pages site that served `support.md` and `privacy-policy.md` was removed on
+2026-10-22, since the iPhone app won't be resubmitted. The web app's own pages are
+https://farty.fm/support/ and https://farty.fm/privacy/.
 
 ## Review notes for Apple
 

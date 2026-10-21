@@ -27,8 +27,9 @@ These drafts describe the app as it must be at submission, not today's Release b
   `app-privacy.md`.
 - **The first App Store version number.** The build is `0.1.0` (managed by release-please); the
   owner picks the number to upload, and "What's New" isn't used for a first version.
-- **Hosted pages:** `privacy-policy.md` and `support.md` are published to
-  https://serpcompany.github.io/farty.fm/ by `.github/workflows/pages.yml` on every change to `main`.
+- **Hosted pages:** none. The GitHub Pages site that published `privacy-policy.md` and `support.md`
+  was removed on 2026-10-22, since the iPhone app won't be resubmitted. The web app has its own
+  https://farty.fm/privacy/ and https://farty.fm/support/.
 
 ## Screenshots
 
