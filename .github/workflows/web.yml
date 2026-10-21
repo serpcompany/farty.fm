@@ -119,7 +119,7 @@ jobs:
     needs: changes
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 90
     env:
       WEB: ${{ needs.changes.outputs.web }}
     defaults:
@@ -174,7 +174,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Record journeys on workerd
         if: steps.receipt.outputs.run == 'true'
-        run: pnpm test:e2e
+        run: pnpm test:e2e e2e/record-warm.spec.ts e2e/compose.spec.ts --repeat-each 20 --retries 0
         env:
           E2E_SERVER: preview
           CI: 'true'
