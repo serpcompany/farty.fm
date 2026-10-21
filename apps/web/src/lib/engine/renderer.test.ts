@@ -58,7 +58,8 @@ function storedAnalysis(g: GoldenRecording): Analysis {
     pitchEstimateMidi: g.pitch_estimate_midi,
     pitchConfidence: g.pitch_confidence,
     recordingPitchMidi: g.recording_pitch_midi,
-    shortestNoteSeconds: g.shortest_note_s
+    shortestNoteSeconds: g.shortest_note_s,
+    settleSeconds: g.settle_s
   }
 }
 

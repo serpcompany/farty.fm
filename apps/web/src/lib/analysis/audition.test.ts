@@ -6,7 +6,7 @@ import {
   goldenRecordings,
   row
 } from '../../test-support/golden'
-import { NOTE_LENGTHS, readBackCents, shortestNote } from './audition'
+import { NOTE_LENGTHS, readBackCents, settleTime, shortestNote } from './audition'
 import { midiToHz } from './numeric'
 
 const EXPECTED_MELODIC = ['013', '017', '019', '021', '059', '084', '086', '090', '094']
@@ -63,4 +63,37 @@ test('the unsnapped golden contour gives the same shortest notes', async () => {
     const shortest = shortestNote(await gestureBody(golden), f0, estimate)
     expect.soft(shortest, `${golden.id} with the 4-decimal contour`).toBe(golden.shortest_note_s)
   }
+})
+
+/** The settle time's tolerance (`fixtures/golden/README.md`): 2 pYIN frames of 256 samples. */
+const SETTLE_TOLERANCE_SECONDS = (2 * 256) / 44_100
+
+// #116: from the golden gesture, contour and Recording Pitch, the same settle time as the
+// reference's `settle_time()` for every Melodic Recording.
+test('settle times match the golden data', async () => {
+  const lines = [row('id', 'settle s', 'golden', 'Δ frames')]
+  let exact = 0
+  let melodic = 0
+  for (const golden of goldenRecordings) {
+    if (!golden.melodic) {
+      expect.soft(golden.settle_s, `${golden.id}: Noise-like`).toBeNull()
+      continue
+    }
+    melodic++
+    const settle = settleTime(
+      await gestureBody(golden),
+      goldenContourHz(golden),
+      golden.recording_pitch_midi as number
+    )
+    const expected = golden.settle_s as number
+    if (settle === expected) exact++
+    expect
+      .soft(Math.abs(settle - expected), `${golden.id}: settle time`)
+      .toBeLessThanOrEqual(SETTLE_TOLERANCE_SECONDS)
+    lines.push(
+      row(golden.id, settle.toFixed(6), expected.toFixed(6), ((settle - expected) * 44_100) / 256)
+    )
+  }
+  lines.push(`Settle time: ${exact}/${melodic} exact`)
+  console.log(lines.join('\n'))
 })

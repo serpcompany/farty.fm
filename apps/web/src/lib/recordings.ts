@@ -14,6 +14,11 @@ export type Analysis = {
   recordingPitchMidi: number | null
   /** The shortest note the Recording holds on pitch, in seconds; null when Noise-like. */
   shortestNoteSeconds: number | null
+  /**
+   * When the Recording settles on its pitch, in seconds from the gesture start; null when
+   * Noise-like. Absent from an analysis stored before #116 until `withSettleTime` adds it.
+   */
+  settleSeconds?: number | null
 }
 
 /** Saving never waits for analysis (ADR 0002), so a Recording can be saved but not analyzed. */
@@ -44,6 +49,28 @@ export function recordingPitch(recording: Recording): number | null {
   return recording.analysis.state === 'analyzed'
     ? recording.analysis.analysis.recordingPitchMidi
     : null
+}
+
+/**
+ * Whether a Melodic Recording's stored analysis predates the settle time (#116), so
+ * `withSettleTime` should add it.
+ */
+export function needsSettleTime(recording: Recording): boolean {
+  return (
+    recording.analysis.state === 'analyzed' &&
+    recording.analysis.analysis.recordingPitchMidi !== null &&
+    recording.analysis.analysis.settleSeconds === undefined
+  )
+}
+
+/**
+ * A stored analysis with the settle time from a fresh analysis of the same audio, and nothing else
+ * changed, so Pitch Coverage stays as it was. If the fresh one found another Recording Pitch, its
+ * settle time doesn't fit, and the settle time stays unknown (null), which Auto-map costs nothing.
+ */
+export function withSettleTime(stored: Analysis, fresh: Analysis): Analysis {
+  const fits = fresh.recordingPitchMidi === stored.recordingPitchMidi
+  return { ...stored, settleSeconds: fits ? (fresh.settleSeconds ?? null) : null }
 }
 
 export function firstFartUsed(recording: Recording): boolean {

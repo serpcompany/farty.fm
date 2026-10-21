@@ -10,7 +10,8 @@ export function toAnalysis(result: RecordingAnalysis): Analysis {
     pitchEstimateMidi: result.pitchEstimateMidi,
     pitchConfidence: result.pitchConfidence,
     recordingPitchMidi: result.recordingPitchMidi,
-    shortestNoteSeconds: result.shortestNoteSeconds
+    shortestNoteSeconds: result.shortestNoteSeconds,
+    settleSeconds: result.settleSeconds
   }
 }
 

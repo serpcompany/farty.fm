@@ -34,9 +34,11 @@ import * as store from '@/lib/recording-store'
 import {
   heardSomething,
   maximumTakeSeconds,
+  needsSettleTime,
   type Recording,
   recordingPitch,
-  replaySegment
+  replaySegment,
+  withSettleTime
 } from '@/lib/recordings'
 import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
 import { makeToot as renderToot } from '@/lib/toot-renderer'
@@ -216,6 +218,28 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   )
 
   /**
+   * Adds the settle time (#116) to an analysis stored before it: Recording Analysis runs again on
+   * the stored audio, and only the settle time is kept. If that fails, the stored analysis stays,
+   * and the next visit tries again.
+   */
+  const addSettleTime = useCallback(
+    async (recording: Recording) => {
+      if (recording.analysis.state !== 'analyzed') return
+      const stored = recording.analysis.analysis
+      try {
+        const { samples, sampleRate } = decodeWav(await store.loadAudio(recording.id))
+        const fresh = await analyze({ samples, sampleRate })
+        const analysis = withSettleTime(stored, fresh)
+        const updated = await store.saveAnalysis(recording.id, { state: 'analyzed', analysis })
+        if (updated) replace(updated)
+      } catch {
+        // Until then Auto-map treats the settle time as unknown.
+      }
+    },
+    [replace]
+  )
+
+  /**
    * The Result screen after analysis, with what the Recording changed in the Song Catalog's Pitch
    * Coverage: the iPhone app's `analyze()` compares the Recordings before and after it.
    */
@@ -235,10 +259,12 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     // A guest's new visit first clears the last one's Recordings and Toots (`visit.ts`).
     const library = openVisit().library
     library.then(store.loadRecordings).then(loaded => {
-      // An analysis cut off by closing the page starts again.
+      // An analysis cut off by closing the page starts again, and one stored before #116 gets
+      // its settle time.
       setRecordings(loaded)
       for (const recording of loaded) {
         if (recording.analysis.state === 'analyzing') void runAnalysis(recording.id)
+        else if (needsSettleTime(recording)) void addSettleTime(recording)
       }
     })
     library
@@ -254,7 +280,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         setTootsFailed(true)
         setToots(current => current ?? [])
       })
-  }, [runAnalysis])
+  }, [runAnalysis, addSettleTime])
 
   // What a sync changes shows at once: Recordings and Toots from the account's other browsers,
   // their renames and deletes (`library-sync.ts`).

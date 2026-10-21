@@ -1,6 +1,6 @@
 # Golden data from the reference engine
 
-The answers of the approved Python reference engine ([`tools/melody-lab/`](../../tools/melody-lab/)) for the Fixture Library and the Song Catalog. Swift port tests check themselves against these files. Everything except this README is generated; don't edit it by hand.
+The answers of the approved Python reference engine ([`tools/melody-lab/`](../../tools/melody-lab/)) for the Fixture Library and the Song Catalog. The web app's port (`apps/web/src/lib/analysis/` and `src/lib/engine/`) checks itself against these files, and so do the Swift port's tests, except the Swift Auto-map: it is frozen at format 2, before the settle cost (#116), and its tests read their own copy of that format's planner answers in [`RecordingAnalysisKit/Tests/GoldenFormat2/`](../../RecordingAnalysisKit/Tests/GoldenFormat2/). Everything except this README is generated; don't edit it by hand.
 
 Regenerate after any change to the lab, the Fixture Library or the catalog, and commit the result:
 
@@ -79,9 +79,9 @@ The contour is `analyze_recording()`'s `f0`, which a port must reproduce step by
 
 ## `coverage.json`
 
-`subsets[]`: each has `recordings` (the subset's ids) and `songs[]`, one per catalog Song: `song`, `unlocked`, `pitch_coverage`, `transpose`, `octave_moves`, `plan_cost` and `recording_for_pitch` (Song pitch as a string, to a Recording id or `null`). It's what a Swift Pitch Coverage test compares with on every subset. Arrangements aren't rendered here.
+`subsets[]`: each has `recordings` (the subset's ids) and `songs[]`, one per catalog Song: `song`, `unlocked`, `pitch_coverage`, `transpose`, `octave_moves`, `plan_cost` and `recording_for_pitch` (Song pitch as a string, to a Recording id or `null`). It's what a port's Pitch Coverage test compares with on every subset. Arrangements aren't rendered here.
 
-## Tolerances for Swift tests
+## Tolerances for port tests
 
 Test each stage on the golden outputs of the stage before it, so that one port's small differences don't fail the next port's test.
 
