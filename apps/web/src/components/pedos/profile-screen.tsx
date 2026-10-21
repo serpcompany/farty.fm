@@ -161,10 +161,10 @@ const row =
 
 /**
  * Signed out: Save to an account, which opens the account step, and what a guest loses. Signed
- * in: the email, Pedos news, Sign out and Delete account.
+ * in: the email, Pedos news, Sign out and Delete account. A session that ended: Sign in again.
  */
 function AccountSection() {
-  const { account, openStep, signOut, deleteAccount, setMarketingEmail } = useAccount()
+  const { account, openStep, retry, signOut, deleteAccount, setMarketingEmail } = useAccount()
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   const [confirmsDelete, setConfirmsDelete] = useState(false)
@@ -188,24 +188,35 @@ function AccountSection() {
   }
   if (account.status === 'unreachable') {
     return (
-      <p className="rounded-xl bg-muted/60 px-4 py-3 text-muted-foreground">
-        Can't reach your account right now.
-      </p>
+      <ul className={list}>
+        <li className="flex min-h-11 items-center justify-between gap-4 py-0 pl-4">
+          <span className="text-muted-foreground">Can't reach your account right now.</span>
+          <button
+            type="button"
+            className="min-h-11 shrink-0 px-4 font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
+            onClick={retry}
+          >
+            Retry
+          </button>
+        </li>
+      </ul>
     )
   }
-  if (account.status === 'signedOut') {
+  if (account.status === 'signedOut' || account.status === 'expired') {
     return (
       <>
         <ul className={list}>
           <li>
             <button type="button" className={row} onClick={openStep}>
-              Save to an account
+              {account.status === 'expired' ? 'Sign in again' : 'Save to an account'}
               <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
             </button>
           </li>
         </ul>
         <p className="px-4 pt-1.5 text-xs text-muted-foreground">
-          Without an account, your farts are gone when you close Pedos.
+          {account.status === 'expired'
+            ? 'Your session ended. Your farts stay on this device until you sign in.'
+            : 'Without an account, your farts are gone when you close Pedos.'}
         </p>
       </>
     )

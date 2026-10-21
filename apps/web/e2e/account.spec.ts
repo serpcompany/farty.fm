@@ -21,6 +21,8 @@ test("a guest's first Result offers the account step, and Not now goes where the
 
   const step = page.getByRole('dialog', { name: 'Keep your farts' })
   await expect(step).toBeVisible()
+  // Focus moves into the step, so a screen reader says it opened.
+  await expect(step.getByRole('heading', { name: 'Keep your farts' })).toBeFocused()
   await expect(step).toContainText(
     'Make a free account to keep your Recordings and Toots on any device.'
   )
@@ -184,6 +186,8 @@ test("Profile's account: the email, Pedos news, and Sign out, which leaves nothi
   await expect(page.getByTestId('stat-recordings')).toHaveText('Recordings0')
   expect(await session(page)).toBeNull()
   expect(await recordingsStored(page)).toBe(0)
+  // A guest's browser again: the next visit clears what a guest saves.
+  expect(await page.evaluate(() => localStorage.getItem('pedos.account'))).toBeNull()
 })
 
 test('Delete account asks first, then deletes the account and leaves nothing here', async ({
@@ -239,6 +243,8 @@ test("Profile's Save to an account opens the step, which stays while they read t
   await step.getByRole('button', { name: 'Not now' }).click()
   await expect(step).toBeHidden()
   await expect(page).toHaveURL(/\/profile\/$/)
+  // Focus goes back to the button that opened it.
+  await expect(save).toBeFocused()
 })
 
 test("a guest's Recording lasts the visit: through a reload and another tab, then it's gone", async ({
@@ -335,6 +341,89 @@ test("a Recording saved while Pedos still reads the session isn't cleared with t
   answer()
   await expect(visit.getByTestId('result-note')).toHaveText('G3')
   expect(await recordingsStored(visit)).toBe(1)
+})
+
+test("an account's farts stay when its session ends, and Pedos asks to sign in again", async ({
+  page,
+  context
+}, testInfo) => {
+  test.setTimeout(120_000)
+  const email = newEmail(testInfo, 'expired')
+  // A guest's first open, then sign-in: the next visit would clear a guest's farts.
+  await recordAndSave(page, 1.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+  await signInByApi(page, email)
+  await page.reload()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+
+  // The session ends (7 days without an open, or the cookie goes), and Pedos opens again.
+  await context.clearCookies()
+  const reopened = await reopen(context, page)
+  const step = reopened.getByRole('dialog', { name: 'Sign in again' })
+  await expect(step).toBeVisible()
+  await expect(step).toContainText('Your farts stay on this device until you sign in.')
+  await expect(step.getByTestId('account-step-guest')).toHaveCount(0)
+  await step.getByRole('button', { name: 'Not now' }).click()
+  await expect(reopened.getByTestId('recording-row')).toHaveCount(1)
+  expect(await recordingsStored(reopened)).toBe(1)
+
+  // Asked once a visit; Profile asks too.
+  await reopened.goto('/profile/')
+  const again = reopened.getByRole('button', { name: 'Sign in again' })
+  await expectTappable(again)
+  await expect(step).toBeHidden()
+})
+
+test("Profile retries an account it couldn't reach, and reads it again back online", async ({
+  page
+}) => {
+  await page.addInitScript(skipWelcome)
+  await page.route('**/api/auth/get-session*', route => route.abort('internetdisconnected'))
+  await page.goto('/profile/')
+  await expect(page.getByText("Can't reach your account right now.")).toBeVisible()
+  const retry = page.getByRole('button', { name: 'Retry' })
+  await expectTappable(retry)
+
+  await page.unrouteAll()
+  await retry.click()
+  const save = page.getByRole('button', { name: 'Save to an account' })
+  await expect(save).toBeVisible()
+
+  await page.route('**/api/auth/get-session*', route => route.abort('internetdisconnected'))
+  await page.reload()
+  await expect(retry).toBeVisible()
+  await page.unrouteAll()
+  await page.evaluate(() => window.dispatchEvent(new Event('online')))
+  await expect(save).toBeVisible()
+})
+
+test('a reload while they read their email comes back to the code, which still signs in', async ({
+  page
+}, testInfo) => {
+  test.setTimeout(120_000)
+  const email = newEmail(testInfo, 'reload')
+  await ownClient(page.context())
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await page.getByRole('button', { name: 'Save to an account' }).click()
+  const step = page.getByRole('dialog', { name: 'Keep your farts' })
+  await step.getByLabel('Email').fill(email)
+  await step.getByRole('button', { name: 'Send code' }).click()
+  await expect(step.getByLabel('Code')).toBeFocused()
+
+  // The phone drops the tab while Mail is open; coming back reloads Pedos.
+  await page.reload()
+  await expect(step).toContainText(`We sent a 6-digit code to ${email}.`)
+  await expect(step.getByLabel('Code')).toBeFocused()
+  await step.getByLabel('Code').fill(await codeFor(page, email))
+  await step.getByRole('button', { name: 'Sign in' }).click()
+  await expect(step).toBeHidden()
+  await expect(page.getByTestId('account-email')).toHaveText(email)
+  // Closed, the step stays closed through the next reload.
+  await page.reload()
+  await expect(page.getByTestId('account-email')).toHaveText(email)
+  await expect(step).toBeHidden()
 })
 
 /** Closes Pedos's last tab, and opens Pedos again on Recordings. */

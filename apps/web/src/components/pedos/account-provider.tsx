@@ -10,7 +10,17 @@ import {
   useState
 } from 'react'
 import * as api from '@/lib/account'
-import { type Account, type StepMoment, stopStepOffers, takeStepOffer } from '@/lib/account'
+import {
+  type Account,
+  clearStepDraft,
+  forgetAccount,
+  readSession,
+  readStepDraft,
+  type StepMoment,
+  stopStepOffers,
+  takeSignInAgain,
+  takeStepOffer
+} from '@/lib/account'
 import { keepRecordings } from '@/lib/install'
 import { clearLibrary } from '@/lib/recording-store'
 import { openVisit } from '@/lib/visit'
@@ -24,8 +34,10 @@ type AccountContext = {
    * `then`, which goes where the person tapped. Signed in, or once it's been offered, just `then`.
    */
   offerStep(moment: StepMoment, then?: () => void): void
-  /** Profile's Save to an account. */
+  /** Profile's Save to an account, or Sign in again. */
   openStep(): void
+  /** Reads the session again, as Profile's Retry. It never clears anything. */
+  retry(): void
   /** Not now: closes the step and carries on. */
   skipStep(): void
   /** The step signed in: closes it and carries on. */
@@ -52,6 +64,7 @@ export function useAccount(): AccountContext {
  */
 async function leave(): Promise<void> {
   // #156 waits for the outbox to upload here first (the plan's §2).
+  forgetAccount()
   await clearLibrary().catch(() => {})
   window.location.replace('/profile/')
 }
@@ -66,24 +79,47 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let current = true
     openVisit().account.then(read => {
-      if (current) setAccount(read)
+      if (!current) return
+      setAccount(read)
+      if (read.status === 'signedIn') return
+      // A reload while the step was open (a phone dropping the tab during Mail) comes back to it,
+      // and a browser whose session ended is asked to sign in again, once a visit.
+      if (readStepDraft() || (read.status === 'expired' && takeSignInAgain())) setStepOpen(true)
     })
     return () => {
       current = false
     }
   }, [])
 
+  const retry = useCallback(() => {
+    setAccount({ status: 'checking' })
+    void readSession().then(setAccount)
+  }, [])
+
+  // Back online, an account that couldn't be read is read again.
+  useEffect(() => {
+    if (account.status !== 'unreachable') return
+    window.addEventListener('online', retry)
+    return () => window.removeEventListener('online', retry)
+  }, [account.status, retry])
+
+  /** Opens the step afresh, at the email. */
+  const show = useCallback((next: (() => void) | null) => {
+    clearStepDraft()
+    then.current = next
+    setStepOpen(true)
+  }, [])
+
   const offerStep = useCallback(
     (moment: StepMoment, next?: () => void) => {
-      if (account.status === 'signedOut' && takeStepOffer(moment)) {
-        then.current = next ?? null
-        setStepOpen(true)
-      } else next?.()
+      if (account.status === 'signedOut' && takeStepOffer(moment)) show(next ?? null)
+      else next?.()
     },
-    [account.status]
+    [account.status, show]
   )
 
   const close = useCallback(() => {
+    clearStepDraft()
     setStepOpen(false)
     const next = then.current
     then.current = null
@@ -127,10 +163,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     account,
     stepOpen,
     offerStep,
-    openStep: () => {
-      then.current = null
-      setStepOpen(true)
-    },
+    openStep: () => show(null),
+    retry,
     skipStep: close,
     finishSignIn,
     signOut,

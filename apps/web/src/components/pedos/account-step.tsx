@@ -4,7 +4,7 @@ import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { type SignInProblem, sendCode, signIn } from '@/lib/account'
+import { readStepDraft, type SignInProblem, saveStepDraft, sendCode, signIn } from '@/lib/account'
 import { useAccount } from './account-provider'
 
 const messages: Record<SignInProblem, string> = {
@@ -18,26 +18,46 @@ const messages: Record<SignInProblem, string> = {
 
 /**
  * The account step (#155, the plan's §1), full screen over everything: an email, then the 6-digit
- * code sent to it, which signs in or makes the account. Not now says what a guest loses.
+ * code sent to it, which signs in or makes the account. Not now says what a guest loses. A browser
+ * whose session ended (`expired`) is asked to sign in again, and loses nothing.
  */
 export function AccountStep() {
   const { stepOpen } = useAccount()
-  // Mounted afresh each time it opens, so it starts at the email.
+  // Mounted afresh each time it opens, so it starts at the email, or where a reload left it.
   return stepOpen ? <Step /> : null
 }
 
 function Step() {
-  const { skipStep, finishSignIn } = useAccount()
-  const [phase, setPhase] = useState<'email' | 'code'>('email')
-  const [email, setEmail] = useState('')
+  const { account, skipStep, finishSignIn } = useAccount()
+  const again = account.status === 'expired'
+  const [draft] = useState(readStepDraft)
+  const [phase, setPhase] = useState(draft?.phase ?? 'email')
+  const [email, setEmail] = useState(draft?.email ?? '')
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<SignInProblem | null>(null)
+  const heading = useRef<HTMLHeadingElement>(null)
+  const emailField = useRef<HTMLInputElement>(null)
   const codeField = useRef<HTMLInputElement>(null)
+  const focusedPhase = useRef<string | null>(null)
 
+  // Focus goes back where it was, such as the Result's button, once the step closes.
+  useEffect(() => {
+    const opener = document.activeElement
+    return () => {
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus()
+    }
+  }, [])
+
+  // Opening moves focus into the step, so a screen reader announces it; a new phase, to its field.
   useEffect(() => {
     if (phase === 'code') codeField.current?.focus()
+    else if (focusedPhase.current === 'code') emailField.current?.focus()
+    else heading.current?.focus()
+    focusedPhase.current = phase
   }, [phase])
+
+  useEffect(() => saveStepDraft({ phase, email }), [phase, email])
 
   const send = async (event: FormEvent) => {
     event.preventDefault()
@@ -78,11 +98,18 @@ function Step() {
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5">
         <div className="flex flex-1 flex-col justify-center gap-6 py-6">
           <div className="space-y-2 text-center">
-            <h1 id="account-step-title" className="text-3xl font-bold tracking-tight">
-              Keep your farts
+            <h1
+              ref={heading}
+              id="account-step-title"
+              tabIndex={-1}
+              className="text-3xl font-bold tracking-tight outline-none"
+            >
+              {again ? 'Sign in again' : 'Keep your farts'}
             </h1>
             <p className="text-muted-foreground">
-              Make a free account to keep your Recordings and Toots on any device.
+              {again
+                ? 'Your session ended. Your farts stay on this device until you sign in.'
+                : 'Make a free account to keep your Recordings and Toots on any device.'}
             </p>
           </div>
 
@@ -92,6 +119,7 @@ function Step() {
                 Email
               </label>
               <Input
+                ref={emailField}
                 id="account-email"
                 type="email"
                 autoComplete="email"
@@ -160,9 +188,14 @@ function Step() {
         </div>
 
         <div className="grid gap-2 pb-3">
-          <p className="text-center text-sm text-muted-foreground" data-testid="account-step-guest">
-            Without an account, your farts are gone when you close Pedos.
-          </p>
+          {!again && (
+            <p
+              className="text-center text-sm text-muted-foreground"
+              data-testid="account-step-guest"
+            >
+              Without an account, your farts are gone when you close Pedos.
+            </p>
+          )}
           <Button variant="secondary" className="h-12 text-base" onClick={skipStep}>
             Not now
           </Button>

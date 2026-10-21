@@ -5,13 +5,14 @@ import { clearLibrary } from './recording-store'
 // and Toots last until Pedos closes: they survive a reload in the same tab, and the next open
 // clears them before anything shows. IndexedDB stays the working copy, since sessionStorage is too
 // small for audio; a sessionStorage flag says this tab's visit has started. Signed in, the
-// browser's copy is the account's, and stays.
+// browser's copy is the account's, and stays, also once the session has ended (`expired`).
 
 /** sessionStorage: this tab's visit has started, so opening again is a reload. */
 const visitKey = 'pedos.visit'
 /**
- * localStorage: Pedos has opened in this browser since guests keep nothing. Before that, what a
- * browser holds counts as this visit's (#150): the next visit clears it.
+ * localStorage: a guest's visit has opened in this browser since guests keep nothing, with the
+ * session read as signed out. Before that, what a browser holds counts as this visit's (#150): the
+ * next visit clears it.
  */
 const openedKey = 'pedos.opened'
 /** A Web Lock each open Pedos tab holds, so a new tab doesn't clear another tab's visit. */
@@ -28,7 +29,8 @@ export type OpenFacts = {
 
 /**
  * Whether a new visit clears this browser's Recordings and Toots: a guest's. Only a session that
- * reads as signed out clears: offline, or with sign-in unreachable, nothing does.
+ * reads as signed out clears: offline, with sign-in unreachable, or `expired` (a browser that was
+ * signed in), nothing does.
  */
 export function clearsOnOpen(facts: OpenFacts): boolean {
   return facts.account.status === 'signedOut' && !facts.firstOpen && !facts.otherTabOpen
@@ -59,11 +61,13 @@ async function startVisit(account: Promise<Account>): Promise<void> {
       otherTabOpen: await anotherTabOpen()
     }
     if (clearsOnOpen(facts)) await clearLibrary()
+    // The first open's grace is spent only on an open that reads as a guest's, where the step and
+    // Profile say farts go at the end of the visit. Offline or unreachable, it waits for the next.
+    if (facts.account.status === 'signedOut') setFlag(() => localStorage, openedKey)
     setFlag(() => sessionStorage, visitKey)
   } catch {
     // A clear that failed leaves the last visit's farts. Pedos still opens.
   } finally {
-    setFlag(() => localStorage, openedKey)
     holdOpen()
   }
 }

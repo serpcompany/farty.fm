@@ -8,6 +8,11 @@ export type Account =
   | { status: 'checking' }
   | { status: 'signedOut' }
   | { status: 'signedIn'; email: string; marketingEmail: boolean }
+  /**
+   * Signed out, in a browser that was signed in: the session ended (it lasts 7 days without an
+   * open) or its cookie went. This browser's copy is still the account's, so it stays.
+   */
+  | { status: 'expired' }
   /** The session couldn't be read: offline, or sign-in isn't set up here. */
   | { status: 'unreachable' }
 
@@ -27,19 +32,59 @@ const SESSION_TIMEOUT_MS = 5000
 
 /**
  * Reads the session. Each read also renews a session's cookie for another 7 days, once a day, so
- * Pedos calls it on every open (#155).
+ * Pedos calls it on every open (#155). Signed out in a browser that was signed in reads `expired`.
  */
 export async function readSession(): Promise<Account> {
+  // Not `AbortSignal.timeout`: a timer the tests can run.
+  const timeout = new AbortController()
+  const timer = setTimeout(() => timeout.abort(), SESSION_TIMEOUT_MS)
   try {
     const response = await fetch('/api/auth/get-session', {
       cache: 'no-store',
-      signal: AbortSignal.timeout(SESSION_TIMEOUT_MS)
+      signal: timeout.signal
     })
     if (!response.ok) return { status: 'unreachable' }
     const body = (await response.json()) as { user?: User } | null
-    return body?.user ? signedIn(body.user) : { status: 'signedOut' }
+    if (body?.user) {
+      rememberAccount()
+      return signedIn(body.user)
+    }
+    return hadAccount() ? { status: 'expired' } : { status: 'signedOut' }
   } catch {
     return { status: 'unreachable' }
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+/**
+ * localStorage: this browser has been signed in, so its Recordings and Toots are an account's.
+ * Set on sign-in, removed on Sign out and Delete account. Without it, signed out is a guest.
+ */
+const accountKey = 'pedos.account'
+
+function rememberAccount(): void {
+  try {
+    localStorage.setItem(accountKey, '1')
+  } catch {
+    // Nothing to remember it in. With localStorage blocked, a guest's farts aren't cleared either.
+  }
+}
+
+function hadAccount(): boolean {
+  try {
+    return localStorage.getItem(accountKey) !== null
+  } catch {
+    return false
+  }
+}
+
+/** Signed out or deleted: this browser is a guest's again. */
+export function forgetAccount(): void {
+  try {
+    localStorage.removeItem(accountKey)
+  } catch {
+    // Nothing was remembered.
   }
 }
 
@@ -106,6 +151,7 @@ export async function signIn(email: string, code: string): Promise<Result<Accoun
     const response = await post('/api/auth/sign-in/email-otp', { email: email.trim(), otp: code })
     if (!response.ok) return { ok: false, problem: await problemOf(response) }
     const body = (await response.json()) as { user?: User }
+    rememberAccount()
     return { ok: true, value: signedIn(body.user ?? { email }) }
   } catch {
     return { ok: false, problem: 'failed' }
@@ -187,5 +233,56 @@ export function stopStepOffers(): void {
     localStorage.setItem(stepKey, 'done')
   } catch {
     // Nothing to remember it in. Signed in, the step doesn't offer itself anyway.
+  }
+}
+
+/** The account step, open in this tab: where it was, so a reload comes back to it. */
+export type StepDraft = { phase: 'email' | 'code'; email: string }
+
+/**
+ * sessionStorage: the open step's draft. A phone often drops the tab while the person reads the
+ * code in Mail; coming back reloads Pedos, which opens the step where it was.
+ */
+const draftKey = 'pedos.accountStep.draft'
+
+export function readStepDraft(): StepDraft | null {
+  try {
+    const draft = JSON.parse(
+      sessionStorage.getItem(draftKey) ?? 'null'
+    ) as Partial<StepDraft> | null
+    if (!draft || (draft.phase !== 'email' && draft.phase !== 'code')) return null
+    return { phase: draft.phase, email: String(draft.email ?? '') }
+  } catch {
+    return null
+  }
+}
+
+export function saveStepDraft(draft: StepDraft): void {
+  try {
+    sessionStorage.setItem(draftKey, JSON.stringify(draft))
+  } catch {
+    // Nothing to keep it in: a reload starts the step afresh, from Profile.
+  }
+}
+
+export function clearStepDraft(): void {
+  try {
+    sessionStorage.removeItem(draftKey)
+  } catch {
+    // Nothing was kept.
+  }
+}
+
+/** sessionStorage: this tab has asked an `expired` browser to sign in again. */
+const signInAgainKey = 'pedos.signInAgain'
+
+/** Whether to ask an `expired` browser to sign in again: once a visit, remembering it did. */
+export function takeSignInAgain(): boolean {
+  try {
+    if (sessionStorage.getItem(signInAgainKey) !== null) return false
+    sessionStorage.setItem(signInAgainKey, '1')
+    return true
+  } catch {
+    return false
   }
 }
