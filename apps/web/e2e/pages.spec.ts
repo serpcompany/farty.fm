@@ -17,6 +17,7 @@ test('the privacy page covers accounts, news email, guests, error reports, page 
   await expect(page.getByRole('heading', { name: 'Page views' })).toBeVisible()
   await expect(page.getByText('counts page views on every page of Pedos')).toBeVisible()
   await expect(page.getByText("don't stop it: they stop error reports")).toBeVisible()
+  await expect(page.getByText('a sampled summary for 6 months')).toBeVisible()
   await expect(page.getByText('never includes your farts, their names, your email')).toBeVisible()
   await expect(page.getByText('turn off Share anonymous error reports on Profile')).toBeVisible()
   await expect(page.getByText('keeps your IP address, browser and rough location')).toBeVisible()

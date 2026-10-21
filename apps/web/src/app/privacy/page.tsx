@@ -54,9 +54,11 @@ export default function PrivacyPage() {
 
       <h2>Page views</h2>
       <p>
-        Cloudflare Web Analytics counts page views on every page of Pedos, without cookies or
-        anything that identifies a person. The switch and Global Privacy Control don&apos;t stop it:
-        they stop error reports.
+        Cloudflare Web Analytics counts page views on every page of Pedos: the page, the site you
+        came from, your browser and device type, your country and how fast the page loaded. It uses
+        no cookies and doesn&apos;t include your account, name or email. Cloudflare keeps the full
+        records for 7 days and a sampled summary for 6 months. The switch and Global Privacy Control
+        don&apos;t stop it: they stop error reports.
       </p>
 
       <h2>What Pedos doesn&apos;t do</h2>

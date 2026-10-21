@@ -26,16 +26,7 @@ export default defineConfig({
         test: {
           name: 'happy-dom',
           include: [interactionTests],
-          environment: 'happy-dom',
-          // A test that adds a third-party <script> never fetches it.
-          environmentOptions: {
-            happyDOM: {
-              settings: {
-                disableJavaScriptFileLoading: true,
-                handleDisabledFileLoadingAsSuccess: true
-              }
-            }
-          }
+          environment: 'happy-dom'
         }
       },
       {
