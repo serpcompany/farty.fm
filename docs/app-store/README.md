@@ -28,7 +28,7 @@ These drafts describe the app as it must be at submission, not today's Release b
 - **The first App Store version number.** The build is `0.1.0` (managed by release-please); the
   owner picks the number to upload, and "What's New" isn't used for a first version.
 - **Hosted pages:** `privacy-policy.md` and `support.md` are published to
-  https://serpcompany.github.io/pedos-app/ by `.github/workflows/pages.yml` on every change to `main`.
+  https://serpcompany.github.io/farty.fm/ by `.github/workflows/pages.yml` on every change to `main`.
 
 ## Screenshots
 

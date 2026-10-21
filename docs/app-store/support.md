@@ -42,4 +42,4 @@ backups turned on. We never receive them, so we can't recover them. Deleting the
 Every song comes from a public-domain score in the PDMX dataset.
 
 **Does Pedos collect my data?**
-No. See the [privacy policy](https://serpcompany.github.io/pedos-app/privacy/).
+No. See the [privacy policy](https://serpcompany.github.io/farty.fm/privacy/).

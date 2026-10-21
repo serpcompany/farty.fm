@@ -2,7 +2,7 @@
 """Builds the public privacy and support pages from privacy-policy.md and support.md.
 
 Run by .github/workflows/pages.yml, which publishes the output to
-https://serpcompany.github.io/pedos-app/. Usage: build-site.py <output folder>
+https://serpcompany.github.io/farty.fm/. Usage: build-site.py <output folder>
 """
 import pathlib
 import shutil
