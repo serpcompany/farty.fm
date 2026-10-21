@@ -68,6 +68,21 @@ export function tootPlayback(tootId: string, note?: number): string {
   return note === undefined ? `toot:${tootId}` : `toot:${tootId}:note:${note}`
 }
 
+/**
+ * What Profile counts, from what's in this browser. As the iPhone app's `ProfileStats`; unlocked
+ * Songs follow Compose's Pitch Coverage.
+ */
+export type ProfileStats = {
+  recordings: number
+  melodicRecordings: number
+  /** The distinct notes the Melodic Recordings sound, octave included, as on Recordings. */
+  notesCollected: number
+  unlockedSongs: number
+  /** Every Song in the Song Catalog this build ships. */
+  songs: number
+  toots: number
+}
+
 type Pedos = {
   recordings: Recording[] | null
   recording(id: string): Recording | undefined
@@ -105,6 +120,8 @@ type Pedos = {
   importRecordings(files: { id: string; wav: ArrayBuffer }[]): Promise<void>
   /** Saved Toots, newest first; null until they load. */
   toots: Toot[] | null
+  /** The saved Toots didn't load: `toots` is only those saved since. */
+  tootsFailed: boolean
   toot(id: string): Toot | undefined
   /**
    * Makes the Toot of an Unlocked Song in the render worker: Song Creator. Throws a `TootError`.
@@ -112,14 +129,26 @@ type Pedos = {
   makeToot(song: Song): Promise<TootDraft>
   /** Keeps a made Toot, once: saving it again does nothing. */
   saveToot(draft: TootDraft): Promise<void>
-  /** Plays or stops the whole Toot, or just its `note`th note as rendered. */
-  toggleTootPlayback(draft: TootDraft, note?: number): void
-  /** Lets go of a Toot's decoded audio, when its screen closes. */
+  /**
+   * Plays or stops the whole Toot, or just its `note`th note as rendered: a made Toot from its
+   * draft's audio, a saved one from the store. A saved Toot whose audio is gone is marked
+   * `isAudioMissing`; one whose audio couldn't be read this time is `tootPlayFailed`.
+   */
+  toggleTootPlayback(toot: TootDraft | Toot, note?: number): void
+  /** The saved Toot whose audio couldn't be read on its last play, until the next play. */
+  tootPlayFailed: string | null
+  /** Gives a Toot a new title, trimmed. An empty title changes nothing. */
+  renameToot(id: string, title: string): void
+  /** Deletes a Toot and its audio, and stops it if it's playing. */
+  deleteToot(id: string): void
+  /** Lets go of a Toot's decoded audio, and its failed play, when its screen closes. */
   forgetToot(id: string): void
   /** When what's playing started (`performance.now()`), once it has; null otherwise. */
   playbackStartedAt: number | null
   /** The database waits for Pedos in another tab, on an older version, to close. */
   waitsForOtherTabs: boolean
+  /** Profile's counts; null until the Recordings and Toots load. */
+  profileStats: ProfileStats | null
 }
 
 const PedosContext = createContext<Pedos | null>(null)
@@ -142,6 +171,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [toots, setToots] = useState<Toot[] | null>(null)
+  const [tootsFailed, setTootsFailed] = useState(false)
+  const [tootPlayFailed, setTootPlayFailed] = useState<string | null>(null)
   const [playbackStart, setPlaybackStart] = useState<{ key: string; at: number } | null>(null)
   const [waitsForOtherTabs, setWaitsForOtherTabs] = useState(false)
   const savingToots = useRef(new Set<string>())
@@ -210,7 +241,10 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           ...saved
         ])
       )
-      .catch(() => setToots(current => current ?? []))
+      .catch(() => {
+        setTootsFailed(true)
+        setToots(current => current ?? [])
+      })
   }, [runAnalysis])
 
   const finishWelcome = useCallback(() => {
@@ -399,13 +433,22 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     [toots]
   )
 
+  const markAudioMissing = useCallback((id: string) => {
+    setToots(list => list?.map(t => (t.id === id ? { ...t, isAudioMissing: true } : t)) ?? null)
+  }, [])
+
   const toggleTootPlayback = useCallback(
-    (draft: TootDraft, note?: number) => {
-      const key = tootPlayback(draft.id, note)
+    (toot: TootDraft | Toot, note?: number) => {
+      const key = tootPlayback(toot.id, note)
+      setTootPlayFailed(null)
       if (nowPlaying === key) {
         stopPlayback()
         return
       }
+      const song = 'song' in toot ? toot.song : songs.find(s => s.id === toot.songId)
+      // A note needs its Song, to find it in the audio.
+      if (note !== undefined && !song) return
+      const written = note === undefined || !song ? null : noteSeconds(song, song.notes[note])
       const ended = () => setNowPlaying(current => (current === key ? null : current))
       setNowPlaying(key)
       // The playhead waits for this play to start, not an earlier one of the same Toot.
@@ -413,18 +456,50 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       tootPlays.current += 1
       const thisPlay = tootPlays.current
       // A note plays as written, from the Toot's own audio: `Song.seconds(of:)` on the iPhone.
-      const written = note === undefined ? null : noteSeconds(draft.song, draft.song.notes[note])
       const segment = written && { start: written.start, end: written.start + written.length }
-      // The whole Toot and its notes share one decode. Decoding takes the buffer it's given, so it
-      // gets a copy, and the draft keeps its audio to save.
-      void play(`toot-${draft.id}`, async () => draft.wav.slice(0), segment, ended).then(() => {
+      // The whole Toot and its notes share one decode. Decoding takes the buffer it's given, so a
+      // draft's gets a copy, and the draft keeps its audio to save.
+      const audio =
+        'wav' in toot
+          ? async () => toot.wav.slice(0)
+          : () =>
+              tootStore.loadTootAudio(toot.id).catch(error => {
+                // Only audio that's gone offers Delete. Any other error may pass: try again.
+                if (error instanceof tootStore.TootAudioMissing) markAudioMissing(toot.id)
+                else setTootPlayFailed(toot.id)
+                throw error
+              })
+      void play(`toot-${toot.id}`, audio, segment, ended).then(() => {
         if (thisPlay === tootPlays.current) setPlaybackStart({ key, at: performance.now() })
       })
+    },
+    [nowPlaying, markAudioMissing]
+  )
+
+  // As the iPhone app's `renameToot`: the list changes at once, and a failed write is let go.
+  const renameToot = useCallback((id: string, title: string) => {
+    const trimmed = title.trim()
+    if (!trimmed) return
+    setToots(list => list?.map(t => (t.id === id ? { ...t, title: trimmed } : t)) ?? null)
+    tootStore.renameToot(id, trimmed).catch(() => {})
+  }, [])
+
+  // As the iPhone app's `deleteToot`.
+  const deleteToot = useCallback(
+    (id: string) => {
+      const key = tootPlayback(id)
+      if (nowPlaying === key || nowPlaying?.startsWith(`${key}:`)) stopPlayback()
+      setToots(list => list?.filter(t => t.id !== id) ?? null)
+      forgetDecoded(`toot-${id}`)
+      tootStore.deleteToot(id).catch(() => {})
     },
     [nowPlaying]
   )
 
-  const forgetToot = useCallback((id: string) => forgetDecoded(`toot-${id}`), [])
+  const forgetToot = useCallback((id: string) => {
+    forgetDecoded(`toot-${id}`)
+    setTootPlayFailed(current => (current === id ? null : current))
+  }, [])
 
   const melodicRecordings = (recordings ?? []).filter(r => recordingPitch(r) !== null)
   const collectedNotes = new Set(
@@ -439,6 +514,18 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const key = coverageKey(recordings ?? [])
   // biome-ignore lint/correctness/useExhaustiveDependencies: `key` stands for `recordings`.
   const rows = useMemo(() => songRows(songs, recordings ?? []), [key])
+
+  const profileStats: ProfileStats | null =
+    recordings === null || toots === null
+      ? null
+      : {
+          recordings: recordings.length,
+          melodicRecordings: melodicRecordings.length,
+          notesCollected: collectedNotes.size,
+          unlockedSongs: rows.filter(row => row.coverage.unlocked).length,
+          songs: songs.length,
+          toots: toots.length
+        }
 
   const value: Pedos = {
     recordings,
@@ -467,14 +554,19 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     deleteRecording,
     importRecordings,
     toots,
+    tootsFailed,
     toot: id => toots?.find(t => t.id === id),
     makeToot,
     saveToot,
     toggleTootPlayback,
+    tootPlayFailed,
+    renameToot,
+    deleteToot,
     forgetToot,
     playbackStartedAt:
       playbackStart !== null && playbackStart.key === nowPlaying ? playbackStart.at : null,
-    waitsForOtherTabs
+    waitsForOtherTabs,
+    profileStats
   }
   return <PedosContext value={value}>{children}</PedosContext>
 }
