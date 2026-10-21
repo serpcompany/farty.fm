@@ -1,193 +1,29 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { expect, type Page, test } from '@playwright/test'
+import {
+  type FakeMicrophone,
+  fakeMicrophone,
+  fartAndRecord,
+  fixtureWavs,
+  getUserMediaMs,
+  microphone,
+  waitForOpenMicrophone
+} from './fake-microphone'
 import { skipWelcome } from './record'
 
 // The microphone stays open on the Record screen, so a tap captures at once and a take keeps the
-// 300 ms before it (#148, #149). getUserMedia is slowed to 800 ms here, about what an iPhone
-// takes, so a tap that waited for it would show.
-
-/**
- * The farts the microphone can play, by fixture id. 090 is Melodic, with golden Recording Pitch
- * G3. With 084, 086 (both G♯3) and 094 (B3) it unlocks Mary Had a Little Lamb (see compose.spec).
- */
-const fixtures: Record<string, string> = {
-  '090': '090__carlosramon__17-pet__186119.wav',
-  '084': '084__walter-odington__grim-fart__26216.wav',
-  '086': '086__walter-odington__little-parp__26793.wav',
-  '094': '094__manicciola__fart__121783.wav'
-}
-/** How long each take records after the press, in ms: about a second longer than its fart. */
-const takeMs: Record<string, number> = { '090': 1500, '084': 3500, '086': 1500, '094': 5750 }
-const getUserMediaMs = 800
-/** How long the person holds the button: they start to fart as they press, and click on release. */
-const pressMs = 150
-
-type FakeMicrophone = {
-  /** getUserMedia calls, and the tracks they gave out. */
-  calls: number
-  tracks: MediaStreamTrack[]
-  /** When each Record click and each capture batch happened (`performance.now()`). */
-  clicks: number[]
-  batches: number[]
-  /** The fixture id the next press on Record plays into the microphone. */
-  fartOnPress: string | null
-  /** The last fart's energy (sum of squares) as the microphone played it. */
-  fartEnergy: number
-  /** Capture worklet nodes made, and how many were told to close. */
-  nodes: number
-  closed: number
-  /** Each audio session type the app set, in order (a stand-in for Safari's `audioSession`). */
-  sessions: string[]
-}
-
-const microphone = (page: Page) =>
-  page.evaluate(() => {
-    const mic = (window as unknown as { pedosMic: FakeMicrophone }).pedosMic
-    return {
-      calls: mic.calls,
-      opened: mic.tracks.length,
-      live: mic.tracks.filter(track => track.readyState === 'live').length,
-      clicks: mic.clicks,
-      batches: mic.batches,
-      fartEnergy: mic.fartEnergy,
-      nodes: mic.nodes,
-      closed: mic.closed,
-      sessions: mic.sessions
-    }
-  })
-
-/**
- * Replaces the microphone with one that answers after `delayMs` and plays a fixture when the
- * person presses Record. It also times each Record click and each batch from the capture worklet,
- * counts the worklet nodes and their closing, and records the audio session the app sets.
- */
-function fakeMicrophone({ wavs, delayMs }: { wavs: Record<string, string>; delayMs: number }) {
-  const mic: FakeMicrophone = {
-    calls: 0,
-    tracks: [],
-    clicks: [],
-    batches: [],
-    fartOnPress: null,
-    fartEnergy: 0,
-    nodes: 0,
-    closed: 0,
-    sessions: []
-  }
-  const page = window as unknown as { pedosMic: FakeMicrophone; pedosMediaDevices: MediaDevices }
-  page.pedosMic = mic
-  // WebKit's garbage collector drops a `navigator.mediaDevices` wrapper nothing holds, and the
-  // replaced getUserMedia with it. Holding it keeps the fake.
-  page.pedosMediaDevices = navigator.mediaDevices
-  let context: AudioContext | null = null
-  let output: MediaStreamAudioDestinationNode | null = null
-  const farts: Record<string, AudioBuffer> = {}
-
-  let sessionType = 'auto'
-  Object.defineProperty(navigator, 'audioSession', {
-    configurable: true,
-    value: {
-      get type() {
-        return sessionType
-      },
-      set type(type: string) {
-        sessionType = type
-        mic.sessions.push(type)
-      }
-    }
-  })
-
-  navigator.mediaDevices.getUserMedia = async () => {
-    mic.calls += 1
-    await new Promise(done => setTimeout(done, delayMs))
-    context ??= new AudioContext()
-    output ??= context.createMediaStreamDestination()
-    for (const [id, wav] of Object.entries(wavs)) {
-      if (farts[id]) continue
-      const bytes = Uint8Array.from(atob(wav), c => c.charCodeAt(0))
-      farts[id] = await context.decodeAudioData(bytes.buffer)
-    }
-    // A new track per call, as a real microphone gives.
-    const tracks = output.stream.getAudioTracks().map(track => track.clone())
-    mic.tracks.push(...tracks)
-    return new MediaStream(tracks)
-  }
-
-  const onRecord = (event: Event) =>
-    event.target instanceof Element && event.target.closest('[data-testid="record-button"]')
-  document.addEventListener(
-    'pointerdown',
-    event => {
-      if (!onRecord(event) || !context || !output) return
-      void context.resume()
-      const fart = mic.fartOnPress && farts[mic.fartOnPress]
-      if (fart) {
-        mic.fartOnPress = null
-        mic.fartEnergy = fart.getChannelData(0).reduce((sum, v) => sum + v * v, 0)
-        const source = context.createBufferSource()
-        source.buffer = fart
-        source.connect(output)
-        source.start()
-      }
-    },
-    true
-  )
-  document.addEventListener(
-    'click',
-    event => {
-      if (onRecord(event)) mic.clicks.push(performance.now())
-    },
-    true
-  )
-
-  const Native = window.AudioWorkletNode
-  window.AudioWorkletNode = class extends Native {
-    constructor(...args: ConstructorParameters<typeof AudioWorkletNode>) {
-      super(...args)
-      mic.nodes += 1
-      this.port.addEventListener('message', () => mic.batches.push(performance.now()))
-      const post = this.port.postMessage.bind(this.port)
-      this.port.postMessage = ((
-        message: { type?: string },
-        options?: StructuredSerializeOptions
-      ) => {
-        if (message?.type === 'close') mic.closed += 1
-        post(message, options)
-      }) as MessagePort['postMessage']
-    }
-  }
-}
-
-/** Every fixture the fake microphone can play, as base64. */
-function fixtureWavs(): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(fixtures).map(([id, file]) => [
-      id,
-      readFileSync(resolve(__dirname, '../../../fixtures/recordings', file)).toString('base64')
-    ])
-  )
-}
+// 300 ms before it (#148, #149). The fake microphone is in `fake-microphone.ts`.
 
 /** The time from each Record click to the first capture batch after it, in ms. */
 function clickToFirstBatch(clicks: number[], batches: number[]): number[] {
   return clicks.map(at => (batches.find(b => b >= at) ?? Number.POSITIVE_INFINITY) - at)
 }
 
-/** Presses Record, playing fixture `id` from the press, and clicks on release. */
-async function fartAndRecord(page: Page, id = '090'): Promise<void> {
-  await page.evaluate(fart => {
-    ;(window as unknown as { pedosMic: FakeMicrophone }).pedosMic.fartOnPress = fart
-  }, id)
-  const box = await page.getByTestId('record-button').boundingBox()
-  if (!box) throw new Error('No Record button')
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-  await page.mouse.down()
-  await page.waitForTimeout(pressMs)
-  await page.mouse.up()
-  await expect(page.getByTestId('stop-button')).toBeVisible()
-  await page.waitForTimeout(takeMs[id])
-  await page.getByTestId('stop-button').click()
-  await expect(page.getByRole('heading', { name: 'New Recording' })).toBeVisible()
+/** Fires `type` on every track the microphone gave out, as an interruption on iPhone does. */
+function interrupt(page: Page, type: 'mute' | 'ended'): Promise<void> {
+  return page.evaluate(event => {
+    const mic = (window as unknown as { pedosMic: FakeMicrophone }).pedosMic
+    for (const track of mic.tracks) track.dispatchEvent(new Event(event))
+  }, type)
 }
 
 /** The newest saved Recording's audio, as samples, from the app's IndexedDB. */
@@ -231,7 +67,7 @@ test.describe('with microphone permission granted', () => {
   }) => {
     await page.goto('/')
     // The Record screen opens the microphone by itself.
-    await expect.poll(async () => (await microphone(page)).opened).toBe(1)
+    await waitForOpenMicrophone(page)
 
     // Take 1: only silence. Nothing heard, and the microphone stays open.
     await page.getByTestId('record-button').click()
@@ -250,7 +86,7 @@ test.describe('with microphone permission granted', () => {
     await page.getByRole('button', { name: 'Discard' }).click()
 
     // Back on Record: the microphone opens again, once.
-    await expect.poll(async () => (await microphone(page)).opened).toBe(2)
+    await waitForOpenMicrophone(page)
     await fartAndRecord(page)
     await page.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByTestId('result-note')).toHaveText('G3')
@@ -292,12 +128,12 @@ test.describe('with microphone permission granted', () => {
         document.dispatchEvent(new Event('visibilitychange'))
       }, state)
     await page.goto('/')
-    await expect.poll(async () => (await microphone(page)).live).toBe(1)
+    await waitForOpenMicrophone(page)
     await setVisibility('hidden')
     expect((await microphone(page)).live).toBe(0)
     expect((await microphone(page)).sessions.at(-1)).toBe('playback')
     await setVisibility('visible')
-    await expect.poll(async () => (await microphone(page)).live).toBe(1)
+    await waitForOpenMicrophone(page)
     expect((await microphone(page)).sessions.at(-1)).toBe('play-and-record')
     // Toots, because the Next.js dev badge covers the Recordings tab in a dev build.
     await page
@@ -336,7 +172,7 @@ test.describe('with microphone permission granted', () => {
     }
 
     await page.goto('/')
-    await expect.poll(async () => (await microphone(page)).live).toBe(1)
+    await waitForOpenMicrophone(page)
 
     // Record another: Record shows idle, so the microphone opens there, once.
     await recordAndSave('090')
@@ -345,10 +181,8 @@ test.describe('with microphone permission granted', () => {
     )
     expect(another.opened).toBe(1)
     expect(another.sessions.filter(type => type === 'play-and-record')).toHaveLength(1)
-    await expect.poll(async () => (await microphone(page)).live).toBe(1)
     // Only the open microphone's processor runs; every earlier one was closed.
-    const open = await microphone(page)
-    expect(open.nodes - open.closed).toBe(1)
+    await waitForOpenMicrophone(page)
 
     // Done: on to Recordings, without opening the microphone on the way.
     await recordAndSave('084')
@@ -357,13 +191,13 @@ test.describe('with microphone permission granted', () => {
     expect(done.sessions).not.toContain('play-and-record')
     expect(done.unclosed).toBe(0)
     await tabs.getByRole('link', { name: 'Record', exact: true }).click()
-    await expect.poll(async () => (await microphone(page)).live).toBe(1)
+    await waitForOpenMicrophone(page)
 
     await recordAndSave('086')
     await leaveResult('Record another', () =>
       expect(page.getByTestId('record-button')).toBeEnabled()
     )
-    await expect.poll(async () => (await microphone(page)).live).toBe(1)
+    await waitForOpenMicrophone(page)
 
     // Try it: on to Song Creator, which plays; the session stays on playback.
     await recordAndSave('094')
@@ -380,21 +214,60 @@ test.describe('with microphone permission granted', () => {
     page
   }) => {
     await page.goto('/')
-    await expect.poll(async () => (await microphone(page)).live).toBe(1)
+    await waitForOpenMicrophone(page)
     // Siri, an alarm or a call banner on iPhone mutes the track without ending it.
-    await page.evaluate(() => {
-      const mic = (window as unknown as { pedosMic: FakeMicrophone }).pedosMic
-      for (const track of mic.tracks) track.dispatchEvent(new Event('mute'))
-    })
+    await interrupt(page, 'mute')
+    // The app empties the capture ring: it heard the interruption.
+    await expect.poll(async () => (await microphone(page)).flushed).toBe(1)
     await page.getByTestId('record-button').click()
     await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
     await expect(page.getByTestId('stop-button')).toBeVisible()
     const mic = await microphone(page)
+    console.log(
+      `getUserMedia → capture processor (ms): ${mic.processorMs.map(t => t.toFixed(1)).join(', ')}`
+    )
     expect(mic.calls).toBe(2)
     expect(mic.opened).toBe(2)
     expect(mic.live).toBe(1)
     expect(mic.closed).toBe(1)
   })
+
+  // The app loads its capture processor once getUserMedia answers, which takes longest on a slow
+  // phone. An interruption then, and a tap before it has loaded, still open the microphone afresh
+  // (#172). Here the processor loads only when the test lets it.
+  for (const event of ['mute', 'ended'] as const) {
+    test(`an interruption while the microphone opens is heard too (${event})`, async ({ page }) => {
+      await page.addInitScript(() => {
+        const held = window as unknown as { loadCaptureProcessor: () => void }
+        const loaded = new Promise<void>(done => {
+          held.loadCaptureProcessor = done
+        })
+        const addModule = AudioWorklet.prototype.addModule
+        AudioWorklet.prototype.addModule = async function (
+          this: AudioWorklet,
+          ...args: Parameters<AudioWorklet['addModule']>
+        ) {
+          await loaded
+          return addModule.apply(this, args)
+        }
+      })
+      await page.goto('/')
+      await expect.poll(async () => (await microphone(page)).live).toBe(1)
+      expect((await microphone(page)).nodes).toBe(0)
+      await interrupt(page, event)
+      await page.getByTestId('record-button').click()
+      await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
+      await page.evaluate(() =>
+        (window as unknown as { loadCaptureProcessor: () => void }).loadCaptureProcessor()
+      )
+      await expect(page.getByTestId('stop-button')).toBeVisible()
+      const mic = await microphone(page)
+      expect(mic.calls).toBe(2)
+      expect(mic.opened).toBe(2)
+      expect(mic.live).toBe(1)
+      expect(mic.closed).toBe(1)
+    })
+  }
 
   test('the button says Starting… until audio comes in', async ({ page }) => {
     await page.goto('/')
@@ -417,7 +290,7 @@ test.describe('before microphone permission is granted', () => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Allow microphone' }).click()
     await expect(page.getByRole('button', { name: 'Allow microphone' })).toBeHidden()
-    await expect.poll(async () => (await microphone(page)).live).toBe(1)
+    await waitForOpenMicrophone(page)
     await page.getByTestId('record-button').click()
     await expect(page.getByTestId('stop-button')).toBeVisible()
     const mic = await microphone(page)

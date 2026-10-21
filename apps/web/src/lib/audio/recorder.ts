@@ -125,6 +125,14 @@ async function connect(openedIn: number): Promise<Microphone> {
     throw error
   }
   granted = true
+  // An interruption is heard from the moment the stream opens. One that comes while the capture
+  // processor loads, which takes longest on a slow phone, opens the microphone afresh too (#172).
+  let interruptedWhileOpening = false
+  for (const track of stream.getAudioTracks()) {
+    track.onmute = track.onended = () => {
+      interruptedWhileOpening = true
+    }
+  }
 
   try {
     if (openedIn !== generation) throw new MicrophoneReleasedError()
@@ -163,7 +171,7 @@ async function connect(openedIn: number): Promise<Microphone> {
     source,
     node,
     mute,
-    interrupted: false,
+    interrupted: interruptedWhileOpening,
     unwatch: () => context.removeEventListener('statechange', contextChanged)
   }
 
@@ -230,7 +238,12 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
     .resume()
     .catch(() => {})
   if (microphone && !capturing && interrupted(microphone)) releaseMicrophone()
-  const mic = await openMicrophone()
+  let mic = await openMicrophone()
+  // Tapped while it was opening, and interrupted then.
+  if (mic.interrupted && !capturing) {
+    releaseMicrophone()
+    mic = await openMicrophone()
+  }
 
   takes += 1
   const id = takes
