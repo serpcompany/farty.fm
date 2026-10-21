@@ -97,8 +97,10 @@ test.describe('on iPhone', () => {
     await expect(page.getByTestId('result-note')).toHaveText('G3')
     // Never over the new Recording's note.
     await expect(card).toBeHidden()
+    // A guest's farts last only the visit, so Pedos doesn't ask the browser to keep them
+    // (account.spec.ts checks it asks once signed in).
     expect(await page.evaluate(() => (window as unknown as { keepAsked: boolean }).keepAsked)).toBe(
-      true
+      false
     )
 
     await page.getByRole('button', { name: 'Done' }).click()

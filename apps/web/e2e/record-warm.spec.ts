@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { expect, type Page, test } from '@playwright/test'
+import { skipWelcome } from './record'
 
 // The microphone stays open on the Record screen, so a tap captures at once and a take keeps the
 // 300 ms before it (#148, #149). getUserMedia is slowed to 800 ms here, about what an iPhone
@@ -222,7 +223,7 @@ test.describe('with microphone permission granted', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(fakeMicrophone, { wavs: fixtureWavs(), delayMs: getUserMediaMs })
-    await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
+    await page.addInitScript(skipWelcome)
   })
 
   test('a tap captures at once, keeps the fart from before it, and the mic opens once per visit', async ({
@@ -427,7 +428,7 @@ test.describe('before microphone permission is granted', () => {
   })
 
   test('the microphone opens on the first tap, not when Pedos opens', async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
+    await page.addInitScript(skipWelcome)
     await page.goto('/')
     await expect(page.getByTestId('record-button')).toBeEnabled()
     await page.waitForTimeout(getUserMediaMs + 200)

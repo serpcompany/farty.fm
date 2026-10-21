@@ -88,6 +88,7 @@ One line each is in `apps/web/AGENTS.md`. The detail:
 - `apps/web` isn't `"type": "module"`, so Playwright compiles `e2e/` as CommonJS. Use `__dirname`, not `import.meta`.
 - Biome treats any function named `use…` as a React hook. That's why the fake-microphone helper is `withFakeMicrophone`.
 - Chromium's fake microphone: `--use-file-for-fake-audio-capture=<wav>%noloop` plays the file once. It needs a PCM WAV. Fixtures 090 (G3), 084 (G♯3, two farts) and 069 (Noise-like) are the e2e cases.
+- Accounts in the journeys (#155): a guest's farts last only the visit, so a spec that relaunches the browser signs in first (`signInByApi` in `e2e/account.ts`, with the code from `/dev/mail/`). Locally every request comes from 127.0.0.1, one client with 10 codes in 10 minutes, so `ownClient` gives each test its own `cf-connecting-ip`, which Miniflare passes through. `skipWelcome` and `recordAndSave` (`e2e/record.ts`) keep the account step out of the way unless a spec asks for it.
 - Through the fake microphone, 4 of 5 Melodic fixtures give a Recording Pitch identical to golden. 094 (low confidence) comes out 20 cents high, still B3. Expect small differences on re-recorded audio. Assert note names, not exact MIDI.
 - V8's `2 ** x` and `Math.log2` differ from numpy by an ulp on some pYIN bins. `analysis/numeric.ts` has correctly rounded `exp2` and `log2`. Use them, or bit-identity breaks.
 - The timing tests need `fileParallelism: false` (`vitest.config.mts`).

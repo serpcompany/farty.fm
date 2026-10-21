@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { AccountProvider } from '@/components/pedos/account-provider'
 import { AppShell } from '@/components/pedos/app-shell'
 import { InstallPrompt } from '@/components/pedos/install-prompt'
 import { PedosProvider } from '@/components/pedos/pedos-provider'
@@ -34,10 +35,12 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
       </head>
       <body className="min-h-full">
-        <PedosProvider>
-          <AppShell>{children}</AppShell>
-          <InstallPrompt />
-        </PedosProvider>
+        <AccountProvider>
+          <PedosProvider>
+            <AppShell>{children}</AppShell>
+            <InstallPrompt />
+          </PedosProvider>
+        </AccountProvider>
       </body>
     </html>
   )

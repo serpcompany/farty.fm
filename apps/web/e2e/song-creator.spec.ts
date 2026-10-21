@@ -281,11 +281,12 @@ test.describe('installed', () => {
 
 /**
  * Records, in the page, each sound it starts (`__starts`) and each AudioContext resume inside a
- * click (`__resumesInTaps`), and skips the Welcome.
+ * click (`__resumesInTaps`), and skips the Welcome and the account step.
  */
 async function listenToThePage(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem('pedos.welcomed', '1')
+    localStorage.setItem('pedos.accountStep', 'done')
     // What the page hears: each sound it starts, with its length and loudest sample.
     window.__starts = []
     const start = AudioBufferSourceNode.prototype.start

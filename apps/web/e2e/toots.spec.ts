@@ -1,5 +1,6 @@
 import { type BrowserContext, expect, type Locator, type Page, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
+import { newEmail, signInByApi } from './account'
 
 // The Toots tab, a Toot's screen and Profile, on the Staging build with the Fixture Library
 // loaded, so every Song is unlocked. The first test is the owner's check on a phone: make Toots,
@@ -77,6 +78,11 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
   let page = context.pages()[0] ?? (await context.newPage())
   /** How many Recordings the Fixture Library added. */
   let recordings = ''
+
+  await test.step("signed in, so the Toots outlast a relaunch: a guest's last only the visit", async () => {
+    await page.goto('/profile/')
+    await signInByApi(page, newEmail(testInfo, 'toots'))
+  })
 
   await test.step('a new Profile: no stats yet, the Songs credit, the version and the pages', async () => {
     await page.goto('/profile/')
@@ -479,12 +485,13 @@ function tab(page: Page, label: string) {
 }
 
 /**
- * Skips the Welcome, and records each sound the page starts (`__starts`) and stops (`__stops`),
+ * Skips the Welcome and the account step, and records each sound the page starts (`__starts`) and stops (`__stops`),
  * each decode, each Back, and each promise rejection nothing handled.
  */
 async function listenToThePage(context: BrowserContext) {
   await context.addInitScript(() => {
     localStorage.setItem('pedos.welcomed', '1')
+    localStorage.setItem('pedos.accountStep', 'done')
     window.__starts = []
     const start = AudioBufferSourceNode.prototype.start
     AudioBufferSourceNode.prototype.start = function (this: AudioBufferSourceNode, ...args) {

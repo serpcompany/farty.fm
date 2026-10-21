@@ -13,6 +13,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useRef } from 'react'
 import { type Tab, tabOf, tabs } from '@/lib/tabs'
 import { cn } from '@/lib/utils'
+import { useAccount } from './account-provider'
+import { AccountStep } from './account-step'
 import { usePedos } from './pedos-provider'
 import { useTrackPages } from './previous-page'
 import { RecordFlow } from './record-flow'
@@ -32,11 +34,14 @@ const icons: Record<Tab, LucideIcon> = {
 
 /**
  * The five tabs, as the iPhone app's `AppTabs`. Playback stops on a tab change and while the page
- * is hidden. The page comes back on Record, unless Recording, Review or Result is open.
+ * is hidden. The page comes back on Record, unless Recording, Review, Result or the account step is
+ * open.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const pedos = usePedos()
   const { stopPlayback, showsRecordFlow } = pedos
+  // Reading the sign-in code in another app hides the page: the step stays where it was.
+  const { stepOpen } = useAccount()
   const pathname = usePathname()
   const router = useRouter()
   const tab = tabOf(pathname)
@@ -59,12 +64,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       } else if (wasHidden.current) {
         wasHidden.current = false
         // Pages outside the tabs stay where they are.
-        if (!showsRecordFlow && tab !== null && tab !== 'record') router.push('/')
+        if (!showsRecordFlow && !stepOpen && tab !== null && tab !== 'record') router.push('/')
       }
     }
     document.addEventListener('visibilitychange', visibilityChanged)
     return () => document.removeEventListener('visibilitychange', visibilityChanged)
-  }, [router, showsRecordFlow, stopPlayback, tab])
+  }, [router, showsRecordFlow, stepOpen, stopPlayback, tab])
 
   return (
     <div className="flex min-h-dvh flex-col overflow-x-clip">
@@ -103,6 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </ul>
       </nav>
       <RecordFlow />
+      <AccountStep />
       {/* Only on the tabs, so the privacy, support and 404 pages are always readable. */}
       {pedos.showsWelcome && tab !== null && <Welcome />}
     </div>

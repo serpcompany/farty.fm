@@ -40,6 +40,7 @@ import {
 import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
 import { makeToot as renderToot } from '@/lib/toot-renderer'
 import * as tootStore from '@/lib/toot-store'
+import { openVisit } from '@/lib/visit'
 import { decodeWav, encodeWav, type PcmAudio } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 
@@ -230,15 +231,17 @@ export function PedosProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setShowsWelcome(localStorage.getItem(welcomedKey) === null)
-    store.loadRecordings().then(loaded => {
+    // A guest's new visit first clears the last one's Recordings and Toots (`visit.ts`).
+    const library = openVisit().library
+    library.then(store.loadRecordings).then(loaded => {
       // An analysis cut off by closing the page starts again.
       setRecordings(loaded)
       for (const recording of loaded) {
         if (recording.analysis.state === 'analyzing') void runAnalysis(recording.id)
       }
     })
-    tootStore
-      .loadToots()
+    library
+      .then(tootStore.loadToots)
       // A Toot saved before the list loads is newer than any in it, so it stays first.
       .then(saved =>
         setToots(current => [
@@ -312,6 +315,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     stopPlayback()
     let saved: Recording
     try {
+      // Saved after the visit has started, so clearing the last one's never takes it.
+      await openVisit().library
       saved = await store.saveRecording(
         { seconds: draft.seconds, sampleRate: draft.audio.sampleRate, waveform: draft.waveform },
         encodeWav(draft.audio)
