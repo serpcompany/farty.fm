@@ -69,7 +69,8 @@ test('the app opens on Record, and every tab works before the first Recording', 
 }) => {
   await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
   await page.goto('/')
-  const tabs = page.getByRole('navigation', { name: 'Tabs' }).getByRole('link')
+  // From 768px the top bar also links Farty's name home, before the tabs' list.
+  const tabs = page.getByRole('navigation', { name: 'Tabs' }).getByRole('list').getByRole('link')
   await expect(tabs).toHaveText(['Recordings', 'Compose', 'Record', 'Toots', 'Profile'])
   await expect(tabs.nth(2)).toHaveAttribute('aria-current', 'page')
   await expect(page.getByTestId('record-button')).toBeVisible()

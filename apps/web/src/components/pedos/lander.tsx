@@ -10,10 +10,13 @@ import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { usePedos } from './pedos-provider'
 
+/** From 768px (Tailwind's `md`), as a media query. */
+export const desktop = '(min-width: 48rem)'
+
 /**
- * Farty's product page, from 768px, until the app has been opened in this browser. Open Farty
- * shows the app on the same page; Sign up opens the account step over it. Phones never see it:
- * they get Welcome.
+ * Farty's product page at `/`, from 768px, until the app has been opened in this browser. Open
+ * Farty shows the app on the same page; Sign up opens the account step in it. Phones never see it,
+ * or download its images: they get Welcome.
  */
 export function Lander() {
   const pedos = usePedos()
@@ -104,7 +107,7 @@ export function Lander() {
             src="/lander/song.webp"
             alt="Farty playing Mary Had a Little Lamb with 4 of your Recordings, one per note."
             className="w-72"
-            priority
+            first
           />
           <Phone
             src="/lander/compose.webp"
@@ -162,7 +165,7 @@ export function Lander() {
               Something else?{' '}
               <Link
                 href="/support/"
-                className="font-medium text-foreground underline underline-offset-4"
+                className="inline-flex min-h-11 items-center font-medium text-foreground underline underline-offset-4"
               >
                 Ask Support
               </Link>
@@ -181,7 +184,7 @@ export function Lander() {
       </section>
 
       <section className="px-6 pb-24">
-        <div className="mx-auto grid max-w-6xl items-center gap-8 overflow-hidden rounded-3xl border bg-brand/8 px-10 pt-12 md:grid-cols-[3fr_2fr] lg:px-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-8 overflow-hidden rounded-3xl border bg-brand/8 px-8 pt-12 md:grid-cols-[3fr_2fr] lg:px-16">
           <div className="pb-12">
             <h2 className="text-4xl font-bold tracking-tight text-balance">Make your first Toot</h2>
             <p className="mt-4 max-w-md text-lg text-muted-foreground">
@@ -199,7 +202,7 @@ export function Lander() {
             <Phone
               src="/lander/record.webp"
               alt="Farty's Record tab: one big red button."
-              className="mx-auto w-64 rounded-b-none border-b-0"
+              className="mx-auto w-52 rounded-b-none border-b-0 lg:w-64"
             />
           </div>
         </div>
@@ -312,12 +315,13 @@ function Phone({
   src,
   alt,
   className,
-  priority
+  first
 }: {
   src: string
   alt: string
   className?: string
-  priority?: boolean
+  /** The hero's: fetched first. */
+  first?: boolean
 }) {
   return (
     <div
@@ -326,19 +330,27 @@ function Phone({
         className
       )}
     >
-      <Image
-        src={src}
-        alt={alt}
-        width={780}
-        height={1688}
-        // Static WebPs; Workers has no image optimizer configured.
-        unoptimized
-        priority={priority}
-        className="h-auto w-full rounded-[2.1rem]"
-      />
+      <picture>
+        {/* Below 768px the browser takes the blank pixel instead, so a phone downloads nothing. */}
+        <source media={desktop} srcSet={src} />
+        <img
+          src={blank}
+          alt={alt}
+          width={780}
+          height={1688}
+          // Lazy, so a hidden lander, once Farty has been opened, downloads nothing either.
+          loading="lazy"
+          decoding="async"
+          fetchPriority={first ? 'high' : undefined}
+          className="h-auto w-full rounded-[2.1rem]"
+        />
+      </picture>
     </div>
   )
 }
+
+/** A transparent pixel. */
+const blank = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
 function SectionLink({ href, children }: { href: string; children: ReactNode }) {
   return (

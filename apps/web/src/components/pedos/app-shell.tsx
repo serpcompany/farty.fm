@@ -16,7 +16,7 @@ import { type Tab, tabOf, tabs } from '@/lib/tabs'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { AccountStep } from './account-step'
-import { Lander } from './lander'
+import { desktop, Lander } from './lander'
 import { usePedos } from './pedos-provider'
 import { useTrackPages } from './previous-page'
 import { RecordFlow } from './record-flow'
@@ -41,13 +41,23 @@ const icons: Record<Tab, LucideIcon> = {
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const pedos = usePedos()
-  const { stopPlayback, showsRecordFlow } = pedos
+  const { stopPlayback, showsRecordFlow, finishWelcome } = pedos
   // Reading the sign-in code in another app hides the page: the step stays where it was.
   const { stepOpen } = useAccount()
   const pathname = usePathname()
   const router = useRouter()
   const tab = tabOf(pathname)
+  const stepsOpen = showsRecordFlow || stepOpen
+  // From 768px, `/` is the lander until Farty is opened in this browser (`lander.tsx`).
+  const atLander = pathname === '/'
   useTrackPages()
+
+  // From 768px, any other tab's URL, such as a Song's link, opens the app and counts as opened.
+  // Phones keep Welcome, which asks for the microphone, on every tab.
+  useEffect(() => {
+    if (tab === null || atLander || document.documentElement.hasAttribute('data-welcomed')) return
+    if (window.matchMedia(desktop).matches) finishWelcome()
+  }, [tab, atLander, finishWelcome])
 
   // Moving within a tab, such as to a Song on Compose, isn't a tab change.
   const shownTab = useRef(tab)
@@ -75,14 +85,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      {/* From 768px, a browser that hasn't opened the app gets the lander on the tabs instead of
-          Welcome. The privacy, support and 404 pages are always the page itself. */}
-      {tab !== null && <Lander />}
+      {/* From 768px, a browser that hasn't opened the app gets the lander at `/` instead of
+          Welcome. Every other page is always the page itself. */}
+      {atLander && <Lander />}
       {/* From 768px the tab bar is a top bar with the name, and the page is a wider column. */}
       <div
         className={cn(
           'flex min-h-dvh flex-col overflow-x-clip md:pt-16',
-          tab !== null && 'md:unwelcomed:hidden'
+          atLander && 'md:unwelcomed:hidden'
         )}
       >
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] pb-20 md:max-w-2xl md:pt-6 md:pb-12">
@@ -95,6 +105,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
         <nav
           aria-label="Tabs"
+          // Recording, Review, Result and the account step leave the top bar in view from 768px,
+          // but, as on a phone, the tabs wait until they close.
+          inert={stepsOpen}
           className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:top-0 md:bottom-auto md:border-t-0 md:border-b"
         >
           <div className="contents md:mx-auto md:flex md:h-16 md:max-w-5xl md:items-center md:justify-between md:px-6">
@@ -113,7 +126,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               />
               Farty
             </Link>
-            <ul className="mx-auto flex max-w-md md:mx-0 md:max-w-none md:gap-1">
+            <ul
+              className={cn(
+                'mx-auto flex max-w-md md:mx-0 md:max-w-none md:gap-1',
+                stepsOpen && 'md:opacity-50'
+              )}
+            >
               {tabs.map(({ id, href, label }) => {
                 const current = id === tab
                 const Icon = icons[id]

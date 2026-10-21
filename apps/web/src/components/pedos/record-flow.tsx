@@ -100,18 +100,23 @@ function recordingTitle(recording: Recording | undefined): string {
   return recording ? recordingName(recording) : ''
 }
 
+/**
+ * Full screen on a phone. From 768px, a card in the page under the top bar, which stays in view.
+ */
 function Cover({ title, children }: { title?: string; children: ReactNode }) {
   return (
-    <div
-      role="dialog"
-      aria-modal
-      aria-label={title ?? 'Recording'}
-      className="fixed inset-0 z-40 flex flex-col bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
-    >
-      <header className="flex h-12 shrink-0 items-center justify-center px-4">
-        {title && <h1 className="font-semibold">{title}</h1>}
-      </header>
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col">{children}</div>
+    <div className="contents md:fixed md:inset-x-0 md:top-[calc(4rem+1px)] md:bottom-0 md:z-40 md:flex md:items-center md:justify-center md:bg-background md:p-6">
+      <div
+        role="dialog"
+        aria-modal
+        aria-label={title ?? 'Recording'}
+        className="fixed inset-0 z-40 flex flex-col bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:static md:h-full md:max-h-[44rem] md:w-full md:max-w-md md:rounded-3xl md:border md:py-3 md:shadow-sm"
+      >
+        <header className="flex h-12 shrink-0 items-center justify-center px-4">
+          {title && <h1 className="font-semibold">{title}</h1>}
+        </header>
+        <div className="mx-auto flex w-full max-w-md flex-1 flex-col md:min-h-0">{children}</div>
+      </div>
     </div>
   )
 }
