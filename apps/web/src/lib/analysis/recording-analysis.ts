@@ -5,9 +5,10 @@ import { ANALYSIS_SAMPLE_RATE, resampleToAnalysisRate } from './resample'
 import { noteSegment } from './trimming'
 
 /**
- * Bumped whenever the analysis would give different results. Version 1 is the Swift
- * `RecordingAnalysis.currentVersion`; version 2 adds the settle time (#116), which Swift doesn't
- * have.
+ * Version 1 is the Swift `RecordingAnalysis.currentVersion`; version 2 adds the settle time
+ * (#116), which Swift doesn't have. The web app stores no version with an analysis (`toAnalysis`
+ * drops it), so bumping this re-runs nothing: a stored analysis is upgraded when a field it lacks
+ * is missing, as `needsSettleTime` keys on a missing `settleSeconds`.
  */
 export const ANALYSIS_VERSION = 2
 
