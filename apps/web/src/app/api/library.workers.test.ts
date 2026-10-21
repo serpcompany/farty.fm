@@ -647,13 +647,17 @@ describe('the rows a route keeps', () => {
     expect(kept.get(R2)).toEqual(analysis({}))
     expect(kept.get(R2)).not.toHaveProperty('analysis.settleSeconds')
 
-    const refused = await api.put(
-      'recordings',
-      R3,
-      uploadBody(recordingMetadata(R3, { analysis: analysis({ settleSeconds: '0.1' }) }), wav()),
-      a
-    )
-    expect(refused.status).toBe(400)
+    // Not a number, negative, or longer than any Recording (3600 s).
+    for (const settleSeconds of ['0.1', -0.001, 3600.001]) {
+      const refused = await api.put(
+        'recordings',
+        R3,
+        uploadBody(recordingMetadata(R3, { analysis: analysis({ settleSeconds }) }), wav()),
+        a
+      )
+      expect(refused.status).toBe(400)
+      expect(await refused.json()).toEqual({ error: 'invalid_request' })
+    }
     expect(await rowsOf('recordings')).toEqual([`${a.id} ${R1}`, `${a.id} ${R2}`])
   })
 })

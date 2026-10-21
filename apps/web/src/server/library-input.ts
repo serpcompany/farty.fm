@@ -132,7 +132,9 @@ function parseAnalysis(value: unknown): Analysis | null | undefined {
     isNumberOrNull(a.recordingPitchMidi) &&
     isNumberOrNull(a.shortestNoteSeconds) &&
     // A browser on a release before #116 sends none.
-    (a.settleSeconds === undefined || isNumberOrNull(a.settleSeconds))
+    (a.settleSeconds === undefined ||
+      a.settleSeconds === null ||
+      isNumberIn(a.settleSeconds, 0, MAX_SECONDS))
   if (!valid) return undefined
   return {
     gestureStartSeconds: a.gestureStartSeconds,
