@@ -1,31 +1,191 @@
 name: Web
 
-# The web app in apps/web: lint, types, unit tests (including Recording Analysis against
-# fixtures/golden/), the Workers build, and the record journeys in Playwright on workerd.
+# The web app in apps/web, by SERP's CI Workflows standard: lint, types and unit tests (including
+# Recording Analysis against fixtures/golden/), both Workers builds, and the record journeys in
+# Playwright on workerd. Then a push to `staging` deploys Staging, and a push to `main` (the
+# promotion, a hotfix or a release) deploys Production, each once the checks pass, and smoke-tests
+# it on its workers.dev host.
 #
-# Like the iOS workflow, draft PRs are not built: a PR runs when it is opened or marked ready, and
-# on each push while it is ready.
+# Every push runs, with no paths filter, so a deploy never skips. On a pull request, `changes`
+# skips the checks' steps when nothing the web app builds from changed, and they still report.
+# Draft pull requests skip `e2e`, which runs once the PR is marked ready. A manual run on `staging`
+# or `main` checks and redeploys that branch's tip, for when no push started a run.
+#
+# Each deploy reads CLOUDFLARE_API_TOKEN from its own environment (staging or production) and the
+# CLOUDFLARE_ACCOUNT_ID variable. With no token the deploy fails, so a green run at the tip always
+# deployed and passed the smoke test.
 on:
-  push:
-    branches: [main]
-    paths: [apps/web/**, fixtures/**, .github/workflows/web.yml]
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths: [apps/web/**, fixtures/**, .github/workflows/web.yml]
+  push:
+    branches: [staging, main]
   workflow_dispatch:
-
-concurrency:
-  group: web-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
+  actions: read
+
+# Cancels superseded PR runs, and checks every push.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      web: ${{ steps.paths.outputs.web }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      # A PR's run tests its merge commit, whose first parent is the base branch, so this diff is
+      # what the PR changes. A push always checks, and an error in the diff checks too.
+      - id: paths
+        run: |
+          if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
+            echo "web=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet HEAD^1 HEAD -- apps/web fixtures catalog .github/workflows/web.yml; then
+            echo "web=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Nothing the web app builds from changed, so its checks skip their steps."
+          else
+            echo "web=true" >> "$GITHUB_OUTPUT"
+          fi
+
   check:
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      WEB: ${{ needs.changes.outputs.web }}
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - if: env.WEB == 'true'
+        uses: actions/checkout@v7
+      - if: env.WEB == 'true'
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: apps/web/package.json
+      - if: env.WEB == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - if: env.WEB == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: ShellCheck the smoke test
+        if: env.WEB == 'true'
+        run: shellcheck scripts/smoke.sh
+      - if: env.WEB == 'true'
+        run: pnpm lint
+      - if: env.WEB == 'true'
+        run: pnpm typecheck
+      - if: env.WEB == 'true'
+        run: pnpm test
+      # Both Workers builds run on every PR, once each: `e2e` builds Staging, except on a draft,
+      # which skips `e2e`. On a push, the deploy job's build is this commit's build check.
+      - name: Build for Staging, on a draft
+        if: env.WEB == 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft
+        run: pnpm build:staging
+      # `pnpm check`'s build, as Production builds. It fails if the build carries any file of the
+      # Fixture Library, so it runs after the Staging build, which copies the library in.
+      - name: Build for Production, with no Fixture Library
+        if: env.WEB == 'true' && github.event_name == 'pull_request'
+        run: pnpm build:production
+
+  e2e:
+    needs: changes
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      WEB: ${{ needs.changes.outputs.web }}
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - if: env.WEB == 'true'
+        uses: actions/checkout@v7
+      # A push skips the suite when a passing run already tested its tree. No receipt, or an error
+      # looking one up, runs it.
+      - id: receipt
+        if: env.WEB == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO_ID: ${{ github.repository_id }}
+        run: |
+          tree=$(git rev-parse 'HEAD^{tree}')
+          echo "tree=$tree" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            n=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=passed-e2e-$tree" --jq \
+              "[.artifacts[] | select(.expired | not) | select(.workflow_run.head_repository_id == $REPO_ID)] | length") || n=0
+            if [ "$n" -gt 0 ]; then
+              echo "::notice::A passing run already tested tree $tree, so the journeys skip."
+              exit 0
+            fi
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
+      - if: steps.receipt.outputs.run == 'true'
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: apps/web/package.json
+      - if: steps.receipt.outputs.run == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - if: steps.receipt.outputs.run == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: Build for Staging, with the Fixture Library
+        if: steps.receipt.outputs.run == 'true'
+        run: pnpm build:staging
+      # The local Workers build runs behind the Staging gate, with the password from .dev.vars.
+      - name: Write .dev.vars
+        if: steps.receipt.outputs.run == 'true'
+        run: cp .dev.vars.example .dev.vars
+      - if: steps.receipt.outputs.run == 'true'
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Record journeys on workerd
+        if: steps.receipt.outputs.run == 'true'
+        run: pnpm test:e2e
+        env:
+          E2E_SERVER: preview
+          CI: 'true'
+      - name: Write the receipt
+        if: steps.receipt.outputs.run == 'true'
+        env:
+          TREE: ${{ steps.receipt.outputs.tree }}
+        run: echo "$TREE" > receipt.txt
+      - if: steps.receipt.outputs.run == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: passed-e2e-${{ steps.receipt.outputs.tree }}
+          path: apps/web/receipt.txt
+          retention-days: 30
+          overwrite: true # a re-run uploads the same name again
+      - if: failure() && steps.receipt.outputs.run == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: apps/web/e2e/report
+
+  deploy-staging:
+    if: github.event_name != 'pull_request' && github.ref_name == 'staging'
+    needs: [check, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: staging
+      url: https://staging.pedos.app
+    # A running deploy is never cancelled; a newer queued one replaces an older one.
+    concurrency:
+      group: deploy-web-staging
+      cancel-in-progress: false
     defaults:
       run:
         working-directory: apps/web
@@ -40,17 +200,75 @@ jobs:
           cache: pnpm
           cache-dependency-path: apps/web/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm check
-      - name: Build for Workers
-        run: SITE_ENV=staging pnpm exec opennextjs-cloudflare build
-      - run: pnpm exec playwright install --with-deps chromium
-      - name: Record journeys on workerd
-        run: pnpm test:e2e
+      - name: Build for Staging
+        run: pnpm build:staging
+      # Deploy only the branch tip, so re-running an old commit's run never deploys older code.
+      - name: Check this is the branch tip
+        id: tip
+        run: |
+          set -o pipefail
+          tip=$(git ls-remote origin refs/heads/staging | cut -f1)
+          if [ "$tip" = "$GITHUB_SHA" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$GITHUB_SHA isn't the tip of staging ($tip), so nothing was deployed."
+          fi
+      - name: Deploy to Staging
+        if: steps.tip.outputs.deploy == 'true'
+        run: pnpm exec opennextjs-cloudflare deploy --env staging
         env:
-          E2E_SERVER: preview
-          CI: 'true'
-      - uses: actions/upload-artifact@v7
-        if: failure()
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Smoke test Staging
+        if: steps.tip.outputs.deploy == 'true'
+        run: scripts/smoke.sh https://pedos-web-staging.serpcompany.workers.dev staging
+
+  deploy-production:
+    if: github.event_name != 'pull_request' && github.ref_name == 'main'
+    needs: [check, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://pedos.app
+    # A running deploy is never cancelled; a newer queued one replaces an older one.
+    concurrency:
+      group: deploy-web-production
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
-          name: playwright-report
-          path: apps/web/e2e/report
+          package_json_file: apps/web/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      # Fails if the build carries any file of the Fixture Library, which never ships.
+      - name: Build for Production
+        run: pnpm build:production
+      # Deploy only the branch tip, so re-running an old commit's run never deploys older code.
+      - name: Check this is the branch tip
+        id: tip
+        run: |
+          set -o pipefail
+          tip=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$tip" = "$GITHUB_SHA" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$GITHUB_SHA isn't the tip of main ($tip), so nothing was deployed."
+          fi
+      - name: Deploy to Production
+        if: steps.tip.outputs.deploy == 'true'
+        run: pnpm exec opennextjs-cloudflare deploy --env production
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Smoke test Production
+        if: steps.tip.outputs.deploy == 'true'
+        run: scripts/smoke.sh https://pedos-web-production.serpcompany.workers.dev production

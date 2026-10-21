@@ -9,7 +9,7 @@ Turns fart Recordings into recognizable melodies, using only the Recordings them
 
 ## Where it stands
 
-**The web app** (`apps/web/`) runs on Cloudflare Workers. Staging is https://pedos-web-staging.serpcompany.workers.dev (password `stagingpassword`, any username). It has the five tabs, recording and its note, the Recordings list, the Song Catalog and install from the browser. Agent docs: [`apps/web/AGENTS.md`](apps/web/AGENTS.md) and [`docs/agents/web.md`](docs/agents/web.md).
+**The web app** (`apps/web/`) runs on Cloudflare Workers. Production is https://pedos.app from launch (#122), and Staging is https://staging.pedos.app (password `stagingpassword`, any username). It has the five tabs, recording and its note, the Recordings list, the Song Catalog and install from the browser. Agent docs: [`apps/web/AGENTS.md`](apps/web/AGENTS.md) and [`docs/agents/web.md`](docs/agents/web.md).
 
 **The iPhone app (history).** **v0.1.0 was a proof of concept** on sample data. Since then, the app records for real: TestFlight builds record your farts, save them, and find each one's pitch with Recording Analysis ported to Swift (`RecordingAnalysisKit/`, which matches the reference engine on all 23 Fixture Library Recordings). Debug builds still use the Fixture Library for the screens' UI tests.
 
