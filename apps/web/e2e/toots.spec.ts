@@ -510,7 +510,9 @@ async function listenToThePage(context: BrowserContext) {
       return decode.apply(this, args)
     }
     window.__unhandled = []
-    addEventListener('unhandledrejection', event => window.__unhandled.push(String(event.reason)))
+    window.addEventListener('unhandledrejection', event =>
+      window.__unhandled.push(String(event.reason))
+    )
     window.__backs = 0
     const back = History.prototype.back
     History.prototype.back = function (this: History) {

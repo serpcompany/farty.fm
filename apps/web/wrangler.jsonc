@@ -14,6 +14,24 @@
   "workers_dev": false,
   "preview_urls": false,
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web" }],
+  // Accounts (#150): D1 through Drizzle (src/db/schema.ts, migrations in drizzle/), and the audio
+  // in R2. Local runs keep both in .wrangler/ (`pnpm db:migrate:local`); each environment below
+  // binds its own, and never these.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "pedos-local",
+      "database_id": "local-only-do-not-deploy",
+      "migrations_dir": "drizzle",
+      "migrations_table": "d1_migrations",
+      "remote": false
+    }
+  ],
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-local", "remote": false }],
+  // The dev mailbox: local runs capture sign-in email here instead of sending it. Top level only,
+  // with no id. Never declare it under "env" (src/db/deploy-config.test.ts); Wrangler's warning
+  // that the environments lack it is the intended result.
+  "kv_namespaces": [{ "binding": "DEV_MAILBOX" }],
   "env": {
     "staging": {
       // The Staging gate's password (worker.ts). It is public, so it is a plain variable, not a
@@ -31,7 +49,18 @@
       "preview_urls": false,
       "routes": [{ "pattern": "staging.pedos.app", "custom_domain": true }],
       "observability": { "enabled": true },
-      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-staging" }]
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-staging" }],
+      // Changed only by CI: `pnpm db:migrate:staging` runs before each deploy (web.yml).
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "pedos-staging",
+          "database_id": "df88f16e-3999-4d6d-b210-b7c016e97b18",
+          "migrations_dir": "drizzle",
+          "migrations_table": "d1_migrations"
+        }
+      ],
+      "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-staging" }]
     },
     "production": {
       "vars": { "SITE_ENV": "production" },
@@ -43,7 +72,18 @@
         { "pattern": "www.pedos.app", "custom_domain": true }
       ],
       "observability": { "enabled": true },
-      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-production" }]
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-production" }],
+      // Changed only by CI: `pnpm db:migrate:production` runs before each deploy (web.yml).
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "pedos-production",
+          "database_id": "f7ceaad1-93ba-495d-981b-86a0c2f1eea7",
+          "migrations_dir": "drizzle",
+          "migrations_table": "d1_migrations"
+        }
+      ],
+      "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-production" }]
     }
   }
 }
