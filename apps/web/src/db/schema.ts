@@ -70,9 +70,8 @@ export const account = sqliteTable(
 )
 
 /**
- * Sign-in codes waiting to be used, keyed by email. Better Auth's emailOTP plugin stores the code
- * as plain text by default (`storeOTP: 'plain'`), so #152 must set `storeOTP` to hash it, as
- * serp.app does.
+ * Sign-in codes waiting to be used, keyed by email. Each code is kept only as an HMAC under
+ * `BETTER_AUTH_SECRET` (`storeOTP` in `src/server/auth-config.ts`), never as the code itself.
  */
 export const verification = sqliteTable(
   'verification',
@@ -91,14 +90,19 @@ export const verification = sqliteTable(
  * Rate-limit counters, kept in D1 because each Worker isolate has its own memory: Better Auth's
  * and sign-in's own (`consumeSlot` in `src/server/auth-config.ts`). Each `key` is a label and an
  * HMAC, never an email or IP address, and `last_request` is when the row's window ends, in epoch
- * milliseconds.
+ * milliseconds. Every spend first deletes the rows whose window has ended, through the index on
+ * `last_request`, so it never reads the live rows.
  */
-export const rateLimit = sqliteTable('rate_limit', {
-  id: text('id').primaryKey(),
-  key: text('key').notNull().unique(),
-  count: integer('count').notNull(),
-  lastRequest: integer('last_request').notNull()
-})
+export const rateLimit = sqliteTable(
+  'rate_limit',
+  {
+    id: text('id').primaryKey(),
+    key: text('key').notNull().unique(),
+    count: integer('count').notNull(),
+    lastRequest: integer('last_request').notNull()
+  },
+  table => [index('rate_limit_last_request_idx').on(table.lastRequest)]
+)
 
 // A user's Recordings and Toots, as the browser keeps them (`src/lib/recordings.ts`,
 // `src/lib/toot.ts`), keyed by the user and the id the browser gave them. Their audio is in R2
