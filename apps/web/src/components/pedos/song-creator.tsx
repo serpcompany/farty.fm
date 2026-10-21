@@ -10,6 +10,7 @@ import type { Song } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
 import * as store from '@/lib/recording-store'
 import { formattedLength, type Recording, recordingName, recordingPitch } from '@/lib/recordings'
+import { reportError } from '@/lib/telemetry/errors'
 import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/toot'
 import { TootError } from '@/lib/toot-renderer'
 import { cn } from '@/lib/utils'
@@ -59,10 +60,15 @@ export function SongCreator({ song }: { song: Song }) {
         playOnce(draft)
       },
       error => {
+        const locked = error instanceof TootError && error.reason === 'locked'
+        // "Couldn't make this Toot": reported by the error that caused it, such as a decode.
+        if (!locked)
+          reportError(
+            'toot-make-failed',
+            error instanceof TootError ? (error.cause ?? error) : error
+          )
         if (left) return
-        setPhase({
-          kind: error instanceof TootError && error.reason === 'locked' ? 'locked' : 'failed'
-        })
+        setPhase({ kind: locked ? 'locked' : 'failed' })
       }
     )
     return () => {
@@ -149,7 +155,8 @@ function Ready({ draft }: { draft: TootDraft }) {
     try {
       await pedos.saveToot(draft)
       offerStep('toot')
-    } catch {
+    } catch (error) {
+      reportError('toot-save-failed', error)
       setSaveFailed(true)
     } finally {
       setSaving(false)

@@ -4,9 +4,13 @@ import { AppShell } from '@/components/pedos/app-shell'
 import { InstallPrompt } from '@/components/pedos/install-prompt'
 import { PedosProvider } from '@/components/pedos/pedos-provider'
 import { siteOrigin } from '@/lib/site'
+import { webAnalyticsToken } from '@/lib/telemetry/analytics'
+import { AnalyticsBeacon } from '@/lib/telemetry/analytics-beacon'
 import './globals.css'
 
 const origin = siteOrigin()
+/** Cloudflare Web Analytics, in Production only (#126). */
+const analyticsToken = webAnalyticsToken()
 
 export const metadata: Metadata = {
   title: 'Pedos',
@@ -41,6 +45,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
             <InstallPrompt />
           </PedosProvider>
         </AccountProvider>
+        {analyticsToken && <AnalyticsBeacon token={analyticsToken} />}
       </body>
     </html>
   )
