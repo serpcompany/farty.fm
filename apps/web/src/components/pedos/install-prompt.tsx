@@ -2,7 +2,7 @@
 
 import { X } from 'lucide-react'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   currentInstallRoute,
@@ -11,6 +11,7 @@ import {
   registerServiceWorker
 } from '@/lib/install'
 import { onRecordingSaved } from '@/lib/recording-store'
+import { useAccount } from './account-provider'
 import { ShareSheetHint, useInstallRoute } from './install-button'
 import { usePedos } from './pedos-provider'
 
@@ -18,20 +19,25 @@ const offeredKey = 'pedos.installOffered'
 
 /**
  * Offers to install Pedos once, after the first saved Recording, above the tabs. It hides when
- * it's closed or Pedos is installed. It also registers the service worker, and asks the browser
- * to keep the Recordings.
+ * it's closed or Pedos is installed. It also registers the service worker and, signed in, asks
+ * the browser to keep the Recordings: a guest's last only for the visit (`visit.ts`).
  */
 export function InstallPrompt() {
   const pedos = usePedos()
+  const { account } = useAccount()
   const route = useInstallRoute()
   const [open, setOpen] = useState(false)
 
   useEffect(registerServiceWorker, [])
 
+  const keep = useEffectEvent(() => {
+    if (account.status === 'signedIn') void keepRecordings()
+  })
+
   useEffect(
     () =>
       onRecordingSaved(() => {
-        void keepRecordings()
+        keep()
         if (currentInstallRoute() === null) return
         try {
           if (localStorage.getItem(offeredKey) !== null) return

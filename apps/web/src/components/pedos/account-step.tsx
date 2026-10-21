@@ -1,0 +1,173 @@
+'use client'
+
+import { type FormEvent, useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
+import { type SignInProblem, sendCode, signIn } from '@/lib/account'
+import { useAccount } from './account-provider'
+
+const messages: Record<SignInProblem, string> = {
+  invalidEmail: 'Enter a valid email address.',
+  wrongCode: "That code isn't right. Check it and try again.",
+  codeExpired: 'That code no longer works. Send a new one.',
+  tooManyTries: 'Too many tries. Wait a few minutes, then try again.',
+  unavailable: "Accounts aren't available right now.",
+  failed: "Couldn't reach Pedos. Check your connection and try again."
+}
+
+/**
+ * The account step (#155, the plan's §1), full screen over everything: an email, then the 6-digit
+ * code sent to it, which signs in or makes the account. Not now says what a guest loses.
+ */
+export function AccountStep() {
+  const { stepOpen } = useAccount()
+  // Mounted afresh each time it opens, so it starts at the email.
+  return stepOpen ? <Step /> : null
+}
+
+function Step() {
+  const { skipStep, finishSignIn } = useAccount()
+  const [phase, setPhase] = useState<'email' | 'code'>('email')
+  const [email, setEmail] = useState('')
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<SignInProblem | null>(null)
+  const codeField = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (phase === 'code') codeField.current?.focus()
+  }, [phase])
+
+  const send = async (event: FormEvent) => {
+    event.preventDefault()
+    setBusy(true)
+    setProblem(null)
+    const sent = await sendCode(email)
+    setBusy(false)
+    if (!sent.ok) {
+      setProblem(sent.problem)
+      return
+    }
+    setCode('')
+    setPhase('code')
+  }
+
+  const submitCode = async (event: FormEvent) => {
+    event.preventDefault()
+    setBusy(true)
+    setProblem(null)
+    const result = await signIn(email, code)
+    setBusy(false)
+    if (result.ok) {
+      finishSignIn(result.value)
+      return
+    }
+    setProblem(result.problem)
+    // An expired code can't be tried again: the email is where a new one comes from.
+    if (result.problem === 'codeExpired') setPhase('email')
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal
+      aria-labelledby="account-step-title"
+      className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+    >
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5">
+        <div className="flex flex-1 flex-col justify-center gap-6 py-6">
+          <div className="space-y-2 text-center">
+            <h1 id="account-step-title" className="text-3xl font-bold tracking-tight">
+              Keep your farts
+            </h1>
+            <p className="text-muted-foreground">
+              Make a free account to keep your Recordings and Toots on any device.
+            </p>
+          </div>
+
+          {phase === 'email' ? (
+            <form className="grid gap-3" onSubmit={send}>
+              <label htmlFor="account-email" className="text-sm font-medium">
+                Email
+              </label>
+              <Input
+                id="account-email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                required
+                className="h-12"
+                value={email}
+                onChange={event => setEmail(event.target.value)}
+              />
+              <Button type="submit" className="h-12 text-base" disabled={busy}>
+                {busy ? <Spinner /> : 'Send code'}
+              </Button>
+            </form>
+          ) : (
+            <form className="grid gap-3" onSubmit={submitCode}>
+              <label htmlFor="account-code" className="text-sm font-medium">
+                Code
+              </label>
+              <p className="-mt-2 text-sm text-muted-foreground">
+                We sent a 6-digit code to <span className="text-foreground">{email.trim()}</span>.
+              </p>
+              <Input
+                ref={codeField}
+                id="account-code"
+                autoComplete="one-time-code"
+                inputMode="numeric"
+                required
+                className="h-12 text-center text-lg tracking-widest"
+                value={code}
+                onChange={event => setCode(event.target.value)}
+              />
+              <Button type="submit" className="h-12 text-base" disabled={busy}>
+                {busy ? <Spinner /> : 'Sign in'}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-11 text-base"
+                onClick={() => {
+                  setProblem(null)
+                  setPhase('email')
+                }}
+              >
+                Change email
+              </Button>
+            </form>
+          )}
+
+          {problem && (
+            <p role="alert" className="text-center text-sm text-destructive">
+              {messages[problem]}
+            </p>
+          )}
+
+          <p className="text-center text-xs text-muted-foreground">
+            We'll also send you Pedos news. You can turn it off on Profile.{' '}
+            <a
+              href="/privacy/"
+              target="_blank"
+              rel="noopener"
+              className="inline-flex min-h-11 items-center px-2 underline underline-offset-2"
+            >
+              Privacy
+            </a>
+          </p>
+        </div>
+
+        <div className="grid gap-2 pb-3">
+          <p className="text-center text-sm text-muted-foreground" data-testid="account-step-guest">
+            Without an account, your farts are gone when you close Pedos.
+          </p>
+          <Button variant="secondary" className="h-12 text-base" onClick={skipStep}>
+            Not now
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}

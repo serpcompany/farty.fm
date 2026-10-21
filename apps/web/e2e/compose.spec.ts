@@ -1,5 +1,6 @@
 import { resolve } from 'node:path'
 import { type BrowserContext, expect, type Locator, type Page, test } from '@playwright/test'
+import { newEmail, signInByApi } from './account'
 import { recordAndSave } from './record'
 
 // Compose and the Result screen, with Recordings made through Chromium's fake microphone. A
@@ -65,6 +66,9 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
   let page = context.pages()[0] ?? (await context.newPage())
   await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
   await page.goto('/compose/')
+  // Signed in, so the Recordings outlast each relaunch: a guest's last only the visit.
+  await signInByApi(page, newEmail(testInfo, 'compose'))
+  await page.reload()
   await expect(page.getByText('No Melodic Recordings yet')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Locked · 12' })).toBeVisible()
   await expect(page.getByRole('heading', { name: /^Unlocked/ })).toHaveCount(0)

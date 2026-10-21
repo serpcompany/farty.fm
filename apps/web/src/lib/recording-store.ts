@@ -3,8 +3,9 @@ import type { AnalysisState, Recording } from './recordings'
 import type { Toot } from './toot'
 
 /**
- * Recordings and Toots live only in this browser, in IndexedDB (ADR 0001's local-first rule, on
- * the web). Metadata and audio are separate stores, so listing them never loads their audio.
+ * Recordings and Toots live in this browser, in IndexedDB (ADR 0001's local-first rule, on the
+ * web). Metadata and audio are separate stores, so listing them never loads their audio. Without
+ * an account they last only for the visit (`visit.ts`).
  */
 interface PedosDB extends DBSchema {
   recordings: { key: string; value: Recording }
@@ -137,4 +138,11 @@ export async function deleteRecording(id: string): Promise<void> {
     tx.objectStore('audio').delete(id),
     tx.done
   ])
+}
+
+/** Deletes every Recording and Toot in this browser, with their audio, together. */
+export async function clearLibrary(): Promise<void> {
+  const stores = ['recordings', 'audio', 'toots', 'tootAudio'] as const
+  const tx = (await db()).transaction(stores, 'readwrite')
+  await Promise.all([...stores.map(name => tx.objectStore(name).clear()), tx.done])
 }
