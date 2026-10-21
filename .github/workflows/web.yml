@@ -91,6 +91,17 @@ jobs:
       - name: Check the migrations match Drizzle's journal
         if: env.WEB == 'true'
         run: pnpm db:check
+      # `drizzle-kit check` never reads src/db/schema.ts, so a schema change without its migration
+      # would pass. With every migration committed, `db:generate` writes nothing.
+      - name: Check every schema change has its migration
+        if: env.WEB == 'true'
+        run: |
+          pnpm db:generate
+          if [ -n "$(git status --porcelain -- drizzle)" ]; then
+            git status --porcelain -- drizzle
+            echo "::error::src/db/schema.ts changed without its migration. Run pnpm db:generate and commit drizzle/."
+            exit 1
+          fi
       - if: env.WEB == 'true'
         run: pnpm test
       # Both Workers builds run on every PR, once each: `e2e` builds Staging, except on a draft,
