@@ -9,7 +9,7 @@ import {
   LockOpen,
   Scissors
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
@@ -245,10 +245,36 @@ function SaveFailed() {
   )
 }
 
+/** A path without its trailing slash, so `/recordings/` and `/recordings` match. */
+const route = (path: string) => path.replace(/\/$/, '') || '/'
+
+/**
+ * Closes the flow and goes to `href`. Going to another page, the flow stays open until that page
+ * shows: closed first, it would show the Record screen idle on the way out, and that screen opens
+ * the microphone.
+ */
+function useFinishFlow(): (href: string) => void {
+  const { finishFlow } = usePedos()
+  const router = useRouter()
+  const pathname = usePathname()
+  const [leaving, setLeaving] = useState<string | null>(null)
+  useEffect(() => {
+    if (leaving !== null && route(pathname) !== leaving) finishFlow()
+  }, [finishFlow, leaving, pathname])
+  return href => {
+    if (route(href) === route(pathname)) {
+      finishFlow()
+      return
+    }
+    setLeaving(route(pathname))
+    router.push(href)
+  }
+}
+
 /** "Saved, but we couldn't find its note", with Retry. The Recording stays listed. */
 function AnalysisFailed({ id }: { id: string }) {
   const pedos = usePedos()
-  const router = useRouter()
+  const finish = useFinishFlow()
   return (
     <>
       <Empty className="flex-1">
@@ -262,13 +288,7 @@ function AnalysisFailed({ id }: { id: string }) {
       </Empty>
       <FlowButtons
         secondary={
-          <FlowButton
-            variant="secondary"
-            onClick={() => {
-              pedos.finishFlow()
-              router.push('/recordings/')
-            }}
-          >
+          <FlowButton variant="secondary" onClick={() => finish('/recordings/')}>
             Done
           </FlowButton>
         }
@@ -285,12 +305,8 @@ function AnalysisFailed({ id }: { id: string }) {
 /** Result: the note you just made, and what it unlocked. Matches the iPhone app's `ResultView`. */
 function Result({ recording, changes }: { recording: Recording; changes: CoverageChanges }) {
   const pedos = usePedos()
-  const router = useRouter()
+  const finish = useFinishFlow()
   const pitch = recordingPitch(recording)
-  const finish = (href: string) => {
-    pedos.finishFlow()
-    router.push(href)
-  }
 
   return (
     <>

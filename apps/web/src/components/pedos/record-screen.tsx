@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,6 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import { keepMicrophoneOpen } from '@/lib/audio/recorder'
 import { type RecordProblem, usePedos } from './pedos-provider'
 import { RecordButton } from './record-button'
 
@@ -25,10 +27,15 @@ const problems: Record<
   interrupted: { title: 'Recording stopped', message: 'Nothing was saved.' }
 }
 
-/** The Record tab: one big red button. Matches the iPhone app's `RecordTab`. */
+/**
+ * The Record tab: one big red button. Matches the iPhone app's `RecordTab`. The microphone stays
+ * open while it shows, through a take, and closes once Review or Result opens.
+ */
 export function RecordScreen() {
   const pedos = usePedos()
   const alert = pedos.problem && pedos.problem !== 'nothingHeard' ? pedos.problem : null
+  const flowOpen = pedos.flow !== null
+  useEffect(() => (flowOpen ? undefined : keepMicrophoneOpen()), [flowOpen])
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-7">
@@ -36,6 +43,7 @@ export function RecordScreen() {
       <div className="h-10" />
       <RecordButton
         isRecording={false}
+        starting={pedos.capture.kind === 'starting'}
         disabled={pedos.capture.kind !== 'idle'}
         onClick={() => void pedos.startRecording()}
       />
