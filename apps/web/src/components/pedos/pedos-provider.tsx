@@ -38,6 +38,7 @@ import {
   recordingPitch,
   replaySegment
 } from '@/lib/recordings'
+import { reportError } from '@/lib/telemetry/errors'
 import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
 import { makeToot as renderToot } from '@/lib/toot-renderer'
 import * as tootStore from '@/lib/toot-store'
@@ -206,7 +207,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         if (!updated) return null
         replace(updated)
         return updated
-      } catch {
+      } catch (error) {
+        reportError('analysis-failed', error)
         const updated = await store.saveAnalysis(id, { state: 'notAnalyzed' })
         if (updated) replace(updated)
         return null
@@ -250,7 +252,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           ...saved
         ])
       )
-      .catch(() => {
+      .catch(error => {
+        reportError('toots-load-failed', error)
         setTootsFailed(true)
         setToots(current => current ?? [])
       })
@@ -267,8 +270,12 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       onLibraryChanged(change => {
         if (change.reset) {
           stopPlayback()
-          void store.loadRecordings().then(setRecordings, () => {})
-          void tootStore.loadToots().then(setToots, () => {})
+          void store
+            .loadRecordings()
+            .then(setRecordings, error => reportError('library-reload-failed', error))
+          void tootStore
+            .loadToots()
+            .then(setToots, error => reportError('library-reload-failed', error))
           return
         }
         const { recordings: added, toots: changed, deleted } = change
@@ -358,7 +365,9 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       setCapture({ kind: 'idle' })
       // The page was hidden, or the Record screen closed, before the microphone opened.
       if (error instanceof MicrophoneReleasedError) return
-      setProblem(error instanceof MicrophoneDeniedError ? 'microphoneOff' : 'couldNotStart')
+      const denied = error instanceof MicrophoneDeniedError
+      reportError(denied ? 'mic-denied' : 'mic-start-failed', error)
+      setProblem(denied ? 'microphoneOff' : 'couldNotStart')
     }
   }, [capture.kind, flow, stopRecording])
 
@@ -375,7 +384,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         { seconds: draft.seconds, sampleRate: draft.audio.sampleRate, waveform: draft.waveform },
         encodeWav(draft.audio)
       )
-    } catch {
+    } catch (error) {
+      reportError('recording-save-failed', error)
       setIsSaving(false)
       setFlow({ kind: 'saveFailed', draft })
       return
@@ -524,8 +534,13 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           : () =>
               tootStore.loadTootAudio(toot.id).catch(error => {
                 // Only audio that's gone offers Delete. Any other error may pass: try again.
-                if (error instanceof tootStore.TootAudioMissing) markAudioMissing(toot.id)
-                else setTootPlayFailed(toot.id)
+                if (error instanceof tootStore.TootAudioMissing) {
+                  reportError('toot-audio-missing', error)
+                  markAudioMissing(toot.id)
+                } else {
+                  reportError('toot-audio-read-failed', error)
+                  setTootPlayFailed(toot.id)
+                }
                 throw error
               })
       void play(`toot-${toot.id}`, audio, segment, ended).then(() => {
@@ -540,7 +555,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     const trimmed = title.trim()
     if (!trimmed) return
     setToots(list => list?.map(t => (t.id === id ? { ...t, title: trimmed } : t)) ?? null)
-    tootStore.renameToot(id, trimmed).catch(() => {})
+    tootStore.renameToot(id, trimmed).catch(error => reportError('toot-rename-failed', error))
   }, [])
 
   // As the iPhone app's `deleteToot`.
@@ -550,7 +565,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       if (nowPlaying === key || nowPlaying?.startsWith(`${key}:`)) stopPlayback()
       setToots(list => list?.filter(t => t.id !== id) ?? null)
       forgetDecoded(`toot-${id}`)
-      tootStore.deleteToot(id).catch(() => {})
+      tootStore.deleteToot(id).catch(error => reportError('toot-delete-failed', error))
     },
     [nowPlaying]
   )
