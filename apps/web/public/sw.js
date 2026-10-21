@@ -1,4 +1,4 @@
-// Pedos's service worker: it keeps the app shell, so an installed Pedos opens offline.
+// Farty's service worker: it keeps the app shell, so an installed Farty opens offline.
 //
 // Every request it handles goes to the network first, so a deploy shows at once. The cache is
 // only the fallback when there's no network. It holds pages, scripts, styles, fonts and images,
@@ -114,7 +114,7 @@ async function refreshShell(startPage) {
 }
 
 // The start page, the pages it links to (the tabs), each Song's page (`/shell.json`), and the
-// files they load, so Pedos opens offline right after it's installed, before any of them is
+// files they load, so Farty opens offline right after it's installed, before any of them is
 // fetched again. `startHtml` is the start page already fetched, if any. Resolves to false when
 // the network failed for any of them.
 async function precacheShell(startHtml) {

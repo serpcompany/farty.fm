@@ -30,7 +30,7 @@ describe('clearsOnOpen', () => {
     expect(clearsOnOpen({ ...guestsNewVisit, firstOpen: true })).toBe(false)
   })
 
-  it('keeps them while Pedos is open in another tab', () => {
+  it('keeps them while Farty is open in another tab', () => {
     expect(clearsOnOpen({ ...guestsNewVisit, otherTabOpen: true })).toBe(false)
   })
 })
@@ -51,7 +51,7 @@ describe('openVisit', () => {
   const signedIn = () =>
     Response.json({ session: {}, user: { id: 'user-a', email: 'a@example.com' } })
 
-  /** Opens Pedos in a new tab (or `tab`, for a reload), with get-session answering `session`. */
+  /** Opens Farty in a new tab (or `tab`, for a reload), with get-session answering `session`. */
   async function open(
     session: () => Response | Error,
     tab: Storage = memoryStorage()
@@ -103,7 +103,7 @@ describe('openVisit', () => {
     expect(localStorage.getItem('pedos.account')).toBe('user-a')
   })
 
-  // Without sessionStorage, Pedos can't tell a reload from a new visit.
+  // Without sessionStorage, Farty can't tell a reload from a new visit.
   it('clears nothing when sessionStorage is blocked', async () => {
     pastFirstOpen()
     await open(signedOut, blockedStorage())

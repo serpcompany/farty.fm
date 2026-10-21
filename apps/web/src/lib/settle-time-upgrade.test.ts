@@ -10,7 +10,7 @@ import { encodeWav, type PcmAudio } from './wav'
 
 let page: Awaited<ReturnType<typeof openPage>>
 
-/** A page of Pedos: fresh modules, over this browser's database. */
+/** A page of Farty: fresh modules, over this browser's database. */
 async function openPage() {
   vi.resetModules()
   return {

@@ -91,7 +91,7 @@ function owner(): string | null | undefined {
  * Makes this browser's library `accountId`'s (with its `email`), so it can sync: true once it is.
  * A guest's library becomes the account's, and uploads. Another account's is cleared first: it
  * never uploads to this one, and its farts not uploaded yet are lost, which the account step says
- * before it signs in (`unsavedBeforeSignIn`). With localStorage blocked Pedos can't tell whose it
+ * before it signs in (`unsavedBeforeSignIn`). With localStorage blocked Farty can't tell whose it
  * is, so it never syncs.
  */
 export async function claimLibrary(accountId: string, email = ''): Promise<boolean> {
@@ -131,7 +131,7 @@ export async function unsavedBeforeSignIn(email: string): Promise<number> {
 
 /**
  * Signs this browser out of its library: forgets whose it was and clears it, while no sync is
- * applying anything. Pedos's other tabs show it cleared too.
+ * applying anything. Farty's other tabs show it cleared too.
  */
 export async function forgetLibrary(): Promise<void> {
   await withSyncLock(async () => {
@@ -145,7 +145,7 @@ export async function forgetLibrary(): Promise<void> {
 type Sent = 'next' | 'refused' | 'stop'
 
 /**
- * Whether to stop sending: Pedos is unreachable or busy, the session ended, or the account isn't
+ * Whether to stop sending: Farty is unreachable or busy, the session ended, or the account isn't
  * this library's.
  */
 const stops = ({ status, error }: api.Answer) =>
@@ -439,7 +439,7 @@ export async function downloadAll(stopped: () => boolean): Promise<void> {
 /**
  * Keeps this browser's library in step with `accountId`'s while the page is open: once `ready`
  * (the visit's library) and claimed, then whenever something joins the outbox, the browser comes
- * back online, or Pedos comes back into view. Returns a function that stops it.
+ * back online, or Farty comes back into view. Returns a function that stops it.
  */
 export function startSync(accountId: string, email: string, ready: Promise<void>): () => void {
   let stopped = false

@@ -5,7 +5,7 @@ import { siteEnv } from '@/lib/site'
 import { TelemetryTriggers } from './triggers'
 
 export const metadata: Metadata = {
-  title: 'Error report test · Pedos',
+  title: 'Error report test · Farty',
   robots: { index: false, follow: false }
 }
 

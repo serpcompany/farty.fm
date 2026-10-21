@@ -25,8 +25,8 @@ base="${1:?$usage}"
 env="${2:?$usage}"
 base="${base%/}"
 case "$env" in
-  production) canonical=https://pedos.app ;;
-  staging) canonical=https://staging.pedos.app ;;
+  production) canonical=https://farty.fm ;;
+  staging) canonical=https://staging.farty.fm ;;
   *)
     echo "$usage" >&2
     exit 2
@@ -40,7 +40,7 @@ smoke=(-H 'x-pedos-smoke-test: 1')
 # Staging's public password, a plain variable in wrangler.jsonc. The gate ignores the username.
 password=(-u 'pedos:stagingpassword')
 wrong_password=(-u 'pedos:wrong')
-challenge='www-authenticate: Basic realm="pedos staging", charset="UTF-8"'
+challenge='www-authenticate: Basic realm="farty staging", charset="UTF-8"'
 # A file Workers serves from `assets` (public/), not through Next as /icon.png is.
 static_file=/welcome-icon.png
 # The Fixture Library's index (scripts/fixture-library.ts), in the Staging build only.
@@ -307,9 +307,9 @@ if [[ ! "$base" =~ $local_base ]]; then
   if [[ "$env" == production ]]; then
     on_the_host "$canonical/" "a request at $canonical/ gets 200 with no password and no noindex" \
       serves "$canonical/" indexable
-    on_the_host https://www.pedos.app/privacy \
-      "https://www.pedos.app/privacy gets a 308 to $canonical/privacy/" \
-      redirects https://www.pedos.app/privacy "$canonical/privacy/"
+    on_the_host https://www.farty.fm/privacy \
+      "https://www.farty.fm/privacy gets a 308 to $canonical/privacy/" \
+      redirects https://www.farty.fm/privacy "$canonical/privacy/"
   else
     on_the_host "$canonical/" "a request with no password at $canonical/ gets 401" \
       refuses "$canonical/"

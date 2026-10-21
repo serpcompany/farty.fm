@@ -46,7 +46,7 @@ The plan is the pinned Web MVP roadmap issue (#106). All roadmap issues are in t
 
 ## Git workflow
 
-Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/git-workflow.md), and [Verification cadence](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification-cadence.md) for merging and deploys. Pedos's own steps:
+Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/git-workflow.md), and [Verification cadence](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification-cadence.md) for merging and deploys. Farty's own steps:
 
 1. Branch from `staging` as `issue-<n>-<short-slug>`. Name the branch correctly before opening a PR: renaming a PR's head branch closes the PR. `main` changes only by promotion from `staging` and by its release PR (`docs/agents/web.md`, Promotion and releases), never by a PR from a work branch.
 2. Open a small **draft** PR into `staging`.

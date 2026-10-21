@@ -40,7 +40,7 @@ test('a code from the dev mailbox signs in to the library, and signing out ends 
 
   await page.goto('/dev/mail/')
   const mail = page.getByTestId('dev-mail').filter({ hasText: email }).first()
-  await expect(mail).toContainText('is your Pedos sign-in code')
+  await expect(mail).toContainText('is your Farty sign-in code')
   const code = (await mail.locator('pre').innerText()).match(/^\d{6}$/m)?.[0]
   expect(code).toMatch(/^\d{6}$/)
 

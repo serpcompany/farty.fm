@@ -314,7 +314,7 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
 
 /**
  * Keeps the microphone open while the Record screen shows, so a tap starts capturing at once and
- * the take has its pre-roll. It opens only when permission is already granted, so Pedos doesn't
+ * the take has its pre-roll. It opens only when permission is already granted, so Farty doesn't
  * ask as soon as it opens; otherwise the first tap opens it. Hiding the page lets it go, and
  * showing the page again opens it. Returns the function that lets it go.
  */

@@ -1,8 +1,8 @@
-// A Pedos account, from the browser: the sign-in API (`src/server/auth-config.ts`: send a code,
+// A Farty account, from the browser: the sign-in API (`src/server/auth-config.ts`: send a code,
 // sign in with it, read the session, sign out) and the account routes (`/api/account/`). Every
 // call is same-origin, so the browser sends the session cookie and its own Origin.
 
-/** Who's using Pedos here, as far as this page knows. */
+/** Who's using Farty here, as far as this page knows. */
 export type Account =
   /** Not known yet: the session is being read. */
   | { status: 'checking' }
@@ -29,12 +29,12 @@ function signedIn(user: User): Account {
   }
 }
 
-/** How long opening Pedos waits for the session before it carries on without it. */
+/** How long opening Farty waits for the session before it carries on without it. */
 const SESSION_TIMEOUT_MS = 5000
 
 /**
  * Reads the session. Each read also renews a session's cookie for another 7 days, once a day, so
- * Pedos calls it on every open (#155). Signed out in a browser that was signed in reads `expired`.
+ * Farty calls it on every open (#155). Signed out in a browser that was signed in reads `expired`.
  */
 export async function readSession(): Promise<Account> {
   // Not `AbortSignal.timeout`: a timer the tests can run.
@@ -121,7 +121,7 @@ export type SignInProblem =
   | 'tooManyTries'
   /** Sign-in codes can't be sent from here (a build without email). */
   | 'unavailable'
-  /** Pedos couldn't be reached, or answered something unexpected. */
+  /** Farty couldn't be reached, or answered something unexpected. */
   | 'failed'
 
 export type Result<T> = { ok: true; value: T } | { ok: false; problem: SignInProblem }
@@ -181,7 +181,7 @@ export async function signIn(email: string, code: string): Promise<Result<Accoun
   }
 }
 
-/** Ends this browser's session. False when Pedos couldn't be reached. */
+/** Ends this browser's session. False when Farty couldn't be reached. */
 export async function signOut(): Promise<boolean> {
   try {
     return (await post('/api/auth/sign-out', {})).ok
@@ -223,7 +223,7 @@ export function deleteAccount(accountId: string): Promise<AccountChange> {
   return changeAccount(accountId, { method: 'DELETE' })
 }
 
-/** Turns Pedos news by email on or off for `accountId`'s account. */
+/** Turns Farty news by email on or off for `accountId`'s account. */
 export function setMarketingEmail(on: boolean, accountId: string): Promise<AccountChange> {
   return changeAccount(accountId, {
     method: 'PATCH',
@@ -255,7 +255,7 @@ export function stepOffer(
 
 /**
  * Whether the account step offers itself at `moment`, remembering that it did. With storage
- * blocked Pedos can't remember, so it never offers: only Profile does.
+ * blocked Farty can't remember, so it never offers: only Profile does.
  */
 export function takeStepOffer(moment: StepMoment): boolean {
   try {
@@ -283,7 +283,7 @@ export type StepDraft = { phase: 'email' | 'code'; email: string }
 
 /**
  * sessionStorage: the open step's draft. A phone often drops the tab while the person reads the
- * code in Mail; coming back reloads Pedos, which opens the step where it was.
+ * code in Mail; coming back reloads Farty, which opens the step where it was.
  */
 const draftKey = 'pedos.accountStep.draft'
 

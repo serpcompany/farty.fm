@@ -22,7 +22,7 @@ export const user = sqliteTable('user', {
   email: text('email').notNull().unique(),
   emailVerified: flag('email_verified').notNull().default(false),
   image: text('image'),
-  /** Pedos news by email: on unless they turn it off (the owner's decision, #150). */
+  /** Farty news by email: on unless they turn it off (the owner's decision, #150). */
   marketingEmail: flag('marketing_email').notNull().default(true),
   createdAt: timestamp('created_at').notNull(),
   updatedAt: timestamp('updated_at').notNull()

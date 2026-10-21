@@ -10,8 +10,8 @@ export const dynamic = 'force-static'
  */
 const manifest: MetadataRoute.Manifest = {
   id: '/',
-  name: 'Pedos',
-  short_name: 'Pedos',
+  name: 'Farty',
+  short_name: 'Farty',
   description: 'Record your farts and find the note in each one.',
   start_url: '/',
   scope: '/',

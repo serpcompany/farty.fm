@@ -5,7 +5,7 @@ import { timingSafeEqual } from 'node:crypto'
 // routes through the entry (`run_worker_first`). Copied from zenbujapanese-monorepo's
 // src/lib/staging-access.ts.
 
-export const stagingAccessChallenge = 'Basic realm="pedos staging", charset="UTF-8"'
+export const stagingAccessChallenge = 'Basic realm="farty staging", charset="UTF-8"'
 export const environmentNoindex = 'noindex, nofollow'
 // CI's smoke test sends it. Search engines never do.
 export const smokeTestHeader = 'x-pedos-smoke-test'

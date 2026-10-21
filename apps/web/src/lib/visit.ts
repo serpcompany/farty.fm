@@ -3,7 +3,7 @@ import { claimLibrary } from './library-sync'
 import { clearLibrary } from './recording-store'
 
 // Guests keep nothing beyond the visit (owner, 2026-10-21, #150). Without an account, Recordings
-// and Toots last until Pedos closes: they survive a reload in the same tab, and the next open
+// and Toots last until Farty closes: they survive a reload in the same tab, and the next open
 // clears them before anything shows. IndexedDB stays the working copy, since sessionStorage is too
 // small for audio; a sessionStorage flag says this tab's visit has started. Signed in, the
 // browser's copy is the account's, and stays, also once the session has ended (`expired`).
@@ -16,7 +16,7 @@ const visitKey = 'pedos.visit'
  * next visit clears it.
  */
 const openedKey = 'pedos.opened'
-/** A Web Lock each open Pedos tab holds, so a new tab doesn't clear another tab's visit. */
+/** A Web Lock each open Farty tab holds, so a new tab doesn't clear another tab's visit. */
 const openLock = 'pedos-open'
 
 /** What a new visit knows as it opens. A reload never clears (`startVisit`). */
@@ -24,7 +24,7 @@ export type OpenFacts = {
   account: Account
   /** The first open since guests keep nothing. */
   firstOpen: boolean
-  /** Pedos is open in another tab, and this visit is that one's too. */
+  /** Farty is open in another tab, and this visit is that one's too. */
   otherTabOpen: boolean
 }
 
@@ -60,7 +60,7 @@ async function claimOnOpen(account: Promise<Account>): Promise<void> {
 
 async function startVisit(account: Promise<Account>): Promise<void> {
   try {
-    // A reload continues this tab's visit. With storage blocked, Pedos can't tell a reload from a
+    // A reload continues this tab's visit. With storage blocked, Farty can't tell a reload from a
     // new visit, so it clears nothing.
     if (hasFlag(() => sessionStorage, visitKey, true)) return
     const facts: OpenFacts = {
@@ -74,7 +74,7 @@ async function startVisit(account: Promise<Account>): Promise<void> {
     if (facts.account.status === 'signedOut') setFlag(() => localStorage, openedKey)
     setFlag(() => sessionStorage, visitKey)
   } catch {
-    // A clear that failed leaves the last visit's farts. Pedos still opens.
+    // A clear that failed leaves the last visit's farts. Farty still opens.
   } finally {
     holdOpen()
   }

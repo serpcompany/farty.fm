@@ -36,7 +36,7 @@ export async function codeFor(page: Page, email: string): Promise<string> {
 
 /**
  * Signs in to a new account with the page's own requests, as the account step makes them. The
- * page must be on Pedos; reload it after, so Pedos reads the session as it opens.
+ * page must be on Farty; reload it after, so Farty reads the session as it opens.
  */
 export async function signInByApi(page: Page, email: string): Promise<void> {
   await ownClient(page.context())

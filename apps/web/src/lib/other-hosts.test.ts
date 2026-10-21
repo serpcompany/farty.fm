@@ -2,9 +2,9 @@ import { describe, expect, test } from 'vitest'
 import { canonicalPath, otherHostResponse } from './other-hosts'
 import { smokeTestHeader } from './staging-access'
 
-const www = 'https://www.pedos.app'
-const production = 'https://pedos.app'
-const staging = 'https://staging.pedos.app'
+const www = 'https://www.farty.fm'
+const production = 'https://farty.fm'
+const staging = 'https://staging.farty.fm'
 const stagingWorker = 'https://pedos-web-staging.serpcompany.workers.dev'
 const productionWorker = 'https://pedos-web-production.serpcompany.workers.dev'
 

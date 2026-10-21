@@ -27,7 +27,7 @@ test("a guest's first Result offers the account step, and Not now goes where the
     'Make a free account to keep your Recordings and Toots on any device.'
   )
   await expect(step.getByTestId('account-step-guest')).toHaveText(
-    'Without an account, your farts are gone when you close Pedos.'
+    'Without an account, your farts are gone when you close Farty.'
   )
   for (const control of [
     step.getByLabel('Email'),
@@ -37,7 +37,7 @@ test("a guest's first Result offers the account step, and Not now goes where the
   ]) {
     await expectTappable(control)
   }
-  // Not until the step closes does Pedos go where the tap said.
+  // Not until the step closes does Farty go where the tap said.
   await expect(page).not.toHaveURL(/\/recordings\/$/)
 
   await step.getByRole('button', { name: 'Not now' }).click()
@@ -149,7 +149,7 @@ test('signing up from the first Result keeps the Recording, and goes where they 
   expect(await reopened.evaluate(() => localStorage.getItem('pedos.accountStep'))).toBe('done')
 })
 
-test("Profile's account: the email, Pedos news, and Sign out, which leaves nothing here", async ({
+test("Profile's account: the email, Farty news, and Sign out, which leaves nothing here", async ({
   page
 }, testInfo) => {
   test.setTimeout(120_000)
@@ -161,7 +161,7 @@ test("Profile's account: the email, Pedos news, and Sign out, which leaves nothi
   await page.goto('/profile/')
 
   await expect(page.getByTestId('account-email')).toHaveText(email)
-  const news = page.getByRole('switch', { name: 'Pedos news' })
+  const news = page.getByRole('switch', { name: 'Farty news' })
   // On by default (#150).
   await expect(news).toBeChecked()
   for (const control of [
@@ -320,12 +320,12 @@ test('Profile left open on one account never changes or deletes the account anot
     await expect(other.getByTestId('account-email')).toHaveText(email)
   }
 
-  // Pedos news, from the page still showing the first account: nothing changes, and the page
+  // Farty news, from the page still showing the first account: nothing changes, and the page
   // reloads as the account signed in now.
   await signInElsewhere(second)
-  await page.getByRole('switch', { name: 'Pedos news' }).click()
+  await page.getByRole('switch', { name: 'Farty news' }).click()
   await expect(page.getByTestId('account-email')).toHaveText(second)
-  await expect(page.getByRole('switch', { name: 'Pedos news' })).toBeChecked()
+  await expect(page.getByRole('switch', { name: 'Farty news' })).toBeChecked()
   expect((await session(page))?.user.marketingEmail).not.toBe(false)
 
   // Delete account, from the page now showing the second: the first account, signed in now, and
@@ -349,7 +349,7 @@ test("Profile's Save to an account opens the step, which stays while they read t
   const save = page.getByRole('button', { name: 'Save to an account' })
   await expectTappable(save)
   await expect(
-    page.getByText('Without an account, your farts are gone when you close Pedos.')
+    page.getByText('Without an account, your farts are gone when you close Farty.')
   ).toBeVisible()
   await save.click()
   const step = page.getByRole('dialog', { name: 'Keep your farts' })
@@ -392,7 +392,7 @@ test("a guest's Recording lasts the visit: through a reload and another tab, the
   await expect(rows(second)).toHaveCount(1)
   await second.close()
 
-  // Pedos closes, and opens again.
+  // Farty closes, and opens again.
   const reopened = await reopen(context, page)
   await expect(reopened.getByText('No Recordings yet')).toBeVisible()
   expect(await recordingsStored(reopened)).toBe(0)
@@ -403,7 +403,7 @@ test('farts saved before guests kept nothing last this visit, then go', async ({
   context
 }) => {
   await context.addInitScript(skipWelcome)
-  // A browser that used Pedos before: a Recording, saved by the app's own database.
+  // A browser that used Farty before: a Recording, saved by the app's own database.
   await page.goto('/robots.txt')
   const wav = readFileSync(resolve(__dirname, '../../../fixtures/recordings', g3))
   await page.evaluate(async base64 => {
@@ -443,7 +443,7 @@ test('farts saved before guests kept nothing last this visit, then go', async ({
   await expect(reopened.getByText('No Recordings yet')).toBeVisible()
 })
 
-test("a Recording saved while Pedos still reads the session isn't cleared with the last visit's", async ({
+test("a Recording saved while Farty still reads the session isn't cleared with the last visit's", async ({
   page,
   context
 }) => {
@@ -454,7 +454,7 @@ test("a Recording saved while Pedos still reads the session isn't cleared with t
   await page.close()
   const visit = await context.newPage()
 
-  // The session answers only when the test says, within the 5 seconds Pedos waits for it.
+  // The session answers only when the test says, within the 5 seconds Farty waits for it.
   let answer = () => {}
   const answered = new Promise<void>(resolve => (answer = resolve))
   await visit.route('**/api/auth/get-session*', async route => {
@@ -470,7 +470,7 @@ test("a Recording saved while Pedos still reads the session isn't cleared with t
   expect(await recordingsStored(visit)).toBe(1)
 })
 
-test("an account's farts stay when its session ends: Pedos asks to sign in again, or clears them", async ({
+test("an account's farts stay when its session ends: Farty asks to sign in again, or clears them", async ({
   page,
   context
 }, testInfo) => {
@@ -484,7 +484,7 @@ test("an account's farts stay when its session ends: Pedos asks to sign in again
   await page.reload()
   await expect(page.getByTestId('recording-row')).toHaveCount(1)
 
-  // The session ends (7 days without an open, or the cookie goes), and Pedos opens again.
+  // The session ends (7 days without an open, or the cookie goes), and Farty opens again.
   await context.clearCookies()
   const reopened = await reopen(context, page)
   const step = reopened.getByRole('dialog', { name: 'Sign in again' })
@@ -609,7 +609,7 @@ test('signing in to another account says first how many farts here it removes, a
   expect((await session(reopened))?.user.email).toBe(second)
 })
 
-test("Sign out clears Pedos's other tabs too, without a reload", async ({
+test("Sign out clears Farty's other tabs too, without a reload", async ({
   page,
   context
 }, testInfo) => {
@@ -667,7 +667,7 @@ test('a reload while they read their email comes back to the code, which still s
   await step.getByRole('button', { name: 'Send code' }).click()
   await expect(step.getByLabel('Code')).toBeFocused()
 
-  // The phone drops the tab while Mail is open; coming back reloads Pedos.
+  // The phone drops the tab while Mail is open; coming back reloads Farty.
   await page.reload()
   await expect(step).toContainText(`We sent a 6-digit code to ${email}.`)
   await expect(step.getByLabel('Code')).toBeFocused()
@@ -681,7 +681,7 @@ test('a reload while they read their email comes back to the code, which still s
   await expect(step).toBeHidden()
 })
 
-/** Closes Pedos's last tab, and opens Pedos again on Recordings. */
+/** Closes Farty's last tab, and opens Farty again on Recordings. */
 async function reopen(context: BrowserContext, page: Page): Promise<Page> {
   await page.close()
   const reopened = await context.newPage()
@@ -732,7 +732,7 @@ async function uploaded(page: Page) {
 }
 
 /**
- * Signs in to an account, records a fart that uploads, then ends the session and opens Pedos
+ * Signs in to an account, records a fart that uploads, then ends the session and opens Farty
  * again on Recordings, where the step asks to sign in again.
  */
 async function expiredWithARecording(page: Page, context: BrowserContext, email: string) {

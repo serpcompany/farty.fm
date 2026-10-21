@@ -18,7 +18,7 @@ describe('robots.txt', () => {
         { userAgent: '*', disallow: '/' },
         { userAgent: 'AhrefsSiteAudit', allow: '/' }
       ],
-      sitemap: 'https://staging.pedos.app/sitemap-index.xml'
+      sitemap: 'https://staging.farty.fm/sitemap-index.xml'
     })
   })
 
@@ -26,7 +26,7 @@ describe('robots.txt', () => {
     vi.stubEnv('SITE_ENV', 'production')
     expect(robots()).toEqual({
       rules: { userAgent: '*', allow: '/' },
-      sitemap: 'https://pedos.app/sitemap-index.xml'
+      sitemap: 'https://farty.fm/sitemap-index.xml'
     })
   })
 })

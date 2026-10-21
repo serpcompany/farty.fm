@@ -46,7 +46,7 @@ describe('the dev mailbox', () => {
       [{ ...local, SITE_ENV: 'staging' }, 'localhost:4115'],
       [{ ...local, SITE_ENV: 'production' }, 'localhost:4115'],
       [{ ...local, SITE_ENV: 'preview' }, 'localhost:4115'],
-      [local, 'staging.pedos.app'],
+      [local, 'staging.farty.fm'],
       [local, 'pedos-web-staging.serpcompany.workers.dev'],
       [local, 'localhost.evil.example'],
       [local, 'localhost@evil.example'],
@@ -59,7 +59,7 @@ describe('the dev mailbox', () => {
 
   it('keeps each email, newest first', async () => {
     const store = memoryStore()
-    const from = { name: 'Pedos', email: 'support@pedos.app' }
+    const from = { name: 'Farty', email: 'support@farty.fm' }
     const email = (subject: string) => ({
       from,
       to: 'fan@example.com',
@@ -82,27 +82,27 @@ describe('where email goes', () => {
   const deployed = {
     SITE_ENV: 'production',
     EMAIL: sendBinding,
-    EMAIL_FROM: 'Pedos <support@pedos.app>'
+    EMAIL_FROM: 'Farty <support@farty.fm>'
   }
 
   it('sends from Staging and Production, and captures locally', () => {
-    expect(emailConfig(deployed, 'pedos.app')).toMatchObject({
+    expect(emailConfig(deployed, 'farty.fm')).toMatchObject({
       kind: 'send',
-      from: { name: 'Pedos', email: 'support@pedos.app' }
+      from: { name: 'Farty', email: 'support@farty.fm' }
     })
     expect(emailConfig({ DEV_MAILBOX: memoryStore() }, 'localhost:3115')).toMatchObject({
       kind: 'capture',
-      from: { email: 'support@pedos.app' }
+      from: { email: 'support@farty.fm' }
     })
   })
 
   it('goes nowhere, for a reason, when anything is missing', () => {
     const reasons = [
-      emailConfig({ ...deployed, SITE_ENV: 'preview' }, 'pedos.app'),
-      emailConfig({ ...deployed, EMAIL: undefined }, 'pedos.app'),
-      emailConfig({ ...deployed, EMAIL_FROM: undefined }, 'pedos.app'),
-      emailConfig({ ...deployed, EMAIL_FROM: 'Pedos <someone@pedos.app>' }, 'pedos.app'),
-      emailConfig({ DEV_MAILBOX: memoryStore() }, 'pedos.app'),
+      emailConfig({ ...deployed, SITE_ENV: 'preview' }, 'farty.fm'),
+      emailConfig({ ...deployed, EMAIL: undefined }, 'farty.fm'),
+      emailConfig({ ...deployed, EMAIL_FROM: undefined }, 'farty.fm'),
+      emailConfig({ ...deployed, EMAIL_FROM: 'Farty <someone@farty.fm>' }, 'farty.fm'),
+      emailConfig({ DEV_MAILBOX: memoryStore() }, 'farty.fm'),
       // A deployment never captures, even with the binding.
       emailConfig({ SITE_ENV: 'staging', DEV_MAILBOX: memoryStore() }, 'localhost:3115')
     ].map(config => (config.kind === 'off' ? config.reason : config.kind))
@@ -117,20 +117,20 @@ describe('where email goes', () => {
   })
 
   it('sends only from the support address', () => {
-    expect(parseSender('Pedos <support@pedos.app>')).toEqual({
-      name: 'Pedos',
-      email: 'support@pedos.app'
+    expect(parseSender('Farty <support@farty.fm>')).toEqual({
+      name: 'Farty',
+      email: 'support@farty.fm'
     })
-    expect(parseSender(' Pedos  <SUPPORT@pedos.app> ')).toEqual({
-      name: 'Pedos',
-      email: 'support@pedos.app'
+    expect(parseSender(' Farty  <SUPPORT@farty.fm> ')).toEqual({
+      name: 'Farty',
+      email: 'support@farty.fm'
     })
     for (const value of [
-      'support@pedos.app',
-      'Pedos <hello@pedos.app>',
-      'Pedos <support@pedos.app.evil.example>',
-      'Pedos\r\nBcc: x <support@pedos.app>',
-      '<support@pedos.app>',
+      'support@farty.fm',
+      'Farty <hello@farty.fm>',
+      'Farty <support@farty.fm.evil.example>',
+      'Farty\r\nBcc: x <support@farty.fm>',
+      '<support@farty.fm>',
       42,
       undefined
     ]) {
@@ -151,7 +151,7 @@ describe('sending a code', () => {
     return { email, lines }
   }
 
-  const from = { name: 'Pedos', email: 'support@pedos.app' }
+  const from = { name: 'Farty', email: 'support@farty.fm' }
 
   it('logs what happened, never the recipient or the code', async () => {
     const sent: EmailMessageBuilder[] = []
@@ -167,7 +167,7 @@ describe('sending a code', () => {
       expect.objectContaining({
         from,
         to: 'fan@example.com',
-        subject: '048213 is your Pedos sign-in code',
+        subject: '048213 is your Farty sign-in code',
         text: expect.stringContaining('\n048213\n')
       })
     ])

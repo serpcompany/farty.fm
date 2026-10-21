@@ -61,7 +61,7 @@ export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
 
-/** Whether this tab's upgrade waits for Pedos in another tab, which holds an older version open. */
+/** Whether this tab's upgrade waits for Farty in another tab, which holds an older version open. */
 let waiting = false
 const waits = new EventTarget()
 
@@ -72,7 +72,7 @@ function setWaiting(value: boolean) {
 }
 
 /**
- * Calls `listener` now and on each change with whether the database waits for Pedos in another
+ * Calls `listener` now and on each change with whether the database waits for Farty in another
  * tab to close. Returns a function that stops it.
  */
 export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () => void {

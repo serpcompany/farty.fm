@@ -202,7 +202,7 @@ function SharingSection() {
 
 /**
  * Signed out: Save to an account, which opens the account step, and what a guest loses. Signed
- * in: the email, Pedos news, Sign out and Delete account. A session that ended: Sign in again.
+ * in: the email, Farty news, Sign out and Delete account. A session that ended: Sign in again.
  */
 function AccountSection() {
   const { account, openStep, retry, signOut, deleteAccount, setMarketingEmail, clearDevice } =
@@ -285,7 +285,7 @@ function AccountSection() {
         <p className="px-4 pt-1.5 text-xs text-muted-foreground">
           {account.status === 'expired'
             ? 'Your session ended. Your farts stay on this device until you sign in.'
-            : 'Without an account, your farts are gone when you close Pedos.'}
+            : 'Without an account, your farts are gone when you close Farty.'}
         </p>
         <AlertDialog open={confirmsClear} onOpenChange={open => !busy && setConfirmsClear(open)}>
           <AlertDialogContent>
@@ -330,13 +330,13 @@ function AccountSection() {
         <li>
           {/* The whole row toggles the switch, so it's a full-size target. */}
           <label htmlFor="pedos-news" className={row}>
-            Pedos news
+            Farty news
             <Switch
               id="pedos-news"
               checked={account.marketingEmail}
               disabled={busy}
               onCheckedChange={on =>
-                void run(() => setMarketingEmail(on), "Couldn't change Pedos news. Try again.")
+                void run(() => setMarketingEmail(on), "Couldn't change Farty news. Try again.")
               }
             />
           </label>
@@ -373,7 +373,7 @@ function AccountSection() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete your account?</AlertDialogTitle>
             <AlertDialogDescription>
-              This deletes your email, Recordings and Toots from Pedos, on every device. It can't be
+              This deletes your email, Recordings and Toots from Farty, on every device. It can't be
               undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

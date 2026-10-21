@@ -143,7 +143,7 @@ test("two browsers signed in to one account play each other's farts, and see eac
     await a.getByRole('button', { name: `Stop ${twinkle.title}` }).click()
   })
 
-  await test.step("A deletes B's Toot, and it's gone from B once B comes back to Pedos", async () => {
+  await test.step("A deletes B's Toot, and it's gone from B once B comes back to Farty", async () => {
     await tab(b, 'Toots').click()
     await expect(b.getByTestId('toot-row')).toHaveCount(2)
     await a.getByRole('button', { name: `More for ${twinkle.title}` }).click()
@@ -155,7 +155,7 @@ test("two browsers signed in to one account play each other's farts, and see eac
     await expect(a.getByTestId('toot-row')).toHaveCount(1)
     await uploaded(a)
 
-    // Back in Pedos, which opens on Record, without a reload.
+    // Back in Farty, which opens on Record, without a reload.
     await comeBack(b)
     await expect(b).toHaveURL(/:\d+\/$/)
     await tab(b, 'Toots').click()
@@ -338,7 +338,7 @@ async function uploaded(page: Page) {
 }
 
 /**
- * Fakes the page going to the background and coming back, as a phone switching apps does. Pedos
+ * Fakes the page going to the background and coming back, as a phone switching apps does. Farty
  * comes back on Record (`app-shell.tsx`), and syncs.
  */
 async function comeBack(page: Page) {

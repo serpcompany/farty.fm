@@ -1,6 +1,6 @@
 name: Release Please
 
-# Keeps a "release: Pedos x.y.z" PR open on main from the Conventional Commits that promotion
+# Keeps a "release: Farty x.y.z" PR open on main from the Conventional Commits that promotion
 # brings there. Merging it bumps apps/web/package.json, writes CHANGELOG.md and tags the release.
 # Nobody types versions by hand. Its commit lands on main only, so a merge-back PR brings it to
 # staging (docs/agents/web.md, Environments and deploys).

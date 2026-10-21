@@ -5,7 +5,7 @@ import type { Toot } from './toot'
 // The account's library, from the browser: the routes in `src/app/api/` (`src/server/library.ts`).
 // Every call is same-origin, so the browser sends the session cookie and its own Origin, and names
 // the account the library is (`accountId`): the server refuses one that isn't the session's (409
-// `wrong_account`). Each answers its status, or 0 when Pedos couldn't be reached in time.
+// `wrong_account`). Each answers its status, or 0 when Farty couldn't be reached in time.
 
 /** How long one request may take before it counts as unreachable: a Toot's WAV is up to 16 MB. */
 const REQUEST_TIMEOUT_MS = 60_000

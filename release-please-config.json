@@ -4,7 +4,7 @@
   "include-component-in-tag": false,
   "include-v-in-tag": true,
   "bump-minor-pre-major": true,
-  "pull-request-title-pattern": "release: Pedos ${version}",
+  "pull-request-title-pattern": "release: Farty ${version}",
   "changelog-sections": [
     { "type": "feat", "section": "Features" },
     { "type": "fix", "section": "Fixes" },
@@ -19,7 +19,7 @@
   ],
   "packages": {
     "apps/web": {
-      "package-name": "pedos",
+      "package-name": "farty",
       "changelog-path": "CHANGELOG.md"
     }
   }
