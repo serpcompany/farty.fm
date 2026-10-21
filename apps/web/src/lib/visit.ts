@@ -55,7 +55,7 @@ export function openVisit(): { account: Promise<Account>; library: Promise<void>
 
 async function claimOnOpen(account: Promise<Account>): Promise<void> {
   const read = await account
-  if (read.status === 'signedIn') await claimLibrary(read.id).catch(() => false)
+  if (read.status === 'signedIn') await claimLibrary(read.id, read.email).catch(() => false)
 }
 
 async function startVisit(account: Promise<Account>): Promise<void> {

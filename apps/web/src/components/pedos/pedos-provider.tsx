@@ -281,8 +281,16 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         setRecordings(list => {
           if (!list) return list
           const kept = list.filter(r => !deleted.recordings.includes(r.id))
+          // A Recording not uploaded yet may come back with a new number.
+          const fresh = new Map(added.map(r => [r.id, r]))
+          const merged = kept.map(r => {
+            const renumbered = fresh.get(r.id)
+            return renumbered ? { ...r, number: renumbered.number } : r
+          })
           const ids = new Set(kept.map(r => r.id))
-          return [...kept, ...added.filter(r => !ids.has(r.id))].sort((a, b) => a.number - b.number)
+          return [...merged, ...added.filter(r => !ids.has(r.id))].sort(
+            (a, b) => a.number - b.number
+          )
         })
         setToots(list => {
           if (!list) return list

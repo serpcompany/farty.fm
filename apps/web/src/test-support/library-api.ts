@@ -23,7 +23,12 @@ export const testDb = () => createDatabase(env.DB)
 export const media = () => env.MEDIA
 
 /** Who sends a request: their session cookie (none when signed out), and the page's origin. */
-export type As = { cookie?: string; origin?: string | null }
+export type As = {
+  cookie?: string
+  origin?: string | null
+  /** The library's account the request names (`x-pedos-library`), as the browser sends it. */
+  library?: string
+}
 
 /** A user with an account and a signed-in browser. */
 export async function signUp(name: string): Promise<{ id: string; cookie: string }> {
@@ -46,9 +51,14 @@ export async function signUp(name: string): Promise<{ id: string; cookie: string
   return { id, cookie: `${TEST_SESSION_COOKIE}=${token}` }
 }
 
-function headers(method: string, { cookie, origin }: As, extra: HeadersInit = {}): Headers {
+function headers(
+  method: string,
+  { cookie, origin, library }: As,
+  extra: HeadersInit = {}
+): Headers {
   const result = new Headers(extra)
   if (cookie) result.set('cookie', cookie)
+  if (library) result.set('x-pedos-library', library)
   // Browsers send Origin with every write, and pages can't change it.
   const sent = origin === undefined ? (method === 'GET' ? null : ORIGIN) : origin
   if (sent !== null) result.set('origin', sent)

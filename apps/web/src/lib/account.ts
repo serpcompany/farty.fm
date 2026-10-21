@@ -71,9 +71,27 @@ export function libraryOwner(): string | null {
   return localStorage.getItem(accountKey)
 }
 
-/** Makes this browser's library `accountId`'s. Throws if storage is blocked. */
-export function setLibraryOwner(accountId: string): void {
+/**
+ * localStorage: the email of the account `pedos.account` is, lowercased, so the account step can
+ * tell a sign-in to another account before it clears this browser's library (`unsavedBeforeSignIn`
+ * in `library-sync.ts`).
+ */
+const accountEmailKey = 'pedos.account.email'
+
+/** The email of the account this browser's library is, if known. Throws if storage is blocked. */
+export function libraryOwnerEmail(): string | null {
+  return localStorage.getItem(accountEmailKey)
+}
+
+/**
+ * Makes this browser's library `accountId`'s, with its `email`. Without one, another account's
+ * email is forgotten and the same account's kept. Throws if storage is blocked.
+ */
+export function setLibraryOwner(accountId: string, email = ''): void {
+  const same = localStorage.getItem(accountKey) === accountId
   localStorage.setItem(accountKey, accountId)
+  if (email) localStorage.setItem(accountEmailKey, email.trim().toLowerCase())
+  else if (!same) localStorage.removeItem(accountEmailKey)
 }
 
 function hadAccount(): boolean {
@@ -88,6 +106,7 @@ function hadAccount(): boolean {
 export function forgetAccount(): void {
   try {
     localStorage.removeItem(accountKey)
+    localStorage.removeItem(accountEmailKey)
   } catch {
     // Nothing was remembered.
   }

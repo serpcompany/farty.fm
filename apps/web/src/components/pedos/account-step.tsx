@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { readStepDraft, type SignInProblem, saveStepDraft, sendCode, signIn } from '@/lib/account'
+import { unsavedBeforeSignIn } from '@/lib/library-sync'
 import { useAccount } from './account-provider'
 
 const messages: Record<SignInProblem, string> = {
@@ -19,7 +20,8 @@ const messages: Record<SignInProblem, string> = {
 /**
  * The account step (#155, the plan's §1), full screen over everything: an email, then the 6-digit
  * code sent to it, which signs in or makes the account. Not now says what a guest loses. A browser
- * whose session ended (`expired`) is asked to sign in again, and loses nothing.
+ * whose session ended (`expired`) is asked to sign in again, and loses nothing. Signing in to
+ * another account clears this device's farts not saved to the first: the step says so first.
  */
 export function AccountStep() {
   const { stepOpen } = useAccount()
@@ -36,6 +38,8 @@ function Step() {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<SignInProblem | null>(null)
+  /** Farts this device would lose by signing in as `email`, shown before its code is sent. */
+  const [unsaved, setUnsaved] = useState(0)
   const heading = useRef<HTMLHeadingElement>(null)
   const emailField = useRef<HTMLInputElement>(null)
   const codeField = useRef<HTMLInputElement>(null)
@@ -61,6 +65,25 @@ function Step() {
 
   const send = async (event: FormEvent) => {
     event.preventDefault()
+    setBusy(true)
+    setProblem(null)
+    const losing = await unsavedBeforeSignIn(email).catch(() => 0)
+    setBusy(false)
+    if (losing > 0) {
+      setUnsaved(losing)
+      return
+    }
+    await sendNow()
+  }
+
+  const goBack = () => {
+    setUnsaved(0)
+    // After the warning's buttons have gone.
+    requestAnimationFrame(() => emailField.current?.focus())
+  }
+
+  const sendNow = async () => {
+    setUnsaved(0)
     setBusy(true)
     setProblem(null)
     const sent = await sendCode(email)
@@ -113,7 +136,21 @@ function Step() {
             </p>
           </div>
 
-          {phase === 'email' ? (
+          {phase === 'email' && unsaved > 0 ? (
+            <div className="grid gap-3" data-testid="account-step-unsaved">
+              <p role="alert" className="text-center">
+                {unsaved === 1
+                  ? "1 fart on this device hasn't saved to the other account. Signing in here removes it from this device."
+                  : `${unsaved} farts on this device haven't saved to the other account. Signing in here removes them from this device.`}
+              </p>
+              <Button className="h-12 text-base" onClick={goBack}>
+                Go back
+              </Button>
+              <Button variant="secondary" className="h-12 text-base" onClick={() => void sendNow()}>
+                Sign in anyway
+              </Button>
+            </div>
+          ) : phase === 'email' ? (
             <form className="grid gap-3" onSubmit={send}>
               <label htmlFor="account-email" className="text-sm font-medium">
                 Email

@@ -9,6 +9,6 @@ export const PUT = userRoute<Params>((user, request, { id }) =>
 )
 
 /** Deletes a Recording and its WAV, leaving a tombstone. */
-export const DELETE = userRoute<Params>((user, _request, { id }) =>
-  deleteItem('recordings', requestStores(), user, id)
+export const DELETE = userRoute<Params>((user, request, { id }) =>
+  deleteItem('recordings', requestStores(), user, id, request)
 )

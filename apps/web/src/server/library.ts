@@ -89,12 +89,29 @@ const notFound = () => apiError(404, 'not_found')
 const gone = () => apiError(410, 'deleted')
 
 /**
+ * The header each of a browser's library requests names its library's account in
+ * (`pedos.account`). A library that isn't the session's account's never reads, uploads to,
+ * renames or deletes in it: a sign-in in another tab can change the cookie while this tab's
+ * requests are on their way.
+ */
+export const LIBRARY_HEADER = 'x-pedos-library'
+
+/** 409 `wrong_account` when the request names another account's library, or null. */
+function wrongLibrary(user: SessionUser, request: Request): Response | null {
+  const library = request.headers.get(LIBRARY_HEADER)
+  return library !== null && library !== user.id ? apiError(409, 'wrong_account') : null
+}
+
+/**
  * `GET /api/library/?since=`: what changed since the `cursor` an earlier answer gave (everything
  * without `since`), with the ids of Recordings and Toots deleted since. `full` says the answer
  * lists every live Recording and Toot: `since` is older than the tombstones are kept, so a browser
- * drops what it holds from the account that isn't listed.
+ * drops what it holds from the account that isn't listed. 409 when `LIBRARY_HEADER` names another
+ * account (`wrong_account`), as for every library route.
  */
 export async function getLibrary({ db }: Stores, user: SessionUser, request: Request) {
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
   const since = new URL(request.url).searchParams.get('since') ?? '0'
   if (!/^\d{1,15}$/.test(since)) return apiError(400, 'invalid_request')
   const changes = await libraryChanges(db, user.id, Number(since))
@@ -111,13 +128,6 @@ export async function getLibrary({ db }: Stores, user: SessionUser, request: Req
 }
 
 /**
- * The header a browser's upload names its library's account in (`pedos.account`). A library that
- * isn't the session's account's never uploads to it: a sign-in in another tab can change the
- * cookie while this tab's uploads are on their way.
- */
-export const LIBRARY_HEADER = 'x-pedos-library'
-
-/**
  * `PUT /api/{recordings|toots}/{id}/`: keeps a new Recording or Toot and its WAV. 201 once kept,
  * 200 if it already was (an upload that's retried changes nothing), 410 if it was deleted, 409 at
  * the limit, or when `LIBRARY_HEADER` names another account (`wrong_account`).
@@ -130,8 +140,8 @@ export async function putItem(
   request: Request
 ): Promise<Response> {
   if (!isItemId(id)) return notFound()
-  const library = request.headers.get(LIBRARY_HEADER)
-  if (library !== null && library !== user.id) return apiError(409, 'wrong_account')
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
   const { maxAudioBytes, maxItems } = LIMITS[kind]
   const upload = await readUpload(request, maxAudioBytes)
   if (upload instanceof Response) return upload
@@ -186,9 +196,12 @@ export async function deleteItem(
   kind: Kind,
   { db, media }: Stores,
   user: SessionUser,
-  id: string
+  id: string,
+  request: Request
 ): Promise<Response> {
   if (!isItemId(id)) return notFound()
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
   const before = await tombstone(db, kind, user.id, id)
   if (before === null) return notFound()
   await media.delete(audioKey(user.id, kind, id))
@@ -201,9 +214,12 @@ export async function getItemAudio(
   kind: Kind,
   { media }: Stores,
   user: SessionUser,
-  id: string
+  id: string,
+  request: Request
 ): Promise<Response> {
   if (!isItemId(id)) return notFound()
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
   const object = await media.get(audioKey(user.id, kind, id))
   if (!object) return notFound()
   return new Response(object.body, {
@@ -223,6 +239,8 @@ export async function patchToot(
   request: Request
 ): Promise<Response> {
   if (!isItemId(id)) return notFound()
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
   const body = await readJson(request)
   if (body instanceof Response) return body
   const title = parseTitle((body.json as { title?: unknown } | null)?.title)

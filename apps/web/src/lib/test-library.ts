@@ -77,6 +77,7 @@ export function fakeAccount(userId = 'user-a') {
 
   async function answer(method: string, url: URL, init: RequestInit, library: string | null) {
     const error = (status: number, code: string) => Response.json({ error: code }, { status })
+    if (library !== null && library !== userId) return error(409, 'wrong_account')
     if (url.pathname === '/api/library/') {
       const since = Number(url.searchParams.get('since') ?? '0')
       const changed = (kind: Kind) => [...items[kind].values()].filter(s => s.updatedAt >= since)
@@ -107,7 +108,6 @@ export function fakeAccount(userId = 'user-a') {
         : error(404, 'not_found')
     }
     if (method === 'PUT') {
-      if (library !== null && library !== userId) return error(409, 'wrong_account')
       if (stored?.deletedAt) return error(410, 'deleted')
       if (stored) return Response.json({ id }, { status: 200 })
       const form = init.body as FormData

@@ -481,6 +481,112 @@ test("an account's farts stay when its session ends: Pedos asks to sign in again
   expect(await reopened.evaluate(() => localStorage.getItem('pedos.account'))).toBeNull()
 })
 
+test("signing in to another account mid-visit asks nothing with nothing unsaved, and the first account's farts leave the screen", async ({
+  page,
+  context
+}, testInfo) => {
+  test.setTimeout(120_000)
+  const second = newEmail(testInfo, 'second')
+  const reopened = await expiredWithARecording(page, context, newEmail(testInfo, 'first'))
+  const step = reopened.getByRole('dialog', { name: 'Sign in again' })
+  await expect(step).toBeVisible()
+  await expect(reopened.getByTestId('recording-row')).toHaveCount(1)
+
+  await step.getByLabel('Email').fill(second)
+  await step.getByRole('button', { name: 'Send code' }).click()
+  const code = step.getByLabel('Code')
+  await expect(code).toBeFocused()
+  await expect(step.getByTestId('account-step-unsaved')).toHaveCount(0)
+  await code.fill(await codeFor(reopened, second))
+  await step.getByRole('button', { name: 'Sign in' }).click()
+
+  // Without a reload, the first account's Recording leaves the screen and this device.
+  await expect(step).toBeHidden()
+  await expect(reopened).toHaveURL(/\/recordings\/$/)
+  await expect(reopened.getByTestId('recording-row')).toHaveCount(0)
+  await expect.poll(() => recordingsStored(reopened)).toBe(0)
+  expect((await session(reopened))?.user.email).toBe(second)
+})
+
+test('signing in to another account says first how many farts here it removes, and Go back keeps them', async ({
+  page,
+  context
+}, testInfo) => {
+  test.setTimeout(150_000)
+  const first = newEmail(testInfo, 'first')
+  const second = newEmail(testInfo, 'second')
+  const reopened = await expiredWithARecording(page, context, first)
+  await reopened
+    .getByRole('dialog', { name: 'Sign in again' })
+    .getByRole('button', { name: 'Not now' })
+    .click()
+  // Made while the session has ended: it stays on this device until a sign-in.
+  await recordAndSave(reopened, 1.5)
+  await reopened.getByRole('button', { name: 'Done' }).click()
+  await expect(reopened.getByTestId('recording-row')).toHaveCount(2)
+  expect(await recordingsStored(reopened, 'outbox')).toBe(1)
+
+  await tab(reopened, 'Profile').click()
+  await reopened.getByRole('button', { name: 'Sign in again' }).click()
+  const step = reopened.getByRole('dialog', { name: 'Sign in again' })
+  await step.getByLabel('Email').fill(second)
+  await step.getByRole('button', { name: 'Send code' }).click()
+  const warning = step.getByTestId('account-step-unsaved')
+  await expect(warning.getByRole('alert')).toHaveText(
+    "1 fart on this device hasn't saved to the other account. Signing in here removes it from this device."
+  )
+  const back = warning.getByRole('button', { name: 'Go back' })
+  const anyway = warning.getByRole('button', { name: 'Sign in anyway' })
+  for (const control of [back, anyway]) await expectTappable(control)
+  await reopened.screenshot({ path: testInfo.outputPath('unsaved-farts.png') })
+
+  // Go back: the email again, and nothing removed.
+  await back.click()
+  await expect(warning).toHaveCount(0)
+  await expect(step.getByLabel('Email')).toBeFocused()
+  expect(await recordingsStored(reopened)).toBe(2)
+
+  // The account they came from, however it's typed, asks nothing.
+  await step.getByLabel('Email').fill(first.toUpperCase())
+  await step.getByRole('button', { name: 'Send code' }).click()
+  await expect(step.getByLabel('Code')).toBeFocused()
+  await step.getByRole('button', { name: 'Change email' }).click()
+
+  // Sign in anyway: the other account, and this device's farts go.
+  await step.getByLabel('Email').fill(second)
+  await step.getByRole('button', { name: 'Send code' }).click()
+  await anyway.click()
+  const code = step.getByLabel('Code')
+  await expect(code).toBeFocused()
+  await code.fill(await codeFor(reopened, second))
+  await step.getByRole('button', { name: 'Sign in' }).click()
+  await expect(step).toBeHidden()
+  await expect(reopened.getByTestId('stat-recordings')).toHaveText('Recordings0')
+  await expect.poll(() => recordingsStored(reopened)).toBe(0)
+  expect((await session(reopened))?.user.email).toBe(second)
+})
+
+test("Sign out clears Pedos's other tabs too, without a reload", async ({
+  page,
+  context
+}, testInfo) => {
+  test.setTimeout(120_000)
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, newEmail(testInfo, 'tabs'))
+  await recordAndSave(page, 1.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+  const other = await context.newPage()
+  await other.goto('/recordings/')
+  await expect(other.getByTestId('recording-row')).toHaveCount(1)
+
+  await tab(page, 'Profile').click()
+  await page.getByRole('button', { name: 'Sign out' }).click()
+  await expect(page.getByRole('button', { name: 'Save to an account' })).toBeVisible()
+  await expect(other.getByTestId('recording-row')).toHaveCount(0)
+})
+
 test("Profile retries an account it couldn't reach, and reads it again back online", async ({
   page
 }) => {
@@ -558,23 +664,44 @@ function tab(page: Page, label: string) {
     .getByRole('link', { name: label, exact: true })
 }
 
-/** How many Recordings the `pedos` database holds. */
-function recordingsStored(page: Page): Promise<number> {
-  return page.evaluate(async () => {
+/** How many Recordings (or what `store` holds) the `pedos` database holds. */
+function recordingsStored(page: Page, store = 'recordings'): Promise<number> {
+  return page.evaluate(async store => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open('pedos')
       request.onsuccess = () => resolve(request.result)
       request.onerror = () => reject(request.error)
     })
     const count = await new Promise<number>((resolve, reject) => {
-      if (!db.objectStoreNames.contains('recordings')) return resolve(0)
-      const request = db.transaction('recordings').objectStore('recordings').count()
+      if (!db.objectStoreNames.contains(store)) return resolve(0)
+      const request = db.transaction(store).objectStore(store).count()
       request.onsuccess = () => resolve(request.result)
       request.onerror = () => reject(request.error)
     })
     db.close()
     return count
-  })
+  }, store)
+}
+
+/** Waits until everything this browser changed is in the account: its outbox is empty. */
+async function uploaded(page: Page) {
+  await expect.poll(() => recordingsStored(page, 'outbox'), { timeout: 30_000 }).toBe(0)
+}
+
+/**
+ * Signs in to an account, records a fart that uploads, then ends the session and opens Pedos
+ * again on Recordings, where the step asks to sign in again.
+ */
+async function expiredWithARecording(page: Page, context: BrowserContext, email: string) {
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, email)
+  await recordAndSave(page, 1.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+  await uploaded(page)
+  await context.clearCookies()
+  return reopen(context, page)
 }
 
 /** Fakes the page going to the background (`hidden`) and coming back (`visible`). */

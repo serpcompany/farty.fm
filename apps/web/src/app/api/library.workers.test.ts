@@ -226,19 +226,11 @@ describe('one user never reaches another’s Recordings or Toots', () => {
   })
 })
 
-describe('an upload names its library’s account', () => {
+describe('every library request names its library’s account', () => {
   const upload = (cookie: string, library: string) =>
-    api.put(
-      'recordings',
-      R1,
-      uploadBody(recordingMetadata(R1), wav()),
-      { cookie },
-      {
-        headers: { 'x-pedos-library': library }
-      }
-    )
+    api.put('recordings', R1, uploadBody(recordingMetadata(R1), wav()), { cookie, library })
 
-  it('refuses one that names another account (409), and keeps nothing', async () => {
+  it('refuses an upload that names another account (409), and keeps nothing', async () => {
     const a = await signUp('A')
     const b = await signUp('B')
 
@@ -250,6 +242,37 @@ describe('an upload names its library’s account', () => {
     expect((await library(a.cookie)).recordings).toEqual([])
     expect((await library(b.cookie)).recordings).toEqual([])
     expect((await upload(a.cookie, a.id)).status).toBe(201)
+  })
+
+  // Another tab's sign-in changed the cookie to B's while A's library still sends what it queued.
+  it('refuses a read, delete, rename or download that names another account, and changes nothing', async () => {
+    const a = await signUp('A')
+    const b = await signUp('B')
+    await upload(b.cookie, b.id)
+    await api.put('toots', T1, uploadBody(tootMetadata(T1), wav()), { cookie: b.cookie })
+    const asA = { cookie: b.cookie, library: a.id }
+
+    for (const refused of [
+      await api.library(asA),
+      await api.delete('recordings', R1, asA),
+      await api.delete('toots', T1, asA),
+      await api.rename(T1, 'Not B’s', asA),
+      await api.audio('recordings', R1, asA)
+    ]) {
+      expect(refused.status).toBe(409)
+      expect(await refused.json()).toEqual({ error: 'wrong_account' })
+    }
+    const kept = await library(b.cookie)
+    expect(kept.recordings).toMatchObject([{ id: R1 }])
+    expect(kept.toots).toMatchObject([{ id: T1, title: 'Twinkle Twinkle Little Star' }])
+    expect(kept.deleted).toEqual({ recordings: [], toots: [] })
+
+    // Naming B's own library, each goes through.
+    const asB = { cookie: b.cookie, library: b.id }
+    expect((await api.library(asB)).status).toBe(200)
+    expect((await api.audio('recordings', R1, asB)).status).toBe(200)
+    expect((await api.rename(T1, 'B’s', asB)).status).toBe(200)
+    expect((await api.delete('recordings', R1, asB)).status).toBe(204)
   })
 })
 

@@ -104,9 +104,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   // Signed in, this browser's library keeps in step with the account's (#156).
   const accountId = account.status === 'signedIn' ? account.id : null
+  const accountEmail = account.status === 'signedIn' ? account.email : ''
   useEffect(() => {
-    if (accountId) return startSync(accountId, openVisit().library)
-  }, [accountId])
+    if (accountId) return startSync(accountId, accountEmail, openVisit().library)
+  }, [accountId, accountEmail])
 
   const retry = useCallback(() => {
     setAccount({ status: 'checking' })

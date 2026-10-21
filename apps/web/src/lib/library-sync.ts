@@ -1,4 +1,10 @@
-import { forgetAccount, legacyOwner, libraryOwner, setLibraryOwner } from './account'
+import {
+  forgetAccount,
+  legacyOwner,
+  libraryOwner,
+  libraryOwnerEmail,
+  setLibraryOwner
+} from './account'
 import * as api from './library-api'
 import { itemKey, type Kind, type OutboxEntry, onQueued } from './outbox'
 import { audioStore, clearLibrary, db, download } from './recording-store'
@@ -17,7 +23,7 @@ export type LibraryChange =
   | { reset: true }
   | {
       reset?: false
-      /** Recordings now here that weren't. */
+      /** Recordings now here that weren't, or with a new number. */
       recordings: Recording[]
       /** Toots now here, or with a new title. */
       toots: Toot[]
@@ -82,22 +88,22 @@ function owner(): string | null | undefined {
 }
 
 /**
- * Makes this browser's library `accountId`'s, so it can sync: true once it is. A guest's library
- * becomes the account's, and uploads. Another account's is cleared first: it never uploads to
- * this one, and its farts not uploaded yet are lost. With localStorage blocked Pedos can't tell
- * whose it is, so it never syncs.
+ * Makes this browser's library `accountId`'s (with its `email`), so it can sync: true once it is.
+ * A guest's library becomes the account's, and uploads. Another account's is cleared first: it
+ * never uploads to this one, and its farts not uploaded yet are lost, which the account step says
+ * before it signs in (`unsavedBeforeSignIn`). With localStorage blocked Pedos can't tell whose it
+ * is, so it never syncs.
  */
-export async function claimLibrary(accountId: string): Promise<boolean> {
+export async function claimLibrary(accountId: string, email = ''): Promise<boolean> {
   if (!accountId) return false
   const current = owner()
   if (current === undefined) return false
-  if (current === accountId) return true
-  if (current !== null && current !== legacyOwner) {
+  if (current !== accountId && current !== null && current !== legacyOwner) {
     await withSyncLock(clearLibrary)
     emit({ reset: true })
   }
   try {
-    setLibraryOwner(accountId)
+    setLibraryOwner(accountId, email)
     return true
   } catch {
     return false
@@ -105,14 +111,34 @@ export async function claimLibrary(accountId: string): Promise<boolean> {
 }
 
 /**
+ * How many farts (Recordings and Toots) on this device haven't uploaded to the account its library
+ * is, which signing in as `email` would clear (`claimLibrary`): none for a guest's library, or for
+ * `email`'s own. A library whose account's email isn't known counts as another's.
+ */
+export async function unsavedBeforeSignIn(email: string): Promise<number> {
+  const current = owner()
+  if (!current || current === legacyOwner) return 0
+  let ownerEmail: string | null = null
+  try {
+    ownerEmail = libraryOwnerEmail()
+  } catch {
+    // Unknown, then.
+  }
+  if (ownerEmail !== null && ownerEmail === email.trim().toLowerCase()) return 0
+  const queued = await (await db()).getAll('outbox')
+  return queued.filter(entry => entry.op === 'put').length
+}
+
+/**
  * Signs this browser out of its library: forgets whose it was and clears it, while no sync is
- * applying anything.
+ * applying anything. Pedos's other tabs show it cleared too.
  */
 export async function forgetLibrary(): Promise<void> {
   await withSyncLock(async () => {
     forgetAccount()
     await clearLibrary().catch(() => {})
   })
+  emit({ reset: true })
 }
 
 /** How a request went: on to the next, the entry refused (kept, and skipped this round), or stop. */
@@ -240,14 +266,14 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
     return 'refused'
   }
   if (taken.op === 'rename') {
-    const answer = await api.renameToot(entry.id, taken.title)
+    const answer = await api.renameToot(entry.id, taken.title, accountId)
     if (stops(answer)) return 'stop'
     if (answer.status === 410) await deleteHere(entry.kind, entry.id)
     // Renamed; or not on the account, or a title it refuses, which no retry changes.
     else await settle(entry)
     return 'next'
   }
-  const answer = await api.deleteItem(entry.kind, entry.id)
+  const answer = await api.deleteItem(entry.kind, entry.id, accountId)
   if (stops(answer)) return 'stop'
   // Deleted, or never on the account.
   await settle(entry)
@@ -275,11 +301,12 @@ async function drain(accountId: string): Promise<boolean> {
  * Reads the account's changes since this browser's last read and applies them, in one
  * transaction. What this browser still has to send wins: a Recording or Toot it's deleting stays
  * deleted, and a Toot it's uploading or renaming keeps its title. A `full` answer lists everything
- * the account has, so what's here from the account and isn't listed was deleted there.
+ * the account has, so what's here from the account and isn't listed was deleted there. Recordings
+ * not uploaded yet are numbered after the rest (`renumberWaiting`). False when nothing was read.
  */
 async function pull(accountId: string): Promise<boolean> {
   const since = (await (await db()).get('meta', 'cursor')) ?? 0
-  const answer = await api.getLibrary(since)
+  const answer = await api.getLibrary(since, accountId)
   if (!('cursor' in answer) || owner() !== accountId) return false
   const tx = (await db()).transaction(
     ['recordings', 'audio', 'toots', 'tootAudio', 'downloads', 'outbox', 'meta'],
@@ -348,6 +375,13 @@ async function pull(accountId: string): Promise<boolean> {
       }
     }
   }
+  const listed = new Set(answer.recordings.map(r => r.id))
+  const waits = (r: Recording) =>
+    pending.get(itemKey('recordings', r.id)) === 'put' && !listed.has(r.id)
+  for (const renumbered of renumberWaiting(await recordings.getAll(), waits)) {
+    await recordings.put(renumbered)
+    change.recordings.push(renumbered)
+  }
   await Promise.all([tx.objectStore('meta').put(answer.cursor, 'cursor'), tx.done])
   const changed =
     change.recordings.length +
@@ -359,14 +393,37 @@ async function pull(accountId: string): Promise<boolean> {
 }
 
 /**
+ * The Recordings `waits` says haven't uploaded, numbered after every other one, in their order:
+ * none when they already come after. A Recording's number is its name on every browser, and a
+ * Recording made here before the account's reached it, such as a guest's first one before signing
+ * in, would share a number with one of the account's.
+ */
+export function renumberWaiting(
+  all: Recording[],
+  waits: (recording: Recording) => boolean
+): Recording[] {
+  const waiting = all.filter(waits).sort((a, b) => a.number - b.number)
+  const highest = Math.max(0, ...all.filter(r => !waits(r)).map(r => r.number))
+  if (waiting.length === 0 || waiting[0].number > highest) return []
+  return waiting.map((recording, i) => ({ ...recording, number: highest + 1 + i }))
+}
+
+/**
+ * Reads the account's changes, then sends the outbox, under the lock: only once the read worked,
+ * so a Recording uploads numbered after the account's.
+ */
+async function pullThenDrain(accountId: string): Promise<void> {
+  if (await pull(accountId)) await drain(accountId)
+}
+
+/**
  * One sync, while no other tab syncs: reads the account's changes, then sends the outbox. Nothing
  * while this browser's library isn't `accountId`'s.
  */
 export async function syncOnce(accountId: string): Promise<void> {
   await withSyncLock(async () => {
     if (owner() !== accountId) return
-    await pull(accountId)
-    await drain(accountId)
+    await pullThenDrain(accountId)
   })
 }
 
@@ -384,7 +441,7 @@ export async function downloadAll(stopped: () => boolean): Promise<void> {
  * (the visit's library) and claimed, then whenever something joins the outbox, the browser comes
  * back online, or Pedos comes back into view. Returns a function that stops it.
  */
-export function startSync(accountId: string, ready: Promise<void>): () => void {
+export function startSync(accountId: string, email: string, ready: Promise<void>): () => void {
   let stopped = false
   let running = false
   let again = false
@@ -430,7 +487,7 @@ export function startSync(accountId: string, ready: Promise<void>): () => void {
 
   let stopQueued = () => {}
   ready
-    .then(() => (stopped ? false : claimLibrary(accountId)))
+    .then(() => (stopped ? false : claimLibrary(accountId, email)))
     .then(claimed => {
       if (!claimed || stopped) return
       stopQueued = onQueued(trigger)
@@ -449,12 +506,13 @@ export function startSync(accountId: string, ready: Promise<void>): () => void {
 }
 
 /**
- * Before signing out: sends what's left in the outbox, after any sync already running. The
- * number of entries still waiting: none means everything this browser made is on the account.
+ * Before signing out: reads the account's changes and sends what's left in the outbox, after any
+ * sync already running. The number of entries still waiting: none means everything this browser
+ * made is on the account.
  */
 export async function uploadBeforeSignOut(accountId: string): Promise<number> {
   return withSyncLock(async () => {
-    if (owner() === accountId) await drain(accountId)
+    if (owner() === accountId) await pullThenDrain(accountId)
     return (await db()).count('outbox')
   })
 }

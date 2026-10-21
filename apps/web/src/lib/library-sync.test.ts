@@ -208,6 +208,15 @@ describe('claimLibrary', () => {
     expect(await page.store.loadRecordings()).toHaveLength(1)
   })
 
+  it("remembers the account's email, and forgets another account's", async () => {
+    expect(await page.sync.claimLibrary('user-a', ' A@Example.com ')).toBe(true)
+    expect(localStorage.getItem('pedos.account.email')).toBe('a@example.com')
+    expect(await page.sync.claimLibrary('user-a')).toBe(true)
+    expect(localStorage.getItem('pedos.account.email')).toBe('a@example.com')
+    expect(await page.sync.claimLibrary('user-b')).toBe(true)
+    expect(localStorage.getItem('pedos.account.email')).toBeNull()
+  })
+
   it("claims nothing without an id, or where it can't remember whose it is", async () => {
     expect(await page.sync.claimLibrary('')).toBe(false)
     vi.stubGlobal('localStorage', blockedStorage())
@@ -241,8 +250,8 @@ describe('uploading', () => {
   it('stops uploading once the library is claimed by another account', async () => {
     await recorded(1)
     await recorded(2)
-    account.intercept = () => {
-      claimedBy('user-b')
+    account.intercept = sent => {
+      if (sent.method === 'PUT') claimedBy('user-b')
       return undefined
     }
     await page.sync.uploadBeforeSignOut('user-a')
@@ -258,7 +267,15 @@ describe('uploading', () => {
   })
 
   it.each([
-    ['is offline', () => (account.offline = true)],
+    [
+      'is unreachable',
+      () => {
+        account.intercept = sent => {
+          if (sent.method === 'PUT') throw new TypeError('Failed to fetch')
+          return undefined
+        }
+      }
+    ],
     ['answers 401', () => refuse('PUT', 401, 'unauthorized')],
     ['answers 503', () => refuse('PUT', 503, 'unavailable')],
     ['names another account', () => refuse('PUT', 409, 'wrong_account')]
@@ -268,6 +285,51 @@ describe('uploading', () => {
     fail()
     expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(2)
     expect(requests('PUT')).toHaveLength(1)
+  })
+
+  // A Recording uploads numbered after the account's, which only a read tells.
+  it.each([
+    ['is offline', () => (account.offline = true)],
+    ['names another account', () => refuse('GET', 409, 'wrong_account')]
+  ])('uploads nothing until it has read the account: not when Pedos %s', async (_, fail) => {
+    await recorded(1)
+    fail()
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    await page.sync.syncOnce('user-a')
+    expect(requests('PUT')).toEqual([])
+    expect(account.sent.map(s => s.library)).toEqual(account.sent.map(() => 'user-a'))
+  })
+
+  it('names the library’s account in every request', async () => {
+    const recording = await recorded(1)
+    const saved = toot()
+    await page.toots.saveToot(saved, wav(9))
+    await page.sync.syncOnce('user-a')
+    await page.toots.renameToot(saved.id, 'Renamed')
+    await page.store.deleteRecording(recording.id)
+    const made = toot()
+    account.add('toots', made, wav(6))
+    await page.sync.syncOnce('user-a')
+    await page.toots.loadTootAudio(made.id)
+    expect(new Set(account.sent.map(s => s.method))).toEqual(
+      new Set(['GET', 'PUT', 'PATCH', 'DELETE'])
+    )
+    expect(account.sent.some(s => s.path.endsWith('/audio/'))).toBe(true)
+    expect(account.sent.map(s => s.library)).toEqual(account.sent.map(() => 'user-a'))
+  })
+
+  it.each([
+    ['rename', 'PATCH'],
+    ['delete', 'DELETE']
+  ])('stops, keeping it queued, when a %s names another account', async (_, method) => {
+    const saved = toot()
+    await page.toots.saveToot(saved, wav(9))
+    await page.sync.syncOnce('user-a')
+    if (method === 'PATCH') await page.toots.renameToot(saved.id, 'Renamed')
+    else await page.toots.deleteToot(saved.id)
+    refuse(method, 409, 'wrong_account')
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    expect(await outbox()).toEqual([expect.objectContaining({ id: saved.id })])
   })
 
   it('keeps a refused upload queued, and sends the rest', async () => {
@@ -467,11 +529,80 @@ describe('reading the account', () => {
 })
 
 describe('forgetLibrary', () => {
-  it('clears this browser, and forgets whose library it was', async () => {
-    claimedBy('user-a')
+  it('clears this browser, forgets whose library it was, and tells the other tabs', async () => {
+    await page.sync.claimLibrary('user-a', 'a@example.com')
     await recorded()
+    const changes: LibraryChange[] = []
+    page.sync.onLibraryChanged(change => changes.push(change))
     await page.sync.forgetLibrary()
     expect(localStorage.getItem('pedos.account')).toBeNull()
+    expect(localStorage.getItem('pedos.account.email')).toBeNull()
     expect(await page.store.loadRecordings()).toEqual([])
+    expect(changes).toEqual([{ reset: true }])
+  })
+})
+
+describe('a guest who records, then signs in', () => {
+  // The account step comes after the first Result (#150): a new browser's first Recording is a
+  // guest's Recording 1, and the account may have its own.
+  it("numbers the guest's Recordings after the account's, here and on the account", async () => {
+    const first = await recorded(1)
+    const second = await recorded(2)
+    expect([first.number, second.number]).toEqual([1, 2])
+    account.add('recordings', theirs(1), wav(5))
+    account.add('recordings', theirs(2), wav(6))
+    account.add('recordings', theirs(3), wav(7))
+    const changes: LibraryChange[] = []
+    page.sync.onLibraryChanged(change => changes.push(change))
+
+    expect(await page.sync.claimLibrary('user-a', 'a@example.com')).toBe(true)
+    await page.sync.syncOnce('user-a')
+
+    const numbers = (await page.store.loadRecordings()).map(r => r.number)
+    expect(numbers).toEqual([1, 2, 3, 4, 5])
+    expect(account.get('recordings', first.id)?.item).toMatchObject({ number: 4 })
+    expect(account.get('recordings', second.id)?.item).toMatchObject({ number: 5 })
+    expect(changes).toHaveLength(1)
+    expect(changes[0]).toMatchObject({
+      recordings: expect.arrayContaining([
+        expect.objectContaining({ id: first.id, number: 4 }),
+        expect.objectContaining({ id: second.id, number: 5 })
+      ])
+    })
+  })
+
+  it('keeps the numbers of Recordings that already come after the account’s', async () => {
+    const mine = await recorded(1)
+    await recorded(2)
+    await page.store.deleteRecording(mine.id)
+    account.add('recordings', theirs(1), wav(5))
+    await page.sync.claimLibrary('user-a')
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings()).map(r => r.number)).toEqual([1, 2])
+  })
+})
+
+describe('unsavedBeforeSignIn', () => {
+  it('counts the farts not uploaded that signing in to another account would clear', async () => {
+    await page.sync.claimLibrary('user-a', 'a@example.com')
+    await recorded(1)
+    await page.toots.saveToot(toot(), wav(9))
+    expect(await page.sync.unsavedBeforeSignIn('b@example.com')).toBe(2)
+    // The same account keeps them, however its email is typed.
+    expect(await page.sync.unsavedBeforeSignIn(' A@example.COM ')).toBe(0)
+  })
+
+  it('counts nothing for a guest, or once everything uploaded', async () => {
+    await recorded(1)
+    expect(await page.sync.unsavedBeforeSignIn('b@example.com')).toBe(0)
+    await page.sync.claimLibrary('user-a', 'a@example.com')
+    await page.sync.syncOnce('user-a')
+    expect(await page.sync.unsavedBeforeSignIn('b@example.com')).toBe(0)
+  })
+
+  it("counts a library's farts whose account's email isn't known", async () => {
+    claimedBy('user-a')
+    await recorded(1)
+    expect(await page.sync.unsavedBeforeSignIn('a@example.com')).toBe(1)
   })
 })

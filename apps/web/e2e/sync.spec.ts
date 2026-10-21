@@ -6,7 +6,8 @@ import { recordAndSave, withFakeMicrophone } from './record'
 
 // One account in two browsers (#156), at phone size on the Staging build, which has the Fixture
 // Library to unlock Songs. Each browser plays the Recording and the Toot the other made, with the
-// WAV the other uploaded, byte for byte, and a delete in one shows in the other.
+// WAV the other uploaded, byte for byte, and a rename or delete in one shows in the other. A
+// guest's Recording joins the account numbered after the account's.
 
 const g3 = '090__carlosramon__17-pet__186119.wav'
 withFakeMicrophone(g3)
@@ -163,6 +164,23 @@ test("two browsers signed in to one account play each other's farts, and see eac
     expect(await stored(b, 'toots')).toBe(1)
   })
 
+  await test.step('A renames a Toot, and B shows the new name once it comes back, without a reload', async () => {
+    const renamed = 'Lamb, from A'
+    await a.getByRole('button', { name: `More for ${mary.title}` }).click()
+    await a.getByRole('menuitem', { name: 'Rename' }).click()
+    const dialog = a.getByRole('alertdialog', { name: 'Rename' })
+    await dialog.getByRole('textbox', { name: 'Name' }).fill(renamed)
+    await dialog.getByRole('button', { name: 'Save' }).click()
+    await expect(a.getByRole('button', { name: `Play ${renamed}` })).toBeVisible()
+    await uploaded(a)
+
+    await comeBack(b)
+    await expect(b).toHaveURL(/:\d+\/$/)
+    await tab(b, 'Toots').click()
+    await expect(b.getByRole('button', { name: `Play ${renamed}` })).toBeVisible()
+    await expect(b.getByTestId('toot-row')).toHaveCount(1)
+  })
+
   await test.step("B deletes A's Recording, and it's gone from A once A comes back, and after a reload", async () => {
     await tab(b, 'Recordings').click()
     await tab(a, 'Recordings').click()
@@ -184,6 +202,73 @@ test("two browsers signed in to one account play each other's farts, and see eac
 
   // The evidence for the PR: what was heard, with its WAV's size and SHA-256.
   writeFileSync(testInfo.outputPath('heard.json'), JSON.stringify(heard, null, 2))
+  expect(await a.evaluate(() => window.__unhandled)).toEqual([])
+  expect(await b.evaluate(() => window.__unhandled)).toEqual([])
+  await other.close()
+})
+
+test("a guest's Recording joins the account numbered after the account's, in both browsers", async ({
+  context,
+  browser,
+  baseURL,
+  httpCredentials,
+  viewport,
+  userAgent,
+  deviceScaleFactor,
+  isMobile,
+  hasTouch
+}, testInfo) => {
+  test.setTimeout(180_000)
+  const email = newEmail(testInfo, 'numbers')
+  const other = await browser.newContext({
+    baseURL,
+    httpCredentials,
+    viewport,
+    userAgent,
+    deviceScaleFactor,
+    isMobile,
+    hasTouch,
+    serviceWorkers: 'block'
+  })
+  for (const browserContext of [context, other]) await listenToThePage(browserContext)
+  const a = await context.newPage()
+  const b = await other.newPage()
+  const row = (page: Page, n: number) =>
+    page.getByRole('button', { name: new RegExp(`^Recording ${n}, `) })
+
+  await test.step('A signs in and records Recording 1', async () => {
+    await a.goto('/')
+    await signInByApi(a, email)
+    await recordAndSave(a, 1.5)
+    await a.getByRole('button', { name: 'Done' }).click()
+    await expect(row(a, 1)).toBeVisible()
+    await uploaded(a)
+  })
+
+  await test.step('B records as a guest, its own Recording 1, then signs in to the account', async () => {
+    await recordAndSave(b, 1.5)
+    await b.getByRole('button', { name: 'Done' }).click()
+    await expect(row(b, 1)).toBeVisible()
+    await signInByApi(b, email)
+    await b.reload()
+    await expect(b.getByTestId('recording-row')).toHaveCount(2)
+    await expect(row(b, 1)).toHaveCount(1)
+    await expect(row(b, 2)).toHaveCount(1)
+    await uploaded(b)
+    await b.screenshot({ path: testInfo.outputPath('b-numbers.png') })
+  })
+
+  await test.step('A shows the two Recordings, numbered 1 and 2', async () => {
+    await comeBack(a)
+    await tab(a, 'Recordings').click()
+    await expect(a.getByTestId('recording-row')).toHaveCount(2)
+    await expect(row(a, 1)).toHaveCount(1)
+    await expect(row(a, 2)).toHaveCount(1)
+    await a.reload()
+    await expect(row(a, 1)).toHaveCount(1)
+    await expect(row(a, 2)).toHaveCount(1)
+  })
+
   expect(await a.evaluate(() => window.__unhandled)).toEqual([])
   expect(await b.evaluate(() => window.__unhandled)).toEqual([])
   await other.close()

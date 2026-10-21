@@ -6,6 +6,7 @@ import {
   openDB,
   type StoreNames
 } from 'idb'
+import { libraryOwner } from './account'
 import { getAudio } from './library-api'
 import {
   announceQueued,
@@ -155,12 +156,9 @@ type OutboxStore = IDBPObjectStore<PedosDB, StoreNames<PedosDB>[], 'outbox', 're
 
 /**
  * Adds `op` on a Recording or Toot to the outbox, in the transaction that makes the change, so the
- * change and its entry are written together or not at all.
- */
-/**
- * Queues a change in its write's transaction. A write names `outbox` before its first request: a
- * store asked for once a request has aborted the transaction throws there and then, leaving the
- * requests already made, and `tx.done`, unhandled.
+ * change and its entry are written together or not at all. A write names `outbox` before its
+ * first request: a store asked for once a request has aborted the transaction throws there and
+ * then, leaving the requests already made, and `tx.done`, unhandled.
  */
 export async function queue(
   outbox: OutboxStore,
@@ -295,7 +293,15 @@ async function fetchDownload(kind: Kind, id: string): Promise<Download> {
     // Another tab may have stored it meanwhile.
     return (await database.get(audioStore[kind], id)) ?? 'missing'
   }
-  const wav = await getAudio(kind, id)
+  // Only from the account this library is.
+  let accountId: string | null = null
+  try {
+    accountId = libraryOwner()
+  } catch {
+    // Storage is blocked: a library that never syncs has nothing to download.
+  }
+  if (!accountId) return 'failed'
+  const wav = await getAudio(kind, id, accountId)
   if (!(wav instanceof ArrayBuffer) && wav.status !== 404) return 'failed'
   const tx = (await db()).transaction([kind, audioStore[kind], 'downloads'], 'readwrite')
   // Only for an item still waiting for it: a delete or a sign-out meanwhile wins, and another
