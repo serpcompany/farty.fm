@@ -13,6 +13,7 @@
   "navigationDividerColorDark": "#ffffff",
   "backgroundColor": "#ffffff",
   "startUrl": "/",
+  "fullScopeUrl": "https://pedos.app/",
   "iconUrl": "https://pedos.app/icon.png",
   "maskableIconUrl": "https://pedos.app/icons/maskable-512.png",
   "webManifestUrl": "https://pedos.app/manifest.webmanifest",

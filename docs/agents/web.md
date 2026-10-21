@@ -96,10 +96,10 @@ One line each is in `apps/web/AGENTS.md`. The detail:
 
 **The agent, after:**
 
-1. Generate the upload keystore at `~/.config/pedos/android-upload.keystore` (alias `upload`) with its password in the owner's keychain, never printed. Run `bubblewrap build` from `android/` for the signed `.aab`, and hand it to the owner to upload.
-2. Add `apps/web/public/.well-known/assetlinks.json` with the Play app-signing SHA-256 from Play Console (Setup, App signing), plus a `scripts/smoke.sh` check that it serves as JSON on Production.
+1. Generate the upload keystore at `~/.config/pedos/android-upload.keystore` (alias `upload`) with its password in the owner's keychain, never printed. Run `bubblewrap build` from `android/` for the signed `.aab`, and hand it to the owner to upload. If Bubblewrap doesn't expand `~` in `signingKey.path`, use the absolute path for that build and don't commit it.
+2. Add `apps/web/public/.well-known/assetlinks.json` with the Play app-signing SHA-256 from Play Console (Setup, App signing), plus an `apps/web/scripts/smoke.sh` check that it serves as JSON on Production.
 3. Draft the store listing from `docs/app-store/metadata.md` and take phone-size screenshots.
-4. Data safety: Recordings are saved to the account in the cloud when signed in, and otherwise kept only for the visit.
+4. Data safety: when signed in, Recordings (audio), Toots and the email address are stored with the account on Cloudflare and deleted with it, so the form declares audio as collected. Without an account, nothing personal is collected. Anonymous error reports and usage (#126) are declared too.
 
 Most updates ship by deploying the site, with no new upload. Upload a new `.aab` (raise `appVersionCode`) only when `android/twa-manifest.json` changes.
 
