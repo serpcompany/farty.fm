@@ -69,7 +69,11 @@ export const account = sqliteTable(
   table => [index('account_user_id_idx').on(table.userId)]
 )
 
-/** Sign-in codes waiting to be used, keyed by email. Better Auth stores a hash, never the code. */
+/**
+ * Sign-in codes waiting to be used, keyed by email. Better Auth's emailOTP plugin stores the code
+ * as plain text by default (`storeOTP: 'plain'`), so #152 must set `storeOTP` to hash it, as
+ * serp.app does.
+ */
 export const verification = sqliteTable(
   'verification',
   {
