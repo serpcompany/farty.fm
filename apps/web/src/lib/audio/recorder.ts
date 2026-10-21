@@ -1,4 +1,5 @@
 import type { PcmAudio } from '@/lib/wav'
+import { type CaptureBatch, type CaptureCommand, captureProcessorSource } from './capture-processor'
 import { audioContext, setAudioSession } from './context'
 
 /** A take in progress. `stop` returns the raw microphone audio; `cancel` throws it away. */
@@ -9,46 +10,50 @@ export type Take = {
 
 export class MicrophoneDeniedError extends Error {}
 
-/**
- * Copies the microphone's samples to the page in 4096-frame batches. An AudioWorklet runs on the
- * audio thread, so a busy page can't drop samples the way a ScriptProcessorNode can.
- */
-const captureProcessor = `
-class PedosCapture extends AudioWorkletProcessor {
-  constructor() {
-    super()
-    this.batch = new Float32Array(4096)
-    this.filled = 0
-    this.port.onmessage = () => {
-      this.port.postMessage({ samples: this.batch.slice(0, this.filled), done: true })
-      this.filled = 0
-    }
-  }
-  process(inputs) {
-    const channel = inputs[0] && inputs[0][0]
-    if (!channel) return true
-    let read = 0
-    while (read < channel.length) {
-      const n = Math.min(channel.length - read, this.batch.length - this.filled)
-      this.batch.set(channel.subarray(read, read + n), this.filled)
-      this.filled += n
-      read += n
-      if (this.filled === this.batch.length) {
-        this.port.postMessage({ samples: this.batch.slice(), done: false })
-        this.filled = 0
-      }
-    }
-    return true
-  }
+/** The microphone was let go, by `releaseMicrophone`, before the take began. */
+export class MicrophoneReleasedError extends Error {}
+
+/** An open microphone: one stream, source and capture node, kept between takes. */
+type Microphone = {
+  context: AudioContext
+  stream: MediaStream
+  source: MediaStreamAudioSourceNode
+  node: AudioWorkletNode
+  mute: GainNode
+  /** An interruption muted the track or stopped the context, so the next tap opens it afresh. */
+  interrupted: boolean
+  /** Stops listening to the shared context. */
+  unwatch(): void
 }
-registerProcessor('pedos-capture', PedosCapture)
-`
+
+/** A take being captured, with what's waiting on it. */
+type Capturing = {
+  id: number
+  chunks: Float32Array[]
+  began(): void
+  finished: (() => void) | null
+  lost(): void
+}
+
+let microphone: Microphone | null = null
+let opening: Promise<Microphone> | null = null
+/** Counts `releaseMicrophone` calls, so a microphone that opens after one is let go at once. */
+let generation = 0
+/** The microphone opened in this page, so permission was granted. */
+let granted = false
+let capturing: Capturing | null = null
+let takes = 0
+/** How many Record screens keep the microphone open: one, or none. */
+let keepers = 0
+
+/** A take that hasn't sent its first batch by now, with the microphone open, didn't start. */
+const firstBatchTimeoutMs = 3000
 
 const loadedContexts = new WeakSet<BaseAudioContext>()
 
 async function loadCaptureProcessor(context: AudioContext): Promise<void> {
   if (loadedContexts.has(context)) return
-  const url = URL.createObjectURL(new Blob([captureProcessor], { type: 'text/javascript' }))
+  const url = URL.createObjectURL(new Blob([captureProcessorSource], { type: 'text/javascript' }))
   try {
     await context.audioWorklet.addModule(url)
     loadedContexts.add(context)
@@ -58,36 +63,78 @@ async function loadCaptureProcessor(context: AudioContext): Promise<void> {
 }
 
 /**
- * Opens the microphone and starts capturing. Call it from a tap: Safari only starts audio then.
- * The browser's voice processing is turned off, because echo cancellation, noise suppression and
- * gain control would bend the pitch and level of the fart.
+ * Whether the microphone can open without asking: it opened in this page already, or the
+ * Permissions API says it's granted. Where the browser can't tell, it asks on the first tap.
  */
-export async function startTake(onInterrupted: () => void): Promise<Take> {
+export async function microphoneGranted(): Promise<boolean> {
+  if (granted) return true
+  try {
+    const status = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+    return status.state === 'granted'
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Opens the microphone, or returns the one that's open or opening. It stays open between takes
+ * until `releaseMicrophone`. The browser's voice processing is turned off, because echo
+ * cancellation, noise suppression and gain control would bend the pitch and level of the fart.
+ */
+export function openMicrophone(): Promise<Microphone> {
+  if (microphone) return Promise.resolve(microphone)
+  if (!opening) {
+    const thisOpening = connect(generation)
+    opening = thisOpening
+    thisOpening.then(
+      opened => {
+        if (opening === thisOpening) {
+          opening = null
+          microphone = opened
+        }
+      },
+      () => {
+        if (opening === thisOpening) opening = null
+      }
+    )
+  }
+  return opening
+}
+
+const microphoneConstraints: MediaStreamConstraints = {
+  audio: {
+    channelCount: 1,
+    echoCancellation: false,
+    noiseSuppression: false,
+    autoGainControl: false
+  }
+}
+
+async function connect(openedIn: number): Promise<Microphone> {
   const context = audioContext()
   setAudioSession('play-and-record')
   let stream: MediaStream
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        channelCount: 1,
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false
-      }
-    })
+    stream = await navigator.mediaDevices.getUserMedia(microphoneConstraints)
   } catch (error) {
+    if (openedIn !== generation) throw new MicrophoneReleasedError()
     setAudioSession('playback')
     if (error instanceof DOMException && error.name === 'NotAllowedError') {
       throw new MicrophoneDeniedError()
     }
     throw error
   }
+  granted = true
 
   try {
-    await context.resume()
+    if (openedIn !== generation) throw new MicrophoneReleasedError()
+    // Outside a tap this may not start the context; the next Record tap does.
+    context.resume().catch(() => {})
     await loadCaptureProcessor(context)
+    if (openedIn !== generation) throw new MicrophoneReleasedError()
   } catch (error) {
-    release(stream)
+    for (const track of stream.getTracks()) track.stop()
+    if (openedIn === generation) setAudioSession('playback')
     throw error
   }
 
@@ -97,56 +144,209 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
   const mute = context.createGain()
   mute.gain.value = 0
   source.connect(node).connect(mute).connect(context.destination)
-
-  const chunks: Float32Array[] = []
-  let finish: (() => void) | null = null
-  node.port.onmessage = (event: MessageEvent<{ samples: Float32Array; done: boolean }>) => {
-    chunks.push(event.data.samples)
-    if (event.data.done) finish?.()
+  // Siri, an alarm or a call banner on iPhone mutes the track, or stops the context, without
+  // ending it. The ring would then hold silence, or audio from before the interruption, so it's
+  // emptied, and the next tap opens the microphone afresh.
+  const interrupt = () => {
+    opened.interrupted = true
+    send(node, { type: 'flush' })
+  }
+  let running = context.state === 'running'
+  const contextChanged = () => {
+    if (running && context.state !== 'running') interrupt()
+    running = context.state === 'running'
+  }
+  context.addEventListener('statechange', contextChanged)
+  const opened: Microphone = {
+    context,
+    stream,
+    source,
+    node,
+    mute,
+    interrupted: false,
+    unwatch: () => context.removeEventListener('statechange', contextChanged)
   }
 
-  let ended = false
-  const end = () => {
-    if (ended) return false
-    ended = true
-    source.disconnect()
-    node.disconnect()
-    mute.disconnect()
-    release(stream)
-    return true
+  node.port.onmessage = (event: MessageEvent<CaptureBatch>) => {
+    const take = capturing
+    if (!take || event.data.take !== take.id) return
+    take.chunks.push(event.data.samples)
+    take.began()
+    if (event.data.done) take.finished?.()
   }
-  // A call or another app taking the microphone ends the track: the take is lost.
+  // A call or another app taking the microphone ends the track: a take in progress is lost.
   for (const track of stream.getAudioTracks()) {
     track.onended = () => {
-      if (end()) onInterrupted()
+      if (microphone === opened) releaseMicrophone()
+    }
+    track.onmute = interrupt
+  }
+  return opened
+}
+
+/** Whether an interruption has left the open microphone's track silent or its ring stale. */
+function interrupted(mic: Microphone): boolean {
+  return mic.interrupted || mic.stream.getAudioTracks().some(track => track.muted)
+}
+
+/**
+ * Closes the microphone and puts the audio session back to playback, so sound plays at full
+ * volume on iPhone. A take in progress is lost, and one still opening the microphone fails.
+ */
+export function releaseMicrophone(): void {
+  generation += 1
+  opening = null
+  const lost = capturing
+  capturing = null
+  lost?.lost()
+  const closing = microphone
+  microphone = null
+  if (closing) {
+    closing.unwatch()
+    // Ends the processor, which would otherwise run on the audio thread until the page closes.
+    send(closing.node, { type: 'close' })
+    closing.source.disconnect()
+    closing.node.disconnect()
+    closing.mute.disconnect()
+    closing.node.port.onmessage = null
+    for (const track of closing.stream.getTracks()) track.stop()
+  }
+  setAudioSession('playback')
+}
+
+function send(node: AudioWorkletNode, command: CaptureCommand): void {
+  node.port.postMessage(command)
+}
+
+/**
+ * Starts a take on the open microphone, opening it first if it isn't. Call it from a tap: Safari
+ * only starts audio then. It resolves once the first batch arrives, so audio is being captured,
+ * and the take begins with the pre-roll from before the tap. `onInterrupted` runs if the
+ * microphone is lost during the take.
+ */
+export async function startTake(onInterrupted: () => void): Promise<Take> {
+  // Before the first await, so it counts as part of the tap.
+  audioContext()
+    .resume()
+    .catch(() => {})
+  if (microphone && !capturing && interrupted(microphone)) releaseMicrophone()
+  const mic = await openMicrophone()
+
+  takes += 1
+  const id = takes
+  let begin = () => {}
+  let fail = (_: Error) => {}
+  const started = new Promise<void>((resolve, reject) => {
+    begin = resolve
+    fail = reject
+  })
+  let inProgress = false
+  const take: Capturing = {
+    id,
+    chunks: [],
+    began: () => begin(),
+    finished: null,
+    lost: () => {
+      if (inProgress) onInterrupted()
+      else fail(new MicrophoneReleasedError())
     }
   }
+  capturing = take
+  send(mic.node, { type: 'start', take: id })
+
+  const timeout = setTimeout(
+    () => fail(new Error('No audio from the microphone')),
+    firstBatchTimeoutMs
+  )
+  try {
+    await started
+  } catch (error) {
+    if (capturing === take) {
+      capturing = null
+      send(mic.node, { type: 'cancel', take: id })
+    }
+    throw error
+  } finally {
+    clearTimeout(timeout)
+  }
+  inProgress = true
 
   return {
     async stop() {
-      // Ask the processor for its last partial batch before letting go of the microphone.
-      await new Promise<void>(resolve => {
-        finish = resolve
-        node.port.postMessage('flush')
-        setTimeout(resolve, 500)
-      })
-      end()
-      const length = chunks.reduce((sum, chunk) => sum + chunk.length, 0)
+      if (capturing === take) {
+        // Ask the processor for its last partial batch.
+        await new Promise<void>(resolve => {
+          take.finished = resolve
+          send(mic.node, { type: 'stop', take: id })
+          setTimeout(resolve, 500)
+        })
+        if (capturing === take) capturing = null
+      }
+      const length = take.chunks.reduce((sum, chunk) => sum + chunk.length, 0)
       const samples = new Float32Array(length)
       let at = 0
-      for (const chunk of chunks) {
+      for (const chunk of take.chunks) {
         samples.set(chunk, at)
         at += chunk.length
       }
-      return { samples, sampleRate: context.sampleRate }
+      return { samples, sampleRate: mic.context.sampleRate }
     },
     cancel() {
-      end()
+      if (capturing !== take) return
+      capturing = null
+      send(mic.node, { type: 'cancel', take: id })
     }
   }
 }
 
-function release(stream: MediaStream): void {
+/**
+ * Keeps the microphone open while the Record screen shows, so a tap starts capturing at once and
+ * the take has its pre-roll. It opens only when permission is already granted, so Pedos doesn't
+ * ask as soon as it opens; otherwise the first tap opens it. Hiding the page lets it go, and
+ * showing the page again opens it. Returns the function that lets it go.
+ */
+export function keepMicrophoneOpen(): () => void {
+  let kept = true
+  keepers += 1
+  const open = async () => {
+    if (!(await microphoneGranted())) return
+    if (kept && document.visibilityState === 'visible') openMicrophone().catch(() => {})
+  }
+  const visibilityChanged = () => {
+    if (document.visibilityState === 'hidden') releaseMicrophone()
+    else void open()
+  }
+  void open()
+  document.addEventListener('visibilitychange', visibilityChanged)
+  window.addEventListener('pagehide', releaseMicrophone)
+  return () => {
+    kept = false
+    keepers -= 1
+    document.removeEventListener('visibilitychange', visibilityChanged)
+    window.removeEventListener('pagehide', releaseMicrophone)
+    releaseMicrophone()
+  }
+}
+
+/**
+ * Asks for the microphone before the first take, as Welcome does. Over the Record screen it opens
+ * the microphone and keeps it, so the first tap captures at once with its pre-roll; anywhere else
+ * it closes it again. Throws `MicrophoneDeniedError` when the person says no.
+ */
+export async function askForMicrophone(): Promise<void> {
+  if (keepers > 0) {
+    await openMicrophone()
+    return
+  }
+  let stream: MediaStream
+  try {
+    stream = await navigator.mediaDevices.getUserMedia(microphoneConstraints)
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'NotAllowedError') {
+      throw new MicrophoneDeniedError()
+    }
+    throw error
+  }
   for (const track of stream.getTracks()) track.stop()
-  setAudioSession('playback')
+  granted = true
 }

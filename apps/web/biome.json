@@ -15,7 +15,8 @@
       "!.wrangler",
       "!e2e/results",
       "!e2e/report",
-      "!cloudflare-env.d.ts"
+      "!cloudflare-env.d.ts",
+      "!drizzle"
     ]
   },
   "formatter": {

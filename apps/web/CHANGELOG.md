@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/serpcompany/pedos-app/compare/v1.1.0...v1.1.1) (2026-10-21)
+
+
+### Fixes
+
+* Record captures from the tap and keeps short farts ([#159](https://github.com/serpcompany/pedos-app/issues/159)) ([4583297](https://github.com/serpcompany/pedos-app/commit/45832970b1bcece9d3fdf75eb6c7df2fd662b280))
+
 ## [1.1.0](https://github.com/serpcompany/pedos-app/compare/v1.0.0...v1.1.0) (2026-10-21)
 
 
