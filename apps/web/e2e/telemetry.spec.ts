@@ -1,24 +1,19 @@
 import { expect, type Page, type Request, test } from '@playwright/test'
 
-// Error reports and usage (#126): what the browser sends to /api/telemetry/, that Profile's switch
-// and Global Privacy Control stop all of it, and the Web Analytics beacon, Production's only.
+// Error reports (#126): what the browser sends to /api/telemetry/, and that Profile's switch and
+// Global Privacy Control stop it. Analytics are Cloudflare's automatic Web Analytics, at the edge:
+// nothing in the app to test.
 //
 // Most of it runs on Staging's build or `next dev`, which have the synthetic triggers on
-// /dev/telemetry/ and no beacon. With E2E_SITE_ENV=production, against the Production build's
-// preview (E2E_BASE_URL), only the beacon's tests run, and the triggers' page must be gone.
+// /dev/telemetry/. With E2E_SITE_ENV=production, against the Production build's preview
+// (E2E_BASE_URL), only the check that the triggers' page is gone runs.
 
 const production = process.env.E2E_SITE_ENV === 'production'
 const SECRET = 'test@example.com'
-const SWITCH = 'Share anonymous error reports and usage'
-const BEACON = 'https://static.cloudflareinsights.com/beacon.min.js'
+const SWITCH = 'Share anonymous error reports'
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
-  // Never load Cloudflare's real beacon or send it a visit: a stand-in records that it loaded.
-  await page.route('https://static.cloudflareinsights.com/**', route =>
-    route.fulfill({ contentType: 'text/javascript', body: 'window.beaconLoaded = true' })
-  )
-  await page.route('**/cdn-cgi/rum**', route => route.fulfill({ status: 204 }))
 })
 
 /** Every request this page makes to the error report route, from now on. */
@@ -28,15 +23,6 @@ function reportsFrom(page: Page): Request[] {
     if (new URL(request.url()).pathname === '/api/telemetry/') sent.push(request)
   })
   return sent
-}
-
-/** Every request for Cloudflare's beacon, from now on. */
-function beaconLoadsFrom(page: Page): Request[] {
-  const loads: Request[] = []
-  page.on('request', request => {
-    if (request.url().startsWith('https://static.cloudflareinsights.com/')) loads.push(request)
-  })
-  return loads
 }
 
 /** Waits long enough for a report the page would send to have gone. */
@@ -150,50 +136,10 @@ test.describe('error reports', () => {
     await aMoment(page)
     expect(sent).toEqual([])
   })
-
-  test('this build loads no Web Analytics beacon', async ({ page }) => {
-    const loads = beaconLoadsFrom(page)
-    for (const path of ['/', '/profile/', '/privacy/']) {
-      await page.goto(path)
-      await aMoment(page)
-    }
-    await expect(page.locator('script[src*="cloudflareinsights"]')).toHaveCount(0)
-    expect(loads).toEqual([])
-  })
 })
 
-test.describe('the Web Analytics beacon, in Production', () => {
-  test.skip(!production, 'Only the Production build has a beacon')
-
-  test("loads with pedos.app's token, and goes with the switch", async ({ page }) => {
-    const loads = beaconLoadsFrom(page)
-    await page.goto('/')
-    const beacon = page.locator(`script[src="${BEACON}"]`)
-    await expect(beacon).toHaveCount(1)
-    await expect(beacon).toHaveAttribute(
-      'data-cf-beacon',
-      JSON.stringify({ token: 'e5c178acd813418c8a128caf531d2b03' })
-    )
-    await expect.poll(() => page.evaluate(() => 'beaconLoaded' in window)).toBe(true)
-    expect(loads).toHaveLength(1)
-
-    await turnSharingOff(page)
-    await expect(beacon).toHaveCount(0)
-    loads.length = 0
-    await page.goto('/')
-    await aMoment(page)
-    await expect(beacon).toHaveCount(0)
-    expect(loads).toEqual([])
-  })
-
-  test('never loads with Global Privacy Control', async ({ page }) => {
-    await page.addInitScript(withGpc)
-    const loads = beaconLoadsFrom(page)
-    await page.goto('/')
-    await aMoment(page)
-    await expect(page.locator('script[src*="cloudflareinsights"]')).toHaveCount(0)
-    expect(loads).toEqual([])
-  })
+test.describe('Production', () => {
+  test.skip(!production, 'Only the Production build hides the triggers')
 
   test('the synthetic triggers are not found', async ({ request }) => {
     const response = await request.get('/dev/telemetry/', { maxRedirects: 0 })

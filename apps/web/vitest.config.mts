@@ -27,7 +27,7 @@ export default defineConfig({
           name: 'happy-dom',
           include: [interactionTests],
           environment: 'happy-dom',
-          // A test that adds a third-party <script> (the Web Analytics beacon) never fetches it.
+          // A test that adds a third-party <script> never fetches it.
           environmentOptions: {
             happyDOM: {
               settings: {
