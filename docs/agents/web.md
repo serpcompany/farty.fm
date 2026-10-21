@@ -89,7 +89,7 @@ One line each is in `apps/web/AGENTS.md`. The detail:
 - Chromium's fake microphone: `--use-file-for-fake-audio-capture=<wav>%noloop` plays the file once. It needs a PCM WAV. Fixtures 090 (G3), 084 (G♯3, two farts) and 069 (Noise-like) are the e2e cases.
 - Through the fake microphone, 4 of 5 Melodic fixtures give a Recording Pitch identical to golden. 094 (low confidence) comes out 20 cents high, still B3. Expect small differences on re-recorded audio. Assert note names, not exact MIDI.
 - V8's `2 ** x` and `Math.log2` differ from numpy by an ulp on some pYIN bins. `analysis/numeric.ts` has correctly rounded `exp2` and `log2`. Use them, or bit-identity breaks.
-- The timing tests need `fileParallelism: false` (`vitest.config.ts`).
+- The timing tests need `fileParallelism: false` (`vitest.config.mts`).
 - Safari mutes Web Audio when the silent switch is on unless `navigator.audioSession.type = 'playback'` is set (`context.ts`). The microphone needs `'play-and-record'` while recording.
 - The Welcome icon uses `next/image` with `unoptimized`, because Workers has no image optimizer.
 - 16-bit WAV: encode as `round(x × 32768)`, clamped, and decode as `/32768`, as other decoders do.

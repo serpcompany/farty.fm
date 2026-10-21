@@ -13,7 +13,7 @@ Run from `apps/web/`:
 | Command | Runs |
 | --- | --- |
 | `pnpm dev` | The app at http://localhost:3000 |
-| `pnpm test` | Unit tests, including Recording Analysis against `fixtures/golden/` |
+| `pnpm test` | Unit tests, including Recording Analysis against `fixtures/golden/`, and the API routes in workerd with a real D1 and R2 (`*.workers.test.ts`) |
 | `pnpm test:e2e` | Record journeys in Chromium with a fixture as a fake microphone |
 | `pnpm lint`, `pnpm typecheck` | Biome, then TypeScript |
 | `pnpm check` | The finish gate: lint, types (including `wrangler types --check` on `cloudflare-env.d.ts`), `drizzle-kit check`, tests and build. It never writes files. |
@@ -31,6 +31,7 @@ Run from `apps/web/`:
 - `src/lib/recording-store.ts`: the `pedos` IndexedDB database, with Recordings (`recording-store.ts`) and Toots (`toot-store.ts`). Nothing leaves the browser.
 - `src/lib/toot.ts`, `toot-renderer.ts`: a Toot, a Song rendered with the user's Recordings in the render worker, as Song Creator makes it.
 - `src/db/`: the D1 schema (Better Auth's tables, `recordings` and `toots`), `createDatabase()` over any D1 binding (`database.ts`, importable from tests) and `getDb()` for a request (`index.ts`, server-only), through Drizzle. Migrations are in `drizzle/`.
+- `src/app/api/`, `src/server/`: a signed-in user's library (Recordings, Toots and their WAVs in R2) and account. Every route outside `api/auth/` is built with `userRoute` (`require-user.ts`): session, then `Origin` on writes, `private, no-store`. `every-route.workers.test.ts` fails a route that skips it.
 - `src/components/pedos/`: the screens, matching the iPhone app's. `src/components/ui/` stays stock shadcn.
 
 ## Where this differs from SERP's standards
