@@ -2,7 +2,7 @@ import { env } from 'cloudflare:test'
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 
-import { recordings, session, toots, user } from '@/db/schema'
+import { recordings, session, toots, user, verification } from '@/db/schema'
 import { deleteAccount } from '@/server/library'
 import {
   api,
@@ -124,6 +124,29 @@ describe('DELETE /api/account/', () => {
 
     expect(written).toBe(true)
     expect(await bucketKeys()).toEqual([])
+  })
+
+  it('deletes the sign-in codes waiting for the user’s email, by its lowercase', async () => {
+    const a = await signUp('A')
+    await signUp('B')
+    const now = new Date()
+    const code = (identifier: string) => ({
+      id: identifier,
+      identifier,
+      value: 'hash:0',
+      expiresAt: new Date(now.getTime() + 60_000),
+      createdAt: now,
+      updatedAt: now
+    })
+    // Sign-in names a code's row by the lowercased email; signUp's are `A@example.test`.
+    await testDb()
+      .insert(verification)
+      .values([code('sign-in-otp-a@example.test'), code('sign-in-otp-b@example.test')])
+
+    expect((await api.deleteAccount(a)).status).toBe(204)
+
+    const left = await testDb().select({ identifier: verification.identifier }).from(verification)
+    expect(left).toEqual([{ identifier: 'sign-in-otp-b@example.test' }])
   })
 
   it('answers a signed-out request with 401 and deletes nothing', async () => {

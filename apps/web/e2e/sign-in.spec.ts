@@ -20,13 +20,17 @@ function call(page: Page, method: 'GET' | 'POST', path: string, body?: unknown):
   )
 }
 
-test('a code from the dev mailbox signs in, and signing out ends the session', async ({
+test('a code from the dev mailbox signs in to the library, and signing out ends the session', async ({
   page
 }, testInfo) => {
   const email = `fan-${testInfo.project.name}-${Date.now()}@example.com`
   await page.goto('/privacy/')
 
   expect(await call(page, 'GET', '/api/auth/get-session')).toEqual({ status: 200, body: null })
+  expect(await call(page, 'GET', '/api/library/')).toEqual({
+    status: 401,
+    body: { error: 'signed_out' }
+  })
   expect(
     await call(page, 'POST', '/api/auth/email-otp/send-verification-otp', {
       email,
@@ -52,9 +56,15 @@ test('a code from the dev mailbox signs in, and signing out ends the session', a
     httpOnly: true,
     sameSite: 'Lax'
   })
+  // The library routes take the same session (src/server/session-user.ts).
+  expect(await call(page, 'GET', '/api/library/')).toMatchObject({
+    status: 200,
+    body: { recordings: [], toots: [] }
+  })
 
   expect(await call(page, 'POST', '/api/auth/sign-out', {})).toMatchObject({ status: 200 })
   expect(await call(page, 'GET', '/api/auth/get-session')).toEqual({ status: 200, body: null })
+  expect((await call(page, 'GET', '/api/library/')).status).toBe(401)
 })
 
 test('a wrong code is refused, and only the four endpoints answer', async ({ page }) => {

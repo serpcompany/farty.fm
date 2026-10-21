@@ -7,7 +7,7 @@ import type { SessionUser } from '@/server/session-user'
 
 // `src/server/session-user.ts` in the `workers` tests: the user of the `session` row whose token
 // is in the `test_session` cookie, until it expires or the user is deleted. Sign-in's own cookie
-// and signature are #152's, so its tests cover them.
+// and signature are covered by `auth-config.test.ts` and `signed-in.workers.test.ts`.
 
 export const TEST_SESSION_COOKIE = 'test_session'
 
