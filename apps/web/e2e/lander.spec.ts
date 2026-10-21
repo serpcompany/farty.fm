@@ -1,7 +1,11 @@
 import { expect, type Page, test } from '@playwright/test'
+import { skipWelcome, withFakeMicrophone } from './record'
 
 // The product page at `/` from 768px, until Farty is opened in this browser (#191). Phones get
 // Welcome instead, and download none of the lander's images.
+
+// Only the record flow's test records.
+withFakeMicrophone('090__carlosramon__17-pet__186119.wav')
 
 function hero(page: Page) {
   return page.getByRole('heading', { name: 'Record your farts. Turn them into songs.', level: 1 })
@@ -61,6 +65,38 @@ test.describe('from 768px', () => {
     await tabs(page).getByRole('link', { name: 'Record', exact: true }).click()
     await expect(page.getByTestId('record-button')).toBeVisible()
     await expect(hero(page)).toBeHidden()
+  })
+
+  test('Recording, Review and Result are a card under the top bar, whose tabs wait for them', async ({
+    page
+  }) => {
+    test.setTimeout(60_000)
+    await page.addInitScript(skipWelcome, {})
+    await page.goto('/')
+    const top = await tabs(page).boundingBox()
+    const underTopBar = async (name: string) => {
+      const card = page.getByRole('dialog', { name })
+      await expect(card).toBeVisible()
+      await expect(tabs(page)).toBeVisible()
+      await expect(tabs(page)).toHaveAttribute('inert', '')
+      expect((await card.boundingBox())?.y).toBeGreaterThan((top?.y ?? 0) + (top?.height ?? 0))
+    }
+
+    await page.getByTestId('record-button').click()
+    await expect(page.getByTestId('recording-timer')).toBeVisible()
+    await underTopBar('Recording')
+    await page.waitForTimeout(1000)
+    await page.getByTestId('stop-button').click()
+    await underTopBar('New Recording')
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByTestId('result-note').or(page.getByTestId('result-noise'))).toBeVisible({
+      timeout: 30_000
+    })
+    await underTopBar('Recording 1')
+
+    await page.getByRole('button', { name: 'Done' }).click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(tabs(page)).not.toHaveAttribute('inert')
   })
 })
 

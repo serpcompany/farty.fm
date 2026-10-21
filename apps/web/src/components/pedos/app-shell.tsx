@@ -41,13 +41,16 @@ const icons: Record<Tab, LucideIcon> = {
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const pedos = usePedos()
-  const { stopPlayback, showsRecordFlow, finishWelcome } = pedos
+  const { stopPlayback, showsRecordFlow, finishWelcome, flow, capture } = pedos
   // Reading the sign-in code in another app hides the page: the step stays where it was.
   const { stepOpen } = useAccount()
   const pathname = usePathname()
   const router = useRouter()
   const tab = tabOf(pathname)
-  const stepsOpen = showsRecordFlow || stepOpen
+  // While Recording, Review, Result (`record-flow.tsx`) or the account step shows, but not while
+  // the microphone is still opening, when the Record screen and its tabs are still there.
+  const stepsOpen =
+    stepOpen || flow !== null || capture.kind === 'recording' || capture.kind === 'finishing'
   // From 768px, `/` is the lander until Farty is opened in this browser (`lander.tsx`).
   const atLander = pathname === '/'
   useTrackPages()
