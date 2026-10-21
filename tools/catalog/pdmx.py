@@ -271,14 +271,14 @@ def render_problems(metrics, bar):
     return problems
 
 
-def hash_problems(archive_md5, published_md5, member_sha256, copy_sha256=None):
-    """The MIDI archive matches the checksum Zenodo publishes, and the catalog's copy of the score
-    is byte for byte the file in the archive (`copy_sha256` is None before it's copied)."""
+def hash_problems(archive_md5, published_md5, member_sha256, copy_sha256, copy="the catalog copy"):
+    """The MIDI archive matches the checksum Zenodo publishes, and a copy of the score (the
+    extracted file the gates import, or the catalog's copy) is byte for byte the file in the archive."""
     problems = []
     if archive_md5 != published_md5:
         problems.append(f"the MIDI archive's md5 {archive_md5} is not Zenodo's {published_md5}")
-    if copy_sha256 is not None and copy_sha256 != member_sha256:
-        problems.append(f"the catalog copy's sha256 {copy_sha256} is not the archive file's {member_sha256}")
+    if copy_sha256 != member_sha256:
+        problems.append(f"{copy}'s sha256 {copy_sha256} is not the archive file's {member_sha256}")
     return problems
 
 
@@ -286,11 +286,12 @@ def hash_problems(archive_md5, published_md5, member_sha256, copy_sha256=None):
 
 
 def new_title_problems(title, catalog):
-    """A Title must be new: no catalog entry outside its own batch has its id or title."""
+    """A Title must be new: no catalog entry outside its own batch has its id or title. Titles
+    compare as names do (match_key), so a leading 'the' on either side doesn't matter."""
     for e in catalog:
         if e["id"] == title.id:
             return [f"the catalog already has id {title.id!r}"]
-        if normalize(e["title"]) in title.names:
+        if match_key(e["title"]) in title.names:
             return [f"the catalog already has {e['title']!r} ({e['id']})"]
     return []
 

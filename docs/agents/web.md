@@ -87,6 +87,25 @@ One line each is in `apps/web/AGENTS.md`. The detail:
   - **Analytics.** Cloudflare Web Analytics' beacon, cookieless, Production only: its public token is in `src/lib/telemetry/analytics.ts`, and the layout adds the script in the browser only while sharing is on. Staging and local runs have none. The site uses no CSP, so nothing allows it.
   - **Testing it.** `/dev/telemetry/` (Staging and local runs; 404 in Production) sends a synthetic crash and handled error. `e2e/telemetry.spec.ts` checks what is sent, offline and opt-out; with `E2E_SITE_ENV=production` and `E2E_BASE_URL` on `opennextjs-cloudflare preview --env production` after `pnpm build:production`, it checks the beacon.
 
+## Google Play
+
+`android/twa-manifest.json` is the Bubblewrap config that wraps `https://pedos.app` as a Trusted Web Activity, package `com.serp.pedos` (the iPhone bundle id), free (#114). The web manifest already has the 512 px and maskable icons it needs. No keystore, password or `.aab` is ever committed.
+
+**The owner, once:**
+
+1. Create SERP's organization Play developer account (D-U-N-S number, $25 fee).
+2. In Play Console, create the app "Pedos" as a free app.
+3. Tell the agent the app exists.
+
+**The agent, after:**
+
+1. Generate the upload keystore at `~/.config/pedos/android-upload.keystore` (alias `upload`) with its password in the owner's keychain, never printed. Run `bubblewrap build` from `android/` for the signed `.aab`, and hand it to the owner to upload. If Bubblewrap doesn't expand `~` in `signingKey.path`, use the absolute path for that build and don't commit it.
+2. Add `apps/web/public/.well-known/assetlinks.json` with the Play app-signing SHA-256 from Play Console (Setup, App signing), plus an `apps/web/scripts/smoke.sh` check that it serves as JSON on Production.
+3. Draft the store listing from `docs/app-store/metadata.md` and take phone-size screenshots.
+4. Data safety: when signed in, Recordings (audio), Toots and the email address are stored with the account on Cloudflare and deleted with it, so the form declares audio as collected. Without an account, nothing personal is collected. Anonymous error reports and usage (#126) are declared too.
+
+Most updates ship by deploying the site, with no new upload. Upload a new `.aab` (raise `appVersionCode`) only when `android/twa-manifest.json` changes.
+
 ## Gotchas learned in slice 1
 
 - `apps/web` isn't `"type": "module"`, so Playwright compiles `e2e/` as CommonJS. Use `__dirname`, not `import.meta`.
