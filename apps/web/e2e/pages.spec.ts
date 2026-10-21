@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 
-test('the privacy page covers accounts, news email, guests and deleting', async ({ page }) => {
+test('the privacy page covers accounts, news email, guests, error reports, usage and deleting', async ({
+  page
+}) => {
   await page.goto('/privacy/')
   await expect(page.getByRole('heading', { name: 'Privacy', level: 1 })).toBeVisible()
   await expect(
@@ -11,7 +13,11 @@ test('the privacy page covers accounts, news email, guests and deleting', async 
   await expect(page.getByText('never sold')).toBeVisible()
   await expect(page.getByText('last only until you close Pedos')).toBeVisible()
   await expect(page.getByText('Delete account on Profile removes your email')).toBeVisible()
-  await expect(page.getByText('no ads, analytics or tracking')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Error reports and usage' })).toBeVisible()
+  await expect(page.getByText('never includes your farts, their names, your email')).toBeVisible()
+  await expect(page.getByText('turn off Share anonymous error reports and usage')).toBeVisible()
+  await expect(page.getByText('keeps your IP address, browser and rough location')).toBeVisible()
+  await expect(page.getByText('nothing in it follows you to other sites')).toBeVisible()
   await expect(page.getByText("Pedos doesn't ask anyone's age")).toBeVisible()
   await expect(page.getByRole('link', { name: 'support@pedos.app' })).toHaveAttribute(
     'href',

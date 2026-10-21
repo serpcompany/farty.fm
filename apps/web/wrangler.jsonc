@@ -32,6 +32,16 @@
   // with no id. Never declare it under "env" (src/db/deploy-config.test.ts); Wrangler's warning
   // that the environments lack it is the intended result.
   "kv_namespaces": [{ "binding": "DEV_MAILBOX" }],
+  // Error reports (#126, src/app/api/telemetry/route.ts): 30 a minute per client, keyed by
+  // cf-connecting-ip, which a browser in normal use never reaches. Each environment has its own
+  // namespace_id, so their counters are separate.
+  "ratelimits": [
+    {
+      "name": "TELEMETRY_RATE_LIMIT",
+      "namespace_id": "126001",
+      "simple": { "limit": 30, "period": 60 }
+    }
+  ],
   "env": {
     "staging": {
       // The Staging gate's password (worker.ts). It is public, so it is a plain variable, not a
@@ -79,7 +89,14 @@
           "migrations_table": "d1_migrations"
         }
       ],
-      "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-staging" }]
+      "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-staging" }],
+      "ratelimits": [
+        {
+          "name": "TELEMETRY_RATE_LIMIT",
+          "namespace_id": "126002",
+          "simple": { "limit": 30, "period": 60 }
+        }
+      ]
     },
     "production": {
       // Sign-in (#152): as Staging's, with sign-up open to anyone. BETTER_AUTH_SECRET is a Worker
@@ -109,7 +126,14 @@
           "migrations_table": "d1_migrations"
         }
       ],
-      "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-production" }]
+      "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-production" }],
+      "ratelimits": [
+        {
+          "name": "TELEMETRY_RATE_LIMIT",
+          "namespace_id": "126003",
+          "simple": { "limit": 30, "period": 60 }
+        }
+      ]
     }
   }
 }

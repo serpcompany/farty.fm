@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
+import { setSharing, useSharing } from '@/lib/telemetry/sharing'
 import { useAccount } from './account-provider'
 import { InstallButton, useInstallRoute } from './install-button'
 import { usePedos } from './pedos-provider'
@@ -36,7 +37,8 @@ const list = 'divide-y overflow-hidden rounded-xl bg-muted/60'
 /**
  * Profile: what you've collected and made, counted from what's in this browser, your account,
  * where the Songs come from, and the app version. As the iPhone app's `ProfileTab`, plus the
- * account (#155), Install and the privacy and support pages, which the web app needs.
+ * account (#155), Install, sharing error reports and usage (#126) and the privacy and support
+ * pages, which the web app needs.
  */
 export function ProfileScreen({ version }: { version: string }) {
   const stats = usePedos().profileStats
@@ -105,6 +107,13 @@ export function ProfileScreen({ version }: { version: string }) {
         </section>
       )}
 
+      <section aria-labelledby="profile-privacy" className="pt-6">
+        <h2 id="profile-privacy" className={header}>
+          Privacy
+        </h2>
+        <SharingSection />
+      </section>
+
       <section aria-labelledby="profile-about" className="pt-6">
         <h2 id="profile-about" className={header}>
           About
@@ -158,6 +167,38 @@ function LinkRow({ href, children }: { href: string; children: ReactNode }) {
 
 const row =
   'flex min-h-11 w-full items-center justify-between gap-4 px-4 py-2.5 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset disabled:opacity-50'
+
+/**
+ * Share anonymous error reports and usage (#126): on by default, kept in this browser, and off
+ * means nothing is sent (`src/lib/telemetry/`). Global Privacy Control turns it off, so the switch
+ * shows off and can't be turned on.
+ */
+function SharingSection() {
+  const sharing = useSharing()
+  return (
+    <>
+      <ul className={list}>
+        <li>
+          {/* The whole row toggles the switch, so it's a full-size target. */}
+          <label htmlFor="share-telemetry" className={row}>
+            Share anonymous error reports and usage
+            <Switch
+              id="share-telemetry"
+              checked={sharing === 'on' || sharing === null}
+              disabled={sharing === null || sharing === 'gpc'}
+              onCheckedChange={setSharing}
+            />
+          </label>
+        </li>
+      </ul>
+      {sharing === 'gpc' && (
+        <p className="px-4 pt-1.5 text-xs text-muted-foreground">
+          Off, because your browser asks sites not to share your data (Global Privacy Control).
+        </p>
+      )}
+    </>
+  )
+}
 
 /**
  * Signed out: Save to an account, which opens the account step, and what a guest loses. Signed
