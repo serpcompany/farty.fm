@@ -37,6 +37,7 @@ class Source:
     pitch_confidence: float  # 0..1
     rms_db: float
     min_note_s: float = 0.0  # shortest note this Recording reads back on-pitch
+    settle_s: float = 0.0  # when its played pitch settles within 50 cents of ref_midi (settle_time())
     start: int = 0  # gesture start, in samples of the decoded original file
     end: int = 0  # gesture end (exclusive), in samples of the decoded original file
     pitch_estimate: float | None = None  # ref_midi before audition() (kept when audition rejects it)
@@ -127,6 +128,8 @@ def analyze_recording(rid, y):
         src.min_note_s = audition(src)
         if src.min_note_s is None:  # never reads back on pitch: not melodic after all
             src.ref_midi = None
+        else:
+            src.settle_s = settle_time(src)
     return src
 
 
@@ -144,6 +147,33 @@ def audition(src):
         if length >= src.seconds:
             break
     return None
+
+
+SETTLE_CENTS = 50.0  # "on pitch", as evaluate.py counts a note
+SETTLE_RUN_FRAMES = 9  # 9 hops = 52 ms in a row on pitch
+
+
+def heard_cents(src):
+    """The whole gesture played through the real render path at its own pitch (as audition()
+    does) and read back by pYIN: cents from ref_midi per hop, nan where unvoiced."""
+    seg = variable_resample(src.audio, src.f0, 1.0, 1.0, len(src.audio), src.ref_midi)
+    f0, voiced, _ = librosa.pyin(seg, fmin=45, fmax=900, sr=SR, frame_length=2048, hop_length=HOP)
+    ok = voiced & np.isfinite(f0)
+    return np.where(ok, (librosa.hz_to_midi(np.where(ok, f0, 1.0)) - src.ref_midi) * 100, np.nan)
+
+
+def settle_time(src):
+    """Seconds from the gesture start until the Recording, played at its own pitch, is on pitch
+    and stays there: the first pYIN frame (centered at frame x 256 samples) that starts
+    SETTLE_RUN_FRAMES voiced frames in a row within SETTLE_CENTS of ref_midi. The Recording's
+    whole length if that never happens. Glides, scoops and slow starts that the renderer's
+    pitch-following can't straighten show up here; an Octave Move scales it by 2^(-shift/12)."""
+    heard = heard_cents(src)
+    on = np.abs(np.nan_to_num(heard, nan=np.inf)) <= SETTLE_CENTS
+    for i in range(len(on) - SETTLE_RUN_FRAMES + 1):
+        if on[i : i + SETTLE_RUN_FRAMES].all():
+            return min(src.seconds, i * HOP / SR)
+    return src.seconds
 
 
 def load_library(ids=None):
@@ -185,6 +215,28 @@ def too_short_cost(note_seconds, recording_seconds, shortest_note_s, shift):
     return cost
 
 
+UNSETTLED_COST = 20.0  # per note played entirely before its Recording settles; less for part of it (#92)
+
+
+def unsettled_cost(note_seconds, recording_seconds, settle_s, shift):
+    """Cost of the share of each note a Recording plays before its pitch settles (#92).
+
+    A note sounds for min(its length, the Recording's resampled length), as in too_short_cost().
+    The Recording settles settle_s (settle_time()) after it starts, also scaled by resampling.
+    Each note costs UNSETTLED_COST x the share of its sounding time that comes before that: a
+    short note on a slow-settling fart costs up to UNSETTLED_COST, the same fart on a long note
+    costs little. Picked from 15, 20, 30, 40, 80 and 160 (and per-second forms) by renders
+    passing; 40 and above make a full-library Song worse.
+    """
+    played = recording_seconds * 2 ** (-shift / 12)
+    settle = settle_s * 2 ** (-shift / 12)
+    cost = 0.0
+    for a in note_seconds:
+        sounds = min(a, played)
+        cost += UNSETTLED_COST * min(sounds, settle) / max(1e-9, sounds)
+    return cost
+
+
 @dataclass
 class Assignment:
     note_index: int
@@ -219,7 +271,7 @@ class Fit:
     transpose: int
     recording_for_pitch: dict  # Song pitch -> Recording id, or None when no Recording covers it
     octave_moves: int
-    cost: float  # over covered pitches: beats x move_cost + too_short_cost of its notes
+    cost: float  # over covered pitches: beats x move_cost + too_short_cost + unsettled_cost of its notes
 
     @property
     def covered(self):
@@ -264,7 +316,8 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
                 if m is None:
                     row.append(None)
                 else:
-                    row.append((m[1], weight[p] * m[0] + too_short_cost(note_seconds[p], s.seconds, s.min_note_s, shift)))
+                    row.append((m[1], weight[p] * m[0] + too_short_cost(note_seconds[p], s.seconds, s.min_note_s, shift)
+                                + unsettled_cost(note_seconds[p], s.seconds, s.settle_s, shift)))
             out.append(row)
         return out
 

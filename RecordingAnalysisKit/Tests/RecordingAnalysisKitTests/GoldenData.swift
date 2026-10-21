@@ -11,6 +11,9 @@ enum Golden {
         .deletingLastPathComponent()
     static let recordingsDir = repoRoot.appending(path: "fixtures/recordings")
     static let goldenDir = repoRoot.appending(path: "fixtures/golden")
+    /// The planner answers as they were at golden format 2, before the settle cost (#116). The
+    /// Swift Auto-map is frozen there: see `Tests/GoldenFormat2/README.md`.
+    static let goldenFormat2Dir = repoRoot.appending(path: "RecordingAnalysisKit/Tests/GoldenFormat2")
 
     struct Index: Decodable {
         struct SongEntry: Decodable {

@@ -1,0 +1,53 @@
+{
+  "library": "small",
+  "max_abs_shift_semitones": null,
+  "metrics": null,
+  "notes": null,
+  "octave_moves": 0,
+  "per_pitch": [
+    {
+      "octave_move": false,
+      "recording": "021",
+      "shift_semitones": -0.22592059366017025,
+      "song_pitch": 60,
+      "target_midi": 48
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 62,
+      "target_midi": 50
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 64,
+      "target_midi": 52
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 65,
+      "target_midi": 53
+    },
+    {
+      "octave_move": false,
+      "recording": "090",
+      "shift_semitones": -0.12592059366016173,
+      "song_pitch": 67,
+      "target_midi": 55
+    }
+  ],
+  "pitch_coverage": {
+    "covered": 2,
+    "total": 5
+  },
+  "plan_cost": 19.131485847333625,
+  "render_settings": null,
+  "song": "saints",
+  "transpose": -12,
+  "unlocked": false
+}

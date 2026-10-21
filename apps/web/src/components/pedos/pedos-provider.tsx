@@ -38,6 +38,7 @@ import {
   recordingPitch,
   replaySegment
 } from '@/lib/recordings'
+import { addSettleTimes } from '@/lib/settle-time-upgrade'
 import { reportError } from '@/lib/telemetry/errors'
 import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
 import { makeToot as renderToot } from '@/lib/toot-renderer'
@@ -237,11 +238,13 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     // A guest's new visit first clears the last one's Recordings and Toots (`visit.ts`).
     const library = openVisit().library
     library.then(store.loadRecordings).then(loaded => {
-      // An analysis cut off by closing the page starts again.
+      // An analysis cut off by closing the page starts again, and those stored before #116 get
+      // their settle time, one at a time.
       setRecordings(loaded)
       for (const recording of loaded) {
         if (recording.analysis.state === 'analyzing') void runAnalysis(recording.id)
       }
+      void addSettleTimes(loaded, analyze, replace)
     })
     library
       .then(tootStore.loadToots)
@@ -257,7 +260,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         setTootsFailed(true)
         setToots(current => current ?? [])
       })
-  }, [runAnalysis])
+  }, [runAnalysis, replace])
 
   // What a sync changes shows at once: Recordings and Toots from the account's other browsers,
   // their renames and deletes (`library-sync.ts`).

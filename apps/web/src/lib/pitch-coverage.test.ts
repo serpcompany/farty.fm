@@ -46,7 +46,8 @@ function fixtureRecording(id: string, number: number): Recording {
         pitchEstimateMidi: golden.pitch_estimate_midi,
         pitchConfidence: golden.pitch_confidence,
         recordingPitchMidi: golden.melodic ? golden.recording_pitch_midi : null,
-        shortestNoteSeconds: golden.melodic ? golden.shortest_note_s : null
+        shortestNoteSeconds: golden.melodic ? golden.shortest_note_s : null,
+        settleSeconds: golden.melodic ? golden.settle_s : null
       }
     }
   }
@@ -328,13 +329,15 @@ describe('Compose’s listing', () => {
     expect(ms).toBeLessThan(10_000)
   })
 
+  // The reference's `melody_fit().missing` on the same takes. The settle cost (#116) moved the
+  // cheapest transposition of locked `frere` and `birthday`.
   it('names the missing notes with their octave', () => {
     expect(missingNotes(coverageOf(song('birthday'), eight))).toBe('B2 and E3')
-    expect(missingNotes(coverageOf(song('frere'), eight))).toBe('D♯3')
+    expect(missingNotes(coverageOf(song('frere'), eight))).toBe('C♯3')
     expect(missingNotes(coverageOf(song('mary'), eight))).toBeNull()
     const few = takes(3)
-    expect(missingNotes(coverageOf(song('birthday'), few))).toBe('A♯2, D3, D♯3, F3, G♯3, and A♯3')
-    expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe('A♯2, D3, D♯3, and 3 more')
+    expect(missingNotes(coverageOf(song('birthday'), few))).toBe('G♯2, A♯2, C♯3, D♯3, F3, and F♯3')
+    expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe('G♯2, A♯2, C♯3, and 3 more')
     expect(missingNotes(coverageOf(song('mary'), few), 3)).toBe('D3 and E3')
   })
 
@@ -347,6 +350,14 @@ describe('Compose’s listing', () => {
     const analyzing: Recording = { ...takes(6)[5], analysis: { state: 'analyzing' } }
     expect(coverageKey([...five, analyzing])).toBe(coverageKey(five))
     expect(listing(takes(6)).unlocked.map(r => r.song.id)).toEqual(['mary'])
+    // So does a settle time added on load to an analysis stored before #116: it moves Auto-map.
+    // The 2nd take, 021, is Melodic and settles in 0.017 s.
+    const [first, second, ...rest] = five
+    if (second.analysis.state !== 'analyzed') throw new Error('The 2nd take is analyzed')
+    const { settleSeconds, ...stored } = second.analysis.analysis
+    expect(settleSeconds).toBeGreaterThan(0)
+    const unknown: Recording = { ...second, analysis: { state: 'analyzed', analysis: stored } }
+    expect(coverageKey([first, unknown, ...rest])).not.toBe(coverageKey(five))
   })
 })
 

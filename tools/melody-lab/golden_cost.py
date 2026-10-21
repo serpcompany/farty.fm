@@ -11,7 +11,7 @@ returned Recording ids charges that mistake and rejects it.
 """
 import json
 
-from engine import GAP_S, ROOT, SR, move_cost, too_short_cost
+from engine import GAP_S, ROOT, SR, move_cost, too_short_cost, unsettled_cost
 
 GOLDEN = ROOT / "fixtures/golden"
 
@@ -26,8 +26,8 @@ def arrangement_cost(song, recordings, transpose, recording_for_pitch):
                          distinct Song pitch
 
     Per covered pitch, in ascending pitch order: the pitch's total note length in beats x
-    move_cost(shift), plus too_short_cost() over its notes. A Recording plays at most one pitch,
-    and only moves the unlock rule allows count.
+    move_cost(shift), plus too_short_cost() and unsettled_cost() over its notes. A Recording
+    plays at most one pitch, and only moves the unlock rule allows count.
     """
     pitches = sorted({n["pitch"] for n in song["notes"]})
     assert sorted(recording_for_pitch) == pitches, "one entry per distinct Song pitch"
@@ -51,7 +51,11 @@ def arrangement_cost(song, recordings, transpose, recording_for_pitch):
         seconds = (rec["gesture"]["end_sample"] - rec["gesture"]["start_sample"]) / SR
         note_seconds = [n["dur"] * spb - GAP_S for n in notes]
         octaves += move[1]
-        cost += weight * move[0] + too_short_cost(note_seconds, seconds, rec["shortest_note_s"], shift)
+        cost += (
+            weight * move[0]
+            + too_short_cost(note_seconds, seconds, rec["shortest_note_s"], shift)
+            + unsettled_cost(note_seconds, seconds, rec["settle_s"], shift)
+        )
     return uncovered, octaves, cost
 
 

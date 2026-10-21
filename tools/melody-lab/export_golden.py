@@ -36,7 +36,7 @@ from melody import load_catalog
 GOLDEN = engine.ROOT / "fixtures/golden"
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")  # README.md is written by hand
 TUNE = 1.0  # render settings of run_all.py and build.py's "tuned" variant
-FORMAT_VERSION = 2
+FORMAT_VERSION = 3
 COVERAGE_SEEDS = 10  # random subsets per size in coverage.json
 
 
@@ -115,6 +115,7 @@ def recording_json(entry, src):
         "recording_pitch_midi": exact(src.ref_midi),
         "recording_pitch_note": librosa.midi_to_note(src.ref_midi, cents=True) if src.pitched else None,
         "shortest_note_s": src.min_note_s if src.pitched else None,
+        "settle_s": exact(src.settle_s) if src.pitched else None,
         "melodic": src.pitched,
         "noise_like_reason": reason,
         "rms_db": num(src.rms_db, 4),
