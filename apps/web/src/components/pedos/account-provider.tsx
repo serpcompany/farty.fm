@@ -52,9 +52,15 @@ type AccountContext = {
    * `anyway`, signs out without waiting for the upload, and what didn't upload is lost.
    */
   signOut(anyway?: boolean): Promise<SignOut>
-  /** Deletes the account, then this browser's copy. False when it didn't. */
+  /**
+   * Deletes the account, then this browser's copy. False when it didn't. When the session is
+   * another account's now (a sign-in in another tab), deletes nothing and reloads as that account.
+   */
   deleteAccount(): Promise<boolean>
-  /** Turns Pedos news by email on or off. False when it didn't change. */
+  /**
+   * Turns Pedos news by email on or off. False when it didn't change. When the session is another
+   * account's now, changes nothing and reloads as that account.
+   */
   setMarketingEmail(on: boolean): Promise<boolean>
   /**
    * After a session ended: clears this browser's copy, for a device that's no longer the
@@ -78,6 +84,14 @@ export function useAccount(): AccountContext {
 async function leave(): Promise<void> {
   await forgetLibrary()
   window.location.replace('/profile/')
+}
+
+/**
+ * The session is another account's now (a sign-in in another tab): this page reloads as that
+ * account, which reads the session and claims the library, and nothing is deleted or changed.
+ */
+function reopenAsSignedIn(): void {
+  window.location.reload()
 }
 
 /** The account of whoever uses Pedos here, and the account step (#155). */
@@ -169,20 +183,27 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   )
 
   const deleteAccount = useCallback(async () => {
-    if (!(await api.deleteAccount())) return false
-    await leave()
-    return true
-  }, [])
+    if (!accountId) return false
+    const result = await api.deleteAccount(accountId)
+    if (result === 'otherAccount') reopenAsSignedIn()
+    else if (result === 'done') await leave()
+    return result !== 'failed'
+  }, [accountId])
 
-  const setMarketingEmail = useCallback(async (on: boolean) => {
-    const changed = await api.setMarketingEmail(on)
-    if (changed) {
-      setAccount(current =>
-        current.status === 'signedIn' ? { ...current, marketingEmail: on } : current
-      )
-    }
-    return changed
-  }, [])
+  const setMarketingEmail = useCallback(
+    async (on: boolean) => {
+      if (!accountId) return false
+      const result = await api.setMarketingEmail(on, accountId)
+      if (result === 'otherAccount') reopenAsSignedIn()
+      else if (result === 'done') {
+        setAccount(current =>
+          current.status === 'signedIn' ? { ...current, marketingEmail: on } : current
+        )
+      }
+      return result !== 'failed'
+    },
+    [accountId]
+  )
 
   const value: AccountContext = {
     account,

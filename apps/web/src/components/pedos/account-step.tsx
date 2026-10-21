@@ -43,6 +43,7 @@ function Step() {
   const heading = useRef<HTMLHeadingElement>(null)
   const emailField = useRef<HTMLInputElement>(null)
   const codeField = useRef<HTMLInputElement>(null)
+  const backButton = useRef<HTMLButtonElement>(null)
   const focusedPhase = useRef<string | null>(null)
 
   // Focus goes back where it was, such as the Result's button, once the step closes.
@@ -60,6 +61,12 @@ function Step() {
     else heading.current?.focus()
     focusedPhase.current = phase
   }, [phase])
+
+  // The warning replaces the form and its focused control, so focus moves to its Go back.
+  const warns = unsaved > 0
+  useEffect(() => {
+    if (warns) backButton.current?.focus()
+  }, [warns])
 
   useEffect(() => saveStepDraft({ phase, email }), [phase, email])
 
@@ -143,7 +150,7 @@ function Step() {
                   ? "1 fart on this device hasn't saved to the other account. Signing in here removes it from this device."
                   : `${unsaved} farts on this device haven't saved to the other account. Signing in here removes them from this device.`}
               </p>
-              <Button className="h-12 text-base" onClick={goBack}>
+              <Button ref={backButton} className="h-12 text-base" onClick={goBack}>
                 Go back
               </Button>
               <Button variant="secondary" className="h-12 text-base" onClick={() => void sendNow()}>

@@ -190,27 +190,46 @@ export async function signOut(): Promise<boolean> {
   }
 }
 
-/** Deletes the account, its Recordings and Toots and their audio. False when it didn't. */
-export async function deleteAccount(): Promise<boolean> {
+/**
+ * How a change to the account went: done; refused, because the session is another account's now
+ * (a sign-in in another tab); or it didn't happen.
+ */
+export type AccountChange = 'done' | 'otherAccount' | 'failed'
+
+/**
+ * Sends a change to `/api/account/` as `accountId`, the account this page shows, in the header
+ * the library's requests name it in too (`LIBRARY_HEADER` on the server): the server refuses it
+ * when the session is another account's, so a page left open never deletes or changes it.
+ */
+async function changeAccount(accountId: string, init: RequestInit): Promise<AccountChange> {
   try {
-    return (await fetch('/api/account/', { method: 'DELETE' })).ok
+    const headers = new Headers(init.headers)
+    headers.set('x-pedos-library', accountId)
+    const response = await fetch('/api/account/', { ...init, headers })
+    if (response.ok) return 'done'
+    if (response.status !== 409) return 'failed'
+    const error = await response
+      .json()
+      .then(body => (body as { error?: unknown } | null)?.error)
+      .catch(() => undefined)
+    return error === 'wrong_account' ? 'otherAccount' : 'failed'
   } catch {
-    return false
+    return 'failed'
   }
 }
 
-/** Turns Pedos news by email on or off. False when it didn't change. */
-export async function setMarketingEmail(on: boolean): Promise<boolean> {
-  try {
-    const response = await fetch('/api/account/', {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ marketingEmail: on })
-    })
-    return response.ok
-  } catch {
-    return false
-  }
+/** Deletes `accountId`'s account, its Recordings and Toots and their audio. */
+export function deleteAccount(accountId: string): Promise<AccountChange> {
+  return changeAccount(accountId, { method: 'DELETE' })
+}
+
+/** Turns Pedos news by email on or off for `accountId`'s account. */
+export function setMarketingEmail(on: boolean, accountId: string): Promise<AccountChange> {
+  return changeAccount(accountId, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ marketingEmail: on })
+  })
 }
 
 /**

@@ -89,10 +89,10 @@ const notFound = () => apiError(404, 'not_found')
 const gone = () => apiError(410, 'deleted')
 
 /**
- * The header each of a browser's library requests names its library's account in
+ * The header each of a browser's library and account requests names its library's account in
  * (`pedos.account`). A library that isn't the session's account's never reads, uploads to,
- * renames or deletes in it: a sign-in in another tab can change the cookie while this tab's
- * requests are on their way.
+ * renames or deletes in it, and a page showing one account never deletes or changes another: a
+ * sign-in in another tab can change the cookie while this tab's requests are on their way.
  */
 export const LIBRARY_HEADER = 'x-pedos-library'
 
@@ -251,12 +251,17 @@ export async function patchToot(
   return Response.json({ id, title })
 }
 
-/** `PATCH /api/account/` with `{ marketingEmail }`: turns Pedos news by email on or off. */
+/**
+ * `PATCH /api/account/` with `{ marketingEmail }`: turns Pedos news by email on or off. 409 when
+ * `LIBRARY_HEADER` names another account (`wrong_account`).
+ */
 export async function patchAccount(
   { db }: Stores,
   user: SessionUser,
   request: Request
 ): Promise<Response> {
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
   const body = await readJson(request)
   if (body instanceof Response) return body
   const marketingEmail = (body.json as { marketingEmail?: unknown } | null)?.marketingEmail
@@ -269,9 +274,16 @@ export async function patchAccount(
  * `DELETE /api/account/`: deletes all the user's audio, then their row, which deletes their
  * sessions, Recordings and Toots with it. Audio first, so a failure leaves an account to retry
  * with, never audio with no account. Then the audio again: an upload already past its session
- * check may have written a WAV between the two, and its row can no longer be added.
+ * check may have written a WAV between the two, and its row can no longer be added. 409, deleting
+ * nothing, when `LIBRARY_HEADER` names another account (`wrong_account`).
  */
-export async function deleteAccount({ db, media }: Stores, user: SessionUser): Promise<Response> {
+export async function deleteAccount(
+  { db, media }: Stores,
+  user: SessionUser,
+  request: Request
+): Promise<Response> {
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
   await deleteUserMedia(media, user.id)
   await deleteUser(db, user.id)
   await deleteUserMedia(media, user.id)

@@ -300,6 +300,47 @@ test('Delete account asks first, then deletes the account and leaves nothing her
   expect(await page.evaluate(async () => (await fetch('/api/library/')).status)).toBe(401)
 })
 
+test('Profile left open on one account never changes or deletes the account another tab signed in to', async ({
+  page,
+  context
+}, testInfo) => {
+  test.setTimeout(150_000)
+  const first = newEmail(testInfo, 'first')
+  const second = newEmail(testInfo, 'second')
+  await context.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, first)
+  await page.goto('/profile/')
+  await expect(page.getByTestId('account-email')).toHaveText(first)
+  const other = await context.newPage()
+  await other.goto('/profile/')
+  const signInElsewhere = async (email: string) => {
+    await signInByApi(other, email)
+    await other.reload()
+    await expect(other.getByTestId('account-email')).toHaveText(email)
+  }
+
+  // Pedos news, from the page still showing the first account: nothing changes, and the page
+  // reloads as the account signed in now.
+  await signInElsewhere(second)
+  await page.getByRole('switch', { name: 'Pedos news' }).click()
+  await expect(page.getByTestId('account-email')).toHaveText(second)
+  await expect(page.getByRole('switch', { name: 'Pedos news' })).toBeChecked()
+  expect((await session(page))?.user.marketingEmail).not.toBe(false)
+
+  // Delete account, from the page now showing the second: the first account, signed in now, and
+  // its session stay.
+  await signInElsewhere(first)
+  await page.getByRole('button', { name: 'Delete account' }).click()
+  await page
+    .getByRole('alertdialog', { name: 'Delete your account?' })
+    .getByRole('button', { name: 'Delete' })
+    .click()
+  await expect(page.getByTestId('account-email')).toHaveText(first)
+  expect((await session(page))?.user.email).toBe(first)
+  expect(await page.evaluate(async () => (await fetch('/api/library/')).status)).toBe(200)
+})
+
 test("Profile's Save to an account opens the step, which stays while they read their email", async ({
   page
 }) => {
@@ -537,6 +578,8 @@ test('signing in to another account says first how many farts here it removes, a
   )
   const back = warning.getByRole('button', { name: 'Go back' })
   const anyway = warning.getByRole('button', { name: 'Sign in anyway' })
+  // The warning replaces the form, so focus moves to Go back rather than falling to the page.
+  await expect(back).toBeFocused()
   for (const control of [back, anyway]) await expectTappable(control)
   await reopened.screenshot({ path: testInfo.outputPath('unsaved-farts.png') })
 

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   clearStepDraft,
+  deleteAccount,
   forgetAccount,
   libraryOwner,
   problemOf,
@@ -9,6 +10,7 @@ import {
   type StepOffers,
   saveStepDraft,
   setLibraryOwner,
+  setMarketingEmail,
   signIn,
   stepOffer,
   stopStepOffers,
@@ -204,6 +206,49 @@ describe('signIn', () => {
       ok: true,
       value: { status: 'signedIn', email: 'a@example.com' }
     })
+  })
+})
+
+describe('deleteAccount and setMarketingEmail', () => {
+  // A page left open on one account, after another signed in in another tab: the server refuses
+  // a change that names the account the page shows (`wrong_account`), so it deletes nothing.
+  const changes = [
+    ['deleteAccount', () => deleteAccount('user-a')],
+    ['setMarketingEmail', () => setMarketingEmail(false, 'user-a')]
+  ] as const
+
+  it.each(changes)('%s names the account the page shows', async (_, change) => {
+    const fetch = vi.fn(async (_path: string, _init?: RequestInit) => Response.json({}))
+    vi.stubGlobal('fetch', fetch)
+    expect(await change()).toBe('done')
+    const init = fetch.mock.calls[0][1]
+    expect(new Headers(init?.headers).get('x-pedos-library')).toBe('user-a')
+  })
+
+  it.each(changes)('%s says when the session is another account’s', async (_, change) => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ error: 'wrong_account' }, { status: 409 }))
+    )
+    expect(await change()).toBe('otherAccount')
+  })
+
+  it.each(changes)('%s fails on any other refusal, or offline', async (_, change) => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ error: 'x' }, { status: 409 }))
+    )
+    expect(await change()).toBe('failed')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(null, { status: 500 }))
+    )
+    expect(await change()).toBe('failed')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.reject(new TypeError('offline')))
+    )
+    expect(await change()).toBe('failed')
   })
 })
 
