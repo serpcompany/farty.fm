@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import { ProfileScreen } from '@/components/pedos/profile-screen'
+import { version } from '../../../package.json'
 
 export const metadata: Metadata = { title: 'Profile · Pedos' }
 
 export default function ProfilePage() {
-  return <ProfileScreen />
+  return <ProfileScreen version={version} />
 }

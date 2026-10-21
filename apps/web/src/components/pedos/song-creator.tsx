@@ -1,16 +1,16 @@
 'use client'
 
-import { Check, ChevronLeft, Play, Square, Trash2 } from 'lucide-react'
+import { Check, ChevronLeft, CircleAlert, Play, Square, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useEffectEvent, useState } from 'react'
+import { type ReactNode, useEffect, useEffectEvent, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import type { Song } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
 import * as store from '@/lib/recording-store'
 import { formattedLength, type Recording, recordingName, recordingPitch } from '@/lib/recordings'
-import { noteCaption, soundingPitch, type TootDraft } from '@/lib/toot'
+import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/toot'
 import { TootError } from '@/lib/toot-renderer'
 import { cn } from '@/lib/utils'
 import { decodeWav } from '@/lib/wav'
@@ -152,7 +152,7 @@ function Ready({ draft }: { draft: TootDraft }) {
 
   return (
     <>
-      <TootLayout draft={draft} />
+      <TootLayout toot={draft} song={draft.song} />
       <div className="sticky bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] mt-auto bg-linear-to-t from-background from-70% to-transparent px-5 pt-5 pb-3">
         <Button className="h-12 w-full text-base" disabled={isSaved || saving} onClick={save}>
           {isSaved ? (
@@ -176,16 +176,30 @@ function Ready({ draft }: { draft: TootDraft }) {
 type Focus = { pitch: number } | { note: number } | null
 
 /**
- * Play, the note view, and the Recordings used: tap a Recording to hear it alone and see which
- * notes it plays; tap a note to hear just that note as rendered, with what it is and how far its
- * Recording moved. As the iPhone app's `TootLayout`.
+ * What Song Creator and a Toot's screen share: Play, the note view, and the Recordings used. Tap a
+ * Recording to hear it alone and see which notes it plays; tap a note to hear just that note as
+ * rendered, with what it is and how far its Recording moved. As the iPhone app's `TootLayout`.
+ *
+ * `toot` is the made Toot (Song Creator) or a saved one (its screen, with no Save). When its audio
+ * is missing, Play and the notes can't play, and the Recordings still can. `children` are more
+ * lines under "N of your Recordings, one per note".
  */
-export function TootLayout({ draft }: { draft: TootDraft }) {
+export function TootLayout({
+  toot,
+  song,
+  isAudioMissing = false,
+  children
+}: {
+  toot: TootDraft | Toot
+  song: Song
+  isAudioMissing?: boolean
+  children?: ReactNode
+}) {
   const pedos = usePedos()
-  const { song, arrangement } = draft
+  const { arrangement } = toot
   const [focus, setFocus] = useState<Focus>(null)
-  const isPlaying = pedos.nowPlaying === tootPlayback(draft.id)
-  const playingNote = song.notes.findIndex((_, i) => pedos.nowPlaying === tootPlayback(draft.id, i))
+  const isPlaying = pedos.nowPlaying === tootPlayback(toot.id)
+  const playingNote = song.notes.findIndex((_, i) => pedos.nowPlaying === tootPlayback(toot.id, i))
   const selectedNote = focus && 'note' in focus ? focus.note : null
   const highlightedPitch =
     focus === null ? null : 'pitch' in focus ? focus.pitch : song.notes[focus.note].pitch
@@ -199,18 +213,25 @@ export function TootLayout({ draft }: { draft: TootDraft }) {
       <div className="flex items-center gap-4">
         <button
           type="button"
-          aria-label={isPlaying ? 'Stop' : 'Play'}
+          aria-label={isAudioMissing ? 'Audio missing' : isPlaying ? 'Stop' : 'Play'}
           data-testid="song-creator-play"
+          disabled={isAudioMissing}
           className={cn(
             'flex size-14 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-            isPlaying ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'
+            isAudioMissing
+              ? 'bg-muted text-muted-foreground'
+              : isPlaying
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-primary/10 text-primary'
           )}
           onClick={() => {
             setFocus(null)
-            pedos.toggleTootPlayback(draft)
+            pedos.toggleTootPlayback(toot)
           }}
         >
-          {isPlaying ? (
+          {isAudioMissing ? (
+            <CircleAlert className="size-6" />
+          ) : isPlaying ? (
             <Square className="size-5 fill-current" />
           ) : (
             <Play className="size-6 fill-current" />
@@ -218,11 +239,12 @@ export function TootLayout({ draft }: { draft: TootDraft }) {
         </button>
         <div className="min-w-0">
           <p className="font-semibold" data-testid="song-creator-state">
-            {isPlaying ? 'Playing' : 'Ready'}
+            {isAudioMissing ? 'Audio missing' : isPlaying ? 'Playing' : 'Ready'}
           </p>
           <p className="text-sm text-muted-foreground">
             {song.pitches.length} of your Recordings, one per note
           </p>
+          {children}
         </div>
       </div>
 
@@ -239,8 +261,9 @@ export function TootLayout({ draft }: { draft: TootDraft }) {
           selectedNote={selectedNote}
           playingNote={playingNote === -1 ? null : playingNote}
           onTapNote={index => {
+            if (isAudioMissing) return
             setFocus({ note: index })
-            pedos.toggleTootPlayback(draft, index)
+            pedos.toggleTootPlayback(toot, index)
           }}
         />
         {selectedNote !== null && (

@@ -21,7 +21,13 @@ export function useInstallRoute(): InstallRoute | null {
  */
 export function InstallButton() {
   const route = useInstallRoute()
-  if (route === 'prompt') return <Button onClick={() => void promptInstall()}>Install app</Button>
+  if (route === 'prompt') {
+    return (
+      <Button className="h-11 px-5 text-base" onClick={() => void promptInstall()}>
+        Install app
+      </Button>
+    )
+  }
   if (route === 'share-sheet') return <ShareSheetHint />
   return null
 }

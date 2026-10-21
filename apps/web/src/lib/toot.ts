@@ -34,12 +34,45 @@ export type TootDraft = {
  */
 export type Toot = {
   id: string
-  /** The Song's title, when it was made. */
+  /** The Song's title until the user renames it. */
   title: string
   songId: string
   createdAt: number
   seconds: number
   arrangement: TootArrangement
+  /**
+   * Its audio was gone when the Toots loaded, or when it was played: it can't play. Worked out
+   * then and never stored, as the iPhone app's `isAudioMissing`.
+   */
+  isAudioMissing?: boolean
+}
+
+/** A Toot's length as its row shows it: "0:17". As `formattedTootLength`. */
+export function formattedTootLength(seconds: number): string {
+  const whole = Math.round(seconds)
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`
+}
+
+/** When a Toot was made, as its row shows it: "Today", "Yesterday", or "Oct 19, 2026". */
+export function formattedTootDate(createdAt: number, now: Date = new Date()): string {
+  const made = new Date(createdAt)
+  const day = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  // Rounded, since a day with a daylight saving change is 23 or 25 hours long.
+  const daysAgo = Math.round((day(now).getTime() - day(made).getTime()) / 86_400_000)
+  if (daysAgo === 0) return 'Today'
+  if (daysAgo === 1) return 'Yesterday'
+  return made.toLocaleDateString(undefined, { dateStyle: 'medium' })
+}
+
+/**
+ * What a Toot's row says under its title: "Mary Had a Little Lamb · Today · 0:12", or
+ * "… · Audio missing".
+ */
+export function tootDetails(toot: Toot, songTitle: string, now: Date = new Date()): string {
+  const rest = toot.isAudioMissing
+    ? ['Audio missing']
+    : [formattedTootDate(toot.createdAt, now), formattedTootLength(toot.seconds)]
+  return [songTitle, ...rest].join(' · ')
 }
 
 /** The note a pitch of the score sounds at, as a MIDI note number. */
