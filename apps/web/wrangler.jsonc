@@ -57,8 +57,9 @@
         "EMAIL_FROM": "Farty <support@farty.fm>",
         "STAGING_SIGNUP_ALLOWLIST": "devin@serp.co"
       },
-      // Cloudflare Email Sending, from support@ only, and on Staging only to test recipients. It
-      // sends once farty.fm is onboarded to Email Sending (#184).
+      // Cloudflare Email Sending, from support@ only, and on Staging only to test recipients. The
+      // hosts, BETTER_AUTH_URL and the sender must match site.ts and SUPPORT_EMAIL
+      // (src/db/deploy-config.test.ts).
       "send_email": [
         {
           "name": "EMAIL",
