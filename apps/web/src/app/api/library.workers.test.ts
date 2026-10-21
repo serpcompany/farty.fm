@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { Kind } from '@/db/library'
 import { recordings, toots } from '@/db/schema'
+import { maximumTakeSeconds } from '@/lib/recordings'
 import {
   api,
   bucketKeys,
@@ -198,7 +199,7 @@ describe('one user never reaches another’s Recordings or Toots', () => {
 
 describe('the limits', () => {
   it.each<[Kind, number]>([
-    ['recordings', 4 * MiB],
+    ['recordings', 6 * MiB],
     ['toots', 16 * MiB]
   ])('keeps a %s WAV of %i bytes and refuses one a sample larger (413)', async (kind, limit) => {
     const a = await signUp('A')
@@ -219,10 +220,26 @@ describe('the limits', () => {
     expect(await bucketKeys()).toEqual([`users/${a.id}/${kind}/${R2}.wav`])
   })
 
+  it('keeps a 30 s Recording at 96 kHz (201)', async () => {
+    const a = await signUp('A')
+    const audio = wav(maximumTakeSeconds, 96_000)
+    expect(audio.byteLength).toBe(5_760_044)
+
+    const response = await api.put(
+      'recordings',
+      R1,
+      uploadBody(recordingMetadata(R1, { seconds: maximumTakeSeconds, sampleRate: 96_000 }), audio),
+      a
+    )
+
+    expect(response.status).toBe(201)
+    expect(await bucketKeys()).toEqual([`users/${a.id}/recordings/${R1}.wav`])
+  })
+
   it('stops reading a body larger than the WAV limit and the form around it (413)', async () => {
     const a = await signUp('A')
-
-    const response = await api.put('recordings', R1, new Uint8Array(5 * MiB), a, {
+    // Over a Recording's 6 MiB and the 64 KiB allowed for the form around it.
+    const response = await api.put('recordings', R1, new Uint8Array(7 * MiB), a, {
       headers: { 'content-type': 'multipart/form-data; boundary=x' }
     })
 
@@ -253,15 +270,21 @@ describe('the limits', () => {
     expect(await (await upload(kind, R1, b.cookie)).json()).toEqual({ error: 'limit_reached' })
   })
 
-  it('counts only live items: a delete makes room again', async () => {
+  it.each<Kind>([
+    'recordings',
+    'toots'
+  ])('counts only live %s: a delete makes room again', async kind => {
     const a = await signUp('A')
-    await seed('recordings', a.id, 299)
-    await upload('recordings', R1, a.cookie)
-    expect((await upload('recordings', R2, a.cookie)).status).toBe(409)
+    await seed(kind, a.id, 299)
+    await upload(kind, R1, a.cookie)
+    expect((await upload(kind, R2, a.cookie)).status).toBe(409)
 
-    await api.delete('recordings', R1, a)
+    await api.delete(kind, R1, a)
 
-    expect((await upload('recordings', R2, a.cookie)).status).toBe(201)
+    expect((await upload(kind, R2, a.cookie)).status).toBe(201)
+    // A second delete leaves two tombstones, and still makes room.
+    await api.delete(kind, R2, a)
+    expect((await upload(kind, T1, a.cookie)).status).toBe(201)
   })
 })
 
@@ -302,6 +325,9 @@ describe('deletes and GET /api/library/?since=', () => {
     await upload('recordings', R1, a.cookie)
     await upload('recordings', R2, a.cookie)
     await upload('toots', T1, a.cookie)
+    // The cursor counts whole milliseconds and `since` includes its own millisecond, so a change
+    // in the same millisecond as the cursor comes back again. Wait, so this read sees none.
+    await tick()
     const first = await library(a.cookie)
     expect(first.recordings.map(r => r.id).sort()).toEqual([R1, R2])
     expect(first.deleted).toEqual({ recordings: [], toots: [] })
@@ -345,6 +371,8 @@ describe('deletes and GET /api/library/?since=', () => {
   it('lists only what changed since the cursor', async () => {
     const a = await signUp('A')
     await upload('recordings', R1, a.cookie)
+    // R1 in the cursor's own millisecond would come back again (by design: never missed).
+    await tick()
     const first = await library(a.cookie)
     await tick()
 

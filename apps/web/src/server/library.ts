@@ -43,8 +43,11 @@ export function requestStores(): Stores {
 
 /** How much one user can keep: the plan's limits (#150). */
 export const LIMITS: Record<Kind, { maxAudioBytes: number; maxItems: number }> = {
-  /** A Recording is at most 30 seconds, about 2.9 MB at 48 kHz. */
-  recordings: { maxAudioBytes: 4 * 1024 * 1024, maxItems: 300 },
+  /**
+   * A Recording is at most `maximumTakeSeconds` (30 s) of mono 16-bit audio at the microphone's
+   * own rate: about 2.9 MB at 48 kHz, and 5,760,044 bytes at 96 kHz, which 6 MiB still keeps.
+   */
+  recordings: { maxAudioBytes: 6 * 1024 * 1024, maxItems: 300 },
   toots: { maxAudioBytes: 16 * 1024 * 1024, maxItems: 300 }
 }
 
