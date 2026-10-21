@@ -41,7 +41,7 @@ export default function PrivacyPage() {
       <h2>What Pedos doesn&apos;t do</h2>
       <ul>
         <li>It has no ads, analytics or tracking, and contains no third-party code that does.</li>
-        <li>It doesn&apos;t sell or share your data.</li>
+        <li>It doesn&apos;t sell your data.</li>
       </ul>
       <p>
         Opening the site is an ordinary web request, like any website. Pedos runs on Cloudflare,

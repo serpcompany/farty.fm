@@ -12,6 +12,7 @@ test('the privacy page covers accounts, news email, guests and deleting', async 
   await expect(page.getByText('last only until you close Pedos')).toBeVisible()
   await expect(page.getByText('Delete account on Profile removes your email')).toBeVisible()
   await expect(page.getByText('no ads, analytics or tracking')).toBeVisible()
+  await expect(page.getByText("Pedos doesn't ask anyone's age")).toBeVisible()
   await expect(page.getByRole('link', { name: 'support@pedos.app' })).toHaveAttribute(
     'href',
     'mailto:support@pedos.app'
