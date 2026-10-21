@@ -41,6 +41,10 @@ function handles(request) {
   if (url.origin !== self.location.origin) return false
   // The Fixture Library is internal (AGENTS.md): never kept, even by a build that serves it.
   if (/(?:^|\/)fixtures\//.test(url.pathname)) return false
+  // The lander's images (#191): only a desktop that hasn't opened Farty shows them, and never
+  // offline, so the worker neither precaches them from `/`'s markup nor keeps them. Phones never
+  // download them.
+  if (url.pathname.startsWith('/lander/')) return false
   if (request.mode === 'navigate') return true
   return url.pathname !== '/sw.js' && shellFile.test(url.pathname)
 }

@@ -166,7 +166,7 @@ function Ready({ draft }: { draft: TootDraft }) {
   return (
     <>
       <TootLayout toot={draft} song={draft.song} />
-      <div className="sticky bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] mt-auto bg-linear-to-t from-background from-70% to-transparent px-5 pt-5 pb-3">
+      <div className="sticky bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] mt-auto md:bottom-0 bg-linear-to-t from-background from-70% to-transparent px-5 pt-5 pb-3">
         <Button className="h-12 w-full text-base" disabled={isSaved || saving} onClick={save}>
           {isSaved ? (
             <>

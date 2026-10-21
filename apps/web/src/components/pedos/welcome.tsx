@@ -8,7 +8,7 @@ import { usePedos } from './pedos-provider'
 
 /**
  * Says what Farty does and asks for the microphone before the first recording. First visit only.
- * Matches the iPhone app's `WelcomeSheet`.
+ * Matches the iPhone app's `WelcomeSheet`. From 768px the lander takes its place (`lander.tsx`).
  */
 export function Welcome() {
   const pedos = usePedos()
@@ -25,7 +25,7 @@ export function Welcome() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background p-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background p-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] md:hidden">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
         <div className="flex-1" />
         <Image

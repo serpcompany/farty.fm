@@ -49,10 +49,11 @@ test('a made-up URL answers 404 with one noindex tag and a link home', async ({
   await expect(page.getByRole('link', { name: 'Back to Farty' })).toHaveAttribute('href', '/')
 })
 
-test('Welcome shows on the tabs but never covers the privacy, support or 404 page', async ({
-  page
+test('Welcome, or from 768px the lander, shows on a first visit but never covers the privacy, support or 404 page', async ({
+  page,
+  isMobile
 }) => {
-  const welcome = page.getByRole('button', { name: 'Not now' })
+  const welcome = page.getByRole('button', { name: isMobile ? 'Not now' : 'Sign up free' })
   await page.goto('/')
   await expect(welcome).toBeVisible()
 

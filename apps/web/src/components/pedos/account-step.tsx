@@ -18,8 +18,9 @@ const messages: Record<SignInProblem, string> = {
 }
 
 /**
- * The account step (#155, the plan's §1), full screen over everything: an email, then the 6-digit
- * code sent to it, which signs in or makes the account. Not now says what a guest loses. A browser
+ * The account step (#155, the plan's §1), full screen over everything on a phone, and a card under
+ * the top bar from 768px: an email, then the 6-digit code sent to it, which signs in or makes the
+ * account. Not now says what a guest loses. A browser
  * whose session ended (`expired`) is asked to sign in again, and loses nothing. Signing in to
  * another account clears this device's farts not saved to the first: the step says so first.
  */
@@ -123,9 +124,9 @@ function Step() {
       role="dialog"
       aria-modal
       aria-labelledby="account-step-title"
-      className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:top-[calc(4rem+1px)] md:p-6"
     >
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 md:my-auto md:flex-none md:rounded-3xl md:border md:py-3 md:shadow-sm">
         <div className="flex flex-1 flex-col justify-center gap-6 py-6">
           <div className="space-y-2 text-center">
             <h1
