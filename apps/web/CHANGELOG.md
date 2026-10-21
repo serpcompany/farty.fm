@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/serpcompany/pedos-app/compare/v1.2.0...v1.3.0) (2026-10-21)
+
+
+### Features
+
+* Auto-map keeps short notes off farts that settle on pitch late (reference engine) ([#117](https://github.com/serpcompany/pedos-app/issues/117)) ([e7d764e](https://github.com/serpcompany/pedos-app/commit/e7d764ea68c93c315255a19deb3137fe0f42777d))
+* **web:** Cloudflare-native error reports and analytics, with one opt-out ([#126](https://github.com/serpcompany/pedos-app/issues/126)) ([#178](https://github.com/serpcompany/pedos-app/issues/178)) ([31a2408](https://github.com/serpcompany/pedos-app/commit/31a24084e16155867d1259d68b4628532e3fbf3f))
+* **web:** drop the app's analytics beacon; keep Cloudflare's automatic one ([#126](https://github.com/serpcompany/pedos-app/issues/126)) ([#181](https://github.com/serpcompany/pedos-app/issues/181)) ([e7b8dad](https://github.com/serpcompany/pedos-app/commit/e7b8dada95ffd77510831ae4fc71c023dc4f7430))
+
+
+### Fixes
+
+* **web:** hear an interruption while the microphone opens, and steady two flaky journeys ([#172](https://github.com/serpcompany/pedos-app/issues/172), [#141](https://github.com/serpcompany/pedos-app/issues/141)) ([#179](https://github.com/serpcompany/pedos-app/issues/179)) ([8ea6795](https://github.com/serpcompany/pedos-app/commit/8ea67950371cc89c6954d9fe53dd3281c6e4aeb5))
+
 ## [1.2.0](https://github.com/serpcompany/pedos-app/compare/v1.1.1...v1.2.0) (2026-10-21)
 
 
