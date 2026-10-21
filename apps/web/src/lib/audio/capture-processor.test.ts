@@ -8,7 +8,7 @@ import {
 } from './capture-processor'
 
 type Processor = {
-  port: { onmessage: (event: { data: CaptureCommand }) => void }
+  port: { onmessage: ((event: { data: CaptureCommand }) => void) | null }
   process(inputs: Float32Array[][]): boolean
 }
 
@@ -36,14 +36,17 @@ function capture() {
   return {
     sent,
     /** Feeds `frames` of a ramp that counts samples from 1, so each one says where it came from. */
-    feed(frames: number) {
+    /** Returns what the last `process` call returned: false once the processor is done. */
+    feed(frames: number): boolean {
+      let running = true
       for (let done = 0; done < frames; done += quantum) {
         const channel = Float32Array.from({ length: quantum }, () => ++next)
-        processor.process([[channel]])
+        running = processor.process([[channel]])
       }
+      return running
     },
     send(command: CaptureCommand) {
-      processor.port.onmessage({ data: command })
+      processor.port.onmessage?.({ data: command })
     }
   }
 }
@@ -115,5 +118,26 @@ describe('capture processor', () => {
     const before = c.sent.length
     c.feed(2 * batchFrames)
     expect(c.sent).toHaveLength(before)
+  })
+
+  it('stops running once closed, so released microphones leave no processor behind', () => {
+    const c = capture()
+    expect(c.feed(sampleRate)).toBe(true)
+    c.send({ type: 'start', take: 1 })
+    c.send({ type: 'close' })
+    expect(c.feed(quantum)).toBe(false)
+    expect(c.sent).toHaveLength(0)
+  })
+
+  it('forgets the pre-roll on flush, so a take after an interruption has none of the old audio', () => {
+    const c = capture()
+    c.feed(sampleRate)
+    c.send({ type: 'flush' })
+    c.feed(2 * quantum)
+    c.send({ type: 'start', take: 1 })
+    c.feed(quantum)
+    expect(Array.from(c.sent[0].samples)).toEqual(
+      Array.from({ length: 3 * quantum }, (_, i) => sampleRate + i + 1)
+    )
   })
 })

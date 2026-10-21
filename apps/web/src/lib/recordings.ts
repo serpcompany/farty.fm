@@ -73,7 +73,7 @@ export const maximumTakeSeconds = 30
 /** A take's loudest 50 ms must reach this level… */
 const quietestFartDb = -50
 /** …and stand this far above the take's own room (its 10th-percentile 50 ms level). */
-const minimumContrastDb = 5
+const minimumContrastDb = 4
 
 /**
  * Whether a take holds a sound worth reviewing, judged from the audio: its loudest 50 ms level

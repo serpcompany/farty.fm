@@ -4,8 +4,14 @@ export const preRollSeconds = 0.3
 /** Takes after the first arrive in batches of this many frames. */
 export const batchFrames = 4096
 
-/** What the page tells the capture processor. `take` numbers each take. */
-export type CaptureCommand = { type: 'start' | 'stop' | 'cancel'; take: number }
+/**
+ * What the page tells the capture processor. `take` numbers each take. `flush` empties the
+ * pre-roll ring, after an interruption. `close` ends the processor for good, when the microphone
+ * is let go, so the audio thread stops running it.
+ */
+export type CaptureCommand =
+  | { type: 'start' | 'stop' | 'cancel'; take: number }
+  | { type: 'flush' | 'close' }
 
 /** What the capture processor sends back: a batch of a take's samples, the last one `done`. */
 export type CaptureBatch = { take: number; samples: Float32Array; done: boolean }
@@ -18,7 +24,8 @@ export type CaptureBatch = { take: number; samples: Float32Array; done: boolean 
  * While the microphone is open it keeps the last `preRollSeconds` of audio in a ring, in memory
  * only. A take starts with that ring, so a fart that starts as the person taps is kept whole.
  * The first batch goes out in the first render quantum after `start`, so the page knows capture
- * has begun; later batches are `batchFrames` long. `stop` sends the rest, marked `done`.
+ * has begun; later batches are `batchFrames` long. `stop` sends the rest, marked `done`. After
+ * `close`, `process` returns false, so the browser can free the processor.
  */
 export const captureProcessorSource = `
 class PedosCapture extends AudioWorkletProcessor {
@@ -31,11 +38,17 @@ class PedosCapture extends AudioWorkletProcessor {
     this.first = null
     this.batch = new Float32Array(${batchFrames})
     this.filled = 0
+    this.closed = false
     this.port.onmessage = event => this.receive(event.data)
   }
 
   receive(command) {
-    if (command.type === 'start') {
+    if (command.type === 'close') {
+      this.closed = true
+      this.port.onmessage = null
+    } else if (command.type === 'flush') {
+      this.ringFilled = 0
+    } else if (command.type === 'start') {
       this.take = command.take
       this.first = this.preRoll()
       this.filled = 0
@@ -69,6 +82,7 @@ class PedosCapture extends AudioWorkletProcessor {
   }
 
   process(inputs) {
+    if (this.closed) return false
     const channel = inputs[0] && inputs[0][0]
     if (!channel) return true
     if (this.take !== null && this.first) {

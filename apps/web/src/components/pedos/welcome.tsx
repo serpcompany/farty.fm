@@ -3,6 +3,7 @@
 import { Lock, Mic, Music } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { askForMicrophone } from '@/lib/audio/recorder'
 import { usePedos } from './pedos-provider'
 
 /**
@@ -14,9 +15,9 @@ export function Welcome() {
 
   async function allowMicrophone() {
     try {
-      // Ask now, so the first Record tap records instead of prompting.
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      for (const track of stream.getTracks()) track.stop()
+      // Ask now, so the first Record tap records instead of prompting. Over Record, the
+      // microphone stays open, so that first tap captures at once.
+      await askForMicrophone()
     } catch {
       // Saying no is an answer, not an error: Record explains it if they tap it later.
     }

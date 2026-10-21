@@ -20,6 +20,10 @@ type Microphone = {
   source: MediaStreamAudioSourceNode
   node: AudioWorkletNode
   mute: GainNode
+  /** An interruption muted the track or stopped the context, so the next tap opens it afresh. */
+  interrupted: boolean
+  /** Stops listening to the shared context. */
+  unwatch(): void
 }
 
 /** A take being captured, with what's waiting on it. */
@@ -39,6 +43,8 @@ let generation = 0
 let granted = false
 let capturing: Capturing | null = null
 let takes = 0
+/** How many Record screens keep the microphone open: one, or none. */
+let keepers = 0
 
 /** A take that hasn't sent its first batch by now, with the microphone open, didn't start. */
 const firstBatchTimeoutMs = 3000
@@ -95,19 +101,21 @@ export function openMicrophone(): Promise<Microphone> {
   return opening
 }
 
+const microphoneConstraints: MediaStreamConstraints = {
+  audio: {
+    channelCount: 1,
+    echoCancellation: false,
+    noiseSuppression: false,
+    autoGainControl: false
+  }
+}
+
 async function connect(openedIn: number): Promise<Microphone> {
   const context = audioContext()
   setAudioSession('play-and-record')
   let stream: MediaStream
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        channelCount: 1,
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false
-      }
-    })
+    stream = await navigator.mediaDevices.getUserMedia(microphoneConstraints)
   } catch (error) {
     if (openedIn !== generation) throw new MicrophoneReleasedError()
     setAudioSession('playback')
@@ -136,7 +144,28 @@ async function connect(openedIn: number): Promise<Microphone> {
   const mute = context.createGain()
   mute.gain.value = 0
   source.connect(node).connect(mute).connect(context.destination)
-  const opened: Microphone = { context, stream, source, node, mute }
+  // Siri, an alarm or a call banner on iPhone mutes the track, or stops the context, without
+  // ending it. The ring would then hold silence, or audio from before the interruption, so it's
+  // emptied, and the next tap opens the microphone afresh.
+  const interrupt = () => {
+    opened.interrupted = true
+    send(node, { type: 'flush' })
+  }
+  let running = context.state === 'running'
+  const contextChanged = () => {
+    if (running && context.state !== 'running') interrupt()
+    running = context.state === 'running'
+  }
+  context.addEventListener('statechange', contextChanged)
+  const opened: Microphone = {
+    context,
+    stream,
+    source,
+    node,
+    mute,
+    interrupted: false,
+    unwatch: () => context.removeEventListener('statechange', contextChanged)
+  }
 
   node.port.onmessage = (event: MessageEvent<CaptureBatch>) => {
     const take = capturing
@@ -150,8 +179,14 @@ async function connect(openedIn: number): Promise<Microphone> {
     track.onended = () => {
       if (microphone === opened) releaseMicrophone()
     }
+    track.onmute = interrupt
   }
   return opened
+}
+
+/** Whether an interruption has left the open microphone's track silent or its ring stale. */
+function interrupted(mic: Microphone): boolean {
+  return mic.interrupted || mic.stream.getAudioTracks().some(track => track.muted)
 }
 
 /**
@@ -167,6 +202,9 @@ export function releaseMicrophone(): void {
   const closing = microphone
   microphone = null
   if (closing) {
+    closing.unwatch()
+    // Ends the processor, which would otherwise run on the audio thread until the page closes.
+    send(closing.node, { type: 'close' })
     closing.source.disconnect()
     closing.node.disconnect()
     closing.mute.disconnect()
@@ -191,6 +229,7 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
   audioContext()
     .resume()
     .catch(() => {})
+  if (microphone && !capturing && interrupted(microphone)) releaseMicrophone()
   const mic = await openMicrophone()
 
   takes += 1
@@ -268,6 +307,7 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
  */
 export function keepMicrophoneOpen(): () => void {
   let kept = true
+  keepers += 1
   const open = async () => {
     if (!(await microphoneGranted())) return
     if (kept && document.visibilityState === 'visible') openMicrophone().catch(() => {})
@@ -281,8 +321,32 @@ export function keepMicrophoneOpen(): () => void {
   window.addEventListener('pagehide', releaseMicrophone)
   return () => {
     kept = false
+    keepers -= 1
     document.removeEventListener('visibilitychange', visibilityChanged)
     window.removeEventListener('pagehide', releaseMicrophone)
     releaseMicrophone()
   }
+}
+
+/**
+ * Asks for the microphone before the first take, as Welcome does. Over the Record screen it opens
+ * the microphone and keeps it, so the first tap captures at once with its pre-roll; anywhere else
+ * it closes it again. Throws `MicrophoneDeniedError` when the person says no.
+ */
+export async function askForMicrophone(): Promise<void> {
+  if (keepers > 0) {
+    await openMicrophone()
+    return
+  }
+  let stream: MediaStream
+  try {
+    stream = await navigator.mediaDevices.getUserMedia(microphoneConstraints)
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'NotAllowedError') {
+      throw new MicrophoneDeniedError()
+    }
+    throw error
+  }
+  for (const track of stream.getTracks()) track.stop()
+  granted = true
 }
