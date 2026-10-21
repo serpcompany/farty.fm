@@ -2,7 +2,7 @@
 
 Issues for this repo live in GitHub Issues. Use the `gh` CLI for all operations; it infers the repo inside the clone.
 
-Agents run every `gh` command below, and every `git` command that reaches GitHub (commit, fetch, push), as serp-agent through the `serp-github-app` skill, never with the owner's sign-in. See [Agent GitHub Identity](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/agent-harness/agent-github-identity.md).
+Agents act on GitHub only as serp-agent: every `gh` command below, and every `git` command that reaches GitHub (commit, fetch, push), runs through the `serp-github-app` skill's `gh.sh` and `git.sh`. Never use the owner's `gh` login, not even to read. See [Agent GitHub Identity](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/agent-harness/agent-github-identity.md).
 
 `gh` older than 2.82.1 fails on plain `gh issue view`, `gh pr view` and `gh pr edit` because GitHub removed Projects (classic). Upgrade with `brew upgrade gh`, or use the `--json` and `gh api` forms below, which work on any version.
 
@@ -60,6 +60,13 @@ Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob
    - Never run `pnpm deploy:*`; CI deploys Staging.
 4. One review. Follow the git workflow's review loop: a fresh review agent that didn't write the change posts findings as PR review comments marked **blocking** or **suggestion**, and the author replies on each. Record the outcome in the PR. A clean review is not owner acceptance.
 5. Update the branch from `staging`, then mark the PR ready. Until launch, agents merge every PR once a fresh review has no open blocking finding and the cited local `pnpm check` on the head and the required checks are green. Squash-merge and delete the branch.
+   - The owner isn't asked to merge, review or tap through (owner, 2026-10-21). Ask only for design choices, secret-value clicks (`serp-create-secret`) and what the hard limits forbid.
+   - After a merge, check the linked issue. A squash merge by an agent may not auto-close it; if it is still open, close it with `gh issue close <n> --comment "Shipped in #<pr>."`.
+
+## Shell gotchas
+
+- zsh has `noclobber` set: overwrite a file with `>|`, and use `bash -c` for `set -- $words` loops.
+- Keep the `gh.sh` path in a variable with no spaces, then call it as `G=<path>; bash $G ...`.
 
 ## iOS history
 

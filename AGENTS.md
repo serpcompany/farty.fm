@@ -20,4 +20,7 @@ These rules come from a long first attempt that produced a lot of process and li
 - **Songs need sources.** Never type melody notes by hand. Add Songs through `catalog/` with a cited score and license (ADR 0003).
 - **Match the reference.** `tools/melody-lab/` is the reference engine. When Swift behavior differs from it, either fix the Swift code or change the reference deliberately and re-verify it.
 - **Keep the UI simple.** Remove anything that isn't needed.
+- **The owner is not a blocker (before the MVP).** Agents merge every PR, release PRs included, once the rules in `docs/agents/issue-tracker.md` (Git workflow) are met, and tap through user-visible changes themselves. Ask the owner only to choose between design options, for secret-value clicks (`serp-create-secret`), and for what the hard limits forbid.
+- **Never touch a secret.** Don't read, type or print one. Move a secret with the `serp-create-secret` skill.
+- **No App Store or TestFlight.** Never submit to either again. 1.0.0 was rejected under guidelines 4.3(b) and 1.1.1 (ADR 0007), and the owner said never to resubmit a fart app.
 - **Fixtures are internal.** The Fixture Library (`fixtures/recordings/`) never ships in regular-user builds.
