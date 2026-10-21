@@ -6,7 +6,7 @@ Farty was called Pedos until 2026-10-22 ([ADR 0009](docs/adr/0009-rename-pedos-t
 
 **Farty is becoming a web app** (`apps/web/`, ADR 0007). Apple rejected the App Store submission because it won't accept fart apps (#75). The web app is being built slice by slice (#106). The iPhone app below is no longer built or released: TestFlight releases stopped on 2026-10-06 (#103).
 
-- **Plan:** the pinned [Web MVP roadmap](https://github.com/serpcompany/pedos-app/issues/106) issue, in build order.
+- **Plan:** the pinned [Web MVP roadmap](https://github.com/serpcompany/farty.fm/issues/106) issue, in build order.
 - **Vocabulary:** [`CONTEXT.md`](CONTEXT.md). **Decisions:** [`docs/adr/`](docs/adr/).
 
 ## Where it stands

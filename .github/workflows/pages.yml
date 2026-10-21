@@ -1,5 +1,5 @@
 # Publishes the App Store privacy and support pages (docs/app-store) to
-# https://serpcompany.github.io/pedos-app/. Only these pages are public; the repo stays private.
+# https://serpcompany.github.io/farty.fm/. Only these pages are public; the repo stays private.
 name: Pages
 
 on:

@@ -165,8 +165,8 @@ Digital Services Act trader status, which can be added later.
 
 ## Support and privacy URLs
 
-- Support URL: https://serpcompany.github.io/pedos-app/support/
-- Privacy Policy URL: https://serpcompany.github.io/pedos-app/privacy/
+- Support URL: https://serpcompany.github.io/farty.fm/support/
+- Privacy Policy URL: https://serpcompany.github.io/farty.fm/privacy/
 
 Both are built from `support.md` and `privacy-policy.md` by `.github/workflows/pages.yml`.
 

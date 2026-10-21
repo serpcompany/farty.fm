@@ -15,7 +15,7 @@ Agents run every `gh` command below, and every `git` command that reaches GitHub
 - **Apply or remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`.
 - **Close**: `gh issue close <number> --comment "..."`.
 - **Read a PR**: `gh pr view <n> --json title,body,headRefName` and `gh pr diff <n>`.
-- **Edit a PR**: `gh api -X PATCH repos/serpcompany/pedos-app/pulls/<n> -f title=... -F body=@<file>`.
+- **Edit a PR**: `gh api -X PATCH repos/serpcompany/farty.fm/pulls/<n> -f title=... -F body=@<file>`.
 
 Write every issue so a fresh agent session can finish it from the issue text alone: outcome, scope, what's deliberately not included, and how it's accepted.
 
@@ -34,15 +34,15 @@ When a skill says "fetch the relevant ticket," run `gh issue view <number> --jso
 The plan is the pinned Web MVP roadmap issue (#106). All roadmap issues are in the **Web MVP** milestone.
 
 - **Labels**: `slice` for build work, `decision` for an open question that blocks build work, `later` for ideas deferred past the MVP, and `tools` for tools-track work (combined with `slice` or `decision`).
-- **Order**: `gh api --paginate repos/serpcompany/pedos-app/issues/<n>/sub_issues --jq '.[] | [.number, .state, .title] | @tsv'`, starting from #106. Read it depth-first: a sub-issue that has its own sub-issues is replaced by its children, in their order, before moving on to its next sibling.
-- **Blocking**: GitHub's built-in dependencies, not text in the body. Read them with `gh api repos/serpcompany/pedos-app/issues/<n>/dependencies/blocked_by --jq '.[] | [.number, .state] | @tsv'`. A parent's blockers also block its children.
+- **Order**: `gh api --paginate repos/serpcompany/farty.fm/issues/<n>/sub_issues --jq '.[] | [.number, .state, .title] | @tsv'`, starting from #106. Read it depth-first: a sub-issue that has its own sub-issues is replaced by its children, in their order, before moving on to its next sibling.
+- **Blocking**: GitHub's built-in dependencies, not text in the body. Read them with `gh api repos/serpcompany/farty.fm/issues/<n>/dependencies/blocked_by --jq '.[] | [.number, .state] | @tsv'`. A parent's blockers also block its children.
 - **Next up**: the first leaf, in depth-first order, that is open, has no open blockers, and has no open PR. An open PR on an `issue-<n>-…` branch marks an issue as taken; the orchestrator tracks claims, so agents don't assign issues. Check for a PR with `gh pr list --state open --limit 200 --json number,headRefName --jq '.[] | select(.headRefName | startswith("issue-<n>-")) | .number'`.
 - **`decision` issues**: an agent prepares the options the issue asks for (usually a listening page) and asks the owner to choose. Then one PR with `Closes #<n>` adds the candidates, the listening page and an ADR recording the choice.
 - **Parallel sessions (waves)**: the roadmap runs in waves. Sessions run in parallel when their issues' owned files don't overlap, each in its own worktree, dev port and `E2E_PORT`. An issue lists its owned files; other issues leave them alone and note what they need in their PR. Issues labeled `tools` are tools-track work (typically `tools/`, `catalog/` and `fixtures/golden/`).
-- **Adding a roadmap issue**: add it under #106 (or its parent) at the right position and link its blockers. These endpoints take numeric issue ids (`gh api repos/serpcompany/pedos-app/issues/<number> --jq .id`), not issue numbers:
-  - `gh api -X POST repos/serpcompany/pedos-app/issues/<parent-number>/sub_issues -F sub_issue_id=<new-id>` appends the new issue.
-  - `gh api -X PATCH repos/serpcompany/pedos-app/issues/<parent-number>/sub_issues/priority -F sub_issue_id=<new-id> -F after_id=<sibling-id>` moves it after a sibling.
-  - `gh api -X POST repos/serpcompany/pedos-app/issues/<new-number>/dependencies/blocked_by -F issue_id=<blocker-id>` adds a blocker.
+- **Adding a roadmap issue**: add it under #106 (or its parent) at the right position and link its blockers. These endpoints take numeric issue ids (`gh api repos/serpcompany/farty.fm/issues/<number> --jq .id`), not issue numbers:
+  - `gh api -X POST repos/serpcompany/farty.fm/issues/<parent-number>/sub_issues -F sub_issue_id=<new-id>` appends the new issue.
+  - `gh api -X PATCH repos/serpcompany/farty.fm/issues/<parent-number>/sub_issues/priority -F sub_issue_id=<new-id> -F after_id=<sibling-id>` moves it after a sibling.
+  - `gh api -X POST repos/serpcompany/farty.fm/issues/<new-number>/dependencies/blocked_by -F issue_id=<blocker-id>` adds a blocker.
 
 ## Git workflow
 
