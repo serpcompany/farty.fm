@@ -16,7 +16,9 @@ Run from `apps/web/`:
 | `pnpm test` | Unit tests, including Recording Analysis against `fixtures/golden/` |
 | `pnpm test:e2e` | Record journeys in Chromium with a fixture as a fake microphone |
 | `pnpm lint`, `pnpm typecheck` | Biome, then TypeScript |
-| `pnpm check` | The finish gate: lint, types, tests and build. It never writes files. |
+| `pnpm check` | The finish gate: lint, types, `drizzle-kit check`, tests and build. It never writes files. |
+| `pnpm db:generate` | Write a migration into `drizzle/` after a change to `src/db/schema.ts` |
+| `pnpm db:migrate:local` | Apply the migrations to the local D1 in `.wrangler/`. CI applies Staging's and Production's (`db:migrate:<env>`) before each deploy; agents never run those. |
 | `pnpm build:staging`, `pnpm build:production` | The Workers build for one environment, into `.open-next/` |
 | `pnpm deploy:staging`, `pnpm deploy:production` | Build and deploy that environment's Worker, for a person in an emergency. Agents never run them. CI deploys Staging on every push to `staging`, and Production on every push to `main`, once the checks pass (`web.yml`). |
 | `scripts/smoke.sh <url> <staging\|production>` | The post-deploy smoke test, also run against a local preview |
@@ -28,6 +30,7 @@ Run from `apps/web/`:
 - `src/lib/audio/`: the microphone (an AudioWorklet, with the browser's voice processing off) and playback.
 - `src/lib/recording-store.ts`: the `pedos` IndexedDB database, with Recordings (`recording-store.ts`) and Toots (`toot-store.ts`). Nothing leaves the browser.
 - `src/lib/toot.ts`, `toot-renderer.ts`: a Toot, a Song rendered with the user's Recordings in the render worker, as Song Creator makes it.
+- `src/db/`: the D1 schema (Better Auth's tables, `recordings` and `toots`) and `getDb()`, through Drizzle. Migrations are in `drizzle/`.
 - `src/components/pedos/`: the screens, matching the iPhone app's. `src/components/ui/` stays stock shadcn.
 
 ## Where this differs from SERP's standards

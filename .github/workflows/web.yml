@@ -14,6 +14,10 @@ name: Web
 # Each deploy reads CLOUDFLARE_API_TOKEN from its own environment (staging or production) and the
 # CLOUDFLARE_ACCOUNT_ID variable. With no token the deploy fails, so a green run at the tip always
 # deployed and passed the smoke test.
+#
+# The D1 databases change only here: each deploy applies its environment's migrations
+# (`pnpm db:migrate:<env>`) first, and `e2e` applies them to its local database before the
+# journeys. src/db/deploy-config.test.ts checks that every deploy and migration names its --env.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -84,6 +88,9 @@ jobs:
         run: pnpm lint
       - if: env.WEB == 'true'
         run: pnpm typecheck
+      - name: Check the migrations match Drizzle's journal
+        if: env.WEB == 'true'
+        run: pnpm db:check
       - if: env.WEB == 'true'
         run: pnpm test
       # Both Workers builds run on every PR, once each: `e2e` builds Staging, except on a draft,
@@ -148,6 +155,10 @@ jobs:
       - name: Write .dev.vars
         if: steps.receipt.outputs.run == 'true'
         run: cp .dev.vars.example .dev.vars
+      # The preview runs the top level of wrangler.jsonc, with its local D1 in .wrangler/.
+      - name: Apply the migrations to the local database
+        if: steps.receipt.outputs.run == 'true'
+        run: pnpm db:migrate:local
       - if: steps.receipt.outputs.run == 'true'
         run: pnpm exec playwright install --with-deps chromium
       - name: Record journeys on workerd
@@ -213,6 +224,13 @@ jobs:
           else
             echo "::notice::$GITHUB_SHA isn't the tip of staging ($tip), so nothing was deployed."
           fi
+      # Before the code that needs them. A migration that fails stops the deploy.
+      - name: Apply the migrations to Staging's database
+        if: steps.tip.outputs.deploy == 'true'
+        run: pnpm db:migrate:staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy to Staging
         if: steps.tip.outputs.deploy == 'true'
         run: pnpm exec opennextjs-cloudflare deploy --env staging
@@ -263,6 +281,13 @@ jobs:
           else
             echo "::notice::$GITHUB_SHA isn't the tip of main ($tip), so nothing was deployed."
           fi
+      # Before the code that needs them. A migration that fails stops the deploy.
+      - name: Apply the migrations to Production's database
+        if: steps.tip.outputs.deploy == 'true'
+        run: pnpm db:migrate:production
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy to Production
         if: steps.tip.outputs.deploy == 'true'
         run: pnpm exec opennextjs-cloudflare deploy --env production
