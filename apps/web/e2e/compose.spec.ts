@@ -123,6 +123,9 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   // Back returns to Compose, where the Unlocked Song opens Song Creator too.
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
+  // A reload continues a guest's visit (`visit.ts`), so from here Compose and Recordings read the
+  // four Recordings back from storage.
+  await page.reload()
   await expect(page.getByRole('heading', { name: 'Unlocked · 1' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Locked · 11' })).toBeVisible()
   const unlocked = page.getByTestId('unlocked-songs').getByRole('link')
