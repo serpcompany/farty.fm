@@ -128,7 +128,8 @@ export function coverageKey(recordings: readonly Recording[]): string {
       r.id,
       r.recordingPitchMidi,
       r.shortestNoteSeconds,
-      r.gestureSeconds
+      r.gestureSeconds,
+      r.settleSeconds
     ])
   )
 }

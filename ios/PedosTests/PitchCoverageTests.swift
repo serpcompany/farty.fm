@@ -2,8 +2,9 @@ import XCTest
 @testable import Pedos
 
 /// Pitch Coverage and Auto-map in the app (`CoverageResult`, from `RecordingAnalysisKit.AutoMap`),
-/// checked against the reference engine: its golden Arrangements (`fixtures/golden/`, read from
-/// the repo) and its `melody_fit()` on the sample story's takes.
+/// checked against the reference engine: its golden Arrangements at format 2 (the frozen copy in
+/// `RecordingAnalysisKit/Tests/GoldenFormat2/`, read from the repo; #116) and its `melody_fit()`
+/// on the sample story's takes.
 final class PitchCoverageTests: XCTestCase {
     private let songs = Song.prototypeCatalog
     private let fixtures = SampleFixture.prototypeLibrary
@@ -25,7 +26,8 @@ final class PitchCoverageTests: XCTestCase {
         id.map { String($0.uuidString.suffix(3)) }
     }
 
-    /// One golden Arrangement: `fixtures/golden/arrangements/<library>/<song>.json`.
+    /// One golden Arrangement at format 2:
+    /// `RecordingAnalysisKit/Tests/GoldenFormat2/arrangements/<library>/<song>.json`.
     private struct GoldenArrangement: Decodable {
         struct PerPitch: Decodable {
             let songPitch: Int
@@ -39,7 +41,7 @@ final class PitchCoverageTests: XCTestCase {
     private func golden(_ library: String, _ song: String) throws -> GoldenArrangement {
         let url = URL(filePath: #filePath)
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-            .appending(path: "fixtures/golden/arrangements/\(library)/\(song).json")
+            .appending(path: "RecordingAnalysisKit/Tests/GoldenFormat2/arrangements/\(library)/\(song).json")
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return try decoder.decode(GoldenArrangement.self, from: Data(contentsOf: url))

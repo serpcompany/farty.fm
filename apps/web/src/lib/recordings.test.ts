@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { decoded, goldenRecordings } from '@/test-support/golden'
-import { heardSomething, levelContrast } from './recordings'
+import {
+  type Analysis,
+  type AnalysisState,
+  heardSomething,
+  levelContrast,
+  needsSettleTime,
+  type Recording,
+  withSettleTime
+} from './recordings'
 
 /**
  * Steady noise at `rmsDb` dBFS, the same every run: white noise through a one-pole low-pass. The
@@ -100,5 +108,50 @@ describe('heardSomething', () => {
     // 017 is the quietest fixture over its own floor.
     expect(levelContrast(samples, sampleRate)?.contrastDb).toBeGreaterThan(4)
     expect(levelContrast(roomNoise(2, 48_000, -40), 48_000)?.contrastDb).toBeLessThan(4)
+  })
+})
+
+describe('an analysis stored before the settle time (#116)', () => {
+  const stored: Analysis = {
+    gestureStartSeconds: 0.01,
+    gestureEndSeconds: 0.5,
+    cutAtReattack: false,
+    pitchEstimateMidi: 55.825920593660186,
+    pitchConfidence: 0.9,
+    recordingPitchMidi: 55.825920593660186,
+    shortestNoteSeconds: 0.12
+  }
+  const recording = (analysis: AnalysisState): Recording => ({
+    id: 'r',
+    number: 1,
+    createdAt: 0,
+    seconds: 0.5,
+    sampleRate: 44_100,
+    waveform: [],
+    analysis
+  })
+
+  it('needs one only when Melodic and missing', () => {
+    expect(needsSettleTime(recording({ state: 'analyzed', analysis: stored }))).toBe(true)
+    const noiseLike = { ...stored, recordingPitchMidi: null, shortestNoteSeconds: null }
+    expect(needsSettleTime(recording({ state: 'analyzed', analysis: noiseLike }))).toBe(false)
+    for (const settleSeconds of [0.087, null]) {
+      const analysis = { ...stored, settleSeconds }
+      expect(needsSettleTime(recording({ state: 'analyzed', analysis }))).toBe(false)
+    }
+    expect(needsSettleTime(recording({ state: 'analyzing' }))).toBe(false)
+    expect(needsSettleTime(recording({ state: 'notAnalyzed' }))).toBe(false)
+  })
+
+  it('takes only the settle time from a fresh analysis', () => {
+    const fresh = { ...stored, gestureEndSeconds: 0.6, pitchConfidence: 0.8, settleSeconds: 0.18 }
+    expect(withSettleTime(stored, fresh)).toEqual({ ...stored, settleSeconds: 0.18 })
+  })
+
+  it('leaves it unknown when the fresh analysis found another Recording Pitch', () => {
+    const fresh = { ...stored, recordingPitchMidi: 55.73, settleSeconds: 0.18 }
+    expect(withSettleTime(stored, fresh)).toEqual({ ...stored, settleSeconds: null })
+    const noiseLike = { ...stored, recordingPitchMidi: null, settleSeconds: null }
+    expect(withSettleTime(stored, noiseLike)).toEqual({ ...stored, settleSeconds: null })
   })
 })

@@ -35,6 +35,8 @@ export interface GoldenRecording {
   pitch_confidence: number
   recording_pitch_midi: number | null
   shortest_note_s: number | null
+  /** Format 3 (#116): when the Recording settles on its pitch. Null when Noise-like. */
+  settle_s: number | null
   melodic: boolean
   noise_like_reason: 'no_steady_pitch' | 'failed_audition' | null
   rms_db: number

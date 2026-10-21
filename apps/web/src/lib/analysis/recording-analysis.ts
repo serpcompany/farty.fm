@@ -1,14 +1,16 @@
-import { shortestNote } from './audition'
+import { settleTime, shortestNote } from './audition'
 import { hzToMidi, roundHalfEven } from './numeric'
 import { analyzePitch } from './recording-pitch'
 import { ANALYSIS_SAMPLE_RATE, resampleToAnalysisRate } from './resample'
 import { noteSegment } from './trimming'
 
 /**
- * Bumped whenever the analysis would give different results. Same analysis as the Swift
- * `RecordingAnalysis.currentVersion`.
+ * Version 1 is the Swift `RecordingAnalysis.currentVersion`; version 2 adds the settle time
+ * (#116), which Swift doesn't have. The web app stores no version with an analysis (`toAnalysis`
+ * drops it), so bumping this re-runs nothing: a stored analysis is upgraded when a field it lacks
+ * is missing, as `needsSettleTime` keys on a missing `settleSeconds`.
  */
-export const ANALYSIS_VERSION = 1
+export const ANALYSIS_VERSION = 2
 
 export type NoiseLikeReason = 'no_steady_pitch' | 'failed_audition'
 
@@ -46,13 +48,19 @@ export interface RecordingAnalysis {
    * pitch. Null for Noise-like Recordings.
    */
   shortestNoteSeconds: number | null
+  /**
+   * When the Recording, played at its own pitch, settles within 50 cents of it, in seconds from
+   * the gesture start (`settle_time()`). Null for Noise-like Recordings.
+   */
+  settleSeconds: number | null
   /** RMS level of the gesture in dB. */
   rmsDb: number
 }
 
 /**
  * The whole reference analysis of a mono Recording at any sample rate: resample to 44.1 kHz,
- * cut the single clean gesture, track its pitch, estimate the Recording Pitch and audition it.
+ * cut the single clean gesture, track its pitch, estimate the Recording Pitch, audition it and
+ * measure when it settles on pitch.
  *
  * Pure and synchronous: no DOM, Web Audio or Node APIs, so it runs the same in a Web Worker and
  * in tests. CPU-bound; call it off the main thread.
@@ -65,6 +73,8 @@ export function analyzeRecording(samples: Float32Array, sampleRate: number): Rec
   const shortest =
     pitch.estimateMidi === null ? null : shortestNote(body, pitch.f0, pitch.estimateMidi)
   const melodic = shortest !== null
+  const settle =
+    melodic && pitch.estimateMidi !== null ? settleTime(body, pitch.f0, pitch.estimateMidi) : null
   const sr = ANALYSIS_SAMPLE_RATE
   return {
     version: ANALYSIS_VERSION,
@@ -84,6 +94,7 @@ export function analyzeRecording(samples: Float32Array, sampleRate: number): Rec
         ? 'no_steady_pitch'
         : 'failed_audition',
     shortestNoteSeconds: shortest,
+    settleSeconds: settle,
     rmsDb: rmsDb(body)
   }
 }
