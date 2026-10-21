@@ -7,23 +7,30 @@ import {
   AUTH_ENDPOINTS,
   AUTH_MAX_BYTES,
   type AuthEnv,
+  AuthUnavailableError,
   authRoutes,
-  CODES_PER_EMAIL,
-  consumeEmailSlot,
+  clientLimitKey,
+  consumeSlot,
   createAuth,
-  emailLimitKey,
   GET_SESSION_ENDPOINT,
   hashSignInCode,
-  RATE_LIMITS,
   readSessionUser,
   resolveAuthSettings,
   SEND_CODE_ENDPOINT,
+  SESSION_EXPIRES_SECONDS,
+  SESSION_UPDATE_AGE_SECONDS,
   SIGN_IN_ENDPOINT,
   SIGN_OUT_ENDPOINT,
+  SITE_CODES_KEY,
   serveAuthRequest
 } from './auth-config'
 import { listCapturedEmails } from './dev-mailbox'
-import { createEmailSender } from './email'
+import {
+  createEmailSender,
+  SIGN_IN_CODE_ATTEMPTS,
+  SIGN_IN_CODE_LENGTH,
+  SIGN_IN_CODE_MINUTES
+} from './email'
 
 // Sign-in on a real local D1 and dev mailbox (src/test-support/local-bindings.ts), through the
 // same `serveAuthRequest` the route serves. Each test starts from empty tables.
@@ -265,6 +272,39 @@ describe('local sign-in', () => {
     expect(await session.json()).toBeNull()
   })
 
+  it('keeps a session 7 days, moved on when read a day or more after', async () => {
+    expect([SESSION_EXPIRES_SECONDS, SESSION_UPDATE_AGE_SECONDS]).toEqual([7 * 86_400, 86_400])
+    const week = 7 * 86_400_000
+    const before = Date.now()
+    const cookie = await signIn('fan@example.com')
+    const expiry = async () =>
+      (await rows<{ expires_at: number }>('SELECT expires_at FROM session'))[0].expires_at
+    expect(await expiry()).toBeGreaterThanOrEqual(before + week)
+    expect(await expiry()).toBeLessThanOrEqual(Date.now() + week)
+    const age = (ms: number) =>
+      bindings.DB.prepare('UPDATE session SET expires_at = expires_at - ?').bind(ms).run()
+    const request = new Request(LOCAL, { headers: { cookie } })
+
+    // Under a day old: left as it is.
+    await age(23 * 3_600_000)
+    const kept = await expiry()
+    expect(await readSessionUser(request, local())).not.toBeNull()
+    expect(await expiry()).toBe(kept)
+
+    // Two days old: getSessionUser moves it on in D1 only.
+    await age(25 * 3_600_000)
+    const reading = Date.now()
+    expect(await readSessionUser(request, local())).not.toBeNull()
+    expect(await expiry()).toBeGreaterThanOrEqual(reading + week)
+
+    // The client's get-session moves it on and sets the cookie again, for 7 days.
+    await age(2 * 86_400_000)
+    const session = await serveAuthRequest(get(GET_SESSION_ENDPOINT, { cookie }), local())
+    expect(session.status).toBe(200)
+    const set = session.headers.getSetCookie().find(line => line.includes('session_token'))
+    expect(set).toMatch(/Max-Age=604800/)
+  })
+
   it('keeps no IP address or user agent with a session', async () => {
     await signIn('fan@example.com', { headers: { 'user-agent': 'Mozilla/5.0 Test' } })
     expect(await rows('SELECT ip_address, user_agent FROM session')).toEqual([
@@ -272,12 +312,21 @@ describe('local sign-in', () => {
     ])
   })
 
-  it('refuses any field but email and otp, and any code type but sign-in', async () => {
+  it('refuses any field but email and otp, or email and type, and any code type but sign-in', async () => {
     const extra = await serveAuthRequest(
       post(SIGN_IN_ENDPOINT, { email: 'fan@example.com', otp: '123456', name: 'Fan' }),
       local()
     )
     expect(await answer(extra)).toMatchObject({ status: 400, body: { code: 'FIELD_NOT_ALLOWED' } })
+    // Better Auth's own schema drops unknown fields here, rather than refusing them.
+    const extraSend = await serveAuthRequest(
+      post(SEND_CODE_ENDPOINT, { email: 'fan@example.com', type: 'sign-in', name: 'Fan' }),
+      local()
+    )
+    expect(await answer(extraSend)).toMatchObject({
+      status: 400,
+      body: { code: 'FIELD_NOT_ALLOWED' }
+    })
     const reset = await serveAuthRequest(
       post(SEND_CODE_ENDPOINT, { email: 'fan@example.com', type: 'forget-password' }),
       local()
@@ -290,12 +339,70 @@ describe('local sign-in', () => {
   })
 
   it('refuses a body over AUTH_MAX_BYTES', async () => {
+    expect(AUTH_MAX_BYTES).toBe(16 * 1024)
     const padded = { email: 'fan@example.com', type: 'sign-in', pad: 'x'.repeat(AUTH_MAX_BYTES) }
     const response = await serveAuthRequest(post(SEND_CODE_ENDPOINT, padded), local())
     expect(await answer(response)).toMatchObject({
       status: 413,
       body: { code: 'PAYLOAD_TOO_LARGE' }
     })
+  })
+
+  /** A body that streams `chunks` KB, and what reading it did. */
+  function streamed(chunks: number, headers: Record<string, string> = {}) {
+    const seen = { pulls: 0, cancelled: false }
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        seen.pulls++
+        if (seen.pulls > chunks) controller.close()
+        else controller.enqueue(new TextEncoder().encode(' '.repeat(1024)))
+      },
+      cancel() {
+        seen.cancelled = true
+      }
+    })
+    const request = new Request(`${LOCAL}/api/auth${SEND_CODE_ENDPOINT}`, {
+      method: 'POST',
+      headers: { origin: LOCAL, 'content-type': 'application/json', ...headers },
+      body,
+      duplex: 'half'
+    } as RequestInit)
+    return { request, seen }
+  }
+
+  it('refuses a body by its Content-Length, before reading any of it', async () => {
+    const { request, seen } = streamed(1, { 'content-length': String(AUTH_MAX_BYTES + 1) })
+    expect(request.headers.get('content-length')).toBe(String(AUTH_MAX_BYTES + 1))
+    const response = await serveAuthRequest(request, local())
+    expect(await answer(response)).toMatchObject({
+      status: 413,
+      body: { code: 'PAYLOAD_TOO_LARGE' }
+    })
+    expect(seen.pulls).toBeLessThanOrEqual(1)
+    expect(seen.cancelled).toBe(true)
+  })
+
+  it('stops reading a body with no length once it passes AUTH_MAX_BYTES', async () => {
+    const { request, seen } = streamed(1000)
+    expect(request.headers.get('content-length')).toBeNull()
+    const response = await serveAuthRequest(request, local())
+    expect(await answer(response)).toMatchObject({
+      status: 413,
+      body: { code: 'PAYLOAD_TOO_LARGE' }
+    })
+    expect(seen.cancelled).toBe(true)
+    expect(seen.pulls).toBeLessThan(AUTH_MAX_BYTES / 1024 + 4)
+  })
+
+  it('refuses a code request for a missing or malformed email itself', async () => {
+    for (const body of [{ type: 'sign-in' }, { email: 'not-an-email', type: 'sign-in' }]) {
+      const response = await serveAuthRequest(post(SEND_CODE_ENDPOINT, body), local())
+      expect(await answer(response)).toEqual({
+        status: 400,
+        body: { code: 'INVALID_EMAIL', message: 'Enter a valid email address.' }
+      })
+    }
+    expect(await listCapturedEmails(bindings.DEV_MAILBOX)).toEqual([])
   })
 
   it('refuses a code request when email goes nowhere', async () => {
@@ -346,9 +453,18 @@ describe('codes', () => {
     expect(digest).toBe(await hashSignInCode(SECRET, code))
   })
 
-  it('allow three guesses', async () => {
+  it('are 6 digits, live 10 minutes and allow 3 guesses, defined once', async () => {
+    expect([SIGN_IN_CODE_LENGTH, SIGN_IN_CODE_MINUTES, SIGN_IN_CODE_ATTEMPTS]).toEqual([6, 10, 3])
+    const before = Date.now()
     await sendCode(local(), 'fan@example.com')
+    const after = Date.now()
     const code = await mailedCode('fan@example.com')
+    expect(code).toMatch(/^\d{6}$/)
+    const [stored] = await rows<{ expires_at: number }>(
+      "SELECT expires_at FROM verification WHERE identifier = 'sign-in-otp-fan@example.com'"
+    )
+    expect(stored.expires_at).toBeGreaterThanOrEqual(before + 10 * 60_000)
+    expect(stored.expires_at).toBeLessThanOrEqual(after + 10 * 60_000)
     const wrong = code === '000000' ? '111111' : '000000'
     for (const _ of [1, 2, 3]) {
       const guess = await trySignIn(local(), 'fan@example.com', wrong)
@@ -356,6 +472,17 @@ describe('codes', () => {
     }
     const right = await trySignIn(local(), 'fan@example.com', code)
     expect(right.status).toBe(403)
+  })
+
+  it('stop working once they expire', async () => {
+    await sendCode(local(), 'fan@example.com')
+    const code = await mailedCode('fan@example.com')
+    await bindings.DB.prepare('UPDATE verification SET expires_at = ?')
+      .bind(Date.now() - 1000)
+      .run()
+    const late = await trySignIn(local(), 'fan@example.com', code)
+    expect(await answer(late)).toMatchObject({ status: 400, body: { code: 'OTP_EXPIRED' } })
+    expect(await rows('SELECT id FROM session')).toEqual([])
   })
 })
 
@@ -384,7 +511,7 @@ describe('no answer says whether an email has an account', () => {
     }
   })
 
-  it('a code request past the per-email limit, or off Staging’s allowlist', async () => {
+  it('a code request past a per-email limit, or off Staging’s allowlist', async () => {
     const sent: Sent = []
     const env = staging(sent)
     const ip = (n: number) => ({ base: STAGING, ip: `198.51.100.${n}` })
@@ -392,83 +519,139 @@ describe('no answer says whether an email has an account', () => {
     const other = await sendCode(env, 'other@example.com', ip(2))
     expect(await answer(other)).toEqual(await answer(allowed))
     expect(allowed.status).toBe(200)
-    for (let n = 2; n <= CODES_PER_EMAIL; n++) await sendCode(env, 'member@example.com', ip(n))
-    const held = await sendCode(env, 'member@example.com', ip(9))
+    for (let n = 2; n <= 5; n++) await sendCode(env, 'member@example.com', ip(1))
+    const held = await sendCode(env, 'member@example.com', ip(1))
     expect(await answer(held)).toEqual({ status: 200, body: { success: true } })
-    expect(sent.map(message => message.to)).toEqual(
-      Array(CODES_PER_EMAIL).fill('member@example.com')
-    )
+    expect([...held.headers.keys()]).toEqual([...allowed.headers.keys()])
+    expect(sent.map(message => message.to)).toEqual(Array(5).fill('member@example.com'))
   })
 })
 
 describe('rate limits, in D1', () => {
-  it('hold code requests per IP', async () => {
-    const { max } = RATE_LIMITS[SEND_CODE_ENDPOINT]
-    for (let n = 1; n <= max; n++) {
+  it('hold code requests at 10 per 10 minutes per client', async () => {
+    for (let n = 1; n <= 10; n++) {
       expect((await sendCode(local(), `fan${n}@example.com`)).status).toBe(200)
     }
     const held = await sendCode(local(), 'one-more@example.com')
     expect(held.status).toBe(429)
+    expect(Number(held.headers.get('x-retry-after'))).toBeGreaterThan(9 * 60)
     expect(await mailCount('one-more@example.com')).toBe(0)
     const elsewhere = await sendCode(local(), 'one-more@example.com', { ip: '203.0.113.9' })
     expect(elsewhere.status).toBe(200)
-    expect(
-      await rows('SELECT key, count FROM rate_limit WHERE key LIKE ?', '203.0.113.1|%')
-    ).toEqual([{ key: `203.0.113.1|${SEND_CODE_ENDPOINT}`, count: max }])
+    const key = await clientLimitKey(SECRET, `203.0.113.1|${SEND_CODE_ENDPOINT}`)
+    expect(await rows('SELECT count FROM rate_limit WHERE key = ?', key)).toEqual([{ count: 10 }])
   })
 
-  it('hold sign-in guesses per IP', async () => {
-    const { max } = RATE_LIMITS[SIGN_IN_ENDPOINT]
-    for (let n = 1; n <= max; n++) {
+  it('hold sign-in guesses at 10 a minute per client', async () => {
+    for (let n = 1; n <= 10; n++) {
       expect((await trySignIn(local(), `fan${n}@example.com`, '123456')).status).toBe(400)
     }
     expect((await trySignIn(local(), 'fan@example.com', '123456')).status).toBe(429)
   })
 
-  it('send an email at most CODES_PER_EMAIL codes an hour, from any IP', async () => {
-    for (let n = 1; n <= CODES_PER_EMAIL + 2; n++) {
+  it('hold sign-in guesses at 60 an hour per client', async () => {
+    const minute = await clientLimitKey(SECRET, `203.0.113.1|${SIGN_IN_ENDPOINT}`)
+    for (let n = 1; n <= 60; n++) {
+      expect((await trySignIn(local(), `fan${n}@example.com`, '123456')).status).toBe(400)
+      // A minute passes every 10 guesses.
+      if (n % 10 === 0)
+        await bindings.DB.prepare('DELETE FROM rate_limit WHERE key = ?').bind(minute).run()
+    }
+    const held = await trySignIn(local(), 'fan@example.com', '123456')
+    expect(held.status).toBe(429)
+    expect(Number(held.headers.get('x-retry-after'))).toBeGreaterThan(59 * 60)
+    const elsewhere = await trySignIn(local(), 'fan@example.com', '123456', { ip: '203.0.113.9' })
+    expect(elsewhere.status).toBe(400)
+  })
+
+  it('know a client only by cf-connecting-ip, never X-Forwarded-For', async () => {
+    for (let n = 1; n <= 10; n++) {
+      const spoofed = { headers: { 'x-forwarded-for': `192.0.2.${n}` } }
+      expect((await sendCode(local(), `fan${n}@example.com`, spoofed)).status).toBe(200)
+    }
+    const held = { headers: { 'x-forwarded-for': '192.0.2.99' } }
+    expect((await sendCode(local(), 'fan@example.com', held)).status).toBe(429)
+  })
+
+  it('count an IPv6 /64 as one client', async () => {
+    for (let n = 1; n <= 10; n++) {
+      const ip = `2001:db8:1:2::${n.toString(16)}`
+      expect((await sendCode(local(), `fan${n}@example.com`, { ip })).status).toBe(200)
+    }
+    expect(
+      (await sendCode(local(), 'fan@example.com', { ip: '2001:db8:1:2:ffff::1' })).status
+    ).toBe(429)
+    expect((await sendCode(local(), 'fan@example.com', { ip: '2001:db8:1:3::1' })).status).toBe(200)
+  })
+
+  it('send an email 5 codes an hour from one client, so one client can’t spend them all', async () => {
+    for (let n = 1; n <= 7; n++) {
+      const response = await sendCode(local(), 'member@example.com', { ip: '198.51.100.1' })
+      expect(await answer(response)).toEqual({ status: 200, body: { success: true } })
+    }
+    expect(await mailCount('member@example.com')).toBe(5)
+    await sendCode(local(), 'member@example.com', { ip: '198.51.100.2' })
+    expect(await mailCount('member@example.com')).toBe(6)
+  })
+
+  it('send an email 20 codes an hour from every client together', async () => {
+    for (let n = 1; n <= 25; n++) {
       const response = await sendCode(local(), 'fan@example.com', { ip: `198.51.100.${n}` })
       expect(await answer(response)).toEqual({ status: 200, body: { success: true } })
     }
-    expect(await mailCount('fan@example.com')).toBe(CODES_PER_EMAIL)
-    const [row] = await rows<{ key: string }>("SELECT key FROM rate_limit WHERE key LIKE 'email|%'")
-    expect(row.key).not.toContain('fan')
+    expect(await mailCount('fan@example.com')).toBe(20)
   })
 
-  it('give an email new slots once its hour is up', async () => {
+  it('send 300 code emails an hour across the site', async () => {
+    await bindings.DB.prepare(
+      'INSERT INTO rate_limit (id, key, count, last_request) VALUES (?, ?, ?, ?)'
+    )
+      .bind('site', SITE_CODES_KEY, 299, Date.now() + 30 * 60_000)
+      .run()
+    expect((await sendCode(local(), 'fan1@example.com')).status).toBe(200)
+    const held = await sendCode(local(), 'fan2@example.com', { ip: '203.0.113.9' })
+    expect(await answer(held)).toEqual({ status: 200, body: { success: true } })
+    expect(await mailCount('fan1@example.com')).toBe(1)
+    expect(await mailCount('fan2@example.com')).toBe(0)
+  })
+
+  it('keep no email or IP address in their keys', async () => {
+    await signIn('Fan@Example.com', { ip: '203.0.113.77' })
+    await signIn('fan@example.com', { ip: '2001:db8:77::1' })
+    const keys = (await rows<{ key: string }>('SELECT key FROM rate_limit')).map(row => row.key)
+    expect(keys.length).toBeGreaterThanOrEqual(8)
+    for (const key of keys) {
+      expect(key).toMatch(
+        /^(client|email|email-client|sign-in-client)\|[0-9a-f]{64}$|^site\|send-code$/
+      )
+    }
+    expect(keys.join(' ')).not.toMatch(/203|2001|db8|fan|example/i)
+  })
+
+  it('count each window from its first request, and refuse with the time left', async () => {
     const rule = { window: 60, max: 2 }
     const start = 1_000_000
-    const slot = (at: number) => consumeEmailSlot(bindings.DB, 'email|x', at, rule)
-    expect([await slot(start), await slot(start + 1), await slot(start + 2)]).toEqual([
-      true,
-      true,
-      false
-    ])
+    const slot = async (at: number) => (await consumeSlot(bindings.DB, 'x', at, rule)).allowed
+    expect([await slot(start), await slot(start + 1)]).toEqual([true, true])
+    expect(await consumeSlot(bindings.DB, 'x', start + 2, rule)).toEqual({
+      allowed: false,
+      retryAfter: 60
+    })
     expect(await slot(start + 59_999)).toBe(false)
     expect([await slot(start + 60_000), await slot(start + 60_001)]).toEqual([true, true])
     expect(await slot(start + 60_002)).toBe(false)
   })
 
-  it('keep an email’s hour through Better Auth’s pruning of its own old rows', async () => {
-    const minutes = (n: number) => n * 60_000
-    const key = await emailLimitKey(SECRET, 'Fan@Example.com')
-    for (let n = 0; n < CODES_PER_EMAIL; n++) {
-      await consumeEmailSlot(bindings.DB, key, Date.now() - minutes(20))
-    }
-    // An IP whose window ran out, so its next request prunes, and a row old enough to go.
+  it('delete every row whose window has ended, on any request', async () => {
     const insert = 'INSERT INTO rate_limit (id, key, count, last_request) VALUES (?, ?, 1, ?)'
     await bindings.DB.batch([
-      bindings.DB.prepare(insert).bind(
-        'a',
-        `203.0.113.1|${SEND_CODE_ENDPOINT}`,
-        Date.now() - minutes(11)
-      ),
-      bindings.DB.prepare(insert).bind('b', 'stale', Date.now() - minutes(120))
+      bindings.DB.prepare(insert).bind('a', 'ended', Date.now() - 1),
+      bindings.DB.prepare(insert).bind('b', 'live', Date.now() + 60_000)
     ])
-    expect((await sendCode(local(), 'other@example.com')).status).toBe(200)
-    expect(await rows("SELECT key FROM rate_limit WHERE key = 'stale'")).toEqual([])
     expect((await sendCode(local(), 'fan@example.com')).status).toBe(200)
-    expect(await mailCount('fan@example.com')).toBe(0)
+    const keys = (await rows<{ key: string }>('SELECT key FROM rate_limit')).map(row => row.key)
+    expect(keys).toContain('live')
+    expect(keys).not.toContain('ended')
   })
 
   it('never hold reading the session', async () => {
@@ -504,6 +687,8 @@ describe('writes from anywhere but the site', () => {
     const form = post(SEND_CODE_ENDPOINT, body, { headers: { 'content-type': 'text/plain' } })
     expect(await refused(form)).toEqual({ status: 415, code: 'UNSUPPORTED_MEDIA_TYPE' })
     expect(await mailCount('fan@example.com')).toBe(0)
+    // Refused here, before Better Auth (whose own 415 comes after its limiter counts it).
+    expect(await rows('SELECT key FROM rate_limit')).toEqual([])
 
     const sameOrigin = post(SEND_CODE_ENDPOINT, body, {
       headers: { 'sec-fetch-site': 'same-origin' }
@@ -635,7 +820,9 @@ describe('settings', () => {
       status: 503,
       body: { code: 'AUTH_UNAVAILABLE' }
     })
-    expect(await readSessionUser(new Request(STAGING), env)).toBe('unavailable')
+    await expect(readSessionUser(new Request(STAGING), env)).rejects.toBeInstanceOf(
+      AuthUnavailableError
+    )
   })
 
   it('run locally without a secret, on any loopback host', async () => {

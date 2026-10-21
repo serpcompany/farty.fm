@@ -88,9 +88,10 @@ export const verification = sqliteTable(
 )
 
 /**
- * Better Auth's rate-limit counters, kept in D1 because each Worker isolate has its own memory
- * (`rateLimit: { storage: 'database' }`). `last_request` is epoch milliseconds, as Better Auth
- * writes it.
+ * Rate-limit counters, kept in D1 because each Worker isolate has its own memory: Better Auth's
+ * and sign-in's own (`consumeSlot` in `src/server/auth-config.ts`). Each `key` is a label and an
+ * HMAC, never an email or IP address, and `last_request` is when the row's window ends, in epoch
+ * milliseconds.
  */
 export const rateLimit = sqliteTable('rate_limit', {
   id: text('id').primaryKey(),

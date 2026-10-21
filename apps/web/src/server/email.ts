@@ -18,8 +18,13 @@ import { type DeploymentEnv, deployment, isLocalHost } from './environment'
 /** The one address Pedos sends from and receives at (Email Routing forwards it). */
 export const SUPPORT_EMAIL = 'support@pedos.app'
 
-/** A sign-in code works this long. */
+/**
+ * A sign-in code: its digits, how long it works and how many guesses it allows. Defined once, for
+ * the auth config, this email and the sign-in screen (pinned together in `auth-config.test.ts`).
+ */
+export const SIGN_IN_CODE_LENGTH = 6
 export const SIGN_IN_CODE_MINUTES = 10
+export const SIGN_IN_CODE_ATTEMPTS = 3
 
 /** The `send_email` binding's structured `send()`, the one method used here. */
 export type SendEmailBinding = { send(message: EmailMessageBuilder): Promise<unknown> }

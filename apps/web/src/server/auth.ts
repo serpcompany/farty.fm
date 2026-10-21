@@ -6,7 +6,7 @@ import { readSessionUser, type SessionUser, serveAuthRequest } from './auth-conf
 import { type CapturedEmail, listCapturedEmails } from './dev-mailbox'
 import { devMailboxStore } from './email'
 
-export type { SessionUser } from './auth-config'
+export { AuthUnavailableError, type SessionUser } from './auth-config'
 
 /**
  * Sign-in for a request, with this Worker's bindings (`auth-config.ts` holds the configuration and
@@ -19,12 +19,12 @@ export function handleAuthRequest(request: Request): Promise<Response> {
 }
 
 /**
- * The signed-in person, read from D1 on every call (no cookie cache), or null: no session, an
- * expired one, or sign-in not set up here (logged as `auth_unavailable`).
+ * The signed-in person, read from D1 on every call (no cookie cache): `{ id, email, marketingEmail }`
+ * when signed in, null when signed out. Throws `AuthUnavailableError` (status 503) when sign-in
+ * isn't set up here (logged as `auth_unavailable`): answer it 503, never 401.
  */
-export async function getSessionUser(request: Request): Promise<SessionUser | null> {
-  const user = await readSessionUser(request, getCloudflareContext().env)
-  return user === 'unavailable' ? null : user
+export function getSessionUser(request: Request): Promise<SessionUser | null> {
+  return readSessionUser(request, getCloudflareContext().env)
 }
 
 /** The dev mailbox's emails, newest first, or null anywhere but a local run on a local host. */

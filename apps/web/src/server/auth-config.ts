@@ -1,6 +1,6 @@
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { APIError, createAuthMiddleware } from 'better-auth/api'
-import { betterAuth } from 'better-auth/minimal'
+import { APIError, createAuthMiddleware, getIP } from 'better-auth/api'
+import { type BetterAuthOptions, betterAuth } from 'better-auth/minimal'
 import { emailOTP } from 'better-auth/plugins/email-otp'
 import { z } from 'zod'
 
@@ -12,6 +12,8 @@ import {
   type EmailEnv,
   type EmailSender,
   emailConfig,
+  SIGN_IN_CODE_ATTEMPTS,
+  SIGN_IN_CODE_LENGTH,
   SIGN_IN_CODE_MINUTES
 } from './email'
 import { deployment, isLocalHost } from './environment'
@@ -27,13 +29,14 @@ import { deployment, isLocalHost } from './environment'
  *   origin and CSRF checks also run, forced on (Better Auth skips them under `NODE_ENV=test`).
  * - **Codes** are 6 digits, live 10 minutes, allow 3 guesses, and are stored only as an HMAC
  *   keyed by `BETTER_AUTH_SECRET`, so a copy of the database can't be brute-forced into codes.
- * - **Limits** live in D1's `rate_limit` table: Better Auth's per-IP limits (`RATE_LIMITS`), and
- *   `CODES_PER_EMAIL` per email per hour (`consumeEmailSlot`).
- * - **No answer says whether an email has an account.** A code request for any email answers
- *   `{ success: true }`, sent or not (the per-email limit, Staging's sign-up allowlist), and every
- *   wrong guess answers `INVALID_OTP`.
- * - **Sessions** are read from D1 on every request (no cookie cache), and keep no IP address or
- *   user agent.
+ * - **Limits** live in D1's `rate_limit` table, keyed by HMACs, never an email or IP address:
+ *   Better Auth's per-client limits (`RATE_LIMITS`, a 429) and the hook's own (`LIMITS`): codes per
+ *   email and client, per email, site-wide, and sign-in guesses per client an hour.
+ * - **No answer says whether an email has an account.** A code request for any valid email answers
+ *   `{ success: true }`, sent or not (a per-email or site-wide limit, Staging's sign-up allowlist),
+ *   and every wrong guess answers `INVALID_OTP`.
+ * - **Sessions** last 7 days, are read from D1 on every request (no cookie cache), and keep no IP
+ *   address or user agent.
  */
 
 export const AUTH_BASE_PATH = '/api/auth'
@@ -52,7 +55,12 @@ export const AUTH_ENDPOINTS: readonly AuthEndpoint[] = [
   { method: 'POST', path: SIGN_OUT_ENDPOINT }
 ]
 
-/** Per IP, by Better Auth's limiter. `false` turns it off for a path. */
+export type SlotRule = { window: number; max: number }
+
+/**
+ * Per client (an IPv4 address or an IPv6 /64, from `cf-connecting-ip` only), by Better Auth's
+ * limiter on `rate_limit` (`clientLimitStorage`). Over one, a 429. `false` turns it off for a path.
+ */
 export const RATE_LIMITS = {
   [SEND_CODE_ENDPOINT]: { window: 10 * 60, max: 10 },
   [SIGN_IN_ENDPOINT]: { window: 60, max: 10 },
@@ -60,15 +68,31 @@ export const RATE_LIMITS = {
   [GET_SESSION_ENDPOINT]: false
 } as const
 
-/** Codes sent to one email per `EMAIL_WINDOW_SECONDS`, whoever asks. */
-export const CODES_PER_EMAIL = 5
-export const EMAIL_WINDOW_SECONDS = 60 * 60
+const HOUR = 60 * 60
+
+/**
+ * The hook's own limits, each a row in `rate_limit` (`consumeSlot`). Past a code limit, the
+ * request answers like a sent code and nothing is sent; past the sign-in one, a 429.
+ */
+export const LIMITS = {
+  /** Codes to one email from one client: one client can't spend an email's codes. */
+  codesPerEmailAndClient: { window: HOUR, max: 5 },
+  /** Codes to one email from every client together. */
+  codesPerEmail: { window: HOUR, max: 20 },
+  /** Code emails the whole site sends. */
+  codesSiteWide: { window: HOUR, max: 300 },
+  /** Code guesses from one client, beside Better Auth's 10 a minute. */
+  signInsPerClient: { window: HOUR, max: 60 }
+} as const satisfies Record<string, SlotRule>
 
 /** Far above any sign-in body, far below anything that costs memory. */
 export const AUTH_MAX_BYTES = 16 * 1024
 
+/** A session lasts 7 days, and moves to 7 days from now when it's read a day or more after. */
+export const SESSION_EXPIRES_SECONDS = 7 * 24 * HOUR
+export const SESSION_UPDATE_AGE_SECONDS = 24 * HOUR
+
 const COOKIE_PREFIX = 'pedos'
-const SIGN_IN_CODE_ATTEMPTS = 3
 const MIN_SECRET_LENGTH = 32
 
 export type AuthEnv = EmailEnv & {
@@ -179,36 +203,80 @@ export async function keyedHash(secret: string, label: string, value: string): P
 export const hashSignInCode = (secret: string, code: string) =>
   keyedHash(secret, 'sign-in-code', code)
 
-/** An email's row in `rate_limit`: an HMAC of the address, so the table never holds one. */
+// Every `rate_limit` key is a label and an HMAC under the secret: the table never holds an email
+// or an IP address.
+
+/** An email's row, across every client: `email|<HMAC of the lowercased address>`. */
 export async function emailLimitKey(secret: string, email: string): Promise<string> {
   return `email|${await keyedHash(secret, 'email-limit', email.toLowerCase())}`
 }
 
+/** An email's row for one client. */
+export async function emailClientLimitKey(
+  secret: string,
+  email: string,
+  client: string
+): Promise<string> {
+  const value = `${email.toLowerCase()}\0${client}`
+  return `email-client|${await keyedHash(secret, 'email-client-limit', value)}`
+}
+
+/** A client's row for sign-in guesses an hour. */
+export async function signInClientLimitKey(secret: string, client: string): Promise<string> {
+  return `sign-in-client|${await keyedHash(secret, 'sign-in-client-limit', client)}`
+}
+
+/** Better Auth's per-client row, from its own `<client>|<path>` key. */
+export async function clientLimitKey(secret: string, betterAuthKey: string): Promise<string> {
+  return `client|${await keyedHash(secret, 'client-limit', betterAuthKey)}`
+}
+
+/** The site's one row for code emails. */
+export const SITE_CODES_KEY = 'site|send-code'
+
+/** The client Better Auth's limiter sees: `cf-connecting-ip`, an IPv6 address cut to its /64. */
+function clientOf(request: Request | undefined, options: BetterAuthOptions): string {
+  return (request && getIP(request, options)) || 'no-trusted-ip'
+}
+
+export type SlotResult = { allowed: boolean; retryAfter: number | null }
+
 /**
- * Spends one of an email's code slots, atomically, in the `rate_limit` table: true while fewer
- * than `max` codes were sent to it in the current window. For these rows `last_request` is when
- * the window ends. Better Auth deletes every row whose `last_request` is older than its own
- * longest window (10 minutes), which would end an hour's window early if it held the start.
+ * Spends one slot of `key`'s window, atomically, in `rate_limit`: allowed while fewer than `max`
+ * were spent in the window, which starts at the first and lasts `window` seconds. Each row's
+ * `last_request` holds when its window ends, and every call first deletes the rows whose window
+ * has ended, so no row outlasts its window by more than the time to the next request.
  */
-export async function consumeEmailSlot(
+export async function consumeSlot(
   database: D1Database,
   key: string,
   now: number,
-  { window, max } = { window: EMAIL_WINDOW_SECONDS, max: CODES_PER_EMAIL }
-): Promise<boolean> {
-  const row = await database
-    .prepare(
-      `INSERT INTO rate_limit (id, key, count, last_request) VALUES (?1, ?2, 1, ?3 + ?4)
-       ON CONFLICT (key) DO UPDATE SET
-         count = CASE WHEN ?3 >= rate_limit.last_request THEN 1 ELSE rate_limit.count + 1 END,
-         last_request = CASE WHEN ?3 >= rate_limit.last_request THEN ?3 + ?4
-           ELSE rate_limit.last_request END
-       WHERE ?3 >= rate_limit.last_request OR rate_limit.count < ?5
-       RETURNING count`
-    )
-    .bind(crypto.randomUUID(), key, now, window * 1000, max)
-    .first<{ count: number }>()
-  return row !== null
+  { window, max }: SlotRule
+): Promise<SlotResult> {
+  const [, spent, row] = await database.batch<{ count?: number; last_request?: number }>([
+    database.prepare('DELETE FROM rate_limit WHERE last_request <= ?1').bind(now),
+    database
+      .prepare(
+        `INSERT INTO rate_limit (id, key, count, last_request) VALUES (?1, ?2, 1, ?3)
+         ON CONFLICT (key) DO UPDATE SET count = rate_limit.count + 1
+         WHERE rate_limit.count < ?4
+         RETURNING count`
+      )
+      .bind(crypto.randomUUID(), key, now + window * 1000, max),
+    database.prepare('SELECT last_request FROM rate_limit WHERE key = ?1').bind(key)
+  ])
+  if (spent.results.length > 0) return { allowed: true, retryAfter: null }
+  const ends = row.results[0]?.last_request ?? now + window * 1000
+  return { allowed: false, retryAfter: Math.max(1, Math.ceil((ends - now) / 1000)) }
+}
+
+/** Better Auth's per-client limiter, on `consumeSlot` with HMAC keys. */
+function clientLimitStorage(database: D1Database, secret: string) {
+  return {
+    async consume(key: string, rule: SlotRule): Promise<SlotResult> {
+      return consumeSlot(database, await clientLimitKey(secret, key), Date.now(), rule)
+    }
+  }
 }
 
 export type CreateAuthOptions = {
@@ -219,7 +287,7 @@ export type CreateAuthOptions = {
 
 export function createAuth({ db, settings, email }: CreateAuthOptions) {
   const otp = emailOTP({
-    otpLength: 6,
+    otpLength: SIGN_IN_CODE_LENGTH,
     expiresIn: SIGN_IN_CODE_MINUTES * 60,
     allowedAttempts: SIGN_IN_CODE_ATTEMPTS,
     storeOTP: { hash: code => hashSignInCode(settings.secret, code) },
@@ -245,10 +313,18 @@ export function createAuth({ db, settings, email }: CreateAuthOptions) {
         marketingEmail: { type: 'boolean', input: false, required: false, defaultValue: true }
       }
     },
-    session: { cookieCache: { enabled: false } },
+    session: {
+      expiresIn: SESSION_EXPIRES_SECONDS,
+      updateAge: SESSION_UPDATE_AGE_SECONDS,
+      cookieCache: { enabled: false }
+    },
     emailAndPassword: { enabled: false },
     plugins: [otp],
-    rateLimit: { enabled: true, storage: 'database', customRules: RATE_LIMITS },
+    rateLimit: {
+      enabled: true,
+      customRules: RATE_LIMITS,
+      customStorage: clientLimitStorage(db.$client, settings.secret)
+    },
     telemetry: { enabled: false },
     advanced: {
       cookiePrefix: COOKIE_PREFIX,
@@ -304,20 +380,51 @@ export function createAuth({ db, settings, email }: CreateAuthOptions) {
               message: 'Only sign-in codes are supported.'
             })
           }
-          // A missing or malformed email gets Better Auth's own 400, before any slot is spent.
-          if (typeof body.email !== 'string') return
-          const address = body.email.toLowerCase()
-          if (!EMAIL.safeParse(address).success) return
-          const key = await emailLimitKey(settings.secret, address)
-          const allowed = await consumeEmailSlot(db.$client, key, Date.now())
-          // Held by the limit or the allowlist, it answers as a sent code would.
-          if (!allowed || settings.signupAllowlist?.has(address) === false) {
-            return ctx.json({ success: true })
+          // Refused here, so no code goes out unless this check passed, whatever Better Auth's
+          // own check would say.
+          const address = typeof body.email === 'string' ? body.email.toLowerCase() : null
+          if (address === null || !EMAIL.safeParse(address).success) {
+            throw new APIError('BAD_REQUEST', {
+              code: 'INVALID_EMAIL',
+              message: 'Enter a valid email address.'
+            })
           }
+          const client = clientOf(ctx.request, ctx.context.options)
+          const now = Date.now()
+          const spend = async (key: string, rule: SlotRule) =>
+            (await consumeSlot(db.$client, key, now, rule)).allowed
+          // In order, each spent only when the ones before allow it. The site's count is last,
+          // so it counts only codes that go out.
+          const sends =
+            (await spend(
+              await emailClientLimitKey(settings.secret, address, client),
+              LIMITS.codesPerEmailAndClient
+            )) &&
+            (await spend(await emailLimitKey(settings.secret, address), LIMITS.codesPerEmail)) &&
+            settings.signupAllowlist?.has(address) !== false &&
+            (await spend(SITE_CODES_KEY, LIMITS.codesSiteWide))
+          // Held by a limit or the allowlist, it answers as a sent code would.
+          if (!sends) return ctx.json({ success: true })
           return
         }
         if (ctx.path === SIGN_IN_ENDPOINT) {
           refuseOtherFields(body, ['email', 'otp'])
+          const client = clientOf(ctx.request, ctx.context.options)
+          const key = await signInClientLimitKey(settings.secret, client)
+          const { allowed, retryAfter } = await consumeSlot(
+            db.$client,
+            key,
+            Date.now(),
+            LIMITS.signInsPerClient
+          )
+          if (!allowed) {
+            // As Better Auth's own limiter answers.
+            throw new APIError(
+              'TOO_MANY_REQUESTS',
+              { message: 'Too many requests. Please try again later.' },
+              { 'X-Retry-After': String(retryAfter) }
+            )
+          }
           // A code pasted with spaces or a dash still signs in.
           if (typeof body.otp !== 'string') return
           return { context: { body: { ...body, otp: body.otp.replace(/[\s-]/g, '') } } }
@@ -427,33 +534,78 @@ export async function serveAuthRequest(request: Request, env: AuthEnv): Promise<
   // `next dev` adds a trailing slash (trailingSlash: true); Better Auth's routes have none.
   const forwardedUrl = new URL(`${AUTH_BASE_PATH}${path}${url.search}`, url)
   const headers = new Headers(request.headers)
-  let body: string | undefined
+  let body: Uint8Array<ArrayBuffer> | undefined
   if (request.method === 'POST') {
     const refused = crossSiteRefusal(request, built.settings)
     if (refused) return noStore(refused)
-    body = await request.text()
-    if (new TextEncoder().encode(body).length > AUTH_MAX_BYTES) {
+    const read = await readCapped(request, AUTH_MAX_BYTES)
+    if (read === null) {
       return noStore(failure(413, 'PAYLOAD_TOO_LARGE', 'That request is too large.'))
     }
+    body = read
     headers.delete('content-length')
   }
   const forwarded = new Request(forwardedUrl, { method: request.method, headers, body })
   return noStore(await built.auth.handler(forwarded))
 }
 
+/**
+ * The request's body, or null past `max` bytes: refused on its `Content-Length` before any of it
+ * is read, and otherwise counted as it streams in and cancelled once past `max`, so a body
+ * without a length can't be buffered whole either.
+ */
+export async function readCapped(
+  request: Request,
+  max: number
+): Promise<Uint8Array<ArrayBuffer> | null> {
+  const declared = Number(request.headers.get('content-length') ?? 0)
+  if (!(declared <= max)) {
+    await request.body?.cancel()
+    return null
+  }
+  const body = new Uint8Array(max)
+  let length = 0
+  if (request.body) {
+    const reader = request.body.getReader()
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      if (length + value.byteLength > max) {
+        await reader.cancel()
+        return null
+      }
+      body.set(value, length)
+      length += value.byteLength
+    }
+  }
+  return body.subarray(0, length)
+}
+
 /** What the app knows of a signed-in person. */
 export type SessionUser = { id: string; email: string; marketingEmail: boolean }
 
 /**
- * The person the request's session cookie names, read from D1 (no cookie cache), or null when
- * there's no valid session. `unavailable` when sign-in isn't set up here.
+ * Sign-in isn't set up in this environment (no secret, a wrong `BETTER_AUTH_URL` or `SITE_ENV`):
+ * answer 503, never 401, so a client doesn't take a broken deploy for a signed-out person.
  */
-export async function readSessionUser(
-  request: Request,
-  env: AuthEnv
-): Promise<SessionUser | null | 'unavailable'> {
+export class AuthUnavailableError extends Error {
+  readonly status = 503
+  constructor() {
+    super('Sign-in isn’t available right now.')
+    this.name = 'AuthUnavailableError'
+  }
+}
+
+/**
+ * The person the request's session cookie names, read from D1 on every call (no cookie cache):
+ * `{ id, email, marketingEmail }` when signed in, null when signed out (no cookie, a forged or
+ * expired one). Throws `AuthUnavailableError` when sign-in isn't set up here, for the caller to
+ * answer 503. Reading a session a day or more old moves its expiry in D1 to 7 days from now; only
+ * Better Auth's `GET /api/auth/get-session` also re-sets the cookie.
+ */
+export async function readSessionUser(request: Request, env: AuthEnv): Promise<SessionUser | null> {
   const built = authFor(request, env)
-  if (!built.ok) return 'unavailable'
+  if (!built.ok) throw new AuthUnavailableError()
   // A local run's base URL comes from the request's host. A Worker's request always carries
   // `Host`; a request built in a test may not, so take it from the URL then.
   const headers = new Headers(request.headers)
