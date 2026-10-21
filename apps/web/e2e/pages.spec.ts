@@ -1,9 +1,22 @@
 import { expect, test } from '@playwright/test'
 
-test('the privacy page says there is no tracking', async ({ page }) => {
+test('the privacy page covers accounts, news email, guests and deleting', async ({ page }) => {
   await page.goto('/privacy/')
   await expect(page.getByRole('heading', { name: 'Privacy', level: 1 })).toBeVisible()
+  await expect(
+    page.getByText('Your email, Recordings and Toots (audio included) are stored on Cloudflare')
+  ).toBeVisible()
+  await expect(page.getByText('Pedos news, which is on by default')).toBeVisible()
+  await expect(page.getByText('unsubscribe from any email or on Profile')).toBeVisible()
+  await expect(page.getByText('never sold')).toBeVisible()
+  await expect(page.getByText('last only until you close Pedos')).toBeVisible()
+  await expect(page.getByText('Delete account on Profile removes your email')).toBeVisible()
   await expect(page.getByText('no ads, analytics or tracking')).toBeVisible()
+  await expect(page.getByText("Pedos doesn't ask anyone's age")).toBeVisible()
+  await expect(page.getByRole('link', { name: 'support@pedos.app' })).toHaveAttribute(
+    'href',
+    'mailto:support@pedos.app'
+  )
 })
 
 test('the support page has a way to get in touch', async ({ page }) => {
