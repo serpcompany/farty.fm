@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.2.0](https://github.com/serpcompany/pedos-app/compare/v1.1.1...v1.2.0) (2026-10-21)
+
+
+### Features
+
+* give Staging and Production their own D1 and R2, with Drizzle migrations in CI ([#157](https://github.com/serpcompany/pedos-app/issues/157)) ([5ae2c25](https://github.com/serpcompany/pedos-app/commit/5ae2c252170a1a8365ef771e4f5ed94d93d24ee5))
+* keep a signed-in user's Recordings and Toots on the server, with delete account ([#160](https://github.com/serpcompany/pedos-app/issues/160)) ([7e949cd](https://github.com/serpcompany/pedos-app/commit/7e949cd09f6cb22fb7408bfde7b358d58051e932))
+* privacy page for accounts and marketing email ([#158](https://github.com/serpcompany/pedos-app/issues/158)) ([16fd1da](https://github.com/serpcompany/pedos-app/commit/16fd1dad9121298ae4fe9f67f292809c802fdf8e))
+* **web:** sign-in server with Better Auth email codes ([#162](https://github.com/serpcompany/pedos-app/issues/162)) ([3995e9f](https://github.com/serpcompany/pedos-app/commit/3995e9fdb75972998c1c907d8cf88a3bbd90d63e))
+* **web:** sync Recordings and Toots between a signed-in user's browsers ([#156](https://github.com/serpcompany/pedos-app/issues/156)) ([#168](https://github.com/serpcompany/pedos-app/issues/168)) ([23c9df8](https://github.com/serpcompany/pedos-app/commit/23c9df8a7bbfc3c636fa10bb5290f4d72b92ceb2))
+* **web:** the account step after the first Result, and Profile's account ([#165](https://github.com/serpcompany/pedos-app/issues/165)) ([ff45dcc](https://github.com/serpcompany/pedos-app/commit/ff45dccc0324e5a244444602aab7819b7530a27e))
+
+
+### Fixes
+
+* harden sign-in before it reaches Production ([#167](https://github.com/serpcompany/pedos-app/issues/167)) ([5c8e5ef](https://github.com/serpcompany/pedos-app/commit/5c8e5ef2982f7ae4bbdf9156a7a8a13f463bcbe5))
+
 ## [1.1.1](https://github.com/serpcompany/pedos-app/compare/v1.1.0...v1.1.1) (2026-10-21)
 
 
