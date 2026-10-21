@@ -48,10 +48,11 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({
       deviceScaleFactor,
       isMobile,
       hasTouch,
-      permissions: ['microphone'],
       // A relaunched profile's service worker answers navigations itself, and its requests then
       // meet the Staging gate without the test's credentials.
       serviceWorkers: 'block',
+      // No microphone permission up front, so the first tap opens the microphone and the file
+      // plays from the tap (see `withFakeMicrophone`).
       args: [
         '--use-fake-ui-for-media-stream',
         '--use-fake-device-for-media-stream',

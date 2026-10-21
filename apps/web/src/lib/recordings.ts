@@ -67,7 +67,47 @@ export function formattedLength(seconds: number): string {
   return `${seconds.toFixed(1)} s`
 }
 
-/** Takes shorter than this are treated as nothing heard, as on the iPhone. */
-export const minimumTakeSeconds = 0.5
 /** Recording stops by itself after this long, as on the iPhone. */
 export const maximumTakeSeconds = 30
+
+/** A take's loudest 50 ms must reach this level… */
+const quietestFartDb = -50
+/** …and stand this far above the take's own room (its 10th-percentile 50 ms level). */
+const minimumContrastDb = 4
+
+/**
+ * Whether a take holds a sound worth reviewing, judged from the audio: its loudest 50 ms level
+ * against an absolute floor and against the take's own room. Silence and steady room noise fail.
+ * The iPhone app and `tools/melody-lab/` have no such gate: the iPhone app rejects takes shorter
+ * than 0.5 s, and the reference never rejects. A take shorter than one 50 ms window fails.
+ */
+export function heardSomething(samples: Float32Array, sampleRate: number): boolean {
+  const level = levelContrast(samples, sampleRate)
+  return level !== null && level.peakDb >= quietestFartDb && level.contrastDb >= minimumContrastDb
+}
+
+/**
+ * The peak and floor (10th percentile) of a take's 50 ms RMS level every 5 ms, in dBFS, and the
+ * contrast between them. Only whole windows count, so the take's edges don't read as quiet room.
+ * Null when the take is shorter than one window.
+ */
+export function levelContrast(
+  samples: Float32Array,
+  sampleRate: number
+): { peakDb: number; floorDb: number; contrastDb: number } | null {
+  const hop = Math.max(1, Math.trunc(0.005 * sampleRate))
+  const frame = 10 * hop
+  if (samples.length < frame) return null
+  // Running sums of squares, so each window costs two lookups.
+  const energy = new Float64Array(samples.length + 1)
+  for (let i = 0; i < samples.length; i++) energy[i + 1] = energy[i] + samples[i] * samples[i]
+  const levels: number[] = []
+  for (let start = 0; start + frame <= samples.length; start += hop) {
+    const meanSquare = Math.max(0, energy[start + frame] - energy[start]) / frame
+    levels.push(20 * Math.log10(Math.sqrt(meanSquare) + 1e-9))
+  }
+  levels.sort((a, b) => a - b)
+  const peakDb = levels[levels.length - 1]
+  const floorDb = levels[Math.floor(levels.length * 0.1)]
+  return { peakDb, floorDb, contrastDb: peakDb - floorDb }
+}

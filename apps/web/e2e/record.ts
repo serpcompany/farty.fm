@@ -1,11 +1,16 @@
 import { resolve } from 'node:path'
 import { expect, type Page, test } from '@playwright/test'
 
-/** A Fixture Library Recording, played once into Chromium's fake microphone. */
+/**
+ * A Fixture Library Recording, played once into Chromium's fake microphone. The fake microphone
+ * plays its file from the moment the stream opens. With permission granted, Record would open it
+ * as soon as it shows, before the tap (#149), so permission isn't granted up front: the first tap
+ * opens the microphone, and the file plays from the tap. `--use-fake-ui-for-media-stream` still
+ * lets it open. `record-warm.spec.ts` covers the open-ahead microphone.
+ */
 export function withFakeMicrophone(fixture: string): void {
   const file = resolve(__dirname, '../../../fixtures/recordings', fixture)
   test.use({
-    permissions: ['microphone'],
     launchOptions: {
       args: [
         '--use-fake-ui-for-media-stream',
