@@ -320,6 +320,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   )
 
   const finishWelcome = useCallback(() => {
+    // From 768px this swaps the lander for the app (`lander.tsx`), even where storage is blocked.
+    document.documentElement.setAttribute('data-welcomed', '')
     localStorage.setItem(welcomedKey, '1')
     setShowsWelcome(false)
   }, [])

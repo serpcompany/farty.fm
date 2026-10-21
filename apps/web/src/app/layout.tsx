@@ -29,8 +29,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    // The script marks a browser that has opened the app before paint, so from 768px a returning
+    // visitor gets the app and a new one the lander, with no flash of the other (`lander.tsx`).
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <head>
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: a fixed string, run before paint.
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{localStorage.getItem('pedos.welcomed')!==null&&document.documentElement.setAttribute('data-welcomed','')}catch(e){}"
+          }}
+        />
         {/* With credentials, so Chrome can fetch it behind the Staging password (#123). */}
         <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
       </head>

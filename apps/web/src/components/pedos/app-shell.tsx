@@ -16,6 +16,7 @@ import { type Tab, tabOf, tabs } from '@/lib/tabs'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { AccountStep } from './account-step'
+import { Lander } from './lander'
 import { usePedos } from './pedos-provider'
 import { useTrackPages } from './previous-page'
 import { RecordFlow } from './record-flow'
@@ -73,64 +74,73 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [router, showsRecordFlow, stepOpen, stopPlayback, tab])
 
   return (
-    // From 768px the tab bar is a top bar with the name, Welcome is a hero above the app, and the
-    // page is a wider column.
-    <div className="flex min-h-dvh flex-col overflow-x-clip md:pt-16">
-      {/* Only on the tabs, so the privacy, support and 404 pages are always readable. */}
-      {pedos.showsWelcome && tab !== null && <Welcome />}
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] pb-20 md:max-w-2xl md:pt-6 md:pb-12">
-        {pedos.waitsForOtherTabs && (
-          <output className="block px-4 pt-4 text-center text-muted-foreground">
-            Close Farty in your other tabs to carry on.
-          </output>
+    <>
+      {/* From 768px, a browser that hasn't opened the app gets the lander on the tabs instead of
+          Welcome. The privacy, support and 404 pages are always the page itself. */}
+      {tab !== null && <Lander />}
+      {/* From 768px the tab bar is a top bar with the name, and the page is a wider column. */}
+      <div
+        className={cn(
+          'flex min-h-dvh flex-col overflow-x-clip md:pt-16',
+          tab !== null && 'md:unwelcomed:hidden'
         )}
-        {children}
-      </main>
-      <nav
-        aria-label="Tabs"
-        className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:top-0 md:bottom-auto md:border-t-0 md:border-b"
       >
-        <div className="contents md:mx-auto md:flex md:h-16 md:max-w-5xl md:items-center md:justify-between md:px-6">
-          <Link
-            href="/"
-            className="hidden rounded-md text-lg font-bold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:flex md:h-11 md:items-center md:gap-2.5"
-          >
-            <Image
-              src="/icons/icon-192.png"
-              alt=""
-              width={32}
-              height={32}
-              // A small static PNG; Workers has no image optimizer configured.
-              unoptimized
-              className="rounded-lg"
-            />
-            Farty
-          </Link>
-          <ul className="mx-auto flex max-w-md md:mx-0 md:max-w-none md:gap-1">
-            {tabs.map(({ id, href, label }) => {
-              const current = id === tab
-              const Icon = icons[id]
-              return (
-                <li key={id} className="flex-1 md:flex-none">
-                  <Link
-                    href={href}
-                    aria-current={current ? 'page' : undefined}
-                    className={cn(
-                      'flex h-14 flex-col items-center justify-center gap-0.5 text-xs font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:h-11 md:flex-row md:gap-2 md:rounded-md md:px-3 md:text-sm',
-                      current ? 'text-foreground md:bg-muted' : 'text-muted-foreground'
-                    )}
-                  >
-                    <Icon className="size-6 md:size-5" aria-hidden />
-                    {label}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      </nav>
-      <RecordFlow />
-      <AccountStep />
-    </div>
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] pb-20 md:max-w-2xl md:pt-6 md:pb-12">
+          {pedos.waitsForOtherTabs && (
+            <output className="block px-4 pt-4 text-center text-muted-foreground">
+              Close Farty in your other tabs to carry on.
+            </output>
+          )}
+          {children}
+        </main>
+        <nav
+          aria-label="Tabs"
+          className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:top-0 md:bottom-auto md:border-t-0 md:border-b"
+        >
+          <div className="contents md:mx-auto md:flex md:h-16 md:max-w-5xl md:items-center md:justify-between md:px-6">
+            <Link
+              href="/"
+              className="hidden rounded-md text-lg font-bold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:flex md:h-11 md:items-center md:gap-2.5"
+            >
+              <Image
+                src="/icons/icon-192.png"
+                alt=""
+                width={32}
+                height={32}
+                // A small static PNG; Workers has no image optimizer configured.
+                unoptimized
+                className="rounded-lg"
+              />
+              Farty
+            </Link>
+            <ul className="mx-auto flex max-w-md md:mx-0 md:max-w-none md:gap-1">
+              {tabs.map(({ id, href, label }) => {
+                const current = id === tab
+                const Icon = icons[id]
+                return (
+                  <li key={id} className="flex-1 md:flex-none">
+                    <Link
+                      href={href}
+                      aria-current={current ? 'page' : undefined}
+                      className={cn(
+                        'flex h-14 flex-col items-center justify-center gap-0.5 text-xs font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:h-11 md:flex-row md:gap-2 md:rounded-md md:px-3 md:text-sm',
+                        current ? 'text-foreground md:bg-muted' : 'text-muted-foreground'
+                      )}
+                    >
+                      <Icon className="size-6 md:size-5" aria-hidden />
+                      {label}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </nav>
+        <RecordFlow />
+        <AccountStep />
+        {/* Only on the tabs, so the privacy, support and 404 pages are always readable. */}
+        {pedos.showsWelcome && tab !== null && <Welcome />}
+      </div>
+    </>
   )
 }
