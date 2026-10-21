@@ -15,6 +15,10 @@ function tabs(page: Page) {
   return page.getByRole('navigation', { name: 'Tabs' })
 }
 
+function app(page: Page) {
+  return page.getByRole('main')
+}
+
 test.describe('from 768px', () => {
   test.skip(({ isMobile }) => isMobile, 'The lander is checked at desktop size')
 
@@ -30,6 +34,8 @@ test.describe('from 768px', () => {
     await expect(hero(page)).toBeHidden()
     await expect(tabs(page)).toBeVisible()
     await expect(page.getByTestId('record-button')).toBeVisible()
+    // The pressed button is hidden, so focus moves to the app rather than dropping to the page.
+    await expect(app(page)).toBeFocused()
 
     await page.reload()
     await expect(page.getByTestId('record-button')).toBeVisible()
@@ -55,6 +61,19 @@ test.describe('from 768px', () => {
     await expect(step).toBeHidden()
     await expect(tabs(page)).not.toHaveAttribute('inert')
     await expect(page.getByTestId('record-button')).toBeVisible()
+    await expect(app(page)).toBeFocused()
+  })
+
+  test('Sign up free opens the account step where storage is blocked', async ({ page }) => {
+    await page.addInitScript(() => {
+      Storage.prototype.setItem = () => {
+        throw new DOMException('Blocked', 'SecurityError')
+      }
+    })
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Sign up free' }).click()
+    await expect(page.getByRole('dialog', { name: 'Keep your farts' })).toBeVisible()
+    await expect(hero(page)).toBeHidden()
   })
 
   test("another tab's URL opens the app and counts as opened", async ({ page }) => {
@@ -102,16 +121,31 @@ test.describe('from 768px', () => {
 
 test('a phone gets Welcome, not the lander, and downloads none of its images', async ({
   page,
+  context,
   isMobile
 }) => {
   test.skip(!isMobile, 'Phone only')
+  // The context sees the service worker's requests too, such as its precache of `/`.
   const images: string[] = []
-  page.on('request', request => {
+  context.on('request', request => {
     if (request.url().includes('/lander/')) images.push(request.url())
   })
   await page.goto('/')
   await expect(page.getByRole('button', { name: 'Allow microphone' })).toBeVisible()
   await expect(hero(page)).toBeHidden()
   await page.waitForLoadState('networkidle')
+  // Only a build registers the service worker. Once it's ready, its install has precached `/`.
+  if (process.env.E2E_SERVER === 'preview' || process.env.E2E_BASE_URL) {
+    const kept = await page.evaluate(async () => {
+      await navigator.serviceWorker.ready
+      const urls: string[] = []
+      for (const name of await caches.keys()) {
+        for (const request of await (await caches.open(name)).keys()) urls.push(request.url)
+      }
+      return urls
+    })
+    expect(kept).toContain(new URL('/', page.url()).href)
+    expect(kept.filter(url => url.includes('/lander/'))).toEqual([])
+  }
   expect(images).toEqual([])
 })

@@ -4,6 +4,7 @@ import { AppShell } from '@/components/pedos/app-shell'
 import { InstallPrompt } from '@/components/pedos/install-prompt'
 import { PedosProvider } from '@/components/pedos/pedos-provider'
 import { siteOrigin } from '@/lib/site'
+import { welcomedKey } from '@/lib/welcomed'
 import './globals.css'
 
 const origin = siteOrigin()
@@ -36,8 +37,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: a fixed string, run before paint.
           dangerouslySetInnerHTML={{
-            __html:
-              "try{localStorage.getItem('pedos.welcomed')!==null&&document.documentElement.setAttribute('data-welcomed','')}catch(e){}"
+            __html: `try{localStorage.getItem(${JSON.stringify(welcomedKey)})!==null&&document.documentElement.setAttribute('data-welcomed','')}catch(e){}`
           }}
         />
         {/* With credentials, so Chrome can fetch it behind the Staging password (#123). */}

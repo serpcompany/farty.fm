@@ -16,7 +16,7 @@ import { type Tab, tabOf, tabs } from '@/lib/tabs'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { AccountStep } from './account-step'
-import { desktop, Lander } from './lander'
+import { appMain, desktop, Lander } from './lander'
 import { usePedos } from './pedos-provider'
 import { useTrackPages } from './previous-page'
 import { RecordFlow } from './record-flow'
@@ -98,7 +98,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           atLander && 'md:unwelcomed:hidden'
         )}
       >
-        <main className="mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] pb-20 md:max-w-2xl md:pt-6 md:pb-12">
+        <main
+          id={appMain}
+          // Focusable only from script: the lander's Open Farty moves focus here (`lander.tsx`).
+          tabIndex={-1}
+          className="mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] pb-20 outline-none md:max-w-2xl md:pt-6 md:pb-12"
+        >
           {pedos.waitsForOtherTabs && (
             <output className="block px-4 pt-4 text-center text-muted-foreground">
               Close Farty in your other tabs to carry on.

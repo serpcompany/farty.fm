@@ -46,6 +46,7 @@ import * as tootStore from '@/lib/toot-store'
 import { openVisit } from '@/lib/visit'
 import { decodeWav, encodeWav, type PcmAudio } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
+import { welcomedKey } from '@/lib/welcomed'
 
 /** A just-recorded take that hasn't been saved or discarded yet. */
 export type Draft = { audio: PcmAudio; seconds: number; waveform: number[] }
@@ -167,8 +168,6 @@ export function usePedos(): Pedos {
   if (!pedos) throw new Error('usePedos needs a PedosProvider')
   return pedos
 }
-
-const welcomedKey = 'pedos.welcomed'
 
 /** The app's state and actions, mirroring the iPhone app's `AppModel`. */
 export function PedosProvider({ children }: { children: ReactNode }) {
@@ -320,9 +319,14 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   )
 
   const finishWelcome = useCallback(() => {
-    // From 768px this swaps the lander for the app (`lander.tsx`), even where storage is blocked.
+    // From 768px this swaps the lander for the app (`lander.tsx`), even where storage is blocked:
+    // then only this page load remembers it.
     document.documentElement.setAttribute('data-welcomed', '')
-    localStorage.setItem(welcomedKey, '1')
+    try {
+      localStorage.setItem(welcomedKey, '1')
+    } catch {
+      // Blocked or full storage: Welcome or the lander shows again on the next load.
+    }
     setShowsWelcome(false)
   }, [])
 

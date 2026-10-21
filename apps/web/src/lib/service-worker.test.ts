@@ -121,11 +121,12 @@ const startPage = `<html><head>
 <script src="/_next/static/chunks/main.js" async></script>
 <link rel="stylesheet" href="/_next/static/css/app.css">
 </head><body><nav><a href="/recordings/">Recordings</a><a href="/">Record</a></nav>
+<picture><source media="(min-width: 48rem)" srcSet="/lander/song.webp"/><img src="data:image/gif;base64,R0lGOD"></picture>
 <script>self.__next_f.push([1,"0:[\\"/_next/static/chunks/page.js\\"]"])</script>
 </body></html>`
 
 describe('the service worker', () => {
-  it('keeps the start page, the tabs it links to, and the files they load when it installs', async () => {
+  it("keeps the start page, the tabs it links to, and the files they load when it installs, but not the lander's images", async () => {
     const worker = startWorker(url => {
       const path = url.replace(origin, '')
       if (path === '/') return ok(startPage)
@@ -324,6 +325,7 @@ describe('the service worker', () => {
     for (const path of [
       '/fixtures/recordings/090__carlosramon__17-pet__186119.wav',
       '/fixtures/recordings/cover.png',
+      '/lander/song.webp',
       '/_next/static/media/fart.wav',
       '/catalog/songs.json',
       '/sw.js',

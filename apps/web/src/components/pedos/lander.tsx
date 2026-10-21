@@ -13,6 +13,9 @@ import { usePedos } from './pedos-provider'
 /** From 768px (Tailwind's `md`), as a media query. */
 export const desktop = '(min-width: 48rem)'
 
+/** The app's `main` (`app-shell.tsx`), where focus goes once the lander hides. */
+export const appMain = 'app'
+
 /**
  * Farty's product page at `/`, from 768px, until the app has been opened in this browser. Open
  * Farty shows the app on the same page; Sign up opens the account step in it. Phones never see it,
@@ -25,6 +28,9 @@ export function Lander() {
   function openFarty() {
     pedos.finishWelcome()
     window.scrollTo({ top: 0 })
+    // The lander, and the button just pressed, are hidden now, so focus moves to the app instead of
+    // dropping to the page. The account step, opened next by Sign up, gives it back here too.
+    document.getElementById(appMain)?.focus({ preventScroll: true })
   }
 
   function signUp() {
