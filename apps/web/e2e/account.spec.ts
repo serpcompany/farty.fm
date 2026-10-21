@@ -234,6 +234,7 @@ test("Profile's Save to an account opens the step, which stays while they read t
   await save.click()
   const step = page.getByRole('dialog', { name: 'Keep your farts' })
   await expect(step).toBeVisible()
+  await step.getByLabel('Email').fill('later@example.com')
 
   // Off to Mail and back: a hidden page comes back on Record, but not with the step open.
   await setVisibility(page, 'hidden')
@@ -245,6 +246,12 @@ test("Profile's Save to an account opens the step, which stays while they read t
   await expect(page).toHaveURL(/\/profile\/$/)
   // Focus goes back to the button that opened it.
   await expect(save).toBeFocused()
+
+  // Not now drops the half-typed email, so a reload doesn't bring the step back.
+  await page.reload()
+  // Profile shows the button once the session is read, in the same update that would reopen it.
+  await expect(save).toBeVisible()
+  await expect(step).toBeHidden()
 })
 
 test("a guest's Recording lasts the visit: through a reload and another tab, then it's gone", async ({

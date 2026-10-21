@@ -165,6 +165,13 @@ describe('readSession', () => {
     answer(Response.json(null))
     expect(await readSession()).toEqual({ status: 'signedOut' })
   })
+
+  // Remembering the account is best effort: a browser that can't store it is still signed in.
+  it('reads a session as signed in when localStorage is blocked', async () => {
+    vi.stubGlobal('localStorage', blockedStorage())
+    answer(Response.json({ session: {}, user: { email: 'a@example.com' } }))
+    expect(await readSession()).toMatchObject({ status: 'signedIn', email: 'a@example.com' })
+  })
 })
 
 describe('signIn', () => {
@@ -176,6 +183,19 @@ describe('signIn', () => {
     )
     expect(await signIn('a@example.com', '123456')).toMatchObject({ ok: true })
     expect(localStorage.getItem('pedos.account')).toBe('1')
+  })
+
+  // The code was right and the cookie is set, so a blocked localStorage isn't "Couldn't reach Pedos".
+  it('signs in when localStorage is blocked', async () => {
+    vi.stubGlobal('localStorage', blockedStorage())
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ user: { email: 'a@example.com' } }))
+    )
+    expect(await signIn('a@example.com', '123456')).toMatchObject({
+      ok: true,
+      value: { status: 'signedIn', email: 'a@example.com' }
+    })
   })
 })
 
