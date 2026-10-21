@@ -1,0 +1,29 @@
+{
+  "packageId": "com.serp.pedos",
+  "host": "pedos.app",
+  "name": "Pedos",
+  "launcherName": "Pedos",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#ffffff",
+  "themeColorDark": "#ffffff",
+  "navigationColor": "#ffffff",
+  "navigationColorDark": "#ffffff",
+  "navigationDividerColor": "#ffffff",
+  "navigationDividerColorDark": "#ffffff",
+  "backgroundColor": "#ffffff",
+  "startUrl": "/",
+  "fullScopeUrl": "https://pedos.app/",
+  "iconUrl": "https://pedos.app/icon.png",
+  "maskableIconUrl": "https://pedos.app/icons/maskable-512.png",
+  "webManifestUrl": "https://pedos.app/manifest.webmanifest",
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "fallbackType": "customtabs",
+  "enableNotifications": false,
+  "enableSiteSettingsShortcut": false,
+  "signingKey": {
+    "path": "~/.config/pedos/android-upload.keystore",
+    "alias": "upload"
+  }
+}
