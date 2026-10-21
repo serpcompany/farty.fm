@@ -15,6 +15,7 @@ import { TootError } from '@/lib/toot-renderer'
 import { cn } from '@/lib/utils'
 import { decodeWav } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
+import { useAccount } from './account-provider'
 import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
@@ -131,9 +132,13 @@ export function SongCreator({ song }: { song: Song }) {
   )
 }
 
-/** The made Toot, with Save to Toots pinned above the tabs. */
+/**
+ * The made Toot, with Save to Toots pinned above the tabs. The first save may offer the account
+ * step once more (#155).
+ */
 function Ready({ draft }: { draft: TootDraft }) {
   const pedos = usePedos()
+  const { offerStep } = useAccount()
   const isSaved = pedos.toot(draft.id) !== undefined
   const [saving, setSaving] = useState(false)
   const [saveFailed, setSaveFailed] = useState(false)
@@ -143,6 +148,7 @@ function Ready({ draft }: { draft: TootDraft }) {
     setSaveFailed(false)
     try {
       await pedos.saveToot(draft)
+      offerStep('toot')
     } catch {
       setSaveFailed(true)
     } finally {

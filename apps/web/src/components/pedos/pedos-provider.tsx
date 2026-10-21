@@ -20,6 +20,7 @@ import {
 } from '@/lib/audio/recorder'
 import type { Song } from '@/lib/catalog/song'
 import { songs } from '@/lib/catalog/songs.generated'
+import { onLibraryChanged } from '@/lib/library-sync'
 import { nearestNote } from '@/lib/pitch'
 import {
   type CoverageChanges,
@@ -40,6 +41,7 @@ import {
 import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
 import { makeToot as renderToot } from '@/lib/toot-renderer'
 import * as tootStore from '@/lib/toot-store'
+import { openVisit } from '@/lib/visit'
 import { decodeWav, encodeWav, type PcmAudio } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 
@@ -230,15 +232,17 @@ export function PedosProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setShowsWelcome(localStorage.getItem(welcomedKey) === null)
-    store.loadRecordings().then(loaded => {
+    // A guest's new visit first clears the last one's Recordings and Toots (`visit.ts`).
+    const library = openVisit().library
+    library.then(store.loadRecordings).then(loaded => {
       // An analysis cut off by closing the page starts again.
       setRecordings(loaded)
       for (const recording of loaded) {
         if (recording.analysis.state === 'analyzing') void runAnalysis(recording.id)
       }
     })
-    tootStore
-      .loadToots()
+    library
+      .then(tootStore.loadToots)
       // A Toot saved before the list loads is newer than any in it, so it stays first.
       .then(saved =>
         setToots(current => [
@@ -251,6 +255,59 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         setToots(current => current ?? [])
       })
   }, [runAnalysis])
+
+  // What a sync changes shows at once: Recordings and Toots from the account's other browsers,
+  // their renames and deletes (`library-sync.ts`).
+  const playing = useRef(nowPlaying)
+  useEffect(() => {
+    playing.current = nowPlaying
+  }, [nowPlaying])
+  useEffect(
+    () =>
+      onLibraryChanged(change => {
+        if (change.reset) {
+          stopPlayback()
+          void store.loadRecordings().then(setRecordings, () => {})
+          void tootStore.loadToots().then(setToots, () => {})
+          return
+        }
+        const { recordings: added, toots: changed, deleted } = change
+        const gone = [...deleted.recordings, ...deleted.toots.map(id => tootPlayback(id))]
+        const current = playing.current
+        if (current && gone.some(key => current === key || current.startsWith(`${key}:`))) {
+          stopPlayback()
+        }
+        for (const id of deleted.toots) forgetDecoded(`toot-${id}`)
+        setRecordings(list => {
+          if (!list) return list
+          const kept = list.filter(r => !deleted.recordings.includes(r.id))
+          // A Recording not uploaded yet may come back with a new number.
+          const fresh = new Map(added.map(r => [r.id, r]))
+          const merged = kept.map(r => {
+            const renumbered = fresh.get(r.id)
+            return renumbered ? { ...r, number: renumbered.number } : r
+          })
+          const ids = new Set(kept.map(r => r.id))
+          return [...merged, ...added.filter(r => !ids.has(r.id))].sort(
+            (a, b) => a.number - b.number
+          )
+        })
+        setToots(list => {
+          if (!list) return list
+          const kept = list.filter(t => !deleted.toots.includes(t.id))
+          const fresh = new Map(changed.map(t => [t.id, t]))
+          const merged = kept.map(t => {
+            const renamed = fresh.get(t.id)
+            return renamed ? { ...t, title: renamed.title } : t
+          })
+          const ids = new Set(kept.map(t => t.id))
+          return [...merged, ...changed.filter(t => !ids.has(t.id))].sort(
+            (a, b) => b.createdAt - a.createdAt
+          )
+        })
+      }),
+    []
+  )
 
   const finishWelcome = useCallback(() => {
     localStorage.setItem(welcomedKey, '1')
@@ -312,6 +369,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     stopPlayback()
     let saved: Recording
     try {
+      // Saved after the visit has started, so clearing the last one's never takes it.
+      await openVisit().library
       saved = await store.saveRecording(
         { seconds: draft.seconds, sampleRate: draft.audio.sampleRate, waveform: draft.waveform },
         encodeWav(draft.audio)

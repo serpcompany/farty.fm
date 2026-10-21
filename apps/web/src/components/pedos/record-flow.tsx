@@ -31,6 +31,7 @@ import {
   recordingPitch
 } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
+import { useAccount } from './account-provider'
 import { type Draft, usePedos } from './pedos-provider'
 import { PitchStrip } from './pitch-strip'
 import { RecordButton } from './record-button'
@@ -302,10 +303,15 @@ function AnalysisFailed({ id }: { id: string }) {
   )
 }
 
-/** Result: the note you just made, and what it unlocked. Matches the iPhone app's `ResultView`. */
+/**
+ * Result: the note you just made, and what it unlocked. Matches the iPhone app's `ResultView`. The
+ * first time, each button opens the account step before it goes where it was tapped (#155).
+ */
 function Result({ recording, changes }: { recording: Recording; changes: CoverageChanges }) {
   const pedos = usePedos()
   const finish = useFinishFlow()
+  const { offerStep } = useAccount()
+  const go = (href: string) => offerStep('result', () => finish(href))
   const pitch = recordingPitch(recording)
 
   return (
@@ -347,7 +353,7 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
       {changes.unlocked.length > 0 ? (
         <FlowButtons
           secondary={
-            <FlowButton variant="secondary" onClick={() => finish('/recordings/')}>
+            <FlowButton variant="secondary" onClick={() => go('/recordings/')}>
               Done
             </FlowButton>
           }
@@ -357,7 +363,7 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
               onClick={() => {
                 // Song Creator plays the Toot once it's made: the tap starts the sound it needs.
                 startAudioInTap()
-                finish(`/compose/${changes.unlocked[0].id}/`)
+                go(`/compose/${changes.unlocked[0].id}/`)
               }}
             >
               Try it
@@ -367,12 +373,12 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
       ) : (
         <FlowButtons
           secondary={
-            <FlowButton variant="secondary" onClick={() => finish('/')}>
+            <FlowButton variant="secondary" onClick={() => go('/')}>
               Record another
             </FlowButton>
           }
           primary={
-            <FlowButton variant="primary" onClick={() => finish('/recordings/')}>
+            <FlowButton variant="primary" onClick={() => go('/recordings/')}>
               Done
             </FlowButton>
           }

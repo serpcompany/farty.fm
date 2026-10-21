@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
     document.addEventListener('DOMContentLoaded', () => {
       const style = document.createElement('style')
       style.textContent = 'nextjs-portal { display: none !important; }'
-      document.head.append(style)
+      document.head.appendChild(style)
     })
   })
 })
