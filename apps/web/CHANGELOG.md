@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/serpcompany/farty.fm/compare/v1.4.0...v1.5.0) (2026-10-22)
+
+
+### Features
+
+* **web:** a product page for farty.fm on computers and tablets ([#195](https://github.com/serpcompany/farty.fm/issues/195)) ([44d1d21](https://github.com/serpcompany/farty.fm/commit/44d1d21529e9a6c66d9e7872f0ff2ae9d49a49fe))
+* **web:** on a computer, farty.fm is a product page for a phone app ([#200](https://github.com/serpcompany/farty.fm/issues/200)) ([8360828](https://github.com/serpcompany/farty.fm/commit/8360828f5835c664a65f67b08cc3e5588c18b15f))
+
 ## [1.4.0](https://github.com/serpcompany/pedos-app/compare/v1.3.0...v1.4.0) (2026-10-21)
 
 
