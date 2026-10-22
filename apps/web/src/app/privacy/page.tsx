@@ -23,7 +23,7 @@ export default function PrivacyPage() {
       <ul>
         <li>
           Your email, Recordings and Toots (audio included) are stored on Cloudflare, in your
-          account, so you can use them on any device.
+          account, so you can use them on any phone or tablet you sign in on.
         </li>
         <li>
           Your email is used for sign-in codes and for Farty news, which is on by default. You can

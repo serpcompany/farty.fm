@@ -8,7 +8,8 @@ import { usePedos } from './pedos-provider'
 
 /**
  * Says what Farty does and asks for the microphone before the first recording. First visit only.
- * Matches the iPhone app's `WelcomeSheet`. From 768px the lander takes its place (`lander.tsx`).
+ * Matches the iPhone app's `WelcomeSheet`. On a touch tablet the lander takes its place at `/`, and
+ * on a computer on every tab (`lander.tsx`).
  */
 export function Welcome() {
   const pedos = usePedos()

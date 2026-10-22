@@ -3,6 +3,7 @@ import { type BrowserContext, expect, type Page, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { newEmail, signInByApi } from './account'
 import { recordAndSave, withFakeMicrophone } from './record'
+import { onPhone } from './screens'
 
 // One account in two browsers (#156), at phone size on the Staging build, which has the Fixture
 // Library to unlock Songs. Each browser plays the Recording and the Toot the other made, with the
@@ -21,7 +22,7 @@ declare global {
   }
 }
 
-test.skip(({ isMobile }) => !isMobile, 'Sync is checked at phone size')
+test.skip(({ viewport }) => !onPhone({ viewport }), 'Sync is checked at phone size')
 
 test.beforeEach(async ({ request }) => {
   const onStagingBuild =

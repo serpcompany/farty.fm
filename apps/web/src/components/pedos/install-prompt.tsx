@@ -19,8 +19,9 @@ const offeredKey = 'pedos.installOffered'
 
 /**
  * Offers to install Farty once, after the first saved Recording, above the tabs. It hides when
- * it's closed or Farty is installed. It also registers the service worker and, signed in, asks
- * the browser to keep the Recordings: a guest's last only for the visit (`visit.ts`).
+ * it's closed or Farty is installed, and never shows on a computer, which has no app (#199). It
+ * also registers the service worker and, signed in, asks the browser to keep the Recordings: a
+ * guest's last only for the visit (`visit.ts`).
  */
 export function InstallPrompt() {
   const pedos = usePedos()
@@ -56,7 +57,7 @@ export function InstallPrompt() {
   return (
     <aside
       aria-label="Install Farty"
-      className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 mx-auto w-full max-w-md px-3 md:bottom-4"
+      className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 mx-auto w-full max-w-md px-3 md:bottom-4 desktop:hidden"
     >
       <div className="flex items-center gap-3 rounded-2xl border bg-card p-3 text-card-foreground shadow-lg">
         <Image

@@ -36,8 +36,19 @@ export default defineConfig({
   },
   // The record journeys feed a fixture to Chromium's fake microphone, which only Chromium has.
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
-    { name: 'phone', use: { ...devices['Pixel 7'] } }
+    // A computer has no app, only the product page (#199), so it runs only its own spec.
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+      testMatch: 'desktop.spec.ts'
+    },
+    // An iPad-size touch tablet, in Chromium: the app with the top bar, from 768px.
+    {
+      name: 'tablet',
+      use: { ...devices['Galaxy Tab S4'], viewport: { width: 820, height: 1180 } },
+      testIgnore: 'desktop.spec.ts'
+    },
+    { name: 'phone', use: { ...devices['Pixel 7'] }, testIgnore: 'desktop.spec.ts' }
   ],
   webServer: process.env.E2E_BASE_URL
     ? undefined

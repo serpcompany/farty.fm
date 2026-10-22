@@ -12,11 +12,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useRef } from 'react'
+import { desktop, wide } from '@/lib/desktop'
 import { type Tab, tabOf, tabs } from '@/lib/tabs'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { AccountStep } from './account-step'
-import { appMain, desktop, Lander } from './lander'
+import { appMain, Lander } from './lander'
 import { usePedos } from './pedos-provider'
 import { useTrackPages } from './previous-page'
 import { RecordFlow } from './record-flow'
@@ -37,9 +38,10 @@ const icons: Record<Tab, LucideIcon> = {
 /**
  * The five tabs, as the iPhone app's `AppTabs`. Playback stops on a tab change and while the page
  * is hidden. The page comes back on Record, unless Recording, Review, Result or the account step is
- * open.
+ * open. On a computer, every tab is the product page instead (`lander.tsx`), whose Download App
+ * shows `qrCode`.
  */
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: ReactNode }) {
   const pedos = usePedos()
   const { stopPlayback, showsRecordFlow, finishWelcome, flow, capture } = pedos
   // Reading the sign-in code in another app hides the page: the step stays where it was.
@@ -51,15 +53,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   // the microphone is still opening, when the Record screen and its tabs are still there.
   const stepsOpen =
     stepOpen || flow !== null || capture.kind === 'recording' || capture.kind === 'finishing'
-  // From 768px, `/` is the lander until Farty is opened in this browser (`lander.tsx`).
+  // On a touch tablet, `/` is the lander until Farty is opened in this browser (`lander.tsx`).
   const atLander = pathname === '/'
   useTrackPages()
 
-  // From 768px, any other tab's URL, such as a Song's link, opens the app and counts as opened.
-  // Phones keep Welcome, which asks for the microphone, on every tab.
+  // On a touch tablet, any other tab's URL, such as a Song's link, opens the app and counts as
+  // opened. Phones keep Welcome, which asks for the microphone, on every tab, and a computer never
+  // opens the app.
   useEffect(() => {
     if (tab === null || atLander || document.documentElement.hasAttribute('data-welcomed')) return
-    if (window.matchMedia(desktop).matches) finishWelcome()
+    if (window.matchMedia(wide).matches && !window.matchMedia(desktop).matches) finishWelcome()
   }, [tab, atLander, finishWelcome])
 
   // Moving within a tab, such as to a Song on Compose, isn't a tab change.
@@ -78,8 +81,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         stopPlayback()
       } else if (wasHidden.current) {
         wasHidden.current = false
-        // Pages outside the tabs stay where they are.
-        if (!showsRecordFlow && !stepOpen && tab !== null && tab !== 'record') router.push('/')
+        // Pages outside the tabs stay where they are, and so does a computer's product page.
+        if (showsRecordFlow || stepOpen || tab === null || tab === 'record') return
+        if (!window.matchMedia(desktop).matches) router.push('/')
       }
     }
     document.addEventListener('visibilitychange', visibilityChanged)
@@ -88,14 +92,16 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      {/* From 768px, a browser that hasn't opened the app gets the lander at `/` instead of
-          Welcome. Every other page is always the page itself. */}
-      {atLander && <Lander />}
+      {/* A computer gets the lander on every tab, and a touch tablet that hasn't opened the app
+          gets it at `/` instead of Welcome. The privacy, support and 404 pages are always
+          themselves. */}
+      {tab !== null && <Lander atHome={atLander} qrCode={qrCode} />}
       {/* From 768px the tab bar is a top bar with the name, and the page is a wider column. */}
       <div
         className={cn(
           'flex min-h-dvh flex-col overflow-x-clip md:pt-16',
-          atLander && 'md:unwelcomed:hidden'
+          atLander && 'md:unwelcomed:hidden',
+          tab !== null && 'desktop:hidden'
         )}
       >
         <main
@@ -134,9 +140,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               />
               Farty
             </Link>
+            {/* A computer has no app, so its privacy, support and 404 pages link only home. */}
             <ul
               className={cn(
-                'mx-auto flex max-w-md md:mx-0 md:max-w-none md:gap-1',
+                'mx-auto flex max-w-md md:mx-0 md:max-w-none md:gap-1 desktop:hidden',
                 stepsOpen && 'md:opacity-50'
               )}
             >

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { AccountProvider } from '@/components/pedos/account-provider'
 import { AppShell } from '@/components/pedos/app-shell'
+import { DownloadQr } from '@/components/pedos/download-qr'
 import { InstallPrompt } from '@/components/pedos/install-prompt'
 import { PedosProvider } from '@/components/pedos/pedos-provider'
 import { siteOrigin } from '@/lib/site'
@@ -30,8 +31,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    // The script marks a browser that has opened the app before paint, so from 768px a returning
-    // visitor gets the app and a new one the lander, with no flash of the other (`lander.tsx`).
+    // The script marks a browser that has opened the app before paint, so on a touch tablet a
+    // returning visitor gets the app and a new one the lander, with no flash of the other. A computer
+    // always gets the lander, by CSS alone (`lander.tsx`).
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <head>
         <script
@@ -46,7 +48,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="min-h-full">
         <AccountProvider>
           <PedosProvider>
-            <AppShell>{children}</AppShell>
+            <AppShell qrCode={<DownloadQr />}>{children}</AppShell>
             <InstallPrompt />
           </PedosProvider>
         </AccountProvider>

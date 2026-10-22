@@ -140,7 +140,7 @@ function Step() {
             <p className="text-muted-foreground">
               {again
                 ? 'Your session ended. Your farts stay on this device until you sign in.'
-                : 'Make a free account to keep your Recordings and Toots on any device.'}
+                : 'Make a free account to keep your Recordings and Toots, even on a new phone.'}
             </p>
           </div>
 
