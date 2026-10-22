@@ -12,6 +12,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { keepMicrophoneOpen } from '@/lib/audio/recorder'
+import { desktop } from '@/lib/desktop'
 import { type RecordProblem, usePedos } from './pedos-provider'
 import { RecordButton } from './record-button'
 
@@ -29,13 +30,17 @@ const problems: Record<
 
 /**
  * The Record tab: one big red button. Matches the iPhone app's `RecordTab`. The microphone stays
- * open while it shows, through a take, and closes once Review or Result opens.
+ * open while it shows, through a take, and closes once Review or Result opens. A computer shows the
+ * product page instead (`lander.tsx`), so there it never opens the microphone (#199).
  */
 export function RecordScreen() {
   const pedos = usePedos()
   const alert = pedos.problem && pedos.problem !== 'nothingHeard' ? pedos.problem : null
   const flowOpen = pedos.flow !== null
-  useEffect(() => (flowOpen ? undefined : keepMicrophoneOpen()), [flowOpen])
+  useEffect(
+    () => (flowOpen || window.matchMedia(desktop).matches ? undefined : keepMicrophoneOpen()),
+    [flowOpen]
+  )
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-7">

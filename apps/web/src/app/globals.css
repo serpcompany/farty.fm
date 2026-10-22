@@ -3,8 +3,12 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (@media (prefers-color-scheme: dark));
-/* A browser that hasn't opened the app yet, so from 768px it shows the lander (`lander.tsx`). */
+/* A browser that hasn't opened the app yet, so a touch tablet shows the lander at `/`
+   (`lander.tsx`). */
 @custom-variant unwelcomed (&:where(html:not([data-welcomed]) *));
+/* A computer: 768px and wider with a mouse or trackpad, where every tab is the product page (#199,
+   `src/lib/desktop.ts`). */
+@custom-variant desktop (@media (min-width: 48rem) and (hover: hover) and (pointer: fine));
 
 @theme inline {
   --color-background: var(--background);

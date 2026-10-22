@@ -1,8 +1,10 @@
 import { expect, type Page, test } from '@playwright/test'
 import { skipWelcome, withFakeMicrophone } from './record'
+import { onPhone } from './screens'
 
-// The product page at `/` from 768px, until Farty is opened in this browser (#191). Phones get
-// Welcome instead, and download none of the lander's images.
+// The product page at `/` on a touch tablet, until Farty is opened in this browser (#191). Phones
+// get Welcome instead, and download none of the lander's images. A computer gets the product page
+// on every tab (`desktop.spec.ts`).
 
 // Only the record flow's test records.
 withFakeMicrophone('090__carlosramon__17-pet__186119.wav')
@@ -19,8 +21,8 @@ function app(page: Page) {
   return page.getByRole('main')
 }
 
-test.describe('from 768px', () => {
-  test.skip(({ isMobile }) => isMobile, 'The lander is checked at desktop size')
+test.describe('on a touch tablet', () => {
+  test.skip(({ viewport }) => onPhone({ viewport }), 'The lander is checked on a touch tablet')
 
   test('a first visit shows the lander; Open Farty shows the app, and a reload goes straight to it', async ({
     page
@@ -28,6 +30,8 @@ test.describe('from 768px', () => {
     await page.goto('/')
     await expect(hero(page)).toBeVisible()
     await expect(tabs(page)).toBeHidden()
+    // Download App is for a computer only.
+    await expect(page.getByRole('button', { name: 'Download App' })).toHaveCount(0)
 
     // The hero's, between the header's and the closing band's.
     await page.getByRole('button', { name: 'Open Farty' }).nth(1).click()
@@ -122,14 +126,19 @@ test.describe('from 768px', () => {
 test('a phone gets Welcome, not the lander, and downloads none of its images', async ({
   page,
   context,
-  isMobile
+  viewport
 }) => {
-  test.skip(!isMobile, 'Phone only')
+  test.skip(!onPhone({ viewport }), 'Phone only')
   // The context sees the service worker's requests too, such as its precache of `/`.
   const images: string[] = []
   context.on('request', request => {
     if (request.url().includes('/lander/')) images.push(request.url())
   })
+  // Every tab's page carries the lander, hidden, for a computer.
+  await page.goto('/compose/')
+  await expect(page.getByRole('button', { name: 'Allow microphone' })).toBeVisible()
+  await expect(hero(page)).toBeHidden()
+  await page.waitForLoadState('networkidle')
   await page.goto('/')
   await expect(page.getByRole('button', { name: 'Allow microphone' })).toBeVisible()
   await expect(hero(page)).toBeHidden()

@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import { type BrowserContext, expect, type Locator, type Page, test } from '@playwright/test'
 import { codeFor, newEmail, ownClient, session, signInByApi } from './account'
 import { recordAndSave, skipWelcome, withFakeMicrophone } from './record'
+import { onPhone } from './screens'
 
 // The account step and Profile's account (#155), and a guest's farts lasting only the visit
 // (#150), at phone size. Sign-in codes come from the dev mailbox (`e2e/account.ts`).
@@ -10,7 +11,7 @@ import { recordAndSave, skipWelcome, withFakeMicrophone } from './record'
 const g3 = '090__carlosramon__17-pet__186119.wav'
 withFakeMicrophone(g3)
 
-test.skip(({ isMobile }) => !isMobile, 'The account step is checked at phone size')
+test.skip(({ viewport }) => !onPhone({ viewport }), 'The account step is checked at phone size')
 
 test("a guest's first Result offers the account step, and Not now goes where they tapped", async ({
   page

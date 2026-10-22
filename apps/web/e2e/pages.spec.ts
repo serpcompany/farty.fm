@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { onPhone } from './screens'
 
 test('the privacy page covers accounts, news email, guests, error reports, page views and deleting', async ({
   page
@@ -51,9 +52,11 @@ test('a made-up URL answers 404 with one noindex tag and a link home', async ({
 
 test('Welcome, or from 768px the lander, shows on a first visit but never covers the privacy, support or 404 page', async ({
   page,
-  isMobile
+  viewport
 }) => {
-  const welcome = page.getByRole('button', { name: isMobile ? 'Not now' : 'Sign up free' })
+  const welcome = page.getByRole('button', {
+    name: onPhone({ viewport }) ? 'Not now' : 'Sign up free'
+  })
   await page.goto('/')
   await expect(welcome).toBeVisible()
 

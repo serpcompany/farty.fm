@@ -9,6 +9,7 @@ import {
   waitForOpenMicrophone
 } from './fake-microphone'
 import { skipWelcome } from './record'
+import { onPhone } from './screens'
 
 // The microphone stays open on the Record screen, so a tap captures at once and a take keeps the
 // 300 ms before it (#148, #149). The fake microphone is in `fake-microphone.ts`.
@@ -55,7 +56,7 @@ function savedTake(page: Page): Promise<{ samples: number[]; sampleRate: number 
 test.describe('with microphone permission granted', () => {
   test.use({ permissions: ['microphone'] })
   // Audio timing doesn't depend on the screen size; phone size is how people record.
-  test.skip(({ isMobile }) => !isMobile, 'Phone only')
+  test.skip(({ viewport }) => !onPhone({ viewport }), 'Phone only')
 
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(fakeMicrophone, { wavs: fixtureWavs(), delayMs: getUserMediaMs })
@@ -280,7 +281,7 @@ test.describe('with microphone permission granted', () => {
 })
 
 test.describe('before microphone permission is granted', () => {
-  test.skip(({ isMobile }) => !isMobile, 'Phone only')
+  test.skip(({ viewport }) => !onPhone({ viewport }), 'Phone only')
 
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(fakeMicrophone, { wavs: {}, delayMs: getUserMediaMs })

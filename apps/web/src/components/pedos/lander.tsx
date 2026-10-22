@@ -6,22 +6,34 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
+import { wide } from '@/lib/desktop'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { usePedos } from './pedos-provider'
 
-/** From 768px (Tailwind's `md`), as a media query. */
-export const desktop = '(min-width: 48rem)'
-
 /** The app's `main` (`app-shell.tsx`), where focus goes once the lander hides. */
 export const appMain = 'app'
 
+/** Farty's brand button, behind white text. */
+const brand = 'bg-brand-strong text-white hover:bg-brand-strong/90'
+
 /**
- * Farty's product page at `/`, from 768px, until the app has been opened in this browser. Open
- * Farty shows the app on the same page; Sign up opens the account step in it. Phones never see it,
- * or download its images: they get Welcome.
+ * Farty's product page, for a phone app.
+ * - A computer (`desktop` in `globals.css`) gets it on every tab, whatever this browser has opened,
+ *   and only Download App, a QR code for a phone (#199).
+ * - A touch tablet gets it at `/` (`atHome`) until the app is opened in this browser. Open Farty
+ *   shows the app on the same page; Sign up opens the account step in it.
+ * - Phones never see it, or download its images: they get Welcome.
  */
-export function Lander() {
+export function Lander({ atHome, qrCode }: { atHome: boolean; qrCode: ReactNode }) {
   const pedos = usePedos()
   const { openStep } = useAccount()
 
@@ -39,7 +51,7 @@ export function Lander() {
   }
 
   return (
-    <div id="top" className="hidden md:unwelcomed:block">
+    <div id="top" className={cn('hidden desktop:block', atHome && 'md:unwelcomed:block')}>
       <header className="sticky top-0 z-40 px-4 pt-4">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 rounded-2xl border bg-background/80 pr-2.5 pl-4 shadow-sm backdrop-blur">
           <a
@@ -62,15 +74,13 @@ export function Lander() {
             <SectionLink href="#faq">FAQ</SectionLink>
           </nav>
           <div className="flex gap-1.5">
-            <Button variant="ghost" className="h-11 px-4 text-sm" onClick={signUp}>
+            <Button variant="ghost" className="h-11 px-4 text-sm desktop:hidden" onClick={signUp}>
               Sign in
             </Button>
-            <Button
-              className="h-11 bg-brand-strong px-5 text-sm text-white hover:bg-brand-strong/90"
-              onClick={openFarty}
-            >
+            <Button className={cn(brand, 'h-11 px-5 text-sm desktop:hidden')} onClick={openFarty}>
               Open Farty
             </Button>
+            <DownloadApp qrCode={qrCode} className="h-11 px-5 text-sm" />
           </div>
         </div>
       </header>
@@ -88,20 +98,20 @@ export function Lander() {
             Farty finds the note in each fart, then plays songs with your own farts.
           </p>
           <div className="mt-8 flex justify-center gap-3">
-            <Button
-              className="h-12 bg-brand-strong px-7 text-base text-white hover:bg-brand-strong/90"
-              onClick={openFarty}
-            >
+            <Button className={cn(brand, 'h-12 px-7 text-base desktop:hidden')} onClick={openFarty}>
               Open Farty
               <ArrowRight className="size-5" aria-hidden />
             </Button>
-            <Button variant="outline" className="h-12 px-7 text-base" onClick={signUp}>
+            <Button
+              variant="outline"
+              className="h-12 px-7 text-base desktop:hidden"
+              onClick={signUp}
+            >
               Sign up free
             </Button>
+            <DownloadApp qrCode={qrCode} className="h-12 px-7 text-base" />
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Free, in this browser. Nothing to download.
-          </p>
+          <p className="mt-4 text-sm text-muted-foreground">Free. No app store needed.</p>
         </div>
         <div className="mx-auto mt-14 flex max-w-5xl items-start justify-center gap-8 px-6">
           <Phone
@@ -197,12 +207,13 @@ export function Lander() {
               Record a fart, see its note, and start collecting. It's free.
             </p>
             <Button
-              className="mt-8 h-12 bg-brand-strong px-7 text-base text-white hover:bg-brand-strong/90"
+              className={cn(brand, 'mt-8 h-12 px-7 text-base desktop:hidden')}
               onClick={openFarty}
             >
               Open Farty
               <ArrowRight className="size-5" aria-hidden />
             </Button>
+            <DownloadApp qrCode={qrCode} className="mt-8 h-12 px-7 text-base" />
           </div>
           <div className="h-80 self-end overflow-hidden">
             <Phone
@@ -258,8 +269,8 @@ const features = [
   },
   {
     icon: UserRound,
-    title: 'Keep them anywhere',
-    text: 'Sign in with your email to keep your Recordings and Toots on any device.'
+    title: 'Keep them for later',
+    text: 'Sign in with your email to keep your Recordings and Toots, even on a new phone.'
   }
 ]
 
@@ -282,13 +293,13 @@ const steps = [
 const faq = [
   { question: 'Is Farty free?', answer: 'Yes. Farty is free, and so is an account.' },
   {
-    question: 'Do I need to download anything?',
-    answer: 'No. Farty runs in your browser. On a phone you can add it to your Home Screen.'
+    question: 'Do I need an app store?',
+    answer: "No. Farty opens in your phone's browser, and you can add it to your Home Screen."
   },
   {
     question: 'Where do my farts go?',
     answer:
-      'Without an account they stay in this browser, and are gone when you close Farty. Sign in with your email to keep them on any device.'
+      'Without an account they stay in the browser you recorded them in, and are gone when you close Farty. Sign in with your email to keep them.'
   },
   {
     question: 'Why has my fart got no note?',
@@ -338,7 +349,7 @@ function Phone({
     >
       <picture>
         {/* Below 768px the browser takes the blank pixel instead, so a phone downloads nothing. */}
-        <source media={desktop} srcSet={src} />
+        <source media={wide} srcSet={src} />
         <img
           src={blank}
           alt={alt}
@@ -352,6 +363,31 @@ function Phone({
         />
       </picture>
     </div>
+  )
+}
+
+/**
+ * Download App, on a computer only: a QR code that opens Farty on a phone (#199). Closing it gives
+ * focus back to the button.
+ */
+function DownloadApp({ qrCode, className }: { qrCode: ReactNode; className: string }) {
+  return (
+    <Dialog>
+      <DialogTrigger
+        render={<Button className={cn(brand, 'hidden desktop:inline-flex', className)} />}
+      >
+        Download App
+      </DialogTrigger>
+      <DialogContent className="justify-items-center gap-5 p-6 text-center">
+        <DialogHeader>
+          <DialogTitle className="text-lg">Scan to open Farty on your phone</DialogTitle>
+        </DialogHeader>
+        {qrCode}
+        <DialogDescription className="text-base">
+          Then add it to your Home Screen. On iPhone, it's in the Share menu.
+        </DialogDescription>
+      </DialogContent>
+    </Dialog>
   )
 }
 
