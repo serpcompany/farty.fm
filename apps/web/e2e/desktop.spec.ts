@@ -1,5 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
+import { fakeMicrophone, microphone, waitForOpenMicrophone } from './fake-microphone'
 import { skipWelcome } from './record'
 
 // On a computer, a wide window with a mouse, Farty is a phone app (#199): every tab is the product
@@ -63,6 +64,26 @@ test('a browser that opened Farty before still gets the product page, and the mi
   await expectProductPage(page)
   await page.waitForLoadState('networkidle')
   expect(await page.evaluate(() => Reflect.get(window, 'microphoneOpened').count)).toBe(0)
+})
+
+test('widening a narrow window into the product page shuts the microphone', async ({
+  page,
+  context
+}) => {
+  await context.grantPermissions(['microphone'])
+  await page.addInitScript(fakeMicrophone, { wavs: {}, delayMs: 0 })
+  await page.addInitScript(skipWelcome, {})
+  // Narrower than 768px, a computer gets the phone app, and Record opens the microphone.
+  await page.setViewportSize({ width: 700, height: 900 })
+  await page.goto('/')
+  await expect(page.getByTestId('record-button')).toBeVisible()
+  await waitForOpenMicrophone(page)
+
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await expectProductPage(page)
+  await expect.poll(async () => (await microphone(page)).live).toBe(0)
+  const mic = await microphone(page)
+  expect(mic.nodes - mic.closed).toBe(0)
 })
 
 test('coming back to the page leaves the product page where it was', async ({ page }) => {

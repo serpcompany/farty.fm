@@ -25,7 +25,7 @@ test("a guest's first Result offers the account step, and Not now goes where the
   // Focus moves into the step, so a screen reader says it opened.
   await expect(step.getByRole('heading', { name: 'Keep your farts' })).toBeFocused()
   await expect(step).toContainText(
-    'Make a free account to keep your Recordings and Toots on any device.'
+    'Make a free account to keep your Recordings and Toots, even on a new phone.'
   )
   await expect(step.getByTestId('account-step-guest')).toHaveText(
     'Without an account, your farts are gone when you close Farty.'
