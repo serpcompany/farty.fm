@@ -11,8 +11,9 @@ import {
 import { skipWelcome } from './record'
 import { onPhone } from './screens'
 
-// The microphone stays open on the Record screen, so a tap captures at once and a take keeps the
-// 300 ms before it (#148, #149). The fake microphone is in `fake-microphone.ts`.
+// The microphone stays open from the first time Record shows to the end of the launch (#206), so a
+// tap captures at once and a take keeps the 300 ms before it (#148, #149). The fake microphone is
+// in `fake-microphone.ts`.
 
 /** The time from each Record click to the first capture batch after it, in ms. */
 function clickToFirstBatch(clicks: number[], batches: number[]): number[] {
@@ -148,6 +149,15 @@ test.describe('with microphone permission granted', () => {
     expect(left.calls).toBe(2)
     expect(left.nodes - left.closed).toBe(1)
     expect(left.sessions.at(-1)).toBe('play-and-record')
+    // Hidden and shown again on Toots, it opens again there.
+    await setVisibility('hidden')
+    expect((await microphone(page)).live).toBe(0)
+    await setVisibility('visible')
+    await waitForOpenMicrophone(page)
+    const back = await microphone(page)
+    expect(back.calls).toBe(3)
+    expect(back.live).toBe(1)
+    expect(back.sessions.at(-1)).toBe('play-and-record')
   })
 
   test('opened on another tab, Farty opens the microphone only once Record shows', async ({
@@ -207,6 +217,8 @@ test.describe('with microphone permission granted', () => {
     )
     await page.getByRole('button', { name: 'Try it', exact: true }).click()
     await expect(page).toHaveURL(/\/compose\/mary\/$/)
+    // The Toot is playing, so its sound has chosen its session.
+    await expect(page.getByTestId('song-creator-play')).toHaveAccessibleName('Stop')
     await stillOpen()
   })
 

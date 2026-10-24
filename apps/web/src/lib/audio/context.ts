@@ -1,6 +1,7 @@
 /**
- * One AudioContext for recording and playback. iPhone Safari allows only a few, and each must
- * start from a tap, so the app makes one on the first Record or Play tap and keeps it.
+ * One AudioContext for recording and playback. iPhone Safari allows only a few, so the app makes
+ * one and keeps it. Record may make it before a tap, to load the capture processor, but it starts
+ * only from a tap: Record, Play, or one that opens a screen which plays (`startAudioInTap`).
  */
 let shared: AudioContext | null = null
 
@@ -42,8 +43,10 @@ export function setPlaybackSession(): void {
 
 /**
  * Safari's Audio Session API (iOS 16.4+). "playback" makes Web Audio play with the ring/silent
- * switch on, which Safari otherwise mutes; "play-and-record" is needed while the mic is open.
- * Other browsers don't have it and need neither.
+ * switch on, which Safari otherwise mutes; "play-and-record" is needed while the mic is open. The
+ * mic stays open from the first time Record shows to the end of the launch (`keepMicrophoneOpen`),
+ * so from then on every sound plays in "play-and-record". Other browsers don't have it and need
+ * neither.
  */
 function setAudioSession(type: AudioSessionType): void {
   const session = (navigator as Navigator & { audioSession?: { type: AudioSessionType } })

@@ -372,7 +372,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       setCapture({ kind: 'recording', startedAt: Date.now() })
     } catch (error) {
       setCapture({ kind: 'idle' })
-      // The page was hidden, or the Record screen closed, before the microphone opened.
+      // The page was hidden, or widened into the product page, before the microphone opened.
       if (error instanceof MicrophoneReleasedError) return
       const denied = error instanceof MicrophoneDeniedError
       reportError(denied ? 'mic-denied' : 'mic-start-failed', error)

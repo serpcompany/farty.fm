@@ -50,17 +50,20 @@ let keeping = false
 /** A take that hasn't sent its first batch by now, with the microphone open, didn't start. */
 const firstBatchTimeoutMs = 3000
 
-const loadedContexts = new WeakSet<BaseAudioContext>()
+/** Each context's load of the capture processor, shared by Record's preload and the first tap. */
+const loads = new WeakMap<BaseAudioContext, Promise<void>>()
 
-async function loadCaptureProcessor(context: AudioContext): Promise<void> {
-  if (loadedContexts.has(context)) return
+function loadCaptureProcessor(context: AudioContext): Promise<void> {
+  const loaded = loads.get(context)
+  if (loaded) return loaded
   const url = URL.createObjectURL(new Blob([captureProcessorSource], { type: 'text/javascript' }))
-  try {
-    await context.audioWorklet.addModule(url)
-    loadedContexts.add(context)
-  } finally {
-    URL.revokeObjectURL(url)
-  }
+  const loading = context.audioWorklet.addModule(url).finally(() => URL.revokeObjectURL(url))
+  loads.set(context, loading)
+  // A load that failed is tried again by the next caller.
+  loading.catch(() => {
+    if (loads.get(context) === loading) loads.delete(context)
+  })
+  return loading
 }
 
 /**
