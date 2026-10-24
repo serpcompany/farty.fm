@@ -1384,5 +1384,2476 @@
    "tool": "tools/catalog/import_pdmx.py",
    "titles": "tools/catalog/titles-01.txt"
   }
+ },
+ {
+  "id": "hickory-dickory-dock",
+  "title": "Hickory Dickory Dock",
+  "file": "midi/pdmx-hickory-dickory-dock.mid",
+  "sha256": "188af21f58374ef1f7277d29f19599d2274d1651f14b8fb58537b7d46e1ae59f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/48/QmbvbZHCCQCfmnguGhRFAFDHt19N2eP1XhupKvfYpsvJCY.mid",
+   "musescore_score_id": "4608220",
+   "musescore_url": "https://musescore.com/score/4608220",
+   "score_title": "Hickory dickory dock",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "32"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "ring-around-the-rosie",
+  "title": "Ring Around the Rosie",
+  "file": "midi/pdmx-ring-around-the-rosie.mid",
+  "sha256": "89f5c3c480c6945499efcff6693574e77d19d55d7b4ca329b5231a1f5b531c21",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/14/45/QmWTUvCJquEAxvQJnzRxDV5MU2nAgvQkdzrYJpchyCekMj.mid",
+   "musescore_score_id": "4593884",
+   "musescore_url": "https://musescore.com/score/4593884",
+   "score_title": "Ring A Ring O' Roses",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "60"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "mulberry-bush",
+  "title": "Here We Go Round the Mulberry Bush",
+  "file": "midi/pdmx-mulberry-bush.mid",
+  "sha256": "aea0449aa2578336058b2bb0c11cfb1946254bf77ef715d510fe36913ea683f0",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/48/Qmav3Q4xvegC8SSVv4Mbq2VTKEHgcM3Yb9oAb8j14Uq8TD.mid",
+   "musescore_score_id": "4927896",
+   "musescore_url": "https://musescore.com/score/4927896",
+   "score_title": "The Mulberry Bush",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "22"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "farmer-in-the-dell",
+  "title": "The Farmer in the Dell",
+  "file": "midi/pdmx-farmer-in-the-dell.mid",
+  "sha256": "d3ecffc27b745a1fb8920dc636fa8a3da8607471d006728058b0b45d48e36e20",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/0/Qme1Ln86apHkYpEW9nQbHAo2KqrXL5qcFZd2SdmWi3dkW5.mid",
+   "musescore_score_id": "6404872",
+   "musescore_url": "https://musescore.com/score/6404872",
+   "score_title": "Exercise - Farmer in the Dell",
+   "composer": "Traditional",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.79",
+   "n_ratings": "7",
+   "n_views": "168"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "did-you-ever-see-a-lassie",
+  "title": "Did You Ever See a Lassie",
+  "file": "midi/pdmx-did-you-ever-see-a-lassie.mid",
+  "sha256": "7d9c90ec8cd5fa1bdf86469c9180af6f985cc637c4698faf53db5a98552036b2",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/2/QmX31ReHKBexSqneifkTzLtoPBBu2edw9VT4F1J9oHXUgu.mid",
+   "musescore_score_id": "4964516",
+   "musescore_url": "https://musescore.com/score/4964516",
+   "score_title": "Did You Ever See a Lassie?",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "88"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "teddy-bears-picnic",
+  "title": "The Teddy Bears' Picnic",
+  "file": "midi/pdmx-teddy-bears-picnic.mid",
+  "sha256": "a7eab3f4082f4a445de4b06e257f05d06752f09843fb58ef49e477c66c0c9a26",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/30/QmZLU73dyCxZjeqbohQzaBZiCFHTeNEMdTPFNpteHovrGN.mid",
+   "musescore_score_id": "4859461",
+   "musescore_url": "https://musescore.com/score/4859461",
+   "score_title": "the Teddy Bears' Picnic",
+   "composer": "John W. Bratton (c.1907)",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.74",
+   "n_ratings": "5",
+   "n_views": "147"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31.5
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "sur-le-pont",
+  "title": "Sur le Pont d'Avignon",
+  "file": "midi/pdmx-sur-le-pont.mid",
+  "sha256": "573df105b18e22b8a0add6c3d858e179be0ff3cdf578235e91935be5b5973d2b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/28/QmdkjCr2uUUhifbxjeFFQoEjJz8pbv18KmevPJtsud7xgM.mid",
+   "musescore_score_id": "4556762",
+   "musescore_url": "https://musescore.com/score/4556762",
+   "score_title": "Sur le pont d'Avignon",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "21"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "chopsticks",
+  "title": "Chopsticks",
+  "file": "midi/pdmx-chopsticks.mid",
+  "sha256": "594048351a031d05e086d79aa7cdee14bb0020fe4477a75af241e2210c425834",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/40/QmZrb5GStMrToFVj4gQAGcqX8ftWMfDFqnryNJJL5PX6Nz.mid",
+   "musescore_score_id": "5086598",
+   "musescore_url": "https://musescore.com/score/5086598",
+   "score_title": "Allen - Chopsticks for Flute and Piano",
+   "composer": "Euphemia Allen (18611949)",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "3.93",
+   "n_ratings": "11",
+   "n_views": "1710"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 90,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "coming-round-the-mountain",
+  "title": "She'll Be Coming 'Round the Mountain",
+  "file": "midi/pdmx-coming-round-the-mountain.mid",
+  "sha256": "9795abca0eeda145cc8323529a9ac626b67d55ddcdeb0bc6dab460d7b79e840d",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/2/Qmd3QqpPW8fnwbUyJP4WFdGmAYDmZzBRoxSsgvNhsrYre4.mid",
+   "musescore_score_id": "4659585",
+   "musescore_url": "https://musescore.com/score/4659585",
+   "score_title": "She'll be coming round the mountain",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "59"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 32,
+   "beats_per_bar": 2
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "buffalo-gals",
+  "title": "Buffalo Gals",
+  "file": "midi/pdmx-buffalo-gals.mid",
+  "sha256": "e5bf78688fd6c305f83de875a397acaf6a5cf85b76cb24bdfd1b174ab397be1b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/5/QmP6V2iBWbvoqW3YVhRxuvc5FB2gNU8GxCn5coaRVwdAsG.mid",
+   "musescore_score_id": "4690264",
+   "musescore_url": "https://musescore.com/score/4690264",
+   "score_title": "Buffalo Gals",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "6"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "old-smoky",
+  "title": "On Top of Old Smoky",
+  "file": "midi/pdmx-old-smoky.mid",
+  "sha256": "bf3fb3546e166f7b310ad1c6320e2ecb74fbbcfa16aa138be779bb529ccd584e",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/7/QmP8UVZbJY7y5m4ZesBfmXgbwr487izSeTBW3hP4aDKZsz.mid",
+   "musescore_score_id": "4552094",
+   "musescore_url": "https://musescore.com/score/4552094",
+   "score_title": "On top of old Smokey",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "68"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "streets-of-laredo",
+  "title": "The Streets of Laredo",
+  "file": "midi/pdmx-streets-of-laredo.mid",
+  "sha256": "3deb942e63075f147ea28c6cde24a57c088262855de728d880b2880f3fee29dc",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/56/QmYzechZFVzucVoN5VMHBftELZgWMAD2K3xKgUsV8fy8ey.mid",
+   "musescore_score_id": "4611874",
+   "musescore_url": "https://musescore.com/score/4611874",
+   "score_title": "Streets of Laredo",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.42",
+   "n_ratings": "4",
+   "n_views": "22"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "yellow-rose-of-texas",
+  "title": "The Yellow Rose of Texas",
+  "file": "midi/pdmx-yellow-rose-of-texas.mid",
+  "sha256": "16396d4986a98c3993a6081c63f45a69112f673ba60243c5e6b4594ed11262a2",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/1/QmQ289QvDYrB2ZA2rWQRcG8qJoHnMa2o1CrqTsUBu3xQb9.mid",
+   "musescore_score_id": "5063877",
+   "musescore_url": "https://musescore.com/score/5063877",
+   "score_title": "The Yellow Rose of Texas",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "38"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "beautiful-dreamer",
+  "title": "Beautiful Dreamer",
+  "file": "midi/pdmx-beautiful-dreamer.mid",
+  "sha256": "2165c7d13817b095f66cf4e065166508015590bdc907b30f008f243866635b75",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/7/QmP8yr6DL7opc1NskVHKQrUF8Qrht2jhHdDkRXwZm5nnch.mid",
+   "musescore_score_id": "4667288",
+   "musescore_url": "https://musescore.com/score/4667288",
+   "score_title": "Beautiful Dreamer",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "20"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 22
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "aura-lee",
+  "title": "Aura Lee",
+  "file": "midi/pdmx-aura-lee.mid",
+  "sha256": "1077556f6ac7b51577169b6f323be0e61e684a4a8d7447912d5a23e17df44d37",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/15/QmZdP6gM3ewirPXTjqh4YejoSex5SDUswYvSCjEoxcUnqv.mid",
+   "musescore_score_id": "92227",
+   "musescore_url": "https://musescore.com/score/92227",
+   "score_title": "Aura Lee",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "272"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "start_beat": 4,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "grandfathers-clock",
+  "title": "My Grandfather's Clock",
+  "file": "midi/pdmx-grandfathers-clock.mid",
+  "sha256": "118a4a90d73873b7a8a966c50b8691455b2271a7bfd636f91cd882c34ddcd1ce",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/24/QmPH3vUrPZt3G4iCMRRj3zhVqCxRTnBLQ81TTfp4wEwoXB.mid",
+   "musescore_score_id": "4928940",
+   "musescore_url": "https://musescore.com/score/4928940",
+   "score_title": "Grandfather's Clock",
+   "composer": "S-GHenry Clay Work",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "8"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "polly-wolly-doodle",
+  "title": "Polly Wolly Doodle",
+  "file": "midi/pdmx-polly-wolly-doodle.mid",
+  "sha256": "80f99d39932fe55435c27155f704bcb2a15683a66d1017e5ca5ab28707554baf",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/18/QmQEeWFok1TDfYAoHR2HRBJNnw8DNZpoRJ4kqSj2nNW5c8.mid",
+   "musescore_score_id": "4889112",
+   "musescore_url": "https://musescore.com/score/4889112",
+   "score_title": "Polly Wolly Doodle",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "33"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 2
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "oh-dear-what-can-the-matter-be",
+  "title": "Oh Dear, What Can the Matter Be",
+  "file": "midi/pdmx-oh-dear-what-can-the-matter-be.mid",
+  "sha256": "d29273d47185e140706b2e63c7caad66164d87f0a3ba9c6a42be517d54920b2f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/10/QmbA6uiEK49LQcqjmaqfEYPMEt6ximptpyJant3jGxGVk1.mid",
+   "musescore_score_id": "4663638",
+   "musescore_url": "https://musescore.com/score/4663638",
+   "score_title": "Oh Dear What Can the Matter Be",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "43"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "blow-the-man-down",
+  "title": "Blow the Man Down",
+  "file": "midi/pdmx-blow-the-man-down.mid",
+  "sha256": "c97be83e600b3ebe21d38c22db87c23ee82cbe4f51c2e9a218b926b901d6526b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/35/QmSo8vX12WgQMmPAZU6baKJxXzzHwoM8RfPvFmKr1sgoFU.mid",
+   "musescore_score_id": "5962395",
+   "musescore_url": "https://musescore.com/score/5962395",
+   "score_title": "Blow The Man Down",
+   "composer": "1860s English Sea Shanty",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.56",
+   "n_ratings": "4",
+   "n_views": "427"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "sloop-john-b",
+  "title": "Sloop John B",
+  "file": "midi/pdmx-sloop-john-b.mid",
+  "sha256": "163de23b9f1b04bb93a8247b5b3e632b3fc8b5b8b418b6081dbca1f79dcec1e1",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/25/QmXirxrhqYBjozNo1FJVZGL3Xfzw3X5GicQsKwckzhWx7C.mid",
+   "musescore_score_id": "4596515",
+   "musescore_url": "https://musescore.com/score/4596515",
+   "score_title": "Sloop John B",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.27",
+   "n_ratings": "8",
+   "n_views": "185"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "wayfaring-stranger",
+  "title": "Wayfaring Stranger",
+  "file": "midi/pdmx-wayfaring-stranger.mid",
+  "sha256": "84753d5e011a5e2506e4c787e244aff8272ca9bf724bf6ec83a17c286ecc351a",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/20/QmZFau8eVC8urSQozHRpk1KkyvXscc1aiYMVVAmS67wr16.mid",
+   "musescore_score_id": "5921326",
+   "musescore_url": "https://musescore.com/score/5921326",
+   "score_title": "Wayfaring Stranger",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.62",
+   "n_ratings": "5",
+   "n_views": "643"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "start_beat": 16,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "water-is-wide",
+  "title": "The Water Is Wide",
+  "file": "midi/pdmx-water-is-wide.mid",
+  "sha256": "47aba31325a342829dbdaf7224038c6d3502eb293a2d7948f8bd32f5ed2b0c55",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/28/QmTkFVAwvGuU1anvHSDDBPJyT3Gq9dFTGm9iAxjtS9K4yv.mid",
+   "musescore_score_id": "6156083",
+   "musescore_url": "https://musescore.com/score/6156083",
+   "score_title": "The Water is Wide",
+   "composer": "Traditional",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "72"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "nobody-knows",
+  "title": "Nobody Knows the Trouble I've Seen",
+  "file": "midi/pdmx-nobody-knows.mid",
+  "sha256": "63d5ecb1485b5fc7e56029cad4969d8c423203d6604deedc6d2e04a646d44943",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/19/QmYf3s1CpU6kiPbARnHAjBifqNiZWw1d2S42wk8UCfmcW1.mid",
+   "musescore_score_id": "5052301",
+   "musescore_url": "https://musescore.com/score/5052301",
+   "score_title": "Nobody knows the trouble I've seen",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.87",
+   "n_ratings": "5",
+   "n_views": "152"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "go-down-moses",
+  "title": "Go Down, Moses",
+  "file": "midi/pdmx-go-down-moses.mid",
+  "sha256": "08a47583fe1cfa646381074378630b56592b5bee176c90b94301601c2629ba4f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/32/QmQMYnNoWg9CMzN3BHJYkmiNCTmb37tYG8irhX7f33MMJq.mid",
+   "musescore_score_id": "6225258",
+   "musescore_url": "https://musescore.com/score/6225258",
+   "score_title": "Let My People Go - Accordéon",
+   "composer": "Negro Spiritual Traditionnel",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "391"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "down-by-the-riverside",
+  "title": "Down by the Riverside",
+  "file": "midi/pdmx-down-by-the-riverside.mid",
+  "sha256": "90c84f8bdf6dc46d7998e3ba96e103495f103a5cec321ea90efae9450e4056a7",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/51/QmPW1rJCPXC3tNyBWk5o7bqjNVQHUomcaXLty95dCeYh69.mid",
+   "musescore_score_id": "1303091",
+   "musescore_url": "https://musescore.com/score/1303091",
+   "score_title": "Down By The Riverside",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.66",
+   "n_ratings": "24",
+   "n_views": "1700"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "joshua",
+  "title": "Joshua Fit the Battle of Jericho",
+  "file": "midi/pdmx-joshua.mid",
+  "sha256": "38ed443bca6a34f97e350f5ecdf75c263eb662b6475abe768423e97b4fef41e4",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/8/QmT9qQRrmHTQttrqE79PNeQCEDU9yzTGnnEn2CCpbUt5aV.mid",
+   "musescore_score_id": "5064037",
+   "musescore_url": "https://musescore.com/score/5064037",
+   "score_title": "Joshua fit the battle of Jericho",
+   "composer": "Jay Roberts",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "3.99",
+   "n_ratings": "3",
+   "n_views": "643"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "loch-lomond",
+  "title": "Loch Lomond",
+  "file": "midi/pdmx-loch-lomond.mid",
+  "sha256": "206b621893f692941da01bb92f25629d3cbf3a9f39aca1189570aa236101e0d9",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/17/QmQeddaTKVBgXMyx3Ur8AFwtUzdBLx7ip56U93choeE1D8.mid",
+   "musescore_score_id": "5995327",
+   "musescore_url": "https://musescore.com/score/5995327",
+   "score_title": "The Bonnie Banks o' Loch Lomond",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.49",
+   "n_ratings": "3",
+   "n_views": "527"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "all-through-the-night",
+  "title": "All Through the Night",
+  "file": "midi/pdmx-all-through-the-night.mid",
+  "sha256": "6e32435ceb29cbfe649693a6708f81d27a82929abdc8fdf4f947151db92c2bd0",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/39/QmeQCC62a2AdvVGexDpPhvCD82VkiDoMFQSvNnaQTuCUw9.mid",
+   "musescore_score_id": "2547421",
+   "musescore_url": "https://musescore.com/score/2547421",
+   "score_title": "All through the night",
+   "composer": "English Words by AP Graves",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "153"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "my-bonnie",
+  "title": "My Bonnie Lies over the Ocean",
+  "file": "midi/pdmx-my-bonnie.mid",
+  "sha256": "3d18545f92a796c3240ea65fcb1b3d77f22015532ba4dd74a2dc0b01383b9064",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/5/6/Qmf71MKmjSfeQTj8dTB4mwpgU94TtWiwdbDg6eWHnvE11c.mid",
+   "musescore_score_id": "4920746",
+   "musescore_url": "https://musescore.com/score/4920746",
+   "score_title": "My Bonnie",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "208"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "skye-boat-song",
+  "title": "The Skye Boat Song",
+  "file": "midi/pdmx-skye-boat-song.mid",
+  "sha256": "20a217ff4ec444ed87a1b023089ce3144d27f9eb3c8ad9bbcabdf23b1fcb4091",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/53/QmeXDvFZtqr5spBSg9hWp8aHifPK12K2vCnTp4hPTaRR7S.mid",
+   "musescore_score_id": "2858336",
+   "musescore_url": "https://musescore.com/score/2858336",
+   "score_title": "The Skye Boat Song",
+   "composer": "Traditional Scottish",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "465"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "irish-washerwoman",
+  "title": "The Irish Washerwoman",
+  "file": "midi/pdmx-irish-washerwoman.mid",
+  "sha256": "ba9e035c6814499245834a91b585c3a84b3fb9b1e0ea35992523a025fd0e8390",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/6/11/QmNb8ywrzsAYpAKA223nehtDxyhjKbdLps182qJcXwfhb3.mid",
+   "musescore_score_id": "48182",
+   "musescore_url": "https://musescore.com/score/48182",
+   "score_title": "The Irish Washerwoman",
+   "composer": "Irish Traditional",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.66",
+   "n_ratings": "12",
+   "n_views": "3402"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "wild-rover",
+  "title": "The Wild Rover",
+  "file": "midi/pdmx-wild-rover.mid",
+  "sha256": "5b7dbf2cb5e60d37c854e2f6d95fc117fc863babd62799c2093772a095170e64",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/6/23/QmNhUVf61Xwr2gH7KbfCHU1pbGJkzoD57cQBeTCFhCBMhM.mid",
+   "musescore_score_id": "5919827",
+   "musescore_url": "https://musescore.com/score/5919827",
+   "score_title": "Wild Rover",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "91"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "waltzing-matilda",
+  "title": "Waltzing Matilda",
+  "file": "midi/pdmx-waltzing-matilda.mid",
+  "sha256": "72b0240037fcf94eecc851988f940e03d455d3b943ac43379a840780035fd834",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/21/QmcgB3DYZQbaR69BEWWBMmhjHsjv8sYP5XwRbfCDWAaYS8.mid",
+   "musescore_score_id": "5901706",
+   "musescore_url": "https://musescore.com/score/5901706",
+   "score_title": "Waltzing Matilda",
+   "composer": "Banjo Paterson",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.6",
+   "n_ratings": "27",
+   "n_views": "2070"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 114,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "santa-lucia",
+  "title": "Santa Lucia",
+  "file": "midi/pdmx-santa-lucia.mid",
+  "sha256": "4abe1b07e553438c240fdff5671fc9d8c06c7588ec632bff190507fb72f36306",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/27/QmUJdZY5Wz3KKwUGyFA4a2p7urYGAbS5Fzdevr39P9QCPb.mid",
+   "musescore_score_id": "4662643",
+   "musescore_url": "https://musescore.com/score/4662643",
+   "score_title": "Santa Lucia",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "65"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "funiculi",
+  "title": "Funiculì, Funiculà",
+  "file": "midi/pdmx-funiculi.mid",
+  "sha256": "783873d36ce1faf2587996d50e638d344f875dfadd1823fe7bb0ba070960226c",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/29/QmaKH3EfZvEg5rXGteHsLdKQkT7Nsv43zkcMNotRbkrhDK.mid",
+   "musescore_score_id": "4652128",
+   "musescore_url": "https://musescore.com/score/4652128",
+   "score_title": "Fúnicúlí Fúnicúla",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "49"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "hava-nagila",
+  "title": "Hava Nagila",
+  "file": "midi/pdmx-hava-nagila.mid",
+  "sha256": "42a0e14696921d2885f4ba3655f07847920a2e5bd2b3442004373b24777b10cf",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/5/2/Qmf3HW4FuboW2seYSYhVibf4TVLx3ZRvRNvGYujcFe8jCg.mid",
+   "musescore_score_id": "4700014",
+   "musescore_url": "https://musescore.com/score/4700014",
+   "score_title": "Hava Nagila",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.83",
+   "n_ratings": "3",
+   "n_views": "41"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "korobeiniki",
+  "title": "Korobeiniki",
+  "file": "midi/pdmx-korobeiniki.mid",
+  "sha256": "89e63db277e70e4f19f0ea9d94207e0859edffce7aceab2d7c0288b659169455",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/28/QmPkw4BV4NU157nux2iiUpk4hFZ1ziWNPqM4ZcfHDTUHMH.mid",
+   "musescore_score_id": "3104746",
+   "musescore_url": "https://musescore.com/score/3104746",
+   "score_title": "Korobushka",
+   "composer": "Russisches Volkslied",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "790"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "kalinka",
+  "title": "Kalinka",
+  "file": "midi/pdmx-kalinka.mid",
+  "sha256": "5c49467ae1c980b7cbda4aa4d2a7e49e5d543c783dba8ea8f9f276a0d56f6eee",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/48/QmXvJAqPSFc2QR8KTyijNqZqxdWr4rxTaTd2Z48MFmuf2e.mid",
+   "musescore_score_id": "4867218",
+   "musescore_url": "https://musescore.com/score/4867218",
+   "score_title": "Kalinka",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "25"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 2
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "arirang",
+  "title": "Arirang",
+  "file": "midi/pdmx-arirang.mid",
+  "sha256": "ed45793df8cdf6c5f75673d1eaaf136d1237730bfccf5e701fbf5d597fb60afb",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/57/QmQZuf7A6ut75uMW7khTL2C3sLPcTXnYzyyxxUkJh7yCMV.mid",
+   "musescore_score_id": "4851099",
+   "musescore_url": "https://musescore.com/score/4851099",
+   "score_title": "Arirang",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "12"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "daisy-bell",
+  "title": "Daisy Bell",
+  "file": "midi/pdmx-daisy-bell.mid",
+  "sha256": "6c46dd805d8b410ed8237ee9b1dff7d93196f0e39e1886b85c4a066b53807f20",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/41/QmTREwiSX3Qcpd2i9g3uXwnewTQQc8EnxayRAUfnTrFAEH.mid",
+   "musescore_score_id": "4867204",
+   "musescore_url": "https://musescore.com/score/4867204",
+   "score_title": "Harry Dacre - Daisy Bell",
+   "composer": "Harry Dacre 1892",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "65"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "let-me-call-you-sweetheart",
+  "title": "Let Me Call You Sweetheart",
+  "file": "midi/pdmx-let-me-call-you-sweetheart.mid",
+  "sha256": "6064ae4be87c1048df56452deda9c3ed4788f0d80d0231b15b34caea2df9ff11",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/1/QmU2YK9jGwoP8uL16m6QHCPP5BDnnYcnXGAzrbDJH71NXv.mid",
+   "musescore_score_id": "4668126",
+   "musescore_url": "https://musescore.com/score/4668126",
+   "score_title": "Let Me Call You Sweetheart",
+   "composer": "music: Leo Friedman [1910]",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "108"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "silvery-moon",
+  "title": "By the Light of the Silvery Moon",
+  "file": "midi/pdmx-silvery-moon.mid",
+  "sha256": "d1b982af0aa36461e06e86ab655d6b94beb34ff454c5b2cd117fe5ef0b148ede",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/23/QmUhM2LnR1LQRXqEFy1AqdAM34XsEeL691mhwJVPVTPB2Y.mid",
+   "musescore_score_id": "1300741",
+   "musescore_url": "https://musescore.com/score/1300741",
+   "score_title": "By the Light of the Silvery Moon",
+   "composer": "Gus Edwards & Edward Madden 1909",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.78",
+   "n_ratings": "11",
+   "n_views": "536"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "my-wild-irish-rose",
+  "title": "My Wild Irish Rose",
+  "file": "midi/pdmx-my-wild-irish-rose.mid",
+  "sha256": "9831211f30e55fa51a86fab87c9d049fef239a266a5e80791963f5333bb4ddc8",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/5/QmS6vg4Y8gv3HAVKzWCkVXdGvp2PusbFnWv29XDGRSEsbq.mid",
+   "musescore_score_id": "1350501",
+   "musescore_url": "https://musescore.com/score/1350501",
+   "score_title": "My Wild irish Rose",
+   "composer": "Chauncey Olcott",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.7",
+   "n_ratings": "7",
+   "n_views": "1199"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "tipperary",
+  "title": "It's a Long Way to Tipperary",
+  "file": "midi/pdmx-tipperary.mid",
+  "sha256": "452e4aa590e3782e18ec09ba312779d5f950bf73b000f78d29eb5f9b261e5650",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/14/39/QmWQ6YzuoGZt3BS1mPJFW2kqxpu5o5eq4vxDNLUekDFDAW.mid",
+   "musescore_score_id": "5102811",
+   "musescore_url": "https://musescore.com/score/5102811",
+   "score_title": "It's a Long Way to Tipperary",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.44",
+   "n_ratings": "6",
+   "n_views": "178"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "pack-up-your-troubles",
+  "title": "Pack Up Your Troubles in Your Old Kit-Bag",
+  "file": "midi/pdmx-pack-up-your-troubles.mid",
+  "sha256": "17733f75cacabd317e32e0b38b7b924129af74b655174026db064fd2f704387e",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/43/QmYSyPQW1qaARKHexUxdWXx7MNcQjd4ZmQ99C4DxhMq5xT.mid",
+   "musescore_score_id": "784796",
+   "musescore_url": "https://musescore.com/score/784796",
+   "score_title": "Pack Up Your Troubles in Your Old Kit Bag",
+   "composer": "Felix Powel",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.59",
+   "n_ratings": "7",
+   "n_views": "3275"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "start_beat": 24,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "grand-old-flag",
+  "title": "You're a Grand Old Flag",
+  "file": "midi/pdmx-grand-old-flag.mid",
+  "sha256": "faa016ca689f00c710b180d371771ffe0c95e8e5aeef3b1876d59f0bc4c797dd",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/24/QmQHYCZzYqKro6Au5tzuCqKk1CpWGBeEE19mHjCuHmLkC1.mid",
+   "musescore_score_id": "5829394",
+   "musescore_url": "https://musescore.com/score/5829394",
+   "score_title": "You're a Grand Old Flag",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.66",
+   "n_ratings": "3",
+   "n_views": "116"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "hark-the-herald",
+  "title": "Hark! The Herald Angels Sing",
+  "file": "midi/pdmx-hark-the-herald.mid",
+  "sha256": "e9f1d404b996ce98544c0cff64a173a8a589c4483f5d55510de7ccbfff090fe8",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/29/QmVKgHe8kJ5Y8iWmPL1Xxo26HxsXHGe9DRKMJGGb8CuyzU.mid",
+   "musescore_score_id": "1477481",
+   "musescore_url": "https://musescore.com/score/1477481",
+   "score_title": "Hark! The Herald Angels Sing",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.69",
+   "n_ratings": "20",
+   "n_views": "1839"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "god-rest-ye",
+  "title": "God Rest You Merry, Gentlemen",
+  "file": "midi/pdmx-god-rest-ye.mid",
+  "sha256": "1fc61a0674da66aa655312d767090024127743cb49022915205082491f882019",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/33/QmZnVBCF4mHXD2zrSqFbZSFyqjMGovzkKBKAgE53uCo6Jz.mid",
+   "musescore_score_id": "5893953",
+   "musescore_url": "https://musescore.com/score/5893953",
+   "score_title": "God Rest Ye Merry Gentlemen",
+   "composer": "Traditional",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.61",
+   "n_ratings": "10",
+   "n_views": "471"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "good-king-wenceslas",
+  "title": "Good King Wenceslas",
+  "file": "midi/pdmx-good-king-wenceslas.mid",
+  "sha256": "91aa0381cc578b1cadf694ef2a29ca7f4021692b05c9077a65cc8f34f4efb828",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/14/QmVCx24jj3wNcNbjPDXLHiPRmW7Geuo91UZyskYZAJKp8D.mid",
+   "musescore_score_id": "46163",
+   "musescore_url": "https://musescore.com/score/46163",
+   "score_title": "Good King Wenceslas",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "346"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "angels-we-have-heard",
+  "title": "Angels We Have Heard on High",
+  "file": "midi/pdmx-angels-we-have-heard.mid",
+  "sha256": "b0f6c6535f685331eed40f869272b8d3ccb45face12a12b515be02400554fd7b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/39/QmQQWnGgjHvN3nLtetYXqfANUZVuiUWn8KF7oQ8bq3Nu6y.mid",
+   "musescore_score_id": "2627566",
+   "musescore_url": "https://musescore.com/score/2627566",
+   "score_title": "Angels We Have Heard on High",
+   "composer": "French Carol",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "490"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "o-come-emmanuel",
+  "title": "O Come, O Come, Emmanuel",
+  "file": "midi/pdmx-o-come-emmanuel.mid",
+  "sha256": "54767fd811ff1c56b5a1dd2d57089d251e60a69f39d884716cf62997adcef51c",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/5/16/QmfDANkjcLqoF33EZMymQ6NX81Td13JQAyvHCHje3TCiTe.mid",
+   "musescore_score_id": "5848624",
+   "musescore_url": "https://musescore.com/score/5848624",
+   "score_title": "O come O come Emmanuel",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "53"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "up-on-the-housetop",
+  "title": "Up on the Housetop",
+  "file": "midi/pdmx-up-on-the-housetop.mid",
+  "sha256": "76f0d682ebb43851c88d24c1b89c039b3de4fd1b2e373c7ab896ed05d9ee46b2",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/12/QmcBCmS8Vae4REM7xyw7vJENvEEyrokt6ag7yd715nVpoV.mid",
+   "musescore_score_id": "5518526",
+   "musescore_url": "https://musescore.com/score/5518526",
+   "score_title": "Up_On_The_Housetop",
+   "composer": "Benjamin Hanby",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.63",
+   "n_ratings": "8",
+   "n_views": "652"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "coventry-carol",
+  "title": "Coventry Carol",
+  "file": "midi/pdmx-coventry-carol.mid",
+  "sha256": "52ef9bc9fa322078ccf9d67ab4c3dbc55781436f0d2355465db9a82fe6fe9830",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/42/QmbsVRZYvySYNZSMWbGqxtpVngw5Av4D6smhHSAD2bpvdU.mid",
+   "musescore_score_id": "4693165",
+   "musescore_url": "https://musescore.com/score/4693165",
+   "score_title": "the Coventry Carol",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "60"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "o-holy-night",
+  "title": "O Holy Night",
+  "file": "midi/pdmx-o-holy-night.mid",
+  "sha256": "cd491834b45066ccbb9f0cee62102bc2cb8f6fe0d97b44b157bf5aba2b4bc33f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/6/Qmb7r4RkDUeCL7ypdUJUMWPYQCBsh8WpDr67ZUWN4gCB6f.mid",
+   "musescore_score_id": "5342138",
+   "musescore_url": "https://musescore.com/score/5342138",
+   "score_title": "O Holy Night",
+   "composer": "Adolphe Adam",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.67",
+   "n_ratings": "54",
+   "n_views": "4425"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 105,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "twelve-days",
+  "title": "The Twelve Days of Christmas",
+  "file": "midi/pdmx-twelve-days.mid",
+  "sha256": "884b2cbb8205fa3a2df82e8fb38d81f835c1e4e1bf9bedf7fbdb6e41238c99be",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/12/QmbBRXDnfeoyvhLFSjwxzWPkbV9dgNUwRqxQxCcTS4HGeY.mid",
+   "musescore_score_id": "5851745",
+   "musescore_url": "https://musescore.com/score/5851745",
+   "score_title": "The Twelve Days of Christmas",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.53",
+   "n_ratings": "12",
+   "n_views": "516"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "i-saw-three-ships",
+  "title": "I Saw Three Ships",
+  "file": "midi/pdmx-i-saw-three-ships.mid",
+  "sha256": "ba2294573a9ddb62f1fe3b867a85de48bcd36385eec866dcac445a6ae34fffe5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/14/2/QmW3rxETrdJXveLnC1oLrigFnrK1EhEf1KPeC7zyT36iwd.mid",
+   "musescore_score_id": "4566180",
+   "musescore_url": "https://musescore.com/score/4566180",
+   "score_title": "I Saw Three Ships",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "26"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "ding-dong-merrily",
+  "title": "Ding Dong Merrily on High",
+  "file": "midi/pdmx-ding-dong-merrily.mid",
+  "sha256": "69b1666e81f9770ca28c90a9d10cd906eaa26df1a466baacc85cbb66c44e4c0d",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/48/QmQvRvqVvZRSnWTBHavgvwZBkM56B9owxhHyBVmNb5rmL5.mid",
+   "musescore_score_id": "5851850",
+   "musescore_url": "https://musescore.com/score/5851850",
+   "score_title": "Ding dong merrily on high",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "47"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "good-christian-men",
+  "title": "Good Christian Men, Rejoice",
+  "file": "midi/pdmx-good-christian-men.mid",
+  "sha256": "3a07fb674dceecee4af18532aad48bd56e4b57aae36e841f5d5a62bfaf3d0086",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/6/38/QmNqQHrkVv1R3nkWeoTrbm4mZ2FCuxcfSwZxBujzquQgAY.mid",
+   "musescore_score_id": "80977",
+   "musescore_url": "https://musescore.com/score/80977",
+   "score_title": "Good Christian Men Rejoice",
+   "composer": "Fourteenth century melody (in dulci jubilo); harmonized by Charles Winfred Douglas (18671944) 1918",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.45",
+   "n_ratings": "8",
+   "n_views": "1176"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 31,
+   "beats_per_bar": 6
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "what-a-friend",
+  "title": "What a Friend We Have in Jesus",
+  "file": "midi/pdmx-what-a-friend.mid",
+  "sha256": "48636bb87f581298dd8ec0d9b0fab701e39fa50c0f24ef7813b67cd4ec0de6fa",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/42/QmXsL1uTgwAdM5yCKnQidY933ykQ3Vaw9jmQgf2Px4xsbF.mid",
+   "musescore_score_id": "4592394",
+   "musescore_url": "https://musescore.com/score/4592394",
+   "score_title": "What a Friend We Have in Jesus",
+   "composer": "Words Charles C. Converse 1868 Lyrics Joseph M. Scriven 1855",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.81",
+   "n_ratings": "8",
+   "n_views": "112"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "jesus-loves-me",
+  "title": "Jesus Loves Me",
+  "file": "midi/pdmx-jesus-loves-me.mid",
+  "sha256": "942ac64163ee4a9c4113b816fbb6d3882f3f35a033b242adf02c1aa3a30028b5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/19/Qmcf9T4BXSEw1rmbV8p93euuGJVuXBhCgnyYS1SdKf4iLo.mid",
+   "musescore_score_id": "126188",
+   "musescore_url": "https://musescore.com/score/126188",
+   "score_title": "Jesus Loves Me",
+   "composer": "William B Bradbury",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.89",
+   "n_ratings": "7",
+   "n_views": "2115"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "start_beat": 8,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "doxology",
+  "title": "Old Hundredth",
+  "file": "midi/pdmx-doxology.mid",
+  "sha256": "ab0b81f084e7d3dd3f745cd2ddd685680e9fc2e70b5f55eda56ab9bda2e9ee07",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/41/QmVRwYocdE69RdFSncEzbwQkVdgfL9wZ87xF2FRQmPrJ8n.mid",
+   "musescore_score_id": "2884091",
+   "musescore_url": "https://musescore.com/score/2884091",
+   "score_title": "Old Hundredth (Bass Clef)",
+   "composer": "OLD HUNDREDTH L.M. Thomas Ken1551",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "195"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "eine-kleine",
+  "title": "Eine kleine Nachtmusik",
+  "file": "midi/pdmx-eine-kleine.mid",
+  "sha256": "3f2c9258c1036a36863e4b6c5adf909411eb2ead0d5534c1189e76eacada0c51",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/50/QmRwu8AxPxRz95pNGgNb4stEV25XsVqMj39UWJJh7JBCd6.mid",
+   "musescore_score_id": "1080491",
+   "musescore_url": "https://musescore.com/score/1080491",
+   "score_title": "Eine Kleine Nachtmusik",
+   "composer": "W.A.Mozart",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1724"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "william-tell",
+  "title": "William Tell Overture",
+  "file": "midi/pdmx-william-tell.mid",
+  "sha256": "5702b314063c9d719a1eb460fb0bf9e89fd2cd4694a0701f14230a5e0ab9b7c5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/57/QmUZBcEtm3x2AtEq5H6ThvGTtBZKbqMJwntNG2shxPU13N.mid",
+   "musescore_score_id": "4896949",
+   "musescore_url": "https://musescore.com/score/4896949",
+   "score_title": "William Tell Overture",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "37"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "la-donna",
+  "title": "La donna è mobile",
+  "file": "midi/pdmx-la-donna.mid",
+  "sha256": "a3a6f0e8cb4739b9bb6e543538f09d9297923bcc45f8a388ec5497f2820f678d",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/42/QmPsh9ENEUzLoHWLcT9BnSgwxRhw88vemMEPXMLsVGJU7g.mid",
+   "musescore_score_id": "5855728",
+   "musescore_url": "https://musescore.com/score/5855728",
+   "score_title": "La donna e mobile",
+   "composer": "Giuseppe Verdi",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.66",
+   "n_ratings": "9",
+   "n_views": "566"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "start_beat": 30,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "new-world-largo",
+  "title": "Largo from the New World Symphony",
+  "file": "midi/pdmx-new-world-largo.mid",
+  "sha256": "0f0bbd931a5687a55c60c8caa2d3eb141b174e3e860a8701f1d59fdeaa30ce44",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/5/0/Qmf1CTFYRVnD7vg64ufvJHJJquqVHc1GT8sZfjosm899qK.mid",
+   "musescore_score_id": "3274521",
+   "musescore_url": "https://musescore.com/score/3274521",
+   "score_title": "Largo from New World Symphony Tuba Flute Duet",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.63",
+   "n_ratings": "8",
+   "n_views": "1177"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "swan-lake",
+  "title": "Swan Lake",
+  "file": "midi/pdmx-swan-lake.mid",
+  "sha256": "d4694c0b1749f9c26073095559e0b2c4495b16d0e5da67e177980dbe28dcc11a",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/50/QmXw1JouGSKb7wd1ypVYQJJn15VXr3gUVHuYQ5qcZt7ne7.mid",
+   "musescore_score_id": "287116",
+   "musescore_url": "https://musescore.com/score/287116",
+   "score_title": "Swan Lake",
+   "composer": "P.I. Tchaikovsky",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.83",
+   "n_ratings": "9",
+   "n_views": "16142"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "sugar-plum",
+  "title": "Dance of the Sugar Plum Fairy",
+  "file": "midi/pdmx-sugar-plum.mid",
+  "sha256": "3d299ab90082d8845114b5d02a07471484c5fbc862998c8a0014935fd31a9d7a",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/0/QmR1biErH78iDHNaoDutEf7YdX6KGjEpWpigENkGKeu8RW.mid",
+   "musescore_score_id": "5834577",
+   "musescore_url": "https://musescore.com/score/5834577",
+   "score_title": "Dance of the Sugar Plum Fairy Duet",
+   "composer": "Peter Ilyich Tchaikovsky",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.78",
+   "n_ratings": "15",
+   "n_views": "1145"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 110,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "blue-danube",
+  "title": "The Blue Danube",
+  "file": "midi/pdmx-blue-danube.mid",
+  "sha256": "02f26ecfb84482eeb99fb71ce79affae0b20169f984aeb525c6a29918482e484",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/43/QmSSnNYxcd2QLY1v3jkHLaxhUEFXCiwsF7YRZyEUtRkW4P.mid",
+   "musescore_score_id": "4982538",
+   "musescore_url": "https://musescore.com/score/4982538",
+   "score_title": "Blue Danube",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "16"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "radetzky",
+  "title": "Radetzky March",
+  "file": "midi/pdmx-radetzky.mid",
+  "sha256": "1091f95884aff91fb3ee7426458ca0315489a2fd6cf82df665660f6ef0f56dce",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/18/QmSEzLTi6rAPZK6h2VY374RtwUjEzoK83uN4URxupKxMh7.mid",
+   "musescore_score_id": "5924516",
+   "musescore_url": "https://musescore.com/score/5924516",
+   "score_title": "radetzky march",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.49",
+   "n_ratings": "3",
+   "n_views": "255"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "trumpet-voluntary",
+  "title": "Trumpet Voluntary",
+  "file": "midi/pdmx-trumpet-voluntary.mid",
+  "sha256": "66080fd38174b3a38e95478e57f406f85dda826e655df75f6db5c7a3073614f5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/4/Qmd51pq7EC67MiSUmwmvh1FzpN2wmHNZekGNjMx9aQ1LYb.mid",
+   "musescore_score_id": "5977928",
+   "musescore_url": "https://musescore.com/score/5977928",
+   "score_title": "Trumpet Voluntary",
+   "composer": "Jeremiah Clarke",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "74"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 108,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "stars-and-stripes",
+  "title": "The Stars and Stripes Forever",
+  "file": "midi/pdmx-stars-and-stripes.mid",
+  "sha256": "e09fffc288b2e1b1974a4d041d6d9da0906a8b0a43cd82af61065a23c585d926",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/35/QmXokqqs7kEv5NHHm1qPziALtawqTE1KJk8UJTNR1FFBTW.mid",
+   "musescore_score_id": "5041874",
+   "musescore_url": "https://musescore.com/score/5041874",
+   "score_title": "Stars and Stripes Forever (2nd section)",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "8"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 26,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "washington-post",
+  "title": "The Washington Post",
+  "file": "midi/pdmx-washington-post.mid",
+  "sha256": "a50c897bea99517995e4156ad133b4a1220287d1ae31b11a9241863d37716771",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/15/Qmad5NwjVKDYA4aP3t4kPMaWVwELkbGtjtjM4ixDNTYJ5x.mid",
+   "musescore_score_id": "5105169",
+   "musescore_url": "https://musescore.com/score/5105169",
+   "score_title": "Washington Post March AMR 2018",
+   "composer": "J.P.Sousa",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "225"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "liberty-bell",
+  "title": "The Liberty Bell",
+  "file": "midi/pdmx-liberty-bell.mid",
+  "sha256": "a3de9534e98538d218df3a6a1178296479aeb441fb6e594ac2adb311c4cf6cdf",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/28/Qmek1JZCKGVY5GYwwDhYm4GDyNBvitak43m5emHtRZuSAE.mid",
+   "musescore_score_id": "4957781",
+   "musescore_url": "https://musescore.com/score/4957781",
+   "score_title": "The Liberty Bell March",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "marines-hymn",
+  "title": "The Marines' Hymn",
+  "file": "midi/pdmx-marines-hymn.mid",
+  "sha256": "1dd5cbe3886ce602e191ca9dc73759088468dbf3d42e84277add5efab97f8928",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/52/QmUx6ApPZMks6MkzV4ddpTbjEfGabgYqCWoHMDESHLxfHJ.mid",
+   "musescore_score_id": "4713385",
+   "musescore_url": "https://musescore.com/score/4713385",
+   "score_title": "Marines' Hymn",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "23"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 30,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "my-country-tis",
+  "title": "My Country, 'Tis of Thee",
+  "file": "midi/pdmx-my-country-tis.mid",
+  "sha256": "cb338d2155854903e1043cf9903e904b4bc21f600c8910435325159b121747f3",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/18/QmZEqUaFGWYmpLUwee8qxfBETTD9mHAT2XTDceXPHdfZ76.mid",
+   "musescore_score_id": "6253932",
+   "musescore_url": "https://musescore.com/score/6253932",
+   "score_title": "God Save the Queen",
+   "composer": "Unknown",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "81"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "star-spangled-banner",
+  "title": "The Star-Spangled Banner",
+  "file": "midi/pdmx-star-spangled-banner.mid",
+  "sha256": "9ac53fc33ab18491a8afb8381e25ff376f3a333ce691fc2c23f790eb7eb22db4",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/34/QmVNJZHWfGUVvrtuYBNfWZ8Mxnn4bdpEqopPZmbfbpq6jP.mid",
+   "musescore_score_id": "20295",
+   "musescore_url": "https://musescore.com/score/20295",
+   "score_title": "The Star-Spangled Banner",
+   "composer": "John Stafford Smith (1750-1836)",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.83",
+   "n_ratings": "3",
+   "n_views": "1925"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "battle-hymn",
+  "title": "Battle Hymn of the Republic",
+  "file": "midi/pdmx-battle-hymn.mid",
+  "sha256": "c82076a7c3af0ae160db74572c31dc35d51809f88817fc187515063f83134aa7",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/47/QmZUGtYq8PcjcFEsp8VL8pqRAoDRbVwMLq2gQhY7TYRB7i.mid",
+   "musescore_score_id": "5372482",
+   "musescore_url": "https://musescore.com/score/5372482",
+   "score_title": "Battle Hymn of the Republic",
+   "composer": "William Steffe",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.85",
+   "n_ratings": "4",
+   "n_views": "156"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 80,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "johnny-comes-marching",
+  "title": "When Johnny Comes Marching Home",
+  "file": "midi/pdmx-johnny-comes-marching.mid",
+  "sha256": "d233847028170eee286cf59bc8495e5b8a89fedb261feba0b232e4c39e72ff2d",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/10/QmVAyPt6gRtaVdr4pEjBj2EZjLk7gwayxz52NoJuen1vKh.mid",
+   "musescore_score_id": "3959221",
+   "musescore_url": "https://musescore.com/score/3959221",
+   "score_title": "When Johnny Comes Marching Home",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "213"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "taps",
+  "title": "Taps",
+  "file": "midi/pdmx-taps.mid",
+  "sha256": "b1f1b70280662cb5c6105666282584c969cbcbbc3ad7f76da9f87cad87631b82",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/51/QmdWqXsmki2dM21kf3KNPFou2XyAmbhqghtu752n337uqJ.mid",
+   "musescore_score_id": "1580506",
+   "musescore_url": "https://musescore.com/score/1580506",
+   "score_title": "Taps",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.7",
+   "n_ratings": "50",
+   "n_views": "30639"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "rule-britannia",
+  "title": "Rule, Britannia!",
+  "file": "midi/pdmx-rule-britannia.mid",
+  "sha256": "4346b44007ffc93eb8822fab35c83ea9489f931755fe7719f3418a410509615c",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/44/Qmbt5tXfpRxEN1vPiEsmTXkjFLmABYVC5njcQJG8x5EJWF.mid",
+   "musescore_score_id": "217561",
+   "musescore_url": "https://musescore.com/score/217561",
+   "score_title": "Rule Britannia",
+   "composer": "Thomas Arne",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1103"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "scotland-the-brave",
+  "title": "Scotland the Brave",
+  "file": "midi/pdmx-scotland-the-brave.mid",
+  "sha256": "7db5ee5cd9349843ed6527ed800a75646b31d9a2a8474335114eb18346c0b127",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/3/Qmd4C5DbrnxEMwARBBnPwZGEuVcVQQ998CbVtgp8tK7vCQ.mid",
+   "musescore_score_id": "4687284",
+   "musescore_url": "https://musescore.com/score/4687284",
+   "score_title": "Scotland the Brave",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "28"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-02.txt"
+  }
  }
 ]
