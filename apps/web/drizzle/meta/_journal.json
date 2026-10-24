@@ -15,6 +15,13 @@
       "when": 1792570181091,
       "tag": "0001_rate_limit_last_request_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792864121294,
+      "tag": "0002_toot_payments",
+      "breakpoints": true
     }
   ]
 }

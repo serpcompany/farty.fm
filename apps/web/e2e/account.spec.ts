@@ -1,7 +1,15 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { type BrowserContext, expect, type Locator, type Page, test } from '@playwright/test'
+import {
+  type APIRequestContext,
+  type BrowserContext,
+  expect,
+  type Locator,
+  type Page,
+  test
+} from '@playwright/test'
 import { codeFor, newEmail, ownClient, session, signInByApi } from './account'
+import { payAtTheDevCheckout } from './pay'
 import { recordAndSave, skipWelcome, withFakeMicrophone } from './record'
 import { onPhone } from './screens'
 
@@ -50,46 +58,111 @@ test("a guest's first Result offers the account step, and Not now goes where the
   expect(await page.evaluate(() => localStorage.getItem('pedos.accountStep'))).toBe('once')
 })
 
-test('the step comes back once after the first saved Toot, then only from Profile', async ({
-  page,
-  request
-}) => {
-  test.setTimeout(180_000)
-  test.skip(
-    !(await request.get('/fixtures/recordings/index.json')).ok(),
-    'Toots need the Fixture Library, which only the Staging build has (pnpm build:staging)'
-  )
-  // As after Not now on the first Result.
-  await page.addInitScript(() => {
-    localStorage.setItem('pedos.welcomed', '1')
-    if (localStorage.getItem('pedos.accountStep') === null) {
-      localStorage.setItem('pedos.accountStep', 'once')
-    }
-  })
-  await page.goto('/profile/')
-  const library = page.getByTestId('fixture-library')
-  await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
-  await expect(library.getByRole('button', { name: 'Fixture Library loaded' })).toBeDisabled({
-    timeout: 90_000
-  })
+// Saving a Toot needs an account and $0.99 for it (ADR 0010). A local run has no Stripe key, so
+// Save goes to the dev checkout (`/dev/checkout/`), which stands in for Stripe Checkout.
 
+test("a guest's Toot plays free, and Save asks for an account first", async ({ page, request }) => {
+  test.setTimeout(180_000)
+  await needsTheFixtureLibrary(request)
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await loadTheFixtureLibrary(page)
+  await openASong(page, 'mary')
+
+  const save = page.getByRole('button', { name: 'Save to Toots' })
+  await expect(save).toHaveText('Save to Toots · $0.99')
+  await expectTappable(save)
+  await save.click()
   const step = page.getByRole('dialog', { name: 'Keep your farts' })
-  await saveAToot(page, 'mary')
   await expect(step).toBeVisible()
   await step.getByRole('button', { name: 'Not now' }).click()
   await expect(step).toBeHidden()
-  // The Toot was saved, and Song Creator is still there.
+
+  // Not now keeps nothing: the Toot is still only a preview, and Save asks again.
   await expect(page).toHaveURL(/\/compose\/mary\/$/)
-  await expect(page.getByRole('button', { name: 'Saved to Toots' })).toBeDisabled()
+  await expect(save).toBeEnabled()
+  expect(await recordingsStored(page, 'toots')).toBe(0)
+  await save.click()
+  await expect(step).toBeVisible()
+  await step.getByRole('button', { name: 'Not now' }).click()
+  await tab(page, 'Toots').click()
+  await expect(page.getByText('Nothing yet')).toBeVisible()
 
-  await saveAToot(page, 'twinkle')
-  await expect(page.getByRole('button', { name: 'Saved to Toots' })).toBeDisabled()
-  await expect(step).toHaveCount(0)
-
-  // Profile's Save to an account opens it any time.
+  // Profile's Save to an account opens the step any time.
   await tab(page, 'Profile').click()
   await page.getByRole('button', { name: 'Save to an account' }).click()
   await expect(step).toBeVisible()
+})
+
+test('a guest who signs in at Save pays $0.99, and the Toot is saved to the account', async ({
+  page,
+  request
+}, testInfo) => {
+  test.setTimeout(180_000)
+  await needsTheFixtureLibrary(request)
+  const email = newEmail(testInfo, 'pay')
+  await ownClient(page.context())
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await loadTheFixtureLibrary(page)
+  await openASong(page, 'mary')
+
+  await page.getByRole('button', { name: 'Save to Toots · $0.99' }).click()
+  const step = page.getByRole('dialog', { name: 'Keep your farts' })
+  await step.getByLabel('Email').fill(email)
+  await step.getByRole('button', { name: 'Send code' }).click()
+  await step.getByLabel('Code').fill(await codeFor(page, email))
+  await step.getByRole('button', { name: 'Sign in' }).click()
+  await expect(step).toBeHidden()
+
+  // Signed in, Save goes on to the checkout by itself, and paid, the Toot is saved.
+  const checkout = await checkoutToot(page)
+  await expectTappable(page.getByRole('button', { name: 'Pay $0.99' }))
+  await payAtTheDevCheckout(page)
+  expect(await recordingsStored(page, 'toots')).toBe(1)
+  await uploaded(page)
+  // And it's in the account, as the Toot that was paid for.
+  const kept = await page.evaluate(
+    async account =>
+      (await (
+        await fetch('/api/library/', { headers: { 'x-pedos-library': account } })
+      ).json()) as { toots: { id: string }[] },
+    await accountOf(page)
+  )
+  expect(kept.toots.map(toot => toot.id)).toEqual([checkout])
+
+  await tab(page, 'Toots').click()
+  await expect(page.getByTestId('toot-row')).toHaveCount(1)
+  await expect(page.getByTestId('toot-row')).toContainText('Mary Had a Little Lamb')
+})
+
+test('cancelled at the checkout, the Toot is still unsaved, and Save pays for that same Toot', async ({
+  page,
+  request
+}, testInfo) => {
+  test.setTimeout(180_000)
+  await needsTheFixtureLibrary(request)
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, newEmail(testInfo, 'cancel'))
+  await page.reload()
+  await loadTheFixtureLibrary(page)
+  await openASong(page, 'mary')
+
+  const save = page.getByRole('button', { name: 'Save to Toots · $0.99' })
+  await save.click()
+  const toot = await checkoutToot(page)
+  await page.getByRole('link', { name: 'Cancel' }).click()
+  // Back on Song Creator with the same Toot, which isn't saved, and the address is clean again.
+  await expect(page).toHaveURL(/\/compose\/mary\/$/)
+  await expect(page.getByTestId('song-creator-state')).toBeVisible({ timeout: 60_000 })
+  await expect(save).toBeEnabled()
+  expect(await recordingsStored(page, 'toots')).toBe(0)
+
+  await save.click()
+  expect(await checkoutToot(page)).toBe(toot)
+  await payAtTheDevCheckout(page)
+  expect(await recordingsStored(page, 'toots')).toBe(1)
 })
 
 test('signing up from the first Result keeps the Recording, and goes where they tapped', async ({
@@ -824,8 +897,25 @@ async function expectARecordingThatPlays(page: Page) {
   await expect(row).toHaveAttribute('aria-pressed', 'true')
 }
 
-/** Opens a Song from Compose, waits for its Toot, and saves it. */
-async function saveAToot(page: Page, songId: string) {
+/** Skips a test that makes Toots on a build without the Fixture Library. */
+async function needsTheFixtureLibrary(request: APIRequestContext) {
+  test.skip(
+    !(await request.get('/fixtures/recordings/index.json')).ok(),
+    'Toots need the Fixture Library, which only the Staging build has (pnpm build:staging)'
+  )
+}
+
+/** Loads the Fixture Library from Profile, which unlocks every Song. */
+async function loadTheFixtureLibrary(page: Page) {
+  const library = page.getByTestId('fixture-library')
+  await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
+  await expect(library.getByRole('button', { name: 'Fixture Library loaded' })).toBeDisabled({
+    timeout: 90_000
+  })
+}
+
+/** Opens a Song from Compose and waits for its Toot to play, free. */
+async function openASong(page: Page, songId: string) {
   await tab(page, 'Compose').click()
   await page
     .getByTestId('unlocked-songs')
@@ -833,7 +923,18 @@ async function saveAToot(page: Page, songId: string) {
     .getByRole('link')
     .click({ timeout: 60_000 })
   await expect(page).toHaveURL(new RegExp(`/compose/${songId}/$`))
-  await page.getByRole('button', { name: 'Save to Toots' }).click({ timeout: 60_000 })
+  await expect(page.getByTestId('song-creator-state')).toHaveText('Playing', { timeout: 60_000 })
+}
+
+/** The dev checkout is open: the id of the Toot it is for. */
+async function checkoutToot(page: Page): Promise<string> {
+  await expect(page).toHaveURL(/\/dev\/checkout\/\?toot=[\w-]+&song=\w+$/, { timeout: 30_000 })
+  return new URL(page.url()).searchParams.get('toot') as string
+}
+
+/** The account this browser's library is (`pedos.account`). */
+function accountOf(page: Page): Promise<string> {
+  return page.evaluate(() => localStorage.getItem('pedos.account') as string)
 }
 
 function tab(page: Page, label: string) {

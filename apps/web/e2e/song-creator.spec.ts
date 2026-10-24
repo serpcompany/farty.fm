@@ -2,10 +2,12 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { expect, type Locator, type Page, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
+import { newEmail, signInByApi } from './account'
+import { payAtTheDevCheckout } from './pay'
 
 // Song Creator on the Staging build, with the whole Fixture Library loaded: every Song is
 // unlocked. Each Song opens from Compose, is made and starts playing, plays one tapped note, and
-// is saved; the Toots are then read back from IndexedDB. Then a direct load, a failed render, a
+// is paid for and saved (ADR 0010); the Toots are then read back from IndexedDB. Then a direct load, a failed render, a
 // locked and an unknown Song, and a Song opened offline.
 //
 // With E2E_EVIDENCE_DIR set, the test also writes each Toot's WAV, the time each took to make,
@@ -52,6 +54,9 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
 
   await listenToThePage(page)
   await page.goto('/profile/')
+  // Saving a Toot needs an account.
+  await signInByApi(page, newEmail(testInfo, 'songs'))
+  await page.reload()
   await loadTheFixtureLibrary(page)
   if (out) await page.screenshot({ path: join(out, 'compose.png') })
 
@@ -122,8 +127,9 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       const lowest = song.notes.filter(n => n.pitch === song.pitches[0]).length
       await expect(noteView.getByRole('button', { name: /, highlighted/ })).toHaveCount(lowest)
 
-      // Save turns into a disabled "Saved to Toots". Two taps, before it can turn, still make one
-      // Toot (checked below).
+      // Save asks for $0.99, then turns into a disabled "Saved to Toots" once it's paid. Two taps,
+      // before it can go to the checkout, still make one Toot (checked below).
+      await expect(save).toHaveText('Save to Toots · $0.99')
       if (song === songs[0]) {
         await save.evaluate(button => {
           ;(button as HTMLButtonElement).click()
@@ -132,8 +138,8 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       } else {
         await save.click()
       }
-      await expect(page.getByRole('button', { name: 'Saved to Toots' })).toBeDisabled()
-      // Without the guard the second tap's write fails on the same id and shows the save error.
+      await payAtTheDevCheckout(page)
+      // Without the guard the second tap starts a second checkout, or a second write of the same id.
       await expect(page.getByText("Couldn't save this Toot.")).toHaveCount(0)
       if (out && song.id === 'mary') await page.screenshot({ path: join(out, 'mary-saved.png') })
       if (out && song.id === 'merryxmas') {
@@ -143,13 +149,11 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
         await page.screenshot({ path: join(out, 'merryxmas-bottom.png') })
       }
 
+      // Back from the checkout's return, Compose opens in its place.
       await back.click()
       await expect(page).toHaveURL(/\/compose\/$/)
     })
   }
-  // Back went back each time, so the page before Compose is one system Back away.
-  await page.goBack()
-  await expect(page).toHaveURL(/\/profile\/$/)
 
   // The Toots in IndexedDB: one per Song, each with its audio as a 44.1 kHz mono 16-bit WAV.
   const toots = await page.evaluate(async () => {

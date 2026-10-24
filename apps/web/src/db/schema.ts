@@ -12,7 +12,7 @@ const flag = (name: string) => integer(name, { mode: 'boolean' })
 // Better Auth's tables, as its `drizzleAdapter(db, { provider: 'sqlite' })` finds them: each export
 // is named after its model, and each property after Better Auth's field. Better Auth writes every
 // `created_at` and `updated_at` itself, so they have no defaults. Deleting a user deletes their
-// sessions, sign-in methods, Recordings and Toots.
+// sessions, sign-in methods, Recordings, Toots and Toot payments.
 
 /** A person with an account. A first sign-in with an email code creates one. */
 export const user = sqliteTable('user', {
@@ -163,4 +163,28 @@ export const toots = sqliteTable(
     primaryKey({ columns: [table.userId, table.id] }),
     index('toots_user_id_updated_at_idx').on(table.userId, table.updatedAt)
   ]
+)
+
+/**
+ * A Toot's payment (ADR 0010): one row per Toot a user has started to pay for, keyed by the user
+ * and the Toot's id, made before its Toot is saved. `paid_at` is set once Stripe says it's paid
+ * (the webhook, or the return from Checkout asking Stripe), and only then does the Toot upload.
+ * Stripe keeps the payment itself; no card data is here.
+ */
+export const tootPayments = sqliteTable(
+  'toot_payments',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    tootId: text('toot_id').notNull(),
+    /** The latest Checkout Session for it: `cs_test_…` from Stripe, `dev_…` on a local run. */
+    checkoutSessionId: text('checkout_session_id').notNull(),
+    /** What the session charges, in the currency's smallest unit. */
+    amount: integer('amount').notNull(),
+    currency: text('currency').notNull(),
+    createdAt: timestamp('created_at').notNull(),
+    paidAt: timestamp('paid_at')
+  },
+  table => [primaryKey({ columns: [table.userId, table.tootId] })]
 )

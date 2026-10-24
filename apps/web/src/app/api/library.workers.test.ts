@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:test'
 import { and, eq } from 'drizzle-orm'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { Kind } from '@/db/library'
 import { recordings, toots } from '@/db/schema'
@@ -19,6 +19,13 @@ import {
 
 // The library routes in workerd, with a real D1 and R2: uploads, the limits, deletes and their
 // tombstones, renames, and one user never reaching another's Recordings or Toots.
+
+// Saving a Toot is paid for on a local run (ADR 0010), which `payments.workers.test.ts` tests.
+// Here a Toot saves free, as on Production.
+vi.mock('@/server/toot-payments', async original => ({
+  ...(await original<typeof import('@/server/toot-payments')>()),
+  requestPayments: () => ({ kind: 'free' })
+}))
 
 const R1 = '11111111-1111-4111-8111-111111111111'
 const R2 = '22222222-2222-4222-8222-222222222222'

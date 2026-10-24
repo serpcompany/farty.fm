@@ -24,7 +24,7 @@ const UPLOAD_OVERHEAD_BYTES = 64 * 1024
 const JSON_MAX_BYTES = 16 * 1024
 
 /** The body's bytes, or null once it is larger than `maxBytes`, counted as they arrive. */
-async function readCapped(
+export async function readCapped(
   request: Request,
   maxBytes: number
 ): Promise<Uint8Array<ArrayBuffer> | null> {
