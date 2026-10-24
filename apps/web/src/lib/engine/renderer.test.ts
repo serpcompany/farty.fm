@@ -164,15 +164,15 @@ describe('the render path from what the app stores', () => {
   })
 
   it('refuses a locked Song, and a Recording it was not given', () => {
-    const song = goldenSong('mary')
+    const song = goldenSong('twinkle')
     const locked = arrange(song, libraries.small.map(autoMapInput))
-    expect(() => renderSong(song, locked, sources)).toThrow(/locked: 2 of 4 notes covered/)
+    expect(() => renderSong(song, locked, sources)).toThrow(/locked: 5 of 6 notes covered/)
     const unlocked = arrange(song, library)
     expect(() => renderSong(song, unlocked, new Map())).toThrow(/No Recording plays pitch/)
   })
 
   it('refuses a Noise-like Recording as a source', () => {
-    const g = goldenRecording('002')
+    const g = goldenRecording('009')
     expect(() =>
       renderSource({ samples: new Float32Array(44100), sampleRate: 44100 }, storedAnalysis(g))
     ).toThrow(/Melodic/)

@@ -11,8 +11,9 @@ enum Golden {
         .deletingLastPathComponent()
     static let recordingsDir = repoRoot.appending(path: "fixtures/recordings")
     static let goldenDir = repoRoot.appending(path: "fixtures/golden")
-    /// The planner answers as they were at golden format 2, before the settle cost (#116). The
-    /// Swift Auto-map is frozen there: see `Tests/GoldenFormat2/README.md`.
+    /// The golden data as it was at format 2: Recording Analysis before the pitch contour kept the
+    /// attack (#208), and the planner before the settle cost (#116). Swift is frozen there: see
+    /// `Tests/GoldenFormat2/README.md`.
     static let goldenFormat2Dir = repoRoot.appending(path: "RecordingAnalysisKit/Tests/GoldenFormat2")
 
     struct Index: Decodable {
@@ -67,12 +68,12 @@ enum Golden {
     }
 
     static let index: Index = {
-        let data = try! Data(contentsOf: goldenDir.appending(path: "index.json"))
+        let data = try! Data(contentsOf: goldenFormat2Dir.appending(path: "index.json"))
         return try! decoder().decode(Index.self, from: data)
     }()
 
     static let recordings: [Recording] = index.recordings.map { id in
-        let data = try! Data(contentsOf: goldenDir.appending(path: "recordings/\(id).json"))
+        let data = try! Data(contentsOf: goldenFormat2Dir.appending(path: "recordings/\(id).json"))
         return try! decoder().decode(Recording.self, from: data)
     }
 
@@ -138,7 +139,7 @@ enum Golden {
 
     /// `library` is `full` or `small`.
     static func arrangement(_ library: String, _ song: String) -> Arrangement {
-        let data = try! Data(contentsOf: goldenDir.appending(path: "arrangements/\(library)/\(song).json"))
+        let data = try! Data(contentsOf: goldenFormat2Dir.appending(path: "arrangements/\(library)/\(song).json"))
         return try! decoder().decode(Arrangement.self, from: data)
     }
 

@@ -660,4 +660,41 @@ describe('the rows a route keeps', () => {
     }
     expect(await rowsOf('recordings')).toEqual([`${a.id} ${R1}`, `${a.id} ${R2}`])
   })
+
+  it('keep the analysis version (#208), and none when an older browser sends none', async () => {
+    const a = await signUp('A')
+    const R3 = '66666666-6666-4666-8666-666666666666'
+    const analysis = (fields: Record<string, unknown>) => ({
+      state: 'analyzed',
+      analysis: { ...recordingMetadata(R1).analysis.analysis, ...fields }
+    })
+    for (const [id, fields] of [
+      [R1, { settleSeconds: 0.087, version: 3 }],
+      [R2, { settleSeconds: 0.087 }]
+    ] as const) {
+      const response = await api.put(
+        'recordings',
+        id,
+        uploadBody(recordingMetadata(id, { analysis: analysis(fields) }), wav()),
+        a
+      )
+      expect(response.status).toBe(201)
+    }
+    const kept = new Map((await library(a.cookie)).recordings.map(r => [r.id, r.analysis]))
+    expect(kept.get(R1)).toEqual(analysis({ settleSeconds: 0.087, version: 3 }))
+    expect(kept.get(R2)).not.toHaveProperty('analysis.version')
+
+    // Not a whole number from 1 to 1000.
+    for (const version of ['3', 0, 2.5, 1001]) {
+      const refused = await api.put(
+        'recordings',
+        R3,
+        uploadBody(recordingMetadata(R3, { analysis: analysis({ version }) }), wav()),
+        a
+      )
+      expect(refused.status).toBe(400)
+      expect(await refused.json()).toEqual({ error: 'invalid_request' })
+    }
+    expect(await rowsOf('recordings')).toEqual([`${a.id} ${R1}`, `${a.id} ${R2}`])
+  })
 })

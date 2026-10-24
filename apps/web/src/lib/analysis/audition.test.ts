@@ -9,7 +9,23 @@ import {
 import { NOTE_LENGTHS, readBackCents, settleTime, shortestNote } from './audition'
 import { midiToHz } from './numeric'
 
-const EXPECTED_MELODIC = ['013', '017', '019', '021', '059', '084', '086', '090', '094']
+const EXPECTED_MELODIC = [
+  '002',
+  '013',
+  '016',
+  '017',
+  '019',
+  '021',
+  '022',
+  '032',
+  '059',
+  '069',
+  '084',
+  '086',
+  '090',
+  '091',
+  '094'
+]
 
 // #36: from the golden gesture, contour and estimate, the same shortest note for every Recording,
 // and so the same Melodic set (`AuditionTests.swift`).

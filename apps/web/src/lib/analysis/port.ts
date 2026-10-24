@@ -11,7 +11,8 @@ export function toAnalysis(result: RecordingAnalysis): Analysis {
     pitchConfidence: result.pitchConfidence,
     recordingPitchMidi: result.recordingPitchMidi,
     shortestNoteSeconds: result.shortestNoteSeconds,
-    settleSeconds: result.settleSeconds
+    settleSeconds: result.settleSeconds,
+    version: result.version
   }
 }
 

@@ -3,65 +3,65 @@
   "max_abs_shift_semitones": null,
   "metrics": null,
   "notes": null,
-  "octave_moves": 0,
+  "octave_moves": 1,
   "per_pitch": [
+    {
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": 1.574079406339827,
+      "song_pitch": 68,
+      "target_midi": 46
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": 0.5740794063398198,
+      "song_pitch": 69,
+      "target_midi": 47
+    },
     {
       "octave_move": false,
       "recording": "021",
       "shift_semitones": 0.7740794063398297,
-      "song_pitch": 68,
+      "song_pitch": 71,
       "target_midi": 49
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
-      "song_pitch": 69,
+      "song_pitch": 72,
       "target_midi": 50
     },
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 71,
+      "octave_move": true,
+      "recording": "016",
+      "shift_semitones": 11.674079406339814,
+      "song_pitch": 74,
       "target_midi": 52
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
-      "song_pitch": 72,
+      "song_pitch": 75,
       "target_midi": 53
     },
     {
       "octave_move": false,
       "recording": "090",
-      "shift_semitones": -0.12592059366016173,
-      "song_pitch": 74,
-      "target_midi": 55
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 75,
-      "target_midi": 56
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "shift_semitones": -1.2259205936601774,
       "song_pitch": 76,
-      "target_midi": 57
+      "target_midi": 54
     }
   ],
   "pitch_coverage": {
-    "covered": 2,
+    "covered": 5,
     "total": 7
   },
-  "plan_cost": 15.892131549297128,
+  "plan_cost": 100.3728160614581,
   "render_settings": null,
   "song": "furelise",
-  "transpose": -19,
+  "transpose": -22,
   "unlocked": false
 }

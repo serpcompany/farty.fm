@@ -1,3 +1,5 @@
+import { ANALYSIS_VERSION } from './analysis/version'
+
 /** A Recording: one saved fart clip (see `CONTEXT.md`), as the web app keeps it. */
 
 /** What Recording Analysis found in a Recording, as the iPhone app's `SavedAnalysis`. */
@@ -16,9 +18,11 @@ export type Analysis = {
   shortestNoteSeconds: number | null
   /**
    * When the Recording settles on its pitch, in seconds from the gesture start; null when
-   * Noise-like. Absent from an analysis stored before #116 until `withSettleTime` adds it.
+   * Noise-like. Absent from an analysis stored before #116.
    */
   settleSeconds?: number | null
+  /** The Recording Analysis version that made it (`ANALYSIS_VERSION`); absent before #208. */
+  version?: number
 }
 
 /** Saving never waits for analysis (ADR 0002), so a Recording can be saved but not analyzed. */
@@ -52,25 +56,14 @@ export function recordingPitch(recording: Recording): number | null {
 }
 
 /**
- * Whether a Melodic Recording's stored analysis predates the settle time (#116), so
- * `withSettleTime` should add it.
+ * Whether a Recording's stored analysis came from an older Recording Analysis, Melodic or not, so
+ * `upgradeAnalyses` should run the current one on its audio.
  */
-export function needsSettleTime(recording: Recording): boolean {
+export function needsReanalysis(recording: Recording): boolean {
   return (
     recording.analysis.state === 'analyzed' &&
-    recording.analysis.analysis.recordingPitchMidi !== null &&
-    recording.analysis.analysis.settleSeconds === undefined
+    (recording.analysis.analysis.version ?? 0) < ANALYSIS_VERSION
   )
-}
-
-/**
- * A stored analysis with the settle time from a fresh analysis of the same audio, and nothing else
- * changed, so Pitch Coverage stays as it was. If the fresh one found another Recording Pitch, its
- * settle time doesn't fit, and the settle time stays unknown (null), which Auto-map costs nothing.
- */
-export function withSettleTime(stored: Analysis, fresh: Analysis): Analysis {
-  const fits = fresh.recordingPitchMidi === stored.recordingPitchMidi
-  return { ...stored, settleSeconds: fits ? (fresh.settleSeconds ?? null) : null }
 }
 
 export function firstFartUsed(recording: Recording): boolean {

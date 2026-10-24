@@ -166,11 +166,11 @@ describe('Auto-map matches the golden Arrangements', () => {
     }
   }
 
-  it('unlocks all 13 Songs on the full library and none on the small one', () => {
+  it('unlocks all 13 Songs on the full library and 5 on the small one', () => {
     const unlocked = (library: Library) =>
-      songIds.filter(id => arrange(goldenSong(id), inputs(libraries[library])).unlocked).length
-    expect(unlocked('full')).toBe(13)
-    expect(unlocked('small')).toBe(0)
+      songIds.filter(id => arrange(goldenSong(id), inputs(libraries[library])).unlocked)
+    expect(unlocked('full')).toHaveLength(13)
+    expect(unlocked('small')).toEqual(['mary', 'jingle', 'saints', 'ode', 'ode-mutopia'])
   })
 })
 
@@ -249,9 +249,13 @@ describe('Auto-map ties', () => {
   })
 
   it('never puts two tied pitches on one Recording of a tie group', () => {
-    // 013, 084 and 086 share one Recording Pitch exactly, so a planner that looks Recordings up by
-    // pitch would reuse one of them. The matching rule above already rejects that; this says so.
-    expect(tieGroups).toEqual([['013', '084', '086']])
+    // 013 and 086, and 016 and 022, share one Recording Pitch exactly, so a planner that looks
+    // Recordings up by pitch would reuse one of them. The matching rule above already rejects that;
+    // this says so.
+    expect(tieGroups).toEqual([
+      ['013', '086'],
+      ['016', '022']
+    ])
     for (const id of songIds) {
       const a = arrange(goldenSong(id), inputs(libraries.full))
       const ids = a.pitches.map(c => c.recordingId).filter(r => r !== null)
@@ -301,7 +305,7 @@ describe('Auto-map inputs and terms', () => {
 
   it('leaves a Song locked, at the lowest transposition, when no Recording is Melodic', () => {
     const song = goldenSong('mary')
-    const noise = inputs(['002', '009', '016'])
+    const noise = inputs(['009', '018', '052'])
     expect(noise.every(r => r.recordingPitchMidi === null)).toBe(true)
     const a = arrange(song, noise)
     expect(a.transposition).toBe(LOWEST_TRANSPOSITION)

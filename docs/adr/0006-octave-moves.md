@@ -69,6 +69,7 @@ Notes moved down are the weakest. Even so, steering away from them makes the who
   - `002` sits just under pYIN's confidence bar (0.09 against 0.1). Every candidate agrees on about 46.3.
 
   That could make 11 Melodic fixtures instead of 9, but nothing shows yet that Toots on them pass ADR 0004's checks. Lowering pYIN's bar alone would also admit `022`, which the independent readers reject. #83 measures this before anything is built.
+  Update 2026-10-25 (#208): Recording Analysis no longer drops the frames pYIN is unsure of, and the confidence bar is 0.2. 15 fixtures are Melodic, `002` and `022` among them, and `055` stays Noise-like. YIN and autocorrelation read each of the 15 within 20 cents of its Recording Pitch, and every Toot on them passes ADR 0004's checks (`fixtures/golden/`).
 
 ## Consequences
 
