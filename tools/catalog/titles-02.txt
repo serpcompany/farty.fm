@@ -1,0 +1,132 @@
+# The second PDMX batch (#202): more well-known tunes that are public domain as compositions,
+# none already in catalog/catalog.json or titles-01.txt.
+# id | catalog title | other titles a score of the same Song may carry (optional, ; separated)
+# A score matches when its title, its title before " - ", "(", "[" or ":", or its MuseScore song
+# name is one of these.
+# Left out: titles no pickable PDMX score matches, and titles whose matching scores include a
+# different tune under the same name (a hymn set to several tunes, or a copyrighted song).
+# Every tune here is public domain in the US and where copyright lasts the author's life plus 70
+# years. The authors are the composer and, for a song whose words were written with the music, the
+# lyricist (as the EU counts it); words added later, as on "The Teddy Bears' Picnic" or "Hava
+# Nagila", don't count. So "Bye Bye Blackbird", "Take Me Out to the Ball Game", "O Sole Mio",
+# "Cielito Lindo", "When Irish Eyes Are Smiling" and "O mio babbino caro" wait for a later batch.
+# Also left out: titles whose pick, as the importer reads it, isn't the tune most scores of that
+# title carry: the highest track is an accompaniment or a one-note ostinato ("Go Tell It on the
+# Mountain", "Molly Malone", "The Ash Grove"), or the score sets another tune of the same name
+# ("Here We Come A-Wassailing").
+
+# Nursery rhymes and children's songs
+hickory-dickory-dock | Hickory Dickory Dock | Hickory, Dickory, Dock
+humpty-dumpty | Humpty Dumpty
+ring-around-the-rosie | Ring Around the Rosie | Ring a Ring o' Roses; Ring Around the Rosy; Ring-a-Ring o' Roses
+mulberry-bush | Here We Go Round the Mulberry Bush | The Mulberry Bush; Mulberry Bush
+farmer-in-the-dell | The Farmer in the Dell | Farmer in the Dell
+did-you-ever-see-a-lassie | Did You Ever See a Lassie | Did You Ever See a Lassie?
+little-brown-jug | Little Brown Jug
+teddy-bears-picnic | The Teddy Bears' Picnic | Teddy Bears Picnic
+alouette | Alouette
+sur-le-pont | Sur le Pont d'Avignon
+chopsticks | Chopsticks | The Celebrated Chop Waltz
+
+# Folk songs and spirituals
+coming-round-the-mountain | She'll Be Coming 'Round the Mountain | She'll Be Coming Round the Mountain; Coming Round the Mountain
+working-on-the-railroad | I've Been Working on the Railroad | Ive Been Working on the Railroad
+buffalo-gals | Buffalo Gals
+old-smoky | On Top of Old Smoky | On Top of Old Smokey
+streets-of-laredo | The Streets of Laredo | Streets of Laredo
+yellow-rose-of-texas | The Yellow Rose of Texas | Yellow Rose of Texas
+beautiful-dreamer | Beautiful Dreamer
+jeanie | Jeanie with the Light Brown Hair
+aura-lee | Aura Lee | Aura Lea
+grandfathers-clock | My Grandfather's Clock | Grandfather's Clock
+polly-wolly-doodle | Polly Wolly Doodle
+oh-dear-what-can-the-matter-be | Oh Dear, What Can the Matter Be | Oh Dear What Can the Matter Be?
+blow-the-man-down | Blow the Man Down
+sloop-john-b | Sloop John B | The John B. Sails; The Wreck of the John B
+wayfaring-stranger | Wayfaring Stranger | The Wayfaring Stranger; Poor Wayfaring Stranger
+water-is-wide | The Water Is Wide | O Waly, Waly
+nobody-knows | Nobody Knows the Trouble I've Seen | Nobody Knows the Trouble Ive Seen
+go-down-moses | Go Down, Moses | Go Down Moses; Let My People Go
+down-by-the-riverside | Down by the Riverside | Ain't Gonna Study War No More
+joshua | Joshua Fit the Battle of Jericho | Joshua Fought the Battle of Jericho
+loch-lomond | Loch Lomond | The Bonnie Banks o' Loch Lomond
+all-through-the-night | All Through the Night | Ar Hyd y Nos
+my-bonnie | My Bonnie Lies over the Ocean | My Bonnie; My Bonnie Lies Over the Sea
+skye-boat-song | The Skye Boat Song | Skye Boat Song
+irish-washerwoman | The Irish Washerwoman | Irish Washerwoman
+wild-rover | The Wild Rover | Wild Rover
+waltzing-matilda | Waltzing Matilda
+santa-lucia | Santa Lucia
+funiculi | Funiculì, Funiculà | Funiculi Funicula
+hava-nagila | Hava Nagila
+korobeiniki | Korobeiniki | Korobushka; Korobeyniki
+kalinka | Kalinka
+arirang | Arirang
+
+# Popular songs from before 1929
+daisy-bell | Daisy Bell | Bicycle Built for Two; A Bicycle Built for Two
+let-me-call-you-sweetheart | Let Me Call You Sweetheart
+silvery-moon | By the Light of the Silvery Moon
+my-wild-irish-rose | My Wild Irish Rose
+tipperary | It's a Long Way to Tipperary | Its a Long Way to Tipperary; Tipperary
+pack-up-your-troubles | Pack Up Your Troubles in Your Old Kit-Bag | Pack Up Your Troubles
+grand-old-flag | You're a Grand Old Flag | Youre a Grand Old Flag
+the-entertainer | The Entertainer
+
+# Carols and hymns
+hark-the-herald | Hark! The Herald Angels Sing | Hark the Herald Angels Sing
+god-rest-ye | God Rest You Merry, Gentlemen | God Rest Ye Merry, Gentlemen; God Rest Ye Merry Gentlemen
+good-king-wenceslas | Good King Wenceslas
+angels-we-have-heard | Angels We Have Heard on High | Les Anges dans nos campagnes
+o-come-emmanuel | O Come, O Come, Emmanuel | O Come O Come Emmanuel; Veni Emmanuel
+up-on-the-housetop | Up on the Housetop
+what-child-is-this | What Child Is This | What Child Is This?
+coventry-carol | Coventry Carol | The Coventry Carol
+o-holy-night | O Holy Night | Cantique de Noël; Minuit, Chrétiens
+twelve-days | The Twelve Days of Christmas | Twelve Days of Christmas
+i-saw-three-ships | I Saw Three Ships
+ding-dong-merrily | Ding Dong Merrily on High | Ding Dong! Merrily on High
+good-christian-men | Good Christian Men, Rejoice | In Dulci Jubilo
+carol-of-the-bells | Carol of the Bells | Shchedryk
+rock-of-ages | Rock of Ages
+what-a-friend | What a Friend We Have in Jesus
+jesus-loves-me | Jesus Loves Me
+doxology | Old Hundredth | Doxology; Praise God from Whom All Blessings Flow; All People That on Earth Do Dwell
+
+# Classical themes
+eine-kleine | Eine kleine Nachtmusik
+canon-in-d | Canon in D | Pachelbel's Canon; Canon in D Major
+william-tell | William Tell Overture | William Tell Theme
+hallelujah-chorus | Hallelujah Chorus | Hallelujah! (Messiah)
+wedding-march | Wedding March
+bridal-chorus | Bridal Chorus | Here Comes the Bride
+habanera | Habanera | L'amour est un oiseau rebelle
+la-donna | La donna è mobile
+new-world-largo | Largo from the New World Symphony | Goin' Home
+air-on-g | Air on the G String | Air on G String
+jesu-joy | Jesu, Joy of Man's Desiring | Jesu Joy of Mans Desiring
+swan-lake | Swan Lake
+sugar-plum | Dance of the Sugar Plum Fairy | Dance of the Sugar-Plum Fairy; Sugar Plum Fairy
+blue-danube | The Blue Danube | Blue Danube; An der schönen blauen Donau
+radetzky | Radetzky March
+hungarian-dance | Hungarian Dance No. 5 | Hungarian Dance No 5
+turkish-march | Turkish March | Rondo alla Turca; Alla Turca
+gymnopedie | Gymnopédie No. 1 | Gymnopedie No 1; Gymnopédie No.1
+pomp-and-circumstance | Pomp and Circumstance | Pomp and Circumstance March No. 1
+trumpet-voluntary | Trumpet Voluntary | Prince of Denmark's March
+
+# Patriotic songs and marches
+stars-and-stripes | The Stars and Stripes Forever | Stars and Stripes Forever
+washington-post | The Washington Post | Washington Post March
+colonel-bogey | Colonel Bogey March | Colonel Bogey
+liberty-bell | The Liberty Bell | Liberty Bell March
+marines-hymn | The Marines' Hymn | Marines Hymn
+hail-to-the-chief | Hail to the Chief
+my-country-tis | My Country, 'Tis of Thee | My Country Tis of Thee; God Save the King; God Save the Queen
+star-spangled-banner | The Star-Spangled Banner | Star Spangled Banner
+battle-hymn | Battle Hymn of the Republic | The Battle Hymn of the Republic; Glory, Glory, Hallelujah; John Brown's Body
+johnny-comes-marching | When Johnny Comes Marching Home | When Johnny Comes Marching Home Again
+taps | Taps
+marseillaise | La Marseillaise
+rule-britannia | Rule, Britannia! | Rule Britannia
+scotland-the-brave | Scotland the Brave
