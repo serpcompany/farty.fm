@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Test Recording Analysis against the reference engine
-        # Every Fixture Library Recording, against fixtures/golden/.
+        # Every Fixture Library Recording, against golden format 2 (RecordingAnalysisKit/Tests/GoldenFormat2/).
         working-directory: RecordingAnalysisKit
         run: swift test -c release
 

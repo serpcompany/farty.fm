@@ -30,6 +30,35 @@ def has_reattack(seg):
     return False
 
 
+ON_PITCH_CENTS = 50
+LOUD_DB = 20  # frames within this of the note's loudest are heard
+
+
+def on_pitch_share(audio, melody, events, bpm):
+    """Share of the loud frames inside notes that YIN reads within 50 cents of the note (#208).
+
+    YIN reads every frame, with no voicing decision, so it hears a note bending in from its
+    attack or wandering off, which the pYIN median per note above smooths over. Over each note's
+    sounding part (12 ms in from either end), frames within 20 dB of the note's loudest. Frames
+    more than 9 semitones off are octave errors and left out."""
+    f = librosa.yin(audio, fmin=45, fmax=1200, sr=SR, frame_length=2048, hop_length=HOP)
+    db = 20 * np.log10(librosa.feature.rms(y=audio, frame_length=2048, hop_length=HOP)[0] + 1e-9)
+    t = librosa.times_like(f, sr=SR, hop_length=HOP)
+    spb = 60 / bpm
+    cents = []
+    for e in events:
+        s = melody.notes[e["note_index"]].start * spb
+        heard_len = min(e["len_s"], melody.notes[e["note_index"]].dur * spb)
+        win = np.where((t >= s + 0.012) & (t <= s + heard_len - 0.012))[0]
+        if len(win) == 0:
+            continue
+        loud = win[db[win] > db[win].max() - LOUD_DB]
+        c = (librosa.hz_to_midi(f[loud]) - e["target_midi"]) * 100
+        cents.append(c[np.abs(c) <= 900])
+    cents = np.concatenate(cents) if cents else np.array([])
+    return float(np.mean(np.abs(cents) <= ON_PITCH_CENTS)) if len(cents) else 0.0
+
+
 def evaluate(audio, melody, events, bpm):
     spb = 60 / bpm
     f0, voiced, vprob = librosa.pyin(audio, fmin=45, fmax=1200, sr=SR, frame_length=2048, hop_length=HOP)
@@ -68,5 +97,6 @@ def evaluate(audio, melody, events, bpm):
         "onsets_on_time_pct": round(100 * matched / n_notes),
         "notes_with_retrigger": retrigger_notes,
         "distinct_recordings": len({e["source_id"] for e in events}),
+        "on_pitch_pct": round(100 * on_pitch_share(audio, melody, events, bpm)),
         "per_note": per_note,
     }

@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { recordAndSave, withFakeMicrophone } from './record'
 
-// Fixture 069 is Noise-like: the golden analysis finds no steady pitch.
-withFakeMicrophone('069__reino93__fart-11__324630.wav')
+// Fixture 065 is Noise-like: the golden analysis finds no steady pitch.
+withFakeMicrophone('065__reino93__fart-7__324626.wav')
 
 test('recording a Noise-like fart says it has no steady note', async ({ page }) => {
   await recordAndSave(page, 2.5)

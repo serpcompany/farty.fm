@@ -12,12 +12,13 @@ and checks it:
   +-50 ms, and no second attack inside a note;
 - no worse than golden on within_50c_pct, onsets_on_time_pct and notes_with_retrigger.
 
-`furelise` note 15 is a tolerance edge (fixtures/golden/README.md, "Near-threshold
-Recordings"), so it counts as within at +-60 cents.
-
 First it checks that `dir` holds exactly one render (`.json` and `.wav`) per golden Arrangement
 that is unlocked (`fixtures/golden/arrangements/full/*.json`), and fails on a missing, extra or
 stale one. Exits 1 if any check fails. It changes nothing in the reference.
+
+The renders are the full library's only. Last it lists, for information, the small library's
+unlocked golden Arrangements that pYIN reads under the bar (`fixtures/golden/README.md` says
+why).
 
 With --against-reference it also renders each Song with the reference (`plan`, then
 `render(tune=1.0)` on `load_library()`) and prints the largest sample difference from it, for
@@ -36,37 +37,8 @@ from evaluate import evaluate
 from melody import load_catalog
 
 GOLDEN = ROOT / "fixtures/golden/arrangements/full"
-TOLERANCE_EDGE = {"furelise": 15}
-EDGE_CENTS = 60
+SMALL = ROOT / "fixtures/golden/arrangements/small"
 BAR = {"within_50c_pct": 94, "onsets_on_time_pct": 95, "notes_with_retrigger": 0}
-
-
-def strict_count(pct, n):
-    """How many of n notes evaluate() counted, from its rounded percentage (unique while n <= 100)."""
-    counts = [k for k in range(n + 1) if round(100 * k / n) == pct]
-    assert len(counts) == 1, (pct, n, counts)
-    return counts[0]
-
-
-def within_with_edge(song, r):
-    """within_50c_pct, with the Song's tolerance-edge note counted as within at +-EDGE_CENTS."""
-    if song not in TOLERANCE_EDGE:
-        return r["within_50c_pct"], None
-    n = r["notes"]
-    k = strict_count(r["within_50c_pct"], n)
-    cents = {p["i"]: p["cents"] for p in r["per_note"]}
-    edge = cents[TOLERANCE_EDGE[song]]
-    if edge is None or abs(edge) > EDGE_CENTS:
-        return round(100 * k / n), edge
-    # per_note cents are rounded. Below 50 the note was already counted, above 50 it wasn't; at
-    # exactly 50 it was counted if k has room for it beside the notes that surely were.
-    sure = sum(1 for c in cents.values() if c is not None and abs(c) < 50)
-    at_50 = sum(1 for c in cents.values() if c is not None and abs(c) == 50)
-    if abs(edge) < 50 or (abs(edge) == 50 and (at_50 > 1 or k - sure == 1)):
-        counted = 0
-    else:
-        counted = 1
-    return round(100 * (k + counted) / n), edge
 
 
 def render_set_problems(out):
@@ -88,6 +60,17 @@ def render_set_problems(out):
         if song != stem:
             problems.append(f"{stem}.json says it is {song!r}")
     return sorted(unlocked & jsons & wavs), problems
+
+
+def small_library_under_bar():
+    """The small library's unlocked golden Arrangements under ADR 0004's within-50c bar."""
+    under = []
+    for path in sorted(SMALL.glob("*.json")):
+        golden = json.loads(path.read_text())
+        within = golden["metrics"]["within_50c_pct"] if golden["unlocked"] else None
+        if within is not None and within < BAR["within_50c_pct"]:
+            under.append(f"{path.stem} {within}%")
+    return under
 
 
 def against_reference(library, melody, audio):
@@ -129,7 +112,7 @@ def main():
             f"{song:12s} T={events['transpose']:+d} notes={r['notes']:3d} in50c={r['within_50c_pct']:3d}%"
             f" med={r['median_abs_cents']:5.1f}c onTime={r['onsets_on_time_pct']}%"
             f" reatk={r['notes_with_retrigger']} recs={r['distinct_recordings']}"
-            f" octaveMoves={events['octave_moves']} maxShift={max(shifts):.1f}"
+            f" octaveMoves={events['octave_moves']} maxShift={max(shifts):.1f} onPitch={r['on_pitch_pct']}%"
         )
         golden = json.loads((GOLDEN / f"{song}.json").read_text())
         g = golden["metrics"]
@@ -138,6 +121,7 @@ def main():
             f" med={g['median_abs_cents']:5.1f}c onTime={g['onsets_on_time_pct']}%"
             f" reatk={g['notes_with_retrigger']} recs={g['distinct_recordings']}"
             f" octaveMoves={golden['octave_moves']}"
+            + (f" onPitch={g['on_pitch_pct']}%" if "on_pitch_pct" in g else "")
         )
         # Note by note against the golden heard_cents (both rounded to the cent): information only.
         heard = {n["index"]: n["heard_cents"] for n in golden["notes"]}
@@ -148,10 +132,7 @@ def main():
               + (f", max |diff| {max(deltas)}c" if deltas else ""))
         if library is not None:
             print(f"{'':12s} against the reference render: {against_reference(library, melody, audio)}")
-        within, edge = within_with_edge(song, r)
-        if song in TOLERANCE_EDGE:
-            print(f"{'':12s} note {TOLERANCE_EDGE[song]} reads {edge} cents (tolerance edge,"
-                  f" within at +-{EDGE_CENTS}): in50c={within}%")
+        within = r["within_50c_pct"]
         problems = []
         if r["notes"] != g["notes"]:
             problems.append(f"{r['notes']} notes, golden {g['notes']}")
@@ -173,6 +154,10 @@ def main():
     print(f"{len(renders) - len(failures)} of {len(renders)} renders pass" + (f"; failing: {' '.join(failures)}" if failures else ""))
     if set_problems:
         print(f"FAIL: {len(set_problems)} problem(s) with the set of renders (above)")
+    under = small_library_under_bar()
+    if under:
+        print(f"note: on the small library, golden reads unlocked Songs under {BAR['within_50c_pct']}%"
+              f" within +-50 cents by pYIN: {', '.join(under)} (fixtures/golden/README.md)")
     sys.exit(1 if failures or set_problems else 0)
 
 

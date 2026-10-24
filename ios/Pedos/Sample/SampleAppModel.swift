@@ -543,7 +543,8 @@ struct SampleFixture: Identifiable, Hashable, Sendable {
     /// The shortest note it plays on pitch, in seconds; nil when Noise-like.
     let shortestNoteSeconds: Double?
 
-    /// The reference engine's analysis of the fixture file (`fixtures/golden/recordings/`).
+    /// The reference engine's analysis of the fixture file, at golden format 2
+    /// (`RecordingAnalysisKit/Tests/GoldenFormat2/recordings/`).
     var analysis: RecordingAnalysis {
         RecordingAnalysis(
             pitch: pitch,

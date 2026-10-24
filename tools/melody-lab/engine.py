@@ -21,7 +21,8 @@ AUDIO_DIR = ROOT / "fixtures/recordings"
 SR = 44100
 HOP = 256
 GAP_S = 0.025  # silence between consecutive notes (articulation)
-MIN_PITCH_CONF = 0.1  # loose on purpose: audition() is the real gate
+MIN_PITCH_CONF = 0.2  # loose on purpose: audition() is the real gate (#208 raised it from 0.1)
+FAR_FROM_CENTER = 6.0  # semitones: contour frames farther than this from the gesture's center are dropped (#208)
 
 
 # ---------------------------------------------------------------- Recording Analysis
@@ -83,31 +84,43 @@ def note_segment(y):
     return start, min(len(y), end), reattack_at is not None
 
 
+def weighted_median(mids, w):
+    """The pitch below which half the weight lies."""
+    order = np.argsort(mids)
+    cw = np.cumsum(w[order]) / w.sum()
+    return mids[order][np.searchsorted(cw, 0.5)]
+
+
 def analyze_recording(rid, y):
     start, end, cut_at_reattack = note_segment(y)
     body = y[start:end].astype(np.float64)
 
-    f0, voiced, vprob = librosa.pyin(body, fmin=45, fmax=900, sr=SR, frame_length=2048, hop_length=HOP)
-    f0 = np.where(voiced & (vprob > 0.05), f0, np.nan)
+    # Every frame pYIN calls voiced, attack included. A voiced-probability gate on top (0.05
+    # until #208) dropped most attacks, so the renderer bent each note in from the attack's pitch.
+    f0, voiced, _ = librosa.pyin(body, fmin=45, fmax=900, sr=SR, frame_length=2048, hop_length=HOP)
+    f0 = np.where(voiced, f0, np.nan)
+    frame_rms = librosa.feature.rms(y=body, frame_length=2048, hop_length=HOP)[0][: len(f0)]
     # smooth pitch contour and drop isolated blips
     finite = np.isfinite(f0)
     if finite.sum() >= 3:
         m = librosa.hz_to_midi(np.where(finite, f0, 1.0))
         m = np.where(finite, median_filter(np.where(finite, m, 0), size=5), np.nan)
         m = np.where(np.isfinite(m) & (m > 10), m, np.nan)
+        # drop octave errors and glide tails, which the renderer would bend toward
+        kept = np.isfinite(m)
+        if kept.sum() >= 3:
+            center = weighted_median(m[kept], frame_rms[kept])
+            m = np.where(np.abs(m - center) > FAR_FROM_CENTER, np.nan, m)
         f0 = librosa.midi_to_hz(m)
     # reference pitch: energy-weighted median of voiced frames in the first 450 ms
     head = min(len(f0), int(0.45 * SR / HOP))
-    frame_rms = librosa.feature.rms(y=body, frame_length=2048, hop_length=HOP)[0][: len(f0)]
     v = np.isfinite(f0[:head])
     coverage = v.sum() / max(1, head if len(body) > 0.45 * SR else len(f0))
     ref_midi, conf = None, 0.0
     if v.sum() >= 4:
         mids = librosa.hz_to_midi(f0[:head][v])
         w = frame_rms[:head][v]
-        order = np.argsort(mids)
-        cw = np.cumsum(w[order]) / w.sum()
-        med = mids[order][np.searchsorted(cw, 0.5)]
+        med = weighted_median(mids, w)
         spread = np.median(np.abs(mids - med))
         conf = float(np.clip(coverage, 0, 1) * np.clip(1 - spread / 3, 0, 1))
         if conf >= MIN_PITCH_CONF:

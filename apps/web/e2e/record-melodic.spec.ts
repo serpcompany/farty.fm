@@ -41,7 +41,7 @@ async function storedAnalysis(page: Page): Promise<Record<string, unknown> | nul
   })
 }
 
-test('an analysis stored before the settle time (#116) gets it on the next open', async ({
+test('an analysis an older Recording Analysis made runs again on the next open', async ({
   page
 }) => {
   await recordAndSave(page, 1.5)
@@ -50,8 +50,10 @@ test('an analysis stored before the settle time (#116) gets it on the next open'
   await expect(page.getByTestId('recording-row')).toHaveCount(1)
   const analyzed = await storedAnalysis(page)
   expect(typeof analyzed?.settleSeconds).toBe('number')
+  expect(typeof analyzed?.version).toBe('number')
 
-  // As an earlier release stored it: the same analysis, with no settle time.
+  // As a release before #208 stored it: the same analysis, with no version (and, before #116,
+  // no settle time).
   await page.evaluate(async () => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open('pedos')
@@ -64,6 +66,7 @@ test('an analysis stored before the settle time (#116) gets it on the next open'
       request.onsuccess = () => {
         const [recording] = request.result
         delete recording.analysis.analysis.settleSeconds
+        delete recording.analysis.analysis.version
         const put = store.put(recording)
         put.onsuccess = () => resolve()
         put.onerror = () => reject(put.error)
@@ -72,7 +75,7 @@ test('an analysis stored before the settle time (#116) gets it on the next open'
     })
     db.close()
   })
-  expect(await storedAnalysis(page)).not.toHaveProperty('settleSeconds')
+  expect(await storedAnalysis(page)).not.toHaveProperty('version')
 
   await page.reload()
   await expect(page.getByTestId('recording-note')).toHaveText('G3')

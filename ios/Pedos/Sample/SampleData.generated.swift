@@ -207,7 +207,7 @@ extension Song {
 #if INTERNAL
 extension SampleFixture {
     /// Every Fixture Library Recording: its file, and its Recording Analysis as the reference
-    /// engine computes it (`fixtures/golden/recordings/`).
+    /// engine computed it at golden format 2 (`RecordingAnalysisKit/Tests/GoldenFormat2/recordings/`).
     static let prototypeLibrary: [SampleFixture] = [
         SampleFixture(
             id: "002", file: "002__frenkfurth__wav-fart-vegan-026-wav__650671.mp3",
