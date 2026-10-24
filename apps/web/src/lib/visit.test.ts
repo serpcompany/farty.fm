@@ -181,6 +181,26 @@ describe('openVisit', () => {
     ])
   })
 
+  it("clears a library an account left as a guest's, from before #203, as a guest's visit opens", async () => {
+    pastFirstOpen()
+    const signedInVisit = await open(signedIn)
+    const { recording } = await makeFarts(signedInVisit)
+    await signedInVisit.sync.syncOnce('user-a')
+    expect(account.get('recordings', recording.id)).toBeDefined()
+    // A Sign out before #203 whose clear failed: the account forgotten, its library left.
+    localStorage.removeItem('pedos.account')
+
+    const guest = await open(signedOut)
+    expect(await held(guest)).toEqual({
+      recordings: [],
+      audio: [],
+      toots: [],
+      tootAudio: [],
+      outbox: []
+    })
+    expect(await (await guest.store.db()).getAllKeys('meta')).toEqual([])
+  })
+
   it("clears another account's library before a signed-in visit loads it", async () => {
     await open(signedInAs('user-b'))
     const theirs = await open(signedInAs('user-b'))

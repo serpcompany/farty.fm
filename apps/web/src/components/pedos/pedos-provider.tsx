@@ -387,7 +387,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     stopPlayback()
     let saved: Recording
     try {
-      // Saved after the visit has started, so clearing the last one's never takes it.
+      // Saved after the visit has started, so what its open clears (the last visit's Toots, a
+      // library an account left, or another account's at sign-in) never takes it.
       await openVisit().library
       saved = await store.saveRecording(
         { seconds: draft.seconds, sampleRate: draft.audio.sampleRate, waveform: draft.waveform },

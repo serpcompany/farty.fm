@@ -112,6 +112,17 @@ export async function claimLibrary(accountId: string, email = ''): Promise<boole
 }
 
 /**
+ * Whether this browser's library has read an account's changes (its `cursor`), so it's an
+ * account's, also with no `pedos.account`. A guest's never has: `claimLibrary` makes it an
+ * account's first. Before #203, a Sign out whose clear failed forgot the account and left its
+ * library, which the next guest visit cleared; a guest's open still clears such a library whole
+ * (`visit.ts`).
+ */
+export async function leftByAnAccount(): Promise<boolean> {
+  return (await (await db()).get('meta', 'cursor')) !== undefined
+}
+
+/**
  * How many farts (Recordings and Toots) on this device haven't uploaded to the account its library
  * is, which signing in as `email` would clear (`claimLibrary`): none for a guest's library, or for
  * `email`'s own. A library whose account's email isn't known counts as another's.

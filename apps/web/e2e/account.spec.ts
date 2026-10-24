@@ -29,7 +29,7 @@ test("a guest's first Result offers the account step, and Not now goes where the
     'Make a free account to keep your Recordings and Toots, even on a new phone.'
   )
   await expect(step.getByTestId('account-step-guest')).toHaveText(
-    'Without an account, your Recordings stay only on this device, and your Toots are gone when you close Farty.'
+    'Without an account, your Recordings stay only in this browser, and your Toots are gone when you close Farty.'
   )
   for (const control of [
     step.getByLabel('Email'),
@@ -352,7 +352,7 @@ test("Profile's Save to an account opens the step, which stays while they read t
   await expectTappable(save)
   await expect(
     page.getByText(
-      'Without an account, your Recordings stay only on this device, and your Toots are gone when you close Farty.'
+      'Without an account, your Recordings stay only in this browser, and your Toots are gone when you close Farty.'
     )
   ).toBeVisible()
   await save.click()
@@ -500,10 +500,25 @@ test('a Recording saved while Farty still reads the session waits for the visit 
   page,
   context
 }) => {
-  // A guest's second visit, whose open clears the first's Toots.
+  // A guest's second visit, on a library an account left before #203, which its open clears whole.
   await context.addInitScript(skipWelcome)
   await page.goto('/recordings/')
   await expect(page.getByText('No Recordings yet')).toBeVisible()
+  // It has read the account's changes.
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('pedos')
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    const transaction = db.transaction('meta', 'readwrite')
+    transaction.objectStore('meta').put(1, 'cursor')
+    await new Promise((resolve, reject) => {
+      transaction.oncomplete = resolve
+      transaction.onerror = () => reject(transaction.error)
+    })
+    db.close()
+  })
   await page.close()
   const visit = await context.newPage()
 
@@ -521,6 +536,7 @@ test('a Recording saved while Farty still reads the session waits for the visit 
   answer()
   await expect(visit.getByTestId('result-note')).toHaveText('G3')
   expect(await recordingsStored(visit)).toBe(1)
+  expect(await recordingsStored(visit, 'meta')).toBe(0)
 })
 
 test("an account's farts stay when its session ends: Farty asks to sign in again, or clears them", async ({

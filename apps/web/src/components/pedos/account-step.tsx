@@ -238,7 +238,7 @@ function Step() {
               className="text-center text-sm text-muted-foreground"
               data-testid="account-step-guest"
             >
-              Without an account, your Recordings stay only on this device, and your Toots are gone
+              Without an account, your Recordings stay only in this browser, and your Toots are gone
               when you close Farty.
             </p>
           )}

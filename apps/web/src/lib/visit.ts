@@ -1,6 +1,6 @@
 import { type Account, readSession } from './account'
-import { claimLibrary } from './library-sync'
-import { clearToots } from './recording-store'
+import { claimLibrary, leftByAnAccount } from './library-sync'
+import { clearLibrary, clearToots } from './recording-store'
 
 // A guest keeps their Recordings, and their Toots last only the visit. Guests kept nothing beyond
 // the visit (owner, 2026-10-21, #150) until the owner said to "definitely fix the losing of
@@ -9,7 +9,8 @@ import { clearToots } from './recording-store'
 // open clears them before anything shows. IndexedDB is the working copy, since sessionStorage is
 // too small for audio; a sessionStorage flag says this tab's visit has started. Signed in, the
 // browser's copy is the account's, and stays, also once the session has ended (`expired`). Sign
-// out clears it all (`forgetLibrary`), so a guest's library holds only what was made here as one.
+// out clears it all (`forgetLibrary`), so a guest's library holds only what was made here as one;
+// one an account left anyway, from before #203, a guest's next visit clears whole.
 
 /** sessionStorage: this tab's visit has started, so opening again is a reload. */
 const visitKey = 'pedos.visit'
@@ -71,7 +72,7 @@ async function startVisit(account: Promise<Account>): Promise<void> {
       firstOpen: !hasFlag(() => localStorage, openedKey, false),
       otherTabOpen: await anotherTabOpen()
     }
-    if (clearsOnOpen(facts)) await clearToots()
+    if (clearsOnOpen(facts)) await ((await leftByAnAccount()) ? clearLibrary() : clearToots())
     // The first open's grace is spent only on an open that reads as a guest's, where the step and
     // Profile say Toots go at the end of the visit. Offline or unreachable, it waits for the next.
     if (facts.account.status === 'signedOut') setFlag(() => localStorage, openedKey)
