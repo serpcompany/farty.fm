@@ -250,6 +250,24 @@ def unsettled_cost(note_seconds, recording_seconds, settle_s, shift):
     return cost
 
 
+SILENT_COST_PER_S = 30.0  # per second of a note its Recording leaves silent (#205)
+
+
+def silent_cost(note_seconds, recording_seconds, shift):
+    """Cost of the part of each note a Recording is too short to fill (#205).
+
+    A note sounds for min(its length, the Recording's resampled length), as in too_short_cost();
+    the rest of it is silence. Each second of that costs SILENT_COST_PER_S, so a long note
+    prefers a long Recording. Picked from 0, 10, 20, 30, 40, 60 and 80 on the 12 app Songs with
+    the Fixture Library: every value keeps all 12 passing with no Octave Move notes, and 30 is
+    the smallest that plays Happy Birthday's last half note in full (0.41 to 1.18 s). Above 30
+    sounding time gains little (90.0% to at most 93.2%) and single Songs lose on-pitch time:
+    amazing 90 to 83% from 40 up, row 90 to 88% from 40 up, and frere 95 to 81% at 80.
+    """
+    played = recording_seconds * 2 ** (-shift / 12)
+    return SILENT_COST_PER_S * sum(max(0.0, a - played) for a in note_seconds)
+
+
 @dataclass
 class Assignment:
     note_index: int
@@ -284,7 +302,7 @@ class Fit:
     transpose: int
     recording_for_pitch: dict  # Song pitch -> Recording id, or None when no Recording covers it
     octave_moves: int
-    cost: float  # over covered pitches: beats x move_cost + too_short_cost + unsettled_cost of its notes
+    cost: float  # over covered pitches: beats x move_cost + too_short, unsettled and silent costs of its notes
 
     @property
     def covered(self):
@@ -330,7 +348,8 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
                     row.append(None)
                 else:
                     row.append((m[1], weight[p] * m[0] + too_short_cost(note_seconds[p], s.seconds, s.min_note_s, shift)
-                                + unsettled_cost(note_seconds[p], s.seconds, s.settle_s, shift)))
+                                + unsettled_cost(note_seconds[p], s.seconds, s.settle_s, shift)
+                                + silent_cost(note_seconds[p], s.seconds, shift)))
             out.append(row)
         return out
 

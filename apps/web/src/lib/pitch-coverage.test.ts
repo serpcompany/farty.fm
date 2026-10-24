@@ -137,9 +137,9 @@ describe('Pitch Coverage against the reference engine', () => {
   it('reads the coverage of locked Songs as the reference does', () => {
     const mary = coverageOf(song('mary'), takes(3))
     expect(coverageSummary(mary)).toBe('2 of 4 notes covered')
-    expect(mary.transposition).toBe(-24)
-    expect(missingNotes(mary)).toBe('D3 and E3')
-    expect(fixtureId(mary.recordingForPitch.get(72))).toBe('021')
+    expect(mary.transposition).toBe(-26)
+    expect(missingNotes(mary)).toBe('A♯2 and D3')
+    expect(fixtureId(mary.recordingForPitch.get(74))).toBe('021')
     expect(fixtureId(mary.recordingForPitch.get(79))).toBe('090')
 
     const birthday = coverageOf(song('birthday'), eight)
@@ -340,9 +340,9 @@ describe('Compose’s listing', () => {
     expect(missingNotes(coverageOf(song('frere'), eight))).toBe('C♯3')
     expect(missingNotes(coverageOf(song('mary'), eight))).toBeNull()
     const few = takes(3)
-    expect(missingNotes(coverageOf(song('birthday'), few))).toBe('G♯2, A♯2, C♯3, D♯3, F3, and F♯3')
-    expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe('G♯2, A♯2, C♯3, and 3 more')
-    expect(missingNotes(coverageOf(song('mary'), few), 3)).toBe('D3 and E3')
+    expect(missingNotes(coverageOf(song('birthday'), few))).toBe('F2, G2, A2, A♯2, C3, and D3')
+    expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe('F2, G2, A2, and 3 more')
+    expect(missingNotes(coverageOf(song('mary'), few), 3)).toBe('A♯2 and D3')
   })
 
   it('matches the catalog again only when the Melodic Recordings change', () => {

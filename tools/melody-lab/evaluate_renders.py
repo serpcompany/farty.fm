@@ -113,6 +113,7 @@ def main():
             f" med={r['median_abs_cents']:5.1f}c onTime={r['onsets_on_time_pct']}%"
             f" reatk={r['notes_with_retrigger']} recs={r['distinct_recordings']}"
             f" octaveMoves={events['octave_moves']} maxShift={max(shifts):.1f} onPitch={r['on_pitch_pct']}%"
+            f" sounding={r['sounding_pct']}% mostlySilent={r['notes_mostly_silent']}"
         )
         golden = json.loads((GOLDEN / f"{song}.json").read_text())
         g = golden["metrics"]
@@ -122,6 +123,7 @@ def main():
             f" reatk={g['notes_with_retrigger']} recs={g['distinct_recordings']}"
             f" octaveMoves={golden['octave_moves']}"
             + (f" onPitch={g['on_pitch_pct']}%" if "on_pitch_pct" in g else "")
+            + (f" sounding={g['sounding_pct']}% mostlySilent={g['notes_mostly_silent']}" if "sounding_pct" in g else "")
         )
         # Note by note against the golden heard_cents (both rounded to the cent): information only.
         heard = {n["index"]: n["heard_cents"] for n in golden["notes"]}
