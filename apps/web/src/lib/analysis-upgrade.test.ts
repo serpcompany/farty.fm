@@ -10,10 +10,12 @@ import { encodeWav, type PcmAudio } from './wav'
 // The analysis upgrade (#208) over a real IndexedDB (fake-indexeddb), with a fake analysis.
 
 let page: Awaited<ReturnType<typeof openPage>>
+const reportError = vi.fn()
 
 /** A page of Farty: fresh modules, over this browser's database. */
 async function openPage() {
   vi.resetModules()
+  vi.doMock('./telemetry/errors', () => ({ reportError }))
   return {
     store: await import('./recording-store'),
     upgrade: await import('./analysis-upgrade')
@@ -33,6 +35,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  reportError.mockReset()
 })
 
 /** A Melodic analysis as a release before #116 stored it: no settle time and no version. */
@@ -133,6 +136,8 @@ describe('upgradeAnalyses', () => {
     expect(fetch).toHaveBeenCalled()
     expect(analyze).not.toHaveBeenCalled()
     expect(updated).not.toHaveBeenCalled()
+    // Audio this browser can't get yet isn't an analysis failure.
+    expect(reportError).not.toHaveBeenCalled()
     const now = await storedNow(recording.id)
     expect(now).toEqual(recording)
     expect(now?.analysis).toEqual({ state: 'analyzed', analysis: stored })
@@ -160,5 +165,7 @@ describe('upgradeAnalyses', () => {
       analysis: fresh(0.2)
     })
     expect(updated).toHaveBeenCalledTimes(1)
+    expect(reportError).toHaveBeenCalledOnce()
+    expect(reportError).toHaveBeenCalledWith('analysis-failed', new Error('Analysis failed'))
   })
 })

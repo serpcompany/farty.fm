@@ -272,9 +272,13 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       onLibraryChanged(change => {
         if (change.reset) {
           stopPlayback()
-          void store
-            .loadRecordings()
-            .then(setRecordings, error => reportError('library-reload-failed', error))
+          void store.loadRecordings().then(
+            loaded => {
+              setRecordings(loaded)
+              void upgradeAnalyses(loaded, analyze, replace)
+            },
+            error => reportError('library-reload-failed', error)
+          )
           void tootStore
             .loadToots()
             .then(setToots, error => reportError('library-reload-failed', error))
@@ -287,6 +291,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           stopPlayback()
         }
         for (const id of deleted.toots) forgetDecoded(`toot-${id}`)
+        // The account keeps the analysis each Recording was uploaded with, maybe an older one.
+        void upgradeAnalyses(added, analyze, replace)
         setRecordings(list => {
           if (!list) return list
           const kept = list.filter(r => !deleted.recordings.includes(r.id))
@@ -315,7 +321,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           )
         })
       }),
-    []
+    [replace]
   )
 
   const finishWelcome = useCallback(() => {

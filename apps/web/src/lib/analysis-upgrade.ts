@@ -1,5 +1,6 @@
 import { loadAudio, saveAnalysis } from './recording-store'
 import { type Analysis, needsReanalysis, type Recording } from './recordings'
+import { reportError } from './telemetry/errors'
 import { decodeWav, type PcmAudio } from './wav'
 
 /**
@@ -15,7 +16,8 @@ import { decodeWav, type PcmAudio } from './wav'
  * downloading is shared, not fetched again (`download` in `recording-store.ts`).
  *
  * If one fails (its audio can't be read or downloaded, or analysis fails), its stored analysis
- * stays exactly as it was, so the next open tries again.
+ * stays exactly as it was, so the next open tries again. A failed analysis is reported
+ * (`analysis-failed`); audio this browser can't get yet, such as offline, is not.
  */
 export async function upgradeAnalyses(
   recordings: Recording[],
@@ -24,12 +26,18 @@ export async function upgradeAnalyses(
 ): Promise<void> {
   for (const recording of recordings) {
     if (!needsReanalysis(recording)) continue
+    let wav: ArrayBuffer
     try {
-      const analysis = await analyze(decodeWav(await loadAudio(recording.id)))
+      wav = await loadAudio(recording.id)
+    } catch {
+      continue // The next open tries again.
+    }
+    try {
+      const analysis = await analyze(decodeWav(wav))
       const saved = await saveAnalysis(recording.id, { state: 'analyzed', analysis })
       if (saved) updated(saved)
-    } catch {
-      // The next open tries again.
+    } catch (error) {
+      reportError('analysis-failed', error) // The next open tries again.
     }
   }
 }
