@@ -6,17 +6,17 @@ export default function PrivacyPage() {
   return (
     <article className="flex flex-col gap-3 px-4 pt-4 pb-6 text-sm leading-relaxed [&_a]:underline [&_h2]:pt-3 [&_h2]:text-lg [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
       <h1 className="text-3xl font-bold tracking-tight">Privacy</h1>
-      <p className="text-muted-foreground">Last updated: October 22, 2026</p>
+      <p className="text-muted-foreground">Last updated: October 25, 2026</p>
       <p>
         Farty records your farts, finds the note of each one, and plays songs with them. This policy
         explains what happens to your data. The short version:{' '}
-        <strong>without an account, nothing you record is kept.</strong>
+        <strong>without an account, nothing you record leaves your device.</strong>
       </p>
 
       <h2>Without an account</h2>
       <p>
-        Nothing you record is kept. Your Recordings and Toots last only until you close Farty, and
-        they stay in your browser on your device. We never receive them.
+        Your Recordings stay in your browser on your device, and your Toots last only until you
+        close Farty. We never receive them.
       </p>
 
       <h2>With an account</h2>
@@ -76,7 +76,8 @@ export default function PrivacyPage() {
       <h2>Deleting your data</h2>
       <p>
         Delete account on Profile removes your email, Recordings and Toots. Without an account,
-        close Farty and everything is gone.
+        delete a Recording on the Recordings tab, or clear this site&apos;s data in your browser to
+        remove everything.
       </p>
 
       <h2>Children</h2>
