@@ -29,34 +29,24 @@ const problems: Record<
 }
 
 /**
- * The Record tab: one big red button. Matches the iPhone app's `RecordTab`. The microphone stays
- * open while it shows, through a take, and closes once Review or Result opens. A computer shows the
+ * The Record tab: one big red button. Matches the iPhone app's `RecordTab`. Once it shows, the
+ * microphone stays open for the rest of the launch (`keepMicrophoneOpen`). A computer shows the
  * product page instead (`lander.tsx`), so there the microphone stays shut, and widening a narrow
  * window into the product page lets it go (#199).
  */
 export function RecordScreen() {
   const pedos = usePedos()
   const alert = pedos.problem && pedos.problem !== 'nothingHeard' ? pedos.problem : null
-  const flowOpen = pedos.flow !== null
   useEffect(() => {
-    if (flowOpen) return
-    // A window resized across the query switches between the app and the product page, so the
-    // microphone follows it: a window widened into the product page lets it go.
+    // A window narrowed out of the product page shows Record again.
     const computer = window.matchMedia(desktop)
-    let release: (() => void) | undefined
     const follow = () => {
-      if (computer.matches) {
-        release?.()
-        release = undefined
-      } else release ??= keepMicrophoneOpen()
+      if (!computer.matches) keepMicrophoneOpen()
     }
     follow()
     computer.addEventListener('change', follow)
-    return () => {
-      computer.removeEventListener('change', follow)
-      release?.()
-    }
-  }, [flowOpen])
+    return () => computer.removeEventListener('change', follow)
+  }, [])
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-7">

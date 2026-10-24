@@ -53,7 +53,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Microphone off (alert)
 - **Error, couldn't start:** "Couldn't start recording", with Try again
 - **Error, interrupted** (a call or another app took the microphone): "Recording stopped. Nothing was saved.", with Try again
-- **Starting:** on the web, a tap before the microphone is open (the first tap before permission, or a tap as the screen opens) shows "Starting…" on the button until audio comes in. The microphone stays open while Record shows, so later taps capture at once, with the 300 ms before the tap.
+- **Starting:** on the web, a tap before the microphone is open (the first tap before permission, or a tap as the screen opens) shows "Starting…" on the button until audio comes in. Once Record has shown, the microphone stays open for the rest of the launch while the page shows, through Review, Result and the other tabs, so later taps capture at once, with the 300 ms before the tap.
 - **Nothing heard:** a take with nothing louder than the room goes straight back to Idle with "Didn't catch that. Try again." and nothing to save. On the web, its loudest 50 ms must reach -50 dBFS and stand at least 4 dB above the take's own room (its 10th-percentile 50 ms level), so short farts count. The iPhone app still turns away takes shorter than 0.5 s.
 **NAVIGATION TYPE:** Tab.
 **PATTERN CHOICE:** Recording fills the screen over the tabs, and Stop goes on to Review in the same full-screen cover. Apple's HIG says not to disable tab bar buttons; a modal may cover them.
