@@ -261,7 +261,8 @@ def silent_cost(note_seconds, recording_seconds, shift):
     prefers a long Recording. Picked from 0, 10, 20, 30, 40, 60 and 80 on the 12 app Songs with
     the Fixture Library: every value keeps all 12 passing with no Octave Move notes, and 30 is
     the smallest that plays Happy Birthday's last half note in full (0.41 to 1.18 s). Above 30
-    sounding time gains little and on-pitch time keeps falling (amazing 83% at 40).
+    sounding time gains little (90.0% to at most 93.2%) and single Songs lose on-pitch time:
+    amazing 90 to 83% from 40 up, row 90 to 88% from 40 up, and frere 95 to 81% at 80.
     """
     played = recording_seconds * 2 ** (-shift / 12)
     return SILENT_COST_PER_S * sum(max(0.0, a - played) for a in note_seconds)

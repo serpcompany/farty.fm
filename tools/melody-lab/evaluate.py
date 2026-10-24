@@ -61,16 +61,18 @@ def on_pitch_share(audio, melody, events, bpm):
 
 
 SOUNDING_DB = 30  # a 10 ms frame sounds when it is within this many dB of the note's peak
+SILENT_FLOOR_DB = -80  # and is louder than this (dBFS), so a silent note doesn't count as sounding
 
 
 def sounding_share(seg):
     """Share of a note's time that sounds: 10 ms frames (5 ms apart) within SOUNDING_DB of the
-    note's loudest frame. A fart shorter than its note leaves the rest silent (#205)."""
+    note's loudest frame and above SILENT_FLOOR_DB. A fart shorter than its note leaves the rest
+    silent (#205)."""
     hop = int(0.005 * SR)
     if len(seg) < 2 * hop:
         return 0.0
     db = 20 * np.log10(librosa.feature.rms(y=seg, frame_length=2 * hop, hop_length=hop)[0] + 1e-9)
-    return float(np.mean(db > db.max() - SOUNDING_DB))
+    return float(np.mean((db > db.max() - SOUNDING_DB) & (db > SILENT_FLOOR_DB)))
 
 
 def evaluate(audio, melody, events, bpm):
