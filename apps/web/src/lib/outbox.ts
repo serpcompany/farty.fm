@@ -1,8 +1,8 @@
 // The outbox: what this browser still has to send to the account, one entry per Recording or
 // Toot, kept in IndexedDB beside them (`recording-store.ts`) and written in the same transaction
 // as the change it records. `library-sync.ts` sends it. Every save, rename and delete joins it,
-// a guest's too, so signing in sends everything this visit made; a guest's new visit clears it
-// with the farts (`visit.ts`).
+// a guest's too, so signing in sends what a guest kept: their Recordings, and this visit's Toots.
+// A guest's new visit clears the Toots' entries with the Toots (`visit.ts`).
 
 /** A user's Recordings or their Toots, by the name of their store and their route. */
 export type Kind = 'recordings' | 'toots'

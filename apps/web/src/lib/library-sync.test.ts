@@ -540,6 +540,33 @@ describe('forgetLibrary', () => {
     expect(await page.store.loadRecordings()).toEqual([])
     expect(changes).toEqual([{ reset: true }])
   })
+
+  // A guest's Recordings are kept (#203): an account's left here as a guest's would upload to the
+  // next account signed in to.
+  it("keeps the library the account's when the clear fails", async () => {
+    await page.sync.claimLibrary('user-a', 'a@example.com')
+    const recording = await recorded()
+    const original = IDBObjectStore.prototype.clear
+    // As a full disk does: the transaction aborts once its requests are made.
+    IDBObjectStore.prototype.clear = function (this: IDBObjectStore) {
+      const request = original.call(this)
+      queueMicrotask(() => {
+        try {
+          this.transaction.abort()
+        } catch {
+          // Aborted already.
+        }
+      })
+      return request
+    }
+    try {
+      await page.sync.forgetLibrary()
+    } finally {
+      IDBObjectStore.prototype.clear = original
+    }
+    expect(localStorage.getItem('pedos.account')).toBe('user-a')
+    expect((await page.store.loadRecordings()).map(r => r.id)).toEqual([recording.id])
+  })
 })
 
 describe('a guest who records, then signs in', () => {

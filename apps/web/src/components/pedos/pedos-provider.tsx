@@ -234,7 +234,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setShowsWelcome(localStorage.getItem(welcomedKey) === null)
-    // A guest's new visit first clears the last one's Recordings and Toots (`visit.ts`).
+    // A guest's new visit first clears the last one's Toots (`visit.ts`).
     const library = openVisit().library
     library.then(store.loadRecordings).then(loaded => {
       // An analysis cut off by closing the page starts again, and those stored before #116 get
