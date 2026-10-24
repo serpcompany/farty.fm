@@ -1,4 +1,4 @@
-import { audioContext, setAudioSession } from './context'
+import { audioContext, setPlaybackSession } from './context'
 
 /**
  * Each sound's decode, by key, so replaying doesn't decode again and taps during a decode share it.
@@ -40,7 +40,7 @@ export async function play(
   const request = requests
   try {
     const context = audioContext()
-    setAudioSession('playback')
+    setPlaybackSession()
     await context.resume()
     let decoding = decoded.get(key)
     if (!decoding) {

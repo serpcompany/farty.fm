@@ -1,6 +1,7 @@
+import { desktop } from '@/lib/desktop'
 import type { PcmAudio } from '@/lib/wav'
 import { type CaptureBatch, type CaptureCommand, captureProcessorSource } from './capture-processor'
-import { audioContext, setAudioSession } from './context'
+import { audioContext, setMicrophoneSession } from './context'
 
 /** A take in progress. `stop` returns the raw microphone audio; `cancel` throws it away. */
 export type Take = {
@@ -43,23 +44,33 @@ let generation = 0
 let granted = false
 let capturing: Capturing | null = null
 let takes = 0
-/** How many Record screens keep the microphone open: one, or none. */
-let keepers = 0
+/** The microphone stays open for the rest of the launch (`keepMicrophoneOpen`). */
+let keeping = false
 
 /** A take that hasn't sent its first batch by now, with the microphone open, didn't start. */
 const firstBatchTimeoutMs = 3000
 
-const loadedContexts = new WeakSet<BaseAudioContext>()
+/** Each context's load of the capture processor, shared by Record's preload and the first tap. */
+const loads = new WeakMap<BaseAudioContext, Promise<void>>()
 
-async function loadCaptureProcessor(context: AudioContext): Promise<void> {
-  if (loadedContexts.has(context)) return
-  const url = URL.createObjectURL(new Blob([captureProcessorSource], { type: 'text/javascript' }))
-  try {
-    await context.audioWorklet.addModule(url)
-    loadedContexts.add(context)
-  } finally {
-    URL.revokeObjectURL(url)
-  }
+function loadCaptureProcessor(context: AudioContext): Promise<void> {
+  const loaded = loads.get(context)
+  if (loaded) return loaded
+  // Async, so a browser without `audioWorklet` rejects rather than throws.
+  const loading = (async () => {
+    const url = URL.createObjectURL(new Blob([captureProcessorSource], { type: 'text/javascript' }))
+    try {
+      await context.audioWorklet.addModule(url)
+    } finally {
+      URL.revokeObjectURL(url)
+    }
+  })()
+  loads.set(context, loading)
+  // A load that failed is tried again by the next caller.
+  loading.catch(() => {
+    if (loads.get(context) === loading) loads.delete(context)
+  })
+  return loading
 }
 
 /**
@@ -112,13 +123,13 @@ const microphoneConstraints: MediaStreamConstraints = {
 
 async function connect(openedIn: number): Promise<Microphone> {
   const context = audioContext()
-  setAudioSession('play-and-record')
+  setMicrophoneSession(true)
   let stream: MediaStream
   try {
     stream = await navigator.mediaDevices.getUserMedia(microphoneConstraints)
   } catch (error) {
     if (openedIn !== generation) throw new MicrophoneReleasedError()
-    setAudioSession('playback')
+    setMicrophoneSession(false)
     if (error instanceof DOMException && error.name === 'NotAllowedError') {
       throw new MicrophoneDeniedError()
     }
@@ -142,7 +153,7 @@ async function connect(openedIn: number): Promise<Microphone> {
     if (openedIn !== generation) throw new MicrophoneReleasedError()
   } catch (error) {
     for (const track of stream.getTracks()) track.stop()
-    if (openedIn === generation) setAudioSession('playback')
+    if (openedIn === generation) setMicrophoneSession(false)
     throw error
   }
 
@@ -198,8 +209,8 @@ function interrupted(mic: Microphone): boolean {
 }
 
 /**
- * Closes the microphone and puts the audio session back to playback, so sound plays at full
- * volume on iPhone. A take in progress is lost, and one still opening the microphone fails.
+ * Closes the microphone and puts the audio session back to playback. A take in progress is lost,
+ * and one still opening the microphone fails.
  */
 export function releaseMicrophone(): void {
   generation += 1
@@ -219,7 +230,7 @@ export function releaseMicrophone(): void {
     closing.node.port.onmessage = null
     for (const track of closing.stream.getTracks()) track.stop()
   }
-  setAudioSession('playback')
+  setMicrophoneSession(false)
 }
 
 function send(node: AudioWorkletNode, command: CaptureCommand): void {
@@ -313,41 +324,58 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
 }
 
 /**
- * Keeps the microphone open while the Record screen shows, so a tap starts capturing at once and
- * the take has its pre-roll. It opens only when permission is already granted, so Farty doesn't
- * ask as soon as it opens; otherwise the first tap opens it. Hiding the page lets it go, and
- * showing the page again opens it. Returns the function that lets it go.
+ * Keeps the microphone open for the rest of the launch, from the first time the Record screen
+ * shows: through Review, Result and the other tabs, so every tap on Record captures at once with
+ * its pre-roll. Sounds meanwhile play in the microphone's session (`setPlaybackSession`). It opens
+ * only when permission is already granted, so Farty doesn't ask as soon as it opens; otherwise
+ * the first tap opens it. Hiding the page lets it go, and showing the page again opens it. A
+ * computer's product page lets it go until Record shows again (#199).
  */
-export function keepMicrophoneOpen(): () => void {
-  let kept = true
-  keepers += 1
-  const open = async () => {
-    if (!(await microphoneGranted())) return
-    if (kept && document.visibilityState === 'visible') openMicrophone().catch(() => {})
+export function keepMicrophoneOpen(): void {
+  if (window.matchMedia(desktop).matches) return
+  if (!keeping) {
+    keeping = true
+    computer = window.matchMedia(desktop)
+    computer.addEventListener('change', becameComputer)
+    document.addEventListener('visibilitychange', visibilityChanged)
+    window.addEventListener('pagehide', releaseMicrophone)
   }
-  const visibilityChanged = () => {
-    if (document.visibilityState === 'hidden') releaseMicrophone()
-    else void open()
+  void openIfGranted()
+}
+
+let computer: MediaQueryList | null = null
+
+/** A window widened into the product page lets the microphone go. */
+function becameComputer(event: MediaQueryListEvent): void {
+  if (!event.matches) return
+  keeping = false
+  computer?.removeEventListener('change', becameComputer)
+  document.removeEventListener('visibilitychange', visibilityChanged)
+  window.removeEventListener('pagehide', releaseMicrophone)
+  releaseMicrophone()
+}
+
+function visibilityChanged(): void {
+  if (document.visibilityState === 'hidden') releaseMicrophone()
+  else void openIfGranted()
+}
+
+async function openIfGranted(): Promise<void> {
+  if (!(await microphoneGranted())) {
+    // The first tap then waits only for the microphone. The context stays suspended until a tap.
+    loadCaptureProcessor(audioContext()).catch(() => {})
+    return
   }
-  void open()
-  document.addEventListener('visibilitychange', visibilityChanged)
-  window.addEventListener('pagehide', releaseMicrophone)
-  return () => {
-    kept = false
-    keepers -= 1
-    document.removeEventListener('visibilitychange', visibilityChanged)
-    window.removeEventListener('pagehide', releaseMicrophone)
-    releaseMicrophone()
-  }
+  if (keeping && document.visibilityState === 'visible') openMicrophone().catch(() => {})
 }
 
 /**
- * Asks for the microphone before the first take, as Welcome does. Over the Record screen it opens
- * the microphone and keeps it, so the first tap captures at once with its pre-roll; anywhere else
- * it closes it again. Throws `MicrophoneDeniedError` when the person says no.
+ * Asks for the microphone before the first take, as Welcome does. Once Record has shown, it opens
+ * the microphone and keeps it, so the first tap captures at once with its pre-roll; before that it
+ * closes it again. Throws `MicrophoneDeniedError` when the person says no.
  */
 export async function askForMicrophone(): Promise<void> {
-  if (keepers > 0) {
+  if (keeping) {
     await openMicrophone()
     return
   }
