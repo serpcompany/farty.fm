@@ -56,8 +56,15 @@ const loads = new WeakMap<BaseAudioContext, Promise<void>>()
 function loadCaptureProcessor(context: AudioContext): Promise<void> {
   const loaded = loads.get(context)
   if (loaded) return loaded
-  const url = URL.createObjectURL(new Blob([captureProcessorSource], { type: 'text/javascript' }))
-  const loading = context.audioWorklet.addModule(url).finally(() => URL.revokeObjectURL(url))
+  // Async, so a browser without `audioWorklet` rejects rather than throws.
+  const loading = (async () => {
+    const url = URL.createObjectURL(new Blob([captureProcessorSource], { type: 'text/javascript' }))
+    try {
+      await context.audioWorklet.addModule(url)
+    } finally {
+      URL.revokeObjectURL(url)
+    }
+  })()
   loads.set(context, loading)
   // A load that failed is tried again by the next caller.
   loading.catch(() => {
