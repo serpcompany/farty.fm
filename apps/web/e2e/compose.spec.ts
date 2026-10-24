@@ -9,8 +9,7 @@ import {
 import { skipWelcome } from './record'
 
 // Compose and the Result screen, with Recordings made through the fake microphone in
-// `fake-microphone.ts`, which plays each fart as the person presses Record. A guest's Recordings
-// last the visit, so the whole journey is one page.
+// `fake-microphone.ts`, which plays each fart as the person presses Record, all on one page.
 //
 // Mary Had a Little Lamb unlocks with fixtures 090 (G3), 084 and 086 (both G♯3) and 094 (B3): the
 // reference's golden Arrangement for Mary with the whole Fixture Library.
