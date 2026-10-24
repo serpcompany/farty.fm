@@ -15,6 +15,8 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { wide } from '@/lib/desktop'
+import { TOOT_PRICE_LABEL } from '@/lib/pricing'
+import { saveAsksForPayment } from '@/lib/toot-payment'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { usePedos } from './pedos-provider'
@@ -291,7 +293,12 @@ const steps = [
 ]
 
 const faq = [
-  { question: 'Is Farty free?', answer: 'Yes. Farty is free, and so is an account.' },
+  {
+    question: 'Is Farty free?',
+    answer: saveAsksForPayment()
+      ? `Recording and making Toots is free, and so is an account. Saving a Toot costs ${TOOT_PRICE_LABEL}.`
+      : 'Yes. Farty is free, and so is an account.'
+  },
   {
     question: 'Do I need an app store?',
     answer: "No. Farty opens in your phone's browser, and you can add it to your Home Screen."
