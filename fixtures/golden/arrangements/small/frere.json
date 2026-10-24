@@ -28,15 +28,15 @@
     },
     {
       "octave_move": false,
-      "recording": "021",
-      "shift_semitones": -0.22592059366017025,
+      "recording": "002",
+      "shift_semitones": 1.5740794063398198,
       "song_pitch": 59,
       "target_midi": 48
     },
     {
       "octave_move": false,
-      "recording": "002",
-      "shift_semitones": 2.57407940633982,
+      "recording": "021",
+      "shift_semitones": 0.7740794063398297,
       "song_pitch": 60,
       "target_midi": 49
     },
@@ -59,7 +59,7 @@
     "covered": 5,
     "total": 7
   },
-  "plan_cost": 55.70153260534197,
+  "plan_cost": 74.03665835353522,
   "render_settings": null,
   "song": "frere",
   "transpose": -11,

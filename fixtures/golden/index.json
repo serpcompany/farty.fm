@@ -97,7 +97,7 @@
       "title": "Twinkle, Twinkle, Little Star",
       "transpose": {
         "full": -18,
-        "small": -24
+        "small": -30
       },
       "unlocked": {
         "full": true,
@@ -109,7 +109,7 @@
       "notes": 26,
       "title": "Mary Had a Little Lamb",
       "transpose": {
-        "full": -18,
+        "full": -31,
         "small": -26
       },
       "unlocked": {
@@ -122,8 +122,8 @@
       "notes": 26,
       "title": "Jingle Bells",
       "transpose": {
-        "full": -8,
-        "small": -14
+        "full": -18,
+        "small": -18
       },
       "unlocked": {
         "full": true,
@@ -161,7 +161,7 @@
       "notes": 31,
       "title": "When the Saints Go Marching In",
       "transpose": {
-        "full": -7,
+        "full": -22,
         "small": -19
       },
       "unlocked": {
@@ -174,7 +174,7 @@
       "notes": 27,
       "title": "Row, Row, Row Your Boat",
       "transpose": {
-        "full": -13,
+        "full": -26,
         "small": -26
       },
       "unlocked": {
@@ -187,7 +187,7 @@
       "notes": 30,
       "title": "Ode to Joy",
       "transpose": {
-        "full": -13,
+        "full": -15,
         "small": -26
       },
       "unlocked": {
@@ -201,7 +201,7 @@
       "title": "We Wish You a Merry Christmas",
       "transpose": {
         "full": -14,
-        "small": -20
+        "small": -21
       },
       "unlocked": {
         "full": true,
@@ -213,8 +213,8 @@
       "notes": 16,
       "title": "Amazing Grace",
       "transpose": {
-        "full": -23,
-        "small": -20
+        "full": -20,
+        "small": -21
       },
       "unlocked": {
         "full": true,
@@ -239,7 +239,7 @@
       "notes": 29,
       "title": "Auld Lang Syne",
       "transpose": {
-        "full": -21,
+        "full": -18,
         "small": -19
       },
       "unlocked": {
@@ -252,7 +252,7 @@
       "notes": 30,
       "title": "Ode to Joy (Mutopia SATB)",
       "transpose": {
-        "full": -13,
+        "full": -15,
         "small": -26
       },
       "unlocked": {

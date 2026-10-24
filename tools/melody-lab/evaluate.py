@@ -9,6 +9,7 @@ import numpy as np
 
 SR = 44100
 HOP = 256
+GAP_S = 0.025  # engine.GAP_S: the silence the renderer leaves before each next note
 
 
 def has_reattack(seg):
@@ -59,6 +60,19 @@ def on_pitch_share(audio, melody, events, bpm):
     return float(np.mean(np.abs(cents) <= ON_PITCH_CENTS)) if len(cents) else 0.0
 
 
+SOUNDING_DB = 30  # a 10 ms frame sounds when it is within this many dB of the note's peak
+
+
+def sounding_share(seg):
+    """Share of a note's time that sounds: 10 ms frames (5 ms apart) within SOUNDING_DB of the
+    note's loudest frame. A fart shorter than its note leaves the rest silent (#205)."""
+    hop = int(0.005 * SR)
+    if len(seg) < 2 * hop:
+        return 0.0
+    db = 20 * np.log10(librosa.feature.rms(y=seg, frame_length=2 * hop, hop_length=hop)[0] + 1e-9)
+    return float(np.mean(db > db.max() - SOUNDING_DB))
+
+
 def evaluate(audio, melody, events, bpm):
     spb = 60 / bpm
     f0, voiced, vprob = librosa.pyin(audio, fmin=45, fmax=1200, sr=SR, frame_length=2048, hop_length=HOP)
@@ -66,7 +80,7 @@ def evaluate(audio, melody, events, bpm):
     onset_env = librosa.onset.onset_strength(y=audio, sr=SR, hop_length=HOP)
     onsets = librosa.onset.onset_detect(onset_envelope=onset_env, sr=SR, hop_length=HOP, units="time", backtrack=False)
 
-    per_note, errors = [], []
+    per_note, errors, sounding = [], [], []
     retrigger_notes = 0
     for e in events:
         n = melody.notes[e["note_index"]]
@@ -80,6 +94,9 @@ def evaluate(audio, melody, events, bpm):
             cents = float((heard - e["target_midi"]) * 100)
             errors.append(cents)
         retrigger_notes += has_reattack(audio[int(s * SR): int((s + heard_len) * SR)])
+        # the note's whole slot: its written length less the gap before the next note
+        slot = max(0.06, n.dur * spb - GAP_S)
+        sounding.append(sounding_share(audio[int(s * SR): int(s * SR) + int(slot * SR)]))
         per_note.append({"i": e["note_index"], "target": int(e["target_midi"]), "cents": None if cents is None else round(cents)})
 
     errors = np.array(errors)
@@ -98,5 +115,7 @@ def evaluate(audio, melody, events, bpm):
         "notes_with_retrigger": retrigger_notes,
         "distinct_recordings": len({e["source_id"] for e in events}),
         "on_pitch_pct": round(100 * on_pitch_share(audio, melody, events, bpm)),
+        "sounding_pct": round(100 * float(np.mean(sounding))) if sounding else None,
+        "notes_mostly_silent": sum(1 for x in sounding if x < 0.5),
         "per_note": per_note,
     }

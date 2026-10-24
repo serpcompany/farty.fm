@@ -41,16 +41,16 @@
       "target_midi": 48
     },
     {
-      "octave_move": false,
-      "recording": "021",
-      "shift_semitones": 1.7740794063398297,
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
       "song_pitch": 71,
       "target_midi": 50
     },
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "octave_move": false,
+      "recording": "021",
+      "shift_semitones": 2.7740794063398297,
       "song_pitch": 72,
       "target_midi": 51
     },
@@ -66,7 +66,7 @@
     "covered": 5,
     "total": 8
   },
-  "plan_cost": 50.43865273358689,
+  "plan_cost": 86.54565704017928,
   "render_settings": null,
   "song": "birthday",
   "transpose": -21,

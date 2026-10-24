@@ -5,10 +5,12 @@
     "distinct_recordings": 4,
     "median_abs_cents": 2.6,
     "notes": 26,
+    "notes_mostly_silent": 0,
     "notes_with_retrigger": 0,
     "on_pitch_pct": 95,
     "onsets_on_time_pct": 96,
     "pitch_readable_pct": 100,
+    "sounding_pct": 92,
     "within_50c_any_octave_pct": 100,
     "within_50c_pct": 100
   },
@@ -387,7 +389,7 @@
     "covered": 4,
     "total": 4
   },
-  "plan_cost": 146.1103100446231,
+  "plan_cost": 172.08791719359667,
   "render_settings": {
     "bpm": 84,
     "tune": 1.0

@@ -25,6 +25,7 @@ import {
   HIGHEST_TRANSPOSITION,
   LOWEST_TRANSPOSITION,
   moveCost,
+  silentCost,
   tooShortCost,
   unsettledCost
 } from './auto-map'
@@ -72,18 +73,21 @@ function arrangementCost(song: Song, transpose: number, recordingFor: Map<number
     const settle = (r.settle_s as number) * exp2(-shift / 12)
     let short = 0
     let unsettled = 0
+    const silent: number[] = []
     for (const n of notes) {
       const sounds = Math.min(n.dur * spb - 0.025, played)
       const shortest = r.shortest_note_s as number
       if (sounds < shortest) short += 8 + 400 * (shortest - sounds)
       unsettled += (20 * Math.min(sounds, settle)) / Math.max(1e-9, sounds)
+      silent.push(Math.max(0, n.dur * spb - 0.025 - played))
     }
-    cost += neumaierSum(notes.map(n => n.dur)) * perBeat + short + unsettled
+    cost +=
+      neumaierSum(notes.map(n => n.dur)) * perBeat + short + unsettled + 30 * neumaierSum(silent)
   }
   return { uncovered, octaves, cost }
 }
 
-/** Python 3.12's `sum()` of floats, as `golden_cost.py` sums a pitch's beats. */
+/** Python 3.12's `sum()` of floats, as `golden_cost.py` sums a pitch's beats and silent seconds. */
 function neumaierSum(values: number[]): number {
   let s = 0
   let c = 0
@@ -347,6 +351,14 @@ describe('Auto-map inputs and terms', () => {
     // An Octave Move up halves the settle time and the gesture.
     expect(unsettledCost([0.5], 1, 0.1, 12)).toBeCloseTo(20 * 0.1, 9)
     expect(unsettledCost([0.5, 0.05], 1, 0, 0)).toBe(0)
+  })
+
+  it('charges the seconds of each note the Recording is too short to fill', () => {
+    // A 0.4 s gesture leaves 0.6 s of a 1 s note silent, and nothing of a 0.3 s note.
+    expect(silentCost([1, 0.3], 0.4, 0)).toBeCloseTo(30 * 0.6, 9)
+    expect(silentCost([0.3], 0.4, 0)).toBe(0)
+    // An Octave Move up halves the gesture: 0.8 s of the 1 s note is silent.
+    expect(silentCost([1], 0.4, 12)).toBeCloseTo(30 * 0.8, 9)
   })
 
   it('orders ids by code point', () => {

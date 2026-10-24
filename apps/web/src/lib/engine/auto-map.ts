@@ -6,8 +6,8 @@ import { type Song, secondsPerBeat } from './song'
 
 // Auto-map and Pitch Coverage: a port of `AutoMap.swift`, the iPhone 1.0 planner, which ports the
 // reference engine's `melody_fit()` (`tools/melody-lab/engine.py`) and the unlock rule of ADR 0004
-// and ADR 0006. Since #116 it also has the reference's settle cost, which the Swift port, frozen
-// at golden format 2, doesn't.
+// and ADR 0006. Since #116 it also has the reference's settle cost, and since #205 its silence
+// cost, which the Swift port, frozen at golden format 2, doesn't.
 //
 // Each distinct Song pitch gets its own Melodic Recording (one to one, never reused), shifted at
 // most 3 semitones, or with an Octave Move (12 semitones up or down, plus at most 3) where the
@@ -32,6 +32,8 @@ const TOO_SHORT_COST = 8
 const TOO_SHORT_COST_PER_SECOND = 400
 /** Cost of a note played entirely before its Recording settles on pitch; less for part of it. */
 const UNSETTLED_COST = 20
+/** Cost per second of a note its Recording is too short to fill. */
+const SILENT_COST_PER_SECOND = 30
 /** Silence before the next note: a note sounds for its length minus this. */
 const GAP_SECONDS = 0.025
 /** Arrangement costs this close are equal. */
@@ -260,6 +262,21 @@ export function unsettledCost(
   return cost
 }
 
+/**
+ * Cost of the part of each note a Recording is too short to fill (#205). A note sounds as in
+ * `tooShortCost`; the rest of it is silence, which costs `SILENT_COST_PER_SECOND` per second, so a
+ * long note prefers a long Recording. The seconds are summed first, with Python's `sum()`, as the
+ * reference does.
+ */
+export function silentCost(
+  noteSeconds: readonly number[],
+  recordingSeconds: number,
+  shift: number
+): number {
+  const played = recordingSeconds * exp2(-shift / 12)
+  return SILENT_COST_PER_SECOND * pythonSum(noteSeconds.map(a => Math.max(0, a - played)))
+}
+
 /** Ids compare by code point, as the reference's Python strings do (and UTF-8 bytes). */
 export function compareIds(a: string, b: string): number {
   let i = 0
@@ -343,7 +360,8 @@ class Table {
           tooShortCost(noteSeconds[i], r.gestureSeconds, r.shortestNoteSeconds as number, shift) +
           (r.settleSeconds === null
             ? 0
-            : unsettledCost(noteSeconds[i], r.gestureSeconds, r.settleSeconds, shift))
+            : unsettledCost(noteSeconds[i], r.gestureSeconds, r.settleSeconds, shift)) +
+          silentCost(noteSeconds[i], r.gestureSeconds, shift)
       })
     })
   }
