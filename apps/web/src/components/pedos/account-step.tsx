@@ -238,7 +238,8 @@ function Step() {
               className="text-center text-sm text-muted-foreground"
               data-testid="account-step-guest"
             >
-              Without an account, your farts are gone when you close Farty.
+              Without an account, your Recordings stay only in this browser, and your Toots are gone
+              when you close Farty.
             </p>
           )}
           <Button variant="secondary" className="h-12 text-base" onClick={skipStep}>
