@@ -299,7 +299,7 @@ const faq = [
   {
     question: 'Where do my farts go?',
     answer:
-      'Without an account they stay in the browser you recorded them in, and are gone when you close Farty. Sign in with your email to keep them.'
+      'Without an account, your Recordings stay in the browser you recorded them in, and your Toots are gone when you close Farty. Sign in with your email to keep them all, on any phone.'
   },
   {
     question: 'Why has my fart got no note?',
