@@ -1,12 +1,15 @@
 # The second PDMX batch (#202): more well-known tunes that are public domain as compositions,
 # none already in catalog/catalog.json or titles-01.txt.
 # id | catalog title | other titles a score of the same Song may carry (optional, ; separated)
-# A score matches when its title, or its title before " - ", "(", "[" or ":", is one of these.
+# A score matches when its title, its title before " - ", "(", "[" or ":", or its MuseScore song
+# name is one of these.
 # Left out: titles no pickable PDMX score matches, and titles whose matching scores include a
 # different tune under the same name (a hymn set to several tunes, or a copyrighted song).
-# Every tune here is public domain where copyright lasts the composer's life plus 70 years, as well
-# as in the US, so songs like "Bye Bye Blackbird", "Take Me Out to the Ball Game" and "O Sole Mio"
-# wait for a later batch.
+# Every tune here is public domain in the US and where copyright lasts the author's life plus 70
+# years. The authors are the composer and, for a song whose words were written with the music, the
+# lyricist (as the EU counts it); words added later, as on "The Teddy Bears' Picnic" or "Hava
+# Nagila", don't count. So "Bye Bye Blackbird", "Take Me Out to the Ball Game", "O Sole Mio",
+# "Cielito Lindo", "When Irish Eyes Are Smiling" and "O mio babbino caro" wait for a later batch.
 # Also left out: titles whose pick, as the importer reads it, isn't the tune most scores of that
 # title carry: the highest track is an accompaniment or a one-note ostinato ("Go Tell It on the
 # Mountain", "Molly Malone", "The Ash Grove"), or the score sets another tune of the same name
@@ -53,7 +56,6 @@ skye-boat-song | The Skye Boat Song | Skye Boat Song
 irish-washerwoman | The Irish Washerwoman | Irish Washerwoman
 wild-rover | The Wild Rover | Wild Rover
 waltzing-matilda | Waltzing Matilda
-cielito-lindo | Cielito Lindo
 santa-lucia | Santa Lucia
 funiculi | Funiculì, Funiculà | Funiculi Funicula
 hava-nagila | Hava Nagila
@@ -66,7 +68,6 @@ daisy-bell | Daisy Bell | Bicycle Built for Two; A Bicycle Built for Two
 let-me-call-you-sweetheart | Let Me Call You Sweetheart
 silvery-moon | By the Light of the Silvery Moon
 my-wild-irish-rose | My Wild Irish Rose
-irish-eyes | When Irish Eyes Are Smiling
 tipperary | It's a Long Way to Tipperary | Its a Long Way to Tipperary; Tipperary
 pack-up-your-troubles | Pack Up Your Troubles in Your Old Kit-Bag | Pack Up Your Troubles
 grand-old-flag | You're a Grand Old Flag | Youre a Grand Old Flag
@@ -113,7 +114,6 @@ turkish-march | Turkish March | Rondo alla Turca; Alla Turca
 gymnopedie | Gymnopédie No. 1 | Gymnopedie No 1; Gymnopédie No.1
 pomp-and-circumstance | Pomp and Circumstance | Pomp and Circumstance March No. 1
 trumpet-voluntary | Trumpet Voluntary | Prince of Denmark's March
-o-mio-babbino | O mio babbino caro
 
 # Patriotic songs and marches
 stars-and-stripes | The Stars and Stripes Forever | Stars and Stripes Forever

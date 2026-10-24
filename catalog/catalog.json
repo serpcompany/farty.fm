@@ -2395,37 +2395,6 @@
   }
  },
  {
-  "id": "cielito-lindo",
-  "title": "Cielito Lindo",
-  "file": "midi/pdmx-cielito-lindo.mid",
-  "sha256": "80232d406683dbea77558d3bc42eb0bb8d95529341915d57271679c1dea4828f",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/1/40/Qmbr6bsCo19TmPxhLQPyu6vWJH7KEoqwey7xf2YTQCrwAU.mid",
-   "musescore_score_id": "6286380",
-   "musescore_url": "https://musescore.com/score/6286380",
-   "score_title": "Cielito Lindo (Melody)",
-   "composer": "NA",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "40"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 144,
-   "max_beats": 30,
-   "beats_per_bar": 3
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-02.txt"
-  }
- },
- {
   "id": "santa-lucia",
   "title": "Santa Lucia",
   "file": "midi/pdmx-santa-lucia.mid",
@@ -2717,37 +2686,6 @@
    "rating": "4.7",
    "n_ratings": "7",
    "n_views": "1199"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 31,
-   "beats_per_bar": 3
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-02.txt"
-  }
- },
- {
-  "id": "irish-eyes",
-  "title": "When Irish Eyes Are Smiling",
-  "file": "midi/pdmx-irish-eyes.mid",
-  "sha256": "0545d9103e90c9f00bf296f7ec531c54d55a9b3b2db6f9464fb4279acb07b943",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/3/42/QmdsXm7tVyZdsPTywJvNFuAfUJSSc7oz4pg4RiHK8vmvyw.mid",
-   "musescore_score_id": "1437956",
-   "musescore_url": "https://musescore.com/score/1437956",
-   "score_title": "When Irish Eyes Are Smiling",
-   "composer": "Ball/Olcot - 1912",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.39",
-   "n_ratings": "7",
-   "n_views": "924"
   },
   "retrieved": "2026-10-25",
   "render": {
@@ -3575,37 +3513,6 @@
   "render": {
    "bpm": 108,
    "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-02.txt"
-  }
- },
- {
-  "id": "o-mio-babbino",
-  "title": "O mio babbino caro",
-  "file": "midi/pdmx-o-mio-babbino.mid",
-  "sha256": "3f9d3a6872ac73f475828c969dabcae49c2621b0f11d1d9227e9d6fa4e2414ed",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/0/26/QmajZ6GAyGyBCwNNDcjFBQmyDukdczp9LeCmWtrvvkM3GE.mid",
-   "musescore_score_id": "31182",
-   "musescore_url": "https://musescore.com/score/31182",
-   "score_title": "Oh mio babbino caro - (Oh My Beloved Father)",
-   "composer": "Giacomo Puccini (1858-1924)",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.7",
-   "n_ratings": "7",
-   "n_views": "4973"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 30,
-   "beats_per_bar": 3
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
