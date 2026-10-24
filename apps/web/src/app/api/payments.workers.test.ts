@@ -322,6 +322,20 @@ describe('with Stripe Checkout in test mode', () => {
     expect((await tootPayment(testDb(), a.id, T1))?.checkoutSessionId).toBe('cs_test_second')
   })
 
+  it('starts a new session when Stripe no longer has the last one', async () => {
+    const a = await signUp('A')
+    const next = sessionFor(a.id, T1, {
+      id: 'cs_test_second',
+      url: 'https://checkout.stripe.com/c/pay/cs_test_second'
+    })
+    const gone = () => Response.json({ error: { message: 'No such session' } }, { status: 404 })
+    stubStripe(sessionFor(a.id, T1), gone(), gone(), next)
+    await checkout(T1, a)
+    expect(await paid(T1, a)).toBe(false)
+    expect(await (await checkout(T1, a)).json()).toEqual({ url: next.url })
+    expect((await tootPayment(testDb(), a.id, T1))?.checkoutSessionId).toBe('cs_test_second')
+  })
+
   it('saves once Stripe says it’s paid, on the return, before the webhook', async () => {
     const a = await signUp('A')
     stubStripe(

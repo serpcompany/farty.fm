@@ -99,12 +99,12 @@ Saving a Toot is paid on Staging in Stripe's test mode (ADR 0010). The code is d
 **The owner, once, for Staging (test mode):**
 
 1. In the Stripe Dashboard, with **Test mode** on, open **Developers → API keys** and create a restricted key with **Write** on **Checkout Sessions** (everything else None), or use the test secret key.
-2. Open **Developers → Webhooks → Add endpoint**: URL `https://staging.farty.fm/api/stripe/webhook/`, events `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Keep the endpoint's signing secret for the next step.
+2. Open **Developers → Webhooks → Add endpoint**: URL `https://staging.farty.fm/api/stripe/webhook/`, events `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Keep the trailing slash: the Staging gate lets only that exact path through. Keep the endpoint's signing secret for the next step.
 3. Set both on the Staging Worker with the `serp-create-secret` skill: `STRIPE_SECRET_KEY` (the key from step 1) and `STRIPE_WEBHOOK_SECRET` (the signing secret from step 2), on `pedos-web-staging`. Nobody types or prints either value.
-4. In **Settings → Payments → Payment methods**, leave Cards, Apple Pay and Google Pay on. Hosted Checkout needs no Apple Pay domain setup.
+4. In **Settings → Payments → Payment methods**, leave Cards, Apple Pay and Google Pay on. Hosted Checkout needs no Apple Pay domain setup. Checkout asks for cards only (Apple Pay and Google Pay are cards), since a slower method would leave the Toot unsaved after the return.
 5. Pay once on https://staging.farty.fm with Stripe's test card `4242 4242 4242 4242`, and check that the Toot shows as saved and the payment shows in the Dashboard.
 
-**Later, for Production:** live keys and a live webhook endpoint on `https://farty.fm/api/stripe/webhook/`, set on `pedos-web-production` the same way; then a PR that lets `paymentsConfig` take live keys there and changes `savingIsPaid`. Settle Google Play's billing policy for the Play app (#114) first.
+**Later, for Production:** live keys and a live webhook endpoint on `https://farty.fm/api/stripe/webhook/`, set on `pedos-web-production` the same way; then a PR that lets `paymentsConfig` take live keys there, lets the webhook take live events (`receiveStripeEvent` in `toot-payments.ts` takes only `livemode: false`), and changes `savingIsPaid`. Settle Google Play's billing policy for the Play app (#114) first.
 
 ## Google Play
 

@@ -142,6 +142,7 @@ describe('createCheckoutSession', () => {
     expect(new Headers(init?.headers).get('authorization')).toBe(`Bearer ${TEST_KEY}`)
     expect(Object.fromEntries(init?.body as URLSearchParams)).toEqual({
       mode: 'payment',
+      'payment_method_types[0]': 'card',
       'line_items[0][quantity]': '1',
       'line_items[0][price_data][currency]': 'usd',
       'line_items[0][price_data][unit_amount]': '99',
@@ -237,6 +238,13 @@ describe('verifyStripeSignature', () => {
     expect(await verify(`t=${ahead},v1=${await sign(payload, ahead)}`)).toBe(false)
     const edge = now - SIGNATURE_TOLERANCE_SECONDS
     expect(await verify(`t=${edge},v1=${await sign(payload, edge)}`)).toBe(true)
+  })
+
+  it('refuses more v1 than Stripe sends, even with the right one among them', async () => {
+    const wrong = await sign(payload, now, 'whsec_forged')
+    const right = await sign(payload, now)
+    const many = [wrong, wrong, wrong, wrong, right].map(v1 => `v1=${v1}`).join(',')
+    expect(await verify(`t=${now},${many}`)).toBe(false)
   })
 
   it('refuses a missing or malformed header', async () => {

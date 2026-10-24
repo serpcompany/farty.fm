@@ -109,8 +109,9 @@ export type NewCheckout = {
 
 /**
  * Starts a Checkout Session that pays `TOOT_PRICE` to save one Toot. Its metadata names the user
- * and the Toot, which is how the webhook and the return find what was paid for. Checkout shows
- * the payment methods the Stripe account has on, Apple Pay and Google Pay among them.
+ * and the Toot, which is how the webhook and the return find what was paid for. Cards only, with
+ * Apple Pay and Google Pay, which pay at once: a slower method would leave the Toot unsaved after
+ * the return, and Save would start a second payment.
  */
 export async function createCheckoutSession(
   secretKey: string,
@@ -118,6 +119,7 @@ export async function createCheckoutSession(
 ): Promise<CheckoutSession> {
   const params = new URLSearchParams({
     mode: 'payment',
+    'payment_method_types[0]': 'card',
     'line_items[0][quantity]': '1',
     'line_items[0][price_data][currency]': TOOT_PRICE.currency,
     'line_items[0][price_data][unit_amount]': String(TOOT_PRICE.amount),
@@ -155,6 +157,8 @@ export function paidFor(session: CheckoutSession, userId: string, tootId: string
 
 /** How far a webhook's timestamp may be from now, in seconds: Stripe's own default. */
 export const SIGNATURE_TOLERANCE_SECONDS = 300
+/** Stripe sends two `v1` while a secret is rolled. More than this, and it isn't Stripe. */
+const MAX_SIGNATURES = 4
 
 function hexBytes(hex: string): Uint8Array<ArrayBuffer> | null {
   if (!/^(?:[0-9a-f]{2})+$/.test(hex)) return null
@@ -187,7 +191,8 @@ export async function verifyStripeSignature(
       if (bytes) signatures.push(bytes)
     }
   }
-  if (timestamp === null || !/^\d{1,12}$/.test(timestamp) || signatures.length === 0) return false
+  if (timestamp === null || !/^\d{1,12}$/.test(timestamp)) return false
+  if (signatures.length === 0 || signatures.length > MAX_SIGNATURES) return false
   if (Math.abs(nowSeconds - Number(timestamp)) > SIGNATURE_TOLERANCE_SECONDS) return false
   const encoder = new TextEncoder()
   const key = await crypto.subtle.importKey(

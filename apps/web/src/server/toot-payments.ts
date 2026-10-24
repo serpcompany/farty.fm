@@ -54,15 +54,24 @@ function songCreatorUrl(request: Request, songId: string, tootId: string, done: 
   return url.toString()
 }
 
-/** Asks Stripe about the Toot's latest Checkout Session, and records it paid if it is. */
+/**
+ * Asks Stripe about the Toot's latest Checkout Session, and records it paid if it is. Null when
+ * Stripe no longer has it (deleted test data, or another Stripe account's key), so a new one starts.
+ */
 async function paidAtStripe(
   { db }: Pick<Stores, 'db'>,
   secretKey: string,
   user: SessionUser,
   tootId: string,
   checkoutSessionId: string
-): Promise<{ paid: boolean; session: CheckoutSession }> {
-  const session = await retrieveCheckoutSession(secretKey, checkoutSessionId)
+): Promise<{ paid: boolean; session: CheckoutSession } | null> {
+  let session: CheckoutSession
+  try {
+    session = await retrieveCheckoutSession(secretKey, checkoutSessionId)
+  } catch (error) {
+    if (error instanceof StripeError && error.status === 404) return null
+    throw error
+  }
   if (!paidFor(session, user.id, tootId)) return { paid: false, session }
   return { paid: await markTootPaid(db, user.id, tootId, session.id), session }
 }
@@ -118,8 +127,8 @@ export async function startCheckout(
         id,
         payment.checkoutSessionId
       )
-      if (earlier.paid) return paid()
-      if (earlier.session.status === 'open' && earlier.session.url) {
+      if (earlier?.paid) return paid()
+      if (earlier?.session.status === 'open' && earlier.session.url) {
         return Response.json({ url: earlier.session.url })
       }
     }
@@ -164,7 +173,7 @@ export async function getTootPayment(
         id,
         payment.checkoutSessionId
       )
-      return Response.json({ paid: now.paid })
+      return Response.json({ paid: now?.paid ?? false })
     } catch (error) {
       return stripeFailed(error)
     }
@@ -194,9 +203,10 @@ export async function receiveStripeEvent(
   nowSeconds = Date.now() / 1000
 ): Promise<Response> {
   if (payments.kind !== 'stripe' || !payments.webhookSecret) return unavailable()
+  const signature = request.headers.get('stripe-signature')
+  if (!signature) return apiError(400, 'invalid_signature')
   const body = await readCapped(request, WEBHOOK_MAX_BYTES)
   if (body === null) return apiError(413, 'too_large')
-  const signature = request.headers.get('stripe-signature')
   if (!(await verifyStripeSignature(body, signature, payments.webhookSecret, nowSeconds))) {
     return apiError(400, 'invalid_signature')
   }

@@ -180,21 +180,24 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
   /** A second tap, before the first one's answer, starts nothing. */
   const paying = useRef(false)
 
-  const save = async () => {
+  /** Saves the Toot. True once it's saved. */
+  const save = async (): Promise<boolean> => {
     setBusy('saving')
     setProblem(null)
     try {
       await pedos.saveToot(draft)
       if (!isPaid) offerStep('toot')
+      return true
     } catch (error) {
       reportError('toot-save-failed', error)
       setProblem('saveFailed')
+      return false
     } finally {
       setBusy(null)
     }
   }
 
-  const pay = useEffectEvent(async (accountId: string) => {
+  const pay = async (accountId: string) => {
     if (paying.current) return
     paying.current = true
     setBusy('paying')
@@ -207,9 +210,11 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
     }
     paying.current = false
     setBusy(null)
-    if (checkout.kind === 'paid') await save()
-    else setProblem(checkout.problem)
-  })
+    if (checkout.kind === 'paid') {
+      if (await save()) clearCheckoutReturn()
+    } else setProblem(checkout.problem)
+  }
+  const payAfterSignIn = useEffectEvent((accountId: string) => void pay(accountId))
 
   const tapSave = () => {
     if (!isPaid) void save()
@@ -228,7 +233,7 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
     if (!paysAfterSignIn) return
     if (accountId) {
       setPaysAfterSignIn(false)
-      void pay(accountId)
+      payAfterSignIn(accountId)
     } else if (!stepOpen) setPaysAfterSignIn(false)
   }, [paysAfterSignIn, accountId, stepOpen])
 
@@ -244,16 +249,23 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
   }, [])
 
   // Back from Checkout for this Toot: saved once it's paid, which Stripe usually says at once. A
-  // paid Toot is saved even if the screen has been left meanwhile.
+  // paid Toot is saved even if the screen has been left meanwhile. Until it's saved, the address
+  // keeps the return, so a reload makes the same Toot and checks again.
   const confirm = useEffectEvent(async (accountId: string) => {
     setBusy('confirming')
     const paid = await waitUntilPaid(draft.id, accountId)
     setBusy(null)
-    if (paid) await save()
-    else setProblem('notPaidYet')
-    clearCheckoutReturn()
+    if (!paid) setProblem('notPaidYet')
+    else if (await save()) clearCheckoutReturn()
   })
   const returnedPaid = isPaid && back?.done === true && back.tootId === draft.id
+  // The account isn't read yet (or can't be, offline): the confirming waits for it.
+  const waitsForAccount =
+    returnedPaid &&
+    !isSaved &&
+    busy === null &&
+    problem === null &&
+    (account.status === 'checking' || account.status === 'unreachable')
   const confirming = useRef(false)
   useEffect(() => {
     if (!returnedPaid || !accountId || confirming.current) return
@@ -271,7 +283,7 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
       <div className="sticky bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] mt-auto md:bottom-0 bg-linear-to-t from-background from-70% to-transparent px-5 pt-5 pb-3">
         <Button
           className="h-12 w-full text-base"
-          disabled={isSaved || busy !== null}
+          disabled={isSaved || busy !== null || waitsForAccount}
           onClick={tapSave}
         >
           {isSaved ? (
@@ -279,7 +291,7 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
               <Check className="size-5" />
               Saved to Toots
             </>
-          ) : busy === 'confirming' ? (
+          ) : busy === 'confirming' || waitsForAccount ? (
             <>
               <Spinner className="size-5" />
               Confirming payment…
