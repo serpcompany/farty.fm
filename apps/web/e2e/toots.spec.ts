@@ -1,6 +1,7 @@
 import { type BrowserContext, expect, type Locator, type Page, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { newEmail, signInByApi } from './account'
+import { payToSave } from './pay'
 
 // The Toots tab, a Toot's screen and Profile, on the Staging build with the Fixture Library
 // loaded, so every Song is unlocked. The first test is the owner's check on a phone: make Toots,
@@ -324,10 +325,13 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
 
 test("a Toot whose audio is gone says so, and can't play; one the store fails for a moment is kept", async ({
   page
-}) => {
+}, testInfo) => {
   test.setTimeout(180_000)
   await listenToThePage(page.context())
   await page.goto('/profile/')
+  // Saving a Toot needs an account (ADR 0010).
+  await signInByApi(page, newEmail(testInfo, 'gone'))
+  await page.reload()
   await loadTheFixtureLibrary(page)
   await makeAToot(page, mary.id)
   await makeAToot(page, twinkle.id)
@@ -446,10 +450,16 @@ test("Toots that fail to load, and a Toot that isn't there, say so", async ({ pa
 test.describe('installed', () => {
   test.use({ serviceWorkers: 'allow' })
 
-  test('the installed app opens a Toot offline, and plays it', async ({ page, context }) => {
+  test('the installed app opens a Toot offline, and plays it', async ({
+    page,
+    context
+  }, testInfo) => {
     test.setTimeout(180_000)
     await listenToThePage(context)
     await page.goto('/profile/')
+    // Saving a Toot needs an account (ADR 0010).
+    await signInByApi(page, newEmail(testInfo, 'offline'))
+    await page.reload()
     await page.waitForFunction(async () => {
       await navigator.serviceWorker.ready
       return navigator.serviceWorker.controller !== null
@@ -492,6 +502,9 @@ async function listenToThePage(context: BrowserContext) {
   await context.addInitScript(() => {
     localStorage.setItem('pedos.welcomed', '1')
     localStorage.setItem('pedos.accountStep', 'done')
+    // A relaunched profile isn't incognito, so Chrome may offer to install Farty, and the offer
+    // would cover Save. install.spec.ts tests the offer.
+    localStorage.setItem('pedos.installOffered', '1')
     window.__starts = []
     const start = AudioBufferSourceNode.prototype.start
     AudioBufferSourceNode.prototype.start = function (this: AudioBufferSourceNode, ...args) {
@@ -538,7 +551,7 @@ async function loadTheFixtureLibrary(page: Page) {
   })
 }
 
-/** Opens a Song from Compose, waits for its Toot, saves it, and goes back to Compose. */
+/** Opens a Song from Compose, waits for its Toot, pays to save it, and goes back to Compose. */
 async function makeAToot(page: Page, songId: string) {
   await tab(page, 'Compose').click()
   await page
@@ -547,8 +560,7 @@ async function makeAToot(page: Page, songId: string) {
     .getByRole('link')
     .click({ timeout: 60_000 })
   await expect(page.getByTestId('song-creator-state')).toBeVisible({ timeout: 60_000 })
-  await page.getByRole('button', { name: 'Save to Toots' }).click()
-  await expect(page.getByRole('button', { name: 'Saved to Toots' })).toBeDisabled()
+  await payToSave(page)
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
 }

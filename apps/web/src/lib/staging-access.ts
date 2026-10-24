@@ -11,6 +11,9 @@ export const environmentNoindex = 'noindex, nofollow'
 export const smokeTestHeader = 'x-pedos-smoke-test'
 
 const servedWithoutThePassword = new Set(['/robots.txt'])
+// Stripe's webhook (ADR 0010), which Stripe can't send the password with. The route serves
+// nothing without Stripe's signature on the event, which only Stripe and the Worker can make.
+const postedWithoutThePassword = new Set(['/api/stripe/webhook/'])
 // The Fixture Library's files, which only the Staging build carries (`scripts/fixture-library.ts`
 // serves them under `/fixtures/`), need the password even with the smoke test's header. The path
 // is matched decoded and in any case, so no spelling of it reaches `assets` without the password.
@@ -66,6 +69,7 @@ function refusal(request: Request): Response {
 }
 
 function isServedWithoutThePassword(request: Request, url: URL): boolean {
+  if (request.method === 'POST') return postedWithoutThePassword.has(url.pathname)
   if (!servedWithoutThePassword.has(url.pathname)) return false
   return request.method === 'GET' || request.method === 'HEAD'
 }

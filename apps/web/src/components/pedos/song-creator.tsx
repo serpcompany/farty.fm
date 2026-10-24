@@ -3,15 +3,24 @@
 import { Check, ChevronLeft, CircleAlert, Play, Square, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type ReactNode, useEffect, useEffectEvent, useState } from 'react'
+import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import type { Song } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
+import { TOOT_PRICE_LABEL } from '@/lib/pricing'
 import * as store from '@/lib/recording-store'
 import { formattedLength, type Recording, recordingName, recordingPitch } from '@/lib/recordings'
 import { reportError } from '@/lib/telemetry/errors'
 import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/toot'
+import {
+  type CheckoutReturn,
+  clearCheckoutReturn,
+  readCheckoutReturn,
+  saveAsksForPayment,
+  startCheckout,
+  waitUntilPaid
+} from '@/lib/toot-payment'
 import { TootError } from '@/lib/toot-renderer'
 import { cn } from '@/lib/utils'
 import { decodeWav } from '@/lib/wav'
@@ -24,7 +33,7 @@ import { Waveform } from './waveform'
 
 type Phase =
   | { kind: 'making' }
-  | { kind: 'ready'; draft: TootDraft }
+  | { kind: 'ready'; draft: TootDraft; back: CheckoutReturn | null }
   | { kind: 'locked' }
   | { kind: 'failed' }
 
@@ -41,7 +50,11 @@ export function SongCreator({ song }: { song: Song }) {
   const [attempt, setAttempt] = useState(0)
   const loaded = pedos.recordings !== null
 
-  const make = useEffectEvent(() => pedos.makeToot(song))
+  // Back from Checkout, the same Toot is made again, with the id it was paid for (ADR 0010).
+  const make = useEffectEvent(async () => {
+    const back = readCheckoutReturn()
+    return { draft: await pedos.makeToot(song, back?.tootId), back }
+  })
   const playOnce = useEffectEvent((draft: TootDraft) => {
     // A page opened from a link or a reload can't start sound before a tap.
     if (navigator.userActivation?.hasBeenActive ?? true) pedos.toggleTootPlayback(draft)
@@ -54,10 +67,11 @@ export function SongCreator({ song }: { song: Song }) {
     if (!loaded) return
     let left = false
     make().then(
-      draft => {
+      ({ draft, back }) => {
         if (left) return
-        setPhase({ kind: 'ready', draft })
-        playOnce(draft)
+        setPhase({ kind: 'ready', draft, back })
+        // Back from Checkout, the Toot was heard already: it waits for a tap.
+        if (!back) playOnce(draft)
       },
       error => {
         const locked = error instanceof TootError && error.reason === 'locked'
@@ -133,52 +147,151 @@ export function SongCreator({ song }: { song: Song }) {
           </Button>
         </div>
       )}
-      {phase.kind === 'ready' && <Ready draft={phase.draft} />}
+      {phase.kind === 'ready' && <Ready draft={phase.draft} back={phase.back} />}
     </div>
   )
 }
 
+/** What Save says when it didn't save the Toot. */
+const SAVE_PROBLEMS = {
+  saveFailed: "Couldn't save this Toot.",
+  unavailable: "Payments aren't available right now.",
+  limitReached: "You've kept as many Toots as an account can. Delete one to save this one.",
+  failed: "Couldn't start the payment.",
+  notPaidYet: "Your payment hasn't come through yet. Tap Save to check again."
+}
+
 /**
- * The made Toot, with Save to Toots pinned above the tabs. The first save may offer the account
+ * The made Toot, with Save to Toots pinned above the tabs. Where saving is paid (ADR 0010), Save
+ * asks for an account first, then goes to Checkout for this Toot; back from Checkout, it saves
+ * the Toot once the server says it's paid. Where it's free, the first save may offer the account
  * step once more (#155).
  */
-function Ready({ draft }: { draft: TootDraft }) {
+function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null }) {
   const pedos = usePedos()
-  const { offerStep } = useAccount()
+  const { account, stepOpen, offerStep, openStep } = useAccount()
+  const accountId = account.status === 'signedIn' ? account.id : null
+  const isPaid = saveAsksForPayment()
   const isSaved = pedos.toot(draft.id) !== undefined
-  const [saving, setSaving] = useState(false)
-  const [saveFailed, setSaveFailed] = useState(false)
+  const [busy, setBusy] = useState<'saving' | 'paying' | 'confirming' | null>(null)
+  const [problem, setProblem] = useState<keyof typeof SAVE_PROBLEMS | null>(null)
+  /** Save opened the account step: once it signs in, on to Checkout. */
+  const [paysAfterSignIn, setPaysAfterSignIn] = useState(false)
+  /** A second tap, before the first one's answer, starts nothing. */
+  const paying = useRef(false)
 
   const save = async () => {
-    setSaving(true)
-    setSaveFailed(false)
+    setBusy('saving')
+    setProblem(null)
     try {
       await pedos.saveToot(draft)
-      offerStep('toot')
+      if (!isPaid) offerStep('toot')
     } catch (error) {
       reportError('toot-save-failed', error)
-      setSaveFailed(true)
+      setProblem('saveFailed')
     } finally {
-      setSaving(false)
+      setBusy(null)
     }
   }
+
+  const pay = useEffectEvent(async (accountId: string) => {
+    if (paying.current) return
+    paying.current = true
+    setBusy('paying')
+    setProblem(null)
+    const checkout = await startCheckout(draft.id, draft.song.id, accountId)
+    if (checkout.kind === 'pay') {
+      // Off to Checkout: Save stays busy while the page goes.
+      window.location.assign(checkout.url)
+      return
+    }
+    paying.current = false
+    setBusy(null)
+    if (checkout.kind === 'paid') await save()
+    else setProblem(checkout.problem)
+  })
+
+  const tapSave = () => {
+    if (!isPaid) void save()
+    else if (accountId) void pay(accountId)
+    else if (account.status === 'signedOut' || account.status === 'expired') {
+      setPaysAfterSignIn(true)
+      openStep()
+    } else {
+      // The session couldn't be read (offline), so it isn't known who is paying.
+      setProblem('failed')
+    }
+  }
+
+  // The account step that Save opened: signed in, on to Checkout; Not now pays nothing.
+  useEffect(() => {
+    if (!paysAfterSignIn) return
+    if (accountId) {
+      setPaysAfterSignIn(false)
+      void pay(accountId)
+    } else if (!stepOpen) setPaysAfterSignIn(false)
+  }, [paysAfterSignIn, accountId, stepOpen])
+
+  // Back to this page from Checkout's with the browser's Back, Save can be tapped again.
+  useEffect(() => {
+    const shown = (event: PageTransitionEvent) => {
+      if (!event.persisted) return
+      paying.current = false
+      setBusy(null)
+    }
+    window.addEventListener('pageshow', shown)
+    return () => window.removeEventListener('pageshow', shown)
+  }, [])
+
+  // Back from Checkout for this Toot: saved once it's paid, which Stripe usually says at once. A
+  // paid Toot is saved even if the screen has been left meanwhile.
+  const confirm = useEffectEvent(async (accountId: string) => {
+    setBusy('confirming')
+    const paid = await waitUntilPaid(draft.id, accountId)
+    setBusy(null)
+    if (paid) await save()
+    else setProblem('notPaidYet')
+    clearCheckoutReturn()
+  })
+  const returnedPaid = isPaid && back?.done === true && back.tootId === draft.id
+  const confirming = useRef(false)
+  useEffect(() => {
+    if (!returnedPaid || !accountId || confirming.current) return
+    confirming.current = true
+    void confirm(accountId)
+  }, [returnedPaid, accountId])
+  // Back from a cancelled Checkout: the address is Song Creator's own again.
+  useEffect(() => {
+    if (back && !back.done) clearCheckoutReturn()
+  }, [back])
 
   return (
     <>
       <TootLayout toot={draft} song={draft.song} />
       <div className="sticky bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] mt-auto md:bottom-0 bg-linear-to-t from-background from-70% to-transparent px-5 pt-5 pb-3">
-        <Button className="h-12 w-full text-base" disabled={isSaved || saving} onClick={save}>
+        <Button
+          className="h-12 w-full text-base"
+          disabled={isSaved || busy !== null}
+          onClick={tapSave}
+        >
           {isSaved ? (
             <>
               <Check className="size-5" />
               Saved to Toots
             </>
+          ) : busy === 'confirming' ? (
+            <>
+              <Spinner className="size-5" />
+              Confirming payment…
+            </>
+          ) : isPaid ? (
+            `Save to Toots · ${TOOT_PRICE_LABEL}`
           ) : (
             'Save to Toots'
           )}
         </Button>
-        {saveFailed && (
-          <p className="pt-2 text-center text-sm text-muted-foreground">Couldn't save this Toot.</p>
+        {problem && (
+          <p className="pt-2 text-center text-sm text-muted-foreground">{SAVE_PROBLEMS[problem]}</p>
         )}
       </div>
     </>

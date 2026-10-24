@@ -17,7 +17,8 @@
 # Sign-in (#152), off localhost: the dev mailbox (/dev/mail/) is never served, the session endpoint
 # answers JSON, and a malformed sign-in gets a 400. Both need the environment's BETTER_AUTH_SECRET
 # (.github/workflows/web-auth-secret.yml); without it they get a 503. A local preview's sign-in is
-# the e2e journey's (e2e/sign-in.spec.ts).
+# the e2e journey's (e2e/sign-in.spec.ts). The dev checkout (/dev/checkout/, ADR 0010) is never served
+# either.
 set -euo pipefail
 
 usage='usage: smoke.sh <base-url> <staging|production>'
@@ -301,6 +302,8 @@ fi
 if [[ ! "$base" =~ $local_base ]]; then
   tries=10
   eventually 'the dev mailbox is not served' answers /dev/mail/ 404 '' "${smoke[@]}"
+  eventually 'the dev checkout is not served' \
+    answers '/dev/checkout/?toot=00000000-0000-4000-8000-000000000000&song=mary' 404 '' "${smoke[@]}"
   eventually 'the session endpoint answers JSON' \
     answers /api/auth/get-session 200 application/json "${smoke[@]}"
   eventually 'a malformed sign-in from the site gets a 400' refuses_a_bad_sign_in

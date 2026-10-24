@@ -179,6 +179,20 @@ describe('behindStagingAccess', () => {
     expect((await ask('/robots.txt', { method: 'POST' }).response).status).toBe(401)
   })
 
+  test("serves Stripe's webhook without the password, with noindex, to a POST only", async () => {
+    const { response, serve } = ask('/api/stripe/webhook/', { method: 'POST' })
+    const exempt = await response
+    expect(exempt.status).toBe(200)
+    expect(exempt.headers.get('X-Robots-Tag')).toBe(environmentNoindex)
+    expect(serve).toHaveBeenCalledOnce()
+    for (const method of ['GET', 'PUT', 'DELETE']) {
+      expect((await ask('/api/stripe/webhook/', { method }).response).status, method).toBe(401)
+    }
+    for (const path of ['/api/stripe/webhook', '/api/stripe/', '/api/toots/', '/']) {
+      expect((await ask(path, { method: 'POST' }).response).status, path).toBe(401)
+    }
+  })
+
   test("serves the smoke test's header without the password, with noindex", async () => {
     expect(smokeTestHeader).toBe('x-pedos-smoke-test')
     const { response, serve } = ask('/', { headers: { [smokeTestHeader]: '1' } })
