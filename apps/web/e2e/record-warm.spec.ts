@@ -11,8 +11,9 @@ import {
 import { skipWelcome } from './record'
 import { onPhone } from './screens'
 
-// The microphone stays open on the Record screen, so a tap captures at once and a take keeps the
-// 300 ms before it (#148, #149). The fake microphone is in `fake-microphone.ts`.
+// The microphone stays open from the first time Record shows to the end of the launch (#206), so a
+// tap captures at once and a take keeps the 300 ms before it (#148, #149). The fake microphone is
+// in `fake-microphone.ts`.
 
 /** The time from each Record click to the first capture batch after it, in ms. */
 function clickToFirstBatch(clicks: number[], batches: number[]): number[] {
@@ -63,7 +64,7 @@ test.describe('with microphone permission granted', () => {
     await page.addInitScript(skipWelcome)
   })
 
-  test('a tap captures at once, keeps the fart from before it, and the mic opens once per visit', async ({
+  test('a tap captures at once, keeps the fart from before it, and the mic opens once per launch', async ({
     page
   }) => {
     await page.goto('/')
@@ -77,29 +78,28 @@ test.describe('with microphone permission granted', () => {
     await expect(page.getByTestId('record-status')).toHaveText("Didn't catch that. Try again.")
     expect((await microphone(page)).live).toBe(1)
 
-    // Take 2: a fart that starts as the person presses Record. Review lets the microphone go,
-    // ends its capture processor and puts the session back to playback.
+    // Take 2: a fart that starts as the person presses Record. Review keeps the microphone open,
+    // and plays the take in its session: switching to playback would mute it on iPhone.
     await fartAndRecord(page)
+    await page.getByTestId('review-play').click()
+    await expect(page.getByRole('button', { name: 'Stop' })).toBeVisible()
     const onReview = await microphone(page)
-    expect(onReview.live).toBe(0)
-    expect(onReview.closed).toBe(onReview.nodes)
-    expect(onReview.sessions.at(-1)).toBe('playback')
+    expect(onReview.live).toBe(1)
+    expect(onReview.sessions).toEqual(['play-and-record'])
     await page.getByRole('button', { name: 'Discard' }).click()
 
-    // Back on Record: the microphone opens again, once.
-    await waitForOpenMicrophone(page)
+    // Back on Record, the same microphone takes the next one.
     await fartAndRecord(page)
     await page.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByTestId('result-note')).toHaveText('G3')
 
     const mic = await microphone(page)
-    expect(mic.calls).toBe(2)
-    expect(mic.live).toBe(0)
-    // One capture processor per visit, each closed when the microphone was let go.
-    expect(mic.nodes).toBe(2)
-    expect(mic.closed).toBe(2)
-    expect(mic.sessions.filter(type => type === 'play-and-record')).toHaveLength(2)
-    expect(mic.sessions.at(-1)).toBe('playback')
+    expect(mic.calls).toBe(1)
+    expect(mic.live).toBe(1)
+    // One capture processor for the launch, still running.
+    expect(mic.nodes).toBe(1)
+    expect(mic.closed).toBe(0)
+    expect(mic.sessions).toEqual(['play-and-record'])
     const timings = clickToFirstBatch(mic.clicks, mic.batches)
     console.log(`click → first capture batch (ms): ${timings.map(t => t.toFixed(1)).join(', ')}`)
     expect(timings).toHaveLength(3)
@@ -117,7 +117,7 @@ test.describe('with microphone permission granted', () => {
     expect(energy / mic.fartEnergy).toBeGreaterThan(0.97)
   })
 
-  test('the microphone closes when the page is hidden or the person leaves Record', async ({
+  test('the microphone closes while the page is hidden, and stays open on the other tabs', async ({
     page
   }) => {
     const setVisibility = (state: 'hidden' | 'visible') =>
@@ -142,73 +142,84 @@ test.describe('with microphone permission granted', () => {
       .getByRole('link', { name: 'Toots' })
       .click()
     await expect(page).toHaveURL(/\/toots\/$/)
+    // Longer than it takes the page to let the microphone go, had it tried.
+    await page.waitForTimeout(500)
     const left = await microphone(page)
-    expect(left.live).toBe(0)
+    expect(left.live).toBe(1)
     expect(left.calls).toBe(2)
-    expect(left.closed).toBe(left.nodes)
-    expect(left.sessions.at(-1)).toBe('playback')
+    expect(left.nodes - left.closed).toBe(1)
+    expect(left.sessions.at(-1)).toBe('play-and-record')
+    // Hidden and shown again on Toots, it opens again there.
+    await setVisibility('hidden')
+    expect((await microphone(page)).live).toBe(0)
+    await setVisibility('visible')
+    await waitForOpenMicrophone(page)
+    const back = await microphone(page)
+    expect(back.calls).toBe(3)
+    expect(back.live).toBe(1)
+    expect(back.sessions.at(-1)).toBe('play-and-record')
   })
 
-  test('leaving Result opens the microphone only where Record shows', async ({ page }) => {
+  test('opened on another tab, Farty opens the microphone only once Record shows', async ({
+    page
+  }) => {
+    await page.goto('/toots/')
+    const tabs = page.getByRole('navigation', { name: 'Tabs' })
+    await expect(tabs).toBeVisible()
+    await page.waitForTimeout(getUserMediaMs + 200)
+    expect((await microphone(page)).calls).toBe(0)
+    await tabs.getByRole('link', { name: 'Record', exact: true }).click()
+    await waitForOpenMicrophone(page)
+    expect((await microphone(page)).calls).toBe(1)
+  })
+
+  test('the microphone stays open from Result to every screen after it', async ({ page }) => {
     test.setTimeout(120_000)
     const tabs = page.getByRole('navigation', { name: 'Tabs' })
-    /** Taps a Result button; returns what the microphone did from the tap until `settled`. */
-    const leaveResult = async (button: string, settled: () => Promise<void>) => {
-      const before = await microphone(page)
-      await page.getByRole('button', { name: button, exact: true }).click()
-      await settled()
-      // Longer than it takes the page to open the microphone, had it tried.
-      await page.waitForTimeout(500)
-      const after = await microphone(page)
-      return {
-        opened: after.calls - before.calls,
-        sessions: after.sessions.slice(before.sessions.length),
-        unclosed: after.nodes - after.closed
-      }
-    }
     const recordAndSave = async (id: string) => {
       await fartAndRecord(page, id)
       await page.getByRole('button', { name: 'Save' }).click()
       await expect(page.getByTestId('result-note')).toBeVisible()
     }
+    /** The microphone opened once and is still open, in its session. */
+    const stillOpen = async () => {
+      // Longer than it takes the page to let the microphone go or open it again, had it tried.
+      await page.waitForTimeout(500)
+      const mic = await microphone(page)
+      expect(mic.calls).toBe(1)
+      expect(mic.live).toBe(1)
+      expect(mic.nodes - mic.closed).toBe(1)
+      expect(mic.sessions).toEqual(['play-and-record'])
+    }
 
     await page.goto('/')
     await waitForOpenMicrophone(page)
 
-    // Record another: Record shows idle, so the microphone opens there, once.
     await recordAndSave('090')
-    const another = await leaveResult('Record another', () =>
-      expect(page.getByTestId('record-button')).toBeEnabled()
-    )
-    expect(another.opened).toBe(1)
-    expect(another.sessions.filter(type => type === 'play-and-record')).toHaveLength(1)
-    // Only the open microphone's processor runs; every earlier one was closed.
-    await waitForOpenMicrophone(page)
+    await page.getByRole('button', { name: 'Record another', exact: true }).click()
+    await expect(page.getByTestId('record-button')).toBeEnabled()
+    await stillOpen()
 
-    // Done: on to Recordings, without opening the microphone on the way.
     await recordAndSave('084')
-    const done = await leaveResult('Done', () => expect(page).toHaveURL(/\/recordings\/$/))
-    expect(done.opened).toBe(0)
-    expect(done.sessions).not.toContain('play-and-record')
-    expect(done.unclosed).toBe(0)
+    await page.getByRole('button', { name: 'Done', exact: true }).click()
+    await expect(page).toHaveURL(/\/recordings\/$/)
+    await stillOpen()
     await tabs.getByRole('link', { name: 'Record', exact: true }).click()
-    await waitForOpenMicrophone(page)
 
     await recordAndSave('086')
-    await leaveResult('Record another', () =>
-      expect(page.getByTestId('record-button')).toBeEnabled()
-    )
-    await waitForOpenMicrophone(page)
+    await page.getByRole('button', { name: 'Record another', exact: true }).click()
+    await expect(page.getByTestId('record-button')).toBeEnabled()
 
-    // Try it: on to Song Creator, which plays; the session stays on playback.
+    // Try it: on to Song Creator, which plays the Toot in the microphone's session.
     await recordAndSave('094')
     await expect(page.getByTestId('result-progress')).toContainText(
       'You unlocked Mary Had a Little Lamb'
     )
-    const tryIt = await leaveResult('Try it', () => expect(page).toHaveURL(/\/compose\/mary\/$/))
-    expect(tryIt.opened).toBe(0)
-    expect(tryIt.sessions).not.toContain('play-and-record')
-    expect(tryIt.unclosed).toBe(0)
+    await page.getByRole('button', { name: 'Try it', exact: true }).click()
+    await expect(page).toHaveURL(/\/compose\/mary\/$/)
+    // The Toot is playing, so its sound has chosen its session.
+    await expect(page.getByTestId('song-creator-play')).toHaveAccessibleName('Stop')
+    await stillOpen()
   })
 
   test('after an interruption mutes the microphone, the next tap opens it afresh', async ({
@@ -310,6 +321,11 @@ test.describe('before microphone permission is granted', () => {
     await page.getByTestId('record-button').click()
     await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
     await expect(page.getByTestId('stop-button')).toBeVisible()
-    expect((await microphone(page)).calls).toBe(1)
+    const mic = await microphone(page)
+    expect(mic.calls).toBe(1)
+    // The capture processor loaded before the tap, so the tap waits only for the microphone.
+    const [ms] = clickToFirstBatch(mic.clicks, mic.batches)
+    console.log(`first tap, click → first capture batch: ${ms.toFixed(1)} ms`)
+    expect(ms).toBeLessThan(getUserMediaMs + 100)
   })
 })
