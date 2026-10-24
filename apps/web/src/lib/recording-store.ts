@@ -23,8 +23,8 @@ import type { Toot } from './toot'
 /**
  * Recordings and Toots live in this browser, in IndexedDB (ADR 0001's local-first rule, on the
  * web). Metadata and audio are separate stores, so listing them never loads their audio. Without
- * an account they last only for the visit (`visit.ts`). Signed in, they are the account's working
- * copy, kept in step with it by `library-sync.ts`.
+ * an account the Recordings are kept and the Toots last only the visit (`visit.ts`). Signed in,
+ * they are the account's working copy, kept in step with it by `library-sync.ts`.
  */
 export interface PedosDB extends DBSchema {
   recordings: { key: string; value: Recording }
@@ -262,6 +262,23 @@ export async function deleteItem(kind: Kind, id: string): Promise<void> {
 export async function clearLibrary(): Promise<void> {
   const tx = (await db()).transaction(allStores, 'readwrite')
   await Promise.all([...allStores.map(name => tx.objectStore(name).clear()), tx.done])
+}
+
+/**
+ * Deletes every Toot in this browser, with its audio and whatever waits to send or download for
+ * it, together. The Recordings stay, with their outbox, so a sign-in still uploads them.
+ */
+export async function clearToots(): Promise<void> {
+  const tx = (await db()).transaction(['toots', 'tootAudio', 'outbox', 'downloads'], 'readwrite')
+  // Every key that starts `toots:` (`itemKey`).
+  const forToots = IDBKeyRange.bound(itemKey('toots', ''), itemKey('toots', '\uffff'))
+  await Promise.all([
+    tx.objectStore('toots').clear(),
+    tx.objectStore('tootAudio').clear(),
+    tx.objectStore('outbox').delete(forToots),
+    tx.objectStore('downloads').delete(forToots),
+    tx.done
+  ])
 }
 
 /**
