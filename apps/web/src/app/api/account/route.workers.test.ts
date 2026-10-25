@@ -2,7 +2,9 @@ import { env } from 'cloudflare:test'
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 
-import { recordings, session, toots, user, verification } from '@/db/schema'
+import { markTootPaid, startTootPayment } from '@/db/payments'
+import { recordings, session, tootPayments, toots, user, verification } from '@/db/schema'
+import { TOOT_PRICE } from '@/lib/pricing'
 import { deleteAccount } from '@/server/library'
 import {
   api,
@@ -27,14 +29,18 @@ async function rowsOf(userId: string) {
     users: await db.select().from(user).where(eq(user.id, userId)),
     sessions: await db.select().from(session).where(eq(session.userId, userId)),
     recordings: await db.select().from(recordings).where(eq(recordings.userId, userId)),
-    toots: await db.select().from(toots).where(eq(toots.userId, userId))
+    toots: await db.select().from(toots).where(eq(toots.userId, userId)),
+    tootPayments: await db.select().from(tootPayments).where(eq(tootPayments.userId, userId))
   }
 }
 
 const deleteRequest = () => new Request(`${ORIGIN}/api/account/`, { method: 'DELETE' })
 
-async function fill(cookie: string) {
+/** A Recording and a paid-for Toot (ADR 0010). */
+async function fill({ id, cookie }: { id: string; cookie: string }) {
   await api.put('recordings', R1, uploadBody(recordingMetadata(R1), wav()), { cookie })
+  await startTootPayment(testDb(), id, T1, 'dev_test', TOOT_PRICE)
+  await markTootPaid(testDb(), id, T1, 'dev_test')
   await api.put('toots', T1, uploadBody(tootMetadata(T1), wav()), { cookie })
 }
 
@@ -82,18 +88,24 @@ describe('PATCH /api/account/', () => {
 })
 
 describe('DELETE /api/account/', () => {
-  it('deletes the user’s audio, then their row with their sessions, Recordings and Toots', async () => {
+  it('deletes the user’s audio, then their row with their sessions, Recordings, Toots and payments', async () => {
     const a = await signUp('A')
     const b = await signUp('B')
-    await fill(a.cookie)
-    await fill(b.cookie)
+    await fill(a)
+    await fill(b)
     await api.delete('recordings', R1, a)
     const bKeys = await bucketKeys(`users/${b.id}/`)
 
     const response = await api.deleteAccount(a)
 
     expect(response.status).toBe(204)
-    expect(await rowsOf(a.id)).toEqual({ users: [], sessions: [], recordings: [], toots: [] })
+    expect(await rowsOf(a.id)).toEqual({
+      users: [],
+      sessions: [],
+      recordings: [],
+      toots: [],
+      tootPayments: []
+    })
     expect(await bucketKeys(`users/${a.id}/`)).toEqual([])
     // Signed out everywhere: the session went with the user.
     expect((await api.library(a)).status).toBe(401)
@@ -101,6 +113,7 @@ describe('DELETE /api/account/', () => {
     const others = await rowsOf(b.id)
     expect([others.users.length, others.sessions.length]).toEqual([1, 1])
     expect([others.recordings.length, others.toots.length]).toEqual([1, 1])
+    expect(others.tootPayments).toHaveLength(1)
     expect(bKeys).toHaveLength(2)
     expect(await bucketKeys(`users/${b.id}/`)).toEqual(bKeys)
   })
@@ -108,8 +121,8 @@ describe('DELETE /api/account/', () => {
   it('refuses a delete that names another account (409), and deletes nothing', async () => {
     const a = await signUp('A')
     const b = await signUp('B')
-    await fill(a.cookie)
-    await fill(b.cookie)
+    await fill(a)
+    await fill(b)
     const keys = await bucketKeys()
     const before = [await rowsOf(a.id), await rowsOf(b.id)]
 
@@ -122,12 +135,18 @@ describe('DELETE /api/account/', () => {
     expect(keys).toHaveLength(4)
     expect([await rowsOf(a.id), await rowsOf(b.id)]).toEqual(before)
     expect((await api.deleteAccount({ ...a, library: a.id })).status).toBe(204)
-    expect(await rowsOf(a.id)).toEqual({ users: [], sessions: [], recordings: [], toots: [] })
+    expect(await rowsOf(a.id)).toEqual({
+      users: [],
+      sessions: [],
+      recordings: [],
+      toots: [],
+      tootPayments: []
+    })
   })
 
   it('deletes the audio first, so a failure leaves an account to try again with', async () => {
     const a = await signUp('A')
-    await fill(a.cookie)
+    await fill(a)
     const failing = {
       list: (options: R2ListOptions) => env.MEDIA.list(options),
       delete: () => Promise.reject(new Error('R2 is down'))
@@ -144,7 +163,7 @@ describe('DELETE /api/account/', () => {
 
   it('deletes a WAV an upload in flight wrote while the account was being deleted', async () => {
     const a = await signUp('A')
-    await fill(a.cookie)
+    await fill(a)
     const late = `users/${a.id}/recordings/late.wav`
     let written = false
     // R2 as an upload that passed its session check before the delete writes to it: its WAV
@@ -192,7 +211,7 @@ describe('DELETE /api/account/', () => {
 
   it('answers a signed-out request with 401 and deletes nothing', async () => {
     const a = await signUp('A')
-    await fill(a.cookie)
+    await fill(a)
 
     expect((await api.deleteAccount({})).status).toBe(401)
     expect((await rowsOf(a.id)).users).toHaveLength(1)

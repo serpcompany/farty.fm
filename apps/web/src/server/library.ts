@@ -16,6 +16,7 @@ import {
   tombstone,
   uploadState
 } from '@/db/library'
+import { isTootPaid } from '@/db/payments'
 import type { Recording } from '@/lib/recordings'
 import type { Toot } from '@/lib/toot'
 
@@ -97,7 +98,7 @@ const gone = () => apiError(410, 'deleted')
 export const LIBRARY_HEADER = 'x-pedos-library'
 
 /** 409 `wrong_account` when the request names another account's library, or null. */
-function wrongLibrary(user: SessionUser, request: Request): Response | null {
+export function wrongLibrary(user: SessionUser, request: Request): Response | null {
   const library = request.headers.get(LIBRARY_HEADER)
   return library !== null && library !== user.id ? apiError(409, 'wrong_account') : null
 }
@@ -130,14 +131,17 @@ export async function getLibrary({ db }: Stores, user: SessionUser, request: Req
 /**
  * `PUT /api/{recordings|toots}/{id}/`: keeps a new Recording or Toot and its WAV. 201 once kept,
  * 200 if it already was (an upload that's retried changes nothing), 410 if it was deleted, 409 at
- * the limit, or when `LIBRARY_HEADER` names another account (`wrong_account`).
+ * the limit, or when `LIBRARY_HEADER` names another account (`wrong_account`). With `paidOnly`,
+ * where saving a Toot is paid (ADR 0010), 402 for a new one that isn't paid for
+ * (`payment_required`).
  */
 export async function putItem(
   kind: Kind,
   { db, media }: Stores,
   user: SessionUser,
   id: string,
-  request: Request
+  request: Request,
+  paidOnly = false
 ): Promise<Response> {
   if (!isItemId(id)) return notFound()
   const wrong = wrongLibrary(user, request)
@@ -162,6 +166,7 @@ export async function putItem(
   const before = await uploadState(db, kind, user.id, id)
   if (before.status === 'live') return Response.json({ id }, { status: 200 })
   if (before.status === 'deleted') return gone()
+  if (paidOnly && !(await isTootPaid(db, user.id, id))) return apiError(402, 'payment_required')
   if (before.live >= maxItems) return apiError(409, 'limit_reached')
 
   const key = audioKey(user.id, kind, id)

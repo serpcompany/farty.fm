@@ -135,8 +135,9 @@ type Pedos = {
   toot(id: string): Toot | undefined
   /**
    * Makes the Toot of an Unlocked Song in the render worker: Song Creator. Throws a `TootError`.
+   * `id` is a new one unless given, as when Checkout comes back for the Toot it paid for.
    */
-  makeToot(song: Song): Promise<TootDraft>
+  makeToot(song: Song, id?: string): Promise<TootDraft>
   /** Keeps a made Toot, once: saving it again does nothing. */
   saveToot(draft: TootDraft): Promise<void>
   /**
@@ -492,7 +493,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   )
 
   const makeToot = useCallback(
-    (song: Song) => renderToot(song, recordings ?? [], store.loadAudio),
+    (song: Song, id?: string) => renderToot(song, recordings ?? [], store.loadAudio, undefined, id),
     [recordings]
   )
 
