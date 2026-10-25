@@ -91,16 +91,6 @@
       "notes": ""
     },
     {
-      "id": "021",
-      "filename": "021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3",
-      "source": "https://freesound.org/people/designerschoice/sounds/807507/",
-      "permission": "CC BY 4.0",
-      "permissionEvidence": "https://freesound.org/people/designerschoice/sounds/807507/",
-      "candidateBatch": 1,
-      "durationSeconds": 0.607,
-      "notes": ""
-    },
-    {
       "id": "022",
       "filename": "022__smokevhstapes__fart-wav__177050.mp3",
       "source": "https://freesound.org/people/smokevhstapes/sounds/177050/",
@@ -262,6 +252,23 @@
       "candidateBatch": 2,
       "durationSeconds": 4.75,
       "notes": ""
+    }
+  ],
+  "removed": [
+    {
+      "id": "021",
+      "filename": "021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3",
+      "source": "https://freesound.org/people/designerschoice/sounds/807507/",
+      "permission": "CC BY 4.0",
+      "permissionEvidence": "https://freesound.org/people/designerschoice/sounds/807507/",
+      "candidateBatch": 1,
+      "durationSeconds": 0.607,
+      "notes": "",
+      "removedAt": "2026-10-25",
+      "removedBy": "product-owner",
+      "reason": "The owner listened to the whole library again and judged it not to sound like a real fart.",
+      "issue": "https://github.com/serpcompany/farty.fm/issues/215",
+      "fileKeptFor": "The frozen iPhone app (golden format 2, RecordingAnalysisKit/Tests/GoldenFormat2/) still reads the file. Nothing else uses it."
     }
   ]
 }

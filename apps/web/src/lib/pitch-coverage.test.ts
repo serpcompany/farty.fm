@@ -26,7 +26,7 @@ import type { AnalysisState, Recording } from './recordings'
  * The sample story's takes, in order: Melodic ones that unlock Songs, with 3 Noise-like takes
  * (018, 052, 055). The iPhone's story starts with 069 and ends with 002, which #208 made Melodic.
  */
-const story = ['018', '021', '090', '052', '094', '059', '019', '086', '017', '084', '013', '055']
+const story = ['018', '032', '090', '052', '094', '059', '019', '086', '017', '084', '013', '055']
 const fixtureIds = goldenIndex.recordings
 
 /** A Recording of this fixture with the reference engine's analysis and its Fixture Library id. */
@@ -74,8 +74,8 @@ const listing = (recordings: Recording[], query = '', order: SongOrder = 'closes
   songListing(sortRows(songRows(songs, recordings), order), query)
 
 describe('Pitch Coverage against the reference engine', () => {
-  it('unlocks all 12 Songs with the 15 Melodic fixtures', () => {
-    expect(all.filter(r => coverageKey([r]) !== '[]')).toHaveLength(15)
+  it('unlocks all 12 Songs with the 14 Melodic fixtures', () => {
+    expect(all.filter(r => coverageKey([r]) !== '[]')).toHaveLength(14)
     expect(songs).toHaveLength(12)
     for (const s of songs) expect(coverageOf(s, all).unlocked, s.id).toBe(true)
   })
@@ -137,15 +137,15 @@ describe('Pitch Coverage against the reference engine', () => {
   it('reads the coverage of locked Songs as the reference does', () => {
     const mary = coverageOf(song('mary'), takes(3))
     expect(coverageSummary(mary)).toBe('2 of 4 notes covered')
-    expect(mary.transposition).toBe(-26)
-    expect(missingNotes(mary)).toBe('A♯2 and D3')
-    expect(fixtureId(mary.recordingForPitch.get(74))).toBe('021')
-    expect(fixtureId(mary.recordingForPitch.get(79))).toBe('090')
+    expect(mary.transposition).toBe(-21)
+    expect(missingNotes(mary)).toBe('F3 and A♯3')
+    expect(fixtureId(mary.recordingForPitch.get(72))).toBe('032')
+    expect(fixtureId(mary.recordingForPitch.get(76))).toBe('090')
 
     const birthday = coverageOf(song('birthday'), eight)
     expect(coverageSummary(birthday)).toBe('6 of 8 notes covered')
     expect(birthday.transposition).toBe(-16)
-    expect(missingNotes(birthday)).toBe('D3 and D♯3')
+    expect(missingNotes(birthday)).toBe('C3 and D♯3')
   })
 })
 
@@ -336,13 +336,13 @@ describe('Compose’s listing', () => {
   // cheapest transposition of locked `frere` and `birthday`, and the contour that keeps the attack
   // (#208) moved `birthday`'s again.
   it('names the missing notes with their octave', () => {
-    expect(missingNotes(coverageOf(song('birthday'), eight))).toBe('D3 and D♯3')
+    expect(missingNotes(coverageOf(song('birthday'), eight))).toBe('C3 and D♯3')
     expect(missingNotes(coverageOf(song('frere'), eight))).toBe('C♯3')
     expect(missingNotes(coverageOf(song('mary'), eight))).toBeNull()
     const few = takes(3)
-    expect(missingNotes(coverageOf(song('birthday'), few))).toBe('F2, G2, A2, A♯2, C3, and D3')
-    expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe('F2, G2, A2, and 3 more')
-    expect(missingNotes(coverageOf(song('mary'), few), 3)).toBe('A♯2 and D3')
+    expect(missingNotes(coverageOf(song('birthday'), few))).toBe('G♯2, A♯2, C3, C♯3, F3, and G♯3')
+    expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe('G♯2, A♯2, C3, and 3 more')
+    expect(missingNotes(coverageOf(song('mary'), few), 3)).toBe('F3 and A♯3')
   })
 
   it('matches the catalog again only when the Melodic Recordings change', () => {
@@ -355,7 +355,7 @@ describe('Compose’s listing', () => {
     expect(coverageKey([...five, analyzing])).toBe(coverageKey(five))
     expect(listing(takes(6)).unlocked.map(r => r.song.id)).toEqual(['mary'])
     // So does a settle time added on load to an analysis stored before #116: it moves Auto-map.
-    // The 2nd take, 021, is Melodic and settles in 0.017 s.
+    // The 2nd take, 032, is Melodic and settles in 0.128 s.
     const [first, second, ...rest] = five
     if (second.analysis.state !== 'analyzed') throw new Error('The 2nd take is analyzed')
     const { settleSeconds, ...stored } = second.analysis.analysis

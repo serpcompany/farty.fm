@@ -14,7 +14,7 @@ from melody import load_catalog
 
 OUT = Path(__file__).parent / "out/listen"
 AUDIO = OUT / "audio"
-SMALL_LIBRARY = ["002", "009", "016", "021", "069", "090"]  # a plausible new user's first six (golden data)
+SMALL_LIBRARY = ["002", "009", "016", "022", "069", "090"]  # a plausible new user's first six (golden data)
 
 
 def encode(y, name):
