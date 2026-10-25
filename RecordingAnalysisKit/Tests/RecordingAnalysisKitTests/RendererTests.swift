@@ -141,7 +141,8 @@ import RenderChecking
     }
 }
 
-/// Notes whose golden read-back sits within a pYIN bin of ±50 cents (fixtures/golden/README.md).
+/// Notes whose golden read-back sits within a pYIN bin of ±50 cents (fixtures/golden/README.md as
+/// of golden format 2, which these tests read: Tests/GoldenFormat2/README.md).
 /// saints note 10 reads +47.6 cents in the reference; a correct renderer can read it just over
 /// 50, so it is accepted up to ±60 (one 10-cent pYIN bin further).
 let toleranceEdge: [String: Set<Int>] = ["full/saints": [10]]

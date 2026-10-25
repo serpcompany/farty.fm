@@ -3,58 +3,58 @@
   "max_abs_shift_semitones": null,
   "metrics": null,
   "notes": null,
-  "octave_moves": 0,
+  "octave_moves": 1,
   "per_pitch": [
+    {
+      "octave_move": false,
+      "recording": "016",
+      "shift_semitones": -1.3259205936601859,
+      "song_pitch": 69,
+      "target_midi": 39
+    },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
-      "song_pitch": 69,
+      "song_pitch": 71,
+      "target_midi": 41
+    },
+    {
+      "octave_move": true,
+      "recording": "090",
+      "shift_semitones": -12.225920593660177,
+      "song_pitch": 73,
+      "target_midi": 43
+    },
+    {
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": -0.4259205936601731,
+      "song_pitch": 74,
+      "target_midi": 44
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": -0.4259205936601802,
+      "song_pitch": 76,
       "target_midi": 46
     },
     {
       "octave_move": false,
       "recording": "021",
       "shift_semitones": -0.22592059366017025,
-      "song_pitch": 71,
-      "target_midi": 48
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 73,
-      "target_midi": 50
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 74,
-      "target_midi": 51
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 76,
-      "target_midi": 53
-    },
-    {
-      "octave_move": false,
-      "recording": "090",
-      "shift_semitones": -0.12592059366016173,
       "song_pitch": 78,
-      "target_midi": 55
+      "target_midi": 48
     }
   ],
   "pitch_coverage": {
-    "covered": 2,
+    "covered": 5,
     "total": 6
   },
-  "plan_cost": 11.28417629479324,
+  "plan_cost": 155.49514527680566,
   "render_settings": null,
   "song": "twinkle",
-  "transpose": -23,
+  "transpose": -30,
   "unlocked": false
 }

@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { decoded, goldenRecordings } from '@/test-support/golden'
+import { ANALYSIS_VERSION } from './analysis/version'
 import {
   type Analysis,
   type AnalysisState,
   heardSomething,
   levelContrast,
-  needsSettleTime,
-  type Recording,
-  withSettleTime
+  needsReanalysis,
+  type Recording
 } from './recordings'
 
 /**
@@ -111,7 +111,7 @@ describe('heardSomething', () => {
   })
 })
 
-describe('an analysis stored before the settle time (#116)', () => {
+describe('an analysis an older Recording Analysis made', () => {
   const stored: Analysis = {
     gestureStartSeconds: 0.01,
     gestureEndSeconds: 0.5,
@@ -131,27 +131,23 @@ describe('an analysis stored before the settle time (#116)', () => {
     analysis
   })
 
-  it('needs one only when Melodic and missing', () => {
-    expect(needsSettleTime(recording({ state: 'analyzed', analysis: stored }))).toBe(true)
+  it('runs again, Melodic or not, when it has no version or an older one', () => {
     const noiseLike = { ...stored, recordingPitchMidi: null, shortestNoteSeconds: null }
-    expect(needsSettleTime(recording({ state: 'analyzed', analysis: noiseLike }))).toBe(false)
-    for (const settleSeconds of [0.087, null]) {
-      const analysis = { ...stored, settleSeconds }
-      expect(needsSettleTime(recording({ state: 'analyzed', analysis }))).toBe(false)
+    for (const analysis of [stored, { ...stored, settleSeconds: 0.087 }, noiseLike]) {
+      expect(needsReanalysis(recording({ state: 'analyzed', analysis }))).toBe(true)
     }
-    expect(needsSettleTime(recording({ state: 'analyzing' }))).toBe(false)
-    expect(needsSettleTime(recording({ state: 'notAnalyzed' }))).toBe(false)
+    const older = { ...stored, settleSeconds: 0.087, version: ANALYSIS_VERSION - 1 }
+    expect(needsReanalysis(recording({ state: 'analyzed', analysis: older }))).toBe(true)
   })
 
-  it('takes only the settle time from a fresh analysis', () => {
-    const fresh = { ...stored, gestureEndSeconds: 0.6, pitchConfidence: 0.8, settleSeconds: 0.18 }
-    expect(withSettleTime(stored, fresh)).toEqual({ ...stored, settleSeconds: 0.18 })
-  })
-
-  it('leaves it unknown when the fresh analysis found another Recording Pitch', () => {
-    const fresh = { ...stored, recordingPitchMidi: 55.73, settleSeconds: 0.18 }
-    expect(withSettleTime(stored, fresh)).toEqual({ ...stored, settleSeconds: null })
-    const noiseLike = { ...stored, recordingPitchMidi: null, settleSeconds: null }
-    expect(withSettleTime(stored, noiseLike)).toEqual({ ...stored, settleSeconds: null })
+  it('does not run again once the current one made it, or when there is none', () => {
+    for (const analysis of [
+      { ...stored, settleSeconds: 0.087, version: ANALYSIS_VERSION },
+      { ...stored, recordingPitchMidi: null, settleSeconds: null, version: ANALYSIS_VERSION }
+    ]) {
+      expect(needsReanalysis(recording({ state: 'analyzed', analysis }))).toBe(false)
+    }
+    expect(needsReanalysis(recording({ state: 'analyzing' }))).toBe(false)
+    expect(needsReanalysis(recording({ state: 'notAnalyzed' }))).toBe(false)
   })
 })

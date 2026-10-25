@@ -2,8 +2,8 @@
 """Generate the app's sample data from the design prototype's data and the golden data.
 
 Reads docs/design/prototype/data.js (built from the Fixture Library by the melody lab, #47) and
-the reference engine's golden data (fixtures/golden/, from tools/melody-lab/export_golden.py),
-and writes ios/Pedos/Sample/SampleData.generated.swift:
+the reference engine's golden data (fixtures/golden/, from tools/melody-lab/export_golden.py,
+with the Recordings from RecordingAnalysisKit/Tests/GoldenFormat2/, where Swift is frozen), and writes ios/Pedos/Sample/SampleData.generated.swift:
 
 - the prototype's Songs with their distinct pitches, their notes, tempo and beats per bar;
 - each Fixture Library Recording's file and its Recording Analysis, as the reference engine
@@ -26,6 +26,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 SOURCE = REPO / "docs/design/prototype/data.js"
 GOLDEN = REPO / "fixtures/golden"
+# Swift's Recording Analysis is frozen at golden format 2 (RecordingAnalysisKit/Tests/GoldenFormat2/README.md).
+GOLDEN_RECORDINGS = REPO / "RecordingAnalysisKit/Tests/GoldenFormat2/recordings"
 FIXTURES = REPO / "fixtures/recordings"
 OUTPUT = REPO / "ios/Pedos/Sample/SampleData.generated.swift"
 
@@ -64,7 +66,7 @@ def load():
 
 
 def golden(kind, item_id):
-    path = GOLDEN / kind / f"{item_id}.json"
+    path = (GOLDEN_RECORDINGS if kind == "recordings" else GOLDEN / kind) / f"{item_id}.json"
     if not path.is_file():
         sys.exit(f"error: no golden data {path.relative_to(REPO)}")
     return json.loads(path.read_text(encoding="utf-8"))
@@ -145,7 +147,7 @@ def render(data):
         "#if INTERNAL",
         "extension SampleFixture {",
         "    /// Every Fixture Library Recording: its file, and its Recording Analysis as the reference",
-        "    /// engine computes it (`fixtures/golden/recordings/`).",
+        "    /// engine computed it at golden format 2 (`RecordingAnalysisKit/Tests/GoldenFormat2/recordings/`).",
         "    static let prototypeLibrary: [SampleFixture] = [",
     ]
     for r in recordings:

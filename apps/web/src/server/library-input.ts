@@ -117,6 +117,8 @@ const isTime = (value: unknown): value is number =>
 const MAX_SECONDS = 3600
 const MAX_WAVEFORM_BARS = 256
 const MAX_TITLE_LENGTH = 200
+/** Room for the Recording Analysis versions of later releases, which an older Worker still keeps. */
+const MAX_ANALYSIS_VERSION = 1000
 
 function parseAnalysis(value: unknown): Analysis | null | undefined {
   if (!isObject(value)) return undefined
@@ -134,7 +136,9 @@ function parseAnalysis(value: unknown): Analysis | null | undefined {
     // A browser on a release before #116 sends none.
     (a.settleSeconds === undefined ||
       a.settleSeconds === null ||
-      isNumberIn(a.settleSeconds, 0, MAX_SECONDS))
+      isNumberIn(a.settleSeconds, 0, MAX_SECONDS)) &&
+    // A browser on a release before #208 sends none.
+    (a.version === undefined || isIntegerIn(a.version, 1, MAX_ANALYSIS_VERSION))
   if (!valid) return undefined
   return {
     gestureStartSeconds: a.gestureStartSeconds,
@@ -144,7 +148,8 @@ function parseAnalysis(value: unknown): Analysis | null | undefined {
     pitchConfidence: a.pitchConfidence,
     recordingPitchMidi: a.recordingPitchMidi,
     shortestNoteSeconds: a.shortestNoteSeconds,
-    ...(a.settleSeconds === undefined ? {} : { settleSeconds: a.settleSeconds })
+    ...(a.settleSeconds === undefined ? {} : { settleSeconds: a.settleSeconds }),
+    ...(a.version === undefined ? {} : { version: a.version })
   } as Analysis
 }
 

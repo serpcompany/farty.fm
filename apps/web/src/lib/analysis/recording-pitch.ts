@@ -18,10 +18,10 @@ export interface PitchAnalysis {
   confidence: number
 }
 
-/** Loose on purpose: audition is the real gate. */
-export const MINIMUM_CONFIDENCE = 0.1
-/** Voiced probability a frame needs, on top of pYIN's own voicing decision. */
-const MINIMUM_VOICED_PROBABILITY = 0.05
+/** Loose on purpose: audition is the real gate (#208 raised it from 0.1). */
+export const MINIMUM_CONFIDENCE = 0.2
+/** Contour frames farther than this from the gesture's center, in semitones, are dropped. */
+const FAR_FROM_CENTER = 6
 
 /** Pitch contour, Recording Pitch estimate and pitch confidence of a gesture. */
 export function analyzePitch(body: Float64Array): PitchAnalysis {
@@ -31,10 +31,12 @@ export function analyzePitch(body: Float64Array): PitchAnalysis {
 }
 
 /**
- * pYIN over the gesture, then the reference's smoothing: keep frames voiced with probability
- * above 0.05; if at least 3, run a 5-frame median filter over the MIDI values with unvoiced frames
- * as 0 (scipy `reflect` edges), keep it only on voiced frames, and drop values at or below MIDI
- * 10 (the median landed on the zeros).
+ * pYIN over the gesture, then the reference's smoothing: keep every frame pYIN calls voiced,
+ * attack included (#208); if at least 3, run a 5-frame median filter over the MIDI values with
+ * unvoiced frames as 0 (scipy `reflect` edges), keep it only on voiced frames, and drop values at
+ * or below MIDI 10 (the median landed on the zeros). If at least 3 are left, drop those more than
+ * 6 semitones from their energy-weighted median: octave errors and glide tails, which the
+ * renderer would bend toward.
  */
 export function contour(body: Float64Array): Float64Array {
   const pyin = sharedPyin().run(body)
@@ -42,17 +44,27 @@ export function contour(body: Float64Array): Float64Array {
   const f0 = new Float64Array(n)
   let finiteCount = 0
   for (let i = 0; i < n; i++) {
-    const keep = pyin.voiced[i] && pyin.voicedProbability[i] > MINIMUM_VOICED_PROBABILITY
-    f0[i] = keep ? pyin.f0[i] : Number.NaN
+    f0[i] = pyin.voiced[i] ? pyin.f0[i] : Number.NaN
     if (Number.isFinite(f0[i])) finiteCount++
   }
   if (finiteCount < 3) return f0
   const midi = f0.map(v => (Number.isFinite(v) ? hzToMidi(v) : 0))
   const smoothed = medianFilter5(midi)
+  const m = new Float64Array(n)
+  const kept: number[] = []
   for (let i = 0; i < n; i++) {
-    const m = Number.isFinite(f0[i]) ? smoothed[i] : Number.NaN
-    f0[i] = Number.isFinite(m) && m > 10 ? midiToHz(m) : Number.NaN
+    m[i] = Number.isFinite(f0[i]) && smoothed[i] > 10 ? smoothed[i] : Number.NaN
+    if (Number.isFinite(m[i])) kept.push(i)
   }
+  if (kept.length >= 3) {
+    const rms = frameRms(body, Pyin.frameLength, Pyin.hopLength)
+    const center = weightedMedian(
+      kept.map(i => m[i]),
+      kept.map(i => rms[i])
+    )
+    for (const i of kept) if (Math.abs(m[i] - center) > FAR_FROM_CENTER) m[i] = Number.NaN
+  }
+  for (let i = 0; i < n; i++) f0[i] = Number.isFinite(m[i]) ? midiToHz(m[i]) : Number.NaN
   return f0
 }
 
@@ -74,23 +86,26 @@ export function estimate(
 
   const rms = frameRms(body, Pyin.frameLength, hop)
   const mids = voiced.map(i => hzToMidi(f0[i]))
-  const weights = voiced.map(i => rms[i])
+  const median = weightedMedian(
+    mids,
+    voiced.map(i => rms[i])
+  )
+  const spread = npMedian(mids.map(m => Math.abs(m - median)))
+  const confidence = clamp01(coverage) * clamp01(1 - spread / 3)
+  return { midi: confidence >= MINIMUM_CONFIDENCE ? median : null, confidence }
+}
+
+/** The pitch below which half the weight lies (`weighted_median` in the reference). */
+export function weightedMedian(mids: number[], weights: number[]): number {
   // A stable sort, so equal pitches keep frame order.
   const order = mids.map((_, i) => i).sort((a, b) => mids[a] - mids[b])
   const total = weights.reduce((s, w) => s + w, 0)
   let cumulative = 0
-  let medianIndex = order[order.length - 1]
   for (const i of order) {
     cumulative += weights[i]
-    if (cumulative / total >= 0.5) {
-      medianIndex = i
-      break
-    }
+    if (cumulative / total >= 0.5) return mids[i]
   }
-  const median = mids[medianIndex]
-  const spread = npMedian(mids.map(m => Math.abs(m - median)))
-  const confidence = clamp01(coverage) * clamp01(1 - spread / 3)
-  return { midi: confidence >= MINIMUM_CONFIDENCE ? median : null, confidence }
+  return mids[order[order.length - 1]]
 }
 
 /** `librosa.feature.rms(y, frame_length, hop_length)`: centered, zero-padded frames. */

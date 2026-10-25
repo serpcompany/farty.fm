@@ -16,7 +16,7 @@ Inputs: `../../fixtures/recordings/` (Fixture Library) and `../../catalog/` (Son
 | --- | --- |
 | `melody.py` | MIDI → monophonic melody plan (sustain-aware skyline; reports everything dropped) |
 | `engine.py` | Recording Analysis (single-gesture segment, pitch contour, self-audition, settle time), Melody Fit (Pitch Coverage, unlocks and Auto-map: key choice and one Recording per pitch), rendering |
-| `evaluate.py` | Reads each render back with a pitch tracker: notes on pitch, onsets on time, re-attacks inside a note |
+| `evaluate.py` | Reads each render back with a pitch tracker: notes on pitch, onsets on time, re-attacks inside a note, how much of each note sounds, and how much of the sounding notes YIN hears on pitch |
 | `build.py` | Renders all versions and writes the listening page (`listen/index.html` + data + audio) |
 | `run_all.py` | Prints the checks for every Song; the quickest regression check |
 | `export_golden.py` | Writes the reference results (Recording Analysis, imported Songs, Arrangements, metrics) as deterministic JSON to `fixtures/golden/`; see its README |

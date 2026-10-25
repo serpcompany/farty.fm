@@ -22,8 +22,11 @@ import type { AnalysisState, Recording } from './recordings'
 // Pitch Coverage as the app reads it, checked against the reference engine's golden data and
 // ported from the iPhone app's `PitchCoverageTests` and `SongListingTests`.
 
-/** The sample story's takes, in order: 3 Noise-like, then the Melodic ones that unlock Songs. */
-const story = ['069', '021', '090', '052', '094', '059', '019', '086', '017', '084', '013', '002']
+/**
+ * The sample story's takes, in order: Melodic ones that unlock Songs, with 3 Noise-like takes
+ * (018, 052, 055). The iPhone's story starts with 069 and ends with 002, which #208 made Melodic.
+ */
+const story = ['018', '021', '090', '052', '094', '059', '019', '086', '017', '084', '013', '055']
 const fixtureIds = goldenIndex.recordings
 
 /** A Recording of this fixture with the reference engine's analysis and its Fixture Library id. */
@@ -71,8 +74,8 @@ const listing = (recordings: Recording[], query = '', order: SongOrder = 'closes
   songListing(sortRows(songRows(songs, recordings), order), query)
 
 describe('Pitch Coverage against the reference engine', () => {
-  it('unlocks all 12 Songs with the 9 Melodic fixtures', () => {
-    expect(all.filter(r => coverageKey([r]) !== '[]')).toHaveLength(9)
+  it('unlocks all 12 Songs with the 15 Melodic fixtures', () => {
+    expect(all.filter(r => coverageKey([r]) !== '[]')).toHaveLength(15)
     expect(songs).toHaveLength(12)
     for (const s of songs) expect(coverageOf(s, all).unlocked, s.id).toBe(true)
   })
@@ -134,15 +137,15 @@ describe('Pitch Coverage against the reference engine', () => {
   it('reads the coverage of locked Songs as the reference does', () => {
     const mary = coverageOf(song('mary'), takes(3))
     expect(coverageSummary(mary)).toBe('2 of 4 notes covered')
-    expect(mary.transposition).toBe(-24)
-    expect(missingNotes(mary)).toBe('D3 and E3')
-    expect(fixtureId(mary.recordingForPitch.get(72))).toBe('021')
+    expect(mary.transposition).toBe(-26)
+    expect(missingNotes(mary)).toBe('A♯2 and D3')
+    expect(fixtureId(mary.recordingForPitch.get(74))).toBe('021')
     expect(fixtureId(mary.recordingForPitch.get(79))).toBe('090')
 
     const birthday = coverageOf(song('birthday'), eight)
     expect(coverageSummary(birthday)).toBe('6 of 8 notes covered')
-    expect(birthday.transposition).toBe(-15)
-    expect(missingNotes(birthday)).toBe('B2 and E3')
+    expect(birthday.transposition).toBe(-16)
+    expect(missingNotes(birthday)).toBe('D3 and D♯3')
   })
 })
 
@@ -302,7 +305,7 @@ describe('Compose’s listing', () => {
   })
 
   it('locks every Song, fewest notes first, without Melodic Recordings', () => {
-    const { unlocked, locked } = listing(fixtures(['069']))
+    const { unlocked, locked } = listing(fixtures(['018']))
     expect(unlocked).toHaveLength(0)
     expect(locked).toHaveLength(12)
     expect(locked[0].song.id).toBe('mary')
@@ -330,21 +333,22 @@ describe('Compose’s listing', () => {
   })
 
   // The reference's `melody_fit().missing` on the same takes. The settle cost (#116) moved the
-  // cheapest transposition of locked `frere` and `birthday`.
+  // cheapest transposition of locked `frere` and `birthday`, and the contour that keeps the attack
+  // (#208) moved `birthday`'s again.
   it('names the missing notes with their octave', () => {
-    expect(missingNotes(coverageOf(song('birthday'), eight))).toBe('B2 and E3')
+    expect(missingNotes(coverageOf(song('birthday'), eight))).toBe('D3 and D♯3')
     expect(missingNotes(coverageOf(song('frere'), eight))).toBe('C♯3')
     expect(missingNotes(coverageOf(song('mary'), eight))).toBeNull()
     const few = takes(3)
-    expect(missingNotes(coverageOf(song('birthday'), few))).toBe('G♯2, A♯2, C♯3, D♯3, F3, and F♯3')
-    expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe('G♯2, A♯2, C♯3, and 3 more')
-    expect(missingNotes(coverageOf(song('mary'), few), 3)).toBe('D3 and E3')
+    expect(missingNotes(coverageOf(song('birthday'), few))).toBe('F2, G2, A2, A♯2, C3, and D3')
+    expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe('F2, G2, A2, and 3 more')
+    expect(missingNotes(coverageOf(song('mary'), few), 3)).toBe('A♯2 and D3')
   })
 
   it('matches the catalog again only when the Melodic Recordings change', () => {
     const five = takes(5)
-    const noise = fixtures(['002'])
-    // A Noise-like Recording (002) changes nothing; the 6th take, a Melodic one, does.
+    const noise = fixtures(['055'])
+    // A Noise-like Recording (055) changes nothing; the 6th take, a Melodic one, does.
     expect(coverageKey([...five, ...noise])).toBe(coverageKey(five))
     expect(coverageKey(takes(6))).not.toBe(coverageKey(five))
     const analyzing: Recording = { ...takes(6)[5], analysis: { state: 'analyzing' } }
@@ -372,7 +376,7 @@ describe('what a save changed', () => {
   })
 
   it('shows no unlock for a Noise-like save, and the Song closest to unlocking', () => {
-    const changes = coverageChanges(songs, takes(4), [...takes(4), ...fixtures(['002'])])
+    const changes = coverageChanges(songs, takes(4), [...takes(4), ...fixtures(['055'])])
     expect(changes.unlocked).toEqual([])
     expect(changes.improved).toEqual([])
     // The first in catalog order of the locked Songs with the highest coverage, as on the iPhone.

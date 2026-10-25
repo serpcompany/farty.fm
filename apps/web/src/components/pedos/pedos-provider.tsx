@@ -11,6 +11,7 @@ import {
   useState
 } from 'react'
 import { analyze } from '@/lib/analysis/client'
+import { upgradeAnalyses } from '@/lib/analysis-upgrade'
 import { forgetDecoded, play, stopPlayback } from '@/lib/audio/player'
 import {
   MicrophoneDeniedError,
@@ -38,7 +39,6 @@ import {
   recordingPitch,
   replaySegment
 } from '@/lib/recordings'
-import { addSettleTimes } from '@/lib/settle-time-upgrade'
 import { reportError } from '@/lib/telemetry/errors'
 import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
 import { makeToot as renderToot } from '@/lib/toot-renderer'
@@ -238,13 +238,13 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     // A guest's new visit first clears the last one's Toots (`visit.ts`).
     const library = openVisit().library
     library.then(store.loadRecordings).then(loaded => {
-      // An analysis cut off by closing the page starts again, and those stored before #116 get
-      // their settle time, one at a time.
+      // An analysis cut off by closing the page starts again, and those an older Recording
+      // Analysis made run the current one, one at a time.
       setRecordings(loaded)
       for (const recording of loaded) {
         if (recording.analysis.state === 'analyzing') void runAnalysis(recording.id)
       }
-      void addSettleTimes(loaded, analyze, replace)
+      void upgradeAnalyses(loaded, analyze, replace)
     })
     library
       .then(tootStore.loadToots)
@@ -273,9 +273,13 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       onLibraryChanged(change => {
         if (change.reset) {
           stopPlayback()
-          void store
-            .loadRecordings()
-            .then(setRecordings, error => reportError('library-reload-failed', error))
+          void store.loadRecordings().then(
+            loaded => {
+              setRecordings(loaded)
+              void upgradeAnalyses(loaded, analyze, replace)
+            },
+            error => reportError('library-reload-failed', error)
+          )
           void tootStore
             .loadToots()
             .then(setToots, error => reportError('library-reload-failed', error))
@@ -288,6 +292,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           stopPlayback()
         }
         for (const id of deleted.toots) forgetDecoded(`toot-${id}`)
+        // The account keeps the analysis each Recording was uploaded with, maybe an older one.
+        void upgradeAnalyses(added, analyze, replace)
         setRecordings(list => {
           if (!list) return list
           const kept = list.filter(r => !deleted.recordings.includes(r.id))
@@ -316,7 +322,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           )
         })
       }),
-    []
+    [replace]
   )
 
   const finishWelcome = useCallback(() => {

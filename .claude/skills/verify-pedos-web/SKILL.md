@@ -27,7 +27,7 @@ Use your own port so parallel agents don't collide. The examples use 4109.
 
 `E2E_SERVER=preview E2E_PORT=4109 pnpm test:e2e` runs the Playwright journeys in `e2e/` against that preview, on a touch tablet (iPad size) and a phone (Pixel 7). The desktop project (1440×900, a mouse) runs only `e2e/desktop.spec.ts`: a computer gets the product page, not the app (#199). It sends the password from `.dev.vars` with `httpCredentials`. Name a spec file to run one, such as `e2e/record-melodic.spec.ts` (Record).
 
-For a new feature, add a spec in `e2e/`. To record, call `withFakeMicrophone('<file>.wav')` from `e2e/record.ts` with a Recording in `fixtures/recordings/` (090 is Melodic, G3; 084 is two farts; 069 is Noise-like), then `recordAndSave(page, seconds)`. Assert note names, not exact pitches.
+For a new feature, add a spec in `e2e/`. To record, call `withFakeMicrophone('<file>.wav')` from `e2e/record.ts` with a Recording in `fixtures/recordings/` (090 is Melodic, G3; 084 is two farts; 065 is Noise-like), then `recordAndSave(page, seconds)`. Assert note names, not exact pitches.
 
 ## 4. Screenshot at phone size
 

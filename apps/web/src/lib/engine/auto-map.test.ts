@@ -25,6 +25,7 @@ import {
   HIGHEST_TRANSPOSITION,
   LOWEST_TRANSPOSITION,
   moveCost,
+  silentCost,
   tooShortCost,
   unsettledCost
 } from './auto-map'
@@ -72,18 +73,21 @@ function arrangementCost(song: Song, transpose: number, recordingFor: Map<number
     const settle = (r.settle_s as number) * exp2(-shift / 12)
     let short = 0
     let unsettled = 0
+    const silent: number[] = []
     for (const n of notes) {
       const sounds = Math.min(n.dur * spb - 0.025, played)
       const shortest = r.shortest_note_s as number
       if (sounds < shortest) short += 8 + 400 * (shortest - sounds)
       unsettled += (20 * Math.min(sounds, settle)) / Math.max(1e-9, sounds)
+      silent.push(Math.max(0, n.dur * spb - 0.025 - played))
     }
-    cost += neumaierSum(notes.map(n => n.dur)) * perBeat + short + unsettled
+    cost +=
+      neumaierSum(notes.map(n => n.dur)) * perBeat + short + unsettled + 30 * neumaierSum(silent)
   }
   return { uncovered, octaves, cost }
 }
 
-/** Python 3.12's `sum()` of floats, as `golden_cost.py` sums a pitch's beats. */
+/** Python 3.12's `sum()` of floats, as `golden_cost.py` sums a pitch's beats and silent seconds. */
 function neumaierSum(values: number[]): number {
   let s = 0
   let c = 0
@@ -166,11 +170,11 @@ describe('Auto-map matches the golden Arrangements', () => {
     }
   }
 
-  it('unlocks all 13 Songs on the full library and none on the small one', () => {
+  it('unlocks all 13 Songs on the full library and 5 on the small one', () => {
     const unlocked = (library: Library) =>
-      songIds.filter(id => arrange(goldenSong(id), inputs(libraries[library])).unlocked).length
-    expect(unlocked('full')).toBe(13)
-    expect(unlocked('small')).toBe(0)
+      songIds.filter(id => arrange(goldenSong(id), inputs(libraries[library])).unlocked)
+    expect(unlocked('full')).toHaveLength(13)
+    expect(unlocked('small')).toEqual(['mary', 'jingle', 'saints', 'ode', 'ode-mutopia'])
   })
 })
 
@@ -249,9 +253,13 @@ describe('Auto-map ties', () => {
   })
 
   it('never puts two tied pitches on one Recording of a tie group', () => {
-    // 013, 084 and 086 share one Recording Pitch exactly, so a planner that looks Recordings up by
-    // pitch would reuse one of them. The matching rule above already rejects that; this says so.
-    expect(tieGroups).toEqual([['013', '084', '086']])
+    // 013 and 086, and 016 and 022, share one Recording Pitch exactly, so a planner that looks
+    // Recordings up by pitch would reuse one of them. The matching rule above already rejects that;
+    // this says so.
+    expect(tieGroups).toEqual([
+      ['013', '086'],
+      ['016', '022']
+    ])
     for (const id of songIds) {
       const a = arrange(goldenSong(id), inputs(libraries.full))
       const ids = a.pitches.map(c => c.recordingId).filter(r => r !== null)
@@ -301,7 +309,7 @@ describe('Auto-map inputs and terms', () => {
 
   it('leaves a Song locked, at the lowest transposition, when no Recording is Melodic', () => {
     const song = goldenSong('mary')
-    const noise = inputs(['002', '009', '016'])
+    const noise = inputs(['009', '018', '052'])
     expect(noise.every(r => r.recordingPitchMidi === null)).toBe(true)
     const a = arrange(song, noise)
     expect(a.transposition).toBe(LOWEST_TRANSPOSITION)
@@ -343,6 +351,14 @@ describe('Auto-map inputs and terms', () => {
     // An Octave Move up halves the settle time and the gesture.
     expect(unsettledCost([0.5], 1, 0.1, 12)).toBeCloseTo(20 * 0.1, 9)
     expect(unsettledCost([0.5, 0.05], 1, 0, 0)).toBe(0)
+  })
+
+  it('charges the seconds of each note the Recording is too short to fill', () => {
+    // A 0.4 s gesture leaves 0.6 s of a 1 s note silent, and nothing of a 0.3 s note.
+    expect(silentCost([1, 0.3], 0.4, 0)).toBeCloseTo(30 * 0.6, 9)
+    expect(silentCost([0.3], 0.4, 0)).toBe(0)
+    // An Octave Move up halves the gesture: 0.8 s of the 1 s note is silent.
+    expect(silentCost([1], 0.4, 12)).toBeCloseTo(30 * 0.8, 9)
   })
 
   it('orders ids by code point', () => {
