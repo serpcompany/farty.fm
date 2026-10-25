@@ -15,7 +15,7 @@ const LIBRARY_HEADER = 'x-pedos-library'
 
 export type Answer = { status: number; error?: string }
 
-async function send(
+export async function send(
   path: string,
   accountId: string,
   init: RequestInit = {}
@@ -34,7 +34,7 @@ async function send(
   }
 }
 
-async function answer(response: Response | null): Promise<Answer> {
+export async function answer(response: Response | null): Promise<Answer> {
   if (!response) return { status: 0 }
   if (response.ok) return { status: response.status }
   const error = await response

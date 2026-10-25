@@ -46,13 +46,15 @@ export function tootArrangement(arrangement: Arrangement): TootArrangement {
  * 16-bit WAV.
  *
  * Throws a `TootError`: `locked` when the Song isn't unlocked, `couldNotMake` when a Recording's
- * audio or analysis is missing or the render fails.
+ * audio or analysis is missing or the render fails. `id` is a new one unless given: the return
+ * from Checkout makes the Toot it paid for again (ADR 0010).
  */
 export async function makeToot(
   song: Song,
   recordings: readonly Recording[],
   loadAudio: (id: string) => Promise<ArrayBuffer>,
-  render: Render = renderInWorker
+  render: Render = renderInWorker,
+  id: string = crypto.randomUUID()
 ): Promise<TootDraft> {
   const arrangement = arrangementOf(song, recordings)
   if (!arrangement.unlocked) throw new TootError('locked')
@@ -72,7 +74,7 @@ export async function makeToot(
   }
   const { samples, sampleRate } = rendered
   return {
-    id: crypto.randomUUID(),
+    id,
     song,
     arrangement: tootArrangement(arrangement),
     seconds: samples.length / sampleRate,

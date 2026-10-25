@@ -5,10 +5,11 @@ import { getSessionUser, type SessionUser } from './session-user'
 
 export type { SessionUser } from './session-user'
 
-// Every route under `src/app/api/` except sign-in's own (`api/auth/`) and the error reports'
-// (`api/telemetry/`, which reads no session) is a user's library, so each
-// method is built with `userRoute`, which calls `requireUser()` before anything else.
-// `src/app/api/every-route.workers.test.ts` fails on a route that answers without a session.
+// Every route under `src/app/api/` except sign-in's own (`api/auth/`), the error reports'
+// (`api/telemetry/`, which reads no session) and Stripe's webhook (`api/stripe/`, which checks
+// Stripe's signature) is a user's library, so each method is built with `userRoute`, which calls
+// `requireUser()` before anything else. `src/app/api/every-route.workers.test.ts` fails on a route
+// that answers without a session.
 
 /** Nothing about a user's library is cached, by the browser or anything between. */
 const NO_STORE = 'private, no-store'
