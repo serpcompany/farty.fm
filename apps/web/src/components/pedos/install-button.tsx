@@ -1,6 +1,6 @@
 'use client'
 
-import { Ellipsis, EllipsisVertical, Share } from 'lucide-react'
+import { Ellipsis, EllipsisVertical, Menu, Share } from 'lucide-react'
 import { type ReactNode, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,8 +36,9 @@ function Steps({ guide }: { guide: InstallGuide }) {
       return (
         <>
           <li>
-            Tap <Control>Share</Control> <Share className={icon} aria-hidden />. If you don't see
-            it, tap <Ellipsis className={icon} aria-hidden />
+            Tap <Control>Share</Control>
+            <Share className={`${icon} ml-1`} aria-hidden />. If you don't see it, tap{' '}
+            <Ellipsis className={icon} aria-hidden />
             <span className="sr-only">More</span> first.
           </li>
           <li>
@@ -62,6 +63,20 @@ function Steps({ guide }: { guide: InstallGuide }) {
           </li>
           <li>
             Tap <Control>Install</Control>.
+          </li>
+        </>
+      )
+    case 'samsung-menu':
+      return (
+        <>
+          <li>
+            Tap the <Control>menu</Control> <Menu className={icon} aria-hidden /> in your browser.
+          </li>
+          <li>
+            Tap <Control>Add page to</Control>, then <Control>Home screen</Control>.
+          </li>
+          <li>
+            Tap <Control>Add</Control> or <Control>Install</Control>.
           </li>
         </>
       )

@@ -15,6 +15,7 @@ export type InstallRoute = 'prompt' | 'share-sheet'
  * - `share-sheet`: Safari on iPhone and iPad, and the browsers built on it: Share, then Add to
  *   Home Screen.
  * - `browser-menu`: Android before or without Chrome's prompt: the browser's menu, then Install.
+ * - `samsung-menu`: Samsung Internet, whose menu says Add page to, then Home screen.
  * - `open-in-safari`, `open-in-browser`: an in-app browser, on iPhone or Android, which can't
  *   install Farty, so first open the page in Safari or the browser.
  * - `phone`: a computer, where Farty is a phone app (#199).
@@ -24,6 +25,7 @@ export type InstallGuide =
   | 'prompt'
   | 'share-sheet'
   | 'browser-menu'
+  | 'samsung-menu'
   | 'open-in-safari'
   | 'open-in-browser'
   | 'phone'
@@ -56,11 +58,10 @@ export function installGuideFor(browser: Browser): InstallGuide {
       : 'open-in-safari'
   }
   // Chrome on an Android tablet asks for desktop sites, as Linux, and only touch gives it away.
-  if (/Android/.test(userAgent) || (/Linux/.test(userAgent) && !/CrOS/.test(userAgent) && touch)) {
+  if (/Android/.test(userAgent) || (/Linux/.test(userAgent) && touch)) {
     // "wv" is Android's WebView, which in-app browsers are built on.
-    return /; wv\)/.test(userAgent) || inAppBrowser.test(userAgent)
-      ? 'open-in-browser'
-      : 'browser-menu'
+    if (/; wv\)/.test(userAgent) || inAppBrowser.test(userAgent)) return 'open-in-browser'
+    return /SamsungBrowser\//.test(userAgent) ? 'samsung-menu' : 'browser-menu'
   }
   return 'phone'
 }

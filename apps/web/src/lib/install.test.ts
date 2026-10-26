@@ -120,11 +120,11 @@ describe('installGuideFor', () => {
     for (const android of [
       'androidChrome',
       'androidFirefox',
-      'androidSamsung',
       'androidTabletDesktopSite'
     ] as const) {
       expect(guide(userAgents[android]), android).toBe('browser-menu')
     }
+    expect(guide(userAgents.androidSamsung)).toBe('samsung-menu')
     expect(guide(userAgents.androidChrome, { canPrompt: true })).toBe('prompt')
     expect(guide(userAgents.androidTabletDesktopSite, { canPrompt: true })).toBe('prompt')
   })

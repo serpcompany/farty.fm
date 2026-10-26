@@ -1,8 +1,9 @@
 import { expect, type Page, test } from '@playwright/test'
 
 // Profile's Get the app (#217): what installing gives you, then the steps for the browser it's
-// in: Chrome's prompt or menu on Android, the Share sheet on iPhone and iPad, Safari or the
-// browser first from an in-app browser, a phone from a computer, and that Farty is installed.
+// in: Chrome's prompt or menu, or Samsung Internet's, on Android, the Share sheet on iPhone and
+// iPad, Safari or the browser first from an in-app browser, a phone from a computer, and that
+// Farty is installed.
 
 const userAgents = {
   iPhoneSafari:
@@ -12,6 +13,8 @@ const userAgents = {
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15',
   iPhoneInstagram:
     'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 400.0.0.0 (iPhone16,2; iOS 18_6; en_US)',
+  androidSamsung:
+    'Mozilla/5.0 (Linux; Android 15; SAMSUNG SM-S931B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/28.0 Chrome/130.0.0.0 Mobile Safari/537.36',
   androidInstagram:
     'Mozilla/5.0 (Linux; Android 15; Pixel 9 Build/AP3A.241105.008; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/141.0.7390.43 Mobile Safari/537.36 Instagram 400.0.0.0.0 Android',
   windowsChrome:
@@ -122,6 +125,19 @@ test.describe('on Android', () => {
     await expect(section.getByRole('button')).toHaveCount(0)
   })
 
+  test.describe('in Samsung Internet', () => {
+    test.use({ userAgent: userAgents.androidSamsung })
+
+    test("says to add Farty from Samsung Internet's menu", async ({ page }) => {
+      await page.goto('/profile/')
+      await expect(getTheApp(page).getByRole('listitem')).toHaveText([
+        'Tap the menu in your browser.',
+        'Tap Add page to, then Home screen.',
+        'Tap Add or Install.'
+      ])
+    })
+  })
+
   test.describe('in an in-app browser', () => {
     test.use({ userAgent: userAgents.androidInstagram })
 
@@ -136,7 +152,7 @@ test.describe('on Android', () => {
 })
 
 const shareSheetSteps = [
-  "Tap Share . If you don't see it, tap More first.",
+  "Tap Share. If you don't see it, tap More first.",
   'Tap Add to Home Screen. Scroll down or tap View More to find it.',
   'Tap Add.'
 ]
