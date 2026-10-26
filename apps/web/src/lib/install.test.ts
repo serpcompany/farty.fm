@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { installRouteFor } from './install'
+import { installGuideFor, installRouteFor } from './install'
 
 const userAgents = {
   iPhoneSafari:
@@ -23,15 +23,40 @@ const userAgents = {
   iPadSafari:
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Safari/605.1.15',
   androidChrome:
-    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36'
+    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36',
+  androidFirefox: 'Mozilla/5.0 (Android 15; Mobile; rv:144.0) Gecko/144.0 Firefox/144.0',
+  androidSamsung:
+    'Mozilla/5.0 (Linux; Android 15; SAMSUNG SM-S931B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/28.0 Chrome/130.0.0.0 Mobile Safari/537.36',
+  // Chrome on an Android tablet asks for desktop sites by default.
+  androidTabletDesktopSite:
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+  androidWebView:
+    'Mozilla/5.0 (Linux; Android 15; Pixel 9 Build/AP3A.241105.008; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/141.0.7390.43 Mobile Safari/537.36',
+  androidInstagram:
+    'Mozilla/5.0 (Linux; Android 15; Pixel 9 Build/AP3A.241105.008; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/141.0.7390.43 Mobile Safari/537.36 Instagram 400.0.0.0.0 Android',
+  androidFacebook:
+    'Mozilla/5.0 (Linux; Android 15; Pixel 9 Build/AP3A.241105.008) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.7390.43 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/520.0.0.38.101;]',
+  macSafari:
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15',
+  windowsChrome:
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+  chromeOS:
+    'Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+  linuxFirefox: 'Mozilla/5.0 (X11; Linux x86_64; rv:144.0) Gecko/20100101 Firefox/144.0'
 }
 
 type Browser = Parameters<typeof installRouteFor>[0]
 
+const touchScreen = { maxTouchPoints: 5, standalone: false, canPrompt: false }
+
 /** A touch-screen browser that isn't installed and hasn't offered Chrome's prompt. */
 function browser(userAgent: string, overrides: Partial<Browser> = {}) {
-  const defaults = { maxTouchPoints: 5, standalone: false, canPrompt: false }
-  return installRouteFor({ userAgent, ...defaults, ...overrides })
+  return installRouteFor({ userAgent, ...touchScreen, ...overrides })
+}
+
+/** Profile's guide in a touch-screen browser that isn't installed and hasn't offered the prompt. */
+function guide(userAgent: string, overrides: Partial<Browser> = {}) {
+  return installGuideFor({ userAgent, ...touchScreen, ...overrides })
 }
 
 describe('installRouteFor', () => {
@@ -67,5 +92,65 @@ describe('installRouteFor', () => {
   it('offers nothing once Farty runs from the Home Screen', () => {
     expect(browser(userAgents.iPhoneSafari, { standalone: true })).toBeNull()
     expect(browser(userAgents.androidChrome, { canPrompt: true, standalone: true })).toBeNull()
+  })
+})
+
+describe('installGuideFor', () => {
+  it('uses the Share sheet on iPhone and iPad, in Safari and the browsers built on it', () => {
+    expect(guide(userAgents.iPhoneSafari)).toBe('share-sheet')
+    expect(guide(userAgents.iPhoneChrome)).toBe('share-sheet')
+    expect(guide(userAgents.iPadSafari)).toBe('share-sheet')
+  })
+
+  it("sends an iPhone's in-app browsers to Safari first", () => {
+    for (const app of [
+      'iPhoneInstagram',
+      'iPhoneGoogleApp',
+      'iPhoneFacebook',
+      'iPhoneLine',
+      'iPhoneTwitter',
+      'iPhoneLinkedIn',
+      'iPhoneSnapchat'
+    ] as const) {
+      expect(guide(userAgents[app]), app).toBe('open-in-safari')
+    }
+  })
+
+  it("uses the browser's menu on Android until Chrome offers its prompt", () => {
+    for (const android of [
+      'androidChrome',
+      'androidFirefox',
+      'androidTabletDesktopSite'
+    ] as const) {
+      expect(guide(userAgents[android]), android).toBe('browser-menu')
+    }
+    expect(guide(userAgents.androidSamsung)).toBe('samsung-menu')
+    expect(guide(userAgents.androidChrome, { canPrompt: true })).toBe('prompt')
+    expect(guide(userAgents.androidTabletDesktopSite, { canPrompt: true })).toBe('prompt')
+  })
+
+  it("sends Android's in-app browsers to the browser first", () => {
+    expect(guide(userAgents.androidWebView)).toBe('open-in-browser')
+    expect(guide(userAgents.androidInstagram)).toBe('open-in-browser')
+    expect(guide(userAgents.androidFacebook)).toBe('open-in-browser')
+  })
+
+  it('says to open Farty on a phone from a computer', () => {
+    const mouse = { maxTouchPoints: 0 }
+    expect(guide(userAgents.macSafari, mouse)).toBe('phone')
+    // A Mac's user agent is an iPad's: only touch tells them apart.
+    expect(guide(userAgents.iPadSafari, mouse)).toBe('phone')
+    expect(guide(userAgents.windowsChrome, mouse)).toBe('phone')
+    expect(guide(userAgents.linuxFirefox, mouse)).toBe('phone')
+    expect(guide(userAgents.androidTabletDesktopSite, mouse)).toBe('phone')
+    // A touch-screen Chromebook or Windows laptop is still a computer.
+    expect(guide(userAgents.chromeOS)).toBe('phone')
+    expect(guide(userAgents.windowsChrome)).toBe('phone')
+  })
+
+  it('says Farty is installed once it runs from the Home Screen', () => {
+    expect(guide(userAgents.iPhoneSafari, { standalone: true })).toBe('installed')
+    expect(guide(userAgents.androidChrome, { canPrompt: true, standalone: true })).toBe('installed')
+    expect(guide(userAgents.windowsChrome, { standalone: true })).toBe('installed')
   })
 })

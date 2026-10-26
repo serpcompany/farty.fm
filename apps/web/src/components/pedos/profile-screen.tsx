@@ -18,7 +18,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import { setSharing, useSharing } from '@/lib/telemetry/sharing'
 import { useAccount } from './account-provider'
-import { InstallButton, useInstallRoute } from './install-button'
+import { InstallGuideCard } from './install-button'
 import { usePedos } from './pedos-provider'
 
 /**
@@ -42,7 +42,6 @@ const list = 'divide-y overflow-hidden rounded-xl bg-muted/60'
  */
 export function ProfileScreen({ version }: { version: string }) {
   const stats = usePedos().profileStats
-  const installRoute = useInstallRoute()
 
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
@@ -96,16 +95,12 @@ export function ProfileScreen({ version }: { version: string }) {
 
       {FixtureLibrary && <FixtureLibrary />}
 
-      {installRoute && (
-        <section aria-labelledby="profile-install" className="pt-6">
-          <h2 id="profile-install" className={header}>
-            Install
-          </h2>
-          <div className="rounded-xl bg-muted/60 px-4 py-3">
-            <InstallButton />
-          </div>
-        </section>
-      )}
+      <section aria-labelledby="profile-install" className="pt-6">
+        <h2 id="profile-install" className={header}>
+          Get the app
+        </h2>
+        <InstallGuideCard />
+      </section>
 
       <section aria-labelledby="profile-privacy" className="pt-6">
         <h2 id="profile-privacy" className={header}>
