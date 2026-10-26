@@ -128,7 +128,8 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     await tab(page, 'Profile').click()
     await expect(page.getByTestId('stat-melodic')).toHaveText(`Melodic Recordings${melodic}`)
     await expect(page.getByTestId('stat-notes')).toHaveText(`Notes collected${notes}`)
-    for (const row of await page.getByRole('main').getByRole('listitem').all()) {
+    // Profile's rows, not the numbered steps under Get the app.
+    for (const row of await page.getByRole('main').locator('ul > li').all()) {
       await expectAtLeast44High(row)
     }
   })
