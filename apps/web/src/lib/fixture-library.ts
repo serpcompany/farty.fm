@@ -1,4 +1,4 @@
-// The Fixture Library in an internal build (Staging): the 23 test farts of `fixtures/recordings/`,
+// The Fixture Library in an internal build (Staging): the test farts of `fixtures/recordings/`,
 // added as the user's own Recordings, as the iPhone app's `FixtureLibrary`. Only the Staging build
 // carries them (`scripts/fixture-library.ts`), and only it imports this module.
 
