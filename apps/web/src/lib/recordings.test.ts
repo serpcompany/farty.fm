@@ -42,7 +42,7 @@ describe('heardSomething', () => {
   })
 
   it('hears every fart in the Fixture Library', async () => {
-    expect(goldenRecordings).toHaveLength(22)
+    expect(goldenRecordings).toHaveLength(32)
     for (const golden of goldenRecordings) {
       const { samples, sampleRate } = await decoded(golden)
       expect(heardSomething(samples, sampleRate), golden.id).toBe(true)
@@ -88,13 +88,13 @@ describe('heardSomething', () => {
     }
   })
 
-  it('in a loud room (-40 dBFS), misses only the three faintest farts 20 dB quieter', async () => {
+  it('in a loud room (-40 dBFS), misses only the four faintest farts 20 dB quieter', async () => {
     const missed: string[] = []
     for (const golden of goldenRecordings) {
       const { take, sampleRate } = await fartInRoom(golden.id, -40)
       if (!heardSomething(take, sampleRate)) missed.push(golden.id)
     }
-    expect(missed).toEqual(['017', '019', '022'])
+    expect(missed).toEqual(['017', '019', '022', '096'])
   })
 
   it('hears nothing in less than one 50 ms level window', () => {

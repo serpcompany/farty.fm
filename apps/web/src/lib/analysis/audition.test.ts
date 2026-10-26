@@ -23,7 +23,17 @@ const EXPECTED_MELODIC = [
   '086',
   '090',
   '091',
-  '094'
+  '094',
+  '095',
+  '096',
+  '097',
+  '098',
+  '099',
+  '100',
+  '101',
+  '102',
+  '103',
+  '104'
 ]
 
 // #36: from the golden gesture, contour and estimate, the same shortest note for every Recording,

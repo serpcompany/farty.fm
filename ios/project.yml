@@ -38,11 +38,14 @@ targets:
     sources:
       - path: Pedos
       # The Fixture Library, for the sample model (Debug) and "Load the Fixture Library" (Debug
-      # and QA). Release excludes it.
+      # and QA). Release excludes it. The frozen app keeps the 23 Recordings it was built on (ids
+      # up to 094, 021 included); later batches are for the web app only (#219).
       - path: ../fixtures/recordings
         includes:
-          - "*.mp3"
-          - "*.wav"
+          - "0[0-8][0-9]__*.mp3"
+          - "0[0-8][0-9]__*.wav"
+          - "09[0-4]__*.mp3"
+          - "09[0-4]__*.wav"
         buildPhase: resources
     dependencies:
       - package: RecordingAnalysisKit

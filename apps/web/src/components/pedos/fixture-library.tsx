@@ -6,7 +6,7 @@ import { type FixtureIndex, fixtureLibraryPath, fixtureRecordingId } from '@/lib
 import { usePedos } from './pedos-provider'
 
 /**
- * Internal builds only (Staging): add the 23 Fixture Library Recordings as your own, analyzed like
+ * Internal builds only (Staging): add every Fixture Library Recording as your own, analyzed like
  * real ones. Matches the Internal build section of the iPhone app's `ProfileTab`. Shows nothing
  * when the build carries no fixtures.
  */

@@ -29,8 +29,12 @@ async function decodeMp3(bytes: Uint8Array): Promise<DecodedFile> {
   const decoder = new MPEGDecoder({ enableGapless: true })
   await decoder.ready
   try {
-    const { channelData, samplesDecoded, sampleRate, errors } = decoder.decode(bytes)
+    const decoded = decoder.decode(bytes)
+    const { samplesDecoded, sampleRate, errors } = decoded
     if (errors.length > 0) throw new Error(`MP3 decode errors: ${errors[0].message}`)
+    // mpg123-decoder always returns two channels and copies a mono stream into both;
+    // libsndfile reports the stream's own channel count.
+    const channelData = isMonoMp3(bytes) ? decoded.channelData.slice(0, 1) : decoded.channelData
     return {
       samples: toMono(channelData, samplesDecoded),
       sampleRate,
@@ -40,6 +44,21 @@ async function decodeMp3(bytes: Uint8Array): Promise<DecodedFile> {
   } finally {
     decoder.free()
   }
+}
+
+/** Whether the first MPEG audio frame (after any ID3v2 tag) is single-channel. */
+function isMonoMp3(bytes: Uint8Array): boolean {
+  let at = 0
+  if (bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) {
+    // ID3v2: a 10-byte header, a synchsafe size, and a 10-byte footer when flag 0x10 is set.
+    const size = (bytes[6] << 21) | (bytes[7] << 14) | (bytes[8] << 7) | bytes[9]
+    at = 10 + size + (bytes[5] & 0x10 ? 10 : 0)
+  }
+  for (; at + 3 < bytes.length; at++) {
+    // Frame sync (11 bits) with a Layer III header; the channel mode is the top 2 bits of byte 3.
+    if (bytes[at] === 0xff && (bytes[at + 1] & 0xe6) === 0xe2) return bytes[at + 3] >> 6 === 3
+  }
+  throw new Error('No MPEG audio frame found')
 }
 
 /** PCM WAV. libsndfile scales 16-bit samples by 1/32768 and 24/32-bit ones likewise. */
