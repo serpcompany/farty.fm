@@ -24,6 +24,7 @@ import { renderSource } from '../src/lib/engine/render-source'
 import type { RenderSource } from '../src/lib/engine/renderer'
 import type { Song } from '../src/lib/engine/song'
 import { decodeFile } from '../src/test-support/decode'
+import { fixtures } from './fixture-library'
 
 const ROOT = resolve(__dirname, '../../..')
 const FIXTURES = join(ROOT, 'fixtures/recordings')
@@ -90,18 +91,16 @@ async function main() {
     if (/\.(wav|json)$/.test(name)) rmSync(join(outDir, name))
   }
 
-  // The full Fixture Library, through Recording Analysis as the app runs it on a new Recording.
-  const files = readdirSync(FIXTURES)
-    .filter(name => /^\d{3}__/.test(name))
-    .sort()
+  // The full Fixture Library, as the manifest lists it (a removed fixture's file can stay in the
+  // folder), through Recording Analysis as the app runs it on a new Recording.
   const recordings: RecordingToRender[] = []
   let analysisMs = 0
-  for (const name of files) {
-    const file = await decodeFile(join(FIXTURES, name))
+  for (const { id, filename } of fixtures()) {
+    const file = await decodeFile(join(FIXTURES, filename))
     const audio = { samples: file.samples, sampleRate: file.sampleRate }
     const { result, ms } = time(() => toAnalysis(analyzeRecording(audio.samples, audio.sampleRate)))
     analysisMs += ms
-    recordings.push({ id: name.slice(0, 3), audio, analysis: result })
+    recordings.push({ id, audio, analysis: result })
   }
   const library = recordings.map(r => autoMapRecording(r.id, r.analysis))
   const melodic = library.filter(r => r.recordingPitchMidi !== null).map(r => r.id)

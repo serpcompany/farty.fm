@@ -224,7 +224,7 @@ describe('fart-only rendering (ADR 0004)', () => {
   })
 
   it('accents downbeats by 1.5 dB, in any meter', () => {
-    const source = sources.get('021') as RenderSource
+    const source = sources.get('002') as RenderSource
     const beats = (start: number) => ({ start, dur: 1, bpm: 90, beatsPerBar: 3 })
     const notes = [0, 1, 3, 4.5, 6 + 1e-9].map(start => noteInBeats(source, 48, beats(start)))
     expect(notes.map(n => n.downbeat)).toEqual([true, false, true, false, true])
