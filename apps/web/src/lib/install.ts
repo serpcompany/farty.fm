@@ -1,11 +1,32 @@
 /**
  * Installing Farty from the browser. Chrome on Android has its own install prompt
  * (`beforeinstallprompt`), which Farty holds until it offers an Install app button. Safari on
- * iPhone has none, so Farty says how to use Share, then Add to Home Screen.
+ * iPhone has none, so Farty says how to use Share, then Add to Home Screen. Profile says how for
+ * every browser (`installGuideFor`).
  */
 
 /** How this browser installs Farty: Chrome's prompt, or the Share sheet on iPhone and iPad. */
 export type InstallRoute = 'prompt' | 'share-sheet'
+
+/**
+ * What Profile says about installing Farty here:
+ * - `installed`: it runs from the Home Screen, or Chrome just installed it.
+ * - `prompt`: Chrome's install prompt, behind an Install app button.
+ * - `share-sheet`: Safari on iPhone and iPad, and the browsers built on it: Share, then Add to
+ *   Home Screen.
+ * - `browser-menu`: Android before or without Chrome's prompt: the browser's menu, then Install.
+ * - `open-in-safari`, `open-in-browser`: an in-app browser, on iPhone or Android, which can't
+ *   install Farty, so first open the page in Safari or the browser.
+ * - `phone`: a computer, where Farty is a phone app (#199).
+ */
+export type InstallGuide =
+  | 'installed'
+  | 'prompt'
+  | 'share-sheet'
+  | 'browser-menu'
+  | 'open-in-safari'
+  | 'open-in-browser'
+  | 'phone'
 
 type BeforeInstallPromptEvent = Event & { prompt(): Promise<void> }
 
@@ -15,21 +36,42 @@ type BeforeInstallPromptEvent = Event & { prompt(): Promise<void> }
 const inAppBrowser =
   /GSA\/|FBAN|FBAV|Instagram|Line\/|Twitter|LinkedInApp|Snapchat|musical_ly|BytedanceWebview/
 
-export function installRouteFor(browser: {
+type Browser = {
   userAgent: string
   maxTouchPoints: number
   standalone: boolean
   canPrompt: boolean
-}): InstallRoute | null {
-  if (browser.standalone) return null
+}
+
+export function installGuideFor(browser: Browser): InstallGuide {
+  if (browser.standalone) return 'installed'
   if (browser.canPrompt) return 'prompt'
   const { userAgent } = browser
+  const touch = browser.maxTouchPoints > 1
   // iPadOS Safari reports itself as a Mac, and only touch gives it away.
-  const apple =
-    /iPhone|iPad|iPod/.test(userAgent) ||
-    (/Macintosh/.test(userAgent) && browser.maxTouchPoints > 1)
-  // Safari, and Chrome and Firefox on iOS, send "Safari/". Most in-app browsers leave it out.
-  return apple && /Safari\//.test(userAgent) && !inAppBrowser.test(userAgent) ? 'share-sheet' : null
+  if (/iPhone|iPad|iPod/.test(userAgent) || (/Macintosh/.test(userAgent) && touch)) {
+    // Safari, and Chrome and Firefox on iOS, send "Safari/". Most in-app browsers leave it out.
+    return /Safari\//.test(userAgent) && !inAppBrowser.test(userAgent)
+      ? 'share-sheet'
+      : 'open-in-safari'
+  }
+  // Chrome on an Android tablet asks for desktop sites, as Linux, and only touch gives it away.
+  if (/Android/.test(userAgent) || (/Linux/.test(userAgent) && !/CrOS/.test(userAgent) && touch)) {
+    // "wv" is Android's WebView, which in-app browsers are built on.
+    return /; wv\)/.test(userAgent) || inAppBrowser.test(userAgent)
+      ? 'open-in-browser'
+      : 'browser-menu'
+  }
+  return 'phone'
+}
+
+/** How this browser can install Farty now, or null when it's installed or can't be. */
+export function installRouteFor(browser: Browser): InstallRoute | null {
+  return routeOf(installGuideFor(browser))
+}
+
+function routeOf(guide: InstallGuide | null): InstallRoute | null {
+  return guide === 'prompt' || guide === 'share-sheet' ? guide : null
 }
 
 let deferredPrompt: BeforeInstallPromptEvent | null = null
@@ -55,20 +97,27 @@ if (typeof window !== 'undefined') {
   })
 }
 
-/** How this browser can install Farty now, or null when it's installed or can't be. */
-export function currentInstallRoute(): InstallRoute | null {
-  if (typeof window === 'undefined' || installed) return null
-  return installRouteFor({
+/** What Profile says about installing Farty here, or null on the server. */
+export function currentInstallGuide(): InstallGuide | null {
+  if (typeof window === 'undefined') return null
+  return installGuideFor({
     userAgent: navigator.userAgent,
     maxTouchPoints: navigator.maxTouchPoints,
+    // Chrome's appinstalled counts too: Farty is on the Home Screen, though this tab isn't it.
     standalone:
+      installed ||
       window.matchMedia('(display-mode: standalone)').matches ||
       (navigator as Navigator & { standalone?: boolean }).standalone === true,
     canPrompt: deferredPrompt !== null
   })
 }
 
-/** Calls `listener` when `currentInstallRoute()` may have changed. Returns a function that stops it. */
+/** How this browser can install Farty now, or null when it's installed or can't be. */
+export function currentInstallRoute(): InstallRoute | null {
+  return routeOf(currentInstallGuide())
+}
+
+/** Calls `listener` when `currentInstallGuide()` may have changed. Returns a function that stops it. */
 export function subscribeToInstall(listener: () => void): () => void {
   listeners.add(listener)
   return () => listeners.delete(listener)
