@@ -18,8 +18,8 @@ describe('the Fixture Library', () => {
     expect(ids).toEqual([...ids].sort())
   })
 
-  it('has the 23 fixtures of the golden library', () => {
-    expect(fixtures().map(f => f.id)).toHaveLength(23)
+  it('has the 22 fixtures of the golden library', () => {
+    expect(fixtures().map(f => f.id)).toHaveLength(22)
   })
 
   it('analyzes as the reference does and unlocks every Song, as 16-bit WAV', async () => {

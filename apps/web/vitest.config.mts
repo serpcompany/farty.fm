@@ -15,7 +15,7 @@ export default defineConfig({
           name: 'node',
           include: ['src/**/*.test.{ts,tsx}'],
           exclude: [...configDefaults.exclude, interactionTests, workersTests],
-          // The golden tests analyze all 23 fixtures. One file at a time, so the timings in
+          // The golden tests analyze all 22 fixtures. One file at a time, so the timings in
           // src/lib/analysis/timing.test.ts aren't measured while other files compete for the CPU.
           testTimeout: 120_000,
           fileParallelism: false

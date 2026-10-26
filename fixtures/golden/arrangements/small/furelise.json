@@ -7,61 +7,61 @@
   "per_pitch": [
     {
       "octave_move": false,
-      "recording": "069",
-      "shift_semitones": 1.574079406339827,
+      "recording": "016",
+      "shift_semitones": -0.3259205936601859,
       "song_pitch": 68,
-      "target_midi": 46
+      "target_midi": 40
     },
     {
       "octave_move": false,
-      "recording": "002",
-      "shift_semitones": 0.5740794063398198,
+      "recording": "022",
+      "shift_semitones": 0.6740794063398141,
       "song_pitch": 69,
-      "target_midi": 47
+      "target_midi": 41
     },
     {
-      "octave_move": false,
-      "recording": "021",
-      "shift_semitones": 0.7740794063398297,
+      "octave_move": true,
+      "recording": "090",
+      "shift_semitones": -12.225920593660177,
       "song_pitch": 71,
-      "target_midi": 49
+      "target_midi": 43
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
       "song_pitch": 72,
-      "target_midi": 50
+      "target_midi": 44
     },
     {
-      "octave_move": true,
-      "recording": "016",
-      "shift_semitones": 11.674079406339814,
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": 1.574079406339827,
       "song_pitch": 74,
-      "target_midi": 52
+      "target_midi": 46
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": 0.5740794063398198,
+      "song_pitch": 75,
+      "target_midi": 47
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
-      "song_pitch": 75,
-      "target_midi": 53
-    },
-    {
-      "octave_move": false,
-      "recording": "090",
-      "shift_semitones": -1.2259205936601774,
       "song_pitch": 76,
-      "target_midi": 54
+      "target_midi": 48
     }
   ],
   "pitch_coverage": {
     "covered": 5,
     "total": 7
   },
-  "plan_cost": 125.48935416188425,
+  "plan_cost": 191.50330227350068,
   "render_settings": null,
   "song": "furelise",
-  "transpose": -22,
+  "transpose": -28,
   "unlocked": false
 }
