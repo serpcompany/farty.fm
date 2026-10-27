@@ -4,7 +4,7 @@ Writes deterministic JSON to fixtures/golden/ (format and tolerances: fixtures/g
 
   index.json                         libraries, Recordings, Songs, a summary, library versions
   recordings/<id>.json               Recording Analysis of every Fixture Library Recording
-  songs/<id>.json                    the imported melody of every hand-entered catalog Song
+  songs/<id>.json                    the imported melody of every golden Song (golden_catalog())
   arrangements/<library>/<id>.json   Pitch Coverage, transposition, Arrangement and evaluate.py
                                      metrics per Song, for the full Fixture Library and the small
                                      6-Recording one (no Arrangement to render when locked)
@@ -34,6 +34,7 @@ from evaluate import evaluate
 from melody import load_catalog
 
 GOLDEN = engine.ROOT / "fixtures/golden"
+SHIP_LIST = engine.ROOT / "apps/web/src/lib/catalog/ship-list.json"  # the Songs the web app ships
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")  # README.md is written by hand
 FORMAT_VERSION = 5  # 5: Songs play farts raw (ADR 0012); 4: the length rule (#221) and each fit's `missing`
 COVERAGE_SEEDS = 10  # random subsets per size in coverage.json
@@ -220,6 +221,18 @@ def coverage_json(catalog, lib):
     return {"subsets": out}
 
 
+def golden_catalog():
+    """The catalog Songs that get golden data, in catalog order: every Song the web app ships
+    (its ship list, which apps/web/src/lib/catalog/generate.ts reads too), and every hand-entered
+    Song. The other PDMX imports (catalog entries with "import") are gated by
+    tools/catalog/import_pdmx.py instead, and would make the golden data ten times larger."""
+    ship = json.loads(SHIP_LIST.read_text())
+    catalog = [(c, m) for c, m in load_catalog() if c["id"] in ship or "import" not in c]
+    missing = set(ship) - {c["id"] for c, _ in catalog}
+    assert not missing, f"the ship list names Songs that aren't in catalog/: {sorted(missing)}"
+    return catalog
+
+
 def main():
     for name in GENERATED:
         path = GOLDEN / name
@@ -236,9 +249,7 @@ def main():
     for src in lib:
         write(f"recordings/{src.id}.json", recording_json(manifest[src.id], src))
 
-    # The hand-entered Songs only: the PDMX imports (catalog entries with "import") are gated by
-    # tools/catalog/import_pdmx.py instead, and would make the golden data ten times larger.
-    catalog = [(c, m) for c, m in load_catalog() if "import" not in c]
+    catalog = golden_catalog()
     songs = []
     for c, m in catalog:
         write(f"songs/{c['id']}.json", song_json(c, m))

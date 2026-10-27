@@ -15,26 +15,6 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-/**
- * The Songs the app ships, in the iPhone app's order. A Song added to `catalog/` doesn't ship
- * until it's on this list. The Mutopia Ode to Joy (`ode-mutopia`) stays out: it's the same tune
- * as `ode`, kept in the catalog to exercise the reference engine's importer.
- */
-export const shipList = [
-  'twinkle',
-  'mary',
-  'jingle',
-  'birthday',
-  'frere',
-  'saints',
-  'row',
-  'ode',
-  'merryxmas',
-  'amazing',
-  'furelise',
-  'auld'
-]
-
 /** An entry of `catalog/catalog.json`: the cited score and how the reference engine imports it. */
 export type CatalogEntry = {
   id: string
@@ -66,6 +46,17 @@ export const outputPath = fileURLToPath(new URL('songs.generated.ts', import.met
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(fileURLToPath(new URL(path, repo)), 'utf8')) as T
 }
+
+/**
+ * The Songs the app ships, in the iPhone app's order, from `ship-list.json`. A Song added to
+ * `catalog/` doesn't ship until it's on this list. The Mutopia Ode to Joy (`ode-mutopia`) stays
+ * out: it's the same tune as `ode`, kept in the catalog to exercise the reference engine's
+ * importer. `tools/melody-lab/export_golden.py` reads the same file, so every Song on it has
+ * golden data.
+ */
+export const shipList: readonly string[] = readJson<string[]>(
+  'apps/web/src/lib/catalog/ship-list.json'
+)
 
 /** The catalog and the golden Songs, read from the repository. */
 export function readSources(): Sources {
