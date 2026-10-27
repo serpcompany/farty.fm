@@ -284,10 +284,13 @@ def fills(recording_seconds, longest_note_s, shift):
     NOTE_FILL was chosen by measurement (ADR 0011): 0.75, 0.9 and 1.0 swept on the 12 app Songs
     and the 129 catalog Songs with the full Fixture Library (32 Recordings). 1.0 is the only one
     that keeps every unlocked app Song at ADR 0004's bar. At 0.9 and 0.75 Fur Elise reads 91%
-    within 50 cents: its B2 (score 71) has a 0.97 s note, so the gate moves it from 019 (0.33 s)
-    to 069 (1.08 s), whose attack reads +243 cents on the 0.25 s notes of that pitch. 1.0 gives it
-    022 (1.37 s), which reads 100%. Amazing Grace locks from 0.9 up: its 2.98 s note is longer
-    than any Recording can last, even moved down an octave. See ADR 0011 for the table.
+    within 50 cents: its G2 (score 71, at T=-28) has a 1.066 s note, so the gate moves it from
+    019 (0.33 s) to 069 (1.17 s at G2), whose attack reads +243 cents on the 0.25 s notes of that
+    pitch. At 1.0 069 still fills G2, but score 69's 1.339 s note is too long for 022 (1.32 s at
+    F2), so 69 takes 032 with an Octave Move, and 022 goes to G2, beating 069 on cost. The Song
+    reads 100% through the cost ranking, not because the gate excludes 069. Amazing Grace locks
+    from 0.9 up: its 2.98 s note is longer than any Recording can last, even moved down an
+    octave. See ADR 0011 for the table.
     """
     return recording_seconds * 2 ** (-shift / 12) >= NOTE_FILL * longest_note_s
 
