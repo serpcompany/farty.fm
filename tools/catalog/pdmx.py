@@ -288,8 +288,10 @@ def padded_pickup_problems(meters, notes, first_onset):
     The bar is the one that holds the melody's first note (`first_onset`), where the excerpt
     starts, and `notes` is every track's notes as (start, end) beats. The bar fails when it opens
     with a note, its notes run with no rest of PADDED_PICKUP_REST beats or more between them, and
-    every track then rests PADDED_PICKUP_REST beats or more to the next bar line. A bar with a rest
-    that long between its notes too is the score's own rhythm, not a padded pickup."""
+    every track then rests PADDED_PICKUP_REST beats or more to the next bar line, for at least as
+    long as the bar's notes lasted. A pickup is at most half its bar, so a full bar that ends on a
+    real rest ("C D E -") passes. A bar with a rest of PADDED_PICKUP_REST beats or more between its
+    notes too is the score's own rhythm, not a padded pickup."""
     bars = _bar_lines(_meters(meters), first_onset)
     line, length, _ = bars[_bar_index(bars, first_onset)]
     end = line + length
@@ -302,9 +304,10 @@ def padded_pickup_problems(meters, notes, first_onset):
             return []
         reach = max(reach, stop)
     rest = _grid(end - reach)
-    if rest < PADDED_PICKUP_REST:
+    if rest < PADDED_PICKUP_REST or rest < _grid(reach - line):
         return []
-    return [f"the first bar is a pickup padded with silence: every track rests {_number(rest)} beats after its notes"]
+    beats = "beat" if _number(rest) == 1 else "beats"
+    return [f"the first bar is a pickup padded with silence: every track rests {_number(rest)} {beats} after its notes"]
 
 
 def _grid(beats):

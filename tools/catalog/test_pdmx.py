@@ -206,9 +206,16 @@ class Gates(unittest.TestCase):
         padded = [(0.0, 0.75), (0.75, 1.0), (3.0, 4.0), (4.0, 5.0)]
         self.assertEqual(pdmx.padded_pickup_problems([(0.0, 3, 4)], padded, 0.0),
                          ["the first bar is a pickup padded with silence: every track rests 2 beats after its notes"])
+        # The silence must last at least as long as the notes before it: a pickup is at most half its bar.
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 2.0), (4.0, 5.0)], 0.0),
+                         ["the first bar is a pickup padded with silence: every track rests 2 beats after its notes"])
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 2.25), (4.0, 5.0)], 0.0), [])
         # One beat of silence is enough; less isn't.
-        self.assertEqual(len(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 3.0), (4.0, 5.0)], 0.0)), 1)
-        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 3.5), (4.0, 5.0)], 0.0), [])
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 2, 4)], [(0.0, 1.0), (2.0, 3.0)], 0.0),
+                         ["the first bar is a pickup padded with silence: every track rests 1 beat after its notes"])
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 0.75), (4.0, 5.0)], 0.0),
+                         ["the first bar is a pickup padded with silence: every track rests 3.25 beats after its notes"])
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 2, 4)], [(0.0, 0.5), (1.5, 1.75), (2.0, 3.0)], 0.0), [])
         # The bar of the melody's first note, where the excerpt starts; the bars before it don't count.
         self.assertEqual(len(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 1.0), (8.0, 9.0), (12.0, 13.0)], 8.0)), 1)
 
@@ -221,6 +228,14 @@ class Gates(unittest.TestCase):
         self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 1.0), (2.0, 3.0), (4.0, 5.0)], 0.0), [])
         # Another track plays on through the melody's rest.
         self.assertEqual(pdmx.padded_pickup_problems([(0.0, 3, 4)], [(0.0, 1.0), (0.0, 3.0), (3.0, 4.0)], 0.0), [])
+        # A full bar that ends on a real rest, as a melody-only score can open (#231 review, N1).
+        # 4/4: C half, D quarter, quarter rest.
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 2.0), (2.0, 3.0), (4.0, 5.0)], 0.0), [])
+        # 3/4: a half note, then a quarter rest.
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 3, 4)], [(0.0, 2.0), (3.0, 4.0)], 0.0), [])
+        # 4/4: three staccato eighths on beats 1 to 3, then a rest.
+        staccato = [(0.0, 0.5), (1.0, 1.5), (2.0, 2.5), (4.0, 5.0)]
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], staccato, 0.0), [])
 
     def test_render_bar(self):
         ok = {"within_50c_of_fart_pct": 94, "onsets_on_time_pct": 95, "notes_with_retrigger": 0}
