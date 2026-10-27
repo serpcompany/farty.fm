@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { TOOT_PRICE } from '@/lib/pricing'
+
 import {
   type CheckoutSession,
   createCheckoutSession,
@@ -155,26 +157,43 @@ const session = (fields: Partial<CheckoutSession> = {}): CheckoutSession => ({
 
 describe('paidFor', () => {
   it('is true for a paid session for this user and Toot', () => {
-    expect(paidFor(session(), 'userA', TOOT)).toBe(true)
+    expect(paidFor(session(), 'userA', TOOT, TOOT_PRICE)).toBe(true)
   })
 
   it('is false for an unpaid session, or one for another user or Toot', () => {
-    expect(paidFor(session({ payment_status: 'unpaid' }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session({ payment_status: 'no_payment_required' }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session({ mode: 'subscription' }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session(), 'userB', TOOT)).toBe(false)
+    expect(paidFor(session({ payment_status: 'unpaid' }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(
+      paidFor(session({ payment_status: 'no_payment_required' }), 'userA', TOOT, TOOT_PRICE)
+    ).toBe(false)
+    expect(paidFor(session({ mode: 'subscription' }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session(), 'userB', TOOT, TOOT_PRICE)).toBe(false)
     const other = '44444444-4444-4444-8444-444444444444'
-    expect(paidFor(session(), 'userA', other)).toBe(false)
-    expect(paidFor(session({ client_reference_id: other }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session({ metadata: null }), 'userA', TOOT)).toBe(false)
+    expect(paidFor(session(), 'userA', other, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ client_reference_id: other }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ metadata: null }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
   })
 
   it('is false for a session that charged anything but the Toot’s price', () => {
-    expect(paidFor(session({ amount_total: 1 }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session({ amount_total: 0 }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session({ amount_total: null }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session({ currency: 'eur' }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session({ currency: null }), 'userA', TOOT)).toBe(false)
+    expect(paidFor(session({ amount_total: 1 }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ amount_total: 0 }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ amount_total: null }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ currency: 'eur' }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ currency: null }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+  })
+
+  it('is true with Adaptive Pricing: the session keeps 99 usd, the buyer paid in their currency', () => {
+    const local = session({
+      presentment_details: { presentment_currency: 'jpy', presentment_amount: 163 }
+    })
+    expect(paidFor(local, 'userA', TOOT, TOOT_PRICE)).toBe(true)
+  })
+
+  it('judges by the price the Toot’s checkout started at, not today’s', () => {
+    const before = { amount: 149, currency: 'usd' }
+    const paidThen = session({ amount_total: 149 })
+    expect(paidFor(paidThen, 'userA', TOOT, before)).toBe(true)
+    expect(paidFor(paidThen, 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session(), 'userA', TOOT, before)).toBe(false)
   })
 })
 

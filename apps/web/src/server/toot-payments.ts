@@ -1,7 +1,13 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 import { uploadState } from '@/db/library'
-import { markTootPaid, paidUnsavedToot, startTootPayment, tootPayment } from '@/db/payments'
+import {
+  markTootPaid,
+  paidUnsavedToot,
+  startTootPayment,
+  type TootPaymentRow,
+  tootPayment
+} from '@/db/payments'
 import { songs } from '@/lib/catalog/songs.generated'
 import { TOOT_PRICE } from '@/lib/pricing'
 import { servedOrigin } from '@/lib/site'
@@ -75,25 +81,25 @@ function songCreatorUrl(request: Request, songId: string, tootId: string, done: 
 }
 
 /**
- * Asks Stripe about the Toot's latest Checkout Session, and records it paid if it is. Null when
- * Stripe no longer has it (deleted test data, or another Stripe account's key), so a new one starts.
+ * Asks Stripe about the Toot's latest Checkout Session (`payment`, its row), and records it paid if
+ * it paid the price the row recorded. Null when Stripe no longer has it (deleted test data, or
+ * another Stripe account's key), so a new one starts.
  */
 async function paidAtStripe(
   { db }: Pick<Stores, 'db'>,
   secretKey: string,
   user: SessionUser,
-  tootId: string,
-  checkoutSessionId: string
+  payment: TootPaymentRow
 ): Promise<{ paid: boolean; session: CheckoutSession } | null> {
   let session: CheckoutSession
   try {
-    session = await retrieveCheckoutSession(secretKey, checkoutSessionId)
+    session = await retrieveCheckoutSession(secretKey, payment.checkoutSessionId)
   } catch (error) {
     if (error instanceof StripeError && error.status === 404) return null
     throw error
   }
-  if (!paidFor(session, user.id, tootId)) return { paid: false, session }
-  return { paid: await markTootPaid(db, user.id, tootId, session.id), session }
+  if (!paidFor(session, user.id, payment.tootId, payment)) return { paid: false, session }
+  return { paid: await markTootPaid(db, user.id, payment.tootId, session.id), session }
 }
 
 /**
@@ -103,8 +109,9 @@ async function paidAtStripe(
  * for the same Toot is reused, so two taps or two tabs can't pay twice. `{ paidToot }` names
  * another Toot of the same Song that's paid for and was never saved (the page closed before the
  * return saved it), for Song Creator to make and save instead of paying again. 410 if the Toot was
- * deleted, 409 at the Toot limit (before anything is paid), 429 past `PAYMENT_LIMITS.checkouts`,
- * 503 when payments aren't set up here.
+ * deleted, 409 at the Toot limit (before anything is paid), 409 `payment_mismatch` when its last
+ * session is paid but not at the price its row recorded (logged, and never paid for twice), 429
+ * past `PAYMENT_LIMITS.checkouts`, 503 when payments aren't set up here.
  */
 export async function startCheckout(
   { db }: Pick<Stores, 'db'>,
@@ -151,14 +158,20 @@ export async function startCheckout(
     return Response.json({ url: url.toString() })
   }
 
-  const earlierId =
-    payment && isCheckoutSessionId(payment.checkoutSessionId) ? payment.checkoutSessionId : null
+  const earlier = payment && isCheckoutSessionId(payment.checkoutSessionId) ? payment : null
   try {
-    if (earlierId) {
-      const earlier = await paidAtStripe({ db }, payments.secretKey, user, id, earlierId)
-      if (earlier?.paid) return paid()
-      if (earlier?.session.status === 'open' && earlier.session.url) {
-        return Response.json({ url: earlier.session.url })
+    if (earlier) {
+      const atStripe = await paidAtStripe({ db }, payments.secretKey, user, earlier)
+      if (atStripe?.paid) return paid()
+      // Paid, but not what its row says it charged: never start a second payment for the Toot.
+      if (atStripe?.session.payment_status === 'paid') {
+        console.error(
+          JSON.stringify({ event: 'stripe_paid_session_refused', session: atStripe.session.id })
+        )
+        return apiError(409, 'payment_mismatch')
+      }
+      if (atStripe?.session.status === 'open' && atStripe.session.url) {
+        return Response.json({ url: atStripe.session.url })
       }
     }
     const session = await createCheckoutSession(payments.secretKey, {
@@ -167,7 +180,7 @@ export async function startCheckout(
       songTitle: song.title,
       successUrl: songCreatorUrl(request, song.id, id, true),
       cancelUrl: songCreatorUrl(request, song.id, id, false),
-      replaces: earlierId
+      replaces: earlier?.checkoutSessionId ?? null
     })
     if (!session.url) throw new StripeError(502)
     await startTootPayment(db, user.id, id, song.id, session.id, TOOT_PRICE)
@@ -198,13 +211,7 @@ export async function getTootPayment(
   if (payment && payments.kind === 'stripe' && isCheckoutSessionId(payment.checkoutSessionId)) {
     if (!(await spend(db, user, 'stripeChecks')).allowed) return Response.json({ paid: false })
     try {
-      const now = await paidAtStripe(
-        { db },
-        payments.secretKey,
-        user,
-        id,
-        payment.checkoutSessionId
-      )
+      const now = await paidAtStripe({ db }, payments.secretKey, user, payment)
       return Response.json({ paid: now?.paid ?? false })
     } catch (error) {
       return stripeFailed(error)
@@ -257,14 +264,12 @@ export async function receiveStripeEvent(
     const session = event.data?.object as CheckoutSession | undefined
     const userId = session?.metadata?.user_id
     const tootId = session?.metadata?.toot_id
-    if (
-      session &&
-      typeof userId === 'string' &&
-      USER_ID.test(userId) &&
-      isItemId(tootId) &&
-      paidFor(session, userId, tootId)
-    ) {
-      await markTootPaid(db, userId, tootId, session.id)
+    if (session && typeof userId === 'string' && USER_ID.test(userId) && isItemId(tootId)) {
+      // Only a Toot whose payment was started here, at the price its row recorded.
+      const payment = await tootPayment(db, userId, tootId)
+      if (payment && paidFor(session, userId, tootId, payment)) {
+        await markTootPaid(db, userId, tootId, session.id)
+      }
     }
   }
   return Response.json({ received: true })

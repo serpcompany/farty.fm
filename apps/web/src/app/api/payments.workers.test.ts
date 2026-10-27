@@ -479,6 +479,66 @@ describe('with Stripe Checkout in test mode', () => {
     expect((await save(T1, a)).status).toBe(402)
   })
 
+  it('takes a payment in the buyer’s own currency (Adaptive Pricing): the session keeps 99 usd', async () => {
+    const a = await signUp('A')
+    stubStripe(sessionFor(a.id, T1))
+    await checkout(T1, a)
+    const local = sessionFor(a.id, T1, {
+      status: 'complete',
+      payment_status: 'paid',
+      presentment_details: { presentment_currency: 'jpy', presentment_amount: 163 }
+    })
+    expect((await deliver(completed(local))).status).toBe(200)
+    expect(await paid(T1, a)).toBe(true)
+    expect((await save(T1, a)).status).toBe(201)
+  })
+
+  it('takes a session paid at the price its checkout started at, after the price changed', async () => {
+    const a = await signUp('A')
+    // The checkout started when a Toot cost 149, and TOOT_PRICE has changed since.
+    const before = { amount: 149, currency: 'usd' }
+    expect(before.amount).not.toBe(TOOT_PRICE.amount)
+    await startTootPayment(testDb(), a.id, T1, 'twinkle', 'cs_test_first', before)
+    const paidThen = sessionFor(a.id, T1, {
+      status: 'complete',
+      payment_status: 'paid',
+      amount_total: before.amount
+    })
+    const stripe = stubStripe(paidThen)
+    expect(await (await checkout(T1, a)).json()).toEqual({ paid: true })
+    // Stripe was asked about that session, and no new one was made.
+    expect(stripe.mock.calls.map(([url]) => String(url))).toEqual([
+      'https://api.stripe.com/v1/checkout/sessions/cs_test_first'
+    ])
+    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
+    expect((await save(T1, a)).status).toBe(201)
+
+    // The webhook judges by the row's price too.
+    await startTootPayment(testDb(), a.id, T2, 'twinkle', 'cs_test_second', before)
+    const webhookPaid = { ...paidThen, id: 'cs_test_second', client_reference_id: T2 }
+    webhookPaid.metadata = { user_id: a.id, toot_id: T2 }
+    expect((await deliver(completed(webhookPaid))).status).toBe(200)
+    expect((await tootPayment(testDb(), a.id, T2))?.paidAt).toBeInstanceOf(Date)
+  })
+
+  it('never starts a second payment for a Toot whose last session is paid at another price', async () => {
+    const a = await signUp('A')
+    const stripe = stubStripe(
+      sessionFor(a.id, T1),
+      sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid', amount_total: 1 })
+    )
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+    await checkout(T1, a)
+    const refused = await checkout(T1, a)
+    expect(refused.status).toBe(409)
+    expect(await refused.json()).toEqual({ error: 'payment_mismatch' })
+    expect(stripe).toHaveBeenCalledTimes(2)
+    expect(log).toHaveBeenCalledWith(
+      JSON.stringify({ event: 'stripe_paid_session_refused', session: 'cs_test_first' })
+    )
+    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeNull()
+  })
+
   it('asks Stripe only so often while a return waits, then answers from D1', async () => {
     const a = await signUp('A')
     stubStripe(sessionFor(a.id, T1))

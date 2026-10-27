@@ -80,9 +80,14 @@ export type CheckoutSession = {
   client_reference_id: string | null
   metadata: Record<string, string> | null
   livemode: boolean
-  /** What it charges, in the currency's smallest unit. */
+  /**
+   * What it charges, in the currency's smallest unit: the price it was created with. Adaptive
+   * Pricing doesn't change these; what the buyer paid in their own currency is in
+   * `presentment_details`, which Farty doesn't read.
+   */
   amount_total: number | null
   currency: string | null
+  presentment_details?: { presentment_amount: number; presentment_currency: string } | null
 }
 
 const STRIPE_API = 'https://api.stripe.com/v1'
@@ -186,13 +191,25 @@ export async function retrieveCheckoutSession(
   return (await stripeRequest(secretKey, `/checkout/sessions/${id}`)) as CheckoutSession
 }
 
-/** Whether Stripe says `session` paid `TOOT_PRICE` for `tootId`, for `userId`. */
-export function paidFor(session: CheckoutSession, userId: string, tootId: string): boolean {
+/** The price a Toot's checkout started at, as its payment row keeps it (`startTootPayment`). */
+export type Price = { amount: number; currency: string }
+
+/**
+ * Whether Stripe says `session` paid `price` for `tootId`, for `userId`. `price` is the one the
+ * Toot's payment row recorded when its checkout started, not today's `TOOT_PRICE`, so a session
+ * paid before the price changed still counts.
+ */
+export function paidFor(
+  session: CheckoutSession,
+  userId: string,
+  tootId: string,
+  price: Price
+): boolean {
   return (
     session.mode === 'payment' &&
     session.payment_status === 'paid' &&
-    session.amount_total === TOOT_PRICE.amount &&
-    session.currency === TOOT_PRICE.currency &&
+    session.amount_total === price.amount &&
+    session.currency === price.currency &&
     session.client_reference_id === tootId &&
     session.metadata?.toot_id === tootId &&
     session.metadata?.user_id === userId
