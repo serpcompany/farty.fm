@@ -1,5 +1,5 @@
 import { answer, send } from './library-api'
-import { savingIsPaid } from './pricing'
+import { builtFor, savingIsPaid } from './pricing'
 
 // Paying to save a Toot, from the browser (ADR 0010): Song Creator starts a Checkout for the Toot
 // (`/api/toots/{id}/checkout/`), the browser goes to Stripe's page, and Stripe sends it back to
@@ -8,15 +8,18 @@ import { savingIsPaid } from './pricing'
 
 /** Whether this build's Save to Toots asks for a payment first: the environment it's built for. */
 export function saveAsksForPayment(): boolean {
-  const env = process.env.PEDOS_ENVIRONMENT
-  return savingIsPaid(env === 'staging' || env === 'production' ? env : 'local')
+  return savingIsPaid(builtFor())
 }
 
-/** How starting to pay went: go to Checkout's page, or there's nothing to pay, or it failed. */
+/**
+ * How starting to pay went: go to Checkout's page, or there's nothing to pay, or another Toot of
+ * the Song is paid for and was never saved (`tootId`), or it failed.
+ */
 export type Checkout =
   | { kind: 'pay'; url: string }
   | { kind: 'paid' }
-  | { kind: 'failed'; problem: 'unavailable' | 'limitReached' | 'failed' }
+  | { kind: 'paidToot'; tootId: string }
+  | { kind: 'failed'; problem: 'unavailable' | 'limitReached' | 'tooMany' | 'failed' }
 
 /** Stripe's page, or the dev checkout on this same site. Nothing else is gone to. */
 function isCheckoutPage(url: string): boolean {
@@ -41,8 +44,12 @@ export async function startCheckout(
     const body = (await response.json().catch(() => null)) as {
       url?: unknown
       paid?: unknown
+      paidToot?: unknown
     } | null
     if (body?.paid === true) return { kind: 'paid' }
+    if (typeof body?.paidToot === 'string' && TOOT_ID.test(body.paidToot)) {
+      return { kind: 'paidToot', tootId: body.paidToot }
+    }
     if (typeof body?.url === 'string' && isCheckoutPage(body.url)) {
       return { kind: 'pay', url: body.url }
     }
@@ -53,6 +60,7 @@ export async function startCheckout(
   if (status === 409 && error === 'limit_reached') {
     return { kind: 'failed', problem: 'limitReached' }
   }
+  if (status === 429) return { kind: 'failed', problem: 'tooMany' }
   return { kind: 'failed', problem: 'failed' }
 }
 
@@ -94,6 +102,11 @@ export function readCheckoutReturn(search = window.location.search): CheckoutRet
   const tootId = params.get('toot')
   if (tootId === null || !TOOT_ID.test(tootId)) return null
   return { tootId, done: params.get('checkout') === 'done' }
+}
+
+/** Song Creator's address back from a paid Checkout for the Toot `tootId` of `songId`. */
+export function paidReturnPath(songId: string, tootId: string): string {
+  return `/compose/${songId}/?${new URLSearchParams({ toot: tootId, checkout: 'done' })}`
 }
 
 /** Takes the return's query off the address, so a reload makes a new Toot. */

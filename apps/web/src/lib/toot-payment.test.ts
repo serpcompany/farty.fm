@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { readCheckoutReturn, startCheckout, tootPaid, waitUntilPaid } from './toot-payment'
+import {
+  paidReturnPath,
+  readCheckoutReturn,
+  startCheckout,
+  tootPaid,
+  waitUntilPaid
+} from './toot-payment'
 
 const TOOT = '33333333-3333-4333-8333-333333333333'
 
@@ -62,10 +68,29 @@ describe('startCheckout', () => {
     expect(await startCheckout(TOOT, 'twinkle', 'userA')).toEqual({ kind: 'paid' })
   })
 
+  it('names another Toot of the Song that is paid for and was never saved', async () => {
+    const other = '44444444-4444-4444-8444-444444444444'
+    answering(Response.json({ paidToot: other }))
+    expect(await startCheckout(TOOT, 'twinkle', 'userA')).toEqual({
+      kind: 'paidToot',
+      tootId: other
+    })
+    vi.restoreAllMocks()
+    for (const paidToot of ['../profile', `${other}x`, 42]) {
+      answering(Response.json({ paidToot }))
+      expect(await startCheckout(TOOT, 'twinkle', 'userA')).toEqual({
+        kind: 'failed',
+        problem: 'failed'
+      })
+      vi.restoreAllMocks()
+    }
+  })
+
   it('says why it failed', async () => {
     const cases: [Response | Error, string][] = [
       [Response.json({ error: 'payments_unavailable' }, { status: 503 }), 'unavailable'],
       [Response.json({ error: 'limit_reached' }, { status: 409 }), 'limitReached'],
+      [Response.json({ error: 'rate_limited' }, { status: 429 }), 'tooMany'],
       [Response.json({ error: 'wrong_library' }, { status: 409 }), 'failed'],
       [Response.json({ error: 'payments_failed' }, { status: 502 }), 'failed'],
       [new TypeError('offline'), 'failed']
@@ -122,5 +147,16 @@ describe('readCheckoutReturn', () => {
     for (const search of ['', '?checkout=done', '?toot=abc&checkout=done', `?toot=${TOOT}x`]) {
       expect(readCheckoutReturn(search)).toBeNull()
     }
+  })
+})
+
+describe('paidReturnPath', () => {
+  it('is the Song Creator address a paid Checkout comes back to', () => {
+    const path = paidReturnPath('twinkle', TOOT)
+    expect(path).toBe(`/compose/twinkle/?toot=${TOOT}&checkout=done`)
+    expect(readCheckoutReturn(new URL(path, 'https://farty.fm').search)).toEqual({
+      tootId: TOOT,
+      done: true
+    })
   })
 })

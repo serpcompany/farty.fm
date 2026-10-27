@@ -18,6 +18,7 @@ import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/too
 import {
   type CheckoutReturn,
   clearCheckoutReturn,
+  paidReturnPath,
   readCheckoutReturn,
   saveAsksForPayment,
   startCheckout,
@@ -159,22 +160,26 @@ const SAVE_PROBLEMS = {
   saveFailed: "Couldn't save this Toot.",
   unavailable: "Payments aren't available right now.",
   limitReached: "You've kept as many Toots as an account can. Delete one to save this one.",
+  tooMany: "You've started a lot of payments. Try again later.",
   failed: "Couldn't start the payment.",
-  notPaidYet: "Your payment hasn't come through yet. Tap Save to check again."
+  notPaidYet: "Your payment hasn't come through yet. Tap Save to check again.",
+  unreachable: "Couldn't reach your account. Tap Save to try again."
 }
 
 /**
  * The made Toot, with Save to Toots pinned above the tabs. Where saving is paid (ADR 0010), Save
  * asks for an account first, then goes to Checkout for this Toot; back from Checkout, it saves
- * the Toot once the server says it's paid. Where it's free, the first save may offer the account
- * step once more (#155).
+ * the Toot once the server says it's paid. A Toot of this Song paid for and never saved is saved
+ * instead of paying again. Where it's free, the first save may offer the account step once more
+ * (#155).
  */
-function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null }) {
+export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null }) {
   const pedos = usePedos()
-  const { account, stepOpen, offerStep, openStep } = useAccount()
+  const { account, stepOpen, offerStep, openStep, retry } = useAccount()
   const accountId = account.status === 'signedIn' ? account.id : null
   const isPaid = saveAsksForPayment()
   const isSaved = pedos.toot(draft.id) !== undefined
+  const returnedPaid = isPaid && back?.done === true && back.tootId === draft.id
   const [busy, setBusy] = useState<'saving' | 'paying' | 'confirming' | null>(null)
   const [problem, setProblem] = useState<keyof typeof SAVE_PROBLEMS | null>(null)
   /** Save opened the account step: once it signs in, on to Checkout. */
@@ -212,6 +217,11 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
       window.location.assign(checkout.url)
       return
     }
+    if (checkout.kind === 'paidToot') {
+      // That Toot is made again and saved, as back from its Checkout. This one is left unpaid.
+      window.location.replace(paidReturnPath(draft.song.id, checkout.tootId))
+      return
+    }
     paying.current = false
     setBusy(null)
     if (checkout.kind === 'paid') {
@@ -226,11 +236,21 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
     else if (account.status === 'signedOut' || account.status === 'expired') {
       setPaysAfterSignIn(true)
       openStep()
+    } else if (account.status === 'unreachable') {
+      // The session couldn't be read, so it isn't known who is paying: read it again. Back from
+      // Checkout, the Toot then saves by itself.
+      setProblem(returnedPaid ? null : 'unreachable')
+      retry()
     } else {
-      // The session couldn't be read (offline), so it isn't known who is paying.
+      // The session is still being read.
       setProblem('failed')
     }
   }
+
+  // The account is back: Save can pay.
+  useEffect(() => {
+    if (accountId) setProblem(current => (current === 'unreachable' ? null : current))
+  }, [accountId])
 
   // The account step that Save opened: signed in, on to Checkout; Not now pays nothing.
   useEffect(() => {
@@ -262,14 +282,15 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
     if (!paid) setProblem('notPaidYet')
     else if (await save()) clearCheckoutReturn()
   })
-  const returnedPaid = isPaid && back?.done === true && back.tootId === draft.id
-  // The account isn't read yet (or can't be, offline): the confirming waits for it.
+  // The account isn't read yet: the confirming waits for it. If it can't be read, Save reads it
+  // again, rather than waiting for the browser to come online.
   const waitsForAccount =
-    returnedPaid &&
-    !isSaved &&
-    busy === null &&
-    problem === null &&
-    (account.status === 'checking' || account.status === 'unreachable')
+    returnedPaid && !isSaved && busy === null && problem === null && account.status === 'checking'
+  const shownProblem =
+    problem ??
+    (returnedPaid && !isSaved && busy === null && account.status === 'unreachable'
+      ? 'unreachable'
+      : null)
   const confirming = useRef(false)
   useEffect(() => {
     if (!returnedPaid || !accountId || confirming.current) return
@@ -306,8 +327,10 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
             'Save to Toots'
           )}
         </Button>
-        {problem && (
-          <p className="pt-2 text-center text-sm text-muted-foreground">{SAVE_PROBLEMS[problem]}</p>
+        {shownProblem && (
+          <p className="pt-2 text-center text-sm text-muted-foreground">
+            {SAVE_PROBLEMS[shownProblem]}
+          </p>
         )}
       </div>
     </>

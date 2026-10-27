@@ -13,9 +13,19 @@ export const TOOT_PRICE_LABEL = new Intl.NumberFormat('en-US', {
 }).format(TOOT_PRICE.amount / 100)
 
 /**
- * Whether Save to Toots costs `TOOT_PRICE` in `environment`. Production keeps saving free until it
- * has Stripe's live keys (ADR 0010).
+ * Whether Save to Toots costs `TOOT_PRICE` in `environment`. Production keeps saving free until the
+ * owner changes this, once its Worker has Stripe's live keys (ADR 0010).
  */
 export function savingIsPaid(environment: SiteEnv): boolean {
   return environment !== 'production'
+}
+
+/**
+ * The environment this build is for: `PEDOS_ENVIRONMENT`, which `next.config.ts` inlines from
+ * `SITE_ENV` at build time. The browser's Save goes by it, and so does a local run's server, so a
+ * Production build run locally saves free on both sides.
+ */
+export function builtFor(): SiteEnv {
+  const env = process.env.PEDOS_ENVIRONMENT
+  return env === 'staging' || env === 'production' ? env : 'local'
 }
