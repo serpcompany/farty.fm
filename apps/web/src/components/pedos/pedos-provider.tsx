@@ -39,6 +39,7 @@ import {
   recordingPitch,
   replaySegment
 } from '@/lib/recordings'
+import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
 import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
 import { makeToot as renderToot } from '@/lib/toot-renderer'
@@ -386,6 +387,11 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       setProblem(denied ? 'microphoneOff' : 'couldNotStart')
     }
   }, [capture.kind, flow, stopRecording])
+
+  // A new build's reload waits for the take and the record flow after it to close
+  // (`stale-build.ts`, #222).
+  const recordFlowOpen = capture.kind !== 'idle' || flow !== null
+  useEffect(() => (recordFlowOpen ? holdReload() : undefined), [recordFlowOpen])
 
   const saveDraft = useCallback(async () => {
     if (!flow || (flow.kind !== 'review' && flow.kind !== 'saveFailed') || isSaving) return

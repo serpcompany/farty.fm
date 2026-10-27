@@ -1,8 +1,9 @@
 // Farty's service worker: it keeps the app shell, so an installed Farty opens offline.
 //
 // Every request it handles goes to the network first, so a deploy shows at once. The cache is
-// only the fallback when there's no network. It holds pages, scripts, styles, fonts and images,
-// never audio: Recordings live in IndexedDB, and the Fixture Library is never kept.
+// only the fallback when there's no network, or when a deploy has taken an older build's file
+// off the server. It holds pages, scripts, styles, fonts and images, never audio: Recordings live
+// in IndexedDB, and the Fixture Library is never kept.
 //
 // Bump `version` when the cache's contents change shape. A new worker deletes every other
 // version's cache when it activates.
@@ -55,13 +56,16 @@ async function networkFirst(event) {
   try {
     response = await fetch(request)
   } catch (offline) {
-    const cache = await caches.open(cacheName)
-    const kept = await cache.match(request.url, {
-      ignoreVary: true,
-      ignoreSearch: request.mode === 'navigate'
-    })
+    const kept = await keptCopy(request)
     if (kept) return kept
     throw offline
+  }
+  // A tab opened before a deploy still loads its own build's scripts, such as a tab's code or
+  // the render worker's, and the deploy took them off the server (#222). The copy kept from
+  // before answers instead of the 404. A build's files never change under the same name.
+  if (response.status === 404 && new URL(request.url).pathname.startsWith('/_next/static/')) {
+    const kept = await keptCopy(request)
+    if (kept) return kept
   }
   if (keepable(response)) {
     event.waitUntil(keep(request.url, response.clone()))
@@ -76,6 +80,14 @@ async function networkFirst(event) {
     event.waitUntil(self.registration.unregister())
   }
   return response
+}
+
+async function keptCopy(request) {
+  const cache = await caches.open(cacheName)
+  return await cache.match(request.url, {
+    ignoreVary: true,
+    ignoreSearch: request.mode === 'navigate'
+  })
 }
 
 // Only a whole, same-origin success. That leaves out the Staging password's 401 (#123),

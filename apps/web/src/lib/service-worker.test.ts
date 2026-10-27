@@ -246,6 +246,40 @@ describe('the service worker', () => {
     expect(worker.registration.unregistered).toBe(false)
   })
 
+  it("answers an older build's script with the copy it kept, once a deploy has taken it off the server", async () => {
+    let deployed = false
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      if (deployed && path.startsWith('/_next/static/')) return failed(404)
+      return ok(`first build's ${path}`)
+    })
+    const chunk = '/_next/static/chunks/toots-a1b2.js'
+    await worker.request(chunk)
+    await worker.request('/_next/static/chunks/turbopack-worker.js#params=render')
+
+    deployed = true
+    const answer = await worker.request(chunk)
+    expect(answer?.status).toBe(200)
+    expect(await answer?.text()).toBe(`first build's ${chunk}`)
+    // The render worker's script, which the worker keeps without its fragment.
+    const script = await worker.request('/_next/static/chunks/turbopack-worker.js#params=song')
+    expect(await script?.text()).toBe(
+      "first build's /_next/static/chunks/turbopack-worker.js#params=render"
+    )
+    // One it never kept is the server's 404.
+    expect((await worker.request('/_next/static/chunks/never-loaded.js'))?.status).toBe(404)
+  })
+
+  it("leaves a 404 outside the build's own files to the server", async () => {
+    let gone = false
+    const worker = startWorker(url => (gone ? failed(404) : ok(`kept ${url.replace(origin, '')}`)))
+    await worker.request('/compose/mary/', { mode: 'navigate' })
+    await worker.request('/icon.png')
+    gone = true
+    expect((await worker.request('/compose/mary/', { mode: 'navigate' }))?.status).toBe(404)
+    expect((await worker.request('/icon.png'))?.status).toBe(404)
+  })
+
   it("keeps a later deploy's tabs, new and changed, after one online visit to the start page", async () => {
     let online = true
     let deploy: Record<string, string> = {
