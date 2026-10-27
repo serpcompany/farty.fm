@@ -274,6 +274,33 @@ test.describe('with microphone permission granted', () => {
     expect(ms).toBeLessThan(100)
   })
 
+  // A stream kept through an interruption could come back sending digital silence, which no real
+  // microphone does: the first take on it then opens the microphone afresh, in the same tap. The
+  // fake microphone sends exact zeros while nothing plays.
+  test('a kept stream that comes back silent is opened afresh by the next tap', async ({
+    page
+  }) => {
+    await page.goto('/')
+    await waitForOpenMicrophone(page)
+    await interrupt(page, 'mute')
+    await interrupt(page, 'unmute')
+    await expect.poll(async () => (await microphone(page)).flushed).toBe(2)
+    await page.getByTestId('record-button').click()
+    await expect(page.getByTestId('stop-button')).toBeVisible()
+    const mic = await microphone(page)
+    expect(mic.calls).toBe(2)
+    expect(mic.opened).toBe(2)
+    expect(mic.live).toBe(1)
+    expect(mic.closed).toBe(1)
+    // The take goes on, on the fresh stream.
+    await page.getByTestId('stop-button').click()
+    await expect(page.getByTestId('record-status')).toHaveText("Didn't catch that. Try again.")
+    // Only the first take on a kept stream is checked: the next silent one keeps it.
+    await page.getByTestId('record-button').click()
+    await expect(page.getByTestId('stop-button')).toBeVisible()
+    expect((await microphone(page)).calls).toBe(2)
+  })
+
   // The app loads its capture processor once getUserMedia answers, which takes longest on a slow
   // phone. An interruption then, and a tap before it has loaded, still open the microphone afresh
   // (#172). Here the processor loads only when the test lets it.
@@ -373,6 +400,43 @@ test.describe("with the page's own microphone grant, as on iPhone", () => {
     // The take after the page showed again captured at once, with its pre-roll.
     const timings = clickToFirstBatch(mic.clicks, mic.batches)
     expect(timings.at(-1)).toBeLessThan(100)
+  })
+
+  // Never listening while hidden: an interruption that mutes the track as the person leaves, and
+  // ends while they're away (a call on Android Chrome), lets the microphone go.
+  test('a microphone that unmutes while the page is hidden is let go', async ({ page }) => {
+    await page.goto('/')
+    await firstTap(page)
+
+    await interrupt(page, 'mute')
+    await setVisibility(page, 'hidden')
+    // Muted at the hidden page's check, so it's kept.
+    await page.waitForTimeout(hiddenListeningMs)
+    expect((await microphone(page)).live).toBe(1)
+
+    await interrupt(page, 'unmute')
+    await expect.poll(async () => (await microphone(page)).live).toBe(0)
+    const mic = await microphone(page)
+    expect(mic.nodes - mic.closed).toBe(0)
+    expect(mic.sessions.at(-1)).toBe('playback')
+  })
+
+  // iPhone Safari may unmute the track just before it says the page shows.
+  test('a microphone that unmutes as the page shows is kept', async ({ page }) => {
+    await page.goto('/')
+    await firstTap(page)
+
+    await setVisibility(page, 'hidden')
+    await interrupt(page, 'mute')
+    await page.waitForTimeout(hiddenListeningMs)
+    await interrupt(page, 'unmute')
+    await setVisibility(page, 'visible')
+    await page.waitForTimeout(hiddenListeningMs)
+    const mic = await microphone(page)
+    expect(mic.calls).toBe(1)
+    expect(mic.live).toBe(1)
+    expect(mic.closed).toBe(0)
+    expect(mic.sessions.at(-1)).toBe('play-and-record')
   })
 
   test('hidden longer than the grant lasts outside a tap, the microphone waits for the Record tap', async ({

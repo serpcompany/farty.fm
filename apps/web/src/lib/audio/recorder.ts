@@ -28,6 +28,11 @@ type Microphone = {
    * the page is hidden. Capture goes on when it unmutes; until then the next tap opens it afresh.
    */
   silenced: boolean
+  /**
+   * Capture went on with this stream after an interruption or a hidden page, rather than with a
+   * fresh one, and no take has run on it since. The next take checks it hears something.
+   */
+  resumed: boolean
   /** Stops listening to the shared context. */
   unwatch(): void
 }
@@ -240,6 +245,7 @@ async function connect(openedIn: number): Promise<Microphone> {
     mute,
     ended: endedWhileOpening,
     silenced: mutedWhileOpening,
+    resumed: false,
     unwatch: () => context.removeEventListener('statechange', contextChanged)
   }
 
@@ -263,7 +269,14 @@ async function connect(openedIn: number): Promise<Microphone> {
       send(node, { type: 'flush' })
     }
     track.onunmute = () => {
-      if (microphone === opened) resumeCapture(opened)
+      if (microphone !== opened) return
+      if (document.visibilityState === 'hidden') {
+        // Never listening while hidden: the interruption ended while the person is away. The
+        // stream is let go unless the page shows within `hiddenListeningMs`, since iPhone Safari
+        // may unmute it just before it says the page shows.
+        opened.silenced = false
+        releaseIfHiddenAndListening()
+      } else resumeCapture(opened)
     }
   }
   return opened
@@ -272,8 +285,14 @@ async function connect(openedIn: number): Promise<Microphone> {
 /** The track unmuted: what the ring heard before it is stale, and the stream is good again. */
 function resumeCapture(mic: Microphone): void {
   mic.silenced = false
+  mic.resumed = true
   captureStarted()
   send(mic.node, { type: 'flush' })
+}
+
+/** All of a take's first batch is exact zeros: a microphone delivers noise, never that. */
+function digitalSilence(samples: Float32Array): boolean {
+  return samples.every(sample => sample === 0)
 }
 
 /** The track is muted, so the stream hears nothing until it unmutes. */
@@ -349,7 +368,24 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
     releaseMicrophone()
     mic = await openMicrophone()
   }
+  const resumed = mic.resumed
+  mic.resumed = false
+  const take = await capture(mic, onInterrupted)
+  // A stream kept through an interruption may come back sending digital silence (#172, #222).
+  // Its first take then opens it afresh, in the same tap, rather than recording nothing.
+  if (resumed && digitalSilence(take.first) && microphone === mic) {
+    take.cancel()
+    releaseMicrophone()
+    return capture(await openMicrophone(), onInterrupted)
+  }
+  return take
+}
 
+/** Starts a take on `mic`. It resolves with the take, and its first batch, once audio comes in. */
+async function capture(
+  mic: Microphone,
+  onInterrupted: () => void
+): Promise<Take & { first: Float32Array }> {
   takes += 1
   const id = takes
   let begin = () => {}
@@ -390,6 +426,7 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
   inProgress = true
 
   return {
+    first: take.chunks[0],
     async stop() {
       if (capturing === take) {
         // Ask the processor for its last partial batch.
@@ -469,6 +506,15 @@ function pageHidden(): void {
   loseTake()
   // Safari may stop capture before it says so; the clock starts now either way.
   captureStopped()
+  releaseIfHiddenAndListening()
+}
+
+/**
+ * In `hiddenListeningMs`, lets the microphone go if the page is still hidden and its stream could
+ * hear: as the page hides, and again if a muted stream unmutes before it shows.
+ */
+function releaseIfHiddenAndListening(): void {
+  clearTimeout(hiddenTimer)
   hiddenTimer = setTimeout(() => {
     const mic = microphone
     if (document.visibilityState !== 'hidden' || !mic) return
