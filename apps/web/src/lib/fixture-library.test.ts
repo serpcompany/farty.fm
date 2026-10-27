@@ -22,7 +22,7 @@ describe('the Fixture Library', () => {
     expect(fixtures().map(f => f.id)).toHaveLength(32)
   })
 
-  it('analyzes as the reference does and unlocks every Song, as 16-bit WAV', async () => {
+  it('analyzes as the reference does and unlocks the Songs it does, as 16-bit WAV', async () => {
     const recordings: Recording[] = []
     for (const [i, { id, filename }] of fixtures().entries()) {
       const { samples, sampleRate } = decodeWav(await fixtureWav(filename))
@@ -48,10 +48,12 @@ describe('the Fixture Library', () => {
     for (const song of songs) {
       const coverage = coverageOf(song, recordings)
       const golden = goldenArrangement('full', song.id)
-      expect(coverage.unlocked, song.id).toBe(true)
+      // Every Song but Amazing Grace, whose 2.98 s note outlasts every fixture (ADR 0011).
+      expect(coverage.unlocked, song.id).toBe(song.id !== 'amazing')
+      expect(coverage.unlocked, song.id).toBe(golden.unlocked)
       expect(coverage.transposition, song.id).toBe(golden.transpose)
       for (const entry of golden.per_pitch) {
-        expect(coverage.recordingForPitch.get(entry.song_pitch)?.slice(-3), song.id).toBe(
+        expect(coverage.recordingForPitch.get(entry.song_pitch)?.slice(-3) ?? null, song.id).toBe(
           entry.recording
         )
       }

@@ -6,7 +6,8 @@ There is no oscillator, filter-resonator, looping, or granular re-triggering any
 Each operation has a direct AVAudioEngine / Accelerate equivalent for the iOS port.
 """
 import json
-from dataclasses import dataclass, asdict
+import math
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 import librosa
@@ -268,6 +269,39 @@ def silent_cost(note_seconds, recording_seconds, shift):
     return SILENT_COST_PER_S * sum(max(0.0, a - played) for a in note_seconds)
 
 
+NOTE_FILL = 1.0  # a Recording covers a pitch only if it lasts this share of the pitch's longest note (#221)
+
+
+def fills(recording_seconds, longest_note_s, shift):
+    """Whether a Recording is long enough to cover a pitch: the length rule of unlocking (#221).
+
+    The Recording's length after resampling `shift` semitones (an Octave Move up halves it) must
+    be at least NOTE_FILL x the longest slot among the pitch's notes, each slot being the note's
+    written length less GAP_S. Stretching, looping or re-triggering a Recording to fill a note
+    is never done (ADR 0004), so without this rule a short fart unlocked a Song and left most of
+    a long note silent.
+
+    NOTE_FILL was chosen by measurement (ADR 0011): 0.75, 0.9 and 1.0 swept on the 12 app Songs
+    and the 129 catalog Songs with the full Fixture Library (32 Recordings). 1.0 is the only one
+    that keeps every unlocked app Song at ADR 0004's bar. At 0.9 and 0.75 Fur Elise reads 91%
+    within 50 cents: its G2 (score 71, at T=-28) has a 1.066 s note, so the gate moves it from
+    019 (0.33 s) to 069 (1.17 s at G2), whose attack reads +243 cents on the 0.25 s notes of that
+    pitch. At 1.0 069 still fills G2, but score 69's 1.339 s note is too long for 022 (1.32 s at
+    F2), so 69 takes 032 with an Octave Move, and 022 goes to G2, beating 069 on cost. The Song
+    reads 100% through the cost ranking, not because the gate excludes 069. Amazing Grace locks
+    from 0.9 up: its 2.98 s note is longer than any Recording can last, even moved down an
+    octave. See ADR 0011 for the table.
+    """
+    return recording_seconds * 2 ** (-shift / 12) >= NOTE_FILL * longest_note_s
+
+
+def needed_seconds(longest_note_s):
+    """The shortest Recording that covers a pitch whose longest slot is `longest_note_s`, at
+    its own pitch: NOTE_FILL x the slot, rounded up to 0.1 s ("Needs a fart near F3 (1.2 s)").
+    The 1e-9 keeps float noise from adding 0.1 s to an exact tenth."""
+    return math.ceil(NOTE_FILL * longest_note_s * 10 - 1e-9) / 10
+
+
 @dataclass
 class Assignment:
     note_index: int
@@ -303,6 +337,7 @@ class Fit:
     recording_for_pitch: dict  # Song pitch -> Recording id, or None when no Recording covers it
     octave_moves: int
     cost: float  # over covered pitches: beats x move_cost + too_short, unsettled and silent costs of its notes
+    longest_note_s: dict = field(default_factory=dict)  # Song pitch -> its longest slot in seconds
 
     @property
     def covered(self):
@@ -318,8 +353,13 @@ class Fit:
 
     @property
     def missing(self):
-        """The notes (MIDI, after transposition) that no Recording covers."""
-        return [p + self.transpose for p, r in sorted(self.recording_for_pitch.items()) if r is None]
+        """The notes no Recording covers, as (MIDI after transposition, seconds): the shortest
+        Recording near that note that would cover it (needed_seconds()), lowest note first."""
+        return [
+            (p + self.transpose, needed_seconds(self.longest_note_s[p]))
+            for p, r in sorted(self.recording_for_pitch.items())
+            if r is None
+        ]
 
 
 def melody_fit(melody, sources, transpose=None, octave_moves=True):
@@ -328,7 +368,8 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
     Like a multi-sampled instrument: each distinct Song pitch gets its own Melodic Recording
     (one to one, never reused), moved at most 3 semitones, or with an Octave Move at most 3
     semitones from the same note an octave away. Every transposition from -36 to +24 is
-    tried. A Song is unlocked when every pitch is covered under the best transposition.
+    tried. A Recording also has to last, once moved, at least as long as the pitch's longest
+    note (fills(), ADR 0011). A Song is unlocked when every pitch is covered under the best transposition.
     `octave_moves=False` gives ADR 0004's rule without Octave Moves, for comparison.
     """
     pitched = sorted((s for s in sources if s.pitched), key=lambda s: s.id)
@@ -336,6 +377,7 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
     spb = 60 / melody.bpm
     weight = {p: sum(n.dur for n in melody.notes if n.pitch == p) for p in pitches}
     note_seconds = {p: [n.dur * spb - GAP_S for n in melody.notes if n.pitch == p] for p in pitches}
+    longest = {p: max(note_seconds[p]) for p in pitches}
 
     def cells(t):  # cells[i][j]: (Octave Move?, cost) of pitch i on Recording j, or None
         out = []
@@ -344,7 +386,7 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
             for s in pitched:
                 shift = p + t - s.ref_midi
                 m = move_cost(shift, octave_moves)
-                if m is None:
+                if m is None or not fills(s.seconds, longest[p], shift):
                     row.append(None)
                 else:
                     row.append((m[1], weight[p] * m[0] + too_short_cost(note_seconds[p], s.seconds, s.min_note_s, shift)
@@ -418,6 +460,7 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
         recording_for_pitch={p: (pitched[j].id if j is not None else None) for p, j in zip(pitches, choice)},
         octave_moves=octaves,
         cost=float(cost),
+        longest_note_s=longest,
     )
 
 

@@ -5,21 +5,21 @@ import { minimumCost } from './assignment'
 import { type Song, secondsPerBeat } from './song'
 
 // Auto-map and Pitch Coverage: a port of `AutoMap.swift`, the iPhone 1.0 planner, which ports the
-// reference engine's `melody_fit()` (`tools/melody-lab/engine.py`) and the unlock rule of ADR 0004
-// and ADR 0006. Since #116 it also has the reference's settle cost, and since #205 its silence
-// cost, which the Swift port, frozen at golden format 2, doesn't.
+// reference engine's `melody_fit()` (`tools/melody-lab/engine.py`) and the unlock rule of ADR 0004,
+// ADR 0006 and ADR 0011. Since #116 it also has the reference's settle cost, since #205 its silence
+// cost, and since #221 its length rule, which the Swift port, frozen at golden format 2, doesn't.
 //
 // Each distinct Song pitch gets its own Melodic Recording (one to one, never reused), shifted at
 // most 3 semitones, or with an Octave Move (12 semitones up or down, plus at most 3) where the
-// Song needs it. Every transposition from −36 to +24 is tried. Arrangements rank by:
+// Song needs it, and at least as long as the pitch's longest note once moved (`fills`). Every transposition from
+// −36 to +24 is tried. Arrangements rank by:
 // 1. the most pitches covered (Pitch Coverage);
 // 2. the fewest Octave Moves;
 // 3. the lowest cost, where costs within `TIE` are equal;
 // 4. the Recording ids read in ascending Song pitch order, lexicographically smallest, with an
 //    uncovered pitch after every id; then the lower transposition.
 //
-// A Song is unlocked when every distinct pitch is covered. Note length changes the cost, never
-// whether a Song unlocks.
+// A Song is unlocked when every distinct pitch is covered.
 
 /** The furthest a Recording may be moved from its Recording Pitch, or from the same note an octave away, in semitones. */
 export const MAXIMUM_SHIFT = 3
@@ -36,6 +36,11 @@ const UNSETTLED_COST = 20
 const SILENT_COST_PER_SECOND = 30
 /** Silence before the next note: a note sounds for its length minus this. */
 const GAP_SECONDS = 0.025
+/**
+ * A Recording covers a pitch only if, after resampling, it lasts this share of the pitch's longest
+ * note (#221). ADR 0011 has the measurement: 0.9 and 0.75 leave Für Elise under ADR 0004's bar.
+ */
+export const NOTE_FILL = 1.0
 /** Arrangement costs this close are equal. */
 const TIE = 1e-9
 /** The transpositions tried, in semitones: −36 to +24. */
@@ -109,8 +114,16 @@ export interface Arrangement {
   total: number
   /** Every distinct pitch has its own Recording, so the Song can be played. */
   unlocked: boolean
-  /** The notes (MIDI, after transposition) that no Recording covers, lowest first. */
-  missingNotes: number[]
+  /** The notes that no Recording covers, lowest first, with how long a fart each needs. */
+  missingNotes: MissingNote[]
+}
+
+/** A note no Recording covers yet, and the shortest Recording near it that would cover it. */
+export interface MissingNote {
+  /** The note, after transposition, as a MIDI note number. */
+  midi: number
+  /** The shortest Recording at that pitch that covers it, in seconds, rounded up to 0.1 s. */
+  seconds: number
 }
 
 /**
@@ -126,15 +139,17 @@ export function arrange(song: Song, recordings: readonly AutoMapRecording[]): Ar
   const spb = secondsPerBeat(song)
   const weight: number[] = []
   const noteSeconds: number[][] = []
+  const longest: number[] = []
   for (const p of pitches) {
     const notes = song.notes.filter(n => n.pitch === p)
     weight.push(pythonSum(notes.map(n => n.dur)))
     noteSeconds.push(notes.map(n => n.dur * spb - GAP_SECONDS))
+    longest.push(Math.max(...noteSeconds[noteSeconds.length - 1]))
   }
 
   const tables: Table[] = []
   for (let t = LOWEST_TRANSPOSITION; t <= HIGHEST_TRANSPOSITION; t++) {
-    tables.push(new Table(pitches, melodic, t, weight, noteSeconds))
+    tables.push(new Table(pitches, melodic, t, weight, noteSeconds, longest))
   }
   const best = tables.map(table => table.solve([]).key)
   let top = best[0]
@@ -190,7 +205,9 @@ export function arrange(song: Song, recordings: readonly AutoMapRecording[]): Ar
     covered,
     total: picked.length,
     unlocked: covered === picked.length,
-    missingNotes: picked.filter(c => c.recordingId === null).map(c => c.targetMidi)
+    missingNotes: picked.flatMap((c, i) =>
+      c.recordingId === null ? [{ midi: c.targetMidi, seconds: neededSeconds(longest[i]) }] : []
+    )
   }
 }
 
@@ -215,6 +232,28 @@ export function moveCost(shift: number): { cost: number; octaveMove: boolean } |
     return { cost: OCTAVE_MOVE_COST + Math.abs(a - OCTAVE) ** 1.5, octaveMove: true }
   }
   return null
+}
+
+/**
+ * Whether a Recording is long enough to cover a pitch (#221, ADR 0011): after resampling by
+ * `shift` (an Octave Move up halves it), it lasts at least `NOTE_FILL` × the longest of the pitch's
+ * notes, each its written length less the gap. Recordings are never stretched (ADR 0004).
+ */
+export function fills(
+  recordingSeconds: number,
+  longestNoteSeconds: number,
+  shift: number
+): boolean {
+  return recordingSeconds * exp2(-shift / 12) >= NOTE_FILL * longestNoteSeconds
+}
+
+/**
+ * The shortest Recording, at its own pitch, that covers a pitch whose longest note lasts
+ * `longestNoteSeconds`: `NOTE_FILL` × that, rounded up to 0.1 s ("Needs a fart near F3 (1.2 s)").
+ * The 1e-9 keeps float noise from adding 0.1 s to an exact tenth, as the reference does.
+ */
+export function neededSeconds(longestNoteSeconds: number): number {
+  return Math.ceil(NOTE_FILL * longestNoteSeconds * 10 - 1e-9) / 10
 }
 
 /**
@@ -339,7 +378,8 @@ class Table {
     recordings: readonly AutoMapRecording[],
     t: number,
     weight: readonly number[],
-    noteSeconds: readonly number[][]
+    noteSeconds: readonly number[][],
+    longest: readonly number[]
   ) {
     this.rows = pitches.length
     this.columns = recordings.length
@@ -351,7 +391,7 @@ class Table {
       recordings.forEach((r, j) => {
         const shift = p + t - (r.recordingPitchMidi as number)
         const move = moveCost(shift)
-        if (move === null) return
+        if (move === null || !fills(r.gestureSeconds, longest[i], shift)) return
         const cell = i * this.columns + j
         this.allowed[cell] = 1
         this.isOctaveMove[cell] = move.octaveMove ? 1 : 0

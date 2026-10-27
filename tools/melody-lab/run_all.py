@@ -1,3 +1,4 @@
+from librosa import midi_to_note
 from engine import load_library, melody_fit, plan, render
 from melody import load_catalog
 from evaluate import evaluate
@@ -5,7 +6,8 @@ lib = load_library()
 for c, m in load_catalog():
     fit = melody_fit(m, lib)
     if not fit.unlocked:
-        print(f"{c['id']:12s} T={fit.transpose:+d} locked: {fit.covered} of {fit.total} notes covered, needs {fit.missing}")
+        needs = " ".join(f"{midi_to_note(p)} ({s:.1f} s)" for p, s in fit.missing)
+        print(f"{c['id']:12s} T={fit.transpose:+d} locked: {fit.covered} of {fit.total} notes covered, needs {needs}")
         continue
     T, asg = plan(m, lib)
     audio, ev = render(m, lib, asg, tune=1.0, bpm=m.bpm)

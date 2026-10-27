@@ -54,7 +54,7 @@ afterAll(() => {
 
 describe('makeToot', () => {
   it.each(
-    songs.map(s => [s.id, s])
+    songs.filter(s => goldenArrangement('full', s.id).unlocked).map(s => [s.id, s])
   )('renders %s as the engine does on the same WAVs', async (_, song) => {
     let fromWorker: RenderedSong | undefined
     const draft = await makeToot(song, recordings, loadAudio, async (...args) => {
@@ -93,6 +93,12 @@ describe('makeToot', () => {
     const error = await makeToot(songs[0], [], loadAudio).catch(e => e)
     expect(error).toBeInstanceOf(TootError)
     expect(error.reason).toBe('locked')
+    // Amazing Grace stays locked with the whole Fixture Library: its 2.98 s note outlasts every
+    // fixture (ADR 0011).
+    const amazing = songs.filter(s => s.id === 'amazing')[0]
+    const tooLong = await makeToot(amazing, recordings, loadAudio).catch(e => e)
+    expect(tooLong).toBeInstanceOf(TootError)
+    expect(tooLong.reason).toBe('locked')
   })
 
   it("can't be made when a Recording's audio is gone", async () => {

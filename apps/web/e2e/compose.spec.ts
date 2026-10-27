@@ -11,8 +11,9 @@ import { skipWelcome } from './record'
 // Compose and the Result screen, with Recordings made through the fake microphone in
 // `fake-microphone.ts`, which plays each fart as the person presses Record, all on one page.
 //
-// Mary Had a Little Lamb unlocks with fixtures 090 (G3), 084 and 086 (both G♯3) and 094 (B3): the
-// reference's golden Arrangement for Mary with the whole Fixture Library.
+// Mary Had a Little Lamb unlocks with fixtures 090 (G3), 084 and 013 (both G♯3) and 094 (B3), and
+// no Song unlocks before the fourth: the reference's `melody_fit()` on these four. 013 lasts long
+// enough, moved down an octave, for Mary's half notes (ADR 0011); 086, 0.24 s, doesn't.
 
 test.use({ permissions: ['microphone'] })
 
@@ -69,11 +70,16 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(page.getByText('No Melodic Recordings yet')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Locked · 12' })).toBeVisible()
   const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb' })
-  await expect(mary).toHaveAccessibleDescription(/^Locked\. 1 of 4 notes covered\. Needs /)
+  await expect(mary).toHaveAccessibleDescription(
+    'Locked. 1 of 4 notes covered. Needs C2 (1.5 s), D2 (0.7 s), and 1 more'
+  )
 
-  // The locked Song's sheet names the notes it needs; Record goes to the Record tab.
+  // The locked Song's sheet names the notes it needs, and how long a fart each needs (ADR 0011):
+  // the reference's `melody_fit()` on 090 alone. Record goes to the Record tab.
   await mary.click()
-  await expect(sheet.getByTestId('locked-song-needs')).toHaveText(/^Needs a fart near .+\.$/)
+  await expect(sheet.getByTestId('locked-song-needs')).toHaveText(
+    'Needs a fart near C2 (1.5 s), D2 (0.7 s), and E2 (0.7 s).'
+  )
   await expect(sheet.getByTestId('pitch-strip')).toHaveAccessibleName(
     /^Notes collected: G\. Needed: /
   )
@@ -82,7 +88,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(page.getByTestId('record-button')).toBeVisible()
 
   // Three more takes; the fourth unlocks Mary.
-  for (const id of ['084', '086']) {
+  for (const id of ['084', '013']) {
     await recordAndSave(page, id)
     await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
     await page.getByRole('button', { name: 'Record another' }).click()

@@ -66,7 +66,7 @@ export function LockedSongSheet({
 
 function Body({ coverage, onRecord }: { coverage: Coverage; onRecord: () => void }) {
   const pedos = usePedos()
-  const needed = new Set(coverage.missing.map(pitchClass))
+  const needed = new Set(coverage.missing.map(m => pitchClass(m.midi)))
   return (
     <div className="flex flex-1 flex-col gap-4 p-5">
       <div className="flex flex-col gap-1.5">
@@ -88,7 +88,7 @@ function Body({ coverage, onRecord }: { coverage: Coverage; onRecord: () => void
   )
 }
 
-/** "Needs a fart near D3 and F3.", or how to start without Melodic Recordings. */
+/** "Needs a fart near D3 (0.5 s) and F3 (1.2 s).", or how to start without Melodic Recordings. */
 function needs(coverage: Coverage): string {
   const missing = missingNotes(coverage)
   if (!coverage.hasMelodicRecordings || missing === null) {

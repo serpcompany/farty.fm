@@ -3,7 +3,8 @@ import {
   type Arrangement,
   type AutoMapRecording,
   arrange,
-  autoMapRecording
+  autoMapRecording,
+  type MissingNote
 } from '@/lib/engine/auto-map'
 import type { Song as EngineSong } from '@/lib/engine/song'
 import { noteName, pitchClass } from '@/lib/pitch'
@@ -16,15 +17,19 @@ import { type Recording, recordingPitch } from '@/lib/recordings'
 /**
  * A Song's Pitch Coverage by the user's Melodic Recordings, and the Arrangement Auto-map chose:
  * each distinct pitch gets its own Melodic Recording within 3 semitones, or an octave away with an
- * Octave Move (ADR 0004, ADR 0006). As the iPhone app's `CoverageResult`.
+ * Octave Move (ADR 0004, ADR 0006), and at least as long as the pitch's longest note (ADR 0011). As
+ * the iPhone app's `CoverageResult`.
  */
 export type Coverage = {
   covered: number
   total: number
   /** The transposition, in semitones, Auto-map chose. */
   transposition: number
-  /** The transposed pitches still needed, as MIDI note numbers, lowest first. */
-  missing: number[]
+  /**
+   * The transposed pitches still needed, lowest first: each as a MIDI note number, with the
+   * shortest fart near it that would cover it. A fart too short for a pitch leaves it missing.
+   */
+  missing: MissingNote[]
   /** The Melodic Recording that covers each covered pitch, keyed by the Song's pitch (score key). */
   recordingForPitch: Map<number, string>
   /** False when there are no Melodic Recordings at all. */
@@ -97,11 +102,12 @@ export function coverageSummary(coverage: Coverage): string {
 const andList = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' })
 
 /**
- * The notes still needed, with their octave: "D3 and F3", or with a `limit` of 3,
- * "D3, F3, A3, and 2 more". Null when nothing is missing.
+ * The notes still needed, with their octave and how long a fart each needs: "D3 (0.5 s) and F3
+ * (1.2 s)", or with a `limit` of 3, "D3 (0.5 s), F3 (1.2 s), A3 (0.4 s), and 2 more". Null when
+ * nothing is missing.
  */
 export function missingNotes(coverage: Coverage, limit?: number): string | null {
-  const names = coverage.missing.map(noteName)
+  const names = coverage.missing.map(m => `${noteName(m.midi)} (${m.seconds.toFixed(1)} s)`)
   if (names.length === 0) return null
   if (limit === undefined || names.length <= limit) return andList.format(names)
   return andList.format([...names.slice(0, limit), `${names.length - limit} more`])

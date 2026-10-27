@@ -2,66 +2,76 @@
   "library": "small",
   "max_abs_shift_semitones": null,
   "metrics": null,
+  "missing": [
+    {
+      "seconds": 1.4,
+      "target_midi": 39
+    },
+    {
+      "seconds": 1.7,
+      "target_midi": 42
+    }
+  ],
   "notes": null,
   "octave_moves": 1,
   "per_pitch": [
     {
       "octave_move": false,
       "recording": "016",
-      "shift_semitones": -0.3259205936601859,
+      "shift_semitones": -2.325920593660186,
       "song_pitch": 68,
-      "target_midi": 40
+      "target_midi": 38
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 69,
+      "target_midi": 39
     },
     {
       "octave_move": false,
       "recording": "022",
       "shift_semitones": 0.6740794063398141,
-      "song_pitch": 69,
-      "target_midi": 41
-    },
-    {
-      "octave_move": true,
-      "recording": "090",
-      "shift_semitones": -12.225920593660177,
       "song_pitch": 71,
-      "target_midi": 43
+      "target_midi": 41
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
       "song_pitch": 72,
-      "target_midi": 44
+      "target_midi": 42
     },
     {
       "octave_move": false,
       "recording": "069",
-      "shift_semitones": 1.574079406339827,
+      "shift_semitones": -0.4259205936601731,
       "song_pitch": 74,
-      "target_midi": 46
+      "target_midi": 44
+    },
+    {
+      "octave_move": true,
+      "recording": "090",
+      "shift_semitones": -10.225920593660177,
+      "song_pitch": 75,
+      "target_midi": 45
     },
     {
       "octave_move": false,
       "recording": "002",
-      "shift_semitones": 0.5740794063398198,
-      "song_pitch": 75,
-      "target_midi": 47
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "shift_semitones": -0.4259205936601802,
       "song_pitch": 76,
-      "target_midi": 48
+      "target_midi": 46
     }
   ],
   "pitch_coverage": {
     "covered": 5,
     "total": 7
   },
-  "plan_cost": 191.50330227350068,
+  "plan_cost": 210.2011493142052,
   "render_settings": null,
   "song": "furelise",
-  "transpose": -28,
+  "transpose": -30,
   "unlocked": false
 }

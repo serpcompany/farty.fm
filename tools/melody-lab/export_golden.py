@@ -36,7 +36,7 @@ from melody import load_catalog
 GOLDEN = engine.ROOT / "fixtures/golden"
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")  # README.md is written by hand
 TUNE = 1.0  # render settings of run_all.py and build.py's "tuned" variant
-FORMAT_VERSION = 3
+FORMAT_VERSION = 4  # 4: the length rule (#221) and each fit's `missing`
 COVERAGE_SEEDS = 10  # random subsets per size in coverage.json
 
 
@@ -148,6 +148,7 @@ def fit_json(fit):
         "transpose": int(fit.transpose),
         "octave_moves": fit.octave_moves,
         "plan_cost": exact(fit.cost),
+        "missing": [{"target_midi": int(m), "seconds": s} for m, s in fit.missing],
     }
 
 
