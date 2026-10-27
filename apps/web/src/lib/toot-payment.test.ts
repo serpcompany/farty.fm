@@ -90,6 +90,7 @@ describe('startCheckout', () => {
     const cases: [Response | Error, string][] = [
       [Response.json({ error: 'payments_unavailable' }, { status: 503 }), 'unavailable'],
       [Response.json({ error: 'limit_reached' }, { status: 409 }), 'limitReached'],
+      [Response.json({ error: 'payment_mismatch' }, { status: 409 }), 'charged'],
       [Response.json({ error: 'rate_limited' }, { status: 429 }), 'tooMany'],
       [Response.json({ error: 'wrong_library' }, { status: 409 }), 'failed'],
       [Response.json({ error: 'payments_failed' }, { status: 502 }), 'failed'],
