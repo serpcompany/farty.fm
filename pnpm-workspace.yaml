@@ -8,3 +8,6 @@ ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
   - workerd
+
+onlyBuiltDependencies:
+  - lefthook

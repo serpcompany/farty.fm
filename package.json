@@ -11,6 +11,7 @@
     "node": ">=22.18.0"
   },
   "devDependencies": {
-    "@serpcompany/verify": "0.1.1"
+    "@serpcompany/verify": "0.1.1",
+    "lefthook": "2.0.15"
   }
 }
