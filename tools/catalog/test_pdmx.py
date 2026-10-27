@@ -201,6 +201,42 @@ class Gates(unittest.TestCase):
         self.assertEqual(pdmx.sanity_problems([60] * 10, 6, 4, 90), [])  # 10 of 100: 10%
         self.assertIn("11%", pdmx.sanity_problems([60] * 10, 7, 4, 89)[0])
 
+    def test_padded_pickup(self):
+        # Happy Birthday as PDMX padded it: "Hap-py" for 1 beat, then 2 beats of silence in a 3/4 bar.
+        padded = [(0.0, 0.75), (0.75, 1.0), (3.0, 4.0), (4.0, 5.0)]
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 3, 4)], padded, 0.0),
+                         ["the first bar is a pickup padded with silence: every track rests 2 beats after its notes"])
+        # The silence must last at least as long as the notes before it: a pickup is at most half its bar.
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 2.0), (4.0, 5.0)], 0.0),
+                         ["the first bar is a pickup padded with silence: every track rests 2 beats after its notes"])
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 2.25), (4.0, 5.0)], 0.0), [])
+        # One beat of silence is enough; less isn't.
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 2, 4)], [(0.0, 1.0), (2.0, 3.0)], 0.0),
+                         ["the first bar is a pickup padded with silence: every track rests 1 beat after its notes"])
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 0.75), (4.0, 5.0)], 0.0),
+                         ["the first bar is a pickup padded with silence: every track rests 3.25 beats after its notes"])
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 2, 4)], [(0.0, 0.5), (1.5, 1.75), (2.0, 3.0)], 0.0), [])
+        # The bar of the melody's first note, where the excerpt starts; the bars before it don't count.
+        self.assertEqual(len(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 1.0), (8.0, 9.0), (12.0, 13.0)], 8.0)), 1)
+
+    def test_not_a_padded_pickup(self):
+        # The same pickup written as its own 1/4 bar, then 3/4: it leads straight into bar 1.
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 1, 4), (1.0, 3, 4)], [(0.0, 0.75), (0.75, 1.0), (1.0, 2.0)], 0.0), [])
+        # Written as a full bar that opens with rests: the silence comes before the pickup.
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 3, 4)], [(2.0, 2.75), (2.75, 3.0), (3.0, 4.0)], 0.0), [])
+        # A rest of a beat between the bar's notes too: the score's own rhythm (By the Light of the Silvery Moon).
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 1.0), (2.0, 3.0), (4.0, 5.0)], 0.0), [])
+        # Another track plays on through the melody's rest.
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 3, 4)], [(0.0, 1.0), (0.0, 3.0), (3.0, 4.0)], 0.0), [])
+        # A full bar that ends on a real rest, as a melody-only score can open (#231 review, N1).
+        # 4/4: C half, D quarter, quarter rest.
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], [(0.0, 2.0), (2.0, 3.0), (4.0, 5.0)], 0.0), [])
+        # 3/4: a half note, then a quarter rest.
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 3, 4)], [(0.0, 2.0), (3.0, 4.0)], 0.0), [])
+        # 4/4: three staccato eighths on beats 1 to 3, then a rest.
+        staccato = [(0.0, 0.5), (1.0, 1.5), (2.0, 2.5), (4.0, 5.0)]
+        self.assertEqual(pdmx.padded_pickup_problems([(0.0, 4, 4)], staccato, 0.0), [])
+
     def test_render_bar(self):
         ok = {"within_50c_of_fart_pct": 94, "onsets_on_time_pct": 95, "notes_with_retrigger": 0}
         self.assertEqual(pdmx.render_problems(ok, BAR), [])
@@ -283,6 +319,37 @@ class ScoreMeta(unittest.TestCase):
                 self.assertEqual(pdmx.render_options(*import_pdmx.score_meta(path), first)["beats_per_bar"], beats_per_bar)
 
 
+class PaddedPickup(unittest.TestCase):
+    """The padded-pickup check on real PDMX files, as the sanity gate runs it (#225)."""
+
+    @staticmethod
+    def problems(path):
+        _, meters = import_pdmx.score_meta(path)
+        return pdmx.padded_pickup_problems(meters, import_pdmx.score_notes(path), load_midi(path).notes[0].start)
+
+    def test_fails_the_scores_the_app_had_for_happy_birthday_and_merry_christmas(self):
+        # Until #225 the catalog had these two MuseScore 1.14 scores, public domain in PDMX:
+        # https://musescore.com/score/95546 (./mid/1/49/QmbVDLKjmtAqCoc1TNjgtASz7Bi8gXfSt8i6Mmowhjqi1C.mid) and
+        # https://musescore.com/score/151013 (./mid/9/43/QmRSYgs3jvLQMTdwaDaGV4EAJKyndRhoxFQppHXwfjKWCE.mid).
+        for name in ("pdmx-95546.mid", "pdmx-151013.mid"):
+            with self.subTest(name=name):
+                self.assertEqual(self.problems(HERE / "testdata" / name),
+                                 ["the first bar is a pickup padded with silence: every track rests 2 beats after its notes"])
+
+    def test_no_catalog_song_opens_with_a_padded_pickup(self):
+        catalog = json.loads((ROOT / "catalog/catalog.json").read_text())
+        for entry in catalog:
+            with self.subTest(song=entry["id"]):
+                self.assertEqual(self.problems(ROOT / "catalog" / entry["file"]), [])
+
+    def test_score_notes_reads_every_track(self):
+        # Each note ends a tick (1/480 beat) early in this file.
+        notes = [(round(s, 2), round(e, 2)) for s, e in import_pdmx.score_notes(HERE / "testdata/pdmx-95546.mid")]
+        self.assertEqual(notes[:3], [(0.0, 0.75), (0.75, 1.0), (3.0, 4.0)])
+        self.assertIn((3.0, 5.0), notes)  # the accompaniment's first chord
+        self.assertEqual(len(notes), 48)  # 26 melody notes and 22 accompaniment notes
+
+
 class Extract(unittest.TestCase):
     def test_a_cached_file_cut_short_is_read_again_from_the_archive(self):
         tmp, data = temp_dir(self), SCORE.read_bytes()
@@ -350,6 +417,13 @@ class Gate(unittest.TestCase):
         r, rendered = self.gate(self.file(data), sha256(data))
         self.assertEqual(list(r["gates"]), ["license", "hash", "sanity"])
         self.assertIn("the MIDI file doesn't import", r["gates"]["sanity"][0])
+        self.assertFalse(r["passed"] or rendered)
+
+    def test_a_padded_pickup_fails_the_sanity_gate(self):
+        data = (HERE / "testdata/pdmx-95546.mid").read_bytes()
+        r, rendered = self.gate(self.file(data), sha256(data))
+        self.assertEqual(r["gates"]["sanity"],
+                         ["the first bar is a pickup padded with silence: every track rests 2 beats after its notes"])
         self.assertFalse(r["passed"] or rendered)
 
     def test_passes_only_on_the_bar(self):

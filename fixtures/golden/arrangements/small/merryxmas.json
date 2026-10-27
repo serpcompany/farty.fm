@@ -5,84 +5,73 @@
   "missing": [
     {
       "seconds": 0.5,
-      "target_midi": 47
+      "target_midi": 44
     },
     {
-      "seconds": 0.5,
+      "seconds": 1.0,
       "target_midi": 49
-    },
-    {
-      "seconds": 0.5,
-      "target_midi": 51
     }
   ],
   "notes": null,
-  "octave_moves": 1,
+  "octave_moves": 2,
   "per_pitch": [
     {
-      "octave_move": false,
-      "recording": "022",
-      "shift_semitones": 1.6740794063398141,
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
       "song_pitch": 62,
-      "target_midi": 42
-    },
-    {
-      "octave_move": false,
-      "recording": "069",
-      "shift_semitones": -0.4259205936601731,
-      "song_pitch": 64,
       "target_midi": 44
     },
     {
       "octave_move": false,
-      "recording": "002",
-      "shift_semitones": -0.4259205936601802,
-      "song_pitch": 66,
+      "recording": "069",
+      "shift_semitones": 1.574079406339827,
+      "song_pitch": 64,
       "target_midi": 46
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": 1.5740794063398198,
+      "song_pitch": 66,
+      "target_midi": 48
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
       "song_pitch": 67,
-      "target_midi": 47
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 69,
       "target_midi": 49
     },
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 71,
-      "target_midi": 51
-    },
-    {
       "octave_move": true,
-      "recording": "016",
-      "shift_semitones": 11.674079406339814,
-      "song_pitch": 72,
-      "target_midi": 52
+      "recording": "022",
+      "shift_semitones": 10.674079406339814,
+      "song_pitch": 69,
+      "target_midi": 51
     },
     {
       "octave_move": false,
       "recording": "090",
-      "shift_semitones": -1.2259205936601774,
-      "song_pitch": 74,
+      "shift_semitones": -2.2259205936601774,
+      "song_pitch": 71,
+      "target_midi": 53
+    },
+    {
+      "octave_move": true,
+      "recording": "016",
+      "shift_semitones": 13.674079406339814,
+      "song_pitch": 72,
       "target_midi": 54
     }
   ],
   "pitch_coverage": {
     "covered": 5,
-    "total": 8
+    "total": 7
   },
-  "plan_cost": 143.27258612187373,
+  "plan_cost": 135.9553626565968,
   "render_settings": null,
   "song": "merryxmas",
-  "transpose": -20,
+  "transpose": -18,
   "unlocked": false
 }

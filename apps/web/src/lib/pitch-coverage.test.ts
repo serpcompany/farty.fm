@@ -123,7 +123,7 @@ describe('Pitch Coverage against the reference engine', () => {
     expect(checked).toBe(50 * 12)
   })
 
-  it('unlocks Mary and Ode to Joy at the 9th story take, and 6 Songs by the 11th', () => {
+  it('unlocks Mary, Ode to Joy and Merry Christmas at the 9th story take, and 7 Songs by the 11th', () => {
     const unlocks: Record<number, string[]> = {}
     const before = new Set<string>()
     for (let take = 1; take <= story.length; take++) {
@@ -132,10 +132,10 @@ describe('Pitch Coverage against the reference engine', () => {
       if (fresh.length > 0) unlocks[take] = fresh
       for (const id of unlocked) before.add(id)
     }
-    // Happy Birthday still needs a 1.2 s fart near D3, and Amazing Grace a 3 s one near B3.
+    // Amazing Grace still needs a 3 s fart near B3.
     expect(unlocks).toEqual({
-      9: ['mary', 'ode'],
-      10: ['frere', 'merryxmas'],
+      9: ['mary', 'ode', 'merryxmas'],
+      10: ['birthday', 'frere'],
       11: ['twinkle', 'saints']
     })
   })
@@ -149,10 +149,10 @@ describe('Pitch Coverage against the reference engine', () => {
     expect(fixtureId(mary.recordingForPitch.get(74))).toBeUndefined()
     expect(fixtureId(mary.recordingForPitch.get(79))).toBe('032')
 
-    const birthday = coverageOf(song('birthday'), ten)
-    expect(coverageSummary(birthday)).toBe('7 of 8 notes covered')
-    expect(birthday.transposition).toBe(-18)
-    expect(missingNotes(birthday)).toBe('C♯3 (1.2 s)')
+    const furelise = coverageOf(song('furelise'), ten)
+    expect(coverageSummary(furelise)).toBe('6 of 7 notes covered')
+    expect(furelise.transposition).toBe(-16)
+    expect(missingNotes(furelise)).toBe('F3 (1.4 s)')
   })
 })
 
@@ -256,9 +256,8 @@ function pitchClassOf(r: Recording): number[] {
 describe('Compose’s listing', () => {
   it('puts the highest coverage first, then fewer notes', () => {
     const { unlocked, locked } = listing(ten)
-    expect(unlocked.map(r => r.song.id)).toEqual(['mary', 'ode', 'frere', 'merryxmas'])
+    expect(unlocked.map(r => r.song.id)).toEqual(['mary', 'ode', 'frere', 'merryxmas', 'birthday'])
     expect(locked.map(r => r.song.id)).toEqual([
-      'birthday',
       'furelise',
       'auld',
       'twinkle',
@@ -273,6 +272,7 @@ describe('Compose’s listing', () => {
     const { unlocked, locked } = listing(ten, '', 'alphabetical')
     expect(unlocked.map(r => r.song.title)).toEqual([
       'Frère Jacques',
+      'Happy Birthday',
       'Mary Had a Little Lamb',
       'Ode to Joy',
       'We Wish You a Merry Christmas'
@@ -281,7 +281,6 @@ describe('Compose’s listing', () => {
       'Amazing Grace',
       'Auld Lang Syne',
       'Für Elise',
-      'Happy Birthday',
       'Jingle Bells',
       'Row, Row, Row Your Boat',
       'Twinkle, Twinkle, Little Star',
@@ -296,7 +295,7 @@ describe('Compose’s listing', () => {
     expect(ids(listing(ten, 'frere').unlocked)).toEqual(['frere'])
     expect(ids(listing(ten, 'little').unlocked)).toEqual(['mary'])
     expect(ids(listing(ten, 'little').locked)).toEqual(['twinkle'])
-    expect(listing(ten, '  ').unlocked).toHaveLength(4)
+    expect(listing(ten, '  ').unlocked).toHaveLength(5)
     const none = listing(ten, 'zzz')
     expect(none.unlocked.length + none.locked.length).toBe(0)
   })
@@ -332,23 +331,23 @@ describe('Compose’s listing', () => {
     )
     const ms = performance.now() - started
     expect(unlocked.length + locked.length).toBe(500)
-    // 41 rounds of 4 Unlocked Songs, then 3 of the next 8 Songs.
-    expect(unlocked).toHaveLength(167)
+    // 41 rounds of 5 Unlocked Songs, then 4 of the next 8 Songs.
+    expect(unlocked).toHaveLength(209)
     expect(ms).toBeLessThan(10_000)
   })
 
   // The reference's `melody_fit().missing` on the same takes: each note with the shortest fart
   // that would cover it (ADR 0011).
   it('names the missing notes with their octave and length', () => {
-    expect(missingNotes(coverageOf(song('birthday'), ten))).toBe('C♯3 (1.2 s)')
+    expect(missingNotes(coverageOf(song('furelise'), ten))).toBe('F3 (1.4 s)')
     expect(missingNotes(coverageOf(song('jingle'), ten))).toBe('A2 (2.0 s)')
     expect(missingNotes(coverageOf(song('mary'), ten))).toBeNull()
     const few = takes(3)
     expect(missingNotes(coverageOf(song('birthday'), few))).toBe(
-      'G♯2 (0.6 s), A♯2 (0.6 s), C3 (1.2 s), C♯3 (1.2 s), F3 (0.6 s), and G♯3 (0.6 s)'
+      'G♯2 (0.5 s), A♯2 (0.5 s), C3 (1.0 s), C♯3 (1.0 s), F3 (0.5 s), and F♯3 (0.3 s)'
     )
     expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe(
-      'G♯2 (0.6 s), A♯2 (0.6 s), C3 (1.2 s), and 3 more'
+      'G♯2 (0.5 s), A♯2 (0.5 s), C3 (1.0 s), and 3 more'
     )
     expect(missingNotes(coverageOf(song('mary'), few), 3)).toBe(
       'G♯2 (1.5 s), A♯2 (0.7 s), and C3 (0.7 s)'
@@ -364,7 +363,7 @@ describe('Compose’s listing', () => {
     const analyzing: Recording = { ...takes(9)[8], analysis: { state: 'analyzing' } }
     expect(coverageKey([...eight, analyzing])).toBe(coverageKey(eight))
     expect(listing(eight).unlocked).toEqual([])
-    expect(listing(takes(9)).unlocked.map(r => r.song.id)).toEqual(['mary', 'ode'])
+    expect(listing(takes(9)).unlocked.map(r => r.song.id)).toEqual(['mary', 'ode', 'merryxmas'])
     // So does a settle time added on load to an analysis stored before #116: it moves Auto-map.
     // The 2nd take, 032, is Melodic and settles in 0.128 s.
     const [first, second, ...rest] = eight
@@ -379,7 +378,7 @@ describe('Compose’s listing', () => {
 describe('what a save changed', () => {
   it('lists the unlocks, then the improvements closest first', () => {
     const changes = coverageChanges(songs, takes(8), takes(9))
-    expect(changes.unlocked.map(s => s.id)).toEqual(['mary', 'ode'])
+    expect(changes.unlocked.map(s => s.id)).toEqual(['mary', 'ode', 'merryxmas'])
     expect(changes.improved.every(r => !r.coverage.unlocked)).toBe(true)
     const fractions = changes.improved.map(r => coverageFraction(r.coverage))
     expect(fractions).toEqual([...fractions].sort((a, b) => b - a))

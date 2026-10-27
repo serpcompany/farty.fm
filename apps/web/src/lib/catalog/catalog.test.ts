@@ -1,6 +1,7 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
-import { type CatalogEntry, outputPath, readSources, renderCatalog } from './generate'
+import { REPO_ROOT } from '../../test-support/golden'
+import { type CatalogEntry, outputPath, readSources, renderCatalog, shipList } from './generate'
 import { songs } from './songs.generated'
 
 const sources = readSources()
@@ -39,6 +40,25 @@ describe('the Song Catalog in the app', () => {
     expect(song.pitches).toEqual(golden.pitches)
     expect(song.title).toBe(entry.title)
     expect(song.source).toBe('Public domain score · PDMX')
+  })
+})
+
+// export_golden.py reads the same ship list (#225), so a Song can't ship without the golden data
+// the Auto-map and renderer tests check it against.
+describe('the golden data', () => {
+  const golden = `${REPO_ROOT}/fixtures/golden`
+  const index = JSON.parse(readFileSync(`${golden}/index.json`, 'utf8')) as {
+    songs: { id: string }[]
+  }
+
+  test.each(shipList)('covers %s, which the app ships', id => {
+    expect(index.songs.map(s => s.id)).toContain(id)
+    for (const file of [
+      `songs/${id}.json`,
+      `arrangements/full/${id}.json`,
+      `arrangements/small/${id}.json`
+    ])
+      expect(existsSync(`${golden}/${file}`), file).toBe(true)
   })
 })
 
