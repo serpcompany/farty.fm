@@ -13,13 +13,14 @@ export function saveAsksForPayment(): boolean {
 
 /**
  * How starting to pay went: go to Checkout's page, or there's nothing to pay, or another Toot of
- * the Song is paid for and was never saved (`tootId`), or it failed.
+ * the Song is paid for and was never saved (`tootId`), or it failed. `charged` is a payment Stripe
+ * took that doesn't match the Toot's price, which only support can sort out.
  */
 export type Checkout =
   | { kind: 'pay'; url: string }
   | { kind: 'paid' }
   | { kind: 'paidToot'; tootId: string }
-  | { kind: 'failed'; problem: 'unavailable' | 'limitReached' | 'tooMany' | 'failed' }
+  | { kind: 'failed'; problem: 'unavailable' | 'limitReached' | 'charged' | 'tooMany' | 'failed' }
 
 /** Stripe's page, or the dev checkout on this same site. Nothing else is gone to. */
 function isCheckoutPage(url: string): boolean {
@@ -60,6 +61,7 @@ export async function startCheckout(
   if (status === 409 && error === 'limit_reached') {
     return { kind: 'failed', problem: 'limitReached' }
   }
+  if (status === 409 && error === 'payment_mismatch') return { kind: 'failed', problem: 'charged' }
   if (status === 429) return { kind: 'failed', problem: 'tooMany' }
   return { kind: 'failed', problem: 'failed' }
 }

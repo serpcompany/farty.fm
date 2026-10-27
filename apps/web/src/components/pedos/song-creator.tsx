@@ -160,6 +160,15 @@ const SAVE_PROBLEMS = {
   saveFailed: "Couldn't save this Toot.",
   unavailable: "Payments aren't available right now.",
   limitReached: "You've kept as many Toots as an account can. Delete one to save this one.",
+  charged: (
+    <>
+      You were charged, but this Toot couldn't be saved.{' '}
+      <Link href="/support/" className="underline">
+        Contact support
+      </Link>{' '}
+      for a refund.
+    </>
+  ),
   tooMany: "You've started a lot of payments. Try again later.",
   failed: "Couldn't start the payment.",
   notPaidYet: "Your payment hasn't come through yet. Tap Save to check again.",

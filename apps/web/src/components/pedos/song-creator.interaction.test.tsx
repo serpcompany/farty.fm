@@ -137,6 +137,18 @@ describe('Save to Toots, where saving is paid', () => {
     expect(container.textContent).toContain("You've started a lot of payments. Try again later.")
   })
 
+  it('says the user was charged and links Support when the paid session doesn’t match (payment_mismatch)', async () => {
+    checkoutAnswers({ error: 'payment_mismatch' }, 409)
+    await render()
+    await tapSave()
+    expect(container.textContent).toContain(
+      "You were charged, but this Toot couldn't be saved. Contact support for a refund."
+    )
+    // next/link drops the trailing slash outside a Next build, which adds it back (trailingSlash).
+    const link = [...container.querySelectorAll('a')].find(a => a.textContent === 'Contact support')
+    expect(link?.getAttribute('href')).toMatch(/^\/support\/?$/)
+  })
+
   it('says the payment hasn’t come through yet, back from Checkout, and checks again on Save', async () => {
     const { waitUntilPaid } = await import('@/lib/toot-payment')
     await render({ tootId: TOOT, done: true })
