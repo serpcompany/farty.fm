@@ -20,6 +20,18 @@
       "cf-typegen.env": "hash-lines"
     }
   },
+  "rules": {
+    "comments": "docs/agents/code.md, The rules",
+    "docs": "docs/agents/code.md, The rules",
+    "sizes": "docs/agents/code.md, The rules",
+    "layers": "docs/agents/code.md, The rules",
+    "waits": "docs/agents/code.md, The rules",
+    "secrets": "docs/agents/code.md, The rules",
+    "duplicates": "docs/agents/code.md, The rules",
+    "deadcode": "docs/agents/code.md, The rules",
+    "dependencies": "docs/agents/code.md, The rules",
+    "linters": "docs/agents/code.md, The checks"
+  },
   "dependencies": {
     "parts": [
       {
@@ -46,6 +58,16 @@
       }
     ]
   },
+  "docs": {
+    "skills": {
+      "catalog": "docs/agents/code.md"
+    },
+    "github": {
+      "exempt": {
+        ".claude/skills/pr-review/SKILL.md": "the Repository workflow's review job runs it, where its gh commands read the pull request with that job's own token"
+      }
+    }
+  },
   "exceptions": {
     "knownLongDocs": {
       "apps/web/AGENTS.md": {
@@ -53,7 +75,7 @@
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       },
       "docs/agents/web.md": {
-        "lines": 376,
+        "lines": 344,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       },
       "docs/design/screens.md": {
@@ -256,22 +278,6 @@
     },
     "baseline": {
       "comments": {
-        ".github/workflows/pr-issue-link.yml": {
-          "findings": 9,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        ".github/workflows/release-please.yml": {
-          "findings": 4,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        ".github/workflows/web-auth-secret.yml": {
-          "findings": 12,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        ".github/workflows/web.yml": {
-          "findings": 39,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         ".gitignore": {
           "findings": 6,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -1216,14 +1222,6 @@
         }
       },
       "deadcode": {
-        ".github/workflows/web-auth-secret.yml": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        ".github/workflows/web.yml": {
-          "findings": 4,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/package.json": {
           "findings": 2,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"

@@ -1,23 +1,5 @@
 name: Web
 
-# The web app in apps/web, by SERP's CI Workflows standard: lint, types and unit tests (including
-# Recording Analysis against fixtures/golden/), both Workers builds, and the record journeys in
-# Playwright on workerd. Then a push to `staging` deploys Staging, and a push to `main` (the
-# promotion, a hotfix or a release) deploys Production, each once the checks pass, and smoke-tests
-# it on its workers.dev host.
-#
-# Every push runs, with no paths filter, so a deploy never skips. On a pull request, `changes`
-# skips the checks' steps when nothing the web app builds from changed, and they still report.
-# Draft pull requests skip `e2e`, which runs once the PR is marked ready. A manual run on `staging`
-# or `main` checks and redeploys that branch's tip, for when no push started a run.
-#
-# Each deploy reads CLOUDFLARE_API_TOKEN from its own environment (staging or production) and the
-# CLOUDFLARE_ACCOUNT_ID variable. With no token the deploy fails, so a green run at the tip always
-# deployed and passed the smoke test.
-#
-# The D1 databases change only here: each deploy applies its environment's migrations
-# (`pnpm db:migrate:<env>`) first, and `e2e` applies them to its local database before the
-# journeys. src/db/deploy-config.test.ts checks that every deploy and migration names its --env.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -30,7 +12,6 @@ permissions:
   actions: read
   packages: read
 
-# Cancels superseded PR runs, and checks every push.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -42,11 +23,9 @@ jobs:
     outputs:
       web: ${{ steps.paths.outputs.web }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 2
-      # A PR's run tests its merge commit, whose first parent is the base branch, so this diff is
-      # what the PR changes. A push always checks, and an error in the diff checks too.
       - id: paths
         run: |
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
@@ -64,16 +43,13 @@ jobs:
     timeout-minutes: 20
     env:
       WEB: ${{ needs.changes.outputs.web }}
-    defaults:
-      run:
-        working-directory: apps/web
     steps:
       - if: env.WEB == 'true'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - if: env.WEB == 'true'
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
       - if: env.WEB == 'true'
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version-file: .node-version
           cache: pnpm
@@ -85,18 +61,21 @@ jobs:
           NODE_AUTH_TOKEN: ${{ github.token }}
       - name: ShellCheck the smoke test
         if: env.WEB == 'true'
+        working-directory: apps/web
         run: shellcheck scripts/smoke.sh
       - if: env.WEB == 'true'
+        working-directory: apps/web
         run: pnpm lint
       - if: env.WEB == 'true'
+        working-directory: apps/web
         run: pnpm typecheck
       - name: Check the migrations match Drizzle's journal
         if: env.WEB == 'true'
+        working-directory: apps/web
         run: pnpm db:check
-      # `drizzle-kit check` never reads src/db/schema.ts, so a schema change without its migration
-      # would pass. With every migration committed, `db:generate` writes nothing.
       - name: Check every schema change has its migration
         if: env.WEB == 'true'
+        working-directory: apps/web
         run: |
           pnpm db:generate
           if [ -n "$(git status --porcelain -- drizzle)" ]; then
@@ -105,16 +84,15 @@ jobs:
             exit 1
           fi
       - if: env.WEB == 'true'
+        working-directory: apps/web
         run: pnpm test
-      # Both Workers builds run on every PR, once each: `e2e` builds Staging, except on a draft,
-      # which skips `e2e`. On a push, the deploy job's build is this commit's build check.
       - name: Build for Staging, on a draft
         if: env.WEB == 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft
+        working-directory: apps/web
         run: pnpm build:staging
-      # `pnpm check`'s build, as Production builds. It fails if the build carries any file of the
-      # Fixture Library, so it runs after the Staging build, which copies the library in.
       - name: Build for Production, with no Fixture Library
         if: env.WEB == 'true' && github.event_name == 'pull_request'
+        working-directory: apps/web
         run: pnpm build:production
 
   e2e:
@@ -124,14 +102,9 @@ jobs:
     timeout-minutes: 25
     env:
       WEB: ${{ needs.changes.outputs.web }}
-    defaults:
-      run:
-        working-directory: apps/web
     steps:
       - if: env.WEB == 'true'
-        uses: actions/checkout@v7
-      # A push skips the suite when a passing run already tested its tree. No receipt, or an error
-      # looking one up, runs it.
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - id: receipt
         if: env.WEB == 'true'
         env:
@@ -150,9 +123,9 @@ jobs:
           fi
           echo "run=true" >> "$GITHUB_OUTPUT"
       - if: steps.receipt.outputs.run == 'true'
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
       - if: steps.receipt.outputs.run == 'true'
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version-file: .node-version
           cache: pnpm
@@ -164,37 +137,41 @@ jobs:
           NODE_AUTH_TOKEN: ${{ github.token }}
       - name: Build for Staging, with the Fixture Library
         if: steps.receipt.outputs.run == 'true'
+        working-directory: apps/web
         run: pnpm build:staging
-      # The local Workers build runs behind the Staging gate, with the password from .dev.vars.
       - name: Write .dev.vars
         if: steps.receipt.outputs.run == 'true'
+        working-directory: apps/web
         run: cp .dev.vars.example .dev.vars
-      # The preview runs the top level of wrangler.jsonc, with its local D1 in .wrangler/.
       - name: Apply the migrations to the local database
         if: steps.receipt.outputs.run == 'true'
+        working-directory: apps/web
         run: pnpm db:migrate:local
       - if: steps.receipt.outputs.run == 'true'
+        working-directory: apps/web
         run: pnpm exec playwright install --with-deps chromium
       - name: Record journeys on workerd
         if: steps.receipt.outputs.run == 'true'
+        working-directory: apps/web
         run: pnpm test:e2e
         env:
           E2E_SERVER: preview
           CI: 'true'
       - name: Write the receipt
         if: steps.receipt.outputs.run == 'true'
+        working-directory: apps/web
         env:
           TREE: ${{ steps.receipt.outputs.tree }}
         run: echo "$TREE" > receipt.txt
       - if: steps.receipt.outputs.run == 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: passed-e2e-${{ steps.receipt.outputs.tree }}
           path: apps/web/receipt.txt
           retention-days: 30
-          overwrite: true # a re-run uploads the same name again
+          overwrite: true
       - if: failure() && steps.receipt.outputs.run == 'true'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: playwright-report
           path: apps/web/e2e/report
@@ -207,17 +184,13 @@ jobs:
     environment:
       name: staging
       url: https://staging.farty.fm
-    # A running deploy is never cancelled; a newer queued one replaces an older one.
     concurrency:
       group: deploy-web-staging
       cancel-in-progress: false
-    defaults:
-      run:
-        working-directory: apps/web
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version-file: .node-version
           cache: pnpm
@@ -227,8 +200,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
       - name: Build for Staging
+        working-directory: apps/web
         run: pnpm build:staging
-      # Deploy only the branch tip, so re-running an old commit's run never deploys older code.
       - name: Check this is the branch tip
         id: tip
         run: |
@@ -239,21 +212,23 @@ jobs:
           else
             echo "::notice::$GITHUB_SHA isn't the tip of staging ($tip), so nothing was deployed."
           fi
-      # Before the code that needs them. A migration that fails stops the deploy.
       - name: Apply the migrations to Staging's database
         if: steps.tip.outputs.deploy == 'true'
+        working-directory: apps/web
         run: pnpm db:migrate:staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy to Staging
         if: steps.tip.outputs.deploy == 'true'
+        working-directory: apps/web
         run: pnpm exec opennextjs-cloudflare deploy --env staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       - name: Smoke test Staging
         if: steps.tip.outputs.deploy == 'true'
+        working-directory: apps/web
         run: scripts/smoke.sh https://pedos-web-staging.serpcompany.workers.dev staging
 
   deploy-production:
@@ -264,17 +239,13 @@ jobs:
     environment:
       name: production
       url: https://farty.fm
-    # A running deploy is never cancelled; a newer queued one replaces an older one.
     concurrency:
       group: deploy-web-production
       cancel-in-progress: false
-    defaults:
-      run:
-        working-directory: apps/web
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version-file: .node-version
           cache: pnpm
@@ -283,10 +254,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-      # Fails if the build carries any file of the Fixture Library, which never ships.
       - name: Build for Production
+        working-directory: apps/web
         run: pnpm build:production
-      # Deploy only the branch tip, so re-running an old commit's run never deploys older code.
       - name: Check this is the branch tip
         id: tip
         run: |
@@ -297,19 +267,21 @@ jobs:
           else
             echo "::notice::$GITHUB_SHA isn't the tip of main ($tip), so nothing was deployed."
           fi
-      # Before the code that needs them. A migration that fails stops the deploy.
       - name: Apply the migrations to Production's database
         if: steps.tip.outputs.deploy == 'true'
+        working-directory: apps/web
         run: pnpm db:migrate:production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy to Production
         if: steps.tip.outputs.deploy == 'true'
+        working-directory: apps/web
         run: pnpm exec opennextjs-cloudflare deploy --env production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       - name: Smoke test Production
         if: steps.tip.outputs.deploy == 'true'
+        working-directory: apps/web
         run: scripts/smoke.sh https://pedos-web-production.serpcompany.workers.dev production

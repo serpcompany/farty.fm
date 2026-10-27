@@ -10,7 +10,7 @@ In English, "pedo" is common slang for pedophile, so most English speakers read 
 
 - **Hosts.** Production is farty.fm, with www.farty.fm sending a 308 to it, and Staging is staging.farty.fm. `apps/web/src/lib/site.ts` holds them, and `BETTER_AUTH_URL` in `apps/web/wrangler.jsonc` matches it.
 - **The old hosts.** pedos.app, www.pedos.app and staging.pedos.app are no longer the Worker's custom domains. A redirect rule on the pedos.app zone answers each with a 301 to the same path on farty.fm or staging.farty.fm, query included, outside the Worker. Keep renewing pedos.app for it.
-- **Name.** Everything a user sees says Farty: the screens, page titles, the web app manifest, the Privacy and Support pages, the sign-in email (from `Farty <support@farty.fm>`) and the Staging password prompt. Release PRs are titled `release: Farty x.y.z`.
+- **Name.** Everything a user sees says Farty: the screens, page titles, the web app manifest, the Privacy and Support pages, the sign-in email (from `Farty <support@farty.fm>`) and the Staging password prompt. Release PRs are titled `chore: release Farty x.y.z` (`release:` until 2026-10-27, when SERP's title check came in).
 - **Android.** The Trusted Web Activity wraps farty.fm as `com.serp.farty`, set before the first Play upload, because a package ID can't change once published.
 
 ## What stays internal
