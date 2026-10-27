@@ -28,6 +28,7 @@ on:
 permissions:
   contents: read
   actions: read
+  packages: read
 
 # Cancels superseded PR runs, and checks every push.
 concurrency:
@@ -50,7 +51,7 @@ jobs:
         run: |
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
             echo "web=true" >> "$GITHUB_OUTPUT"
-          elif git diff --quiet HEAD^1 HEAD -- apps/web fixtures catalog .github/workflows/web.yml; then
+          elif git diff --quiet HEAD^1 HEAD -- apps/web fixtures catalog package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc .node-version .github/workflows/web.yml; then
             echo "web=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Nothing the web app builds from changed, so its checks skip their steps."
           else
@@ -71,16 +72,17 @@ jobs:
         uses: actions/checkout@v7
       - if: env.WEB == 'true'
         uses: pnpm/action-setup@v6
-        with:
-          package_json_file: apps/web/package.json
       - if: env.WEB == 'true'
         uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version-file: .node-version
           cache: pnpm
-          cache-dependency-path: apps/web/pnpm-lock.yaml
+          registry-url: https://npm.pkg.github.com
+          scope: "@serpcompany"
       - if: env.WEB == 'true'
         run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
       - name: ShellCheck the smoke test
         if: env.WEB == 'true'
         run: shellcheck scripts/smoke.sh
@@ -149,16 +151,17 @@ jobs:
           echo "run=true" >> "$GITHUB_OUTPUT"
       - if: steps.receipt.outputs.run == 'true'
         uses: pnpm/action-setup@v6
-        with:
-          package_json_file: apps/web/package.json
       - if: steps.receipt.outputs.run == 'true'
         uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version-file: .node-version
           cache: pnpm
-          cache-dependency-path: apps/web/pnpm-lock.yaml
+          registry-url: https://npm.pkg.github.com
+          scope: "@serpcompany"
       - if: steps.receipt.outputs.run == 'true'
         run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
       - name: Build for Staging, with the Fixture Library
         if: steps.receipt.outputs.run == 'true'
         run: pnpm build:staging
@@ -214,14 +217,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
-        with:
-          package_json_file: apps/web/package.json
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version-file: .node-version
           cache: pnpm
-          cache-dependency-path: apps/web/pnpm-lock.yaml
+          registry-url: https://npm.pkg.github.com
+          scope: "@serpcompany"
       - run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
       - name: Build for Staging
         run: pnpm build:staging
       # Deploy only the branch tip, so re-running an old commit's run never deploys older code.
@@ -270,14 +274,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
-        with:
-          package_json_file: apps/web/package.json
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version-file: .node-version
           cache: pnpm
-          cache-dependency-path: apps/web/pnpm-lock.yaml
+          registry-url: https://npm.pkg.github.com
+          scope: "@serpcompany"
       - run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
       # Fails if the build carries any file of the Fixture Library, which never ships.
       - name: Build for Production
         run: pnpm build:production

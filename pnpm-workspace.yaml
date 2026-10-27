@@ -1,4 +1,10 @@
+packages:
+  - apps/web
+
 shellEmulator: true
+
 ignoredBuiltDependencies:
+  - esbuild
   - sharp
   - unrs-resolver
+  - workerd

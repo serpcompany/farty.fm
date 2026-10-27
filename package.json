@@ -1,0 +1,16 @@
+{
+  "name": "farty",
+  "private": true,
+  "description": "Farty turns fart Recordings into recognizable melodies. The web app is in apps/web; this root holds the shared checks.",
+  "scripts": {
+    "verify": "serp-verify",
+    "check": "pnpm --filter pedos-web check"
+  },
+  "packageManager": "pnpm@10.17.0",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "devDependencies": {
+    "@serpcompany/verify": "0.1.1"
+  }
+}

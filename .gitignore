@@ -13,3 +13,6 @@ tmp/
 
 # Local Worker secrets
 .dev.vars
+
+# Dependencies
+node_modules/
