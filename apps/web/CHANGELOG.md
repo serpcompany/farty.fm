@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.6.0](https://github.com/serpcompany/farty.fm/compare/v1.5.0...v1.6.0) (2026-10-27)
+
+
+### Features
+
+* **fixtures:** add 10 owner-kept Recordings to the Fixture Library ([#219](https://github.com/serpcompany/farty.fm/issues/219)) ([#220](https://github.com/serpcompany/farty.fm/issues/220)) ([ef3523b](https://github.com/serpcompany/farty.fm/commit/ef3523b81ccb4dd5cb93f6fdbbbb7474a8aa70d8))
+* Profile shows how to put Farty on your Home Screen, for the device it's on ([#218](https://github.com/serpcompany/farty.fm/issues/218)) ([8c30a63](https://github.com/serpcompany/farty.fm/commit/8c30a63e20270b898ee150992d4a52d83131665d))
+* recording starts at once: the microphone opens once per launch ([#207](https://github.com/serpcompany/farty.fm/issues/207)) ([340ac36](https://github.com/serpcompany/farty.fm/commit/340ac3677aa8ef7c1fdc5ce2da343736e992ea5d))
+* Recordings and Song Creator show the fart's length, the length that unlocks a Song ([#236](https://github.com/serpcompany/farty.fm/issues/236)) ([60da673](https://github.com/serpcompany/farty.fm/commit/60da6732bb7d8a36683aaef39a2eb743ad56dcbf))
+* Songs play each fart raw, at its own pitch and speed ([#230](https://github.com/serpcompany/farty.fm/issues/230)) ([e2b1e0b](https://github.com/serpcompany/farty.fm/commit/e2b1e0b2292d81101f1a759fe22301b609a85a46))
+* the pitch contour keeps the attack, so Toots hold pitch and more farts are Melodic ([#210](https://github.com/serpcompany/farty.fm/issues/210)) ([8e709f3](https://github.com/serpcompany/farty.fm/commit/8e709f3a4394cabf997fa291381d7b9bb79b8793))
+* **web:** pay $0.99 to save a Toot, through Stripe Checkout ([#204](https://github.com/serpcompany/farty.fm/issues/204)) ([#211](https://github.com/serpcompany/farty.fm/issues/211)) ([a048409](https://github.com/serpcompany/farty.fm/commit/a04840965f58a42de0927c3c2d70327951a6bb94))
+
+
+### Fixes
+
+* ask for the microphone less on iPhone, and keep a long-open tab working ([#223](https://github.com/serpcompany/farty.fm/issues/223)) ([4ebe621](https://github.com/serpcompany/farty.fm/commit/4ebe62143627ac0e0399afd197473a75e4bea34e))
+* **catalog:** Happy Birthday and Merry Christmas lead straight from the pickup ([#225](https://github.com/serpcompany/farty.fm/issues/225)) ([#231](https://github.com/serpcompany/farty.fm/issues/231)) ([7f3e01b](https://github.com/serpcompany/farty.fm/commit/7f3e01bd5ffc758c17121c52efdedd4c3a920f36))
+* **fixtures:** remove Recording 021 from the Fixture Library ([#215](https://github.com/serpcompany/farty.fm/issues/215)) ([#216](https://github.com/serpcompany/farty.fm/issues/216)) ([0dc0c4e](https://github.com/serpcompany/farty.fm/commit/0dc0c4e5e31f8398810e3b3c68bbbad400d1bf4f))
+* **web:** a guest's Recordings survive closing Farty ([#209](https://github.com/serpcompany/farty.fm/issues/209)) ([ac6c860](https://github.com/serpcompany/farty.fm/commit/ac6c860975f5548a4ae24d91b9997887b68099bc)), closes [#203](https://github.com/serpcompany/farty.fm/issues/203)
+
 ## [1.5.0](https://github.com/serpcompany/farty.fm/compare/v1.4.0...v1.5.0) (2026-10-22)
 
 
