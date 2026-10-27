@@ -6,7 +6,7 @@ Farty's first paywall (#204). The owner decided it on 2026-10-25: anyone can mak
 
 - **Preview is free.** Anyone, guest or signed in, can open an Unlocked Song in Song Creator, have the Toot made and play it, its notes and its Recordings, as often as they like.
 - **Saving costs $0.99 per Toot.** Save to Toots is what keeps a Toot: it goes into Toots, lasts past the visit and syncs to the account's other browsers. It needs an account, because a guest's Toots don't outlast the visit (#150), and a paid Toot must live somewhere. A guest's tap on Save opens the account step first.
-- **One payment, one Toot.** The payment is for one Toot id. Renaming it is free; deleting it doesn't refund it, and a deleted Toot can't be saved again under the same id. Making the same Song again makes a new Toot, which is paid for again.
+- **One payment, one Toot.** The payment is for one Toot id, and its first save uses it up. Renaming it is free; deleting it doesn't refund it, and a deleted Toot can't be saved again under the same id. Making the same Song again makes a new Toot, which is paid for again, unless a Toot of that Song was paid for and never saved (the page closed before the return from Checkout): Save then saves that one, made again from the Song and the Recordings, and charges nothing (#213).
 - **The server decides.** A Stripe webhook marks the Toot paid in D1 (`toot_payments`), and `PUT /api/toots/{id}/` refuses a Toot that isn't paid (402 `payment_required`). The return from Checkout also asks Stripe, so a late webhook doesn't hold the save up. A browser can still keep audio it played, as any web page can; what it can't do without paying is put the Toot in the account.
 - **Download and share** aren't in the web app yet. When they come, they're for saved Toots only.
 
@@ -24,11 +24,11 @@ Stripe's standard US card rate is 2.9% + 30Â¢, so a $0.99 payment pays about 33Â
 
 | Environment | Saving | Stripe |
 | --- | --- | --- |
-| Local run | Paid | A stand-in for Checkout at `/dev/checkout/` when there's no Stripe key, for the e2e journeys and tap-throughs. It answers 404 anywhere else. |
+| Local run | As the build: paid, or free for a Production build | Test mode, or a stand-in for Checkout at `/dev/checkout/` when there's no Stripe key, for the e2e journeys and tap-throughs. It answers 404 anywhere else. |
 | Staging | Paid | Test mode. Until its keys are set, Save says payments aren't available. |
-| Production | Free, as before | None yet. It turns on once the owner has Stripe's live keys and they are set on Production's Worker; then `savingIsPaid` in `pricing.ts` changes, in its own PR. |
+| Production | Free, as before | Live mode, once the owner sets Stripe's live keys on Production's Worker; then `savingIsPaid` in `pricing.ts` changes, in its own PR. |
 
-The server accepts only test-mode keys (`sk_test_`, `rk_test_`) for now, so a live key can't be used by mistake before Production is ready.
+Production takes only live keys (`sk_live_`, `rk_live_`) and live events; Staging and local runs only test keys and test events (#213). A test key can't take real payments, and a live key can't be used outside Production.
 
 ## Options considered
 

@@ -1,11 +1,18 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 import { uploadState } from '@/db/library'
-import { markTootPaid, startTootPayment, tootPayment } from '@/db/payments'
+import {
+  markTootPaid,
+  paidUnsavedToot,
+  startTootPayment,
+  type TootPaymentRow,
+  tootPayment
+} from '@/db/payments'
 import { songs } from '@/lib/catalog/songs.generated'
 import { TOOT_PRICE } from '@/lib/pricing'
 import { servedOrigin } from '@/lib/site'
 
+import { consumeSlot, type SlotRule } from './auth-config'
 import { LIMITS, type Stores, wrongLibrary } from './library'
 import { isItemId, readCapped, readJson } from './library-input'
 import { apiError, type SessionUser } from './require-user'
@@ -34,6 +41,25 @@ const notFound = () => apiError(404, 'not_found')
 const unavailable = () => apiError(503, 'payments_unavailable')
 const paid = () => Response.json({ paid: true })
 
+/**
+ * How much one user can ask of Stripe (#213), each a row in `rate_limit` (`consumeSlot`), keyed by
+ * the user's id:
+ *
+ * - `checkouts`: checkouts that record a payment and call Stripe (or the dev checkout), one per
+ *   Save tap. Past it, checkout answers 429 `rate_limited`, so payment rows can't pile up.
+ * - `stripeChecks`: the payment check's questions to Stripe. A return from Checkout asks up to 15
+ *   times (`PAYMENT_WAIT`). Past it, the check answers from D1 alone, which the webhook keeps.
+ */
+export const PAYMENT_LIMITS = {
+  checkouts: { window: 60 * 60, max: 20 },
+  stripeChecks: { window: 10 * 60, max: 60 }
+} as const satisfies Record<string, SlotRule>
+
+/** Spends one of the user's `limit`, by D1's rate limiter. */
+function spend(db: Stores['db'], user: SessionUser, limit: keyof typeof PAYMENT_LIMITS) {
+  return consumeSlot(db.$client, `${limit}|${user.id}`, Date.now(), PAYMENT_LIMITS[limit])
+}
+
 /** A Stripe request failed: logged by its status alone, and answered 502. */
 function stripeFailed(error: unknown): Response {
   if (!(error instanceof StripeError)) throw error
@@ -55,33 +81,37 @@ function songCreatorUrl(request: Request, songId: string, tootId: string, done: 
 }
 
 /**
- * Asks Stripe about the Toot's latest Checkout Session, and records it paid if it is. Null when
- * Stripe no longer has it (deleted test data, or another Stripe account's key), so a new one starts.
+ * Asks Stripe about the Toot's latest Checkout Session (`payment`, its row), and records it paid if
+ * it paid the price the row recorded. Null when Stripe no longer has it (deleted test data, or
+ * another Stripe account's key), so a new one starts.
  */
 async function paidAtStripe(
   { db }: Pick<Stores, 'db'>,
   secretKey: string,
   user: SessionUser,
-  tootId: string,
-  checkoutSessionId: string
+  payment: TootPaymentRow
 ): Promise<{ paid: boolean; session: CheckoutSession } | null> {
   let session: CheckoutSession
   try {
-    session = await retrieveCheckoutSession(secretKey, checkoutSessionId)
+    session = await retrieveCheckoutSession(secretKey, payment.checkoutSessionId)
   } catch (error) {
     if (error instanceof StripeError && error.status === 404) return null
     throw error
   }
-  if (!paidFor(session, user.id, tootId)) return { paid: false, session }
-  return { paid: await markTootPaid(db, user.id, tootId, session.id), session }
+  if (!paidFor(session, user.id, payment.tootId, payment)) return { paid: false, session }
+  return { paid: await markTootPaid(db, user.id, payment.tootId, session.id), session }
 }
 
 /**
  * `POST /api/toots/{id}/checkout/` with `{ songId }`: where to pay to save the Toot. `{ url }`,
  * Stripe Checkout's page (or `/dev/checkout/` on a local run), or `{ paid: true }` when there's
  * nothing to pay: it's paid already, it's saved, or saving is free here. An open Checkout Session
- * for the same Toot is reused, so two taps or two tabs can't pay twice. 410 if the Toot was
- * deleted, 409 at the Toot limit (before anything is paid), 503 when payments aren't set up here.
+ * for the same Toot is reused, so two taps or two tabs can't pay twice. `{ paidToot }` names
+ * another Toot of the same Song that's paid for and was never saved (the page closed before the
+ * return saved it), for Song Creator to make and save instead of paying again. 410 if the Toot was
+ * deleted, 409 at the Toot limit (before anything is paid), 409 `payment_mismatch` when its last
+ * session is paid but not at the price its row recorded (logged, and never paid for twice), 429
+ * past `PAYMENT_LIMITS.checkouts`, 503 when payments aren't set up here.
  */
 export async function startCheckout(
   { db }: Pick<Stores, 'db'>,
@@ -104,32 +134,44 @@ export async function startCheckout(
   if (saved.status === 'live') return paid()
   if (saved.status === 'deleted') return apiError(410, 'deleted')
   const payment = await tootPayment(db, user.id, id)
+  // Saved once and deleted since, its tombstone purged: its payment is used.
+  if (payment?.savedAt) return apiError(410, 'deleted')
   if (payment?.paidAt) return paid()
   if (saved.live >= LIMITS.toots.maxItems) return apiError(409, 'limit_reached')
+  const unsaved = await paidUnsavedToot(db, user.id, song.id, id)
+  if (unsaved) return Response.json({ paidToot: unsaved })
+  const slot = await spend(db, user, 'checkouts')
+  if (!slot.allowed) {
+    const limited = apiError(429, 'rate_limited')
+    limited.headers.set('Retry-After', String(slot.retryAfter))
+    return limited
+  }
 
   if (payments.kind === 'dev') {
     const sessionId = payment?.checkoutSessionId.startsWith('dev_')
       ? payment.checkoutSessionId
       : `dev_${crypto.randomUUID()}`
-    await startTootPayment(db, user.id, id, sessionId, TOOT_PRICE)
+    await startTootPayment(db, user.id, id, song.id, sessionId, TOOT_PRICE)
     const url = new URL('/dev/checkout/', servedOrigin(request))
     url.searchParams.set('toot', id)
     url.searchParams.set('song', song.id)
     return Response.json({ url: url.toString() })
   }
 
+  const earlier = payment && isCheckoutSessionId(payment.checkoutSessionId) ? payment : null
   try {
-    if (payment && isCheckoutSessionId(payment.checkoutSessionId)) {
-      const earlier = await paidAtStripe(
-        { db },
-        payments.secretKey,
-        user,
-        id,
-        payment.checkoutSessionId
-      )
-      if (earlier?.paid) return paid()
-      if (earlier?.session.status === 'open' && earlier.session.url) {
-        return Response.json({ url: earlier.session.url })
+    if (earlier) {
+      const atStripe = await paidAtStripe({ db }, payments.secretKey, user, earlier)
+      if (atStripe?.paid) return paid()
+      // Paid, but not what its row says it charged: never start a second payment for the Toot.
+      if (atStripe?.session.payment_status === 'paid') {
+        console.error(
+          JSON.stringify({ event: 'stripe_paid_session_refused', session: atStripe.session.id })
+        )
+        return apiError(409, 'payment_mismatch')
+      }
+      if (atStripe?.session.status === 'open' && atStripe.session.url) {
+        return Response.json({ url: atStripe.session.url })
       }
     }
     const session = await createCheckoutSession(payments.secretKey, {
@@ -137,10 +179,11 @@ export async function startCheckout(
       tootId: id,
       songTitle: song.title,
       successUrl: songCreatorUrl(request, song.id, id, true),
-      cancelUrl: songCreatorUrl(request, song.id, id, false)
+      cancelUrl: songCreatorUrl(request, song.id, id, false),
+      replaces: earlier?.checkoutSessionId ?? null
     })
     if (!session.url) throw new StripeError(502)
-    await startTootPayment(db, user.id, id, session.id, TOOT_PRICE)
+    await startTootPayment(db, user.id, id, song.id, session.id, TOOT_PRICE)
     return Response.json({ url: session.url })
   } catch (error) {
     return stripeFailed(error)
@@ -149,7 +192,8 @@ export async function startCheckout(
 
 /**
  * `GET /api/toots/{id}/payment/`: `{ paid }`, whether the Toot is paid for. Unpaid with a Stripe
- * Checkout Session, it asks Stripe, so the return from Checkout doesn't wait for the webhook.
+ * Checkout Session, it asks Stripe, so the return from Checkout doesn't wait for the webhook, up to
+ * `PAYMENT_LIMITS.stripeChecks`; past it, D1 alone answers.
  */
 export async function getTootPayment(
   { db }: Pick<Stores, 'db'>,
@@ -165,14 +209,9 @@ export async function getTootPayment(
   const payment = await tootPayment(db, user.id, id)
   if (payment?.paidAt) return paid()
   if (payment && payments.kind === 'stripe' && isCheckoutSessionId(payment.checkoutSessionId)) {
+    if (!(await spend(db, user, 'stripeChecks')).allowed) return Response.json({ paid: false })
     try {
-      const now = await paidAtStripe(
-        { db },
-        payments.secretKey,
-        user,
-        id,
-        payment.checkoutSessionId
-      )
+      const now = await paidAtStripe({ db }, payments.secretKey, user, payment)
       return Response.json({ paid: now?.paid ?? false })
     } catch (error) {
       return stripeFailed(error)
@@ -216,19 +255,21 @@ export async function receiveStripeEvent(
   } catch {
     return apiError(400, 'invalid_request')
   }
-  // Test mode only, as `paymentsConfig` takes only test keys (ADR 0010).
-  if (typeof event.type === 'string' && PAID_EVENTS.has(event.type) && event.livemode === false) {
+  // Live events on Production, test events everywhere else, as `paymentsConfig` takes the keys.
+  if (
+    typeof event.type === 'string' &&
+    PAID_EVENTS.has(event.type) &&
+    event.livemode === payments.livemode
+  ) {
     const session = event.data?.object as CheckoutSession | undefined
     const userId = session?.metadata?.user_id
     const tootId = session?.metadata?.toot_id
-    if (
-      session &&
-      typeof userId === 'string' &&
-      USER_ID.test(userId) &&
-      isItemId(tootId) &&
-      paidFor(session, userId, tootId)
-    ) {
-      await markTootPaid(db, userId, tootId, session.id)
+    if (session && typeof userId === 'string' && USER_ID.test(userId) && isItemId(tootId)) {
+      // Only a Toot whose payment was started here, at the price its row recorded.
+      const payment = await tootPayment(db, userId, tootId)
+      if (payment && paidFor(session, userId, tootId, payment)) {
+        await markTootPaid(db, userId, tootId, session.id)
+      }
     }
   }
   return Response.json({ received: true })
