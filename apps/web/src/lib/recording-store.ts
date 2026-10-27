@@ -18,6 +18,7 @@ import {
   queueStamp
 } from './outbox'
 import type { AnalysisState, Recording } from './recordings'
+import { reportError } from './telemetry/errors'
 import type { Toot } from './toot'
 
 /**
@@ -86,9 +87,14 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
  * The app's database, upgraded to version 3 (the outbox) on first open. Version 1 held Recordings
  * only, and version 2 added Toots. An upgrade keeps them, and queues each to upload, since none
  * has been (`queueEverything`).
+ *
+ * One connection serves the page until the browser closes it, as WebKit can while the tab sleeps
+ * (#222), or it fails to open: the next call then opens a fresh one. Reads and writes go through
+ * `withDb`, which also gets past a connection lost before the browser says so.
  */
 export function db(): Promise<IDBPDatabase<PedosDB>> {
-  opening ??= openDB<PedosDB>('pedos', 3, {
+  if (opening) return opening
+  const thisOpening: Promise<IDBPDatabase<PedosDB>> = openDB<PedosDB>('pedos', 3, {
     upgrade(database, oldVersion, _newVersion, transaction) {
       if (oldVersion < 1) {
         database.createObjectStore('recordings', { keyPath: 'id' })
@@ -115,10 +121,59 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
     // again on the next call.
     blocking(_version, _blocked, event) {
       ;(event.target as IDBDatabase).close()
-      opening = null
+      forget(thisOpening)
+    },
+    // The browser closed the connection: storage cleared, or the IndexedDB server lost.
+    terminated() {
+      forget(thisOpening)
     }
   }).finally(() => setWaiting(false))
-  return opening
+  opening = thisOpening
+  thisOpening.catch(() => forget(thisOpening))
+  return thisOpening
+}
+
+/** Drops `connection`, if it's still the page's, so the next `db()` opens a fresh one. */
+function forget(connection: Promise<IDBPDatabase<PedosDB>>): void {
+  if (opening === connection) opening = null
+}
+
+/**
+ * Whether `error` came from a connection the browser closed or lost: an `InvalidStateError` from
+ * a closed connection, or WebKit's `UnknownError`, "Connection to Indexed Database server lost.
+ * Refresh the page to try again".
+ */
+export function connectionLost(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false
+  const { name, message } = error as { name?: unknown; message?: unknown }
+  if (name === 'InvalidStateError') return true
+  return (
+    (name === 'UnknownError' || name === 'AbortError') &&
+    typeof message === 'string' &&
+    /connection|server.*lost/i.test(message)
+  )
+}
+
+/**
+ * Runs `work`, a read or a write, on the database. When it fails because the connection was
+ * closed or lost, it runs once more on a fresh connection, so a tab left asleep still saves and
+ * plays (#222). Should that fail too, the failure is reported (`library-connection-lost`) and
+ * thrown. `work` may run twice, so it does nothing outside the database.
+ */
+export async function withDb<T>(work: (database: IDBPDatabase<PedosDB>) => Promise<T>): Promise<T> {
+  const connection = db()
+  try {
+    return await work(await connection)
+  } catch (error) {
+    if (!connectionLost(error)) throw error
+    forget(connection)
+    try {
+      return await work(await db())
+    } catch (again) {
+      reportError('library-connection-lost', again)
+      throw again
+    }
+  }
 }
 
 /**
@@ -184,7 +239,7 @@ export function onRecordingSaved(listener: (recording: Recording) => void): () =
 
 /** Every Recording, oldest first. */
 export async function loadRecordings(): Promise<Recording[]> {
-  const all = await (await db()).getAll('recordings')
+  const all = await withDb(database => database.getAll('recordings'))
   return all.sort((a, b) => a.number - b.number)
 }
 
@@ -198,42 +253,46 @@ export async function saveRecording(
   wav: ArrayBuffer,
   id: string = crypto.randomUUID()
 ): Promise<Recording> {
-  const database = await db()
-  const tx = database.transaction(['recordings', 'audio', 'outbox'], 'readwrite')
-  const outbox = tx.objectStore('outbox')
-  const existing = await tx.objectStore('recordings').getAll()
-  const recording: Recording = {
-    ...fields,
-    id,
-    number: existing.reduce((highest, r) => Math.max(highest, r.number), 0) + 1,
-    createdAt: Date.now(),
-    analysis: { state: 'analyzing' }
-  }
-  await Promise.all([
-    tx.objectStore('recordings').add(recording),
-    tx.objectStore('audio').add(wav, recording.id),
-    queue(outbox, 'recordings', recording.id, 'put'),
-    tx.done
-  ])
+  const recording = await withDb(async database => {
+    const tx = database.transaction(['recordings', 'audio', 'outbox'], 'readwrite')
+    const outbox = tx.objectStore('outbox')
+    const existing = await tx.objectStore('recordings').getAll()
+    const recording: Recording = {
+      ...fields,
+      id,
+      number: existing.reduce((highest, r) => Math.max(highest, r.number), 0) + 1,
+      createdAt: Date.now(),
+      analysis: { state: 'analyzing' }
+    }
+    await Promise.all([
+      tx.objectStore('recordings').add(recording),
+      tx.objectStore('audio').add(wav, recording.id),
+      queue(outbox, 'recordings', recording.id, 'put'),
+      tx.done
+    ])
+    return recording
+  })
   saved.dispatchEvent(new CustomEvent('recording-saved', { detail: recording }))
   return recording
 }
 
 export async function saveAnalysis(id: string, analysis: AnalysisState): Promise<Recording | null> {
-  const database = await db()
-  const tx = database.transaction('recordings', 'readwrite')
-  const recording = await tx.store.get(id)
-  if (!recording) return null
-  const updated = { ...recording, analysis }
-  await Promise.all([tx.store.put(updated), tx.done])
+  const updated = await withDb(async database => {
+    const tx = database.transaction('recordings', 'readwrite')
+    const recording = await tx.store.get(id)
+    if (!recording) return null
+    const updated = { ...recording, analysis }
+    await Promise.all([tx.store.put(updated), tx.done])
+    return updated
+  })
   // A Recording uploads once its analysis is done.
-  announceQueued()
+  if (updated) announceQueued()
   return updated
 }
 
 /** A Recording's WAV: this browser's, or the account's, downloaded now if it hasn't been yet. */
 export async function loadAudio(id: string): Promise<ArrayBuffer> {
-  const audio = await (await db()).get('audio', id)
+  const audio = await withDb(database => database.get('audio', id))
   if (audio) return audio
   const downloaded = await download('recordings', id)
   if (downloaded instanceof ArrayBuffer) return downloaded
@@ -246,22 +305,26 @@ export async function deleteRecording(id: string): Promise<void> {
 
 /** Deletes a Recording or Toot and its audio, and queues the delete for the account, together. */
 export async function deleteItem(kind: Kind, id: string): Promise<void> {
-  const tx = (await db()).transaction([kind, audioStore[kind], 'downloads', 'outbox'], 'readwrite')
-  const outbox = tx.objectStore('outbox')
-  await Promise.all([
-    tx.objectStore(kind).delete(id),
-    tx.objectStore(audioStore[kind]).delete(id),
-    tx.objectStore('downloads').delete(itemKey(kind, id)),
-    queue(outbox, kind, id, 'delete'),
-    tx.done
-  ])
+  await withDb(async database => {
+    const tx = database.transaction([kind, audioStore[kind], 'downloads', 'outbox'], 'readwrite')
+    const outbox = tx.objectStore('outbox')
+    await Promise.all([
+      tx.objectStore(kind).delete(id),
+      tx.objectStore(audioStore[kind]).delete(id),
+      tx.objectStore('downloads').delete(itemKey(kind, id)),
+      queue(outbox, kind, id, 'delete'),
+      tx.done
+    ])
+  })
   announceQueued()
 }
 
 /** Deletes every Recording and Toot in this browser, with their audio and outbox, together. */
 export async function clearLibrary(): Promise<void> {
-  const tx = (await db()).transaction(allStores, 'readwrite')
-  await Promise.all([...allStores.map(name => tx.objectStore(name).clear()), tx.done])
+  await withDb(async database => {
+    const tx = database.transaction(allStores, 'readwrite')
+    await Promise.all([...allStores.map(name => tx.objectStore(name).clear()), tx.done])
+  })
 }
 
 /**
@@ -269,16 +332,18 @@ export async function clearLibrary(): Promise<void> {
  * it, together. The Recordings stay, with their outbox, so a sign-in still uploads them.
  */
 export async function clearToots(): Promise<void> {
-  const tx = (await db()).transaction(['toots', 'tootAudio', 'outbox', 'downloads'], 'readwrite')
   // Every key that starts `toots:` (`itemKey`).
   const forToots = IDBKeyRange.bound(itemKey('toots', ''), itemKey('toots', '\uffff'))
-  await Promise.all([
-    tx.objectStore('toots').clear(),
-    tx.objectStore('tootAudio').clear(),
-    tx.objectStore('outbox').delete(forToots),
-    tx.objectStore('downloads').delete(forToots),
-    tx.done
-  ])
+  await withDb(async database => {
+    const tx = database.transaction(['toots', 'tootAudio', 'outbox', 'downloads'], 'readwrite')
+    await Promise.all([
+      tx.objectStore('toots').clear(),
+      tx.objectStore('tootAudio').clear(),
+      tx.objectStore('outbox').delete(forToots),
+      tx.objectStore('downloads').delete(forToots),
+      tx.done
+    ])
+  })
 }
 
 /**
@@ -305,11 +370,12 @@ export function download(kind: Kind, id: string): Promise<Download> {
 
 async function fetchDownload(kind: Kind, id: string): Promise<Download> {
   const key = itemKey(kind, id)
-  const database = await db()
-  if (!(await database.getKey('downloads', key))) {
+  const waiting = await withDb(async database => {
+    if (await database.getKey('downloads', key)) return true
     // Another tab may have stored it meanwhile.
-    return (await database.get(audioStore[kind], id)) ?? 'missing'
-  }
+    return (await database.get(audioStore[kind], id)) ?? ('missing' as const)
+  })
+  if (waiting !== true) return waiting
   // Only from the account this library is.
   let accountId: string | null = null
   try {
@@ -320,27 +386,29 @@ async function fetchDownload(kind: Kind, id: string): Promise<Download> {
   if (!accountId) return 'failed'
   const wav = await getAudio(kind, id, accountId)
   if (!(wav instanceof ArrayBuffer) && wav.status !== 404) return 'failed'
-  const tx = (await db()).transaction([kind, audioStore[kind], 'downloads'], 'readwrite')
-  // Only for an item still waiting for it: a delete or a sign-out meanwhile wins, and another
-  // tab's download may have stored it.
-  const [item, waits, stored] = await Promise.all([
-    tx.objectStore(kind).getKey(id),
-    tx.objectStore('downloads').getKey(key),
-    tx.objectStore(audioStore[kind]).get(id)
-  ])
-  if (!item || !waits) {
-    await tx.done
-    return (item && stored) || 'missing'
-  }
-  if (!(wav instanceof ArrayBuffer)) {
-    // The account has no audio for it: it's missing here too, from now on.
-    await Promise.all([tx.objectStore('downloads').delete(key), tx.done])
-    return 'missing'
-  }
-  await Promise.all([
-    tx.objectStore(audioStore[kind]).put(wav, id),
-    tx.objectStore('downloads').delete(key),
-    tx.done
-  ])
-  return wav
+  return withDb(async database => {
+    const tx = database.transaction([kind, audioStore[kind], 'downloads'], 'readwrite')
+    // Only for an item still waiting for it: a delete or a sign-out meanwhile wins, and another
+    // tab's download may have stored it.
+    const [item, waits, stored] = await Promise.all([
+      tx.objectStore(kind).getKey(id),
+      tx.objectStore('downloads').getKey(key),
+      tx.objectStore(audioStore[kind]).get(id)
+    ])
+    if (!item || !waits) {
+      await tx.done
+      return (item && stored) || 'missing'
+    }
+    if (!(wav instanceof ArrayBuffer)) {
+      // The account has no audio for it: it's missing here too, from now on.
+      await Promise.all([tx.objectStore('downloads').delete(key), tx.done])
+      return 'missing'
+    }
+    await Promise.all([
+      tx.objectStore(audioStore[kind]).put(wav, id),
+      tx.objectStore('downloads').delete(key),
+      tx.done
+    ])
+    return wav
+  })
 }
