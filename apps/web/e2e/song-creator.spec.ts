@@ -110,6 +110,9 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       const noteView = page.getByTestId('note-view')
       const used = page.getByTestId('recording-used')
       await expect(used).toHaveCount(song.pitches.length)
+      // Fixture 002, Recording 1: its fart's length, not its 4.2 s take's (#227).
+      if (song.id === 'mary')
+        await expect(used.getByRole('button', { name: /^Recording 1,/ })).toContainText('1.7 s')
       for (const control of [back, play, save, noteView]) await expectTappable(control)
       for (const recording of await used.getByRole('button').all()) await expectTappable(recording)
 

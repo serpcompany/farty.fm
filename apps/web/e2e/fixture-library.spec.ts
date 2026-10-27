@@ -39,6 +39,17 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
   })
   await expect(library.getByTestId('fixture-library-count')).toHaveText('32 of 32')
 
+  // A Recording shows its fart's length, rounded down, which "Needs" is measured against (#227):
+  // fixture 002 is Recording 1, a 1.799 s fart in a 4.2 s take.
+  await page
+    .getByRole('navigation', { name: 'Tabs' })
+    .getByRole('link', { name: 'Recordings', exact: true })
+    .click()
+  const first = page
+    .getByTestId('recording-row')
+    .filter({ has: page.getByRole('button', { name: /^Recording 1,/ }) })
+  await expect(first.getByTestId('recording-length')).toHaveText('1.7 s')
+
   await page
     .getByRole('navigation', { name: 'Tabs' })
     .getByRole('link', { name: 'Compose', exact: true })
