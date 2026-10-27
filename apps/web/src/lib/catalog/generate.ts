@@ -75,10 +75,14 @@ export function readSources(): Sources {
   }
 }
 
-/** The line each Song shows under its title, from its source and license. */
+/**
+ * The line each Song shows under its title, from its source and license. CC0 is a public domain
+ * dedication, so a CC0 score's line is a public domain score's.
+ */
 function sourceLine(entry: CatalogEntry): string {
   const { dataset = '', license } = entry.source
-  if (dataset.startsWith('PDMX') && license === 'publicdomain') return 'Public domain score · PDMX'
+  if (dataset.startsWith('PDMX') && (license === 'publicdomain' || license === 'cc-zero'))
+    return 'Public domain score · PDMX'
   throw new Error(`Song ${entry.id} has a source this script has no line for; add one here`)
 }
 

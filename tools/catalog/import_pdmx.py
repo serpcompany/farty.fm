@@ -15,7 +15,8 @@ The rules and thresholds are in pdmx.py. The gates, in order:
   license  public domain or CC0, with the URL PDMX records, and no PDMX license conflict
   hash     the MIDI archive matches Zenodo's md5, and the extracted file the gates import and the
            catalog copy are byte for byte the archive's file
-  sanity   the excerpt's note count and range, and the share of notes the importer drops
+  sanity   the excerpt's note count and range, the share of notes the importer drops, and no
+           first bar that is a pickup padded with silence
   render   unlocked with the full Fixture Library, and the renderer's bar on the reference render
            (ADR 0012, evaluate.BAR): in50cFart >= 94% (notes within 50 cents of their fart's
            own pitch), onTime >= 95%, no re-attacks
@@ -171,6 +172,22 @@ def score_meta(path):
     return sorted(tempos.items()), [(at, *m) for at, m in sorted(meters.items())]
 
 
+def score_notes(path):
+    """Every track's notes in a MIDI file, as (start, end) quarter-note beats."""
+    mid = mido.MidiFile(path)
+    notes = []
+    for track in mid.tracks:
+        tick, sounding = 0, {}
+        for msg in track:
+            tick += msg.time
+            if msg.type == "note_on" and msg.velocity > 0:
+                sounding.setdefault((msg.channel, msg.note), []).append(tick)
+            elif msg.type in ("note_on", "note_off") and sounding.get((msg.channel, msg.note)):
+                start = sounding[(msg.channel, msg.note)].pop(0)
+                notes.append((start / mid.ticks_per_beat, tick / mid.ticks_per_beat))
+    return sorted(notes)
+
+
 def gate(title, match, row, midi, member_sha256, archive, library):
     """Run every gate on one PDMX score, stopping at the first that fails. `midi` is the extracted
     file and `member_sha256` the archive file's sha256 (extract); the hash gate checks one against
@@ -206,8 +223,10 @@ def gate(title, match, row, midi, member_sha256, archive, library):
 
     try:
         whole = load_midi(midi)
-        options = pdmx.render_options(*score_meta(midi), first_onset=whole.notes[0].start)
+        tempos, meters = score_meta(midi)
+        options = pdmx.render_options(tempos, meters, first_onset=whole.notes[0].start)
         melody = load_midi(midi, title=title.title, **options)
+        padded = pdmx.padded_pickup_problems(meters, score_notes(midi), whole.notes[0].start)
     except Exception as e:  # a MIDI file the importer can't read fails sanity
         failed("sanity", [f"the MIDI file doesn't import: {type(e).__name__}: {e}"])
         return result
@@ -222,7 +241,7 @@ def gate(title, match, row, midi, member_sha256, archive, library):
     )
     sanity = pdmx.sanity_problems(
         pitches, report["chord_tones_dropped"], report["inner_voice_onsets_dropped"], len(whole.notes)
-    )
+    ) + padded
     if failed("sanity", sanity):
         return result
 
@@ -524,7 +543,8 @@ def main():
                     f"license {' or '.join(pdmx.LICENSES)} with no PDMX license conflict; at most {pdmx.MAX_TRACKS} tracks; "
                     f"then the highest rating, the most views; up to {args.tries} scores tried per title, best first"),
         "gates": (f"license; hash; sanity: {pdmx.MIN_NOTES}-{pdmx.MAX_NOTES} notes, range <= {pdmx.MAX_RANGE} semitones, "
-                  f"at most {pdmx.MAX_DROPPED_SHARE:.0%} of the track's notes dropped; render with excerpt "
+                  f"at most {pdmx.MAX_DROPPED_SHARE:.0%} of the track's notes dropped, no first bar that is a pickup "
+                  f"padded with {pdmx.PADDED_PICKUP_REST} beat or more of silence; render with excerpt "
                   f"<= {pdmx.EXCERPT_BEATS} beats of whole bars and the score's tempo within {pdmx.MIN_BPM}-{pdmx.MAX_BPM} bpm"),
         "bar": BAR,
     }

@@ -1,0 +1,167 @@
+{
+ "titles": "tools/catalog/titles-03.txt",
+ "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-03.txt --tries 5",
+ "dataset": {
+  "PDMX.csv": {
+   "md5": "30392ccf38bb63ce70e7afae70f9c88c",
+   "published_md5": "30392ccf38bb63ce70e7afae70f9c88c",
+   "downloaded": "2026-10-25"
+  },
+  "mid.tar.gz": {
+   "md5": "d920a21b2fcd99a56d9c381b39debbb2",
+   "published_md5": "d920a21b2fcd99a56d9c381b39debbb2",
+   "downloaded": "2026-10-25"
+  }
+ },
+ "library": "32 Recordings, 24 Melodic",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with 1 beat or more of silence; render with excerpt <= 32 beats of whole bars and the score's tempo within 72-144 bpm",
+ "bar": {
+  "within_50c_pct": 94,
+  "onsets_on_time_pct": 95,
+  "notes_with_retrigger": 0
+ },
+ "songs": [
+  {
+   "id": "birthday",
+   "title": "Happy Birthday",
+   "matched": 82,
+   "eligible": 55,
+   "rejected": {
+    "PDMX flags a license conflict": 10,
+    "more than 2 tracks": 19
+   },
+   "tried": [
+    {
+     "score_id": "6064902",
+     "url": "https://musescore.com/score/6064902",
+     "score_title": "Happy Birthday to You",
+     "match": "title",
+     "rating": "4.94",
+     "n_ratings": "15",
+     "n_views": "718",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/6/17/QmNecetm6r2YzsBRcQ1mCGFLxhvpNusxJF4cJbzHBzRtCq.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "48f8cbcc841d3a3ab676dffeb3eef48c15a68057df4aaf0d6778169dd1be7e1f",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 25
+     },
+     "track_notes": 25,
+     "range_semitones": 12,
+     "distinct_pitches": 8,
+     "pitch_coverage": "8 of 8",
+     "metrics": {
+      "notes": 25,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 8,
+      "on_pitch_pct": 93,
+      "sounding_pct": 96,
+      "notes_mostly_silent": 0,
+      "transpose": -26,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.93
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "6064902"
+  },
+  {
+   "id": "merryxmas",
+   "title": "We Wish You a Merry Christmas",
+   "matched": 42,
+   "eligible": 24,
+   "rejected": {
+    "PDMX flags a license conflict": 6,
+    "more than 2 tracks": 14
+   },
+   "tried": [
+    {
+     "score_id": "4808283",
+     "url": "https://musescore.com/score/4808283",
+     "score_title": "We wish you a merry Christmas",
+     "match": "title",
+     "rating": "4.7",
+     "n_ratings": "7",
+     "n_views": "610",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/9/9/QmRavoTqkSJjECqApGy8Ptv67qmgnV3xkz2hTU7hpyidhS.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "493124c8ff48ec79af46ca0b709fdc2bbe1eba35353461f13b925b12ba124086",
+     "render": {
+      "bpm": 120,
+      "max_beats": 31,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 0,
+      "note_count": 36
+     },
+     "track_notes": 54,
+     "range_semitones": 10,
+     "distinct_pitches": 7,
+     "pitch_coverage": "7 of 7",
+     "metrics": {
+      "notes": 36,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 100,
+      "within_50c_any_octave_pct": 100,
+      "median_abs_cents": 2.6,
+      "onsets_on_time_pct": 100,
+      "notes_with_retrigger": 0,
+      "distinct_recordings": 7,
+      "on_pitch_pct": 92,
+      "sounding_pct": 96,
+      "notes_mostly_silent": 0,
+      "transpose": -17,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.57
+     }
+    }
+   ],
+   "result": "pass",
+   "reason": null,
+   "picked": "4808283"
+  }
+ ]
+}

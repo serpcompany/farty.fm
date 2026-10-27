@@ -24,6 +24,8 @@ MIN_BPM, MAX_BPM = 72, 144  # the score's own tempo, kept inside this range
 MIN_NOTES, MAX_NOTES = 8, 64
 MAX_RANGE = 19  # semitones, an octave and a fifth
 MAX_DROPPED_SHARE = 0.10  # chord tones and inner-voice onsets the importer drops, of the track's notes
+PADDED_PICKUP_REST = 1  # beats of silence after a first bar's notes that make it a padded pickup
+GRID = 1 / 48  # beats: the grid note times are compared on
 
 
 # ---------------------------------------------------------------- titles
@@ -198,22 +200,12 @@ def render_options(tempos, meters, first_onset):
     most of it), given only when it differs from the first time signature's numerator, which
     melody.py uses by default (6/8 has 3 quarter beats; a 1/4 pickup bar isn't the meter)."""
     tempos = sorted(tempos) or [(0.0, 120.0)]
-    meters = sorted(meters) or [(0.0, 4, 4)]
-    if meters[0][0] > 0:
-        meters.insert(0, (0.0, 4, 4))
+    meters = _meters(meters)
     bpm = next((b for at, b in reversed(tempos) if at <= first_onset + EPS), 120.0)
     opts = {"bpm": int(min(MAX_BPM, max(MIN_BPM, round(bpm))))}
 
-    # Bar lines, each tagged with the meter of the bar it starts.
-    bars = []
-    for i, (at, num, den) in enumerate(meters):
-        until = meters[i + 1][0] if i + 1 < len(meters) else math.inf
-        length = num * 4 / den
-        line = at
-        while line < until - EPS and line <= first_onset + EXCERPT_BEATS + EPS:
-            bars.append((line, length, (num, den)))
-            line += length
-    start_index = max(i for i, (line, _, _) in enumerate(bars) if line <= first_onset + EPS)
+    bars = _bar_lines(meters, first_onset + EXCERPT_BEATS)
+    start_index = _bar_index(bars, first_onset)
     start = bars[start_index][0]
     end = start + bars[start_index][1]  # at least one bar, however long
     covered = {}
@@ -231,6 +223,33 @@ def render_options(tempos, meters, first_onset):
     if bar == int(bar) and bar != meters[0][1]:
         opts["beats_per_bar"] = int(bar)
     return opts
+
+
+def _meters(meters):
+    """The time signatures in order, with melody.py's 4/4 at beat 0 when the score sets none there."""
+    meters = sorted(meters) or [(0.0, 4, 4)]
+    if meters[0][0] > 0:
+        meters.insert(0, (0.0, 4, 4))
+    return meters
+
+
+def _bar_lines(meters, until):
+    """The bar lines up to beat `until`, each as (beat, bar length, meter of the bar it starts).
+    Each time signature starts a bar."""
+    bars = []
+    for i, (at, num, den) in enumerate(meters):
+        end = meters[i + 1][0] if i + 1 < len(meters) else math.inf
+        length = num * 4 / den
+        line = at
+        while line < end - EPS and line <= until + EPS:
+            bars.append((line, length, (num, den)))
+            line += length
+    return bars
+
+
+def _bar_index(bars, beat):
+    """The index in `bars` of the bar that holds `beat`."""
+    return max(i for i, (line, _, _) in enumerate(bars) if line <= beat + EPS)
 
 
 def _number(x):
@@ -257,6 +276,39 @@ def sanity_problems(pitches, chord_tones_dropped, inner_onsets_dropped, track_no
             f" {share:.0%} of the track's notes (at most {MAX_DROPPED_SHARE:.0%})"
         )
     return problems
+
+
+def padded_pickup_problems(meters, notes, first_onset):
+    """A first bar that is a pickup padded with silence (#225), so the Song would open with its
+    pickup cut off from bar 1. PDMX's reader takes a measure's length from its `len` attribute or
+    its time signature, and a MuseScore 1.x file can give a pickup's length only in the score's
+    `<siglist>`, so the MIDI file pads the pickup out to a full bar: its notes start on the bar
+    line, and every track is then silent to the next bar line.
+
+    The bar is the one that holds the melody's first note (`first_onset`), where the excerpt
+    starts, and `notes` is every track's notes as (start, end) beats. The bar fails when it opens
+    with a note, its notes run with no rest of PADDED_PICKUP_REST beats or more between them, and
+    every track then rests PADDED_PICKUP_REST beats or more to the next bar line. A bar with a rest
+    that long between its notes too is the score's own rhythm, not a padded pickup."""
+    bars = _bar_lines(_meters(meters), first_onset)
+    line, length, _ = bars[_bar_index(bars, first_onset)]
+    end = line + length
+    spans = sorted((max(s, line), min(e, end)) for s, e in notes if s < end - EPS and e > line + EPS)
+    if not spans or _grid(spans[0][0] - line) > 0:
+        return []
+    reach = line
+    for start, stop in spans:
+        if _grid(start - reach) >= PADDED_PICKUP_REST:
+            return []
+        reach = max(reach, stop)
+    rest = _grid(end - reach)
+    if rest < PADDED_PICKUP_REST:
+        return []
+    return [f"the first bar is a pickup padded with silence: every track rests {_number(rest)} beats after its notes"]
+
+
+def _grid(beats):
+    return round(beats / GRID) * GRID
 
 
 def render_problems(metrics, bar):

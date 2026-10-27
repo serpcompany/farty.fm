@@ -1,0 +1,7 @@
+# The third PDMX batch (#225): Happy Birthday and We Wish You a Merry Christmas, imported again.
+# Their hand-picked MuseScore 1.14 scores (95546 and 151013) open with a pickup that PDMX's MIDI
+# pads out to a full bar, so the Song played "Hap-py" and "We", then 2 beats of silence. The
+# sanity gate now fails a padded pickup, and these titles go through the import like any other.
+# id | catalog title | other titles a score of the same Song may carry (optional, ; separated)
+birthday | Happy Birthday | Happy Birthday to You
+merryxmas | We Wish You a Merry Christmas
