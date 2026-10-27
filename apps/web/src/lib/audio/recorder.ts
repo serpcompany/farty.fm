@@ -1,7 +1,8 @@
 import { desktop } from '@/lib/desktop'
 import type { PcmAudio } from '@/lib/wav'
 import { type CaptureBatch, type CaptureCommand, captureProcessorSource } from './capture-processor'
-import { audioContext, setMicrophoneSession } from './context'
+import { audioContext, replaceAudioContext, setMicrophoneSession } from './context'
+import { stopPlayback } from './player'
 
 /** A take in progress. `stop` returns the raw microphone audio; `cancel` throws it away. */
 export type Take = {
@@ -13,6 +14,20 @@ export class MicrophoneDeniedError extends Error {}
 
 /** The microphone was let go, by `releaseMicrophone`, before the take began. */
 export class MicrophoneReleasedError extends Error {}
+
+/**
+ * A take sent no audio within `firstBatchTimeoutMs`. Its name, which the error report keeps, says
+ * the context's state and whether its clock ran meanwhile: a stopped clock means the context
+ * stopped, a running one that the stream stopped feeding it.
+ */
+export class NoMicrophoneAudioError extends Error {
+  constructor(context: AudioContext, clockAt: number) {
+    super('No audio from the microphone')
+    const state = String(context.state).replace(/[^a-z]/gi, '')
+    const clock = context.currentTime > clockAt ? 'Ran' : 'Stopped'
+    this.name = `NoAudio${state.charAt(0).toUpperCase()}${state.slice(1)}Clock${clock}`
+  }
+}
 
 /** An open microphone: one stream, source and capture node, kept between takes. */
 type Microphone = {
@@ -408,8 +423,9 @@ async function capture(
   capturing = take
   send(mic.node, { type: 'start', take: id })
 
+  const clockAt = mic.context.currentTime
   const timeout = setTimeout(
-    () => fail(new Error('No audio from the microphone')),
+    () => fail(new NoMicrophoneAudioError(mic.context, clockAt)),
     firstBatchTimeoutMs
   )
   try {
@@ -418,6 +434,14 @@ async function capture(
     if (capturing === take) {
       capturing = null
       send(mic.node, { type: 'cancel', take: id })
+    }
+    if (error instanceof NoMicrophoneAudioError) {
+      // The stream or the context stopped while its track still looks live, and neither comes
+      // back by itself, so every later take would fail too. The next tap opens both afresh.
+      if (microphone === mic) releaseMicrophone()
+      // A sound started meanwhile on another screen stops now, rather than with the context.
+      stopPlayback()
+      replaceAudioContext(mic.context)
     }
     throw error
   } finally {
