@@ -75,30 +75,6 @@
   }
  },
  {
-  "id": "birthday",
-  "title": "Happy Birthday",
-  "file": "midi/pdmx-birthday.mid",
-  "sha256": "fea74a6196ba2524eba98abb60b6c60a6d3ed9325c6dc5d95ffdd54482b07128",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/1/49/QmbVDLKjmtAqCoc1TNjgtASz7Bi8gXfSt8i6Mmowhjqi1C.mid",
-   "musescore_score_id": "95546",
-   "musescore_url": "https://musescore.com/score/95546",
-   "score_title": "Happy Birthday",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0"
-  },
-  "retrieved": "2026-09-29",
-  "render": {
-   "bpm": 100
-  }
- },
- {
   "id": "frere",
   "title": "Frère Jacques",
   "file": "midi/pdmx-frere.mid",
@@ -195,31 +171,6 @@
   "render": {
    "bpm": 110,
    "max_beats": 32
-  }
- },
- {
-  "id": "merryxmas",
-  "title": "We Wish You a Merry Christmas",
-  "file": "midi/pdmx-merryxmas.mid",
-  "sha256": "050552977817d9710c21e1e604652ce4fc283b61956aa8f405279a5e33436d7b",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/9/43/QmRSYgs3jvLQMTdwaDaGV4EAJKyndRhoxFQppHXwfjKWCE.mid",
-   "musescore_score_id": "151013",
-   "musescore_url": "https://musescore.com/score/151013",
-   "score_title": "We wish you a merry Christmas",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0"
-  },
-  "retrieved": "2026-09-29",
-  "render": {
-   "bpm": 140,
-   "max_beats": 48
   }
  },
  {
@@ -3854,6 +3805,67 @@
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
    "titles": "tools/catalog/titles-02.txt"
+  }
+ },
+ {
+  "id": "birthday",
+  "title": "Happy Birthday",
+  "file": "midi/pdmx-birthday.mid",
+  "sha256": "48f8cbcc841d3a3ab676dffeb3eef48c15a68057df4aaf0d6778169dd1be7e1f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/6/17/QmNecetm6r2YzsBRcQ1mCGFLxhvpNusxJF4cJbzHBzRtCq.mid",
+   "musescore_score_id": "6064902",
+   "musescore_url": "https://musescore.com/score/6064902",
+   "score_title": "Happy Birthday to You",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.94",
+   "n_ratings": "15",
+   "n_views": "718"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-03.txt"
+  }
+ },
+ {
+  "id": "merryxmas",
+  "title": "We Wish You a Merry Christmas",
+  "file": "midi/pdmx-merryxmas.mid",
+  "sha256": "493124c8ff48ec79af46ca0b709fdc2bbe1eba35353461f13b925b12ba124086",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/9/QmRavoTqkSJjECqApGy8Ptv67qmgnV3xkz2hTU7hpyidhS.mid",
+   "musescore_score_id": "4808283",
+   "musescore_url": "https://musescore.com/score/4808283",
+   "score_title": "We wish you a merry Christmas",
+   "composer": "NA",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.7",
+   "n_ratings": "7",
+   "n_views": "610"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-03.txt"
   }
  }
 ]

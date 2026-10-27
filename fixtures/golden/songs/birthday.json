@@ -1,100 +1,110 @@
 {
   "beats_per_bar": 3,
-  "bpm": 100,
+  "bpm": 120,
   "file": "midi/pdmx-birthday.mid",
   "id": "birthday",
   "import_args": {
-    "bpm": 100
+    "bpm": 120,
+    "max_beats": 30
   },
   "import_report": {
     "catalog_id": "birthday",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 26,
+    "note_count": 25,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-birthday.mid",
     "tempo_changes_ignored": 0,
     "track_used": 0,
     "tracks_with_notes": [
-      0,
-      1
+      0
     ]
   },
-  "length_beats": 26.0,
+  "length_beats": 24.0,
   "notes": [
     {
-      "dur": 0.75,
-      "pitch": 62,
+      "dur": 0.5,
+      "pitch": 67,
       "start": 0.0
     },
     {
-      "dur": 0.25,
-      "pitch": 62,
-      "start": 0.75
-    },
-    {
-      "dur": 1.0,
-      "pitch": 64,
-      "start": 3.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
-      "start": 4.0
-    },
-    {
-      "dur": 1.0,
+      "dur": 0.5,
       "pitch": 67,
-      "start": 5.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 66,
-      "start": 6.0
-    },
-    {
-      "dur": 0.375,
-      "pitch": 62,
-      "start": 8.0
-    },
-    {
-      "dur": 0.125,
-      "pitch": 62,
-      "start": 8.375
-    },
-    {
-      "dur": 1.0,
-      "pitch": 64,
-      "start": 9.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
-      "start": 10.0
+      "start": 0.5
     },
     {
       "dur": 1.0,
       "pitch": 69,
-      "start": 11.0
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 3.0
     },
     {
       "dur": 2.0,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
       "pitch": 67,
-      "start": 12.0
+      "start": 6.0
     },
     {
-      "dur": 0.75,
-      "pitch": 62,
-      "start": 14.0
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.5
     },
     {
-      "dur": 0.25,
-      "pitch": 62,
-      "start": 14.75
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 8.0
     },
     {
       "dur": 1.0,
       "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
       "start": 15.0
     },
     {
@@ -103,66 +113,51 @@
       "start": 16.0
     },
     {
-      "dur": 0.75,
-      "pitch": 67,
+      "dur": 1.0,
+      "pitch": 69,
       "start": 17.0
     },
     {
-      "dur": 0.25,
-      "pitch": 67,
-      "start": 17.75
-    },
-    {
-      "dur": 1.0,
-      "pitch": 66,
+      "dur": 0.5,
+      "pitch": 77,
       "start": 18.0
     },
     {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 18.5
+    },
+    {
       "dur": 1.0,
-      "pitch": 64,
+      "pitch": 76,
       "start": 19.0
     },
     {
-      "dur": 0.75,
+      "dur": 1.0,
       "pitch": 72,
       "start": 20.0
     },
     {
-      "dur": 0.25,
-      "pitch": 72,
-      "start": 20.75
-    },
-    {
       "dur": 1.0,
-      "pitch": 71,
+      "pitch": 74,
       "start": 21.0
     },
     {
-      "dur": 1.0,
-      "pitch": 67,
-      "start": 22.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 23.0
-    },
-    {
       "dur": 2.0,
-      "pitch": 67,
-      "start": 24.0
+      "pitch": 72,
+      "start": 22.0
     }
   ],
   "pitches": [
-    62,
-    64,
-    66,
     67,
     69,
     71,
     72,
-    74
+    74,
+    76,
+    77,
+    79
   ],
-  "sha256": "fea74a6196ba2524eba98abb60b6c60a6d3ed9325c6dc5d95ffdd54482b07128",
+  "sha256": "48f8cbcc841d3a3ab676dffeb3eef48c15a68057df4aaf0d6778169dd1be7e1f",
   "title": "Happy Birthday"
 }

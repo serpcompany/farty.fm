@@ -158,19 +158,6 @@
       }
     },
     {
-      "id": "birthday",
-      "notes": 26,
-      "title": "Happy Birthday",
-      "transpose": {
-        "full": -23,
-        "small": -19
-      },
-      "unlocked": {
-        "full": true,
-        "small": false
-      }
-    },
-    {
       "id": "frere",
       "notes": 32,
       "title": "Frère Jacques",
@@ -223,19 +210,6 @@
       }
     },
     {
-      "id": "merryxmas",
-      "notes": 53,
-      "title": "We Wish You a Merry Christmas",
-      "transpose": {
-        "full": -15,
-        "small": -20
-      },
-      "unlocked": {
-        "full": true,
-        "small": false
-      }
-    },
-    {
       "id": "amazing",
       "notes": 16,
       "title": "Amazing Grace",
@@ -281,6 +255,32 @@
       "transpose": {
         "full": -31,
         "small": -27
+      },
+      "unlocked": {
+        "full": true,
+        "small": false
+      }
+    },
+    {
+      "id": "birthday",
+      "notes": 25,
+      "title": "Happy Birthday",
+      "transpose": {
+        "full": -28,
+        "small": -26
+      },
+      "unlocked": {
+        "full": true,
+        "small": false
+      }
+    },
+    {
+      "id": "merryxmas",
+      "notes": 36,
+      "title": "We Wish You a Merry Christmas",
+      "transpose": {
+        "full": -23,
+        "small": -18
       },
       "unlocked": {
         "full": true,

@@ -133,7 +133,7 @@ enum Golden {
     }
 
     static func song(_ id: String) -> Song {
-        let data = try! Data(contentsOf: goldenDir.appending(path: "songs/\(id).json"))
+        let data = try! Data(contentsOf: goldenFormat2Dir.appending(path: "songs/\(id).json"))
         return try! decoder().decode(Song.self, from: data)
     }
 
