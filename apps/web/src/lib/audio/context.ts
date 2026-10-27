@@ -11,6 +11,16 @@ export function audioContext(): AudioContext {
 }
 
 /**
+ * Closes `context` if it's the shared one, so the next `audioContext()` makes a new one: after it
+ * stopped bringing in the microphone (`recorder.ts`).
+ */
+export function replaceAudioContext(context: AudioContext): void {
+  if (shared !== context) return
+  shared = null
+  context.close().catch(() => {})
+}
+
+/**
  * Starts the shared AudioContext inside a tap that opens a screen which plays by itself after an
  * await, such as Song Creator. iPhone Safari starts a context only while it handles a tap, so the
  * screen's later play finds it running.
