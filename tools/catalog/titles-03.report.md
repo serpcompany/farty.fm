@@ -10,12 +10,12 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools
 
 - Dataset: PDMX, doi:10.5281/zenodo.15571083. `PDMX.csv` md5 `30392ccf38bb63ce70e7afae70f9c88c` and `mid.tar.gz` md5 `d920a21b2fcd99a56d9c381b39debbb2`, both equal to Zenodo's; downloaded 2026-10-25.
 - Picking: title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; then the highest rating, the most views; up to 5 scores tried per title, best first
-- Gates: license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with 1 beat or more of silence; render with excerpt <= 32 beats of whole bars and the score's tempo within 72-144 bpm
-- Render bar: in50c >= 94%, onTime >= 95%, re-attacks <= 0, with the full Fixture Library (32 Recordings, 24 Melodic).
+- Gates: license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt <= 32 beats of whole bars and the score's tempo within 72-144 bpm
+- Render bar: in50cFart >= 94%, onTime >= 95%, re-attacks <= 0, with the full Fixture Library (32 Recordings, 24 Melodic).
 
 ## Every title
 
-| Song | Result | Score | Match | License | Rating | Views | Notes | Range | Dropped | Pitches | in50c | onTime | Re-attacks | Why it failed |
+| Song | Result | Score | Match | License | Rating | Views | Notes | Range | Dropped | Pitches | in50cFart | onTime | Re-attacks | Why it failed |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Happy Birthday | pass | [6064902](https://musescore.com/score/6064902) | title | cc-zero | 4.94 | 718 | 25 | 12 | 0 of 25 | 8 of 8 | 100% | 100% | 0 |  |
 | We Wish You a Merry Christmas | pass | [4808283](https://musescore.com/score/4808283) | title | cc-zero | 4.7 | 610 | 36 | 10 | 0 of 54 | 7 of 7 | 100% | 100% | 0 |  |

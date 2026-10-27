@@ -15,9 +15,9 @@
  },
  "library": "32 Recordings, 24 Melodic",
  "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; then the highest rating, the most views; up to 5 scores tried per title, best first",
- "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with 1 beat or more of silence; render with excerpt <= 32 beats of whole bars and the score's tempo within 72-144 bpm",
+ "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt <= 32 beats of whole bars and the score's tempo within 72-144 bpm",
  "bar": {
-  "within_50c_pct": 94,
+  "within_50c_of_fart_pct": 94,
   "onsets_on_time_pct": 95,
   "notes_with_retrigger": 0
  },
@@ -72,19 +72,21 @@
      "pitch_coverage": "8 of 8",
      "metrics": {
       "notes": 25,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 100,
-      "within_50c_any_octave_pct": 100,
-      "median_abs_cents": 2.6,
+      "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 40,
+      "within_50c_any_octave_pct": 40,
+      "median_abs_cents": 102.4,
+      "contour_pct": 90,
       "distinct_recordings": 8,
-      "on_pitch_pct": 93,
-      "sounding_pct": 96,
+      "on_pitch_pct": 19,
+      "sounding_pct": 97,
       "notes_mostly_silent": 0,
-      "transpose": -26,
+      "transpose": -28,
       "octave_moves": 0,
-      "max_abs_shift_semitones": 2.93
+      "max_abs_shift_semitones": 2.83
      }
     }
    ],
@@ -143,19 +145,21 @@
      "pitch_coverage": "7 of 7",
      "metrics": {
       "notes": 36,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 100,
-      "within_50c_any_octave_pct": 100,
-      "median_abs_cents": 2.6,
+      "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
+      "pitch_readable_pct": 97,
+      "within_50c_pct": 44,
+      "within_50c_any_octave_pct": 44,
+      "median_abs_cents": 52.6,
+      "contour_pct": 80,
       "distinct_recordings": 7,
-      "on_pitch_pct": 92,
-      "sounding_pct": 96,
+      "on_pitch_pct": 21,
+      "sounding_pct": 97,
       "notes_mostly_silent": 0,
-      "transpose": -17,
+      "transpose": -23,
       "octave_moves": 0,
-      "max_abs_shift_semitones": 2.57
+      "max_abs_shift_semitones": 2.83
      }
     }
    ],

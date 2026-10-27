@@ -39,4 +39,4 @@ The run writes `catalog/` only after every passing Song's entry imports, through
 
 ## After a batch
 
-Imported Songs are in the catalog, so the melody lab renders them (`run_all.py`, `build.py`), but they don't ship: the app lists only the Songs on its ship list (`apps/web/src/lib/catalog/generate.ts`). Shipping some is a separate change that adds them to the ship list, re-exports `fixtures/golden/` and regenerates the app's catalog. Re-running a titles file replaces that batch's entries; nothing else in the catalog changes.
+Imported Songs are in the catalog, so the melody lab renders them (`run_all.py`, `build.py`), but they don't ship: the app lists only the Songs on its ship list (`apps/web/src/lib/catalog/ship-list.json`). Shipping some is a separate change that adds them to the ship list, re-exports `fixtures/golden/` (which covers every Song on the ship list) and regenerates the app's catalog. Re-running a titles file replaces that batch's entries; nothing else in the catalog changes.

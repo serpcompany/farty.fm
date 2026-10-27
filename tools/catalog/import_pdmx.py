@@ -8,7 +8,7 @@ so no two Songs share a score. A Song that passes is copied to catalog/midi/ and
 catalog/catalog.json with its provenance. Every title gets a line in the report, written next to
 the titles file (<titles>.report.md and .json). Nothing edits notes: the catalog keeps the
 score's own MIDI file and only chooses the excerpt and tempo (ADR 0003). Imported Songs don't
-ship until they're on the app's ship list (apps/web/src/lib/catalog/generate.ts).
+ship until they're on the app's ship list (apps/web/src/lib/catalog/ship-list.json).
 
 The rules and thresholds are in pdmx.py. The gates, in order:
 
@@ -544,7 +544,7 @@ def main():
                     f"then the highest rating, the most views; up to {args.tries} scores tried per title, best first"),
         "gates": (f"license; hash; sanity: {pdmx.MIN_NOTES}-{pdmx.MAX_NOTES} notes, range <= {pdmx.MAX_RANGE} semitones, "
                   f"at most {pdmx.MAX_DROPPED_SHARE:.0%} of the track's notes dropped, no first bar that is a pickup "
-                  f"padded with {pdmx.PADDED_PICKUP_REST} beat or more of silence; render with excerpt "
+                  f"padded with silence ({pdmx.PADDED_PICKUP_REST} beat or more, and at least as long as the bar's notes); render with excerpt "
                   f"<= {pdmx.EXCERPT_BEATS} beats of whole bars and the score's tempo within {pdmx.MIN_BPM}-{pdmx.MAX_BPM} bpm"),
         "bar": BAR,
     }
