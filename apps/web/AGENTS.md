@@ -43,7 +43,7 @@ Run from `apps/web/`:
 
 SERP's [web stack](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/web-stack/README.md) is the default. These are the exceptions, with detail in [`docs/agents/web.md`](../../docs/agents/web.md#exceptions-to-serps-standards):
 
-- **Agents tap through, on the local Workers build,** not on a PR preview or by the owner. Before launch they also merge every PR (Who merges, in [`docs/agents/web.md`](../../docs/agents/web.md#promotion-and-releases)).
+- **Agents tap through, on the local Workers build,** not on a PR preview or by the owner.
 - **Errors and analytics are Cloudflare's own (#126).** No Sentry and no GTM: error reports go to the Worker's logs, and analytics come from Cloudflare's automatic Web Analytics on the zone, which the app doesn't load ([detail](../../docs/agents/web.md#exceptions-to-serps-standards)).
 - **No mockups.** See Design, above.
 

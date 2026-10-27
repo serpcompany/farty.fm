@@ -71,11 +71,11 @@
   "exceptions": {
     "knownLongDocs": {
       "apps/web/AGENTS.md": {
-        "lines": 126,
+        "lines": 124,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       },
       "docs/agents/web.md": {
-        "lines": 344,
+        "lines": 341,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       },
       "docs/design/screens.md": {
@@ -1199,28 +1199,7 @@
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         }
       },
-      "docs": {
-        "docs/agents/domain.md": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "docs/agents/issue-tracker.md": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "docs/brand/README.md": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "docs/design/app-map.md": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "docs/design/screens.md": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        }
-      },
+      "docs": {},
       "deadcode": {
         "apps/web/package.json": {
           "findings": 2,
