@@ -5,8 +5,9 @@ import { songs } from '../src/lib/catalog/songs.generated'
 import { newEmail, signInByApi } from './account'
 import { payAtTheDevCheckout } from './pay'
 
-// Song Creator on the Staging build, with the whole Fixture Library loaded: every Song is
-// unlocked. Each Song opens from Compose, is made and starts playing, plays one tapped note, and
+// Song Creator on the Staging build, with the whole Fixture Library loaded: every Song but Amazing
+// Grace is unlocked (its 2.98 s note outlasts every fixture, ADR 0011). Each Song opens from
+// Compose, is made and starts playing, plays one tapped note, and
 // is paid for and saved (ADR 0010); the Toots are then read back from IndexedDB. Then a direct load, a failed render, a
 // locked and an unknown Song, and a Song opened offline.
 //
@@ -29,6 +30,9 @@ declare global {
 }
 
 const evidence = process.env.E2E_EVIDENCE_DIR ? resolve(process.env.E2E_EVIDENCE_DIR) : null
+
+/** The Songs the whole Fixture Library unlocks: the reference's golden Arrangements. */
+const unlockedSongs = songs.filter(s => s.id !== 'amazing')
 
 test.beforeEach(async ({ request }) => {
   // `next dev` never shows the loader, even with fixtures left in public/ by a Staging build.
@@ -61,7 +65,7 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
   if (out) await page.screenshot({ path: join(out, 'compose.png') })
 
   const timings: { song: string; tapToReadyMs: number; makingMs: number }[] = []
-  for (const song of songs) {
+  for (const song of unlockedSongs) {
     await test.step(song.id, async () => {
       const link = page
         .getByTestId('unlocked-songs')
@@ -172,7 +176,7 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
     db.close()
     return all
   })
-  expect(toots.map(t => t.songId).sort()).toEqual(songs.map(s => s.id).sort())
+  expect(toots.map(t => t.songId).sort()).toEqual(unlockedSongs.map(s => s.id).sort())
   for (const toot of toots) {
     const song = songs.find(s => s.id === toot.songId)
     expect(toot.title).toBe(song?.title)
@@ -315,7 +319,7 @@ async function listenToThePage(page: Page) {
   })
 }
 
-/** Loads the Fixture Library from Profile, then opens Compose with all 12 Songs unlocked. */
+/** Loads the Fixture Library from Profile, then opens Compose with 11 of the 12 Songs unlocked. */
 async function loadTheFixtureLibrary(page: Page) {
   const library = page.getByTestId('fixture-library')
   await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
@@ -326,7 +330,9 @@ async function loadTheFixtureLibrary(page: Page) {
     .getByRole('navigation', { name: 'Tabs' })
     .getByRole('link', { name: 'Compose', exact: true })
     .click()
-  await expect(page.getByRole('heading', { name: 'Unlocked · 12' })).toBeVisible({
+  await expect(
+    page.getByRole('heading', { name: `Unlocked · ${unlockedSongs.length}` })
+  ).toBeVisible({
     timeout: 60_000
   })
 }

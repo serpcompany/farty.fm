@@ -37,15 +37,15 @@ The set of Songs shipped with the app, each with its preserved source and licens
 _Avoid_: Melody pool, song library, melody library
 
 **Melody Fit**:
-How well a set of Melodic Recordings can play a particular Song, judged by how far each Recording would have to be moved to reach the notes it plays.
+How well a set of Melodic Recordings can play a particular Song, judged by how far each Recording would have to be moved to reach the notes it plays, and how much of each note it fills.
 _Avoid_: Song match, quality score
 
 **Pitch Coverage**:
-How many of a Song's distinct pitches are covered, each by its own Melodic Recording within 3 semitones of it or close enough for an Octave Move, shown as "3 of 4 notes covered".
+How many of a Song's distinct pitches are covered, shown as "3 of 4 notes covered". A pitch is covered by its own Melodic Recording within 3 semitones of it or close enough for an Octave Move, that lasts, once moved, at least as long as the pitch's longest note (ADR 0011). A missing pitch names the shortest fart that would cover it: "Needs a fart near F3 (1.2 s)".
 _Avoid_: Progress, completion
 
 **Unlocked Song**:
-A Song whose Pitch Coverage is complete: every distinct pitch has its own Melodic Recording.
+A Song whose Pitch Coverage is complete: every distinct pitch has its own Melodic Recording, near enough in pitch and long enough for its longest note.
 _Avoid_: Available song, playable song
 
 **Arrangement**:
@@ -57,7 +57,7 @@ A Melodic Recording playing a note about an octave from its Recording Pitch: res
 _Avoid_: Octave folding, octave jump
 
 **Auto-map**:
-The Arrangement the app chooses on its own, giving each distinct pitch its own Melodic Recording, with as few Octave Moves as possible and then as close in pitch as possible.
+The Arrangement the app chooses on its own, giving each distinct pitch its own Melodic Recording that is long enough for it, with as few Octave Moves as possible and then as close in pitch as possible.
 _Avoid_: Smart choose, AI pick, best fit
 
 **Toot**:

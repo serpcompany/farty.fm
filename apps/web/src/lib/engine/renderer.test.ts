@@ -33,7 +33,7 @@ import {
 } from './renderer'
 
 // The renderer on the golden inputs (gesture, contour and Recording Pitch from fixtures/golden),
-// checked against the reference's own placement of every note of the 13 unlocked Arrangements.
+// checked against the reference's own placement of every note of the 12 unlocked Arrangements.
 // The audio itself is measured with the reference's evaluate() by
 // tools/melody-lab/evaluate_renders.py on the renders of scripts/render-songs.ts.
 
@@ -80,6 +80,12 @@ describe('the renderer places every note as the reference does', () => {
       const song = goldenSong(id)
       const golden = goldenArrangement('full', id)
       const arrangement = arrange(song, library)
+      if (!golden.unlocked) {
+        // Amazing Grace: its 2.98 s note outlasts every fixture (ADR 0011).
+        expect(arrangement.unlocked, id).toBe(false)
+        expect(() => renderSong(song, arrangement, sources)).toThrow(/locked/)
+        return
+      }
       const started = performance.now()
       const rendered = renderSong(song, arrangement, sources)
       const ms = performance.now() - started
@@ -166,7 +172,7 @@ describe('the render path from what the app stores', () => {
   it('refuses a locked Song, and a Recording it was not given', () => {
     const song = goldenSong('twinkle')
     const locked = arrange(song, libraries.small.map(autoMapInput))
-    expect(() => renderSong(song, locked, sources)).toThrow(/locked: 5 of 6 notes covered/)
+    expect(() => renderSong(song, locked, sources)).toThrow(/locked: 4 of 6 notes covered/)
     const unlocked = arrange(song, library)
     expect(() => renderSong(song, unlocked, new Map())).toThrow(/No Recording plays pitch/)
   })

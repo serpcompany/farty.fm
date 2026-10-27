@@ -196,11 +196,14 @@ function UnlockedSongRow({ song }: { song: Song }) {
   )
 }
 
-/** A locked Song: its title, a Pitch Coverage bar, a lock and the nearest missing notes. */
+/**
+ * A locked Song: its title, a Pitch Coverage bar, a lock and the lowest missing notes, with how
+ * long a fart each needs. Two of them, so "Needs …" stays on one line on a phone.
+ */
 function LockedSongRow({ row, onOpen }: { row: SongRow; onOpen: () => void }) {
   const { song, coverage } = row
   const valueId = useId()
-  const missing = missingNotes(coverage, 3)
+  const missing = missingNotes(coverage, 2)
   const needs = missing === null ? null : `Needs ${missing}`
   return (
     <li data-testid="song-row" data-song={song.id}>

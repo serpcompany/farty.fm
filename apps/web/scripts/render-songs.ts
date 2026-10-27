@@ -135,7 +135,7 @@ async function main() {
     if (!arrangement.unlocked) {
       console.log(
         `${id.padEnd(13)}locked: ${arrangement.covered} of ${arrangement.total} notes covered, ` +
-          `needs ${arrangement.missingNotes.join(' ')}`
+          `needs ${arrangement.missingNotes.map(m => `${m.midi} (${m.seconds.toFixed(1)} s)`).join(' ')}`
       )
       if (goldenUnlocks(id)) wronglyLocked.push(id)
       continue

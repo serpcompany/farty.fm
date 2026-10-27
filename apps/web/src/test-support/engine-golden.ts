@@ -42,6 +42,8 @@ export interface GoldenArrangement {
   transpose: number
   octave_moves: number
   plan_cost: number
+  /** The notes no Recording covers, lowest first, and the shortest fart that would cover each. */
+  missing: { target_midi: number; seconds: number }[]
   per_pitch: {
     song_pitch: number
     target_midi: number
@@ -81,6 +83,7 @@ export interface GoldenCoverage {
   transpose: number
   octave_moves: number
   plan_cost: number
+  missing: { target_midi: number; seconds: number }[]
   recording_for_pitch: Record<string, string | null>
 }
 

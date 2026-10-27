@@ -109,14 +109,15 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     await expect(page.getByTestId('stat-recordings')).toBeVisible()
   })
 
-  await test.step('the Fixture Library fills the stats, and every Song unlocks', async () => {
+  await test.step('the Fixture Library fills the stats, and every Song but one unlocks', async () => {
     await loadTheFixtureLibrary(page)
     const total = await page.getByTestId('fixture-library-count').textContent()
     recordings = total?.split(' of ')[1] ?? ''
     expect(Number(recordings)).toBeGreaterThan(0)
     await expect(page.getByTestId('stat-recordings')).toHaveText(`Recordings${recordings}`)
+    // Amazing Grace's 2.98 s note outlasts every fixture (ADR 0011).
     await expect(page.getByTestId('stat-songs')).toHaveText(
-      `Songs unlocked${songs.length} of ${songs.length}`
+      `Songs unlocked${songs.length - 1} of ${songs.length}`
     )
     await expect(page.getByTestId('profile-new-user')).toHaveCount(0)
     // The same counts as the Recordings tab's.
@@ -244,7 +245,7 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     await expect(page.getByTestId('stat-toots')).toHaveText('Toots2')
     await expect(page.getByTestId('stat-recordings')).toHaveText(`Recordings${recordings}`)
     await expect(page.getByTestId('stat-songs')).toHaveText(
-      `Songs unlocked${songs.length} of ${songs.length}`
+      `Songs unlocked${songs.length - 1} of ${songs.length}`
     )
   })
 

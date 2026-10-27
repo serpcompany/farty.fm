@@ -206,7 +206,7 @@ test.describe('with microphone permission granted', () => {
     await stillOpen()
     await tabs.getByRole('link', { name: 'Record', exact: true }).click()
 
-    await recordAndSave('086')
+    await recordAndSave('013')
     await page.getByRole('button', { name: 'Record another', exact: true }).click()
     await expect(page.getByTestId('record-button')).toBeEnabled()
 

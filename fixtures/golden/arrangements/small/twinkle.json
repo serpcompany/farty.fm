@@ -2,13 +2,23 @@
   "library": "small",
   "max_abs_shift_semitones": null,
   "metrics": null,
+  "missing": [
+    {
+      "seconds": 1.1,
+      "target_midi": 38
+    },
+    {
+      "seconds": 0.6,
+      "target_midi": 42
+    }
+  ],
   "notes": null,
   "octave_moves": 1,
   "per_pitch": [
     {
-      "octave_move": false,
-      "recording": "016",
-      "shift_semitones": -2.325920593660186,
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
       "song_pitch": 69,
       "target_midi": 38
     },
@@ -49,10 +59,10 @@
     }
   ],
   "pitch_coverage": {
-    "covered": 5,
+    "covered": 4,
     "total": 6
   },
-  "plan_cost": 140.90193015915506,
+  "plan_cost": 86.17119027523879,
   "render_settings": null,
   "song": "twinkle",
   "transpose": -31,

@@ -230,7 +230,7 @@ def gate(title, match, row, midi, member_sha256, archive, library):
     fit = melody_fit(melody, library)
     result["pitch_coverage"] = f"{fit.covered} of {fit.total}"
     if not fit.unlocked:
-        missing = " ".join(librosa.midi_to_note(p) for p in fit.missing)
+        missing = " ".join(f"{librosa.midi_to_note(p)} ({s:.1f} s)" for p, s in fit.missing)
         failed("render", [f"locked with the full Fixture Library: {fit.covered} of {fit.total} notes covered, needs {missing}"])
         return result
     transpose, assignments = plan(melody, library)

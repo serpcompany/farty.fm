@@ -22,9 +22,12 @@ import {
   autoMapRecording,
   choiceForSongPitch,
   compareIds,
+  fills,
   HIGHEST_TRANSPOSITION,
   LOWEST_TRANSPOSITION,
   moveCost,
+  NOTE_FILL,
+  neededSeconds,
   silentCost,
   tooShortCost,
   unsettledCost
@@ -41,7 +44,8 @@ const SR = 44100
 /**
  * (uncovered, Octave Moves, cost) of an Arrangement, recomputed from the golden data alone: a port
  * of `arrangement_cost()` in `tools/melody-lab/golden_cost.py`, independent of the planner. It
- * rejects a Recording that plays two pitches and any move the unlock rule doesn't allow.
+ * rejects a Recording that plays two pitches and any move the unlock rule doesn't allow, by pitch or
+ * by length (ADR 0011).
  */
 function arrangementCost(song: Song, transpose: number, recordingFor: Map<number, string | null>) {
   const pitches = [...new Set(song.notes.map(n => n.pitch))].sort((a, b) => a - b)
@@ -70,6 +74,8 @@ function arrangementCost(song: Song, transpose: number, recordingFor: Map<number
     } else throw new Error(`${id} can't play ${p + transpose} (shift ${shift})`)
     const notes = song.notes.filter(n => n.pitch === p)
     const played = gestureSeconds(r) * exp2(-shift / 12)
+    const longest = Math.max(...notes.map(n => n.dur * spb - 0.025))
+    expect(played >= NOTE_FILL * longest, `${id} lasts long enough for ${p + transpose}`).toBe(true)
     const settle = (r.settle_s as number) * exp2(-shift / 12)
     let short = 0
     let unsettled = 0
@@ -105,6 +111,7 @@ interface GoldenFit {
   transpose: number
   octave_moves: number
   plan_cost: number
+  missing: { target_midi: number; seconds: number }[]
 }
 
 /** The README's matching rule, for an arrangement file or a coverage.json entry. */
@@ -130,8 +137,12 @@ function expectMatches(
   expect(Math.abs(recomputed.cost - golden.plan_cost), label).toBeLessThanOrEqual(TOLERANCE)
   expect(Math.abs(mine.cost - golden.plan_cost), label).toBeLessThanOrEqual(TOLERANCE)
 
+  expect(
+    mine.missingNotes.map(m => m.midi),
+    label
+  ).toEqual(mine.pitches.filter(c => c.recordingId === null).map(c => c.targetMidi))
   expect(mine.missingNotes, label).toEqual(
-    mine.pitches.filter(c => c.recordingId === null).map(c => c.targetMidi)
+    golden.missing.map(m => ({ midi: m.target_midi, seconds: m.seconds }))
   )
 }
 
@@ -170,11 +181,12 @@ describe('Auto-map matches the golden Arrangements', () => {
     }
   }
 
-  it('unlocks all 13 Songs on the full library and 5 on the small one', () => {
+  it('unlocks 12 of the 13 Songs on the full library and only Mary on the small one', () => {
     const unlocked = (library: Library) =>
       songIds.filter(id => arrange(goldenSong(id), inputs(libraries[library])).unlocked)
-    expect(unlocked('full')).toHaveLength(13)
-    expect(unlocked('small')).toEqual(['mary', 'jingle', 'saints', 'ode', 'ode-mutopia'])
+    // Amazing Grace's 2.98 s note outlasts every fixture, and the small library's six are short.
+    expect(unlocked('full')).toEqual(songIds.filter(id => id !== 'amazing'))
+    expect(unlocked('small')).toEqual(['mary'])
   })
 })
 
@@ -316,7 +328,7 @@ describe('Auto-map inputs and terms', () => {
     expect(a.covered).toBe(0)
     expect(a.unlocked).toBe(false)
     const pitches = [...new Set(song.notes.map(n => n.pitch))].sort((x, y) => x - y)
-    expect(a.missingNotes).toEqual(pitches.map(p => p + LOWEST_TRANSPOSITION))
+    expect(a.missingNotes.map(m => m.midi)).toEqual(pitches.map(p => p + LOWEST_TRANSPOSITION))
     expect(arrange(song, []).missingNotes).toEqual(a.missingNotes)
     expect(HIGHEST_TRANSPOSITION).toBe(24)
   })
@@ -330,6 +342,55 @@ describe('Auto-map inputs and terms', () => {
     expect(moveCost(-12)).toEqual({ cost: 6, octaveMove: true })
     expect(moveCost(15)).toEqual({ cost: 6 + 3 ** 1.5, octaveMove: true })
     expect(moveCost(15.01)).toBeNull()
+  })
+
+  it('covers a pitch only with a Recording as long as its longest note', () => {
+    expect(NOTE_FILL).toBe(1)
+    // A 1 s note needs 1 s of fart, after resampling.
+    expect(fills(1, 1, 0)).toBe(true)
+    expect(fills(0.99, 1, 0)).toBe(false)
+    // An Octave Move up halves the Recording; one down doubles it.
+    expect(fills(2, 1, 12)).toBe(true)
+    expect(fills(1.9, 1, 12)).toBe(false)
+    expect(fills(0.5, 1, -12)).toBe(true)
+    // A 0.975 s half note at 120 bpm. Moved at most 3 semitones down, a 0.8 s fart lasts 0.95 s, so
+    // it covers the note only moved down an octave; a 0.35 s fart lasts 0.83 s at most, so none.
+    const half: Song = {
+      bpm: 120,
+      beats_per_bar: 4,
+      length_beats: 3,
+      notes: [
+        { start: 0, dur: 1, pitch: 60 },
+        { start: 1, dur: 2, pitch: 60 }
+      ]
+    }
+    const fart = (gestureSeconds: number) => [
+      {
+        id: 'a',
+        recordingPitchMidi: 60,
+        shortestNoteSeconds: 0.12,
+        gestureSeconds,
+        settleSeconds: 0
+      }
+    ]
+    expect(arrange(half, fart(1))).toMatchObject({
+      unlocked: true,
+      transposition: 0,
+      octaveMoves: 0
+    })
+    expect(arrange(half, fart(0.8))).toMatchObject({ unlocked: true, octaveMoves: 1 })
+    expect(arrange(half, fart(0.35))).toMatchObject({
+      unlocked: false,
+      missingNotes: [{ midi: 60 + LOWEST_TRANSPOSITION, seconds: 1 }]
+    })
+  })
+
+  it('says how long a fart each missing note needs, rounded up to 0.1 s', () => {
+    expect(neededSeconds(0.975)).toBe(1)
+    expect(neededSeconds(0.475)).toBe(0.5)
+    expect(neededSeconds(2.975)).toBe(3)
+    // 0.7 × 10 is 7.000000000000001 in floating point: still 0.7 s, not 0.8 s.
+    expect(neededSeconds(0.7)).toBe(0.7)
   })
 
   it('charges notes that sound shorter than the Recording can settle', () => {

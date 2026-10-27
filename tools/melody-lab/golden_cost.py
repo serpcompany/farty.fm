@@ -11,7 +11,7 @@ returned Recording ids charges that mistake and rejects it.
 """
 import json
 
-from engine import GAP_S, ROOT, SR, move_cost, silent_cost, too_short_cost, unsettled_cost
+from engine import GAP_S, ROOT, SR, fills, move_cost, needed_seconds, silent_cost, too_short_cost, unsettled_cost
 
 GOLDEN = ROOT / "fixtures/golden"
 
@@ -27,7 +27,8 @@ def arrangement_cost(song, recordings, transpose, recording_for_pitch):
 
     Per covered pitch, in ascending pitch order: the pitch's total note length in beats x
     move_cost(shift), plus too_short_cost(), unsettled_cost() and silent_cost() over its
-    notes. A Recording plays at most one pitch, and only moves the unlock rule allows count.
+    notes. A Recording plays at most one pitch, and only moves the unlock rule allows count:
+    within move_cost()'s reach, and long enough for the pitch's longest note (fills()).
     """
     pitches = sorted({n["pitch"] for n in song["notes"]})
     assert sorted(recording_for_pitch) == pitches, "one entry per distinct Song pitch"
@@ -50,6 +51,7 @@ def arrangement_cost(song, recordings, transpose, recording_for_pitch):
         weight = sum(n["dur"] for n in notes)
         seconds = (rec["gesture"]["end_sample"] - rec["gesture"]["start_sample"]) / SR
         note_seconds = [n["dur"] * spb - GAP_S for n in notes]
+        assert fills(seconds, max(note_seconds), shift), f"{rid} is too short for {p + transpose}"
         octaves += move[1]
         cost += (
             weight * move[0]
@@ -58,6 +60,18 @@ def arrangement_cost(song, recordings, transpose, recording_for_pitch):
             + silent_cost(note_seconds, seconds, shift)
         )
     return uncovered, octaves, cost
+
+
+def missing(song, transpose, recording_for_pitch):
+    """The notes no Recording covers, as {target_midi, seconds}: each uncovered pitch after
+    transposition, and needed_seconds() of its longest slot, lowest first (Fit.missing)."""
+    spb = 60 / song["bpm"]
+    out = []
+    for p in sorted(recording_for_pitch):
+        if recording_for_pitch[p] is None:
+            longest = max(n["dur"] * spb - GAP_S for n in song["notes"] if n["pitch"] == p)
+            out.append({"target_midi": p + transpose, "seconds": needed_seconds(longest)})
+    return out
 
 
 def load(rel):
@@ -75,6 +89,7 @@ def check(fit, song, recordings):
     assert fit["unlocked"] == (uncovered == 0), fit
     assert octaves == fit["octave_moves"], fit
     assert abs(cost - fit["plan_cost"]) <= 1e-9, (fit, cost)
+    assert missing(song, fit["transpose"], per_pitch) == fit["missing"], fit
     return abs(cost - fit["plan_cost"])
 
 
