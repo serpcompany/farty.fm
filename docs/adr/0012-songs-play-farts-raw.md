@@ -5,10 +5,10 @@ Until #226 every note resampled its fart to the note's pitch and held it there, 
 > "RaW is the best its the funniest. it doesnt have to sound exaclty like the song as long as the listener gets the idea which they wil"
 
 1. **No pitch change.** Every note plays its fart as recorded, at the fart's own pitch and speed. Rendering trims the dead space before and after the fart, cuts it at the note's end (its written length less the 25 ms gap), fades it, sets its level and mixes. It never resamples a fart to change its pitch or its length, so a Song is played by farts as they are.
-2. **Auto-map keeps its rules.** Pitch Coverage, the unlock rule's pitch part, the ranking and the costs are unchanged. A fart still covers a note within 3 semitones of its Recording Pitch, or within 3 semitones of the same note an octave away (an Octave Move, ADR 0006). An Octave Move now plays its fart an octave from the note, give or take 3 semitones.
+2. **Auto-map keeps its rules.** Pitch Coverage, the unlock rule's pitch part and the ranking are unchanged. The costs keep their form but now use the fart's own length (point 3). A fart still covers a note within 3 semitones of its Recording Pitch, or within 3 semitones of the same note an octave away (an Octave Move, ADR 0006). An Octave Move now plays its fart an octave from the note, give or take 3 semitones.
 3. **Length is the fart's own.** The length rule (ADR 0011) and Auto-map's costs use the fart's own length. They used its length after resampling, `seconds × 2^(−shift / 12)`, so an Octave Move down doubled a fart's length and one up halved it.
 4. **The bar** that a render must pass changes. ADR 0004's "notes within ±50 cents of the note" can't hold when farts play raw. The new bar:
-   - **Fidelity:** at least 94% of notes sound within ±50 cents of their fart's own pitch over the stretch played (`within_50c_of_fart_pct`). This fails any render that shifts or bends a fart.
+   - **Fidelity:** at least 94% of notes sound within ±50 cents of their fart's own pitch over the stretch played (`within_50c_of_fart_pct`). A render that moves a fart's pitch more than 50 cents on more than 6% of its notes fails it.
    - **Timing:** at least 95% of onsets within ±50 ms, and no second attack inside a note. Unchanged.
    - **Reported, not gated:** per Song, the typical distance from the melody (`median_abs_cents`, pYIN's per-note median) and a contour score (`contour_pct`): the share of the melody's note-to-note steps that the render moves the same way.
 
@@ -57,7 +57,7 @@ Every app Song whose picks changed has at least one pitch whose fart is too shor
 - **Ode to Joy:** D3 on `101` (0.52 s, just under 0.52 s). All 30 notes change.
 - **Merry Christmas:** G♯3 on `091` (0.38 s) for 0.40 s. 6 of 53 notes change.
 - **Für Elise:** F2 on `032`, 1.64 s moved down an octave but 0.93 s raw, for 1.34 s. 26 of 32 notes change.
-- **Jingle Bells, Row, Row, Row Your Boat and Auld Lang Syne lock:** under every transposition, some pitch has no Melodic fixture long enough within reach. Jingle Bells' 1.98 s G♯2 had `002` (1.80 s, 2.07 s moved down 2.4 semitones), Row's 1.48 s D2 had `022` (1.37 s, 1.57 s moved down 2.3 semitones), and Auld Lang Syne's 1.77 s F3 had `059` (0.79 s, 1.82 s moved down an octave).
+- **Jingle Bells, Row, Row, Row Your Boat and Auld Lang Syne lock:** under every transposition, some pitch has no Melodic fixture long enough within reach. Jingle Bells' 1.98 s G♯2 had `002` (1.80 s, 2.07 s moved down 2.4 semitones), Row's 1.48 s D2 had `022` (1.37 s, 1.57 s moved down 2.3 semitones), and Auld Lang Syne's 1.77 s F3 had `059` (0.79 s, 1.82 s moved down an octave). Two more pitches also fall short: Jingle Bells' B2 on `094` (0.67 s, an Octave Move) for 0.975 s, and Row's D3 on `100` (0.21 s) for 0.225 s.
 
 When one pitch's fart no longer fits, Auto-map searches again, so the transposition and the other pitches' farts can change too.
 

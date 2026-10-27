@@ -16,7 +16,7 @@ These rules come from a long first attempt that produced a lot of process and li
 
 - **Show working results, not process.** Finish a slice until the product owner can hear or tap it. Don't ask them to judge anything a test or measurement can check.
 - **Verify the audio before claiming anything.** For rendering work, run the checks in `tools/melody-lab/evaluate.py` (or their Swift equivalents) on the real output and report the numbers. Never describe audio you haven't measured.
-- **Fart-only sound.** Rendering may only trim, resample, fade, adjust gain, and mix Recordings (ADR 0004). No oscillators, resonators, loops, or granular re-triggering.
+- **Fart-only sound.** Rendering may only trim, cut, fade, adjust gain, and mix Recordings, and plays each fart at its own pitch and speed (ADR 0004, ADR 0012). The only resampling is sample-rate conversion. No oscillators, resonators, loops, or granular re-triggering.
 - **Songs need sources.** Never type melody notes by hand. Add Songs through `catalog/` with a cited score and license (ADR 0003).
 - **Match the reference.** `tools/melody-lab/` is the reference engine. When Swift behavior differs from it, either fix the Swift code or change the reference deliberately and re-verify it.
 - **Keep the UI simple.** Remove anything that isn't needed.

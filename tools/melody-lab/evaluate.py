@@ -6,8 +6,8 @@ recorded and on time:
 
 - fidelity: at least 94% of notes sound within +-50 cents of their fart's own pitch over the
   stretch played (`within_50c_of_fart_pct`). YIN reads each note in the render and the same
-  stretch of the dry Recording on the same frames (fart_cents()). A render that shifts or
-  bends a fart fails it;
+  stretch of the dry Recording on the same frames (fart_cents()). A render that moves a
+  fart's pitch more than 50 cents on more than 6% of notes fails it;
 - timing: at least 95% of onsets within +-50 ms (`onsets_on_time_pct`), and no second attack
   inside a note (`notes_with_retrigger`).
 
