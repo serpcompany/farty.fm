@@ -1,3 +1,4 @@
+shellEmulator: true
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
