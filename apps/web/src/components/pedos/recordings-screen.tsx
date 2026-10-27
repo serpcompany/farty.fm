@@ -16,10 +16,10 @@ import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Spinner } from '@/components/ui/spinner'
 import { noteName } from '@/lib/pitch'
+import { formattedFartLength } from '@/lib/pitch-coverage'
 import { loadAudio } from '@/lib/recording-store'
 import {
   firstFartUsed,
-  formattedLength,
   type Recording,
   recordingName,
   recordingPitch,
@@ -130,7 +130,9 @@ function counted(number: number, noun: string): string {
 
 /**
  * A Recording: a big play button, its name, its note in a pill ("B3"), and the waveform of the
- * fart replay plays, without the silence around it. Tap to play. Matches `RecordingsRow`.
+ * fart replay plays, without the silence around it, and the fart's length. Tap to play. Matches
+ * `RecordingsRow`, plus the length, which the iPhone only reads out: it is what a locked Song's
+ * "Needs a fart near F3 (3.0 s)" is measured against (#227).
  */
 function RecordingRow({ recording, onDelete }: { recording: Recording; onDelete: () => void }) {
   const pedos = usePedos()
@@ -157,7 +159,15 @@ function RecordingRow({ recording, onDelete }: { recording: Recording; onDelete:
               <span className="font-semibold">{name}</span>
               <Note recording={recording} />
             </span>
-            <Waveform levels={levels} isPlaying={isPlaying} className="h-[30px]" />
+            <span className="flex items-center gap-2">
+              <Waveform levels={levels} isPlaying={isPlaying} className="h-[30px] min-w-0 flex-1" />
+              <span
+                className="shrink-0 text-sm text-muted-foreground tabular-nums"
+                data-testid="recording-length"
+              >
+                {formattedFartLength(recording)}
+              </span>
+            </span>
             {firstFartUsed(recording) && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Scissors className="size-3.5" aria-hidden />
@@ -245,7 +255,7 @@ function Status({ recording }: { recording: Recording }) {
 
 /** What the row's button says after the name: "1.1 s, B3, first fart used". */
 function describe(recording: Recording): string[] {
-  const parts = [formattedLength(recording.seconds)]
+  const parts = [formattedFartLength(recording)]
   switch (recording.analysis.state) {
     case 'analyzing':
       parts.push('analyzing')
