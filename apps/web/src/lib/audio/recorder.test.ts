@@ -3,9 +3,9 @@ import { errorName } from '@/lib/telemetry/report'
 import { type CaptureBatch, type CaptureCommand, captureProcessorSource } from './capture-processor'
 
 // The recorder against a stand-in for the browser: getUserMedia, an AudioContext whose clock the
-// test runs, and the shipped capture processor on that clock. A pipeline can be broken the two ways
-// an iPhone's was seen to, so a take never sends its first batch: the context's clock stops, or
-// the stream feeds the graph nothing while its track still says it's live and unmuted.
+// test runs, and the shipped capture processor on that clock. A pipeline is broken in either of the
+// two ways that could leave a take without its first batch, as on the owner's iPhone (#247): the
+// context's clock stops, or the stream feeds the graph nothing while its track says it's live.
 
 const quantum = 128
 const sampleRate = 48_000

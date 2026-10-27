@@ -2,6 +2,7 @@ import { desktop } from '@/lib/desktop'
 import type { PcmAudio } from '@/lib/wav'
 import { type CaptureBatch, type CaptureCommand, captureProcessorSource } from './capture-processor'
 import { audioContext, replaceAudioContext, setMicrophoneSession } from './context'
+import { stopPlayback } from './player'
 
 /** A take in progress. `stop` returns the raw microphone audio; `cancel` throws it away. */
 export type Take = {
@@ -438,6 +439,8 @@ async function capture(
       // The stream or the context stopped while its track still looks live, and neither comes
       // back by itself, so every later take would fail too. The next tap opens both afresh.
       if (microphone === mic) releaseMicrophone()
+      // A sound started meanwhile on another screen stops now, rather than with the context.
+      stopPlayback()
       replaceAudioContext(mic.context)
     }
     throw error
