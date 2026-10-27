@@ -1,6 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "pedos-web",
+  // The SERP account, so `wrangler` picks it when a login sees more than one account. CI names the
+  // same account with the CLOUDFLARE_ACCOUNT_ID variable.
+  "account_id": "cec5f04e1d18bcc65f2be0aefb04f059",
   "main": "worker.ts",
   "compatibility_date": "2026-09-28",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
