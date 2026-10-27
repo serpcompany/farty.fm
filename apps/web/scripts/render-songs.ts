@@ -140,8 +140,8 @@ async function main() {
       if (goldenUnlocks(id)) wronglyLocked.push(id)
       continue
     }
-    // `render ms` renders from Recordings already cut and tracked; `worker ms` is what the render
-    // worker runs for one request: cut every Recording the Arrangement uses, track it, render.
+    // `render ms` renders from Recordings already cut; `worker ms` is what the render
+    // worker runs for one request: cut every Recording the Arrangement uses, then render.
     const rendered = medianMs(() => renderSong(song, arrangement, sources))
     const worker = medianMs(() => renderFromRecordings(song, arrangement, recordings))
     const { samples, sampleRate, notes } = rendered.result
@@ -162,7 +162,6 @@ async function main() {
         note_index: n.noteIndex,
         source_id: n.recordingId,
         target_midi: n.targetMidi,
-        shift_semitones: n.shiftSemitones,
         start_s: round(n.startSample / sampleRate, 3),
         len_s: round(n.lengthSamples / sampleRate, 3),
         gain_db: round(n.gainDb, 1)
@@ -184,7 +183,7 @@ async function main() {
     )
   }
   const perSource = [...sourceMs].map(([id, ms]) => `${id} ${ms.toFixed(0)}`).join(', ')
-  console.log(`cut and track each Melodic Recording (ms, median of ${RUNS}): ${perSource}`)
+  console.log(`cut each Melodic Recording (ms, median of ${RUNS}): ${perSource}`)
   console.log(`wrote ${outDir}`)
   if (wronglyLocked.length > 0) {
     console.error(`locked here, but the golden Arrangement unlocks it: ${wronglyLocked.join(' ')}`)

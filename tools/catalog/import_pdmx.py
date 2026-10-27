@@ -17,8 +17,8 @@ The rules and thresholds are in pdmx.py. The gates, in order:
            catalog copy are byte for byte the archive's file
   sanity   the excerpt's note count and range, and the share of notes the importer drops
   render   unlocked with the full Fixture Library, and the renderer's bar on the reference render
-           (fixtures/golden/README.md, evaluate_renders.BAR): in50c >= 94%, onTime >= 95%,
-           no re-attacks
+           (ADR 0012, evaluate.BAR): in50cFart >= 94% (notes within 50 cents of their fart's
+           own pitch), onTime >= 95%, no re-attacks
 
 catalog/ is written only once every passing Song's entry imports to exactly the melody its gates
 judged. If one doesn't, the run stops with ReimportMismatch and leaves catalog/ as it was.
@@ -60,8 +60,7 @@ import soundfile as sf  # noqa: E402
 
 import pdmx  # noqa: E402
 from engine import SR, load_library, melody_fit, plan, render  # noqa: E402
-from evaluate import evaluate  # noqa: E402
-from evaluate_renders import BAR  # noqa: E402
+from evaluate import BAR, evaluate  # noqa: E402
 from melody import load_catalog, load_midi  # noqa: E402
 
 RECORD = "https://zenodo.org/api/records/15571083"
@@ -234,8 +233,8 @@ def gate(title, match, row, midi, member_sha256, archive, library):
         failed("render", [f"locked with the full Fixture Library: {fit.covered} of {fit.total} notes covered, needs {missing}"])
         return result
     transpose, assignments = plan(melody, library)
-    audio, events = render(melody, library, assignments, tune=1.0, bpm=melody.bpm)
-    metrics = evaluate(audio, melody, events, melody.bpm)
+    audio, events = render(melody, library, assignments, bpm=melody.bpm)
+    metrics = evaluate(audio, melody, events, melody.bpm, library)
     metrics.pop("per_note")
     metrics.update(
         transpose=transpose,
@@ -254,9 +253,9 @@ def summary_line(song_id, r):
         return f"{song_id:24s} {r['score_id']:>9s} {'PASS' if r['passed'] else 'fail'}"
     return (
         f"{song_id:24s} {r['score_id']:>9s} {'PASS' if r['passed'] else 'fail'} T={m['transpose']:+d}"
-        f" notes={m['notes']:3d} in50c={m['within_50c_pct']:3d}% med={m['median_abs_cents']:5.1f}c"
-        f" onTime={m['onsets_on_time_pct']}% reatk={m['notes_with_retrigger']} recs={m['distinct_recordings']}"
-        f" octaveMoves={m['octave_moves']} maxShift={m['max_abs_shift_semitones']:.1f}"
+        f" notes={m['notes']:3d} in50cFart={m['within_50c_of_fart_pct']:3d}% onTime={m['onsets_on_time_pct']}%"
+        f" reatk={m['notes_with_retrigger']} | in50c={m['within_50c_pct']:3d}% med={m['median_abs_cents']:5.1f}c"
+        f" contour={m['contour_pct']}% recs={m['distinct_recordings']} octaveMoves={m['octave_moves']}"
     )
 
 
@@ -413,13 +412,13 @@ def write_report(path, run, songs):
         f"`{run['dataset']['mid.tar.gz']['md5']}`, both equal to Zenodo's; downloaded {run['dataset']['mid.tar.gz']['downloaded']}.",
         f"- Picking: {run['picking']}",
         f"- Gates: {run['gates']}",
-        f"- Render bar: in50c >= {BAR['within_50c_pct']}%, onTime >= {BAR['onsets_on_time_pct']}%, "
+        f"- Render bar: in50cFart >= {BAR['within_50c_of_fart_pct']}%, onTime >= {BAR['onsets_on_time_pct']}%, "
         f"re-attacks <= {BAR['notes_with_retrigger']}, with the full Fixture Library ({run['library']}).",
         "",
         "## Every title",
         "",
         table_row("Song", "Result", "Score", "Match", "License", "Rating", "Views", "Notes", "Range", "Dropped",
-                  "Pitches", "in50c", "onTime", "Re-attacks", "Why it failed"),
+                  "Pitches", "in50cFart", "onTime", "Re-attacks", "Why it failed"),
         table_row(*["---"] * 15),
     ]
     for s in songs:
@@ -434,7 +433,7 @@ def write_report(path, run, songs):
         lines.append(table_row(
             s["title"], s["result"], f"[{r['score_id']}]({r['url']})", r["match"], r["license"], r["rating"], r["n_views"],
             rep.get("note_count", ""), r.get("range_semitones", ""), dropped, r.get("pitch_coverage", ""),
-            f"{m['within_50c_pct']}%" if m else "", f"{m['onsets_on_time_pct']}%" if m else "",
+            f"{m['within_50c_of_fart_pct']}%" if m else "", f"{m['onsets_on_time_pct']}%" if m else "",
             m.get("notes_with_retrigger", ""), "" if s["result"] == "pass" else s["reason"],
         ))
     lines += [
@@ -462,17 +461,18 @@ def listen(sample, library, out):
     for title, r, midi in sample:
         melody = load_midi(midi, title=title.title, **r["render"])
         _, assignments = plan(melody, library)
-        audio, events = render(melody, library, assignments, tune=1.0, bpm=melody.bpm)
+        audio, events = render(melody, library, assignments, bpm=melody.bpm)
         wav = out / f"{title.id}.wav"
         sf.write(wav, audio, SR, subtype="PCM_16")
         heard, _ = librosa.load(wav, sr=SR, mono=True)
-        metrics = evaluate(heard, melody, events, melody.bpm)
+        metrics = evaluate(heard, melody, events, melody.bpm, library)
         metrics.pop("per_note")
         (out / f"{title.id}.json").write_text(json.dumps(
             {"song": title.id, "title": title.title, "score": r["url"], "render": r["render"],
              "measured_on": wav.name, "metrics": metrics, "gate_metrics": r["metrics"]}, indent=1) + "\n")
-        print(f"listen {wav}: in50c={metrics['within_50c_pct']}% onTime={metrics['onsets_on_time_pct']}%"
-              f" reatk={metrics['notes_with_retrigger']} med={metrics['median_abs_cents']}c notes={metrics['notes']}")
+        print(f"listen {wav}: in50cFart={metrics['within_50c_of_fart_pct']}% onTime={metrics['onsets_on_time_pct']}%"
+              f" reatk={metrics['notes_with_retrigger']} med={metrics['median_abs_cents']}c contour={metrics['contour_pct']}%"
+              f" notes={metrics['notes']}")
 
 
 # ---------------------------------------------------------------- main

@@ -257,7 +257,7 @@ const features = [
   {
     icon: AudioLines,
     title: 'Only real farts',
-    text: 'Every note you hear is one of your Recordings, shifted to the right pitch. No synths.'
+    text: 'Every note you hear is one of your Recordings, played just as you made it. No synths.'
   },
   {
     icon: Music2,

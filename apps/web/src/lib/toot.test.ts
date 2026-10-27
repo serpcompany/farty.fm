@@ -6,20 +6,10 @@ import {
   formattedTootLength,
   noteCaption,
   noteSeconds,
-  semitones,
   type Toot,
   type TootArrangement,
   tootDetails
 } from './toot'
-
-describe('semitones', () => {
-  it('rounds to a tenth, with a sign, as the iPhone app', () => {
-    expect(semitones(1.24)).toBe('+1.2 semitones')
-    expect(semitones(-2.75)).toBe('−2.8 semitones')
-    expect(semitones(0.04)).toBe('0.0 semitones')
-    expect(semitones(-0.04)).toBe('0.0 semitones')
-  })
-})
 
 describe('noteCaption', () => {
   const song = songs.find(s => s.id === 'mary') ?? songs[0]
@@ -49,14 +39,13 @@ describe('noteCaption', () => {
     }
   })
 
-  it('names the note, its Recording and Recording Pitch, the shift and the written length', () => {
+  it('names the note, its Recording and Recording Pitch, and the written length', () => {
+    // The fart plays raw, at its own pitch (ADR 0012), so the caption names no shift.
     const sounding = note.pitch - 2
     const length = noteSeconds(song, note).length.toFixed(1)
     const caption = noteCaption(song, arrangement, note, recording(sounding + 2.1))
     expect(caption).toMatch(
-      new RegExp(
-        `^[A-G]♯?\\d · Recording 21 \\([A-G]♯?\\d\\), shifted −2\\.1 semitones · ${length} s$`
-      )
+      new RegExp(`^[A-G]♯?\\d · Recording 21 \\([A-G]♯?\\d\\) · ${length} s$`)
     )
   })
 
@@ -64,7 +53,7 @@ describe('noteCaption', () => {
     expect(noteCaption(song, arrangement, note, undefined)).toMatch(/ · Recording deleted · /)
   })
 
-  it('leaves out the shift of a Recording without a pitch', () => {
+  it('leaves out the Recording Pitch of a Recording without one', () => {
     expect(noteCaption(song, arrangement, note, recording(null))).toMatch(
       /^[A-G]♯?\d · Recording 21 · \d+\.\d s$/
     )

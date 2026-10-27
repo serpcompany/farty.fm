@@ -8,6 +8,8 @@ A Recording Pitch is a real pitch, octave included: a G2 fart and a G3 fart are 
 
 The owner left the last two choices, which octave directions to allow and whether to add a second tracker, to whichever measured higher quality (#79, #81, 2026-10-06).
 
+Update 2026-10-28 (ADR 0012, #226): Songs play every fart raw, so an Octave Move is no longer resampled. Its fart plays an octave from the note it covers, give or take 3 semitones, as in the "Other octave, no resampling" row below, which failed ADR 0004's bar. The owner chose raw by ear, and ADR 0012 has the bar that replaces it. Rule 1 is unchanged: which farts may cover a note, and that real-pitch matches come first. Every measurement here was taken on renders that held each note's pitch.
+
 ## Why
 
 Songs unlocked (of 12) under each rule in #68's measurements, a mean of 30 random Fixture Library subsets. "Pass" is ADR 0004's checks on every distinct Unlocked Song's render (at least 94% of notes within ±50 cents and on time within ±50 ms, and no second attack inside a note).

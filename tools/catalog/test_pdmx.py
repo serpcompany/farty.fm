@@ -23,7 +23,7 @@ sys.path[:0] = [str(HERE), str(ROOT / "tools/melody-lab")]
 
 import import_pdmx  # noqa: E402
 import pdmx  # noqa: E402
-from evaluate_renders import BAR  # noqa: E402
+from evaluate import BAR  # noqa: E402
 from melody import load_midi  # noqa: E402
 
 PD = "https://creativecommons.org/publicdomain/mark/1.0/"
@@ -202,22 +202,23 @@ class Gates(unittest.TestCase):
         self.assertIn("11%", pdmx.sanity_problems([60] * 10, 7, 4, 89)[0])
 
     def test_render_bar(self):
-        ok = {"within_50c_pct": 94, "onsets_on_time_pct": 95, "notes_with_retrigger": 0}
+        ok = {"within_50c_of_fart_pct": 94, "onsets_on_time_pct": 95, "notes_with_retrigger": 0}
         self.assertEqual(pdmx.render_problems(ok, BAR), [])
-        self.assertEqual(len(pdmx.render_problems({**ok, "within_50c_pct": 93}, BAR)), 1)
+        self.assertEqual(pdmx.render_problems({**ok, "within_50c_of_fart_pct": 93}, BAR), ["in50cFart 93% < 94%"])
         self.assertEqual(len(pdmx.render_problems({**ok, "onsets_on_time_pct": 94}, BAR)), 1)
         self.assertEqual(pdmx.render_problems({**ok, "notes_with_retrigger": 1}, BAR), ["1 notes re-attack"])
 
     def test_the_bar_is_the_readmes_bar(self):
         # fixtures/golden/README.md states the renderer's bar on notes; this tool's README states the whole gate.
-        golden = re.search(r"\*\*Renderer \(#41\)\*\* requires at least (\d+)% of notes within ±50 cents",
-                           (ROOT / "fixtures/golden/README.md").read_text())
-        gate = re.search(r"at least (\d+)% of notes within ±50 cents, at least (\d+)% of onsets within ±50 ms, "
-                         r"and no re-attacks", (HERE / "README.md").read_text())
+        golden = re.search(r"\*\*Renderer \(#41\)\*\* requires at least (\d+)% of notes within ±50 cents of "
+                           r"their fart's own pitch", (ROOT / "fixtures/golden/README.md").read_text())
+        gate = re.search(r"at least (\d+)% of notes within ±50 cents of their fart's own pitch, at least (\d+)% of "
+                         r"onsets within ±50 ms, and no re-attacks", (HERE / "README.md").read_text())
         self.assertIsNotNone(golden, "fixtures/golden/README.md no longer states the renderer's bar")
         self.assertIsNotNone(gate, "tools/catalog/README.md no longer states the render gate's bar")
         self.assertEqual(int(gate[1]), int(golden[1]))
-        self.assertEqual(BAR, {"within_50c_pct": int(golden[1]), "onsets_on_time_pct": int(gate[2]), "notes_with_retrigger": 0})
+        self.assertEqual(BAR, {"within_50c_of_fart_pct": int(golden[1]), "onsets_on_time_pct": int(gate[2]),
+                               "notes_with_retrigger": 0})
 
     def test_hash(self):
         self.assertEqual(pdmx.hash_problems("a", "a", "s", "s"), [])
@@ -353,10 +354,10 @@ class Gate(unittest.TestCase):
 
     def test_passes_only_on_the_bar(self):
         data = SCORE.read_bytes()
-        on_bar = {"within_50c_pct": 94, "onsets_on_time_pct": 95, "notes_with_retrigger": 0}
-        r, rendered = self.gate(self.file(data), sha256(data), metrics={**on_bar, "within_50c_pct": 93})
+        on_bar = {"within_50c_of_fart_pct": 94, "onsets_on_time_pct": 95, "notes_with_retrigger": 0}
+        r, rendered = self.gate(self.file(data), sha256(data), metrics={**on_bar, "within_50c_of_fart_pct": 93})
         self.assertTrue(rendered)
-        self.assertEqual(r["gates"], {"license": "pass", "hash": "pass", "sanity": "pass", "render": ["in50c 93% < 94%"]})
+        self.assertEqual(r["gates"], {"license": "pass", "hash": "pass", "sanity": "pass", "render": ["in50cFart 93% < 94%"]})
         self.assertFalse(r["passed"])
         r, _ = self.gate(self.file(data), sha256(data), metrics=on_bar)
         self.assertEqual(r["gates"], dict.fromkeys(import_pdmx.GATES, "pass"))
@@ -379,7 +380,7 @@ class PickScores(unittest.TestCase):
             sid = pdmx.score_id(r)
             ran.append((title.id, sid))
             return {"score_id": sid, "url": "", "score_title": r["title"], "passed": sid in passing,
-                    "gates": {"render": "pass" if sid in passing else ["in50c 50% < 94%"]}}
+                    "gates": {"render": "pass" if sid in passing else ["in50cFart 50% < 94%"]}}
 
         with quiet():
             songs, picks = import_pdmx.pick_scores(ts, pdmx.find_candidates(rows, ts), list(others), tries, try_score,
@@ -397,7 +398,7 @@ class PickScores(unittest.TestCase):
         songs, picks, ran = self.pick("s | Shenandoah", self.rows, passing=set(), tries=2)
         self.assertEqual(ran, [("s", "1"), ("s", "2")])
         self.assertEqual(picks, [])
-        self.assertEqual(songs[0]["reason"], "none of the 2 best scores passed; the best: render: in50c 50% < 94%")
+        self.assertEqual(songs[0]["reason"], "none of the 2 best scores passed; the best: render: in50cFart 50% < 94%")
 
     def test_a_title_already_in_the_catalog_tries_nothing(self):
         songs, picks, ran = self.pick("s | Shenandoah", self.rows, passing={"1"}, others=[{"id": "x", "title": "The Shenandoah"}])

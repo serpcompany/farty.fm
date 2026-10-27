@@ -8,17 +8,7 @@ import {
   libraries,
   songIds
 } from '@/test-support/engine-golden'
-import {
-  CONTOUR_TOLERANCE_MIDI,
-  compareContour,
-  decoded,
-  type GoldenRecording,
-  gestureBody,
-  goldenContourHz,
-  goldenIndex,
-  row
-} from '@/test-support/golden'
-import { hzToMidi } from '../analysis/numeric'
+import { decoded, type GoldenRecording, gestureBody, goldenIndex, row } from '@/test-support/golden'
 import { arrange } from './auto-map'
 import { renderFromRecordings, renderSong } from './render-song'
 import { renderSource } from './render-source'
@@ -32,8 +22,8 @@ import {
   songSeconds
 } from './renderer'
 
-// The renderer on the golden inputs (gesture, contour and Recording Pitch from fixtures/golden),
-// checked against the reference's own placement of every note of the 12 unlocked Arrangements.
+// The renderer on the golden inputs (each gesture from fixtures/golden), checked against the
+// reference's own placement of every note of the 9 unlocked Arrangements.
 // The audio itself is measured with the reference's evaluate() by
 // tools/melody-lab/evaluate_renders.py on the renders of scripts/render-songs.ts.
 
@@ -42,11 +32,7 @@ const library = libraries.full.map(autoMapInput)
 const sources = new Map<string, RenderSource>()
 
 async function goldenSource(g: GoldenRecording): Promise<RenderSource> {
-  return {
-    gesture: await gestureBody(g),
-    pitchContourHz: goldenContourHz(g),
-    recordingPitchMidi: g.recording_pitch_midi as number
-  }
+  return { gesture: await gestureBody(g) }
 }
 
 /** The analysis the app would store for a fixture, from the golden bounds. */
@@ -81,7 +67,7 @@ describe('the renderer places every note as the reference does', () => {
       const golden = goldenArrangement('full', id)
       const arrangement = arrange(song, library)
       if (!golden.unlocked) {
-        // Amazing Grace: its 2.98 s note outlasts every fixture (ADR 0011).
+        // A note longer than every fixture near its pitch (ADR 0011), played raw (ADR 0012).
         expect(arrangement.unlocked, id).toBe(false)
         expect(() => renderSong(song, arrangement, sources)).toThrow(/locked/)
         return
@@ -102,7 +88,6 @@ describe('the renderer places every note as the reference does', () => {
         expect(mine.noteIndex, label).toBe(g.index)
         expect(mine.recordingId, label).toBe(g.recording)
         expect(mine.targetMidi, label).toBe(g.target_midi)
-        expect(mine.shiftSemitones, label).toBe(g.shift_semitones)
         expect(round(mine.startSample / SR, 3), label).toBe(g.render.start_s)
         expect(round(mine.lengthSamples / SR, 3), label).toBe(g.render.len_s)
         songGain = Math.max(songGain, Math.abs(mine.gainDb - g.render.gain_db))
@@ -127,7 +112,7 @@ describe('the renderer places every note as the reference does', () => {
 })
 
 describe('the render path from what the app stores', () => {
-  it('cuts the golden gesture and recomputes the golden contour', async () => {
+  it('cuts the golden gesture', async () => {
     for (const id of goldenIndex.melodic_recordings) {
       const g = goldenRecording(id)
       const file = await decoded(g)
@@ -136,12 +121,6 @@ describe('the render path from what the app stores', () => {
         storedAnalysis(g)
       )
       expect(source.gesture, id).toEqual(await gestureBody(g))
-      expect(source.recordingPitchMidi).toBe(g.recording_pitch_midi)
-      const midi = Array.from(source.pitchContourHz, f => (Number.isFinite(f) ? hzToMidi(f) : null))
-      const agreement = compareContour(midi, g)
-      expect(midi.length, id).toBe(g.pitch_contour.frames)
-      expect(agreement.voicingAgrees, id).toBe(g.pitch_contour.frames)
-      expect(agreement.maxDiffMidi, id).toBeLessThanOrEqual(CONTOUR_TOLERANCE_MIDI)
     }
   })
 
@@ -172,7 +151,7 @@ describe('the render path from what the app stores', () => {
   it('refuses a locked Song, and a Recording it was not given', () => {
     const song = goldenSong('twinkle')
     const locked = arrange(song, libraries.small.map(autoMapInput))
-    expect(() => renderSong(song, locked, sources)).toThrow(/locked: 4 of 6 notes covered/)
+    expect(() => renderSong(song, locked, sources)).toThrow(/locked: 3 of 6 notes covered/)
     const unlocked = arrange(song, library)
     expect(() => renderSong(song, unlocked, new Map())).toThrow(/No Recording plays pitch/)
   })
@@ -185,12 +164,8 @@ describe('the render path from what the app stores', () => {
   })
 })
 
-describe('fart-only rendering (ADR 0004)', () => {
-  const silent: RenderSource = {
-    gesture: new Float64Array(44100),
-    pitchContourHz: new Float64Array(172).fill(Number.NaN),
-    recordingPitchMidi: 60
-  }
+describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
+  const silent: RenderSource = { gesture: new Float64Array(44100) }
 
   it('renders silence from silent Recordings', () => {
     const notes = [0, 1, 2, 3].map(beat =>
@@ -201,23 +176,13 @@ describe('fart-only rendering (ADR 0004)', () => {
     expect(out.samples.every(s => s === 0)).toBe(true)
   })
 
-  it('plays a note at its own pitch as the Recording, trimmed, faded and scaled', () => {
-    // An empty contour leaves nothing to tune, and a shift of 0 reads every sample in place.
+  it('plays a note as its Recording, trimmed, faded and scaled, whatever the note', () => {
     const g = goldenRecording('013')
-    const own = sources.get('013') as RenderSource
-    const source = {
-      ...own,
-      pitchContourHz: new Float64Array(own.pitchContourHz.length).fill(Number.NaN)
-    }
-    const note = noteInBeats(source, g.recording_pitch_midi as number, {
-      start: 1,
-      dur: 1,
-      bpm: 120,
-      beatsPerBar: 4
-    })
-    const out = render([note], 2)
+    const source = sources.get('013') as RenderSource
+    const at = (targetMidi: number) =>
+      render([noteInBeats(source, targetMidi, { start: 1, dur: 1, bpm: 120, beatsPerBar: 4 })], 2)
+    const out = at(g.recording_pitch_midi as number)
     const placed = out.notes[0]
-    expect(placed.shiftSemitones).toBe(0)
     expect(placed.startSample).toBe(22050)
     expect(placed.lengthSamples).toBe(Math.trunc(0.475 * SR))
 
@@ -227,6 +192,18 @@ describe('fart-only rendering (ADR 0004)', () => {
     const gain = 10 ** (placed.gainDb / 20)
     for (let i = 0; i < segment.length; i++) expected[22050 + i] += segment[i] * gain
     expect(out.samples).toEqual(limit(expected))
+    // Three semitones up, or an Octave Move down: the same fart, at its own pitch and speed.
+    expect(at((g.recording_pitch_midi as number) + 3)).toEqual(out)
+    expect(at((g.recording_pitch_midi as number) - 12)).toEqual(out)
+  })
+
+  it('plays a fart shorter than its note whole, then leaves the rest silent', () => {
+    // 016 lasts 0.31 s, less than a 0.975 s half note at 120 bpm: it is never stretched.
+    const source = sources.get('016') as RenderSource
+    const out = render([noteInBeats(source, 40, { start: 0, dur: 2, bpm: 120, beatsPerBar: 4 })], 1)
+    const placed = out.notes[0]
+    expect(placed.lengthSamples).toBe(source.gesture.length)
+    expect(out.samples.subarray(placed.lengthSamples).every(s => s === 0)).toBe(true)
   })
 
   it('accents downbeats by 1.5 dB, in any meter', () => {
@@ -254,15 +231,11 @@ describe('fart-only rendering (ADR 0004)', () => {
 // use synthetic note placements.
 describe('where the reference would fail', () => {
   it('clips a note that runs past the end of the mix', () => {
-    // At its own pitch with an empty contour, the note is the Recording trimmed, faded and scaled.
-    const own = sources.get('013') as RenderSource
-    const source = {
-      ...own,
-      pitchContourHz: new Float64Array(own.pitchContourHz.length).fill(Number.NaN)
-    }
+    // The note is the Recording trimmed, faded and scaled.
+    const source = sources.get('013') as RenderSource
     const note = {
       source,
-      targetMidi: own.recordingPitchMidi,
+      targetMidi: 55,
       startSeconds: 1.9,
       lengthSeconds: 0.5,
       downbeat: false

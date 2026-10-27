@@ -11,9 +11,10 @@ import { skipWelcome } from './record'
 // Compose and the Result screen, with Recordings made through the fake microphone in
 // `fake-microphone.ts`, which plays each fart as the person presses Record, all on one page.
 //
-// Mary Had a Little Lamb unlocks with fixtures 090 (G3), 084 and 013 (both G♯3) and 094 (B3), and
-// no Song unlocks before the fourth: the reference's `melody_fit()` on these four. 013 lasts long
-// enough, moved down an octave, for Mary's half notes (ADR 0011); 086, 0.24 s, doesn't.
+// Mary Had a Little Lamb unlocks with fixtures 095 (F2), 017 (D♯2), 022 (E2) and 002 (A♯2), and
+// no Song unlocks before the fourth: the reference's `melody_fit()` on these four, the same picks
+// as on the whole Fixture Library. Songs play each fart raw, at its own length (ADR 0012), so
+// Mary's last note, 1.40 s long, needs 002 (1.80 s), the only fixture that long (ADR 0011).
 
 test.use({ permissions: ['microphone'] })
 
@@ -56,11 +57,11 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await sheet.getByRole('button', { name: 'Close' }).click()
   await expect(sheet).toBeHidden()
 
-  // The first take: G3, collected on the Result's pitch strip. Nothing unlocks yet.
+  // The first take: F2, collected on the Result's pitch strip. Nothing unlocks yet.
   await tab(page, 'Record').click()
-  await recordAndSave(page, '090')
-  await expect(page.getByTestId('result-note')).toHaveText('G3')
-  await expect(page.getByTestId('pitch-strip')).toHaveAccessibleName('Notes collected: G. New: G')
+  await recordAndSave(page, '095')
+  await expect(page.getByTestId('result-note')).toHaveText('F2')
+  await expect(page.getByTestId('pitch-strip')).toHaveAccessibleName('Notes collected: F. New: F')
   await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
   await expect(page.getByRole('button', { name: 'Record another' })).toBeVisible()
   await page.getByRole('button', { name: 'Done' }).click()
@@ -75,25 +76,25 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   )
 
   // The locked Song's sheet names the notes it needs, and how long a fart each needs (ADR 0011):
-  // the reference's `melody_fit()` on 090 alone. Record goes to the Record tab.
+  // the reference's `melody_fit()` on 095 alone. Record goes to the Record tab.
   await mary.click()
   await expect(sheet.getByTestId('locked-song-needs')).toHaveText(
     'Needs a fart near C2 (1.5 s), D2 (0.7 s), and E2 (0.7 s).'
   )
   await expect(sheet.getByTestId('pitch-strip')).toHaveAccessibleName(
-    /^Notes collected: G\. Needed: /
+    /^Notes collected: F\. Needed: /
   )
   await sheet.getByRole('button', { name: 'Record' }).click()
   await expect(sheet).toBeHidden()
   await expect(page.getByTestId('record-button')).toBeVisible()
 
   // Three more takes; the fourth unlocks Mary.
-  for (const id of ['084', '013']) {
+  for (const id of ['017', '022']) {
     await recordAndSave(page, id)
     await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
     await page.getByRole('button', { name: 'Record another' }).click()
   }
-  await recordAndSave(page, '094')
+  await recordAndSave(page, '002')
 
   await expect(page.getByTestId('result-progress')).toContainText(
     'You unlocked Mary Had a Little Lamb'

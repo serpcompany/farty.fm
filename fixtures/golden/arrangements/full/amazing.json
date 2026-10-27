@@ -4,63 +4,67 @@
   "metrics": null,
   "missing": [
     {
+      "seconds": 1.2,
+      "target_midi": 50
+    },
+    {
       "seconds": 3.0,
-      "target_midi": 51
+      "target_midi": 53
     }
   ],
   "notes": null,
-  "octave_moves": 1,
+  "octave_moves": 0,
   "per_pitch": [
     {
       "octave_move": false,
       "recording": "022",
-      "shift_semitones": -1.3259205936601859,
+      "shift_semitones": 0.6740794063398141,
       "song_pitch": 62,
-      "target_midi": 39
+      "target_midi": 41
     },
     {
       "octave_move": false,
       "recording": "095",
-      "shift_semitones": 0.27407940633982975,
+      "shift_semitones": 2.2740794063398297,
       "song_pitch": 64,
-      "target_midi": 41
-    },
-    {
-      "octave_move": true,
-      "recording": "084",
-      "shift_semitones": -12.025920593660175,
-      "song_pitch": 67,
-      "target_midi": 44
-    },
-    {
-      "octave_move": false,
-      "recording": "069",
-      "shift_semitones": 1.574079406339827,
-      "song_pitch": 69,
-      "target_midi": 46
+      "target_midi": 43
     },
     {
       "octave_move": false,
       "recording": "002",
-      "shift_semitones": 1.5740794063398198,
-      "song_pitch": 71,
+      "shift_semitones": -0.4259205936601802,
+      "song_pitch": 67,
+      "target_midi": 46
+    },
+    {
+      "octave_move": false,
+      "recording": "032",
+      "shift_semitones": -2.8259205936601717,
+      "song_pitch": 69,
       "target_midi": 48
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
+      "song_pitch": 71,
+      "target_midi": 50
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
       "song_pitch": 74,
-      "target_midi": 51
+      "target_midi": 53
     }
   ],
   "pitch_coverage": {
-    "covered": 5,
+    "covered": 4,
     "total": 6
   },
-  "plan_cost": 101.11722641370673,
+  "plan_cost": 35.70330046473234,
   "render_settings": null,
   "song": "amazing",
-  "transpose": -23,
+  "transpose": -21,
   "unlocked": false
 }

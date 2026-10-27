@@ -59,16 +59,22 @@ export interface GoldenArrangement {
         recording: string
         shift_semitones: number
         heard_cents: number | null
+        /** How far the note sounds from its own fart played dry (ADR 0012). */
+        fart_cents: number | null
         render: { start_s: number; len_s: number; gain_db: number }
       }[]
     | null
   metrics: {
     notes: number
+    /** The bar (ADR 0012): notes within ±50 cents of their fart's own pitch. */
+    within_50c_of_fart_pct: number
+    /** Reported, not gated: notes within ±50 cents of the melody. */
     within_50c_pct: number
+    contour_pct: number | null
     onsets_on_time_pct: number
     notes_with_retrigger: number
   } | null
-  render_settings: { bpm: number; tune: number } | null
+  render_settings: { bpm: number } | null
 }
 
 export function goldenArrangement(library: Library, song: string): GoldenArrangement {

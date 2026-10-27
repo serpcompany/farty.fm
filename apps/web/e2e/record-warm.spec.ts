@@ -205,23 +205,23 @@ test.describe('with microphone permission granted', () => {
     await page.goto('/')
     await waitForOpenMicrophone(page)
 
-    await recordAndSave('090')
+    await recordAndSave('095')
     await page.getByRole('button', { name: 'Record another', exact: true }).click()
     await expect(page.getByTestId('record-button')).toBeEnabled()
     await stillOpen()
 
-    await recordAndSave('084')
+    await recordAndSave('017')
     await page.getByRole('button', { name: 'Done', exact: true }).click()
     await expect(page).toHaveURL(/\/recordings\/$/)
     await stillOpen()
     await tabs.getByRole('link', { name: 'Record', exact: true }).click()
 
-    await recordAndSave('013')
+    await recordAndSave('022')
     await page.getByRole('button', { name: 'Record another', exact: true }).click()
     await expect(page.getByTestId('record-button')).toBeEnabled()
 
     // Try it: on to Song Creator, which plays the Toot in the microphone's session.
-    await recordAndSave('094')
+    await recordAndSave('002')
     await expect(page.getByTestId('result-progress')).toContainText(
       'You unlocked Mary Had a Little Lamb'
     )

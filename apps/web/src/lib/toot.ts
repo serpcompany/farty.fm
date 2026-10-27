@@ -89,17 +89,10 @@ export function noteSeconds(
   return { start: note.start * beat, length: note.dur * beat }
 }
 
-/** "+1.2 semitones", "−2.8 semitones" (a minus sign), "0.0 semitones". */
-export function semitones(shift: number): string {
-  // Halves round away from zero, as Swift's `rounded()`: −2.75 is −2.8.
-  const rounded = (Math.sign(shift) * Math.round(Math.abs(shift) * 10)) / 10
-  const sign = rounded > 0 ? '+' : rounded < 0 ? '−' : ''
-  return `${sign}${Math.abs(rounded).toFixed(1)} semitones`
-}
-
 /**
- * What a selected note shows: "A3 · Recording 20 (G♯3), shifted +1.2 semitones · 0.4 s", or
- * "A3 · Recording deleted · 0.4 s" once its Recording is gone. As `Arrangement.caption`.
+ * What a selected note shows: "A3 · Recording 20 (G♯3) · 0.4 s", or "A3 · Recording deleted ·
+ * 0.4 s" once its Recording is gone. As `Arrangement.caption`, without its shift: Songs play each
+ * fart raw, at its own pitch (ADR 0012).
  */
 export function noteCaption(
   song: Song,
@@ -112,6 +105,5 @@ export function noteCaption(
   if (!recording) return `${name} · Recording deleted · ${length}`
   const pitch = recordingPitch(recording)
   if (pitch === null) return `${name} · ${recordingName(recording)} · ${length}`
-  const shift = soundingPitch(arrangement, note.pitch) - pitch
-  return `${name} · ${recordingName(recording)} (${noteName(pitch)}), shifted ${semitones(shift)} · ${length}`
+  return `${name} · ${recordingName(recording)} (${noteName(pitch)}) · ${length}`
 }

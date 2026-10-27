@@ -6,6 +6,8 @@ Auto-map works like a multi-sampled instrument. It picks a transposition for the
 
 Update 2026-10-05: a Recording may also play a pitch an octave away, resampled by 12 semitones plus at most 3, where a Song needs it (an Octave Move, ADR 0006). That replaces "a larger shift is never used". Everything else here stands.
 
+Update 2026-10-28 (ADR 0012, #226): Songs play every fart raw, at its own pitch and speed. Rendering no longer resamples a fart to change its pitch: it trims, cuts at the note's end, fades, adjusts gain and mixes. The bar's "notes on pitch within ±50 cents" becomes "notes within ±50 cents of their fart's own pitch". Onsets on time and no second attack stand. So does the unlock rule: one fart per pitch, within 3 semitones of the note, now the furthest a note may be from the fart that plays it.
+
 ## Consequences
 
 Only some Recordings are Melodic (9 of the 23 in the Fixture Library). Noise-like Recordings can't carry a recognizable melody by themselves. This is why Pitch Coverage and Unlocked Songs are part of the product.

@@ -43,14 +43,18 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
     .getByRole('navigation', { name: 'Tabs' })
     .getByRole('link', { name: 'Compose', exact: true })
     .click()
-  await expect(page.getByRole('heading', { name: 'Unlocked · 11' })).toBeVisible({
+  // Songs play each fart raw, at its own length (ADR 0012), so Jingle Bells, Row, Row, Row Your
+  // Boat, Amazing Grace and Auld Lang Syne each have a note longer than any fixture near its pitch.
+  await expect(page.getByRole('heading', { name: 'Unlocked · 8' })).toBeVisible({
     timeout: 60_000
   })
-  await expect(page.getByRole('heading', { name: 'Locked · 1', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Locked · 4', exact: true })).toBeVisible()
   const amazing = page.getByRole('button', { name: 'Amazing Grace' })
   await expect(amazing).toHaveAccessibleDescription(
-    'Locked. 5 of 6 notes covered. Needs D♯3 (3.0 s)'
+    'Locked. 4 of 6 notes covered. Needs D3 (1.2 s) and F3 (3.0 s)'
   )
   await amazing.click()
-  await expect(page.getByTestId('locked-song-needs')).toHaveText('Needs a fart near D♯3 (3.0 s).')
+  await expect(page.getByTestId('locked-song-needs')).toHaveText(
+    'Needs a fart near D3 (1.2 s) and F3 (3.0 s).'
+  )
 })

@@ -27,8 +27,9 @@ def arrangement_cost(song, recordings, transpose, recording_for_pitch):
 
     Per covered pitch, in ascending pitch order: the pitch's total note length in beats x
     move_cost(shift), plus too_short_cost(), unsettled_cost() and silent_cost() over its
-    notes. A Recording plays at most one pitch, and only moves the unlock rule allows count:
-    within move_cost()'s reach, and long enough for the pitch's longest note (fills()).
+    notes, on the Recording's own length (Songs play farts raw, ADR 0012). A Recording plays
+    at most one pitch, and only moves the unlock rule allows count: within move_cost()'s
+    reach, and long enough for the pitch's longest note (fills()).
     """
     pitches = sorted({n["pitch"] for n in song["notes"]})
     assert sorted(recording_for_pitch) == pitches, "one entry per distinct Song pitch"
@@ -51,13 +52,13 @@ def arrangement_cost(song, recordings, transpose, recording_for_pitch):
         weight = sum(n["dur"] for n in notes)
         seconds = (rec["gesture"]["end_sample"] - rec["gesture"]["start_sample"]) / SR
         note_seconds = [n["dur"] * spb - GAP_S for n in notes]
-        assert fills(seconds, max(note_seconds), shift), f"{rid} is too short for {p + transpose}"
+        assert fills(seconds, max(note_seconds)), f"{rid} is too short for {p + transpose}"
         octaves += move[1]
         cost += (
             weight * move[0]
-            + too_short_cost(note_seconds, seconds, rec["shortest_note_s"], shift)
-            + unsettled_cost(note_seconds, seconds, rec["settle_s"], shift)
-            + silent_cost(note_seconds, seconds, shift)
+            + too_short_cost(note_seconds, seconds, rec["shortest_note_s"])
+            + unsettled_cost(note_seconds, seconds, rec["settle_s"])
+            + silent_cost(note_seconds, seconds)
         )
     return uncovered, octaves, cost
 
