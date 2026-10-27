@@ -1,6 +1,6 @@
 # Golden data from the reference engine
 
-The answers of the approved Python reference engine ([`tools/melody-lab/`](../../tools/melody-lab/)) for the Fixture Library and the Song Catalog. The web app's port (`apps/web/src/lib/analysis/` and `src/lib/engine/`) checks itself against these files. Swift doesn't: it is frozen at format 2, before the settle cost (#116), the pitch contour that keeps the attack (#208), the silence cost (#205), the length rule (ADR 0011) and raw playing ([ADR 0012](../../docs/adr/0012-songs-play-farts-raw.md)), and its tests read their own copy of that format in [`RecordingAnalysisKit/Tests/GoldenFormat2/`](../../RecordingAnalysisKit/Tests/GoldenFormat2/). Everything except this README is generated; don't edit it by hand.
+The answers of the approved Python reference engine ([`tools/melody-lab/`](../../tools/melody-lab/)) for the Fixture Library and the Song Catalog. The web app's port (`apps/web/src/lib/analysis/` and `src/lib/engine/`) checks itself against these files. Everything except this README is generated; don't edit it by hand.
 
 Regenerate after any change to the lab, the Fixture Library or the catalog, and commit the result:
 

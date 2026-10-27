@@ -1,6 +1,6 @@
 /**
  * Generates the Songs the app ships (`songs.generated.ts`) from what the reference engine already
- * imported, as the iPhone app's `ios/scripts/generate-sample-data.py` does (ADR 0003):
+ * imported (ADR 0003):
  *
  * - each Song's melody from `fixtures/golden/songs/<id>.json`, so nothing parses MIDI here;
  * - its title and source line from `catalog/catalog.json`, checked against the golden copy, so

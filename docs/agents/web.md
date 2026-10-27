@@ -23,7 +23,7 @@ How `apps/web` is built, deployed and checked. Its commands are in `apps/web/AGE
   - `check`: ShellCheck on the smoke test, lint, types (with `wrangler types --check`), `drizzle-kit check`, a guard that fails when `pnpm db:generate` would write a migration (a `schema.ts` change without its migration), and unit tests. On a PR it also runs both Workers builds: `build:production`, which fails if the build carries any Fixture Library file, and `build:staging`, which `check` runs only on a draft, since `e2e` builds it otherwise. On a push, the deploy job's build is the build check.
   - `e2e`: the Playwright journeys on the Staging build in workerd, behind the gate. CI writes `.dev.vars` from `.dev.vars.example` and applies the migrations to the local database first. A draft PR skips it; it runs when the PR is marked ready. A passing run uploads a `passed-e2e-<tree>` receipt, and a push whose tree already passed skips the suite.
   - `deploy-staging` on a push to `staging`, and `deploy-production` on a push to `main`, each once `check` and `e2e` pass, in its GitHub environment. Each builds and, only when the commit is still the branch tip (an older run passes without deploying), applies its environment's migrations (`pnpm db:migrate:<env>`) and deploys, then runs `scripts/smoke.sh` on its workers.dev host. Each has its own group (`deploy-web-staging`, `deploy-web-production`): a running deploy is never cancelled, and a newer queued run replaces an older one. When no push started a run (for example, `web.yml` was off), `bash ~/.claude/skills/serp-github-app/scripts/gh.sh workflow run web.yml --ref staging` (or `--ref main`) checks and redeploys that branch's tip.
-  - `staging` and `main` require `changes`, `check`, `e2e` and `issue-link` (`pr-issue-link.yml`). `ios.yml` isn't required: its `paths` filter would leave its check pending.
+  - `staging` and `main` require `changes`, `check`, `e2e` and `issue-link` (`pr-issue-link.yml`).
 - **Each environment has its own token.** `CLOUDFLARE_API_TOKEN` is an environment secret in `staging` and in `production`, each a different token, and `CLOUDFLARE_ACCOUNT_ID` is a repository variable naming the SERP account, which `wrangler.jsonc` also names (`account_id`), so `wrangler` picks it on a machine whose login sees more than one account. If the two ever differ, `wrangler.jsonc` wins. Each environment's branch policy lets only its own branch deploy: `staging` from `staging`, `production` from `main`. Each token can edit every Worker in the account, so these policies are what keep other branches away from both tokens. With no token the deploy fails, so a green run at the tip always deployed and passed the smoke test. Since each is account-wide, making or rolling one is the owner's ([Secret Authority](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/agent-operations/secret-authority.md)). The owner's keychain minter makes only tokens scoped to one project ([Cloudflare API tokens](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/environment-configuration.md#cloudflare-api-tokens)).
 - **Agents never sign in on Production.** Agents never create an account or sign in on Production (https://farty.fm, www.farty.fm). They use Staging for sign-in tests.
 - **Web consoles use Claude in Chrome.** For web consoles (GitHub settings, the Cloudflare dashboard, App Store Connect) and owner-only dashboard steps, such as secret-value clicks, use Claude in Chrome (owner, 2026-10-06), not the built-in browser. GitHub actions themselves (issues, PRs, comments, merges, workflow runs) still go through serp-agent's `gh.sh`. Never read, type or print a secret there. A dashboard's key is the owner's to set from their own terminal ([Secret Authority](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/agent-operations/secret-authority.md)).
@@ -112,22 +112,7 @@ Saving a Toot is paid on Staging in Stripe's test mode (ADR 0010). The code is d
 
 ## Google Play
 
-`android/twa-manifest.json` is the Bubblewrap config that wraps `https://farty.fm` as a Trusted Web Activity, package `com.serp.farty` (#184; it can't change once uploaded), free (#114). The web manifest already has the 512 px and maskable icons it needs. No keystore, password or `.aab` is ever committed.
-
-**The owner, once:**
-
-1. Create SERP's organization Play developer account (D-U-N-S number, $25 fee).
-2. In Play Console, create the app "Farty" as a free app.
-3. Tell the agent the app exists.
-
-**The agent, after:**
-
-1. Generate the upload keystore at `~/.config/pedos/android-upload.keystore` (alias `upload`) with its password in the owner's keychain, never printed. Run `bubblewrap build` from `android/` for the signed `.aab`, and hand it to the owner to upload. If Bubblewrap doesn't expand `~` in `signingKey.path`, use the absolute path for that build and don't commit it.
-2. Add `apps/web/public/.well-known/assetlinks.json` with the Play app-signing SHA-256 from Play Console (Setup, App signing), plus an `apps/web/scripts/smoke.sh` check that it serves as JSON on Production.
-3. Draft the store listing from `docs/app-store/metadata.md` and take phone-size screenshots.
-4. Data safety: when signed in, Recordings (audio), Toots and the email address are stored with the account on Cloudflare and deleted with it, so the form declares audio as collected. Without an account, nothing personal is collected. Anonymous error reports and usage (#126) are declared too.
-
-Most updates ship by deploying the site, with no new upload. Upload a new `.aab` (raise `appVersionCode`) only when `android/twa-manifest.json` changes.
+The Play app wraps https://farty.fm as a Trusted Web Activity: [Google Play](google-play.md) has its setup and store listing.
 
 ## Gotchas learned in slice 1
 

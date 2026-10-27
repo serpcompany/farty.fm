@@ -2,7 +2,7 @@
 
 The Farty web app (ADR 0007). Read the repository's `AGENTS.md` first: its working rules apply here.
 
-**Design.** The iPhone app is the approved design. No mockup round. Where `docs/design/` or an ADR differs from the Swift code, the Swift code wins.
+**Design.** The web app as built is the approved design (ADR 0013). No mockup round.
 
 **Before you touch environments, deploys, the Staging gate, CI or the e2e setup, read [`docs/agents/web.md`](../../docs/agents/web.md).** It holds the environment table, how each environment deploys, promotion and releases, the password gate, how to run the Workers build locally, the detail behind each exception below, and the gotchas learned in slice 1.
 
@@ -25,8 +25,8 @@ Run from `apps/web/`:
 
 ## Layout
 
-- `src/lib/analysis/`: Recording Analysis, ported from `RecordingAnalysisKit`. Plain TypeScript with no DOM or Web Audio, so it runs in the Web Worker (`worker.ts`) and in Vitest alike.
-- `src/lib/engine/`: Auto-map and the fart-only renderer, ported from `AutoMap.swift` and `Renderer.swift` and matched to the reference. Plain TypeScript, so it renders in its Web Worker (`worker.ts`) and in Vitest alike. `pnpm exec tsx scripts/render-songs.ts` renders every Song for `tools/melody-lab/evaluate_renders.py`.
+- `src/lib/analysis/`: Recording Analysis, matched to the reference through `fixtures/golden/`. Plain TypeScript with no DOM or Web Audio, so it runs in the Web Worker (`worker.ts`) and in Vitest alike.
+- `src/lib/engine/`: Auto-map and the fart-only renderer, matched to the reference. Plain TypeScript, so it renders in its Web Worker (`worker.ts`) and in Vitest alike. `pnpm exec tsx scripts/render-songs.ts` renders every Song for `tools/melody-lab/evaluate_renders.py`.
 - `src/lib/audio/`: the microphone (an AudioWorklet, with the browser's voice processing off) and playback.
 - `src/lib/recording-store.ts`: the `pedos` IndexedDB database, with Recordings (`recording-store.ts`) and Toots (`toot-store.ts`), this browser's working copy. A guest keeps their Recordings, and their Toots last only the visit (owner, 2026-10-25, #203): each open reads the session, and a guest's new visit clears the last one's Toots (`visit.ts`).
 - `src/lib/library-sync.ts`, `outbox.ts`, `library-api.ts`: a signed-in browser's sync with the account (#156). Each save, rename and delete queues in the outbox with the change itself; the sync uploads it and reads the account's changes since its last read. `pedos.account` names the account the library is, and every library request names it (`x-pedos-library`), so a library never reads from, uploads to or deletes in another.

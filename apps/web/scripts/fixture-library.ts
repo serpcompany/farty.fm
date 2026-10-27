@@ -1,5 +1,4 @@
-// The Fixture Library in the Staging build only, as the iPhone app carries it only in internal
-// builds (`ios/scripts/check-release-build.sh`). `fixtures/recordings/` never ships to regular
+// The Fixture Library in the Staging build only. `fixtures/recordings/` never ships to regular
 // users (AGENTS.md), so Production is checked for it after every build.
 //
 //   pnpm exec tsx scripts/fixture-library.ts copy    # before the Staging build (build:staging)

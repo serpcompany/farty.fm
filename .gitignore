@@ -1,15 +1,3 @@
-# Xcode / SwiftPM
-.derivedData/
-DerivedData/
-.build/
-.swiftpm/
-xcuserdata/
-*.xcuserstate
-*.xcresult/
-
-# XcodeGen output: generate it from ios/project.yml
-ios/*.xcodeproj/
-
 # Python
 .venv/
 __pycache__/

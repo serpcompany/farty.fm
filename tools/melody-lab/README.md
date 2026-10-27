@@ -6,7 +6,7 @@ Turns the approved Fixture Library Recordings into recognizable melodies, using 
 uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requirements.txt
 .venv/bin/python run_all.py        # quick check: renders every Song and prints the metrics
 .venv/bin/python build.py          # renders every Song/version into out/listen/ (index.html + audio)
-.venv/bin/python export_golden.py  # writes the reference results to ../../fixtures/golden/ for the Swift port
+.venv/bin/python export_golden.py  # writes the reference results to ../../fixtures/golden/ for the web app
 open out/listen/index.html
 ```
 
