@@ -4,7 +4,7 @@
   "description": "Farty turns fart Recordings into recognizable melodies. The web app is in apps/web; this root holds the shared checks.",
   "scripts": {
     "verify": "serp-verify",
-    "check": "pnpm --filter pedos-web check"
+    "check": "pnpm verify && pnpm --filter pedos-web check"
   },
   "packageManager": "pnpm@10.17.0",
   "engines": {

@@ -1,0 +1,1422 @@
+{
+  "$schema": "./node_modules/@serpcompany/verify/verify.schema.json",
+  "files": {
+    "generated": {
+      "pnpm-lock.yaml": "pnpm install",
+      "apps/web/CHANGELOG.md": "Release Please",
+      "apps/web/cloudflare-env.d.ts": "wrangler types (pnpm cf-typegen in apps/web)",
+      "apps/web/drizzle/**": "drizzle-kit (pnpm db:generate in apps/web)",
+      "apps/web/src/lib/catalog/songs.generated.ts": "src/lib/catalog/generate.ts (pnpm exec tsx src/lib/catalog/generate.ts in apps/web)",
+      "fixtures/golden/**/*.json": "the reference engine (tools/melody-lab/export_golden.py)",
+      "tools/catalog/titles-*.report.*": "the PDMX import (tools/catalog/import_pdmx.py)"
+    },
+    "thirdParty": {
+      "catalog/midi/**": "the public-domain scores catalog/catalog.json cites, each with its source and license",
+      "fixtures/recordings/*.{mp3,wav}": "the Freesound uploads fixtures/recordings/manifest.json lists, each with its source and license",
+      "tools/catalog/testdata/*.mid": "PDMX scores the importer's tests read, as published"
+    },
+    "names": {
+      ".dev.vars.example": "hash-lines",
+      "cf-typegen.env": "hash-lines"
+    }
+  },
+  "dependencies": {
+    "parts": [
+      {
+        "folder": "apps/web",
+        "sources": [
+          "src",
+          "worker.ts",
+          "e2e",
+          "scripts"
+        ],
+        "testCode": "(\\.test\\.tsx?$|^e2e/|^src/test-support/)",
+        "entries": [
+          "^src/app/(|.*/)(page|layout|route|not-found|global-not-found|error|global-error|loading|template|default|sitemap|robots|manifest|icon|opengraph-image)\\.tsx?$",
+          "^src/instrumentation-client\\.ts$",
+          "^src/lib/[^/]+/worker\\.ts$",
+          "^src/lib/catalog/generate\\.ts$",
+          "^worker\\.ts$",
+          "^scripts/[^/]+\\.ts$"
+        ],
+        "runtime": {
+          "path": "^(src/|worker\\.ts$)",
+          "pathNot": "(\\.test\\.tsx?$|^e2e/|^src/test-support/|^src/lib/catalog/generate\\.ts$)"
+        }
+      }
+    ]
+  },
+  "exceptions": {
+    "knownLongDocs": {
+      "apps/web/AGENTS.md": {
+        "lines": 126,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "docs/agents/web.md": {
+        "lines": 376,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "docs/design/screens.md": {
+        "lines": 315,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "fixtures/golden/README.md": {
+        "lines": 362,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      }
+    },
+    "knownLargeFiles": {
+      "apps/web/e2e/account.spec.ts": {
+        "lines": 1002,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/e2e/record-warm.spec.ts": {
+        "lines": 533,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/e2e/toots.spec.ts": {
+        "lines": 708,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/src/app/api/library.workers.test.ts": {
+        "lines": 707,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/src/components/pedos/pedos-provider.tsx": {
+        "lines": 669,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/src/components/pedos/song-creator.tsx": {
+        "lines": 609,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/src/lib/audio/recorder.ts": {
+        "lines": 576,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/src/lib/engine/auto-map.test.ts": {
+        "lines": 548,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/src/lib/library-sync.test.ts": {
+        "lines": 635,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/src/lib/library-sync.ts": {
+        "lines": 560,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/src/server/auth-config.test.ts": {
+        "lines": 932,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps/web/src/server/auth-config.ts": {
+        "lines": 635,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "tools/catalog/import_pdmx.py": {
+        "lines": 562,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "tools/catalog/test_pdmx.py": {
+        "lines": 590,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "tools/melody-lab/engine.py": {
+        "lines": 590,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      }
+    },
+    "allowedPauses": {},
+    "knownDuplicates": {
+      "apps\\web\\e2e\\compose.spec.ts and apps\\web\\e2e\\song-creator.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\compose.spec.ts and apps\\web\\e2e\\stale-build.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\database-upgrade.spec.ts and apps\\web\\e2e\\database-upgrade.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\database-upgrade.spec.ts and apps\\web\\e2e\\record-melodic.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\desktop.spec.ts and apps\\web\\e2e\\pages.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\install.spec.ts and apps\\web\\e2e\\profile.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\library-connection.spec.ts and apps\\web\\e2e\\record-warm.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\record-melodic.spec.ts and apps\\web\\e2e\\record-melodic.spec.ts": {
+        "blocks": 2,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\record-melodic.spec.ts and apps\\web\\e2e\\sync.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\record-melodic.spec.ts and apps\\web\\e2e\\tabs.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\record-warm.spec.ts and apps\\web\\e2e\\record-warm.spec.ts": {
+        "blocks": 5,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\song-creator.spec.ts and apps\\web\\e2e\\song-creator.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\song-creator.spec.ts and apps\\web\\e2e\\toots.spec.ts": {
+        "blocks": 5,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\sync.spec.ts and apps\\web\\e2e\\sync.spec.ts": {
+        "blocks": 3,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\sync.spec.ts and apps\\web\\e2e\\toots.spec.ts": {
+        "blocks": 3,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\telemetry.spec.ts and apps\\web\\e2e\\telemetry.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\e2e\\toots.spec.ts and apps\\web\\e2e\\toots.spec.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\app\\api\\library.workers.test.ts and apps\\web\\src\\app\\api\\library.workers.test.ts": {
+        "blocks": 3,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\app\\api\\payments.workers.test.ts and apps\\web\\src\\app\\api\\payments.workers.test.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\app\\api\\payments.workers.test.ts and apps\\web\\src\\server\\stripe.test.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\db\\schema.ts and apps\\web\\src\\db\\schema.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\lib\\analysis\\client.ts and apps\\web\\src\\lib\\engine\\client.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\lib\\analysis\\recording-pitch.ts and apps\\web\\src\\lib\\analysis\\trimming.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\lib\\engine\\auto-map.test.ts and apps\\web\\src\\lib\\engine\\auto-map.test.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\lib\\engine\\auto-map.test.ts and apps\\web\\src\\lib\\engine\\renderer.test.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\lib\\wav.ts and apps\\web\\src\\test-support\\decode.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\server\\auth-config.test.ts and apps\\web\\src\\server\\auth-config.test.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\server\\auth-config.ts and apps\\web\\src\\server\\stripe.test.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\server\\library.ts and apps\\web\\src\\server\\library.ts": {
+        "blocks": 2,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "apps\\web\\src\\server\\toot-payments.ts and apps\\web\\src\\server\\toot-payments.ts": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      },
+      "tools\\catalog\\pdmx.py and tools\\melody-lab\\evaluate.py": {
+        "blocks": 1,
+        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+      }
+    },
+    "baseline": {
+      "comments": {
+        ".github/workflows/pr-issue-link.yml": {
+          "findings": 9,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        ".github/workflows/release-please.yml": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        ".github/workflows/web-auth-secret.yml": {
+          "findings": 12,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        ".github/workflows/web.yml": {
+          "findings": 39,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        ".gitignore": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/.dev.vars.example": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/.gitignore": {
+          "findings": 13,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/drizzle.config.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/account.spec.ts": {
+          "findings": 71,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/account.ts": {
+          "findings": 7,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/compose.spec.ts": {
+          "findings": 23,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/database-upgrade.spec.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/desktop.spec.ts": {
+          "findings": 9,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/fake-microphone.ts": {
+          "findings": 22,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/fixture-library.spec.ts": {
+          "findings": 8,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/install.spec.ts": {
+          "findings": 13,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/lander.spec.ts": {
+          "findings": 10,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/library-connection.spec.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/pay.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/profile.spec.ts": {
+          "findings": 13,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/record-melodic.spec.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/record-noise.spec.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/record-two-farts.spec.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/record-warm.spec.ts": {
+          "findings": 55,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/record.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/screens.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/sign-in.spec.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/song-creator.spec.ts": {
+          "findings": 47,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/stale-build.spec.ts": {
+          "findings": 11,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/sync.spec.ts": {
+          "findings": 17,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/tabs.spec.ts": {
+          "findings": 7,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/telemetry.spec.ts": {
+          "findings": 9,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/e2e/toots.spec.ts": {
+          "findings": 56,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/next.config.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/open-next-worker.d.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/open-next.config.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/playwright.config.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/public/sw.js": {
+          "findings": 40,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/scripts/fixture-library.ts": {
+          "findings": 15,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/scripts/render-songs.ts": {
+          "findings": 21,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/scripts/smoke.sh": {
+          "findings": 45,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/account/route.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/account/route.workers.test.ts": {
+          "findings": 9,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/auth/[...all]/route.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/dev/checkout/route.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/every-route.workers.test.ts": {
+          "findings": 7,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/library.workers.test.ts": {
+          "findings": 23,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/library/route.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/payments.workers.test.ts": {
+          "findings": 11,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/recordings/[id]/audio/route.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/recordings/[id]/route.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/signed-in.workers.test.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/stripe/webhook/route.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/telemetry/route.test.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/telemetry/route.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/toots/[id]/audio/route.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/toots/[id]/checkout/route.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/toots/[id]/payment/route.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/api/toots/[id]/route.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/compose/[song]/page.tsx": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/dev/checkout/page.tsx": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/dev/mail/page.tsx": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/dev/telemetry/page.test.tsx": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/dev/telemetry/page.tsx": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/dev/telemetry/triggers.tsx": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/globals.css": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/layout.tsx": {
+          "findings": 7,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/manifest.webmanifest/route.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/not-found.tsx": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/page.tsx": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/robots.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/shell.json/route.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/app/toots/toot/page.tsx": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/account-provider.tsx": {
+          "findings": 21,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/account-step.tsx": {
+          "findings": 8,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/app-shell.tsx": {
+          "findings": 19,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/compose-screen.tsx": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/download-qr.tsx": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/fixture-library.tsx": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/install-button.tsx": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/install-prompt.tsx": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/lander.tsx": {
+          "findings": 11,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/locked-song-sheet.tsx": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/note-view.tsx": {
+          "findings": 33,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/pedos-provider.tsx": {
+          "findings": 61,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/pitch-strip.tsx": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/previous-page.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/profile-screen.tsx": {
+          "findings": 11,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/record-button.tsx": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/record-flow.tsx": {
+          "findings": 14,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/record-screen.tsx": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/recordings-screen.tsx": {
+          "findings": 11,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/song-creator.tsx": {
+          "findings": 31,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/toot-screen.tsx": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/toots-screen.tsx": {
+          "findings": 13,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/waveform.tsx": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/welcome.tsx": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/db/database.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/db/deploy-config.test.ts": {
+          "findings": 14,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/db/index.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/db/library.ts": {
+          "findings": 17,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/db/payments.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/db/schema.ts": {
+          "findings": 32,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/instrumentation-client.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/account.test.ts": {
+          "findings": 11,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/account.ts": {
+          "findings": 42,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis-upgrade.test.ts": {
+          "findings": 8,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis-upgrade.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/audition.test.ts": {
+          "findings": 8,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/audition.ts": {
+          "findings": 12,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/client.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/fft.ts": {
+          "findings": 12,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/numeric.ts": {
+          "findings": 13,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/port.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/pyin.ts": {
+          "findings": 26,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/recording-analysis.test.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/recording-analysis.ts": {
+          "findings": 15,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/recording-pitch.test.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/recording-pitch.ts": {
+          "findings": 14,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/resample.test.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/resample.ts": {
+          "findings": 15,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/timing.test.ts": {
+          "findings": 8,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/trimming.test.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/trimming.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/variable-resample.ts": {
+          "findings": 17,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/version.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/worker.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/audio/capture-processor.test.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/audio/capture-processor.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/audio/context.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/audio/player.test.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/audio/player.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/audio/recorder.ts": {
+          "findings": 59,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/catalog/catalog.test.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/catalog/generate.ts": {
+          "findings": 7,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/catalog/song.ts": {
+          "findings": 11,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/desktop.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/download-qr.test.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/download-qr.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/assignment.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/auto-map.test.ts": {
+          "findings": 29,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/auto-map.ts": {
+          "findings": 72,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/client.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/render-song.ts": {
+          "findings": 10,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/render-source.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/renderer.test.ts": {
+          "findings": 16,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/renderer.ts": {
+          "findings": 35,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/song.ts": {
+          "findings": 8,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/worker.test.ts": {
+          "findings": 8,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/worker.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/fixture-library.test.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/fixture-library.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/install.test.ts": {
+          "findings": 8,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/install.ts": {
+          "findings": 25,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/library-api.ts": {
+          "findings": 10,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/library-sync.test.ts": {
+          "findings": 24,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/library-sync.ts": {
+          "findings": 46,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/other-hosts.ts": {
+          "findings": 9,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/outbox.test.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/outbox.ts": {
+          "findings": 16,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/pitch-coverage.test.ts": {
+          "findings": 24,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/pitch-coverage.ts": {
+          "findings": 34,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/pitch.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/pricing.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/recording-store.test.ts": {
+          "findings": 10,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/recording-store.ts": {
+          "findings": 42,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/recordings.test.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/recordings.ts": {
+          "findings": 23,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/service-worker.test.ts": {
+          "findings": 14,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/site.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/sitemap.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/staging-access.ts": {
+          "findings": 15,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/stale-build.test.ts": {
+          "findings": 10,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/stale-build.ts": {
+          "findings": 11,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/tabs.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/telemetry/errors.test.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/telemetry/errors.ts": {
+          "findings": 13,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/telemetry/queue.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/telemetry/report.ts": {
+          "findings": 21,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/telemetry/sharing.ts": {
+          "findings": 7,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/test-library.ts": {
+          "findings": 12,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/test-storage.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/toot-payment.ts": {
+          "findings": 14,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/toot-renderer.test.ts": {
+          "findings": 10,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/toot-renderer.ts": {
+          "findings": 7,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/toot-store.ts": {
+          "findings": 12,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/toot.test.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/toot.ts": {
+          "findings": 16,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/visit.test.ts": {
+          "findings": 16,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/visit.ts": {
+          "findings": 25,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/wav.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/waveform.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/welcomed.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/auth-config.test.ts": {
+          "findings": 24,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/auth-config.ts": {
+          "findings": 59,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/auth.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/dev-mailbox.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/email.test.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/email.ts": {
+          "findings": 13,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/environment.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/library-input.ts": {
+          "findings": 16,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/library.ts": {
+          "findings": 22,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/media.ts": {
+          "findings": 10,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/media.workers.test.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/require-user.ts": {
+          "findings": 10,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/session-user.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/stripe.test.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/stripe.ts": {
+          "findings": 16,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/toot-payments.ts": {
+          "findings": 16,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/wav-header.test.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/wav-header.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/test-support/decode.ts": {
+          "findings": 14,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/test-support/engine-golden.ts": {
+          "findings": 11,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/test-support/fake-worker.ts": {
+          "findings": 13,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/test-support/golden.ts": {
+          "findings": 12,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/test-support/library-api.ts": {
+          "findings": 13,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/test-support/local-bindings.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/test-support/workers-entry.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/test-support/workers-session.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/test-support/workers-setup.ts": {
+          "findings": 7,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/vitest.config.mts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/worker.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/wrangler.jsonc": {
+          "findings": 29,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/catalog/import_pdmx.py": {
+          "findings": 27,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/catalog/pdmx.py": {
+          "findings": 48,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/catalog/test_pdmx.py": {
+          "findings": 51,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/melody-lab/build.py": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/melody-lab/engine.py": {
+          "findings": 67,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/melody-lab/evaluate_renders.py": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/melody-lab/evaluate.py": {
+          "findings": 23,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/melody-lab/export_golden.py": {
+          "findings": 15,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/melody-lab/golden_cost.py": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/melody-lab/melody.py": {
+          "findings": 13,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/melody-lab/test_needed_seconds.py": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        }
+      },
+      "docs": {
+        "docs/agents/domain.md": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "docs/agents/issue-tracker.md": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "docs/brand/README.md": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "docs/design/app-map.md": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "docs/design/screens.md": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        }
+      },
+      "deadcode": {
+        ".github/workflows/web-auth-secret.yml": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        ".github/workflows/web.yml": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/package.json": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/pedos-provider.tsx": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/pedos/toots-screen.tsx": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/alert-dialog.tsx": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/card.tsx": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/dialog.tsx": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/dropdown-menu.tsx": {
+          "findings": 9,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/empty.tsx": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/item.tsx": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/progress.tsx": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/separator.tsx": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/sheet.tsx": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/numeric.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/recording-analysis.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/recording-pitch.ts": {
+          "findings": 6,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/trimming.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/analysis/variable-resample.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/audio/recorder.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/auto-map.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/render-song.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/renderer.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/engine/song.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/sitemap.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/staging-access.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/stale-build.ts": {
+          "findings": 5,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/telemetry/errors.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/telemetry/queue.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/telemetry/report.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/telemetry/sharing.ts": {
+          "findings": 2,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/test-library.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/toot-payment.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/toot-renderer.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/auth-config.ts": {
+          "findings": 12,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/auth.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/email.ts": {
+          "findings": 4,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/library.ts": {
+          "findings": 3,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/server/require-user.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/test-support/engine-golden.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        }
+      },
+      "dependencies": {
+        "apps/web/scripts/fixture-library.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/scripts/render-songs.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/item.tsx": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/components/ui/separator.tsx": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/test-library.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "apps/web/src/lib/test-storage.ts": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        }
+      },
+      "linters": {
+        "tools/melody-lab/melody.py": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/melody-lab/plot_env.py": {
+          "findings": 14,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        },
+        "tools/melody-lab/run_all.py": {
+          "findings": 1,
+          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
+        }
+      }
+    }
+  }
+}
