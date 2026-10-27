@@ -21,6 +21,6 @@ These rules come from a long first attempt that produced a lot of process and li
 - **Match the reference.** `tools/melody-lab/` is the reference engine. When Swift behavior differs from it, either fix the Swift code or change the reference deliberately and re-verify it.
 - **Keep the UI simple.** Remove anything that isn't needed.
 - **The owner is not a blocker (before the MVP).** See Who merges in `docs/agents/web.md`.
-- **Never read, type or print a secret.** Move one with the `serp-create-secret` skill, which handles it without you seeing the value.
+- **Never read, type or print a secret.** Follow SERP's [Secret Authority](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/agent-operations/secret-authority.md). Write a value you make, or a Cloudflare API token from the owner's keychain minter, straight to where it's read. Stripe's and every other dashboard's keys are the owner's to set from their own terminal.
 - **No App Store or TestFlight.** Never submit to either again. 1.0.0 was rejected under guidelines 4.3(b) and 1.1.1 (ADR 0007), and the owner said never to resubmit a fart app.
 - **Fixtures are internal.** The Fixture Library (`fixtures/recordings/`) never ships in regular-user builds.
