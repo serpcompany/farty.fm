@@ -2,6 +2,7 @@ import { getDb } from '@/db'
 import type { Database } from '@/db/database'
 import {
   deleteUser,
+  insertPaidToot,
   insertRecording,
   insertToot,
   itemStatus,
@@ -16,7 +17,7 @@ import {
   tombstone,
   uploadState
 } from '@/db/library'
-import { isTootPaid } from '@/db/payments'
+import { tootPayment } from '@/db/payments'
 import type { Recording } from '@/lib/recordings'
 import type { Toot } from '@/lib/toot'
 
@@ -133,7 +134,8 @@ export async function getLibrary({ db }: Stores, user: SessionUser, request: Req
  * 200 if it already was (an upload that's retried changes nothing), 410 if it was deleted, 409 at
  * the limit, or when `LIBRARY_HEADER` names another account (`wrong_account`). With `paidOnly`,
  * where saving a Toot is paid (ADR 0010), 402 for a new one that isn't paid for
- * (`payment_required`).
+ * (`payment_required`), and the first save uses its payment up: 410 for one saved and deleted
+ * since, even once its tombstone is purged.
  */
 export async function putItem(
   kind: Kind,
@@ -159,14 +161,19 @@ export async function putItem(
     }
   } else {
     const toot = parseToot(upload.metadata, id)
-    if (toot) add = audioBytes => insertToot(db, user.id, { ...toot, audioBytes }, maxItems)
+    const insert = paidOnly ? insertPaidToot : insertToot
+    if (toot) add = audioBytes => insert(db, user.id, { ...toot, audioBytes }, maxItems)
   }
   if (!add) return apiError(400, 'invalid_request')
 
   const before = await uploadState(db, kind, user.id, id)
   if (before.status === 'live') return Response.json({ id }, { status: 200 })
   if (before.status === 'deleted') return gone()
-  if (paidOnly && !(await isTootPaid(db, user.id, id))) return apiError(402, 'payment_required')
+  if (paidOnly) {
+    const payment = await tootPayment(db, user.id, id)
+    if (payment?.savedAt) return gone()
+    if (!payment?.paidAt) return apiError(402, 'payment_required')
+  }
   if (before.live >= maxItems) return apiError(409, 'limit_reached')
 
   const key = audioKey(user.id, kind, id)

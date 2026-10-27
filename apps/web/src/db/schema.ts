@@ -169,7 +169,9 @@ export const toots = sqliteTable(
  * A Toot's payment (ADR 0010): one row per Toot a user has started to pay for, keyed by the user
  * and the Toot's id, made before its Toot is saved. `paid_at` is set once Stripe says it's paid
  * (the webhook, or the return from Checkout asking Stripe), and only then does the Toot upload.
- * Stripe keeps the payment itself; no card data is here.
+ * `saved_at` is set with the Toot's first save, which uses the payment up: a Toot deleted since
+ * can't be saved again, even once its tombstone is gone. Stripe keeps the payment itself; no card
+ * data is here.
  */
 export const tootPayments = sqliteTable(
   'toot_payments',
@@ -183,8 +185,14 @@ export const tootPayments = sqliteTable(
     /** What the session charges, in the currency's smallest unit. */
     amount: integer('amount').notNull(),
     currency: text('currency').notNull(),
+    /**
+     * The Song it's a Toot of, so a paid Toot whose save never came back can be made and saved
+     * again. Null for a payment started before #213.
+     */
+    songId: text('song_id'),
     createdAt: timestamp('created_at').notNull(),
-    paidAt: timestamp('paid_at')
+    paidAt: timestamp('paid_at'),
+    savedAt: timestamp('saved_at')
   },
   table => [primaryKey({ columns: [table.userId, table.tootId] })]
 )
