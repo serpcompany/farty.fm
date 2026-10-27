@@ -157,23 +157,37 @@ export function connectionLost(error: unknown): boolean {
 /**
  * Runs `work`, a read or a write, on the database. When it fails because the connection was
  * closed or lost, it runs once more on a fresh connection, so a tab left asleep still saves and
- * plays (#222). Should that fail too, the failure is reported (`library-connection-lost`) and
- * thrown. `work` may run twice, so it does nothing outside the database.
+ * plays (#222). Should that lose its connection too, the failure is reported
+ * (`library-connection-lost`) and thrown; any other failure is thrown as it is.
+ *
+ * `work` may run twice, so it does nothing outside the database. The first run may have committed
+ * though the page never heard (WebKit can lose the connection between the two), so the second,
+ * told it's a `retry`, finds its own write already there rather than failing on it.
  */
-export async function withDb<T>(work: (database: IDBPDatabase<PedosDB>) => Promise<T>): Promise<T> {
+export async function withDb<T>(
+  work: (database: IDBPDatabase<PedosDB>, retry: boolean) => Promise<T>
+): Promise<T> {
   const connection = db()
   try {
-    return await work(await connection)
+    return await work(await connection, false)
   } catch (error) {
     if (!connectionLost(error)) throw error
     forget(connection)
     try {
-      return await work(await db())
+      return await work(await db(), true)
     } catch (again) {
-      reportError('library-connection-lost', again)
+      if (connectionLost(again)) reportError('library-connection-lost', again)
       throw again
     }
   }
+}
+
+/** Whether `stored` holds every field of `fields`, as a write of them would have left it. */
+export function holds(stored: object, fields: object): boolean {
+  const kept = stored as Record<string, unknown>
+  return Object.entries(fields).every(
+    ([key, value]) => JSON.stringify(kept[key]) === JSON.stringify(value)
+  )
 }
 
 /**
@@ -253,9 +267,17 @@ export async function saveRecording(
   wav: ArrayBuffer,
   id: string = crypto.randomUUID()
 ): Promise<Recording> {
-  const recording = await withDb(async database => {
+  const recording = await withDb(async (database, retry) => {
     const tx = database.transaction(['recordings', 'audio', 'outbox'], 'readwrite')
     const outbox = tx.objectStore('outbox')
+    if (retry) {
+      // The first try's Recording, with its audio and its upload queued in the same transaction.
+      const stored = await tx.objectStore('recordings').get(id)
+      if (stored && holds(stored, fields)) {
+        await tx.done
+        return stored
+      }
+    }
     const existing = await tx.objectStore('recordings').getAll()
     const recording: Recording = {
       ...fields,

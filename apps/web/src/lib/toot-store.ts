@@ -1,5 +1,5 @@
 import { announceQueued, itemKey } from './outbox'
-import { deleteItem, download, queue, withDb } from './recording-store'
+import { deleteItem, download, holds, queue, withDb } from './recording-store'
 import type { Toot } from './toot'
 
 // Toots in IndexedDB, beside the Recordings (version 2 of the `pedos` database). As the iPhone
@@ -30,11 +30,21 @@ export async function loadToots(): Promise<Toot[]> {
     .sort((a, b) => b.createdAt - a.createdAt)
 }
 
-/** Saves a Toot and its WAV together. Throws if a Toot with this id is already saved. */
+/**
+ * Saves a Toot and its WAV together. Throws if another Toot with this id is already saved: a
+ * retry finding this one, saved by a first try the page didn't hear back from, is done (`withDb`).
+ */
 export async function saveToot(toot: Toot, wav: ArrayBuffer): Promise<void> {
-  await withDb(async database => {
+  await withDb(async (database, retry) => {
     const tx = database.transaction(['toots', 'tootAudio', 'outbox'], 'readwrite')
     const outbox = tx.objectStore('outbox')
+    if (retry) {
+      const stored = await tx.objectStore('toots').get(toot.id)
+      if (stored && holds(stored, toot)) {
+        await tx.done
+        return
+      }
+    }
     await Promise.all([
       tx.objectStore('toots').add(toot),
       tx.objectStore('tootAudio').add(wav, toot.id),

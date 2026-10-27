@@ -82,6 +82,85 @@ describe('a lost database connection', () => {
     expect(reportError).not.toHaveBeenCalled()
   })
 
+  it('reports only a lost connection: another failure on the retry is thrown as it is', async () => {
+    const store = await page()
+    const constraint = new DOMException(
+      'Key already exists in the object store.',
+      'ConstraintError'
+    )
+    const work = vi
+      .fn<(database: unknown, retry: boolean) => Promise<void>>()
+      .mockRejectedValueOnce(lost())
+      .mockRejectedValueOnce(constraint)
+    await expect(store.withDb(work)).rejects.toBe(constraint)
+    expect(work).toHaveBeenCalledTimes(2)
+    expect(work.mock.calls.map(([, retry]) => retry)).toEqual([false, true])
+    expect(reportError).not.toHaveBeenCalled()
+  })
+
+  /**
+   * The next transaction on the page's connection commits, but the page hears its connection was
+   * lost instead, as WebKit can when the IndexedDB server goes away as a transaction completes.
+   */
+  async function loseNextCompletion(store: Store) {
+    const connection = unwrap(await store.db())
+    const transaction = connection.transaction.bind(connection)
+    connection.transaction = ((...args: Parameters<IDBDatabase['transaction']>) => {
+      connection.transaction = transaction
+      const tx = transaction(...args)
+      // idb listens for `complete`, `error` and `abort` as it wraps the transaction (`tx.done`):
+      // its `complete` hears an `error` instead. Whatever listens after it hears as usual.
+      let failed: EventListenerOrEventListenerObject | null = null
+      const listen = tx.addEventListener
+      tx.addEventListener = ((type: string, listener: EventListenerOrEventListenerObject) => {
+        if (type === 'complete') {
+          listen.call(tx, 'complete', event => {
+            Object.defineProperty(tx, 'error', { get: lost })
+            if (typeof failed === 'function') failed(event)
+          })
+          return
+        }
+        if (type === 'error') failed = listener
+        if (type === 'abort') tx.addEventListener = listen
+        listen.call(tx, type, listener)
+      }) as IDBTransaction['addEventListener']
+      return tx
+    }) as IDBDatabase['transaction']
+  }
+
+  it('a retried save finds the Recording its first try saved, unheard, and keeps one', async () => {
+    const store = await page()
+    await loseNextCompletion(store)
+    const saved = await save(store)
+    expect(saved.number).toBe(1)
+    const all = await store.loadRecordings()
+    expect(all).toEqual([saved])
+    const outbox = await store.withDb(database => database.getAll('outbox'))
+    expect(outbox.map(entry => entry.id)).toEqual([saved.id])
+    expect(reportError).not.toHaveBeenCalled()
+  })
+
+  it('a retried Toot save finds the Toot its first try saved, unheard, and keeps one', async () => {
+    const store = await page()
+    const toots = await import('./toot-store')
+    const toot = {
+      id: 'toot-1',
+      title: 'Mary Had a Little Lamb',
+      songId: 'mary',
+      createdAt: 1,
+      seconds: 12,
+      arrangement: { transposition: 0, recordingForPitch: { 55: 'recording-1' } }
+    }
+    await loseNextCompletion(store)
+    await toots.saveToot(toot, new ArrayBuffer(8))
+    expect(await toots.loadToots()).toEqual([toot])
+    const outbox = await store.withDb(database => database.getAll('outbox'))
+    expect(outbox.map(entry => entry.id)).toEqual([toot.id])
+    // Another Toot under its id still fails.
+    await expect(toots.saveToot({ ...toot, title: 'Other' }, new ArrayBuffer(8))).rejects.toThrow()
+    expect(reportError).not.toHaveBeenCalled()
+  })
+
   it.each([
     [new DOMException('The database connection is closing.', 'InvalidStateError'), true],
     [lost(), true],
