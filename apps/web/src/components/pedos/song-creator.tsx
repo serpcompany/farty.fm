@@ -8,9 +8,10 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import type { Song } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
+import { formattedFartLength } from '@/lib/pitch-coverage'
 import { TOOT_PRICE_LABEL } from '@/lib/pricing'
 import * as store from '@/lib/recording-store'
-import { formattedLength, type Recording, recordingName, recordingPitch } from '@/lib/recordings'
+import { type Recording, recordingName, recordingPitch } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
 import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/toot'
@@ -463,8 +464,9 @@ export function TootLayout({
 }
 
 /**
- * A Recording the Toot uses: the color of its notes, play, its name, its waveform and length, and
- * the note it plays in the Song. As the iPhone app's `RecordingRow` in Song Creator.
+ * A Recording the Toot uses: the color of its notes, play, its name, its waveform and its fart's
+ * length, and the note it plays in the Song. As the iPhone app's `RecordingRow` in Song Creator,
+ * which shows the whole take's length.
  */
 function RecordingUsedRow({
   recording,
@@ -484,7 +486,7 @@ function RecordingUsedRow({
   const levels = useWholeLevels(recording.id)
   const name = recordingName(recording)
   const pitch = recordingPitch(recording)
-  const length = formattedLength(recording.seconds)
+  const length = formattedFartLength(recording)
 
   return (
     <li

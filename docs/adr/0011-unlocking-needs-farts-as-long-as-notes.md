@@ -13,6 +13,8 @@ Until #221, unlocking checked pitch only. A note's length was only a cost (the s
 
 Update 2026-10-28 (ADR 0012, #226): Songs play every fart raw, so the rule uses the fart's own length, `seconds ≥ NOTE_FILL × max(dur × 60 / bpm − GAP_S)`. An Octave Move no longer halves or doubles it, and the length in 3 is the same whatever the fart's octave. The costs use the fart's own length too. With the Fixture Library this locks Jingle Bells, Row, Row, Row Your Boat and Auld Lang Syne, and 35 other catalog Songs. The measurements below used lengths after resampling.
 
+Update 2026-10-28 (#227): the Recordings screen and Song Creator show each Recording's fart length, the gesture this rule measures, not the whole take. They round it down to 0.1 s, as the length in 3 is rounded up, so a fart shown as long as a missing note says is long enough for it.
+
 The reference engine (`fills()` and `needed_seconds()` in `tools/melody-lab/engine.py`) defines the rule, and Auto-map in `apps/web/src/lib/engine/auto-map.ts` matches it. `fixtures/golden/` (format 4) records each locked Song's `missing` notes with their lengths.
 
 ## Why

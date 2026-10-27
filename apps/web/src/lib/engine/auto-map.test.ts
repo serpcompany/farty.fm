@@ -389,6 +389,60 @@ describe('Auto-map inputs and terms', () => {
     expect(neededSeconds(0.7)).toBe(0.7)
   })
 
+  /** A fart of `seconds`, in whole samples, as Recording Analysis measures one. */
+  const exactly = (seconds: number) => Math.round(seconds * SR) / SR
+
+  it('says the shortest length, in tenths of a second, that fills every pitch of every Song', () => {
+    let pitches = 0
+    for (const id of songIds) {
+      const song = goldenSong(id)
+      const spb = 60 / song.bpm
+      for (const p of new Set(song.notes.map(n => n.pitch))) {
+        // As `arrange` measures a pitch's longest note, to the last bit.
+        const longest = Math.max(
+          ...song.notes.filter(n => n.pitch === p).map(n => n.dur * spb - 0.025)
+        )
+        const needed = neededSeconds(longest)
+        expect(fills(exactly(needed), longest), `${id} ${p}: ${needed} s`).toBe(true)
+        expect(fills(exactly(needed - 0.1), longest), `${id} ${p}: ${needed} s`).toBe(false)
+        pitches++
+      }
+    }
+    expect(pitches).toBeGreaterThan(70)
+  })
+
+  it('unlocks a locked Song with farts as long as it says, 3 semitones or an octave from each note', () => {
+    // Songs play every fart at its own length (ADR 0012), so the stated length holds for any fart
+    // that may play the note: 3 semitones below or above it, or an octave away (an Octave Move).
+    let locked = 0
+    let lockedInGolden = 0
+    for (const library of Object.keys(libraries) as Library[]) {
+      const recordings = libraries[library].map(autoMapInput)
+      for (const id of songIds) {
+        if (!goldenArrangement(library, id).unlocked) lockedInGolden++
+        const song = goldenSong(id)
+        const { unlocked, missingNotes } = arrange(song, recordings)
+        if (unlocked) continue
+        locked++
+        for (const fromNote of [-3, 3, -12, 12]) {
+          const farts = missingNotes.map(m => ({
+            id: `new-${m.midi}`,
+            recordingPitchMidi: m.midi + fromNote,
+            shortestNoteSeconds: 0.1,
+            gestureSeconds: exactly(m.seconds),
+            settleSeconds: 0
+          }))
+          expect(
+            arrange(song, [...recordings, ...farts]).unlocked,
+            `${id} on the ${library} library, farts ${fromNote} semitones from ${missingNotes.map(m => `${m.midi} (${m.seconds} s)`).join(', ')}`
+          ).toBe(true)
+        }
+      }
+    }
+    expect(locked).toBe(lockedInGolden)
+    expect(locked).toBeGreaterThan(0)
+  })
+
   it('charges notes that sound shorter than the Recording can settle', () => {
     expect(tooShortCost([0.5], 1, 0.35)).toBe(0)
     expect(tooShortCost([0.3], 1, 0.35)).toBeCloseTo(8 + 400 * 0.05, 9)

@@ -11,6 +11,8 @@ import {
   coverageKey,
   coverageOf,
   coverageSummary,
+  fartSeconds,
+  formattedFartLength,
   missingNotes,
   type SongOrder,
   songListing,
@@ -399,5 +401,54 @@ describe('what a save changed', () => {
     expect(coverageChanges(songs, all, all).closest?.song.id).toBe('auld')
     const others = songs.filter(s => !lockedByAll.includes(s.id))
     expect(coverageChanges(others, all, all).closest).toBeNull()
+  })
+})
+
+describe('the fart length a Recording shows (#227)', () => {
+  /** A Melodic Recording at `midi` whose fart lasts `fart` seconds, in a take 1 s longer. */
+  const take = (number: number, midi: number, fart: number): Recording => ({
+    id: `take-${number}`,
+    number,
+    createdAt: 0,
+    seconds: fart + 1,
+    sampleRate: 44_100,
+    waveform: [],
+    analysis: {
+      state: 'analyzed',
+      analysis: {
+        gestureStartSeconds: 0.5,
+        gestureEndSeconds: 0.5 + fart,
+        cutAtReattack: false,
+        pitchEstimateMidi: midi,
+        pitchConfidence: 1,
+        recordingPitchMidi: midi,
+        shortestNoteSeconds: 0.1,
+        settleSeconds: 0
+      }
+    }
+  })
+
+  it('is the fart, not the whole take', () => {
+    const recording = take(1, 60, 2.4)
+    expect(fartSeconds(recording)).toBeCloseTo(2.4, 9)
+    expect(formattedFartLength(recording)).toBe('2.4 s')
+    // Before analysis has found the fart, the whole take.
+    expect(formattedFartLength({ ...recording, analysis: { state: 'analyzing' } })).toBe('3.4 s')
+  })
+
+  it('unlocks a locked Song once a fart near each missing note shows the length it needs', () => {
+    // Amazing Grace on the whole Fixture Library. Its F3 needs 3.0 s for a 2.975 s note, so a
+    // 2.96 s fart shows 2.9 s: rounded to the nearest, it would show 3.0 s and stay locked.
+    const amazing = song('amazing')
+    const { missing } = coverageOf(amazing, all)
+    expect(missingNotes(coverageOf(amazing, all))).toBe('D3 (1.2 s) and F3 (3.0 s)')
+    // Each fart 3 semitones below its note.
+    const near = (lengths: number[]) => missing.map((m, i) => take(100 + i, m.midi - 3, lengths[i]))
+    const asNeeded = near(missing.map(m => m.seconds))
+    expect(asNeeded.map(formattedFartLength)).toEqual(['1.2 s', '3.0 s'])
+    expect(coverageOf(amazing, [...all, ...asNeeded]).unlocked).toBe(true)
+    const tooShort = near([1.2, 2.96])
+    expect(tooShort.map(formattedFartLength)).toEqual(['1.2 s', '2.9 s'])
+    expect(coverageOf(amazing, [...all, ...tooShort]).unlocked).toBe(false)
   })
 })

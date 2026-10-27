@@ -8,7 +8,7 @@ import {
 } from '@/lib/engine/auto-map'
 import type { Song as EngineSong } from '@/lib/engine/song'
 import { noteName, pitchClass } from '@/lib/pitch'
-import { type Recording, recordingPitch } from '@/lib/recordings'
+import { formattedLength, type Recording, recordingPitch } from '@/lib/recordings'
 
 // Pitch Coverage of the Song Catalog by the user's Recordings: a port of the iPhone app's
 // `PitchCoverage.swift` and `SongListing.swift`. Auto-map (`engine/auto-map.ts`) decides it; this
@@ -47,6 +47,27 @@ function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[]
       ? [autoMapRecording(r.id, r.analysis.analysis)]
       : []
   )
+}
+
+/**
+ * How long a Recording's fart lasts, in seconds: its single clean gesture, without the silence
+ * around it, which is the length the unlock rule measures (ADR 0011, ADR 0012). Before analysis
+ * has found the fart, the whole take.
+ */
+export function fartSeconds(recording: Recording): number {
+  return recording.analysis.state === 'analyzed'
+    ? autoMapRecording(recording.id, recording.analysis.analysis).gestureSeconds
+    : recording.seconds
+}
+
+/**
+ * A Recording's fart length as its rows show it: "2.9 s". Rounded down to 0.1 s, as a missing
+ * note's length is rounded up, so a fart shown as long as a locked Song needs ("Needs a fart near
+ * F3 (3.0 s)") is long enough. Rounded to the nearest, a 2.96 s fart would show 3.0 s and still be
+ * too short for a 2.975 s note. The 1e-9 keeps float noise from taking 0.1 s off an exact tenth.
+ */
+export function formattedFartLength(recording: Recording): string {
+  return formattedLength(Math.floor(fartSeconds(recording) * 10 + 1e-9) / 10)
 }
 
 /** A catalog Song as the engine takes it. */
