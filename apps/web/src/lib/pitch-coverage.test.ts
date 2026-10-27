@@ -74,8 +74,8 @@ const listing = (recordings: Recording[], query = '', order: SongOrder = 'closes
   songListing(sortRows(songRows(songs, recordings), order), query)
 
 describe('Pitch Coverage against the reference engine', () => {
-  it('unlocks all 12 Songs with the 14 Melodic fixtures', () => {
-    expect(all.filter(r => coverageKey([r]) !== '[]')).toHaveLength(14)
+  it('unlocks all 12 Songs with the 24 Melodic fixtures', () => {
+    expect(all.filter(r => coverageKey([r]) !== '[]')).toHaveLength(24)
     expect(songs).toHaveLength(12)
     for (const s of songs) expect(coverageOf(s, all).unlocked, s.id).toBe(true)
   })
