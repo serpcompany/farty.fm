@@ -23,7 +23,11 @@ const holds = new Set<symbol>()
 let waiting = false
 let reported = false
 
-/** A script's chunk failed to load: Turbopack's `ChunkLoadError`, or a failed `import()`. */
+/**
+ * A script's chunk failed to load: Turbopack's `ChunkLoadError`, or a failed `import()`. A failed
+ * `import()` is a `TypeError`: "Importing a module script failed." in WebKit (Safari 18.4, measured
+ * in Playwright's WebKit), "Failed to fetch dynamically imported module: <url>" in Chromium.
+ */
 export function isScriptLoadFailure(error: unknown): boolean {
   if (typeof error !== 'object' || error === null) return false
   const { name, message } = error as { name?: unknown; message?: unknown }
@@ -38,13 +42,16 @@ export function isScriptLoadFailure(error: unknown): boolean {
 
 /**
  * A worker's script failed to load. The browser fires a plain `error` event when the worker's own
- * script doesn't load, and an `ErrorEvent` when one it imports doesn't (Turbopack's worker loads
- * its chunks with `importScripts`). Any other error in the worker is its own.
+ * script doesn't load, and an `ErrorEvent` when one it imports doesn't: Turbopack's worker is a
+ * classic one, whose bootstrap loads its chunks with `importScripts`. A failed `importScripts` is
+ * a `NetworkError`, whose uncaught message is "NetworkError: Load failed" in WebKit (Safari 18.4,
+ * measured in Playwright's WebKit) and "Uncaught NetworkError: Failed to execute 'importScripts'
+ * …" in Chromium. Any other error in the worker is its own.
  */
 export function isWorkerScriptFailure(event: Event): boolean {
   const { message } = event as Partial<ErrorEvent>
   if (typeof message !== 'string') return true
-  return /importScripts|Failed to load chunk|ChunkLoadError/i.test(message)
+  return /NetworkError|importScripts|Failed to load chunk|ChunkLoadError/i.test(message)
 }
 
 /** A script of an older build failed to load: reloads once nothing holds the page. */

@@ -71,11 +71,14 @@ describe('a script of an older build that fails to load', () => {
     expect(reportError).toHaveBeenCalledExactlyOnceWith('stale-build', error)
   })
 
-  it('reloads for a failed import() too', async () => {
+  // Each browser's own words for a failed import(), as Playwright's WebKit (Safari 18.4) and
+  // Chromium report a 404.
+  it.each([
+    ['WebKit', 'Importing a module script failed.'],
+    ['Chromium', 'Failed to fetch dynamically imported module: https://farty.test/a.js']
+  ])('reloads for a failed import() too (%s)', async (_browser, message) => {
     await load()
-    rejectOnPage(
-      new TypeError('Failed to fetch dynamically imported module: https://farty.test/a.js')
-    )
+    rejectOnPage(new TypeError(message))
     expect(reload).toHaveBeenCalledTimes(1)
   })
 
@@ -99,14 +102,17 @@ describe("a worker's script that fails to load", () => {
     expect(reload).toHaveBeenCalledTimes(1)
   })
 
-  it('reloads the page when a script the worker imports fails to load', async () => {
+  // Each browser's own words for an uncaught failed importScripts, as Playwright's WebKit (Safari
+  // 18.4) and Chromium report a 404 in a classic worker.
+  it.each([
+    ['WebKit', 'NetworkError: Load failed'],
+    [
+      'Chromium',
+      "Uncaught NetworkError: Failed to execute 'importScripts' on 'WorkerGlobalScope': The script at 'https://farty.test/_next/static/chunks/a.js' failed to load."
+    ]
+  ])('reloads the page when a script the worker imports fails to load (%s)', async (_browser, message) => {
     await load()
-    newWorker().dispatchEvent(
-      Object.assign(new Event('error'), {
-        message:
-          "Uncaught NetworkError: Failed to execute 'importScripts' on 'WorkerGlobalScope': The script at 'https://farty.test/_next/static/chunks/a.js' failed to load."
-      })
-    )
+    newWorker().dispatchEvent(Object.assign(new Event('error'), { message }))
     expect(reload).toHaveBeenCalledTimes(1)
   })
 
