@@ -5,12 +5,14 @@
 `dir` holds `<song>.wav` and `<song>.json` per Song, as `apps/web/scripts/render-songs.ts`
 writes them. The JSON has the Song's `bpm` and one event per note (`note_index`, `len_s`,
 `target_midi`, `source_id`). Each render goes through `evaluate()` exactly as run_all.py calls
-it, prints run_all.py's line, then the golden metrics for the same Song on the full library,
-and checks it:
+it, with the reference's Recordings (`load_library()`) to read each fart's own pitch, prints
+run_all.py's line, then the golden metrics for the same Song on the full library, and checks
+it:
 
-- ADR 0004's bar: at least 94% of notes within +-50 cents, at least 95% of onsets within
-  +-50 ms, and no second attack inside a note;
-- no worse than golden on within_50c_pct, onsets_on_time_pct and notes_with_retrigger.
+- the bar (evaluate.BAR, ADR 0012): at least 94% of notes within +-50 cents of their fart's
+  own pitch, at least 95% of onsets within +-50 ms, and no second attack inside a note;
+- no worse than golden on within_50c_of_fart_pct, onsets_on_time_pct and
+  notes_with_retrigger.
 
 First it checks that `dir` holds exactly one render (`.json` and `.wav`) per golden Arrangement
 that is unlocked (`fixtures/golden/arrangements/full/*.json`), and fails on a missing, extra or
@@ -21,7 +23,7 @@ unlocked golden Arrangements that pYIN reads under the bar (`fixtures/golden/REA
 why).
 
 With --against-reference it also renders each Song with the reference (`plan`, then
-`render(tune=1.0)` on `load_library()`) and prints the largest sample difference from it, for
+`render()` on `load_library()`) and prints the largest sample difference from it, for
 information.
 """
 import argparse
@@ -33,12 +35,11 @@ import librosa
 import numpy as np
 
 from engine import ROOT, SR, load_library, plan, render
-from evaluate import evaluate
+from evaluate import BAR, bar_problems, evaluate
 from melody import load_catalog
 
 GOLDEN = ROOT / "fixtures/golden/arrangements/full"
 SMALL = ROOT / "fixtures/golden/arrangements/small"
-BAR = {"within_50c_pct": 94, "onsets_on_time_pct": 95, "notes_with_retrigger": 0}
 
 
 def render_set_problems(out):
@@ -63,12 +64,12 @@ def render_set_problems(out):
 
 
 def small_library_under_bar():
-    """The small library's unlocked golden Arrangements under ADR 0004's within-50c bar."""
+    """The small library's unlocked golden Arrangements under the bar's fidelity (ADR 0012)."""
     under = []
     for path in sorted(SMALL.glob("*.json")):
         golden = json.loads(path.read_text())
-        within = golden["metrics"]["within_50c_pct"] if golden["unlocked"] else None
-        if within is not None and within < BAR["within_50c_pct"]:
+        within = golden["metrics"]["within_50c_of_fart_pct"] if golden["unlocked"] else None
+        if within is not None and within < BAR["within_50c_of_fart_pct"]:
             under.append(f"{path.stem} {within}%")
     return under
 
@@ -76,7 +77,7 @@ def small_library_under_bar():
 def against_reference(library, melody, audio):
     """How far a render is from the reference's own render of the same Song, sample by sample."""
     _, assignments = plan(melody, library)
-    reference, _ = render(melody, library, assignments, tune=1.0, bpm=melody.bpm)
+    reference, _ = render(melody, library, assignments, bpm=melody.bpm)
     n = min(len(reference), len(audio))
     diff = np.abs(reference[:n].astype(np.float64) - audio[:n].astype(np.float64))
     worst = float(diff.max()) if n else 0.0
@@ -92,7 +93,7 @@ def main():
     args = parser.parse_args()
     out = args.dir
     catalog = {c["id"]: m for c, m in load_catalog()}
-    library = load_library() if args.against_reference else None
+    library = load_library()
     renders, set_problems = render_set_problems(out)
     for problem in set_problems:
         print(f"FAIL: {problem}")
@@ -106,46 +107,40 @@ def main():
         song = events["song"]
         melody = catalog[song]
         audio, _ = librosa.load(path.with_suffix(".wav"), sr=SR, mono=True)
-        r = evaluate(audio, melody, events["notes"], events["bpm"])
-        shifts = [abs(e["shift_semitones"]) for e in events["notes"]]
+        r = evaluate(audio, melody, events["notes"], events["bpm"], library)
         print(
-            f"{song:12s} T={events['transpose']:+d} notes={r['notes']:3d} in50c={r['within_50c_pct']:3d}%"
-            f" med={r['median_abs_cents']:5.1f}c onTime={r['onsets_on_time_pct']}%"
-            f" reatk={r['notes_with_retrigger']} recs={r['distinct_recordings']}"
-            f" octaveMoves={events['octave_moves']} maxShift={max(shifts):.1f} onPitch={r['on_pitch_pct']}%"
+            f"{song:12s} T={events['transpose']:+d} notes={r['notes']:3d} in50cFart={r['within_50c_of_fart_pct']:3d}%"
+            f" onTime={r['onsets_on_time_pct']}% reatk={r['notes_with_retrigger']}"
+            f" | in50c={r['within_50c_pct']:3d}% med={r['median_abs_cents']:5.1f}c contour={r['contour_pct']}%"
+            f" recs={r['distinct_recordings']} octaveMoves={events['octave_moves']}"
             f" sounding={r['sounding_pct']}% mostlySilent={r['notes_mostly_silent']}"
         )
         golden = json.loads((GOLDEN / f"{song}.json").read_text())
         g = golden["metrics"]
         print(
-            f"{'  golden':12s} T={golden['transpose']:+d} notes={g['notes']:3d} in50c={g['within_50c_pct']:3d}%"
-            f" med={g['median_abs_cents']:5.1f}c onTime={g['onsets_on_time_pct']}%"
-            f" reatk={g['notes_with_retrigger']} recs={g['distinct_recordings']}"
-            f" octaveMoves={golden['octave_moves']}"
-            + (f" onPitch={g['on_pitch_pct']}%" if "on_pitch_pct" in g else "")
-            + (f" sounding={g['sounding_pct']}% mostlySilent={g['notes_mostly_silent']}" if "sounding_pct" in g else "")
+            f"{'  golden':12s} T={golden['transpose']:+d} notes={g['notes']:3d} in50cFart={g['within_50c_of_fart_pct']:3d}%"
+            f" onTime={g['onsets_on_time_pct']}% reatk={g['notes_with_retrigger']}"
+            f" | in50c={g['within_50c_pct']:3d}% med={g['median_abs_cents']:5.1f}c contour={g['contour_pct']}%"
+            f" recs={g['distinct_recordings']} octaveMoves={golden['octave_moves']}"
+            f" sounding={g['sounding_pct']}% mostlySilent={g['notes_mostly_silent']}"
         )
-        # Note by note against the golden heard_cents (both rounded to the cent): information only.
-        heard = {n["index"]: n["heard_cents"] for n in golden["notes"]}
-        mine = {p["i"]: p["cents"] for p in r["per_note"]}
-        differ = [i for i in heard if mine.get(i) != heard[i]]
-        deltas = [abs(mine[i] - heard[i]) for i in differ if mine.get(i) is not None and heard[i] is not None]
-        print(f"{'':12s} heard cents: {len(heard) - len(differ)} of {len(heard)} notes equal golden"
-              + (f", max |diff| {max(deltas)}c" if deltas else ""))
-        if library is not None:
+        # Note by note against the golden heard_cents and fart_cents (rounded to the cent): information only.
+        for key, name in (("heard_cents", "cents"), ("fart_cents", "fart_cents")):
+            heard = {n["index"]: n[key] for n in golden["notes"]}
+            mine = {p["i"]: p[name] for p in r["per_note"]}
+            differ = [i for i in heard if mine.get(i) != heard[i]]
+            deltas = [abs(mine[i] - heard[i]) for i in differ if mine.get(i) is not None and heard[i] is not None]
+            print(f"{'':12s} {key.replace('_', ' ')}: {len(heard) - len(differ)} of {len(heard)} notes equal golden"
+                  + (f", max |diff| {max(deltas)}c" if deltas else ""))
+        if args.against_reference:
             print(f"{'':12s} against the reference render: {against_reference(library, melody, audio)}")
-        within = r["within_50c_pct"]
+        within = r["within_50c_of_fart_pct"]
         problems = []
         if r["notes"] != g["notes"]:
             problems.append(f"{r['notes']} notes, golden {g['notes']}")
-        if within < BAR["within_50c_pct"]:
-            problems.append(f"in50c {within}% < {BAR['within_50c_pct']}%")
-        if r["onsets_on_time_pct"] < BAR["onsets_on_time_pct"]:
-            problems.append(f"onTime {r['onsets_on_time_pct']}% < {BAR['onsets_on_time_pct']}%")
-        if r["notes_with_retrigger"] > BAR["notes_with_retrigger"]:
-            problems.append(f"{r['notes_with_retrigger']} notes re-attack")
-        if within < g["within_50c_pct"]:
-            problems.append(f"in50c {within}% worse than golden {g['within_50c_pct']}%")
+        problems += bar_problems(r)
+        if within < g["within_50c_of_fart_pct"]:
+            problems.append(f"in50cFart {within}% worse than golden {g['within_50c_of_fart_pct']}%")
         if r["onsets_on_time_pct"] < g["onsets_on_time_pct"]:
             problems.append(f"onTime {r['onsets_on_time_pct']}% worse than golden {g['onsets_on_time_pct']}%")
         if r["notes_with_retrigger"] > g["notes_with_retrigger"]:
@@ -158,8 +153,8 @@ def main():
         print(f"FAIL: {len(set_problems)} problem(s) with the set of renders (above)")
     under = small_library_under_bar()
     if under:
-        print(f"note: on the small library, golden reads unlocked Songs under {BAR['within_50c_pct']}%"
-              f" within +-50 cents by pYIN: {', '.join(under)} (fixtures/golden/README.md)")
+        print(f"note: on the small library, golden reads unlocked Songs under {BAR['within_50c_of_fart_pct']}%"
+              f" within +-50 cents of their farts: {', '.join(under)} (fixtures/golden/README.md)")
     sys.exit(1 if failures or set_problems else 0)
 
 

@@ -37,11 +37,11 @@ The set of Songs shipped with the app, each with its preserved source and licens
 _Avoid_: Melody pool, song library, melody library
 
 **Melody Fit**:
-How well a set of Melodic Recordings can play a particular Song, judged by how far each Recording would have to be moved to reach the notes it plays, and how much of each note it fills.
+How well a set of Melodic Recordings can play a particular Song, judged by how far each Recording's pitch is from the notes it plays, and how much of each note it fills.
 _Avoid_: Song match, quality score
 
 **Pitch Coverage**:
-How many of a Song's distinct pitches are covered, shown as "3 of 4 notes covered". A pitch is covered by its own Melodic Recording within 3 semitones of it or close enough for an Octave Move, that lasts, once moved, at least as long as the pitch's longest note (ADR 0011). A missing pitch names the shortest fart that would cover it: "Needs a fart near F3 (1.2 s)".
+How many of a Song's distinct pitches are covered, shown as "3 of 4 notes covered". A pitch is covered by its own Melodic Recording within 3 semitones of it or close enough for an Octave Move, that lasts at least as long as the pitch's longest note (ADR 0011). A missing pitch names the shortest fart that would cover it: "Needs a fart near F3 (1.2 s)".
 _Avoid_: Progress, completion
 
 **Unlocked Song**:
@@ -49,11 +49,11 @@ A Song whose Pitch Coverage is complete: every distinct pitch has its own Melodi
 _Avoid_: Available song, playable song
 
 **Arrangement**:
-Which Recording plays each note of a melody.
+Which Recording plays each note of a melody. Each Recording plays raw, at its own pitch and speed (ADR 0012), so a Toot sounds near the melody, not on it.
 _Avoid_: Mapping, mix, assignment
 
 **Octave Move**:
-A Melodic Recording playing a note about an octave from its Recording Pitch: resampled 12 semitones up or down, plus at most 3. Used only where a Song can't be covered without it.
+A Melodic Recording covering a note about an octave from its Recording Pitch: 12 semitones up or down, give or take 3. It plays raw, so it sounds an octave from the note (ADR 0012). Used only where a Song can't be covered without it.
 _Avoid_: Octave folding, octave jump
 
 **Auto-map**:

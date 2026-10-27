@@ -177,7 +177,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **SECONDARY ACTIONS:**
 - Play/Stop
 - tap a Recording to hear that fart alone; its notes are highlighted
-- tap a note to hear just that note as rendered (from the Toot's own audio); it's selected, its Recording is highlighted, and a line says what it is: "F3 · Recording 21 (G3), shifted −2.1 semitones · 1.4 s"
+- tap a note to hear just that note as rendered (from the Toot's own audio); it's selected, its Recording is highlighted, and a line says what it is: "F3 · Recording 21 (G3) · 1.4 s" (no shift since ADR 0012: the fart plays raw)
 **STATES:**
 - Making ("Making your Toot…", about 1–2 s)
 - Ready (auto-plays once)

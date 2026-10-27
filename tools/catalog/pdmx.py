@@ -260,10 +260,10 @@ def sanity_problems(pitches, chord_tones_dropped, inner_onsets_dropped, track_no
 
 
 def render_problems(metrics, bar):
-    """The renderer's bar (fixtures/golden/README.md, evaluate_renders.BAR) on evaluate.py's metrics."""
+    """The renderer's bar (ADR 0012, evaluate.BAR) on evaluate.py's metrics."""
     problems = []
-    if metrics["within_50c_pct"] < bar["within_50c_pct"]:
-        problems.append(f"in50c {metrics['within_50c_pct']}% < {bar['within_50c_pct']}%")
+    if metrics["within_50c_of_fart_pct"] < bar["within_50c_of_fart_pct"]:
+        problems.append(f"in50cFart {metrics['within_50c_of_fart_pct']}% < {bar['within_50c_of_fart_pct']}%")
     if metrics["onsets_on_time_pct"] < bar["onsets_on_time_pct"]:
         problems.append(f"onTime {metrics['onsets_on_time_pct']}% < {bar['onsets_on_time_pct']}%")
     if metrics["notes_with_retrigger"] > bar["notes_with_retrigger"]:

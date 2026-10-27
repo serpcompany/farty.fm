@@ -1,9 +1,11 @@
 """Fart-only melody engine (proof).
 
-Every sample in the output is a Recording's own waveform. The only operations are:
-  trim to the detected sound, variable-rate resampling (pitch), fade in/out, gain, and mixing.
-There is no oscillator, filter-resonator, looping, or granular re-triggering anywhere.
-Each operation has a direct AVAudioEngine / Accelerate equivalent for the iOS port.
+Every sample in the output is a Recording's own waveform, played raw (ADR 0012): at its own
+pitch and speed. The only operations are: trim to the detected sound, cut at the note's end,
+fade in/out, gain, and mixing. Nothing changes a fart's pitch or length: there is no
+resampling, oscillator, filter-resonator, looping, or granular re-triggering anywhere.
+Recording Analysis still reads each fart back with its pitch held (variable_resample()) to
+decide whether it is Melodic and when it settles; no Song plays that read-back.
 """
 import json
 import math
@@ -148,12 +150,13 @@ def analyze_recording(rid, y):
 
 
 def audition(src):
-    """Play the Recording through the real render path at its own pitch for a few note
-    lengths and read the pitch back. Returns the shortest note length (s) that still reads
-    within 40 cents, or None. Catches farts whose pitch only settles after the attack."""
+    """Read the Recording back with its pitch held on ref_midi (variable_resample()) for a few
+    note lengths. Returns the shortest note length (s) that still reads within 40 cents, or
+    None. Catches farts whose pitch only settles after the attack. Songs play farts raw since
+    ADR 0012; this read-back stayed as it was, so Melodic Recordings and Auto-map's picks did."""
     for length in (0.12, 0.2, 0.35, 0.6):
         n = int(min(length, src.seconds) * SR)
-        seg = variable_resample(src.audio, src.f0, 1.0, 1.0, n, src.ref_midi)
+        seg = variable_resample(src.audio, src.f0, n, src.ref_midi)
         f0, voiced, _ = librosa.pyin(seg, fmin=45, fmax=900, sr=SR, frame_length=2048, hop_length=HOP)
         f = f0[voiced & np.isfinite(f0)]
         if len(f) >= 2 and abs(np.median(librosa.hz_to_midi(f)) - src.ref_midi) * 100 <= 40:
@@ -168,9 +171,9 @@ SETTLE_RUN_FRAMES = 9  # 9 hops = 52 ms in a row on pitch
 
 
 def heard_cents(src):
-    """The whole gesture played through the real render path at its own pitch (as audition()
-    does) and read back by pYIN: cents from ref_midi per hop, nan where unvoiced."""
-    seg = variable_resample(src.audio, src.f0, 1.0, 1.0, len(src.audio), src.ref_midi)
+    """The whole gesture read back with its pitch held (as audition() does) by pYIN: cents
+    from ref_midi per hop, nan where unvoiced."""
+    seg = variable_resample(src.audio, src.f0, len(src.audio), src.ref_midi)
     f0, voiced, _ = librosa.pyin(seg, fmin=45, fmax=900, sr=SR, frame_length=2048, hop_length=HOP)
     ok = voiced & np.isfinite(f0)
     return np.where(ok, (librosa.hz_to_midi(np.where(ok, f0, 1.0)) - src.ref_midi) * 100, np.nan)
@@ -180,8 +183,8 @@ def settle_time(src):
     """Seconds from the gesture start until the Recording, played at its own pitch, is on pitch
     and stays there: the first pYIN frame (centered at frame x 256 samples) that starts
     SETTLE_RUN_FRAMES voiced frames in a row within SETTLE_CENTS of ref_midi. The Recording's
-    whole length if that never happens. Glides, scoops and slow starts that the renderer's
-    pitch-following can't straighten show up here; an Octave Move scales it by 2^(-shift/12)."""
+    whole length if that never happens. Glides, scoops and slow starts that the pitch-held
+    read-back can't straighten show up here."""
     heard = heard_cents(src)
     on = np.abs(np.nan_to_num(heard, nan=np.inf)) <= SETTLE_CENTS
     for i in range(len(on) - SETTLE_RUN_FRAMES + 1):
@@ -203,27 +206,26 @@ def load_library(ids=None):
 
 # ---------------------------------------------------------------- Melody Fit planning
 
-MAX_SHIFT = 3.0  # semitones a Recording may be moved from its Recording Pitch (ADR 0004) ...
+MAX_SHIFT = 3.0  # semitones a note may be from its Recording's pitch (ADR 0004) ...
 OCTAVE = 12.0  # ... or from the same note an octave up or down, with an Octave Move (ADR 0006)
-OCTAVE_MOVE_COST = 6.0  # per beat, on top of the remaining shift: more than any real-pitch move (3^1.5 = 5.2)
+OCTAVE_MOVE_COST = 6.0  # per beat, on top of the remaining distance: more than any closer note (3^1.5 = 5.2)
 TOO_SHORT_COST = 8.0  # per note that sounds too briefly for the Recording to settle on its pitch ...
 TOO_SHORT_COST_PER_S = 400.0  # ... plus this per second it falls short (4 per 10 ms)
 TIE = 1e-9  # Arrangement costs this close are equal
 TRANSPOSITIONS = range(-36, 25)
 
 
-def too_short_cost(note_seconds, recording_seconds, shortest_note_s, shift):
+def too_short_cost(note_seconds, recording_seconds, shortest_note_s):
     """Cost of the notes a Recording plays too briefly to settle on its pitch.
 
     A note sounds for its own length (minus the gap before the next note) or for the
-    Recording's length after resampling `shift` semitones, whichever is shorter: an Octave
-    Move up halves a Recording's length. Below the Recording's shortest note (`audition()`),
-    each note costs TOO_SHORT_COST plus TOO_SHORT_COST_PER_S per second it falls short.
+    Recording's own length, whichever is shorter: Songs play farts raw, at their own speed
+    (ADR 0012). Below the Recording's shortest note (`audition()`), each note costs
+    TOO_SHORT_COST plus TOO_SHORT_COST_PER_S per second it falls short.
     """
-    played = recording_seconds * 2 ** (-shift / 12)
     cost = 0.0
     for a in note_seconds:
-        sounds = min(a, played)
+        sounds = min(a, recording_seconds)
         if sounds < shortest_note_s:
             cost += TOO_SHORT_COST + TOO_SHORT_COST_PER_S * (shortest_note_s - sounds)
     return cost
@@ -232,32 +234,30 @@ def too_short_cost(note_seconds, recording_seconds, shortest_note_s, shift):
 UNSETTLED_COST = 20.0  # per note played entirely before its Recording settles; less for part of it (#92)
 
 
-def unsettled_cost(note_seconds, recording_seconds, settle_s, shift):
+def unsettled_cost(note_seconds, recording_seconds, settle_s):
     """Cost of the share of each note a Recording plays before its pitch settles (#92).
 
-    A note sounds for min(its length, the Recording's resampled length), as in too_short_cost().
-    The Recording settles settle_s (settle_time()) after it starts, also scaled by resampling.
+    A note sounds for min(its length, the Recording's own length), as in too_short_cost().
+    The Recording settles settle_s (settle_time()) after it starts.
     Each note costs UNSETTLED_COST x the share of its sounding time that comes before that: a
     short note on a slow-settling fart costs up to UNSETTLED_COST, the same fart on a long note
     costs little. Picked from 15, 20, 30, 40, 80 and 160 (and per-second forms) by renders
     passing; 40 and above make a full-library Song worse.
     """
-    played = recording_seconds * 2 ** (-shift / 12)
-    settle = settle_s * 2 ** (-shift / 12)
     cost = 0.0
     for a in note_seconds:
-        sounds = min(a, played)
-        cost += UNSETTLED_COST * min(sounds, settle) / max(1e-9, sounds)
+        sounds = min(a, recording_seconds)
+        cost += UNSETTLED_COST * min(sounds, settle_s) / max(1e-9, sounds)
     return cost
 
 
 SILENT_COST_PER_S = 30.0  # per second of a note its Recording leaves silent (#205)
 
 
-def silent_cost(note_seconds, recording_seconds, shift):
+def silent_cost(note_seconds, recording_seconds):
     """Cost of the part of each note a Recording is too short to fill (#205).
 
-    A note sounds for min(its length, the Recording's resampled length), as in too_short_cost();
+    A note sounds for min(its length, the Recording's own length), as in too_short_cost();
     the rest of it is silence. Each second of that costs SILENT_COST_PER_S, so a long note
     prefers a long Recording. Picked from 0, 10, 20, 30, 40, 60 and 80 on the 12 app Songs with
     the Fixture Library: every value keeps all 12 passing with no Octave Move notes, and 30 is
@@ -265,21 +265,20 @@ def silent_cost(note_seconds, recording_seconds, shift):
     sounding time gains little (90.0% to at most 93.2%) and single Songs lose on-pitch time:
     amazing 90 to 83% from 40 up, row 90 to 88% from 40 up, and frere 95 to 81% at 80.
     """
-    played = recording_seconds * 2 ** (-shift / 12)
-    return SILENT_COST_PER_S * sum(max(0.0, a - played) for a in note_seconds)
+    return SILENT_COST_PER_S * sum(max(0.0, a - recording_seconds) for a in note_seconds)
 
 
 NOTE_FILL = 1.0  # a Recording covers a pitch only if it lasts this share of the pitch's longest note (#221)
 
 
-def fills(recording_seconds, longest_note_s, shift):
+def fills(recording_seconds, longest_note_s):
     """Whether a Recording is long enough to cover a pitch: the length rule of unlocking (#221).
 
-    The Recording's length after resampling `shift` semitones (an Octave Move up halves it) must
-    be at least NOTE_FILL x the longest slot among the pitch's notes, each slot being the note's
-    written length less GAP_S. Stretching, looping or re-triggering a Recording to fill a note
-    is never done (ADR 0004), so without this rule a short fart unlocked a Song and left most of
-    a long note silent.
+    The Recording's own length must be at least NOTE_FILL x the longest slot among the pitch's
+    notes, each slot being the note's written length less GAP_S. Songs play farts raw (ADR
+    0012), so an Octave Move no longer halves or doubles a fart's length. Stretching, looping or
+    re-triggering a Recording to fill a note is never done (ADR 0004), so without this rule a
+    short fart unlocked a Song and left most of a long note silent.
 
     NOTE_FILL was chosen by measurement (ADR 0011): 0.75, 0.9 and 1.0 swept on the 12 app Songs
     and the 129 catalog Songs with the full Fixture Library (32 Recordings). 1.0 is the only one
@@ -290,14 +289,15 @@ def fills(recording_seconds, longest_note_s, shift):
     F2), so 69 takes 032 with an Octave Move, and 022 goes to G2, beating 069 on cost. The Song
     reads 100% through the cost ranking, not because the gate excludes 069. Amazing Grace locks
     from 0.9 up: its 2.98 s note is longer than any Recording can last, even moved down an
-    octave. See ADR 0011 for the table.
+    octave. See ADR 0011 for the table. That sweep measured lengths after resampling, which
+    Songs no longer do (ADR 0012).
     """
-    return recording_seconds * 2 ** (-shift / 12) >= NOTE_FILL * longest_note_s
+    return recording_seconds >= NOTE_FILL * longest_note_s
 
 
 def needed_seconds(longest_note_s):
-    """The shortest Recording that covers a pitch whose longest slot is `longest_note_s`, at
-    its own pitch: NOTE_FILL x the slot, rounded up to 0.1 s ("Needs a fart near F3 (1.2 s)").
+    """The shortest Recording that covers a pitch whose longest slot is `longest_note_s`:
+    NOTE_FILL x the slot, rounded up to 0.1 s ("Needs a fart near F3 (1.2 s)").
     The 1e-9 keeps float noise from adding 0.1 s to an exact tenth."""
     return math.ceil(NOTE_FILL * longest_note_s * 10 - 1e-9) / 10
 
@@ -307,12 +307,14 @@ class Assignment:
     note_index: int
     source_id: str
     target_midi: int
-    shift_semitones: float
+    shift_semitones: float  # target_midi minus the Recording Pitch; the fart plays unshifted (ADR 0012)
 
 
 def move_cost(shift, octave_moves=True):
-    """Cost per beat of playing a note `shift` semitones from the Recording Pitch, and
-    whether that is an Octave Move. None when the unlock rule doesn't allow it.
+    """Cost per beat of a note `shift` semitones from the Recording Pitch, and whether that is
+    an Octave Move. None when the unlock rule doesn't allow it. Songs play the fart unshifted
+    (ADR 0012), so `shift` is how far the note is from the fart's pitch, and an Octave Move
+    plays the fart an octave from its note.
 
     Octave Moves go up or down on equal terms. Allowing only up, or down only as a last
     resort, unlocked fewer Songs or passed the render checks less often (ADR 0006)."""
@@ -366,10 +368,10 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
     """Pitch Coverage and Auto-map in one search (ADR 0004, ADR 0006).
 
     Like a multi-sampled instrument: each distinct Song pitch gets its own Melodic Recording
-    (one to one, never reused), moved at most 3 semitones, or with an Octave Move at most 3
-    semitones from the same note an octave away. Every transposition from -36 to +24 is
-    tried. A Recording also has to last, once moved, at least as long as the pitch's longest
-    note (fills(), ADR 0011). A Song is unlocked when every pitch is covered under the best transposition.
+    (one to one, never reused), at most 3 semitones from the note, or with an Octave Move at
+    most 3 semitones from the same note an octave away. Every transposition from -36 to +24 is
+    tried. A Recording also has to last at least as long as the pitch's longest note (fills(),
+    ADR 0011). A Song is unlocked when every pitch is covered under the best transposition.
     `octave_moves=False` gives ADR 0004's rule without Octave Moves, for comparison.
     """
     pitched = sorted((s for s in sources if s.pitched), key=lambda s: s.id)
@@ -386,12 +388,12 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
             for s in pitched:
                 shift = p + t - s.ref_midi
                 m = move_cost(shift, octave_moves)
-                if m is None or not fills(s.seconds, longest[p], shift):
+                if m is None or not fills(s.seconds, longest[p]):
                     row.append(None)
                 else:
-                    row.append((m[1], weight[p] * m[0] + too_short_cost(note_seconds[p], s.seconds, s.min_note_s, shift)
-                                + unsettled_cost(note_seconds[p], s.seconds, s.settle_s, shift)
-                                + silent_cost(note_seconds[p], s.seconds, shift)))
+                    row.append((m[1], weight[p] * m[0] + too_short_cost(note_seconds[p], s.seconds, s.min_note_s)
+                                + unsettled_cost(note_seconds[p], s.seconds, s.settle_s)
+                                + silent_cost(note_seconds[p], s.seconds)))
             out.append(row)
         return out
 
@@ -494,15 +496,14 @@ def plan(melody, sources, transpose=None, with_cost=False):
 # ---------------------------------------------------------------- Rendering
 
 
-def variable_resample(x, f0, ratio_const, tune, out_len, ref_midi):
-    """Read `x` at a (possibly time-varying) rate. rate > 1 raises pitch.
-
-    tune=0: constant rate (plain sampler transposition, keeps the fart's natural glide).
-    tune=1: rate follows the Recording's own pitch contour so the note holds steady on target.
+def variable_resample(x, f0, out_len, ref_midi):
+    """Recording Analysis's read-back (audition(), heard_cents()): read `x` at a rate that
+    follows its own pitch contour `f0`, so it holds steady on `ref_midi`. Songs never play
+    this: since ADR 0012 they play each fart raw (render()).
     """
     n_hops = len(f0)
-    hop_rate = np.full(n_hops, ratio_const)
-    if tune > 0 and ref_midi is not None:
+    hop_rate = np.full(n_hops, 1.0)
+    if ref_midi is not None:
         m = librosa.hz_to_midi(np.where(np.isfinite(f0), f0, 1.0))
         dev = np.where(np.isfinite(f0), ref_midi - m, np.nan)  # semitones to pull toward ref
         idx = np.arange(n_hops)
@@ -510,7 +511,7 @@ def variable_resample(x, f0, ratio_const, tune, out_len, ref_midi):
         if ok.sum() >= 2:
             dev = np.interp(idx, idx[ok], dev[ok])
             dev = np.clip(dev, -5, 5)
-            hop_rate = ratio_const * 2 ** (tune * dev / 12)
+            hop_rate = 2 ** (dev / 12)
     # anti-alias when reading faster than 1x
     if hop_rate.max() > 1.02:
         b, a = sps.butter(8, min(0.95, 0.9 / hop_rate.max()), btype="low")
@@ -538,7 +539,10 @@ def _cubic_read(x, pos):
     return ((c3 * f + c2) * f + c1) * f + x0
 
 
-def render(melody, sources, assignments, tune=1.0, bpm=None, gap_ms=GAP_S * 1000, accent_db=1.5, target_rms_db=-20):
+def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_db=1.5, target_rms_db=-20):
+    """Play each note's fart raw (ADR 0012): the Recording's gesture from its start, at its own
+    pitch and speed, cut at the note's end (its written length less the gap, at least 60 ms) or
+    where the fart ends, faded, set to a level and mixed. A note's shift_semitones isn't used."""
     by_id = {s.id: s for s in sources}
     bpm = bpm or melody.bpm
     spb = 60 / bpm
@@ -550,8 +554,7 @@ def render(melody, sources, assignments, tune=1.0, bpm=None, gap_ms=GAP_S * 1000
         s = by_id[a.source_id]
         start = int(n.start * spb * SR)
         max_len = int(max(0.06, n.dur * spb - gap_ms / 1000) * SR)
-        ratio = 2 ** (a.shift_semitones / 12)
-        seg = variable_resample(s.audio, s.f0, ratio, tune, max_len, s.ref_midi)
+        seg = s.audio[:max_len].copy()
         fi, fo = int(0.003 * SR), int(min(0.03, len(seg) / SR / 3) * SR)
         env = np.ones(len(seg))
         env[:fi] = np.linspace(0, 1, fi)

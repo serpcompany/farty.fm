@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { exp2 } from '@/lib/analysis/numeric'
 import type { Analysis } from '@/lib/recordings'
 import {
   autoMapInput,
@@ -45,7 +44,7 @@ const SR = 44100
  * (uncovered, Octave Moves, cost) of an Arrangement, recomputed from the golden data alone: a port
  * of `arrangement_cost()` in `tools/melody-lab/golden_cost.py`, independent of the planner. It
  * rejects a Recording that plays two pitches and any move the unlock rule doesn't allow, by pitch or
- * by length (ADR 0011).
+ * by length (ADR 0011), on the Recording's own length (ADR 0012).
  */
 function arrangementCost(song: Song, transpose: number, recordingFor: Map<number, string | null>) {
   const pitches = [...new Set(song.notes.map(n => n.pitch))].sort((a, b) => a - b)
@@ -73,10 +72,10 @@ function arrangementCost(song: Song, transpose: number, recordingFor: Map<number
       octaves++
     } else throw new Error(`${id} can't play ${p + transpose} (shift ${shift})`)
     const notes = song.notes.filter(n => n.pitch === p)
-    const played = gestureSeconds(r) * exp2(-shift / 12)
+    const played = gestureSeconds(r)
     const longest = Math.max(...notes.map(n => n.dur * spb - 0.025))
     expect(played >= NOTE_FILL * longest, `${id} lasts long enough for ${p + transpose}`).toBe(true)
-    const settle = (r.settle_s as number) * exp2(-shift / 12)
+    const settle = r.settle_s as number
     let short = 0
     let unsettled = 0
     const silent: number[] = []
@@ -181,12 +180,14 @@ describe('Auto-map matches the golden Arrangements', () => {
     }
   }
 
-  it('unlocks 12 of the 13 Songs on the full library and only Mary on the small one', () => {
+  it('unlocks 9 of the 13 Songs on the full library and none on the small one', () => {
     const unlocked = (library: Library) =>
       songIds.filter(id => arrange(goldenSong(id), inputs(libraries[library])).unlocked)
-    // Amazing Grace's 2.98 s note outlasts every fixture, and the small library's six are short.
-    expect(unlocked('full')).toEqual(songIds.filter(id => id !== 'amazing'))
-    expect(unlocked('small')).toEqual(['mary'])
+    // Played raw, each of these four has a note longer than any fixture near its pitch (ADR 0012),
+    // and the small library's six are short.
+    const locked = ['jingle', 'row', 'amazing', 'auld']
+    expect(unlocked('full')).toEqual(songIds.filter(id => !locked.includes(id)))
+    expect(unlocked('small')).toEqual([])
   })
 })
 
@@ -234,7 +235,7 @@ describe('Auto-map ties', () => {
     }
   })
 
-  // No golden Song has two equally good transpositions (the smallest gap is 0.086), so these build
+  // No golden Song has two equally good transpositions (the smallest gap is 0.25), so these build
   // one: a single 60 at 120 bpm.
   const oneNote: Song = {
     bpm: 120,
@@ -346,15 +347,11 @@ describe('Auto-map inputs and terms', () => {
 
   it('covers a pitch only with a Recording as long as its longest note', () => {
     expect(NOTE_FILL).toBe(1)
-    // A 1 s note needs 1 s of fart, after resampling.
-    expect(fills(1, 1, 0)).toBe(true)
-    expect(fills(0.99, 1, 0)).toBe(false)
-    // An Octave Move up halves the Recording; one down doubles it.
-    expect(fills(2, 1, 12)).toBe(true)
-    expect(fills(1.9, 1, 12)).toBe(false)
-    expect(fills(0.5, 1, -12)).toBe(true)
-    // A 0.975 s half note at 120 bpm. Moved at most 3 semitones down, a 0.8 s fart lasts 0.95 s, so
-    // it covers the note only moved down an octave; a 0.35 s fart lasts 0.83 s at most, so none.
+    // A 1 s note needs 1 s of fart. Farts play raw (ADR 0012), so no move makes one longer.
+    expect(fills(1, 1)).toBe(true)
+    expect(fills(0.99, 1)).toBe(false)
+    // A 0.975 s half note at 120 bpm: a 1 s fart covers it, a 0.8 s fart doesn't at any
+    // transposition, even with an Octave Move.
     const half: Song = {
       bpm: 120,
       beats_per_bar: 4,
@@ -378,8 +375,7 @@ describe('Auto-map inputs and terms', () => {
       transposition: 0,
       octaveMoves: 0
     })
-    expect(arrange(half, fart(0.8))).toMatchObject({ unlocked: true, octaveMoves: 1 })
-    expect(arrange(half, fart(0.35))).toMatchObject({
+    expect(arrange(half, fart(0.8))).toMatchObject({
       unlocked: false,
       missingNotes: [{ midi: 60 + LOWEST_TRANSPOSITION, seconds: 1 }]
     })
@@ -394,11 +390,11 @@ describe('Auto-map inputs and terms', () => {
   })
 
   it('charges notes that sound shorter than the Recording can settle', () => {
-    // 0.5 s notes on a 1 s gesture: an Octave Move up halves the gesture to exactly 0.5 s.
-    expect(tooShortCost([0.5], 1, 0.35, 0)).toBe(0)
-    expect(tooShortCost([0.3], 1, 0.35, 0)).toBeCloseTo(8 + 400 * 0.05, 9)
-    expect(tooShortCost([0.5], 1, 0.6, 12)).toBeCloseTo(8 + 400 * 0.1, 9)
-    expect(tooShortCost([0.5, 0.2, 0.4], 0.3, 0.35, 0)).toBeCloseTo(
+    expect(tooShortCost([0.5], 1, 0.35)).toBe(0)
+    expect(tooShortCost([0.3], 1, 0.35)).toBeCloseTo(8 + 400 * 0.05, 9)
+    // A 0.4 s gesture sounds for 0.4 s of a 0.5 s note.
+    expect(tooShortCost([0.5], 0.4, 0.6)).toBeCloseTo(8 + 400 * 0.2, 9)
+    expect(tooShortCost([0.5, 0.2, 0.4], 0.3, 0.35)).toBeCloseTo(
       3 * 8 + 400 * (0.05 + 0.15 + 0.05),
       9
     )
@@ -406,20 +402,18 @@ describe('Auto-map inputs and terms', () => {
 
   it('charges the share of each note played before the Recording settles', () => {
     // 0.5 s notes on a 1 s gesture that settles at 0.1 s: a fifth of each note is unsettled.
-    expect(unsettledCost([0.5], 1, 0.1, 0)).toBeCloseTo(20 * 0.2, 9)
-    expect(unsettledCost([0.05], 1, 0.1, 0)).toBeCloseTo(20, 9)
-    expect(unsettledCost([2], 1, 0.1, 0)).toBeCloseTo(20 * 0.1, 9)
-    // An Octave Move up halves the settle time and the gesture.
-    expect(unsettledCost([0.5], 1, 0.1, 12)).toBeCloseTo(20 * 0.1, 9)
-    expect(unsettledCost([0.5, 0.05], 1, 0, 0)).toBe(0)
+    expect(unsettledCost([0.5], 1, 0.1)).toBeCloseTo(20 * 0.2, 9)
+    expect(unsettledCost([0.05], 1, 0.1)).toBeCloseTo(20, 9)
+    expect(unsettledCost([2], 1, 0.1)).toBeCloseTo(20 * 0.1, 9)
+    // A 0.25 s gesture sounds for 0.25 s of the note, and settles in the first 0.1 s of it.
+    expect(unsettledCost([0.5], 0.25, 0.1)).toBeCloseTo(20 * 0.4, 9)
+    expect(unsettledCost([0.5, 0.05], 1, 0)).toBe(0)
   })
 
   it('charges the seconds of each note the Recording is too short to fill', () => {
     // A 0.4 s gesture leaves 0.6 s of a 1 s note silent, and nothing of a 0.3 s note.
-    expect(silentCost([1, 0.3], 0.4, 0)).toBeCloseTo(30 * 0.6, 9)
-    expect(silentCost([0.3], 0.4, 0)).toBe(0)
-    // An Octave Move up halves the gesture: 0.8 s of the 1 s note is silent.
-    expect(silentCost([1], 0.4, 12)).toBeCloseTo(30 * 0.8, 9)
+    expect(silentCost([1, 0.3], 0.4)).toBeCloseTo(30 * 0.6, 9)
+    expect(silentCost([0.3], 0.4)).toBe(0)
   })
 
   it('orders ids by code point', () => {

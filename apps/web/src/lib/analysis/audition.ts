@@ -5,8 +5,10 @@ import { ANALYSIS_SAMPLE_RATE } from './resample'
 import { variableResample } from './variable-resample'
 
 // `audition()` and `settle_time()` of the reference engine (`Audition.swift` has only the first):
-// play the Recording through the real render path at its own pitch and read the pitch back. This
-// is analysis only; the rendered notes are measured and thrown away, never played.
+// read the Recording back with its pitch held on the Recording Pitch (`variableResample`) and
+// measure the pitch. This is analysis only; the notes are measured and thrown away, never played.
+// Songs play farts raw since ADR 0012, but Recording Analysis is unchanged, so the Melodic set
+// and Auto-map's picks are too.
 
 /** Note lengths tried, shortest first, in seconds. */
 export const NOTE_LENGTHS = [0.12, 0.2, 0.35, 0.6]
@@ -37,8 +39,8 @@ export function shortestNote(
 }
 
 /**
- * Renders a note of `length` seconds (or the whole gesture if shorter) at the Recording's own
- * pitch and returns how far its median pYIN pitch is from `referenceMidi`, in cents. Null if
+ * Reads back a note of `length` seconds (or the whole gesture if shorter), pitch held on
+ * `referenceMidi`, and returns how far its median pYIN pitch is from `referenceMidi`, in cents. Null if
  * fewer than 2 frames are voiced.
  */
 export function readBackCents(
@@ -49,7 +51,7 @@ export function readBackCents(
 ): number | null {
   const sr = ANALYSIS_SAMPLE_RATE
   const n = Math.trunc(Math.min(length, audio.length / sr) * sr)
-  const note = variableResample(audio, f0, 1, 1, n, referenceMidi)
+  const note = variableResample(audio, f0, n, referenceMidi)
   const pyin = sharedPyin().run(note)
   const heard: number[] = []
   for (let i = 0; i < pyin.f0.length; i++) {
@@ -63,12 +65,12 @@ export function readBackCents(
  * Seconds from the gesture start until the Recording, played whole at its own pitch, is on pitch
  * and stays there (#116): the first pYIN frame (centered on frame × 256 samples) that starts 9
  * voiced frames in a row within 50 cents of `referenceMidi`, or the gesture's length if none does.
- * Glides and scoops the renderer's pitch-following can't straighten show up here.
+ * Glides and scoops the pitch hold can't straighten show up here.
  */
 export function settleTime(audio: Float64Array, f0: Float64Array, referenceMidi: number): number {
   const sr = ANALYSIS_SAMPLE_RATE
   const seconds = audio.length / sr
-  const played = variableResample(audio, f0, 1, 1, audio.length, referenceMidi)
+  const played = variableResample(audio, f0, audio.length, referenceMidi)
   const pyin = sharedPyin().run(played)
   let run = 0
   for (let i = 0; i < pyin.f0.length; i++) {

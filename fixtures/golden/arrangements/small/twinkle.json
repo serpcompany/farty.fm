@@ -4,67 +4,71 @@
   "metrics": null,
   "missing": [
     {
+      "seconds": 0.6,
+      "target_midi": 47
+    },
+    {
       "seconds": 1.1,
-      "target_midi": 38
+      "target_midi": 49
     },
     {
       "seconds": 0.6,
-      "target_midi": 42
+      "target_midi": 51
     }
   ],
   "notes": null,
-  "octave_moves": 1,
+  "octave_moves": 0,
   "per_pitch": [
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 69,
-      "target_midi": 38
-    },
     {
       "octave_move": false,
       "recording": "022",
-      "shift_semitones": -0.3259205936601859,
-      "song_pitch": 71,
-      "target_midi": 40
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 73,
+      "shift_semitones": 1.6740794063398141,
+      "song_pitch": 69,
       "target_midi": 42
-    },
-    {
-      "octave_move": true,
-      "recording": "090",
-      "shift_semitones": -12.225920593660177,
-      "song_pitch": 74,
-      "target_midi": 43
-    },
-    {
-      "octave_move": false,
-      "recording": "002",
-      "shift_semitones": -1.4259205936601802,
-      "song_pitch": 76,
-      "target_midi": 45
     },
     {
       "octave_move": false,
       "recording": "069",
-      "shift_semitones": 2.574079406339827,
-      "song_pitch": 78,
+      "shift_semitones": -0.4259205936601731,
+      "song_pitch": 71,
+      "target_midi": 44
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": -0.4259205936601802,
+      "song_pitch": 73,
+      "target_midi": 46
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 74,
       "target_midi": 47
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 76,
+      "target_midi": 49
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 78,
+      "target_midi": 51
     }
   ],
   "pitch_coverage": {
-    "covered": 4,
+    "covered": 3,
     "total": 6
   },
-  "plan_cost": 86.17119027523879,
+  "plan_cost": 47.253936016544216,
   "render_settings": null,
   "song": "twinkle",
-  "transpose": -31,
+  "transpose": -27,
   "unlocked": false
 }

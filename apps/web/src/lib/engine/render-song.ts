@@ -15,8 +15,6 @@ export interface RenderedNote {
   startSample: number
   lengthSamples: number
   gainDb: number
-  /** Target minus Recording Pitch, to 0.01 semitone. */
-  shiftSemitones: number
 }
 
 /** A Song played by Recordings, as audio. */
@@ -81,7 +79,7 @@ export interface RecordingToRender {
 
 /**
  * The whole render from what the app stores: cuts each Recording the Arrangement uses to its
- * gesture, recomputes its contour, and renders. This is what the render worker runs.
+ * gesture, and renders. This is what the render worker runs.
  */
 export function renderFromRecordings(
   song: Song,

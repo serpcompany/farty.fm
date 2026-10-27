@@ -29,7 +29,7 @@ A title already in the catalog from another batch, or added by hand, fails, comp
 1. **License**: as above, checked again on the pick.
 2. **Hash**: the MIDI archive matches Zenodo's md5, and both the extracted file the gates import and the catalog copy are byte for byte the archive's file (its sha256 is in the entry).
 3. **Melody sanity**: 8 to 64 notes and a range of at most 19 semitones in the excerpt, and the importer (`melody.py`) drops at most 10% of the track's notes as chord tones or inner-voice onsets.
-4. **Render**: unlocked with the full Fixture Library, and the renderer's bar from [`fixtures/golden/README.md`](../../fixtures/golden/README.md) on the reference render (`render(tune=1.0)`, `evaluate.py`): at least 94% of notes within ±50 cents, at least 95% of onsets within ±50 ms, and no re-attacks.
+4. **Render**: unlocked with the full Fixture Library, and the renderer's bar from [ADR 0012](../../docs/adr/0012-songs-play-farts-raw.md) on the reference render (`render()`, `evaluate.py`): at least 94% of notes within ±50 cents of their fart's own pitch, at least 95% of onsets within ±50 ms, and no re-attacks. Songs play farts raw, so how close a Song sounds to its tune is reported (`in50c`, `med`, `contour`), not gated.
 
 The excerpt is the whole bars that fit in 32 quarter-note beats, from the bar of the melody's first note. Bar lines follow the score's time signatures, so a pickup written as its own short bar (1/4, then 3/4) keeps them, and `beats_per_bar` is the meter that covers most of the excerpt. The tempo is the score's own at the first note, kept within 72 to 144 bpm.
 

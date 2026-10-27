@@ -905,7 +905,7 @@ async function needsTheFixtureLibrary(request: APIRequestContext) {
   )
 }
 
-/** Loads the Fixture Library from Profile, which unlocks every Song. */
+/** Loads the Fixture Library from Profile, which unlocks Mary Had a Little Lamb, among others. */
 async function loadTheFixtureLibrary(page: Page) {
   const library = page.getByTestId('fixture-library')
   await library.getByRole('button', { name: 'Load the Fixture Library' }).click()

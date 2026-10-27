@@ -1,43 +1,40 @@
 import { exp2, hzToMidi, pairwiseSum } from './numeric'
 
-// The part of `Resampling.swift` that audition needs: reading a Recording's own waveform at a
-// variable rate. Fart-only (ADR 0004): every output sample is interpolated from the input
-// Recording. The only operations are a low-pass filter before reading faster than 1x
-// (anti-aliasing) and cubic interpolation.
+// Recording Analysis's read-back (audition.ts): reading a Recording's own waveform at a rate that
+// holds its pitch steady, to hear whether it can hold a note. Songs never play this: since ADR 0012
+// they play every fart raw (`src/lib/engine/renderer.ts`). Every output sample is interpolated
+// from the input Recording, with a low-pass filter before reading faster than 1x (anti-aliasing)
+// and cubic interpolation.
 
 /** Samples per pitch-contour frame. */
 const HOP_LENGTH = 256
 
 /**
- * Reads `x` at a rate that can change every 256 input samples; a rate above 1 raises the pitch.
- * Port of the reference engine's `variable_resample()`.
+ * Reads `x` at a rate that can change every 256 input samples and follows its own pitch contour,
+ * so the note holds steady on `referenceMidi`; a rate above 1 raises the pitch. Port of the
+ * reference engine's `variable_resample()`.
  *
- * - `f0`: the pitch contour in Hz, one value per hop of `x`, NaN when unvoiced.
- * - `ratio`: the constant rate, `2^(semitones / 12)`.
- * - `tune`: 0 keeps a constant rate; 1 makes the rate follow the contour so the note holds steady
- *   on `referenceMidi × ratio`. Deviations are clipped to ±5 semitones and interpolated across
- *   unvoiced frames.
+ * - `f0`: the pitch contour in Hz, one value per hop of `x`, NaN when unvoiced. Deviations from
+ *   `referenceMidi` are clipped to ±5 semitones and interpolated across unvoiced frames.
  * - `outputLength`: how many samples to produce. Fewer come back if `x` runs out first.
- * - `referenceMidi`: the pitch the contour is pulled toward; null disables tuning.
+ * - `referenceMidi`: the pitch the contour is pulled toward; null reads `x` at 1x.
  */
 export function variableResample(
   x: Float64Array,
   f0: Float64Array,
-  ratio: number,
-  tune: number,
   outputLength: number,
   referenceMidi: number | null
 ): Float64Array {
   const nHops = f0.length
-  let hopRate = new Float64Array(Math.max(1, nHops)).fill(ratio)
-  if (tune > 0 && referenceMidi !== null && nHops > 0) {
+  let hopRate = new Float64Array(Math.max(1, nHops)).fill(1)
+  if (referenceMidi !== null && nHops > 0) {
     const known: number[] = []
     for (let i = 0; i < nHops; i++) if (Number.isFinite(f0[i])) known.push(i)
     if (known.length >= 2) {
       // Semitones toward the reference.
       const deviation = known.map(i => referenceMidi - hzToMidi(f0[i]))
       const interpolated = interp(nHops, known, deviation)
-      hopRate = interpolated.map(d => ratio * exp2((tune * Math.min(Math.max(d, -5), 5)) / 12))
+      hopRate = interpolated.map(d => exp2(Math.min(Math.max(d, -5), 5) / 12))
     }
   }
 

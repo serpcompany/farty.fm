@@ -10,16 +10,23 @@ import { expect, type Page } from '@playwright/test'
 
 /**
  * The farts the microphone can play, by fixture id. 090 is Melodic, with golden Recording Pitch
- * G3. With 084, 013 (both G♯3) and 094 (B3) it unlocks Mary Had a Little Lamb (see compose.spec).
+ * G3. 095 (F2), 017 (D♯2), 022 (E2) and 002 (A♯2) unlock Mary Had a Little Lamb (see compose.spec).
  */
 const fixtures: Record<string, string> = {
   '090': '090__carlosramon__17-pet__186119.wav',
-  '084': '084__walter-odington__grim-fart__26216.wav',
-  '013': '013__deleted-user-1391979__bad-chili-fart-wav__94989.mp3',
-  '094': '094__manicciola__fart__121783.wav'
+  '095': '095__breviceps__fart-1__445998.mp3',
+  '017': '017__breviceps__fart-3__446000.mp3',
+  '022': '022__smokevhstapes__fart-wav__177050.mp3',
+  '002': '002__frenkfurth__wav-fart-vegan-026-wav__650671.mp3'
 }
-/** How long each take records after the press, in ms: about a second longer than its fart. */
-const takeMs: Record<string, number> = { '090': 1500, '084': 3500, '013': 2500, '094': 5750 }
+/** How long each take records after the press, in ms: about a second longer than its file. */
+const takeMs: Record<string, number> = {
+  '090': 1500,
+  '095': 1800,
+  '017': 1900,
+  '022': 3000,
+  '002': 5250
+}
 export const getUserMediaMs = 800
 /** How long the person holds the button: they start to fart as they press, and click on release. */
 const pressMs = 150

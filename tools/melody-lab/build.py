@@ -57,10 +57,10 @@ def main():
             print(c["id"], f"locked: {fit.covered} of {fit.total} notes covered")
             continue
         variants = {}
-        for key, sources, tune in (("tuned", lib, 1.0), ("natural", lib, 0.0)):
+        for key, sources in (("raw", lib),):
             T, asg = engine.plan(m, sources)
-            y, ev = engine.render(m, sources, asg, tune=tune, bpm=m.bpm)
-            r = evaluate(y, m, ev, m.bpm)
+            y, ev = engine.render(m, sources, asg, bpm=m.bpm)
+            r = evaluate(y, m, ev, m.bpm, sources)
             variants[key] = {
                 "audio": encode(y, f"{c['id']}-{key}"),
                 "transpose": T,
@@ -73,6 +73,7 @@ def main():
                         "rec": e["source_id"],
                         "shift": e["shift_semitones"],
                         "cents": p["cents"],
+                        "fart_cents": p["fart_cents"],
                     }
                     for e, p in zip(ev, r["per_note"])
                 ],

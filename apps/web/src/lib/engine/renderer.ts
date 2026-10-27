@@ -1,15 +1,14 @@
-import { exp2, pairwiseSum, roundHalfEven } from '@/lib/analysis/numeric'
+import { pairwiseSum, roundHalfEven } from '@/lib/analysis/numeric'
 import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
-import { variableResample } from '@/lib/analysis/variable-resample'
 
-// Renders a Song played by Recordings: a port of `Renderer.swift`, which ports the reference
-// engine's `render()` with `tune=1` (`tools/melody-lab/engine.py`). Where the two differ, this
-// follows the reference.
+// Renders a Song played by Recordings: a port of the reference engine's `render()`
+// (`tools/melody-lab/engine.py`). Where the two differ, this follows the reference.
 //
-// Fart-only (ADR 0004): every output sample comes from a Recording's own waveform. Per note, the
-// renderer trims (the gesture, then the note length), resamples (`variableResample`), fades and
-// sets the gain; then it mixes the notes and limits the peak. There are no oscillators, noise
-// generators, resonators, loops or granular re-triggering. Silent Recordings render silence.
+// Songs play farts raw (ADR 0012): every note plays its Recording's gesture from the start, at the
+// fart's own pitch and speed. Per note, the renderer cuts the gesture at the note's end, fades it
+// and sets its gain; then it mixes the notes and limits the peak. Every output sample is a
+// Recording's own sample, scaled (ADR 0004): no resampling, oscillators, noise generators,
+// resonators, loops or granular re-triggering. Silent Recordings render silence.
 //
 // Plain TypeScript with no DOM or Web Audio, so it renders the same in every browser, in a Web
 // Worker and in Vitest. Web Audio only plays the result.
@@ -38,16 +37,12 @@ const LIMITER_PEAK = 0.89
 export interface RenderSource {
   /** The Recording's single clean gesture, mono at 44.1 kHz. */
   gesture: Float64Array
-  /** The gesture's pitch contour in Hz, one value per 256 samples, NaN when unvoiced. */
-  pitchContourHz: Float64Array
-  /** The Recording Pitch in MIDI. */
-  recordingPitchMidi: number
 }
 
 /** One note of the Song and the Recording that plays it (one row of an Arrangement). */
 export interface RenderNote {
   source: RenderSource
-  /** The pitch to play, in MIDI. */
+  /** The note of the Song, in MIDI. The fart plays at its own pitch, not this one. */
   targetMidi: number
   /** When the note starts, in seconds from the start of the Song. */
   startSeconds: number
@@ -87,8 +82,6 @@ export interface PlacedNote {
   startSample: number
   lengthSamples: number
   gainDb: number
-  /** The pitch shift used, in semitones (target minus Recording Pitch, to 0.01). */
-  shiftSemitones: number
 }
 
 export interface RenderOutput {
@@ -113,16 +106,8 @@ export function render(notes: readonly RenderNote[], songLengthSeconds: number):
     const maxLength = Math.trunc(
       Math.max(SHORTEST_NOTE_SECONDS, note.lengthSeconds - GAP_SECONDS) * sr
     )
-    // The reference rounds the shift to 0.01 semitone (at most 0.5 cent) when it plans.
-    const shift = roundTo2(note.targetMidi - note.source.recordingPitchMidi)
-    const segment = variableResample(
-      note.source.gesture,
-      note.source.pitchContourHz,
-      exp2(shift / 12),
-      1,
-      maxLength,
-      note.source.recordingPitchMidi
-    )
+    // The fart as recorded, cut at the note's end, or shorter if the fart ends first.
+    const segment = note.source.gesture.slice(0, maxLength)
     applyFades(segment)
 
     const measured = Math.min(segment.length, Math.trunc(LEVEL_WINDOW_SECONDS * sr))
@@ -134,12 +119,7 @@ export function render(notes: readonly RenderNote[], songLengthSeconds: number):
 
     const end = Math.min(mix.length, start + segment.length)
     for (let i = start; i < end; i++) mix[i] += segment[i - start] * gain
-    placed.push({
-      startSample: start,
-      lengthSamples: segment.length,
-      gainDb,
-      shiftSemitones: shift
-    })
+    placed.push({ startSample: start, lengthSamples: segment.length, gainDb })
   }
 
   return { samples: limit(mix), notes: placed }
@@ -181,13 +161,4 @@ export function limit(mix: Float64Array): Float32Array {
     out[i] = (Math.tanh((mix[i] / peak) * LIMITER_DRIVE) / knee) * LIMITER_PEAK
   }
   return out
-}
-
-/**
- * Python's `round(x, 2)`: the decimal nearest to `x`'s exact binary value, read back as a double.
- * `toFixed` rounds that same exact value, so the two agree (except on exact decimal ties, which a
- * Recording Pitch on pYIN's grid never produces).
- */
-export function roundTo2(x: number): number {
-  return Number(x.toFixed(2))
 }

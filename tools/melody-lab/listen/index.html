@@ -116,7 +116,7 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
   <header>
     <div class="eyebrow">Pedos · Song Creator engine proof</div>
     <h1>Pedos Melody Lab</h1>
-    <p class="lede">Every note below is one of the 23 approved Fixture Library Recordings, trimmed to a single puff and nudged onto the melody's pitch. No synthesizer, no looping, no instruments. Pick a song, play it, and switch versions to compare.</p>
+    <p class="lede">Every note below is one of the 23 approved Fixture Library Recordings, trimmed to a single puff and played raw, at its own pitch and speed. No synthesizer, no looping, no instruments. Pick a song, play it, and switch versions to compare.</p>
   </header>
 
   <section class="stage">
@@ -155,8 +155,8 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
   <section class="how">
     <div><h3>Melodies with a paper trail</h3><p>Each tune is a MIDI file from PDMX, a published dataset of public-domain MuseScore scores with per-score license checks. The importer keeps the top line and reports anything it drops. No note is typed in by hand.</p></div>
     <div><h3>One puff per note</h3><p>Every Recording is cut to its first clean gesture: it starts at the attack, not the silence before it, and ends before any second "brrt". That is what keeps a quarter note from sounding like four sixteenths.</p></div>
-    <div><h3>Closest fart for each pitch</h3><p>Like a multi-sampled instrument: the engine picks a key, then gives each melody pitch its own Recording, within 3 semitones of its natural pitch, or an octave away only where the Song needs it. The same note always sounds the same.</p></div>
-    <div><h3>Checked by ear and by machine</h3><p>A pitch tracker reads every render back note by note. A note counts as on pitch within 50 cents. Recordings that can't hold a pitch on short notes are kept off them.</p></div>
+    <div><h3>Closest fart for each pitch</h3><p>Like a multi-sampled instrument: the engine picks a key, then gives each melody pitch its own Recording, within 3 semitones of its natural pitch, or an octave away only where the Song needs it. Each fart plays as recorded, so the tune comes through as its shape, not exact pitches. The same note always sounds the same.</p></div>
+    <div><h3>Checked by ear and by machine</h3><p>A pitch tracker reads every render back note by note. Each note must sound within 50 cents of its own fart, so nothing bends a fart. How close it comes to the tune is shown, not required. Recordings that can't hold a pitch on short notes are kept off them.</p></div>
   </section>
 
   <footer id="footer"></footer>
@@ -170,8 +170,7 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
   const $ = (id) => document.getElementById(id);
   const audio = $("audio");
   const VARIANTS = [
-    { key: "tuned", label: "Tuned", tag: "pick", desc: "All 23 Recordings available. Each note is held steady on its pitch by following the fart's own pitch wobble and correcting it." },
-    { key: "natural", label: "Natural pitch", desc: "Same Recordings and notes, but each fart keeps its natural wobble and slide. More character, a bit less in tune." },
+    { key: "raw", label: "Raw", tag: "pick", desc: "Each note plays its fart as recorded, at the fart's own pitch and speed: trimmed, cut at the note's end, faded and set to a level (ADR 0012)." },
     { key: "before", label: "Before", desc: "The failing approach for contrast: raw files started on each beat with no trimming and no pitch matching. This is roughly what earlier attempts sounded like." },
   ];
   const recById = Object.fromEntries(D.recordings.map((r) => [r.id, r]));
@@ -184,7 +183,7 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
   const NOTE = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
   const noteName = (m) => NOTE[m % 12] + (Math.floor(m / 12) - 1);
 
-  let state = { song: D.songs[0].id, variant: "tuned" };
+  let state = { song: D.songs[0].id, variant: "raw" };
   try { const s = JSON.parse(localStorage.getItem("pedos-lab") || "{}"); if (s.song && D.songs.some((x) => x.id === s.song)) state = { ...state, ...s }; } catch (e) {}
   const save = () => { try { localStorage.setItem("pedos-lab", JSON.stringify(state)); } catch (e) {} };
 
@@ -207,7 +206,7 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
 
   const song = () => D.songs.find((s) => s.id === state.song);
   const variant = () => song().variants[state.variant];
-  const notesFor = () => (song().variants[state.variant].notes || song().variants.tuned.notes);
+  const notesFor = () => (song().variants[state.variant].notes || song().variants.raw.notes);
 
   function select(keepPlaying) {
     const wasPlaying = keepPlaying && !audio.paused;
@@ -235,7 +234,9 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
     }
     const m = v.metrics;
     const cells = [
-      [`${m.within_50c_pct}%`, "notes on pitch (±50 cents)", m.within_50c_pct >= 90 ? "good" : "warn"],
+      [`${m.within_50c_of_fart_pct}%`, "notes played as recorded (±50 cents of the fart)", m.within_50c_of_fart_pct >= 94 ? "good" : "warn"],
+      [`${Math.round(m.median_abs_cents)}`, "cents a note typically sounds from the tune", ""],
+      [`${m.contour_pct}%`, "steps that move the same way as the tune", ""],
       [`${m.onsets_on_time_pct}%`, "notes starting on the beat (±50 ms)", m.onsets_on_time_pct >= 90 ? "good" : "warn"],
       [`${m.notes_with_retrigger}`, "notes with a second 'brrt' inside", m.notes_with_retrigger === 0 ? "good" : "warn"],
       [`${m.distinct_recordings}`, "different Recordings used", ""],

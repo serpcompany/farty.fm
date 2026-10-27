@@ -1,4 +1,3 @@
-import { exp2 } from '@/lib/analysis/numeric'
 import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
 import type { Analysis } from '@/lib/recordings'
 import { minimumCost } from './assignment'
@@ -7,12 +6,15 @@ import { type Song, secondsPerBeat } from './song'
 // Auto-map and Pitch Coverage: a port of `AutoMap.swift`, the iPhone 1.0 planner, which ports the
 // reference engine's `melody_fit()` (`tools/melody-lab/engine.py`) and the unlock rule of ADR 0004,
 // ADR 0006 and ADR 0011. Since #116 it also has the reference's settle cost, since #205 its silence
-// cost, and since #221 its length rule, which the Swift port, frozen at golden format 2, doesn't.
+// cost, since #221 its length rule, and since ADR 0012 every length is the Recording's own, which
+// the Swift port, frozen at golden format 2, doesn't have.
 //
-// Each distinct Song pitch gets its own Melodic Recording (one to one, never reused), shifted at
-// most 3 semitones, or with an Octave Move (12 semitones up or down, plus at most 3) where the
-// Song needs it, and at least as long as the pitch's longest note once moved (`fills`). Every transposition from
-// −36 to +24 is tried. Arrangements rank by:
+// Each distinct Song pitch gets its own Melodic Recording (one to one, never reused), at most 3
+// semitones from the note, or with an Octave Move (12 semitones up or down, plus at most 3) where
+// the Song needs it, and at least as long as the pitch's longest note (`fills`). Songs play every
+// fart raw, at its own pitch and length (ADR 0012), so the shift only decides which Recording may
+// play a pitch and what it costs, and an Octave Move plays its fart an octave from the note. Every
+// transposition from −36 to +24 is tried. Arrangements rank by:
 // 1. the most pitches covered (Pitch Coverage);
 // 2. the fewest Octave Moves;
 // 3. the lowest cost, where costs within `TIE` are equal;
@@ -21,7 +23,7 @@ import { type Song, secondsPerBeat } from './song'
 //
 // A Song is unlocked when every distinct pitch is covered.
 
-/** The furthest a Recording may be moved from its Recording Pitch, or from the same note an octave away, in semitones. */
+/** The furthest a note may be from its Recording Pitch, or from the same note an octave away, in semitones. */
 export const MAXIMUM_SHIFT = 3
 const OCTAVE = 12
 /** Cost per beat of an Octave Move, on top of the remaining shift: more than any real-pitch move (3^1.5 = 5.2). */
@@ -37,8 +39,9 @@ const SILENT_COST_PER_SECOND = 30
 /** Silence before the next note: a note sounds for its length minus this. */
 const GAP_SECONDS = 0.025
 /**
- * A Recording covers a pitch only if, after resampling, it lasts this share of the pitch's longest
- * note (#221). ADR 0011 has the measurement: 0.9 and 0.75 leave Für Elise under ADR 0004's bar.
+ * A Recording covers a pitch only if it lasts this share of the pitch's longest note (#221). ADR
+ * 0011 has the measurement, made when farts were still resampled: 0.9 and 0.75 left Für Elise
+ * under ADR 0004's bar.
  */
 export const NOTE_FILL = 1.0
 /** Arrangement costs this close are equal. */
@@ -89,9 +92,12 @@ export interface PitchChoice {
   targetMidi: number
   /** The Recording that plays every note at this pitch; null when none covers it. */
   recordingId: string | null
-  /** Target minus Recording Pitch, in semitones; null when uncovered. */
+  /**
+   * Target minus Recording Pitch, in semitones: how far the note is from its fart, which plays
+   * unshifted (ADR 0012); null when uncovered.
+   */
   shiftSemitones: number | null
-  /** The Recording plays an octave from its Recording Pitch (resampled 12 ± 3 semitones). */
+  /** The note is 12 ± 3 semitones from the Recording Pitch, so the fart plays an octave from it (ADR 0012). */
   octaveMove: boolean
 }
 
@@ -235,16 +241,12 @@ export function moveCost(shift: number): { cost: number; octaveMove: boolean } |
 }
 
 /**
- * Whether a Recording is long enough to cover a pitch (#221, ADR 0011): after resampling by
- * `shift` (an Octave Move up halves it), it lasts at least `NOTE_FILL` × the longest of the pitch's
- * notes, each its written length less the gap. Recordings are never stretched (ADR 0004).
+ * Whether a Recording is long enough to cover a pitch (#221, ADR 0011): at its own length (ADR
+ * 0012), it lasts at least `NOTE_FILL` × the longest of the pitch's notes, each its written length
+ * less the gap. Recordings are never stretched (ADR 0004).
  */
-export function fills(
-  recordingSeconds: number,
-  longestNoteSeconds: number,
-  shift: number
-): boolean {
-  return recordingSeconds * exp2(-shift / 12) >= NOTE_FILL * longestNoteSeconds
+export function fills(recordingSeconds: number, longestNoteSeconds: number): boolean {
+  return recordingSeconds >= NOTE_FILL * longestNoteSeconds
 }
 
 /**
@@ -258,20 +260,18 @@ export function neededSeconds(longestNoteSeconds: number): number {
 
 /**
  * Cost of the notes a Recording plays too briefly to settle on its pitch. A note sounds for its own
- * length (minus the gap) or for the Recording's length after resampling by `shift`, whichever is
- * shorter: an Octave Move up halves a Recording's length. Below the Recording's shortest note, each
- * note costs `TOO_SHORT_COST` plus `TOO_SHORT_COST_PER_SECOND` per second it falls short.
+ * length (minus the gap) or for the Recording's own length, whichever is shorter (ADR 0012). Below
+ * the Recording's shortest note, each note costs `TOO_SHORT_COST` plus `TOO_SHORT_COST_PER_SECOND`
+ * per second it falls short.
  */
 export function tooShortCost(
   noteSeconds: readonly number[],
   recordingSeconds: number,
-  shortestNoteSeconds: number,
-  shift: number
+  shortestNoteSeconds: number
 ): number {
-  const played = recordingSeconds * exp2(-shift / 12)
   let cost = 0
   for (const a of noteSeconds) {
-    const sounds = Math.min(a, played)
+    const sounds = Math.min(a, recordingSeconds)
     if (sounds < shortestNoteSeconds) {
       cost += TOO_SHORT_COST + TOO_SHORT_COST_PER_SECOND * (shortestNoteSeconds - sounds)
     }
@@ -281,22 +281,19 @@ export function tooShortCost(
 
 /**
  * Cost of the share of each note a Recording plays before it settles on its pitch (#116). A note
- * sounds as in `tooShortCost`; the Recording settles `settleSeconds` after it starts, also scaled
- * by resampling. Each note costs `UNSETTLED_COST` × the share of its sounding time before that, so
- * a short note on a slow-settling fart costs up to 20 and the same fart on a long note costs little.
+ * sounds as in `tooShortCost`; the Recording settles `settleSeconds` after it starts. Each note
+ * costs `UNSETTLED_COST` × the share of its sounding time before that, so a short note on a
+ * slow-settling fart costs up to 20 and the same fart on a long note costs little.
  */
 export function unsettledCost(
   noteSeconds: readonly number[],
   recordingSeconds: number,
-  settleSeconds: number,
-  shift: number
+  settleSeconds: number
 ): number {
-  const played = recordingSeconds * exp2(-shift / 12)
-  const settle = settleSeconds * exp2(-shift / 12)
   let cost = 0
   for (const a of noteSeconds) {
-    const sounds = Math.min(a, played)
-    cost += (UNSETTLED_COST * Math.min(sounds, settle)) / Math.max(1e-9, sounds)
+    const sounds = Math.min(a, recordingSeconds)
+    cost += (UNSETTLED_COST * Math.min(sounds, settleSeconds)) / Math.max(1e-9, sounds)
   }
   return cost
 }
@@ -307,13 +304,8 @@ export function unsettledCost(
  * long note prefers a long Recording. The seconds are summed first, with Python's `sum()`, as the
  * reference does.
  */
-export function silentCost(
-  noteSeconds: readonly number[],
-  recordingSeconds: number,
-  shift: number
-): number {
-  const played = recordingSeconds * exp2(-shift / 12)
-  return SILENT_COST_PER_SECOND * pythonSum(noteSeconds.map(a => Math.max(0, a - played)))
+export function silentCost(noteSeconds: readonly number[], recordingSeconds: number): number {
+  return SILENT_COST_PER_SECOND * pythonSum(noteSeconds.map(a => Math.max(0, a - recordingSeconds)))
 }
 
 /** Ids compare by code point, as the reference's Python strings do (and UTF-8 bytes). */
@@ -391,17 +383,17 @@ class Table {
       recordings.forEach((r, j) => {
         const shift = p + t - (r.recordingPitchMidi as number)
         const move = moveCost(shift)
-        if (move === null || !fills(r.gestureSeconds, longest[i], shift)) return
+        if (move === null || !fills(r.gestureSeconds, longest[i])) return
         const cell = i * this.columns + j
         this.allowed[cell] = 1
         this.isOctaveMove[cell] = move.octaveMove ? 1 : 0
         this.cost[cell] =
           weight[i] * move.cost +
-          tooShortCost(noteSeconds[i], r.gestureSeconds, r.shortestNoteSeconds as number, shift) +
+          tooShortCost(noteSeconds[i], r.gestureSeconds, r.shortestNoteSeconds as number) +
           (r.settleSeconds === null
             ? 0
-            : unsettledCost(noteSeconds[i], r.gestureSeconds, r.settleSeconds, shift)) +
-          silentCost(noteSeconds[i], r.gestureSeconds, shift)
+            : unsettledCost(noteSeconds[i], r.gestureSeconds, r.settleSeconds)) +
+          silentCost(noteSeconds[i], r.gestureSeconds)
       })
     })
   }

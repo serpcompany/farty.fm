@@ -79,7 +79,7 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 - **Recording is full screen:** it covers the tabs instead of disabling them.
 - **Recordings used** in Song Creator is a list: each Recording with the color of its notes, its name, waveform and length, the note it plays, and a play button.
 - **A Toot's screen:** tapping a Toot opens Song Creator's layout without Save, with Rename and Delete in its menu. A Toot keeps which Recording played each pitch; one deleted later shows as "Recording deleted", and the Toot still plays.
-- **Checking the sound:** tapping a Recording plays it alone and highlights its notes; tapping a note plays just that note from the Toot's own audio and says what it is ("F3 · Recording 21 (G3), shifted −2.1 semitones · 1.4 s").
+- **Checking the sound:** tapping a Recording plays it alone and highlights its notes; tapping a note plays just that note from the Toot's own audio and says what it is ("F3 · Recording 21 (G3) · 1.4 s"). Update 2026-10-28: the caption no longer names a shift, since Songs play each fart raw (ADR 0012).
 
 ## Decided in the #57 tap-through (2026-09-30)
 
