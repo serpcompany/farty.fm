@@ -1,3 +1,4 @@
+import type { IDBPDatabase } from 'idb'
 import {
   forgetAccount,
   legacyOwner,
@@ -7,9 +8,11 @@ import {
 } from './account'
 import * as api from './library-api'
 import { itemKey, type Kind, type OutboxEntry, onQueued } from './outbox'
-import { audioStore, clearLibrary, db, download } from './recording-store'
+import { audioStore, clearLibrary, download, type PedosDB, withDb } from './recording-store'
 import type { Recording } from './recordings'
 import type { Toot } from './toot'
+
+type Database = IDBPDatabase<PedosDB>
 
 // A signed-in browser's library, kept in step with the account's (#156, the plan's §2). The
 // outbox (`outbox.ts`) sends what this browser changed, and a read of the account's changes since
@@ -119,7 +122,7 @@ export async function claimLibrary(accountId: string, email = ''): Promise<boole
  * (`visit.ts`).
  */
 export async function leftByAnAccount(): Promise<boolean> {
-  return (await (await db()).get('meta', 'cursor')) !== undefined
+  return (await withDb(database => database.get('meta', 'cursor'))) !== undefined
 }
 
 /**
@@ -137,7 +140,7 @@ export async function unsavedBeforeSignIn(email: string): Promise<number> {
     // Unknown, then.
   }
   if (ownerEmail !== null && ownerEmail === email.trim().toLowerCase()) return 0
-  const queued = await (await db()).getAll('outbox')
+  const queued = await withDb(database => database.getAll('outbox'))
   return queued.filter(entry => entry.op === 'put').length
 }
 
@@ -184,8 +187,12 @@ type Taken =
  * The oldest entry to send, marked sent in the same transaction that reads what it sends. A
  * Recording waits for its analysis. Null when nothing is left but `skip`.
  */
-async function takeNext(skip: Set<string>): Promise<Taken | null> {
-  const tx = (await db()).transaction(
+function takeNext(skip: Set<string>): Promise<Taken | null> {
+  return withDb(database => takeNextIn(database, skip))
+}
+
+async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken | null> {
+  const tx = database.transaction(
     ['outbox', 'recordings', 'audio', 'toots', 'tootAudio'],
     'readwrite'
   )
@@ -233,8 +240,16 @@ async function takeNext(skip: Set<string>): Promise<Taken | null> {
  * Toot renamed during its upload is then renamed on the account (`then: 'rename'`), and a later
  * delete is sent next.
  */
-async function settle(sent: OutboxEntry, then: 'done' | 'rename' = 'done'): Promise<void> {
-  const tx = (await db()).transaction('outbox', 'readwrite')
+function settle(sent: OutboxEntry, then: 'done' | 'rename' = 'done'): Promise<void> {
+  return withDb(database => settleIn(database, sent, then))
+}
+
+async function settleIn(
+  database: Database,
+  sent: OutboxEntry,
+  then: 'done' | 'rename'
+): Promise<void> {
+  const tx = database.transaction('outbox', 'readwrite')
   const now = await tx.store.get(sent.key)
   const unchanged = now?.version === sent.version
   if (!now) {
@@ -253,15 +268,17 @@ async function settle(sent: OutboxEntry, then: 'done' | 'rename' = 'done'): Prom
 
 /** Deletes a Recording or Toot the account has deleted, and whatever this browser queued for it. */
 async function deleteHere(kind: Kind, id: string): Promise<void> {
-  const tx = (await db()).transaction([kind, audioStore[kind], 'downloads', 'outbox'], 'readwrite')
   const key = itemKey(kind, id)
-  await Promise.all([
-    tx.objectStore(kind).delete(id),
-    tx.objectStore(audioStore[kind]).delete(id),
-    tx.objectStore('downloads').delete(key),
-    tx.objectStore('outbox').delete(key),
-    tx.done
-  ])
+  await withDb(async database => {
+    const tx = database.transaction([kind, audioStore[kind], 'downloads', 'outbox'], 'readwrite')
+    await Promise.all([
+      tx.objectStore(kind).delete(id),
+      tx.objectStore(audioStore[kind]).delete(id),
+      tx.objectStore('downloads').delete(key),
+      tx.objectStore('outbox').delete(key),
+      tx.done
+    ])
+  })
   const deleted = { recordings: [] as string[], toots: [] as string[] }
   deleted[kind].push(id)
   emit({ recordings: [], toots: [], deleted })
@@ -324,10 +341,22 @@ async function drain(accountId: string): Promise<boolean> {
  * not uploaded yet are numbered after the rest (`renumberWaiting`). False when nothing was read.
  */
 async function pull(accountId: string): Promise<boolean> {
-  const since = (await (await db()).get('meta', 'cursor')) ?? 0
+  const since = (await withDb(database => database.get('meta', 'cursor'))) ?? 0
   const answer = await api.getLibrary(since, accountId)
   if (!('cursor' in answer) || owner() !== accountId) return false
-  const tx = (await db()).transaction(
+  const change = await withDb(database => apply(database, answer))
+  const changed =
+    change.recordings.length +
+    change.toots.length +
+    change.deleted.recordings.length +
+    change.deleted.toots.length
+  if (changed > 0) emit(change)
+  return true
+}
+
+/** Applies what the account read (`pull`), in one transaction. What it changed here. */
+async function apply(database: Database, answer: api.LibraryChanges) {
+  const tx = database.transaction(
     ['recordings', 'audio', 'toots', 'tootAudio', 'downloads', 'outbox', 'meta'],
     'readwrite'
   )
@@ -402,13 +431,7 @@ async function pull(accountId: string): Promise<boolean> {
     change.recordings.push(renumbered)
   }
   await Promise.all([tx.objectStore('meta').put(answer.cursor, 'cursor'), tx.done])
-  const changed =
-    change.recordings.length +
-    change.toots.length +
-    change.deleted.recordings.length +
-    change.deleted.toots.length
-  if (changed > 0) emit(change)
-  return true
+  return change
 }
 
 /**
@@ -448,7 +471,7 @@ export async function syncOnce(accountId: string): Promise<void> {
 
 /** Downloads every WAV this browser still waits for, one at a time, until one fails. */
 export async function downloadAll(stopped: () => boolean): Promise<void> {
-  const waiting = await (await db()).getAll('downloads')
+  const waiting = await withDb(database => database.getAll('downloads'))
   for (const { kind, id } of waiting) {
     if (stopped()) return
     if ((await download(kind, id)) === 'failed') return
@@ -532,6 +555,6 @@ export function startSync(accountId: string, email: string, ready: Promise<void>
 export async function uploadBeforeSignOut(accountId: string): Promise<number> {
   return withSyncLock(async () => {
     if (owner() === accountId) await pullThenDrain(accountId)
-    return (await db()).count('outbox')
+    return withDb(database => database.count('outbox'))
   })
 }

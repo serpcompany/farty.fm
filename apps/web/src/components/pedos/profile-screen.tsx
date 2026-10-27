@@ -18,7 +18,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import { setSharing, useSharing } from '@/lib/telemetry/sharing'
 import { useAccount } from './account-provider'
-import { InstallGuideCard } from './install-button'
+import { InstallGuideCard, useInstallGuide } from './install-button'
 import { usePedos } from './pedos-provider'
 
 /**
@@ -100,6 +100,7 @@ export function ProfileScreen({ version }: { version: string }) {
           Get the app
         </h2>
         <InstallGuideCard />
+        <SafariMicrophoneTip />
       </section>
 
       <section aria-labelledby="profile-privacy" className="pt-6">
@@ -129,6 +130,21 @@ export function ProfileScreen({ version }: { version: string }) {
         </ul>
       </section>
     </div>
+  )
+}
+
+/**
+ * With Safari's Home Screen steps: how to stop Safari asking for the microphone (#222). A new
+ * page starts with no microphone grant unless the site's Microphone setting is Allow. The path is
+ * Apple's, from "Browse the web privately in Safari on iPhone" (iOS 27).
+ */
+function SafariMicrophoneTip() {
+  if (useInstallGuide() !== 'share-sheet') return null
+  return (
+    <p className="px-4 pt-1.5 text-xs text-muted-foreground" data-testid="safari-microphone-tip">
+      To stop Safari asking for the microphone, tap the Page Menu button at the left of the search
+      field, then Website Settings, and set Microphone to Allow.
+    </p>
   )
 }
 

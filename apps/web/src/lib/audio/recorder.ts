@@ -21,8 +21,18 @@ type Microphone = {
   source: MediaStreamAudioSourceNode
   node: AudioWorkletNode
   mute: GainNode
-  /** An interruption muted the track or stopped the context, so the next tap opens it afresh. */
-  interrupted: boolean
+  /** A call or another app took the microphone and ended the track. */
+  ended: boolean
+  /**
+   * The track is muted: by Siri, an alarm or a call banner on iPhone, or by iPhone Safari while
+   * the page is hidden. Capture goes on when it unmutes; until then the next tap opens it afresh.
+   */
+  silenced: boolean
+  /**
+   * Capture went on with this stream after an interruption or a hidden page, rather than with a
+   * fresh one, and no take has run on it since. The next take checks it hears something.
+   */
+  resumed: boolean
   /** Stops listening to the shared context. */
   unwatch(): void
 }
@@ -40,8 +50,19 @@ let microphone: Microphone | null = null
 let opening: Promise<Microphone> | null = null
 /** Counts `releaseMicrophone` calls, so a microphone that opens after one is let go at once. */
 let generation = 0
-/** The microphone opened in this page, so permission was granted. */
+/** The microphone opened in this page, so this page was granted it. */
 let granted = false
+/**
+ * The browser said the microphone was granted before this page asked for it, so the grant is
+ * the browser's own, such as Safari's per-site Microphone setting at Allow, and doesn't lapse.
+ */
+let remembered = false
+/**
+ * When capture last stopped, by `Date.now()`, or null while it runs. iPhone Safari keeps a page's
+ * grant for 24 hours while capture runs. Once it stops, a `getUserMedia` call outside a tap asks
+ * again after 1 minute, and any call asks again after 10 (#222). A muted track counts as stopped.
+ */
+let captureStoppedAt: number | null = null
 let capturing: Capturing | null = null
 let takes = 0
 /** The microphone stays open for the rest of the launch (`keepMicrophoneOpen`). */
@@ -49,6 +70,18 @@ let keeping = false
 
 /** A take that hasn't sent its first batch by now, with the microphone open, didn't start. */
 const firstBatchTimeoutMs = 3000
+/**
+ * How long after capture stops the page still opens the microphone without a tap: inside iPhone
+ * Safari's 1 minute, with room for a slow `getUserMedia`. After it, the next Record tap opens it.
+ */
+export const openWithoutTapMs = 50_000
+/**
+ * How long a hidden page's microphone may keep listening before it's let go. iPhone Safari mutes
+ * it as the page hides, so the stream is kept; a browser that keeps listening loses it.
+ */
+const hiddenListeningMs = 1000
+/** How long the page waits, once shown, for a muted track to unmute before opening it afresh. */
+const unmuteWaitMs = 1500
 
 /** Each context's load of the capture processor, shared by Record's preload and the first tap. */
 const loads = new WeakMap<BaseAudioContext, Promise<void>>()
@@ -73,18 +106,37 @@ function loadCaptureProcessor(context: AudioContext): Promise<void> {
   return loading
 }
 
-/**
- * Whether the microphone can open without asking: it opened in this page already, or the
- * Permissions API says it's granted. Where the browser can't tell, it asks on the first tap.
- */
-export async function microphoneGranted(): Promise<boolean> {
-  if (granted) return true
+async function permissionGranted(): Promise<boolean> {
   try {
     const status = await navigator.permissions.query({ name: 'microphone' as PermissionName })
     return status.state === 'granted'
   } catch {
     return false
   }
+}
+
+/**
+ * Whether the microphone can open now, outside a tap, without the browser asking: the browser
+ * remembers the grant, or this page's own grant is still good outside a tap, because capture ran
+ * less than `openWithoutTapMs` ago. Otherwise the next Record tap opens it.
+ */
+async function mayOpenWithoutTap(): Promise<boolean> {
+  if (!granted && !remembered) {
+    const allowed = await permissionGranted()
+    // iPhone Safari also says granted while the page's own grant lasts, so only an answer from
+    // before this page was granted the microphone counts as the browser's.
+    if (allowed && !granted) remembered = true
+  }
+  if (remembered) return true
+  return granted && (captureStoppedAt === null || Date.now() - captureStoppedAt <= openWithoutTapMs)
+}
+
+function captureStarted(): void {
+  captureStoppedAt = null
+}
+
+function captureStopped(): void {
+  captureStoppedAt ??= Date.now()
 }
 
 /**
@@ -136,12 +188,23 @@ async function connect(openedIn: number): Promise<Microphone> {
     throw error
   }
   granted = true
+  captureStarted()
   // An interruption is heard from the moment the stream opens. One that comes while the capture
-  // processor loads, which takes longest on a slow phone, opens the microphone afresh too (#172).
-  let interruptedWhileOpening = false
+  // processor loads, which takes longest on a slow phone, is heard by the next tap too (#172).
+  let mutedWhileOpening = false
+  let endedWhileOpening = false
   for (const track of stream.getAudioTracks()) {
-    track.onmute = track.onended = () => {
-      interruptedWhileOpening = true
+    track.onmute = () => {
+      mutedWhileOpening = true
+      captureStopped()
+    }
+    track.onunmute = () => {
+      mutedWhileOpening = false
+      captureStarted()
+    }
+    track.onended = () => {
+      endedWhileOpening = true
+      captureStopped()
     }
   }
 
@@ -153,6 +216,7 @@ async function connect(openedIn: number): Promise<Microphone> {
     if (openedIn !== generation) throw new MicrophoneReleasedError()
   } catch (error) {
     for (const track of stream.getTracks()) track.stop()
+    captureStopped()
     if (openedIn === generation) setMicrophoneSession(false)
     throw error
   }
@@ -163,16 +227,13 @@ async function connect(openedIn: number): Promise<Microphone> {
   const mute = context.createGain()
   mute.gain.value = 0
   source.connect(node).connect(mute).connect(context.destination)
-  // Siri, an alarm or a call banner on iPhone mutes the track, or stops the context, without
-  // ending it. The ring would then hold silence, or audio from before the interruption, so it's
-  // emptied, and the next tap opens the microphone afresh.
-  const interrupt = () => {
-    opened.interrupted = true
-    send(node, { type: 'flush' })
-  }
+  // An interruption on iPhone, or hiding the page there, mutes the track or stops the context
+  // without ending it. The ring would then hold silence, or audio from before it, so it's
+  // emptied. Capture goes on with the same stream once the track unmutes and a tap starts the
+  // context again (#222).
   let running = context.state === 'running'
   const contextChanged = () => {
-    if (running && context.state !== 'running') interrupt()
+    if (running && context.state !== 'running') send(node, { type: 'flush' })
     running = context.state === 'running'
   }
   context.addEventListener('statechange', contextChanged)
@@ -182,7 +243,9 @@ async function connect(openedIn: number): Promise<Microphone> {
     source,
     node,
     mute,
-    interrupted: interruptedWhileOpening,
+    ended: endedWhileOpening,
+    silenced: mutedWhileOpening,
+    resumed: false,
     unwatch: () => context.removeEventListener('statechange', contextChanged)
   }
 
@@ -193,19 +256,66 @@ async function connect(openedIn: number): Promise<Microphone> {
     take.began()
     if (event.data.done) take.finished?.()
   }
-  // A call or another app taking the microphone ends the track: a take in progress is lost.
   for (const track of stream.getAudioTracks()) {
+    // A call or another app taking the microphone ends the track: a take in progress is lost.
     track.onended = () => {
+      opened.ended = true
+      captureStopped()
       if (microphone === opened) releaseMicrophone()
     }
-    track.onmute = interrupt
+    track.onmute = () => {
+      opened.silenced = true
+      captureStopped()
+      send(node, { type: 'flush' })
+    }
+    track.onunmute = () => {
+      if (microphone !== opened) return
+      if (document.visibilityState === 'hidden') {
+        // Never listening while hidden: the interruption ended while the person is away. The
+        // stream is let go unless the page shows within `hiddenListeningMs`, since iPhone Safari
+        // may unmute it just before it says the page shows.
+        opened.silenced = false
+        releaseIfHiddenAndListening()
+      } else resumeCapture(opened)
+    }
   }
   return opened
 }
 
-/** Whether an interruption has left the open microphone's track silent or its ring stale. */
+/** The track unmuted: what the ring heard before it is stale, and the stream is good again. */
+function resumeCapture(mic: Microphone): void {
+  mic.silenced = false
+  mic.resumed = true
+  captureStarted()
+  send(mic.node, { type: 'flush' })
+}
+
+/** All of a take's first batch is exact zeros: a microphone delivers noise, never that. */
+function digitalSilence(samples: Float32Array): boolean {
+  return samples.every(sample => sample === 0)
+}
+
+/** The track is muted, so the stream hears nothing until it unmutes. */
+function silent(mic: Microphone): boolean {
+  return mic.silenced || mic.stream.getAudioTracks().some(track => track.muted)
+}
+
+function ended(mic: Microphone): boolean {
+  return mic.ended || mic.stream.getAudioTracks().some(track => track.readyState === 'ended')
+}
+
+/** Whether an interruption has left the open microphone unable to capture. */
 function interrupted(mic: Microphone): boolean {
-  return mic.interrupted || mic.stream.getAudioTracks().some(track => track.muted)
+  return ended(mic) || silent(mic)
+}
+
+/** Loses the take in progress, if any: one still starting fails, and one recording stops. */
+function loseTake(): void {
+  const lost = capturing
+  if (!lost) return
+  capturing = null
+  if (microphone) send(microphone.node, { type: 'cancel', take: lost.id })
+  lost.lost()
 }
 
 /**
@@ -214,10 +324,9 @@ function interrupted(mic: Microphone): boolean {
  */
 export function releaseMicrophone(): void {
   generation += 1
+  const wasOpen = microphone !== null || opening !== null
   opening = null
-  const lost = capturing
-  capturing = null
-  lost?.lost()
+  loseTake()
   const closing = microphone
   microphone = null
   if (closing) {
@@ -228,8 +337,12 @@ export function releaseMicrophone(): void {
     closing.node.disconnect()
     closing.mute.disconnect()
     closing.node.port.onmessage = null
-    for (const track of closing.stream.getTracks()) track.stop()
+    for (const track of closing.stream.getTracks()) {
+      track.onmute = track.onunmute = track.onended = null
+      track.stop()
+    }
   }
+  if (wasOpen) captureStopped()
   setMicrophoneSession(false)
 }
 
@@ -251,11 +364,28 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
   if (microphone && !capturing && interrupted(microphone)) releaseMicrophone()
   let mic = await openMicrophone()
   // Tapped while it was opening, and interrupted then.
-  if (mic.interrupted && !capturing) {
+  if (interrupted(mic) && !capturing) {
     releaseMicrophone()
     mic = await openMicrophone()
   }
+  const resumed = mic.resumed
+  mic.resumed = false
+  const take = await capture(mic, onInterrupted)
+  // A stream kept through an interruption may come back sending digital silence (#172, #222).
+  // Its first take then opens it afresh, in the same tap, rather than recording nothing.
+  if (resumed && digitalSilence(take.first) && microphone === mic) {
+    take.cancel()
+    releaseMicrophone()
+    return capture(await openMicrophone(), onInterrupted)
+  }
+  return take
+}
 
+/** Starts a take on `mic`. It resolves with the take, and its first batch, once audio comes in. */
+async function capture(
+  mic: Microphone,
+  onInterrupted: () => void
+): Promise<Take & { first: Float32Array }> {
   takes += 1
   const id = takes
   let begin = () => {}
@@ -296,6 +426,7 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
   inProgress = true
 
   return {
+    first: take.chunks[0],
     async stop() {
       if (capturing === take) {
         // Ask the processor for its last partial batch.
@@ -326,9 +457,12 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
 /**
  * Keeps the microphone open for the rest of the launch, from the first time the Record screen
  * shows: through Review, Result and the other tabs, so every tap on Record captures at once with
- * its pre-roll. Sounds meanwhile play in the microphone's session (`setPlaybackSession`). It opens
- * only when permission is already granted, so Farty doesn't ask as soon as it opens; otherwise
- * the first tap opens it. Hiding the page lets it go, and showing the page again opens it. A
+ * its pre-roll. Sounds meanwhile play in the microphone's session (`setPlaybackSession`).
+ *
+ * It opens without a tap only while that can't make the browser ask (`mayOpenWithoutTap`);
+ * otherwise the next tap opens it. Hiding the page keeps the stream, which iPhone Safari mutes
+ * until the page shows again, so iPhone doesn't count capture as stopped for good and ask again
+ * (#222). A browser that would keep listening while the page is hidden lets it go instead. A
  * computer's product page lets it go until Record shows again (#199).
  */
 export function keepMicrophoneOpen(): void {
@@ -340,15 +474,19 @@ export function keepMicrophoneOpen(): void {
     document.addEventListener('visibilitychange', visibilityChanged)
     window.addEventListener('pagehide', releaseMicrophone)
   }
-  void openIfGranted()
+  void openIfAllowed()
 }
 
 let computer: MediaQueryList | null = null
+let hiddenTimer: ReturnType<typeof setTimeout> | undefined
+let shownTimer: ReturnType<typeof setTimeout> | undefined
 
 /** A window widened into the product page lets the microphone go. */
 function becameComputer(event: MediaQueryListEvent): void {
   if (!event.matches) return
   keeping = false
+  clearTimeout(hiddenTimer)
+  clearTimeout(shownTimer)
   computer?.removeEventListener('change', becameComputer)
   document.removeEventListener('visibilitychange', visibilityChanged)
   window.removeEventListener('pagehide', releaseMicrophone)
@@ -356,12 +494,56 @@ function becameComputer(event: MediaQueryListEvent): void {
 }
 
 function visibilityChanged(): void {
-  if (document.visibilityState === 'hidden') releaseMicrophone()
-  else void openIfGranted()
+  clearTimeout(hiddenTimer)
+  clearTimeout(shownTimer)
+  if (document.visibilityState === 'hidden') pageHidden()
+  else pageShown()
 }
 
-async function openIfGranted(): Promise<void> {
-  if (!(await microphoneGranted())) {
+function pageHidden(): void {
+  // The person left: a take in progress is lost, and one opening the microphone stops.
+  if (opening) releaseMicrophone()
+  loseTake()
+  // Safari may stop capture before it says so; the clock starts now either way.
+  captureStopped()
+  releaseIfHiddenAndListening()
+}
+
+/**
+ * In `hiddenListeningMs`, lets the microphone go if the page is still hidden and its stream could
+ * hear: as the page hides, and again if a muted stream unmutes before it shows.
+ */
+function releaseIfHiddenAndListening(): void {
+  clearTimeout(hiddenTimer)
+  hiddenTimer = setTimeout(() => {
+    const mic = microphone
+    if (document.visibilityState !== 'hidden' || !mic) return
+    if (!interrupted(mic)) releaseMicrophone()
+  }, hiddenListeningMs)
+}
+
+function pageShown(): void {
+  const mic = microphone
+  if (!mic || ended(mic)) {
+    if (mic) releaseMicrophone()
+    void openIfAllowed()
+    return
+  }
+  if (!silent(mic)) {
+    resumeCapture(mic)
+    return
+  }
+  // iPhone Safari unmutes the track once the page shows (`resumeCapture`). One that stays muted
+  // is opened afresh, if that can't make the browser ask.
+  shownTimer = setTimeout(() => {
+    if (microphone !== mic || !silent(mic) || document.visibilityState !== 'visible') return
+    releaseMicrophone()
+    void openIfAllowed()
+  }, unmuteWaitMs)
+}
+
+async function openIfAllowed(): Promise<void> {
+  if (!(await mayOpenWithoutTap())) {
     // The first tap then waits only for the microphone. The context stays suspended until a tap.
     loadCaptureProcessor(audioContext()).catch(() => {})
     return
@@ -390,4 +572,5 @@ export async function askForMicrophone(): Promise<void> {
   }
   for (const track of stream.getTracks()) track.stop()
   granted = true
+  captureStoppedAt = Date.now()
 }

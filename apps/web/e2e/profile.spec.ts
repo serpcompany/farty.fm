@@ -2,8 +2,8 @@ import { expect, type Page, test } from '@playwright/test'
 
 // Profile's Get the app (#217): what installing gives you, then the steps for the browser it's
 // in: Chrome's prompt or menu, or Samsung Internet's, on Android, the Share sheet on iPhone and
-// iPad, Safari or the browser first from an in-app browser, a phone from a computer, and that
-// Farty is installed.
+// iPad, with how to stop Safari asking for the microphone (#222), Safari or the browser first
+// from an in-app browser, a phone from a computer, and that Farty is installed.
 
 const userAgents = {
   iPhoneSafari:
@@ -157,15 +157,20 @@ const shareSheetSteps = [
   'Tap Add.'
 ]
 
+// Apple's path to a site's Microphone setting (#222).
+const safariMicrophoneTip =
+  'To stop Safari asking for the microphone, tap the Page Menu button at the left of the search field, then Website Settings, and set Microphone to Allow.'
+
 test.describe('on iPhone', () => {
   test.use({ userAgent: userAgents.iPhoneSafari })
 
   test('says how to add Farty to the Home Screen from the Share sheet', async ({ page }) => {
     await page.goto('/profile/')
     const section = getTheApp(page)
-    await expect(section.getByRole('paragraph')).toHaveText(intro)
+    await expect(section.getByTestId('install-guide').getByRole('paragraph')).toHaveText(intro)
     await expect(section.getByRole('listitem')).toHaveText(shareSheetSteps)
     await expect(section.getByRole('button')).toHaveCount(0)
+    await expect(section.getByTestId('safari-microphone-tip')).toHaveText(safariMicrophoneTip)
   })
 
   test('says Farty is installed when it opens from the Home Screen', async ({ page }) => {
@@ -176,6 +181,7 @@ test.describe('on iPhone', () => {
     const section = getTheApp(page)
     await expect(section.getByText('Farty is installed', { exact: true })).toBeVisible()
     await expect(section.getByRole('listitem')).toHaveCount(0)
+    await expect(section.getByTestId('safari-microphone-tip')).toHaveCount(0)
   })
 
   test.describe('in an in-app browser', () => {
@@ -187,6 +193,7 @@ test.describe('on iPhone', () => {
         "In this app's menu, tap Open in Safari or Open in browser.",
         'In Safari, follow the steps that show here.'
       ])
+      await expect(getTheApp(page).getByTestId('safari-microphone-tip')).toHaveCount(0)
     })
   })
 })
@@ -198,6 +205,9 @@ test.describe('on iPad', () => {
     await touchPoints(page, 5)
     await page.goto('/profile/')
     await expect(getTheApp(page).getByRole('listitem')).toHaveText(shareSheetSteps)
+    await expect(getTheApp(page).getByTestId('safari-microphone-tip')).toHaveText(
+      safariMicrophoneTip
+    )
   })
 })
 

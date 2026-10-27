@@ -11,6 +11,7 @@ import { noteName } from '@/lib/pitch'
 import { TOOT_PRICE_LABEL } from '@/lib/pricing'
 import * as store from '@/lib/recording-store'
 import { formattedLength, type Recording, recordingName, recordingPitch } from '@/lib/recordings'
+import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
 import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/toot'
 import {
@@ -179,6 +180,8 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
   const [paysAfterSignIn, setPaysAfterSignIn] = useState(false)
   /** A second tap, before the first one's answer, starts nothing. */
   const paying = useRef(false)
+  // A new build's reload waits while this Toot is unsaved (`stale-build.ts`, #222).
+  useEffect(() => (isSaved ? undefined : holdReload()), [isSaved])
 
   /** Saves the Toot. True once it's saved. */
   const save = async (): Promise<boolean> => {

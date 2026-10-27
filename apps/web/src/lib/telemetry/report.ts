@@ -27,6 +27,13 @@ export const ERROR_CODES = [
   /** Song Creator's "Couldn't make this Toot". */
   'toot-make-failed',
   'toot-save-failed',
+  /**
+   * A read or write of the library failed on a lost IndexedDB connection, and again on a fresh
+   * one (`withDb`, #222).
+   */
+  'library-connection-lost',
+  /** A script of an older build failed to load, and the page reloaded, or would have (#222). */
+  'stale-build',
   /** The Staging-only trigger's handled error (`/dev/telemetry/`). */
   'synthetic-handled'
 ] as const
