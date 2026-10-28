@@ -18,13 +18,15 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      HAS_AGENT_KEY: ${{ secrets.SERP_AGENT_PRIVATE_KEY != '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 2
       - name: A short-lived token that reads the organization's repositories
         id: app-token
-        if: vars.SERP_AGENT_APP_ID != ''
+        if: vars.SERP_AGENT_APP_ID != '' && env.HAS_AGENT_KEY == 'true'
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510
         with:
           app-id: ${{ vars.SERP_AGENT_APP_ID }}
@@ -91,6 +93,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         if: env.HAS_REVIEW_TOKEN == 'true'
