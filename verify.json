@@ -132,18 +132,6 @@
       "apps/web/src/server/auth-config.ts": {
         "lines": 635,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "tools/catalog/import_pdmx.py": {
-        "lines": 562,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "tools/catalog/test_pdmx.py": {
-        "lines": 590,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "tools/melody-lab/engine.py": {
-        "lines": 590,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       }
     },
     "allowedPauses": {},
@@ -265,10 +253,6 @@
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       },
       "apps\\web\\src\\server\\toot-payments.ts and apps\\web\\src\\server\\toot-payments.ts": {
-        "blocks": 1,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "tools\\catalog\\pdmx.py and tools\\melody-lab\\evaluate.py": {
         "blocks": 1,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       }
@@ -1094,50 +1078,6 @@
         "apps/web/src/test-support/workers-setup.ts": {
           "findings": 7,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/catalog/import_pdmx.py": {
-          "findings": 27,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/catalog/pdmx.py": {
-          "findings": 48,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/catalog/test_pdmx.py": {
-          "findings": 51,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/melody-lab/build.py": {
-          "findings": 3,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/melody-lab/engine.py": {
-          "findings": 67,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/melody-lab/evaluate_renders.py": {
-          "findings": 5,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/melody-lab/evaluate.py": {
-          "findings": 23,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/melody-lab/export_golden.py": {
-          "findings": 15,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/melody-lab/golden_cost.py": {
-          "findings": 4,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/melody-lab/melody.py": {
-          "findings": 13,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/melody-lab/test_needed_seconds.py": {
-          "findings": 6,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         }
       },
       "docs": {},
@@ -1317,20 +1257,7 @@
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         }
       },
-      "linters": {
-        "tools/melody-lab/melody.py": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/melody-lab/plot_env.py": {
-          "findings": 14,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "tools/melody-lab/run_all.py": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        }
-      }
+      "linters": {}
     }
   }
 }

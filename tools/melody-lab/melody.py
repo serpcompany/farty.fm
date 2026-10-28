@@ -1,20 +1,20 @@
-"""Deterministic MIDI -> monophonic melody plan importer.
-
-Every melody comes from a checked-in source MIDI file. The importer never invents notes:
-it selects one track, keeps the highest note at each onset ("skyline"), clips overlaps,
-and reports everything it discarded so nothing is silently dropped.
-"""
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import mido
 
+CATALOG = Path(__file__).resolve().parents[2] / "catalog/catalog.json"
+DEFAULT_TEMPO_US = 500000
+DEFAULT_BEATS_PER_BAR = 4
+GRID_PER_BEAT = 48
+
 
 @dataclass
 class Note:
-    start: float  # beats
-    dur: float  # beats
-    pitch: int  # MIDI
+    start: float
+    dur: float
+    pitch: int
 
 
 @dataclass
@@ -30,43 +30,51 @@ class Melody:
         return max(n.start + n.dur for n in self.notes)
 
 
-def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat=0.0, beats_per_bar=None):
-    beats_per_bar_arg = beats_per_bar
-    mid = mido.MidiFile(path)
-    tpb = mid.ticks_per_beat
-    tempo_us, beats_per_bar, tempo_changes = 500000, 4, 0
-    events = {}  # track index -> list of (start_tick, end_tick, pitch)
-    for ti, trk in enumerate(mid.tracks):
-        tick, open_notes, done = 0, {}, []
-        for msg in trk:
-            tick += msg.time
-            if msg.type == "set_tempo":
-                if tick == 0:
-                    tempo_us = msg.tempo
-                else:
-                    tempo_changes += 1
-            elif msg.type == "time_signature" and tick == 0:
-                beats_per_bar = msg.numerator
-            elif msg.type == "note_on" and msg.velocity > 0:
-                open_notes.setdefault((msg.channel, msg.note), []).append(tick)
-            elif msg.type in ("note_off", "note_on"):
-                starts = open_notes.get((msg.channel, msg.note))
-                if starts:
-                    done.append((starts.pop(0), tick, msg.note))
-        done = [d for d in done if d[1] > d[0]]  # zero-length notes carry no sound
-        if done:
-            events[ti] = sorted(done)
-    if track is None:  # default: the track with the highest mean pitch (usually the tune)
-        track = max(events, key=lambda t: sum(p for _, _, p in events[t]) / len(events[t]))
-    raw = events[track]
+@dataclass
+class ScoreEvents:
+    notes_by_track: dict
+    tempo_us: int = DEFAULT_TEMPO_US
+    beats_per_bar: int = DEFAULT_BEATS_PER_BAR
+    tempo_changes: int = 0
 
-    # Sustain-aware skyline: a new melody note starts only when the highest *sounding*
-    # pitch is a note that begins at this onset. Inner-voice onsets under a held top note
-    # are dropped (and counted) instead of chopping the melody note.
-    onsets = sorted({s for s, _, _ in raw})
+
+def track_notes(track, score):
+    tick, open_notes, done = 0, {}, []
+    for msg in track:
+        tick += msg.time
+        if msg.type == "set_tempo":
+            if tick == 0:
+                score.tempo_us = msg.tempo
+            else:
+                score.tempo_changes += 1
+        elif msg.type == "time_signature" and tick == 0:
+            score.beats_per_bar = msg.numerator
+        elif msg.type == "note_on" and msg.velocity > 0:
+            open_notes.setdefault((msg.channel, msg.note), []).append(tick)
+        elif msg.type in ("note_off", "note_on"):
+            starts = open_notes.get((msg.channel, msg.note))
+            if starts:
+                done.append((starts.pop(0), tick, msg.note))
+    return [d for d in done if d[1] > d[0]]
+
+
+def read_score(mid):
+    score = ScoreEvents({})
+    for ti, trk in enumerate(mid.tracks):
+        done = track_notes(trk, score)
+        if done:
+            score.notes_by_track[ti] = sorted(done)
+    return score
+
+
+def highest_track(notes_by_track):
+    return max(notes_by_track, key=lambda t: sum(p for _, _, p in notes_by_track[t]) / len(notes_by_track[t]))
+
+
+def skyline(raw):
     top = []
     dropped_chord_tones = dropped_inner_onsets = 0
-    for s in onsets:
+    for s in sorted({s for s, _, _ in raw}):
         sounding = [(p, st, e) for st, e, p in raw if st <= s < e]
         p, st, e = max(sounding)
         starting_here = sum(1 for _, st2, _ in sounding if st2 == s)
@@ -75,44 +83,59 @@ def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat
             dropped_chord_tones += starting_here - 1
         else:
             dropped_inner_onsets += starting_here
-    # Engraving software exports notes slightly short of their written value (articulation).
-    # A note's slot runs to the next onset unless a real rest follows (a gap of a full beat,
-    # or a gap longer than the note itself).
-    grid = tpb / 48
-    q = lambda x: round(x / grid) * grid
+    return top, dropped_chord_tones, dropped_inner_onsets
+
+
+def snap(x, grid):
+    return round(x / grid) * grid
+
+
+def closes_articulation_gap(start, end, next_onset, tpb):
+    return next_onset - end < tpb and next_onset - end <= 1.1 * (end - start)
+
+
+def slot_notes(top, tpb):
+    grid = tpb / GRID_PER_BEAT
     notes, clipped = [], 0
     for i, (s, e, p) in enumerate(top):
         nxt = top[i + 1][0] if i + 1 < len(top) else None
         if nxt is not None and e > nxt:
             e, clipped = nxt, clipped + 1
-        elif nxt is not None and nxt - e < tpb and nxt - e <= 1.1 * (e - s):
+        elif nxt is not None and closes_articulation_gap(s, e, nxt, tpb):
             e = nxt
-        notes.append(Note(q(s) / tpb, max(grid, q(e) - q(s)) / tpb, p))
+        notes.append(Note(snap(s, grid) / tpb, max(grid, snap(e, grid) - snap(s, grid)) / tpb, p))
+    return notes, clipped
 
+
+def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat=0.0, beats_per_bar=None):
+    mid = mido.MidiFile(path)
+    score = read_score(mid)
+    if track is None:
+        track = highest_track(score.notes_by_track)
+    top, dropped_chord_tones, dropped_inner_onsets = skyline(score.notes_by_track[track])
+    notes, clipped = slot_notes(top, mid.ticks_per_beat)
     notes = [Note(n.start - start_beat, n.dur, n.pitch) for n in notes if n.start >= start_beat]
     if max_beats is not None:
         notes = [n for n in notes if n.start < max_beats]
     return Melody(
         title=title or Path(path).stem,
-        bpm=bpm or round(60_000_000 / tempo_us, 2),
-        beats_per_bar=beats_per_bar_arg or beats_per_bar,
+        bpm=bpm or round(60_000_000 / score.tempo_us, 2),
+        beats_per_bar=beats_per_bar or score.beats_per_bar,
         notes=notes,
         report={
             "source_file": str(path),
             "track_used": track,
-            "tracks_with_notes": sorted(events),
+            "tracks_with_notes": sorted(score.notes_by_track),
             "chord_tones_dropped": dropped_chord_tones,
             "inner_voice_onsets_dropped": dropped_inner_onsets,
             "overlaps_clipped": clipped,
-            "tempo_changes_ignored": tempo_changes,
+            "tempo_changes_ignored": score.tempo_changes,
             "note_count": len(notes),
         },
     )
 
 
-def load_catalog(path=Path(__file__).resolve().parents[2] / "catalog/catalog.json"):
-    import json
-
+def load_catalog(path=CATALOG):
     out = []
     for c in json.loads(Path(path).read_text(encoding="utf-8")):
         m = load_midi(Path(path).parent / c["file"], title=c["title"], **c.get("render", {}))

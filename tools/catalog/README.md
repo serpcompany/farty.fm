@@ -13,9 +13,14 @@ uv run --project tools pytest tools/catalog
 
 | File | Role |
 | --- | --- |
-| `import_pdmx.py` | Downloads, picks, runs the gates with the reference engine, writes `catalog/` and the report |
+| `import_pdmx.py` | The command: picks a score for each title, runs the gates, writes `catalog/` and the report, and renders the `--listen` sample |
 | `pdmx.py` | The rules: title matching, picking, excerpt and tempo, and each gate's thresholds |
-| `test_pdmx.py` | Unit tests for the rules |
+| `dataset.py` | Downloads PDMX, checks Zenodo's md5, and extracts the scores it tries from the MIDI archive |
+| `gates.py` | Runs the gates on one score with the reference engine, and tries each title's scores best first |
+| `catalog_writer.py` | Stages the picked scores and their entries, and writes `catalog/` only once every entry imports as gated |
+| `report.py` | Writes `<titles>.report.md` and `.json` |
+| `test_pdmx.py`, `test_import_pdmx.py`, `pdmx_testing.py` | Unit tests for the rules, and for the importer on temporary files with a stub renderer and no dataset |
+| `testdata/` | The two MuseScore 1.x scores whose pickups PDMX padded ([95546](https://musescore.com/score/95546) and [151013](https://musescore.com/score/151013), #225), as PDMX publishes them |
 | `titles-NN.txt` | A batch: one Song per line, `id \| Title \| alias; alias` |
 | `titles-NN.report.md`, `.json` | The batch's pass/fail report for every title, and every score tried |
 
@@ -36,7 +41,7 @@ The excerpt is the whole bars that fit in 32 quarter-note beats, from the bar of
 
 PDMX's MIDI pads a pickup out to a full bar when a MuseScore 1.x score sets the pickup's length only in its time-signature map, not on the measure itself: PDMX's reader (`read_musescore.py`) takes a measure's length from its `len` attribute or its time signature, and MuseScore takes it from the map. The Song then plays its pickup, then silence for the rest of the bar. Happy Birthday and We Wish You a Merry Christmas came from two such scores, so they were imported again in `titles-03.txt`.
 
-The run writes `catalog/` only after every passing Song's entry imports, through the catalog's own loader, to exactly the melody its gates judged. If one doesn't, it stops with `ReimportMismatch` and leaves `catalog/` and the report as they were.
+The run writes `catalog/` only after every passing Song's entry imports, through the catalog's own loader, to exactly the melody its gates judged. If one doesn't, it stops with `ReimportMismatch` and leaves `catalog/` and the report as they were. The merged `catalog.json` is staged too, and renamed over the real one only after the copies have moved in; the batch's stale copies go last, so a failure before the rename leaves the old `catalog.json` with every file it names.
 
 ## After a batch
 
