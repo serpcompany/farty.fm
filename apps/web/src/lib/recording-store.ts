@@ -6,7 +6,7 @@ import {
   openDB,
   type StoreNames
 } from 'idb'
-import { libraryOwner } from './account'
+import { readableLibraryOwner } from './account'
 import { getAudio } from './library-api'
 import {
   announceQueued,
@@ -21,32 +21,16 @@ import type { AnalysisState, Recording } from './recordings'
 import { reportError } from './telemetry/errors'
 import type { Toot } from './toot'
 
-/**
- * Recordings and Toots live in this browser, in IndexedDB (ADR 0001's local-first rule, on the
- * web). Metadata and audio are separate stores, so listing them never loads their audio. Without
- * an account the Recordings are kept and the Toots last only the visit (`visit.ts`). Signed in,
- * they are the account's working copy, kept in step with it by `library-sync.ts`.
- */
 export interface PedosDB extends DBSchema {
   recordings: { key: string; value: Recording }
-  /** Each Recording's WAV, by Recording id. */
   audio: { key: string; value: ArrayBuffer }
-  /** Since version 2. */
   toots: { key: string; value: Toot }
-  /** Each Toot's own WAV, by Toot id. Since version 2. */
   tootAudio: { key: string; value: ArrayBuffer }
-  /** What the account still needs from this browser (`outbox.ts`). Since version 3. */
   outbox: { key: string; value: OutboxEntry }
-  /**
-   * Recordings and Toots from the account whose WAV hasn't downloaded yet, by `itemKey`. Since
-   * version 3.
-   */
   downloads: { key: string; value: { kind: Kind; id: string } }
-  /** `cursor`: the account's `cursor` as of this browser's last read. Since version 3. */
   meta: { key: string; value: number }
 }
 
-/** Every store: clearing this browser's library clears them all. */
 const allStores = [
   'recordings',
   'audio',
@@ -57,12 +41,12 @@ const allStores = [
   'meta'
 ] as const
 
-/** Where each kind's WAVs are kept. */
+export type LibraryDatabase = IDBPDatabase<PedosDB>
+
 export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
 
-let opening: Promise<IDBPDatabase<PedosDB>> | null = null
+let opening: Promise<LibraryDatabase> | null = null
 
-/** Whether this tab's upgrade waits for Farty in another tab, which holds an older version open. */
 let waiting = false
 const waits = new EventTarget()
 
@@ -72,10 +56,6 @@ function setWaiting(value: boolean) {
   waits.dispatchEvent(new Event('change'))
 }
 
-/**
- * Calls `listener` now and on each change with whether the database waits for Farty in another
- * tab to close. Returns a function that stops it.
- */
 export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () => void {
   const handle = () => listener(waiting)
   waits.addEventListener('change', handle)
@@ -83,18 +63,9 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
   return () => waits.removeEventListener('change', handle)
 }
 
-/**
- * The app's database, upgraded to version 3 (the outbox) on first open. Version 1 held Recordings
- * only, and version 2 added Toots. An upgrade keeps them, and queues each to upload, since none
- * has been (`queueEverything`).
- *
- * One connection serves the page until the browser closes it, as WebKit can while the tab sleeps
- * (#222), or it fails to open: the next call then opens a fresh one. Reads and writes go through
- * `withDb`, which also gets past a connection lost before the browser says so.
- */
-export function db(): Promise<IDBPDatabase<PedosDB>> {
+export function db(): Promise<LibraryDatabase> {
   if (opening) return opening
-  const thisOpening: Promise<IDBPDatabase<PedosDB>> = openDB<PedosDB>('pedos', 3, {
+  const thisOpening: Promise<LibraryDatabase> = openDB<PedosDB>('pedos', 3, {
     upgrade(database, oldVersion, _newVersion, transaction) {
       if (oldVersion < 1) {
         database.createObjectStore('recordings', { keyPath: 'id' })
@@ -108,22 +79,16 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
         database.createObjectStore('outbox', { keyPath: 'key' })
         database.createObjectStore('downloads')
         database.createObjectStore('meta')
-        // A failed write aborts the upgrade, and the open fails with it.
         if (oldVersion >= 1) queueEverything(transaction).catch(() => {})
       }
     },
-    // An older version is open in another tab, and its code may never close it: the upgrade
-    // waits until that tab closes.
     blocked() {
       setWaiting(true)
     },
-    // A later version opening in another tab waits for this connection: close it, and open
-    // again on the next call.
     blocking(_version, _blocked, event) {
       ;(event.target as IDBDatabase).close()
       forget(thisOpening)
     },
-    // The browser closed the connection: storage cleared, or the IndexedDB server lost.
     terminated() {
       forget(thisOpening)
     }
@@ -133,16 +98,10 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
   return thisOpening
 }
 
-/** Drops `connection`, if it's still the page's, so the next `db()` opens a fresh one. */
-function forget(connection: Promise<IDBPDatabase<PedosDB>>): void {
+function forget(connection: Promise<LibraryDatabase>): void {
   if (opening === connection) opening = null
 }
 
-/**
- * Whether `error` came from a connection the browser closed or lost: an `InvalidStateError` from
- * a closed connection, or WebKit's `UnknownError`, "Connection to Indexed Database server lost.
- * Refresh the page to try again".
- */
 export function connectionLost(error: unknown): boolean {
   if (typeof error !== 'object' || error === null) return false
   const { name, message } = error as { name?: unknown; message?: unknown }
@@ -154,18 +113,8 @@ export function connectionLost(error: unknown): boolean {
   )
 }
 
-/**
- * Runs `work`, a read or a write, on the database. When it fails because the connection was
- * closed or lost, it runs once more on a fresh connection, so a tab left asleep still saves and
- * plays (#222). Should that lose its connection too, the failure is reported
- * (`library-connection-lost`) and thrown; any other failure is thrown as it is.
- *
- * `work` may run twice, so it does nothing outside the database. The first run may have committed
- * though the page never heard (WebKit can lose the connection between the two), so the second,
- * told it's a `retry`, finds its own write already there rather than failing on it.
- */
 export async function withDb<T>(
-  work: (database: IDBPDatabase<PedosDB>, retry: boolean) => Promise<T>
+  work: (database: LibraryDatabase, retry: boolean) => Promise<T>
 ): Promise<T> {
   const connection = db()
   try {
@@ -182,7 +131,6 @@ export async function withDb<T>(
   }
 }
 
-/** Whether `stored` holds every field of `fields`, as a write of them would have left it. */
 export function holds(stored: object, fields: object): boolean {
   const kept = stored as Record<string, unknown>
   return Object.entries(fields).every(
@@ -190,10 +138,6 @@ export function holds(stored: object, fields: object): boolean {
   )
 }
 
-/**
- * Queues an upload of every Recording and Toot an upgrade keeps, oldest first: before version 3
- * nothing uploaded, so none is on the account yet.
- */
 async function queueEverything(
   transaction: IDBPTransaction<PedosDB, StoreNames<PedosDB>[], 'versionchange'>
 ): Promise<void> {
@@ -223,12 +167,6 @@ async function queueEverything(
 
 type OutboxStore = IDBPObjectStore<PedosDB, StoreNames<PedosDB>[], 'outbox', 'readwrite'>
 
-/**
- * Adds `op` on a Recording or Toot to the outbox, in the transaction that makes the change, so the
- * change and its entry are written together or not at all. A write names `outbox` before its
- * first request: a store asked for once a request has aborted the transaction throws there and
- * then, leaving the requests already made, and `tx.done`, unhandled.
- */
 export async function queue(
   outbox: OutboxStore,
   kind: Kind,
@@ -244,24 +182,17 @@ export async function queue(
 
 const saved = new EventTarget()
 
-/** Calls `listener` after each new Recording is saved. Returns a function that stops it. */
 export function onRecordingSaved(listener: (recording: Recording) => void): () => void {
   const handle = (event: Event) => listener((event as CustomEvent<Recording>).detail)
   saved.addEventListener('recording-saved', handle)
   return () => saved.removeEventListener('recording-saved', handle)
 }
 
-/** Every Recording, oldest first. */
 export async function loadRecordings(): Promise<Recording[]> {
   const all = await withDb(database => database.getAll('recordings'))
   return all.sort((a, b) => a.number - b.number)
 }
 
-/**
- * Saves a new Recording and its WAV audio together, numbered after the highest so far, and queues
- * its upload. A new Recording gets a random id; the Fixture Library gives its own
- * (`fixtureRecordingId`).
- */
 export async function saveRecording(
   fields: Omit<Recording, 'id' | 'number' | 'createdAt' | 'analysis'>,
   wav: ArrayBuffer,
@@ -271,7 +202,6 @@ export async function saveRecording(
     const tx = database.transaction(['recordings', 'audio', 'outbox'], 'readwrite')
     const outbox = tx.objectStore('outbox')
     if (retry) {
-      // The first try's Recording, with its audio and its upload queued in the same transaction.
       const stored = await tx.objectStore('recordings').get(id)
       if (stored && holds(stored, fields)) {
         await tx.done
@@ -307,12 +237,10 @@ export async function saveAnalysis(id: string, analysis: AnalysisState): Promise
     await Promise.all([tx.store.put(updated), tx.done])
     return updated
   })
-  // A Recording uploads once its analysis is done.
   if (updated) announceQueued()
   return updated
 }
 
-/** A Recording's WAV: this browser's, or the account's, downloaded now if it hasn't been yet. */
 export async function loadAudio(id: string): Promise<ArrayBuffer> {
   const audio = await withDb(database => database.get('audio', id))
   if (audio) return audio
@@ -325,7 +253,6 @@ export async function deleteRecording(id: string): Promise<void> {
   await deleteItem('recordings', id)
 }
 
-/** Deletes a Recording or Toot and its audio, and queues the delete for the account, together. */
 export async function deleteItem(kind: Kind, id: string): Promise<void> {
   await withDb(async database => {
     const tx = database.transaction([kind, audioStore[kind], 'downloads', 'outbox'], 'readwrite')
@@ -341,7 +268,6 @@ export async function deleteItem(kind: Kind, id: string): Promise<void> {
   announceQueued()
 }
 
-/** Deletes every Recording and Toot in this browser, with their audio and outbox, together. */
 export async function clearLibrary(): Promise<void> {
   await withDb(async database => {
     const tx = database.transaction(allStores, 'readwrite')
@@ -349,12 +275,7 @@ export async function clearLibrary(): Promise<void> {
   })
 }
 
-/**
- * Deletes every Toot in this browser, with its audio and whatever waits to send or download for
- * it, together. The Recordings stay, with their outbox, so a sign-in still uploads them.
- */
 export async function clearToots(): Promise<void> {
-  // Every key that starts `toots:` (`itemKey`).
   const forToots = IDBKeyRange.bound(itemKey('toots', ''), itemKey('toots', '\uffff'))
   await withDb(async database => {
     const tx = database.transaction(['toots', 'tootAudio', 'outbox', 'downloads'], 'readwrite')
@@ -368,18 +289,10 @@ export async function clearToots(): Promise<void> {
   })
 }
 
-/**
- * What a download found: the WAV, `missing` when the account has none (or the item is gone
- * here), or `failed` when it couldn't be fetched now.
- */
 export type Download = ArrayBuffer | 'missing' | 'failed'
 
 const downloading = new Map<string, Promise<Download>>()
 
-/**
- * Downloads a Recording's or Toot's WAV from the account, as it is kept there, if this browser
- * still waits for it. One download per item at a time.
- */
 export function download(kind: Kind, id: string): Promise<Download> {
   const key = itemKey(kind, id)
   let running = downloading.get(key)
@@ -394,24 +307,15 @@ async function fetchDownload(kind: Kind, id: string): Promise<Download> {
   const key = itemKey(kind, id)
   const waiting = await withDb(async database => {
     if (await database.getKey('downloads', key)) return true
-    // Another tab may have stored it meanwhile.
     return (await database.get(audioStore[kind], id)) ?? ('missing' as const)
   })
   if (waiting !== true) return waiting
-  // Only from the account this library is.
-  let accountId: string | null = null
-  try {
-    accountId = libraryOwner()
-  } catch {
-    // Storage is blocked: a library that never syncs has nothing to download.
-  }
+  const accountId = readableLibraryOwner()
   if (!accountId) return 'failed'
   const wav = await getAudio(kind, id, accountId)
   if (!(wav instanceof ArrayBuffer) && wav.status !== 404) return 'failed'
   return withDb(async database => {
     const tx = database.transaction([kind, audioStore[kind], 'downloads'], 'readwrite')
-    // Only for an item still waiting for it: a delete or a sign-out meanwhile wins, and another
-    // tab's download may have stored it.
     const [item, waits, stored] = await Promise.all([
       tx.objectStore(kind).getKey(id),
       tx.objectStore('downloads').getKey(key),
@@ -422,7 +326,6 @@ async function fetchDownload(kind: Kind, id: string): Promise<Download> {
       return (item && stored) || 'missing'
     }
     if (!(wav instanceof ArrayBuffer)) {
-      // The account has no audio for it: it's missing here too, from now on.
       await Promise.all([tx.objectStore('downloads').delete(key), tx.done])
       return 'missing'
     }

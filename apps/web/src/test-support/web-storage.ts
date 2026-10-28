@@ -1,5 +1,3 @@
-// Web Storage for the unit tests, which run in Node: one that works, and one a browser blocked.
-
 export function memoryStorage(): Storage {
   const items = new Map<string, string>()
   return {

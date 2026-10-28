@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { blockedStorage, memoryStorage } from '@/test-support/web-storage'
 import {
   clearStepDraft,
   deleteAccount,
@@ -17,7 +18,6 @@ import {
   takeSignInAgain,
   takeStepOffer
 } from './account'
-import { blockedStorage, memoryStorage } from './test-storage'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -120,8 +120,6 @@ describe('readSession', () => {
     expect(await readSession()).toMatchObject({ marketingEmail: false })
   })
 
-  // Only a definite "signed out" may clear a guest's farts (visit.ts), so a session that can't
-  // be read is never one.
   it('reads a refused or failed request as unreachable, not signed out', async () => {
     answer(new Response('down', { status: 503 }))
     expect(await readSession()).toEqual({ status: 'unreachable' })
@@ -131,8 +129,6 @@ describe('readSession', () => {
     expect(await readSession()).toEqual({ status: 'unreachable' })
   })
 
-  // A get-session that never answers (a captive portal, a stalled connection) would hold the
-  // visit's library, and every save, forever.
   it('gives up after 5 seconds and reads unreachable', async () => {
     vi.useFakeTimers()
     vi.stubGlobal(
@@ -154,7 +150,6 @@ describe('readSession', () => {
     expect(read).toEqual({ status: 'unreachable' })
   })
 
-  // An ended session must not read as a guest's: that would clear the account's farts (visit.ts).
   it("reads signed out as expired where the library is an account's, until it signs out", async () => {
     setLibraryOwner('user-a')
     answer(Response.json(null))
@@ -170,7 +165,6 @@ describe('readSession', () => {
     expect(await readSession()).toEqual({ status: 'signedOut' })
   })
 
-  // Remembering the account is best effort: a browser that can't store it is still signed in.
   it('reads a session as signed in when localStorage is blocked', async () => {
     vi.stubGlobal('localStorage', blockedStorage())
     answer(Response.json({ session: {}, user: { email: 'a@example.com' } }))
@@ -179,8 +173,6 @@ describe('readSession', () => {
 })
 
 describe('signIn', () => {
-  // A sign-in never names whose this browser's library is: `claimLibrary` does, once it has
-  // checked it isn't another account's. A sign-in that wrote it would hand that one over.
   it("signs in as the account's id, and leaves this browser's library unclaimed", async () => {
     vi.stubGlobal('localStorage', memoryStorage())
     setLibraryOwner('user-b')
@@ -195,7 +187,6 @@ describe('signIn', () => {
     expect(libraryOwner()).toBe('user-b')
   })
 
-  // The code was right and the cookie is set, so a blocked localStorage isn't "Couldn't reach Farty".
   it('signs in when localStorage is blocked', async () => {
     vi.stubGlobal('localStorage', blockedStorage())
     vi.stubGlobal(
@@ -210,8 +201,6 @@ describe('signIn', () => {
 })
 
 describe('deleteAccount and setMarketingEmail', () => {
-  // A page left open on one account, after another signed in in another tab: the server refuses
-  // a change that names the account the page shows (`wrong_account`), so it deletes nothing.
   const changes = [
     ['deleteAccount', () => deleteAccount('user-a')],
     ['setMarketingEmail', () => setMarketingEmail(false, 'user-a')]

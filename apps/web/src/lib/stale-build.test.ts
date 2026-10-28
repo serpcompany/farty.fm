@@ -1,8 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
-import { blockedStorage, memoryStorage } from './test-storage'
-
-// The reload onto a new build (#222), in Node with the browser's globals stubbed. Each load of the
-// module is a new page load in the same tab: sessionStorage stays.
+import { blockedStorage, memoryStorage } from '@/test-support/web-storage'
+import { reloadGuardMs } from './stale-build'
 
 const { reportError } = vi.hoisted(() => ({ reportError: vi.fn() }))
 vi.mock('./telemetry/errors', () => ({ reportError }))
@@ -19,7 +17,6 @@ let page: EventTarget & { Worker: typeof Worker }
 let reload: Mock<() => void>
 let storage: Storage
 
-/** A new page load: the module afresh, installed. */
 async function load() {
   vi.resetModules()
   page = Object.assign(new EventTarget(), { Worker: FakeWorker as unknown as typeof Worker })
@@ -71,8 +68,6 @@ describe('a script of an older build that fails to load', () => {
     expect(reportError).toHaveBeenCalledExactlyOnceWith('stale-build', error)
   })
 
-  // Each browser's own words for a failed import(), as Playwright's WebKit (Safari 18.4) and
-  // Chromium report a 404.
   it.each([
     ['WebKit', 'Importing a module script failed.'],
     ['Chromium', 'Failed to fetch dynamically imported module: https://farty.test/a.js']
@@ -102,8 +97,6 @@ describe("a worker's script that fails to load", () => {
     expect(reload).toHaveBeenCalledTimes(1)
   })
 
-  // Each browser's own words for an uncaught failed importScripts, as Playwright's WebKit (Safari
-  // 18.4) and Chromium report a 404 in a classic worker.
   it.each([
     ['WebKit', 'NetworkError: Load failed'],
     [
@@ -136,7 +129,6 @@ describe('the reload', () => {
     expect(reload).not.toHaveBeenCalled()
     toot()
     expect(reload).toHaveBeenCalledTimes(1)
-    // A release that already happened changes nothing.
     toot()
     expect(reload).toHaveBeenCalledTimes(1)
   })
@@ -150,17 +142,15 @@ describe('the reload', () => {
 
   it('comes at most once in the guard, so a build that keeps failing never loops', async () => {
     vi.useFakeTimers({ now: new Date('2026-10-28T12:00:00Z') })
-    const { reloadGuardMs } = await load()
+    await load()
     throwOnPage(chunkLoadError())
     expect(reload).toHaveBeenCalledTimes(1)
 
-    // The reloaded page fails too: reported, not reloaded.
     await load()
     throwOnPage(chunkLoadError())
     expect(reload).toHaveBeenCalledTimes(1)
     expect(reportError).toHaveBeenCalledTimes(2)
 
-    // Long after, a later deploy's failure reloads again.
     vi.advanceTimersByTime(reloadGuardMs + 1)
     await load()
     throwOnPage(chunkLoadError())
