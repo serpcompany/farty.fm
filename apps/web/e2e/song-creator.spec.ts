@@ -236,6 +236,10 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
     const tryAgain = page.getByRole('button', { name: 'Try again' })
     await expectTappable(tryAgain)
     await page.unroute(workers)
+    // Only a sound started after Try again counts below.
+    await page.evaluate(() => {
+      window.__starts = []
+    })
     await tryAgain.click()
     // Made after a tap, it plays by itself: the whole Toot, which isn't silence.
     const state = page.getByTestId('song-creator-state')
