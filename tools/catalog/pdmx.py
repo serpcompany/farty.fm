@@ -16,10 +16,11 @@ LICENSES = {
 }
 MAX_TRACKS = 2
 
-# Scores whose bar lines are off the tune: written without the Song's pickup, so the renderers'
-# accent on a bar line (+1.5 dB) falls on the wrong notes (#232). A gate can't tell a missing
-# pickup from the score's own rhythm, so these were found by reading each catalog score's bar lines
-# against the words (melody.bar_lines), and are never picked. MuseScore score id -> why.
+# Scores whose bar lines are off the tune: most are written without the Song's pickup, one in the
+# wrong meter, so the renderers' accent on a bar line (+1.5 dB) falls on the wrong notes (#232).
+# A gate can't tell a missing pickup from the score's own rhythm, so these were found by reading
+# each catalog score's bar lines against the words (melody.bar_lines), and are never picked.
+# MuseScore score id -> why.
 MISBARRED_SCORES = {
     "6064902": 'Happy Birthday in 3/4 from "Hap-": bars start on "Hap-" and "to", not "birth-" and "you"',
     # When the Saints keeps this hand-picked score until the owner decides: the one correctly
@@ -209,8 +210,8 @@ EPS = 1e-6
 def render_options(tempos, meters, first_onset):
     """The catalog's `render` options for a score: the tempo in effect at the melody's first note,
     kept within MIN_BPM..MAX_BPM, and an excerpt from the melody's first note to the end of the
-    whole bars that fit in EXCERPT_BEATS from that note's bar. A pickup written after a rest, in a
-    full bar, so doesn't open the Song with silence; the accents still fall on the score's own bar
+    whole bars that fit in EXCERPT_BEATS from that note's bar, so a pickup written after a rest in a
+    full bar doesn't open the Song with silence. The accents still fall on the score's own bar
     lines, which melody.py reads from its time signatures (`bar_lines`, #232).
 
     `tempos` is [(beat, bpm)] and `meters` [(beat, numerator, denominator)], from the score's
