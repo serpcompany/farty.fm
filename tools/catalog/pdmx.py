@@ -16,6 +16,19 @@ LICENSES = {
 }
 MAX_TRACKS = 2
 
+# Scores whose bar lines are off the tune: written without the Song's pickup, so the renderers'
+# accent on a bar line (+1.5 dB) falls on the wrong notes (#232). A gate can't tell a missing
+# pickup from the score's own rhythm, so these were found by reading each catalog score's bar lines
+# against the words (melody.bar_lines), and are never picked. MuseScore score id -> why.
+MISBARRED_SCORES = {
+    "6064902": 'Happy Birthday in 3/4 from "Hap-": bars start on "Hap-" and "to", not "birth-" and "you"',
+    "2030696": 'When the Saints in 4/4 with "Oh when the" in its first bar: "saints" falls on beat 3',
+    "5893953": 'God Rest Ye in 4/4 from "God": bars start on "God" and "-ry", not "rest" and "gen-"',
+    "20295": 'The Star-Spangled Banner in 3/4 from "O-": bars start on "O-" and "you", not "say" and "see"',
+    "3982531": 'The Star-Spangled Banner with "O-" on a bar line: bars start on "O-" and "you", not "say" and "see"',
+    "5171990": 'The Star-Spangled Banner in 4/4 from "O-": the anthem is in 3/4, with "O-" as its pickup',
+}
+
 # A sensible excerpt and tempo, chosen from the score itself.
 EXCERPT_BEATS = 32  # the whole bars that fit in 32 quarter-note beats: 8 bars of 4/4, 10 of 3/4
 MIN_BPM, MAX_BPM = 72, 144  # the score's own tempo, kept inside this range
@@ -121,8 +134,11 @@ def license_problems(row):
 
 
 def pick_problems(row):
-    """Why a PDMX row can't be picked at all: its license, its track count, or no MIDI file."""
+    """Why a PDMX row can't be picked at all: its license, its track count, no MIDI file, or bar
+    lines off the tune (MISBARRED_SCORES)."""
     problems = license_problems(row)
+    if score_id(row) in MISBARRED_SCORES:
+        problems.append("its bar lines are off the tune")
     if int(float(row["n_tracks"] or 0)) > MAX_TRACKS:
         problems.append(f"more than {MAX_TRACKS} tracks")
     if not row["mid"]:

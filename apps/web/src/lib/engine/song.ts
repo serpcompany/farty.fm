@@ -6,7 +6,8 @@
 export interface Song {
   /** The tempo it plays at, in beats per minute. */
   bpm: number
-  beats_per_bar: number
+  /** Where the score's bars start, in beats: a note that starts on one is accented. */
+  bar_lines: readonly number[]
   /** Where the last note ends, in beats. */
   length_beats: number
   /** The melody's notes in order. */

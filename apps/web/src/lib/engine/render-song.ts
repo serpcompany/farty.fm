@@ -53,7 +53,7 @@ export function renderSong(
       start: note.start,
       dur: note.dur,
       bpm: song.bpm,
-      beatsPerBar: song.beats_per_bar
+      barLines: song.bar_lines
     })
   })
   const output = render(notes, songSeconds(song.length_beats, song.bpm))

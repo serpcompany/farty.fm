@@ -193,7 +193,7 @@ describe('the Pitch Coverage rule', () => {
     title: 'Test',
     source: '',
     bpm: 60,
-    beats_per_bar: 4,
+    bar_lines: [0],
     length_beats: pitches.length,
     pitches: [...new Set(pitches)].sort((a, b) => a - b),
     notes: pitches.map((pitch, start) => ({ start, dur: 1, pitch }))

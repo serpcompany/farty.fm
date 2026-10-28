@@ -32,9 +32,9 @@ describe('the Song Catalog in the app', () => {
     const golden = sources.golden(song.id)
     const entry = sources.catalog.find(e => e.id === song.id) as CatalogEntry
     expect(song.notes).toEqual(golden.notes)
-    expect([song.bpm, song.beats_per_bar, song.length_beats]).toEqual([
+    expect([song.bpm, song.bar_lines, song.length_beats]).toEqual([
       golden.bpm,
-      golden.beats_per_bar,
+      golden.bar_lines,
       golden.length_beats
     ])
     expect(song.pitches).toEqual(golden.pitches)

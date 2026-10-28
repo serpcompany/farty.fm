@@ -2,7 +2,8 @@
 
 Every melody comes from a checked-in source MIDI file. The importer never invents notes:
 it selects one track, keeps the highest note at each onset ("skyline"), clips overlaps,
-and reports everything it discarded so nothing is silently dropped.
+and reports everything it discarded so nothing is silently dropped. It also reads where the
+score's bars start (`bar_lines`) from its time signatures, for the downbeat accent.
 """
 from dataclasses import dataclass, field
 from pathlib import Path
