@@ -3,11 +3,7 @@ import { and, eq, gt } from 'drizzle-orm'
 
 import { createDatabase } from '@/db/database'
 import { session, user } from '@/db/schema'
-import type { SessionUser } from '@/server/session-user'
-
-// `src/server/session-user.ts` in the `workers` tests: the user of the `session` row whose token
-// is in the `test_session` cookie, until it expires or the user is deleted. Sign-in's own cookie
-// and signature are covered by `auth-config.test.ts` and `signed-in.workers.test.ts`.
+import type { SessionUser } from '@/server/auth-session'
 
 export const TEST_SESSION_COOKIE = 'test_session'
 
@@ -16,7 +12,7 @@ export async function getSessionUser(request: Request): Promise<SessionUser | nu
   const token = cookie.match(new RegExp(`(?:^|;\\s*)${TEST_SESSION_COOKIE}=([^;]+)`))?.[1]
   if (!token) return null
   const rows = await createDatabase(env.DB)
-    .select({ id: user.id })
+    .select({ id: user.id, email: user.email, marketingEmail: user.marketingEmail })
     .from(session)
     .innerJoin(user, eq(user.id, session.userId))
     .where(and(eq(session.token, token), gt(session.expiresAt, new Date())))
