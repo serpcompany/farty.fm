@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
+import { violations } from './accessibility'
 import { addFakeMicrophone } from './fake-microphone'
 import { microphone, skipWelcome, waitForOpenMicrophone } from './record'
 import { comeBack, hero, pageSettled, pagesOutsideTheTabs } from './screens'
@@ -34,6 +35,12 @@ for (const [where, path] of [
     await expectProductPage(page)
   })
 }
+
+test('the product page meets WCAG 2.1 AA, in light and dark', async ({ page }) => {
+  await page.goto('/')
+  await expect(hero(page)).toBeVisible()
+  expect(await violations(page)).toEqual([])
+})
 
 test('a browser that opened Farty before still gets the product page, and the microphone stays shut', async ({
   page,

@@ -112,9 +112,11 @@ Each replaces the tab's screen with a message and a Reload button.
 ## Accessibility
 
 - The first visit, every tab, a locked Song's page and the pages outside the tabs meet WCAG 2.1
-  AA, in light and dark, on a phone and a touch tablet (`e2e/accessibility.spec.ts`, "the first
-  visit meets WCAG 2.1 AA"; "${path} meets WCAG 2.1 AA"; "the pages outside the tabs meet WCAG 2.1
-  AA").
+  AA, in light and dark, on a phone and a touch tablet, and so does the product page on a computer
+  (`e2e/accessibility.spec.ts`, "the first visit meets WCAG 2.1 AA"; "${path} meets WCAG 2.1 AA";
+  "the pages outside the tabs meet WCAG 2.1 AA"; `e2e/desktop.spec.ts`, "the product page meets
+  WCAG 2.1 AA, in light and dark"). Where axe can't tell a text's background, such as the product
+  page's gradient, the journeys measure the contrast from the pixels under the text.
 - With reduced motion asked for, nothing but a spinner moves for longer than a frame
   (`e2e/accessibility.spec.ts`, "with reduced motion, nothing but a spinner moves for longer than a
   frame").

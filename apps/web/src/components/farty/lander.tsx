@@ -82,9 +82,10 @@ export function Lander({ atHome, qrCode }: { atHome: boolean; qrCode: ReactNode 
         />
         <div className="mx-auto max-w-5xl px-6 pt-16 text-center lg:pt-20">
           <h1 className="text-5xl font-bold tracking-tight text-balance lg:text-6xl">
-            Record your farts. <span className="text-brand">Turn them into songs.</span>
+            Record your farts.{' '}
+            <span className="text-brand-strong dark:text-brand">Turn them into songs.</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-pretty text-muted-foreground lg:text-xl">
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-pretty text-foreground/80 lg:text-xl">
             Farty finds the note in each fart, then plays songs with your own farts.
           </p>
           <div className="mt-8 flex justify-center gap-3">
@@ -101,7 +102,7 @@ export function Lander({ atHome, qrCode }: { atHome: boolean; qrCode: ReactNode 
             </Button>
             <DownloadApp qrCode={qrCode} className="h-12 px-7 text-base" />
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">Free. No app store needed.</p>
+          <p className="mt-4 text-sm text-foreground/80">Free. No app store needed.</p>
         </div>
         <div className="mx-auto mt-14 flex max-w-5xl items-start justify-center gap-8 px-6">
           <Phone
