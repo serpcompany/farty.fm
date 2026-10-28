@@ -97,4 +97,4 @@ How these read:
   - This happens only when the page is newer than the Worker that answers, for example after a Worker rollback.
 - A saved Toot keeps its audio. Its note captions show a Recording's Placed Pitch as it is now.
 - The iPhone app doesn't have this. It is web only (ADR 0007).
-- The Result screen's "No steady note this time" copy is unchanged. Placing happens on the Recordings tab, and the Support page says how.
+- The Result screen still says "No steady note this time". Its next line said the fart can't play melody notes; it now says it can be placed on a note by ear on the Recordings tab. Placing happens only there, and the Support page says how.

@@ -7,6 +7,9 @@ withFakeMicrophone('065__reino93__fart-7__324626.wav')
 test('recording a Noise-like fart says it has no steady note', async ({ page }) => {
   await recordAndSave(page, 2.5)
   await expect(page.getByTestId('result-noise')).toBeVisible()
+  await expect(
+    page.getByText('On the Recordings tab you can place it on a note by ear')
+  ).toBeVisible()
   await page.getByRole('button', { name: 'Done' }).click()
 
   // On the Recordings tab it's noise-like, and it isn't a Melodic Recording.
