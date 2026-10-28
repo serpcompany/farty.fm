@@ -138,6 +138,21 @@ describe('RecordFlowProvider', () => {
     expect(flow.flow?.kind === 'review' && flow.flow.draft.seconds).toBe(1)
   })
 
+  it('stops a take by itself at 30 s', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    try {
+      takeReturning(takeAudio({ withFart: true }))
+      await act(() => flow.startRecording())
+      await act(async () => vi.advanceTimersByTime(29_999))
+      expect(flow.capture.kind).toBe('recording')
+
+      await act(async () => vi.advanceTimersByTime(1))
+      expect(flow.flow?.kind).toBe('review')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it("says it didn't catch a take with nothing in it", async () => {
     await recordAndStop(takeAudio({ withFart: false }))
 

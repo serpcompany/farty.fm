@@ -56,14 +56,20 @@ as a fake microphone.
   with nothing in it"; `e2e/record-interrupted.spec.ts`, "a kept stream that comes back silent is
   opened afresh by the next tap"; `src/lib/recordings.test.ts`, "hears every fart in the Fixture
   Library"; "hears nothing in 2 s of silence"; "hears nothing in 2 s of room noise at %i dBFS").
+- A take stops by itself at 30 s, as if Stop were tapped
+  (`src/components/farty/record-flow-provider.interaction.test.tsx`, "stops a take by itself at
+  30 s").
 - A call or another app that takes the microphone loses the take: "Recording stopped", "Nothing was
-  saved.", with Try again (`src/components/farty/record-flow-provider.interaction.test.tsx`, "loses
-  the take when another app takes the microphone").
+  saved.", with Cancel and Try again (`src/components/farty/record-flow-provider.interaction.test.tsx`,
+  "loses the take when another app takes the microphone"; `src/components/farty/record-screen.interaction.test.tsx`,
+  "says in words what went wrong (%s), with its buttons").
 - A refused microphone says "Microphone is off" and how to allow it in the browser's site settings,
-  with Cancel only. Any other failure says "Couldn't start recording", with Try again. Both are
-  reported. A microphone let go just before the take began says nothing
+  with Cancel only. Any other failure says "Couldn't start recording", with Cancel and Try again.
+  Both are reported. A microphone let go just before the take began says nothing
   (`src/components/farty/record-flow-provider.interaction.test.tsx`, "explains a microphone that
-  would not start (%s)"; "says nothing when the microphone was let go before the take began").
+  would not start (%s)"; "says nothing when the microphone was let go before the take began";
+  `src/components/farty/record-screen.interaction.test.tsx`, "says in words what went wrong (%s),
+  with its buttons").
 
 ## Review
 
@@ -80,16 +86,18 @@ as a fake microphone.
   reads the session waits for the visit to start").
 - A save that fails says "Couldn't save this Recording", with Discard and Try again
   (`src/components/farty/record-flow-provider.interaction.test.tsx`, "offers to save again when the
-  save failed").
+  save failed"; `src/components/farty/record-flow.interaction.test.tsx`, "says it couldn't save the
+  Recording, with Discard and Try again").
 - While a take is unsaved, a reload after a deploy waits for it ([App shell](app-shell.md#a-new-deploy);
   `src/components/farty/record-flow-provider.interaction.test.tsx`, "holds off a new build until
   the flow closes").
 
 ## Finding the note
 
-- The flow is titled with the new Recording's name ("Recording 1") while Recording Analysis runs
-  (`e2e/lander.spec.ts`, "Recording, Review and Result are a card under the top bar, whose tabs
-  wait for them").
+- The flow is titled with the new Recording's name ("Recording 1") and says "Finding your note…"
+  while Recording Analysis runs (`e2e/lander.spec.ts`, "Recording, Review and Result are a card
+  under the top bar, whose tabs wait for them"; `src/components/farty/record-flow.interaction.test.tsx`,
+  "says Finding your note… while Recording Analysis runs").
 - An analysis that fails says "Saved, but we couldn't find its note" and that it's on the
   Recordings tab as not analyzed, with Done and Retry. Done goes to Recordings, and Retry runs it
   again (`e2e/tabs.spec.ts`, "a Recording that could not be analyzed says so, and Retry finds its
@@ -112,6 +120,10 @@ as a fake microphone.
   the Result says so"; `src/lib/pitch-coverage.test.ts`, "lists the unlocks, then the improvements
   closest first"; "shows no unlock for a Noise-like save, and the Song closest to unlocking"; "has
   no Song closest to unlocking once every Song is unlocked").
+- One or two unlocked Songs each have a card. Three or more show as one card, "You unlocked 3
+  Songs", with their titles (`src/components/farty/record-flow.interaction.test.tsx`, "shows each of
+  two Songs unlocked by one save on its own card"; "shows three or more Songs unlocked by one save
+  as one card, with their titles").
 - With an unlock, the buttons are Done, to Recordings, and Try it, which opens the first Song it
   unlocked in Song Creator and starts audio in the tap, so the Toot plays once made. Without one,
   they are Record another and Done (`e2e/compose.spec.ts`, "saving farts unlocks Songs on Compose,
@@ -124,13 +136,3 @@ as a fake microphone.
 - A guest's first Result offers the account step before going where they tapped
   ([Accounts](account.md#when-the-step-opens)). The first saved Recording brings the install offer
   once the flow closes ([Installing and offline](install.md#the-install-offer)).
-
-## Not checked
-
-- A take stops by itself at 30 s.
-- The words and buttons of the "Microphone is off", "Couldn't start recording" and "Recording
-  stopped" alerts, and of "Couldn't save this Recording": the tests check which problem the flow
-  is in, not what it shows.
-- "Finding your note…" while Recording Analysis runs.
-- Three or more Songs unlocked by one save show as one card, "You unlocked 3 Songs", with their
-  titles.
