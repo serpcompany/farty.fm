@@ -126,6 +126,16 @@ describe('uploading', () => {
     expect(await outbox()).toEqual([expect.objectContaining({ id: first.id, op: 'put' })])
   })
 
+  it('keeps a Recording the account has no room for on this device, waiting to upload', async () => {
+    const recording = await recorded(1)
+    refuse('PUT', 409, 'limit_reached')
+    await library.page.sync.syncOnce('user-a')
+
+    expect((await library.page.store.loadRecordings()).map(r => r.id)).toEqual([recording.id])
+    expect(await outbox()).toEqual([expect.objectContaining({ id: recording.id, op: 'put' })])
+    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+  })
+
   it('deletes here what the account deleted', async () => {
     const recording = await recorded()
     library.account.add('recordings', recording, wav(1))

@@ -35,11 +35,13 @@ works is in [Accounts and sign-in](../../../../docs/agents/accounts.md), how the
 - Once more after a guest saves their first Toot where saving is free (Production), then never
   (`src/lib/account.test.ts`, "offers at the first Result, then once after a saved Toot, then
   never"; "offers after a saved Toot when no Result has offered it yet"; "never offers once done").
-- Profile's Save to an account, the lander's Sign up free, and Save to Toots where saving is paid
-  ([Paying to save a Toot](payments.md)) (`e2e/account-step.spec.ts`, "Profile's Save to an account
-  opens the step, which stays while they read their email"; `e2e/lander.spec.ts`, "Sign up free
-  opens the account step under the top bar, whose tabs wait for it"; `e2e/account-pay.spec.ts`, "a
-  guest's Toot plays free, and Save asks for an account first").
+- Profile's Save to an account, the lander's Sign up free and Sign in, and Save to Toots where
+  saving is paid ([Paying to save a Toot](payments.md)) (`e2e/account-step.spec.ts`, "Profile's Save
+  to an account opens the step, which stays while they read their email"; `e2e/lander.spec.ts`,
+  "Sign up free opens the account step under the top bar, whose tabs wait for it";
+  `src/components/farty/lander.interaction.test.tsx`, "opens the app with the account step on it
+  (%s)"; `e2e/account-pay.spec.ts`, "a guest's Toot plays free, and Save asks for an account
+  first").
 - A session that ended asks to sign in again, once a visit ([A session that
   ends](#a-session-that-ends)).
 - It never offers itself after signing in, or where storage is blocked, since it couldn't remember
@@ -74,9 +76,13 @@ works is in [Accounts and sign-in](../../../../docs/agents/accounts.md), how the
   defined once"; "sign in when typed with spaces or a dash").
 - A wrong code says "That code isn't right. Check it and try again." (`e2e/account-step.spec.ts`,
   "signing up from the first Result keeps the Recording, and goes where they tapped").
-- An expired or used-up code says "That code no longer works. Send a new one." A bad email, too many
-  requests, sign-in that isn't set up and a failed request each say so in a line
-  (`src/lib/account.test.ts`, "reads %i %s as %s").
+- An expired or used-up code says "That code no longer works. Send a new one." and goes back to the
+  Email field, with focus on it. A bad email says "Enter a valid email address.", too many requests
+  "Too many tries. Wait a few minutes, then try again.", sign-in that isn't set up "Accounts aren't
+  available right now." and a failed request "Couldn't reach Farty. Check your connection and try
+  again." (`src/lib/account.test.ts`, "reads %i %s as %s";
+  `src/components/farty/account-step.interaction.test.tsx`, "says what went wrong in words (%s)";
+  "goes back to the Email field when the code no longer works").
 - Too many code requests or guesses from one client say to wait a few minutes. Past an email's, a
   network's or the site's codes for the hour, a request answers like a sent code, so nothing says
   whether an account exists (`src/server/rate-limits.test.ts`, "hold code requests at 10 per 10
@@ -139,6 +145,10 @@ works is in [Accounts and sign-in](../../../../docs/agents/accounts.md), how the
   account asks first, then deletes the account and leaves nothing here";
   `src/app/api/account/route.workers.test.ts`, "deletes the user’s audio, then their row with their
   sessions, Recordings, Toots and payments").
+- When its request fails, Profile says "Couldn't sign out. Check your connection and try again.",
+  "Couldn't delete your account. Check your connection and try again." or "Couldn't change Farty
+  news. Try again." (`src/components/farty/profile-screen.interaction.test.tsx`, "says it couldn't
+  %s when the request fails").
 - A Profile left open on one account never changes or deletes another account that a later tab
   signed in to; it shows the account signed in (`e2e/account-profile.spec.ts`, "Profile left open on
   one account never changes or deletes the account another tab signed in to").
@@ -152,8 +162,11 @@ works is in [Accounts and sign-in](../../../../docs/agents/accounts.md), how the
   for its analysis, and a refused upload stays waiting while the rest go (`src/lib/library-outbox.test.ts`,
   "queues each save, rename and delete with the change itself"; `src/lib/outbox-send.test.ts`,
   "waits for a Recording's analysis"; "keeps a refused upload queued, and sends the rest").
-- An account keeps at most 300 Recordings and 300 Toots (`src/app/api/library-uploads.workers.test.ts`,
-  "keeps 300 %s per account, and only 300 when uploads race (409)").
+- An account keeps at most 300 Recordings and 300 Toots
+  (`src/app/api/library-uploads.workers.test.ts`, "keeps 300 %s per account, and only 300 when
+  uploads race (409)"). A Recording past the account's 300 stays only on this device, waiting to
+  upload (`src/lib/outbox-send.test.ts`, "keeps a Recording the account has no room for on this
+  device, waiting to upload").
 
 ## Staging and local runs
 
@@ -166,9 +179,5 @@ works is in [Accounts and sign-in](../../../../docs/agents/accounts.md), how the
 
 ## Not checked
 
-- The lander's Sign in button opens the step.
-- The words for each problem other than a wrong code, and that an expired code returns to the
-  Email field.
-- "Couldn't sign out", "Couldn't delete your account" and "Couldn't change Farty news", each
-  shown when its request fails.
-- A Recording past the account's 300 stays only on this device, with nothing on screen saying so.
+- Nothing on screen says a Recording past the account's 300 hasn't reached it, and Sign out's "Not
+  uploaded yet" counts it as waiting for a connection. A test would only hold that gap in place.
