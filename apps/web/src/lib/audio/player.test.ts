@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { forgetDecoded, play, stopPlayback } from './player'
 
-type FakeSource = { key: string; started: boolean; stopped: boolean; onended: (() => void) | null }
+type FakeSource = {
+  key: string
+  started: boolean
+  startedWith: number[]
+  stopped: boolean
+  onended: (() => void) | null
+}
 
 const sources: FakeSource[] = []
 
@@ -30,14 +36,16 @@ vi.mock('./context', () => ({
       const source = {
         key: '',
         started: false,
+        startedWith: [] as number[],
         stopped: false,
         onended: null as (() => void) | null,
         set buffer(buffer: { key: string }) {
           source.key = buffer.key
         },
         connect: () => {},
-        start: () => {
+        start: (...at: number[]) => {
           source.started = true
+          source.startedWith = at
         },
         stop: () => {
           source.stopped = true
@@ -162,6 +170,22 @@ describe('the player', () => {
     await play('kept', load, null, () => {})
     expect(load).toHaveBeenCalledOnce()
     expect(sources.map(s => s.key)).toEqual(['kept', 'kept'])
+  })
+
+  test('a segment plays only that part: from its start, for its length', async () => {
+    const part = play('part', wav('part'), { start: 0.25, end: 0.75 }, () => {})
+    await settle()
+    finish('part')
+    await part
+    const whole = play('whole', wav('whole'), null, () => {})
+    await settle()
+    finish('whole')
+    await whole
+
+    expect(sources.map(s => [s.key, s.startedWith])).toEqual([
+      ['part', [0, 0.25, 0.5]],
+      ['whole', []]
+    ])
   })
 
   test("a sound that can't load says it's over", async () => {

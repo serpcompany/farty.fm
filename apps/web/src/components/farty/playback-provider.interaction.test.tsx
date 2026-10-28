@@ -2,7 +2,8 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { play, stopPlayback } from '@/lib/audio/player'
-import { PlaybackProvider, type Sound, usePlayback } from './playback-provider'
+import type { AnalysisState, Recording } from '@/lib/recordings'
+import { PlaybackProvider, recordingSound, type Sound, usePlayback } from './playback-provider'
 
 vi.mock('@/lib/audio/player', () => ({ play: vi.fn(), stopPlayback: vi.fn() }))
 vi.mock('@/lib/recording-store', () => ({ loadAudio: vi.fn() }))
@@ -25,6 +26,25 @@ const sound = (key: string): Sound => ({
 })
 
 const toggle = (key: string) => act(async () => playback.togglePlayback(sound(key)))
+
+function take(id: string, analysis: AnalysisState): Recording {
+  return { id, number: 1, createdAt: 1, seconds: 3, sampleRate: 48_000, waveform: [], analysis }
+}
+
+const fartFrom = (start: number, end: number): AnalysisState => ({
+  state: 'analyzed',
+  analysis: {
+    gestureStartSeconds: start,
+    gestureEndSeconds: end,
+    cutAtReattack: false,
+    pitchEstimateMidi: 57,
+    pitchConfidence: 1,
+    recordingPitchMidi: 57,
+    shortestNoteSeconds: end - start,
+    settleSeconds: 0,
+    version: 99
+  }
+})
 
 function deferredPlays() {
   const starts: (() => void)[] = []
@@ -56,6 +76,19 @@ describe('PlaybackProvider', () => {
     const ended = vi.mocked(play).mock.calls[0][3]
     await act(async () => ended())
     expect(playback.nowPlaying).toBeNull()
+  })
+
+  it('plays only the fart of an analyzed Recording, and the whole take of one not analyzed', async () => {
+    const segmentPlayed = async (recording: Recording) => {
+      await act(async () => playback.togglePlayback(recordingSound(recording)))
+      return vi.mocked(play).mock.lastCall?.[2]
+    }
+
+    expect(await segmentPlayed(take('fart', fartFrom(0.5, 1.25)))).toEqual({
+      start: 0.5,
+      end: 1.25
+    })
+    expect(await segmentPlayed(take('take', { state: 'notAnalyzed' }))).toBeNull()
   })
 
   it('stops the sound that plays when it is tapped again', async () => {
