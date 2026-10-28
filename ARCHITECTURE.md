@@ -74,7 +74,8 @@ Imports point inward, and each rule says what enforces it:
 | --- | --- |
 | `src/lib` holds the app's logic and never imports components, hooks or routes | Biome's `noRestrictedImports` in `apps/web/biome.json` |
 | Components and hooks never import routes (`src/app`) | The same |
-| Server code (`src/server`, `src/db/index.ts`) never reaches the browser | `import 'server-only'` in each entry |
+| Server code (`src/server`, `src/db/index.ts`) never reaches the browser | `import 'server-only'` in each entry, and Biome keeps `src/lib` from importing `src/server` and `src/db` |
+| Server code never imports components, hooks or routes | Biome's `noRestrictedImports` |
 | Production code imports no test or test support, and no devDependency | The dependency check (`verify.json`, the `apps/web` part) |
 | No import cycles, and every module is reachable from an entry point | The same |
-| `src/lib/analysis` and `src/lib/engine` use no DOM or Web Audio, so they run in a Web Worker and in Vitest | Convention for now, checked when their Workers and tests run |
+| `src/lib/analysis` and `src/lib/engine` use no DOM or Web Audio, so they run in a Web Worker and in Vitest | Biome's `noRestrictedGlobals` there (`window`, `document`, `navigator`, `localStorage`, `AudioContext`, `OfflineAudioContext`) |

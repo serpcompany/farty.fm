@@ -57,6 +57,10 @@
                       "@/hooks/**"
                     ],
                     "message": "src/lib holds the app's logic, which components, hooks and routes build on, so it never imports them. Move what both sides need into src/lib."
+                  },
+                  {
+                    "group": ["@/server", "@/server/**", "@/db", "@/db/**"],
+                    "message": "src/lib runs in the browser too, and server code never reaches it. Move what both need into src/lib, and keep the server's part in src/server."
                   }
                 ]
               }
@@ -79,6 +83,55 @@
                     "message": "Routes (src/app) import components and hooks, never the reverse. Pass what a component needs as a prop, or move shared code into src/lib."
                   }
                 ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/server/**", "src/db/**", "!**/*.test.ts", "!**/*.test.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@/components",
+                      "@/components/**",
+                      "@/app",
+                      "@/app/**",
+                      "@/hooks",
+                      "@/hooks/**"
+                    ],
+                    "message": "Server code serves routes and never imports screens or routes. Move what both need into src/lib."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/lib/analysis/**", "src/lib/engine/**", "!**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "window": "Recording Analysis and the engine run in a Web Worker and in Vitest, where there's no window. Take what you need as an argument.",
+                  "document": "Recording Analysis and the engine run in a Web Worker and in Vitest, where there's no document.",
+                  "navigator": "Recording Analysis and the engine run in a Web Worker and in Vitest. Take what you need as an argument.",
+                  "localStorage": "Recording Analysis and the engine run in a Web Worker, which has no localStorage.",
+                  "AudioContext": "Recording Analysis and the engine work on samples, not Web Audio, so they run in a Web Worker and in Vitest.",
+                  "OfflineAudioContext": "Recording Analysis and the engine work on samples, not Web Audio, so they run in a Web Worker and in Vitest."
+                }
               }
             }
           }
