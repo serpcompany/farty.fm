@@ -212,6 +212,13 @@ jobs:
           else
             echo "::notice::$GITHUB_SHA isn't the tip of staging ($tip), so nothing was deployed."
           fi
+      - name: Record Staging's database restore point
+        if: steps.tip.outputs.deploy == 'true'
+        working-directory: apps/web
+        run: pnpm db:bookmark:staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       - name: Apply the migrations to Staging's database
         if: steps.tip.outputs.deploy == 'true'
         working-directory: apps/web
@@ -267,6 +274,13 @@ jobs:
           else
             echo "::notice::$GITHUB_SHA isn't the tip of main ($tip), so nothing was deployed."
           fi
+      - name: Record Production's database restore point
+        if: steps.tip.outputs.deploy == 'true'
+        working-directory: apps/web
+        run: pnpm db:bookmark:production
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       - name: Apply the migrations to Production's database
         if: steps.tip.outputs.deploy == 'true'
         working-directory: apps/web

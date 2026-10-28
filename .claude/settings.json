@@ -87,7 +87,15 @@
       "PowerShell(npx opennextjs-cloudflare deploy*)",
       "PowerShell(npx opennextjs-cloudflare upload*)",
       "PowerShell(pnpm exec opennextjs-cloudflare deploy*)",
-      "PowerShell(pnpm exec opennextjs-cloudflare upload*)"
+      "PowerShell(pnpm exec opennextjs-cloudflare upload*)",
+      "Bash(wrangler d1 time-travel restore*)",
+      "Bash(npx wrangler d1 time-travel restore*)",
+      "Bash(pnpm wrangler d1 time-travel restore*)",
+      "Bash(pnpm exec wrangler d1 time-travel restore*)",
+      "PowerShell(wrangler d1 time-travel restore*)",
+      "PowerShell(npx wrangler d1 time-travel restore*)",
+      "PowerShell(pnpm wrangler d1 time-travel restore*)",
+      "PowerShell(pnpm exec wrangler d1 time-travel restore*)"
     ],
     "ask": [
       "Bash(wrangler * --remote*)",

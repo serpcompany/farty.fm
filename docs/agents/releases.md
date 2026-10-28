@@ -21,7 +21,15 @@ The `gh` and `git` commands here run as the organization's app, through the `ser
   bash ~/.claude/skills/serp-github-app/scripts/gh.sh pr merge <n> --squash
   ```
 
-- **Web releases roll forward, not back.** From #168 on, the library is IndexedDB version 3, which an older build can't open (`VersionError`), so a Cloudflare rollback past it breaks the library in every browser that opened the newer build. Fix forward with a new release instead, and say so in a release PR's Merge Danger.
+- **Web releases roll forward, not back.** From #168 on, the library is IndexedDB version 3, which an older build can't open (`VersionError`), so a Cloudflare rollback past it breaks the library in every browser that opened the newer build. Fix forward with a new release instead, and say so in a release PR's Merge Danger. Rolling back below covers the rare case where a rollback is safe.
+
+## Rolling back
+
+Only the owner rolls back, and only in an emergency: agents never run `wrangler rollback`, `wrangler versions deploy` or `wrangler d1 time-travel restore` (`.claude/settings.json` denies or asks).
+
+- **The Worker** can go back to its previous version (Cloudflare dashboard, the Worker's Deployments, or `wrangler rollback --env production` from `apps/web/`) only when nothing between the two versions raised the IndexedDB version or added a migration the older code can't read. Otherwise, fix forward.
+- **Migrations are additive.** A migration never drops or renames a table or column that the release before it reads. A removal ships in a later release, once no deployed code reads the old shape, so the Worker before a migration still works on the database after it.
+- **The database:** each deploy records D1's restore point (`pnpm db:bookmark:<env>`, the deploy job's "Record … database restore point" step) before it migrates. `wrangler d1 time-travel restore pedos-production --env production --bookmark <bookmark from that step>` puts the database back as it was before that deploy, within 30 days. It also discards every write since then, including users' saves, so it's a last resort.
 - **Merge `main` back into `staging`** at once after a release PR, a hotfix or a diverged promotion, so the next promotion still fast-forwards. It's a `main` → `staging` PR merged with a merge commit; a squash leaves `main` diverged. Open it before anything else merges into `staging`: its head is `main`, so it can't be brought up to date. `issue-link` exempts it.
 
   ```sh
