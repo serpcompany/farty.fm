@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter, useSelectedLayoutSegments } from 'next/navigation'
+import { useSelectedLayoutSegments } from 'next/navigation'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { stopPlayback } from '@/lib/audio/player'
 import { desktop, wide } from '@/lib/desktop'
@@ -19,6 +19,7 @@ import { type Tab, tabOf, tabs } from '@/lib/tabs'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { AccountStep } from './account-step'
+import { useBackOnRecord } from './back-on-record'
 import { appMain, Lander } from './lander'
 import { LibraryProblemScreen } from './library-problem-screen'
 import { useTrackPages } from './previous-page'
@@ -53,25 +54,6 @@ function useStopPlaybackOnTabChange(tab: Tab | null): void {
     shownTab.current = tab
     stopPlayback()
   }, [tab])
-}
-
-function useBackOnRecord(tab: Tab | null, staysPut: boolean): void {
-  const router = useRouter()
-  const wasHidden = useRef(false)
-  useEffect(() => {
-    const visibilityChanged = () => {
-      if (document.visibilityState === 'hidden') {
-        wasHidden.current = true
-        stopPlayback()
-      } else if (wasHidden.current) {
-        wasHidden.current = false
-        if (staysPut || tab === null || tab === 'record') return
-        if (!window.matchMedia(desktop).matches) router.push('/')
-      }
-    }
-    document.addEventListener('visibilitychange', visibilityChanged)
-    return () => document.removeEventListener('visibilitychange', visibilityChanged)
-  }, [router, staysPut, tab])
 }
 
 export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: ReactNode }) {

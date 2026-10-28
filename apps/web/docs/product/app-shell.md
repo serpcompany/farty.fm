@@ -26,12 +26,19 @@ outside the tabs, and where Staging differs. Welcome and the lander are in
 
 - Hiding the page stops whatever plays. On a phone or a touch tablet, Farty opens Record when it
   shows again (`e2e/tabs.spec.ts`, "a Recording shows on the Recordings tab with its note, and
-  playback stops on a tab change").
+  playback stops on a tab change"; `src/components/farty/back-on-record.interaction.test.tsx`, "opens Record after another app").
+- It stays where it was on Record, on a page outside the tabs, and while the record flow is open
+  (`src/components/farty/back-on-record.interaction.test.tsx`, "stays where it was on Record, outside the tabs, or while the flow or account step is
+  open").
+- It stays where it was when the browser left for another page, such as the checkout page, and
+  came back with Back (`src/components/farty/back-on-record.interaction.test.tsx`, "stays where it was after the browser leaves for another page, such
+  as the checkout page, and comes back with Back"). The next return from another app opens Record
+  again (`src/components/farty/back-on-record.interaction.test.tsx`, "opens Record after another app that follows a return from another page").
 - It stays where it was while the account step is open, so a person can read their email for the
   code (`e2e/account-step.spec.ts`, "Profile's Save to an account opens the step, which stays while
   they read their email").
 - On a computer the product page stays where it was (`e2e/desktop.spec.ts`, "coming back to the
-  page leaves the product page where it was").
+  page leaves the product page where it was"; `src/components/farty/back-on-record.interaction.test.tsx`, "stays where it was").
 
 ## Farty in other tabs
 
@@ -116,6 +123,4 @@ Each replaces the tab's screen with a message and a Reload button.
 
 ## Not checked
 
-- Coming back to the page while the record flow is open stays in the flow instead of opening
-  Record.
 - An unsaved Toot in Song Creator holds the reload after a deploy, as an unsaved Recording does.
