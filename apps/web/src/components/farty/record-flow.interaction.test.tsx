@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { forgetDecoded } from '@/lib/audio/player'
 import { songs } from '@/lib/catalog/songs.generated'
 import type { Recording } from '@/lib/recordings'
 import { button, closeScreens, dialogs, show, tap } from '@/test-support/screen'
@@ -7,7 +8,11 @@ import { useRecordFlow } from './record-flow-provider'
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => '/' }))
 vi.mock('./account-provider', () => ({ useAccount: () => ({ offerStep: vi.fn() }) }))
-vi.mock('./playback-provider', () => ({ usePlayback: () => ({ nowPlaying: null }) }))
+const togglePlayback = vi.hoisted(() => vi.fn())
+vi.mock('./playback-provider', () => ({
+  usePlayback: () => ({ nowPlaying: null, togglePlayback })
+}))
+vi.mock('@/lib/audio/player', () => ({ forgetDecoded: vi.fn() }))
 vi.mock('./record-flow-provider', () => ({ useRecordFlow: vi.fn() }))
 vi.mock('./recordings-provider', () => ({
   useRecordings: () => ({
@@ -68,6 +73,18 @@ afterEach(() => {
 })
 
 describe('the record flow', () => {
+  it('decodes a take once however often Review plays it, and forgets it when Review closes', async () => {
+    const audio = { samples: new Float32Array(1), sampleRate: 48_000 }
+    await showFlow({ kind: 'review', draft: { audio, seconds: 1, waveform: [] } })
+    await tap(button('Play'))
+    await tap(button('Play'))
+    const [[first], [second]] = togglePlayback.mock.calls
+    expect(second.decodeKey).toBe(first.decodeKey)
+    expect(forgetDecoded).not.toHaveBeenCalled()
+    closeScreens()
+    expect(forgetDecoded).toHaveBeenCalledWith(first.decodeKey)
+  })
+
   it('says Finding your note… while Recording Analysis runs', async () => {
     await showFlow({ kind: 'analyzing', id: 'r1' })
     expect(flowText()).toBe('Recording 1Finding your note…')

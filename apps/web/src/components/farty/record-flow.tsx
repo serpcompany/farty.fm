@@ -10,12 +10,13 @@ import {
   Scissors
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Progress as CoverageBar } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
 import { startAudioInTap } from '@/lib/audio/context'
+import { forgetDecoded } from '@/lib/audio/player'
 import { noteName, pitchClass } from '@/lib/pitch'
 import {
   type CoverageChanges,
@@ -173,18 +174,24 @@ function RecordingStep() {
   )
 }
 
-function draftSound(audio: PcmAudio): Sound {
-  return {
-    key: 'draft',
-    decodeKey: `draft-${crypto.randomUUID()}`,
-    wav: async () => encodeWav(audio),
-    segment: null
-  }
+function useDraftSound(audio: PcmAudio): Sound {
+  const sound = useMemo(
+    (): Sound => ({
+      key: 'draft',
+      decodeKey: `draft-${crypto.randomUUID()}`,
+      wav: async () => encodeWav(audio),
+      segment: null
+    }),
+    [audio]
+  )
+  useEffect(() => () => forgetDecoded(sound.decodeKey), [sound])
+  return sound
 }
 
 function Review({ draft }: { draft: Draft }) {
   const { isSaving, saveDraft, closeFlow } = useRecordFlow()
   const { nowPlaying, togglePlayback } = usePlayback()
+  const sound = useDraftSound(draft.audio)
   const isPlaying = nowPlaying === 'draft'
   return (
     <>
@@ -198,7 +205,7 @@ function Review({ draft }: { draft: Draft }) {
           aria-label={isPlaying ? 'Stop' : 'Play'}
           data-testid="review-play"
           className="size-20 rounded-full p-0 [&_svg:not([class*='size-'])]:size-18"
-          onClick={() => togglePlayback(draftSound(draft.audio))}
+          onClick={() => togglePlayback(sound)}
         >
           {isPlaying ? <CircleStop strokeWidth={1.25} /> : <CirclePlay strokeWidth={1.25} />}
         </Button>
