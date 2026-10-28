@@ -21,12 +21,12 @@ They chose design A of three ("letys go with design A"). They also chose the Rec
 4. **A Placed Recording is a Melodic Recording at its Placed Pitch.**
    - This holds for Pitch Coverage, Auto-map, the Recordings tab's count, Song Creator and a Toot's note captions (`songPitch()` in `recordings.ts`).
    - It plays raw (ADR 0012): the note says only which notes of a Song it plays, never how it sounds. No copy says it is tuned.
-   - The renderer's Melodic-only guard (`render-source.ts`) now lets a Placed Recording through.
+   - The renderer's Melodic-only guard (`render-source.ts`) is removed, not loosened: `renderSource` cuts any Recording's gesture, placed or not. Auto-map alone decides which farts play. That is safe because only the Recordings an Arrangement uses are rendered (`makeToot` in `toot-renderer.ts`), and Auto-map reads only analyzed Melodic Recordings and Placed ones (`autoMapRecordings` in `pitch-coverage.ts`). A Noise-like Recording left out never reaches the renderer.
 5. **It holds its note from 0.6 s.** Auto-map takes a Placed Recording with its own length, a shortest note of 0.6 s, and settled from its start (`placedAutoMapRecording` in `auto-map.ts`, and `placed()` in the reference's `engine.py`).
    - 0.6 s is the longest note `audition()` tries, so a placed fart ranks as the slowest Melodic Recording. At the same distance from a pitch, an analyzed fart gets the short notes, since an ear's placement is a guess and an analysis is a measurement.
    - A placed fart still plays short notes that nothing else covers, at the usual cost. The length rule (ADR 0011) uses its own length, as it does for every fart.
 6. **It is stored with the Recording, apart from its analysis.**
-   - In IndexedDB, `placedPitch` (a MIDI note, or null) is an optional field on the Recording, so there is no version bump.
+   - In IndexedDB, `placedPitch` (a MIDI note, or null) is an optional field on the Recording. The database still goes to version 4, with no store changed: code from before #268 sends an outbox op it doesn't know, such as `place`, as a delete. Version 4 closes that code's connection and it can't open the library again (`VersionError`), so it never drains an outbox holding `place`. The upgrade also sets the last read's cursor back to 0, so each browser reads its whole library once, with any Placed Pitch a tab on the older build skipped.
    - In D1, it is a nullable `placed_pitch` column on `recordings` (migration 0004).
    - A placement queues in the outbox as `place`, merged like a rename, and goes up as `PATCH /api/recordings/{id}/`.
    - A new analysis replaces the analysis and keeps the placement. If it finds the fart Melodic, its Recording Pitch is used and the placement is ignored. The account takes any MIDI note from 0 to 127, so a later release can widen the picker.
@@ -90,6 +90,7 @@ How these read:
 
 ## Consequences
 
+- **Web releases roll forward only past #268.** A build from before it can't open IndexedDB version 4, so a Cloudflare rollback past it leaves the library unopenable in every browser that opened #268's build, until a release rolls forward (`docs/agents/web.md`).
 - **Migration 0004 must apply before the Worker that reads it.** CI applies D1 migrations before each deploy (`web.yml`).
   - A Worker from before #268 ignores `placedPitch` in an upload, and its library read leaves it out, which a browser reads as no change.
   - Such a Worker answers 405 to the PATCH. The browser then drops it from the outbox, as it does for a note the account refuses, and keeps the placement itself.
