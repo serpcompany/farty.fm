@@ -4,6 +4,7 @@ import {
   claimedBy,
   libraryHarness,
   newToot,
+  openOlderLibrary,
   recordingFields,
   wav
 } from '@/test-support/library-page'
@@ -30,20 +31,11 @@ describe('the outbox', () => {
   it('queues every Recording and Toot a browser kept before version 3, oldest first', async () => {
     const recording = { ...anotherBrowsersRecording(1), createdAt: 2_000 }
     const older = { ...newToot(), createdAt: 1_000 }
-    await new Promise<void>((resolve, reject) => {
-      const open = indexedDB.open('pedos', 2)
-      open.onupgradeneeded = () => {
-        const database = open.result
-        database.createObjectStore('recordings', { keyPath: 'id' }).put(recording)
-        database.createObjectStore('audio').put(wav(1), recording.id)
-        database.createObjectStore('toots', { keyPath: 'id' }).put(older)
-        database.createObjectStore('tootAudio').put(wav(2), older.id)
-      }
-      open.onsuccess = () => {
-        open.result.close()
-        resolve()
-      }
-      open.onerror = () => reject(open.error)
+    await openOlderLibrary(2, database => {
+      database.createObjectStore('recordings', { keyPath: 'id' }).put(recording)
+      database.createObjectStore('audio').put(wav(1), recording.id)
+      database.createObjectStore('toots', { keyPath: 'id' }).put(older)
+      database.createObjectStore('tootAudio').put(wav(2), older.id)
     })
     const queued = (await outbox()).sort((a, b) => a.queuedAt - b.queuedAt)
     expect(queued.map(e => [e.id, e.op])).toEqual([

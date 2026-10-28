@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import type { OutboxOp } from '@/lib/outbox'
 import { bytes, claimedBy, libraryHarness, newToot, wav } from '@/test-support/library-page'
 
 const library = libraryHarness()
@@ -161,6 +162,81 @@ describe('uploading', () => {
     await library.page.toots.saveToot(saved, wav(9))
     expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
     expect(library.account.get('toots', saved.id)?.item).toMatchObject({ title: 'New' })
+  })
+
+  it('places a Recording on the account, in its upload or after it (ADR 0015)', async () => {
+    const early = await recorded(1)
+    await library.page.store.placeRecording(early.id, 40)
+    expect(await outbox()).toEqual([expect.objectContaining({ id: early.id, op: 'put' })])
+    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(library.account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: 40 })
+    expect(requests('PATCH')).toEqual([])
+    await library.page.store.placeRecording(early.id, 41)
+    await library.page.store.placeRecording(early.id, null)
+    expect((await outbox()).map(e => e.op)).toEqual(['place'])
+    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(library.account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: null })
+    expect(requests('PATCH').map(s => [s.path, s.library])).toEqual([
+      [`/api/recordings/${early.id}/`, 'user-a']
+    ])
+  })
+
+  it('places a Recording on the account that was placed while it uploaded', async () => {
+    const recording = await recorded(1)
+    library.account.intercept = async sent => {
+      if (sent.method === 'PUT') await library.page.store.placeRecording(recording.id, 52)
+      return undefined
+    }
+    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(library.account.get('recordings', recording.id)?.item).toMatchObject({
+      placedPitch: 52
+    })
+    expect(await outbox()).toEqual([])
+  })
+
+  it('sends the Placed Pitch of a Recording the account already had, from an upload cut off before it was placed', async () => {
+    const recording = await recorded(1)
+    await library.page.store.placeRecording(recording.id, 45)
+    library.account.add('recordings', { ...recording, placedPitch: null }, wav(1))
+    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(library.account.get('recordings', recording.id)?.item).toMatchObject({
+      placedPitch: 45
+    })
+  })
+
+  it('forgets a place the account refuses, and deletes here what it deleted', async () => {
+    const refused = await recorded(1)
+    const gone = await recorded(2)
+    await library.page.sync.uploadBeforeSignOut('user-a')
+    await library.page.store.placeRecording(refused.id, 40)
+    await library.page.store.placeRecording(gone.id, 40)
+    library.account.remove('recordings', gone.id)
+    library.account.intercept = sent =>
+      sent.method === 'PATCH' && sent.path.includes(refused.id)
+        ? Response.json({ error: 'invalid_request' }, { status: 400 })
+        : undefined
+    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(await outbox()).toEqual([])
+    expect((await library.page.store.loadRecordings()).map(r => r.id)).toEqual([refused.id])
+  })
+
+  it('never sends an op from a later build that it doesn’t know, and keeps it queued, as code from before #268 sent a place as a delete', async () => {
+    const recording = await recorded(1)
+    await library.page.sync.uploadBeforeSignOut('user-a')
+    await library.page.store.placeRecording(recording.id, 40)
+    const database = await library.page.store.db()
+    const [entry] = await database.getAll('outbox')
+    await database.put('outbox', { ...entry, op: 'later' as OutboxOp })
+    const toSend = await recorded(2)
+    const before = library.account.sent.length
+    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    expect(library.account.sent.slice(before).filter(s => s.path.includes(recording.id))).toEqual(
+      []
+    )
+    expect(library.account.isDeleted('recordings', recording.id)).toBe(false)
+    expect(library.account.get('recordings', toSend.id)).toBeDefined()
+    expect(await outbox()).toEqual([expect.objectContaining({ id: recording.id, op: 'later' })])
+    expect((await library.page.store.loadRecordings()).map(r => r.id)).toContain(recording.id)
   })
 
   it('sends the delete of what reached the account, and nothing for what never did', async () => {

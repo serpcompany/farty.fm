@@ -2,7 +2,7 @@
 
 Farty turns fart Recordings into recognizable melodies, using only the Recordings themselves as sound. It's a web app at https://farty.fm that installs from the browser.
 
-Farty was called Pedos until 2026-10-22 ([ADR 0009](docs/adr/0009-rename-pedos-to-farty.md)). Its stored data, Workers and databases keep the old name ([ADR 0016](docs/adr/0016-rename-the-code-names-from-pedos.md)).
+Farty was called Pedos until 2026-10-22 ([ADR 0009](docs/adr/0009-rename-pedos-to-farty.md)). Its stored data, Workers and databases keep the old name ([ADR 0018](docs/adr/0018-rename-the-code-names-from-pedos.md)).
 
 ## Run it
 
@@ -26,4 +26,4 @@ The web app's other commands are in [its guide](apps/web/AGENTS.md). On Windows,
 - [Vocabulary](CONTEXT.md) and [decisions](docs/adr/).
 - [Issues and planned work](https://github.com/serpcompany/farty.fm/issues).
 
-Agents start at [`AGENTS.md`](AGENTS.md). The iPhone app, retired after Apple rejected it ([ADR 0007](docs/adr/0007-web-app-after-app-store-rejection.md), [ADR 0014](docs/adr/0014-retire-the-iphone-app-source.md)), is in the tag `archive-2026-10-27`.
+Agents start at [`AGENTS.md`](AGENTS.md). The iPhone app, retired after Apple rejected it ([ADR 0007](docs/adr/0007-web-app-after-app-store-rejection.md), [ADR 0016](docs/adr/0016-retire-the-iphone-app-source.md)), is in the tag `archive-2026-10-27`.

@@ -10,7 +10,7 @@ const questions = [
   },
   {
     q: 'It says "No steady note this time".',
-    a: 'Some farts are just noise, with no clear pitch. The Recording is still saved, but it can’t play melody notes. Try again: longer, steadier farts are more likely to hold a note.'
+    a: 'Some farts are just noise, with no clear pitch. The Recording is still saved. On the Recordings tab, tap “noise-like” to place it by ear on the piano key it sounds closest to, and Songs can use it there. It still plays as recorded: the note only says where Songs use it. Or try again: longer, steadier farts are more likely to hold a note.'
   },
   {
     q: 'It says "Didn’t catch that".',
@@ -51,7 +51,7 @@ export default function SupportPage() {
         </li>
         <li>
           <strong>Find it again.</strong> Every saved Recording is on the Recordings tab with its
-          note. Play or delete it there.
+          note. Play or delete it there, or place a noise-like one on a note by ear.
         </li>
       </ol>
 

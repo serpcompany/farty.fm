@@ -50,6 +50,8 @@ raw, at its own pitch and speed ([ADR 0005](../../../../docs/adr/0005-song-creat
   `src/lib/toot.test.ts`, "names the note, its Recording and Recording Pitch, and the written
   length"; "times a note by its written start and length"; `src/components/farty/toots-provider.interaction.test.tsx`,
   "plays one note of a made Toot as written, from a copy of its audio").
+- A Noise-like Recording placed by ear shows its Placed Pitch there, as it is now
+  (`src/lib/toot.test.ts`, "names the note a Noise-like Recording is placed on by ear (ADR 0015)").
 - Each note is also a button, out of the pointer's way, named for the keyboard and screen readers
   with its note, start time and Recording, and whether it is selected, highlighted or playing
   (`e2e/song-creator.spec.ts`, "plays each Song with your farts, plays a tapped note, and saves it

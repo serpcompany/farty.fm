@@ -117,8 +117,9 @@ as a fake microphone.
   pitch classes with the collected ones filled and the new one outlined (`e2e/record-melodic.spec.ts`,
   "recording a Melodic fart shows its note, and it is still there after a reload";
   `e2e/compose.spec.ts`, "saving farts unlocks Songs on Compose, and the Result says so").
-- A Noise-like Recording shows "No steady note this time": it's saved, but it can't play melody
-  notes (`e2e/record-noise.spec.ts`, "recording a Noise-like fart says it has no steady note").
+- A Noise-like Recording shows "No steady note this time": it's saved, and on the Recordings tab it
+  can be placed on a note by ear ([Recordings](recordings.md#placing-a-noise-like-fart-by-ear))
+  (`e2e/record-noise.spec.ts`, "recording a Noise-like fart says it has no steady note").
 - A take with more than one fart keeps the first and says "We kept the first fart"
   (`e2e/record-two-farts.spec.ts`, "recording two farts keeps the first and says so").
 - What the save changed: each Song it unlocked ("You unlocked Mary Had a Little Lamb"), up to two

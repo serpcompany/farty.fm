@@ -11,6 +11,7 @@ type Sent = 'next' | 'refused' | 'stop'
 type Taken =
   | { entry: OutboxEntry; op: 'put'; item: Recording | Toot; wav: ArrayBuffer }
   | { entry: OutboxEntry; op: 'rename'; title: string }
+  | { entry: OutboxEntry; op: 'place'; placedPitch: number | null }
   | { entry: OutboxEntry; op: 'delete' }
 
 const stopsSending = ({ status, error }: api.Answer) =>
@@ -61,21 +62,32 @@ async function takeNextIn(database: LibraryDatabase, skip: Set<string>): Promise
       await Promise.all([outbox.put(entry), tx.done])
       return { entry, op: 'rename', title: toot.title }
     }
-    await Promise.all([outbox.put(entry), tx.done])
-    return { entry, op: 'delete' }
+    if (queued.op === 'place') {
+      const recording = await tx.objectStore('recordings').get(queued.id)
+      if (!recording) {
+        await outbox.delete(queued.key)
+        continue
+      }
+      await Promise.all([outbox.put(entry), tx.done])
+      return { entry, op: 'place', placedPitch: recording.placedPitch ?? null }
+    }
+    if (queued.op === 'delete') {
+      await Promise.all([outbox.put(entry), tx.done])
+      return { entry, op: 'delete' }
+    }
   }
   await tx.done
   return null
 }
 
-function settle(sent: OutboxEntry, then: 'done' | 'rename' = 'done'): Promise<void> {
+function settle(sent: OutboxEntry, then: 'done' | 'update' = 'done'): Promise<void> {
   return withDb(database => settleIn(database, sent, then))
 }
 
 async function settleIn(
   database: LibraryDatabase,
   sent: OutboxEntry,
-  then: 'done' | 'rename'
+  then: 'done' | 'update'
 ): Promise<void> {
   const tx = database.transaction('outbox', 'readwrite')
   const now = await tx.store.get(sent.key)
@@ -83,8 +95,9 @@ async function settleIn(
   if (now?.op === 'delete') {
     if (sent.op === 'delete' && unchanged) await tx.store.delete(sent.key)
   } else if (now && sent.op === 'put') {
-    if (sent.kind === 'toots' && (then === 'rename' || !unchanged)) {
-      await tx.store.put({ ...now, op: 'rename', sent: false, version: crypto.randomUUID() })
+    if (then === 'update' || !unchanged) {
+      const op = sent.kind === 'toots' ? 'rename' : 'place'
+      await tx.store.put({ ...now, op, sent: false, version: crypto.randomUUID() })
     } else await tx.store.delete(sent.key)
   } else if (unchanged) await tx.store.delete(sent.key)
   await tx.done
@@ -113,7 +126,7 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
     const answer = await api.putItem(entry.kind, taken.item, taken.wav, accountId)
     if (stopsSending(answer)) return 'stop'
     if (answer.status === 201 || answer.status === 200) {
-      await settle(entry, answer.status === 200 ? 'rename' : 'done')
+      await settle(entry, answer.status === 200 ? 'update' : 'done')
       return 'next'
     }
     if (answer.status === 410) {
@@ -122,8 +135,11 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
     }
     return 'refused'
   }
-  if (taken.op === 'rename') {
-    const answer = await api.renameToot(entry.id, taken.title, accountId)
+  if (taken.op === 'rename' || taken.op === 'place') {
+    const answer =
+      taken.op === 'rename'
+        ? await api.renameToot(entry.id, taken.title, accountId)
+        : await api.placeRecording(entry.id, taken.placedPitch, accountId)
     if (stopsSending(answer)) return 'stop'
     if (answer.status === 410) await deleteHere(entry.kind, entry.id)
     else await settle(entry)

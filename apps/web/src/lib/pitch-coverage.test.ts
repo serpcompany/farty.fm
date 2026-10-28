@@ -229,6 +229,57 @@ describe('the Pitch Coverage rule', () => {
   })
 })
 
+describe('Placed Recordings (ADR 0015)', () => {
+  const C2 = 36
+  const place = (recordings: Recording[], fixture: string, placed: number | null) =>
+    recordings.map(r => (fixtureId(r.id) === fixture ? { ...r, placedPitch: placed } : r))
+
+  it('covers its note like a Melodic Recording: 080 on C2 unlocks 3 Songs the library leaves locked', () => {
+    const placed = place(all, '080', C2)
+    const { unlocked, locked } = listing(placed)
+    expect(unlocked).toHaveLength(11)
+    expect(locked.map(r => r.song.id)).toEqual(['amazing'])
+    expect(missingNotes(locked[0].coverage)).toBe('C3 (3.0 s)')
+    for (const id of ['jingle', 'row', 'auld']) {
+      const coverage = coverageOf(song(id), placed)
+      expect(coverage.unlocked, id).toBe(true)
+      expect([...coverage.recordingForPitch.values()].map(fixtureId), id).toContain('080')
+    }
+  })
+
+  it('counts for nothing left out, the default, or while the Recording is Melodic', () => {
+    expect(coverageKey(place(all, '080', null))).toBe(coverageKey(all))
+    expect(coverageKey(place(all, '002', C2))).toBe(coverageKey(all))
+    expect(collectedPitchClasses(place(all, '002', 37))).toEqual(collectedPitchClasses(all))
+  })
+
+  it('counts only a whole note from C2 to B4, as the picker offers', () => {
+    for (const outside of [35, 72, 48.5, Number.NaN]) {
+      expect(coverageKey(place(all, '080', outside)), String(outside)).toBe(coverageKey(all))
+    }
+    expect(coverageKey(place(all, '080', 71))).not.toBe(coverageKey(all))
+  })
+
+  it('matches the catalog again when the fart is placed, moved or taken off', () => {
+    const keys = [null, C2, C2 + 1, null].map(p => coverageKey(place(all, '080', p)))
+    expect(new Set(keys).size).toBe(3)
+    expect(keys[3]).toBe(keys[0])
+  })
+
+  it('collects the pitch class it is placed on', () => {
+    expect(collectedPitchClasses(place(fixtures(['080']), '080', 37))).toEqual(new Set([1]))
+    expect(collectedPitchClasses(fixtures(['080']))).toEqual(new Set())
+  })
+
+  it('shows no unlock for a Noise-like save until it is placed', () => {
+    const before = all.filter(r => fixtureId(r.id) !== '080')
+    const left = coverageChanges(songs, before, all)
+    expect(left.unlocked).toEqual([])
+    const placed = coverageChanges(songs, before, place(all, '080', C2))
+    expect(placed.unlocked.map(s => s.id)).toEqual(['jingle', 'row', 'auld'])
+  })
+})
+
 function pitchClassOf(r: Recording): number[] {
   if (r.analysis.state !== 'analyzed' || r.analysis.analysis.recordingPitchMidi === null) return []
   return [Math.floor(r.analysis.analysis.recordingPitchMidi + 0.5) % 12]

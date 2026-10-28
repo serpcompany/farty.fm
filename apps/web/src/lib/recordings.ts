@@ -25,6 +25,18 @@ export type Recording = {
   sampleRate: number
   waveform: number[]
   analysis: AnalysisState
+  placedPitch?: number | null
+}
+
+export const LOWEST_PLACED_PITCH = 36
+export const HIGHEST_PLACED_PITCH = 71
+
+export function isPlaceablePitch(value: unknown): value is number {
+  return (
+    Number.isInteger(value) &&
+    (value as number) >= LOWEST_PLACED_PITCH &&
+    (value as number) <= HIGHEST_PLACED_PITCH
+  )
 }
 
 export function recordingName(recording: Pick<Recording, 'number'>): string {
@@ -35,6 +47,23 @@ export function recordingPitch(recording: Recording): number | null {
   return recording.analysis.state === 'analyzed'
     ? recording.analysis.analysis.recordingPitchMidi
     : null
+}
+
+export function isNoiseLike(recording: Recording): boolean {
+  return (
+    recording.analysis.state === 'analyzed' &&
+    recording.analysis.analysis.recordingPitchMidi === null
+  )
+}
+
+export function placedPitch(recording: Recording): number | null {
+  return isNoiseLike(recording) && isPlaceablePitch(recording.placedPitch)
+    ? recording.placedPitch
+    : null
+}
+
+export function songPitch(recording: Recording): number | null {
+  return recordingPitch(recording) ?? placedPitch(recording)
 }
 
 export function needsReanalysis(recording: Recording): boolean {

@@ -17,11 +17,11 @@ import { upgradeAnalyses } from '@/lib/analysis-upgrade'
 import { stopPlayback } from '@/lib/audio/player'
 import type { Song } from '@/lib/catalog/song'
 import { songs } from '@/lib/catalog/songs.generated'
-import { type LibraryChange, onLibraryChanged } from '@/lib/library-changes'
+import { type LibraryChange, onLibraryChanged, recordingsAfter } from '@/lib/library-changes'
 import { nearestNote } from '@/lib/pitch'
 import { collectedPitchClasses, coverageKey, type SongRow, songRows } from '@/lib/pitch-coverage'
 import * as store from '@/lib/recording-store'
-import { type Recording, recordingPitch } from '@/lib/recordings'
+import { type Recording, songPitch } from '@/lib/recordings'
 import { reportError } from '@/lib/telemetry/errors'
 import type { TootDraft } from '@/lib/toot'
 import { makeToot as renderToot } from '@/lib/toot-renderer'
@@ -46,6 +46,7 @@ type Recordings = {
   analyze(id: string): Promise<Recording | null>
   reanalyze(id: string): Promise<Recording | null> | null
   deleteRecording(id: string): Promise<void>
+  placeRecording(id: string, placedPitch: number | null): void
   importRecordings(files: { id: string; wav: ArrayBuffer }[]): Promise<void>
   makeToot(song: Song, id?: string): Promise<TootDraft>
 }
@@ -56,22 +57,6 @@ export function useRecordings(): Recordings {
   const recordings = useContext(RecordingsContext)
   if (!recordings) throw new Error('useRecordings needs a RecordingsProvider')
   return recordings
-}
-
-function withChange(
-  list: Recording[] | null,
-  added: Recording[],
-  deleted: string[]
-): Recording[] | null {
-  if (!list) return list
-  const kept = list.filter(r => !deleted.includes(r.id))
-  const renumbered = new Map(added.map(r => [r.id, r]))
-  const merged = kept.map(r => {
-    const fresh = renumbered.get(r.id)
-    return fresh ? { ...r, number: fresh.number } : r
-  })
-  const ids = new Set(kept.map(r => r.id))
-  return [...merged, ...added.filter(r => !ids.has(r.id))].sort((a, b) => a.number - b.number)
 }
 
 function useSongRows(recordings: readonly Recording[]): SongRow[] {
@@ -123,7 +108,7 @@ function useLibraryRecordings(
         }
         for (const id of change.deleted.recordings) stopPlaying(id)
         void upgradeAnalyses(change.recordings, analyzeAudio, replace)
-        setRecordings(list => withChange(list, change.recordings, change.deleted.recordings))
+        setRecordings(list => list && recordingsAfter(list, change))
       }),
     [setRecordings, replace, stopPlaying]
   )
@@ -192,6 +177,13 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
     setRecordings(list => list?.filter(r => r.id !== id) ?? null)
   }, [])
 
+  const placeRecording = useCallback((id: string, placedPitch: number | null) => {
+    setRecordings(list => list?.map(r => (r.id === id ? { ...r, placedPitch } : r)) ?? null)
+    store
+      .placeRecording(id, placedPitch)
+      .catch(error => reportError('recording-place-failed', error))
+  }, [])
+
   const importRecordings = useCallback(
     async (files: { id: string; wav: ArrayBuffer }[]) => {
       const added: Recording[] = []
@@ -220,14 +212,14 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
   )
 
   const melodicRecordings = useMemo(
-    () => (recordings ?? []).filter(r => recordingPitch(r) !== null),
+    () => (recordings ?? []).filter(r => songPitch(r) !== null),
     [recordings]
   )
   const collectedNotes = useMemo(
     () =>
       new Set(
         melodicRecordings.flatMap(r => {
-          const pitch = recordingPitch(r)
+          const pitch = songPitch(r)
           return pitch === null ? [] : [nearestNote(pitch)]
         })
       ),
@@ -249,6 +241,7 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
       analyze,
       reanalyze,
       deleteRecording,
+      placeRecording,
       importRecordings,
       makeToot
     }),
@@ -263,6 +256,7 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
       analyze,
       reanalyze,
       deleteRecording,
+      placeRecording,
       importRecordings,
       makeToot
     ]

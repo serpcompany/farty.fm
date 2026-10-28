@@ -1,6 +1,6 @@
 export type Kind = 'recordings' | 'toots'
 
-export type OutboxOp = 'put' | 'rename' | 'delete'
+export type OutboxOp = 'put' | 'rename' | 'place' | 'delete'
 
 export type OutboxEntry = {
   key: string
@@ -33,8 +33,8 @@ export function mergeOutbox(
   if (!queued) return fresh(op)
   if (queued.op === 'delete') return queued
   if (op === 'delete') return queued.op === 'put' && !queued.sent ? null : fresh('delete')
-  if (op === 'rename') {
-    return queued.op === 'put' ? { ...queued, version: now.version } : fresh('rename')
+  if (op === 'rename' || op === 'place') {
+    return queued.op === 'put' ? { ...queued, version: now.version } : fresh(op)
   }
   return queued
 }

@@ -4,12 +4,14 @@ import { getDb } from '@/db'
 import type { Database } from '@/db/database'
 import {
   deleteUser,
+  type ItemStatus,
   insertPaidToot,
   insertRecording,
   insertToot,
   itemStatus,
   type Kind,
   libraryChanges,
+  placeRecording,
   purgeTombstones,
   type RecordingRow,
   renameToot,
@@ -25,7 +27,15 @@ import type { Toot } from '@/lib/toot'
 
 import type { SessionUser } from './auth-session'
 import { apiError, gone, notFound } from './http'
-import { isItemId, parseRecording, parseToot, readJson, readUpload, TITLE } from './library-input'
+import {
+  isItemId,
+  PLACED_PITCH,
+  parseRecording,
+  parseToot,
+  readJson,
+  readUpload,
+  TITLE
+} from './library-input'
 import { audioKey, deleteUserMedia, getMedia, putAudioOnce } from './media'
 import { readWavHeader } from './wav-header'
 
@@ -51,6 +61,7 @@ function toRecording(row: RecordingRow): Recording & { audioBytes: number } {
     analysis: row.analysis
       ? { state: 'analyzed', analysis: row.analysis }
       : { state: 'notAnalyzed' },
+    placedPitch: row.placedPitch,
     audioBytes: row.audioBytes
   }
 }
@@ -223,23 +234,45 @@ export async function getItemAudio(
   })
 }
 
+async function patchItem<T extends object>(
+  user: SessionUser,
+  id: string,
+  request: Request,
+  schema: z.ZodType<T>,
+  update: (fields: T) => Promise<ItemStatus>
+): Promise<Response> {
+  const refused = refusedItemRequest(user, id, request)
+  if (refused) return refused
+  const body = await readJson(request, schema)
+  if (body instanceof Response) return body
+  const before = await update(body.json)
+  if (before === null) return notFound()
+  if (before === 'deleted') return gone()
+  return Response.json({ id, ...body.json })
+}
+
 const RENAME = z.object({ title: TITLE })
 
-export async function patchToot(
+export function patchToot(
   { db }: Stores,
   user: SessionUser,
   id: string,
   request: Request
 ): Promise<Response> {
-  const refused = refusedItemRequest(user, id, request)
-  if (refused) return refused
-  const body = await readJson(request, RENAME)
-  if (body instanceof Response) return body
-  const { title } = body.json
-  const before = await renameToot(db, user.id, id, title)
-  if (before === null) return notFound()
-  if (before === 'deleted') return gone()
-  return Response.json({ id, title })
+  return patchItem(user, id, request, RENAME, ({ title }) => renameToot(db, user.id, id, title))
+}
+
+const PLACE = z.object({ placedPitch: PLACED_PITCH })
+
+export function patchRecording(
+  { db }: Stores,
+  user: SessionUser,
+  id: string,
+  request: Request
+): Promise<Response> {
+  return patchItem(user, id, request, PLACE, ({ placedPitch }) =>
+    placeRecording(db, user.id, id, placedPitch)
+  )
 }
 
 const MARKETING_EMAIL = z.object({ marketingEmail: z.boolean() })

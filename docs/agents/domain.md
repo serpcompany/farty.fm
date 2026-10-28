@@ -31,7 +31,7 @@ This is a single-context repository:
 
 Earlier work is preserved as git tags, not on the branches:
 
-- `archive-2026-10-27`: the retired iPhone app, its Swift Recording Analysis and its App Store submission (ADR 0014). Read a file with `git show archive-2026-10-27:<path>`.
+- `archive-2026-10-27`: the retired iPhone app, its Swift Recording Analysis and its App Store submission (ADR 0016). Read a file with `git show archive-2026-10-27:<path>`.
 - `archive/pedos-app-v1`: `main` before the restart, with its research prototypes.
 - `archive/prototype/*`, `archive/research/*`, `archive/codex/*`: the old prototype branches.
 

@@ -22,12 +22,32 @@ function saved(number: number): Recording {
   }
 }
 
+function noiseLike(number: number): Recording {
+  return {
+    ...saved(number),
+    analysis: {
+      state: 'analyzed',
+      analysis: {
+        gestureStartSeconds: 0,
+        gestureEndSeconds: 0.9,
+        cutAtReattack: false,
+        pitchEstimateMidi: null,
+        pitchConfidence: 0,
+        recordingPitchMidi: null,
+        shortestNoteSeconds: null
+      }
+    }
+  }
+}
+
 function showRecordings(recordings: Recording[] | null) {
   vi.mocked(useRecordings).mockReturnValue({
     recordings,
+    recording: (id: string) => recordings?.find(r => r.id === id),
     melodicRecordings: [],
     collectedNotes: new Set(),
-    deleteRecording: vi.fn()
+    deleteRecording: vi.fn(),
+    placeRecording: vi.fn()
   } as unknown as ReturnType<typeof useRecordings>)
   return show(
     <PlaybackProvider>
@@ -60,6 +80,17 @@ describe('Recordings', () => {
     await tap(button('Delete Recording 1'))
     expect(dialogs().map(dialog => dialog.textContent)).toEqual([
       expect.stringContaining('Delete Recording 1?')
+    ])
+
+    await hideAndShowPage()
+    expect(dialogs()).toEqual([])
+  })
+
+  it('opens the place-by-ear picker from a noise-like Recording, and closes it when the page is hidden', async () => {
+    await showRecordings([noiseLike(1)])
+    await tap(button('Recording 1 is noise-like. Place it on a note'))
+    expect(dialogs().map(dialog => dialog.textContent)).toEqual([
+      expect.stringContaining('Place Recording 1 on a note')
     ])
 
     await hideAndShowPage()

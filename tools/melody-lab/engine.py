@@ -1,5 +1,5 @@
 import math
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 
 import librosa
 import numpy as np
@@ -19,6 +19,13 @@ NOTE_FILL = 1.0
 TIE = 1e-9
 TRANSPOSITIONS = range(-36, 25)
 UNCOVERED_LAST = "￿"
+PLACED_MIN_NOTE_S = 0.6
+
+
+def placed(src, midi):
+    if src.pitched:
+        raise ValueError(f"{src.id} is Melodic: only a Noise-like Recording is placed by ear")
+    return replace(src, ref_midi=float(midi), min_note_s=PLACED_MIN_NOTE_S, settle_s=0.0)
 
 
 def too_short_cost(note_seconds, recording_seconds, shortest_note_s):

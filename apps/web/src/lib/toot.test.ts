@@ -58,6 +58,12 @@ describe('noteCaption', () => {
     )
   })
 
+  it('names the note a Noise-like Recording is placed on by ear (ADR 0015)', () => {
+    expect(noteCaption(song, arrangement, note, { ...recording(null), placedPitch: 36 })).toMatch(
+      /^[A-G]♯?\d · Recording 21 \(C2\) · \d+\.\d s$/
+    )
+  })
+
   it('times a note by its written start and length', () => {
     expect(noteSeconds({ bpm: 120 }, { start: 3, dur: 1.5, pitch: 60 })).toEqual({
       start: 1.5,

@@ -115,7 +115,8 @@ export const recordings = libraryTable('recordings', {
   seconds: real('seconds').notNull(),
   sampleRate: integer('sample_rate').notNull(),
   waveform: text('waveform', { mode: 'json' }).$type<number[]>().notNull(),
-  analysis: text('analysis', { mode: 'json' }).$type<Analysis>()
+  analysis: text('analysis', { mode: 'json' }).$type<Analysis>(),
+  placedPitch: integer('placed_pitch')
 })
 
 export const toots = libraryTable('toots', {

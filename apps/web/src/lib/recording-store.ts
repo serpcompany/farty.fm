@@ -45,6 +45,8 @@ export type LibraryDatabase = IDBPDatabase<FartyDB>
 
 export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
 
+const DB_VERSION = 4
+
 let opening: Promise<LibraryDatabase> | null = null
 
 let waiting = false
@@ -65,7 +67,7 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
 
 export function db(): Promise<LibraryDatabase> {
   if (opening) return opening
-  const thisOpening: Promise<LibraryDatabase> = openDB<FartyDB>('pedos', 3, {
+  const thisOpening: Promise<LibraryDatabase> = openDB<FartyDB>('pedos', DB_VERSION, {
     upgrade(database, oldVersion, _newVersion, transaction) {
       if (oldVersion < 1) {
         database.createObjectStore('recordings', { keyPath: 'id' })
@@ -81,6 +83,7 @@ export function db(): Promise<LibraryDatabase> {
         database.createObjectStore('meta')
         if (oldVersion >= 1) queueEverything(transaction).catch(() => {})
       }
+      if (oldVersion === 3) readEverythingAgain(transaction).catch(() => {})
     },
     blocked() {
       setWaiting(true)
@@ -165,6 +168,13 @@ async function queueEverything(
   )
 }
 
+async function readEverythingAgain(
+  transaction: IDBPTransaction<FartyDB, StoreNames<FartyDB>[], 'versionchange'>
+): Promise<void> {
+  const meta = transaction.objectStore('meta')
+  if ((await meta.get('cursor')) !== undefined) await meta.put(0, 'cursor')
+}
+
 type OutboxStore = IDBPObjectStore<FartyDB, StoreNames<FartyDB>[], 'outbox', 'readwrite'>
 
 export async function queue(
@@ -239,6 +249,27 @@ export async function saveAnalysis(id: string, analysis: AnalysisState): Promise
   })
   if (updated) announceQueued()
   return updated
+}
+
+export async function placeRecording(
+  id: string,
+  placedPitch: number | null
+): Promise<Recording | null> {
+  const placed = await withDb(async database => {
+    const tx = database.transaction(['recordings', 'outbox'], 'readwrite')
+    const recordings = tx.objectStore('recordings')
+    const outbox = tx.objectStore('outbox')
+    const recording = await recordings.get(id)
+    if (!recording) {
+      await tx.done
+      return null
+    }
+    const updated: Recording = { ...recording, placedPitch }
+    await Promise.all([recordings.put(updated), queue(outbox, 'recordings', id, 'place'), tx.done])
+    return updated
+  })
+  if (placed) announceQueued()
+  return placed
 }
 
 export async function loadAudio(id: string): Promise<ArrayBuffer> {

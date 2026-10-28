@@ -22,6 +22,8 @@ import {
   moveCost,
   NOTE_FILL,
   neededSeconds,
+  PLACED_SHORTEST_NOTE_SECONDS,
+  placedAutoMapRecording,
   silentCost,
   tooShortCost,
   unsettledCost
@@ -208,5 +210,49 @@ describe('the cost terms', () => {
     ])
     expect(compareIds('ab', 'a')).toBeGreaterThan(0)
     expect(compareIds('013', '013')).toBe(0)
+  })
+})
+
+describe('Placed Recordings (ADR 0015)', () => {
+  const C2 = 36
+  const placed080 = () => {
+    const g = goldenRecording('080')
+    expect(g.melodic).toBe(false)
+    return placedAutoMapRecording('080', storedAnalysis(g), C2)
+  }
+
+  it('counts as Melodic at its note, at its own length, holding it from 0.6 s', () => {
+    expect(placed080()).toEqual({
+      ...autoMapInput('080'),
+      recordingPitchMidi: C2,
+      shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
+      settleSeconds: 0
+    })
+    expect(PLACED_SHORTEST_NOTE_SECONDS).toBe(0.6)
+  })
+
+  it('covers a note nothing else does, as tools/melody-lab/test_placed.py: 080 on C2 unlocks 3 Songs the full library leaves locked', () => {
+    const placed = [...autoMapInputs(libraries.full.filter(id => id !== '080')), placed080()]
+    const expected = {
+      jingle: { covered: 5, total: 5, octaveMoves: 1, cost: 1072.2936, plays: 64 },
+      row: { covered: 6, total: 6, octaveMoves: 0, cost: 602.4985, plays: 67 },
+      amazing: { covered: 5, total: 6, octaveMoves: 0, cost: 71.9576, plays: 62 },
+      auld: { covered: 7, total: 7, octaveMoves: 2, cost: 753.871, plays: 65 }
+    }
+    for (const [id, e] of Object.entries(expected)) {
+      const song = goldenSong(id)
+      expect(arrange(song, autoMapInputs(libraries.full)).unlocked, id).toBe(false)
+      const a = arrange(song, placed)
+      expect({ covered: a.covered, total: a.total, octaveMoves: a.octaveMoves }, id).toEqual({
+        covered: e.covered,
+        total: e.total,
+        octaveMoves: e.octaveMoves
+      })
+      expect(a.cost, id).toBeCloseTo(e.cost, 3)
+      expect(
+        a.pitches.filter(p => p.recordingId === '080').map(p => p.songPitch),
+        id
+      ).toEqual([e.plays])
+    }
   })
 })

@@ -19,11 +19,15 @@ vi.mock('@/lib/recording-store', async importOriginal => ({
   loadAudio: vi.fn(),
   saveAnalysis: vi.fn(),
   saveRecording: vi.fn(),
-  deleteRecording: vi.fn()
+  deleteRecording: vi.fn(),
+  placeRecording: vi.fn()
 }))
 vi.mock('@/lib/analysis/client', () => ({ analyze: vi.fn() }))
 vi.mock('@/lib/analysis-upgrade', () => ({ upgradeAnalyses: vi.fn() }))
-vi.mock('@/lib/library-changes', () => ({ onLibraryChanged: vi.fn() }))
+vi.mock('@/lib/library-changes', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/library-changes')>()),
+  onLibraryChanged: vi.fn()
+}))
 vi.mock('@/lib/audio/player', () => ({ play: vi.fn(), stopPlayback: vi.fn() }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: vi.fn() }))
 vi.mock('@/lib/wav', () => ({
@@ -144,6 +148,22 @@ describe('RecordingsProvider', () => {
     expect([...library.collectedPitchClasses]).toEqual([7])
     expect(library.songRows.map(row => row.song.id)).toEqual(songs.map(song => song.id))
     expect(library.recording('r3')?.number).toBe(3)
+  })
+
+  it('places a Noise-like Recording on a note at once, and reports a placement it could not keep', async () => {
+    await open([saved(1, analyzedAt(55)), saved(2, analyzedAt(null))])
+    expect(library.melodicRecordings.map(r => r.id)).toEqual(['r1'])
+    const failed = new Error('QuotaExceededError')
+    vi.mocked(store.placeRecording).mockRejectedValue(failed)
+
+    act(() => library.placeRecording('r2', 48))
+
+    expect(store.placeRecording).toHaveBeenCalledWith('r2', 48)
+    expect(library.recording('r2')?.placedPitch).toBe(48)
+    expect(library.melodicRecordings.map(r => r.id)).toEqual(['r1', 'r2'])
+    expect([...library.collectedNotes].sort()).toEqual([48, 55])
+    await settle()
+    expect(reportError).toHaveBeenCalledWith('recording-place-failed', failed)
   })
 
   it('matches the Song Catalog again only when Pitch Coverage can change', async () => {

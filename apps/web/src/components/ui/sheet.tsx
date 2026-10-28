@@ -88,4 +88,14 @@ function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
   )
 }
 
-export { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle }
+function SheetDescription({ className, ...props }: SheetPrimitive.Description.Props) {
+  return (
+    <SheetPrimitive.Description
+      data-slot="sheet-description"
+      className={cn('text-sm text-muted-foreground', className)}
+      {...props}
+    />
+  )
+}
+
+export { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle }

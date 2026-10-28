@@ -16,6 +16,12 @@ export function fakeAccount(userId = 'user-a') {
     now += 1
     return now
   }
+  const change = (kind: Kind, id: string, fields: Record<string, unknown>) => {
+    const stored = items[kind].get(id)
+    if (stored) {
+      items[kind].set(id, { ...stored, item: { ...stored.item, ...fields }, updatedAt: tick() })
+    }
+  }
   const sent: Sent[] = []
   const state = {
     sent,
@@ -31,10 +37,10 @@ export function fakeAccount(userId = 'user-a') {
       if (stored) items[kind].set(id, { ...stored, wav: null, deletedAt: tick(), updatedAt: now })
     },
     rename(id: string, title: string) {
-      const stored = items.toots.get(id)
-      if (stored) {
-        items.toots.set(id, { ...stored, item: { ...stored.item, title }, updatedAt: tick() })
-      }
+      change('toots', id, { title })
+    },
+    place(id: string, placedPitch: number | null) {
+      change('recordings', id, { placedPitch })
     },
     get(kind: Kind, id: string) {
       const stored = items[kind].get(id)
@@ -106,9 +112,10 @@ export function fakeAccount(userId = 'user-a') {
     if (method === 'PATCH') {
       if (!stored) return error(404, 'not_found')
       if (stored.deletedAt) return error(410, 'deleted')
-      const { title } = JSON.parse(String(init.body))
-      items[kind].set(id, { ...stored, item: { ...stored.item, title }, updatedAt: tick() })
-      return Response.json({ id, title })
+      const body = JSON.parse(String(init.body))
+      const changed = kind === 'toots' ? { title: body.title } : { placedPitch: body.placedPitch }
+      change(kind, id, changed)
+      return Response.json({ id, ...changed })
     }
     if (method === 'DELETE') {
       if (!stored) return error(404, 'not_found')

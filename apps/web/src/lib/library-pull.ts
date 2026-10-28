@@ -50,7 +50,17 @@ async function apply(database: LibraryDatabase, answer: api.LibraryChanges) {
 
   for (const { audioBytes: _, ...recording } of answer.recordings) {
     const key = itemKey('recordings', recording.id)
-    if (pending.get(key) === 'delete' || (await recordings.getKey(recording.id))) continue
+    const op = pending.get(key)
+    if (op === 'delete') continue
+    const here = await recordings.get(recording.id)
+    if (here) {
+      const placed = recording.placedPitch
+      if (op || placed === undefined || (here.placedPitch ?? null) === placed) continue
+      const moved = { ...here, placedPitch: placed }
+      await recordings.put(moved)
+      change.recordings.push(moved)
+      continue
+    }
     await Promise.all([
       recordings.put(recording),
       downloads.put({ kind: 'recordings', id: recording.id }, key)

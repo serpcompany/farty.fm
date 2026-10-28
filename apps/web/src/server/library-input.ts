@@ -71,6 +71,8 @@ const seconds = between(0, MAX_SECONDS)
 
 export const TITLE = z.string().trim().min(1).max(200)
 
+export const PLACED_PITCH = wholeBetween(0, 127).nullable()
+
 const ANALYSIS = z
   .discriminatedUnion('state', [
     z.object({ state: z.literal('notAnalyzed') }),
@@ -98,7 +100,8 @@ const RECORDING = z.object({
   seconds,
   sampleRate: z.number(),
   waveform: z.array(between(0, 1)).max(256),
-  analysis: ANALYSIS
+  analysis: ANALYSIS,
+  placedPitch: PLACED_PITCH.default(null)
 })
 
 export function parseRecording(

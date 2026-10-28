@@ -81,6 +81,67 @@ describe('reading the account', () => {
     expect((await library.page.toots.loadToots())[0].title).toBe('B')
   })
 
+  it("applies another browser's Placed Pitch, keeping this browser's own analysis (ADR 0015)", async () => {
+    const recording = anotherBrowsersRecording()
+    library.account.add('recordings', recording, wav(5))
+    await library.page.sync.syncOnce('user-a')
+    const analysis = { state: 'analyzing' } as const
+    await library.page.store.saveAnalysis(recording.id, analysis)
+    library.account.place(recording.id, 48)
+    const changes: LibraryChange[] = []
+    library.page.changes.onLibraryChanged(change => changes.push(change))
+    await library.page.sync.syncOnce('user-a')
+    const placed = { ...recording, analysis, placedPitch: 48 }
+    expect(await library.page.store.loadRecordings()).toEqual([placed])
+    expect(changes).toEqual([
+      { recordings: [placed], toots: [], deleted: { recordings: [], toots: [] } }
+    ])
+    library.account.place(recording.id, 48)
+    changes.length = 0
+    await library.page.sync.syncOnce('user-a')
+    expect(changes).toEqual([])
+  })
+
+  it("shows another browser's placement on the screen's Recordings, with this browser's analysis", async () => {
+    const placedThere = anotherBrowsersRecording(1)
+    const deletedThere = anotherBrowsersRecording(2)
+    library.account.add('recordings', placedThere, wav(5))
+    library.account.add('recordings', deletedThere, wav(6))
+    await library.page.sync.syncOnce('user-a')
+    const analysis = { state: 'analyzing' } as const
+    const shown = [{ ...placedThere, analysis }, deletedThere]
+    library.account.place(placedThere.id, 48)
+    library.account.remove('recordings', deletedThere.id)
+    const added = anotherBrowsersRecording(3)
+    library.account.add('recordings', added, wav(7))
+    const changes: LibraryChange[] = []
+    library.page.changes.onLibraryChanged(change => changes.push(change))
+    await library.page.sync.syncOnce('user-a')
+    const [change] = changes
+    if (!change || change.reset) throw new Error('no change')
+    expect(library.page.changes.recordingsAfter(shown, change)).toEqual([
+      { ...placedThere, analysis, placedPitch: 48 },
+      added
+    ])
+  })
+
+  it('keeps a Placed Pitch this browser is sending, and reads none from a Worker before #268 as no change', async () => {
+    const recording = anotherBrowsersRecording()
+    library.account.add('recordings', { ...recording, placedPitch: 40 }, wav(5))
+    await library.page.sync.syncOnce('user-a')
+    expect((await library.page.store.loadRecordings())[0].placedPitch).toBe(40)
+    refuse('PATCH', 503, 'unavailable')
+    await library.page.store.placeRecording(recording.id, 41)
+    library.account.place(recording.id, 42)
+    await library.page.sync.syncOnce('user-a')
+    expect((await library.page.store.loadRecordings())[0].placedPitch).toBe(41)
+    library.account.intercept = null
+    await library.page.sync.syncOnce('user-a')
+    library.account.add('recordings', recording, wav(5))
+    await library.page.sync.syncOnce('user-a')
+    expect((await library.page.store.loadRecordings())[0].placedPitch).toBe(41)
+  })
+
   it("drops what the account no longer has after a full read, but not what's waiting to upload", async () => {
     const gone = anotherBrowsersRecording()
     library.account.add('recordings', gone, wav(5))

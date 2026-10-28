@@ -49,14 +49,26 @@ export async function putItem(
   return answer(await send(`/api/${kind}/${item.id}/`, accountId, { method: 'PUT', body: form }))
 }
 
-export async function renameToot(id: string, title: string, accountId: string): Promise<Answer> {
+async function patch(path: string, accountId: string, fields: object): Promise<Answer> {
   return answer(
-    await send(`/api/toots/${id}/`, accountId, {
+    await send(path, accountId, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ title })
+      body: JSON.stringify(fields)
     })
   )
+}
+
+export function renameToot(id: string, title: string, accountId: string): Promise<Answer> {
+  return patch(`/api/toots/${id}/`, accountId, { title })
+}
+
+export function placeRecording(
+  id: string,
+  placedPitch: number | null,
+  accountId: string
+): Promise<Answer> {
+  return patch(`/api/recordings/${id}/`, accountId, { placedPitch })
 }
 
 export async function deleteItem(kind: Kind, id: string, accountId: string): Promise<Answer> {

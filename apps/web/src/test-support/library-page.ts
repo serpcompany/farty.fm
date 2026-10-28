@@ -64,6 +64,22 @@ export function anotherBrowsersRecording(n = 2): Recording {
 
 export const claimedBy = (id: string) => localStorage.setItem('pedos.account', id)
 
+export function openOlderLibrary(
+  version: number,
+  create: (database: IDBDatabase, transaction: IDBTransaction) => void,
+  keepOpen = false
+): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const open = indexedDB.open('pedos', version)
+    open.onupgradeneeded = () => create(open.result, open.transaction as IDBTransaction)
+    open.onsuccess = () => {
+      if (!keepOpen) open.result.close()
+      resolve(open.result)
+    }
+    open.onerror = () => reject(open.error)
+  })
+}
+
 export function libraryHarness() {
   const harness = {
     account: fakeAccount(),

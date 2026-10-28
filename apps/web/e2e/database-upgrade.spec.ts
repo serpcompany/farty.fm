@@ -40,7 +40,7 @@ test('upgrades a database from before Toots and keeps its Recordings', async ({ 
   await expect(page.getByTestId('recording-row')).toContainText('Recording 7')
 
   expect(await layout(page)).toEqual({
-    version: 3,
+    version: 4,
     stores: ['audio', 'downloads', 'meta', 'outbox', 'recordings', 'tootAudio', 'toots']
   })
   expect((await entry<{ number: number }>(page, 'recordings', 'before-toots'))?.number).toBe(7)
@@ -69,7 +69,7 @@ test('asks you to close Farty in your other tabs while one holds the old databas
     () =>
       new Promise<boolean>((resolve, reject) => {
         let wasBlocked = false
-        const request = indexedDB.open('pedos', 4)
+        const request = indexedDB.open('pedos', 5)
         request.onblocked = () => (wasBlocked = true)
         request.onsuccess = () => {
           request.result.close()
@@ -79,4 +79,14 @@ test('asks you to close Farty in your other tabs while one holds the old databas
       })
   )
   expect(blocked).toBe(false)
+})
+
+test('says Farty was updated when a newer Farty saved the library', async ({ page }) => {
+  await openedBeforeToots(page)
+  await write(page, [], { ...beforeToots, version: 5 })
+
+  await page.goto('/recordings/')
+  await expect(page.getByText('Farty was updated')).toBeVisible()
+  await expect(page.getByText('Your library was saved by a newer version of Farty.')).toBeVisible()
+  expect((await layout(page)).version).toBe(5)
 })

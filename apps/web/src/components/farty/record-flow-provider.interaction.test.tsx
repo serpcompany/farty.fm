@@ -31,7 +31,10 @@ vi.mock('@/lib/recording-store', () => ({
 vi.mock('@/lib/analysis/client', () => ({ analyze: vi.fn() }))
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
 vi.mock('@/lib/analysis-upgrade', () => ({ upgradeAnalyses: vi.fn() }))
-vi.mock('@/lib/library-changes', () => ({ onLibraryChanged: () => () => undefined }))
+vi.mock('@/lib/library-changes', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/library-changes')>()),
+  onLibraryChanged: () => () => undefined
+}))
 vi.mock('@/lib/audio/player', () => ({ play: vi.fn(), stopPlayback: vi.fn() }))
 vi.mock('@/lib/stale-build', () => ({ holdReload: vi.fn() }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: vi.fn() }))

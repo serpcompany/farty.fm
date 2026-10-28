@@ -11,7 +11,7 @@ The `gh` and `git` commands here run as the organization's app, through the `ser
   ```
 
   If `main` has diverged (a hotfix landed there), open a `staging` → `main` PR instead and merge it with a merge commit, then merge back (below).
-- **Releases.** Release Please (`.github/workflows/release-please.yml`, configured for `apps/web` in `release-please-config.json`) keeps one `chore: release Farty x.y.z` PR open on `main`, built from the commits that promotion brought. Merging it bumps `apps/web/package.json`, writes `apps/web/CHANGELOG.md` and tags `vX.Y.Z`. Nobody types versions or tags. The iPhone app's history and its `v1.0.0` release are in tags (ADR 0014), so the web app's first release was `v1.1.0`.
+- **Releases.** Release Please (`.github/workflows/release-please.yml`, configured for `apps/web` in `release-please-config.json`) keeps one `chore: release Farty x.y.z` PR open on `main`, built from the commits that promotion brought. Merging it bumps `apps/web/package.json`, writes `apps/web/CHANGELOG.md` and tags `vX.Y.Z`. Nobody types versions or tags. The iPhone app's history and its `v1.0.0` release are in tags (ADR 0016), so the web app's first release was `v1.1.0`.
 - **A release PR gets its checks from a reopen.** Release Please opens and rewrites its PR with Actions' own `GITHUB_TOKEN`, which starts no workflows, so no check reports on it and `main` requires them. Right before merging, after the last push to `main`, close and reopen it as the app. That runs every required check, with none bypassed and no secret added. Once they pass, merge it:
 
   ```sh
@@ -21,7 +21,7 @@ The `gh` and `git` commands here run as the organization's app, through the `ser
   bash ~/.claude/skills/serp-github-app/scripts/gh.sh pr merge <n> --squash
   ```
 
-- **Web releases roll forward, not back.** From #168 on, the library is IndexedDB version 3, which an older build can't open (`VersionError`), so a Cloudflare rollback past it breaks the library in every browser that opened the newer build. Fix forward with a new release instead, and say so in a release PR's Merge Danger. Rolling back below covers the rare case where a rollback is safe.
+- **Web releases roll forward, not back.** From #168 on, the library is IndexedDB version 3, and from #268 version 4, which an older build can't open (`VersionError`), so a Cloudflare rollback past either breaks the library in every browser that opened the newer build. Version 4 is there so a build from before #268 never sends a queued `place` as a delete. Fix forward with a new release instead, and say so in a release PR's Merge Danger. Rolling back below covers the rare case where a rollback is safe.
 
 ## Rolling back
 

@@ -45,12 +45,27 @@ describe('parseRecording', () => {
     const shuffled = Object.fromEntries(Object.entries(analysis).reverse())
     const sent = recording({
       extra: 'dropped',
+      placedPitch: 40,
       analysis: { state: 'analyzed', analysis: shuffled }
     })
     const kept = parseRecording(sent, ID, 48_000)
-    expect(kept).toEqual({ ...recording(), analysis })
-    expect(Object.keys(kept ?? {})).toEqual(Object.keys(recording()))
+    expect(kept).toEqual({ ...recording(), analysis, placedPitch: 40 })
+    expect(Object.keys(kept ?? {})).toEqual([...Object.keys(recording()), 'placedPitch'])
     expect(Object.keys(kept?.analysis ?? {})).toEqual(Object.keys(analysis))
+  })
+
+  it('reads a Recording sent without a Placed Pitch, as a browser before #268 sends it, as left out', () => {
+    expect(parseRecording(recording(), ID, 48_000)?.placedPitch).toBeNull()
+    expect(parseRecording(recording({ placedPitch: null }), ID, 48_000)?.placedPitch).toBeNull()
+  })
+
+  it('refuses a Placed Pitch that is not a MIDI note, and takes any MIDI note, wider than the picker', () => {
+    for (const placedPitch of ['40', 40.5, -1, 128, Number.NaN]) {
+      expect(parseRecording(recording({ placedPitch }), ID, 48_000), String(placedPitch)).toBeNull()
+    }
+    for (const placedPitch of [0, 127]) {
+      expect(parseRecording(recording({ placedPitch }), ID, 48_000)?.placedPitch).toBe(placedPitch)
+    }
   })
 
   it('takes a Recording that couldn’t be analyzed, whatever else its analysis holds', () => {

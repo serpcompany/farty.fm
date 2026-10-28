@@ -5,7 +5,7 @@ browser signed in to it shares them. This page covers the account step, signing 
 ends, signing out, deleting an account, and sync. How sign-in works is in [Accounts and
 sign-in](../../../../docs/agents/accounts.md), how the library syncs in
 [ARCHITECTURE.md](../../../../ARCHITECTURE.md#how-data-moves-in-the-web-app), and why in
-[ADR 0015](../../../../docs/adr/0015-accounts-and-cloud-save.md) and
+[ADR 0017](../../../../docs/adr/0017-accounts-and-cloud-save.md) and
 [ADR 0013](../../../../docs/adr/0013-keeping-recordings-needs-a-free-account.md).
 
 ## Guest
@@ -212,6 +212,25 @@ sign-in](../../../../docs/agents/accounts.md), how the library syncs in
 - Every browser signed in to an account plays the others' Recordings and Toots, and sees their
   deletes and renames once it comes back to Farty, without a reload (`e2e/sync.spec.ts`, "two
   browsers signed in to one account play each other's farts, and see each other's deletes").
+- A Recording placed on a note by ear, moved or taken off reaches the account, in its upload when
+  that hasn't gone yet, and once however often it changed. A placement the account refuses is
+  dropped, and one on a Recording the account deleted deletes it here too
+  (`src/lib/outbox-send.test.ts`, "places a Recording on the account, in its upload or after it (ADR
+  0015)"; "places a Recording on the account that was placed while it uploaded"; "sends the Placed
+  Pitch of a Recording the account already had, from an upload cut off before it was placed";
+  "forgets a place the account refuses, and deletes here what it deleted";
+  `src/app/api/recording-placement.workers.test.ts`, "places a Recording on a note, moves it and
+  takes it off, keeping its analysis"; "refuses a note that is not a MIDI note (400), a deleted
+  Recording (410), an unknown one (404) and another library (409)";
+  `src/app/api/library-uploads.workers.test.ts`, "keep the Placed Pitch (ADR 0015), and none when a
+  browser before #268 sends none").
+- Another browser's placement shows here once it comes back to Farty, keeping this browser's own
+  analysis, unless this browser is still sending its own (`src/lib/library-pull.test.ts`, "applies
+  another browser's Placed Pitch, keeping this browser's own analysis (ADR 0015)"; "shows another
+  browser's placement on the screen's Recordings, with this browser's analysis"; "keeps a Placed
+  Pitch this browser is sending, and reads none from a Worker before #268 as no change";
+  `src/components/farty/place-by-ear.interaction.test.tsx`, "shows another browser's placement
+  while it's open, read live from the Recordings").
 - Each save, rename and delete waits on the device until it reaches the account. A Recording waits
   for its analysis, and a refused upload stays waiting while the rest go (`src/lib/library-outbox.test.ts`,
   "queues each save, rename and delete with the change itself"; `src/lib/outbox-send.test.ts`,

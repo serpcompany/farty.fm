@@ -6,7 +6,7 @@ import type { Song } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import { loadAudio } from '@/lib/recording-store'
-import { type Recording, recordingName, recordingPitch } from '@/lib/recordings'
+import { type Recording, recordingName, songPitch } from '@/lib/recordings'
 import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/toot'
 import { cn } from '@/lib/utils'
 import { decodeWav } from '@/lib/wav'
@@ -175,7 +175,7 @@ function RecordingUsedRow({
   const isPlaying = nowPlaying === recording.id
   const levels = useWholeLevels(recording.id)
   const name = recordingName(recording)
-  const pitch = recordingPitch(recording)
+  const pitch = songPitch(recording)
   const length = formattedFartLength(recording)
 
   return (

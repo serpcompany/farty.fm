@@ -49,14 +49,25 @@ outside the tabs, and where Staging differs. Welcome and the lander are in
 - A database from before Toots upgrades and keeps its Recordings and their numbers
   (`e2e/database-upgrade.spec.ts`, "upgrades a database from before Toots and keeps its
   Recordings").
+- The database is at version 4, which keeps everything version 3 held. It closes a tab still on a
+  build from before version 4, which then can't open the library again, so that build never sends
+  a placement by ear as a delete. The upgrade reads the account's whole library once, bringing any
+  placement such a tab skipped (`src/lib/database-upgrade.test.ts`, "keeps Recordings, Toots, their
+  WAVs, the outbox and what waits to download"; "closes a tab’s version 3 connection, which then
+  can’t open the library again"; "reads the whole library once: an older tab skipped placements and
+  moved the cursor past them"; "leaves a guest's library without a cursor";
+  `src/lib/outbox-send.test.ts`, "never sends an op from a later build that it doesn’t know, and
+  keeps it queued, as code from before #268 sent a place as a delete").
 - Signing out in one tab clears the others, without a reload ([Accounts](account.md)).
 
 ## When the library won't open
 
 Each replaces the tab's screen with a message and a Reload button.
 
-- A newer Farty saved the library: "Farty was updated" (`src/components/farty/recordings-provider.interaction.test.tsx`,
-  "says Farty was updated when a newer Farty saved the library, and reports it").
+- A newer Farty saved the library: "Farty was updated" (`e2e/database-upgrade.spec.ts`, "says
+  Farty was updated when a newer Farty saved the library";
+  `src/components/farty/recordings-provider.interaction.test.tsx`, "says Farty was updated when a
+  newer Farty saved the library, and reports it").
 - The browser won't let Farty read its storage: "Farty can’t open your library"
   (`src/components/farty/recordings-provider.interaction.test.tsx`, "says the library can’t be
   opened when the browser won’t let Farty read it").

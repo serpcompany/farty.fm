@@ -4,11 +4,12 @@ import {
   type AutoMapRecording,
   arrange,
   autoMapRecording,
-  type MissingNote
+  type MissingNote,
+  placedAutoMapRecording
 } from '@/lib/engine/auto-map'
 import type { Song as EngineSong } from '@/lib/engine/song'
 import { noteName, pitchClass } from '@/lib/pitch'
-import { formattedLength, type Recording, recordingPitch } from '@/lib/recordings'
+import { formattedLength, placedPitch, type Recording, songPitch } from '@/lib/recordings'
 
 export type Coverage = {
   covered: number
@@ -21,13 +22,15 @@ export type Coverage = {
 }
 
 function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[] {
-  return recordings.flatMap(r =>
-    r.analysis.state === 'analyzed' &&
-    r.analysis.analysis.recordingPitchMidi !== null &&
-    r.analysis.analysis.shortestNoteSeconds !== null
-      ? [autoMapRecording(r.id, r.analysis.analysis)]
-      : []
-  )
+  return recordings.flatMap(r => {
+    if (r.analysis.state !== 'analyzed') return []
+    const { analysis } = r.analysis
+    if (analysis.recordingPitchMidi !== null && analysis.shortestNoteSeconds !== null) {
+      return [autoMapRecording(r.id, analysis)]
+    }
+    const placed = placedPitch(r)
+    return placed === null ? [] : [placedAutoMapRecording(r.id, analysis, placed)]
+  })
 }
 
 export function fartSeconds(recording: Recording): number {
@@ -99,7 +102,7 @@ export function missingNotes(coverage: Coverage, limit?: number): string | null 
 export function collectedPitchClasses(recordings: readonly Recording[]): Set<number> {
   return new Set(
     recordings.flatMap(r => {
-      const pitch = recordingPitch(r)
+      const pitch = songPitch(r)
       return pitch === null ? [] : [pitchClass(pitch)]
     })
   )

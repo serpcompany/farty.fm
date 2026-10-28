@@ -1,7 +1,7 @@
 # Recordings
 
 The Recordings tab: every Recording kept in this browser and, signed in, on the account, with its
-note, and Retry for one whose note wasn't found. Recordings are made on the [Record](record.md)
+note, Retry for one whose note wasn't found, and placing a noise-like one on a note by ear. Recordings are made on the [Record](record.md)
 tab.
 
 ## While the Recordings load
@@ -59,6 +59,49 @@ tab.
   an older Recording Analysis made runs again on the next open"; `src/lib/analysis-upgrade.test.ts`,
   "re-analyzes one Recording at a time"; "leaves the stored analysis as it was when re-analysis
   fails, and goes on").
+
+## Placing a noise-like fart by ear
+
+A Noise-like Recording plays in no Song until the person places it on the piano note it sounds
+closest to (ADR 0015). It still plays as recorded: the note says only where Songs use it.
+
+- A noise-like row's note is an outlined "noise-like ›" button, which opens the picker: the fart's
+  play button, waveform and length, one octave of piano keys with an arrow either side, then Place
+  and "Leave it out" (`e2e/record-noise.spec.ts`, "a Noise-like fart can be placed on a note by
+  ear, moved, and taken off (ADR 0015)"; `src/components/farty/recordings-screen.interaction.test.tsx`,
+  "opens the place-by-ear picker from a noise-like Recording, and closes it when the page is
+  hidden").
+- It's a bottom sheet on a phone and a dialog from 48rem wide
+  (`src/components/farty/place-by-ear.interaction.test.tsx`, "is a bottom Sheet on a phone and a
+  Dialog from 48rem").
+- It opens on octave 3, C3 to B3, with no key picked and Place disabled as "Tap a key to choose a
+  note". The arrows move one octave at a time between C2 and B4, and a key picked stays picked
+  (`src/components/farty/place-by-ear.interaction.test.tsx`, "opens on octave 3 with nothing picked,
+  and asks for a key"; "moves one octave at a time between C2 and B4, keeping the key picked").
+- A tapped key plays a short piano note to hold the fart up to, and becomes "Place at E3". Nothing
+  is kept until Place, and "Leave it out" keeps nothing
+  (`src/components/farty/place-by-ear.interaction.test.tsx`, "plays a piano note for the key tapped,
+  and places the fart there on Place"; "leaves an unplaced fart out without keeping anything").
+- Its play button plays the fart, and closing the picker stops it
+  (`src/components/farty/place-by-ear.interaction.test.tsx`, "plays the fart from its play button";
+  "stops the fart when it closes").
+- A placed fart's row shows its note in a dashed pill, with "Placed by ear". It counts as a Melodic
+  Recording on that note in the summary, and stays placed after a reload (`e2e/record-noise.spec.ts`,
+  "a Noise-like fart can be placed on a note by ear, moved, and taken off (ADR 0015)").
+- The pill opens the picker on the placed note, ringed, with "Placed at E3" disabled. Another key
+  makes it "Move to", and "Take it off" makes the fart noise-like again (`e2e/record-noise.spec.ts`,
+  "a Noise-like fart can be placed on a note by ear, moved, and taken off (ADR 0015)";
+  `src/components/farty/place-by-ear.interaction.test.tsx`, "opens a placed fart on its note, ringed
+  while another is picked, and moves it or takes it off").
+- A placement counts at once, in the summary and on Compose, and one this browser couldn't keep is
+  reported (`src/components/farty/recordings-provider.interaction.test.tsx`, "places a Noise-like
+  Recording on a note at once, and reports a placement it could not keep").
+- A new analysis keeps the placement. If it finds the fart Melodic, its Recording Pitch counts and
+  the placement is ignored (`src/lib/recording-store.test.ts`, "keeps the note through a new
+  analysis, and places nothing that is gone"; `src/lib/recordings.test.ts`, "counts for nothing
+  while the Recording is Melodic, or not analyzed").
+- Signed in, the placement reaches the account, and another browser's placement shows here, even
+  in an open picker ([Accounts](account.md#sync)).
 
 ## Delete
 

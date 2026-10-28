@@ -38,6 +38,21 @@ export function autoMapRecording(id: string, analysis: Analysis): AutoMapRecordi
   }
 }
 
+export const PLACED_SHORTEST_NOTE_SECONDS = 0.6
+
+export function placedAutoMapRecording(
+  id: string,
+  analysis: Analysis,
+  placedMidi: number
+): AutoMapRecording {
+  return {
+    ...autoMapRecording(id, analysis),
+    recordingPitchMidi: placedMidi,
+    shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
+    settleSeconds: 0
+  }
+}
+
 export interface PitchChoice {
   songPitch: number
   targetMidi: number

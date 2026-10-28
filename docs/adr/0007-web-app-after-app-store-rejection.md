@@ -27,4 +27,4 @@ The routes the owner weighed (#106):
 - Safari mutes Web Audio when the iPhone's silent switch is on, unless the page sets Safari's Audio Session to playback. The app does.
 - A browser may clear a site's storage. Asking for persistent storage and Add to Home Screen come in #109 and #112.
 
-Update 2026-10-27: accounts, a cloud library and sync replace "no accounts, no cloud libraries, no sync" (ADR 0015). Google Play is planned as a Trusted Web Activity of this web app ([Google Play](../agents/google-play.md)), not the Kotlin rewrite the table above assumed.
+Update 2026-10-27: accounts, a cloud library and sync replace "no accounts, no cloud libraries, no sync" (ADR 0017). Google Play is planned as a Trusted Web Activity of this web app ([Google Play](../agents/google-play.md)), not the Kotlin rewrite the table above assumed.

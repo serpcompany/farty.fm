@@ -4,6 +4,7 @@ const ERROR_CODES = [
   'mic-denied',
   'mic-start-failed',
   'recording-save-failed',
+  'recording-place-failed',
   'analysis-failed',
   'toots-load-failed',
   'library-reload-failed',

@@ -42,7 +42,10 @@ describe.each<Kind>(['recordings', 'toots'])('PUT /api/%s/{id}/', kind => {
     expect(await put.json()).toEqual({ id: R1 })
     expect(await bucketKeys()).toEqual([`users/${a.id}/${kind}/${R1}.wav`])
     const listed = await library(a.cookie)
-    expect(listed[kind]).toEqual([{ ...metadataFor(kind, R1), audioBytes: audio.byteLength }])
+    const leftOut = kind === 'recordings' ? { placedPitch: null } : {}
+    expect(listed[kind]).toEqual([
+      { ...metadataFor(kind, R1), ...leftOut, audioBytes: audio.byteLength }
+    ])
     const played = await api.audio(kind, R1, a)
     expect(played.status).toBe(200)
     expect(played.headers.get('content-type')).toBe('audio/wav')
@@ -233,39 +236,50 @@ describe('the WAV check', () => {
 })
 
 type Signed = Awaited<ReturnType<typeof signUp>>
-type AnalysisFields = Record<string, unknown>
+type Fields = Record<string, unknown>
+type AnalysisFields = Fields
 
 const analysis = (fields: AnalysisFields) => ({
   state: 'analyzed',
   analysis: { ...recordingMetadata(R1).analysis.analysis, ...fields }
 })
 
-const putAnalysis = (a: Signed, id: string, fields: AnalysisFields) =>
-  api.put(
-    'recordings',
-    id,
-    uploadBody(recordingMetadata(id, { analysis: analysis(fields) }), wav()),
-    a
-  )
+const putRecording = (a: Signed, id: string, fields: Fields) =>
+  api.put('recordings', id, uploadBody(recordingMetadata(id, fields), wav()), a)
 
-async function keptAnalyses(a: Signed, first: AnalysisFields, second: AnalysisFields) {
+async function keptRecordings(a: Signed, first: Fields, second: Fields) {
   for (const [id, fields] of [
     [R1, first],
     [R2, second]
   ] as const) {
-    expect((await putAnalysis(a, id, fields)).status).toBe(201)
+    expect((await putRecording(a, id, fields)).status).toBe(201)
   }
-  return new Map((await library(a.cookie)).recordings.map(r => [r.id, r.analysis]))
+  return new Map((await library(a.cookie)).recordings.map(r => [r.id, r]))
 }
 
-async function expectRefusedAnalyses(a: Signed, refusedFields: AnalysisFields[]) {
+async function keptAnalyses(a: Signed, first: AnalysisFields, second: AnalysisFields) {
+  const kept = await keptRecordings(
+    a,
+    { analysis: analysis(first) },
+    { analysis: analysis(second) }
+  )
+  return new Map([...kept].map(([id, r]) => [id, r.analysis]))
+}
+
+async function expectRefusedRecordings(a: Signed, refusedFields: Fields[]) {
   for (const fields of refusedFields) {
-    const refused = await putAnalysis(a, R3, fields)
+    const refused = await putRecording(a, R3, fields)
     expect(refused.status).toBe(400)
     expect(await refused.json()).toEqual({ error: 'invalid_request' })
   }
   expect(await rowsOf('recordings')).toEqual([`${a.id} ${R1}`, `${a.id} ${R2}`])
 }
+
+const expectRefusedAnalyses = (a: Signed, refusedFields: AnalysisFields[]) =>
+  expectRefusedRecordings(
+    a,
+    refusedFields.map(fields => ({ analysis: analysis(fields) }))
+  )
 
 describe('the rows a route keeps', () => {
   it('are the browser’s Recording, with the audio’s size from R2', async () => {
@@ -299,6 +313,17 @@ describe('the rows a route keeps', () => {
     await expectRefusedAnalyses(
       a,
       ['0.1', -0.001, 3600.001].map(settleSeconds => ({ settleSeconds }))
+    )
+  })
+
+  it('keep the Placed Pitch (ADR 0015), and none when a browser before #268 sends none', async () => {
+    const a = await signUp('A')
+    const kept = await keptRecordings(a, { placedPitch: 40 }, {})
+    expect(kept.get(R1)).toMatchObject({ placedPitch: 40 })
+    expect(kept.get(R2)).toMatchObject({ placedPitch: null })
+    await expectRefusedRecordings(
+      a,
+      ['40', 40.5, 128].map(placedPitch => ({ placedPitch }))
     )
   })
 

@@ -1,6 +1,6 @@
 import type { Song, SongNote } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
-import { formattedLength, type Recording, recordingName, recordingPitch } from '@/lib/recordings'
+import { formattedLength, type Recording, recordingName, songPitch } from '@/lib/recordings'
 
 export type TootArrangement = {
   transposition: number
@@ -73,7 +73,7 @@ export function noteCaption(
   const name = noteName(soundingPitch(arrangement, note.pitch))
   const length = formattedLength(noteSeconds(song, note).length)
   if (!recording) return `${name} · Recording deleted · ${length}`
-  const pitch = recordingPitch(recording)
+  const pitch = songPitch(recording)
   if (pitch === null) return `${name} · ${recordingName(recording)} · ${length}`
   return `${name} · ${recordingName(recording)} (${noteName(pitch)}) · ${length}`
 }

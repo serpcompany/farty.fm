@@ -134,6 +134,12 @@ function request(path: string, method: string, as: As, init: RequestInit = {}) {
   })
 }
 
+const patchRequest = (kind: Kind, id: string, body: string, as: As) =>
+  request(`/api/${kind}/${id}/`, 'PATCH', as, {
+    headers: { 'content-type': 'application/json' },
+    body
+  })
+
 export const api = {
   library: (as: As, since?: number | string) =>
     libraryRoute.GET(
@@ -154,13 +160,13 @@ export const api = {
     audioRoutes[kind].GET(request(`/api/${kind}/${id}/audio/`, 'GET', as), params({ id })),
 
   rename: (id: string, title: unknown, as: As) =>
-    tootRoute.PATCH(
-      request(`/api/toots/${id}/`, 'PATCH', as, {
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ title })
-      }),
+    itemRoutes.toots.PATCH(
+      patchRequest('toots', id, JSON.stringify({ title }), as),
       params({ id })
     ),
+
+  place: (id: string, placedPitch: unknown, as: As, body = JSON.stringify({ placedPitch })) =>
+    itemRoutes.recordings.PATCH(patchRequest('recordings', id, body, as), params({ id })),
 
   patchAccount: (body: unknown, as: As) =>
     accountRoute.PATCH(

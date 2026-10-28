@@ -92,8 +92,10 @@ describe('the renderer places every note as the reference does', () => {
 })
 
 describe('the render path from what the app stores', () => {
-  it('cuts the golden gesture', async () => {
-    for (const id of goldenIndex.melodic_recordings) {
+  it('cuts the golden gesture, a Noise-like one too, for a fart placed by ear (ADR 0015)', async () => {
+    const noiseLike = ['009', '080']
+    for (const id of noiseLike) expect(goldenRecording(id).recording_pitch_midi, id).toBeNull()
+    for (const id of [...goldenIndex.melodic_recordings, ...noiseLike]) {
       const g = goldenRecording(id)
       const file = await decoded(g)
       const source = renderSource(
@@ -134,13 +136,6 @@ describe('the render path from what the app stores', () => {
     expect(() => renderSong(song, locked, sources)).toThrow(/locked: 3 of 6 notes covered/)
     const unlocked = arrange(song, library)
     expect(() => renderSong(song, unlocked, new Map())).toThrow(/No Recording plays pitch/)
-  })
-
-  it('refuses a Noise-like Recording as a source', () => {
-    const g = goldenRecording('009')
-    expect(() =>
-      renderSource({ samples: new Float32Array(44100), sampleRate: 44100 }, storedAnalysis(g))
-    ).toThrow(/Melodic/)
   })
 })
 
