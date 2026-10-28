@@ -8,11 +8,11 @@ import {
   signInByApi
 } from './account'
 import { stored } from './database'
-import { g3Fart, recordAndSave, recordG3ToRecordings, withFakeMicrophone } from './record'
+import { recordAndSave, recordG3ToRecordings, withFartingMicrophone } from './record'
 import { expectTappable, onPhone, tab } from './screens'
 import { expect, test } from './test'
 
-withFakeMicrophone(g3Fart)
+withFartingMicrophone()
 test.skip(({ viewport }) => !onPhone({ viewport }), 'The account step is checked at phone size')
 test.describe.configure({ timeout: 150_000 })
 
@@ -99,7 +99,7 @@ test('signing in to another account says first how many farts here it removes, a
     .getByRole('dialog', { name: 'Sign in again' })
     .getByRole('button', { name: 'Not now' })
     .click()
-  await recordAndSave(reopened, 2)
+  await recordAndSave(reopened)
   await reopened.getByRole('button', { name: 'Done' }).click()
   await expect(reopened.getByTestId('recording-row')).toHaveCount(2)
   expect(await stored(reopened, 'outbox')).toBe(1)

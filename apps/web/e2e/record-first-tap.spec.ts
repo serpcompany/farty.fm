@@ -1,13 +1,13 @@
 import type { Page } from '@playwright/test'
+import { getUserMediaMs } from './fake-microphone'
 import {
-  getUserMediaMs,
   lastClickToFirstBatch,
   microphone,
+  skipWelcome,
   tapRecord,
   waitForOpenMicrophone,
   withFartingMicrophone
-} from './fake-microphone'
-import { skipWelcome } from './record'
+} from './record'
 import { onPhone } from './screens'
 import { expect, test } from './test'
 

@@ -1,9 +1,9 @@
 import type { Page } from '@playwright/test'
 import { all, write } from './database'
-import { g3Fart, recordG3, withFakeMicrophone } from './record'
+import { recordG3, withFartingMicrophone } from './record'
 import { expect, test } from './test'
 
-withFakeMicrophone(g3Fart)
+withFartingMicrophone()
 
 type StoredRecording = { analysis: { state: string; analysis?: Record<string, unknown> } }
 

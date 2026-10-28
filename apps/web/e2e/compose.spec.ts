@@ -1,4 +1,4 @@
-import { fartAndSave, withFartingMicrophone } from './fake-microphone'
+import { fartAndSave, withFartingMicrophone } from './record'
 import { expectTappable, tab } from './screens'
 import { countResumesInTaps, forgetResumesInTaps, resumesInTaps } from './sounds'
 import { expect, test } from './test'

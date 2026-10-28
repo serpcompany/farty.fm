@@ -29,11 +29,11 @@ On Windows, run the Workers build and every step after it in Linux, since a Work
 
 `E2E_SERVER=preview E2E_PORT=4110 pnpm test:e2e` runs the Playwright journeys in `e2e/` against the preview with no `--env` (it starts one on that port if none is running), on a touch tablet (iPad size) and a phone (Pixel 7). The desktop project (1440×900, a mouse) runs only `e2e/desktop.spec.ts`: a computer gets the product page, not the app (#199). It sends the password from `.dev.vars` with `httpCredentials`. Name a spec file to run one, such as `e2e/record-melodic.spec.ts` (Record).
 
-For a new feature, add a spec in `e2e/` that imports `test` and `expect` from `./test`, not `@playwright/test` (Biome refuses those): it fails a journey on any console error or page error the journey doesn't name with `pageErrors.expect(...)`. To record, call `withFakeMicrophone('<file>.wav')` from `e2e/record.ts` with a Recording in `fixtures/recordings/` (090 is Melodic, G3; 084 is two farts; 065 is Noise-like), then `recordAndSave(page, seconds)`. Assert note names, not exact pitches.
+For a new feature, add a spec in `e2e/` that imports `test` and `expect` from `./test`, not `@playwright/test` (Biome refuses those): it fails a journey on any console error or page error the journey doesn't name with `pageErrors.expect(...)`. To record, call `withFartingMicrophone()` from `e2e/record.ts`: it puts a fake microphone in every page the test opens, which plays a Recording from `fixtures/recordings/` as Record is pressed (`e2e/fake-microphone.ts` lists them: 090 is Melodic, G3; 084 is two farts; 065 is Noise-like). Then `recordAndSave(page, '<id>')` opens Record, farts and saves. Assert note names, not exact pitches.
 
 ## 4. Screenshot at phone size
 
-Write a throwaway spec, `e2e/shot.spec.ts` (delete it before committing), that drives the feature and ends with `await page.screenshot({ path: '../../tmp/agent/<name>.png' })`. For Record: `withFakeMicrophone('090__carlosramon__17-pet__186119.wav')`, `recordAndSave(page, 1.5)`, wait for `getByTestId('result-note')`, then screenshot. Run `E2E_SERVER=preview E2E_PORT=4110 pnpm test:e2e e2e/shot.spec.ts --project=phone`, then open the image and look at it: it is the proof for a UI change, attached to the PR.
+Write a throwaway spec, `e2e/shot.spec.ts` (delete it before committing), that drives the feature and ends with `await page.screenshot({ path: '../../tmp/agent/<name>.png' })`. For Record: `withFartingMicrophone()`, `recordAndSave(page)` (090 by default), wait for `getByTestId('result-note')`, then screenshot. Run `E2E_SERVER=preview E2E_PORT=4110 pnpm test:e2e e2e/shot.spec.ts --project=phone`, then open the image and look at it: it is the proof for a UI change, attached to the PR.
 
 ## 5. Clean up
 

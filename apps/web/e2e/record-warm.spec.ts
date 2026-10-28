@@ -9,7 +9,7 @@ import {
   tapRecord,
   waitForOpenMicrophone,
   withFartingMicrophone
-} from './fake-microphone'
+} from './record'
 import { onPhone, pageSettled, setVisibility, tab } from './screens'
 import { expect, test } from './test'
 

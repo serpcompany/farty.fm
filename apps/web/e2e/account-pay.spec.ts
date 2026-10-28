@@ -2,12 +2,11 @@ import type { Page } from '@playwright/test'
 import { accountOf, codeFor, newEmail, ownClient, signInByApi } from './account'
 import { stored, uploaded } from './database'
 import { payAtTheDevCheckout } from './pay'
-import { g3Fart, skipWelcome, withFakeMicrophone } from './record'
+import { skipWelcome } from './record'
 import { expectTappable, onPhone, tab } from './screens'
 import { loadTheFixtureLibrary, needsTheFixtureLibrary, openASong } from './songs'
 import { expect, test } from './test'
 
-withFakeMicrophone(g3Fart)
 test.skip(({ viewport }) => !onPhone({ viewport }), 'The account step is checked at phone size')
 needsTheFixtureLibrary()
 test.describe.configure({ timeout: 180_000 })

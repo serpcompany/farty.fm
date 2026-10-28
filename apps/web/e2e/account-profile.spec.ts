@@ -1,11 +1,11 @@
 import type { Page } from '@playwright/test'
 import { accountOf, newEmail, session, signInByApi } from './account'
 import { stored } from './database'
-import { g3Fart, recordG3ToRecordings, skipWelcome, withFakeMicrophone } from './record'
+import { recordG3ToRecordings, skipWelcome, withFartingMicrophone } from './record'
 import { expectTappable, onPhone, tab } from './screens'
 import { expect, test } from './test'
 
-withFakeMicrophone(g3Fart)
+withFartingMicrophone()
 test.skip(({ viewport }) => !onPhone({ viewport }), 'The account step is checked at phone size')
 
 async function signedInWithARecording(page: Page, email: string) {

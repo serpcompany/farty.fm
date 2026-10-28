@@ -3,13 +3,7 @@ import { resolve } from 'node:path'
 import type { Page } from '@playwright/test'
 import { reopen } from './account'
 import { persistAsked, standInForPersist, stored, write } from './database'
-import {
-  g3Fart,
-  recordAndSave,
-  recordG3ToRecordings,
-  skipWelcome,
-  withFakeMicrophone
-} from './record'
+import { g3Fart, recordAndSave, recordG3ToRecordings, withFartingMicrophone } from './record'
 import { onPhone, tab } from './screens'
 import {
   controlledByTheServiceWorker,
@@ -18,12 +12,8 @@ import {
 } from './service-worker'
 import { expect, test } from './test'
 
-withFakeMicrophone(g3Fart)
+withFartingMicrophone()
 test.skip(({ viewport }) => !onPhone({ viewport }), 'The account step is checked at phone size')
-
-test.beforeEach(async ({ context }) => {
-  await context.addInitScript(skipWelcome)
-})
 
 const audio = () =>
   readFileSync(resolve(__dirname, '../../../fixtures/recordings', g3Fart)).toString('base64')
@@ -163,7 +153,7 @@ test('a Recording saved while Farty still reads the session waits for the visit 
     await answered
     await route.continue()
   })
-  await recordAndSave(visit, 1)
+  await recordAndSave(visit)
   await expect(visit.getByRole('button', { name: 'Save' })).toBeDisabled()
   expect(await stored(visit, 'recordings')).toBe(0)
   answer()

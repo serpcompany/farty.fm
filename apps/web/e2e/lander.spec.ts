@@ -1,10 +1,16 @@
 import type { Page } from '@playwright/test'
-import { g3Fart, recordingTimerShows, skipWelcome, withFakeMicrophone } from './record'
+import {
+  skipWelcome,
+  startRecordingAFart,
+  stopPastTheFart,
+  waitForOpenMicrophone,
+  withFartingMicrophone
+} from './record'
 import { hero, onPhone } from './screens'
 import { onABuild } from './service-worker'
 import { expect, test } from './test'
 
-withFakeMicrophone(g3Fart)
+withFartingMicrophone({ welcomed: false })
 
 function tabs(page: Page) {
   return page.getByRole('navigation', { name: 'Tabs' })
@@ -96,11 +102,11 @@ test.describe('on a touch tablet', () => {
       expect((await card.boundingBox())?.y).toBeGreaterThan((top?.y ?? 0) + (top?.height ?? 0))
     }
 
-    await page.getByTestId('record-button').click()
+    await waitForOpenMicrophone(page)
+    await startRecordingAFart(page)
     await expect(page.getByTestId('recording-timer')).toBeVisible()
     await underTopBar('Recording')
-    await recordingTimerShows(page, 1)
-    await page.getByTestId('stop-button').click()
+    await stopPastTheFart(page)
     await underTopBar('New Recording')
     await page.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByTestId('result-note').or(page.getByTestId('result-noise'))).toBeVisible({

@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test'
-import { g3Fart, recordAndSave, recordG3, withFakeMicrophone } from './record'
+import { recordAndSave, recordG3, withFartingMicrophone } from './record'
 import { setVisibility, tab } from './screens'
 import { countStops, stops } from './sounds'
 import { expect, test } from './test'
 
-withFakeMicrophone(g3Fart)
+withFartingMicrophone()
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -36,7 +36,6 @@ async function failFirstAnalysis(page: Page): Promise<void> {
 test('the app opens on Record, and every tab works before the first Recording', async ({
   page
 }) => {
-  await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
   await page.goto('/')
   const tabs = page.getByRole('navigation', { name: 'Tabs' }).getByRole('list').getByRole('link')
   await expect(tabs).toHaveText(['Recordings', 'Compose', 'Record', 'Toots', 'Profile'])
@@ -111,7 +110,7 @@ test('a Recording that could not be analyzed says so, and Retry finds its note',
   page
 }) => {
   await failFirstAnalysis(page)
-  await recordAndSave(page, 2)
+  await recordAndSave(page)
   await expect(page.getByText("Saved, but we couldn't find its note")).toBeVisible()
   await page.getByRole('button', { name: 'Done' }).click()
 

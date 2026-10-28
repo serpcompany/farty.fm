@@ -4,6 +4,7 @@ import {
   test as base,
   expect
 } from '@playwright/test'
+import { addFakeMicrophone, type FakeMicrophoneOptions } from './fake-microphone'
 
 type ExpectedError = string | RegExp
 
@@ -13,6 +14,7 @@ type PageErrors = {
 }
 
 type Fixtures = {
+  fakeMicrophone: FakeMicrophoneOptions | null
   pageErrors: PageErrors
   projectOptions: BrowserContextOptions
   newContext: (options?: BrowserContextOptions) => Promise<BrowserContext>
@@ -41,6 +43,11 @@ function watchForErrors(): PageErrors & { unexpected(): string[] } {
 }
 
 export const test = base.extend<Fixtures>({
+  fakeMicrophone: [null, { option: true }],
+  context: async ({ context, fakeMicrophone }, use) => {
+    if (fakeMicrophone) await addFakeMicrophone(context, fakeMicrophone)
+    await use(context)
+  },
   pageErrors: [
     async ({ context }, use) => {
       const errors = watchForErrors()
@@ -51,7 +58,16 @@ export const test = base.extend<Fixtures>({
     { auto: true }
   ],
   projectOptions: async (
-    { baseURL, httpCredentials, viewport, userAgent, deviceScaleFactor, isMobile, hasTouch },
+    {
+      baseURL,
+      httpCredentials,
+      viewport,
+      userAgent,
+      deviceScaleFactor,
+      isMobile,
+      hasTouch,
+      permissions
+    },
     use
   ) => {
     await use({
@@ -61,13 +77,18 @@ export const test = base.extend<Fixtures>({
       userAgent,
       deviceScaleFactor,
       isMobile,
-      hasTouch
+      hasTouch,
+      permissions
     })
   },
-  newContext: async ({ browser, projectOptions, serviceWorkers, pageErrors }, use) => {
+  newContext: async (
+    { browser, projectOptions, serviceWorkers, pageErrors, fakeMicrophone },
+    use
+  ) => {
     const opened: BrowserContext[] = []
     await use(async options => {
       const context = await browser.newContext({ ...projectOptions, serviceWorkers, ...options })
+      if (fakeMicrophone) await addFakeMicrophone(context, fakeMicrophone)
       pageErrors.watch(context)
       opened.push(context)
       return context

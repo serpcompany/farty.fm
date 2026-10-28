@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test'
-import { fartAndRecord, waitForOpenMicrophone, withFartingMicrophone } from './fake-microphone'
-import { skipWelcome } from './record'
+import { fartAndRecord, skipWelcome, waitForOpenMicrophone, withFartingMicrophone } from './record'
 import { onPhone, tab } from './screens'
 import { controlledByTheServiceWorker, needsTheServiceWorker } from './service-worker'
 import { expect, test } from './test'

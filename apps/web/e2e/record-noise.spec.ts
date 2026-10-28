@@ -1,10 +1,10 @@
-import { recordAndSave, withFakeMicrophone } from './record'
+import { recordAndSave, withFartingMicrophone } from './record'
 import { expect, test } from './test'
 
-withFakeMicrophone('065__reino93__fart-7__324626.wav')
+withFartingMicrophone()
 
 test('recording a Noise-like fart says it has no steady note', async ({ page }) => {
-  await recordAndSave(page, 3)
+  await recordAndSave(page, '065')
   await expect(page.getByTestId('result-noise')).toBeVisible()
   await page.getByRole('button', { name: 'Done' }).click()
 

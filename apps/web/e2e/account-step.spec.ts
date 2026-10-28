@@ -1,10 +1,10 @@
 import { codeFor, newEmail, ownClient, reopen, session } from './account'
 import { persistAsked, standInForPersist } from './database'
-import { g3Fart, recordG3, skipWelcome, withFakeMicrophone } from './record'
+import { recordG3, skipWelcome, withFartingMicrophone } from './record'
 import { comeBack, expectTappable, onPhone } from './screens'
 import { expect, test } from './test'
 
-withFakeMicrophone(g3Fart)
+withFartingMicrophone({ welcomed: false })
 test.skip(({ viewport }) => !onPhone({ viewport }), 'The account step is checked at phone size')
 
 const guestNote =

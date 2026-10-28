@@ -7,7 +7,7 @@ import {
   tapRecord,
   waitForOpenMicrophone,
   withFartingMicrophone
-} from './fake-microphone'
+} from './record'
 import { onPhone } from './screens'
 import { expect, test } from './test'
 

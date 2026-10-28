@@ -3,13 +3,13 @@ import { writeFileSync } from 'node:fs'
 import type { BrowserContext, Page } from '@playwright/test'
 import { newEmail, signInByApi } from './account'
 import { all, bytes, stored, uploaded } from './database'
-import { g3Fart, recordG3, skipWelcome, withFakeMicrophone } from './record'
+import { recordG3, skipWelcome, withFartingMicrophone } from './record'
 import { comeBack, onPhone, tab } from './screens'
 import { loadTheFixtureLibrary, makeAToot, needsTheFixtureLibrary, song } from './songs'
 import { hearSounds, lastSound } from './sounds'
 import { expect, test } from './test'
 
-withFakeMicrophone(g3Fart)
+withFartingMicrophone({ welcomed: false })
 needsTheFixtureLibrary()
 test.skip(({ viewport }) => !onPhone({ viewport }), 'Sync is checked at phone size')
 test.use({ serviceWorkers: 'block' })

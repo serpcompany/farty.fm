@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
-import { fakeMicrophone, microphone, waitForOpenMicrophone } from './fake-microphone'
-import { skipWelcome } from './record'
+import { addFakeMicrophone } from './fake-microphone'
+import { microphone, skipWelcome, waitForOpenMicrophone } from './record'
 import { comeBack, hero, pageSettled, pagesOutsideTheTabs } from './screens'
 import { expect, test } from './test'
 
@@ -61,7 +61,7 @@ test('widening a narrow window into the product page shuts the microphone', asyn
   context
 }) => {
   await context.grantPermissions(['microphone'])
-  await page.addInitScript(fakeMicrophone, { wavs: {}, delayMs: 0 })
+  await addFakeMicrophone(context, { farts: false })
   await page.addInitScript(skipWelcome, {})
   await page.setViewportSize({ width: 700, height: 900 })
   await page.goto('/')

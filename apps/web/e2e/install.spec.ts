@@ -1,6 +1,6 @@
 import { persistAsked, standInForPersist } from './database'
 import { offerInstallPrompt, prompted } from './install-prompt'
-import { g3Fart, recordG3, withFakeMicrophone } from './record'
+import { recordG3, withFartingMicrophone } from './record'
 import {
   controlledByTheServiceWorker,
   errorsWhileOffline,
@@ -8,7 +8,7 @@ import {
 } from './service-worker'
 import { expect, test } from './test'
 
-withFakeMicrophone(g3Fart)
+withFartingMicrophone()
 
 const iPhoneSafari =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1'
@@ -47,7 +47,6 @@ test('the manifest names Farty, opens it full screen, and has its icons', async 
 test('the service worker opens the app shell offline', async ({ page, context, pageErrors }) => {
   needsTheServiceWorker()
   pageErrors.expect(...errorsWhileOffline, 'net::ERR_FAILED')
-  await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
   await page.goto('/')
   await controlledByTheServiceWorker(page)
 
