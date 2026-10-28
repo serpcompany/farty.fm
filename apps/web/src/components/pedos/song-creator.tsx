@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
+import { libraryOwner } from '@/lib/account'
 import type { Song } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
@@ -175,12 +176,21 @@ const SAVE_PROBLEMS = {
   unreachable: "Couldn't reach your account. Tap Save to try again."
 }
 
+/** Whether this browser's library is an account's (`libraryOwner`), when storage can be read. */
+function heldByAnAccount(): boolean {
+  try {
+    return libraryOwner() !== null
+  } catch {
+    return false
+  }
+}
+
 /**
  * The made Toot, with Save to Toots pinned above the tabs. Saving needs an account everywhere
  * (#237): a guest's Save opens the account step first, and carries on once it signs in. Where
  * saving is paid (ADR 0010), Save goes to Checkout for this Toot; back from Checkout, it saves the
  * Toot once the server says it's paid. A Toot of this Song paid for and never saved is saved
- * instead of paying again. Where it's free, Save saves.
+ * instead of paying again. Where it's free, Save saves, offline too in an account's browser.
  */
 export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null }) {
   const pedos = usePedos()
@@ -245,9 +255,13 @@ export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn 
     else if (account.status === 'signedOut' || account.status === 'expired') {
       setSavesAfterSignIn(true)
       openStep()
+    } else if (account.status === 'unreachable' && !isPaid && heldByAnAccount()) {
+      // Offline, in a browser whose library is an account's: a free Toot saves here and uploads
+      // once the account can be read, as before #237.
+      void save()
     } else if (account.status === 'unreachable') {
-      // The session couldn't be read, so it isn't known who is paying: read it again. Back from
-      // Checkout, the Toot then saves by itself.
+      // The session couldn't be read, so it isn't known who is paying, or whether there's an
+      // account: read it again. Back from Checkout, the Toot then saves by itself.
       setProblem(returnedPaid ? null : 'unreachable')
       retry()
     } else {

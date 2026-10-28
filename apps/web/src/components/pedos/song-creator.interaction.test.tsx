@@ -9,8 +9,8 @@ import type { CheckoutReturn } from '@/lib/toot-payment'
 // Song Creator's Save where saving is paid (ADR 0010, #213), in a DOM: what Save says when
 // payments are off or limited, when the payment hasn't come through, and when the account can't be
 // read after a paid return; that a paid Toot never saved is saved instead of paying twice; and that
-// a guest's Save asks for an account first, paid or free (#237). The server is `fetch`, answering
-// as the routes do.
+// a guest's Save asks for an account first, paid or free, while a free one saves offline in an
+// account's browser (#237). The server is `fetch`, answering as the routes do.
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean
@@ -277,5 +277,29 @@ describe('Save to Toots, as a guest', () => {
     // Signed in later, from Profile: Save waits for its own tap.
     await render()
     expect(page.saveToot).not.toHaveBeenCalled()
+  })
+})
+
+describe('Save to Toots, where saving is free, while the account can’t be read', () => {
+  beforeEach(() => {
+    page.paid = false
+    page.account = { status: 'unreachable' }
+  })
+  afterEach(() => localStorage.clear())
+
+  it('saves in a browser whose library is an account’s, as offline before #237', async () => {
+    localStorage.setItem('pedos.account', 'userA')
+    await render()
+    await tapSave()
+    expect(page.saveToot).toHaveBeenCalledWith(draft)
+    expect(page.retry).not.toHaveBeenCalled()
+  })
+
+  it('reads the account again in a guest’s browser, and saves nothing', async () => {
+    await render()
+    await tapSave()
+    expect(page.saveToot).not.toHaveBeenCalled()
+    expect(page.retry).toHaveBeenCalledOnce()
+    expect(container.textContent).toContain("Couldn't reach your account. Tap Save to try again.")
   })
 })
