@@ -1,14 +1,13 @@
-/// <reference lib="webworker" />
+import type { Analysis } from '@/lib/recordings'
 import { analyzeToAnalysis } from './port'
+import { answerRequests } from './worker-requests'
 
-/** Runs Recording Analysis off the page's thread. One request at a time, answered by id. */
-self.onmessage = (
-  event: MessageEvent<{ id: number; samples: Float32Array; sampleRate: number }>
-) => {
-  const { id, samples, sampleRate } = event.data
-  try {
-    self.postMessage({ id, analysis: analyzeToAnalysis(samples, sampleRate) })
-  } catch (error) {
-    self.postMessage({ id, error: error instanceof Error ? error.message : String(error) })
-  }
+export interface AnalysisRequest {
+  id: number
+  samples: Float32Array
+  sampleRate: number
 }
+
+answerRequests<AnalysisRequest, Analysis>(({ samples, sampleRate }) =>
+  analyzeToAnalysis(samples, sampleRate)
+)
