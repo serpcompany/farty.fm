@@ -1,4 +1,6 @@
-import { tab } from './screens'
+import { newEmail, signInByApi } from './account'
+import { uploaded } from './database'
+import { onPhone, tab } from './screens'
 import { loadTheFixtureLibrary, needsTheFixtureLibrary } from './songs'
 import { expect, test } from './test'
 
@@ -49,4 +51,33 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
   await expect(page.getByTestId('locked-song-needs')).toHaveText(
     'Needs a fart near D3 (1.2 s) and F3 (3.0 s).'
   )
+})
+
+test('a fixture deleted from the account loads again, and stays', async ({
+  page,
+  viewport
+}, testInfo) => {
+  test.skip(!onPhone({ viewport }), 'Phone only')
+  test.setTimeout(240_000)
+  await page.goto('/profile/')
+  await signInByApi(page, newEmail(testInfo, 'fixture-again'))
+  await page.reload()
+  await loadTheFixtureLibrary(page)
+  await uploaded(page)
+
+  await tab(page, 'Recordings').click()
+  await page.getByRole('button', { name: 'Delete Recording 1', exact: true }).click()
+  await page
+    .getByRole('alertdialog', { name: 'Delete Recording 1?' })
+    .getByRole('button', { name: 'Delete Recording' })
+    .click()
+  await uploaded(page)
+
+  await tab(page, 'Profile').click()
+  const library = page.getByTestId('fixture-library')
+  await expect(library.getByTestId('fixture-library-count')).toHaveText('31 of 32')
+  await loadTheFixtureLibrary(page)
+  await uploaded(page)
+  await page.reload()
+  await expect(library.getByTestId('fixture-library-count')).toHaveText('32 of 32')
 })

@@ -2,7 +2,12 @@
 
 import { useEffect, useId, useState } from 'react'
 import { Spinner } from '@/components/ui/spinner'
-import { type FixtureIndex, fixtureLibraryPath, fixtureRecordingId } from '@/lib/fixture-library'
+import {
+  type FixtureIndex,
+  fixtureLibraryPath,
+  isFixtureRecording,
+  newFixtureRecordingId
+} from '@/lib/fixture-library'
 import { useRecordings } from './recordings-provider'
 
 export function FixtureLibrary() {
@@ -25,8 +30,9 @@ export function FixtureLibrary() {
 
   if (index === null || recordings === null) return null
 
-  const saved = new Set(recordings.map(r => r.id))
-  const missing = index.recordings.filter(f => !saved.has(fixtureRecordingId(f.id)))
+  const missing = index.recordings.filter(
+    f => !recordings.some(r => isFixtureRecording(r.id, f.id))
+  )
   const total = index.recordings.length
   const loaded = total - missing.length
   const isComplete = loaded >= total
@@ -39,7 +45,7 @@ export function FixtureLibrary() {
         missing.map(async fixture => {
           const response = await fetch(`${fixtureLibraryPath}${fixture.file}`)
           if (!response.ok) throw new Error(`No fixture ${fixture.id}`)
-          return { id: fixtureRecordingId(fixture.id), wav: await response.arrayBuffer() }
+          return { id: newFixtureRecordingId(fixture.id), wav: await response.arrayBuffer() }
         })
       )
       await importRecordings(files)
