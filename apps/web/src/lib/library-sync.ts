@@ -33,6 +33,27 @@ export type LibraryChange =
       deleted: { recordings: string[]; toots: string[] }
     }
 
+/** A sync's change that isn't a reset. */
+export type ItemChange = Exclude<LibraryChange, { reset: true }>
+
+/**
+ * The Recordings a screen shows, `list`, after a sync's `change`: those deleted gone, new ones
+ * added, and those changed with their new number and Placed Pitch, as a Recording not uploaded yet
+ * may come back renumbered and one placed in another browser with its Placed Pitch. Each keeps
+ * this browser's analysis. Oldest first.
+ */
+export function recordingsAfter(list: readonly Recording[], change: ItemChange): Recording[] {
+  const { recordings: added, deleted } = change
+  const kept = list.filter(r => !deleted.recordings.includes(r.id))
+  const fresh = new Map(added.map(r => [r.id, r]))
+  const merged = kept.map(r => {
+    const changed = fresh.get(r.id)
+    return changed ? { ...r, number: changed.number, placedPitch: changed.placedPitch } : r
+  })
+  const ids = new Set(kept.map(r => r.id))
+  return [...merged, ...added.filter(r => !ids.has(r.id))].sort((a, b) => a.number - b.number)
+}
+
 const changes = new EventTarget()
 const channelName = 'pedos-library'
 /** This page, so it skips its own changes when they come back from the other tabs' channel. */

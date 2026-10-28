@@ -21,7 +21,7 @@ import {
 } from '@/lib/audio/recorder'
 import type { Song } from '@/lib/catalog/song'
 import { songs } from '@/lib/catalog/songs.generated'
-import { onLibraryChanged } from '@/lib/library-sync'
+import { onLibraryChanged, recordingsAfter } from '@/lib/library-sync'
 import { nearestNote } from '@/lib/pitch'
 import {
   type CoverageChanges,
@@ -303,21 +303,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         for (const id of deleted.toots) forgetDecoded(`toot-${id}`)
         // The account keeps the analysis each Recording was uploaded with, maybe an older one.
         void upgradeAnalyses(added, analyze, replace)
-        setRecordings(list => {
-          if (!list) return list
-          const kept = list.filter(r => !deleted.recordings.includes(r.id))
-          // A Recording not uploaded yet may come back with a new number, and one placed in
-          // another browser with its Placed Pitch. Its analysis stays this browser's.
-          const fresh = new Map(added.map(r => [r.id, r]))
-          const merged = kept.map(r => {
-            const changed = fresh.get(r.id)
-            return changed ? { ...r, number: changed.number, placedPitch: changed.placedPitch } : r
-          })
-          const ids = new Set(kept.map(r => r.id))
-          return [...merged, ...added.filter(r => !ids.has(r.id))].sort(
-            (a, b) => a.number - b.number
-          )
-        })
+        setRecordings(list => list && recordingsAfter(list, change))
         setToots(list => {
           if (!list) return list
           const kept = list.filter(t => !deleted.toots.includes(t.id))

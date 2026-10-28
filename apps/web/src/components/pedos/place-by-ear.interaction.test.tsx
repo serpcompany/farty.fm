@@ -164,6 +164,18 @@ describe('placing a Noise-like Recording by ear', () => {
     expect(onClose).toHaveBeenCalledOnce()
   })
 
+  // The provider's Recordings take another browser's placement (`recordingsAfter`), and the open
+  // picker reads them live.
+  it("shows another browser's placement while it's open", async () => {
+    await open(noiseLike())
+    expect(button('Leave it out')).toBeDefined()
+    await open(noiseLike(48))
+    expect(button('Take it off')).toBeDefined()
+    expect(button('C3').className).toContain('inset-ring-2')
+    expect(button('Tap a key to choose a note').disabled).toBe(true)
+    expect(octave()).toBe('Octave 3C3 – B3')
+  })
+
   it('plays the fart from its play button', async () => {
     const recording = noiseLike()
     await open(recording)

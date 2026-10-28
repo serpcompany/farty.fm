@@ -653,6 +653,30 @@ describe('reading the account', () => {
     expect(changes).toEqual([])
   })
 
+  it("shows another browser's placement on the screen's Recordings, with this browser's analysis", async () => {
+    const placedThere = theirs(1)
+    const deletedThere = theirs(2)
+    account.add('recordings', placedThere, wav(5))
+    account.add('recordings', deletedThere, wav(6))
+    await page.sync.syncOnce('user-a')
+    // What the screen holds: this browser's own analysis, still running.
+    const analysis = { state: 'analyzing' } as const
+    const shown = [{ ...placedThere, analysis }, deletedThere]
+    account.place(placedThere.id, 48)
+    account.remove('recordings', deletedThere.id)
+    const added = theirs(3)
+    account.add('recordings', added, wav(7))
+    const changes: LibraryChange[] = []
+    page.sync.onLibraryChanged(change => changes.push(change))
+    await page.sync.syncOnce('user-a')
+    const [change] = changes
+    if (!change || change.reset) throw new Error('no change')
+    expect(page.sync.recordingsAfter(shown, change)).toEqual([
+      { ...placedThere, analysis, placedPitch: 48 },
+      added
+    ])
+  })
+
   it('keeps a Placed Pitch this browser is sending, and reads none from an older Worker as none', async () => {
     const recording = theirs()
     account.add('recordings', { ...recording, placedPitch: 40 }, wav(5))
