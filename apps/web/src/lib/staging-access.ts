@@ -1,25 +1,13 @@
 import { timingSafeEqual } from 'node:crypto'
 
-// The Staging gate (SERP's Staging Access standard), run by the Worker entry (worker.ts) before
-// anything is served: pages, and the static files Workers serves from `assets`, which Staging
-// routes through the entry (`run_worker_first`). Copied from zenbujapanese-monorepo's
-// src/lib/staging-access.ts.
-
 export const stagingAccessChallenge = 'Basic realm="farty staging", charset="UTF-8"'
 export const environmentNoindex = 'noindex, nofollow'
-// CI's smoke test sends it. Search engines never do.
 export const smokeTestHeader = 'x-pedos-smoke-test'
 
 const servedWithoutThePassword = new Set(['/robots.txt'])
-// Stripe's webhook (ADR 0010), which Stripe can't send the password with. The route serves
-// nothing without Stripe's signature on the event, which only Stripe and the Worker can make.
 const postedWithoutThePassword = new Set(['/api/stripe/webhook/'])
-// The Fixture Library's files, which only the Staging build carries (`scripts/fixture-library.ts`
-// serves them under `/fixtures/`), need the password even with the smoke test's header. The path
-// is matched decoded and in any case, so no spelling of it reaches `assets` without the password.
 const fixturesNeedThePassword = /\/fixtures(\/|$)/iu
 
-/** What the entry reads from the Worker's env. */
 export interface EntryEnv {
   SITE_ENV?: string
   STAGING_BASIC_AUTH_PASSWORD?: string
@@ -50,7 +38,6 @@ function sha256(value: string): Promise<ArrayBuffer> {
   return crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))
 }
 
-/** Compares in constant time: both sides are hashed first, so the lengths always match. */
 export async function passwordMatches(given: string, expected: string): Promise<boolean> {
   const [givenDigest, expectedDigest] = await Promise.all([sha256(given), sha256(expected)])
   return timingSafeEqual(new Uint8Array(givenDigest), new Uint8Array(expectedDigest))
@@ -107,7 +94,7 @@ async function stagingAccess(
   return { gate: 'refused', response: refusal(request) }
 }
 
-export function withEnvironmentNoindex(response: Response): Response {
+function withEnvironmentNoindex(response: Response): Response {
   const headers = new Headers(response.headers)
   headers.set('X-Robots-Tag', environmentNoindex)
   return new Response(response.body, {
@@ -117,11 +104,6 @@ export function withEnvironmentNoindex(response: Response): Response {
   })
 }
 
-/**
- * Serves a request only once it passes the gate. A request that passed reaches `serve` without
- * its `Authorization`, so it caches like an anonymous one, and its response keeps no `noindex`
- * but its own. Exempt requests are served with `noindex`, added here, after any cache.
- */
 export async function behindStagingAccess(
   request: Request,
   url: URL,
@@ -134,8 +116,7 @@ export async function behindStagingAccess(
   return withEnvironmentNoindex(await serve(request))
 }
 
-/** Serves a static file from `assets` when one matches, as Workers would, or else the page. */
-export async function assetOrPage(
+async function assetOrPage(
   request: Request,
   assets: EntryEnv['ASSETS'],
   page: (request: Request) => Promise<Response>
@@ -148,11 +129,6 @@ export async function assetOrPage(
   return page(request)
 }
 
-/**
- * The Worker entry: Production serves as Workers would with no entry; every other environment,
- * local runs included, serves only through the gate, and refuses everything when its password
- * variable is missing.
- */
 export function servedByTheEntry(
   request: Request,
   env: EntryEnv,

@@ -1,10 +1,6 @@
 import { type ErrorReport, parseReport } from './report'
 
-/**
- * localStorage: error reports raised offline, or whose send failed, waiting to be sent. The newest
- * `QUEUE_LIMIT` are kept. Each keeps its report, without its wait, and when it was raised.
- */
-export const queueKey = 'pedos.telemetry.queue'
+const queueKey = 'pedos.telemetry.queue'
 
 export const QUEUE_LIMIT = 20
 
@@ -30,9 +26,7 @@ export function writeQueue(queue: Queued[]): void {
   try {
     if (queue.length === 0) localStorage.removeItem(queueKey)
     else localStorage.setItem(queueKey, JSON.stringify(queue.slice(-QUEUE_LIMIT)))
-  } catch {
-    // Storage full or blocked: the reports are lost, and nothing else is.
-  }
+  } catch {}
 }
 
 export function clearQueue(): void {
