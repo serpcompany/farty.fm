@@ -12,7 +12,7 @@ import { extname, join, relative } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import type { FixtureIndex } from '../src/lib/fixture-library'
 import { encodeWav } from '../src/lib/wav'
-import { decodeFile } from '../src/test-support/decode'
+import { decodeFile } from './decode-audio-file'
 
 const APP = fileURLToPath(new URL('..', import.meta.url))
 const FIXTURES = join(APP, '../../fixtures/recordings')

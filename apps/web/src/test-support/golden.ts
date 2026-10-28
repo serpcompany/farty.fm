@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import { type DecodedFile, decodeFile } from '../../scripts/decode-audio-file'
 import { hzToMidi, midiToHz } from '../lib/analysis/numeric'
 import { Pyin, sharedPyin } from '../lib/analysis/pyin'
 import { resampleToAnalysisRate } from '../lib/analysis/resample'
-import { type DecodedFile, decodeFile } from './decode'
 
 export const REPO_ROOT = fileURLToPath(new URL('../../../../', import.meta.url)).replace(/\/$/, '')
 const RECORDINGS_DIR = `${REPO_ROOT}/fixtures/recordings`

@@ -11,7 +11,7 @@ import {
 import { renderSource } from '../src/lib/engine/render-source'
 import type { RenderSource } from '../src/lib/engine/renderer'
 import type { Song } from '../src/lib/engine/song'
-import { decodeFile } from '../src/test-support/decode'
+import { decodeFile } from './decode-audio-file'
 import { fixtures } from './fixture-library'
 
 const ROOT = resolve(__dirname, '../../..')

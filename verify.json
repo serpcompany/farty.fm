@@ -91,16 +91,7 @@
       "comments": {},
       "docs": {},
       "deadcode": {},
-      "dependencies": {
-        "apps/web/scripts/fixture-library.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/scripts/render-songs.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        }
-      },
+      "dependencies": {},
       "linters": {}
     }
   }
