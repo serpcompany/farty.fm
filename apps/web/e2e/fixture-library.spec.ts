@@ -42,8 +42,8 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
   })
   await expect(page.getByRole('heading', { name: 'Locked · 4', exact: true })).toBeVisible()
   const amazing = page.getByRole('button', { name: 'Amazing Grace' })
-  await expect(amazing).toHaveAccessibleDescription(
-    'Locked. 4 of 6 notes covered. Needs D3 (1.2 s) and F3 (3.0 s)'
+  await expect(amazing).toHaveAccessibleName(
+    'Amazing Grace 4 of 6 notes covered Needs D3 (1.2 s) and F3 (3.0 s) Locked'
   )
   await amazing.click()
   await expect(page.getByTestId('locked-song-needs')).toHaveText(
