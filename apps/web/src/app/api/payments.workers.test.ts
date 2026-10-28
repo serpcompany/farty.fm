@@ -8,7 +8,13 @@ import * as paymentRoute from '@/app/api/toots/[id]/payment/route'
 import { startTootPayment, tootPayment } from '@/db/payments'
 import { TOOT_PRICE } from '@/lib/pricing'
 import type { CheckoutSession, Payments } from '@/server/stripe'
-import { devCheckoutServes, PAYMENT_LIMITS, receiveStripeEvent } from '@/server/toot-payments'
+import {
+  devCheckoutServes,
+  getTootPayment,
+  PAYMENT_LIMITS,
+  receiveStripeEvent,
+  startCheckout
+} from '@/server/toot-payments'
 import {
   api,
   ORIGIN,
@@ -702,6 +708,33 @@ describe('live and test mode', () => {
     expect(await receive(false, test)).toBe(200)
     expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
     expect((await tootPayment(testDb(), a.id, T2))?.paidAt).toBeInstanceOf(Date)
+  })
+})
+
+describe('with saving free', () => {
+  // No environment saves free today, but a page loaded before a rollback to free saving still asks
+  // to pay, and needs `{ paid: true }` from both to save.
+  it('answers paid to checkout and payment, with no checkout and no Stripe', async () => {
+    const a = await signUp('A')
+    const stripe = vi.spyOn(globalThis, 'fetch')
+    const free: Payments = { kind: 'free' }
+    const request = (path: string, init: RequestInit = {}) =>
+      new Request(`${ORIGIN}/api/toots/${T1}/${path}/`, {
+        ...init,
+        headers: headersFor(init.method ?? 'GET', a, { 'content-type': 'application/json' })
+      })
+    const started = await startCheckout(
+      { db: testDb() },
+      free,
+      a,
+      T1,
+      request('checkout', { method: 'POST', body: JSON.stringify({ songId: 'twinkle' }) })
+    )
+    expect(await started.json()).toEqual({ paid: true })
+    const payment = await getTootPayment({ db: testDb() }, free, a, T1, request('payment'))
+    expect(await payment.json()).toEqual({ paid: true })
+    expect(await tootPayment(testDb(), a.id, T1)).toBeNull()
+    expect(stripe).not.toHaveBeenCalled()
   })
 })
 
