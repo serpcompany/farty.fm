@@ -33,9 +33,11 @@ device with a mouse or trackpad is a computer and one without is a touch tablet
 - Open Farty shows the app, with focus on it, and from then on the browser goes straight to the app
   (`e2e/lander.spec.ts`, "a first visit shows the lander; Open Farty shows the app, and a reload
   goes straight to it").
-- Sign up free shows the app with the account step open on it, even where storage is blocked
-  (`e2e/lander.spec.ts`, "Sign up free opens the account step under the top bar, whose tabs wait
-  for it"; "Sign up free opens the account step where storage is blocked").
+- Sign up free, and Sign in in its top bar, show the app with the account step open on it, even
+  where storage is blocked (`e2e/lander.spec.ts`, "Sign up free opens the account step under the top
+  bar, whose tabs wait for it"; "Sign up free opens the account step where storage is blocked";
+  `src/components/farty/lander.interaction.test.tsx`, "opens the app with the account step on it
+  (%s)").
 - A first visit to any other tab's address shows the app and counts as opened, so Record won't show
   the lander later (`e2e/lander.spec.ts`, "another tab's URL opens the app and counts as opened").
 
@@ -69,11 +71,8 @@ device with a mouse or trackpad is a computer and one without is a touch tablet
 ## Staging and Production
 
 - The FAQ's "Is Farty free?" says saving a Toot costs $0.99 where saving is paid (Staging and a
-  local run), and that Farty is free on Production ([Paying to save a Toot](payments.md)).
+  local run), and that Farty is free on Production ([Paying to save a Toot](payments.md);
+  `src/components/farty/lander.interaction.test.tsx`, "answers whether Farty is free as its
+  environment does (%s)").
 - Download App's QR code opens `staging.farty.fm` on Staging and `farty.fm` on Production
   (`src/lib/download-qr.test.ts`, "opens the build's own origin (SITE_ENV=%s)").
-
-## Not checked
-
-- The lander's Sign in button, in its top bar, opens the account step as Sign up free does.
-- The FAQ's answer to "Is Farty free?" on each environment.
