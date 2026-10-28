@@ -1,4 +1,3 @@
-import { env } from 'cloudflare:test'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as devCheckoutRoute from '@/app/api/dev/checkout/route'
@@ -9,32 +8,32 @@ import { tootPayment } from '@/db/payments'
 import type { CheckoutSession } from '@/server/stripe'
 import {
   api,
+  CF_RAY,
+  deletedAgo,
   ORIGIN,
+  routeFailureLine,
+  seed,
   signUp,
   testDb,
   tootMetadata,
   uploadBody,
   wav
 } from '@/test-support/library-api'
+import {
+  checkoutSession as sessionFor,
+  stripeV1,
+  TEST_KEY,
+  WEBHOOK_SECRET
+} from '@/test-support/stripe'
 
-// Paying to save a Toot (ADR 0010), in workerd with a real D1: a Toot uploads only once it's paid
-// for, through the dev checkout on a local run or Stripe Checkout (its API stubbed) with its
-// webhook. Saving stays free on Production.
-
-/** What the Worker's env has on top of wrangler.jsonc's, as each test sets it. */
 const extraEnv = vi.hoisted(() => ({}) as Record<string, unknown>)
 vi.mock('@opennextjs/cloudflare', async () => {
   const { env } = await import('cloudflare:test')
   return { getCloudflareContext: () => ({ env: { ...env, ...extraEnv } }) }
 })
 
-// Made-up values in Stripe's formats, never real keys.
-const TEST_KEY = 'sk_test_madeUpForTheTests'
-const WEBHOOK_SECRET = 'whsec_madeUpForTheTests'
-
 const T1 = '33333333-3333-4333-8333-333333333333'
 const T2 = '44444444-4444-4444-8444-444444444444'
-/** The test requests' host: a local run on this machine. */
 const HOST = new URL(ORIGIN).host
 
 beforeEach(() => {
@@ -172,26 +171,10 @@ describe('on a local run, with the dev checkout', () => {
 
   it('refuses a deleted Toot, and one past the Toot limit, before anything is paid', async () => {
     const a = await signUp('A')
-    await env.DB.prepare(
-      `insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
-        audio_bytes, updated_at, deleted_at)
-       values (?1, ?2, '', 'twinkle', 0, 0.1, '{"transposition":0,"recordingForPitch":{}}', 100,
-        0, 0)`
-    )
-      .bind(a.id, T1)
-      .run()
+    await deletedAgo('toots', a.id, T1, 0)
     expect(await (await checkout(T1, a)).json()).toEqual({ error: 'deleted' })
 
-    // 300 live Toots, the limit.
-    await env.DB.prepare(
-      `with recursive n(i) as (select 1 union all select i + 1 from n where i < 300)
-       insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
-         audio_bytes, updated_at)
-       select ?1, 'toot-' || i, '', 'twinkle', 0, 0.1,
-         '{"transposition":0,"recordingForPitch":{}}', 100, 0 from n`
-    )
-      .bind(a.id)
-      .run()
+    await seed('toots', a.id, 300)
     const full = await checkout(T2, a)
     expect(full.status).toBe(409)
     expect(await full.json()).toEqual({ error: 'limit_reached' })
@@ -199,23 +182,6 @@ describe('on a local run, with the dev checkout', () => {
   })
 })
 
-const sessionFor = (
-  userId: string,
-  tootId: string,
-  fields: Partial<CheckoutSession> = {}
-): CheckoutSession => ({
-  id: 'cs_test_first',
-  url: 'https://checkout.stripe.com/c/pay/cs_test_first',
-  mode: 'payment',
-  status: 'open',
-  payment_status: 'unpaid',
-  client_reference_id: tootId,
-  metadata: { user_id: userId, toot_id: tootId },
-  livemode: false,
-  ...fields
-})
-
-/** Stripe's API, answering each request with the next of `answers`, and what was asked. */
 function stubStripe(...answers: (CheckoutSession | Response)[]) {
   return vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
     const next = answers.shift()
@@ -224,25 +190,6 @@ function stubStripe(...answers: (CheckoutSession | Response)[]) {
   })
 }
 
-const encoder = new TextEncoder()
-
-/** `Stripe-Signature` for `payload` at `timestamp`, as Stripe makes it. */
-async function signature(payload: string, timestamp: number, secret = WEBHOOK_SECRET) {
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  )
-  const mac = new Uint8Array(
-    await crypto.subtle.sign('HMAC', key, encoder.encode(`${timestamp}.${payload}`))
-  )
-  const hex = Array.from(mac, byte => byte.toString(16).padStart(2, '0')).join('')
-  return `t=${timestamp},v1=${hex}`
-}
-
-/** Stripe sends `event`, signed with `secret` at `timestamp` (now, unless a test says). */
 async function deliver(
   event: unknown,
   { secret = WEBHOOK_SECRET, timestamp = Math.floor(Date.now() / 1000) } = {}
@@ -254,7 +201,8 @@ async function deliver(
       headers: {
         host: 'staging.farty.fm',
         'content-type': 'application/json',
-        'stripe-signature': await signature(payload, timestamp, secret)
+        'stripe-signature': `t=${timestamp},v1=${await stripeV1(payload, timestamp, secret)}`,
+        'cf-ray': CF_RAY
       },
       body: payload
     })
@@ -310,30 +258,32 @@ describe('with Stripe Checkout in test mode', () => {
     ])
   })
 
-  it('starts a new session once the last one expired', async () => {
-    const a = await signUp('A')
-    const next = sessionFor(a.id, T1, {
+  const secondSession = (userId: string) =>
+    sessionFor(userId, T1, {
       id: 'cs_test_second',
       url: 'https://checkout.stripe.com/c/pay/cs_test_second'
     })
-    stubStripe(sessionFor(a.id, T1), sessionFor(a.id, T1, { status: 'expired', url: null }), next)
-    await checkout(T1, a)
-    expect(await (await checkout(T1, a)).json()).toEqual({ url: next.url })
+
+  async function expectSecondSession(a: { id: string; cookie: string }) {
+    expect(await (await checkout(T1, a)).json()).toEqual({ url: secondSession(a.id).url })
     expect((await tootPayment(testDb(), a.id, T1))?.checkoutSessionId).toBe('cs_test_second')
+  }
+
+  it('starts a new session once the last one expired', async () => {
+    const a = await signUp('A')
+    const expired = sessionFor(a.id, T1, { status: 'expired', url: null })
+    stubStripe(sessionFor(a.id, T1), expired, secondSession(a.id))
+    await checkout(T1, a)
+    await expectSecondSession(a)
   })
 
   it('starts a new session when Stripe no longer has the last one', async () => {
     const a = await signUp('A')
-    const next = sessionFor(a.id, T1, {
-      id: 'cs_test_second',
-      url: 'https://checkout.stripe.com/c/pay/cs_test_second'
-    })
     const gone = () => Response.json({ error: { message: 'No such session' } }, { status: 404 })
-    stubStripe(sessionFor(a.id, T1), gone(), gone(), next)
+    stubStripe(sessionFor(a.id, T1), gone(), gone(), secondSession(a.id))
     await checkout(T1, a)
     expect(await paid(T1, a)).toBe(false)
-    expect(await (await checkout(T1, a)).json()).toEqual({ url: next.url })
-    expect((await tootPayment(testDb(), a.id, T1))?.checkoutSessionId).toBe('cs_test_second')
+    await expectSecondSession(a)
   })
 
   it('saves once Stripe says it’s paid, on the return, before the webhook', async () => {
@@ -372,7 +322,6 @@ describe('with Stripe Checkout in test mode', () => {
     expect(received.headers.get('cache-control')).toBe('no-store')
     expect(await paid(T1, a)).toBe(true)
     expect((await save(T1, a)).status).toBe(201)
-    // Stripe sends an event again until it's answered: a second delivery changes nothing.
     expect((await deliver(event)).status).toBe(200)
     expect(stripe).not.toHaveBeenCalled()
   })
@@ -444,6 +393,25 @@ describe('with Stripe Checkout in test mode', () => {
     expect((await deliver(event)).status).toBe(503)
     delete extraEnv.STRIPE_SECRET_KEY
     expect((await deliver(event)).status).toBe(503)
+  })
+
+  it('answers 500 when it fails, so Stripe sends the event again, and logs no event data', async () => {
+    const a = await signUp('A')
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+    extraEnv.DB = undefined
+    const event = completed(sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' }))
+
+    const failed = await deliver(event)
+
+    expect(failed.status).toBe(500)
+    expect(await failed.json()).toEqual({ error: 'server_error' })
+    expect(failed.headers.get('cache-control')).toBe('no-store')
+    const lines = logged.mock.calls.map(([line]) => String(line))
+    expect(lines.map(line => JSON.parse(line))).toEqual([
+      routeFailureLine('stripe_webhook_failed', 'TypeError', 'POST', '/api/stripe/webhook/')
+    ])
+    expect(lines[0]).not.toContain(a.id)
+    expect(lines[0]).not.toContain(T1)
   })
 })
 

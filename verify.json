@@ -167,10 +167,6 @@
       "apps\\web\\e2e\\toots.spec.ts and apps\\web\\e2e\\toots.spec.ts": {
         "blocks": 1,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "apps\\web\\src\\app\\api\\payments.workers.test.ts and apps\\web\\src\\app\\api\\payments.workers.test.ts": {
-        "blocks": 1,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       }
     },
     "baseline": {
@@ -278,27 +274,10 @@
         "apps/web/playwright.config.ts": {
           "findings": 5,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/app/api/payments.workers.test.ts": {
-          "findings": 11,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/app/api/stripe/webhook/route.ts": {
-          "findings": 5,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/server/require-user.ts": {
-          "findings": 10,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         }
       },
       "docs": {},
-      "deadcode": {
-        "apps/web/src/server/require-user.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        }
-      },
+      "deadcode": {},
       "dependencies": {
         "apps/web/scripts/fixture-library.ts": {
           "findings": 1,
