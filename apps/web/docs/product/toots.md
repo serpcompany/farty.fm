@@ -4,6 +4,11 @@ The Toots tab and a Toot's own screen: the Toots saved in [Song Creator](song-cr
 open, rename and delete. A guest's Toots last the visit; an account keeps them
 ([Accounts](account.md)).
 
+## While the Toots load
+
+- A spinner shows in place of the list (`src/components/farty/toots-screen.interaction.test.tsx`,
+  "shows a spinner while the Toots load").
+
 ## Empty
 
 - "Nothing yet", and "Make one in Compose." (`e2e/tabs.spec.ts`, "the app opens on Record, and every
@@ -45,6 +50,9 @@ open, rename and delete. A guest's Toots last the visit; an account keeps them
   title trimmed, and never to nothing").
 - A rename shows at once, even when the browser fails to store it (`e2e/toots.spec.ts`, "a Toot
   whose audio is gone says so, and can't play; one the store fails for a moment is kept").
+- Hiding the page closes the Rename, Delete and audio-missing dialogs, on the list and on a Toot's
+  screen (`src/components/farty/toots-screen.interaction.test.tsx`, "closes the %s dialog when the
+  page is hidden"; "closes the screen's %s dialog when the page is hidden").
 - Delete asks "Delete Mary Had a Little Lamb?", "This can't be undone.", with Cancel and Delete Toot.
   A Toot that plays stops, and the others keep playing without loading their audio again
   (`e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch, renamed, and deleted";
@@ -56,6 +64,14 @@ open, rename and delete. A guest's Toots last the visit; an account keeps them
 - A row's title opens `/toots/toot/?id=…`: Song Creator's layout without Save, with the Toot's
   title, its Song and source, and the More menu. It opens on Ready, and Play plays it
   (`e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch, renamed, and deleted").
+- A Toot that plays keeps playing into its screen, and leaving the list lets go of the audio its
+  rows decoded (`src/components/farty/toots-screen.interaction.test.tsx`, "keeps a Toot that plays
+  playing into its screen, and lets go of the audio its rows decoded").
+- Its More menu renames the Toot as the list's does
+  (`src/components/farty/toots-screen.interaction.test.tsx`, "renames the Toot from its More menu").
+- A Toot whose Song has left the Song Catalog says "This Toot's Song isn't in Farty any more."
+  (`src/components/farty/toots-screen.interaction.test.tsx`, "says a Toot whose Song has left the
+  Song Catalog isn't in Farty any more").
 - Notes and Recordings used play as in [Song Creator](song-creator.md#the-player). A Recording the
   Toot used that was deleted since shows as "Recording deleted", and the Toot still plays
   (`e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch, renamed, and deleted").
@@ -90,12 +106,3 @@ open, rename and delete. A guest's Toots last the visit; an account keeps them
 
 - The installed app opens a Toot's screen offline, plays it, and opens it again on a reload
   (`e2e/toots-kept.spec.ts`, "the installed app opens a Toot offline, and plays it").
-
-## Not checked
-
-- The spinner while the Toots load.
-- A Toot whose Song has left the Song Catalog says "This Toot's Song isn't in Farty any more."
-- Rename from a Toot's screen.
-- A Toot that plays keeps playing into its screen, and leaving the Toots tab lets go of the audio
-  its rows decoded.
-- Hiding the page closes the Rename, Delete and audio-missing dialogs.
