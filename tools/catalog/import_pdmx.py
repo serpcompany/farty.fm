@@ -541,11 +541,13 @@ def main():
         "library": f"{len(library)} Recordings, {sum(s.pitched for s in library)} Melodic",
         "picking": (f"title matches one of the Song's names (MATCHES order: {', '.join(pdmx.MATCHES)}); "
                     f"license {' or '.join(pdmx.LICENSES)} with no PDMX license conflict; at most {pdmx.MAX_TRACKS} tracks; "
+                    f"not one of the {len(pdmx.MISBARRED_SCORES)} scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES); "
                     f"then the highest rating, the most views; up to {args.tries} scores tried per title, best first"),
         "gates": (f"license; hash; sanity: {pdmx.MIN_NOTES}-{pdmx.MAX_NOTES} notes, range <= {pdmx.MAX_RANGE} semitones, "
                   f"at most {pdmx.MAX_DROPPED_SHARE:.0%} of the track's notes dropped, no first bar that is a pickup "
                   f"padded with silence ({pdmx.PADDED_PICKUP_REST} beat or more, and at least as long as the bar's notes); render with excerpt "
-                  f"<= {pdmx.EXCERPT_BEATS} beats of whole bars and the score's tempo within {pdmx.MIN_BPM}-{pdmx.MAX_BPM} bpm"),
+                  f"from the first note to the end of the whole bars that fit in {pdmx.EXCERPT_BEATS} beats from its bar, "
+                  f"and the score's tempo within {pdmx.MIN_BPM}-{pdmx.MAX_BPM} bpm"),
         "bar": BAR,
     }
     report = args.titles.with_name(args.titles.stem + ".report")

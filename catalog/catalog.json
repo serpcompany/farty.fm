@@ -2773,36 +2773,6 @@
   }
  },
  {
-  "id": "god-rest-ye",
-  "title": "God Rest You Merry, Gentlemen",
-  "file": "midi/pdmx-god-rest-ye.mid",
-  "sha256": "1fc61a0674da66aa655312d767090024127743cb49022915205082491f882019",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/17/33/QmZnVBCF4mHXD2zrSqFbZSFyqjMGovzkKBKAgE53uCo6Jz.mid",
-   "musescore_score_id": "5893953",
-   "musescore_url": "https://musescore.com/score/5893953",
-   "score_title": "God Rest Ye Merry Gentlemen",
-   "composer": "Traditional",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.61",
-   "n_ratings": "10",
-   "n_views": "471"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-02.txt"
-  }
- },
- {
   "id": "good-king-wenceslas",
   "title": "Good King Wenceslas",
   "file": "midi/pdmx-good-king-wenceslas.mid",
@@ -3625,36 +3595,6 @@
   }
  },
  {
-  "id": "star-spangled-banner",
-  "title": "The Star-Spangled Banner",
-  "file": "midi/pdmx-star-spangled-banner.mid",
-  "sha256": "9ac53fc33ab18491a8afb8381e25ff376f3a333ce691fc2c23f790eb7eb22db4",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/13/34/QmVNJZHWfGUVvrtuYBNfWZ8Mxnn4bdpEqopPZmbfbpq6jP.mid",
-   "musescore_score_id": "20295",
-   "musescore_url": "https://musescore.com/score/20295",
-   "score_title": "The Star-Spangled Banner",
-   "composer": "John Stafford Smith (1750-1836)",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.83",
-   "n_ratings": "3",
-   "n_views": "1925"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 30
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-02.txt"
-  }
- },
- {
   "id": "battle-hymn",
   "title": "Battle Hymn of the Republic",
   "file": "midi/pdmx-battle-hymn.mid",
@@ -3811,26 +3751,27 @@
   "id": "birthday",
   "title": "Happy Birthday",
   "file": "midi/pdmx-birthday.mid",
-  "sha256": "48f8cbcc841d3a3ab676dffeb3eef48c15a68057df4aaf0d6778169dd1be7e1f",
+  "sha256": "d5a94aa3791e12ebf6fdf5ce1519dc2e8e91485eccc726c272f2d6376e8818ba",
   "source": {
    "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
    "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/6/17/QmNecetm6r2YzsBRcQ1mCGFLxhvpNusxJF4cJbzHBzRtCq.mid",
-   "musescore_score_id": "6064902",
-   "musescore_url": "https://musescore.com/score/6064902",
-   "score_title": "Happy Birthday to You",
-   "composer": "NA",
+   "dataset_path": "./mid/2/45/QmcTcTmTK2E7BJN8oLnPJsTvzvy3rEDEmR3esm6ePBKHKt.mid",
+   "musescore_score_id": "5942108",
+   "musescore_url": "https://musescore.com/score/5942108",
+   "score_title": "Happy Birthday",
+   "composer": "Mildred and Patty HillArr. C. Franklin Sweedy",
    "license": "cc-zero",
    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
    "pdmx_license_conflict": "False",
-   "rating": "4.94",
-   "n_ratings": "15",
-   "n_views": "718"
+   "rating": "4.5",
+   "n_ratings": "21",
+   "n_views": "2349"
   },
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30
+   "start_beat": 2,
+   "max_beats": 28
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -3856,6 +3797,68 @@
    "rating": "4.7",
    "n_ratings": "7",
    "n_views": "610"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-03.txt"
+  }
+ },
+ {
+  "id": "god-rest-ye",
+  "title": "God Rest You Merry, Gentlemen",
+  "file": "midi/pdmx-god-rest-ye.mid",
+  "sha256": "17d36249b4f030749b7cf11dd9c5cc74bd048ff016044d37d15de9fa9758ad89",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/21/QmTgah9bWiH8TN7C3KAUQuQqXnYotRFsK5X7Rgxrr1YAm5.mid",
+   "musescore_score_id": "33779",
+   "musescore_url": "https://musescore.com/score/33779",
+   "score_title": "God Rest Ye Merry Gentlemen",
+   "composer": "Traditional",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.54",
+   "n_ratings": "34",
+   "n_views": "5009"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-03.txt"
+  }
+ },
+ {
+  "id": "star-spangled-banner",
+  "title": "The Star-Spangled Banner",
+  "file": "midi/pdmx-star-spangled-banner.mid",
+  "sha256": "aae5feec413a249fad2505c4cac801ce6f299465c1bc4283b53a98e78e153c16",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/18/QmVEMe16iprcxEB5Gj22auJ7EvNYLEVMv8c3qsnD7wvQkp.mid",
+   "musescore_score_id": "5655658",
+   "musescore_url": "https://musescore.com/score/5655658",
+   "score_title": "The Star Spangled Banner",
+   "composer": "John Stafford Smith",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "40"
   },
   "retrieved": "2026-10-25",
   "render": {

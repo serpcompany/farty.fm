@@ -85,7 +85,7 @@ def main():
                 "id": c["id"],
                 "title": c["title"],
                 "bpm": m.bpm,
-                "beats_per_bar": m.beats_per_bar,
+                "bar_lines": m.bar_lines,
                 "source": c["source"],
                 "import_report": {k: v for k, v in m.report.items() if k != "source_file"},
                 "variants": variants,

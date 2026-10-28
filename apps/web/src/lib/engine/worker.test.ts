@@ -32,7 +32,7 @@ beforeAll(async () => {
   }
   recording = { id: '090', audio: { samples: file.samples, sampleRate: file.sampleRate }, analysis }
   const pitch = Math.round(golden.recording_pitch_midi)
-  song = { bpm: 120, beats_per_bar: 4, length_beats: 2, notes: [{ start: 0, dur: 1, pitch }] }
+  song = { bpm: 120, bar_lines: [0], length_beats: 2, notes: [{ start: 0, dur: 1, pitch }] }
   unlocked = arrange(song, [autoMapRecording('090', analysis)])
   locked = arrange(song, [])
   expect(unlocked.unlocked).toBe(true)

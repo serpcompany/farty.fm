@@ -9,7 +9,7 @@
     "soundfile": "0.14.0",
     "soxr": "1.1.0"
   },
-  "format_version": 5,
+  "format_version": 6,
   "generator": "tools/melody-lab/export_golden.py",
   "hop": 256,
   "libraries": {
@@ -266,8 +266,8 @@
       "notes": 25,
       "title": "Happy Birthday",
       "transpose": {
-        "full": -28,
-        "small": -26
+        "full": -14,
+        "small": -12
       },
       "unlocked": {
         "full": true,
