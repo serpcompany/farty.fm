@@ -8,8 +8,8 @@ import { ORIGIN } from '@/test-support/library-api'
 import { fakeSiteverify, siteverifyCalls, TEST_TOKEN } from '@/test-support/turnstile'
 
 // Turnstile on sign-up (#237), through the route in workerd with wrangler.jsonc's top level: the
-// local run's test site key, and the test secret the code falls back to. Siteverify answers as
-// Cloudflare does for that secret (`fakeSiteverify`); the journeys use the real one.
+// local run's test site key, and the test secret the code falls back to. A stand-in siteverify
+// (`fakeSiteverify`) passes the test token and refuses any other; the journeys use the real one.
 
 const bindings = env as unknown as { DEV_MAILBOX: KVNamespace }
 

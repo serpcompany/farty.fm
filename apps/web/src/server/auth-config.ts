@@ -56,7 +56,7 @@ export const TURNSTILE_ENDPOINT = '/turnstile'
 
 /**
  * Cloudflare's published Turnstile test keys, which always pass: the site key's widget gives a
- * dummy token, which only the test secret accepts. Local runs only.
+ * dummy token, and the test secret passes any token. Local runs only.
  */
 export const TURNSTILE_TEST_SITE_KEY = '1x00000000000000000000AA'
 export const TURNSTILE_TEST_SECRET_KEY = '1x0000000000000000000000000000000AA'

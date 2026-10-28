@@ -100,6 +100,8 @@ test('a code is sent only with a Turnstile token, and the page reads the site ke
       token
     )
   expect(await sendCode(null)).toMatchObject({ status: 400 })
+  // Cloudflare's test secret passes any token (measured: 'not-a-token' got a 200), so a rejected
+  // token's 403 is checked against a siteverify that refuses it (`turnstile.workers.test.ts`).
   expect(await sendCode(TURNSTILE_TEST_TOKEN)).toEqual({ status: 200, body: { success: true } })
 })
 
