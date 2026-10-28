@@ -27,8 +27,8 @@ class Melody:
     bpm: float
     beats_per_bar: int  # the excerpt's main meter, as the catalog records it; accents follow bar_lines
     notes: list
+    bar_lines: list  # beats where a bar starts: a note on one is accented. No default: [] means no accents
     report: dict = field(default_factory=dict)
-    bar_lines: list = field(default_factory=list)  # beats where a bar starts: a note on one is accented
 
     @property
     def length_beats(self):
@@ -43,21 +43,25 @@ def bar_lines(meters, until):
     bar lines. A pickup isn't a bar line: a bar shorter than the one after it that opens the score,
     or that makes one bar of that length with the bar before it (a bar split at a repeat sign:
     3/4 + 1/4 before 4/4), leads into the next bar line. PDMX's MIDI writes a pickup as its own
-    short bar (1/4, then 3/4)."""
+    short bar (1/4, then 3/4), and each half of a split bar as a time signature of its own, so the
+    bar before a split bar's second half must be a whole time-signature segment by itself: two
+    whole 2/4 bars before 4/4 are two bars, not one 4/4 bar split in two."""
     meters = sorted(meters)
     if not meters or meters[0][0] > EPS:
         meters.insert(0, (0.0, 4, 4))
-    bars = []  # (beat, length), through the first bar at or after `until`
+    bars = []  # (beat, length, alone), through the first bar at or after `until`
     for i, (at, num, den) in enumerate(meters):
         end = meters[i + 1][0] if i + 1 < len(meters) else float("inf")
         length, line = num * 4 / den, at
         while line < end - EPS and (not bars or bars[-1][0] < until - EPS):
-            bars.append((line, min(length, end - line)))
+            size = min(length, end - line)
+            bars.append((line, size, abs(line - at) < EPS and line + size > end - EPS))  # alone: the whole segment
             line += length
     lines = []
-    for i, (line, length) in enumerate(bars):
+    for i, (line, length, _) in enumerate(bars):
         after = bars[i + 1][1] if i + 1 < len(bars) else None
-        pickup = after is not None and length < after - EPS and (i == 0 or abs(bars[i - 1][1] + length - after) < EPS)
+        split = i > 0 and bars[i - 1][2] and after is not None and abs(bars[i - 1][1] + length - after) < EPS
+        pickup = after is not None and length < after - EPS and (i == 0 or split)
         if not pickup and line < until - EPS:
             lines.append(line)
     return lines

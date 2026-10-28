@@ -28,6 +28,13 @@ class BarLinesTest(unittest.TestCase):
     def test_a_bar_split_at_a_repeat_is_one_bar(self):
         # 3/4 + 1/4 before 4/4: the 1/4 is the rest of the bar, not a bar of its own.
         self.assertEqual(bar_lines([(0, 4, 4), (8, 3, 4), (11, 1, 4), (12, 4, 4)], 20), [0, 4, 8, 12, 16])
+        # The first half can follow a short bar: 2/4, 2/4, then 3/4 + 1/4 before 4/4.
+        self.assertEqual(bar_lines([(0, 2, 4), (4, 3, 4), (7, 1, 4), (8, 4, 4)], 16), [0, 2, 4, 8, 12])
+
+    def test_two_whole_bars_before_a_longer_meter_are_two_bars(self):
+        # 2/4 then 4/4: the 2/4 bar at 6 isn't the rest of the one at 4 (stars-and-stripes, 2/2 then 4/2).
+        self.assertEqual(bar_lines([(0, 2, 4), (8, 4, 4)], 20), [0, 2, 4, 6, 8, 12, 16])
+        self.assertEqual(bar_lines([(0, 3, 4), (6, 6, 4)], 18), [0, 3, 6, 12])
 
     def test_meter_changes_keep_their_bar_lines(self):
         self.assertEqual(bar_lines([(0, 4, 4), (8, 3, 4)], 14), [0, 4, 8, 11])
