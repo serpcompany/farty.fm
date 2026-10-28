@@ -15,8 +15,8 @@ export default function PrivacyPage() {
 
       <h2>Without an account</h2>
       <p>
-        Your Recordings stay in your browser on your device, and your Toots last only until you
-        close Farty. We never receive them.
+        Your Recordings and Toots stay in your browser on your device, and only until you close
+        Farty. We never receive them.
       </p>
 
       <h2>With an account</h2>
@@ -30,6 +30,17 @@ export default function PrivacyPage() {
           unsubscribe from any email or on Profile. It&apos;s never sold.
         </li>
       </ul>
+
+      <h2>The account step</h2>
+      <p>
+        When the account step opens, such as after your first Result, Cloudflare Turnstile loads in
+        it, whether or not you make an account, and checks that a person asks for a sign-in code.
+        Cloudflare&apos;s use of what it reads from your browser is described in its{' '}
+        <a href="https://www.cloudflare.com/turnstile-privacy-policy/">
+          Turnstile privacy addendum
+        </a>
+        .
+      </p>
 
       <h2>Payments</h2>
       <p>

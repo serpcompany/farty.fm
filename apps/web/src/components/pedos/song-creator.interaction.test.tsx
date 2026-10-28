@@ -8,8 +8,9 @@ import type { CheckoutReturn } from '@/lib/toot-payment'
 
 // Song Creator's Save where saving is paid (ADR 0010, #213), in a DOM: what Save says when
 // payments are off or limited, when the payment hasn't come through, and when the account can't be
-// read after a paid return; and that a paid Toot never saved is saved instead of paying twice. The
-// server is `fetch`, answering as the routes do.
+// read after a paid return; that a paid Toot never saved is saved instead of paying twice; and that
+// a guest's Save asks for an account first, paid or free, while a free one saves offline in an
+// account's browser (#237). The server is `fetch`, answering as the routes do.
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean
@@ -26,17 +27,18 @@ const page = vi.hoisted(() => ({
     email: 'a@example.test',
     marketingEmail: false
   } as Account,
+  stepOpen: false,
   retry: vi.fn(),
   openStep: vi.fn(),
   saveToot: vi.fn(),
-  saved: false
+  saved: false,
+  paid: true
 }))
 
 vi.mock('./account-provider', () => ({
   useAccount: () => ({
     account: page.account,
-    stepOpen: false,
-    offerStep: vi.fn(),
+    stepOpen: page.stepOpen,
     openStep: page.openStep,
     retry: page.retry
   })
@@ -60,8 +62,8 @@ vi.mock('@/lib/stale-build', () => ({ holdReload: () => undefined }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: vi.fn() }))
 vi.mock('@/lib/toot-payment', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/toot-payment')>()),
-  // Saving is paid in this build, and the wait for a payment is cut short.
-  saveAsksForPayment: () => true,
+  // Saving is paid in this build unless a test says so, and the wait for a payment is cut short.
+  saveAsksForPayment: () => page.paid,
   waitUntilPaid: vi.fn(async () => false),
   clearCheckoutReturn: vi.fn()
 }))
@@ -106,6 +108,8 @@ async function tapSave() {
 beforeEach(() => {
   page.account = { status: 'signedIn', id: 'userA', email: 'a@example.test', marketingEmail: false }
   page.saved = false
+  page.stepOpen = false
+  page.paid = true
   container = document.createElement('div')
   document.body.appendChild(container)
   root = createRoot(container)
@@ -218,5 +222,84 @@ describe('Save to Toots, where saving is paid', () => {
     }
     await render()
     expect(container.textContent).not.toContain("Couldn't reach your account.")
+  })
+})
+
+describe('Save to Toots, as a guest', () => {
+  beforeEach(() => {
+    page.account = { status: 'signedOut' }
+    page.openStep.mockImplementation(() => {
+      page.stepOpen = true
+    })
+  })
+
+  it.each([
+    ['paid', true, 'Save to Toots · $0.99'],
+    ['free', false, 'Save to Toots']
+  ])('asks for an account before saving or paying, where saving is %s', async (_, paid, label) => {
+    page.paid = paid
+    // The server says this Toot is paid, so Save goes on to save it once the step signs in.
+    const fetch = checkoutAnswers({ paid: true })
+    await render()
+    expect(saveButton().textContent).toBe(label)
+    await tapSave()
+    expect(page.openStep).toHaveBeenCalledOnce()
+    expect(fetch).not.toHaveBeenCalled()
+    expect(page.saveToot).not.toHaveBeenCalled()
+
+    // The step signs in and closes: on to Checkout where saving is paid, or straight to saving.
+    page.account = {
+      status: 'signedIn',
+      id: 'userA',
+      email: 'a@example.test',
+      marketingEmail: false
+    }
+    page.stepOpen = false
+    await render()
+    if (paid) {
+      expect(fetch).toHaveBeenCalledWith(`/api/toots/${TOOT}/checkout/`, expect.anything())
+    } else expect(fetch).not.toHaveBeenCalled()
+    expect(page.saveToot).toHaveBeenCalledWith(draft)
+  })
+
+  it('saves nothing when the step closes with Not now', async () => {
+    page.paid = false
+    await render()
+    await tapSave()
+    page.stepOpen = false
+    await render()
+    page.account = {
+      status: 'signedIn',
+      id: 'userA',
+      email: 'a@example.test',
+      marketingEmail: false
+    }
+    // Signed in later, from Profile: Save waits for its own tap.
+    await render()
+    expect(page.saveToot).not.toHaveBeenCalled()
+  })
+})
+
+describe('Save to Toots, where saving is free, while the account can’t be read', () => {
+  beforeEach(() => {
+    page.paid = false
+    page.account = { status: 'unreachable' }
+  })
+  afterEach(() => localStorage.clear())
+
+  it('saves in a browser whose library is an account’s, as offline before #237', async () => {
+    localStorage.setItem('pedos.account', 'userA')
+    await render()
+    await tapSave()
+    expect(page.saveToot).toHaveBeenCalledWith(draft)
+    expect(page.retry).not.toHaveBeenCalled()
+  })
+
+  it('reads the account again in a guest’s browser, and saves nothing', async () => {
+    await render()
+    await tapSave()
+    expect(page.saveToot).not.toHaveBeenCalled()
+    expect(page.retry).toHaveBeenCalledOnce()
+    expect(container.textContent).toContain("Couldn't reach your account. Tap Save to try again.")
   })
 })

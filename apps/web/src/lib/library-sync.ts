@@ -93,8 +93,8 @@ function owner(): string | null | undefined {
 /**
  * Makes this browser's library `accountId`'s (with its `email`), so it can sync: true once it is.
  * A guest's library becomes the account's, and uploads, with the Recordings a guest kept from
- * earlier visits (#203). Another account's is cleared first: it never uploads to this one, and its
- * farts not uploaded yet are lost, which the account step says before it signs in
+ * visits before #237 (#203). Another account's is cleared first: it never uploads to this one,
+ * and its farts not uploaded yet are lost, which the account step says before it signs in
  * (`unsavedBeforeSignIn`). With localStorage blocked Farty can't tell whose it is, so it never
  * syncs.
  */
@@ -146,10 +146,10 @@ export async function unsavedBeforeSignIn(email: string): Promise<number> {
 
 /**
  * Signs this browser out of its library: clears it, then forgets whose it was, while no sync is
- * applying anything. Farty's other tabs show it cleared too. A guest's Recordings are kept
- * (#203), so an account's library is never left here as a guest's, which a sign-in would upload
- * to another account: when the clear fails, the library stays the account's, and the next open
- * reads `expired` and offers Clear this device.
+ * applying anything. Farty's other tabs show it cleared too. A guest's library uploads when they
+ * sign in (#203, #237), so an account's library is never left here as a guest's, which a sign-in
+ * would upload to another account: when the clear fails, the library stays the account's, and
+ * the next open reads `expired` and offers Clear this device.
  */
 export async function forgetLibrary(): Promise<void> {
   await withSyncLock(async () => {

@@ -1,11 +1,12 @@
 import { env } from 'cloudflare:test'
 import { eq } from 'drizzle-orm'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as authRoute from '@/app/api/auth/[...all]/route'
 import { session, user, verification } from '@/db/schema'
 import { listCapturedEmails } from '@/server/dev-mailbox'
 import { api, ORIGIN, recordingMetadata, testDb, uploadBody, wav } from '@/test-support/library-api'
+import { fakeSiteverify, TEST_TOKEN } from '@/test-support/turnstile'
 
 // The library routes with sign-in's own session (`src/server/session-user.ts` unmocked): signed in
 // through the real email-code flow and the dev mailbox, in workerd with a real D1, KV and R2.
@@ -17,7 +18,11 @@ const bindings = env as unknown as { SITE_ENV?: string; DEV_MAILBOX: KVNamespace
 function authPost(path: string, body: unknown): Request {
   return new Request(`${ORIGIN}/api/auth${path}`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', origin: ORIGIN },
+    headers: {
+      'content-type': 'application/json',
+      origin: ORIGIN,
+      'x-captcha-response': TEST_TOKEN
+    },
     body: JSON.stringify(body)
   })
 }
@@ -52,8 +57,13 @@ const verificationsFor = (email: string) =>
     .from(verification)
     .where(eq(verification.identifier, `sign-in-otp-${email}`))
 
+beforeEach(() => {
+  fakeSiteverify()
+})
+
 afterEach(() => {
   delete bindings.SITE_ENV
+  vi.restoreAllMocks()
 })
 
 describe('the library with sign-in’s session', () => {

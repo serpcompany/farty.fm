@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { experimental_readRawConfig, unstable_readConfig } from 'wrangler'
 import { parse } from 'yaml'
 import { siteOrigin } from '../lib/site'
+import { TURNSTILE_TEST_SITE_KEY } from '../server/auth-config'
 import { SUPPORT_EMAIL } from '../server/email'
 
 // Each deployed environment's own D1 and R2, its hosts and sender, and the guards that keep local
@@ -128,6 +129,18 @@ describe('each deployed environment', () => {
     expect(config.send_email.map(binding => binding.allowed_sender_addresses)).toEqual([
       [SUPPORT_EMAIL]
     ])
+  })
+
+  // Turnstile on sign-up (#237): a deployed environment with the always-pass test key would let
+  // anyone send codes. The secrets are Worker secrets, never in wrangler.jsonc.
+  it('has its own Turnstile site key, and the top level Cloudflare’s test key', () => {
+    const keys = [undefined, ...DEPLOYED].map(env => resolved(env).vars.TURNSTILE_SITE_KEY)
+    expect(keys[0]).toBe(TURNSTILE_TEST_SITE_KEY)
+    for (const key of keys.slice(1)) expect(key).toMatch(/^0x4[\w-]+$/)
+    expect(new Set(keys).size).toBe(keys.length)
+    for (const env of [undefined, ...DEPLOYED]) {
+      expect(resolved(env).vars).not.toHaveProperty('TURNSTILE_SECRET_KEY')
+    }
   })
 
   it('has a different database from every other environment', () => {

@@ -15,7 +15,6 @@ import {
   clearStepDraft,
   readSession,
   readStepDraft,
-  type StepMoment,
   stopStepOffers,
   takeSignInAgain,
   takeStepOffer
@@ -35,11 +34,11 @@ type AccountContext = {
   /** The account step is on screen, over everything. */
   stepOpen: boolean
   /**
-   * At a Result's button, or after a saved Toot: shows the account step first when it's due, then
-   * `then`, which goes where the person tapped. Signed in, or once it's been offered, just `then`.
+   * At a Result's button: shows the account step first the first time, then `then`, which goes
+   * where the person tapped. Signed in, or once it's been offered, just `then`.
    */
-  offerStep(moment: StepMoment, then?: () => void): void
-  /** Profile's Save to an account, or Sign in again. */
+  offerStep(then?: () => void): void
+  /** Profile's Save to an account, Sign in again, or a guest's Save in Song Creator (#237). */
   openStep(): void
   /** Reads the session again, as Profile's Retry. It never clears anything. */
   retry(): void
@@ -143,8 +142,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const offerStep = useCallback(
-    (moment: StepMoment, next?: () => void) => {
-      if (account.status === 'signedOut' && takeStepOffer(moment)) show(next ?? null)
+    (next?: () => void) => {
+      if (account.status === 'signedOut' && takeStepOffer()) show(next ?? null)
       else next?.()
     },
     [account.status, show]
@@ -162,7 +161,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     (signedIn: Account) => {
       setAccount(signedIn)
       stopStepOffers()
-      // Signed in, this browser's copy is kept, so the browser is asked to keep it too.
+      // Signed in, this browser's copy is kept, so the browser is asked to keep it too. A guest's
+      // farts last only the visit, so a guest's browser is never asked (#237).
       void keepRecordings()
       close()
     },

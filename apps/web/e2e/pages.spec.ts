@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { onPhone } from './screens'
 
-test('the privacy page covers accounts, news email, guests, error reports, page views and deleting', async ({
+test('the privacy page covers accounts, news email, Turnstile, guests, error reports, page views and deleting', async ({
   page
 }) => {
   await page.goto('/privacy/')
@@ -12,8 +12,13 @@ test('the privacy page covers accounts, news email, guests, error reports, page 
   await expect(page.getByText('Farty news, which is on by default')).toBeVisible()
   await expect(page.getByText('unsubscribe from any email or on Profile')).toBeVisible()
   await expect(page.getByText('never sold')).toBeVisible()
-  await expect(page.getByText('Your Recordings stay in your browser on your device')).toBeVisible()
-  await expect(page.getByText('your Toots last only until you close Farty')).toBeVisible()
+  await expect(
+    page.getByText('Your Recordings and Toots stay in your browser on your device, and only until')
+  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'The account step' })).toBeVisible()
+  await expect(
+    page.getByText('When the account step opens, such as after your first Result, Cloudflare')
+  ).toBeVisible()
   await expect(page.getByText('Delete account on Profile removes your email')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Error reports', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Page views' })).toBeVisible()

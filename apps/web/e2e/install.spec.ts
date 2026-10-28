@@ -103,15 +103,13 @@ test.describe('on iPhone', () => {
     await expect(page.getByTestId('result-note')).toHaveText('G3')
     // Never over the new Recording's note.
     await expect(card).toBeHidden()
-    // A guest's Recordings are kept (#203), so with the first one Farty asks the browser to keep
-    // them.
-    await expect
-      .poll(() => page.evaluate(() => (window as unknown as { keepAsked: boolean }).keepAsked))
-      .toBe(true)
-
     await page.getByRole('button', { name: 'Done' }).click()
     await expect(page).toHaveURL(/\/recordings\/$/)
     await expect(card).toHaveText(/^Install Farty\s*Tap\s+Share, then Add to Home Screen$/)
+    // A guest's farts last only the visit (#237), so Farty never asks the browser to keep them.
+    expect(await page.evaluate(() => (window as unknown as { keepAsked: boolean }).keepAsked)).toBe(
+      false
+    )
 
     await card.getByRole('button', { name: 'Close' }).click()
     await expect(card).toBeHidden()

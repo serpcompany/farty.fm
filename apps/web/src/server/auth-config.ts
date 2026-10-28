@@ -1,6 +1,7 @@
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { APIError, createAuthMiddleware, getIP } from 'better-auth/api'
 import { type BetterAuthOptions, betterAuth } from 'better-auth/minimal'
+import { captcha } from 'better-auth/plugins'
 import { emailOTP } from 'better-auth/plugins/email-otp'
 import { z } from 'zod'
 
@@ -24,7 +25,12 @@ import { deployment, isLocalHost } from './environment'
  * No Next.js imports, so the tests run this file on a real local D1 (`auth-config.test.ts`).
  *
  * - **Four endpoints** (`AUTH_ENDPOINTS`): send a code, sign in with it, read the session, sign
- *   out. Every other Better Auth route answers 404 before Better Auth sees the request.
+ *   out. Every other Better Auth route answers 404 before Better Auth sees the request. Farty's
+ *   own `GET /api/auth/turnstile` answers the Turnstile site key.
+ * - **Turnstile** (#237): sending a code needs a Cloudflare Turnstile token (Better Auth's
+ *   `captcha` plugin, in `x-captcha-response`). Deployed, the site key is a var and
+ *   `TURNSTILE_SECRET_KEY` a Worker secret; without both, no code is sent (503). Local runs use
+ *   Cloudflare's published test keys, which always pass.
  * - **Writes** must come from the site itself (`crossSiteRefusal`), as JSON. Better Auth's own
  *   origin and CSRF checks also run, forced on (Better Auth skips them under `NODE_ENV=test`).
  * - **Codes** are 6 digits, live 10 minutes, allow 3 guesses, and are stored only as an HMAC
@@ -45,6 +51,15 @@ export const SEND_CODE_ENDPOINT = '/email-otp/send-verification-otp'
 export const SIGN_IN_ENDPOINT = '/sign-in/email-otp'
 export const GET_SESSION_ENDPOINT = '/get-session'
 export const SIGN_OUT_ENDPOINT = '/sign-out'
+/** Farty's own, not Better Auth's: the Turnstile site key, read at runtime (`turnstileSiteKey`). */
+export const TURNSTILE_ENDPOINT = '/turnstile'
+
+/**
+ * Cloudflare's published Turnstile test keys, which always pass: the site key's widget gives a
+ * dummy token, and the test secret passes any token. Local runs only.
+ */
+export const TURNSTILE_TEST_SITE_KEY = '1x00000000000000000000AA'
+export const TURNSTILE_TEST_SECRET_KEY = '1x0000000000000000000000000000000AA'
 
 export type AuthEndpoint = { method: 'GET' | 'POST'; path: string }
 
@@ -101,7 +116,11 @@ export type AuthEnv = EmailEnv & {
   BETTER_AUTH_URL?: unknown
   BETTER_AUTH_SECRET?: unknown
   STAGING_SIGNUP_ALLOWLIST?: unknown
+  TURNSTILE_SITE_KEY?: unknown
+  TURNSTILE_SECRET_KEY?: unknown
 }
+
+export type TurnstileKeys = { siteKey: string; secretKey: string }
 
 export type AuthSettings = {
   baseURL: string | { allowedHosts: string[]; protocol: 'http' }
@@ -112,6 +131,8 @@ export type AuthSettings = {
   origin: string | null
   /** Staging's sign-up allowlist; null where anyone may sign up. */
   signupAllowlist: ReadonlySet<string> | null
+  /** Turnstile's keys; null where they aren't set, and then no code is sent. */
+  turnstile: TurnstileKeys | null
 }
 
 export type AuthUnavailableReason =
@@ -132,7 +153,9 @@ const EMAIL = z.email()
  * This environment's sign-in settings, or why there are none (answered 503, fail closed).
  * Deployed: `BETTER_AUTH_SECRET` (a Worker secret) and `BETTER_AUTH_URL` naming the environment's
  * own origin, and on Staging a sign-up allowlist. Locally: any loopback host over http, and a
- * throwaway secret unless `.dev.vars` sets one.
+ * throwaway secret unless `.dev.vars` sets one. Turnstile's keys, without which sign-in still
+ * reads sessions but sends no code: deployed, `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY`;
+ * locally, Cloudflare's test keys unless they're set.
  */
 export function resolveAuthSettings(env: AuthEnv): AuthSettingsResult {
   const target = deployment(env)
@@ -141,6 +164,8 @@ export function resolveAuthSettings(env: AuthEnv): AuthSettingsResult {
     typeof env.BETTER_AUTH_SECRET === 'string' && env.BETTER_AUTH_SECRET.length >= MIN_SECRET_LENGTH
       ? env.BETTER_AUTH_SECRET
       : null
+  const siteKey = nonEmpty(env.TURNSTILE_SITE_KEY)
+  const secretKey = nonEmpty(env.TURNSTILE_SECRET_KEY)
   if (target.kind === 'local') {
     const settings: AuthSettings = {
       baseURL: { allowedHosts: LOCAL_HOST_PATTERNS, protocol: 'http' },
@@ -148,7 +173,11 @@ export function resolveAuthSettings(env: AuthEnv): AuthSettingsResult {
       secret: secret ?? ephemeralSecret(),
       useSecureCookies: false,
       origin: null,
-      signupAllowlist: null
+      signupAllowlist: null,
+      turnstile: {
+        siteKey: siteKey ?? TURNSTILE_TEST_SITE_KEY,
+        secretKey: secretKey ?? TURNSTILE_TEST_SECRET_KEY
+      }
     }
     return { ok: true, settings }
   }
@@ -165,9 +194,14 @@ export function resolveAuthSettings(env: AuthEnv): AuthSettingsResult {
     secret,
     useSecureCookies: true,
     origin: target.origin,
-    signupAllowlist
+    signupAllowlist,
+    turnstile: siteKey && secretKey ? { siteKey, secretKey } : null
   }
   return { ok: true, settings }
+}
+
+function nonEmpty(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() !== '' ? value.trim() : null
 }
 
 /** Comma-separated emails, lowercased; null when it's empty or any entry isn't an email. */
@@ -332,7 +366,18 @@ export function createAuth({ db, settings, email }: CreateAuthOptions) {
       cookieCache: { enabled: false }
     },
     emailAndPassword: { enabled: false },
-    plugins: [otp],
+    // Turnstile checks a code request after Better Auth's per-client limit and before the hook's
+    // own limits, so a request without a token spends only the client's.
+    plugins: settings.turnstile
+      ? [
+          otp,
+          captcha({
+            provider: 'cloudflare-turnstile',
+            secretKey: settings.turnstile.secretKey,
+            endpoints: [SEND_CODE_ENDPOINT]
+          })
+        ]
+      : [otp],
     rateLimit: {
       enabled: true,
       customRules: RATE_LIMITS,
@@ -383,6 +428,14 @@ export function createAuth({ db, settings, email }: CreateAuthOptions) {
           if (!email.available) {
             throw new APIError('SERVICE_UNAVAILABLE', {
               code: 'OTP_DELIVERY_UNAVAILABLE',
+              message: 'Sign-in codes can’t be sent here.'
+            })
+          }
+          // Without Turnstile's keys, nothing checked this request is a person's (#237).
+          if (!settings.turnstile) {
+            console.error(`auth_unavailable ${JSON.stringify({ reason: 'turnstile_missing' })}`)
+            throw new APIError('SERVICE_UNAVAILABLE', {
+              code: 'TURNSTILE_UNAVAILABLE',
               message: 'Sign-in codes can’t be sent here.'
             })
           }
@@ -536,12 +589,32 @@ function authFor(request: Request, env: AuthEnv): Built {
 }
 
 /**
- * Serves one `/api/auth/*` request: 404 outside `AUTH_ENDPOINTS`, 503 when sign-in isn't set up
- * here, the write guard for a POST, then Better Auth. Every answer is `private, no-store`.
+ * `GET /api/auth/turnstile`: `{ siteKey }` for the account step's Turnstile widget, read at
+ * runtime because CI's journeys run a Staging build as a local Worker. 503 when sign-in or
+ * Turnstile isn't set up here, as sending a code would answer.
+ */
+function turnstileSiteKey(env: AuthEnv): Response {
+  const resolved = resolveAuthSettings(env)
+  if (!resolved.ok) {
+    console.error(`auth_unavailable ${JSON.stringify({ reason: resolved.reason })}`)
+    return failure(503, 'AUTH_UNAVAILABLE', 'Sign-in isn’t available right now.')
+  }
+  const { turnstile } = resolved.settings
+  if (!turnstile) return failure(503, 'TURNSTILE_UNAVAILABLE', 'Sign-in codes can’t be sent here.')
+  return Response.json({ siteKey: turnstile.siteKey })
+}
+
+/**
+ * Serves one `/api/auth/*` request: the Turnstile site key, or else 404 outside `AUTH_ENDPOINTS`,
+ * 503 when sign-in isn't set up here, the write guard for a POST, then Better Auth. Every answer
+ * is `private, no-store`.
  */
 export async function serveAuthRequest(request: Request, env: AuthEnv): Promise<Response> {
   const url = new URL(request.url)
   const path = endpointPath(url.pathname)
+  if (request.method === 'GET' && path === TURNSTILE_ENDPOINT) {
+    return noStore(turnstileSiteKey(env))
+  }
   if (path === null || !isServed(request.method, path)) {
     return noStore(failure(404, 'NOT_FOUND', 'Not found.'))
   }

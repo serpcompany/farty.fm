@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { createDatabase } from '@/db/database'
 import { type LocalBindings, localBindings } from '@/test-support/local-bindings'
+import { fakeSiteverify, siteverifyCalls, TEST_TOKEN } from '@/test-support/turnstile'
 
 import {
   AUTH_ENDPOINTS,
@@ -22,7 +23,10 @@ import {
   SIGN_IN_ENDPOINT,
   SIGN_OUT_ENDPOINT,
   SITE_CODES_KEY,
-  serveAuthRequest
+  serveAuthRequest,
+  TURNSTILE_ENDPOINT,
+  TURNSTILE_TEST_SECRET_KEY,
+  TURNSTILE_TEST_SITE_KEY
 } from './auth-config'
 import { listCapturedEmails } from './dev-mailbox'
 import {
@@ -50,6 +54,7 @@ beforeEach(async () => {
   for (const level of ['info', 'warn', 'error'] as const) {
     vi.spyOn(console, level).mockImplementation(() => {})
   }
+  fakeSiteverify()
   return () => vi.restoreAllMocks()
 })
 
@@ -74,6 +79,8 @@ const staging = (sent: Sent, extra: Partial<AuthEnv> = {}): AuthEnv => ({
   BETTER_AUTH_URL: STAGING,
   BETTER_AUTH_SECRET: SECRET,
   STAGING_SIGNUP_ALLOWLIST: 'member@example.com',
+  TURNSTILE_SITE_KEY: 'staging-site-key',
+  TURNSTILE_SECRET_KEY: TURNSTILE_TEST_SECRET_KEY,
   ...extra
 })
 
@@ -82,11 +89,14 @@ type RequestOptions = {
   origin?: string | null
   ip?: string
   cookie?: string
+  /** The Turnstile token, `TEST_TOKEN` unless it's given; null sends none. */
+  captcha?: string | null
   headers?: Record<string, string>
 }
 
 function post(path: string, body: unknown, options: RequestOptions = {}): Request {
   const { base = LOCAL, origin = base, ip = '203.0.113.1', cookie, headers = {} } = options
+  const { captcha = TEST_TOKEN } = options
   const all = new Headers({
     'content-type': 'application/json',
     'cf-connecting-ip': ip,
@@ -94,6 +104,7 @@ function post(path: string, body: unknown, options: RequestOptions = {}): Reques
   })
   if (origin !== null) all.set('origin', origin)
   if (cookie) all.set('cookie', cookie)
+  if (captcha !== null) all.set('x-captcha-response', captcha)
   return new Request(`${base}/api/auth${path}`, {
     method: 'POST',
     headers: all,
@@ -796,6 +807,96 @@ describe('writes from anywhere but the site', () => {
   })
 })
 
+describe('Turnstile', () => {
+  it('refuses a code request without a token, having spent only the client’s limit', async () => {
+    const response = await sendCode(local(), 'fan@example.com', { captcha: null })
+    expect(await answer(response)).toMatchObject({
+      status: 400,
+      body: { code: 'MISSING_RESPONSE' }
+    })
+    expect(await mailCount('fan@example.com')).toBe(0)
+    expect(siteverifyCalls()).toEqual([])
+    const key = await clientLimitKey(SECRET, `203.0.113.1|${SEND_CODE_ENDPOINT}`)
+    expect(await rows('SELECT key, count FROM rate_limit')).toEqual([{ key, count: 1 }])
+  })
+
+  it('refuses a code request with a token Turnstile rejects', async () => {
+    const response = await sendCode(local(), 'fan@example.com', { captcha: 'forged' })
+    expect(await answer(response)).toMatchObject({
+      status: 403,
+      body: { code: 'VERIFICATION_FAILED' }
+    })
+    expect(await mailCount('fan@example.com')).toBe(0)
+  })
+
+  it('sends a code once Turnstile accepts the token, asking with the secret and the client', async () => {
+    const response = await sendCode(local(), 'fan@example.com', { ip: '203.0.113.7' })
+    expect(await answer(response)).toEqual({ status: 200, body: { success: true } })
+    expect(await mailCount('fan@example.com')).toBe(1)
+    expect(siteverifyCalls()).toEqual([
+      { secret: TURNSTILE_TEST_SECRET_KEY, response: TEST_TOKEN, remoteip: '203.0.113.7' }
+    ])
+  })
+
+  it('refuses a code request when siteverify can’t be reached', async () => {
+    vi.mocked(globalThis.fetch).mockRejectedValueOnce(new TypeError('fetch failed'))
+    const response = await sendCode(local(), 'fan@example.com')
+    expect(response.status).toBe(500)
+    expect(await mailCount('fan@example.com')).toBe(0)
+  })
+
+  it('checks only code requests', async () => {
+    expect((await sendCode(local(), 'fan@example.com')).status).toBe(200)
+    const code = await mailedCode('fan@example.com')
+    const signedIn = await trySignIn(local(), 'fan@example.com', code, { captcha: null })
+    expect(signedIn.status).toBe(200)
+    expect(siteverifyCalls()).toHaveLength(1)
+  })
+
+  it('sends no code where its keys aren’t set, and still reads sessions', async () => {
+    for (const unset of ['TURNSTILE_SECRET_KEY', 'TURNSTILE_SITE_KEY'] as const) {
+      const sent: Sent = []
+      const env = staging(sent, { [unset]: undefined })
+      const response = await sendCode(env, 'member@example.com', { base: STAGING })
+      expect(await answer(response)).toMatchObject({
+        status: 503,
+        body: { code: 'TURNSTILE_UNAVAILABLE' }
+      })
+      expect(sent).toEqual([])
+      const key = await serveAuthRequest(get(TURNSTILE_ENDPOINT, { base: STAGING }), env)
+      expect(await answer(key)).toMatchObject({
+        status: 503,
+        body: { code: 'TURNSTILE_UNAVAILABLE' }
+      })
+      const session = await serveAuthRequest(get(GET_SESSION_ENDPOINT, { base: STAGING }), env)
+      expect(session.status).toBe(200)
+    }
+  })
+
+  it('answers its site key, never cached: the var, or locally Cloudflare’s test key', async () => {
+    const answers = [
+      await serveAuthRequest(get(TURNSTILE_ENDPOINT, { base: STAGING }), staging([])),
+      await serveAuthRequest(get(`${TURNSTILE_ENDPOINT}/`), local()),
+      await serveAuthRequest(get(TURNSTILE_ENDPOINT), local({ TURNSTILE_SITE_KEY: 'own-key' }))
+    ]
+    expect(answers.map(response => response.headers.get('cache-control'))).toEqual([
+      'private, no-store',
+      'private, no-store',
+      'private, no-store'
+    ])
+    expect(await Promise.all(answers.map(answer))).toEqual([
+      { status: 200, body: { siteKey: 'staging-site-key' } },
+      { status: 200, body: { siteKey: TURNSTILE_TEST_SITE_KEY } },
+      { status: 200, body: { siteKey: 'own-key' } }
+    ])
+    const misconfigured = local({ SITE_ENV: 'preview' })
+    const refused = await serveAuthRequest(get(TURNSTILE_ENDPOINT), misconfigured)
+    expect(await answer(refused)).toMatchObject({ status: 503, body: { code: 'AUTH_UNAVAILABLE' } })
+    const posted = await serveAuthRequest(post(TURNSTILE_ENDPOINT, {}), local())
+    expect(posted.status).toBe(404)
+  })
+})
+
 describe('Staging', () => {
   it('sends codes from the support address, to its allowlist only', async () => {
     const sent: Sent = []
@@ -920,6 +1021,23 @@ describe('settings', () => {
     await expect(readSessionUser(new Request(STAGING), env)).rejects.toBeInstanceOf(
       AuthUnavailableError
     )
+  })
+
+  it('take Turnstile’s keys from the environment, or locally Cloudflare’s test keys', () => {
+    const turnstile = (env: AuthEnv) => {
+      const result = resolveAuthSettings(env)
+      return result.ok ? result.settings.turnstile : result.reason
+    }
+    const keys = { TURNSTILE_SITE_KEY: 'site', TURNSTILE_SECRET_KEY: 'secret' }
+    expect(turnstile({ ...deployed, ...keys })).toEqual({ siteKey: 'site', secretKey: 'secret' })
+    expect(turnstile(deployed)).toBeNull()
+    expect(turnstile({ ...deployed, ...keys, TURNSTILE_SECRET_KEY: ' ' })).toBeNull()
+    expect(turnstile({ ...deployed, ...keys, TURNSTILE_SITE_KEY: undefined })).toBeNull()
+    expect(turnstile(local())).toEqual({
+      siteKey: TURNSTILE_TEST_SITE_KEY,
+      secretKey: TURNSTILE_TEST_SECRET_KEY
+    })
+    expect(turnstile(local(keys))).toEqual({ siteKey: 'site', secretKey: 'secret' })
   })
 
   it('run locally without a secret, on any loopback host', async () => {

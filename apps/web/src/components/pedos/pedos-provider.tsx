@@ -236,7 +236,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setShowsWelcome(localStorage.getItem(welcomedKey) === null)
-    // A guest's new visit first clears the last one's Toots (`visit.ts`).
+    // A guest's new visit first clears the last one's farts (`visit.ts`).
     const library = openVisit().library
     library.then(store.loadRecordings).then(loaded => {
       // An analysis cut off by closing the page starts again, and those an older Recording
@@ -400,7 +400,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     stopPlayback()
     let saved: Recording
     try {
-      // Saved after the visit has started, so what its open clears (the last visit's Toots, a
+      // Saved after the visit has started, so what its open clears (the last visit's farts, a
       // library an account left, or another account's at sign-in) never takes it.
       await openVisit().library
       saved = await store.saveRecording(
