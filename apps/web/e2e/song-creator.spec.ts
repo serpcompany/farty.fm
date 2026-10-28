@@ -237,7 +237,16 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
     await expectTappable(tryAgain)
     await page.unroute(workers)
     await tryAgain.click()
-    await expect(page.getByTestId('song-creator-state')).toHaveText('Ready', { timeout: 60_000 })
+    // Made after a tap, it plays by itself: the whole Toot, which isn't silence.
+    const state = page.getByTestId('song-creator-state')
+    await expect(state).toBeVisible({ timeout: 60_000 })
+    await expect(state).toHaveText('Playing')
+    const whole = await lastStart(page)
+    expect(whole.args).toEqual([])
+    expect(whole.duration).toBeGreaterThan(5)
+    expect(whole.peak).toBeGreaterThan(0.05)
+    // It's Ready by itself once the Toot has played to its end.
+    await expect(state).toHaveText('Ready', { timeout: whole.duration * 1000 + 15_000 })
   })
 })
 
