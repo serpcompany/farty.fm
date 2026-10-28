@@ -244,6 +244,7 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
     busy === null &&
     problem === null &&
     (account.status === 'checking' || account.status === 'unreachable')
+  const readsAccount = isPaid && account.status === 'checking'
   const confirming = useRef(false)
   useEffect(() => {
     if (!returnedPaid || !accountId || confirming.current) return
@@ -260,7 +261,7 @@ function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null 
       <div className="sticky bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] mt-auto md:bottom-0 bg-linear-to-t from-background from-70% to-transparent px-5 pt-5 pb-3">
         <Button
           className="h-12 w-full text-base"
-          disabled={isSaved || busy !== null || waitsForAccount}
+          disabled={isSaved || busy !== null || waitsForAccount || readsAccount}
           onClick={tapSave}
         >
           {saveLabel(isSaved, busy === 'confirming' || waitsForAccount, isPaid)}

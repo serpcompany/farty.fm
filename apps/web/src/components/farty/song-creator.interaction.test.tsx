@@ -188,6 +188,15 @@ describe('Song Creator where saving is paid', () => {
     expect(button('Saved to Toots').disabled).toBe(true)
   })
 
+  it('keeps Save disabled while the account is still read, then lets it be tapped', async () => {
+    const render = await openSongCreator('paid', { status: 'checking' })
+    expect(buttonSaying('Save to Toots')?.disabled).toBe(true)
+
+    asAccount(signedIn)
+    await render(<SongCreator song={song} />)
+    expect(buttonSaying('Save to Toots')?.disabled).toBe(false)
+  })
+
   it('makes Save tappable again when the browser comes back from the checkout page', async () => {
     const assign = vi.fn()
     vi.stubGlobal('location', { ...window.location, assign })

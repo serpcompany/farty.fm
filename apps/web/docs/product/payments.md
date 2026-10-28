@@ -37,6 +37,9 @@ Stripe setup are in [Payments](../../../../docs/agents/payments.md). The rest of
 
 ## Signed in
 
+- Save waits, disabled, until Farty knows whether the person is signed in
+  (`src/components/farty/song-creator.interaction.test.tsx`, "keeps Save disabled while the account
+  is still read, then lets it be tapped").
 - Save goes to the checkout for that one Toot. Paid, the person comes back to Song Creator with the
   same Toot, which saves, and Save turns into "Saved to Toots" (`e2e/song-creator.spec.ts`, "plays
   each Song with your farts, plays a tapped note, and saves it as a Toot"; `src/app/api/payments.workers.test.ts`,
