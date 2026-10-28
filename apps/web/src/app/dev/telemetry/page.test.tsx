@@ -1,9 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import TelemetryTestPage from './page'
 
-// The synthetic crash and handled error are for Staging and local runs: the Production build,
-// which bakes in SITE_ENV, answers 404.
-
 afterEach(() => {
   vi.unstubAllEnvs()
 })

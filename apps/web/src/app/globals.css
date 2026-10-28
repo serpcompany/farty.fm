@@ -3,11 +3,7 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (@media (prefers-color-scheme: dark));
-/* A browser that hasn't opened the app yet, so a touch tablet shows the lander at `/`
-   (`lander.tsx`). */
 @custom-variant unwelcomed (&:where(html:not([data-welcomed]) *));
-/* A computer: 768px and wider with a mouse or trackpad, where every tab is the product page (#199,
-   `src/lib/desktop.ts`). */
 @custom-variant desktop (@media (min-width: 48rem) and (hover: hover) and (pointer: fine));
 
 @theme inline {
@@ -83,10 +79,8 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  /* The Record button: iOS system red. */
   --record: oklch(0.65 0.23 28);
   --record-foreground: oklch(1 0 0);
-  /* The app icon's pink, for accents; a deeper shade behind white text, which keeps 5:1. */
   --brand: #fb1da9;
   --brand-strong: #d1128a;
   --sidebar: oklch(0.985 0 0);
