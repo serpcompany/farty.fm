@@ -22,6 +22,8 @@ MAX_TRACKS = 2
 # against the words (melody.bar_lines), and are never picked. MuseScore score id -> why.
 MISBARRED_SCORES = {
     "6064902": 'Happy Birthday in 3/4 from "Hap-": bars start on "Hap-" and "to", not "birth-" and "you"',
+    # When the Saints keeps this hand-picked score until the owner decides: the one correctly
+    # barred score that passes the gates (6133057) plays "saints" short, then rests 4 beats.
     "2030696": 'When the Saints in 4/4 with "Oh when the" in its first bar: "saints" falls on beat 3',
     "5893953": 'God Rest Ye in 4/4 from "God": bars start on "God" and "-ry", not "rest" and "gen-"',
     "20295": 'The Star-Spangled Banner in 3/4 from "O-": bars start on "O-" and "you", not "say" and "see"',
@@ -206,8 +208,10 @@ EPS = 1e-6
 
 def render_options(tempos, meters, first_onset):
     """The catalog's `render` options for a score: the tempo in effect at the melody's first note,
-    kept within MIN_BPM..MAX_BPM, and the whole bars that fit in EXCERPT_BEATS, from the bar of the
-    melody's first note.
+    kept within MIN_BPM..MAX_BPM, and an excerpt from the melody's first note to the end of the
+    whole bars that fit in EXCERPT_BEATS from that note's bar. A pickup written after a rest, in a
+    full bar, so doesn't open the Song with silence; the accents still fall on the score's own bar
+    lines, which melody.py reads from its time signatures (`bar_lines`, #232).
 
     `tempos` is [(beat, bpm)] and `meters` [(beat, numerator, denominator)], from the score's
     set_tempo and time_signature events. Beats are quarter notes, as in melody.py. Each time
@@ -222,16 +226,22 @@ def render_options(tempos, meters, first_onset):
 
     bars = _bar_lines(meters, first_onset + EXCERPT_BEATS)
     start_index = _bar_index(bars, first_onset)
-    start = bars[start_index][0]
-    end = start + bars[start_index][1]  # at least one bar, however long
+    first_line = bars[start_index][0]
+    end = first_line + bars[start_index][1]  # at least one bar, however long
     covered = {}
     for line, length, meter in bars[start_index:]:
-        if line + length > start + EXCERPT_BEATS + EPS:
+        if line + length > first_line + EXCERPT_BEATS + EPS:
             break
         end = line + length
         covered[meter] = covered.get(meter, 0) + length
-    if start > EPS:
-        opts["start_beat"] = _number(start)
+    if first_onset > first_line + EPS:
+        # The first note's beat exactly as melody.py reads it, so load_midi keeps that note.
+        start = first_onset
+        opts["start_beat"] = int(start) if start == int(start) else start
+    else:
+        start = first_line
+        if start > EPS:
+            opts["start_beat"] = _number(start)
     opts["max_beats"] = _number(end - start)
 
     num, den = max(covered, key=covered.get) if covered else bars[start_index][2]

@@ -100,6 +100,31 @@
   }
  },
  {
+  "id": "saints",
+  "title": "When the Saints Go Marching In",
+  "file": "midi/pdmx-saints.mid",
+  "sha256": "71ca3fce104bf7c82d998184342174a6bef5de4344395385c8ea2c4eaee320b5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/43/QmQSGztG8eTXW2udzFsGMb2DtBffpaguTTgenoq6WDPs8e.mid",
+   "musescore_score_id": "2030696",
+   "musescore_url": "https://musescore.com/score/2030696",
+   "score_title": "When The Saints Go Marching In",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.33",
+   "n_ratings": "3"
+  },
+  "retrieved": "2026-09-29",
+  "render": {
+   "bpm": 150,
+   "max_beats": 32
+  }
+ },
+ {
   "id": "row",
   "title": "Row, Row, Row Your Boat",
   "file": "midi/pdmx-row.mid",
@@ -3745,7 +3770,8 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30
+   "start_beat": 2,
+   "max_beats": 28
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",

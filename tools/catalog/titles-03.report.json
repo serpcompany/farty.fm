@@ -14,8 +14,8 @@
   }
  },
  "library": "32 Recordings, 24 Melodic",
- "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; then the highest rating, the most views; up to 5 scores tried per title, best first",
- "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt <= 32 beats of whole bars and the score's tempo within 72-144 bpm",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES); then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
   "onsets_on_time_pct": 95,
@@ -96,7 +96,8 @@
      "sha256": "d5a94aa3791e12ebf6fdf5ce1519dc2e8e91485eccc726c272f2d6376e8818ba",
      "render": {
       "bpm": 120,
-      "max_beats": 30
+      "start_beat": 2,
+      "max_beats": 28
      },
      "import_report": {
       "track_used": 0,
@@ -211,230 +212,6 @@
    "picked": "4808283"
   },
   {
-   "id": "saints",
-   "title": "When the Saints Go Marching In",
-   "matched": 23,
-   "eligible": 18,
-   "rejected": {
-    "more than 2 tracks": 2,
-    "PDMX flags a license conflict": 3,
-    "its bar lines are off the tune": 1
-   },
-   "tried": [
-    {
-     "score_id": "6052271",
-     "url": "https://musescore.com/score/6052271",
-     "score_title": "When The Saints Go Marching In",
-     "match": "title",
-     "rating": "4.79",
-     "n_ratings": "16",
-     "n_views": "390",
-     "license": "cc-zero",
-     "n_tracks": "2",
-     "dataset_path": "./mid/2/41/QmcRkqTkTZarjJDmdGUknRfZ8yPJhwtc8xBiJJ3f8pbJvR.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": [
-       "locked with the full Fixture Library: 3 of 5 notes covered, needs G♯2 (2.1 s) C♯3 (2.1 s)"
-      ]
-     },
-     "passed": false,
-     "sha256": "30b3b13de30756c4d4881f4b6ed3703e2669ecc4d47505ba9227126725b6d838",
-     "render": {
-      "bpm": 144,
-      "max_beats": 31,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0,
-       1
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 2,
-      "note_count": 18
-     },
-     "track_notes": 70,
-     "range_semitones": 7,
-     "distinct_pitches": 5,
-     "pitch_coverage": "3 of 5"
-    },
-    {
-     "score_id": "2142431",
-     "url": "https://musescore.com/score/2142431",
-     "score_title": "Oh when the Saints",
-     "match": "title",
-     "rating": "4.63",
-     "n_ratings": "111",
-     "n_views": "11671",
-     "license": "cc-zero",
-     "n_tracks": "1",
-     "dataset_path": "./mid/9/57/QmRZfLDycQLh5u4FLK1XGxwtB1jex222YJbaRJw9YD4yuk.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": [
-       "locked with the full Fixture Library: 3 of 5 notes covered, needs G♯2 (2.1 s) C♯3 (2.1 s)"
-      ]
-     },
-     "passed": false,
-     "sha256": "4ff86932da200f70e167e7befa4ff470d47c06d5c7ee0350c34c127433080988",
-     "render": {
-      "bpm": 144,
-      "max_beats": 32,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0,
-       1
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 16
-     },
-     "track_notes": 69,
-     "range_semitones": 7,
-     "distinct_pitches": 5,
-     "pitch_coverage": "3 of 5"
-    },
-    {
-     "score_id": "137774",
-     "url": "https://musescore.com/score/137774",
-     "score_title": "WHEN THE SAINTS GO MARCHING IN",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "4520",
-     "license": "cc-zero",
-     "n_tracks": "1",
-     "dataset_path": "./mid/7/25/QmPi4jYxW9DtS8wrdfRhEygpw8VbNE5TkGxB8VVsk2399Z.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": [
-       "locked with the full Fixture Library: 3 of 5 notes covered, needs G2 (2.0 s) C3 (2.0 s)"
-      ]
-     },
-     "passed": false,
-     "sha256": "1f76097b96f54ad8573bbef77babc194703f804ff65c13bc6f004841b2d12760",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 16
-     },
-     "track_notes": 66,
-     "range_semitones": 7,
-     "distinct_pitches": 5,
-     "pitch_coverage": "3 of 5"
-    },
-    {
-     "score_id": "72874",
-     "url": "https://musescore.com/score/72874",
-     "score_title": "When the Saints Go Marching In",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "2390",
-     "license": "cc-zero",
-     "n_tracks": "1",
-     "dataset_path": "./mid/2/41/QmcRfYZGjX4W6phNstFQV4SUvyYY7j7ZCqg6dY53rB6Btj.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": [
-       "the importer dropped 30 chord tones and inner-voice onsets, 28% of the track's notes (at most 10%)"
-      ]
-     },
-     "passed": false,
-     "sha256": "9e787ff0eccccfc9474051fccf42af452ea14a2283e00fde593b9a61722466c8",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0,
-       1
-      ],
-      "chord_tones_dropped": 30,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 23
-     },
-     "track_notes": 79,
-     "range_semitones": 19,
-     "distinct_pitches": 7
-    },
-    {
-     "score_id": "93548",
-     "url": "https://musescore.com/score/93548",
-     "score_title": "OH WHEN THE SAINTS",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "1484",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/6/36/QmNpFTjSEZHbK1b5famRkK2puaDqkja98KqQa3mkSL9tTR.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": [
-       "locked with the full Fixture Library: 3 of 5 notes covered, needs G2 (2.5 s) C3 (2.5 s)"
-      ]
-     },
-     "passed": false,
-     "sha256": "0b8b61c77aa9ea7ee59d8769a1d88a9021e29a7cb3a6e0b58bdcc887d8f716d5",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 16
-     },
-     "track_notes": 66,
-     "range_semitones": 7,
-     "distinct_pitches": 5,
-     "pitch_coverage": "3 of 5"
-    }
-   ],
-   "result": "fail",
-   "reason": "none of the 5 best scores passed; the best: render: locked with the full Fixture Library: 3 of 5 notes covered, needs G♯2 (2.1 s) C♯3 (2.1 s)",
-   "picked": null
-  },
-  {
    "id": "god-rest-ye",
    "title": "God Rest You Merry, Gentlemen",
    "matched": 47,
@@ -542,7 +319,8 @@
      "sha256": "a481069b57b47a5d5362a024cf8294443cede7001a46241a9270e1138a771c7f",
      "render": {
       "bpm": 90,
-      "max_beats": 30
+      "start_beat": 2,
+      "max_beats": 28
      },
      "import_report": {
       "track_used": 0,

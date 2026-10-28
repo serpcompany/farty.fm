@@ -5,11 +5,10 @@
 # #232: Songs whose score is barred without its pickup, so the accent on each bar line (+1.5 dB)
 # fell on the wrong notes: Happy Birthday's on "Hap-" and "to", not "birth-" and "you". The
 # importer never picks those scores again (pdmx.MISBARRED_SCORES), and these Songs come from the
-# next best score that passes: Happy Birthday, When the Saints (hand-picked until #232), and God
-# Rest You Merry, Gentlemen and The Star-Spangled Banner (from titles-02.txt until #232).
+# next best score that passes: Happy Birthday, and God Rest You Merry, Gentlemen and The
+# Star-Spangled Banner (from titles-02.txt until #232).
 # id | catalog title | other titles a score of the same Song may carry (optional, ; separated)
 birthday | Happy Birthday | Happy Birthday to You
 merryxmas | We Wish You a Merry Christmas
-saints | When the Saints Go Marching In | When The Saints Go Marching In; Oh When the Saints
 god-rest-ye | God Rest You Merry, Gentlemen | God Rest Ye Merry, Gentlemen; God Rest Ye Merry Gentlemen
 star-spangled-banner | The Star-Spangled Banner | Star Spangled Banner
