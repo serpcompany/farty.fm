@@ -8,15 +8,13 @@ export interface RenderRequest {
   song: Song
   arrangement: Arrangement
   recordings: RecordingToRender[]
-  /** The Noise-like Recordings that play the Beats, in turn (ADR 0014). */
-  beats: string[]
 }
 
 /** Renders Songs off the page's thread. One request at a time, answered by id. */
 self.onmessage = (event: MessageEvent<RenderRequest>) => {
-  const { id, song, arrangement, recordings, beats } = event.data
+  const { id, song, arrangement, recordings } = event.data
   try {
-    const rendered = renderFromRecordings(song, arrangement, recordings, beats)
+    const rendered = renderFromRecordings(song, arrangement, recordings)
     // The audio moves to the page instead of being copied.
     self.postMessage({ id, rendered }, [rendered.samples.buffer])
   } catch (error) {

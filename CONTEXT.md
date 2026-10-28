@@ -19,7 +19,7 @@ A Recording whose pitch is steady enough to carry melody notes.
 _Avoid_: Pitched fart, tonal fart, good Recording
 
 **Noise-like Recording**:
-A Recording with no steady pitch. It can still be placed on a note, but it can't tell the listener which note. In a Song it plays the Beats (ADR 0014).
+A Recording with no steady pitch. It can still be placed on a note, but it can't tell the listener which note.
 _Avoid_: Bad Recording, unpitched fart
 
 **Recording Pitch**:
@@ -49,23 +49,19 @@ A Song whose Pitch Coverage is complete: every distinct pitch has its own Melodi
 _Avoid_: Available song, playable song
 
 **Arrangement**:
-Which Recording plays each note of a melody, and which play its Beats. Each Recording plays raw, at its own pitch and speed (ADR 0012), so a Toot sounds near the melody, not on it.
+Which Recording plays each note of a melody. Each Recording plays raw, at its own pitch and speed (ADR 0012), so a Toot sounds near the melody, not on it.
 _Avoid_: Mapping, mix, assignment
 
 **Octave Move**:
 A Melodic Recording covering a note about an octave from its Recording Pitch: 12 semitones up or down, give or take 3. It plays raw, so it sounds an octave from the note (ADR 0012). Used only where a Song can't be covered without it.
 _Avoid_: Octave folding, octave jump
 
-**Beat**:
-A Noise-like Recording played at the start of a bar of a Song, on the score's bar line, under the melody. A Song has one Beat per bar, and the user's Noise-like Recordings take turns. A Beat plays raw and plays no note (ADR 0014).
-_Avoid_: Drum, percussion, rhythm track, downbeat
-
 **Auto-map**:
 The Arrangement the app chooses on its own, giving each distinct pitch its own Melodic Recording that is long enough for it, with as few Octave Moves as possible and then as close in pitch as possible.
 _Avoid_: Smart choose, AI pick, best fit
 
 **Toot**:
-A saved result: a Song played with the user's Recordings, made in Song Creator. It keeps which Recording played each pitch, and which played the Beats. It is not a conventional song or a music release.
+A saved result: a Song played with the user's Recordings, made in Song Creator. It keeps which Recording played each pitch. It is not a conventional song or a music release.
 _Avoid_: Created Melody, Melody, Created Song, generated song, track, output
 
 ## Creation areas

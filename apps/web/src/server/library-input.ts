@@ -196,13 +196,7 @@ function parseArrangement(value: unknown): TootArrangement | null {
     if (!/^\d{1,3}$/.test(pitch) || !isItemId(recordingId)) return null
     recordingForPitch[Number(pitch)] = recordingId
   }
-  const kept = { transposition: value.transposition, recordingForPitch }
-  // The Recordings that play the Beats, one per bar at most (ADR 0014). A Toot made before Beats,
-  // or with none, has no list.
-  const beats = value.beatRecordings
-  if (beats === undefined) return kept
-  if (!Array.isArray(beats) || beats.length > 128 || !beats.every(isItemId)) return null
-  return beats.length === 0 ? kept : { ...kept, beatRecordings: [...beats] }
+  return { transposition: value.transposition, recordingForPitch }
 }
 
 /** The Toot as the browser keeps it (`Toot` in `src/lib/toot.ts`), or null. */

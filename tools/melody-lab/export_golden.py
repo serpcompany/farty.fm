@@ -5,9 +5,9 @@ Writes deterministic JSON to fixtures/golden/ (format and tolerances: fixtures/g
   index.json                         libraries, Recordings, Songs, a summary, library versions
   recordings/<id>.json               Recording Analysis of every Fixture Library Recording
   songs/<id>.json                    the imported melody of every golden Song (golden_catalog())
-  arrangements/<library>/<id>.json   Pitch Coverage, transposition, Arrangement, Beats and
-                                     evaluate.py metrics per Song, for the full Fixture Library and
-                                     the small 6-Recording one (nothing to render when locked)
+  arrangements/<library>/<id>.json   Pitch Coverage, transposition, Arrangement and evaluate.py
+                                     metrics per Song, for the full Fixture Library and the small
+                                     6-Recording one (no Arrangement to render when locked)
   coverage.json                      Pitch Coverage and Arrangement of every Song on fixed random
                                      subsets of the Fixture Library
 
@@ -36,7 +36,7 @@ from melody import load_catalog
 GOLDEN = engine.ROOT / "fixtures/golden"
 SHIP_LIST = engine.ROOT / "apps/web/src/lib/catalog/ship-list.json"  # the Songs the web app ships
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")  # README.md is written by hand
-FORMAT_VERSION = 7  # 7: Beats (ADR 0014); 6: Songs' `bar_lines` (#232); 5: Songs play farts raw (ADR 0012); 4: the length rule (#221)
+FORMAT_VERSION = 6  # 6: Songs' `bar_lines` (#232); 5: Songs play farts raw (ADR 0012); 4: the length rule (#221)
 COVERAGE_SEEDS = 10  # random subsets per size in coverage.json
 
 
@@ -170,19 +170,15 @@ def arrangement_json(c, m, library, sources):
         )
     out = {"song": c["id"], "library": library, **fit_json(fit), "per_pitch": per_pitch}
     if not fit.unlocked:  # a locked Song can't be played, so there is nothing to render
-        return {**out, "render_settings": None, "max_abs_shift_semitones": None, "notes": None, "beats": None,
-                "metrics": None}
+        return {**out, "render_settings": None, "max_abs_shift_semitones": None, "notes": None, "metrics": None}
 
     transpose, assignments, cost = engine.plan(m, sources, with_cost=True)
     assert (transpose, cost) == (fit.transpose, fit.cost)
-    beats = engine.plan_beats(m, sources)
-    audio, events = engine.render(m, sources, assignments, bpm=m.bpm, beats=beats)
+    audio, events = engine.render(m, sources, assignments, bpm=m.bpm)
     metrics = evaluate(audio, m, events, m.bpm, sources)
     per_note = metrics.pop("per_note")
-    note_events = [e for e in events if "beat" not in e]
-    beat_events = [e for e in events if "beat" in e]
     notes = []
-    for a, e, p in zip(assignments, note_events, per_note, strict=True):
+    for a, e, p in zip(assignments, events, per_note, strict=True):
         assert a.note_index == e["note_index"] == p["i"]
         notes.append(
             {
@@ -196,24 +192,11 @@ def arrangement_json(c, m, library, sources):
                 "render": {"start_s": e["start_s"], "len_s": e["len_s"], "gain_db": e["gain_db"]},
             }
         )
-    played_beats = []
-    for b, e in zip(beats, beat_events, strict=True):
-        assert b.bar == e["beat"] and b.source_id == e["source_id"]
-        played_beats.append(
-            {
-                "bar": b.bar,
-                "start_beat": exact(b.start),
-                "dur_beats": exact(b.dur),
-                "recording": b.source_id,
-                "render": {"start_s": e["start_s"], "len_s": e["len_s"], "gain_db": e["gain_db"]},
-            }
-        )
     return {
         **out,
         "render_settings": {"bpm": m.bpm},
         "max_abs_shift_semitones": max(abs(n["shift_semitones"]) for n in notes),
         "notes": notes,
-        "beats": played_beats,
         "metrics": metrics,
     }
 
@@ -286,7 +269,7 @@ def main():
                 f"{c['id']:12s} {name:5s} T={a['transpose']:+d} notes={r['notes']:3d} in50cFart={r['within_50c_of_fart_pct']:3d}% "
                 f"onTime={r['onsets_on_time_pct']}% reatk={r['notes_with_retrigger']} | in50c={r['within_50c_pct']:3d}% "
                 f"med={r['median_abs_cents']:5.1f}c contour={r['contour_pct']}% recs={r['distinct_recordings']} "
-                f"octaveMoves={a['octave_moves']} beats={len(a['beats'])}"
+                f"octaveMoves={a['octave_moves']}"
             )
         songs.append({"id": c["id"], "title": c["title"], "notes": len(m.notes), "transpose": transposes, "unlocked": unlocked})
     write("coverage.json", coverage_json(catalog, lib))

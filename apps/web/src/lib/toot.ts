@@ -7,19 +7,13 @@ import { formattedLength, type Recording, recordingName, recordingPitch } from '
 
 /**
  * What a Toot keeps of its Arrangement: which Recording plays each of the Song's distinct pitches,
- * the transposition, and which Recordings play its Beats. As the iPhone app's `Arrangement`, plus
- * the Beats, which the iPhone app doesn't have.
+ * and the transposition. As the iPhone app's `Arrangement`.
  */
 export type TootArrangement = {
   /** Semitones the Song is moved by: a note of pitch `p` sounds at `p + transposition`. */
   transposition: number
   /** The Recording id that plays each of the Song's distinct pitches (MIDI, in the score's key). */
   recordingForPitch: Record<number, string>
-  /**
-   * The Noise-like Recordings that play the Beats, in turn: bar k plays number k mod n (ADR
-   * 0014). Absent when no Recording plays a Beat, as in a Toot made before Beats.
-   */
-  beatRecordings?: string[]
 }
 
 /**
@@ -93,20 +87,6 @@ export function noteSeconds(
 ): { start: number; length: number } {
   const beat = 60 / song.bpm
   return { start: note.start * beat, length: note.dur * beat }
-}
-
-/**
- * The line over a Toot's Recordings used: "4 of your Recordings, one per note", and with Beats
- * (ADR 0014) "6 of your Recordings: one per note, and 2 for the Beats".
- */
-export function recordingsUsedSummary(
-  song: Pick<Song, 'pitches'>,
-  arrangement: TootArrangement
-): string {
-  const notes = song.pitches.length
-  const beats = arrangement.beatRecordings?.length ?? 0
-  if (beats === 0) return `${notes} of your Recordings, one per note`
-  return `${notes + beats} of your Recordings: one per note, and ${beats} for the Beats`
 }
 
 /**

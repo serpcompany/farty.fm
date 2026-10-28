@@ -69,7 +69,7 @@ The Recording Pitch is the energy-weighted median, the same way, of the contour'
 
 | Field | Meaning |
 | --- | --- |
-| `unlocked` | Whether every distinct Song pitch has its own Recording. Locked Songs can't be played, so `render_settings`, `max_abs_shift_semitones`, `notes`, `beats` and `metrics` are `null`. |
+| `unlocked` | Whether every distinct Song pitch has its own Recording. Locked Songs can't be played, so `render_settings`, `max_abs_shift_semitones`, `notes` and `metrics` are `null`. |
 | `missing[]` | The notes no Recording covers, lowest first: `target_midi` (after transposition) and `seconds`, the shortest fart that would cover it: `NOTE_FILL` × the pitch's longest note (`dur × 60 / bpm − 0.025`), rounded up to 0.1 s (`needed_seconds()`, ADR 0011). Empty when the Song is unlocked. The app shows it as "Needs a fart near D♯3 (3.0 s)". |
 | `pitch_coverage` | `covered` and `total` distinct Song pitches ("2 of 6 notes covered"). |
 | `transpose` | The transposition `melody_fit()` chose, in semitones. |
@@ -77,9 +77,8 @@ The Recording Pitch is the energy-weighted median, the same way, of the contour'
 | `plan_cost` | The Arrangement's cost (exact), summed over covered pitches. See "The planner" below. |
 | `per_pitch[]` | One entry per distinct Song pitch: `song_pitch`, `target_midi`, `recording`, `shift_semitones` (exact: target minus Recording Pitch, which the unlock rule and the cost use; the fart still plays unshifted, ADR 0012) and `octave_move`. When no Recording covers the pitch, `recording`, `shift_semitones` and `octave_move` are `null`, and `target_midi` is the note still needed (also in `missing[]`, with its length). |
 | `notes[]` | One entry per Song note, in order: `index`, `song_pitch`, `target_midi` (`song_pitch + transpose`), `recording` (the Recording id that plays it), `shift_semitones` (rounded to 2 decimals by the engine; how far the note is from its fart, not a shift the renderer applies), `heard_cents` (`evaluate.py`'s pYIN read-back distance from the note, `null` if unreadable), `fart_cents` (how far the note sounds from its own fart played dry, by YIN frame by frame; `null` if no frame is loud enough), and `render` (`start_s`, `len_s`, `gain_db` from `render()`, for debugging a renderer port). |
-| `beats[]` | Format 7 ([ADR 0014](../../docs/adr/0014-noise-like-farts-play-beats-on-bar-lines.md)): one entry per bar line, in order, for the Noise-like Recordings that play the Beats (`plan_beats()`): `bar` (its index in the Song's `bar_lines`), `start_beat` and `dur_beats` (exact: to the next bar line, or the Song's end), `recording` (the Noise-like Recordings sorted by id take turns, bar k on number k mod n) and `render` (`start_s`, `len_s`, `gain_db` from `render()`, as for a note). 4 to 10 per Song on the full library, whose 8 Noise-like Recordings are `009 018 052 055 065 067 080 081`. Empty for a library with no Noise-like Recordings. |
 | `max_abs_shift_semitones` | The largest per-note shift. |
-| `metrics` | `evaluate.py`'s result on the reference render, which measures the melody notes with the Beats sounding: `notes`, `within_50c_of_fart_pct` (the bar, ADR 0012), `contour_pct` (the share of the melody's note-to-note steps that move the same way when heard), `pitch_readable_pct`, `within_50c_pct`, `within_50c_any_octave_pct`, `median_abs_cents`, `onsets_on_time_pct`, `notes_with_retrigger`, `distinct_recordings`, `on_pitch_pct` (#208), `sounding_pct` (the mean share of each note's time that sounds: 10 ms frames within 30 dB of the note's peak, #205) and `notes_mostly_silent` (notes under half sounding). |
+| `metrics` | `evaluate.py`'s result on the reference render: `notes`, `within_50c_of_fart_pct` (the bar, ADR 0012), `contour_pct` (the share of the melody's note-to-note steps that move the same way when heard), `pitch_readable_pct`, `within_50c_pct`, `within_50c_any_octave_pct`, `median_abs_cents`, `onsets_on_time_pct`, `notes_with_retrigger`, `distinct_recordings`, `on_pitch_pct` (#208), `sounding_pct` (the mean share of each note's time that sounds: 10 ms frames within 30 dB of the note's peak, #205) and `notes_mostly_silent` (notes under half sounding). |
 | `render_settings` | The Song's `bpm`. Every fart plays raw, at its own pitch and speed (ADR 0012), so there is no `tune` any more. |
 
 ## `coverage.json`
@@ -98,7 +97,7 @@ Test each stage on the golden outputs of the stage before it, so that one port's
 | Settle time (#92) | the golden gesture, `pitch_contour` and `recording_pitch_midi` | `settle_s` within 2 frames (11.6 ms) |
 | Song import (#38) | the catalog MIDI | Same note count and pitches; `start` and `dur` within 1e-6 beats; the same `bpm`, `beats_per_bar` and `bar_lines` |
 | Auto-map (#40) and Pitch Coverage (#43) | the golden `recording_pitch_midi`, `shortest_note_s`, `settle_s`, `melodic`, gesture length and Song `notes` | The Arrangement matches (next section), for both libraries and every `coverage.json` subset |
-| Renderer (#41) | a golden Arrangement and its `beats` | Each note's and Beat's `render` `start_s` and `len_s` identical and `gain_db` within 0.05 dB (it is written to 0.1 dB), and the same checks as `evaluate.py`, no worse than the golden metrics (see "Metrics" below) |
+| Renderer (#41) | a golden Arrangement | The same checks as `evaluate.py`, no worse than the golden metrics (see "Metrics" below) |
 
 ### When an Arrangement matches
 
@@ -136,7 +135,7 @@ A few Recordings sit close to a decision threshold, so a tiny difference in a Sw
 
 The metrics are the reference renderer's result on its own render, not an exact target. The bar is [ADR 0012](../../docs/adr/0012-songs-play-farts-raw.md)'s: at least 94% of notes within ±50 cents of their fart's own pitch (`within_50c_of_fart_pct`), at least 95% of onsets within ±50 ms, and no second attack inside a note. "No worse than golden" applies to those three. `within_50c_of_fart_pct` compares each note with its own fart played dry: YIN (frame 2048, hop 256, 45 to 1200 Hz) reads the render and the dry fart on the same frame grid, and a note is faithful when the median of the per-frame differences over its loud frames (within 20 dB of the note's loudest, 12 ms in from either end) is within ±50 cents. YIN reads frame by frame with no voicing decision, so the same samples read the same in both, and the per-frame median survives a fart that YIN reads an octave apart on alternate frames (`032`).
 
-How close a Song sounds to its tune is reported, not gated, since Songs play farts raw: `median_abs_cents` (pYIN's per-note read-back distance from the note; 60 to 287 cents on the full library), `within_50c_pct` (0 to 42%) and `contour_pct` (40 to 90%). pYIN reads on a 10-cent grid, so a Swift evaluator with a continuous pitch estimate will give different numbers for these.
+How close a Song sounds to its tune is reported, not gated, since Songs play farts raw: `median_abs_cents` (pYIN's per-note read-back distance from the note; 53 to 287 cents on the full library), `within_50c_pct` (0 to 44%) and `contour_pct` (40 to 90%). pYIN reads on a 10-cent grid, so a Swift evaluator with a continuous pitch estimate will give different numbers for these.
 
 `on_pitch_pct` (#208) is the share of loud frames inside notes that YIN reads within 50 cents of the note, leaving out frames more than 9 semitones off. It is information, not a bar: 3 to 22% on the full library (83 to 97% when farts were pitch-held).
 
