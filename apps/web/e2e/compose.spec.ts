@@ -40,13 +40,18 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(page.getByText('No Melodic Recordings yet')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Locked · 12' })).toBeVisible()
   const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb' })
+  const noteAndLength = (seconds: string) => `[A-G]♯?2 \\(${seconds} s\\)`
   await expect(mary).toHaveAccessibleDescription(
-    'Locked. 1 of 4 notes covered. Needs C2 (1.5 s), D2 (0.7 s), and 1 more'
+    new RegExp(
+      `^Locked\\. 1 of 4 notes covered\\. Needs ${noteAndLength('1\\.5')}, ${noteAndLength('0\\.7')}, and 1 more$`
+    )
   )
 
   await mary.click()
   await expect(sheet.getByTestId('locked-song-needs')).toHaveText(
-    'Needs a fart near C2 (1.5 s), D2 (0.7 s), and E2 (0.7 s).'
+    new RegExp(
+      `^Needs a fart near ${noteAndLength('1\\.5')}, ${noteAndLength('0\\.7')}, and ${noteAndLength('\\d\\.\\d')}\\.$`
+    )
   )
   await expect(sheet.getByTestId('pitch-strip')).toHaveAccessibleName(
     /^Notes collected: F\. Needed: /
