@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { button, closeScreens, show, tap } from '@/test-support/screen'
+import { Lander } from './lander'
 
 const finishWelcome = vi.fn()
 const openStep = vi.fn()
@@ -7,11 +8,11 @@ const openStep = vi.fn()
 vi.mock('./welcome-provider', () => ({ useWelcome: () => ({ finishWelcome }) }))
 vi.mock('./account-provider', () => ({ useAccount: () => ({ openStep }) }))
 
-async function showLander(environment?: string) {
-  if (environment) vi.stubEnv('FARTY_ENVIRONMENT', environment)
+async function showLanderOn(environment: string) {
+  vi.stubEnv('FARTY_ENVIRONMENT', environment)
   vi.resetModules()
-  const { Lander } = await import('./lander')
-  await show(<Lander atHome qrCode={null} />)
+  const built = await import('./lander')
+  await show(<built.Lander atHome qrCode={null} />)
 }
 
 function answerTo(question: string): string | null | undefined {
@@ -30,7 +31,7 @@ describe('the lander', () => {
     'Sign in',
     'Sign up free'
   ])('opens the app with the account step on it (%s)', async name => {
-    await showLander()
+    await show(<Lander atHome qrCode={null} />)
     await tap(button(name))
 
     expect(finishWelcome).toHaveBeenCalledOnce()
@@ -48,7 +49,7 @@ describe('the lander', () => {
     ],
     ['production', 'Yes. Farty is free, and so is an account.']
   ])('answers whether Farty is free as its environment does (%s)', async (environment, answer) => {
-    await showLander(environment)
+    await showLanderOn(environment)
     expect(answerTo('Is Farty free?')).toBe(answer)
   })
 })
