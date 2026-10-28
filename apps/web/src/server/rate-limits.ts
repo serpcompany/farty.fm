@@ -35,7 +35,7 @@ export async function emailClientLimitKey(
   return `email-client|${await keyedHash(secret, 'email-client-limit', value)}`
 }
 
-export function networkOf(client: string): string {
+function networkOf(client: string): string {
   const groups = client.split(':')
   return groups.length === 8 ? `${groups.slice(0, 3).join(':')}::/48` : client
 }
