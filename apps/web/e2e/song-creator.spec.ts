@@ -245,12 +245,11 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
   })
 })
 
-test('a locked Song says how to unlock it, and an unknown Song is not found', async ({
+test('a locked Song says how to unlock it, and an unknown Song is not found, on no tab', async ({
   page,
   pageErrors
 }) => {
-  const hydrationMismatchOnAnUnknownSong = 'Minified React error #418'
-  pageErrors.expect('the server responded with a status of 404', hydrationMismatchOnAnUnknownSong)
+  pageErrors.expect('the server responded with a status of 404')
   await page.goto('/compose/mary/')
   await expect(page.getByRole('heading', { name: 'Mary Had a Little Lamb' })).toBeVisible()
   await expect(
@@ -261,6 +260,9 @@ test('a locked Song says how to unlock it, and an unknown Song is not found', as
   const response = await page.goto('/compose/not-a-song/')
   expect(response?.status()).toBe(404)
   await expect(page.getByText('Page not found')).toBeVisible()
+  await expect(
+    page.getByRole('navigation', { name: 'Tabs' }).locator('[aria-current]')
+  ).toHaveCount(0)
 })
 
 test.describe('installed', () => {

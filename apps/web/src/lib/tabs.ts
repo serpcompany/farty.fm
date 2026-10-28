@@ -8,8 +8,8 @@ export const tabs = [
 
 export type Tab = (typeof tabs)[number]['id']
 
-export function tabOf(pathname: string): Tab | null {
-  const path = pathname.endsWith('/') ? pathname : `${pathname}/`
-  if (path === '/') return 'record'
-  return tabs.find(tab => tab.href !== '/' && path.startsWith(tab.href))?.id ?? null
+export function tabOf(segments: readonly string[]): Tab | null {
+  const [first] = segments
+  if (first === undefined) return 'record'
+  return tabs.find(tab => tab.href === `/${first}/`)?.id ?? null
 }

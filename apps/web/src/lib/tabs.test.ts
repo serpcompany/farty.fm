@@ -13,19 +13,18 @@ describe('tabs', () => {
   })
 
   test.each([
-    ['/', 'record'],
-    ['/recordings/', 'recordings'],
-    ['/recordings', 'recordings'],
-    ['/compose/', 'compose'],
-    ['/compose/twinkle/', 'compose'],
-    ['/toots/', 'toots'],
-    ['/toots/3f2a/', 'toots'],
-    ['/profile/', 'profile']
-  ])('%s is on %s', (path, tab) => {
-    expect(tabOf(path)).toBe(tab)
+    [[], 'record'],
+    [['recordings'], 'recordings'],
+    [['compose'], 'compose'],
+    [['compose', 'twinkle'], 'compose'],
+    [['toots'], 'toots'],
+    [['toots', 'toot'], 'toots'],
+    [['profile'], 'profile']
+  ])('%j is on %s', (segments, tab) => {
+    expect(tabOf(segments)).toBe(tab)
   })
 
-  test.each(['/privacy/', '/composer/', '/recordingsx'])('%s is on no tab', path => {
-    expect(tabOf(path)).toBeNull()
+  test.each([[['privacy']], [['composer']], [['/_not-found']]])('%j is on no tab', segments => {
+    expect(tabOf(segments)).toBeNull()
   })
 })

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter, useSelectedLayoutSegments } from 'next/navigation'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { stopPlayback } from '@/lib/audio/player'
 import { desktop, wide } from '@/lib/desktop'
@@ -80,11 +80,11 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
   const { stepOpen } = useAccount()
   const { libraryProblem } = useRecordings()
   const waitsForOtherTabs = useWaitsForOtherTabs()
-  const pathname = usePathname()
-  const tab = tabOf(pathname)
+  const segments = useSelectedLayoutSegments()
+  const tab = tabOf(segments)
   const tabsCovered =
     stepOpen || flow !== null || capture.kind === 'recording' || capture.kind === 'finishing'
-  const atHome = pathname === '/'
+  const atHome = segments.length === 0
   useTrackPages()
   useStopPlaybackOnTabChange(tab)
   useBackOnRecord(tab, showsRecordFlow || stepOpen)
