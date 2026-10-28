@@ -33,8 +33,7 @@ export default defineConfig({
     baseURL,
     httpCredentials: stagingPassword ? { username: 'farty', password: stagingPassword } : undefined,
     trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure'
+    screenshot: 'only-on-failure'
   },
   projects: [
     {

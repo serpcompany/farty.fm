@@ -137,27 +137,31 @@ test("a browser's farts from before a guest's Toots lasted the visit: the Record
   await expect(reopened.getByText('Nothing yet')).toBeVisible()
 })
 
-test('a Recording saved while Farty still reads the session waits for the visit to start', async ({
-  page,
-  context
-}) => {
-  await page.goto('/recordings/')
-  await expect(page.getByText('No Recordings yet')).toBeVisible()
-  await write(page, [{ store: 'meta', value: 1, key: 'cursor' }])
-  await page.close()
-  const visit = await context.newPage()
+test.describe('with a microphone that answers at once', () => {
+  test.use({ fakeMicrophone: { farts: true, answersAfterMs: 0 } })
 
-  let answer = () => {}
-  const answered = new Promise<void>(resolve => (answer = resolve))
-  await visit.route('**/api/auth/get-session*', async route => {
-    await answered
-    await route.continue()
+  test('a Recording saved while Farty still reads the session waits for the visit to start', async ({
+    page,
+    context
+  }) => {
+    await page.goto('/recordings/')
+    await expect(page.getByText('No Recordings yet')).toBeVisible()
+    await write(page, [{ store: 'meta', value: 1, key: 'cursor' }])
+    await page.close()
+    const visit = await context.newPage()
+
+    let answer = () => {}
+    const answered = new Promise<void>(resolve => (answer = resolve))
+    await visit.route('**/api/auth/get-session*', async route => {
+      await answered
+      await route.continue()
+    })
+    await recordAndSave(visit)
+    await expect(visit.getByRole('button', { name: 'Save' })).toBeDisabled()
+    expect(await stored(visit, 'recordings')).toBe(0)
+    answer()
+    await expect(visit.getByTestId('result-note')).toHaveText('G3')
+    expect(await stored(visit, 'recordings')).toBe(1)
+    expect(await stored(visit, 'meta')).toBe(0)
   })
-  await recordAndSave(visit)
-  await expect(visit.getByRole('button', { name: 'Save' })).toBeDisabled()
-  expect(await stored(visit, 'recordings')).toBe(0)
-  answer()
-  await expect(visit.getByTestId('result-note')).toHaveText('G3')
-  expect(await stored(visit, 'recordings')).toBe(1)
-  expect(await stored(visit, 'meta')).toBe(0)
 })

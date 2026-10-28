@@ -3,7 +3,6 @@ import { songs } from '@/lib/catalog/songs.generated'
 import { songRows } from '@/lib/pitch-coverage'
 import type { Recording } from '@/lib/recordings'
 import {
-  button,
   closeScreens,
   dialogs,
   hideAndShowPage,

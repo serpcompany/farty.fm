@@ -14,7 +14,7 @@ const fixtures: Record<string, string> = {
 
 export const getUserMediaMs = 800
 
-export type FakeMicrophoneOptions = { farts: boolean }
+export type FakeMicrophoneOptions = { farts: boolean; answersAfterMs?: number }
 
 type FakeMicrophone = {
   calls: number
@@ -179,10 +179,10 @@ function fixtureWavs(): Record<string, string> {
 
 export async function addFakeMicrophone(
   context: BrowserContext,
-  { farts }: FakeMicrophoneOptions
+  { farts, answersAfterMs = getUserMediaMs }: FakeMicrophoneOptions
 ): Promise<void> {
   await context.addInitScript(fakeMicrophone, {
     wavs: farts ? fixtureWavs() : {},
-    delayMs: getUserMediaMs
+    delayMs: answersAfterMs
   })
 }
