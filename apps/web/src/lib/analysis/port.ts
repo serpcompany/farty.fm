@@ -1,7 +1,6 @@
 import type { Analysis } from '@/lib/recordings'
 import { analyzeRecording, type RecordingAnalysis } from './recording-analysis'
 
-/** What the app keeps of Recording Analysis, as the iPhone app's `SavedAnalysis`. */
 export function toAnalysis(result: RecordingAnalysis): Analysis {
   return {
     gestureStartSeconds: result.gestureStartSeconds,

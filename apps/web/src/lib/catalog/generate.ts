@@ -1,21 +1,6 @@
-/**
- * Generates the Songs the app ships (`songs.generated.ts`) from what the reference engine already
- * imported (ADR 0003):
- *
- * - each Song's melody from `fixtures/golden/songs/<id>.json`, so nothing parses MIDI here;
- * - its title and source line from `catalog/catalog.json`, checked against the golden copy, so
- *   the notes come from the cited score;
- * - only the Songs on the ship list, in its order.
- *
- * Node-only: the app imports `songs.generated.ts`, never this file. Run from `apps/web/`:
- *
- *     pnpm exec tsx src/lib/catalog/generate.ts           # rewrite songs.generated.ts
- *     pnpm exec tsx src/lib/catalog/generate.ts --check   # fail if it's out of date
- */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-/** An entry of `catalog/catalog.json`: the cited score and how the reference engine imports it. */
 export type CatalogEntry = {
   id: string
   title: string
@@ -25,7 +10,6 @@ export type CatalogEntry = {
   render: { bpm: number }
 }
 
-/** `fixtures/golden/songs/<id>.json`: the reference engine's import of a catalog score. */
 export type GoldenSong = {
   id: string
   title: string
@@ -47,18 +31,10 @@ function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(fileURLToPath(new URL(path, repo)), 'utf8')) as T
 }
 
-/**
- * The Songs the app ships, in the iPhone app's order, from `ship-list.json`. A Song added to
- * `catalog/` doesn't ship until it's on this list. The Mutopia Ode to Joy (`ode-mutopia`) stays
- * out: it's the same tune as `ode`, kept in the catalog to exercise the reference engine's
- * importer. `tools/melody-lab/export_golden.py` reads the same file, so every Song on it has
- * golden data.
- */
 export const shipList: readonly string[] = readJson<string[]>(
   'apps/web/src/lib/catalog/ship-list.json'
 )
 
-/** The catalog and the golden Songs, read from the repository. */
 export function readSources(): Sources {
   return {
     catalog: readJson<CatalogEntry[]>('catalog/catalog.json'),
@@ -66,10 +42,6 @@ export function readSources(): Sources {
   }
 }
 
-/**
- * The line each Song shows under its title, from its source and license. CC0 is a public domain
- * dedication, so a CC0 score's line is a public domain score's.
- */
 function sourceLine(entry: CatalogEntry): string {
   const { dataset = '', license } = entry.source
   if (dataset.startsWith('PDMX') && (license === 'publicdomain' || license === 'cc-zero'))
@@ -117,7 +89,6 @@ function song(entry: CatalogEntry, golden: GoldenSong): string[] {
   ]
 }
 
-/** The text of `songs.generated.ts` for the Songs on `ids`. */
 export function renderCatalog(sources: Sources, ids: readonly string[] = shipList): string {
   if (new Set(ids).size !== ids.length) throw new Error('the ship list names a Song twice')
   const songs = ids.map(id => {

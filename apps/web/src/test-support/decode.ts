@@ -1,15 +1,15 @@
-// Node-only fixture decoding for the tests. Mirrors how the reference reads a file
-// (`librosa.load` → soundfile → libsndfile): float32 samples per channel at the file's own
-// rate, then channels averaged to mono. Resampling is left to `analyzeRecording`.
 import { readFile } from 'node:fs/promises'
 import { MPEGDecoder } from 'mpg123-decoder'
 
+const ID3V2_HEADER_BYTES = 10
+const ID3V2_FOOTER_FLAG = 0x10
+const MONO_CHANNEL_MODE = 3
+const WAVE_FORMAT_EXTENSIBLE = 0xfffe
+
 export interface DecodedFile {
-  /** Mono float32, at the file's own rate. */
   samples: Float32Array
   sampleRate: number
   channels: number
-  /** Frames per channel, as libsndfile reports them (`sf.info(path).frames`). */
   frames: number
 }
 
@@ -20,11 +20,6 @@ export async function decodeFile(path: string): Promise<DecodedFile> {
   throw new Error(`Unsupported fixture format: ${path}`)
 }
 
-/**
- * MP3 through mpg123 (WASM), like libsndfile, which decodes MP3 with libmpg123 in gapless mode:
- * the encoder delay and padding recorded in the LAME/Xing header (plus mpg123's 529-sample
- * decoder delay) are trimmed, so the frame count equals libsndfile's.
- */
 async function decodeMp3(bytes: Uint8Array): Promise<DecodedFile> {
   const decoder = new MPEGDecoder({ enableGapless: true })
   await decoder.ready
@@ -32,8 +27,6 @@ async function decodeMp3(bytes: Uint8Array): Promise<DecodedFile> {
     const decoded = decoder.decode(bytes)
     const { samplesDecoded, sampleRate, errors } = decoded
     if (errors.length > 0) throw new Error(`MP3 decode errors: ${errors[0].message}`)
-    // mpg123-decoder always returns two channels and copies a mono stream into both;
-    // libsndfile reports the stream's own channel count.
     const channelData = isMonoMp3(bytes) ? decoded.channelData.slice(0, 1) : decoded.channelData
     return {
       samples: toMono(channelData, samplesDecoded),
@@ -46,22 +39,24 @@ async function decodeMp3(bytes: Uint8Array): Promise<DecodedFile> {
   }
 }
 
-/** Whether the first MPEG audio frame (after any ID3v2 tag) is single-channel. */
 function isMonoMp3(bytes: Uint8Array): boolean {
-  let at = 0
-  if (bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) {
-    // ID3v2: a 10-byte header, a synchsafe size, and a 10-byte footer when flag 0x10 is set.
-    const size = (bytes[6] << 21) | (bytes[7] << 14) | (bytes[8] << 7) | bytes[9]
-    at = 10 + size + (bytes[5] & 0x10 ? 10 : 0)
-  }
-  for (; at + 3 < bytes.length; at++) {
-    // Frame sync (11 bits) with a Layer III header; the channel mode is the top 2 bits of byte 3.
-    if (bytes[at] === 0xff && (bytes[at + 1] & 0xe6) === 0xe2) return bytes[at + 3] >> 6 === 3
+  for (let at = afterId3v2Tag(bytes); at + 3 < bytes.length; at++) {
+    if (isLayer3FrameSync(bytes, at)) return bytes[at + 3] >> 6 === MONO_CHANNEL_MODE
   }
   throw new Error('No MPEG audio frame found')
 }
 
-/** PCM WAV. libsndfile scales 16-bit samples by 1/32768 and 24/32-bit ones likewise. */
+function afterId3v2Tag(bytes: Uint8Array): number {
+  if (!(bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33)) return 0
+  const synchsafeSize = (bytes[6] << 21) | (bytes[7] << 14) | (bytes[8] << 7) | bytes[9]
+  const footer = bytes[5] & ID3V2_FOOTER_FLAG ? ID3V2_HEADER_BYTES : 0
+  return ID3V2_HEADER_BYTES + synchsafeSize + footer
+}
+
+function isLayer3FrameSync(bytes: Uint8Array, at: number): boolean {
+  return bytes[at] === 0xff && (bytes[at + 1] & 0xe6) === 0xe2
+}
+
 function decodeWav(bytes: Uint8Array): DecodedFile {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
   const tag = (at: number) => String.fromCharCode(...bytes.subarray(at, at + 4))
@@ -80,8 +75,10 @@ function decodeWav(bytes: Uint8Array): DecodedFile {
       channels = view.getUint16(body + 2, true)
       sampleRate = view.getUint32(body + 4, true)
       bits = view.getUint16(body + 14, true)
-      // WAVE_FORMAT_EXTENSIBLE: the real format is the first 2 bytes of the sub-format GUID.
-      if (format === 0xfffe) format = view.getUint16(body + 24, true)
+      if (format === WAVE_FORMAT_EXTENSIBLE) {
+        const subFormatGuidStart = body + 24
+        format = view.getUint16(subFormatGuidStart, true)
+      }
     } else if (id === 'data') {
       const bytesPerSample = bits / 8
       const frames = Math.floor(Math.min(size, bytes.length - body) / (bytesPerSample * channels))
@@ -109,7 +106,6 @@ function sampleReader(view: DataView, format: number, bits: number): (at: number
   throw new Error(`Unsupported WAV sample format ${format} with ${bits} bits`)
 }
 
-/** librosa.to_mono: the mean over channels, in float32. */
 function toMono(channelData: Float32Array[], frames: number): Float32Array {
   if (channelData.length === 1) return channelData[0].subarray(0, frames)
   const mono = new Float32Array(frames)

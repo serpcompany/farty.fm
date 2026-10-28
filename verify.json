@@ -220,14 +220,6 @@
         "blocks": 1,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       },
-      "apps\\web\\src\\lib\\analysis\\client.ts and apps\\web\\src\\lib\\engine\\client.ts": {
-        "blocks": 1,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "apps\\web\\src\\lib\\analysis\\recording-pitch.ts and apps\\web\\src\\lib\\analysis\\trimming.ts": {
-        "blocks": 1,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
       "apps\\web\\src\\lib\\engine\\auto-map.test.ts and apps\\web\\src\\lib\\engine\\auto-map.test.ts": {
         "blocks": 1,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -631,80 +623,12 @@
           "findings": 3,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/lib/analysis/audition.test.ts": {
-          "findings": 8,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/audition.ts": {
-          "findings": 12,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/client.ts": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/fft.ts": {
-          "findings": 12,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/numeric.ts": {
-          "findings": 13,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/port.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/pyin.ts": {
-          "findings": 26,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/lib/analysis/recording-analysis.test.ts": {
           "findings": 5,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/lib/analysis/recording-analysis.ts": {
-          "findings": 15,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/recording-pitch.test.ts": {
-          "findings": 3,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/recording-pitch.ts": {
-          "findings": 14,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/resample.test.ts": {
-          "findings": 6,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/resample.ts": {
-          "findings": 15,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/lib/analysis/timing.test.ts": {
           "findings": 8,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/trimming.test.ts": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/trimming.ts": {
-          "findings": 6,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/variable-resample.ts": {
-          "findings": 17,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/version.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/worker.ts": {
-          "findings": 2,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
         "apps/web/src/lib/audio/capture-processor.test.ts": {
@@ -731,18 +655,6 @@
           "findings": 59,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/lib/catalog/catalog.test.ts": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/catalog/generate.ts": {
-          "findings": 7,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/catalog/song.ts": {
-          "findings": 11,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/lib/desktop.ts": {
           "findings": 2,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -755,48 +667,12 @@
           "findings": 4,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/lib/engine/assignment.ts": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/lib/engine/auto-map.test.ts": {
           "findings": 29,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/lib/engine/auto-map.ts": {
-          "findings": 72,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/client.ts": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/render-song.ts": {
-          "findings": 10,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/render-source.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/lib/engine/renderer.test.ts": {
           "findings": 16,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/renderer.ts": {
-          "findings": 35,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/song.ts": {
-          "findings": 8,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/worker.test.ts": {
-          "findings": 8,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/worker.ts": {
-          "findings": 3,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
         "apps/web/src/lib/fixture-library.test.ts": {
@@ -1043,22 +919,6 @@
           "findings": 5,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/test-support/decode.ts": {
-          "findings": 14,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/test-support/engine-golden.ts": {
-          "findings": 11,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/test-support/fake-worker.ts": {
-          "findings": 13,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/test-support/golden.ts": {
-          "findings": 12,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/test-support/library-api.ts": {
           "findings": 13,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -1126,44 +986,8 @@
           "findings": 3,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/lib/analysis/numeric.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/recording-analysis.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/recording-pitch.ts": {
-          "findings": 6,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/trimming.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/analysis/variable-resample.ts": {
-          "findings": 3,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/lib/audio/recorder.ts": {
           "findings": 3,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/auto-map.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/render-song.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/renderer.ts": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/lib/engine/song.ts": {
-          "findings": 1,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
         "apps/web/src/lib/sitemap.ts": {

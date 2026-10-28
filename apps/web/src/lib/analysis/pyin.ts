@@ -2,85 +2,69 @@ import { Autocorrelation } from './fft'
 import { exp2, pairwiseSum, roundHalfEven } from './numeric'
 
 export interface PyinOutput {
-  /** Hz per frame, NaN when unvoiced. */
   f0: Float64Array
   voiced: Uint8Array
   voicedProbability: Float64Array
 }
 
-/** `np.finfo(np.float64).tiny`, librosa's `util.tiny`: the smallest normal double. */
-const TINY = 2.2250738585072014e-308
-const LOG_TINY = Math.log(TINY)
+const SMALLEST_NORMAL = 2.2250738585072014e-308
+const LOG_SMALLEST_NORMAL = Math.log(SMALLEST_NORMAL)
+const THRESHOLDS = 100
+const PITCH_RESOLUTION_SEMITONES = 0.1
+const BOLTZMANN_PARAMETER = 2
+const NO_TROUGH_PROBABILITY = 0.01
+const MAX_TRANSITION_OCTAVES_PER_SECOND = 35.92
+const VOICING_STAY_PROBABILITY = 0.99
+const TRANSITION_MIN_PROBABILITY = 1e-4
+const AUTOCORRELATION_LENGTH = 4096
 
-/**
- * Probabilistic YIN pitch tracking: a step-by-step port of librosa 1.0.0's
- * `pyin(y, fmin=45, fmax=900, sr=44100, frame_length=2048, hop_length=256)` with all of
- * librosa's other defaults (centered, zero-padded frames; 100 thresholds with a Beta(2, 18)
- * prior; Boltzmann trough prior 2; 0.1-semitone pitch bins starting at fmin; a voicing HMM with
- * 35.92 octaves/s maximum transition rate, switch probability 0.01, decoded with Viterbi over
- * transitions of probability at least 1e-4). Mirrors `PYIN.swift`.
- *
- * The pitch grid matters: Recording Pitches sit on it (MIDI x.x259), so the port keeps the
- * reference's bins, its rounding (half to even) and its tie-breaking.
- */
 export class Pyin {
   static readonly sampleRate = 44_100
   static readonly frameLength = 2048
   static readonly hopLength = 256
   static readonly fmin = 45
-  /**
-   * The highest pitch Recording Analysis looks for. The render checks (`evaluate.py`) read
-   * renders back with a 1200 Hz ceiling instead.
-   */
   static readonly fmax = 900
 
   readonly minPeriod: number
   readonly maxPeriod: number
   readonly pitchBins: number
   readonly binsPerOctave: number
-  /** Bin center frequencies. */
   readonly freqs: Float64Array
   private readonly thresholds: Float64Array
   private readonly betaProbs: Float64Array
-  /** `beta_probs[:n].sum()` for every n. */
   private readonly betaHeadSums: Float64Array
-  /** Boltzmann normalization `(1 − e^−2) / (1 − e^(−2N))` for N troughs. */
   private readonly boltzmannFactor: Float64Array
-  /** `e^(−2k)`. */
   private readonly boltzmannDecay: Float64Array
-  /** Viterbi predecessors of each state (voiced bins, then unvoiced bins), ascending. */
-  private readonly predOffsets: Int32Array
-  private readonly predStates: Int32Array
-  private readonly predLogTransition: Float64Array
+  private readonly transitions: Transitions
   private readonly logInitial: number
-  private readonly acf = new Autocorrelation(4096)
+  private readonly acf = new Autocorrelation(AUTOCORRELATION_LENGTH)
 
   constructor(fmax: number = Pyin.fmax) {
     const sr = Pyin.sampleRate
     this.minPeriod = Math.floor(sr / fmax)
     this.maxPeriod = Math.min(Math.ceil(sr / Pyin.fmin), Pyin.frameLength - 1)
-    const binsPerSemitone = Math.ceil(1 / 0.1)
+    const binsPerSemitone = Math.ceil(1 / PITCH_RESOLUTION_SEMITONES)
     this.binsPerOctave = 12 * binsPerSemitone
     this.pitchBins = Math.floor(this.binsPerOctave * Math.log2(fmax / Pyin.fmin)) + 1
 
-    // Prior over thresholds: np.diff(scipy.stats.beta.cdf(np.linspace(0, 1, 101), 2, 18)).
-    // For integer shape parameters the regularized incomplete beta function has a closed form:
-    // I_x(2, 18) = 1 − (1−x)^19 − 19 x (1−x)^18.
-    this.thresholds = new Float64Array(101)
-    for (let i = 0; i <= 100; i++) this.thresholds[i] = i * 0.01
-    this.thresholds[100] = 1
-    const cdf = this.thresholds.map(x => 1 - (1 - x) ** 19 - 19 * x * (1 - x) ** 18)
-    this.betaProbs = new Float64Array(100)
-    for (let j = 0; j < 100; j++) this.betaProbs[j] = cdf[j + 1] - cdf[j]
-    this.betaHeadSums = new Float64Array(101)
-    for (let n = 0; n <= 100; n++) this.betaHeadSums[n] = pairwiseSum(this.betaProbs, 0, n)
+    this.thresholds = new Float64Array(THRESHOLDS + 1)
+    for (let i = 0; i <= THRESHOLDS; i++) this.thresholds[i] = i * 0.01
+    this.thresholds[THRESHOLDS] = 1
+    const cdf = this.thresholds.map(betaTwoEighteenCdf)
+    this.betaProbs = new Float64Array(THRESHOLDS)
+    for (let j = 0; j < THRESHOLDS; j++) this.betaProbs[j] = cdf[j + 1] - cdf[j]
+    this.betaHeadSums = new Float64Array(THRESHOLDS + 1)
+    for (let n = 0; n <= THRESHOLDS; n++) {
+      this.betaHeadSums[n] = pairwiseSum(this.betaProbs, 0, n)
+    }
 
     const maxTroughs = this.maxPeriod - this.minPeriod + 2
     this.boltzmannFactor = new Float64Array(maxTroughs + 1)
     this.boltzmannDecay = new Float64Array(maxTroughs + 1)
     for (let n = 0; n <= maxTroughs; n++) {
-      this.boltzmannFactor[n] = (1 - Math.exp(-2)) / (1 - Math.exp(-2 * n))
-      this.boltzmannDecay[n] = Math.exp(-2 * n)
+      this.boltzmannFactor[n] =
+        (1 - Math.exp(-BOLTZMANN_PARAMETER)) / (1 - Math.exp(-BOLTZMANN_PARAMETER * n))
+      this.boltzmannDecay[n] = Math.exp(-BOLTZMANN_PARAMETER * n)
     }
 
     this.freqs = new Float64Array(this.pitchBins)
@@ -88,50 +72,8 @@ export class Pyin {
       this.freqs[b] = Pyin.fmin * exp2(b / this.binsPerOctave)
     }
 
-    // Transition matrix: a triangular local window within voiced and within unvoiced bins
-    // (sequence.transition_local), times the voicing switch (transition_loop(2, 0.99)).
-    const maxSemitonesPerFrame = roundHalfEven((35.92 * 12 * Pyin.hopLength) / sr)
-    const width = maxSemitonesPerFrame * binsPerSemitone + 1
-    const half = Math.floor(width / 2)
-    const n = this.pitchBins
-    // scipy triang, rising half: window[half − d] is the weight at distance d.
-    const window = Array.from({ length: half + 1 }, (_, i) => (2 * (i + 1)) / (width + 1))
-    const w = (d: number) => window[half - d]
-    const rowSum = new Float64Array(n)
-    for (let i = 0; i < n; i++) {
-      let s = 0
-      for (let j = Math.max(0, i - half); j <= Math.min(n - 1, i + half); j++) {
-        s += w(Math.abs(i - j))
-      }
-      rowSum[i] = s
-    }
-    const stay = 0.99
-    const switchProb = (1 - stay) / 1
-    const logThreshold = Math.log(1e-4 + TINY)
-    const offsets = [0]
-    const states: number[] = []
-    const logs: number[] = []
-    for (let target = 0; target < 2 * n; target++) {
-      const tv = target < n
-      const tj = target % n
-      for (let source = 0; source < 2 * n; source++) {
-        const sv = source < n
-        const si = source % n
-        const d = Math.abs(si - tj)
-        if (d > half) continue
-        const p = (sv === tv ? stay : switchProb) * (w(d) / rowSum[si])
-        const lp = Math.log(p + TINY)
-        if (lp >= logThreshold) {
-          states.push(source)
-          logs.push(lp)
-        }
-      }
-      offsets.push(states.length)
-    }
-    this.predOffsets = Int32Array.from(offsets)
-    this.predStates = Int32Array.from(states)
-    this.predLogTransition = Float64Array.from(logs)
-    this.logInitial = Math.log(1 / (2 * n) + TINY)
+    this.transitions = viterbiTransitions(this.pitchBins, binsPerSemitone)
+    this.logInitial = Math.log(1 / (2 * this.pitchBins) + SMALLEST_NORMAL)
   }
 
   run(y: Float64Array): PyinOutput {
@@ -145,15 +87,12 @@ export class Pyin {
     const betaProbs = this.betaProbs
     const boltzmannFactor = this.boltzmannFactor
     const boltzmannDecay = this.boltzmannDecay
-    const predOffsets = this.predOffsets
-    const predStates = this.predStates
-    const predLogTransition = this.predLogTransition
+    const { offsets, sources, logProbabilities } = this.transitions
     const nFrames = 1 + Math.floor(y.length / hop)
     const nStates = 2 * pitchBins
     const nYin = maxPeriod - minPeriod + 1
     const sr = Pyin.sampleRate
 
-    // Zero-padded signal so frame t is centered on y[t * hop].
     const padded = new Float64Array(y.length + frameLength)
     padded.set(y, frameLength / 2)
 
@@ -163,9 +102,9 @@ export class Pyin {
     const yin = new Float64Array(nYin)
     const shifts = new Float64Array(nYin)
     const troughs: number[] = []
-    const firstBelow: number[] = []
+    const firstThresholdAbove: number[] = []
+    const countBelow = new Int32Array(THRESHOLDS)
     const troughProbs: number[] = []
-    const countBelow = new Int32Array(100)
     const obsVoiced = new Float64Array(pitchBins)
     const touched: number[] = []
     const logObs = new Float64Array(nStates)
@@ -176,68 +115,35 @@ export class Pyin {
 
     for (let t = 0; t < nFrames; t++) {
       const frame = t * hop
-      // 1. Autocorrelation of the frame (librosa.autocorrelate, via FFT).
       this.acf.compute(padded, frame, frameLength, acf)
-
-      // 2. Cumulative mean normalized difference (_cumulative_mean_normalized_difference).
-      let e = 0
-      for (let m = 0; m < maxPeriod; m++) {
-        e += padded[frame + m] * padded[frame + m]
-        energy[m] = e
-      }
-      const acf0 = acf[0]
-      diff[0] = 0
-      // librosa zeroes the first energy term before using it: d(1) subtracts 0.
-      diff[1] = 2 * (acf0 - acf[1]) - 0
-      for (let k = 2; k <= maxPeriod; k++) diff[k] = 2 * (acf0 - acf[k]) - energy[k - 1]
-      let cumulative = 0
-      for (let k = 1; k <= maxPeriod; k++) {
-        cumulative += diff[k]
-        if (k >= minPeriod) yin[k - minPeriod] = diff[k] / (cumulative / k + TINY)
-      }
-
-      // 3. Parabolic interpolation offsets (_parabolic_interpolation).
-      shifts[0] = 0
-      shifts[nYin - 1] = 0
-      for (let i = 1; i < nYin - 1; i++) {
-        const a = yin[i + 1] + yin[i - 1] - 2 * yin[i]
-        const b = (yin[i + 1] - yin[i - 1]) / 2
-        shifts[i] = Math.abs(b) >= Math.abs(a) ? 0 : -b / a
-      }
-
-      // 4. Troughs and their probabilities (__pyin_helper).
-      troughs.length = 0
-      if (yin[0] < yin[1]) troughs.push(0)
-      for (let i = 1; i < nYin - 1; i++) {
-        if (yin[i] < yin[i - 1] && yin[i] <= yin[i + 1]) troughs.push(i)
-      }
-      if (yin[nYin - 1] < yin[nYin - 2]) troughs.push(nYin - 1)
+      cumulativeMeanNormalizedDifference(padded, frame, acf, energy, diff, minPeriod, yin)
+      parabolicShifts(yin, shifts)
+      findTroughs(yin, troughs)
 
       for (const b of touched) obsVoiced[b] = 0
       touched.length = 0
       let voicedProb = 0
       if (troughs.length > 0) {
-        // firstBelow[i]: the first threshold index j with height < thresholds[j + 1].
-        firstBelow.length = 0
+        firstThresholdAbove.length = 0
         countBelow.fill(0)
         for (const idx of troughs) {
           const h = yin[idx]
           let j = 0
-          while (j < 100 && !(h < thresholds[j + 1])) j++
-          firstBelow.push(j)
-          if (j < 100) countBelow[j]++
+          while (j < THRESHOLDS && !(h < thresholds[j + 1])) j++
+          firstThresholdAbove.push(j)
+          if (j < THRESHOLDS) countBelow[j]++
         }
-        for (let j = 1; j < 100; j++) countBelow[j] += countBelow[j - 1]
+        for (let j = 1; j < THRESHOLDS; j++) countBelow[j] += countBelow[j - 1]
         troughProbs.length = 0
         for (let i = 0; i < troughs.length; i++) troughProbs.push(0)
-        for (let j = 0; j < 100; j++) {
+        for (let j = 0; j < THRESHOLDS; j++) {
           const nBelow = countBelow[j]
           if (nBelow === 0) continue
           const factor = boltzmannFactor[nBelow]
           const beta = betaProbs[j]
           let rank = 0
-          for (let ti = 0; ti < firstBelow.length; ti++) {
-            if (firstBelow[ti] <= j) {
+          for (let ti = 0; ti < firstThresholdAbove.length; ti++) {
+            if (firstThresholdAbove[ti] <= j) {
               troughProbs[ti] += factor * boltzmannDecay[rank] * beta
               rank++
             }
@@ -247,9 +153,9 @@ export class Pyin {
         for (let ti = 1; ti < troughs.length; ti++) {
           if (yin[troughs[ti]] < yin[troughs[globalMin]]) globalMin = ti
         }
-        troughProbs[globalMin] += 0.01 * this.betaHeadSums[firstBelow[globalMin]]
+        troughProbs[globalMin] +=
+          NO_TROUGH_PROBABILITY * this.betaHeadSums[firstThresholdAbove[globalMin]]
 
-        // Pitch bin of each candidate; later (longer-period) candidates overwrite.
         for (let ti = 0; ti < troughs.length; ti++) {
           if (troughProbs[ti] === 0) continue
           const idx = troughs[ti]
@@ -271,10 +177,9 @@ export class Pyin {
       }
       voicedProbability[t] = voicedProb
 
-      // 5. One Viterbi step (sequence.viterbi with transition_min_prob=1e-4).
-      logObs.fill(LOG_TINY, 0, pitchBins)
-      for (const b of touched) logObs[b] = Math.log(obsVoiced[b] + TINY)
-      logObs.fill(Math.log((1 - voicedProb) / pitchBins + TINY), pitchBins, nStates)
+      logObs.fill(LOG_SMALLEST_NORMAL, 0, pitchBins)
+      for (const b of touched) logObs[b] = Math.log(obsVoiced[b] + SMALLEST_NORMAL)
+      logObs.fill(Math.log((1 - voicedProb) / pitchBins + SMALLEST_NORMAL), pitchBins, nStates)
 
       if (t === 0) {
         for (let s = 0; s < nStates; s++) value[s] = logObs[s] + this.logInitial
@@ -284,9 +189,9 @@ export class Pyin {
       for (let j = 0; j < nStates; j++) {
         let best = Number.NEGATIVE_INFINITY
         let bestK = 0
-        for (let q = predOffsets[j]; q < predOffsets[j + 1]; q++) {
-          const k = predStates[q]
-          const cost = value[k] + predLogTransition[q]
+        for (let q = offsets[j]; q < offsets[j + 1]; q++) {
+          const k = sources[q]
+          const cost = value[k] + logProbabilities[q]
           if (cost > best) {
             best = cost
             bestK = k
@@ -300,13 +205,7 @@ export class Pyin {
       next = swap
     }
 
-    // Backtrack from the best final state (first maximum).
-    let state = 0
-    for (let s = 1; s < nStates; s++) if (value[s] > value[state]) state = s
-    const states = new Int32Array(nFrames)
-    states[nFrames - 1] = state
-    for (let t = nFrames - 2; t >= 0; t--) states[t] = ptr[(t + 1) * nStates + states[t + 1]]
-
+    const states = backtrack(value, ptr, nFrames, nStates)
     const f0 = new Float64Array(nFrames)
     const voiced = new Uint8Array(nFrames)
     for (let t = 0; t < nFrames; t++) {
@@ -317,8 +216,125 @@ export class Pyin {
   }
 }
 
+interface Transitions {
+  offsets: Int32Array
+  sources: Int32Array
+  logProbabilities: Float64Array
+}
+
+function betaTwoEighteenCdf(x: number): number {
+  return 1 - (1 - x) ** 19 - 19 * x * (1 - x) ** 18
+}
+
+function viterbiTransitions(pitchBins: number, binsPerSemitone: number): Transitions {
+  const maxSemitonesPerFrame = roundHalfEven(
+    (MAX_TRANSITION_OCTAVES_PER_SECOND * 12 * Pyin.hopLength) / Pyin.sampleRate
+  )
+  const width = maxSemitonesPerFrame * binsPerSemitone + 1
+  const half = Math.floor(width / 2)
+  const n = pitchBins
+  const risingTriangle = Array.from({ length: half + 1 }, (_, i) => (2 * (i + 1)) / (width + 1))
+  const weightAtDistance = (d: number) => risingTriangle[half - d]
+  const rowSum = new Float64Array(n)
+  for (let i = 0; i < n; i++) {
+    let s = 0
+    for (let j = Math.max(0, i - half); j <= Math.min(n - 1, i + half); j++) {
+      s += weightAtDistance(Math.abs(i - j))
+    }
+    rowSum[i] = s
+  }
+  const switchProbability = 1 - VOICING_STAY_PROBABILITY
+  const logThreshold = Math.log(TRANSITION_MIN_PROBABILITY + SMALLEST_NORMAL)
+  const offsets = [0]
+  const sources: number[] = []
+  const logProbabilities: number[] = []
+  for (let target = 0; target < 2 * n; target++) {
+    const targetVoiced = target < n
+    const targetBin = target % n
+    for (let source = 0; source < 2 * n; source++) {
+      const sourceVoiced = source < n
+      const sourceBin = source % n
+      const d = Math.abs(sourceBin - targetBin)
+      if (d > half) continue
+      const voicing = sourceVoiced === targetVoiced ? VOICING_STAY_PROBABILITY : switchProbability
+      const p = voicing * (weightAtDistance(d) / rowSum[sourceBin])
+      const lp = Math.log(p + SMALLEST_NORMAL)
+      if (lp >= logThreshold) {
+        sources.push(source)
+        logProbabilities.push(lp)
+      }
+    }
+    offsets.push(sources.length)
+  }
+  return {
+    offsets: Int32Array.from(offsets),
+    sources: Int32Array.from(sources),
+    logProbabilities: Float64Array.from(logProbabilities)
+  }
+}
+
+function cumulativeMeanNormalizedDifference(
+  padded: Float64Array,
+  frame: number,
+  acf: Float64Array,
+  energy: Float64Array,
+  diff: Float64Array,
+  minPeriod: number,
+  yin: Float64Array
+): void {
+  const maxPeriod = energy.length
+  let e = 0
+  for (let m = 0; m < maxPeriod; m++) {
+    e += padded[frame + m] * padded[frame + m]
+    energy[m] = e
+  }
+  const acf0 = acf[0]
+  diff[0] = 0
+  diff[1] = 2 * (acf0 - acf[1])
+  for (let k = 2; k <= maxPeriod; k++) diff[k] = 2 * (acf0 - acf[k]) - energy[k - 1]
+  let cumulative = 0
+  for (let k = 1; k <= maxPeriod; k++) {
+    cumulative += diff[k]
+    if (k >= minPeriod) yin[k - minPeriod] = diff[k] / (cumulative / k + SMALLEST_NORMAL)
+  }
+}
+
+function parabolicShifts(yin: Float64Array, shifts: Float64Array): void {
+  const n = yin.length
+  shifts[0] = 0
+  shifts[n - 1] = 0
+  for (let i = 1; i < n - 1; i++) {
+    const a = yin[i + 1] + yin[i - 1] - 2 * yin[i]
+    const b = (yin[i + 1] - yin[i - 1]) / 2
+    shifts[i] = Math.abs(b) >= Math.abs(a) ? 0 : -b / a
+  }
+}
+
+function findTroughs(yin: Float64Array, troughs: number[]): void {
+  const n = yin.length
+  troughs.length = 0
+  if (yin[0] < yin[1]) troughs.push(0)
+  for (let i = 1; i < n - 1; i++) {
+    if (yin[i] < yin[i - 1] && yin[i] <= yin[i + 1]) troughs.push(i)
+  }
+  if (yin[n - 1] < yin[n - 2]) troughs.push(n - 1)
+}
+
+function backtrack(
+  finalValue: Float64Array,
+  ptr: Uint16Array,
+  nFrames: number,
+  nStates: number
+): Int32Array {
+  let state = 0
+  for (let s = 1; s < nStates; s++) if (finalValue[s] > finalValue[state]) state = s
+  const states = new Int32Array(nFrames)
+  states[nFrames - 1] = state
+  for (let t = nFrames - 2; t >= 0; t--) states[t] = ptr[(t + 1) * nStates + states[t + 1]]
+  return states
+}
+
 let shared: Pyin | undefined
-/** The analysis pYIN (45 to 900 Hz), built once: its transition table takes a few ms. */
 export function sharedPyin(): Pyin {
   shared ??= new Pyin()
   return shared
