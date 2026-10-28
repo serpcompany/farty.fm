@@ -1,6 +1,7 @@
 // A Farty account, from the browser: the sign-in API (`src/server/auth-config.ts`: send a code,
-// sign in with it, read the session, sign out) and the account routes (`/api/account/`). Every
-// call is same-origin, so the browser sends the session cookie and its own Origin.
+// with a Turnstile token, sign in with it, read the session, sign out) and the account routes
+// (`/api/account/`). Every call is same-origin, so the browser sends the session cookie and its own
+// Origin.
 
 /** Who's using Farty here, as far as this page knows. */
 export type Account =
@@ -119,17 +120,23 @@ export type SignInProblem =
   /** The code expired or was guessed wrong too often: a new one is needed. */
   | 'codeExpired'
   | 'tooManyTries'
-  /** Sign-in codes can't be sent from here (a build without email). */
+  /** Turnstile didn't pass the request: a new token is needed. */
+  | 'notChecked'
+  /** Sign-in codes can't be sent from here (a build without email or Turnstile's keys). */
   | 'unavailable'
   /** Farty couldn't be reached, or answered something unexpected. */
   | 'failed'
 
 export type Result<T> = { ok: true; value: T } | { ok: false; problem: SignInProblem }
 
-async function post(path: string, body: unknown): Promise<Response> {
+async function post(
+  path: string,
+  body: unknown,
+  headers: Record<string, string> = {}
+): Promise<Response> {
   return fetch(path, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...headers },
     body: JSON.stringify(body)
   })
 }
@@ -150,18 +157,38 @@ export async function problemOf(response: Response): Promise<SignInProblem> {
     case 'OTP_EXPIRED':
     case 'TOO_MANY_ATTEMPTS':
       return 'codeExpired'
+    case 'MISSING_RESPONSE':
+    case 'VERIFICATION_FAILED':
+      return 'notChecked'
     default:
       return 'failed'
   }
 }
 
-/** Sends a 6-digit sign-in code to `email`. Signing in with it makes the account if it's new. */
-export async function sendCode(email: string): Promise<Result<null>> {
+/** The Turnstile site key for this environment's widget, read at runtime (#237). */
+export async function turnstileSiteKey(): Promise<Result<string>> {
   try {
-    const response = await post('/api/auth/email-otp/send-verification-otp', {
-      email: email.trim(),
-      type: 'sign-in'
-    })
+    const response = await fetch('/api/auth/turnstile', { cache: 'no-store' })
+    if (!response.ok) return { ok: false, problem: await problemOf(response) }
+    const { siteKey } = (await response.json()) as { siteKey?: unknown }
+    if (typeof siteKey !== 'string' || siteKey === '') return { ok: false, problem: 'failed' }
+    return { ok: true, value: siteKey }
+  } catch {
+    return { ok: false, problem: 'failed' }
+  }
+}
+
+/**
+ * Sends a 6-digit sign-in code to `email`, with the Turnstile `token` that says a person asked
+ * (#237). Each token works once. Signing in with the code makes the account if it's new.
+ */
+export async function sendCode(email: string, token: string): Promise<Result<null>> {
+  try {
+    const response = await post(
+      '/api/auth/email-otp/send-verification-otp',
+      { email: email.trim(), type: 'sign-in' },
+      { 'x-captcha-response': token }
+    )
     if (response.ok) return { ok: true, value: null }
     return { ok: false, problem: await problemOf(response) }
   } catch {
@@ -233,37 +260,21 @@ export function setMarketingEmail(on: boolean, accountId: string): Promise<Accou
 }
 
 /**
- * When the account step offers itself (#150): after a Result's button, the first time; once more
- * after a saved Toot; then only from Profile. Remembered in `localStorage` as `pedos.accountStep`:
- * absent, `once` (offered once) or `done` (offered twice, or signed in).
+ * When the account step offers itself (#150): after a Result's button, the first time; then only
+ * from Profile, and at Save (#237). Remembered in `localStorage` as `pedos.accountStep`: absent,
+ * `once` (offered) or `done` (signed in, or offered twice before #237, after a saved Toot).
  */
-export type StepOffers = null | 'once' | 'done'
-export type StepMoment = 'result' | 'toot'
-
 const stepKey = 'pedos.accountStep'
 
-/** Whether the step offers itself at `moment`, and what's remembered after. */
-export function stepOffer(
-  offers: StepOffers,
-  moment: StepMoment
-): { offer: boolean; next: StepOffers } {
-  if (moment === 'result') {
-    return offers === null ? { offer: true, next: 'once' } : { offer: false, next: offers }
-  }
-  return offers === 'done' ? { offer: false, next: 'done' } : { offer: true, next: 'done' }
-}
-
 /**
- * Whether the account step offers itself at `moment`, remembering that it did. With storage
- * blocked Farty can't remember, so it never offers: only Profile does.
+ * Whether the account step offers itself at a Result's button, remembering that it did. With
+ * storage blocked Farty can't remember, so it never offers: only Profile and Save do.
  */
-export function takeStepOffer(moment: StepMoment): boolean {
+export function takeStepOffer(): boolean {
   try {
-    const stored = localStorage.getItem(stepKey)
-    const offers: StepOffers = stored === 'once' || stored === 'done' ? stored : null
-    const { offer, next } = stepOffer(offers, moment)
-    if (next !== null) localStorage.setItem(stepKey, next)
-    return offer
+    if (localStorage.getItem(stepKey) !== null) return false
+    localStorage.setItem(stepKey, 'once')
+    return true
   } catch {
     return false
   }

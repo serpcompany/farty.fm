@@ -7,12 +7,10 @@ import {
   problemOf,
   readSession,
   readStepDraft,
-  type StepOffers,
   saveStepDraft,
   setLibraryOwner,
   setMarketingEmail,
   signIn,
-  stepOffer,
   stopStepOffers,
   takeSignInAgain,
   takeStepOffer
@@ -24,49 +22,25 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-describe('stepOffer', () => {
-  it('offers at the first Result, then once after a saved Toot, then never', () => {
-    let offers: StepOffers = null
-    const seen: boolean[] = []
-    for (const moment of ['result', 'result', 'toot', 'toot', 'result'] as const) {
-      const { offer, next } = stepOffer(offers, moment)
-      seen.push(offer)
-      offers = next
-    }
-    expect(seen).toEqual([true, false, true, false, false])
-    expect(offers).toBe('done')
-  })
-
-  it('offers after a saved Toot when no Result has offered it yet', () => {
-    expect(stepOffer(null, 'toot')).toEqual({ offer: true, next: 'done' })
-  })
-
-  it('never offers once done', () => {
-    expect(stepOffer('done', 'result').offer).toBe(false)
-    expect(stepOffer('done', 'toot').offer).toBe(false)
-  })
-})
-
 describe('takeStepOffer', () => {
-  it('remembers each offer in localStorage', () => {
+  it('offers at the first Result only, remembering it in localStorage', () => {
     vi.stubGlobal('localStorage', memoryStorage())
-    expect(takeStepOffer('result')).toBe(true)
+    expect(takeStepOffer()).toBe(true)
     expect(localStorage.getItem('pedos.accountStep')).toBe('once')
-    expect(takeStepOffer('result')).toBe(false)
-    expect(takeStepOffer('toot')).toBe(true)
-    expect(takeStepOffer('toot')).toBe(false)
+    expect(takeStepOffer()).toBe(false)
   })
 
-  it('never offers after signing in', () => {
+  it('never offers after signing in, or where it was offered twice before #237', () => {
     vi.stubGlobal('localStorage', memoryStorage())
     stopStepOffers()
-    expect(takeStepOffer('result')).toBe(false)
-    expect(takeStepOffer('toot')).toBe(false)
+    expect(takeStepOffer()).toBe(false)
+    localStorage.setItem('pedos.accountStep', 'done')
+    expect(takeStepOffer()).toBe(false)
   })
 
   it('never offers with storage blocked, since it could not remember', () => {
     vi.stubGlobal('localStorage', blockedStorage())
-    expect(takeStepOffer('result')).toBe(false)
+    expect(takeStepOffer()).toBe(false)
     expect(() => stopStepOffers()).not.toThrow()
   })
 })
