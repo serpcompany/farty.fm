@@ -133,6 +133,21 @@ closest to (ADR 0015). It still plays as recorded: the note says only where Song
   (`src/components/farty/recordings-provider.interaction.test.tsx`, "takes in what a sync changed,
   and stops a deleted Recording that plays"; "loads everything again after a sync reset").
 
+## A full account
+
+An account keeps at most 300 Recordings. When to try again is in [Accounts](account.md#sync).
+
+- While some Recordings can't upload because the account is full, a line under the title says so:
+  "Your account is full, so 2 Recordings are only on this device. Delete some to make room." It
+  counts down as they upload or are deleted, and goes once a delete here makes room, without a
+  reload (`src/components/farty/recordings-screen.interaction.test.tsx`, "says how many Recordings
+  wait for room while the account is full, until they upload"; `e2e/account-full.spec.ts`, "a full
+  account keeps a new Recording on this device and says so, without uploading it again, then
+  uploads it once a delete makes room").
+- A Recording deleted while it waits for room is gone, with nothing sent to the account
+  (`src/lib/outbox-send.test.ts`, "forgets a Recording deleted while it waits for room, with no
+  request").
+
 ## Offline
 
 - The installed app opened offline lists an account's Recordings and plays them

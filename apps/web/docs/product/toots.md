@@ -103,6 +103,20 @@ open, rename and delete. Saving a Toot needs a free account, which keeps them
   other's farts, and see each other's deletes"; `src/components/farty/toots-provider.interaction.test.tsx`,
   "takes in what a sync changed, and stops a deleted Toot that plays").
 
+## A full account
+
+An account keeps at most 300 Toots. Song Creator won't take payment for one past them, but a Toot
+paid for before the account filled up waits for room. When to try again is in
+[Accounts](account.md#sync).
+
+- While some Toots can't upload because the account is full, a line under the title says so: "Your
+  account is full, so 1 Toot is only on this device. Delete some to make room." It goes once they
+  upload (`src/components/farty/toots-screen.interaction.test.tsx`, "says how many Toots wait for
+  room while the account is full, until they upload").
+- A Toot renamed while it waits for room uploads with its new title, and stops counting as waiting
+  once it's uploaded (`src/lib/outbox-send.test.ts`, "stops counting a Toot as waiting for room once
+  it uploads, though its rename waits").
+
 ## Offline
 
 - The installed app opens a Toot's screen offline, plays it, and opens it again on a reload

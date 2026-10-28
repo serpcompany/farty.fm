@@ -2,6 +2,7 @@ import { readableLibraryOwner } from './account'
 import * as api from './library-api'
 import { announceLibraryChange } from './library-changes'
 import { itemKey, type Kind } from './outbox'
+import { roomMayExist } from './outbox-send'
 import { audioStore, type LibraryDatabase, withDb } from './recording-store'
 import type { Recording } from './recordings'
 import type { Toot } from './toot'
@@ -13,6 +14,7 @@ export async function pullAccountChanges(accountId: string): Promise<boolean> {
   const answer = await api.getLibrary(since, accountId)
   if (!('cursor' in answer) || readableLibraryOwner() !== accountId) return false
   const change = await withDb(database => apply(database, answer))
+  roomMayExist(...kinds.filter(kind => change.deleted[kind].length > 0))
   const changed =
     change.recordings.length +
     change.toots.length +

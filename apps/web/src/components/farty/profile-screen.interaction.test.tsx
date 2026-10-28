@@ -13,7 +13,7 @@ import {
   tap,
   type
 } from '@/test-support/screen'
-import { useAccount } from './account-provider'
+import { type NotUploaded, useAccount } from './account-provider'
 import { ProfileScreen } from './profile-screen'
 import { useRecordings } from './recordings-provider'
 import { useToots } from './toots-provider'
@@ -28,8 +28,10 @@ const signedIn: Account = { status: 'signedIn', id: 'u1', email: 'a@b.c', market
 
 type DeleteAccount = () => Promise<AccountChange>
 
+type SignOut = (anyway?: boolean) => Promise<'failed' | NotUploaded>
+
 const failing = {
-  signOut: vi.fn(async () => 'failed'),
+  signOut: vi.fn(async () => 'failed' as const),
   setMarketingEmail: vi.fn(async () => false)
 }
 
@@ -37,12 +39,14 @@ function holding({
   recordings = [],
   toots = [],
   account = signedIn,
-  deleteAccount = async () => 'failed'
+  deleteAccount = async () => 'failed',
+  signOut = failing.signOut
 }: {
   recordings?: Recording[] | null
   toots?: Toot[] | null
   account?: Account
   deleteAccount?: DeleteAccount
+  signOut?: SignOut
 }) {
   vi.mocked(useRecordings).mockReturnValue({
     recordings,
@@ -54,7 +58,8 @@ function holding({
   vi.mocked(useAccount).mockReturnValue({
     account,
     ...failing,
-    deleteAccount
+    deleteAccount,
+    signOut
   } as unknown as ReturnType<typeof useAccount>)
   return <ProfileScreen version="1.0.0" />
 }
@@ -132,6 +137,48 @@ describe('Profile', () => {
     expect(fetch).not.toHaveBeenCalled()
     expect(widgets).toEqual([])
     expect(pageText()).not.toContain('sign in again')
+  })
+})
+
+describe('Sign out with farts not uploaded', () => {
+  it.each([
+    [
+      'all with no room',
+      { full: 2, waiting: 0 },
+      "Your account is full2 farts on this device aren't in your account because it's full. Delete some to make room, or sign out now and lose them.",
+      'Keep them'
+    ],
+    [
+      'one with no room',
+      { full: 1, waiting: 0 },
+      "Your account is full1 fart on this device isn't in your account because it's full. Delete some to make room, or sign out now and lose it.",
+      'Keep it'
+    ],
+    [
+      'some with no room and some not sent',
+      { full: 1, waiting: 2 },
+      "Not uploaded yetSome farts on this device haven't reached your account, and 1 more can't because it's full. Check your connection and wait, or sign out now and lose them.",
+      'Wait'
+    ],
+    [
+      'none with no room',
+      { full: 0, waiting: 1 },
+      "Not uploaded yetSome farts on this device haven't reached your account. Check your connection and wait, or sign out now and lose them.",
+      'Wait'
+    ]
+  ])('says why farts here haven’t reached the account (%s), then keeps them or signs out anyway', async (_, left, words, keep) => {
+    const signOut = vi.fn<SignOut>(async anyway => (anyway ? 'failed' : left))
+    await show(holding({ signOut }))
+    await tap(button('Sign out'))
+    expect(dialogs().map(dialog => dialog.textContent)).toEqual([`${words}${keep}Sign out anyway`])
+
+    await tap(button(keep))
+    expect(dialogs()).toEqual([])
+    expect(signOut).toHaveBeenCalledExactlyOnceWith(false)
+
+    await tap(button('Sign out'))
+    await tap(button('Sign out anyway'))
+    expect(signOut).toHaveBeenLastCalledWith(true)
   })
 })
 

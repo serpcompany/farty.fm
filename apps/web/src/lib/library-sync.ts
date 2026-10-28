@@ -7,8 +7,8 @@ import {
 } from './account'
 import { announceLibraryChange } from './library-changes'
 import { pullAccountChanges } from './library-pull'
-import { onQueued } from './outbox'
-import { sendOutbox } from './outbox-send'
+import { type Kind, onQueued, waitsForRoom } from './outbox'
+import { roomMayExist, sendOutbox } from './outbox-send'
 import { clearLibrary, download, withDb } from './recording-store'
 
 const syncLock = 'pedos-sync'
@@ -20,6 +20,7 @@ async function withSyncLock<T>(job: () => Promise<T>): Promise<T> {
 
 export async function claimLibrary(accountId: string, email = ''): Promise<boolean> {
   if (!accountId) return false
+  roomMayExist('recordings', 'toots')
   const current = readableLibraryOwner()
   if (current === undefined) return false
   if (current !== accountId && current !== null && current !== legacyOwner) {
@@ -144,4 +145,9 @@ export async function uploadBeforeSignOut(accountId: string): Promise<number> {
     if (readableLibraryOwner() === accountId) await pullThenSend(accountId)
     return withDb(database => database.count('outbox'))
   })
+}
+
+export async function waitingForRoom(kind?: Kind): Promise<number> {
+  const queued = await withDb(database => database.getAll('outbox'))
+  return queued.filter(entry => waitsForRoom(entry) && (!kind || entry.kind === kind)).length
 }

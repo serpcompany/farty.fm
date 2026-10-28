@@ -1,7 +1,9 @@
-import type { ReactNode } from 'react'
+import { act, type ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { forgetDecoded, play, stopPlayback } from '@/lib/audio/player'
 import { songs } from '@/lib/catalog/songs.generated'
+import { waitingForRoom } from '@/lib/library-sync'
+import { announceSent } from '@/lib/outbox'
 import type { Toot } from '@/lib/toot'
 import * as tootStore from '@/lib/toot-store'
 import {
@@ -10,6 +12,7 @@ import {
   dialogs,
   hideAndShowPage,
   pageText,
+  settle,
   show,
   tap,
   type
@@ -39,6 +42,7 @@ vi.mock('@/lib/audio/player', () => ({
 }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: vi.fn() }))
 vi.mock('./recordings-provider', () => ({ useRecordings: () => ({ recording: () => undefined }) }))
+vi.mock('@/lib/library-sync', () => ({ waitingForRoom: vi.fn() }))
 
 const saved = (id: string, title: string, more: Partial<Toot> = {}): Toot => ({
   id,
@@ -79,6 +83,7 @@ async function fromMenu(title: string, item: 'Rename' | 'Delete') {
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(play).mockResolvedValue(undefined)
+  vi.mocked(waitingForRoom).mockResolvedValue(0)
 })
 
 afterEach(() => {
@@ -105,6 +110,21 @@ describe('the Toots tab', () => {
       'Playing'
     )
     expect(vi.mocked(forgetDecoded).mock.calls).toEqual([['toot-t1'], ['toot-t2']])
+  })
+
+  it('says how many Toots wait for room while the account is full, until they upload', async () => {
+    vi.mocked(waitingForRoom).mockResolvedValue(1)
+    await opened([saved('t1', 'First')], <TootsScreen />)
+    await settle()
+    expect(pageText()).toContain(
+      'Your account is full, so 1 Toot is only on this device. Delete some to make room.'
+    )
+    expect(vi.mocked(waitingForRoom).mock.calls).toEqual([['toots']])
+
+    vi.mocked(waitingForRoom).mockResolvedValue(0)
+    await act(async () => announceSent())
+    await settle()
+    expect(pageText()).not.toContain('Your account is full')
   })
 
   it.each([

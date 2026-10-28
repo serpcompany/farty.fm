@@ -191,6 +191,12 @@ sign-in](../../../../docs/agents/accounts.md), how the library syncs in
   Wait, which keeps the account, and Sign out anyway, which leaves those farts behind
   (`e2e/account-profile.spec.ts`, "Sign out uploads the farts not uploaded yet, and while it can't,
   Wait keeps the account"; "Sign out anyway signs out and leaves behind the farts not uploaded").
+- When all that's left can't fit in the account, Sign out says "Your account is full" and how many
+  farts aren't in it, with Keep them and Sign out anyway; with others unsent, "Not uploaded yet"
+  adds how many can't fit (`src/components/farty/profile-screen.interaction.test.tsx`, "says why
+  farts here haven’t reached the account (%s), then keeps them or signs out anyway";
+  `e2e/account-full.spec.ts`, "a full account keeps a new Recording on this device and says so,
+  without uploading it again, then uploads it once a delete makes room").
 - Signing out leaves nothing here and opens Profile as a guest, and Farty's other tabs clear too,
   without a reload (`e2e/account-profile.spec.ts`, "Profile's account: the email, Farty news, and
   Sign out, which leaves nothing here"; "Sign out clears Farty's other tabs too, without a reload").
@@ -259,9 +265,19 @@ sign-in](../../../../docs/agents/accounts.md), how the library syncs in
   "waits for a Recording's analysis"; "keeps a refused upload queued, and sends the rest").
 - An account keeps at most 300 Recordings and 300 Toots
   (`src/app/api/library-uploads.workers.test.ts`, "keeps 300 %s per account, and only 300 when
-  uploads race (409)"). A Recording past the account's 300 stays only on this device, waiting to
-  upload (`src/lib/outbox-send.test.ts`, "keeps a Recording the account has no room for on this
-  device, waiting to upload").
+  uploads race (409)"). One past them stays only on this device, waiting for room, and Recordings
+  and Toots say so ([Recordings](recordings.md#a-full-account), [Toots](toots.md#a-full-account);
+  `src/lib/outbox-send.test.ts`, "keeps a Recording the account has no room for on this device,
+  waiting to upload"; "remembers on the upload that the account is full, for that kind only").
+- With no room for a kind, none of it uploads again until there may be room: a delete of that kind
+  sent from here, which uploads what waits in the same sync; a read showing another browser's
+  delete; or a new session or Farty opening, which tries one first. The other kind still uploads
+  (`src/lib/outbox-send.test.ts`, "uploads none of that kind again until there may be room, and
+  still uploads the other kind"; "uploads what waits for room once a delete sent from here makes
+  room, in the same sync"; "uploads what waits for room once a read shows another browser's
+  delete"; "tries once more in a new session or when Farty opens again, with one upload while still
+  full"; `e2e/account-full.spec.ts`, "a full account keeps a new Recording on this device and
+  says so, without uploading it again, then uploads it once a delete makes room").
 
 ## Staging and local runs
 
@@ -277,5 +293,3 @@ sign-in](../../../../docs/agents/accounts.md), how the library syncs in
 - No journey ages a real session past 10 minutes: the old sign-in journey answers its first delete
   with the server's refusal itself, then sends, reads and signs in with a real code and deletes the
   account for real. The Workers tests check the refusal on the server.
-- Nothing on screen says a Recording past the account's 300 hasn't reached it, and Sign out's "Not
-  uploaded yet" counts it as waiting for a connection. A test would only hold that gap in place.

@@ -10,9 +10,12 @@ export type OutboxEntry = {
   sent: boolean
   queuedAt: number
   version: string
+  accountFull?: true
 }
 
 export const itemKey = (kind: Kind, id: string) => `${kind}:${id}`
+
+export const waitsForRoom = (entry: OutboxEntry) => entry.accountFull === true
 
 export function mergeOutbox(
   queued: OutboxEntry | undefined,
@@ -41,13 +44,27 @@ export function mergeOutbox(
 
 export const queueStamp = () => ({ at: Date.now(), version: crypto.randomUUID() })
 
-const queued = new EventTarget()
+const outboxEvents = new EventTarget()
 
 export function announceQueued(): void {
-  queued.dispatchEvent(new Event('queued'))
+  outboxEvents.dispatchEvent(new Event('queued'))
+}
+
+export function announceSent(): void {
+  outboxEvents.dispatchEvent(new Event('sent'))
 }
 
 export function onQueued(listener: () => void): () => void {
-  queued.addEventListener('queued', listener)
-  return () => queued.removeEventListener('queued', listener)
+  outboxEvents.addEventListener('queued', listener)
+  return () => outboxEvents.removeEventListener('queued', listener)
+}
+
+export function onOutboxChanged(listener: () => void): () => void {
+  const stops = ['queued', 'sent'].map(type => {
+    outboxEvents.addEventListener(type, listener)
+    return () => outboxEvents.removeEventListener(type, listener)
+  })
+  return () => {
+    for (const stop of stops) stop()
+  }
 }

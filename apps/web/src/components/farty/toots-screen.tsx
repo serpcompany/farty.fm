@@ -26,6 +26,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { songs } from '@/lib/catalog/songs.generated'
 import { type Toot, tootDetails } from '@/lib/toot'
 import { cn } from '@/lib/utils'
+import { AccountFullNotice } from './account-full-notice'
 import { usePageHidden } from './page-hidden'
 import { usePlayback } from './playback-provider'
 import { tootPlayback, useToots } from './toots-provider'
@@ -62,6 +63,7 @@ export function TootsScreen() {
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
       <h1 className="pt-4 pb-3 text-3xl font-bold tracking-tight">Toots</h1>
+      <AccountFullNotice kind="toots" />
       {tootsFailed && (
         <p
           className={cn(

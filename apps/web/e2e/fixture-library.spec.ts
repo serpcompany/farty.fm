@@ -1,5 +1,6 @@
 import { newEmail, signInByApi } from './account'
 import { uploaded } from './database'
+import { deleteRecording } from './record'
 import { onPhone, tab } from './screens'
 import { loadTheFixtureLibrary, needsTheFixtureLibrary } from './songs'
 import { expect, test } from './test'
@@ -66,11 +67,7 @@ test('a fixture deleted from the account loads again, and stays', async ({
   await uploaded(page)
 
   await tab(page, 'Recordings').click()
-  await page.getByRole('button', { name: 'Delete Recording 1', exact: true }).click()
-  await page
-    .getByRole('alertdialog', { name: 'Delete Recording 1?' })
-    .getByRole('button', { name: 'Delete Recording' })
-    .click()
+  await deleteRecording(page, 1)
   await uploaded(page)
 
   await tab(page, 'Profile').click()

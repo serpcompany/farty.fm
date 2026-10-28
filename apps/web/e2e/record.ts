@@ -120,6 +120,14 @@ export async function recordG3ToRecordings(page: Page): Promise<void> {
   await expect(page.getByTestId('recording-row')).toHaveCount(1)
 }
 
+export async function deleteRecording(page: Page, number: number): Promise<void> {
+  await page.getByRole('button', { name: `Delete Recording ${number}`, exact: true }).click()
+  await page
+    .getByRole('alertdialog', { name: `Delete Recording ${number}?` })
+    .getByRole('button', { name: 'Delete Recording' })
+    .click()
+}
+
 export async function tapRecord(page: Page, { saysStarting = false } = {}) {
   await page.getByTestId('record-button').click()
   if (saysStarting) await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()

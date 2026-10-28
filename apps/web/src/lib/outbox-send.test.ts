@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import type { OutboxOp } from '@/lib/outbox'
-import { bytes, claimedBy, libraryHarness, newToot, wav } from '@/test-support/library-page'
+import type { Kind, OutboxOp } from '@/lib/outbox'
+import {
+  anotherBrowsersRecording,
+  bytes,
+  claimedBy,
+  libraryHarness,
+  newToot,
+  openLibraryPage,
+  wav
+} from '@/test-support/library-page'
 
 const library = libraryHarness()
 const { recorded, outbox, requests, refuse } = library
@@ -120,7 +128,7 @@ describe('uploading', () => {
     const second = await recorded(2)
     library.account.intercept = sent =>
       sent.path.includes(first.id)
-        ? Response.json({ error: 'limit_reached' }, { status: 409 })
+        ? Response.json({ error: 'too_large' }, { status: 413 })
         : undefined
     expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(1)
     expect(library.account.get('recordings', second.id)).toBeDefined()
@@ -248,5 +256,141 @@ describe('uploading', () => {
     expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
     expect(library.account.isDeleted('recordings', uploaded.id)).toBe(true)
     expect(library.account.sent.filter(s => s.path.includes(local.id))).toEqual([])
+  })
+})
+
+function accountFullFor(kind: Kind) {
+  const account = { full: true }
+  library.account.intercept = sent => {
+    if (sent.method === 'DELETE') account.full = false
+    return account.full && sent.method === 'PUT' && sent.path.startsWith(`/api/${kind}/`)
+      ? Response.json({ error: 'limit_reached' }, { status: 409 })
+      : undefined
+  }
+  return account
+}
+
+const uploadsOf = (id: string) => requests('PUT').filter(s => s.path.includes(id)).length
+
+describe('an account with no room', () => {
+  beforeEach(() => claimedBy('user-a'))
+
+  it('remembers on the upload that the account is full, for that kind only', async () => {
+    const recording = await recorded(1)
+    accountFullFor('recordings')
+    await library.page.sync.syncOnce('user-a')
+
+    expect(await outbox()).toEqual([
+      expect.objectContaining({ id: recording.id, op: 'put', sent: false, accountFull: true })
+    ])
+    expect(await library.page.sync.waitingForRoom('recordings')).toBe(1)
+    expect(await library.page.sync.waitingForRoom('toots')).toBe(0)
+    expect(await library.page.sync.waitingForRoom()).toBe(1)
+  })
+
+  it('uploads none of that kind again until there may be room, and still uploads the other kind', async () => {
+    const first = await recorded(1)
+    const second = await recorded(2)
+    accountFullFor('recordings')
+    await library.page.sync.syncOnce('user-a')
+    expect(requests('PUT')).toHaveLength(1)
+
+    const saved = newToot()
+    await library.page.toots.saveToot(saved, wav(9))
+    const third = await recorded(3)
+    await library.page.sync.syncOnce('user-a')
+    await library.page.sync.uploadBeforeSignOut('user-a')
+
+    expect(library.account.get('toots', saved.id)).toBeDefined()
+    expect(uploadsOf(first.id) + uploadsOf(second.id)).toBe(1)
+    expect(uploadsOf(third.id)).toBe(0)
+    expect(await library.page.sync.waitingForRoom('recordings')).toBe(3)
+  })
+
+  it('uploads what waits for room once a delete sent from here makes room, in the same sync', async () => {
+    const uploaded = await recorded(1)
+    await library.page.sync.syncOnce('user-a')
+    const waiting = await recorded(2)
+    const account = accountFullFor('recordings')
+    await library.page.sync.syncOnce('user-a')
+    account.full = false
+    await library.page.sync.syncOnce('user-a')
+    expect(uploadsOf(waiting.id)).toBe(1)
+
+    await library.page.store.deleteRecording(uploaded.id)
+    await library.page.sync.syncOnce('user-a')
+
+    expect(library.account.get('recordings', waiting.id)).toBeDefined()
+    expect(await outbox()).toEqual([])
+    expect(await library.page.sync.waitingForRoom()).toBe(0)
+    expect(library.account.sent.slice(-2).map(s => s.method)).toEqual(['DELETE', 'PUT'])
+  })
+
+  it("uploads what waits for room once a read shows another browser's delete", async () => {
+    const other = anotherBrowsersRecording(1)
+    library.account.add('recordings', other, wav(5))
+    await library.page.sync.syncOnce('user-a')
+    const waiting = await recorded(2)
+    const account = accountFullFor('recordings')
+    await library.page.sync.syncOnce('user-a')
+
+    account.full = false
+    library.account.remove('recordings', other.id)
+    await library.page.sync.syncOnce('user-a')
+
+    expect(uploadsOf(waiting.id)).toBe(2)
+    expect(library.account.get('recordings', waiting.id)).toBeDefined()
+    expect(await library.page.sync.waitingForRoom()).toBe(0)
+  })
+
+  it('tries once more in a new session or when Farty opens again, with one upload while still full', async () => {
+    await recorded(1)
+    await recorded(2)
+    accountFullFor('recordings')
+    await library.page.sync.syncOnce('user-a')
+
+    await library.page.sync.claimLibrary('user-a')
+    await library.page.sync.syncOnce('user-a')
+    await library.page.sync.syncOnce('user-a')
+    expect(requests('PUT')).toHaveLength(2)
+
+    library.page = await openLibraryPage()
+    library.account.intercept = null
+    await library.page.sync.syncOnce('user-a')
+    expect(requests('PUT')).toHaveLength(4)
+    expect(await outbox()).toEqual([])
+  })
+
+  it('forgets a Recording deleted while it waits for room, with no request', async () => {
+    const waiting = await recorded(1)
+    accountFullFor('recordings')
+    await library.page.sync.syncOnce('user-a')
+    await library.page.store.deleteRecording(waiting.id)
+    await library.page.sync.syncOnce('user-a')
+
+    expect(library.account.sent.filter(s => s.method === 'DELETE')).toEqual([])
+    expect(await outbox()).toEqual([])
+    expect(await library.page.sync.waitingForRoom()).toBe(0)
+  })
+
+  it('stops counting a Toot as waiting for room once it uploads, though its rename waits', async () => {
+    const saved = newToot('Old')
+    await library.page.toots.saveToot(saved, wav(9))
+    accountFullFor('toots')
+    await library.page.sync.syncOnce('user-a')
+    await library.page.toots.renameToot(saved.id, 'Renamed')
+    expect(await library.page.sync.waitingForRoom('toots')).toBe(1)
+
+    library.account.intercept = async sent => {
+      if (sent.method === 'PUT') await library.page.toots.renameToot(saved.id, 'New')
+      if (sent.method === 'PATCH') return Response.json({ error: 'unavailable' }, { status: 503 })
+      return undefined
+    }
+    await library.page.sync.claimLibrary('user-a')
+    await library.page.sync.syncOnce('user-a')
+
+    expect(library.account.get('toots', saved.id)?.item).toMatchObject({ title: 'Renamed' })
+    expect(await outbox()).toEqual([expect.objectContaining({ id: saved.id, op: 'rename' })])
+    expect(await library.page.sync.waitingForRoom()).toBe(0)
   })
 })

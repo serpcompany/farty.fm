@@ -26,6 +26,7 @@ import {
   recordingPitch
 } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
+import { AccountFullNotice } from './account-full-notice'
 import { usePageHidden } from './page-hidden'
 import { PlaceByEar } from './place-by-ear'
 import { recordingSound, usePlayback } from './playback-provider'
@@ -55,6 +56,7 @@ export function RecordingsScreen() {
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
       <h1 className="pt-4 pb-3 text-3xl font-bold tracking-tight">Recordings</h1>
+      <AccountFullNotice kind="recordings" />
       {count === 0 ? (
         <Empty className="flex-1">
           <EmptyHeader>

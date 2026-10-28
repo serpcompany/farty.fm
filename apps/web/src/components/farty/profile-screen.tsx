@@ -17,7 +17,7 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import { setSharing, useSharing } from '@/lib/telemetry/sharing'
-import { useAccount } from './account-provider'
+import { type NotUploaded, useAccount } from './account-provider'
 import { DeleteAccount } from './delete-account'
 import { InstallGuideCard, useInstallGuide } from './install-button'
 import { useRecordings } from './recordings-provider'
@@ -203,11 +203,30 @@ function SharingSection() {
   )
 }
 
+function notUploadedWords({ full, waiting }: NotUploaded) {
+  if (waiting > 0) {
+    const fullToo = full === 0 ? '' : `, and ${full} more can't because it's full`
+    return {
+      title: 'Not uploaded yet',
+      text: `Some farts on this device haven't reached your account${fullToo}. Check your connection and wait, or sign out now and lose them.`,
+      keep: 'Wait'
+    }
+  }
+  const one = full === 1
+  const farts = one ? "1 fart on this device isn't" : `${full} farts on this device aren't`
+  return {
+    title: 'Your account is full',
+    text: `${farts} in your account because it's full. Delete some to make room, or sign out now and lose ${one ? 'it' : 'them'}.`,
+    keep: one ? 'Keep it' : 'Keep them'
+  }
+}
+
 function AccountSection() {
   const { account, openStep, retry, signOut, setMarketingEmail, clearDevice } = useAccount()
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   const [notUploaded, setNotUploaded] = useState(false)
+  const [left, setLeft] = useState<NotUploaded>({ full: 0, waiting: 0 })
   const [confirmsClear, setConfirmsClear] = useState(false)
 
   const [signingOut, setSigningOut] = useState(false)
@@ -219,7 +238,9 @@ function AccountSection() {
     const result = await signOut(anyway)
     setBusy(false)
     setSigningOut(false)
-    setNotUploaded(result === 'pending')
+    const pending = typeof result === 'object'
+    if (pending) setLeft(result)
+    setNotUploaded(pending)
     if (result === 'failed') setProblem("Couldn't sign out. Check your connection and try again.")
   }
 
@@ -230,6 +251,8 @@ function AccountSection() {
     setBusy(false)
     if (!done) setProblem("Couldn't change Farty news. Try again.")
   }
+
+  const unsent = notUploadedWords(left)
 
   if (account.status === 'checking') {
     return (
@@ -361,15 +384,12 @@ function AccountSection() {
       <AlertDialog open={notUploaded} onOpenChange={open => !busy && setNotUploaded(open)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Not uploaded yet</AlertDialogTitle>
-            <AlertDialogDescription>
-              Some farts on this device haven't reached your account. Check your connection and
-              wait, or sign out now and lose them.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{unsent.title}</AlertDialogTitle>
+            <AlertDialogDescription>{unsent.text}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="h-11 text-base" disabled={busy}>
-              Wait
+              {unsent.keep}
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
