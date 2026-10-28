@@ -7,3 +7,5 @@ Out of scope for the MVP: Android, iPad layouts, accounts, sharing, and a starte
 Update 2026-09-30: Created Melodies are now called Toots (`CONTEXT.md`, #52).
 
 Update 2026-10-06: Apple rejected the App Store submission as a fart app, so Pedos is now a web app (ADR 0007). The platform choice above is replaced; local-first and no accounts still hold.
+
+Update 2026-10-21: accounts and cloud save replace "no accounts" (ADR 0014). Retired 2026-10-27: the iPhone app's source (ADR 0013).
