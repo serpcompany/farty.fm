@@ -32,7 +32,8 @@ export type GoldenSong = {
   file: string
   sha256: string
   bpm: number
-  beats_per_bar: number
+  /** Where the score's bars start, in beats: a note on one is accented. A pickup isn't a bar. */
+  bar_lines: number[]
   length_beats: number
   pitches: number[]
   notes: { start: number; dur: number; pitch: number }[]
@@ -104,7 +105,7 @@ function song(entry: CatalogEntry, golden: GoldenSong): string[] {
     `    title: ${quoted(entry.title)},`,
     `    source: ${quoted(sourceLine(entry))},`,
     `    bpm: ${golden.bpm},`,
-    `    beats_per_bar: ${golden.beats_per_bar},`,
+    `    bar_lines: [${golden.bar_lines.join(', ')}],`,
     `    length_beats: ${golden.length_beats},`,
     `    pitches: [${pitches.join(', ')}],`,
     '    notes: [',

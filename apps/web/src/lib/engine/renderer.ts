@@ -1,4 +1,4 @@
-import { pairwiseSum, roundHalfEven } from '@/lib/analysis/numeric'
+import { pairwiseSum } from '@/lib/analysis/numeric'
 import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
 
 // Renders a Song played by Recordings: a port of the reference engine's `render()`
@@ -25,7 +25,7 @@ const LONGEST_FADE_OUT_SECONDS = 0.03
 /** Each note is set to this RMS level over its first `LEVEL_WINDOW_SECONDS`. */
 const NOTE_LEVEL_DB = -20
 const LEVEL_WINDOW_SECONDS = 0.25
-/** Extra gain for notes that start a bar. */
+/** Extra gain for notes that start a bar (on one of the score's bar lines). */
 const DOWNBEAT_ACCENT_DB = 1.5
 /** Silence after the last beat, so the last note can ring out. */
 const TAIL_SECONDS = 1
@@ -54,21 +54,21 @@ export interface RenderNote {
 
 /**
  * A note of a Song as the catalog writes it, in beats. Converts to seconds and finds downbeats
- * exactly like the reference, so notes land on the same samples.
+ * exactly like the reference, so notes land on the same samples: a note that starts on one of the
+ * score's bar lines (`barLines`, the Song's `bar_lines`) starts a bar. A pickup isn't a bar.
  */
 export function noteInBeats(
   source: RenderSource,
   targetMidi: number,
-  beats: { start: number; dur: number; bpm: number; beatsPerBar: number }
+  beats: { start: number; dur: number; bpm: number; barLines: readonly number[] }
 ): RenderNote {
   const spb = 60 / beats.bpm
-  const bar = beats.start / beats.beatsPerBar
   return {
     source,
     targetMidi,
     startSeconds: beats.start * spb,
     lengthSeconds: beats.dur * spb,
-    downbeat: Math.abs(bar - roundHalfEven(bar)) < 1e-6
+    downbeat: beats.barLines.some(line => Math.abs(beats.start - line) < 1e-6)
   }
 }
 

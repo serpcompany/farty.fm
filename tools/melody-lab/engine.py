@@ -542,7 +542,8 @@ def _cubic_read(x, pos):
 def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_db=1.5, target_rms_db=-20):
     """Play each note's fart raw (ADR 0012): the Recording's gesture from its start, at its own
     pitch and speed, cut at the note's end (its written length less the gap, at least 60 ms) or
-    where the fart ends, faded, set to a level and mixed. A note's shift_semitones isn't used."""
+    where the fart ends, faded, set to a level and mixed. A note that starts on one of the score's
+    bar lines (melody.bar_lines) is set accent_db louder. A note's shift_semitones isn't used."""
     by_id = {s.id: s for s in sources}
     bpm = bpm or melody.bpm
     spb = 60 / bpm
@@ -562,7 +563,7 @@ def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_d
             env[-fo:] *= np.linspace(1, 0, fo) ** 2
         seg = seg * env
         rms = np.sqrt(np.mean(seg[: int(0.25 * SR)] ** 2)) + 1e-9
-        on_downbeat = abs((n.start / melody.beats_per_bar) - round(n.start / melody.beats_per_bar)) < 1e-6
+        on_downbeat = any(abs(n.start - line) < 1e-6 for line in melody.bar_lines)  # the score's own (melody.py)
         gain_db = target_rms_db - 20 * np.log10(rms) + (accent_db if on_downbeat else 0)
         seg = seg * 10 ** (gain_db / 20)
         mix[start : start + len(seg)] += seg

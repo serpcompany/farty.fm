@@ -1,4 +1,10 @@
 {
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0
+  ],
   "beats_per_bar": 4,
   "bpm": 84,
   "file": "midi/pdmx-mary.mid",

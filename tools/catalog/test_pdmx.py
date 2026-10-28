@@ -108,6 +108,20 @@ class Picking(unittest.TestCase):
         self.assertEqual(pdmx.pick_problems(row("x", tracks="3")), ["more than 2 tracks"])
         self.assertEqual(pdmx.pick_problems(row("x", mid="")), ["no MIDI file"])
 
+    def test_misbarred_scores_are_never_picked(self):
+        # #232: this Happy Birthday is barred from "Hap-", so the accents fell on "Hap-" and "to".
+        rows = [row("Happy Birthday to You", sid="6064902", rating="4.94"), row("Happy Birthday to You", sid="6420004")]
+        [c] = pdmx.find_candidates(rows, titles("birthday | Happy Birthday | Happy Birthday to You"))
+        self.assertEqual([pdmx.score_id(r) for _, r in c.eligible], ["6420004"])
+        self.assertEqual(c.rejected, {"its bar lines are off the tune": 1})
+
+    def test_no_catalog_song_has_a_misbarred_score(self):
+        for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
+            if entry["id"] == "saints":  # keeps its hand-picked misbarred score by decision (#232, comment 6459788077)
+                continue
+            with self.subTest(song=entry["id"]):
+                self.assertNotIn(entry["source"].get("musescore_score_id"), pdmx.MISBARRED_SCORES)
+
     def test_ranking(self):
         rows = [
             row("Mary Had a Little Lamb - Piano", sid="1", rating="5.0", views="9999"),  # head match
@@ -144,8 +158,12 @@ def options(bpm, meter, first_onset=0.0):
 class ExcerptAndTempo(unittest.TestCase):
     def test_four_four(self):
         self.assertEqual(options(120.0, (4, 4)), {"bpm": 120, "max_beats": 32})
-        self.assertEqual(options(100.4, (4, 4), 0.5), {"bpm": 100, "max_beats": 32})  # a late first note
-        self.assertEqual(options(120.0, (4, 4), 9.0), {"bpm": 120, "start_beat": 8, "max_beats": 32})
+        # A late first note: the excerpt starts on it, and ends on the bar line 32 beats after its bar's.
+        self.assertEqual(options(100.4, (4, 4), 0.5), {"bpm": 100, "start_beat": 0.5, "max_beats": 31.5})
+        self.assertEqual(options(120.0, (4, 4), 9.0), {"bpm": 120, "start_beat": 9, "max_beats": 31})
+        self.assertEqual(options(120.0, (4, 4), 8.0), {"bpm": 120, "start_beat": 8, "max_beats": 32})
+        # A first note on a third of a beat keeps its exact beat, so load_midi keeps the note.
+        self.assertEqual(options(120.0, (3, 4), 2 / 3)["start_beat"], 2 / 3)
 
     def test_tempo_is_kept_in_range(self):
         self.assertEqual(options(200.0, (4, 4))["bpm"], 144)
@@ -181,7 +199,7 @@ class ExcerptAndTempo(unittest.TestCase):
         )
         # The excerpt starts after the change: its meter is 3/4.
         self.assertEqual(
-            pdmx.render_options([(0.0, 90.0)], [(0.0, 4, 4), (16.0, 3, 4)], 20.0),
+            pdmx.render_options([(0.0, 90.0)], [(0.0, 4, 4), (16.0, 3, 4)], 19.0),
             {"bpm": 90, "start_beat": 19, "max_beats": 30, "beats_per_bar": 3},
         )
 

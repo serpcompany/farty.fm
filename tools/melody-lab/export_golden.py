@@ -36,7 +36,7 @@ from melody import load_catalog
 GOLDEN = engine.ROOT / "fixtures/golden"
 SHIP_LIST = engine.ROOT / "apps/web/src/lib/catalog/ship-list.json"  # the Songs the web app ships
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")  # README.md is written by hand
-FORMAT_VERSION = 5  # 5: Songs play farts raw (ADR 0012); 4: the length rule (#221) and each fit's `missing`
+FORMAT_VERSION = 6  # 6: Songs' `bar_lines` (#232); 5: Songs play farts raw (ADR 0012); 4: the length rule (#221)
 COVERAGE_SEEDS = 10  # random subsets per size in coverage.json
 
 
@@ -133,6 +133,7 @@ def song_json(c, m):
         "import_args": c.get("render", {}),
         "bpm": m.bpm,
         "beats_per_bar": m.beats_per_bar,
+        "bar_lines": [exact(x) for x in m.bar_lines],
         "length_beats": exact(m.length_beats),
         "pitches": sorted({int(n.pitch) for n in m.notes}),
         "notes": [{"start": exact(n.start), "dur": exact(n.dur), "pitch": int(n.pitch)} for n in m.notes],

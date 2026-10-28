@@ -239,7 +239,7 @@ describe('Auto-map ties', () => {
   // one: a single 60 at 120 bpm.
   const oneNote: Song = {
     bpm: 120,
-    beats_per_bar: 4,
+    bar_lines: [0],
     length_beats: 4,
     notes: [{ start: 0, dur: 1, pitch: 60 }]
   }
@@ -354,7 +354,7 @@ describe('Auto-map inputs and terms', () => {
     // transposition, even with an Octave Move.
     const half: Song = {
       bpm: 120,
-      beats_per_bar: 4,
+      bar_lines: [0],
       length_beats: 3,
       notes: [
         { start: 0, dur: 1, pitch: 60 },
