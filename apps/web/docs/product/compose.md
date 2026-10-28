@@ -24,8 +24,8 @@ search and sort. A locked Song opens a sheet saying what it needs, and an Unlock
 
 - Under "Locked · 12", each row has the Song's title, a Pitch Coverage bar, "1 of 4 notes covered"
   and the notes it needs, at most two by name with the fart length each needs: "Needs D3 (1.2 s)
-  and F3 (3.0 s)", or "Needs …, …, and 1 more". A screen reader hears it as "Locked. 1 of 4 notes
-  covered. Needs …" (`e2e/compose.spec.ts`, "saving farts unlocks Songs on Compose, and the Result
+  and F3 (3.0 s)", or "Needs …, …, and 1 more". A screen reader hears what the row shows, then
+  "Locked" (`e2e/compose.spec.ts`, "saving farts unlocks Songs on Compose, and the Result
   says so"; `e2e/fixture-library.spec.ts`, "loads the Fixture Library and unlocks every Song it is
   long enough for"; `src/lib/pitch-coverage.test.ts`, "names the missing notes with their octave
   and length").

@@ -63,7 +63,11 @@ describe('Compose', () => {
   it('closes a locked Song’s sheet when the page is hidden', async () => {
     libraryOf([])
     await show(<ComposeScreen />)
-    await tap(button(songs[0].title))
+    const row = document.body.querySelector<HTMLButtonElement>(
+      `[data-song="${songs[0].id}"] button`
+    )
+    if (!row) throw new Error(`No row for ${songs[0].id}`)
+    await tap(row)
     expect(dialogs().map(dialog => dialog.textContent)).toEqual([
       expect.stringContaining('Record a fart with a clear note to start.')
     ])

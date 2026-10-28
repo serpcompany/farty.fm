@@ -184,7 +184,6 @@ function UnlockedSongRow({ song }: { song: Song }) {
 
 function LockedSongRow({ row, onOpen }: { row: SongRow; onOpen: () => void }) {
   const { song, coverage } = row
-  const valueId = useId()
   const missing = missingNotes(coverage, 2)
   const needs = missing === null ? null : `Needs ${missing}`
   return (
@@ -192,22 +191,18 @@ function LockedSongRow({ row, onOpen }: { row: SongRow; onOpen: () => void }) {
       <button
         type="button"
         className="flex w-full items-baseline gap-3 px-4 py-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset active:bg-muted"
-        aria-label={song.title}
-        aria-describedby={valueId}
         onClick={onOpen}
       >
-        <span className="flex min-w-0 flex-1 flex-col gap-1.5" aria-hidden>
+        <span className="flex min-w-0 flex-1 flex-col gap-1.5">
           <span>{song.title}</span>
-          <Progress value={coverageFraction(coverage) * 100} />
+          <Progress value={coverageFraction(coverage) * 100} aria-hidden />
           <span className="flex flex-col gap-0.5 text-sm text-muted-foreground">
             <span>{coverageSummary(coverage)}</span>
             {needs && <span>{needs}</span>}
           </span>
         </span>
         <Lock className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-        <span id={valueId} className="sr-only">
-          {['Locked', coverageSummary(coverage), needs].filter(Boolean).join('. ')}
-        </span>
+        <span className="sr-only">Locked</span>
       </button>
     </li>
   )

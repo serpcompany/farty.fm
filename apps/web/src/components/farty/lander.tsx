@@ -193,7 +193,7 @@ export function Lander({ atHome, qrCode }: { atHome: boolean; qrCode: ReactNode 
         <div className="mx-auto grid max-w-6xl items-center gap-8 overflow-hidden rounded-3xl border bg-brand/8 px-8 pt-12 md:grid-cols-[3fr_2fr] lg:px-16">
           <div className="pb-12">
             <h2 className="text-4xl font-bold tracking-tight text-balance">Make your first Toot</h2>
-            <p className="mt-4 max-w-md text-lg text-muted-foreground">
+            <p className="mt-4 max-w-md text-lg text-foreground/80">
               Record a fart, see its note, and start collecting. It's free.
             </p>
             <Button
@@ -315,7 +315,9 @@ function SectionHeading({
 }) {
   return (
     <div className={cn(align === 'center' && 'mx-auto max-w-2xl text-center')}>
-      <p className="text-sm font-semibold tracking-wide text-brand uppercase">{eyebrow}</p>
+      <p className="text-sm font-semibold tracking-wide text-brand-strong uppercase dark:text-brand">
+        {eyebrow}
+      </p>
       <h2 className="mt-2 text-4xl font-bold tracking-tight text-balance">{title}</h2>
       {text && <p className="mt-4 text-lg text-muted-foreground">{text}</p>}
     </div>

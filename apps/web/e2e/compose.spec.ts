@@ -41,9 +41,9 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(page.getByRole('heading', { name: 'Locked · 12' })).toBeVisible()
   const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb' })
   const noteAndLength = (seconds: string) => `[A-G]♯?2 \\(${seconds} s\\)`
-  await expect(mary).toHaveAccessibleDescription(
+  await expect(mary).toHaveAccessibleName(
     new RegExp(
-      `^Locked\\. 1 of 4 notes covered\\. Needs ${noteAndLength('1\\.5')}, ${noteAndLength('0\\.7')}, and 1 more$`
+      `^Mary Had a Little Lamb\\s+1 of 4 notes covered\\s+Needs ${noteAndLength('1\\.5')}, ${noteAndLength('0\\.7')}, and 1 more\\s+Locked$`
     )
   )
 

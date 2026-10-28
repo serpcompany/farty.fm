@@ -106,6 +106,16 @@ Each replaces the tab's screen with a message and a Reload button.
 - A made-up address answers 404 with "Page not found" and Back to Farty, on no tab
   (`e2e/pages.spec.ts`, "a made-up URL answers 404 with one noindex tag and a link home").
 
+## Accessibility
+
+- The first visit, every tab, a locked Song's page and the pages outside the tabs meet WCAG 2.1
+  AA, in light and dark, on a phone and a touch tablet (`e2e/accessibility.spec.ts`, "the first
+  visit meets WCAG 2.1 AA"; "${path} meets WCAG 2.1 AA"; "the pages outside the tabs meet WCAG 2.1
+  AA").
+- With reduced motion asked for, nothing but a spinner moves for longer than a frame
+  (`e2e/accessibility.spec.ts`, "with reduced motion, nothing but a spinner moves for longer than a
+  frame").
+
 ## Staging and Production
 
 - Staging asks for a password before any page. Production never does (`src/lib/staging-access.test.ts`,
