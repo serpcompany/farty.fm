@@ -34,7 +34,11 @@ The owner asked to start at −6 dB and lower the level until the melody still r
 | **−15 dB (chosen)** | **100%** | **97%** | **0** | **1** | **0** | **0** |
 | −18 dB | 100% | 100% | 0 | 1 | 0 | 0 |
 
-−15 dB is the loudest level at which the melody reads as it does under quieter Beats: one note in 270 heard more than 50 cents off (in Happy Birthday; at −18 dB one note moves too, in When the Saints Go Marching In), every Song at 100% fidelity, and no re-attacks. One Frère Jacques onset of 32 reads late (97%, against 100% without Beats). With the Beats at −15 dB, the goldens' metrics (`fixtures/golden/README.md`) change only here, and no note's placement changes:
+−15 dB is the loudest level at which the melody reads as it does under quieter Beats: one note in 270 heard more than 50 cents off (in Happy Birthday; at −18 dB one note moves too, in When the Saints Go Marching In), every Song at 100% fidelity, and no re-attacks. One Frère Jacques onset of 32 reads late (97%, against 100% without Beats).
+
+The level was tuned on the goldens' Songs, which include the 8 the app ships that unlock. The whole catalog is a harder test: 86 of its Songs unlock with the full Fixture Library (2,877 notes), and with Beats at −15 dB all 86 still pass the bar. Against the same renders without Beats, 11 lose 2 to 5 points of onsets on time, and When Johnny Comes Marching Home reads 95%, on the bar. William Tell's fidelity reads 97% (one note), and of the notes pYIN reads in both renders, 32 are heard more than 50 cents from where they were. A Song added to the app is checked by `run_all.py` and its golden, as before, and a Song that falls under the bar there is a reason to lower `BEAT_DB`.
+
+With the Beats at −15 dB, the goldens' metrics (`fixtures/golden/README.md`) change only here, and no note's placement changes:
 
 | Song | Beats | Metrics that changed, without Beats → with |
 |---|---|---|
