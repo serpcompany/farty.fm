@@ -309,7 +309,8 @@ const faq = [
   },
   {
     question: 'Why has my fart got no note?',
-    answer: "Some farts are noise-like, with no steady pitch. They're kept, but can't play a note."
+    answer:
+      "Some farts are noise-like, with no steady pitch, so they can't play a note. In a Song they play the beat instead, one at the start of each bar."
   }
 ]
 

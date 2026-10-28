@@ -11,15 +11,20 @@ import type { RenderRequest } from './worker'
 // The render worker (`worker.ts`) and the page's side of it (`client.ts`): requests answered by
 // id, the audio moved to the page rather than copied, and every way a render can fail.
 
-/** One Melodic fixture with its golden analysis, and a one-note Song on its nearest note. */
+/**
+ * One Melodic fixture with its golden analysis, a one-note Song on its nearest note, and one
+ * Noise-like fixture to play its Beat (ADR 0014).
+ */
 let recording: RecordingToRender
+let noiseLike: RecordingToRender
 let song: Song
 let unlocked: Arrangement
 let locked: Arrangement
 
-beforeAll(async () => {
-  const golden = goldenRecordings.find(r => r.id === '090')
-  if (!golden?.melodic || golden.recording_pitch_midi === null) throw new Error('090 is Melodic')
+/** A fixture as the app stores it, with its golden analysis. */
+async function stored(id: string): Promise<RecordingToRender> {
+  const golden = goldenRecordings.find(r => r.id === id)
+  if (!golden) throw new Error(`No golden Recording ${id}`)
   const file = await decoded(golden)
   const analysis: Analysis = {
     gestureStartSeconds: golden.gesture.start_s,
@@ -30,8 +35,17 @@ beforeAll(async () => {
     recordingPitchMidi: golden.recording_pitch_midi,
     shortestNoteSeconds: golden.shortest_note_s
   }
-  recording = { id: '090', audio: { samples: file.samples, sampleRate: file.sampleRate }, analysis }
-  const pitch = Math.round(golden.recording_pitch_midi)
+  return { id, audio: { samples: file.samples, sampleRate: file.sampleRate }, analysis }
+}
+
+beforeAll(async () => {
+  recording = await stored('090')
+  noiseLike = await stored('065')
+  const golden = recording.analysis
+  if (golden.recordingPitchMidi === null) throw new Error('090 is Melodic')
+  if (noiseLike.analysis.recordingPitchMidi !== null) throw new Error('065 is Noise-like')
+  const analysis = recording.analysis
+  const pitch = Math.round(golden.recordingPitchMidi)
   song = { bpm: 120, bar_lines: [0], length_beats: 2, notes: [{ start: 0, dur: 1, pitch }] }
   unlocked = arrange(song, [autoMapRecording('090', analysis)])
   locked = arrange(song, [])
@@ -72,7 +86,8 @@ describe('the render worker', () => {
       id: 7,
       song,
       arrangement: unlocked,
-      recordings: [recording]
+      recordings: [recording, noiseLike],
+      beats: ['065']
     })
     expect(message.id).toBe(7)
     expect(message.error).toBeUndefined()
@@ -81,11 +96,14 @@ describe('the render worker', () => {
     // Posting moved the buffer to the page: the worker's side is left detached, and empty.
     expect(rendered.samples.buffer.byteLength).toBe(0)
     await vi.waitFor(() => expect(onPage).toBeDefined())
-    const direct = renderFromRecordings(song, unlocked, [recording])
+    const direct = renderFromRecordings(song, unlocked, [recording, noiseLike], ['065'])
     expect(direct.samples.length).toBeGreaterThan(0)
     expect(onPage?.samples).toEqual(direct.samples)
     expect(onPage?.sampleRate).toBe(44100)
     expect(onPage?.notes).toEqual(direct.notes)
+    // The Song's one bar line plays 065 as its Beat.
+    expect(direct.beats.map(b => [b.bar, b.recordingId, b.startSample])).toEqual([[0, '065', 0]])
+    expect(onPage?.beats).toEqual(direct.beats)
   })
 
   it('answers with the error, and transfers nothing, when the render throws', async () => {
@@ -94,7 +112,8 @@ describe('the render worker', () => {
       id: 3,
       song,
       arrangement: locked,
-      recordings: [recording]
+      recordings: [recording],
+      beats: []
     })
     expect(message).toEqual({ id: 3, error: 'Song is locked: 0 of 1 notes covered' })
     expect(transfer).toEqual([])

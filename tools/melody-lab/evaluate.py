@@ -156,7 +156,11 @@ def contour_share(targets, heard):
 
 def evaluate(audio, melody, events, bpm, sources):
     """evaluate.py's metrics for one render. `sources` are the Recordings it played (each with
-    `id` and its gesture as `audio`, like engine.Source), to read each fart's own pitch."""
+    `id` and its gesture as `audio`, like engine.Source), to read each fart's own pitch.
+
+    Every metric is over the melody's notes. Beats (events with a "beat" key, ADR 0014) stay in
+    the audio, so the notes are measured with them sounding, but aren't notes themselves."""
+    events = [e for e in events if "beat" not in e]
     gesture = {s.id: s.audio for s in sources}
     spb = 60 / bpm
     f0, voiced, vprob = librosa.pyin(audio, **PYIN)

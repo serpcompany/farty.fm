@@ -10,10 +10,13 @@ import {
 } from '@/test-support/engine-golden'
 import { decoded, type GoldenRecording, gestureBody, goldenIndex, row } from '@/test-support/golden'
 import { arrange } from './auto-map'
+import { beatRecordings } from './beats'
 import { renderFromRecordings, renderSong } from './render-song'
 import { renderSource } from './render-source'
 import {
   applyFades,
+  BEAT_LEVEL_DB,
+  beatInBeats,
   limit,
   noteInBeats,
   RENDER_SAMPLE_RATE,
@@ -23,12 +26,15 @@ import {
 } from './renderer'
 
 // The renderer on the golden inputs (each gesture from fixtures/golden), checked against the
-// reference's own placement of every note of the 9 unlocked Arrangements.
-// The audio itself is measured with the reference's evaluate() by
+// reference's own placement of every note and every Beat (ADR 0014) of the 9 unlocked
+// Arrangements. The audio itself is measured with the reference's evaluate() by
 // tools/melody-lab/evaluate_renders.py on the renders of scripts/render-songs.ts.
 
 const SR = RENDER_SAMPLE_RATE
 const library = libraries.full.map(autoMapInput)
+/** The full library's Noise-like Recordings, which play the Beats. */
+const noiseLike = libraries.full.filter(id => !goldenRecording(id).melodic)
+/** Every Recording of the full library, Melodic and Noise-like, by id. */
 const sources = new Map<string, RenderSource>()
 
 async function goldenSource(g: GoldenRecording): Promise<RenderSource> {
@@ -52,28 +58,35 @@ function storedAnalysis(g: GoldenRecording): Analysis {
 const round = (x: number, digits: number) => Number(x.toFixed(digits))
 
 beforeAll(async () => {
-  for (const id of goldenIndex.melodic_recordings) {
+  for (const id of libraries.full) {
     sources.set(id, await goldenSource(goldenRecording(id)))
   }
 })
 
-describe('the renderer places every note as the reference does', () => {
-  const lines: string[] = [row('song', 'notes', 'max |Δgain|', 'render ms')]
+describe('the renderer places every note and Beat as the reference does', () => {
+  const lines: string[] = [row('song', 'notes', 'beats', 'max |Δgain|', 'render ms')]
   let worstGain = 0
+
+  it('has Noise-like Recordings to play Beats', () => {
+    expect(noiseLike).toHaveLength(8)
+    expect(noiseLike).toContain('065')
+  })
 
   for (const id of songIds) {
     it(id, () => {
       const song = goldenSong(id)
       const golden = goldenArrangement('full', id)
       const arrangement = arrange(song, library)
+      const beats = beatRecordings(song, noiseLike)
       if (!golden.unlocked) {
         // A note longer than every fixture near its pitch (ADR 0011), played raw (ADR 0012).
         expect(arrangement.unlocked, id).toBe(false)
-        expect(() => renderSong(song, arrangement, sources)).toThrow(/locked/)
+        expect(golden.beats, id).toBeNull()
+        expect(() => renderSong(song, arrangement, sources, beats)).toThrow(/locked/)
         return
       }
       const started = performance.now()
-      const rendered = renderSong(song, arrangement, sources)
+      const rendered = renderSong(song, arrangement, sources, beats)
       const ms = performance.now() - started
 
       expect(rendered.sampleRate).toBe(44100)
@@ -92,6 +105,19 @@ describe('the renderer places every note as the reference does', () => {
         expect(round(mine.lengthSamples / SR, 3), label).toBe(g.render.len_s)
         songGain = Math.max(songGain, Math.abs(mine.gainDb - g.render.gain_db))
       }
+      // One Beat on each bar line, the Noise-like Recordings in turn.
+      expect(golden.beats, id).toHaveLength(song.bar_lines.length)
+      expect(rendered.beats, id).toHaveLength(song.bar_lines.length)
+      for (const g of golden.beats ?? []) {
+        const mine = rendered.beats[g.bar]
+        const label = `${id} bar ${g.bar}`
+        expect(mine.bar, label).toBe(g.bar)
+        expect(mine.recordingId, label).toBe(g.recording)
+        expect(mine.recordingId, label).toBe(noiseLike[g.bar % noiseLike.length])
+        expect(round(mine.startSample / SR, 3), label).toBe(g.render.start_s)
+        expect(round(mine.lengthSamples / SR, 3), label).toBe(g.render.len_s)
+        songGain = Math.max(songGain, Math.abs(mine.gainDb - g.render.gain_db))
+      }
       // gain_db is written to 0.1 dB, so it can't agree closer than 0.05.
       expect(songGain, id).toBeLessThanOrEqual(0.05 + 1e-9)
       worstGain = Math.max(worstGain, songGain)
@@ -102,7 +128,9 @@ describe('the renderer places every note as the reference does', () => {
         peak = Math.max(peak, Math.abs(s))
       }
       expect(peak).toBeCloseTo(0.89, 6)
-      lines.push(row(id, song.notes.length, songGain.toFixed(3), ms.toFixed(0)))
+      lines.push(
+        row(id, song.notes.length, rendered.beats.length, songGain.toFixed(3), ms.toFixed(0))
+      )
     })
   }
 
@@ -112,8 +140,9 @@ describe('the renderer places every note as the reference does', () => {
 })
 
 describe('the render path from what the app stores', () => {
-  it('cuts the golden gesture', async () => {
-    for (const id of goldenIndex.melodic_recordings) {
+  it('cuts the golden gesture, Melodic or Noise-like', async () => {
+    expect(goldenIndex.recordings.length).toBeGreaterThan(goldenIndex.melodic_recordings.length)
+    for (const id of goldenIndex.recordings) {
       const g = goldenRecording(id)
       const file = await decoded(g)
       const source = renderSource(
@@ -138,9 +167,12 @@ describe('the render path from what the app stores', () => {
         }
       })
     )
-    const fromStore = renderFromRecordings(song, arrangement, recordings)
-    const fromGolden = renderSong(song, arrangement, sources)
+    const beats = beatRecordings(song, noiseLike)
+    const fromStore = renderFromRecordings(song, arrangement, recordings, beats)
+    const fromGolden = renderSong(song, arrangement, sources, beats)
+    expect(fromStore.beats).toHaveLength(song.bar_lines.length)
     expect(fromStore.notes).toEqual(fromGolden.notes)
+    expect(fromStore.beats).toEqual(fromGolden.beats)
     let maxDiff = 0
     for (let i = 0; i < fromStore.samples.length; i++) {
       maxDiff = Math.max(maxDiff, Math.abs(fromStore.samples[i] - fromGolden.samples[i]))
@@ -154,13 +186,10 @@ describe('the render path from what the app stores', () => {
     expect(() => renderSong(song, locked, sources)).toThrow(/locked: 3 of 6 notes covered/)
     const unlocked = arrange(song, library)
     expect(() => renderSong(song, unlocked, new Map())).toThrow(/No Recording plays pitch/)
-  })
-
-  it('refuses a Noise-like Recording as a source', () => {
-    const g = goldenRecording('009')
-    expect(() =>
-      renderSource({ samples: new Float32Array(44100), sampleRate: 44100 }, storedAnalysis(g))
-    ).toThrow(/Melodic/)
+    const melodicOnly = new Map([...sources].filter(([id]) => !noiseLike.includes(id)))
+    expect(() => renderSong(song, unlocked, melodicOnly, ['065'])).toThrow(
+      /No Recording 065 for the Beats/
+    )
   })
 })
 
@@ -217,6 +246,40 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
     expect(notes.map(n => n.downbeat)).toEqual([false, false, true, false, true, false, true])
     const out = render(notes, 9)
     expect(out.notes[2].gainDb - out.notes[0].gainDb).toBeCloseTo(1.5, 12)
+  })
+
+  it('plays a Beat as its Recording from the bar line, trimmed, faded and set under a note', () => {
+    // 065 is Noise-like (no steady pitch). A 4/4 bar at 120 bpm lasts 2 s: the Beat is cut at
+    // the next bar line less the note gap, or where the fart ends.
+    const source = sources.get('065') as RenderSource
+    const beat = beatInBeats(source, { start: 4, dur: 4, bpm: 120 })
+    const out = render([], 6, [beat])
+    const placed = out.beats[0]
+    expect(placed.startSample).toBe(2 * SR)
+    expect(placed.lengthSamples).toBe(Math.min(source.gesture.length, Math.trunc(1.975 * SR)))
+
+    const expected = new Float64Array(out.samples.length)
+    const segment = source.gesture.slice(0, placed.lengthSamples)
+    applyFades(segment)
+    const gain = 10 ** (placed.gainDb / 20)
+    for (let i = 0; i < segment.length; i++) expected[2 * SR + i] += segment[i] * gain
+    expect(out.samples).toEqual(limit(expected))
+
+    // The same fart as a note of the same length, off the bar line: BEAT_LEVEL_DB louder, with no
+    // accent on the Beat.
+    const note = noteInBeats(source, 60, { start: 4.5, dur: 4, bpm: 120, barLines: [0, 4, 8] })
+    expect(note.downbeat).toBe(false)
+    const asNote = render([note], 6).notes[0]
+    expect(placed.gainDb - asNote.gainDb).toBeCloseTo(BEAT_LEVEL_DB, 12)
+  })
+
+  it('mixes Beats after the notes, leaving each note where it was', () => {
+    const melodic = sources.get('013') as RenderSource
+    const notes = [0, 1, 2, 3].map(beat =>
+      noteInBeats(melodic, 55, { start: beat, dur: 1, bpm: 120, barLines: [0] })
+    )
+    const beat = beatInBeats(sources.get('065') as RenderSource, { start: 0, dur: 4, bpm: 120 })
+    expect(render(notes, 2, [beat]).notes).toEqual(render(notes, 2).notes)
   })
 
   it('keeps notes at least 60 ms long and fades them in and out', () => {

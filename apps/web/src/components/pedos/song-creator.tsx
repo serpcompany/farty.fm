@@ -15,7 +15,13 @@ import * as store from '@/lib/recording-store'
 import { type Recording, recordingName, recordingPitch } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
-import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/toot'
+import {
+  noteCaption,
+  recordingsUsedSummary,
+  soundingPitch,
+  type Toot,
+  type TootDraft
+} from '@/lib/toot'
 import {
   type CheckoutReturn,
   clearCheckoutReturn,
@@ -366,7 +372,8 @@ type Focus = { pitch: number } | { note: number } | null
 /**
  * What Song Creator and a Toot's screen share: Play, the note view, and the Recordings used. Tap a
  * Recording to hear it alone and see which notes it plays; tap a note to hear just that note as
- * rendered, with what it is and how far its Recording moved. As the iPhone app's `TootLayout`.
+ * rendered, with what it is and how far its Recording moved. As the iPhone app's `TootLayout`,
+ * plus a row for each Recording that plays the Beats (ADR 0014), labeled "Beat".
  *
  * `toot` is the made Toot (Song Creator) or a saved one (its screen, with no Save). When its audio
  * is missing, Play and the notes can't play, and the Recordings still can. `children` are more
@@ -395,6 +402,7 @@ export function TootLayout({
     const id = arrangement.recordingForPitch[pitch]
     return id === undefined ? undefined : pedos.recording(id)
   }
+  const beatRecordings = arrangement.beatRecordings ?? []
 
   return (
     <div className="flex flex-col gap-6 px-4">
@@ -436,7 +444,7 @@ export function TootLayout({
                   : 'Ready'}
           </p>
           <p className="text-sm text-muted-foreground">
-            {song.pitches.length} of your Recordings, one per note
+            {recordingsUsedSummary(song, arrangement)}
           </p>
           {children}
         </div>
@@ -486,7 +494,7 @@ export function TootLayout({
                 key={pitch}
                 recording={recording}
                 color={pitchColor(index)}
-                plays={plays}
+                badge={`plays ${plays}`}
                 isHighlighted={isHighlighted}
                 onTap={() => {
                   const stopping = pedos.nowPlaying === recording.id
@@ -498,9 +506,26 @@ export function TootLayout({
               <DeletedRecordingRow
                 key={pitch}
                 color={pitchColor(index)}
-                plays={plays}
+                badge={`plays ${plays}`}
                 isHighlighted={isHighlighted}
               />
+            )
+          })}
+          {beatRecordings.map(id => {
+            const recording = pedos.recording(id)
+            return recording ? (
+              <RecordingUsedRow
+                key={`beat ${id}`}
+                recording={recording}
+                badge="Beat"
+                isHighlighted={false}
+                onTap={() => {
+                  setFocus(null)
+                  pedos.togglePlayback(recording)
+                }}
+              />
+            ) : (
+              <DeletedRecordingRow key={`beat ${id}`} badge="Beat" isHighlighted={false} />
             )
           })}
         </ul>
@@ -511,19 +536,19 @@ export function TootLayout({
 
 /**
  * A Recording the Toot uses: the color of its notes, play, its name, its waveform and its fart's
- * length, and the note it plays in the Song. As the iPhone app's `RecordingRow` in Song Creator,
- * which shows the whole take's length.
+ * length, and what it plays in the Song: "plays F3", or "Beat" (no color, since a Beat isn't a
+ * note). As the iPhone app's `RecordingRow` in Song Creator, which shows the whole take's length.
  */
 function RecordingUsedRow({
   recording,
   color,
-  plays,
+  badge,
   isHighlighted,
   onTap
 }: {
   recording: Recording
-  color: string
-  plays: string
+  color?: string
+  badge: string
   isHighlighted: boolean
   onTap: () => void
 }) {
@@ -547,7 +572,7 @@ function RecordingUsedRow({
         className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         aria-label={[
           name,
-          `plays ${plays}`,
+          badge,
           length,
           isHighlighted && 'highlighted',
           pitch === null ? 'noise-like' : noteName(pitch)
@@ -557,11 +582,7 @@ function RecordingUsedRow({
         aria-pressed={isPlaying}
         onClick={onTap}
       >
-        <span
-          aria-hidden
-          className="size-2.5 shrink-0 rounded-full"
-          style={{ backgroundColor: color }}
-        />
+        <NoteColor color={color} />
         <span
           aria-hidden
           className={cn(
@@ -587,19 +608,22 @@ function RecordingUsedRow({
           </span>
         </span>
       </button>
-      <PlaysBadge plays={plays} />
+      <Badge text={badge} />
     </li>
   )
 }
 
-/** A Recording the Toot used that has since been deleted: the note it played, and no play button. */
+/**
+ * A Recording the Toot used that has since been deleted: what it played ("plays F3" or "Beat"),
+ * and no play button.
+ */
 function DeletedRecordingRow({
   color,
-  plays,
+  badge,
   isHighlighted
 }: {
-  color: string
-  plays: string
+  color?: string
+  badge: string
   isHighlighted: boolean
 }) {
   return (
@@ -610,28 +634,35 @@ function DeletedRecordingRow({
       )}
       data-testid="recording-used"
     >
-      <span
-        aria-hidden
-        className="size-2.5 shrink-0 rounded-full"
-        style={{ backgroundColor: color }}
-      />
+      <NoteColor color={color} />
       <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
         <Trash2 className="size-4" aria-hidden />
       </span>
       <span className="min-w-0 flex-1 text-muted-foreground">Recording deleted</span>
-      <PlaysBadge plays={plays} />
+      <Badge text={badge} />
     </li>
   )
 }
 
-/** "plays F3": the note a Recording plays in the Song. */
-function PlaysBadge({ plays }: { plays: string }) {
+/** The color of a Recording's notes in the note view; an empty space for a Beat's Recording. */
+function NoteColor({ color }: { color?: string }) {
+  return (
+    <span
+      aria-hidden
+      className="size-2.5 shrink-0 rounded-full"
+      style={{ backgroundColor: color ?? 'transparent' }}
+    />
+  )
+}
+
+/** "plays F3", the note a Recording plays in the Song, or "Beat". */
+function Badge({ text }: { text: string }) {
   return (
     <span
       aria-hidden
       className="shrink-0 rounded-full bg-muted px-3 py-1 text-sm font-semibold tabular-nums"
     >
-      plays {plays}
+      {text}
     </span>
   )
 }
