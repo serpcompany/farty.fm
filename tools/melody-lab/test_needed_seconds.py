@@ -23,7 +23,7 @@ GOLDEN = ROOT / "fixtures/golden"
 
 
 def load(rel):
-    return json.loads((GOLDEN / rel).read_text())
+    return json.loads((GOLDEN / rel).read_text(encoding="utf-8"))
 
 
 INDEX = load("index.json")

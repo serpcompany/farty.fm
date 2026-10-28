@@ -44,7 +44,7 @@ SMALL = ROOT / "fixtures/golden/arrangements/small"
 
 def render_set_problems(out):
     """What is wrong with the set of renders in `out`, against the golden unlocked Arrangements."""
-    unlocked = {p.stem for p in GOLDEN.glob("*.json") if json.loads(p.read_text())["unlocked"]}
+    unlocked = {p.stem for p in GOLDEN.glob("*.json") if json.loads(p.read_text(encoding="utf-8"))["unlocked"]}
     locked = {p.stem for p in GOLDEN.glob("*.json")} - unlocked
     jsons = {p.stem for p in out.glob("*.json")}
     wavs = {p.stem for p in out.glob("*.wav")}
@@ -57,7 +57,7 @@ def render_set_problems(out):
     for stem in sorted((jsons ^ wavs) & unlocked):
         problems.append(f"{stem}: {'.wav' if stem in jsons else '.json'} missing")
     for stem in sorted(jsons & wavs & unlocked):
-        song = json.loads((out / f"{stem}.json").read_text()).get("song")
+        song = json.loads((out / f"{stem}.json").read_text(encoding="utf-8")).get("song")
         if song != stem:
             problems.append(f"{stem}.json says it is {song!r}")
     return sorted(unlocked & jsons & wavs), problems
@@ -67,7 +67,7 @@ def small_library_under_bar():
     """The small library's unlocked golden Arrangements under the bar's fidelity (ADR 0012)."""
     under = []
     for path in sorted(SMALL.glob("*.json")):
-        golden = json.loads(path.read_text())
+        golden = json.loads(path.read_text(encoding="utf-8"))
         within = golden["metrics"]["within_50c_of_fart_pct"] if golden["unlocked"] else None
         if within is not None and within < BAR["within_50c_of_fart_pct"]:
             under.append(f"{path.stem} {within}%")
@@ -103,7 +103,7 @@ def main():
     failures = []
     for stem in renders:
         path = out / f"{stem}.json"
-        events = json.loads(path.read_text())
+        events = json.loads(path.read_text(encoding="utf-8"))
         song = events["song"]
         melody = catalog[song]
         audio, _ = librosa.load(path.with_suffix(".wav"), sr=SR, mono=True)
@@ -115,7 +115,7 @@ def main():
             f" recs={r['distinct_recordings']} octaveMoves={events['octave_moves']}"
             f" sounding={r['sounding_pct']}% mostlySilent={r['notes_mostly_silent']}"
         )
-        golden = json.loads((GOLDEN / f"{song}.json").read_text())
+        golden = json.loads((GOLDEN / f"{song}.json").read_text(encoding="utf-8"))
         g = golden["metrics"]
         print(
             f"{'  golden':12s} T={golden['transpose']:+d} notes={g['notes']:3d} in50cFart={g['within_50c_of_fart_pct']:3d}%"

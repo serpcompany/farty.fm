@@ -76,7 +76,7 @@ def missing(song, transpose, recording_for_pitch):
 
 
 def load(rel):
-    return json.loads((GOLDEN / rel).read_text())
+    return json.loads((GOLDEN / rel).read_text(encoding="utf-8"))
 
 
 def check(fit, song, recordings):

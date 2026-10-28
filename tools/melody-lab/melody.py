@@ -114,7 +114,7 @@ def load_catalog(path=Path(__file__).resolve().parents[2] / "catalog/catalog.jso
     import json
 
     out = []
-    for c in json.loads(Path(path).read_text()):
+    for c in json.loads(Path(path).read_text(encoding="utf-8")):
         m = load_midi(Path(path).parent / c["file"], title=c["title"], **c.get("render", {}))
         m.report["catalog_id"] = c["id"]
         out.append((c, m))

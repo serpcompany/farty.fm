@@ -96,9 +96,9 @@ def fetch_dataset(cache):
     if not record_file.exists():
         with urllib.request.urlopen(RECORD) as r:
             record_file.write_bytes(r.read())
-    published = {f["key"]: f["checksum"].removeprefix("md5:") for f in json.loads(record_file.read_text())["files"]}
+    published = {f["key"]: f["checksum"].removeprefix("md5:") for f in json.loads(record_file.read_text(encoding="utf-8"))["files"]}
     downloads_file = cache / "downloads.json"
-    downloads = json.loads(downloads_file.read_text()) if downloads_file.exists() else {}
+    downloads = json.loads(downloads_file.read_text(encoding="utf-8")) if downloads_file.exists() else {}
     out = {}
     for name in FILES:
         path = cache / name
@@ -113,7 +113,7 @@ def fetch_dataset(cache):
         out[name] = {"path": path, "md5": md5, "published_md5": published[name], "downloaded": downloads[name]["downloaded"]}
         if md5 != published[name]:
             sys.exit(f"error: {path} has md5 {md5}, Zenodo publishes {published[name]}; delete it and run again")
-    downloads_file.write_text(json.dumps(downloads, indent=1) + "\n")
+    downloads_file.write_text(json.dumps(downloads, indent=1) + "\n", encoding="utf-8", newline="\n")
     return out
 
 
@@ -390,7 +390,7 @@ def write_catalog(path, catalog, titles_file, picks, archive):
                 continue
             kept.append((title, r, entry))
         entries = [entry for _, _, entry in kept]
-        (staging / path.name).write_text(json.dumps(entries))
+        (staging / path.name).write_text(json.dumps(entries), encoding="utf-8", newline="\n")
         imported = {c["id"]: m for c, m in load_catalog(staging / path.name)}
         for title, r, _ in kept:
             if [[n.start, n.dur, n.pitch] for n in imported[title.id].notes] != r["notes"]:
@@ -398,7 +398,7 @@ def write_catalog(path, catalog, titles_file, picks, archive):
                                        "the catalog is unchanged")
         merged = pdmx.merge_catalog(catalog, titles_file, entries)
         old = {e["file"] for e in catalog if pdmx.batch_of(e) == titles_file}
-        (staging / path.name).write_text(json.dumps(merged, indent=1, ensure_ascii=False))  # the file's own format
+        (staging / path.name).write_text(json.dumps(merged, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n")  # the file's own format
         for entry in entries:
             (staging / entry["file"]).replace(path.parent / entry["file"])
         os.replace(staging / path.name, path)
@@ -413,7 +413,7 @@ def table_row(*cells):
 
 def write_report(path, run, songs):
     lean = [{**s, "tried": [{k: v for k, v in r.items() if k != "notes"} for r in s["tried"]]} for s in songs]
-    path.with_name(path.name + ".json").write_text(json.dumps({**run, "songs": lean}, indent=1, ensure_ascii=False) + "\n")
+    path.with_name(path.name + ".json").write_text(json.dumps({**run, "songs": lean}, indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     passed = [s for s in songs if s["result"] == "pass"]
     lines = [
         f"# PDMX import report: `{run['titles']}`",
@@ -471,7 +471,7 @@ def write_report(path, run, songs):
         for r in s["tried"]:
             lines.append(f"  - [{r['score_id']}]({r['url']}) {r['score_title']!r}: "
                          + ("pass" if r["passed"] else first_problem(r)))
-    path.with_name(path.name + ".md").write_text("\n".join(lines) + "\n")
+    path.with_name(path.name + ".md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def listen(sample, library, out):
@@ -488,7 +488,7 @@ def listen(sample, library, out):
         metrics.pop("per_note")
         (out / f"{title.id}.json").write_text(json.dumps(
             {"song": title.id, "title": title.title, "score": r["url"], "render": r["render"],
-             "measured_on": wav.name, "metrics": metrics, "gate_metrics": r["metrics"]}, indent=1) + "\n")
+             "measured_on": wav.name, "metrics": metrics, "gate_metrics": r["metrics"]}, indent=1) + "\n", encoding="utf-8", newline="\n")
         print(f"listen {wav}: in50cFart={metrics['within_50c_of_fart_pct']}% onTime={metrics['onsets_on_time_pct']}%"
               f" reatk={metrics['notes_with_retrigger']} med={metrics['median_abs_cents']}c contour={metrics['contour_pct']}%"
               f" notes={metrics['notes']}")
@@ -507,8 +507,8 @@ def main():
     args = parser.parse_args()
 
     titles_file = rel(args.titles)
-    titles = pdmx.read_titles(args.titles.read_text())
-    catalog = json.loads(CATALOG.read_text())
+    titles = pdmx.read_titles(args.titles.read_text(encoding="utf-8"))
+    catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     others = [e for e in catalog if pdmx.batch_of(e) != titles_file]
     dataset = fetch_dataset(args.cache)
     archive = dataset["mid.tar.gz"]

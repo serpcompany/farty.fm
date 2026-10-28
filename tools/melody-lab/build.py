@@ -31,7 +31,7 @@ def encode(y, name):
 def main():
     AUDIO.mkdir(parents=True, exist_ok=True)
     lib = engine.load_library()
-    manifest = {r["id"]: r for r in json.loads(engine.MANIFEST.read_text())["recordings"]}
+    manifest = {r["id"]: r for r in json.loads(engine.MANIFEST.read_text(encoding="utf-8"))["recordings"]}
 
     recordings = []
     for s in lib:
@@ -94,7 +94,7 @@ def main():
 
     data = {"recordings": recordings, "songs": songs}
     shutil.copy(Path(__file__).parent / "listen/index.html", OUT / "index.html")
-    (OUT / "data.js").write_text("window.PEDOS = " + json.dumps(data, ensure_ascii=False) + ";\n")
+    (OUT / "data.js").write_text("window.PEDOS = " + json.dumps(data, ensure_ascii=False) + ";\n", encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":

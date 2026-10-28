@@ -194,7 +194,7 @@ def settle_time(src):
 
 
 def load_library(ids=None):
-    manifest = json.loads(MANIFEST.read_text())["recordings"]
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))["recordings"]
     lib = []
     for r in manifest:
         if ids and r["id"] not in ids:
@@ -578,7 +578,7 @@ def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_d
 def render_naive(melody, sources, bpm=None):
     """What 'place raw recordings on notes' does without analysis: file start on the beat,
     no trimming, no pitch. Kept only to show why the melody disappears."""
-    manifest = {r["id"]: r for r in json.loads(MANIFEST.read_text())["recordings"]}
+    manifest = {r["id"]: r for r in json.loads(MANIFEST.read_text(encoding="utf-8"))["recordings"]}
     spb = 60 / (bpm or melody.bpm)
     mix = np.zeros(int((melody.length_beats * spb + 2) * SR))
     ids = [s.id for s in sources]

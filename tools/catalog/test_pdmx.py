@@ -247,9 +247,9 @@ class Gates(unittest.TestCase):
     def test_the_bar_is_the_readmes_bar(self):
         # fixtures/golden/README.md states the renderer's bar on notes; this tool's README states the whole gate.
         golden = re.search(r"\*\*Renderer \(#41\)\*\* requires at least (\d+)% of notes within ±50 cents of "
-                           r"their fart's own pitch", (ROOT / "fixtures/golden/README.md").read_text())
+                           r"their fart's own pitch", (ROOT / "fixtures/golden/README.md").read_text(encoding="utf-8"))
         gate = re.search(r"at least (\d+)% of notes within ±50 cents of their fart's own pitch, at least (\d+)% of "
-                         r"onsets within ±50 ms, and no re-attacks", (HERE / "README.md").read_text())
+                         r"onsets within ±50 ms, and no re-attacks", (HERE / "README.md").read_text(encoding="utf-8"))
         self.assertIsNotNone(golden, "fixtures/golden/README.md no longer states the renderer's bar")
         self.assertIsNotNone(gate, "tools/catalog/README.md no longer states the render gate's bar")
         self.assertEqual(int(gate[1]), int(golden[1]))
@@ -294,7 +294,7 @@ class Catalog(unittest.TestCase):
         self.assertEqual(pdmx.spread([1, 2, 3], 1), [1])
 
     def test_catalog_keeps_its_format(self):
-        text = (ROOT / "catalog/catalog.json").read_text()
+        text = (ROOT / "catalog/catalog.json").read_text(encoding="utf-8")
         self.assertEqual(json.dumps(json.loads(text), indent=1, ensure_ascii=False), text)
 
 
@@ -337,7 +337,7 @@ class PaddedPickup(unittest.TestCase):
                                  ["the first bar is a pickup padded with silence: every track rests 2 beats after its notes"])
 
     def test_no_catalog_song_opens_with_a_padded_pickup(self):
-        catalog = json.loads((ROOT / "catalog/catalog.json").read_text())
+        catalog = json.loads((ROOT / "catalog/catalog.json").read_text(encoding="utf-8"))
         for entry in catalog:
             with self.subTest(song=entry["id"]):
                 self.assertEqual(self.problems(ROOT / "catalog" / entry["file"]), [])

@@ -74,7 +74,7 @@ def write(rel, obj):
     path = GOLDEN / rel
     path.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps(plain(obj), indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False)
-    path.write_text(text + "\n", encoding="utf-8")
+    path.write_text(text + "\n", encoding="utf-8", newline="\n")
 
 
 def recording_json(entry, src):
@@ -226,7 +226,7 @@ def golden_catalog():
     (its ship list, which apps/web/src/lib/catalog/generate.ts reads too), and every hand-entered
     Song. The other PDMX imports (catalog entries with "import") are gated by
     tools/catalog/import_pdmx.py instead, and would make the golden data ten times larger."""
-    ship = json.loads(SHIP_LIST.read_text())
+    ship = json.loads(SHIP_LIST.read_text(encoding="utf-8"))
     catalog = [(c, m) for c, m in load_catalog() if c["id"] in ship or "import" not in c]
     missing = set(ship) - {c["id"] for c, _ in catalog}
     assert not missing, f"the ship list names Songs that aren't in catalog/: {sorted(missing)}"
@@ -241,7 +241,7 @@ def main():
         elif path.exists():
             path.unlink()
 
-    manifest = {r["id"]: r for r in json.loads(engine.MANIFEST.read_text())["recordings"]}
+    manifest = {r["id"]: r for r in json.loads(engine.MANIFEST.read_text(encoding="utf-8"))["recordings"]}
     lib = engine.load_library()
     small = [s for s in lib if s.id in SMALL_LIBRARY]
     assert [s.id for s in small] == sorted(SMALL_LIBRARY)
