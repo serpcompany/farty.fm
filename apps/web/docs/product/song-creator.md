@@ -59,31 +59,34 @@ raw, at its own pitch and speed ([ADR 0005](../../../../docs/adr/0005-song-creat
   as a Toot").
 - Every control is at least 44 by 44 CSS pixels (`e2e/song-creator.spec.ts`, "plays each Song with
   your farts, plays a tapped note, and saves it as a Toot").
+- Leaving Song Creator stops what plays (`src/components/farty/song-creator.interaction.test.tsx`,
+  "stops what plays when it is left").
 
 ## Saving
 
 - Save to Toots saves the Toot. Where saving is paid, on Staging and a local run, it says "Save to
   Toots · $0.99" and goes through checkout first ([Paying to save a Toot](payments.md)). On
-  Production it says "Save to Toots" and saves at once (`e2e/song-creator.spec.ts`, "plays each Song
-  with your farts, plays a tapped note, and saves it as a Toot"; `e2e/account-pay.spec.ts`, "a
-  guest's Toot plays free, and Save asks for an account first").
+  Production it says "Save to Toots" and saves at once, then offers a guest the account step once
+  ([Accounts](account.md#when-the-step-opens)) (`e2e/song-creator.spec.ts`, "plays each Song with
+  your farts, plays a tapped note, and saves it as a Toot"; `e2e/account-pay.spec.ts`, "a guest's
+  Toot plays free, and Save asks for an account first";
+  `src/components/farty/song-creator.interaction.test.tsx`, "saves at once where saving is free,
+  with no checkout, and offers the account step").
 - Saved, the button turns into a disabled "Saved to Toots". Two quick taps save it once
   (`e2e/song-creator.spec.ts`, "plays each Song with your farts, plays a tapped note, and saves it
   as a Toot"; `src/components/farty/toots-provider.interaction.test.tsx`, "saves a made Toot once").
 - A Toot is saved with its audio and which Recording played each pitch, titled with the Song's
   title (`e2e/song-creator.spec.ts`, "plays each Song with your farts, plays a tapped note, and
   saves it as a Toot").
+- A save that fails says "Couldn't save this Toot." and is reported, and Save can be tapped again
+  (`src/components/farty/song-creator.interaction.test.tsx`, "says a save that failed couldn't save,
+  and reports it").
+- While the Toot is unsaved, a reload after a deploy waits for it ([App
+  shell](app-shell.md#a-new-deploy); `src/components/farty/song-creator.interaction.test.tsx`,
+  "holds off a new build until the Toot is saved").
 - A guest's saved Toot lasts the visit; signed in, it's kept on the account ([Toots](toots.md)).
 
 ## Offline
 
 - The installed app opens a Ready Song offline, makes its Toot and plays it
   (`e2e/song-creator.spec.ts`, "the installed app opens a Ready Song offline, and makes its Toot").
-
-## Not checked
-
-- Leaving Song Creator stops what plays.
-- A save that fails says "Couldn't save this Toot." and is reported.
-- Production's Save: no journey runs on Production, so none taps a free "Save to Toots", or sees
-  the account step it then offers a guest once ([Accounts](account.md#when-the-step-opens)).
-- An unsaved Toot holds the reload after a deploy.

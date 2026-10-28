@@ -8,8 +8,11 @@ Stripe setup are in [Payments](../../../../docs/agents/payments.md). The rest of
 
 ## Where saving is paid
 
-- Production saves a Toot free, with no checkout (`src/server/stripe.test.ts`, "leaves saving free
-  on Production"; `src/app/api/payments.workers.test.ts`, "saves a Toot free, with no checkout").
+- Production saves a Toot free, with no checkout: Save says "Save to Toots" and saves at once
+  (`src/server/stripe.test.ts`, "leaves saving free on Production";
+  `src/app/api/payments.workers.test.ts`, "saves a Toot free, with no checkout";
+  `src/components/farty/song-creator.interaction.test.tsx`, "saves at once where saving is free,
+  with no checkout, and offers the account step").
 - Staging takes payment through Stripe Checkout in test mode, once the owner has set its keys
   (`src/server/stripe.test.ts`, "uses Stripe in test mode on Staging, with the webhook secret once
   it is set"; "takes a restricted test key too").
@@ -41,12 +44,22 @@ Stripe setup are in [Payments](../../../../docs/agents/payments.md). The rest of
 - Cancel at the checkout comes back to Song Creator with the same Toot, still unsaved, and Save pays
   for that same Toot (`e2e/account-pay.spec.ts`, "cancelled at the checkout, the Toot is still
   unsaved, and Save pays for that same Toot").
+- Back from the checkout, paid or not, Song Creator waits for a tap instead of playing the Toot
+  (`src/components/farty/song-creator.interaction.test.tsx`, "plays the Toot once made, but waits
+  for a tap on the return from the checkout").
 - Coming back paid, Song Creator saves once the server says the Toot is paid, which it asks Stripe
-  itself rather than wait for the webhook. It asks again every 2 seconds, 15 times, before saying
-  "Your payment hasn't come through yet. Tap Save to check again." (`src/lib/toot-payment.test.ts`,
-  "asks again until the payment comes through"; "gives up after its tries";
-  `src/app/api/payments.workers.test.ts`, "saves once Stripe says it’s paid, on the return, before
-  the webhook").
+  itself rather than wait for the webhook. Save says "Confirming payment…" meanwhile. It asks again
+  every 2 seconds, 15 times, before saying "Your payment hasn't come through yet. Tap Save to check
+  again." (`src/lib/toot-payment.test.ts`, "asks again until the payment comes through"; "gives up
+  after its tries"; `src/app/api/payments.workers.test.ts`, "saves once Stripe says it’s paid, on
+  the return, before the webhook"; `src/components/farty/song-creator.interaction.test.tsx`, "says
+  Confirming payment… while the return is checked, then that the payment hasn’t come through").
+- While the account is still being read on the return, Save waits, disabled, and then confirms the
+  payment (`src/components/farty/song-creator.interaction.test.tsx`, "keeps Save waiting, disabled,
+  while the account is still read on the return").
+- Coming back with the browser's Back from the checkout page, restored as it was left, makes Save
+  tappable again (`src/components/farty/song-creator.interaction.test.tsx`, "makes Save tappable
+  again when the browser comes back from the checkout page").
 - A Toot already paid for saves with no second checkout, and two taps never pay twice
   (`src/lib/toot-payment.test.ts`, "has nothing to pay for a paid Toot"; `src/app/api/payments.workers.test.ts`,
   "reuses an open session, so two taps can’t pay twice"; "pays for one Toot at a time").
@@ -55,19 +68,18 @@ Stripe setup are in [Payments](../../../../docs/agents/payments.md). The rest of
 
 ## When it can't
 
-- A checkout that can't start says why: payments aren't available, the account already keeps as
-  many Toots as it can (300), or the payment couldn't start (`src/lib/toot-payment.test.ts`, "says
-  why it failed"; `src/app/api/payments.workers.test.ts`, "refuses a deleted Toot, and one past the
-  Toot limit, before anything is paid").
+- A checkout that can't start says why under Save: "Payments aren't available right now.", "You've
+  kept as many Toots as an account can. Delete one to save this one." (300), or "Couldn't start the
+  payment." (`src/lib/toot-payment.test.ts`, "says why it failed";
+  `src/app/api/payments.workers.test.ts`, "refuses a deleted Toot, and one past the Toot limit,
+  before anything is paid"; `src/components/farty/song-creator.interaction.test.tsx`, "says why a
+  checkout couldn't start (%s)").
 - The account won't keep a new Toot that isn't paid for, and one user can't pay for or save
   another's (`src/app/api/payments.workers.test.ts`, "saves a Toot once it is paid for, and not
   before"; "never lets one user pay for, or save, another’s Toot").
 
 ## Not checked
 
-- The words of each problem under Save, "Confirming payment…" while the return is checked, and
-  "Your payment hasn't come through yet."
-- Coming back from the checkout, Song Creator waits for a tap instead of playing the Toot.
-- While the account is still being read on the return, Save waits, disabled.
-- The browser's Back from the checkout page makes Save tappable again.
-- Save where saving is free: no journey runs on Production.
+- That a real browser restores Song Creator from its back/forward cache on Back from the checkout
+  page: only a real browser has that cache. The interaction test above sends the `pageshow` event
+  such a restore fires.

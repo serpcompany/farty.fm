@@ -81,12 +81,14 @@ Each replaces the tab's screen with a message and a Reload button.
 - Pages come from the network first, so a deploy shows on the next navigation
   (`src/lib/service-worker.test.ts`, "fetches pages from the network first, and answers from the
   cache offline").
-- A tab opened before a deploy that then fails to load an older build's script reloads once, at
-  most once in 10 minutes, and waits while an unsaved Recording is on screen (`e2e/stale-build.spec.ts`, "reloads
-  the page once, after the unsaved Recording is gone"; `src/lib/stale-build.test.ts`, "waits while
-  something unsaved is on screen, and comes once the last hold lets go"; "comes at most once in the
-  guard, so a build that keeps failing never loops"; "never comes when the tab has nowhere to note
-  it").
+- A tab opened before a deploy that then fails to load an older build's script reloads once, at most
+  once in 10 minutes, and waits while an unsaved Recording or Toot is on screen
+  (`e2e/stale-build.spec.ts`, "reloads the page once, after the unsaved Recording is gone";
+  `src/lib/stale-build.test.ts`, "waits while something unsaved is on screen, and comes once the
+  last hold lets go"; "comes at most once in the guard, so a build that keeps failing never loops";
+  "never comes when the tab has nowhere to note it";
+  `src/components/farty/song-creator.interaction.test.tsx`, "holds off a new build until the Toot is
+  saved").
 - The service worker answers such a script with the copy it kept ([Installing and
   offline](install.md#offline)).
 
@@ -120,7 +122,3 @@ Each replaces the tab's screen with a message and a Reload button.
   a local host (`src/server/email.test.ts`, "is open only to a local run, on a local host";
   `src/app/api/payments.workers.test.ts`, "has no dev checkout off this machine, or with a Stripe
   key").
-
-## Not checked
-
-- An unsaved Toot in Song Creator holds the reload after a deploy, as an unsaved Recording does.
