@@ -15,8 +15,8 @@ export default function PrivacyPage() {
 
       <h2>Without an account</h2>
       <p>
-        Your Recordings stay in your browser on your device, and your Toots last only until you
-        close Farty. We never receive them.
+        Your Recordings and Toots stay in your browser on your device, and only until you close
+        Farty. We never receive them.
       </p>
 
       <h2>With an account</h2>
@@ -28,6 +28,14 @@ export default function PrivacyPage() {
         <li>
           Your email is used for sign-in codes and for Farty news, which is on by default. You can
           unsubscribe from any email or on Profile. It&apos;s never sold.
+        </li>
+        <li>
+          Before Farty sends a sign-in code, Cloudflare Turnstile checks that a person asked for it.
+          Cloudflare&apos;s use of what it reads from your browser is described in its{' '}
+          <a href="https://www.cloudflare.com/turnstile-privacy-policy/">
+            Turnstile privacy addendum
+          </a>
+          .
         </li>
       </ul>
 

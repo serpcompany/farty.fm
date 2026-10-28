@@ -13,9 +13,10 @@ import { payAtTheDevCheckout } from './pay'
 import { recordAndSave, skipWelcome, withFakeMicrophone } from './record'
 import { onPhone } from './screens'
 
-// The account step and Profile's account (#155), and what a guest keeps: their Recordings,
-// while their Toots last only the visit (#150, #203), at phone size. Sign-in codes come from
-// the dev mailbox (`e2e/account.ts`).
+// The account step and Profile's account (#155), and what a guest keeps: nothing past the visit
+// without a free account, and saving a Toot asks for one (#237, ADR 0013), at phone size. The step
+// sends a code only with Turnstile's token: a local run renders Cloudflare's test widget, which
+// always passes. Sign-in codes come from the dev mailbox (`e2e/account.ts`).
 
 const g3 = '090__carlosramon__17-pet__186119.wav'
 withFakeMicrophone(g3)
@@ -33,12 +34,13 @@ test("a guest's first Result offers the account step, and Not now goes where the
   await expect(step).toBeVisible()
   // Focus moves into the step, so a screen reader says it opened.
   await expect(step.getByRole('heading', { name: 'Keep your farts' })).toBeFocused()
-  await expect(step).toContainText(
-    'Make a free account to keep your Recordings and Toots, even on a new phone.'
-  )
+  await expect(step).toContainText('Make a free account to keep your farts.')
   await expect(step.getByTestId('account-step-guest')).toHaveText(
-    'Without an account, your Recordings stay only in this browser, and your Toots are gone when you close Farty.'
+    'Without an account, your farts are gone when you close Farty.'
   )
+  // Turnstile's test widget, under the email, gives its token, and then a code can be sent.
+  await expect(step.getByTestId('turnstile').locator('iframe')).toBeVisible()
+  await expect(step.getByRole('button', { name: 'Send code' })).toBeEnabled()
   for (const control of [
     step.getByLabel('Email'),
     step.getByRole('button', { name: 'Send code' }),
@@ -54,7 +56,7 @@ test("a guest's first Result offers the account step, and Not now goes where the
   await expect(step).toBeHidden()
   await expect(page).toHaveURL(/\/recordings\/$/)
   await expect(page.getByTestId('recording-row')).toHaveCount(1)
-  // Offered once at a Result: it waits for the first saved Toot now.
+  // Offered once, at the first Result.
   expect(await page.evaluate(() => localStorage.getItem('pedos.accountStep'))).toBe('once')
 })
 
@@ -165,7 +167,7 @@ test('cancelled at the checkout, the Toot is still unsaved, and Save pays for th
   expect(await recordingsStored(page, 'toots')).toBe(1)
 })
 
-test('signing up from the first Result keeps the Recording, and goes where they tapped', async ({
+test('signing up from the first Result goes where they tapped, and Farty opens again with their Recording', async ({
   page
 }, testInfo) => {
   test.setTimeout(120_000)
@@ -215,10 +217,7 @@ test('signing up from the first Result keeps the Recording, and goes where they 
   )
 
   // Closed and opened again, a signed-in user's Recording is still here.
-  const context = page.context()
-  await page.close()
-  const reopened = await context.newPage()
-  await reopened.goto('/recordings/')
+  const reopened = await reopen(page.context(), page)
   await expect(reopened.getByTestId('recording-row')).toHaveCount(1)
   // And the step never offers itself again.
   expect(await reopened.evaluate(() => localStorage.getItem('pedos.accountStep'))).toBe('done')
@@ -424,9 +423,7 @@ test("Profile's Save to an account opens the step, which stays while they read t
   const save = page.getByRole('button', { name: 'Save to an account' })
   await expectTappable(save)
   await expect(
-    page.getByText(
-      'Without an account, your Recordings stay only in this browser, and your Toots are gone when you close Farty.'
-    )
+    page.getByText('Your farts are gone when you close Farty, unless you make a free account.')
   ).toBeVisible()
   await save.click()
   const step = page.getByRole('dialog', { name: 'Keep your farts' })
@@ -451,59 +448,65 @@ test("Profile's Save to an account opens the step, which stays while they read t
   await expect(step).toBeHidden()
 })
 
-test("a guest's Recording outlasts closing Farty and still plays, while their Toot lasts the visit", async ({
+test("a guest's farts last the visit: they record and hear a Song, and Farty opens again with none", async ({
   page,
-  context
+  context,
+  request
 }) => {
+  test.setTimeout(180_000)
+  await needsTheFixtureLibrary(request)
   await context.addInitScript(skipWelcome)
   await context.addInitScript(askedToKeep)
   await recordAndSave(page, 1.5)
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page.getByTestId('recording-row')).toHaveCount(1)
-  // With the first Recording, Farty asks the browser to keep its storage.
-  await expect.poll(() => keepAsked(page)).toBe(true)
-  await saveATootHere(page)
+  await tab(page, 'Profile').click()
+  await loadTheFixtureLibrary(page)
+  await openASong(page, 'mary')
+  const farts = await recordingsStored(page)
+  expect(farts).toBeGreaterThan(1)
+  // A guest's browser is never asked to keep Farty's storage.
+  expect(await keepAsked(page)).toBe(false)
 
   // A reload, and a second tab while this one is open, are the same visit.
+  await page.goto('/recordings/')
   await page.reload()
-  await expect(page.getByTestId('toot-row')).toHaveCount(1)
+  await expect(page.getByTestId('recording-row')).toHaveCount(farts)
   const second = await context.newPage()
-  await second.goto('/toots/')
-  await expect(second.getByTestId('toot-row')).toHaveCount(1)
+  await second.goto('/recordings/')
+  await expect(second.getByTestId('recording-row')).toHaveCount(farts)
   await second.close()
 
-  // Farty closes, and opens again: the Recording is there and plays, and the Toot is gone.
+  // Farty closes, and opens again: a new visit, with no Recordings and nothing left to upload.
   const reopened = await reopen(context, page)
-  await expectARecordingThatPlays(reopened)
-  expect(await recordingsStored(reopened, 'toots')).toBe(0)
-  expect(await recordingsStored(reopened, 'tootAudio')).toBe(0)
-  // What's left for a sign-in to send is the Recording's upload.
-  expect(await recordingsStored(reopened, 'outbox')).toBe(1)
-  await tab(reopened, 'Toots').click()
-  await expect(reopened.getByText('Nothing yet')).toBeVisible()
-
-  // And again, closed and opened.
-  await expectARecordingThatPlays(await reopen(context, reopened))
+  await expect(reopened.getByText('No Recordings yet')).toBeVisible()
+  for (const store of ['recordings', 'audio', 'toots', 'tootAudio', 'outbox']) {
+    expect(await recordingsStored(reopened, store)).toBe(0)
+  }
 })
 
-test("a guest's Recording is there when the installed app opens again offline", async ({
+test("an account's Recording is there when the installed app opens again offline", async ({
   page,
   context
-}) => {
+}, testInfo) => {
   test.skip(
     process.env.E2E_SERVER !== 'preview' && !process.env.E2E_BASE_URL,
     'Only a build registers the service worker'
   )
+  test.setTimeout(120_000)
   await context.addInitScript(skipWelcome)
   await recordAndSave(page, 1.5)
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page.getByTestId('recording-row')).toHaveCount(1)
+  await signInByApi(page, newEmail(testInfo, 'offline'))
+  await page.reload()
+  await uploaded(page)
   await page.waitForFunction(async () => {
     await navigator.serviceWorker.ready
     return navigator.serviceWorker.controller !== null
   })
 
-  // Opened again online, as a guest's new visit, then offline from the service worker.
+  // Opened again online, then offline from the service worker, where the session can't be read.
   const online = await reopen(context, page)
   await expectARecordingThatPlays(online)
   await context.setOffline(true)
@@ -512,10 +515,11 @@ test("a guest's Recording is there when the installed app opens again offline", 
   await context.setOffline(false)
 })
 
-test("a browser's farts from before a guest's Toots lasted the visit: the Recording stays, the Toot goes after this visit", async ({
+test("a guest's Recordings from before #237 stay, while their Toot and their new Recordings go after this visit", async ({
   page,
   context
 }) => {
+  test.setTimeout(120_000)
   await context.addInitScript(skipWelcome)
   // A browser that used Farty before: a Recording and a Toot, saved by the app's own database.
   await page.goto('/robots.txt')
@@ -560,6 +564,7 @@ test("a browser's farts from before a guest's Toots lasted the visit: the Record
     db.close()
   }, wav.toString('base64'))
 
+  // The first open with #237 notes the Recordings it keeps.
   await page.goto('/toots/')
   await expect(page.getByTestId('toot-row')).toHaveCount(1)
   const reopened = await reopen(context, page)
@@ -567,6 +572,14 @@ test("a browser's farts from before a guest's Toots lasted the visit: the Record
   expect(await recordingsStored(reopened, 'toots')).toBe(0)
   await tab(reopened, 'Toots').click()
   await expect(reopened.getByText('Nothing yet')).toBeVisible()
+
+  // A Recording made since lasts only its visit, and the one from before stays.
+  await recordAndSave(reopened, 1.5)
+  expect(await recordingsStored(reopened)).toBe(2)
+  const again = await reopen(context, reopened)
+  await expect(again.getByTestId('recording-row')).toHaveCount(1)
+  expect(await recordingsStored(again)).toBe(1)
+  expect(await recordingsStored(again, 'audio')).toBe(1)
 })
 
 test('a Recording saved while Farty still reads the session waits for the visit to start', async ({
@@ -846,50 +859,7 @@ function keepAsked(page: Page): Promise<boolean> {
   return page.evaluate(() => (window as unknown as { keepAsked: boolean }).keepAsked)
 }
 
-/**
- * Saves a Toot in the app's own database as Song Creator does, with the upload it queues, and
- * opens the Toots tab, where it shows. Song Creator needs a Song unlocked, which needs the Fixture
- * Library, which only the Staging build has.
- */
-async function saveATootHere(page: Page) {
-  await page.evaluate(async () => {
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open('pedos')
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
-    const id = crypto.randomUUID()
-    const transaction = db.transaction(['toots', 'tootAudio', 'outbox'], 'readwrite')
-    transaction.objectStore('toots').put({
-      id,
-      title: 'Mary Had a Little Lamb',
-      songId: 'mary',
-      createdAt: Date.now(),
-      seconds: 1,
-      arrangement: { transposition: 0, recordingForPitch: {} }
-    })
-    transaction.objectStore('tootAudio').put(new ArrayBuffer(44), id)
-    transaction.objectStore('outbox').put({
-      key: `toots:${id}`,
-      kind: 'toots',
-      id,
-      op: 'put',
-      sent: false,
-      queuedAt: Date.now(),
-      version: crypto.randomUUID()
-    })
-    await new Promise((resolve, reject) => {
-      transaction.oncomplete = resolve
-      transaction.onerror = () => reject(transaction.error)
-    })
-    db.close()
-  })
-  // In the same tab, so the same visit, and it reads the Toot.
-  await page.goto('/toots/')
-  await expect(page.getByTestId('toot-row')).toHaveCount(1)
-}
-
-/** The guest's G3 Recording is on Recordings, with its note, and plays from its WAV. */
+/** The G3 Recording is on Recordings, with its note, and plays from its WAV. */
 async function expectARecordingThatPlays(page: Page) {
   await expect(page.getByTestId('recording-row')).toHaveCount(1)
   const row = page.getByRole('button', { name: /^Recording 1, \d+\.\d s, G3$/ })

@@ -3,7 +3,7 @@ import { expect, type Page, test } from '@playwright/test'
 
 /**
  * An init script: skips Welcome and, unless `offersAccount`, the account step, which offers itself
- * after the first Result and the first saved Toot (`account.spec.ts`).
+ * once, after the first Result (`account.spec.ts`).
  */
 export function skipWelcome({ offersAccount = false } = {}): void {
   localStorage.setItem('pedos.welcomed', '1')

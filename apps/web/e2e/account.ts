@@ -4,6 +4,12 @@ import { type BrowserContext, expect, type Page, type TestInfo } from '@playwrig
 // Accounts in the journeys (#155): sign-in codes come from the dev mailbox (`/dev/mail/`), which
 // only a local run without `--env` has, as on CI.
 
+/**
+ * The token Turnstile's test widget gives (#237), which the test secret a local run uses accepts.
+ * A request for a code without it is refused.
+ */
+export const TURNSTILE_TEST_TOKEN = 'XXXX.DUMMY.TOKEN.XXXX'
+
 /** A new email for one test, so no two tests share an account or a code. */
 export function newEmail(testInfo: TestInfo, name: string): string {
   return `${name}-${testInfo.project.name}-${Date.now()}-${randomInt(1e6)}@example.com`
@@ -35,22 +41,23 @@ export async function codeFor(page: Page, email: string): Promise<string> {
 }
 
 /**
- * Signs in to a new account with the page's own requests, as the account step makes them. The
- * page must be on Farty; reload it after, so Farty reads the session as it opens.
+ * Signs in to a new account with the page's own requests, as the account step makes them, with
+ * Turnstile's test token. The page must be on Farty; reload it after, so Farty reads the session
+ * as it opens.
  */
 export async function signInByApi(page: Page, email: string): Promise<void> {
   await ownClient(page.context())
   const post = (path: string, body: unknown) =>
     page.evaluate(
-      async ({ path, body }) =>
+      async ({ path, body, token }) =>
         (
           await fetch(path, {
             method: 'POST',
-            headers: { 'content-type': 'application/json' },
+            headers: { 'content-type': 'application/json', 'x-captcha-response': token },
             body: JSON.stringify(body)
           })
         ).status,
-      { path, body }
+      { path, body, token: TURNSTILE_TEST_TOKEN }
     )
   expect(await post('/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' })).toBe(
     200
