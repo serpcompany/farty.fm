@@ -1,7 +1,7 @@
 # Toots
 
 The Toots tab and a Toot's own screen: the Toots saved in [Song Creator](song-creator.md), to play,
-open, rename and delete. A guest's Toots last the visit; an account keeps them
+open, rename and delete. Saving a Toot needs a free account, which keeps them
 ([Accounts](account.md)).
 
 ## While the Toots load
@@ -88,11 +88,12 @@ open, rename and delete. A guest's Toots last the visit; an account keeps them
 
 ## Guest and signed in
 
-- A guest's Toots last the visit: they stay through a reload and while Farty is open in another
-  tab, and are gone the next time Farty opens (`e2e/guest-visit.spec.ts`, "a guest's Recording
-  outlasts closing Farty and still plays, while their Toot lasts the visit";
-  `src/lib/visit.test.ts`, "clears a guest's Toots when a new visit opens"; "keeps them while Farty
-  is open in another tab"; "keeps the Toots through a reload").
+- A guest can't save a Toot: Save asks for a free account first ([Paying to save a
+  Toot](payments.md#a-guest)). A guest's Toots from before that last the visit: they stay through
+  a reload and while Farty is open in another tab, and are gone the next time Farty opens
+  (`e2e/guest-visit.spec.ts`, "a guest's Recordings from before #237 stay, while their Toot and
+  their new Recordings go after this visit"; `src/lib/visit.test.ts`, "clears a guest's farts when a
+  new visit opens"; "keeps them while Farty is open in another tab"; "clears nothing on a reload").
 - A visit that can't read the session, offline for one, clears nothing (`src/lib/visit.test.ts`,
   "keeps the first open for the next readable one when get-session %s").
 - Signed in, the Toots are kept: they're there after Farty is quit and opened again

@@ -31,6 +31,7 @@ export default defineConfig({
     : [['list']],
   use: {
     baseURL,
+    channel: process.platform === 'darwin' ? 'chromium' : undefined,
     httpCredentials: stagingPassword ? { username: 'farty', password: stagingPassword } : undefined,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure'

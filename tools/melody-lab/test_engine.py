@@ -23,7 +23,7 @@ from signals import harmonic, samples
 
 
 def song(pitches, beats=1.0, bpm=60.0):
-    return Melody("test", bpm, 4, [Note(i * beats, beats, p) for i, p in enumerate(pitches)])
+    return Melody("test", bpm, 4, [Note(i * beats, beats, p) for i, p in enumerate(pitches)], [0.0])
 
 
 def zero_crossing_hz(x):
@@ -148,7 +148,7 @@ class Render(unittest.TestCase):
     def setUp(self):
         self.sources = [source("low", 45.0, samples(1.5), 0.1, 0.0, audio=harmonic(220.0, 1.5, harmonics=1)),
                         source("high", 52.0, samples(1.5), 0.1, 0.0, audio=harmonic(330.0, 1.5, harmonics=1))]
-        self.melody = Melody("test", 120.0, 4, [Note(0.0, 1.0, 57), Note(2.0, 1.0, 64)])
+        self.melody = Melody("test", 120.0, 4, [Note(0.0, 1.0, 57), Note(2.0, 1.0, 64)], [0.0])
         _, self.assignments = plan(self.melody, self.sources)
         self.mix, self.events = render(self.melody, self.sources, self.assignments)
 
@@ -171,5 +171,5 @@ class Render(unittest.TestCase):
 
     def test_a_fart_shorter_than_its_note_plays_to_its_end(self):
         short = [source("low", 45.0, samples(0.2), 0.1, 0.0, audio=harmonic(220.0, 0.2, harmonics=1))]
-        _, events = render(Melody("test", 60.0, 4, [Note(0.0, 1.0, 45)]), short, [Assignment(0, "low", 45, 0.0)])
+        _, events = render(Melody("test", 60.0, 4, [Note(0.0, 1.0, 45)], [0.0]), short, [Assignment(0, "low", 45, 0.0)])
         self.assertEqual(events[0]["len_s"], 0.2)

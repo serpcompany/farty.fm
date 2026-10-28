@@ -1,4 +1,4 @@
-import { pairwiseSum, roundHalfEven } from '@/lib/analysis/numeric'
+import { pairwiseSum } from '@/lib/analysis/numeric'
 import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
 
 export const RENDER_SAMPLE_RATE = ANALYSIS_SAMPLE_RATE
@@ -28,16 +28,15 @@ interface RenderNote {
 export function noteInBeats(
   source: RenderSource,
   targetMidi: number,
-  beats: { start: number; dur: number; bpm: number; beatsPerBar: number }
+  beats: { start: number; dur: number; bpm: number; barLines: readonly number[] }
 ): RenderNote {
   const spb = 60 / beats.bpm
-  const bar = beats.start / beats.beatsPerBar
   return {
     source,
     targetMidi,
     startSeconds: beats.start * spb,
     lengthSeconds: beats.dur * spb,
-    downbeat: Math.abs(bar - roundHalfEven(bar)) < 1e-6
+    downbeat: beats.barLines.some(line => Math.abs(beats.start - line) < 1e-6)
   }
 }
 

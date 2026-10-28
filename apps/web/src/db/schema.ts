@@ -134,8 +134,10 @@ export const tootPayments = sqliteTable(
     checkoutSessionId: text('checkout_session_id').notNull(),
     amount: integer('amount').notNull(),
     currency: text('currency').notNull(),
+    songId: text('song_id'),
     createdAt: timestamp('created_at').notNull(),
-    paidAt: timestamp('paid_at')
+    paidAt: timestamp('paid_at'),
+    savedAt: timestamp('saved_at')
   },
   table => [primaryKey({ columns: [table.userId, table.tootId] })]
 )

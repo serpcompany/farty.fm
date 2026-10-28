@@ -1,14 +1,15 @@
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { APIError } from 'better-auth/api'
 import { betterAuth } from 'better-auth/minimal'
+import { captcha } from 'better-auth/plugins'
 import { emailOTP } from 'better-auth/plugins/email-otp'
 
 import { createDatabase, type Database } from '@/db/database'
 import { account, rateLimit, session, user, verification } from '@/db/schema'
 
-import { AUTH_BASE_PATH } from './auth-endpoints'
+import { AUTH_BASE_PATH, SEND_CODE_ENDPOINT } from './auth-endpoints'
 import { signInGuard } from './auth-hooks'
-import { type AuthEnv, type AuthSettings, resolveAuthSettings } from './auth-settings'
+import { type AuthEnv, type AuthSettings, availableAuthSettings } from './auth-settings'
 import {
   createEmailSender,
   type EmailSender,
@@ -65,7 +66,16 @@ export function createAuth({ db, settings, email }: CreateAuthOptions) {
       cookieCache: { enabled: false }
     },
     emailAndPassword: { enabled: false },
-    plugins: [otp],
+    plugins: settings.turnstile
+      ? [
+          otp,
+          captcha({
+            provider: 'cloudflare-turnstile',
+            secretKey: settings.turnstile.secretKey,
+            endpoints: [SEND_CODE_ENDPOINT]
+          })
+        ]
+      : [otp],
     rateLimit: {
       enabled: true,
       customRules: RATE_LIMITS,
@@ -112,12 +122,8 @@ export function authFor(
   request: Request,
   env: AuthEnv
 ): { auth: Auth; settings: AuthSettings } | null {
-  const resolved = resolveAuthSettings(env)
-  if (!resolved.ok) {
-    console.error(`auth_unavailable ${JSON.stringify({ reason: resolved.reason })}`)
-    return null
-  }
-  const { settings } = resolved
+  const settings = availableAuthSettings(env)
+  if (!settings) return null
   const email = createEmailSender(emailConfig(env, new URL(request.url).host))
   return { auth: createAuth({ db: createDatabase(env.DB), settings, email }), settings }
 }

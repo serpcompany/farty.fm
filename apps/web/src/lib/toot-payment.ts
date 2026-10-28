@@ -1,15 +1,17 @@
 import { answer, send } from './library-api'
-import { savingIsPaid } from './pricing'
+import { builtFor, savingIsPaid } from './pricing'
 
 export function saveAsksForPayment(): boolean {
-  const env = process.env.FARTY_ENVIRONMENT
-  return savingIsPaid(env === 'staging' || env === 'production' ? env : 'local')
+  return savingIsPaid(builtFor())
 }
 
 export type Checkout =
   | { kind: 'pay'; url: string }
   | { kind: 'paid' }
-  | { kind: 'failed'; problem: 'unavailable' | 'limitReached' | 'failed' }
+  | { kind: 'paidToot'; tootId: string }
+  | { kind: 'failed'; problem: 'unavailable' | 'limitReached' | 'charged' | 'tooMany' | 'failed' }
+
+const TOOT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 function isCheckoutPage(url: string): boolean {
   if (!URL.canParse(url)) return false
@@ -32,8 +34,12 @@ export async function startCheckout(
     const body = (await response.json().catch(() => null)) as {
       url?: unknown
       paid?: unknown
+      paidToot?: unknown
     } | null
     if (body?.paid === true) return { kind: 'paid' }
+    if (typeof body?.paidToot === 'string' && TOOT_ID.test(body.paidToot)) {
+      return { kind: 'paidToot', tootId: body.paidToot }
+    }
     if (typeof body?.url === 'string' && isCheckoutPage(body.url)) {
       return { kind: 'pay', url: body.url }
     }
@@ -44,6 +50,8 @@ export async function startCheckout(
   if (status === 409 && error === 'limit_reached') {
     return { kind: 'failed', problem: 'limitReached' }
   }
+  if (status === 409 && error === 'payment_mismatch') return { kind: 'failed', problem: 'charged' }
+  if (status === 429) return { kind: 'failed', problem: 'tooMany' }
   return { kind: 'failed', problem: 'failed' }
 }
 
@@ -70,13 +78,15 @@ export async function waitUntilPaid(
 
 export type CheckoutReturn = { tootId: string; done: boolean }
 
-const TOOT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
-
 export function readCheckoutReturn(search = window.location.search): CheckoutReturn | null {
   const params = new URLSearchParams(search)
   const tootId = params.get('toot')
   if (tootId === null || !TOOT_ID.test(tootId)) return null
   return { tootId, done: params.get('checkout') === 'done' }
+}
+
+export function paidReturnPath(songId: string, tootId: string): string {
+  return `/compose/${songId}/?${new URLSearchParams({ toot: tootId, checkout: 'done' })}`
 }
 
 export function clearCheckoutReturn(): void {

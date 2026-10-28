@@ -40,7 +40,7 @@ The Recording Pitch is the energy-weighted median, the same way, of the contour'
 
 ## `songs/<id>.json`
 
-`notes` is the imported melody: `start` and `dur` in beats (exact), `pitch` in MIDI. Also `bpm`, `beats_per_bar`, `length_beats`, the distinct `pitches`, the catalog's `file`, `sha256` and `import_args` (the catalog's `render` options passed to `load_midi`), and `import_report` (track used, chord tones and inner-voice onsets dropped, overlaps clipped, tempo changes ignored, note count; `source_file` is repo-relative).
+`notes` is the imported melody: `start` and `dur` in beats (exact), `pitch` in MIDI. Also `bpm`, `beats_per_bar` (the excerpt's main meter), `bar_lines` (format 6, #232: the beats where the score's bars start, exact, from its time signatures, so meter changes keep their bar lines and a pickup isn't a bar; a note that starts on one is played 1.5 dB louder), `length_beats`, the distinct `pitches`, the catalog's `file`, `sha256` and `import_args` (the catalog's `render` options passed to `load_midi`), and `import_report` (track used, chord tones and inner-voice onsets dropped, overlaps clipped, tempo changes ignored, note count; `source_file` is repo-relative).
 
 ## `arrangements/<library>/<song>.json`
 

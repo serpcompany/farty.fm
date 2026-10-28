@@ -101,9 +101,10 @@ Each replaces the tab's screen with a message and a Reload button.
   or the 404 page (`e2e/desktop.spec.ts`, "the privacy, support and 404 pages stay pages, with no
   tabs"; `e2e/pages.spec.ts`, "Welcome, or from 768px the lander, shows on a first visit but never
   covers the privacy, support or 404 page").
-- The privacy page says what an account stores, that Farty news is on by default, what a guest
-  keeps, what error reports and page views hold, and how to delete it all (`e2e/pages.spec.ts`,
-  "the privacy page covers accounts, news email, guests, error reports, page views and deleting").
+- The privacy page says what an account stores, that Farty news is on by default, that the account
+  step loads Cloudflare Turnstile, that a guest's farts last only until Farty closes, what error
+  reports and page views hold, and how to delete it all (`e2e/pages.spec.ts`, "the privacy page
+  covers accounts, news email, Turnstile, guests, error reports, page views and deleting").
 - The support page has a way to get in touch (`e2e/pages.spec.ts`, "the support page has a way to
   get in touch").
 - A made-up address answers 404 with "Page not found" and Back to Farty, on no tab
@@ -129,8 +130,9 @@ Each replaces the tab's screen with a message and a Reload button.
   gate and no noindex, even given a wrong password"). The gate is in
   [Staging access](../../../../docs/agents/staging-access.md).
 - Staging alone has the Fixture Library ([Profile](profile.md#internal-build-the-fixture-library)),
-  saving a Toot costs $0.99 on Staging and is free on Production ([Paying to save a
-  Toot](payments.md)), and Staging signs up only the emails on its list ([Accounts](account.md)).
+  saving a Toot costs $0.99 on both, in Stripe's test mode on Staging and live mode on Production
+  ([Paying to save a Toot](payments.md)), and Staging signs up only the emails on its list
+  ([Accounts](account.md)).
 - `/dev/telemetry/` sends a synthetic crash and handled error on Staging and a local run, and is
   not found on Production (`src/app/dev/telemetry/page.test.tsx`, "is not found in Production";
   `e2e/telemetry.spec.ts`, "the synthetic triggers are not found").

@@ -93,7 +93,7 @@ describe('the unlock rule', () => {
     expect(fills(0.99, 1)).toBe(false)
     const quarterThenHalfAt120: Song = {
       bpm: 120,
-      beats_per_bar: 4,
+      bar_lines: [0],
       length_beats: 3,
       notes: [
         { start: 0, dur: 1, pitch: 60 },

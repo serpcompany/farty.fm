@@ -3,7 +3,7 @@ export type Song = {
   title: string
   source: string
   bpm: number
-  beats_per_bar: number
+  bar_lines: readonly number[]
   length_beats: number
   pitches: readonly number[]
   notes: readonly SongNote[]

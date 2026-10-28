@@ -74,9 +74,13 @@ tab.
 
 ## Guest and signed in
 
-- A guest's Recordings stay in this browser from visit to visit, and still play after Farty is
-  closed (`e2e/guest-visit.spec.ts`, "a guest's Recording outlasts closing Farty and still plays,
-  while their Toot lasts the visit").
+- A guest's Recordings last the visit: they stay through a reload and while Farty is open in
+  another tab, and are gone the next time Farty opens, unless they keep them with a free account
+  (`e2e/guest-visit.spec.ts`, "a guest's farts last the visit: they record and hear a Song, and
+  Farty opens again with none"; `src/lib/visit.test.ts`, "clears a guest's Recordings, their audio
+  and their Toots as a new visit opens").
+- A guest's Recordings from before keeping them needed an account stay, while those made since go
+  after their visit ([Accounts](account.md#guest)).
 - Signed in, the Recordings of every browser on the account show and play here, and a delete in one
   browser reaches the others once they come back to Farty. A guest's Recordings join the account
   numbered after the account's own (`e2e/sync.spec.ts`, "two browsers signed in to one account play
@@ -88,8 +92,9 @@ tab.
 
 ## Offline
 
-- The installed app opened offline lists the Recordings and plays them (`e2e/guest-visit.spec.ts`,
-  "a guest's Recording is there when the installed app opens again offline";
+- The installed app opened offline lists an account's Recordings and plays them
+  (`e2e/guest-visit.spec.ts`, "an account's Recording is there when the installed app opens again
+  offline";
   `e2e/install.spec.ts`, "the service worker opens the app shell offline").
 
 ## Staging

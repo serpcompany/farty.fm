@@ -15,7 +15,6 @@ import {
   clearStepDraft,
   readSession,
   readStepDraft,
-  type StepMoment,
   stopStepOffers,
   takeSignInAgain,
   takeStepOffer
@@ -29,7 +28,7 @@ type SignOut = 'signedOut' | 'pending' | 'failed'
 type AccountContext = {
   account: Account
   stepOpen: boolean
-  offerStep(moment: StepMoment, then?: () => void): void
+  offerStep(then?: () => void): void
   openStep(): void
   retry(): void
   skipStep(): void
@@ -99,8 +98,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const offerStep = useCallback(
-    (moment: StepMoment, next?: () => void) => {
-      if (account.status === 'signedOut' && takeStepOffer(moment)) show(next ?? null)
+    (next?: () => void) => {
+      if (account.status === 'signedOut' && takeStepOffer()) show(next ?? null)
       else next?.()
     },
     [account.status, show]

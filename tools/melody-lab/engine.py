@@ -244,8 +244,8 @@ def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_d
         max_len = int(max(0.06, n.dur * spb - gap_ms / 1000) * SR)
         seg = faded(by_id[a.source_id].audio[:max_len].copy())
         rms = np.sqrt(np.mean(seg[: int(0.25 * SR)] ** 2)) + 1e-9
-        on_downbeat = abs((n.start / melody.beats_per_bar) - round(n.start / melody.beats_per_bar)) < 1e-6
-        gain_db = target_rms_db - 20 * np.log10(rms) + (accent_db if on_downbeat else 0)
+        on_bar_line = any(abs(n.start - line) < 1e-6 for line in melody.bar_lines)
+        gain_db = target_rms_db - 20 * np.log10(rms) + (accent_db if on_bar_line else 0)
         seg = seg * 10 ** (gain_db / 20)
         mix[start : start + len(seg)] += seg
         events.append({**asdict(a), "start_s": round(start / SR, 3), "len_s": round(len(seg) / SR, 3), "gain_db": round(gain_db, 1)})

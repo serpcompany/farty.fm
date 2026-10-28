@@ -58,6 +58,19 @@ class Picking(unittest.TestCase):
         self.assertEqual(pdmx.pick_problems(row("x", tracks="3")), ["more than 2 tracks"])
         self.assertEqual(pdmx.pick_problems(row("x", mid="")), ["no MIDI file"])
 
+    def test_misbarred_scores_are_never_picked(self):
+        rows = [row("Happy Birthday to You", sid="6064902", rating="4.94"), row("Happy Birthday to You", sid="6420004")]
+        [c] = pdmx.find_candidates(rows, titles("birthday | Happy Birthday | Happy Birthday to You"))
+        self.assertEqual([pdmx.score_id(r) for _, r in c.eligible], ["6420004"])
+        self.assertEqual(c.rejected, {"its bar lines are off the tune": 1})
+
+    def test_no_catalog_song_but_saints_has_a_misbarred_score(self):
+        for entry in json.loads((ROOT / "catalog/catalog.json").read_text(encoding="utf-8")):
+            if entry["id"] == "saints":
+                continue
+            with self.subTest(song=entry["id"]):
+                self.assertNotIn(entry["source"].get("musescore_score_id"), pdmx.MISBARRED_SCORES)
+
     def test_ranking(self):
         rows = [
             row("Mary Had a Little Lamb - Piano", sid="1", rating="5.0", views="9999"),
@@ -93,8 +106,14 @@ def options(bpm, meter, first_onset=0.0):
 class ExcerptAndTempo(unittest.TestCase):
     def test_four_four(self):
         self.assertEqual(options(120.0, (4, 4)), {"bpm": 120, "max_beats": 32})
-        self.assertEqual(options(100.4, (4, 4), 0.5), {"bpm": 100, "max_beats": 32})
-        self.assertEqual(options(120.0, (4, 4), 9.0), {"bpm": 120, "start_beat": 8, "max_beats": 32})
+        self.assertEqual(options(120.0, (4, 4), 8.0), {"bpm": 120, "start_beat": 8, "max_beats": 32})
+
+    def test_a_late_first_note_starts_the_excerpt_and_its_bar_ends_it(self):
+        self.assertEqual(options(100.4, (4, 4), 0.5), {"bpm": 100, "start_beat": 0.5, "max_beats": 31.5})
+        self.assertEqual(options(120.0, (4, 4), 9.0), {"bpm": 120, "start_beat": 9, "max_beats": 31})
+
+    def test_a_first_note_on_a_third_of_a_beat_keeps_its_exact_beat(self):
+        self.assertEqual(options(120.0, (3, 4), 2 / 3)["start_beat"], 2 / 3)
 
     def test_tempo_is_kept_in_range(self):
         self.assertEqual(options(200.0, (4, 4))["bpm"], 144)
@@ -119,7 +138,7 @@ class ExcerptAndTempo(unittest.TestCase):
     def test_meter_change_inside_the_excerpt(self):
         four_four_covers_more = pdmx.render_options([(0.0, 90.0)], [(0.0, 4, 4), (16.0, 3, 4)], 0.0)
         self.assertEqual(four_four_covers_more, {"bpm": 90, "max_beats": 31})
-        starts_after_the_change = pdmx.render_options([(0.0, 90.0)], [(0.0, 4, 4), (16.0, 3, 4)], 20.0)
+        starts_after_the_change = pdmx.render_options([(0.0, 90.0)], [(0.0, 4, 4), (16.0, 3, 4)], 19.0)
         self.assertEqual(starts_after_the_change, {"bpm": 90, "start_beat": 19, "max_beats": 30, "beats_per_bar": 3})
 
 

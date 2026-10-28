@@ -70,6 +70,13 @@ as a fake microphone.
   would not start (%s)"; "says nothing when the microphone was let go before the take began";
   `src/components/farty/record-screen.interaction.test.tsx`, "says in words what went wrong (%s),
   with its buttons").
+- A take that gets no audio from the microphone, as on an iPhone whose stream or audio clock stopped
+  while the microphone still looked live, says "Couldn't start recording". Its report names whether
+  the audio clock ran meanwhile, and the next tap opens a fresh stream, or a fresh audio context
+  when the clock stopped, so Record works again. A take that starts keeps both
+  (`src/lib/audio/recorder.test.ts`, "opens a fresh stream on the next tap when the stream fed the
+  graph nothing"; "starts a fresh context on the next tap when the context’s clock stopped"; "keeps
+  the microphone and context when the take starts").
 
 ## Review
 

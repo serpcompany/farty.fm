@@ -49,7 +49,7 @@ export function formattedFartLength(recording: Recording): string {
 export function engineSong(song: Song): EngineSong {
   return {
     bpm: song.bpm,
-    beats_per_bar: song.beats_per_bar,
+    bar_lines: song.bar_lines,
     length_beats: song.length_beats,
     notes: [...song.notes]
   }

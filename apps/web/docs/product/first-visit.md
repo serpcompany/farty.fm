@@ -70,9 +70,9 @@ device with a mouse or trackpad is a computer and one without is a touch tablet
 
 ## Staging and Production
 
-- The FAQ's "Is Farty free?" says saving a Toot costs $0.99 where saving is paid (Staging and a
-  local run), and that Farty is free on Production ([Paying to save a Toot](payments.md);
-  `src/components/farty/lander.interaction.test.tsx`, "answers whether Farty is free as its
-  environment does (%s)").
+- The FAQ's "Is Farty free?" says recording, making Toots and an account are free and saving a
+  Toot costs $0.99, on Production, Staging and a local run ([Paying to save a Toot](payments.md);
+  `src/components/farty/lander.interaction.test.tsx`, "says saving a Toot costs $0.99, on every
+  environment (%s)").
 - Download App's QR code opens `staging.farty.fm` on Staging and `farty.fm` on Production
   (`src/lib/download-qr.test.ts`, "opens the build's own origin (SITE_ENV=%s)").

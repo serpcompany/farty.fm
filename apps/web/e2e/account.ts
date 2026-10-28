@@ -4,13 +4,19 @@ import { uploaded } from './database'
 import { recordG3ToRecordings, skipWelcome } from './record'
 import { expect } from './test'
 
+export const TURNSTILE_TEST_TOKEN = 'XXXX.DUMMY.TOKEN.XXXX'
+
 export function newEmail(testInfo: TestInfo, name: string): string {
   return `${name}-${testInfo.project.name}-${Date.now()}-${randomInt(1e6)}@example.com`
 }
 
 export async function ownClient(context: BrowserContext): Promise<void> {
   const address = `10.${randomInt(256)}.${randomInt(256)}.${randomInt(1, 255)}`
-  await context.setExtraHTTPHeaders({ 'cf-connecting-ip': address })
+  await context.route(
+    url => url.hostname === 'localhost' || url.hostname === '127.0.0.1',
+    route =>
+      route.continue({ headers: { ...route.request().headers(), 'cf-connecting-ip': address } })
+  )
 }
 
 export async function codeFor(page: Page, email: string): Promise<string> {
@@ -31,15 +37,15 @@ export async function signInByApi(page: Page, email: string): Promise<void> {
   await ownClient(page.context())
   const post = (path: string, body: unknown) =>
     page.evaluate(
-      async ({ path, body }) =>
+      async ({ path, body, token }) =>
         (
           await fetch(path, {
             method: 'POST',
-            headers: { 'content-type': 'application/json' },
+            headers: { 'content-type': 'application/json', 'x-captcha-response': token },
             body: JSON.stringify(body)
           })
         ).status,
-      { path, body }
+      { path, body, token: TURNSTILE_TEST_TOKEN }
     )
   expect(await post('/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' })).toBe(
     200

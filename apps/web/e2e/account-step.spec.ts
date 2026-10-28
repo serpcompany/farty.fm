@@ -7,9 +7,6 @@ import { expect, test } from './test'
 withFartingMicrophone({ welcomed: false })
 test.skip(({ viewport }) => !onPhone({ viewport }), 'The account step is checked at phone size')
 
-const guestNote =
-  'Without an account, your Recordings stay only in this browser, and your Toots are gone when you close Farty.'
-
 test("a guest's first Result offers the account step, and Not now goes where they tapped", async ({
   page
 }) => {
@@ -19,10 +16,12 @@ test("a guest's first Result offers the account step, and Not now goes where the
   const step = page.getByRole('dialog', { name: 'Keep your farts' })
   await expect(step).toBeVisible()
   await expect(step.getByRole('heading', { name: 'Keep your farts' })).toBeFocused()
-  await expect(step).toContainText(
-    'Make a free account to keep your Recordings and Toots, even on a new phone.'
+  await expect(step).toContainText('Make a free account to keep your farts.')
+  await expect(step.getByTestId('account-step-guest')).toHaveText(
+    'Without an account, your farts are gone when you close Farty.'
   )
-  await expect(step.getByTestId('account-step-guest')).toHaveText(guestNote)
+  await expect(step.getByTestId('turnstile')).toBeVisible()
+  await expect(step.getByRole('button', { name: 'Send code' })).toBeEnabled()
   for (const control of [
     step.getByLabel('Email'),
     step.getByRole('button', { name: 'Send code' }),
@@ -40,7 +39,7 @@ test("a guest's first Result offers the account step, and Not now goes where the
   expect(await page.evaluate(() => localStorage.getItem('pedos.accountStep'))).toBe('once')
 })
 
-test('signing up from the first Result keeps the Recording, and goes where they tapped', async ({
+test('signing up from the first Result goes where they tapped, and Farty opens again with their Recording', async ({
   page,
   pageErrors
 }, testInfo) => {
@@ -91,7 +90,9 @@ test("Profile's Save to an account opens the step, which stays while they read t
   await page.goto('/profile/')
   const save = page.getByRole('button', { name: 'Save to an account' })
   await expectTappable(save)
-  await expect(page.getByText(guestNote)).toBeVisible()
+  await expect(
+    page.getByText('Your farts are gone when you close Farty, unless you make a free account.')
+  ).toBeVisible()
   await save.click()
   const step = page.getByRole('dialog', { name: 'Keep your farts' })
   await expect(step).toBeVisible()
@@ -134,4 +135,36 @@ test('a reload while they read their email comes back to the code, which still s
   await page.reload()
   await expect(page.getByTestId('account-email')).toHaveText(email)
   await expect(step).toBeHidden()
+})
+
+test("when Turnstile's check can't start, Send code tries again and sends the code", async ({
+  page,
+  pageErrors
+}, testInfo) => {
+  pageErrors.expect('the server responded with a status of 500')
+  await ownClient(page.context())
+  await page.addInitScript(skipWelcome)
+  let keyReads = 0
+  await page.route('**/api/auth/turnstile', route =>
+    keyReads++ === 0 ? route.fulfill({ status: 500, body: 'oops' }) : route.fallback()
+  )
+  await page.goto('/profile/')
+  await page.getByRole('button', { name: 'Save to an account' }).click()
+  const step = page.getByRole('dialog', { name: 'Keep your farts' })
+  await expect(step.getByRole('alert')).toHaveText(
+    "Couldn't reach Farty. Check your connection and try again."
+  )
+  const email = newEmail(testInfo, 'check-again')
+  await step.getByLabel('Email').fill(email)
+  const send = step.getByRole('button', { name: 'Send code' })
+  await expect(send).toBeEnabled()
+
+  await send.click()
+  await expect(step.getByRole('alert')).toBeHidden()
+  expect(keyReads).toBe(2)
+  await expect(step.getByTestId('turnstile')).toBeVisible()
+  await expect(send).toBeEnabled()
+  await send.click()
+  await expect(step.getByText(`We sent a 6-digit code to ${email}.`)).toBeVisible()
+  expect(await codeFor(page, email)).toMatch(/^\d{6}$/)
 })

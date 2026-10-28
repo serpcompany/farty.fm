@@ -65,14 +65,19 @@ raw, at its own pitch and speed ([ADR 0005](../../../../docs/adr/0005-song-creat
 
 ## Saving
 
-- Save to Toots saves the Toot. Where saving is paid, on Staging and a local run, it says "Save to
-  Toots · $0.99" and goes through checkout first ([Paying to save a Toot](payments.md)). On
-  Production it says "Save to Toots" and saves at once, then offers a guest the account step once
+- Save to Toots saves the Toot to an account. It says "Save to Toots · $0.99" and goes through
+  checkout first, on Production, Staging and a local run ([Paying to save a Toot](payments.md)). A
+  guest's Save opens the account step first, and carries on once they sign in
   ([Accounts](account.md#when-the-step-opens)) (`e2e/song-creator.spec.ts`, "plays each Song with
-  your farts, plays a tapped note, and saves it as a Toot"; `e2e/account-pay.spec.ts`, "a guest's
-  Toot plays free, and Save asks for an account first";
-  `src/components/farty/song-creator.interaction.test.tsx`, "saves at once where saving is free,
-  with no checkout, and offers the account step").
+  your farts, plays a tapped note, and saves it as a Toot"; `e2e/production-save.spec.ts`, "a
+  signed-in save pays $0.99 first, and two taps pay for and save one Toot";
+  `e2e/account-pay.spec.ts`, "a guest's Toot plays free, and Save asks for an account first";
+  `src/components/farty/song-creator.interaction.test.tsx`, "asks for an account before saving or
+  paying, where saving is %s").
+- Where saving is made free again in `src/lib/pricing.ts`, Save says "Save to Toots" and saves at
+  once, with no checkout (`src/components/farty/song-creator.interaction.test.tsx`, "saves at once
+  where saving is free, with no checkout"; `src/app/api/payments-environments.workers.test.ts`,
+  "answers paid to checkout and payment, with no checkout and no Stripe").
 - Saved, the button turns into a disabled "Saved to Toots". Two quick taps save it once
   (`e2e/song-creator.spec.ts`, "plays each Song with your farts, plays a tapped note, and saves it
   as a Toot"; `src/components/farty/toots-provider.interaction.test.tsx`, "saves a made Toot once").
@@ -85,7 +90,7 @@ raw, at its own pitch and speed ([ADR 0005](../../../../docs/adr/0005-song-creat
 - While the Toot is unsaved, a reload after a deploy waits for it ([App
   shell](app-shell.md#a-new-deploy); `src/components/farty/song-creator.interaction.test.tsx`,
   "holds off a new build until the Toot is saved").
-- A guest's saved Toot lasts the visit; signed in, it's kept on the account ([Toots](toots.md)).
+- A saved Toot is kept on the account ([Toots](toots.md)).
 
 ## Offline
 

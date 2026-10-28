@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-import { savingIsPaid, TOOT_PRICE } from '@/lib/pricing'
+import { builtFor, savingIsPaid, TOOT_PRICE } from '@/lib/pricing'
+import type { SiteEnv } from '@/lib/site'
 
 import { type DeploymentEnv, deployment, isLocalHost } from './environment'
 import { hmacKey } from './hmac'
@@ -12,22 +13,28 @@ type PaymentsEnv = DeploymentEnv & {
 
 export type Payments =
   | { kind: 'free' }
-  | { kind: 'stripe'; secretKey: string; webhookSecret: string | null }
+  | { kind: 'stripe'; secretKey: string; webhookSecret: string | null; livemode: boolean }
   | { kind: 'dev' }
   | { kind: 'off' }
 
 const TEST_KEY = /^(sk|rk)_test_[A-Za-z0-9]+$/
+const LIVE_KEY = /^(sk|rk)_live_[A-Za-z0-9]+$/
 const WEBHOOK_SECRET = /^whsec_[A-Za-z0-9+/=]+$/
 
-export function paymentsConfig(env: PaymentsEnv, host: string | null): Payments {
+export function paymentsConfig(
+  env: PaymentsEnv,
+  host: string | null,
+  paid: (environment: SiteEnv) => boolean = savingIsPaid
+): Payments {
   const target = deployment(env)
   if (target.kind === 'misconfigured') return { kind: 'off' }
-  if (target.kind === 'deployed' && !savingIsPaid(target.name)) return { kind: 'free' }
+  if (!paid(target.kind === 'deployed' ? target.name : builtFor())) return { kind: 'free' }
+  const livemode = target.kind === 'deployed' && target.name === 'production'
   const key = env.STRIPE_SECRET_KEY
-  if (typeof key === 'string' && TEST_KEY.test(key)) {
+  if (typeof key === 'string' && (livemode ? LIVE_KEY : TEST_KEY).test(key)) {
     const secret = env.STRIPE_WEBHOOK_SECRET
     const webhookSecret = typeof secret === 'string' && WEBHOOK_SECRET.test(secret) ? secret : null
-    return { kind: 'stripe', secretKey: key, webhookSecret }
+    return { kind: 'stripe', secretKey: key, webhookSecret, livemode }
   }
   if (key === undefined && target.kind === 'local' && isLocalHost(host)) return { kind: 'dev' }
   return { kind: 'off' }
@@ -48,12 +55,15 @@ export const CHECKOUT_SESSION = z.object({
   payment_status: z.enum(['paid', 'unpaid', 'no_payment_required']),
   client_reference_id: z.string().nullable(),
   metadata: z.record(z.string(), z.string()).nullable(),
-  livemode: z.boolean()
+  livemode: z.boolean(),
+  amount_total: z.number().nullable(),
+  currency: z.string().nullable()
 })
 
 export type CheckoutSession = z.infer<typeof CHECKOUT_SESSION>
 
 const STRIPE_API = 'https://api.stripe.com/v1'
+export const STRIPE_API_VERSION = '2026-08-26.dahlia'
 const STRIPE_TIMEOUT_MS = 10_000
 const SESSION_ID = /^cs_(test|live)_[A-Za-z0-9]+$/
 
@@ -61,20 +71,26 @@ export function isCheckoutSessionId(id: string): boolean {
   return SESSION_ID.test(id)
 }
 
+type StripePost = { body: URLSearchParams; idempotencyKey: string }
+
 async function stripeResponse(
   secretKey: string,
   path: string,
-  body?: URLSearchParams
+  post?: StripePost
 ): Promise<Response> {
   let response: Response
   try {
     response = await fetch(`${STRIPE_API}${path}`, {
-      method: body ? 'POST' : 'GET',
+      method: post ? 'POST' : 'GET',
       headers: {
         Authorization: `Bearer ${secretKey}`,
-        ...(body && { 'Content-Type': 'application/x-www-form-urlencoded' })
+        'Stripe-Version': STRIPE_API_VERSION,
+        ...(post && {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Idempotency-Key': post.idempotencyKey
+        })
       },
-      body,
+      body: post?.body,
       signal: AbortSignal.timeout(STRIPE_TIMEOUT_MS)
     })
   } catch {
@@ -90,9 +106,9 @@ async function stripeResponse(
 async function checkoutSessionRequest(
   secretKey: string,
   path: string,
-  body?: URLSearchParams
+  post?: StripePost
 ): Promise<CheckoutSession> {
-  const response = await stripeResponse(secretKey, path, body)
+  const response = await stripeResponse(secretKey, path, post)
   const session = CHECKOUT_SESSION.safeParse(await response.json().catch(() => null))
   if (!session.success) throw new StripeError(502)
   return session.data
@@ -104,6 +120,7 @@ type NewCheckout = {
   songTitle: string
   successUrl: string
   cancelUrl: string
+  replaces: string | null
 }
 
 export function createCheckoutSession(
@@ -125,7 +142,8 @@ export function createCheckoutSession(
     success_url: checkout.successUrl,
     cancel_url: checkout.cancelUrl
   })
-  return checkoutSessionRequest(secretKey, '/checkout/sessions', params)
+  const idempotencyKey = `toot-checkout/${checkout.userId}/${checkout.tootId}/${checkout.replaces ?? 'first'}`
+  return checkoutSessionRequest(secretKey, '/checkout/sessions', { body: params, idempotencyKey })
 }
 
 export async function retrieveCheckoutSession(
@@ -136,10 +154,19 @@ export async function retrieveCheckoutSession(
   return checkoutSessionRequest(secretKey, `/checkout/sessions/${id}`)
 }
 
-export function paidFor(session: CheckoutSession, userId: string, tootId: string): boolean {
+type Price = { amount: number; currency: string }
+
+export function paidFor(
+  session: CheckoutSession,
+  userId: string,
+  tootId: string,
+  price: Price
+): boolean {
   return (
     session.mode === 'payment' &&
     session.payment_status === 'paid' &&
+    session.amount_total === price.amount &&
+    session.currency === price.currency &&
     session.client_reference_id === tootId &&
     session.metadata?.toot_id === tootId &&
     session.metadata?.user_id === userId

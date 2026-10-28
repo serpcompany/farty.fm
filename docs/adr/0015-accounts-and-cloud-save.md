@@ -8,3 +8,5 @@ ADRs 0001 and 0007 kept Recordings and Toots in one browser, with no accounts an
 4. **Email** to an account includes Farty news by default (#150, the owner's call); the privacy page says so, and Profile turns it off.
 
 This supersedes ADR 0001's "no accounts" and ADR 0007's "no accounts, no cloud libraries, no sync". The rest of both stands. Paying to save a Toot (ADR 0010) builds on these accounts.
+
+Update 2026-10-28: a guest's Recordings now last only the visit too, and keeping them needs a free account (ADR 0013).

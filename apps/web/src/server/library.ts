@@ -4,6 +4,7 @@ import { getDb } from '@/db'
 import type { Database } from '@/db/database'
 import {
   deleteUser,
+  insertPaidToot,
   insertRecording,
   insertToot,
   itemStatus,
@@ -18,7 +19,7 @@ import {
   tombstone,
   uploadState
 } from '@/db/library'
-import { isTootPaid } from '@/db/payments'
+import { tootPayment } from '@/db/payments'
 import type { Recording } from '@/lib/recordings'
 import type { Toot } from '@/lib/toot'
 
@@ -101,13 +102,14 @@ export async function getLibrary({ db }: Stores, user: SessionUser, request: Req
 
 type AddRow = (audioBytes: number) => Promise<boolean>
 
+type ParsedUpload = { metadata: unknown; wavSampleRate: number; paidOnly: boolean }
+
 function rowAdder(
   kind: Kind,
   db: Database,
   user: SessionUser,
   id: string,
-  metadata: unknown,
-  wavSampleRate: number
+  { metadata, wavSampleRate, paidOnly }: ParsedUpload
 ): AddRow | null {
   const { maxItems } = LIMITS[kind]
   if (kind === 'recordings') {
@@ -117,7 +119,18 @@ function rowAdder(
       : null
   }
   const toot = parseToot(metadata, id)
-  return toot ? audioBytes => insertToot(db, user.id, { ...toot, audioBytes }, maxItems) : null
+  const insert = paidOnly ? insertPaidToot : insertToot
+  return toot ? audioBytes => insert(db, user.id, { ...toot, audioBytes }, maxItems) : null
+}
+
+async function unpaidTootRefusal(
+  db: Database,
+  user: SessionUser,
+  id: string
+): Promise<Response | null> {
+  const payment = await tootPayment(db, user.id, id)
+  if (payment?.savedAt) return gone()
+  return payment?.paidAt ? null : apiError(402, 'payment_required')
 }
 
 async function addWithAudio(
@@ -161,13 +174,15 @@ export async function putItem(
   if (upload instanceof Response) return upload
   const wav = readWavHeader(upload.audio)
   if (!wav) return apiError(400, 'invalid_audio')
-  const add = rowAdder(kind, db, user, id, upload.metadata, wav.sampleRate)
+  const parsed = { metadata: upload.metadata, wavSampleRate: wav.sampleRate, paidOnly }
+  const add = rowAdder(kind, db, user, id, parsed)
   if (!add) return apiError(400, 'invalid_request')
 
   const before = await uploadState(db, kind, user.id, id)
   if (before.status === 'live') return Response.json({ id }, { status: 200 })
   if (before.status === 'deleted') return gone()
-  if (paidOnly && !(await isTootPaid(db, user.id, id))) return apiError(402, 'payment_required')
+  const unpaid = paidOnly ? await unpaidTootRefusal(db, user, id) : null
+  if (unpaid) return unpaid
   if (before.live >= LIMITS[kind].maxItems) return apiError(409, 'limit_reached')
   return addWithAudio(kind, stores, user, id, upload.audio, add)
 }

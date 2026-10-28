@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   answer,
+  get,
   post,
   SECRET,
   type Sent,
@@ -10,11 +11,19 @@ import {
   signInHarness,
   trySignIn
 } from '@/test-support/sign-in'
+import { siteverifyCalls, TEST_TOKEN } from '@/test-support/turnstile'
 
-import { SEND_CODE_ENDPOINT, SIGN_IN_ENDPOINT } from './auth-endpoints'
+import {
+  GET_SESSION_ENDPOINT,
+  SEND_CODE_ENDPOINT,
+  SIGN_IN_ENDPOINT,
+  TURNSTILE_ENDPOINT
+} from './auth-endpoints'
 import { serveAuthRequest } from './auth-request'
+import { TURNSTILE_TEST_SECRET_KEY } from './auth-settings'
 import { hashSignInCode } from './create-auth'
 import { SIGN_IN_CODE_ATTEMPTS, SIGN_IN_CODE_LENGTH, SIGN_IN_CODE_MINUTES } from './email'
+import { clientLimitKey } from './rate-limits'
 
 const { db, local, staging, mailed, mailedCode, mailCount, signIn, rows } = signInHarness()
 
@@ -175,5 +184,72 @@ describe('no answer says whether an email has an account', () => {
     expect(await answer(held)).toEqual({ status: 200, body: { success: true } })
     expect([...held.headers.keys()]).toEqual([...allowed.headers.keys()])
     expect(sent.map(message => message.to)).toEqual(Array(5).fill('member@example.com'))
+  })
+})
+
+describe('Turnstile', () => {
+  it('refuses a code request without a token, having spent only the client’s limit', async () => {
+    const response = await sendCode(local(), 'fan@example.com', { captcha: null })
+    expect(await answer(response)).toMatchObject({
+      status: 400,
+      body: { code: 'MISSING_RESPONSE' }
+    })
+    expect(await mailCount('fan@example.com')).toBe(0)
+    expect(siteverifyCalls()).toEqual([])
+    const key = await clientLimitKey(SECRET, `203.0.113.1|${SEND_CODE_ENDPOINT}`)
+    expect(await rows('SELECT key, count FROM rate_limit')).toEqual([{ key, count: 1 }])
+  })
+
+  it('refuses a code request with a token Turnstile rejects', async () => {
+    const response = await sendCode(local(), 'fan@example.com', { captcha: 'forged' })
+    expect(await answer(response)).toMatchObject({
+      status: 403,
+      body: { code: 'VERIFICATION_FAILED' }
+    })
+    expect(await mailCount('fan@example.com')).toBe(0)
+  })
+
+  it('sends a code once Turnstile accepts the token, asking with the secret and the client', async () => {
+    const response = await sendCode(local(), 'fan@example.com', { ip: '203.0.113.7' })
+    expect(await answer(response)).toEqual({ status: 200, body: { success: true } })
+    expect(await mailCount('fan@example.com')).toBe(1)
+    expect(siteverifyCalls()).toEqual([
+      { secret: TURNSTILE_TEST_SECRET_KEY, response: TEST_TOKEN, remoteip: '203.0.113.7' }
+    ])
+  })
+
+  it('refuses a code request when siteverify can’t be reached', async () => {
+    vi.mocked(globalThis.fetch).mockRejectedValueOnce(new TypeError('fetch failed'))
+    const response = await sendCode(local(), 'fan@example.com')
+    expect(response.status).toBe(500)
+    expect(await mailCount('fan@example.com')).toBe(0)
+  })
+
+  it('checks only code requests', async () => {
+    expect((await sendCode(local(), 'fan@example.com')).status).toBe(200)
+    const code = await mailedCode('fan@example.com')
+    const signedIn = await trySignIn(local(), 'fan@example.com', code, { captcha: null })
+    expect(signedIn.status).toBe(200)
+    expect(siteverifyCalls()).toHaveLength(1)
+  })
+
+  it('sends no code where its keys aren’t set, and still reads sessions', async () => {
+    for (const unset of ['TURNSTILE_SECRET_KEY', 'TURNSTILE_SITE_KEY'] as const) {
+      const sent: Sent = []
+      const env = staging(sent, { [unset]: undefined })
+      const response = await sendCode(env, 'member@example.com', { base: STAGING })
+      expect(await answer(response)).toMatchObject({
+        status: 503,
+        body: { code: 'TURNSTILE_UNAVAILABLE' }
+      })
+      expect(sent).toEqual([])
+      const key = await serveAuthRequest(get(TURNSTILE_ENDPOINT, { base: STAGING }), env)
+      expect(await answer(key)).toMatchObject({
+        status: 503,
+        body: { code: 'TURNSTILE_UNAVAILABLE' }
+      })
+      const session = await serveAuthRequest(get(GET_SESSION_ENDPOINT, { base: STAGING }), env)
+      expect(session.status).toBe(200)
+    }
   })
 })

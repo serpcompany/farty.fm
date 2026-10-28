@@ -1,11 +1,22 @@
 {
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0
+  ],
   "beats_per_bar": 3,
   "bpm": 120,
   "file": "midi/pdmx-birthday.mid",
   "id": "birthday",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 28,
+    "start_beat": 2
   },
   "import_report": {
     "catalog_id": "birthday",
@@ -20,144 +31,144 @@
       0
     ]
   },
-  "length_beats": 24.0,
+  "length_beats": 25.0,
   "notes": [
     {
-      "dur": 0.5,
-      "pitch": 67,
+      "dur": 0.75,
+      "pitch": 53,
       "start": 0.0
     },
     {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 0.5
+      "dur": 0.25,
+      "pitch": 53,
+      "start": 0.75
     },
     {
       "dur": 1.0,
-      "pitch": 69,
+      "pitch": 55,
       "start": 1.0
     },
     {
       "dur": 1.0,
-      "pitch": 67,
+      "pitch": 53,
       "start": 2.0
     },
     {
       "dur": 1.0,
-      "pitch": 72,
+      "pitch": 58,
       "start": 3.0
     },
     {
       "dur": 2.0,
-      "pitch": 71,
+      "pitch": 57,
       "start": 4.0
     },
     {
-      "dur": 0.5,
-      "pitch": 67,
+      "dur": 0.75,
+      "pitch": 53,
       "start": 6.0
     },
     {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 6.5
+      "dur": 0.25,
+      "pitch": 53,
+      "start": 6.75
     },
     {
       "dur": 1.0,
-      "pitch": 69,
+      "pitch": 55,
       "start": 7.0
     },
     {
       "dur": 1.0,
-      "pitch": 67,
+      "pitch": 53,
       "start": 8.0
     },
     {
       "dur": 1.0,
-      "pitch": 74,
+      "pitch": 60,
       "start": 9.0
     },
     {
       "dur": 2.0,
-      "pitch": 72,
+      "pitch": 58,
       "start": 10.0
     },
     {
-      "dur": 0.5,
-      "pitch": 67,
+      "dur": 0.75,
+      "pitch": 53,
       "start": 12.0
     },
     {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 12.5
+      "dur": 0.25,
+      "pitch": 53,
+      "start": 12.75
     },
     {
       "dur": 1.0,
-      "pitch": 79,
+      "pitch": 65,
       "start": 13.0
     },
     {
       "dur": 1.0,
-      "pitch": 76,
+      "pitch": 62,
       "start": 14.0
     },
     {
       "dur": 1.0,
-      "pitch": 72,
+      "pitch": 58,
       "start": 15.0
     },
     {
       "dur": 1.0,
-      "pitch": 71,
+      "pitch": 57,
       "start": 16.0
     },
     {
       "dur": 1.0,
-      "pitch": 69,
+      "pitch": 55,
       "start": 17.0
     },
     {
-      "dur": 0.5,
-      "pitch": 77,
+      "dur": 0.75,
+      "pitch": 63,
       "start": 18.0
     },
     {
-      "dur": 0.5,
-      "pitch": 77,
-      "start": 18.5
+      "dur": 0.25,
+      "pitch": 63,
+      "start": 18.75
     },
     {
       "dur": 1.0,
-      "pitch": 76,
+      "pitch": 62,
       "start": 19.0
     },
     {
       "dur": 1.0,
-      "pitch": 72,
+      "pitch": 58,
       "start": 20.0
     },
     {
       "dur": 1.0,
-      "pitch": 74,
+      "pitch": 60,
       "start": 21.0
     },
     {
-      "dur": 2.0,
-      "pitch": 72,
+      "dur": 3.0,
+      "pitch": 58,
       "start": 22.0
     }
   ],
   "pitches": [
-    67,
-    69,
-    71,
-    72,
-    74,
-    76,
-    77,
-    79
+    53,
+    55,
+    57,
+    58,
+    60,
+    62,
+    63,
+    65
   ],
-  "sha256": "48f8cbcc841d3a3ab676dffeb3eef48c15a68057df4aaf0d6778169dd1be7e1f",
+  "sha256": "d5a94aa3791e12ebf6fdf5ce1519dc2e8e91485eccc726c272f2d6376e8818ba",
   "title": "Happy Birthday"
 }

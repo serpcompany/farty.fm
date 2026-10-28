@@ -149,7 +149,7 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
 
   it('renders silence from silent Recordings', () => {
     const notes = [0, 1, 2, 3].map(beat =>
-      noteInBeats(silent, 62, { start: beat, dur: 1, bpm: 60, beatsPerBar: 4 })
+      noteInBeats(silent, 62, { start: beat, dur: 1, bpm: 60, barLines: [0] })
     )
     const out = render(notes, 4)
     expect(out.samples).toHaveLength(5 * 44100)
@@ -160,7 +160,7 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
     const g = goldenRecording('013')
     const source = sources.get('013') as RenderSource
     const at = (targetMidi: number) =>
-      render([noteInBeats(source, targetMidi, { start: 1, dur: 1, bpm: 120, beatsPerBar: 4 })], 2)
+      render([noteInBeats(source, targetMidi, { start: 1, dur: 1, bpm: 120, barLines: [0] })], 2)
     const out = at(g.recording_pitch_midi as number)
     const placed = out.notes[0]
     expect(placed.startSample).toBe(22050)
@@ -178,25 +178,33 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
 
   it('plays a fart shorter than its note whole, unstretched, then leaves the rest silent', () => {
     const source = sources.get('016') as RenderSource
-    const out = render([noteInBeats(source, 40, { start: 0, dur: 2, bpm: 120, beatsPerBar: 4 })], 1)
+    const out = render([noteInBeats(source, 40, { start: 0, dur: 2, bpm: 120, barLines: [0] })], 1)
     const placed = out.notes[0]
     expect(placed.lengthSamples).toBe(source.gesture.length)
     expect(out.samples.subarray(placed.lengthSamples).every(s => s === 0)).toBe(true)
   })
 
-  it('accents downbeats by 1.5 dB, in any meter', () => {
+  it("accents notes on the score's bar lines by 1.5 dB, not a pickup", () => {
     const source = sources.get('002') as RenderSource
-    const beats = (start: number) => ({ start, dur: 1, bpm: 90, beatsPerBar: 3 })
-    const notes = [0, 1, 3, 4.5, 6 + 1e-9].map(start => noteInBeats(source, 48, beats(start)))
-    expect(notes.map(n => n.downbeat)).toEqual([true, false, true, false, true])
+    const happyBirthdayAfterItsPickup = [1, 4, 7]
+    const beats = (start: number) => ({
+      start,
+      dur: 1,
+      bpm: 90,
+      barLines: happyBirthdayAfterItsPickup
+    })
+    const notes = [0, 0.75, 1, 2, 4, 5.5, 7 + 1e-9].map(start =>
+      noteInBeats(source, 48, beats(start))
+    )
+    expect(notes.map(n => n.downbeat)).toEqual([false, false, true, false, true, false, true])
     const out = render(notes, 9)
-    expect(out.notes[0].gainDb - out.notes[1].gainDb).toBeCloseTo(1.5, 12)
+    expect(out.notes[2].gainDb - out.notes[0].gainDb).toBeCloseTo(1.5, 12)
   })
 
   it('keeps notes at least 60 ms long and fades them in and out', () => {
     const source = sources.get('059') as RenderSource
     const out = render(
-      [noteInBeats(source, 67, { start: 0, dur: 0.05, bpm: 120, beatsPerBar: 4 })],
+      [noteInBeats(source, 67, { start: 0, dur: 0.05, bpm: 120, barLines: [0] })],
       1
     )
     expect(out.notes[0].lengthSamples).toBe(Math.trunc(0.06 * SR))

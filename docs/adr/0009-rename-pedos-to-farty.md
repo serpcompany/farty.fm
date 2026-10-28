@@ -30,4 +30,4 @@ Renaming any of these is separate work.
 - Cookies are per host, so a signed-in user signs in again on farty.fm. Their Recordings and Toots are on the account and sync back down. What each browser kept for pedos.app stays there: a guest's visit, unsent changes, the error-report switch and a Home Screen install of pedos.app, which should be installed again from farty.fm.
 - Older ADRs keep the name Pedos, as history.
 
-Update 2026-10-27: the code's names, the smoke test's header and the skill are renamed to Farty. Stored data, names another build shares, and Cloudflare resources keep "pedos" (ADR 0015).
+Update 2026-10-27: the code's names, the smoke test's header and the skill are renamed to Farty. Stored data, names another build shares, and Cloudflare resources keep "pedos" (ADR 0016).

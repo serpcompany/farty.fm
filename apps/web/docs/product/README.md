@@ -21,8 +21,8 @@ The journeys run at phone, touch tablet and computer size (`playwright.config.ts
   last.
 - [Profile](profile.md): stats, the account section, the Fixture Library on Staging, the install
   guide, the error-report switch, and About.
-- [Accounts](account.md): the account step, signing in, a session that ends, signing out, deleting
-  an account, and sync.
+- [Accounts](account.md): what a guest keeps, the account step and its Turnstile check, signing in,
+  a session that ends, signing out, deleting an account, and sync.
 - [Paying to save a Toot](payments.md): where saving is paid, a guest's Save, the checkout and the
   return.
 - [Installing and offline](install.md): the install offer, Profile's guide, the manifest, what

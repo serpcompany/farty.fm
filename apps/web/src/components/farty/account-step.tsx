@@ -1,18 +1,27 @@
 'use client'
 
-import { type FormEvent, useEffect, useRef, useState } from 'react'
+import { type FormEvent, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { readStepDraft, type SignInProblem, saveStepDraft, sendCode, signIn } from '@/lib/account'
+import {
+  readStepDraft,
+  type SignInProblem,
+  saveStepDraft,
+  sendCode,
+  signIn,
+  turnstileSiteKey
+} from '@/lib/account'
 import { unsavedBeforeSignIn } from '@/lib/library-sync'
 import { useAccount } from './account-provider'
+import { Turnstile } from './turnstile'
 
 const messages: Record<SignInProblem, string> = {
   invalidEmail: 'Enter a valid email address.',
   wrongCode: "That code isn't right. Check it and try again.",
   codeExpired: 'That code no longer works. Send a new one.',
   tooManyTries: 'Too many tries. Wait a few minutes, then try again.',
+  notChecked: "Couldn't check that you're a person. Try again.",
   unavailable: "Accounts aren't available right now.",
   failed: "Couldn't reach Farty. Check your connection and try again."
 }
@@ -32,6 +41,10 @@ function Step() {
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<SignInProblem | null>(null)
   const [unsaved, setUnsaved] = useState(0)
+  const [siteKey, setSiteKey] = useState<string | null>(null)
+  const [token, setToken] = useState<string | null>(null)
+  const [widget, setWidget] = useState(0)
+  const [checkFailed, setCheckFailed] = useState(false)
   const heading = useRef<HTMLHeadingElement>(null)
   const emailField = useRef<HTMLInputElement>(null)
   const codeField = useRef<HTMLInputElement>(null)
@@ -59,8 +72,41 @@ function Step() {
 
   useEffect(() => saveStepDraft({ phase, email }), [phase, email])
 
+  const readSiteKey = async () => {
+    const read = await turnstileSiteKey()
+    if (read.ok) setSiteKey(read.value)
+    else {
+      setProblem(read.problem)
+      setCheckFailed(true)
+    }
+  }
+  const readSiteKeyOnShow = useEffectEvent(readSiteKey)
+  const needsSiteKey = phase === 'email' && siteKey === null
+  useEffect(() => {
+    if (needsSiteKey) void readSiteKeyOnShow()
+  }, [needsSiteKey])
+
+  const checkAgain = () => {
+    setCheckFailed(false)
+    setProblem(null)
+    if (siteKey === null) void readSiteKey()
+    else setWidget(n => n + 1)
+  }
+  const checkAgainOnline = useEffectEvent(checkAgain)
+
+  useEffect(() => {
+    if (!checkFailed) return
+    const again = () => checkAgainOnline()
+    window.addEventListener('online', again)
+    return () => window.removeEventListener('online', again)
+  }, [checkFailed])
+
   const send = async (event: FormEvent) => {
     event.preventDefault()
+    if (token === null) {
+      if (checkFailed) checkAgain()
+      return
+    }
     setBusy(true)
     setProblem(null)
     const losing = await unsavedBeforeSignIn(email).catch(() => 0)
@@ -78,10 +124,13 @@ function Step() {
   }
 
   const sendNow = async () => {
+    if (token === null) return
     setUnsaved(0)
     setBusy(true)
     setProblem(null)
-    const sent = await sendCode(email)
+    const sent = await sendCode(email, token)
+    setToken(null)
+    setWidget(n => n + 1)
     setBusy(false)
     if (!sent.ok) {
       setProblem(sent.problem)
@@ -126,7 +175,7 @@ function Step() {
             <p className="text-muted-foreground">
               {again
                 ? 'Your session ended. Your farts stay on this device until you sign in.'
-                : 'Make a free account to keep your Recordings and Toots, even on a new phone.'}
+                : 'Make a free account to keep your farts.'}
             </p>
           </div>
 
@@ -140,7 +189,12 @@ function Step() {
               <Button ref={backButton} className="h-12 text-base" onClick={goBack}>
                 Go back
               </Button>
-              <Button variant="secondary" className="h-12 text-base" onClick={() => void sendNow()}>
+              <Button
+                variant="secondary"
+                className="h-12 text-base"
+                disabled={token === null}
+                onClick={() => void sendNow()}
+              >
                 Sign in anyway
               </Button>
             </div>
@@ -160,7 +214,23 @@ function Step() {
                 value={email}
                 onChange={event => setEmail(event.target.value)}
               />
-              <Button type="submit" className="h-12 text-base" disabled={busy}>
+              {siteKey && (
+                <Turnstile
+                  key={widget}
+                  siteKey={siteKey}
+                  onToken={setToken}
+                  onFailed={() => {
+                    setToken(null)
+                    setProblem('failed')
+                    setCheckFailed(true)
+                  }}
+                />
+              )}
+              <Button
+                type="submit"
+                className="h-12 text-base"
+                disabled={busy || (token === null && !checkFailed)}
+              >
                 {busy ? <Spinner /> : 'Send code'}
               </Button>
             </form>
@@ -224,8 +294,7 @@ function Step() {
               className="text-center text-sm text-muted-foreground"
               data-testid="account-step-guest"
             >
-              Without an account, your Recordings stay only in this browser, and your Toots are gone
-              when you close Farty.
+              Without an account, your farts are gone when you close Farty.
             </p>
           )}
           <Button variant="secondary" className="h-12 text-base" onClick={skipStep}>

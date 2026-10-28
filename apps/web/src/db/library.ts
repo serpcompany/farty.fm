@@ -92,22 +92,54 @@ export async function insertRecording(
   return added.length === 1
 }
 
+function tootInsert(db: Database, userId: string, t: NewToot, limit: number, paid: boolean) {
+  const payment = paid
+    ? sql`and exists (select 1 from toot_payments where user_id = ${userId}
+        and toot_id = ${t.id} and paid_at is not null and saved_at is null)`
+    : sql``
+  return db.all(sql`
+    insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
+      audio_bytes, updated_at)
+    select ${userId}, ${t.id}, ${t.title}, ${t.songId}, ${t.createdAt}, ${t.seconds},
+      ${JSON.stringify(t.arrangement)}, ${t.audioBytes}, ${d1Now}
+    where (select count(*) from toots where user_id = ${userId} and deleted_at is null)
+      < ${limit} ${payment}
+    on conflict do nothing
+    returning id`)
+}
+
 export async function insertToot(
   db: Database,
   userId: string,
   t: NewToot,
   limit: number
 ): Promise<boolean> {
-  const added = await db.all(sql`
-    insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
-      audio_bytes, updated_at)
-    select ${userId}, ${t.id}, ${t.title}, ${t.songId}, ${t.createdAt}, ${t.seconds},
-      ${JSON.stringify(t.arrangement)}, ${t.audioBytes}, ${d1Now}
-    where (select count(*) from toots where user_id = ${userId} and deleted_at is null)
-      < ${limit}
-    on conflict do nothing
-    returning id`)
-  return added.length === 1
+  return (await tootInsert(db, userId, t, limit, false)).length === 1
+}
+
+type RawQuery = { getQuery(): { sql: string; params: unknown[] } }
+
+function asD1Statement(db: Database, query: RawQuery): D1PreparedStatement {
+  const built = query.getQuery()
+  return db.$client.prepare(built.sql).bind(...built.params)
+}
+
+export async function insertPaidToot(
+  db: Database,
+  userId: string,
+  t: NewToot,
+  limit: number
+): Promise<boolean> {
+  const useUpPayment = db.run(sql`
+    update toot_payments set saved_at = ${d1Now}
+    where user_id = ${userId} and toot_id = ${t.id} and paid_at is not null
+      and saved_at is null
+      and exists (select 1 from toots where user_id = ${userId} and id = ${t.id})`)
+  const [added] = await db.$client.batch([
+    asD1Statement(db, tootInsert(db, userId, t, limit, true)),
+    asD1Statement(db, useUpPayment)
+  ])
+  return added.results.length === 1
 }
 
 export async function tombstone(

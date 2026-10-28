@@ -12,7 +12,7 @@ Test each stage on the golden outputs of the stage before it, so that one port's
 | Recording Pitch (#35) | the golden gesture | `pitch_estimate_midi` within ±30 cents, and a non-null estimate for the same Recordings |
 | Audition (#36) | the golden gesture, `pitch_contour` and `pitch_estimate_midi` | The same `shortest_note_s`, and so the same Melodic set (`melodic`, `recording_pitch_midi`): 24 Melodic, `002 013 016 017 019 022 032 059 069 084 086 090 091 094 095 096 097 098 099 100 101 102 103 104` |
 | Settle time (#92) | the golden gesture, `pitch_contour` and `recording_pitch_midi` | `settle_s` within 2 frames (11.6 ms) |
-| Song import (#38) | the catalog MIDI | Same note count and pitches; `start` and `dur` within 1e-6 beats; the same `bpm` and `beats_per_bar` |
+| Song import (#38) | the catalog MIDI | Same note count and pitches; `start` and `dur` within 1e-6 beats; the same `bpm`, `beats_per_bar` and `bar_lines` |
 | Auto-map (#40) and Pitch Coverage (#43) | the golden `recording_pitch_midi`, `shortest_note_s`, `settle_s`, `melodic`, gesture length and Song `notes` | The Arrangement matches (next section), for both libraries and every `coverage.json` subset |
 | Renderer (#41) | a golden Arrangement | The same checks as `evaluate.py`, no worse than the golden metrics (see "Metrics" below) |
 

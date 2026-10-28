@@ -281,7 +281,7 @@ function AccountSection() {
         <p className="px-4 pt-1.5 text-xs text-muted-foreground">
           {account.status === 'expired'
             ? 'Your session ended. Your farts stay on this device until you sign in.'
-            : 'Without an account, your Recordings stay only in this browser, and your Toots are gone when you close Farty.'}
+            : 'Your farts are gone when you close Farty, unless you make a free account.'}
         </p>
         <AlertDialog open={confirmsClear} onOpenChange={open => !busy && setConfirmsClear(open)}>
           <AlertDialogContent>

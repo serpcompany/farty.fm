@@ -2,7 +2,13 @@ import { getCloudflareContext } from '@opennextjs/cloudflare'
 import { z } from 'zod'
 
 import { uploadState } from '@/db/library'
-import { markTootPaid, startTootPayment, type TootPaymentRow, tootPayment } from '@/db/payments'
+import {
+  markTootPaid,
+  paidUnsavedToot,
+  startTootPayment,
+  type TootPaymentRow,
+  tootPayment
+} from '@/db/payments'
 import { songs } from '@/lib/catalog/songs.generated'
 import { TOOT_PRICE } from '@/lib/pricing'
 import { servedOrigin } from '@/lib/site'
@@ -11,6 +17,7 @@ import type { SessionUser } from './auth-session'
 import { apiError, gone, notFound, readCapped } from './http'
 import { LIMITS, refusedItemRequest, type Stores } from './library'
 import { isItemId, readJson } from './library-input'
+import { consumeSlot, type SlotRule } from './rate-limits'
 import {
   CHECKOUT_SESSION,
   type CheckoutSession,
@@ -33,6 +40,21 @@ export function requestPayments(request: Request): Payments {
 const unavailable = () => apiError(503, 'payments_unavailable')
 const paid = () => Response.json({ paid: true })
 
+export const PAYMENT_LIMITS = {
+  checkouts: { window: 60 * 60, max: 20 },
+  stripeChecks: { window: 10 * 60, max: 60 }
+} as const satisfies Record<string, SlotRule>
+
+function spend({ db }: WithDb, user: SessionUser, limit: keyof typeof PAYMENT_LIMITS) {
+  return consumeSlot(db.$client, `${limit}|${user.id}`, Date.now(), PAYMENT_LIMITS[limit])
+}
+
+function rateLimited(retryAfter: number | null): Response {
+  const limited = apiError(429, 'rate_limited')
+  limited.headers.set('Retry-After', String(retryAfter))
+  return limited
+}
+
 function stripeFailed(error: unknown): Response {
   if (!(error instanceof StripeError)) throw error
   console.error(JSON.stringify({ event: 'stripe_request_failed', status: error.status }))
@@ -54,18 +76,22 @@ async function paidAtStripe(
   { db }: WithDb,
   secretKey: string,
   user: SessionUser,
-  tootId: string,
-  checkoutSessionId: string
+  payment: TootPaymentRow
 ): Promise<{ paid: boolean; session: CheckoutSession } | null> {
   let session: CheckoutSession
   try {
-    session = await retrieveCheckoutSession(secretKey, checkoutSessionId)
+    session = await retrieveCheckoutSession(secretKey, payment.checkoutSessionId)
   } catch (error) {
     if (error instanceof StripeError && error.status === 404) return null
     throw error
   }
-  if (!paidFor(session, user.id, tootId)) return { paid: false, session }
-  return { paid: await markTootPaid(db, user.id, tootId, session.id), session }
+  if (!paidFor(session, user.id, payment.tootId, payment)) return { paid: false, session }
+  return { paid: await markTootPaid(db, user.id, payment.tootId, session.id), session }
+}
+
+function paidAtAnotherPrice(session: CheckoutSession): Response {
+  console.error(JSON.stringify({ event: 'stripe_paid_session_refused', session: session.id }))
+  return apiError(409, 'payment_mismatch')
 }
 
 function devCheckout(request: Request, tootId: string, songId: string): Response {
@@ -95,11 +121,13 @@ async function stripeCheckout({
   payment,
   request
 }: StripeCheckout): Promise<Response> {
-  if (payment && isCheckoutSessionId(payment.checkoutSessionId)) {
-    const earlier = await paidAtStripe({ db }, secretKey, user, tootId, payment.checkoutSessionId)
-    if (earlier?.paid) return paid()
-    if (earlier?.session.status === 'open' && earlier.session.url) {
-      return Response.json({ url: earlier.session.url })
+  const earlier = payment && isCheckoutSessionId(payment.checkoutSessionId) ? payment : null
+  if (earlier) {
+    const atStripe = await paidAtStripe({ db }, secretKey, user, earlier)
+    if (atStripe?.paid) return paid()
+    if (atStripe?.session.payment_status === 'paid') return paidAtAnotherPrice(atStripe.session)
+    if (atStripe?.session.status === 'open' && atStripe.session.url) {
+      return Response.json({ url: atStripe.session.url })
     }
   }
   const session = await createCheckoutSession(secretKey, {
@@ -107,10 +135,11 @@ async function stripeCheckout({
     tootId,
     songTitle: song.title,
     successUrl: songCreatorUrl(request, song.id, tootId, true),
-    cancelUrl: songCreatorUrl(request, song.id, tootId, false)
+    cancelUrl: songCreatorUrl(request, song.id, tootId, false),
+    replaces: earlier?.checkoutSessionId ?? null
   })
   if (!session.url) throw new StripeError(502)
-  await startTootPayment(db, user.id, tootId, session.id, TOOT_PRICE)
+  await startTootPayment(db, user.id, tootId, song.id, session.id, TOOT_PRICE)
   return Response.json({ url: session.url })
 }
 
@@ -138,14 +167,19 @@ export const startCheckout: TootPaymentRoute = async ({ db }, payments, user, id
   if (saved.status === 'live') return paid()
   if (saved.status === 'deleted') return gone()
   const payment = await tootPayment(db, user.id, id)
+  if (payment?.savedAt) return gone()
   if (payment?.paidAt) return paid()
   if (saved.live >= LIMITS.toots.maxItems) return apiError(409, 'limit_reached')
+  const unsaved = await paidUnsavedToot(db, user.id, song.id, id)
+  if (unsaved) return Response.json({ paidToot: unsaved })
+  const slot = await spend({ db }, user, 'checkouts')
+  if (!slot.allowed) return rateLimited(slot.retryAfter)
 
   if (payments.kind === 'dev') {
     const sessionId = payment?.checkoutSessionId.startsWith('dev_')
       ? payment.checkoutSessionId
       : `dev_${crypto.randomUUID()}`
-    await startTootPayment(db, user.id, id, sessionId, TOOT_PRICE)
+    await startTootPayment(db, user.id, id, song.id, sessionId, TOOT_PRICE)
     return devCheckout(request, id, song.id)
   }
   try {
@@ -163,14 +197,9 @@ export const getTootPayment: TootPaymentRoute = async ({ db }, payments, user, i
   const payment = await tootPayment(db, user.id, id)
   if (payment?.paidAt) return paid()
   if (payment && payments.kind === 'stripe' && isCheckoutSessionId(payment.checkoutSessionId)) {
+    if (!(await spend({ db }, user, 'stripeChecks')).allowed) return Response.json({ paid: false })
     try {
-      const now = await paidAtStripe(
-        { db },
-        payments.secretKey,
-        user,
-        id,
-        payment.checkoutSessionId
-      )
+      const now = await paidAtStripe({ db }, payments.secretKey, user, payment)
       return Response.json({ paid: now?.paid ?? false })
     } catch (error) {
       return stripeFailed(error)
@@ -181,9 +210,9 @@ export const getTootPayment: TootPaymentRoute = async ({ db }, payments, user, i
 
 const WEBHOOK_MAX_BYTES = 256 * 1024
 
-const PAID_TEST_EVENT = z.object({
+const PAID_EVENT = z.object({
   type: z.enum(['checkout.session.completed', 'checkout.session.async_payment_succeeded']),
-  livemode: z.literal(false),
+  livemode: z.boolean(),
   data: z.object({
     object: CHECKOUT_SESSION.extend({
       metadata: z.object({
@@ -214,11 +243,14 @@ export async function receiveStripeEvent(
   } catch {
     return apiError(400, 'invalid_request')
   }
-  const paidEvent = PAID_TEST_EVENT.safeParse(event)
-  if (paidEvent.success) {
+  const paidEvent = PAID_EVENT.safeParse(event)
+  if (paidEvent.success && paidEvent.data.livemode === payments.livemode) {
     const session = paidEvent.data.data.object
     const { user_id: userId, toot_id: tootId } = session.metadata
-    if (paidFor(session, userId, tootId)) await markTootPaid(db, userId, tootId, session.id)
+    const payment = await tootPayment(db, userId, tootId)
+    if (payment && paidFor(session, userId, tootId, payment)) {
+      await markTootPaid(db, userId, tootId, session.id)
+    }
   }
   return Response.json({ received: true })
 }

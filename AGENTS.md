@@ -70,4 +70,4 @@ SERP's [engineering standards](https://github.com/serpcompany/serp/tree/main/doc
 
 ## Retired material
 
-The iPhone app, its Swift Recording Analysis and its App Store submission are in the tag `archive-2026-10-27` (ADR 0013). Read a file with `git show archive-2026-10-27:<path>`.
+The iPhone app, its Swift Recording Analysis and its App Store submission are in the tag `archive-2026-10-27` (ADR 0014). Read a file with `git show archive-2026-10-27:<path>`.

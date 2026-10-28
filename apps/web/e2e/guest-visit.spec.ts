@@ -1,15 +1,22 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Page } from '@playwright/test'
-import { reopen } from './account'
-import { persistAsked, standInForPersist, stored, write } from './database'
-import { g3Fart, recordAndSave, recordG3ToRecordings, withFartingMicrophone } from './record'
+import { newEmail, reopen, signInByApi } from './account'
+import { persistAsked, standInForPersist, stored, uploaded, write } from './database'
+import {
+  g3Fart,
+  recordAndSave,
+  recordG3,
+  recordG3ToRecordings,
+  withFartingMicrophone
+} from './record'
 import { onPhone, tab } from './screens'
 import {
   controlledByTheServiceWorker,
   errorsWhileOffline,
   needsTheServiceWorker
 } from './service-worker'
+import { loadTheFixtureLibrary, needsTheFixtureLibrary, openASong } from './songs'
 import { expect, test } from './test'
 
 withFartingMicrophone()
@@ -27,28 +34,6 @@ const marysToot = (id: string) => ({
   arrangement: { transposition: 0, recordingForPitch: {} }
 })
 
-async function saveATootHere(page: Page) {
-  const id = crypto.randomUUID()
-  await write(page, [
-    { store: 'toots', value: marysToot(id) },
-    { store: 'tootAudio', bytes: Buffer.alloc(44).toString('base64'), key: id },
-    {
-      store: 'outbox',
-      value: {
-        key: `toots:${id}`,
-        kind: 'toots',
-        id,
-        op: 'put',
-        sent: false,
-        queuedAt: Date.now(),
-        version: crypto.randomUUID()
-      }
-    }
-  ])
-  await page.goto('/toots/')
-  await expect(page.getByTestId('toot-row')).toHaveCount(1)
-}
-
 async function expectARecordingThatPlays(page: Page) {
   await expect(page.getByTestId('recording-row')).toHaveCount(1)
   const row = page.getByRole('button', { name: /^Recording 1, \d+\.\d s, G3$/ })
@@ -56,41 +41,51 @@ async function expectARecordingThatPlays(page: Page) {
   await expect(row).toHaveAttribute('aria-pressed', 'true')
 }
 
-test("a guest's Recording outlasts closing Farty and still plays, while their Toot lasts the visit", async ({
-  page,
-  context
-}) => {
-  await context.addInitScript(standInForPersist)
-  await recordG3ToRecordings(page)
-  await expect.poll(() => persistAsked(page)).toBe(true)
-  await saveATootHere(page)
+test.describe('with the Fixture Library', () => {
+  needsTheFixtureLibrary()
 
-  await page.reload()
-  await expect(page.getByTestId('toot-row')).toHaveCount(1)
-  const second = await context.newPage()
-  await second.goto('/toots/')
-  await expect(second.getByTestId('toot-row')).toHaveCount(1)
-  await second.close()
+  test("a guest's farts last the visit: they record and hear a Song, and Farty opens again with none", async ({
+    page,
+    context
+  }) => {
+    test.setTimeout(180_000)
+    await context.addInitScript(standInForPersist)
+    await recordG3ToRecordings(page)
+    await tab(page, 'Profile').click()
+    await loadTheFixtureLibrary(page)
+    await openASong(page, 'mary')
+    const farts = await stored(page, 'recordings')
+    expect(farts).toBeGreaterThan(1)
+    expect(await persistAsked(page)).toBe(false)
 
-  const reopened = await reopen(context, page)
-  await expectARecordingThatPlays(reopened)
-  expect(await stored(reopened, 'toots')).toBe(0)
-  expect(await stored(reopened, 'tootAudio')).toBe(0)
-  expect(await stored(reopened, 'outbox')).toBe(1)
-  await tab(reopened, 'Toots').click()
-  await expect(reopened.getByText('Nothing yet')).toBeVisible()
+    await page.goto('/recordings/')
+    await page.reload()
+    await expect(page.getByTestId('recording-row')).toHaveCount(farts)
+    const second = await context.newPage()
+    await second.goto('/recordings/')
+    await expect(second.getByTestId('recording-row')).toHaveCount(farts)
+    await second.close()
 
-  await expectARecordingThatPlays(await reopen(context, reopened))
+    const reopened = await reopen(context, page)
+    await expect(reopened.getByText('No Recordings yet')).toBeVisible()
+    for (const store of ['recordings', 'audio', 'toots', 'tootAudio', 'outbox']) {
+      expect(await stored(reopened, store)).toBe(0)
+    }
+  })
 })
 
-test("a guest's Recording is there when the installed app opens again offline", async ({
+test("an account's Recording is there when the installed app opens again offline", async ({
   page,
   context,
   pageErrors
-}) => {
+}, testInfo) => {
   needsTheServiceWorker()
+  test.setTimeout(120_000)
   pageErrors.expect(...errorsWhileOffline)
   await recordG3ToRecordings(page)
+  await signInByApi(page, newEmail(testInfo, 'offline'))
+  await page.reload()
+  await uploaded(page)
   await controlledByTheServiceWorker(page)
 
   const online = await reopen(context, page)
@@ -101,10 +96,11 @@ test("a guest's Recording is there when the installed app opens again offline", 
   await context.setOffline(false)
 })
 
-test("a browser's farts from before a guest's Toots lasted the visit: the Recording stays, the Toot goes after this visit", async ({
+test("a guest's Recordings from before #237 stay, while their Toot and their new Recordings go after this visit", async ({
   page,
   context
 }) => {
+  test.setTimeout(120_000)
   await page.goto('/robots.txt')
   await write(
     page,
@@ -130,11 +126,22 @@ test("a browser's farts from before a guest's Toots lasted the visit: the Record
 
   await page.goto('/toots/')
   await expect(page.getByTestId('toot-row')).toHaveCount(1)
+  expect(await page.evaluate(() => localStorage.getItem('pedos.keptRecordings'))).toBe(
+    '["from-before"]'
+  )
+  expect(await page.evaluate(() => localStorage.getItem('pedos.accountStep'))).toBeNull()
   const reopened = await reopen(context, page)
   await expect(reopened.getByTestId('recording-row')).toHaveCount(1)
   expect(await stored(reopened, 'toots')).toBe(0)
   await tab(reopened, 'Toots').click()
   await expect(reopened.getByText('Nothing yet')).toBeVisible()
+
+  await recordG3(reopened)
+  expect(await stored(reopened, 'recordings')).toBe(2)
+  const again = await reopen(context, reopened)
+  await expect(again.getByTestId('recording-row')).toHaveCount(1)
+  expect(await stored(again, 'recordings')).toBe(1)
+  expect(await stored(again, 'audio')).toBe(1)
 })
 
 test.describe('with a microphone that answers at once', () => {

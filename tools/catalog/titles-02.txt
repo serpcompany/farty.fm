@@ -75,7 +75,7 @@ the-entertainer | The Entertainer
 
 # Carols and hymns
 hark-the-herald | Hark! The Herald Angels Sing | Hark the Herald Angels Sing
-god-rest-ye | God Rest You Merry, Gentlemen | God Rest Ye Merry, Gentlemen; God Rest Ye Merry Gentlemen
+# god-rest-ye moved to titles-03.txt (#232): the score picked here is barred without its pickup.
 good-king-wenceslas | Good King Wenceslas
 angels-we-have-heard | Angels We Have Heard on High | Les Anges dans nos campagnes
 o-come-emmanuel | O Come, O Come, Emmanuel | O Come O Come Emmanuel; Veni Emmanuel
@@ -123,7 +123,7 @@ liberty-bell | The Liberty Bell | Liberty Bell March
 marines-hymn | The Marines' Hymn | Marines Hymn
 hail-to-the-chief | Hail to the Chief
 my-country-tis | My Country, 'Tis of Thee | My Country Tis of Thee; God Save the King; God Save the Queen
-star-spangled-banner | The Star-Spangled Banner | Star Spangled Banner
+# star-spangled-banner moved to titles-03.txt (#232): the score picked here is barred without its pickup.
 battle-hymn | Battle Hymn of the Republic | The Battle Hymn of the Republic; Glory, Glory, Hallelujah; John Brown's Body
 johnny-comes-marching | When Johnny Comes Marching Home | When Johnny Comes Marching Home Again
 taps | Taps

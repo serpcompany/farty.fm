@@ -70,9 +70,9 @@ The service worker registers only in a build, never on `pnpm dev`.
   loads, when it installs"; "keeps the scripts that the scripts load by name, such as the workers'
   chunks"; "answers a worker script offline with a copy that has no URL, so each worker keeps its
   own").
-- Offline, a guest's Recordings are there and play, a Ready Song makes its Toot, and a saved Toot
-  plays (`e2e/guest-visit.spec.ts`, "a guest's Recording is there when the installed app opens
-  again offline"; `e2e/song-creator.spec.ts`, "the installed app opens a Ready Song offline, and
+- Offline, an account's Recordings are there and play, a Ready Song makes its Toot, and a saved
+  Toot plays (`e2e/guest-visit.spec.ts`, "an account's Recording is there when the installed app
+  opens again offline"; `e2e/song-creator.spec.ts`, "the installed app opens a Ready Song offline, and
   makes its Toot"; `e2e/toots-kept.spec.ts`, "the installed app opens a Toot offline, and plays
   it").
 - Online, pages come from the network first, so a deploy shows at once, and an online visit to the
@@ -91,12 +91,13 @@ The service worker registers only in a build, never on `pnpm dev`.
 
 ## Keeping the browser's storage
 
-- Once there's a Recording, and on signing in, Farty asks the browser to keep its storage, so the
-  Recordings aren't cleared to make room (`e2e/install.spec.ts`, "after the first saved Recording,
-  says how to add Farty to the Home Screen, once"; `e2e/guest-visit.spec.ts`, "a guest's Recording
-  outlasts closing Farty and still plays, while their Toot lasts the visit";
-  `e2e/account-step.spec.ts`, "signing up from the first Result keeps the Recording, and goes where
-  they tapped").
+- On signing in, and signed in with a Recording, Farty asks the browser to keep its storage, so
+  the Recordings aren't cleared to make room (`e2e/account-step.spec.ts`, "signing up from the first
+  Result goes where they tapped, and Farty opens again with their Recording").
+- A guest's farts last only the visit, so a guest's browser is never asked (`e2e/install.spec.ts`,
+  "after the first saved Recording, says how to add Farty to the Home Screen, once";
+  `e2e/guest-visit.spec.ts`, "a guest's farts last the visit: they record and hear a Song, and Farty
+  opens again with none").
 
 ## Not checked
 

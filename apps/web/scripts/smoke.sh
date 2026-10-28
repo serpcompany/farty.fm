@@ -271,6 +271,7 @@ if [[ ! "$base" =~ $local_base ]]; then
   eventually 'the session endpoint answers JSON' \
     answers /api/auth/get-session 200 application/json "${smoke[@]}"
   eventually 'a malformed sign-in from the site gets a 400' refuses_a_bad_sign_in
+  eventually 'Turnstile has its keys' answers /api/auth/turnstile 200 application/json "${smoke[@]}"
   if [[ "$env" == production ]]; then
     on_the_host "$canonical/" "a request at $canonical/ gets 200 with no password and no noindex" \
       serves "$canonical/" indexable

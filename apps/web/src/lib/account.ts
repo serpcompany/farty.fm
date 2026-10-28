@@ -86,15 +86,20 @@ export type SignInProblem =
   | 'wrongCode'
   | 'codeExpired'
   | 'tooManyTries'
+  | 'notChecked'
   | 'unavailable'
   | 'failed'
 
 export type Result<T> = { ok: true; value: T } | { ok: false; problem: SignInProblem }
 
-async function post(path: string, body: unknown): Promise<Response> {
+async function post(
+  path: string,
+  body: unknown,
+  headers: Record<string, string> = {}
+): Promise<Response> {
   return fetch(path, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...headers },
     body: JSON.stringify(body)
   })
 }
@@ -114,21 +119,56 @@ export async function problemOf(response: Response): Promise<SignInProblem> {
     case 'OTP_EXPIRED':
     case 'TOO_MANY_ATTEMPTS':
       return 'codeExpired'
+    case 'MISSING_RESPONSE':
+    case 'VERIFICATION_FAILED':
+      return 'notChecked'
     default:
       return 'failed'
   }
 }
 
-export async function sendCode(email: string): Promise<Result<null>> {
+export async function turnstileSiteKey(): Promise<Result<string>> {
   try {
-    const response = await post('/api/auth/email-otp/send-verification-otp', {
-      email: email.trim(),
-      type: 'sign-in'
-    })
-    if (response.ok) return { ok: true, value: null }
-    return { ok: false, problem: await problemOf(response) }
+    const response = await fetch('/api/auth/turnstile', { cache: 'no-store' })
+    if (!response.ok) return { ok: false, problem: await problemOf(response) }
+    const { siteKey } = (await response.json()) as { siteKey?: unknown }
+    if (typeof siteKey !== 'string' || siteKey === '') return { ok: false, problem: 'failed' }
+    return { ok: true, value: siteKey }
   } catch {
     return { ok: false, problem: 'failed' }
+  }
+}
+
+export async function sendCode(email: string, token: string): Promise<Result<null>> {
+  try {
+    const response = await post(
+      '/api/auth/email-otp/send-verification-otp',
+      { email: email.trim(), type: 'sign-in' },
+      { 'x-captcha-response': token }
+    )
+    if (!response.ok) return { ok: false, problem: await problemOf(response) }
+    noteCodeSent()
+    return { ok: true, value: null }
+  } catch {
+    return { ok: false, problem: 'failed' }
+  }
+}
+
+const codeSentKey = 'pedos.codeSent'
+export const CODE_WORKS_MS = 10 * 60_000
+
+function noteCodeSent(): void {
+  try {
+    localStorage.setItem(codeSentKey, String(Date.now()))
+  } catch {}
+}
+
+export function codeSentLately(now = Date.now()): boolean {
+  try {
+    const sent = Number(localStorage.getItem(codeSentKey))
+    return sent > 0 && now >= sent && now - sent < CODE_WORKS_MS
+  } catch {
+    return false
   }
 }
 
@@ -182,31 +222,22 @@ export function setMarketingEmail(on: boolean, accountId: string): Promise<Accou
   })
 }
 
-export type StepOffers = null | 'once' | 'done'
-export type StepMoment = 'result' | 'toot'
-
 const stepKey = 'pedos.accountStep'
 
-export function stepOffer(
-  offers: StepOffers,
-  moment: StepMoment
-): { offer: boolean; next: StepOffers } {
-  if (moment === 'result') {
-    return offers === null ? { offer: true, next: 'once' } : { offer: false, next: offers }
-  }
-  return offers === 'done' ? { offer: false, next: 'done' } : { offer: true, next: 'done' }
-}
-
-export function takeStepOffer(moment: StepMoment): boolean {
+export function takeStepOffer(): boolean {
   try {
-    const stored = localStorage.getItem(stepKey)
-    const offers: StepOffers = stored === 'once' || stored === 'done' ? stored : null
-    const { offer, next } = stepOffer(offers, moment)
-    if (next !== null) localStorage.setItem(stepKey, next)
-    return offer
+    if (localStorage.getItem(stepKey) !== null) return false
+    localStorage.setItem(stepKey, 'once')
+    return true
   } catch {
     return false
   }
+}
+
+export function offerStepAgain(): void {
+  try {
+    localStorage.removeItem(stepKey)
+  } catch {}
 }
 
 export function stopStepOffers(): void {

@@ -55,6 +55,22 @@ function signInCodeAddress(body: Body): string {
   return address
 }
 
+function refuseUnlessCodesCanGo({ settings, email }: Guarded): void {
+  if (!email.available) {
+    throw new APIError('SERVICE_UNAVAILABLE', {
+      code: 'OTP_DELIVERY_UNAVAILABLE',
+      message: 'Sign-in codes can’t be sent here.'
+    })
+  }
+  if (!settings.turnstile) {
+    console.error(`auth_unavailable ${JSON.stringify({ reason: 'turnstile_missing' })}`)
+    throw new APIError('SERVICE_UNAVAILABLE', {
+      code: 'TURNSTILE_UNAVAILABLE',
+      message: 'Sign-in codes can’t be sent here.'
+    })
+  }
+}
+
 async function codeMayGoOut(
   { database, settings }: Guarded,
   address: string,
@@ -96,12 +112,7 @@ export function signInGuard(guarded: Guarded) {
   return createAuthMiddleware(async ctx => {
     const body = (ctx.body ?? {}) as Body
     if (ctx.path === SEND_CODE_ENDPOINT) {
-      if (!guarded.email.available) {
-        throw new APIError('SERVICE_UNAVAILABLE', {
-          code: 'OTP_DELIVERY_UNAVAILABLE',
-          message: 'Sign-in codes can’t be sent here.'
-        })
-      }
+      refuseUnlessCodesCanGo(guarded)
       const address = signInCodeAddress(body)
       const client = clientOf(ctx.request, ctx.context.options)
       if (!(await codeMayGoOut(guarded, address, client))) return ctx.json({ success: true })

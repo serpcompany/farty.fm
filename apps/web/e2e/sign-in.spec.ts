@@ -1,19 +1,29 @@
 import type { Page } from '@playwright/test'
+import { ownClient, TURNSTILE_TEST_TOKEN } from './account'
 import { expect, test } from './test'
 
 type Answer = { status: number; body: unknown }
 
-function call(page: Page, method: 'GET' | 'POST', path: string, body?: unknown): Promise<Answer> {
+function call(
+  page: Page,
+  method: 'GET' | 'POST',
+  path: string,
+  body?: unknown,
+  token: string | null = TURNSTILE_TEST_TOKEN
+): Promise<Answer> {
   return page.evaluate(
-    async ({ method, path, body }) => {
+    async ({ method, path, body, token }) => {
+      const headers: Record<string, string> = {}
+      if (body !== undefined) headers['content-type'] = 'application/json'
+      if (token !== null) headers['x-captcha-response'] = token
       const response = await fetch(path, {
         method,
-        headers: body === undefined ? undefined : { 'content-type': 'application/json' },
+        headers,
         body: body === undefined ? undefined : JSON.stringify(body)
       })
       return { status: response.status, body: await response.json() }
     },
-    { method, path, body }
+    { method, path, body, token }
   )
 }
 
@@ -65,7 +75,31 @@ test('a code from the dev mailbox signs in to the library, and signing out ends 
   expect((await call(page, 'GET', '/api/library/')).status).toBe(401)
 })
 
-test('a wrong code is refused, and only the four endpoints answer', async ({
+test('a code is sent only with a Turnstile token, and the page reads the site key', async ({
+  page,
+  pageErrors
+}, testInfo) => {
+  pageErrors.expect('the server responded with a status of 400')
+  const email = `turnstile-${testInfo.project.name}-${Date.now()}@example.com`
+  await ownClient(page.context())
+  await page.goto('/privacy/')
+  expect(await call(page, 'GET', '/api/auth/turnstile')).toEqual({
+    status: 200,
+    body: { siteKey: '1x00000000000000000000AA' }
+  })
+  const sendCode = (token: string | null) =>
+    call(
+      page,
+      'POST',
+      '/api/auth/email-otp/send-verification-otp',
+      { email, type: 'sign-in' },
+      token
+    )
+  expect(await sendCode(null)).toMatchObject({ status: 400 })
+  expect(await sendCode(TURNSTILE_TEST_TOKEN)).toEqual({ status: 200, body: { success: true } })
+})
+
+test('a wrong code is refused, and only the four endpoints and the site key answer', async ({
   page,
   pageErrors
 }) => {

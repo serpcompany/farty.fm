@@ -1,5 +1,5 @@
-import { AUTH_BASE_PATH, servedEndpoint } from './auth-endpoints'
-import type { AuthEnv, AuthSettings } from './auth-settings'
+import { AUTH_BASE_PATH, isTurnstileKeyRequest, servedEndpoint } from './auth-endpoints'
+import { type AuthEnv, type AuthSettings, availableAuthSettings } from './auth-settings'
 import { authFor } from './create-auth'
 import { isLocalHost } from './environment'
 import { readCapped } from './http'
@@ -8,6 +8,17 @@ export const AUTH_MAX_BYTES = 16 * 1024
 
 function failure(status: number, code: string, message: string): Response {
   return Response.json({ code, message }, { status })
+}
+
+const authUnavailable = () => failure(503, 'AUTH_UNAVAILABLE', 'Sign-in isn’t available right now.')
+
+function turnstileSiteKey(env: AuthEnv): Response {
+  const settings = availableAuthSettings(env)
+  if (!settings) return authUnavailable()
+  if (!settings.turnstile) {
+    return failure(503, 'TURNSTILE_UNAVAILABLE', 'Sign-in codes can’t be sent here.')
+  }
+  return Response.json({ siteKey: settings.turnstile.siteKey })
 }
 
 function crossSiteRefusal(request: Request, settings: AuthSettings): Response | null {
@@ -46,12 +57,11 @@ async function forwardedBody(
 
 export async function serveAuthRequest(request: Request, env: AuthEnv): Promise<Response> {
   const url = new URL(request.url)
+  if (isTurnstileKeyRequest(request.method, url.pathname)) return noStore(turnstileSiteKey(env))
   const path = servedEndpoint(request.method, url.pathname)
   if (path === null) return noStore(failure(404, 'NOT_FOUND', 'Not found.'))
   const built = authFor(request, env)
-  if (!built) {
-    return noStore(failure(503, 'AUTH_UNAVAILABLE', 'Sign-in isn’t available right now.'))
-  }
+  if (!built) return noStore(authUnavailable())
   const body = await forwardedBody(request, built.settings)
   if (body instanceof Response) return noStore(body)
   const headers = new Headers(request.headers)

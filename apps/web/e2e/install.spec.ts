@@ -41,7 +41,11 @@ test('the manifest names Farty, opens it full screen, and has its icons', async 
   }
 
   const chromium = await page.context().newCDPSession(page)
-  expect(await chromium.send('Page.getInstallabilityErrors')).toEqual({ installabilityErrors: [] })
+  const { installabilityErrors } = await chromium.send('Page.getInstallabilityErrors')
+  const onMac = process.platform === 'darwin'
+  expect(installabilityErrors.filter(error => !onMac || error.errorId !== 'in-incognito')).toEqual(
+    []
+  )
 })
 
 test('the service worker opens the app shell offline', async ({ page, context, pageErrors }) => {
@@ -81,11 +85,10 @@ test.describe('on iPhone', () => {
 
     await recordG3(page)
     await expect(card).toBeHidden()
-    await expect.poll(() => persistAsked(page)).toBe(true)
-
     await page.getByRole('button', { name: 'Done' }).click()
     await expect(page).toHaveURL(/\/recordings\/$/)
     await expect(card).toHaveText(/^Install Farty\s*Tap\s+Share, then Add to Home Screen$/)
+    expect(await persistAsked(page)).toBe(false)
 
     await card.getByRole('button', { name: 'Close' }).click()
     await expect(card).toBeHidden()

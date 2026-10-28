@@ -51,7 +51,8 @@ class Evaluate(unittest.TestCase):
     def test_a_render_of_steady_farts_passes_the_bar(self):
         sources = [source(rid, pitch, samples(1.0), 0.12, 0.0, audio=faded(harmonic(hz, 1.0), 0.01) * 0.3)
                    for rid, pitch, hz in (("a", 45.0259, 110.0), ("b", 49.0259, 138.59), ("c", 52.0259, 164.81))]
-        melody = Melody("test", 100.0, 4, [Note(float(i), 1.0, p) for i, p in enumerate([57, 61, 64, 61, 57, 64])])
+        notes = [Note(float(i), 1.0, p) for i, p in enumerate([57, 61, 64, 61, 57, 64])]
+        melody = Melody("test", 100.0, 4, notes, [0.0, 4.0])
         _, assignments = plan(melody, sources)
         audio, events = render(melody, sources, assignments)
         r = evaluate(audio, melody, events, melody.bpm, sources)

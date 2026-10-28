@@ -2,6 +2,7 @@ import { hmacHex } from '@/server/hmac'
 import type { CheckoutSession } from '@/server/stripe'
 
 export const TEST_KEY = 'sk_test_madeUpForTheTests'
+export const LIVE_KEY = 'sk_live_madeUpForTheTests'
 export const WEBHOOK_SECRET = 'whsec_madeUpForTheTests'
 
 export const stripeV1 = (payload: string, timestamp: number, secret = WEBHOOK_SECRET) =>
@@ -21,6 +22,8 @@ export function checkoutSession(
     client_reference_id: tootId,
     metadata: { user_id: userId, toot_id: tootId },
     livemode: false,
+    amount_total: 99,
+    currency: 'usd',
     ...fields
   }
 }

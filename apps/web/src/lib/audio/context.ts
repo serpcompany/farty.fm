@@ -5,6 +5,12 @@ export function audioContext(): AudioContext {
   return shared
 }
 
+export function replaceAudioContext(context: AudioContext): void {
+  if (shared !== context) return
+  shared = null
+  context.close().catch(() => {})
+}
+
 export function startAudioInTap(): void {
   setPlaybackSession()
   audioContext()

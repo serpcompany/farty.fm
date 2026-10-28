@@ -19,7 +19,12 @@ import {
 import { GET_SESSION_ENDPOINT, SIGN_OUT_ENDPOINT } from './auth-endpoints'
 import { serveAuthRequest } from './auth-request'
 import { AuthUnavailableError, readSessionUser } from './auth-session'
-import { type AuthEnv, resolveAuthSettings } from './auth-settings'
+import {
+  type AuthEnv,
+  resolveAuthSettings,
+  TURNSTILE_TEST_SECRET_KEY,
+  TURNSTILE_TEST_SITE_KEY
+} from './auth-settings'
 import { SESSION_EXPIRES_SECONDS, SESSION_UPDATE_AGE_SECONDS } from './create-auth'
 
 const { db, local, staging, mailedCode, signIn, rows } = signInHarness()
@@ -212,6 +217,23 @@ describe('settings', () => {
     await expect(readSessionUser(new Request(STAGING), env)).rejects.toBeInstanceOf(
       AuthUnavailableError
     )
+  })
+
+  it('take Turnstile’s keys from the environment, or locally Cloudflare’s test keys', () => {
+    const turnstile = (env: AuthEnv) => {
+      const result = resolveAuthSettings(env)
+      return result.ok ? result.settings.turnstile : result.reason
+    }
+    const keys = { TURNSTILE_SITE_KEY: 'site', TURNSTILE_SECRET_KEY: 'secret' }
+    expect(turnstile({ ...deployed, ...keys })).toEqual({ siteKey: 'site', secretKey: 'secret' })
+    expect(turnstile(deployed)).toBeNull()
+    expect(turnstile({ ...deployed, ...keys, TURNSTILE_SECRET_KEY: ' ' })).toBeNull()
+    expect(turnstile({ ...deployed, ...keys, TURNSTILE_SITE_KEY: undefined })).toBeNull()
+    expect(turnstile(local())).toEqual({
+      siteKey: TURNSTILE_TEST_SITE_KEY,
+      secretKey: TURNSTILE_TEST_SECRET_KEY
+    })
+    expect(turnstile(local(keys))).toEqual({ siteKey: 'site', secretKey: 'secret' })
   })
 
   it('run locally without a secret, on any loopback host', async () => {

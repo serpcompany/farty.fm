@@ -11,6 +11,7 @@ import {
   registerServiceWorker
 } from '@/lib/install'
 import { onRecordingSaved } from '@/lib/recording-store'
+import { useAccount } from './account-provider'
 import { ShareSheetHint, useInstallRoute } from './install-button'
 import { useRecordFlow } from './record-flow-provider'
 import { useRecordings } from './recordings-provider'
@@ -20,15 +21,16 @@ const offeredKey = 'pedos.installOffered'
 export function InstallPrompt() {
   const { recordings } = useRecordings()
   const { flow } = useRecordFlow()
+  const { account } = useAccount()
   const route = useInstallRoute()
   const [open, setOpen] = useState(false)
 
   useEffect(registerServiceWorker, [])
 
-  const hasRecording = (recordings?.length ?? 0) > 0
+  const keeps = account.status === 'signedIn' && (recordings?.length ?? 0) > 0
   useEffect(() => {
-    if (hasRecording) void keepRecordings()
-  }, [hasRecording])
+    if (keeps) void keepRecordings()
+  }, [keeps])
 
   useEffect(
     () =>

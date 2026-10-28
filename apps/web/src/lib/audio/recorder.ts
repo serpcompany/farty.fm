@@ -7,7 +7,7 @@ import {
   stopCapturing,
   takeInProgress
 } from './capturing'
-import { audioContext } from './context'
+import { audioContext, replaceAudioContext } from './context'
 import {
   currentMicrophone,
   interrupted,
@@ -16,10 +16,20 @@ import {
   openMicrophone,
   releaseMicrophone
 } from './microphone'
+import { stopPlayback } from './player'
 
 export type Take = {
   stop(): Promise<PcmAudio>
   cancel(): void
+}
+
+class NoMicrophoneAudioError extends Error {
+  constructor(context: AudioContext, clockAt: number) {
+    super('No audio from the microphone')
+    const state = String(context.state).replace(/[^a-z]/gi, '')
+    const clock = context.currentTime > clockAt ? 'Ran' : 'Stopped'
+    this.name = `NoAudio${state.charAt(0).toUpperCase()}${state.slice(1)}Clock${clock}`
+  }
 }
 
 const firstBatchTimeoutMs = 3000
@@ -45,6 +55,12 @@ export async function startTake(onInterrupted: () => void): Promise<Take> {
     return capture(await openMicrophone(), onInterrupted)
   }
   return take
+}
+
+function openAfreshNextTap(mic: Microphone): void {
+  if (currentMicrophone() === mic) releaseMicrophone()
+  stopPlayback()
+  replaceAudioContext(mic.context)
 }
 
 function isDigitalSilence(samples: Float32Array): boolean {
@@ -86,14 +102,16 @@ async function capture(
   startCapturing(take)
   sendCommand(mic.node, { type: 'start', take: id })
 
+  const clockAt = mic.context.currentTime
   const timeout = setTimeout(
-    () => fail(new Error('No audio from the microphone')),
+    () => fail(new NoMicrophoneAudioError(mic.context, clockAt)),
     firstBatchTimeoutMs
   )
   try {
     await started
   } catch (error) {
     if (stopCapturing(take)) sendCommand(mic.node, { type: 'cancel', take: id })
+    if (error instanceof NoMicrophoneAudioError) openAfreshNextTap(mic)
     throw error
   } finally {
     clearTimeout(timeout)

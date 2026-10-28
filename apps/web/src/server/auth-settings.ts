@@ -8,7 +8,11 @@ export type AuthEnv = EmailEnv & {
   BETTER_AUTH_URL?: unknown
   BETTER_AUTH_SECRET?: unknown
   STAGING_SIGNUP_ALLOWLIST?: unknown
+  TURNSTILE_SITE_KEY?: unknown
+  TURNSTILE_SECRET_KEY?: unknown
 }
+
+type TurnstileKeys = { siteKey: string; secretKey: string }
 
 export type AuthSettings = {
   baseURL: string | { allowedHosts: string[]; protocol: 'http' }
@@ -17,6 +21,7 @@ export type AuthSettings = {
   useSecureCookies: boolean
   writeOrigin: string | null
   signupAllowlist: ReadonlySet<string> | null
+  turnstile: TurnstileKeys | null
 }
 
 type AuthSettingsResult =
@@ -34,6 +39,9 @@ const MIN_SECRET_LENGTH = 32
 const LOCAL_HOST_PATTERNS = ['localhost', '127.0.0.1', '[::1]'].flatMap(host => [host, `${host}:*`])
 const EMAIL = z.email()
 
+export const TURNSTILE_TEST_SITE_KEY = '1x00000000000000000000AA'
+export const TURNSTILE_TEST_SECRET_KEY = '1x0000000000000000000000000000000AA'
+
 export const isEmail = (value: string) => EMAIL.safeParse(value).success
 
 export function resolveAuthSettings(env: AuthEnv): AuthSettingsResult {
@@ -43,6 +51,8 @@ export function resolveAuthSettings(env: AuthEnv): AuthSettingsResult {
     typeof env.BETTER_AUTH_SECRET === 'string' && env.BETTER_AUTH_SECRET.length >= MIN_SECRET_LENGTH
       ? env.BETTER_AUTH_SECRET
       : null
+  const siteKey = nonEmpty(env.TURNSTILE_SITE_KEY)
+  const secretKey = nonEmpty(env.TURNSTILE_SECRET_KEY)
   if (target.kind === 'local') {
     const settings: AuthSettings = {
       baseURL: { allowedHosts: LOCAL_HOST_PATTERNS, protocol: 'http' },
@@ -50,7 +60,11 @@ export function resolveAuthSettings(env: AuthEnv): AuthSettingsResult {
       secret: secret ?? restartScopedSecret(),
       useSecureCookies: false,
       writeOrigin: null,
-      signupAllowlist: null
+      signupAllowlist: null,
+      turnstile: {
+        siteKey: siteKey ?? TURNSTILE_TEST_SITE_KEY,
+        secretKey: secretKey ?? TURNSTILE_TEST_SECRET_KEY
+      }
     }
     return { ok: true, settings }
   }
@@ -67,9 +81,21 @@ export function resolveAuthSettings(env: AuthEnv): AuthSettingsResult {
     secret,
     useSecureCookies: true,
     writeOrigin: target.origin,
-    signupAllowlist
+    signupAllowlist,
+    turnstile: siteKey && secretKey ? { siteKey, secretKey } : null
   }
   return { ok: true, settings }
+}
+
+export function availableAuthSettings(env: AuthEnv): AuthSettings | null {
+  const resolved = resolveAuthSettings(env)
+  if (resolved.ok) return resolved.settings
+  console.error(`auth_unavailable ${JSON.stringify({ reason: resolved.reason })}`)
+  return null
+}
+
+function nonEmpty(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() !== '' ? value.trim() : null
 }
 
 function parseAllowlist(value: unknown): ReadonlySet<string> | null {

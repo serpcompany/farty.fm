@@ -1,6 +1,6 @@
 export interface Song {
   bpm: number
-  beats_per_bar: number
+  bar_lines: readonly number[]
   length_beats: number
   notes: SongNote[]
 }

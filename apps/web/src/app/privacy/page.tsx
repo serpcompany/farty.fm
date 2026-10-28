@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   return (
     <article className="flex flex-col gap-3 px-4 pt-4 pb-6 text-sm leading-relaxed [&_a]:underline [&_h2]:pt-3 [&_h2]:text-lg [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
       <h1 className="text-3xl font-bold tracking-tight">Privacy</h1>
-      <p className="text-muted-foreground">Last updated: October 25, 2026</p>
+      <p className="text-muted-foreground">Last updated: October 28, 2026</p>
       <p>
         Farty records your farts, finds the note of each one, and plays songs with them. This policy
         explains what happens to your data. The short version:{' '}
@@ -15,8 +15,8 @@ export default function PrivacyPage() {
 
       <h2>Without an account</h2>
       <p>
-        Your Recordings stay in your browser on your device, and your Toots last only until you
-        close Farty. We never receive them.
+        Your Recordings and Toots stay in your browser on your device, and only until you close
+        Farty. We never receive them.
       </p>
 
       <h2>With an account</h2>
@@ -30,6 +30,25 @@ export default function PrivacyPage() {
           unsubscribe from any email or on Profile. It&apos;s never sold.
         </li>
       </ul>
+
+      <h2>The account step</h2>
+      <p>
+        When the account step opens, such as after your first Result, Cloudflare Turnstile loads in
+        it, whether or not you make an account, and checks that a person asks for a sign-in code.
+        Cloudflare&apos;s use of what it reads from your browser is described in its{' '}
+        <a href="https://www.cloudflare.com/turnstile-privacy-policy/">
+          Turnstile privacy addendum
+        </a>
+        .
+      </p>
+
+      <h2>Payments</h2>
+      <p>
+        When you pay to save a Toot, Stripe processes the payment on its own checkout page. Your
+        card details go to Stripe and never reach Farty. Farty keeps which Toot was paid for, when,
+        and Stripe&apos;s reference for the payment. Stripe&apos;s use of your data is described in
+        its <a href="https://stripe.com/privacy">privacy policy</a>.
+      </p>
 
       <h2>The microphone</h2>
       <p>
@@ -75,9 +94,10 @@ export default function PrivacyPage() {
 
       <h2>Deleting your data</h2>
       <p>
-        Delete account on Profile removes your email, Recordings and Toots. Without an account,
-        delete a Recording on the Recordings tab, or clear this site&apos;s data in your browser to
-        remove everything.
+        Delete account on Profile removes your email, Recordings, Toots and Farty&apos;s record of
+        your payments. Stripe keeps its own record of each payment. Without an account, delete a
+        Recording on the Recordings tab, or clear this site&apos;s data in your browser to remove
+        everything.
       </p>
 
       <h2>Children</h2>

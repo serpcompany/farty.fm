@@ -7,6 +7,7 @@ import {
   post,
   type Sent,
   STAGING,
+  STAGING_SITE_KEY,
   STAGING_WORKERS_DEV,
   signInHarness
 } from '@/test-support/sign-in'
@@ -15,10 +16,12 @@ import {
   AUTH_ENDPOINTS,
   GET_SESSION_ENDPOINT,
   SEND_CODE_ENDPOINT,
-  SIGN_OUT_ENDPOINT
+  SIGN_OUT_ENDPOINT,
+  TURNSTILE_ENDPOINT
 } from './auth-endpoints'
 import { AUTH_MAX_BYTES, serveAuthRequest } from './auth-request'
 import { readSessionUser } from './auth-session'
+import { TURNSTILE_TEST_SITE_KEY } from './auth-settings'
 
 const harness = signInHarness()
 const { local, staging, mailCount, rows } = harness
@@ -95,6 +98,29 @@ describe('the endpoints', () => {
       body: { code: 'NOT_FOUND', message: 'Not found.' }
     })
     expect(missing.headers.get('cache-control')).toBe('private, no-store')
+  })
+
+  it('answers the Turnstile site key, never cached: the var, or locally Cloudflare’s test key', async () => {
+    const answers = [
+      await serveAuthRequest(get(TURNSTILE_ENDPOINT, { base: STAGING }), staging([])),
+      await serveAuthRequest(get(`${TURNSTILE_ENDPOINT}/`), local()),
+      await serveAuthRequest(get(TURNSTILE_ENDPOINT), local({ TURNSTILE_SITE_KEY: 'own-key' }))
+    ]
+    expect(answers.map(response => response.headers.get('cache-control'))).toEqual([
+      'private, no-store',
+      'private, no-store',
+      'private, no-store'
+    ])
+    expect(await Promise.all(answers.map(answer))).toEqual([
+      { status: 200, body: { siteKey: STAGING_SITE_KEY } },
+      { status: 200, body: { siteKey: TURNSTILE_TEST_SITE_KEY } },
+      { status: 200, body: { siteKey: 'own-key' } }
+    ])
+    const misconfigured = local({ SITE_ENV: 'preview' })
+    const refused = await serveAuthRequest(get(TURNSTILE_ENDPOINT), misconfigured)
+    expect(await answer(refused)).toMatchObject({ status: 503, body: { code: 'AUTH_UNAVAILABLE' } })
+    const posted = await serveAuthRequest(post(TURNSTILE_ENDPOINT, {}), local())
+    expect(posted.status).toBe(404)
   })
 })
 

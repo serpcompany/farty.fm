@@ -17,6 +17,7 @@ import {
 import {
   countResumesInTaps,
   forgetResumesInTaps,
+  forgetSounds,
   hearSounds,
   lastSound,
   resumesInTaps,
@@ -244,8 +245,12 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
     const tryAgain = page.getByRole('button', { name: 'Try again' })
     await expectTappable(tryAgain)
     await page.unroute(workers)
+    await forgetSounds(page)
     await tryAgain.click()
-    await expectTheWholeToot(page)
+    const state = page.getByTestId('song-creator-state')
+    await expect(state).toBeVisible({ timeout: 60_000 })
+    const whole = await expectTheWholeToot(page)
+    await expect(state).toHaveText('Ready', { timeout: whole.duration * 1000 + 15_000 })
   })
 })
 

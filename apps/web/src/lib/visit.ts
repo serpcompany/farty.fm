@@ -1,19 +1,26 @@
-import { type Account, readSession } from './account'
+import { type Account, codeSentLately, libraryOwner, offerStepAgain, readSession } from './account'
 import { claimLibrary, leftByAnAccount } from './library-sync'
-import { clearLibrary, clearToots } from './recording-store'
+import { clearLibrary, clearVisit, recordingIds } from './recording-store'
 
 const visitKey = 'pedos.visit'
 const openedKey = 'pedos.opened'
+const keptKey = 'pedos.keptRecordings'
 const openLock = 'pedos-open'
 
 export type OpenFacts = {
   account: Account
   firstOpen: boolean
   otherTabOpen: boolean
+  signingUp: boolean
 }
 
 export function clearsOnOpen(facts: OpenFacts): boolean {
-  return facts.account.status === 'signedOut' && !facts.firstOpen && !facts.otherTabOpen
+  return (
+    facts.account.status === 'signedOut' &&
+    !facts.firstOpen &&
+    !facts.otherTabOpen &&
+    !facts.signingUp
+  )
 }
 
 let opening: { account: Promise<Account>; library: Promise<void> } | null = null
@@ -33,19 +40,39 @@ async function claimOnOpen(account: Promise<Account>): Promise<void> {
 
 async function startVisit(account: Promise<Account>): Promise<void> {
   try {
+    await noteKept().catch(() => {})
     const reloadOrUnknown = hasFlag(() => sessionStorage, visitKey, true)
     if (reloadOrUnknown) return
     const facts: OpenFacts = {
       account: await account,
       firstOpen: !hasFlag(() => localStorage, openedKey, false),
-      otherTabOpen: await anotherTabOpen()
+      otherTabOpen: await anotherTabOpen(),
+      signingUp: codeSentLately()
     }
-    if (clearsOnOpen(facts)) await ((await leftByAnAccount()) ? clearLibrary() : clearToots())
-    if (facts.account.status === 'signedOut') setFlag(() => localStorage, openedKey)
     setFlag(() => sessionStorage, visitKey)
+    if (facts.account.status === 'signedOut') setFlag(() => localStorage, openedKey)
+    if (clearsOnOpen(facts)) {
+      await ((await leftByAnAccount()) ? clearLibrary() : clearVisit(keptRecordings()))
+    }
   } catch {
   } finally {
     holdOpen()
+  }
+}
+
+async function noteKept(): Promise<void> {
+  if (hasFlag(() => localStorage, keptKey, true)) return
+  const ids = await recordingIds()
+  localStorage.setItem(keptKey, JSON.stringify(ids))
+  if (ids.length > 0 && libraryOwner() === null) offerStepAgain()
+}
+
+function keptRecordings(): Set<string> | null {
+  try {
+    const ids: unknown = JSON.parse(localStorage.getItem(keptKey) ?? 'null')
+    return Array.isArray(ids) && ids.every(id => typeof id === 'string') ? new Set(ids) : null
+  } catch {
+    return null
   }
 }
 

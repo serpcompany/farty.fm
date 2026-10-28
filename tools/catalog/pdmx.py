@@ -10,6 +10,15 @@ LICENSES = {
 }
 MAX_TRACKS = 2
 
+MISBARRED_SCORES = {
+    "6064902": 'Happy Birthday in 3/4 from "Hap-": bars start on "Hap-" and "to", not "birth-" and "you"',
+    "2030696": 'When the Saints in 4/4 with "Oh when the" in its first bar: "saints" falls on beat 3',
+    "5893953": 'God Rest Ye in 4/4 from "God": bars start on "God" and "-ry", not "rest" and "gen-"',
+    "20295": 'The Star-Spangled Banner in 3/4 from "O-": bars start on "O-" and "you", not "say" and "see"',
+    "3982531": 'The Star-Spangled Banner with "O-" on a bar line: bars start on "O-" and "you", not "say" and "see"',
+    "5171990": 'The Star-Spangled Banner in 4/4 from "O-": the anthem is in 3/4, with "O-" as its pickup',
+}
+
 EXCERPT_BEATS = 32
 MIN_BPM, MAX_BPM = 72, 144
 
@@ -96,6 +105,8 @@ def license_problems(row):
 
 def pick_problems(row):
     problems = license_problems(row)
+    if score_id(row) in MISBARRED_SCORES:
+        problems.append("its bar lines are off the tune")
     if int(float(row["n_tracks"] or 0)) > MAX_TRACKS:
         problems.append(f"more than {MAX_TRACKS} tracks")
     if not row["mid"]:
@@ -159,16 +170,21 @@ def render_options(tempos, meters, first_onset):
 
     bars = _bar_lines(meters, first_onset + EXCERPT_BEATS)
     start_index = _bar_index(bars, first_onset)
-    start = bars[start_index][0]
-    end = start + bars[start_index][1]
+    first_line = bars[start_index][0]
+    end = first_line + bars[start_index][1]
     covered = {}
     for line, length, meter in bars[start_index:]:
-        if line + length > start + EXCERPT_BEATS + EPS:
+        if line + length > first_line + EXCERPT_BEATS + EPS:
             break
         end = line + length
         covered[meter] = covered.get(meter, 0) + length
-    if start > EPS:
-        opts["start_beat"] = _number(start)
+    if first_onset > first_line + EPS:
+        start = first_onset
+        opts["start_beat"] = int(start) if start == int(start) else start
+    else:
+        start = first_line
+        if start > EPS:
+            opts["start_beat"] = _number(start)
     opts["max_beats"] = _number(end - start)
 
     num, den = max(covered, key=covered.get) if covered else bars[start_index][2]

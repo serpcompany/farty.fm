@@ -275,15 +275,34 @@ export async function clearLibrary(): Promise<void> {
   })
 }
 
-export async function clearToots(): Promise<void> {
+export async function recordingIds(): Promise<string[]> {
+  return withDb(database => database.getAllKeys('recordings'))
+}
+
+export async function clearVisit(kept: ReadonlySet<string> | null): Promise<void> {
   const forToots = IDBKeyRange.bound(itemKey('toots', ''), itemKey('toots', '\uffff'))
   await withDb(async database => {
-    const tx = database.transaction(['toots', 'tootAudio', 'outbox', 'downloads'], 'readwrite')
+    const tx = database.transaction(
+      ['toots', 'tootAudio', 'recordings', 'audio', 'outbox', 'downloads'],
+      'readwrite'
+    )
+    const recordings = tx.objectStore('recordings')
+    const audio = tx.objectStore('audio')
+    const outbox = tx.objectStore('outbox')
+    const downloads = tx.objectStore('downloads')
+    const held = kept ? [...(await recordings.getAllKeys()), ...(await audio.getAllKeys())] : []
+    const gone = new Set(held.filter(id => !kept?.has(id)))
     await Promise.all([
       tx.objectStore('toots').clear(),
       tx.objectStore('tootAudio').clear(),
-      tx.objectStore('outbox').delete(forToots),
-      tx.objectStore('downloads').delete(forToots),
+      outbox.delete(forToots),
+      downloads.delete(forToots),
+      ...[...gone].flatMap(id => [
+        recordings.delete(id),
+        audio.delete(id),
+        outbox.delete(itemKey('recordings', id)),
+        downloads.delete(itemKey('recordings', id))
+      ]),
       tx.done
     ])
   })

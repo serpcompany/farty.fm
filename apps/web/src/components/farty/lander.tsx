@@ -294,8 +294,7 @@ const faq = [
   },
   {
     question: 'Where do my farts go?',
-    answer:
-      'Without an account, your Recordings stay in the browser you recorded them in, and your Toots are gone when you close Farty. Sign in with your email to keep them all, on any phone.'
+    answer: "They're gone when you close Farty, unless you make a free account to keep them."
   },
   {
     question: 'Why has my fart got no note?',

@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { checkoutSession, stripeV1, TEST_KEY, WEBHOOK_SECRET } from '@/test-support/stripe'
+import { savingIsPaid, TOOT_PRICE } from '@/lib/pricing'
+import {
+  checkoutSession,
+  LIVE_KEY,
+  stripeV1,
+  TEST_KEY,
+  WEBHOOK_SECRET
+} from '@/test-support/stripe'
 
 import {
   type CheckoutSession,
@@ -10,12 +17,14 @@ import {
   paymentsConfig,
   retrieveCheckoutSession,
   SIGNATURE_TOLERANCE_SECONDS,
+  STRIPE_API_VERSION,
   StripeError,
   verifyStripeSignature
 } from './stripe'
 
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.unstubAllEnvs()
 })
 
 const TOOT = '33333333-3333-4333-8333-333333333333'
@@ -32,11 +41,71 @@ describe('paymentsConfig', () => {
     expect(paymentsConfig({}, null)).toEqual({ kind: 'off' })
   })
 
-  it('leaves saving free on Production', () => {
-    expect(paymentsConfig({ SITE_ENV: 'production' }, 'farty.fm')).toEqual({ kind: 'free' })
-    expect(
-      paymentsConfig({ SITE_ENV: 'production', STRIPE_SECRET_KEY: TEST_KEY }, 'farty.fm')
-    ).toEqual({ kind: 'free' })
+  describe('on Production, where saving is paid (#258)', () => {
+    const production = (key: unknown) =>
+      paymentsConfig({ SITE_ENV: 'production', STRIPE_SECRET_KEY: key }, 'farty.fm')
+
+    it('takes only a live key, in live mode', () => {
+      expect(savingIsPaid('production')).toBe(true)
+      expect(production(LIVE_KEY)).toEqual({
+        kind: 'stripe',
+        secretKey: LIVE_KEY,
+        webhookSecret: null,
+        livemode: true
+      })
+      expect(production('rk_live_madeUpForTheTests')).toMatchObject({
+        kind: 'stripe',
+        livemode: true
+      })
+      expect(
+        paymentsConfig(
+          {
+            SITE_ENV: 'production',
+            STRIPE_SECRET_KEY: LIVE_KEY,
+            STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET
+          },
+          'farty.fm'
+        )
+      ).toMatchObject({ kind: 'stripe', webhookSecret: WEBHOOK_SECRET, livemode: true })
+    })
+
+    it('turns payments off with a test key or none, and never stands in for Checkout', () => {
+      for (const key of [TEST_KEY, 'rk_test_madeUp', undefined, '']) {
+        expect(production(key)).toEqual({ kind: 'off' })
+      }
+      expect(paymentsConfig({ SITE_ENV: 'production' }, 'localhost:8787')).toEqual({
+        kind: 'off'
+      })
+    })
+  })
+
+  it('pays on a local run of a Production build, as its Save does, never with a live key', () => {
+    vi.stubEnv('FARTY_ENVIRONMENT', 'production')
+    expect(paymentsConfig({}, 'localhost:4158')).toEqual({ kind: 'dev' })
+    expect(paymentsConfig({ STRIPE_SECRET_KEY: TEST_KEY }, 'localhost:4158')).toEqual({
+      kind: 'stripe',
+      secretKey: TEST_KEY,
+      webhookSecret: null,
+      livemode: false
+    })
+    expect(paymentsConfig({ STRIPE_SECRET_KEY: LIVE_KEY }, 'localhost:4158')).toEqual({
+      kind: 'off'
+    })
+    vi.stubEnv('FARTY_ENVIRONMENT', 'staging')
+    expect(paymentsConfig({}, 'localhost:3071')).toEqual({ kind: 'dev' })
+  })
+
+  it('saves free where `savingIsPaid` says so, so free saving comes back from pricing.ts alone', () => {
+    const free = vi.fn(() => false)
+    for (const key of [undefined, LIVE_KEY, TEST_KEY]) {
+      expect(
+        paymentsConfig({ SITE_ENV: 'production', STRIPE_SECRET_KEY: key }, 'farty.fm', free)
+      ).toEqual({ kind: 'free' })
+    }
+    expect(free).toHaveBeenLastCalledWith('production')
+    vi.stubEnv('FARTY_ENVIRONMENT', 'production')
+    expect(paymentsConfig({}, 'localhost:3071', free)).toEqual({ kind: 'free' })
+    expect(free).toHaveBeenLastCalledWith('production')
   })
 
   it('uses Stripe in test mode on Staging, with the webhook secret once it is set', () => {
@@ -44,11 +113,17 @@ describe('paymentsConfig', () => {
     expect(paymentsConfig(staging, 'staging.farty.fm')).toEqual({
       kind: 'stripe',
       secretKey: TEST_KEY,
-      webhookSecret: null
+      webhookSecret: null,
+      livemode: false
     })
     expect(
       paymentsConfig({ ...staging, STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET }, 'staging.farty.fm')
-    ).toEqual({ kind: 'stripe', secretKey: TEST_KEY, webhookSecret: WEBHOOK_SECRET })
+    ).toEqual({
+      kind: 'stripe',
+      secretKey: TEST_KEY,
+      webhookSecret: WEBHOOK_SECRET,
+      livemode: false
+    })
     expect(
       paymentsConfig({ ...staging, STRIPE_WEBHOOK_SECRET: 'not-a-secret' }, 'staging.farty.fm')
     ).toMatchObject({ kind: 'stripe', webhookSecret: null })
@@ -76,9 +151,10 @@ describe('paymentsConfig', () => {
     })
   })
 
-  it('uses Stripe on a local run that has a test key', () => {
+  it('uses Stripe in test mode on a local run that has a test key', () => {
     expect(paymentsConfig({ STRIPE_SECRET_KEY: TEST_KEY }, 'localhost:3000')).toMatchObject({
-      kind: 'stripe'
+      kind: 'stripe',
+      livemode: false
     })
   })
 })
@@ -98,18 +174,44 @@ const session = (fields: Partial<CheckoutSession> = {}) =>
 
 describe('paidFor', () => {
   it('is true for a paid session for this user and Toot', () => {
-    expect(paidFor(session(), 'userA', TOOT)).toBe(true)
+    expect(paidFor(session(), 'userA', TOOT, TOOT_PRICE)).toBe(true)
   })
 
   it('is false for an unpaid session, or one for another user or Toot', () => {
-    expect(paidFor(session({ payment_status: 'unpaid' }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session({ payment_status: 'no_payment_required' }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session({ mode: 'subscription' }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session(), 'userB', TOOT)).toBe(false)
+    expect(paidFor(session({ payment_status: 'unpaid' }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(
+      paidFor(session({ payment_status: 'no_payment_required' }), 'userA', TOOT, TOOT_PRICE)
+    ).toBe(false)
+    expect(paidFor(session({ mode: 'subscription' }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session(), 'userB', TOOT, TOOT_PRICE)).toBe(false)
     const other = '44444444-4444-4444-8444-444444444444'
-    expect(paidFor(session(), 'userA', other)).toBe(false)
-    expect(paidFor(session({ client_reference_id: other }), 'userA', TOOT)).toBe(false)
-    expect(paidFor(session({ metadata: null }), 'userA', TOOT)).toBe(false)
+    expect(paidFor(session(), 'userA', other, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ client_reference_id: other }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ metadata: null }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+  })
+
+  it('is false for a session that charged anything but the Toot’s price', () => {
+    expect(paidFor(session({ amount_total: 1 }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ amount_total: 0 }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ amount_total: null }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ currency: 'eur' }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session({ currency: null }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+  })
+
+  it('is true with Adaptive Pricing: the session keeps 99 usd, the buyer paid in their currency', () => {
+    const local = {
+      ...session(),
+      presentment_details: { presentment_currency: 'jpy', presentment_amount: 163 }
+    }
+    expect(paidFor(local, 'userA', TOOT, TOOT_PRICE)).toBe(true)
+  })
+
+  it('judges by the price the Toot’s checkout started at, not today’s', () => {
+    const before = { amount: 149, currency: 'usd' }
+    const paidThen = session({ amount_total: 149 })
+    expect(paidFor(paidThen, 'userA', TOOT, before)).toBe(true)
+    expect(paidFor(paidThen, 'userA', TOOT, TOOT_PRICE)).toBe(false)
+    expect(paidFor(session(), 'userA', TOOT, before)).toBe(false)
   })
 })
 
@@ -123,13 +225,17 @@ describe('createCheckoutSession', () => {
       tootId: TOOT,
       songTitle: 'Twinkle Twinkle Little Star',
       successUrl: `https://staging.farty.fm/compose/twinkle/?toot=${TOOT}&checkout=done`,
-      cancelUrl: `https://staging.farty.fm/compose/twinkle/?toot=${TOOT}`
+      cancelUrl: `https://staging.farty.fm/compose/twinkle/?toot=${TOOT}`,
+      replaces: null
     })
     expect(created.id).toBe('cs_test_first')
     const [url, init] = fetch.mock.calls[0]
     expect(url).toBe('https://api.stripe.com/v1/checkout/sessions')
     expect(init?.method).toBe('POST')
-    expect(new Headers(init?.headers).get('authorization')).toBe(`Bearer ${TEST_KEY}`)
+    const headers = new Headers(init?.headers)
+    expect(headers.get('authorization')).toBe(`Bearer ${TEST_KEY}`)
+    expect(headers.get('stripe-version')).toBe(STRIPE_API_VERSION)
+    expect(headers.get('idempotency-key')).toBe(`toot-checkout/userA/${TOOT}/first`)
     expect(Object.fromEntries(init?.body as URLSearchParams)).toEqual({
       mode: 'payment',
       'payment_method_types[0]': 'card',
@@ -160,11 +266,44 @@ describe('createCheckoutSession', () => {
       tootId: TOOT,
       songTitle: 'Twinkle',
       successUrl: 'https://staging.farty.fm/',
-      cancelUrl: 'https://staging.farty.fm/'
+      cancelUrl: 'https://staging.farty.fm/',
+      replaces: null
     }).catch((error: unknown) => error)
     expect(failed).toBeInstanceOf(StripeError)
     expect((failed as StripeError).status).toBe(401)
     expect(String(failed)).not.toContain(TEST_KEY)
+  })
+
+  it('names the session it replaces in its idempotency key, so only a retry gets the same one', async () => {
+    const fetch = vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(async () => Response.json(session({ status: 'open' })))
+    const checkout = {
+      userId: 'userA',
+      tootId: TOOT,
+      songTitle: 'Twinkle',
+      successUrl: 'https://staging.farty.fm/',
+      cancelUrl: 'https://staging.farty.fm/'
+    }
+    await createCheckoutSession(TEST_KEY, { ...checkout, replaces: null })
+    await createCheckoutSession(TEST_KEY, { ...checkout, replaces: 'cs_test_expired1' })
+    const keys = fetch.mock.calls.map(([, init]) =>
+      new Headers(init?.headers).get('idempotency-key')
+    )
+    expect(keys).toEqual([
+      `toot-checkout/userA/${TOOT}/first`,
+      `toot-checkout/userA/${TOOT}/cs_test_expired1`
+    ])
+  })
+
+  it('reads a session with the pinned API version and no idempotency key', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json(session()))
+    await retrieveCheckoutSession(TEST_KEY, 'cs_test_a1')
+    const [url, init] = fetch.mock.calls[0]
+    expect(url).toBe('https://api.stripe.com/v1/checkout/sessions/cs_test_a1')
+    const headers = new Headers(init?.headers)
+    expect(headers.get('stripe-version')).toBe(STRIPE_API_VERSION)
+    expect(headers.has('idempotency-key')).toBe(false)
   })
 
   it('fails with status 0 when Stripe can’t be reached', async () => {

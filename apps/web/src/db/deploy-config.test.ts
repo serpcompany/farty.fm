@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { experimental_readRawConfig, unstable_readConfig } from 'wrangler'
 import { parse } from 'yaml'
 import { siteOrigin } from '../lib/site'
+import { TURNSTILE_TEST_SITE_KEY } from '../server/auth-settings'
 import { SUPPORT_EMAIL } from '../server/email'
 
 const path = (relative: string) => fileURLToPath(new URL(relative, import.meta.url))
@@ -113,6 +114,16 @@ describe('each deployed environment', () => {
     expect(config.send_email.map(binding => binding.allowed_sender_addresses)).toEqual([
       [SUPPORT_EMAIL]
     ])
+  })
+
+  it('has its own Turnstile site key, and the top level Cloudflare’s test key', () => {
+    const keys = [undefined, ...DEPLOYED].map(env => resolved(env).vars.TURNSTILE_SITE_KEY)
+    expect(keys[0]).toBe(TURNSTILE_TEST_SITE_KEY)
+    for (const key of keys.slice(1)) expect(key).toMatch(/^0x4[\w-]+$/)
+    expect(new Set(keys).size).toBe(keys.length)
+    for (const env of [undefined, ...DEPLOYED]) {
+      expect(resolved(env).vars).not.toHaveProperty('TURNSTILE_SECRET_KEY')
+    }
   })
 
   it('has a different database from every other environment', () => {

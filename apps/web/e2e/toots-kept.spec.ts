@@ -69,6 +69,7 @@ async function recordingUsedBy(page: Page, songId: string): Promise<string> {
 
 test('Toots are kept: made, found after a relaunch, renamed, and deleted', async ({
   playwright,
+  channel,
   headless,
   projectOptions,
   pageErrors
@@ -77,6 +78,7 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
   const profile = testInfo.outputPath('profile')
   const launch = async (): Promise<BrowserContext> => {
     const context = await playwright.chromium.launchPersistentContext(profile, {
+      channel,
       headless,
       ...projectOptions,
       serviceWorkers: 'block'

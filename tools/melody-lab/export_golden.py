@@ -19,7 +19,7 @@ from melody import load_catalog
 GOLDEN = analysis.ROOT / "fixtures/golden"
 SHIP_LIST = analysis.ROOT / "apps/web/src/lib/catalog/ship-list.json"
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")
-FORMAT_VERSION = 5
+FORMAT_VERSION = 6
 COVERAGE_SEEDS = 10
 
 
@@ -115,6 +115,7 @@ def song_json(c, m):
         "import_args": c.get("render", {}),
         "bpm": m.bpm,
         "beats_per_bar": m.beats_per_bar,
+        "bar_lines": [exact(x) for x in m.bar_lines],
         "length_beats": exact(m.length_beats),
         "pitches": sorted({int(n.pitch) for n in m.notes}),
         "notes": [{"start": exact(n.start), "dur": exact(n.dur), "pitch": int(n.pitch)} for n in m.notes],

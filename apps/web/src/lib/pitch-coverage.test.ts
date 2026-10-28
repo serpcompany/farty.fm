@@ -119,8 +119,8 @@ describe('Pitch Coverage against the reference engine', () => {
     }
     expect(unlocks).toEqual({
       9: ['mary', 'ode', 'merryxmas'],
-      10: ['birthday', 'frere'],
-      11: ['twinkle', 'saints']
+      10: ['frere'],
+      11: ['twinkle', 'birthday', 'saints']
     })
   })
 
@@ -174,7 +174,7 @@ describe('the Pitch Coverage rule', () => {
     title: 'Test',
     source: '',
     bpm: 60,
-    beats_per_bar: 4,
+    bar_lines: [0],
     length_beats: pitches.length,
     pitches: [...new Set(pitches)].sort((a, b) => a - b),
     notes: pitches.map((pitch, start) => ({ start, dur: 1, pitch }))
@@ -237,8 +237,9 @@ function pitchClassOf(r: Recording): number[] {
 describe('Compose’s listing', () => {
   it('puts the highest coverage first, then fewer notes', () => {
     const { unlocked, locked } = listing(ten)
-    expect(unlocked.map(r => r.song.id)).toEqual(['mary', 'ode', 'frere', 'merryxmas', 'birthday'])
+    expect(unlocked.map(r => r.song.id)).toEqual(['mary', 'ode', 'frere', 'merryxmas'])
     expect(locked.map(r => r.song.id)).toEqual([
+      'birthday',
       'furelise',
       'auld',
       'twinkle',
@@ -253,7 +254,6 @@ describe('Compose’s listing', () => {
     const { unlocked, locked } = listing(ten, '', 'alphabetical')
     expect(unlocked.map(r => r.song.title)).toEqual([
       'Frère Jacques',
-      'Happy Birthday',
       'Mary Had a Little Lamb',
       'Ode to Joy',
       'We Wish You a Merry Christmas'
@@ -262,6 +262,7 @@ describe('Compose’s listing', () => {
       'Amazing Grace',
       'Auld Lang Syne',
       'Für Elise',
+      'Happy Birthday',
       'Jingle Bells',
       'Row, Row, Row Your Boat',
       'Twinkle, Twinkle, Little Star',
@@ -276,7 +277,7 @@ describe('Compose’s listing', () => {
     expect(ids(listing(ten, 'frere').unlocked)).toEqual(['frere'])
     expect(ids(listing(ten, 'little').unlocked)).toEqual(['mary'])
     expect(ids(listing(ten, 'little').locked)).toEqual(['twinkle'])
-    expect(listing(ten, '  ').unlocked).toHaveLength(5)
+    expect(listing(ten, '  ').unlocked).toHaveLength(4)
     const none = listing(ten, 'zzz')
     expect(none.unlocked.length + none.locked.length).toBe(0)
   })
@@ -312,7 +313,7 @@ describe('Compose’s listing', () => {
     )
     const ms = performance.now() - started
     expect(unlocked.length + locked.length).toBe(500)
-    expect(unlocked).toHaveLength(209)
+    expect(unlocked).toHaveLength(167)
     expect(ms).toBeLessThan(10_000)
   })
 
@@ -322,7 +323,7 @@ describe('Compose’s listing', () => {
     expect(missingNotes(coverageOf(song('mary'), ten))).toBeNull()
     const few = takes(3)
     expect(missingNotes(coverageOf(song('birthday'), few))).toBe(
-      'G♯2 (0.5 s), A♯2 (0.5 s), C3 (1.0 s), C♯3 (1.0 s), F3 (0.5 s), and F♯3 (0.3 s)'
+      'G♯2 (0.5 s), A♯2 (0.5 s), C3 (1.0 s), C♯3 (1.5 s), F3 (0.5 s), and F♯3 (0.4 s)'
     )
     expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe(
       'G♯2 (0.5 s), A♯2 (0.5 s), C3 (1.0 s), and 3 more'

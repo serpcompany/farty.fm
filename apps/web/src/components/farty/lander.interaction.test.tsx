@@ -39,17 +39,13 @@ describe('the lander', () => {
   })
 
   it.each([
-    [
-      'staging',
-      'Recording and making Toots is free, and so is an account. Saving a Toot costs $0.99.'
-    ],
-    [
-      'local',
-      'Recording and making Toots is free, and so is an account. Saving a Toot costs $0.99.'
-    ],
-    ['production', 'Yes. Farty is free, and so is an account.']
-  ])('answers whether Farty is free as its environment does (%s)', async (environment, answer) => {
+    'staging',
+    'local',
+    'production'
+  ])('says saving a Toot costs $0.99, on every environment (%s)', async environment => {
     await showLanderOn(environment)
-    expect(answerTo('Is Farty free?')).toBe(answer)
+    expect(answerTo('Is Farty free?')).toBe(
+      'Recording and making Toots is free, and so is an account. Saving a Toot costs $0.99.'
+    )
   })
 })

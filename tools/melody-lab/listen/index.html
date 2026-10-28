@@ -281,7 +281,7 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
     canvas.width = width * dpr; canvas.height = height * dpr;
     canvas.style.width = width + "px"; canvas.style.height = height + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    geom = { beats, lo, hi, rowH, width, height, left: 44, pxb: (width - 52) / beats, spb: 60 / s.bpm, bar: s.beats_per_bar };
+    geom = { beats, lo, hi, rowH, width, height, left: 44, pxb: (width - 52) / beats, spb: 60 / s.bpm, bars: s.bar_lines };
   }
   function draw() {
     if (!geom) return;
@@ -297,12 +297,11 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
         ctx.fillText(noteName(m), 6, y(m) + g.rowH - 3);
       }
     }
-    for (let b = 0; b <= g.beats; b++) {
-      ctx.fillStyle = css("--line");
-      ctx.globalAlpha = b % g.bar === 0 ? 1 : 0.45;
-      ctx.fillRect(Math.round(x(b)), 4, 1, g.height - 26);
-    }
+    ctx.fillStyle = css("--line");
+    ctx.globalAlpha = 0.45;
+    for (let b = 0; b <= g.beats; b++) ctx.fillRect(Math.round(x(b)), 4, 1, g.height - 26);
     ctx.globalAlpha = 1;
+    g.bars.forEach((b) => ctx.fillRect(Math.round(x(b)), 4, 1, g.height - 26));
     const now = audio.currentTime / g.spb;
     notes.forEach((n) => {
       const w = Math.max(3, n.dur * g.pxb - 2);
@@ -318,7 +317,7 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
       }
     });
     ctx.fillStyle = css("--muted"); ctx.font = "10px " + css("--mono");
-    for (let b = 0; b < g.beats; b += g.bar) ctx.fillText(String(b / g.bar + 1), x(b) + 3, g.height - 6);
+    g.bars.forEach((b, i) => ctx.fillText(String(i + 1), x(b) + 3, g.height - 6));
     if (audio.currentTime > 0) {
       ctx.fillStyle = css("--accent");
       ctx.fillRect(x(now), 0, 2, g.height - 18);

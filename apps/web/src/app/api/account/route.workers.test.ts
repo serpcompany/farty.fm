@@ -41,7 +41,7 @@ const deleteWith = (media: R2Bucket, { id, email }: { id: string; email: string 
 
 async function fill({ id, cookie }: { id: string; cookie: string }) {
   await api.put('recordings', R1, uploadBody(recordingMetadata(R1), wav()), { cookie })
-  await startTootPayment(testDb(), id, T1, 'dev_test', TOOT_PRICE)
+  await startTootPayment(testDb(), id, T1, 'twinkle', 'dev_test', TOOT_PRICE)
   await markTootPaid(testDb(), id, T1, 'dev_test')
   await api.put('toots', T1, uploadBody(tootMetadata(T1), wav()), { cookie })
 }

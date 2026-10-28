@@ -10,7 +10,7 @@ SONGS = {s["id"]: load(f"songs/{s['id']}.json") for s in INDEX["songs"]}
 
 def golden_melody(song):
     notes = [Note(n["start"], n["dur"], n["pitch"]) for n in song["notes"]]
-    return Melody(song["title"], song["bpm"], song["beats_per_bar"], notes)
+    return Melody(song["title"], song["bpm"], song["beats_per_bar"], notes, song["bar_lines"])
 
 
 def source(rid, ref_midi, samples, min_note_s, settle_s, audio=None):

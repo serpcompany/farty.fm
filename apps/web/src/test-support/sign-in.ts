@@ -3,17 +3,23 @@ import { afterAll, beforeAll, beforeEach, expect, vi } from 'vitest'
 import { createDatabase } from '@/db/database'
 import { GET_SESSION_ENDPOINT, SEND_CODE_ENDPOINT, SIGN_IN_ENDPOINT } from '@/server/auth-endpoints'
 import { serveAuthRequest } from '@/server/auth-request'
-import { type AuthEnv, resolveAuthSettings } from '@/server/auth-settings'
+import {
+  type AuthEnv,
+  resolveAuthSettings,
+  TURNSTILE_TEST_SECRET_KEY
+} from '@/server/auth-settings'
 import { createAuth } from '@/server/create-auth'
 import { listCapturedEmails } from '@/server/dev-mailbox'
 import { createEmailSender } from '@/server/email'
 
 import { type LocalBindings, localBindings } from './local-bindings'
+import { fakeSiteverify, TEST_TOKEN } from './turnstile'
 
 export const LOCAL = 'http://localhost:3115'
 export const STAGING = 'https://staging.farty.fm'
 export const SECRET = 'a-test-secret-that-is-long-enough-0123456789'
 export const STAGING_WORKERS_DEV = 'https://pedos-web-staging.serpcompany.workers.dev'
+export const STAGING_SITE_KEY = 'staging-site-key'
 
 export type Sent = EmailMessageBuilder[]
 
@@ -22,11 +28,13 @@ export type RequestOptions = {
   origin?: string | null
   ip?: string
   cookie?: string
+  captcha?: string | null
   headers?: Record<string, string>
 }
 
 export function post(path: string, body: unknown, options: RequestOptions = {}): Request {
   const { base = LOCAL, origin = base, ip = '203.0.113.1', cookie, headers = {} } = options
+  const { captcha = TEST_TOKEN } = options
   const all = new Headers({
     'content-type': 'application/json',
     'cf-connecting-ip': ip,
@@ -34,6 +42,7 @@ export function post(path: string, body: unknown, options: RequestOptions = {}):
   })
   if (origin !== null) all.set('origin', origin)
   if (cookie) all.set('cookie', cookie)
+  if (captcha !== null) all.set('x-captcha-response', captcha)
   return new Request(`${base}/api/auth${path}`, {
     method: 'POST',
     headers: all,
@@ -105,6 +114,7 @@ export function signInHarness() {
     for (const level of ['info', 'warn', 'error'] as const) {
       vi.spyOn(console, level).mockImplementation(() => {})
     }
+    fakeSiteverify()
     return () => vi.restoreAllMocks()
   })
 
@@ -128,6 +138,8 @@ export function signInHarness() {
     BETTER_AUTH_URL: STAGING,
     BETTER_AUTH_SECRET: SECRET,
     STAGING_SIGNUP_ALLOWLIST: 'member@example.com',
+    TURNSTILE_SITE_KEY: STAGING_SITE_KEY,
+    TURNSTILE_SECRET_KEY: TURNSTILE_TEST_SECRET_KEY,
     ...extra
   })
 

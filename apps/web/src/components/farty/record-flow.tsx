@@ -308,7 +308,7 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
   const { collectedPitchClasses, melodicRecordings } = useRecordings()
   const finish = useFinishFlow()
   const { offerStep } = useAccount()
-  const go = (href: string) => offerStep('result', () => finish(href))
+  const go = (href: string) => offerStep(() => finish(href))
   const pitch = recordingPitch(recording)
 
   return (

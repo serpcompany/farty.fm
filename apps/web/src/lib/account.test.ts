@@ -1,19 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { SIGN_IN_CODE_MINUTES } from '@/server/email'
 import { blockedStorage, memoryStorage } from '@/test-support/web-storage'
 import {
+  CODE_WORKS_MS,
   clearStepDraft,
+  codeSentLately,
   deleteAccount,
   forgetAccount,
   libraryOwner,
+  offerStepAgain,
   problemOf,
   readSession,
   readStepDraft,
-  type StepOffers,
   saveStepDraft,
+  sendCode,
   setLibraryOwner,
   setMarketingEmail,
   signIn,
-  stepOffer,
   stopStepOffers,
   takeSignInAgain,
   takeStepOffer
@@ -24,50 +27,79 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-describe('stepOffer', () => {
-  it('offers at the first Result, then once after a saved Toot, then never', () => {
-    let offers: StepOffers = null
-    const seen: boolean[] = []
-    for (const moment of ['result', 'result', 'toot', 'toot', 'result'] as const) {
-      const { offer, next } = stepOffer(offers, moment)
-      seen.push(offer)
-      offers = next
-    }
-    expect(seen).toEqual([true, false, true, false, false])
-    expect(offers).toBe('done')
-  })
-
-  it('offers after a saved Toot when no Result has offered it yet', () => {
-    expect(stepOffer(null, 'toot')).toEqual({ offer: true, next: 'done' })
-  })
-
-  it('never offers once done', () => {
-    expect(stepOffer('done', 'result').offer).toBe(false)
-    expect(stepOffer('done', 'toot').offer).toBe(false)
-  })
-})
-
 describe('takeStepOffer', () => {
-  it('remembers each offer in localStorage', () => {
+  it('offers at the first Result only, remembering it in localStorage', () => {
     vi.stubGlobal('localStorage', memoryStorage())
-    expect(takeStepOffer('result')).toBe(true)
+    expect(takeStepOffer()).toBe(true)
     expect(localStorage.getItem('pedos.accountStep')).toBe('once')
-    expect(takeStepOffer('result')).toBe(false)
-    expect(takeStepOffer('toot')).toBe(true)
-    expect(takeStepOffer('toot')).toBe(false)
+    expect(takeStepOffer()).toBe(false)
   })
 
-  it('never offers after signing in', () => {
+  it('never offers after signing in, or where it was offered twice before #237', () => {
     vi.stubGlobal('localStorage', memoryStorage())
     stopStepOffers()
-    expect(takeStepOffer('result')).toBe(false)
-    expect(takeStepOffer('toot')).toBe(false)
+    expect(takeStepOffer()).toBe(false)
+    localStorage.setItem('pedos.accountStep', 'done')
+    expect(takeStepOffer()).toBe(false)
   })
 
   it('never offers with storage blocked, since it could not remember', () => {
     vi.stubGlobal('localStorage', blockedStorage())
-    expect(takeStepOffer('result')).toBe(false)
+    expect(takeStepOffer()).toBe(false)
     expect(() => stopStepOffers()).not.toThrow()
+  })
+})
+
+describe('offerStepAgain', () => {
+  it('offers the step once more, at the next Result', () => {
+    vi.stubGlobal('localStorage', memoryStorage())
+    expect(takeStepOffer()).toBe(true)
+    offerStepAgain()
+    expect(takeStepOffer()).toBe(true)
+    expect(takeStepOffer()).toBe(false)
+  })
+
+  it('does nothing with storage blocked', () => {
+    vi.stubGlobal('localStorage', blockedStorage())
+    expect(() => offerStepAgain()).not.toThrow()
+  })
+})
+
+describe('sendCode', () => {
+  const sent = (response: Response) => {
+    vi.stubGlobal('localStorage', memoryStorage())
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => response)
+    )
+    return sendCode('a@example.com', 'token')
+  }
+
+  it('remembers a code went out for as long as the code works', async () => {
+    expect(CODE_WORKS_MS).toBe(SIGN_IN_CODE_MINUTES * 60_000)
+    expect(codeSentLately()).toBe(false)
+    expect(await sent(Response.json({ success: true }))).toEqual({ ok: true, value: null })
+    const now = Date.now()
+    expect(codeSentLately(now)).toBe(true)
+    expect(codeSentLately(now + CODE_WORKS_MS - 60_000)).toBe(true)
+    expect(codeSentLately(now + CODE_WORKS_MS + 1)).toBe(false)
+  })
+
+  it("doesn't when the code wasn't sent", async () => {
+    expect(
+      await sent(Response.json({ code: 'VERIFICATION_FAILED' }, { status: 403 }))
+    ).toMatchObject({ ok: false, problem: 'notChecked' })
+    expect(codeSentLately()).toBe(false)
+  })
+
+  it('sends with storage blocked, and remembers nothing', async () => {
+    vi.stubGlobal('localStorage', blockedStorage())
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ success: true }))
+    )
+    expect(await sendCode('a@example.com', 'token')).toMatchObject({ ok: true })
+    expect(codeSentLately()).toBe(false)
   })
 })
 

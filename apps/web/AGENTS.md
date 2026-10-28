@@ -2,7 +2,7 @@
 
 The Farty web app (ADR 0007). Read the repository's `AGENTS.md` first: its working rules apply here.
 
-**Design.** The web app as built is the approved design (ADR 0013). No mockup round.
+**Design.** The web app as built is the approved design (ADR 0014). No mockup round.
 
 **Before you touch environments, deploys, the Staging gate, CI or the e2e setup, read [`docs/agents/web.md`](../../docs/agents/web.md).** It holds the environment table, how each environment deploys, promotion and releases, the password gate, how to run the Workers build locally, the detail behind each exception below, and the gotchas learned in slice 1.
 

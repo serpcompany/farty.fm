@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, isNull, sql } from 'drizzle-orm'
+import { and, desc, eq, isNotNull, isNull, ne, sql } from 'drizzle-orm'
 
 import { d1Now } from './d1-clock'
 import type { Database } from './database'
@@ -18,7 +18,7 @@ export async function tootPayment(
   return row ?? null
 }
 
-export async function isTootPaid(db: Database, userId: string, tootId: string): Promise<boolean> {
+async function isTootPaid(db: Database, userId: string, tootId: string): Promise<boolean> {
   const rows = await db
     .select({ tootId: tootPayments.tootId })
     .from(tootPayments)
@@ -30,6 +30,7 @@ export async function startTootPayment(
   db: Database,
   userId: string,
   tootId: string,
+  songId: string,
   checkoutSessionId: string,
   price: { amount: number; currency: string }
 ): Promise<void> {
@@ -38,6 +39,7 @@ export async function startTootPayment(
     .values({
       userId,
       tootId,
+      songId,
       checkoutSessionId,
       amount: price.amount,
       currency: price.currency,
@@ -46,6 +48,7 @@ export async function startTootPayment(
     .onConflictDoUpdate({
       target: [tootPayments.userId, tootPayments.tootId],
       set: {
+        songId,
         checkoutSessionId,
         amount: price.amount,
         currency: price.currency,
@@ -53,6 +56,31 @@ export async function startTootPayment(
       },
       setWhere: isNull(tootPayments.paidAt)
     })
+}
+
+export async function paidUnsavedToot(
+  db: Database,
+  userId: string,
+  songId: string,
+  tootId: string
+): Promise<string | null> {
+  const [row] = await db
+    .select({ tootId: tootPayments.tootId })
+    .from(tootPayments)
+    .where(
+      and(
+        eq(tootPayments.userId, userId),
+        eq(tootPayments.songId, songId),
+        ne(tootPayments.tootId, tootId),
+        isNotNull(tootPayments.paidAt),
+        isNull(tootPayments.savedAt),
+        sql`not exists (select 1 from toots
+          where toots.user_id = ${tootPayments.userId} and toots.id = ${tootPayments.tootId})`
+      )
+    )
+    .orderBy(desc(tootPayments.paidAt))
+    .limit(1)
+  return row?.tootId ?? null
 }
 
 export async function markTootPaid(

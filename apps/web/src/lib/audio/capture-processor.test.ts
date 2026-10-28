@@ -1,36 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import {
+  newCaptureProcessor,
+  renderQuantum as quantum,
+  captureSampleRate as sampleRate
+} from '@/test-support/capture-processor'
+import {
   batchFrames,
   type CaptureBatch,
   type CaptureCommand,
-  captureProcessorSource,
   preRollSeconds
 } from './capture-processor'
 
-type Processor = {
-  port: { onmessage: ((event: { data: CaptureCommand }) => void) | null }
-  process(inputs: Float32Array[][]): boolean
-}
-
-const sampleRate = 48_000
-const quantum = 128
-
 function capture() {
   const sent: CaptureBatch[] = []
-  class AudioWorkletProcessor {
-    port = { onmessage: (_: unknown) => {}, postMessage: (data: CaptureBatch) => sent.push(data) }
-  }
-  let Registered: (new () => Processor) | undefined
-  const register = (_name: string, processor: new () => Processor) => {
-    Registered = processor
-  }
-  new Function('AudioWorkletProcessor', 'registerProcessor', 'sampleRate', captureProcessorSource)(
-    AudioWorkletProcessor,
-    register,
-    sampleRate
-  )
-  if (!Registered) throw new Error('The source registered no processor')
-  const processor = new Registered()
+  const processor = newCaptureProcessor(data => sent.push(data))
   let next = 0
   return {
     sent,

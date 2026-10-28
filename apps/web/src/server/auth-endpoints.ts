@@ -3,6 +3,7 @@ export const SEND_CODE_ENDPOINT = '/email-otp/send-verification-otp'
 export const SIGN_IN_ENDPOINT = '/sign-in/email-otp'
 export const GET_SESSION_ENDPOINT = '/get-session'
 export const SIGN_OUT_ENDPOINT = '/sign-out'
+export const TURNSTILE_ENDPOINT = '/turnstile'
 
 export const AUTH_ENDPOINTS: readonly { method: 'GET' | 'POST'; path: string }[] = [
   { method: 'POST', path: SEND_CODE_ENDPOINT },
@@ -23,4 +24,8 @@ export function servedEndpoint(method: string, pathname: string): string | null 
     endpoint => endpoint.method === method && endpoint.path === path
   )
   return served ? path : null
+}
+
+export function isTurnstileKeyRequest(method: string, pathname: string): boolean {
+  return method === 'GET' && endpointPath(pathname) === TURNSTILE_ENDPOINT
 }

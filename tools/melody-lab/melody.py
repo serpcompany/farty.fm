@@ -8,6 +8,7 @@ CATALOG = Path(__file__).resolve().parents[2] / "catalog/catalog.json"
 DEFAULT_TEMPO_US = 500000
 DEFAULT_BEATS_PER_BAR = 4
 GRID_PER_BEAT = 48
+EPS = 1e-6
 
 
 @dataclass
@@ -23,6 +24,7 @@ class Melody:
     bpm: float
     beats_per_bar: int
     notes: list
+    bar_lines: list
     report: dict = field(default_factory=dict)
 
     @property
@@ -36,6 +38,48 @@ class ScoreEvents:
     tempo_us: int = DEFAULT_TEMPO_US
     beats_per_bar: int = DEFAULT_BEATS_PER_BAR
     tempo_changes: int = 0
+    meters: dict = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class Bar:
+    line: float
+    length: float
+    whole_segment: bool
+
+
+def opening_meter(meters):
+    meters = sorted(meters)
+    if not meters or meters[0][0] > EPS:
+        meters.insert(0, (0.0, 4, 4))
+    return meters
+
+
+def bars_through(meters, until):
+    bars = []
+    for i, (at, num, den) in enumerate(meters):
+        end = meters[i + 1][0] if i + 1 < len(meters) else float("inf")
+        length, line = num * 4 / den, at
+        while line < end - EPS and (not bars or bars[-1].line < until - EPS):
+            size = min(length, end - line)
+            bars.append(Bar(line, size, abs(line - at) < EPS and line + size > end - EPS))
+            line += length
+    return bars
+
+
+def completes_split_bar(before, bar, after):
+    return before.whole_segment and abs(before.length + bar.length - after.length) < EPS
+
+
+def is_pickup(bars, i):
+    if i + 1 == len(bars) or bars[i].length >= bars[i + 1].length - EPS:
+        return False
+    return i == 0 or completes_split_bar(bars[i - 1], bars[i], bars[i + 1])
+
+
+def bar_lines(meters, until):
+    bars = bars_through(opening_meter(meters), until)
+    return [bar.line for i, bar in enumerate(bars) if bar.line < until - EPS and not is_pickup(bars, i)]
 
 
 def track_notes(track, score):
@@ -47,8 +91,10 @@ def track_notes(track, score):
                 score.tempo_us = msg.tempo
             else:
                 score.tempo_changes += 1
-        elif msg.type == "time_signature" and tick == 0:
-            score.beats_per_bar = msg.numerator
+        elif msg.type == "time_signature":
+            score.meters[tick] = (msg.numerator, msg.denominator)
+            if tick == 0:
+                score.beats_per_bar = msg.numerator
         elif msg.type == "note_on" and msg.velocity > 0:
             open_notes.setdefault((msg.channel, msg.note), []).append(tick)
         elif msg.type in ("note_off", "note_on"):
@@ -107,6 +153,12 @@ def slot_notes(top, tpb):
     return notes, clipped
 
 
+def excerpt_bar_lines(score, tpb, start_beat, notes):
+    until = start_beat + max((n.start + n.dur for n in notes), default=0.0)
+    lines = bar_lines([(tick / tpb, *meter) for tick, meter in score.meters.items()], until)
+    return [line - start_beat for line in lines if line > start_beat - EPS]
+
+
 def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat=0.0, beats_per_bar=None):
     mid = mido.MidiFile(path)
     score = read_score(mid)
@@ -132,6 +184,7 @@ def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat
             "tempo_changes_ignored": score.tempo_changes,
             "note_count": len(notes),
         },
+        bar_lines=excerpt_bar_lines(score, mid.ticks_per_beat, start_beat, notes),
     )
 
 

@@ -25,6 +25,12 @@ describe('security headers', () => {
     expect(policy).toMatch(/connect-src [^;]*https:\/\/cloudflareinsights\.com/)
   })
 
+  it("allows Turnstile's script and its challenge frame, so the account step can send a code", () => {
+    const policy = policyOf('production')
+    expect(policy).toMatch(/script-src [^;]*https:\/\/challenges\.cloudflare\.com/)
+    expect(policy).toMatch(/frame-src [^;]*https:\/\/challenges\.cloudflare\.com/)
+  })
+
   it('leaves the policy off in next dev, whose hot reload needs eval', () => {
     expect(policyOf('development')).toBeUndefined()
     expect(securityHeaders('development')).toContainEqual({

@@ -205,7 +205,7 @@ describe('Auto-map ties', () => {
 
   const oneMiddleCAt120: Song = {
     bpm: 120,
-    beats_per_bar: 4,
+    bar_lines: [0],
     length_beats: 4,
     notes: [{ start: 0, dur: 1, pitch: 60 }]
   }

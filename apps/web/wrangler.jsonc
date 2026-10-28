@@ -26,6 +26,7 @@
   ],
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-local", "remote": false }],
   "kv_namespaces": [{ "binding": "DEV_MAILBOX" }],
+  "vars": { "TURNSTILE_SITE_KEY": "1x00000000000000000000AA" },
   "ratelimits": [
     {
       "name": "TELEMETRY_RATE_LIMIT",
@@ -40,7 +41,8 @@
         "STAGING_BASIC_AUTH_PASSWORD": "stagingpassword",
         "BETTER_AUTH_URL": "https://staging.farty.fm",
         "EMAIL_FROM": "Farty <support@farty.fm>",
-        "STAGING_SIGNUP_ALLOWLIST": "devin@serp.co"
+        "STAGING_SIGNUP_ALLOWLIST": "devin@serp.co",
+        "TURNSTILE_SITE_KEY": "0x4AAAAAAFon5FG7GOLrZH3W"
       },
       "send_email": [
         {
@@ -81,7 +83,8 @@
       "vars": {
         "SITE_ENV": "production",
         "BETTER_AUTH_URL": "https://farty.fm",
-        "EMAIL_FROM": "Farty <support@farty.fm>"
+        "EMAIL_FROM": "Farty <support@farty.fm>",
+        "TURNSTILE_SITE_KEY": "0x4AAAAAAFon5eZmGXjUIQSl"
       },
       "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["support@farty.fm"] }],
       "workers_dev": true,

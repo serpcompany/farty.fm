@@ -26,9 +26,9 @@ What the Account section shows depends on the account's state. Each action is in
   account right now.", with Retry, and it reads it again by itself once the browser is back online
   (`e2e/account-profile.spec.ts`, "Profile retries an account it couldn't reach, and reads it again
   back online").
-- A guest: Save to an account, and the line that their Recordings stay only in this browser and
-  their Toots are gone when they close Farty (`e2e/account-step.spec.ts`, "Profile's Save to an
-  account opens the step, which stays while they read their email").
+- A guest: Save to an account, and the line "Your farts are gone when you close Farty, unless you
+  make a free account." (`e2e/account-step.spec.ts`, "Profile's Save to an account opens the step,
+  which stays while they read their email").
 - A session that ended: Sign in again, and Clear this device (`e2e/session-ended.spec.ts`, "an
   account's farts stay when its session ends: Farty asks to sign in again, or clears them").
 - Signed in: the email, the Farty news switch, Sign out and Delete account
@@ -74,8 +74,8 @@ On Staging's build only, for Internal Testers.
   why, and sends nothing (`e2e/telemetry.spec.ts`, "with Global Privacy Control, nothing is sent and
   the switch shows off").
 - The switch doesn't stop page views, which Cloudflare counts at the edge; the privacy page says so
-  (`e2e/pages.spec.ts`, "the privacy page covers accounts, news email, guests, error reports, page
-  views and deleting").
+  (`e2e/pages.spec.ts`, "the privacy page covers accounts, news email, Turnstile, guests, error
+  reports, page views and deleting").
 
 ## About
 

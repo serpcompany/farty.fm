@@ -1,10 +1,11 @@
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' blob: https://static.cloudflareinsights.com",
+  "script-src 'self' 'unsafe-inline' blob: https://static.cloudflareinsights.com https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
   "connect-src 'self' https://cloudflareinsights.com",
+  'frame-src https://challenges.cloudflare.com',
   "worker-src 'self' blob:",
   "media-src 'self' blob:",
   "manifest-src 'self'",

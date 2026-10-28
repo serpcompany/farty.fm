@@ -6,7 +6,7 @@ import mido
 
 from export_golden import golden_catalog, song_json
 from golden_inputs import SONGS
-from melody import load_midi
+from melody import bar_lines, load_midi
 
 TPB = 480
 
@@ -22,6 +22,10 @@ def track(*events):
 
 def note(pitch, start, end):
     return [(start, mido.Message("note_on", note=pitch, velocity=80)), (end, mido.Message("note_off", note=pitch))]
+
+
+def time_signature(beat, numerator, denominator):
+    return round(beat * TPB), mido.MetaMessage("time_signature", numerator=numerator, denominator=denominator)
 
 
 def midi_file(test, *tracks):
@@ -74,6 +78,54 @@ class LoadMidi(unittest.TestCase):
         self.assertEqual(m.report["overlaps_clipped"], 1)
         self.assertEqual(notes_of(m), [(0.0, 1.0, 72), (1.0, 1.0, 74), (2.0, 1.0, 76)])
         self.assertEqual((m.bpm, m.beats_per_bar), (120.0, 4))
+
+
+class BarLines(unittest.TestCase):
+    def test_one_meter(self):
+        self.assertEqual(bar_lines([(0, 3, 4)], 9), [0, 3, 6])
+
+    def test_a_six_eight_bar_is_three_quarter_notes(self):
+        self.assertEqual(bar_lines([(0, 6, 8)], 7), [0, 3, 6])
+
+    def test_no_time_signature_is_four_four(self):
+        self.assertEqual(bar_lines([], 9), [0, 4, 8])
+
+    def test_a_pickup_written_as_its_own_bar_is_not_a_bar(self):
+        self.assertEqual(bar_lines([(0, 1, 4), (1, 3, 4)], 10), [1, 4, 7])
+        self.assertEqual(bar_lines([(0, 3, 4), (3, 4, 4)], 12), [3, 7, 11])
+
+    def test_a_bar_split_at_a_repeat_is_one_bar(self):
+        self.assertEqual(bar_lines([(0, 4, 4), (8, 3, 4), (11, 1, 4), (12, 4, 4)], 20), [0, 4, 8, 12, 16])
+
+    def test_a_split_bar_can_follow_a_short_bar(self):
+        self.assertEqual(bar_lines([(0, 2, 4), (4, 3, 4), (7, 1, 4), (8, 4, 4)], 16), [0, 2, 4, 8, 12])
+
+    def test_two_whole_bars_before_a_longer_meter_are_two_bars(self):
+        self.assertEqual(bar_lines([(0, 2, 4), (8, 4, 4)], 20), [0, 2, 4, 6, 8, 12, 16])
+        self.assertEqual(bar_lines([(0, 3, 4), (6, 6, 4)], 18), [0, 3, 6, 12])
+
+    def test_meter_changes_keep_their_bar_lines(self):
+        self.assertEqual(bar_lines([(0, 4, 4), (8, 3, 4)], 14), [0, 4, 8, 11])
+
+    def test_a_short_bar_after_a_full_one_is_a_bar_not_a_pickup(self):
+        self.assertEqual(bar_lines([(0, 4, 4), (4, 3, 4), (7, 4, 4)], 12), [0, 4, 7, 11])
+
+    def test_only_bar_lines_before_the_end(self):
+        self.assertEqual(bar_lines([(0, 3, 4)], 6), [0, 3])
+
+    def test_load_midi_gives_the_bar_lines_in_the_excerpts_beats(self):
+        meters = [time_signature(0, 1, 4), time_signature(1, 3, 4)]
+        happy_birthday = [*note(60, 0, 360), *note(60, 360, 480), *note(62, 480, 960), *note(60, 960, 1440),
+                          *note(65, 1440, 1920), *note(64, 1920, 2880)]
+        for meters_are, tracks in (("in their own track", (track(*meters), track(*happy_birthday))),
+                                   ("in the melody's track", (track(*meters, *happy_birthday),))):
+            with self.subTest(meters_are=meters_are):
+                path = midi_file(self, *tracks)
+                m = load_midi(path)
+                self.assertEqual(m.bar_lines, [1, 4])
+                self.assertEqual(m.beats_per_bar, 1)
+                self.assertEqual(load_midi(path, start_beat=1).bar_lines, [0, 3])
+                self.assertEqual(load_midi(path, max_beats=3).bar_lines, [1])
 
 
 class Catalog(unittest.TestCase):

@@ -8,81 +8,85 @@
       "target_midi": 41
     },
     {
-      "seconds": 1.0,
+      "seconds": 1.5,
       "target_midi": 46
     },
     {
       "seconds": 0.5,
       "target_midi": 50
+    },
+    {
+      "seconds": 0.4,
+      "target_midi": 51
     }
   ],
   "notes": null,
-  "octave_moves": 1,
+  "octave_moves": 0,
   "per_pitch": [
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
-      "song_pitch": 67,
+      "song_pitch": 53,
       "target_midi": 41
     },
     {
       "octave_move": false,
       "recording": "022",
       "shift_semitones": 2.674079406339814,
-      "song_pitch": 69,
+      "song_pitch": 55,
       "target_midi": 43
     },
     {
       "octave_move": false,
       "recording": "069",
       "shift_semitones": 0.5740794063398269,
-      "song_pitch": 71,
+      "song_pitch": 57,
       "target_midi": 45
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
-      "song_pitch": 72,
+      "song_pitch": 58,
       "target_midi": 46
     },
     {
       "octave_move": false,
       "recording": "002",
       "shift_semitones": 1.5740794063398198,
-      "song_pitch": 74,
+      "song_pitch": 60,
       "target_midi": 48
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
-      "song_pitch": 76,
+      "song_pitch": 62,
       "target_midi": 50
     },
     {
-      "octave_move": true,
-      "recording": "016",
-      "shift_semitones": 10.674079406339814,
-      "song_pitch": 77,
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 63,
       "target_midi": 51
     },
     {
       "octave_move": false,
       "recording": "090",
       "shift_semitones": -2.2259205936601774,
-      "song_pitch": 79,
+      "song_pitch": 65,
       "target_midi": 53
     }
   ],
   "pitch_coverage": {
-    "covered": 5,
+    "covered": 4,
     "total": 8
   },
-  "plan_cost": 58.13351644994071,
+  "plan_cost": 42.350753237120806,
   "render_settings": null,
   "song": "birthday",
-  "transpose": -26,
+  "transpose": -12,
   "unlocked": false
 }
