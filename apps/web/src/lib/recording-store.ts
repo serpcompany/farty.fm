@@ -42,7 +42,10 @@ export interface PedosDB extends DBSchema {
    * version 3.
    */
   downloads: { key: string; value: { kind: Kind; id: string } }
-  /** `cursor`: the account's `cursor` as of this browser's last read. Since version 3. */
+  /**
+   * `cursor`: the account's `cursor` as of this browser's last read. Since version 3; version 4
+   * sets it back to 0 (`readEverythingAgain`).
+   */
   meta: { key: string; value: number }
 }
 
@@ -59,6 +62,12 @@ const allStores = [
 
 /** Where each kind's WAVs are kept. */
 export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
+
+/**
+ * The `pedos` database's version. Web releases roll forward, not back, past a bump
+ * (`docs/agents/web.md`).
+ */
+export const DB_VERSION = 4
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
 
@@ -84,9 +93,15 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
 }
 
 /**
- * The app's database, upgraded to version 3 (the outbox) on first open. Version 1 held Recordings
- * only, and version 2 added Toots. An upgrade keeps them, and queues each to upload, since none
- * has been (`queueEverything`).
+ * The app's database, upgraded to version 4 on first open. Version 1 held Recordings only, version
+ * 2 added Toots, and version 3 the outbox. An upgrade keeps them, and one from before version 3
+ * queues each to upload, since none has been (`queueEverything`).
+ *
+ * Version 4 (#268) changes no store. It shuts out code from before #268, in a tab opened before
+ * the deploy or after a rollback: that code reads an outbox op it doesn't know, such as `place`,
+ * as a delete, and would delete the Recording from the account. Version 4 closes its connection
+ * (`blocking`), and it can't open version 3 again (`VersionError`). The upgrade also makes the
+ * next sync read the whole library (`readEverythingAgain`).
  *
  * One connection serves the page until the browser closes it, as WebKit can while the tab sleeps
  * (#222), or it fails to open: the next call then opens a fresh one. Reads and writes go through
@@ -94,7 +109,7 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
  */
 export function db(): Promise<IDBPDatabase<PedosDB>> {
   if (opening) return opening
-  const thisOpening: Promise<IDBPDatabase<PedosDB>> = openDB<PedosDB>('pedos', 3, {
+  const thisOpening: Promise<IDBPDatabase<PedosDB>> = openDB<PedosDB>('pedos', DB_VERSION, {
     upgrade(database, oldVersion, _newVersion, transaction) {
       if (oldVersion < 1) {
         database.createObjectStore('recordings', { keyPath: 'id' })
@@ -111,6 +126,7 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
         // A failed write aborts the upgrade, and the open fails with it.
         if (oldVersion >= 1) queueEverything(transaction).catch(() => {})
       }
+      if (oldVersion === 3) readEverythingAgain(transaction).catch(() => {})
     },
     // An older version is open in another tab, and its code may never close it: the upgrade
     // waits until that tab closes.
@@ -221,6 +237,19 @@ async function queueEverything(
   )
 }
 
+/**
+ * Sets the last read's `cursor` back to 0, where there is one, so the next sync reads the whole
+ * library. A tab still on code from before #268 skipped another browser's Placed Pitch on a
+ * Recording it had, and still moved the cursor past it: only a full read brings it. A library with
+ * no cursor never read the account, and gets none, so `leftByAnAccount` still tells it apart.
+ */
+async function readEverythingAgain(
+  transaction: IDBPTransaction<PedosDB, StoreNames<PedosDB>[], 'versionchange'>
+): Promise<void> {
+  const meta = transaction.objectStore('meta')
+  if ((await meta.get('cursor')) !== undefined) await meta.put(0, 'cursor')
+}
+
 type OutboxStore = IDBPObjectStore<PedosDB, StoreNames<PedosDB>[], 'outbox', 'readwrite'>
 
 /**
@@ -310,6 +339,32 @@ export async function saveAnalysis(id: string, analysis: AnalysisState): Promise
   // A Recording uploads once its analysis is done.
   if (updated) announceQueued()
   return updated
+}
+
+/**
+ * Places a Noise-like Recording on a note by ear, or takes it off with null (ADR 0015), and queues
+ * the change for the account. The updated Recording, or null when it's gone.
+ */
+export async function placeRecording(
+  id: string,
+  placedPitch: number | null
+): Promise<Recording | null> {
+  const placed = await withDb(async database => {
+    const tx = database.transaction(['recordings', 'outbox'], 'readwrite')
+    const recordings = tx.objectStore('recordings')
+    const outbox = tx.objectStore('outbox')
+    const recording = await recordings.get(id)
+    // Awaited together, so a failed write's aborted transaction is never left unhandled.
+    if (!recording) {
+      await tx.done
+      return null
+    }
+    const updated: Recording = { ...recording, placedPitch }
+    await Promise.all([recordings.put(updated), queue(outbox, 'recordings', id, 'place'), tx.done])
+    return updated
+  })
+  if (placed) announceQueued()
+  return placed
 }
 
 /** A Recording's WAV: this browser's, or the account's, downloaded now if it hasn't been yet. */

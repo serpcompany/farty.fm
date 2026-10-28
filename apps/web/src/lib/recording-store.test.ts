@@ -174,3 +174,45 @@ describe('a lost database connection', () => {
     expect(store.connectionLost(error)).toBe(expected)
   })
 })
+
+describe('placing a Recording by ear (ADR 0015)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('indexedDB', new IDBFactory())
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  const noiseLike = {
+    state: 'analyzed',
+    analysis: {
+      gestureStartSeconds: 0,
+      gestureEndSeconds: 1,
+      cutAtReattack: false,
+      pitchEstimateMidi: null,
+      pitchConfidence: 0,
+      recordingPitchMidi: null,
+      shortestNoteSeconds: null,
+      settleSeconds: null
+    }
+  } as const
+
+  it('keeps the note through a new analysis, and places nothing that is gone', async () => {
+    vi.resetModules()
+    const store = await import('./recording-store')
+    const saved = await store.saveRecording(
+      { seconds: 1, sampleRate: 48_000, waveform: [0.5] },
+      new ArrayBuffer(8)
+    )
+    expect(saved.placedPitch).toBeUndefined()
+    expect(await store.placeRecording(saved.id, 48)).toEqual({ ...saved, placedPitch: 48 })
+    await store.saveAnalysis(saved.id, noiseLike)
+    const [loaded] = await store.loadRecordings()
+    expect(loaded).toEqual({ ...saved, analysis: noiseLike, placedPitch: 48 })
+    expect((await store.placeRecording(saved.id, null))?.placedPitch).toBeNull()
+    expect(await store.placeRecording('gone', 40)).toBeNull()
+    const outbox = await store.withDb(database => database.getAll('outbox'))
+    expect(outbox.map(entry => [entry.id, entry.op])).toEqual([[saved.id, 'put']])
+  })
+})

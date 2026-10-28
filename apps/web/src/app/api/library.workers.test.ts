@@ -117,7 +117,9 @@ describe.each<Kind>(['recordings', 'toots'])('PUT /api/%s/{id}/', kind => {
     expect(await put.json()).toEqual({ id: R1 })
     expect(await bucketKeys()).toEqual([`users/${a.id}/${kind}/${R1}.wav`])
     const listed = await library(a.cookie)
-    expect(listed[kind]).toEqual([{ ...metadata(kind, R1), audioBytes: audio.byteLength }])
+    // A Recording sent without a Placed Pitch is listed as left out (ADR 0015).
+    const left = kind === 'recordings' ? { placedPitch: null } : {}
+    expect(listed[kind]).toEqual([{ ...metadata(kind, R1), ...left, audioBytes: audio.byteLength }])
     const played = await api.audio(kind, R1, a)
     expect(played.status).toBe(200)
     expect(played.headers.get('content-type')).toBe('audio/wav')
@@ -543,6 +545,52 @@ describe('PATCH /api/toots/{id}/', () => {
   })
 })
 
+describe('PATCH /api/recordings/{id}/ (ADR 0015)', () => {
+  it('places a Recording on a note, moves it and takes it off, keeping its analysis', async () => {
+    const a = await signUp('A')
+    await upload('recordings', R1, a.cookie)
+    const before = await library(a.cookie)
+    await tick()
+
+    const placed = await api.place(R1, 36, a)
+    expect(placed.status).toBe(200)
+    expect(await placed.json()).toEqual({ id: R1, placedPitch: 36 })
+    const changes = await library(a.cookie, before.cursor)
+    expect(changes.recordings).toEqual([
+      { ...before.recordings[0], placedPitch: 36, audioBytes: expect.any(Number) }
+    ])
+
+    expect((await api.place(R1, 71, a)).status).toBe(200)
+    expect((await library(a.cookie)).recordings).toMatchObject([{ id: R1, placedPitch: 71 }])
+    const off = await api.place(R1, null, a)
+    expect(await off.json()).toEqual({ id: R1, placedPitch: null })
+    const [row] = await testDb().select().from(recordings).where(eq(recordings.userId, a.id))
+    expect(row.placedPitch).toBeNull()
+    expect(row.analysis).toEqual(recordingMetadata(R1).analysis.analysis)
+  })
+
+  it('refuses a note that is not a MIDI note (400), a deleted Recording (410), an unknown one (404) and another library (409)', async () => {
+    const a = await signUp('A')
+    const b = await signUp('B')
+    await upload('recordings', R1, a.cookie)
+
+    for (const placedPitch of ['C2', 48.5, -1, 128, undefined]) {
+      const refused = await api.place(R1, placedPitch, a)
+      expect(refused.status, String(placedPitch)).toBe(400)
+      expect(await refused.json()).toEqual({ error: 'invalid_request' })
+    }
+    expect((await api.place(R1, 48, a, 'not json')).status).toBe(400)
+    const asB = await api.place(R1, 48, { cookie: a.cookie, library: b.id })
+    expect(asB.status).toBe(409)
+    expect((await api.place(R1, 48, b)).status).toBe(404)
+    expect((await api.place('not-a-uuid', 48, a)).status).toBe(404)
+    expect((await library(a.cookie)).recordings).toMatchObject([{ id: R1, placedPitch: null }])
+    await api.delete('recordings', R1, a)
+    expect((await api.place(R1, 48, a)).status).toBe(410)
+    expect((await api.place(R2, 48, a)).status).toBe(404)
+  })
+})
+
 describe('writes from another site', () => {
   it('are refused (403) and change nothing, even with the session cookie', async () => {
     const a = await signUp('A')
@@ -660,6 +708,38 @@ describe('the rows a route keeps', () => {
         'recordings',
         R3,
         uploadBody(recordingMetadata(R3, { analysis: analysis({ settleSeconds }) }), wav()),
+        a
+      )
+      expect(refused.status).toBe(400)
+      expect(await refused.json()).toEqual({ error: 'invalid_request' })
+    }
+    expect(await rowsOf('recordings')).toEqual([`${a.id} ${R1}`, `${a.id} ${R2}`])
+  })
+
+  it('keep the Placed Pitch (ADR 0015), and none when an older browser sends none', async () => {
+    const a = await signUp('A')
+    const R3 = '66666666-6666-4666-8666-666666666666'
+    for (const [id, fields] of [
+      [R1, { placedPitch: 40 }],
+      [R2, {}]
+    ] as const) {
+      const response = await api.put(
+        'recordings',
+        id,
+        uploadBody(recordingMetadata(id, fields), wav()),
+        a
+      )
+      expect(response.status).toBe(201)
+    }
+    const kept = new Map((await library(a.cookie)).recordings.map(r => [r.id, r]))
+    expect(kept.get(R1)).toMatchObject({ placedPitch: 40 })
+    expect(kept.get(R2)).toMatchObject({ placedPitch: null })
+
+    for (const placedPitch of ['40', 40.5, 128]) {
+      const refused = await api.put(
+        'recordings',
+        R3,
+        uploadBody(recordingMetadata(R3, { placedPitch }), wav()),
         a
       )
       expect(refused.status).toBe(400)

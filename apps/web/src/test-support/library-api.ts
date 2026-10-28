@@ -163,6 +163,16 @@ export const api = {
       params({ id })
     ),
 
+  /** Places a Recording on a note, or takes it off with null (`body` overrides the JSON sent). */
+  place: (id: string, placedPitch: unknown, as: As, body?: string) =>
+    recordingRoute.PATCH(
+      request(`/api/recordings/${id}/`, 'PATCH', as, {
+        headers: { 'content-type': 'application/json' },
+        body: body ?? JSON.stringify({ placedPitch })
+      }),
+      params({ id })
+    ),
+
   patchAccount: (body: unknown, as: As) =>
     accountRoute.PATCH(
       request('/api/account/', 'PATCH', as, {

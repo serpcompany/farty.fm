@@ -15,6 +15,8 @@ export const ERROR_CODES = [
   'mic-denied',
   'mic-start-failed',
   'recording-save-failed',
+  /** Keeping where a Noise-like Recording is placed by ear failed (ADR 0015). */
+  'recording-place-failed',
   /** Decoding, analyzing or saving the analysis of a Recording failed. */
   'analysis-failed',
   'toots-load-failed',
