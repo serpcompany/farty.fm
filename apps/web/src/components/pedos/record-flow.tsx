@@ -31,19 +31,18 @@ import {
   recordingPitch
 } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
+import { encodeWav, type PcmAudio } from '@/lib/wav'
 import { useAccount } from './account-provider'
-import { type Draft, usePedos } from './pedos-provider'
 import { PitchStrip } from './pitch-strip'
+import { type Sound, usePlayback } from './playback-provider'
 import { RecordButton } from './record-button'
+import { type Draft, useRecordFlow } from './record-flow-provider'
+import { useRecordings } from './recordings-provider'
 import { Waveform } from './waveform'
 
-/**
- * The full-screen cover over the tabs from the start of a take: Recording, then Review and
- * Result, with their error states. Matches the iPhone app's `RecordFlowView`.
- */
 export function RecordFlow() {
-  const pedos = usePedos()
-  const { flow, capture } = pedos
+  const { flow, capture } = useRecordFlow()
+  const { recording } = useRecordings()
 
   if (!flow && (capture.kind === 'recording' || capture.kind === 'finishing')) {
     return (
@@ -67,29 +66,27 @@ export function RecordFlow() {
           <SaveFailed />
         </Cover>
       )
-    case 'analyzing': {
-      const recording = pedos.recording(flow.id)
+    case 'analyzing':
       return (
-        <Cover title={recording ? recordingName(recording) : ''}>
+        <Cover title={recordingTitle(recording(flow.id))}>
           <div className="flex flex-1 flex-col items-center justify-center gap-3">
             <Spinner className="size-8" />
             <p className="text-muted-foreground">Finding your note…</p>
           </div>
         </Cover>
       )
-    }
     case 'analysisFailed':
       return (
-        <Cover title={recordingTitle(pedos.recording(flow.id))}>
+        <Cover title={recordingTitle(recording(flow.id))}>
           <AnalysisFailed id={flow.id} />
         </Cover>
       )
     case 'result': {
-      const recording = pedos.recording(flow.id)
-      if (!recording) return null
+      const analyzed = recording(flow.id)
+      if (!analyzed) return null
       return (
-        <Cover title={recordingName(recording)}>
-          <Result recording={recording} changes={flow.changes} />
+        <Cover title={recordingName(analyzed)}>
+          <Result recording={analyzed} changes={flow.changes} />
         </Cover>
       )
     }
@@ -100,9 +97,6 @@ function recordingTitle(recording: Recording | undefined): string {
   return recording ? recordingName(recording) : ''
 }
 
-/**
- * Full screen on a phone. From 768px, a card in the page under the top bar, which stays in view.
- */
 function Cover({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <div className="contents md:fixed md:inset-x-0 md:top-[calc(4rem+1px)] md:bottom-0 md:z-40 md:flex md:items-center md:justify-center md:bg-background md:p-6">
@@ -121,7 +115,6 @@ function Cover({ title, children }: { title?: string; children: ReactNode }) {
   )
 }
 
-/** Primary and secondary buttons pinned to the bottom of a flow step. */
 function FlowButtons({ secondary, primary }: { secondary?: ReactNode; primary: ReactNode }) {
   return (
     <div className={cn('grid gap-3 px-5 pb-3', secondary && 'grid-cols-2')}>
@@ -155,10 +148,9 @@ function FlowButton({
   )
 }
 
-/** Recording: the big button as Stop, with its pulse and the timer. */
 function RecordingStep() {
-  const pedos = usePedos()
-  const startedAt = pedos.capture.kind === 'recording' ? pedos.capture.startedAt : null
+  const { capture, stopRecording } = useRecordFlow()
+  const startedAt = capture.kind === 'recording' ? capture.startedAt : null
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 250)
@@ -171,8 +163,8 @@ function RecordingStep() {
       <div className="h-10" />
       <RecordButton
         isRecording
-        disabled={pedos.capture.kind !== 'recording'}
-        onClick={() => void pedos.stopRecording()}
+        disabled={capture.kind !== 'recording'}
+        onClick={() => void stopRecording()}
       />
       <p className="h-10 text-4xl tabular-nums" data-testid="recording-timer">
         {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}
@@ -181,10 +173,19 @@ function RecordingStep() {
   )
 }
 
-/** Review: hear the take before keeping it. Save or Discard. */
+function draftSound(audio: PcmAudio): Sound {
+  return {
+    key: 'draft',
+    decodeKey: `draft-${crypto.randomUUID()}`,
+    wav: async () => encodeWav(audio),
+    segment: null
+  }
+}
+
 function Review({ draft }: { draft: Draft }) {
-  const pedos = usePedos()
-  const isPlaying = pedos.nowPlaying === 'draft'
+  const { isSaving, saveDraft, closeFlow } = useRecordFlow()
+  const { nowPlaying, togglePlayback } = usePlayback()
+  const isPlaying = nowPlaying === 'draft'
   return (
     <>
       <div className="flex flex-1 flex-col items-center justify-center gap-7 px-6">
@@ -197,23 +198,19 @@ function Review({ draft }: { draft: Draft }) {
           aria-label={isPlaying ? 'Stop' : 'Play'}
           data-testid="review-play"
           className="size-20 rounded-full p-0 [&_svg:not([class*='size-'])]:size-18"
-          onClick={() => pedos.togglePlayback('draft')}
+          onClick={() => togglePlayback(draftSound(draft.audio))}
         >
           {isPlaying ? <CircleStop strokeWidth={1.25} /> : <CirclePlay strokeWidth={1.25} />}
         </Button>
       </div>
       <FlowButtons
         secondary={
-          <FlowButton variant="secondary" onClick={pedos.discardDraft}>
+          <FlowButton variant="secondary" onClick={closeFlow}>
             Discard
           </FlowButton>
         }
         primary={
-          <FlowButton
-            variant="primary"
-            disabled={pedos.isSaving}
-            onClick={() => void pedos.saveDraft()}
-          >
+          <FlowButton variant="primary" disabled={isSaving} onClick={() => void saveDraft()}>
             Save
           </FlowButton>
         }
@@ -222,9 +219,8 @@ function Review({ draft }: { draft: Draft }) {
   )
 }
 
-/** "Couldn't save this Recording", with Try again and Discard. */
 function SaveFailed() {
-  const pedos = usePedos()
+  const { saveDraft, closeFlow } = useRecordFlow()
   return (
     <>
       <Empty className="flex-1">
@@ -237,12 +233,12 @@ function SaveFailed() {
       </Empty>
       <FlowButtons
         secondary={
-          <FlowButton variant="secondary" onClick={pedos.discardDraft}>
+          <FlowButton variant="secondary" onClick={closeFlow}>
             Discard
           </FlowButton>
         }
         primary={
-          <FlowButton variant="primary" onClick={() => void pedos.saveDraft()}>
+          <FlowButton variant="primary" onClick={() => void saveDraft()}>
             Try again
           </FlowButton>
         }
@@ -251,25 +247,19 @@ function SaveFailed() {
   )
 }
 
-/** A path without its trailing slash, so `/recordings/` and `/recordings` match. */
 const route = (path: string) => path.replace(/\/$/, '') || '/'
 
-/**
- * Closes the flow and goes to `href`. Going to another page, the flow stays open until that page
- * shows: closed first, it would show the Record screen idle on the way out, and that screen opens
- * the microphone.
- */
 function useFinishFlow(): (href: string) => void {
-  const { finishFlow } = usePedos()
+  const { closeFlow } = useRecordFlow()
   const router = useRouter()
   const pathname = usePathname()
   const [leaving, setLeaving] = useState<string | null>(null)
   useEffect(() => {
-    if (leaving !== null && route(pathname) !== leaving) finishFlow()
-  }, [finishFlow, leaving, pathname])
+    if (leaving !== null && route(pathname) !== leaving) closeFlow()
+  }, [closeFlow, leaving, pathname])
   return href => {
     if (route(href) === route(pathname)) {
-      finishFlow()
+      closeFlow()
       return
     }
     setLeaving(route(pathname))
@@ -277,9 +267,8 @@ function useFinishFlow(): (href: string) => void {
   }
 }
 
-/** "Saved, but we couldn't find its note", with Retry. The Recording stays listed. */
 function AnalysisFailed({ id }: { id: string }) {
-  const pedos = usePedos()
+  const { retryAnalysis } = useRecordFlow()
   const finish = useFinishFlow()
   return (
     <>
@@ -299,7 +288,7 @@ function AnalysisFailed({ id }: { id: string }) {
           </FlowButton>
         }
         primary={
-          <FlowButton variant="primary" onClick={() => void pedos.retryAnalysis(id)}>
+          <FlowButton variant="primary" onClick={() => void retryAnalysis(id)}>
             Retry
           </FlowButton>
         }
@@ -308,12 +297,8 @@ function AnalysisFailed({ id }: { id: string }) {
   )
 }
 
-/**
- * Result: the note you just made, and what it unlocked. Matches the iPhone app's `ResultView`. The
- * first time, each button opens the account step before it goes where it was tapped (#155).
- */
 function Result({ recording, changes }: { recording: Recording; changes: CoverageChanges }) {
-  const pedos = usePedos()
+  const { collectedPitchClasses, melodicRecordings } = useRecordings()
   const finish = useFinishFlow()
   const { offerStep } = useAccount()
   const go = (href: string) => offerStep('result', () => finish(href))
@@ -330,7 +315,7 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
             </p>
             <PitchStrip
               className="w-full pt-3"
-              collected={pedos.collectedPitchClasses}
+              collected={collectedPitchClasses}
               outlined={pitchClass(pitch)}
             />
           </div>
@@ -352,9 +337,8 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
             <p className="text-sm text-muted-foreground">We heard more than one.</p>
           </div>
         )}
-        <Progress changes={changes} hasMelodicRecordings={pedos.melodicRecordings.length > 0} />
+        <Progress changes={changes} hasMelodicRecordings={melodicRecordings.length > 0} />
       </div>
-      {/* After an unlock, Try it opens the first Song unlocked in Song Creator. */}
       {changes.unlocked.length > 0 ? (
         <FlowButtons
           secondary={
@@ -366,7 +350,6 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
             <FlowButton
               variant="primary"
               onClick={() => {
-                // Song Creator plays the Toot once it's made: the tap starts the sound it needs.
                 startAudioInTap()
                 go(`/compose/${changes.unlocked[0].id}/`)
               }}
@@ -393,7 +376,6 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
   )
 }
 
-/** Unlocks, then Pitch Coverage that went up, or else the Song closest to unlocking. */
 function Progress({
   changes,
   hasMelodicRecordings
@@ -444,7 +426,6 @@ function Unlocked({ children }: { children: ReactNode }) {
   )
 }
 
-/** A Song's Pitch Coverage: its title, a bar, and "3 of 4 notes covered". */
 function CoverageCard({ row }: { row: SongRow }) {
   return (
     <Box>

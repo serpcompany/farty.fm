@@ -12,24 +12,20 @@ import {
   subscribeToInstall
 } from '@/lib/install'
 
-/** How this browser can install Farty now, or null when it's installed or can't be. */
 export function useInstallRoute(): InstallRoute | null {
   return useSyncExternalStore(subscribeToInstall, currentInstallRoute, () => null)
 }
 
-/** What Profile says about installing Farty here, or null before the page runs in the browser. */
 export function useInstallGuide(): InstallGuide | null {
   return useSyncExternalStore(subscribeToInstall, currentInstallGuide, () => null)
 }
 
 const icon = 'inline size-4 -translate-y-px align-text-bottom'
 
-/** The name of something to tap, as the browser shows it. */
 function Control({ children }: { children: ReactNode }) {
   return <span className="font-medium">{children}</span>
 }
 
-/** The steps for each guide that has them, naming what to tap as the browser does. */
 function Steps({ guide }: { guide: InstallGuide }) {
   switch (guide) {
     case 'share-sheet':
@@ -105,10 +101,6 @@ function Steps({ guide }: { guide: InstallGuide }) {
   }
 }
 
-/**
- * Profile's Install: what installing gives you and the steps for this browser, Chrome's Install
- * app button, or that Farty is installed. On a computer, Farty is a phone app (#199).
- */
 export function InstallGuideCard() {
   const guide = useInstallGuide()
   if (guide === null) return null
@@ -141,7 +133,6 @@ export function InstallGuideCard() {
   )
 }
 
-/** Safari has no install prompt, so this says where to find Add to Home Screen. */
 export function ShareSheetHint() {
   return (
     <p className="text-sm text-muted-foreground">

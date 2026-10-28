@@ -4,25 +4,14 @@ import { Lock, Mic, Music } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { askForMicrophone } from '@/lib/audio/recorder'
-import { usePedos } from './pedos-provider'
+import { useWelcome } from './welcome-provider'
 
-/**
- * Says what Farty does and asks for the microphone before the first recording. First visit only.
- * Matches the iPhone app's `WelcomeSheet`. On a touch tablet the lander takes its place at `/`, and
- * on a computer on every tab (`lander.tsx`).
- */
 export function Welcome() {
-  const pedos = usePedos()
+  const { finishWelcome } = useWelcome()
 
   async function allowMicrophone() {
-    try {
-      // Ask now, so the first Record tap records instead of prompting. Over Record, the
-      // microphone stays open, so that first tap captures at once.
-      await askForMicrophone()
-    } catch {
-      // Saying no is an answer, not an error: Record explains it if they tap it later.
-    }
-    pedos.finishWelcome()
+    await askForMicrophone().catch(() => undefined)
+    finishWelcome()
   }
 
   return (
@@ -34,7 +23,6 @@ export function Welcome() {
           alt=""
           width={88}
           height={88}
-          // A small static PNG; Workers has no image optimizer configured.
           unoptimized
           priority
           className="mb-4 rounded-[20px]"
@@ -66,7 +54,7 @@ export function Welcome() {
             size="lg"
             variant="ghost"
             className="h-12 w-full text-base"
-            onClick={pedos.finishWelcome}
+            onClick={finishWelcome}
           >
             Not now
           </Button>

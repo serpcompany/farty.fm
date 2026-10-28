@@ -1,10 +1,6 @@
 import 'server-only'
 import { downloadUrl, qrCode } from '@/lib/download-qr'
 
-/**
- * Download App's QR code (#199), drawn on the server when the page is built, so no QR library
- * reaches the browser. Black on white in both themes, as scanners expect.
- */
 export function DownloadQr() {
   const url = downloadUrl()
   const { size, path } = qrCode(url)

@@ -3,7 +3,7 @@
 import { ArrowUpDown, ChevronRight, Lock, Music2, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type ReactNode, useEffect, useId, useState } from 'react'
+import { type ReactNode, useId, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -28,35 +28,23 @@ import {
   sortRows
 } from '@/lib/pitch-coverage'
 import { LockedSongSheet } from './locked-song-sheet'
-import { usePedos } from './pedos-provider'
+import { usePageHidden } from './page-hidden'
+import { useRecordings } from './recordings-provider'
 
 const orders: { value: SongOrder; label: string }[] = [
   { value: 'closestToUnlocking', label: 'Closest to unlocking' },
   { value: 'alphabetical', label: 'A–Z' }
 ]
 
-/**
- * Compose: the Song Catalog with each Song's Pitch Coverage. Open an Unlocked Song in Song
- * Creator, or a locked Song to see which notes it still needs. Matches the iPhone app's
- * `ComposeTab`.
- */
 export function ComposeScreen() {
-  const pedos = usePedos()
+  const { songRows, recordings, melodicRecordings } = useRecordings()
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [order, setOrder] = useState<SongOrder>('closestToUnlocking')
   const [lockedSong, setLockedSong] = useState<Song | null>(null)
+  usePageHidden(() => setLockedSong(null))
 
-  // The page comes back on the Record tab, so the sheet doesn't stay open.
-  useEffect(() => {
-    const visibilityChanged = () => {
-      if (document.visibilityState === 'hidden') setLockedSong(null)
-    }
-    document.addEventListener('visibilitychange', visibilityChanged)
-    return () => document.removeEventListener('visibilitychange', visibilityChanged)
-  }, [])
-
-  const listing = songListing(sortRows(pedos.songRows, order), query)
+  const listing = songListing(sortRows(songRows, order), query)
   const isEmpty = listing.unlocked.length === 0 && listing.locked.length === 0
 
   return (
@@ -97,13 +85,13 @@ export function ComposeScreen() {
         />
       </div>
 
-      {pedos.recordings === null ? (
+      {recordings === null ? (
         <div className="flex flex-1 items-center justify-center">
           <Spinner />
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          {pedos.melodicRecordings.length === 0 && query === '' && (
+          {melodicRecordings.length === 0 && query === '' && (
             <Empty className="rounded-xl bg-muted/60 p-6">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -176,13 +164,11 @@ function Section({
   )
 }
 
-/** An Unlocked Song: its title and "Ready". It opens in Song Creator. */
 function UnlockedSongRow({ song }: { song: Song }) {
   return (
     <li data-testid="song-row" data-song={song.id}>
       <Link
         href={`/compose/${song.id}/`}
-        // Song Creator plays the Toot once it's made: the tap starts the sound it needs.
         onClick={startAudioInTap}
         className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset active:bg-muted"
       >
@@ -196,10 +182,6 @@ function UnlockedSongRow({ song }: { song: Song }) {
   )
 }
 
-/**
- * A locked Song: its title, a Pitch Coverage bar, a lock and the lowest missing notes, with how
- * long a fart each needs. Two of them, so "Needs …" stays on one line on a phone.
- */
 function LockedSongRow({ row, onOpen }: { row: SongRow; onOpen: () => void }) {
   const { song, coverage } = row
   const valueId = useId()

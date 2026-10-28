@@ -19,31 +19,19 @@ import { TOOT_PRICE_LABEL } from '@/lib/pricing'
 import { saveAsksForPayment } from '@/lib/toot-payment'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
-import { usePedos } from './pedos-provider'
+import { useWelcome } from './welcome-provider'
 
-/** The app's `main` (`app-shell.tsx`), where focus goes once the lander hides. */
 export const appMain = 'app'
 
-/** Farty's brand button, behind white text. */
 const brand = 'bg-brand-strong text-white hover:bg-brand-strong/90'
 
-/**
- * Farty's product page, for a phone app.
- * - A computer (`desktop` in `globals.css`) gets it on every tab, whatever this browser has opened,
- *   and only Download App, a QR code for a phone (#199).
- * - A touch tablet gets it at `/` (`atHome`) until the app is opened in this browser. Open Farty
- *   shows the app on the same page; Sign up opens the account step in it.
- * - Phones never see it, or download its images: they get Welcome.
- */
 export function Lander({ atHome, qrCode }: { atHome: boolean; qrCode: ReactNode }) {
-  const pedos = usePedos()
+  const { finishWelcome } = useWelcome()
   const { openStep } = useAccount()
 
   function openFarty() {
-    pedos.finishWelcome()
+    finishWelcome()
     window.scrollTo({ top: 0 })
-    // The lander, and the button just pressed, are hidden now, so focus moves to the app instead of
-    // dropping to the page. The account step, opened next by Sign up, gives it back here too.
     document.getElementById(appMain)?.focus({ preventScroll: true })
   }
 
@@ -334,7 +322,6 @@ function SectionHeading({
   )
 }
 
-/** A real screenshot of Farty on a phone, in a plain device frame. */
 function Phone({
   src,
   alt,
@@ -344,7 +331,6 @@ function Phone({
   src: string
   alt: string
   className?: string
-  /** The hero's: fetched first. */
   first?: boolean
 }) {
   return (
@@ -355,14 +341,12 @@ function Phone({
       )}
     >
       <picture>
-        {/* Below 768px the browser takes the blank pixel instead, so a phone downloads nothing. */}
         <source media={wide} srcSet={src} />
         <img
-          src={blank}
+          src={transparentPixel}
           alt={alt}
           width={780}
           height={1688}
-          // Lazy, so a hidden lander, once Farty has been opened, downloads nothing either.
           loading="lazy"
           decoding="async"
           fetchPriority={first ? 'high' : undefined}
@@ -373,10 +357,6 @@ function Phone({
   )
 }
 
-/**
- * Download App, on a computer only: a QR code that opens Farty on a phone (#199). Closing it gives
- * focus back to the button.
- */
 function DownloadApp({ qrCode, className }: { qrCode: ReactNode; className: string }) {
   return (
     <Dialog>
@@ -398,8 +378,8 @@ function DownloadApp({ qrCode, className }: { qrCode: ReactNode; className: stri
   )
 }
 
-/** A transparent pixel. */
-const blank = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+const transparentPixel =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
 function SectionLink({ href, children }: { href: string; children: ReactNode }) {
   return (

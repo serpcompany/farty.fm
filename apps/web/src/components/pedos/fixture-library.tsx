@@ -3,15 +3,10 @@
 import { useEffect, useId, useState } from 'react'
 import { Spinner } from '@/components/ui/spinner'
 import { type FixtureIndex, fixtureLibraryPath, fixtureRecordingId } from '@/lib/fixture-library'
-import { usePedos } from './pedos-provider'
+import { useRecordings } from './recordings-provider'
 
-/**
- * Internal builds only (Staging): add every Fixture Library Recording as your own, analyzed like
- * real ones. Matches the Internal build section of the iPhone app's `ProfileTab`. Shows nothing
- * when the build carries no fixtures.
- */
 export function FixtureLibrary() {
-  const pedos = usePedos()
+  const { recordings, importRecordings } = useRecordings()
   const [index, setIndex] = useState<FixtureIndex | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [didFail, setDidFail] = useState(false)
@@ -28,16 +23,14 @@ export function FixtureLibrary() {
     }
   }, [])
 
-  if (index === null || pedos.recordings === null) return null
+  if (index === null || recordings === null) return null
 
-  const saved = new Set(pedos.recordings.map(r => r.id))
+  const saved = new Set(recordings.map(r => r.id))
   const missing = index.recordings.filter(f => !saved.has(fixtureRecordingId(f.id)))
   const total = index.recordings.length
   const loaded = total - missing.length
   const isComplete = loaded >= total
 
-  // Fixtures are added in id order, skipping the ones already loaded, then analyzed in turn. On a
-  // failure the button stays, and tapping it again adds only the ones still missing.
   const load = async () => {
     setIsLoading(true)
     setDidFail(false)
@@ -49,7 +42,7 @@ export function FixtureLibrary() {
           return { id: fixtureRecordingId(fixture.id), wav: await response.arrayBuffer() }
         })
       )
-      await pedos.importRecordings(files)
+      await importRecordings(files)
     } catch {
       setDidFail(true)
     } finally {

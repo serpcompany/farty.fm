@@ -19,13 +19,9 @@ import { Switch } from '@/components/ui/switch'
 import { setSharing, useSharing } from '@/lib/telemetry/sharing'
 import { useAccount } from './account-provider'
 import { InstallGuideCard, useInstallGuide } from './install-button'
-import { usePedos } from './pedos-provider'
+import { useRecordings } from './recordings-provider'
+import { useToots } from './toots-provider'
 
-/**
- * The Fixture Library loader, in internal builds only: `build:staging` sets
- * NEXT_PUBLIC_FIXTURE_LIBRARY, and `build:production` clears it, so the Production build carries
- * none of the loader (`scripts/fixture-library.ts check`).
- */
 const FixtureLibrary =
   process.env.NEXT_PUBLIC_FIXTURE_LIBRARY === '1'
     ? dynamic(() => import('./fixture-library').then(m => m.FixtureLibrary), { ssr: false })
@@ -34,14 +30,22 @@ const FixtureLibrary =
 const header = 'px-4 pb-1.5 text-xs font-normal text-muted-foreground'
 const list = 'divide-y overflow-hidden rounded-xl bg-muted/60'
 
-/**
- * Profile: what you've collected and made, counted from what's in this browser, your account,
- * where the Songs come from, and the app version. As the iPhone app's `ProfileTab`, plus the
- * account (#155), Install, sharing error reports (#126) and the privacy and support
- * pages, which the web app needs.
- */
+function useProfileStats() {
+  const { recordings, melodicRecordings, collectedNotes, songRows } = useRecordings()
+  const { toots } = useToots()
+  if (recordings === null || toots === null) return null
+  return {
+    recordings: recordings.length,
+    melodicRecordings: melodicRecordings.length,
+    notesCollected: collectedNotes.size,
+    unlockedSongs: songRows.filter(row => row.coverage.unlocked).length,
+    songs: songRows.length,
+    toots: toots.length
+  }
+}
+
 export function ProfileScreen({ version }: { version: string }) {
-  const stats = usePedos().profileStats
+  const stats = useProfileStats()
 
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
@@ -133,11 +137,6 @@ export function ProfileScreen({ version }: { version: string }) {
   )
 }
 
-/**
- * With Safari's Home Screen steps: how to stop Safari asking for the microphone (#222). A new
- * page starts with no microphone grant unless the site's Microphone setting is Allow. The path is
- * Apple's, from "Browse the web privately in Safari on iPhone" (iOS 27).
- */
 function SafariMicrophoneTip() {
   if (useInstallGuide() !== 'share-sheet') return null
   return (
@@ -148,7 +147,6 @@ function SafariMicrophoneTip() {
   )
 }
 
-/** A label with its value on the right, as SwiftUI's `LabeledContent`. */
 function Row({ label, testId, children }: { label: string; testId: string; children: ReactNode }) {
   return (
     <li
@@ -161,7 +159,6 @@ function Row({ label, testId, children }: { label: string; testId: string; child
   )
 }
 
-/** A row that opens one of the web app's own pages. */
 function LinkRow({ href, children }: { href: string; children: ReactNode }) {
   return (
     <li>
@@ -179,18 +176,12 @@ function LinkRow({ href, children }: { href: string; children: ReactNode }) {
 const row =
   'flex min-h-11 w-full items-center justify-between gap-4 px-4 py-2.5 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset disabled:opacity-50'
 
-/**
- * Share anonymous error reports (#126): on by default, kept in this browser, and off means no
- * report is sent (`src/lib/telemetry/`). Global Privacy Control turns it off, so the switch
- * shows off and can't be turned on.
- */
 function SharingSection() {
   const sharing = useSharing()
   return (
     <>
       <ul className={list}>
         <li>
-          {/* The whole row toggles the switch, so it's a full-size target. */}
           <label htmlFor="share-telemetry" className={row}>
             Share anonymous error reports
             <Switch
@@ -211,17 +202,12 @@ function SharingSection() {
   )
 }
 
-/**
- * Signed out: Save to an account, which opens the account step, and what a guest loses. Signed
- * in: the email, Farty news, Sign out and Delete account. A session that ended: Sign in again.
- */
 function AccountSection() {
   const { account, openStep, retry, signOut, deleteAccount, setMarketingEmail, clearDevice } =
     useAccount()
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   const [confirmsDelete, setConfirmsDelete] = useState(false)
-  /** Some farts haven't reached the account: wait, or sign out anyway. */
   const [notUploaded, setNotUploaded] = useState(false)
   const [confirmsClear, setConfirmsClear] = useState(false)
 
@@ -238,7 +224,6 @@ function AccountSection() {
     if (result === 'failed') setProblem("Couldn't sign out. Check your connection and try again.")
   }
 
-  /** Runs `action`, one at a time, and says `failure` if it fails. */
   const run = async (action: () => Promise<boolean>, failure: string) => {
     setBusy(true)
     setProblem(null)
@@ -339,7 +324,6 @@ function AccountSection() {
           </span>
         </li>
         <li>
-          {/* The whole row toggles the switch, so it's a full-size target. */}
           <label htmlFor="pedos-news" className={row}>
             Farty news
             <Switch

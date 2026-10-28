@@ -3,11 +3,6 @@
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-/**
- * The big red button: a circle to record, a square to stop. It's the app's one signature
- * control, so it's a stock Button shaped through `className` and the `record` token. While the
- * microphone starts, the circle says "Starting…" until audio is coming in.
- */
 export function RecordButton({
   isRecording,
   starting = false,

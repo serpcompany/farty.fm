@@ -28,27 +28,18 @@ import {
 import { cn } from '@/lib/utils'
 import { decodeWav } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
-import { usePedos } from './pedos-provider'
+import { usePageHidden } from './page-hidden'
+import { recordingSound, usePlayback } from './playback-provider'
+import { useRecordFlow } from './record-flow-provider'
+import { useRecordings } from './recordings-provider'
 import { Waveform } from './waveform'
 
-/**
- * Every Recording, newest first, with its note and waveform, and how many notes you've
- * collected. Tap a row to play it. Matches the iPhone app's `RecordingsTab`.
- */
 export function RecordingsScreen() {
-  const pedos = usePedos()
+  const { recordings, melodicRecordings, collectedNotes, deleteRecording } = useRecordings()
   const [deleting, setDeleting] = useState<Recording | null>(null)
+  usePageHidden(() => setDeleting(null))
 
-  // The page comes back on the Record tab, so the confirmation doesn't stay open.
-  useEffect(() => {
-    const visibilityChanged = () => {
-      if (document.visibilityState === 'hidden') setDeleting(null)
-    }
-    document.addEventListener('visibilitychange', visibilityChanged)
-    return () => document.removeEventListener('visibilitychange', visibilityChanged)
-  }, [])
-
-  if (pedos.recordings === null) {
+  if (recordings === null) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <Spinner />
@@ -56,7 +47,7 @@ export function RecordingsScreen() {
     )
   }
 
-  const count = pedos.recordings.length
+  const count = recordings.length
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
       <h1 className="pt-4 pb-3 text-3xl font-bold tracking-tight">Recordings</h1>
@@ -72,15 +63,14 @@ export function RecordingsScreen() {
         </Empty>
       ) : (
         <section aria-labelledby="pitch-summary">
-          {/* Side by side when they fit; stacked at large text sizes. */}
           <h2
             id="pitch-summary"
             className="flex flex-wrap justify-between gap-x-4 px-4 pb-1.5 text-xs font-normal text-muted-foreground"
             data-testid="pitch-summary"
           >
             <span>
-              {counted(pedos.melodicRecordings.length, 'Melodic Recording')} across{' '}
-              {counted(pedos.collectedNotes.size, 'note')}
+              {counted(melodicRecordings.length, 'Melodic Recording')} across{' '}
+              {counted(collectedNotes.size, 'note')}
             </span>
             <span>{counted(count, 'Recording')}</span>
           </h2>
@@ -88,7 +78,7 @@ export function RecordingsScreen() {
             className="divide-y overflow-hidden rounded-xl bg-muted/60"
             data-testid="recordings-list"
           >
-            {[...pedos.recordings].reverse().map(recording => (
+            {[...recordings].reverse().map(recording => (
               <RecordingRow
                 key={recording.id}
                 recording={recording}
@@ -110,7 +100,7 @@ export function RecordingsScreen() {
             <AlertDialogAction
               variant="destructive"
               onClick={() => {
-                if (deleting) void pedos.deleteRecording(deleting.id)
+                if (deleting) void deleteRecording(deleting.id)
                 setDeleting(null)
               }}
             >
@@ -123,20 +113,13 @@ export function RecordingsScreen() {
   )
 }
 
-/** "1 Recording", "9 Melodic Recordings". */
 function counted(number: number, noun: string): string {
   return `${number} ${noun}${number === 1 ? '' : 's'}`
 }
 
-/**
- * A Recording: a big play button, its name, its note in a pill ("B3"), and the waveform of the
- * fart replay plays, without the silence around it, and the fart's length. Tap to play. Matches
- * `RecordingsRow`, plus the length, which the iPhone only reads out: it is what a locked Song's
- * "Needs a fart near F3 (3.0 s)" is measured against (#227).
- */
 function RecordingRow({ recording, onDelete }: { recording: Recording; onDelete: () => void }) {
-  const pedos = usePedos()
-  const isPlaying = pedos.nowPlaying === recording.id
+  const { nowPlaying, togglePlayback } = usePlayback()
+  const isPlaying = nowPlaying === recording.id
   const name = recordingName(recording)
   const levels = useReplayLevels(recording)
 
@@ -151,7 +134,7 @@ function RecordingRow({ recording, onDelete }: { recording: Recording; onDelete:
           className="flex min-w-0 flex-1 items-center gap-3.5 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
           aria-label={[name, ...describe(recording)].join(', ')}
           aria-pressed={isPlaying}
-          onClick={() => pedos.togglePlayback(recording)}
+          onClick={() => togglePlayback(recordingSound(recording))}
         >
           <PlayCircle isPlaying={isPlaying} />
           <span className="flex min-w-0 flex-1 flex-col gap-2">
@@ -185,7 +168,6 @@ function RecordingRow({ recording, onDelete }: { recording: Recording; onDelete:
   )
 }
 
-/** The row's play button: a tinted circle, filled while playing. */
 function PlayCircle({ isPlaying }: { isPlaying: boolean }) {
   const Icon = isPlaying ? Square : Play
   return (
@@ -201,7 +183,6 @@ function PlayCircle({ isPlaying }: { isPlaying: boolean }) {
   )
 }
 
-/** The note in a pill, or "noise-like". */
 function Note({ recording }: { recording: Recording }) {
   if (recording.analysis.state !== 'analyzed') return null
   const pitch = recordingPitch(recording)
@@ -222,10 +203,8 @@ function Note({ recording }: { recording: Recording }) {
   )
 }
 
-/** Analyzing, or not analyzed with Retry. */
 function Status({ recording }: { recording: Recording }) {
-  const pedos = usePedos()
-  // Lines up with the name, past the play button.
+  const { retryAnalysis } = useRecordFlow()
   const indent = 'pl-[3.625rem]'
   switch (recording.analysis.state) {
     case 'analyzing':
@@ -242,7 +221,7 @@ function Status({ recording }: { recording: Recording }) {
             variant="outline"
             size="sm"
             aria-label={`Retry analyzing ${recordingName(recording)}`}
-            onClick={() => void pedos.retryAnalysis(recording.id)}
+            onClick={() => void retryAnalysis(recording.id)}
           >
             Retry
           </Button>
@@ -253,7 +232,6 @@ function Status({ recording }: { recording: Recording }) {
   }
 }
 
-/** What the row's button says after the name: "1.1 s, B3, first fart used". */
 function describe(recording: Recording): string[] {
   const parts = [formattedFartLength(recording)]
   switch (recording.analysis.state) {
@@ -272,7 +250,6 @@ function describe(recording: Recording): string[] {
   return parts
 }
 
-/** 48 loudness bars of what replay plays, drawn again when the analysis finds the fart. */
 function useReplayLevels(recording: Recording): number[] {
   const [levels, setLevels] = useState<number[]>([])
   const segment = replaySegment(recording)

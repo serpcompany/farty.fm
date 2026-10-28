@@ -11,7 +11,7 @@ What the web app taught its builders, kept so the next change doesn't relearn it
 - Through the fake microphone, 4 of 5 Melodic fixtures give a Recording Pitch identical to golden. 094 (low confidence) comes out 20 cents high, still B3. Expect small differences on re-recorded audio. Assert note names, not exact MIDI.
 - V8's `2 ** x` and `Math.log2` differ from numpy by an ulp on some pYIN bins. `analysis/numeric.ts` has correctly rounded `exp2` and `log2`. Use them, or bit-identity breaks.
 - Safari mutes Web Audio when the silent switch is on unless `navigator.audioSession.type = 'playback'` is set (`context.ts`). The microphone needs `'play-and-record'` while it's open, which is from the first time Record shows to the end of the launch (`keepMicrophoneOpen`), so sounds play in it then too (`setPlaybackSession`).
-- The Welcome icon uses `next/image` with `unoptimized`, because Workers has no image optimizer.
+- Farty's icons use `next/image` with `unoptimized`, because Workers has no image optimizer.
 - 16-bit WAV: encode as `round(x × 32768)`, clamped, and decode as `/32768`, as other decoders do.
 - A page prerendered by `generateStaticParams` is served on Workers from the static-assets incremental cache (`open-next.config.ts`), which `opennextjs-cloudflare preview` and `deploy` fill. Without it, such a page 404s on Workers though `next build` lists it. `/compose/[song]/` is prerendered with `dynamicParams = false`, so the service worker can keep each Song's page (`/shell.json`), and an unknown Song 404s.
 - Both Web Workers load one Turbopack script, each with its own chunks in the URL's fragment (`#params=`), and a worker runs what its script's response URL says. The service worker keeps a copy with no URL, or a worker started offline runs the other worker's chunks.
@@ -30,6 +30,25 @@ What the web app taught its builders, kept so the next change doesn't relearn it
 - **Timeouts.** Vitest's fake timers don't drive `AbortSignal.timeout`, so requests time out through `withinTimeout` (`timeout.ts`), a `setTimeout` the tests can run.
 - **Stale builds (#222).** A tab opened before a deploy later loads scripts the server no longer has. Next.js 16 loads a navigation from another build in full, and Turbopack retries a failed chunk once; after that, `stale-build.ts` reloads the page once nothing unsaved is on screen (`holdReload`), at most once in 10 minutes a tab, and never with sessionStorage blocked. A failed `import()` is a `TypeError`: "Importing a module script failed." in WebKit, "Failed to fetch dynamically imported module" in Chromium. A worker fires a plain `error` event when its own script fails, and an `ErrorEvent` when an `importScripts` fails: "NetworkError: Load failed" in WebKit, "Failed to execute 'importScripts'" in Chromium.
 - **Installing.** iPadOS Safari says it's a Mac and Chrome on an Android tablet says Linux; only touch gives them away (`install.ts`). An in-app browser built on SFSafariViewController sends Safari's exact user agent, so it can't be told apart. The service worker registers only in a build: on `next dev` it would outlive the session on a localhost port other apps share.
+
+## The screens and routes
+
+- The root layout's inline script sets `data-welcomed` on `<html>` from `localStorage` before paint, so a touch tablet shows a returning visitor the app and a new one the lander (the `unwelcomed` variant in `globals.css`) with no flash. A computer (the `desktop` variant: 768px and wider, with a mouse or trackpad) gets the lander on every tab by CSS alone.
+- The manifest is a route handler, not `manifest.ts`, so the layout can link it with `crossorigin="use-credentials"`. Chrome fetches a manifest without credentials, which behind the Staging password gets a 401, and Next adds the attribute itself only on Vercel previews.
+- The home page writes its own canonical, the bare origin, because Next adds a trailing slash to the layout's. The 404 page has none, since the layout's would name the missing URL.
+- Every Toot opens on one static page, `/toots/toot/?id=`, because a Toot's id is made on the device. The service worker keeps it and each Song's page from `/shell.json`.
+- Song Creator plays the Toot once it's made, and only a tap starts audio: the taps that open it call `startAudioInTap`, and one opened from a link or a reload waits for a tap (`navigator.userActivation`).
+- Back from Song Creator or a Toot's screen goes back in history when Compose or Toots opened it, and otherwise replaces the page, so the system Back never opens it again (`back-link.tsx`).
+- Done or Try it on a Result keeps the record flow open until the next page shows. Closed first, it would show the Record screen idle on the way, which opens the microphone.
+- The note view takes a tap anywhere and plays the nearest note. Each note is also a button, out of the pointer's way, for the keyboard and screen readers.
+- Back from Checkout, Song Creator makes the same Toot again, with the id it was paid for (ADR 0010), and waits for a tap to play it.
+- The lander's screenshots are a `<picture>` whose source applies from 768px and whose `<img>` is a transparent pixel, loaded lazily, so a phone, or a lander hidden once Farty is open, downloads none of them. Download App's QR code is drawn on the server at build (`download-qr.tsx`), so no QR library reaches the browser, black on white in both themes, as scanners expect.
+- The install prompt shows once, after the first saved Recording, and waits for the record flow to close. It also registers the service worker, and asks the browser to keep Farty's storage once there's a Recording (#203), as signing in does.
+- The account step comes back after a reload while it was open (a phone dropping the tab during Mail), and asks a browser whose session ended to sign in again, once a visit.
+- Leaving the Toots tab lets go of the audio its rows decoded. A Toot that plays keeps playing into its screen, as on the iPhone; another tab stops it.
+- Profile's Safari tip (Page Menu, Website Settings, Microphone: Allow) follows Apple's "Browse the web privately in Safari on iPhone" (iOS 27).
+- `--brand` is the app icon's pink, for accents. `--brand-strong`, a deeper shade, goes behind white text, where it keeps a 5:1 contrast.
+- `error.tsx` and `global-error.tsx` report what broke a screen as `uncaught-error` and offer a reload. Next passes only what its built-in boundary catches to `window.reportError`, which `installErrorReporting` hears; an error these catch, Next only logs, so they report it themselves. `global-error.tsx` replaces the root layout, so it brings its own `<html>`, styles and viewport.
 
 ## Shell gotchas
 

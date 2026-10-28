@@ -13,31 +13,22 @@ import {
   coverageSummary,
   missingNotes
 } from '@/lib/pitch-coverage'
-import { usePedos } from './pedos-provider'
 import { PitchStrip } from './pitch-strip'
+import { useRecordings } from './recordings-provider'
 
-/**
- * What a locked Song still needs: its Pitch Coverage, the missing notes with their octave, and the
- * pitch strip with the needed pitch classes marked. A locked Song can't be played. Matches the
- * iPhone app's `LockedSongSheet`.
- */
 export function LockedSongSheet({
   song,
   onClose,
   onRecord
 }: {
-  /** The Song shown, or null when the sheet is closed. */
   song: Song | null
   onClose: () => void
-  /** Record: closes the sheet and switches to the Record tab. */
   onRecord: () => void
 }) {
-  const pedos = usePedos()
-  // The last Song shown stays while the sheet slides away.
+  const { songRows } = useRecordings()
   const [shown, setShown] = useState(song)
   if (song !== null && song !== shown) setShown(song)
-  // Read live, so a Recording analyzed while the sheet is open shows at once.
-  const coverage = pedos.songRows.find(r => r.song.id === shown?.id)?.coverage
+  const coverage = songRows.find(r => r.song.id === shown?.id)?.coverage
 
   return (
     <Sheet open={song !== null} onOpenChange={open => !open && onClose()}>
@@ -65,7 +56,7 @@ export function LockedSongSheet({
 }
 
 function Body({ coverage, onRecord }: { coverage: Coverage; onRecord: () => void }) {
-  const pedos = usePedos()
+  const { collectedPitchClasses } = useRecordings()
   const needed = new Set(coverage.missing.map(m => pitchClass(m.midi)))
   return (
     <div className="flex flex-1 flex-col gap-4 p-5">
@@ -76,7 +67,7 @@ function Body({ coverage, onRecord }: { coverage: Coverage; onRecord: () => void
           {coverageSummary(coverage)}
         </p>
       </div>
-      <PitchStrip collected={pedos.collectedPitchClasses} needed={needed} />
+      <PitchStrip collected={collectedPitchClasses} needed={needed} />
       <p className="text-xl" data-testid="locked-song-needs">
         {needs(coverage)}
       </p>
@@ -88,7 +79,6 @@ function Body({ coverage, onRecord }: { coverage: Coverage; onRecord: () => void
   )
 }
 
-/** "Needs a fart near D3 (0.5 s) and F3 (1.2 s).", or how to start without Melodic Recordings. */
 function needs(coverage: Coverage): string {
   const missing = missingNotes(coverage)
   if (!coverage.hasMelodicRecordings || missing === null) {

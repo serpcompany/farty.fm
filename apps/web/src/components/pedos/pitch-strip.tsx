@@ -4,14 +4,6 @@ import { cn } from '@/lib/utils'
 const sharps = new Set([1, 3, 6, 8, 10])
 const andList = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' })
 
-/**
- * A one-octave keyboard, C to B, that fills in each pitch class you've collected. Matches the
- * iPhone app's `PitchStrip`.
- *
- * - `collected`: pitch classes with a Melodic Recording, filled in.
- * - `outlined`: the pitch class of a Recording just made, outlined.
- * - `needed`: pitch classes a locked Song still needs, dashed.
- */
 export function PitchStrip({
   collected,
   outlined = null,
@@ -60,7 +52,6 @@ export function PitchStrip({
   )
 }
 
-/** "Notes collected: C, G, and G♯. New: G♯. Needed: D and F", as VoiceOver reads it. */
 function describe(
   collected: ReadonlySet<number>,
   outlined: number | null,

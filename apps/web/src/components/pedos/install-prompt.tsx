@@ -12,24 +12,20 @@ import {
 } from '@/lib/install'
 import { onRecordingSaved } from '@/lib/recording-store'
 import { ShareSheetHint, useInstallRoute } from './install-button'
-import { usePedos } from './pedos-provider'
+import { useRecordFlow } from './record-flow-provider'
+import { useRecordings } from './recordings-provider'
 
 const offeredKey = 'pedos.installOffered'
 
-/**
- * Offers to install Farty once, after the first saved Recording, above the tabs. It hides when
- * it's closed or Farty is installed, and never shows on a computer, which has no app (#199). It
- * also registers the service worker and, once there's a Recording, asks the browser to keep
- * Farty's storage: a guest's Recordings are kept too (owner, 2026-10-25, #203).
- */
 export function InstallPrompt() {
-  const pedos = usePedos()
+  const { recordings } = useRecordings()
+  const { flow } = useRecordFlow()
   const route = useInstallRoute()
   const [open, setOpen] = useState(false)
 
   useEffect(registerServiceWorker, [])
 
-  const hasRecording = (pedos.recordings?.length ?? 0) > 0
+  const hasRecording = (recordings?.length ?? 0) > 0
   useEffect(() => {
     if (hasRecording) void keepRecordings()
   }, [hasRecording])
@@ -42,7 +38,6 @@ export function InstallPrompt() {
           if (localStorage.getItem(offeredKey) !== null) return
           localStorage.setItem(offeredKey, '1')
         } catch {
-          // Storage is blocked, so Farty can't remember the offer. It doesn't offer at all.
           return
         }
         setOpen(true)
@@ -50,8 +45,7 @@ export function InstallPrompt() {
     []
   )
 
-  // It waits for the record flow to close, so it never covers the new Recording's note.
-  if (!open || route === null || pedos.flow) return null
+  if (!open || route === null || flow) return null
   return (
     <aside
       aria-label="Install Farty"
@@ -63,7 +57,6 @@ export function InstallPrompt() {
           alt=""
           width={44}
           height={44}
-          // A small static PNG; Workers has no image optimizer configured.
           unoptimized
           className="rounded-[10px]"
         />

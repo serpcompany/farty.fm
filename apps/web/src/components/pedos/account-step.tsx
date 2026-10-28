@@ -17,16 +17,8 @@ const messages: Record<SignInProblem, string> = {
   failed: "Couldn't reach Farty. Check your connection and try again."
 }
 
-/**
- * The account step (#155, the plan's §1), full screen over everything on a phone, and a card under
- * the top bar from 768px: an email, then the 6-digit code sent to it, which signs in or makes the
- * account. Not now says what a guest loses. A browser
- * whose session ended (`expired`) is asked to sign in again, and loses nothing. Signing in to
- * another account clears this device's farts not saved to the first: the step says so first.
- */
 export function AccountStep() {
   const { stepOpen } = useAccount()
-  // Mounted afresh each time it opens, so it starts at the email, or where a reload left it.
   return stepOpen ? <Step /> : null
 }
 
@@ -39,7 +31,6 @@ function Step() {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<SignInProblem | null>(null)
-  /** Farts this device would lose by signing in as `email`, shown before its code is sent. */
   const [unsaved, setUnsaved] = useState(0)
   const heading = useRef<HTMLHeadingElement>(null)
   const emailField = useRef<HTMLInputElement>(null)
@@ -47,7 +38,6 @@ function Step() {
   const backButton = useRef<HTMLButtonElement>(null)
   const focusedPhase = useRef<string | null>(null)
 
-  // Focus goes back where it was, such as the Result's button, once the step closes.
   useEffect(() => {
     const opener = document.activeElement
     return () => {
@@ -55,7 +45,6 @@ function Step() {
     }
   }, [])
 
-  // Opening moves focus into the step, so a screen reader announces it; a new phase, to its field.
   useEffect(() => {
     if (phase === 'code') codeField.current?.focus()
     else if (focusedPhase.current === 'code') emailField.current?.focus()
@@ -63,7 +52,6 @@ function Step() {
     focusedPhase.current = phase
   }, [phase])
 
-  // The warning replaces the form and its focused control, so focus moves to its Go back.
   const warns = unsaved > 0
   useEffect(() => {
     if (warns) backButton.current?.focus()
@@ -86,7 +74,6 @@ function Step() {
 
   const goBack = () => {
     setUnsaved(0)
-    // After the warning's buttons have gone.
     requestAnimationFrame(() => emailField.current?.focus())
   }
 
@@ -115,7 +102,6 @@ function Step() {
       return
     }
     setProblem(result.problem)
-    // An expired code can't be tried again: the email is where a new one comes from.
     if (result.problem === 'codeExpired') setPhase('email')
   }
 

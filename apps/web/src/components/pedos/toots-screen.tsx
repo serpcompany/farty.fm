@@ -26,40 +26,25 @@ import { Spinner } from '@/components/ui/spinner'
 import { songs } from '@/lib/catalog/songs.generated'
 import { type Toot, tootDetails } from '@/lib/toot'
 import { cn } from '@/lib/utils'
-import { tootPlayback, usePedos } from './pedos-provider'
+import { usePageHidden } from './page-hidden'
+import { usePlayback } from './playback-provider'
+import { tootPlayback, useToots } from './toots-provider'
 
-/** Where a Toot's screen is: one page for every Toot, since a Toot's id is made on the device. */
-export function tootPage(id: string): string {
+function tootPage(id: string): string {
   return `/toots/toot/?id=${encodeURIComponent(id)}`
 }
 
-/**
- * Every Toot, newest first. Tap a row's play button to play it, or the row to open it; its More
- * menu renames or deletes it (the iPhone app's long-press and swipe). As the iPhone app's
- * `TootsTab`.
- */
 export function TootsScreen() {
-  const pedos = usePedos()
+  const { toots, tootsFailed, forgetToot, toggleTootPlayback, deleteToot } = useToots()
   const [renaming, setRenaming] = useState<Toot | null>(null)
   const [deleting, setDeleting] = useState<Toot | null>(null)
   const [missingAudio, setMissingAudio] = useState<Toot | null>(null)
+  usePageHidden(() => {
+    setRenaming(null)
+    setDeleting(null)
+    setMissingAudio(null)
+  })
 
-  // The page comes back on the Record tab, so nothing is left open here.
-  useEffect(() => {
-    const visibilityChanged = () => {
-      if (document.visibilityState !== 'hidden') return
-      setRenaming(null)
-      setDeleting(null)
-      setMissingAudio(null)
-    }
-    document.addEventListener('visibilitychange', visibilityChanged)
-    return () => document.removeEventListener('visibilitychange', visibilityChanged)
-  }, [])
-
-  // Leaving the list lets go of the audio its rows decoded, and only then: a delete lets go of
-  // just its own Toot's (`deleteToot`). A Toot playing keeps playing into its screen, as on the
-  // iPhone; another tab stops it (`AppShell`).
-  const { toots, forgetToot } = pedos
   const shown = useRef<string[]>([])
   useEffect(() => {
     shown.current = toots?.map(t => t.id) ?? []
@@ -77,8 +62,7 @@ export function TootsScreen() {
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
       <h1 className="pt-4 pb-3 text-3xl font-bold tracking-tight">Toots</h1>
-      {/* A Toot saved since a failed load still shows, under the line. */}
-      {pedos.tootsFailed && (
+      {tootsFailed && (
         <p
           className={cn(
             'px-4 text-center text-muted-foreground',
@@ -89,7 +73,7 @@ export function TootsScreen() {
         </p>
       )}
       {toots.length === 0 ? (
-        !pedos.tootsFailed && (
+        !tootsFailed && (
           <Empty className="flex-1">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -108,7 +92,7 @@ export function TootsScreen() {
               toot={toot}
               onPlay={() => {
                 if (toot.isAudioMissing) setMissingAudio(toot)
-                else pedos.toggleTootPlayback(toot)
+                else toggleTootPlayback(toot)
               }}
               onRename={() => setRenaming(toot)}
               onDelete={() => setDeleting(toot)}
@@ -134,7 +118,7 @@ export function TootsScreen() {
               variant="destructive"
               className="h-11 text-base"
               onClick={() => {
-                if (missingAudio) pedos.deleteToot(missingAudio.id)
+                if (missingAudio) deleteToot(missingAudio.id)
                 setMissingAudio(null)
               }}
             >
@@ -147,16 +131,12 @@ export function TootsScreen() {
       <DeleteTootDialog
         toot={deleting}
         onClose={() => setDeleting(null)}
-        onDelete={toot => pedos.deleteToot(toot.id)}
+        onDelete={toot => deleteToot(toot.id)}
       />
     </div>
   )
 }
 
-/**
- * A Toot's row: a play button, then the title and the Song it came from, its date and length,
- * which open the Toot's screen, and its More menu. As the iPhone app's `TootRow`.
- */
 function TootRow({
   toot,
   onPlay,
@@ -168,12 +148,12 @@ function TootRow({
   onRename: () => void
   onDelete: () => void
 }) {
-  const pedos = usePedos()
-  const isPlaying = pedos.nowPlaying === tootPlayback(toot.id)
+  const { nowPlaying } = usePlayback()
+  const { tootPlayFailed } = useToots()
+  const isPlaying = nowPlaying === tootPlayback(toot.id)
   const songTitle = songs.find(song => song.id === toot.songId)?.title ?? ''
-  // Until the next play: the Toot is kept, and its play button tries again.
   const details =
-    pedos.tootPlayFailed === toot.id ? `${songTitle} · Couldn't play` : tootDetails(toot, songTitle)
+    tootPlayFailed === toot.id ? `${songTitle} · Couldn't play` : tootDetails(toot, songTitle)
   const Icon = toot.isAudioMissing ? TriangleAlert : isPlaying ? Square : Play
 
   return (
@@ -210,7 +190,6 @@ function TootRow({
   )
 }
 
-/** Rename and Delete, behind More. */
 export function TootMenu({
   title,
   onRename,
@@ -252,12 +231,10 @@ export function TootMenu({
   )
 }
 
-/** Gives a Toot a new name. Shows while `toot` is set. As the iPhone app's Rename alert. */
 export function RenameTootDialog({ toot, onClose }: { toot: Toot | null; onClose: () => void }) {
-  const pedos = usePedos()
+  const { renameToot } = useToots()
   const [title, setTitle] = useState('')
   const [shown, setShown] = useState<Toot | null>(null)
-  // Starts from the Toot's name each time it opens.
   if (toot !== shown) {
     setShown(toot)
     if (toot) setTitle(toot.title)
@@ -270,7 +247,7 @@ export function RenameTootDialog({ toot, onClose }: { toot: Toot | null; onClose
           className="grid gap-4"
           onSubmit={event => {
             event.preventDefault()
-            if (toot) pedos.renameToot(toot.id, title)
+            if (toot) renameToot(toot.id, title)
             onClose()
           }}
         >
@@ -296,7 +273,6 @@ export function RenameTootDialog({ toot, onClose }: { toot: Toot | null; onClose
   )
 }
 
-/** Asks before deleting a Toot. Shows while `toot` is set. */
 export function DeleteTootDialog({
   toot,
   onClose,

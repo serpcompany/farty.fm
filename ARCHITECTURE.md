@@ -63,7 +63,7 @@ What the port in `src/lib/analysis/` and `src/lib/engine/` must reproduce, and w
 - `src/app/api/`, `src/server/`: a signed-in user's library (Recordings, Toots and their WAVs in R2) and account. Every route outside `api/auth/`, `api/telemetry/` and `api/stripe/webhook/` is built with `userRoute` (`require-user.ts`): session, then `Origin` on writes, `private, no-store`. `every-route.workers.test.ts` fails a route that skips it.
 - `src/lib/telemetry/`, `src/app/api/telemetry/`: error reports (`reportError(code, error)`, a stable code and an allowlist, logged by the route), the app's only telemetry, off with Profile's switch or Global Privacy Control (#126). `/dev/telemetry/` sends a synthetic crash and handled error, except in Production.
 - `src/server/`: sign-in (#152), server-only behind `auth.ts`: Better Auth email codes (`auth-config.ts`), email and the dev mailbox (`email.ts`, `dev-mailbox.ts`, `/dev/mail/`) ([Accounts and sign-in](docs/agents/accounts.md)).
-- `src/components/pedos/`: the screens. `src/components/ui/` stays stock shadcn.
+- `src/components/pedos/`: the screens, and the app's state in focused providers, which `pedos-provider.tsx` nests: Welcome, what plays (`playback-provider.tsx`), the Recordings and their Recording Analysis (`recordings-provider.tsx`), the Toots (`toots-provider.tsx`) and the record flow (`record-flow-provider.tsx`). Each context changes only with what it holds, so a screen re-renders only for the state it reads. `src/components/ui/` is shadcn's, kept as shadcn writes it, less what nothing uses.
 - `worker.ts`: the Worker's entry, which answers the host redirects and the Staging gate before Next.js sees a request.
 
 ## Layers
