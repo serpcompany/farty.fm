@@ -30,11 +30,13 @@ if [[ -n "${LINUX_PORT:-}" ]]; then
   published_port=(--publish "$LINUX_PORT:$LINUX_PORT")
 fi
 
+checkout_volumes="farty-linux-$(printf '%s' "$host_root" | cksum | cut -d ' ' -f 1)"
+
 MSYS_NO_PATHCONV=1 docker run --rm "${published_port[@]}" \
   --volume "$host_root:/work" \
-  --volume farty-linux-root-modules:/work/node_modules \
-  --volume farty-linux-web-modules:/work/apps/web/node_modules \
-  --volume farty-linux-wrangler:/work/apps/web/.wrangler \
+  --volume "$checkout_volumes-root-modules:/work/node_modules" \
+  --volume "$checkout_volumes-web-modules:/work/apps/web/node_modules" \
+  --volume "$checkout_volumes-wrangler:/work/apps/web/.wrangler" \
   --volume farty-linux-pnpm-store:/pnpm-store \
   --volume "$host_npmrc:/root/.npmrc:ro" \
   --env COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
