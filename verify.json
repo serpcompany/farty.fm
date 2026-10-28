@@ -8,7 +8,8 @@
       "apps/web/drizzle/**": "drizzle-kit (pnpm db:generate in apps/web)",
       "apps/web/src/lib/catalog/songs.generated.ts": "src/lib/catalog/generate.ts (pnpm exec tsx src/lib/catalog/generate.ts in apps/web)",
       "fixtures/golden/**/*.json": "the reference engine (tools/melody-lab/export_golden.py)",
-      "tools/catalog/titles-*.report.*": "the PDMX import (tools/catalog/import_pdmx.py)"
+      "tools/catalog/titles-*.report.*": "the PDMX import (tools/catalog/import_pdmx.py)",
+      "tools/uv.lock": "uv lock (in tools/)"
     },
     "thirdParty": {
       "catalog/midi/**": "the public-domain scores catalog/catalog.json cites, each with its source and license",
