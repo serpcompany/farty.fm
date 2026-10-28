@@ -69,11 +69,12 @@ describe('WelcomeProvider', () => {
 
   it('finishes Welcome for this page load where storage is blocked', async () => {
     await openFarty()
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    const write = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
       throw new DOMException('Blocked', 'SecurityError')
     })
     act(() => welcome.finishWelcome())
 
+    expect(write).toHaveBeenCalled()
     expect(welcome.showsWelcome).toBe(false)
     expect(document.documentElement.hasAttribute('data-welcomed')).toBe(true)
   })
