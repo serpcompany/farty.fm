@@ -1,0 +1,88 @@
+name: Tools
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [staging, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  tools-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      tools: ${{ steps.paths.outputs.tools }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+      - id: paths
+        run: |
+          if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
+            echo "tools=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet HEAD^1 HEAD -- tools fixtures catalog apps/web/src/lib/catalog/ship-list.json .python-version .github/workflows/tools.yml; then
+            echo "tools=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Nothing the reference engine or the catalog importer reads changed, so their checks skip their steps."
+          else
+            echo "tools=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  reference:
+    needs: tools-changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TOOLS: ${{ needs.tools-changes.outputs.tools }}
+    steps:
+      - if: env.TOOLS == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - if: env.TOOLS == 'true'
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: "0.7.2"
+          working-directory: tools
+      - name: Install the locked environment
+        if: env.TOOLS == 'true'
+        working-directory: tools
+        run: uv sync --locked
+      - name: Unit tests
+        if: env.TOOLS == 'true'
+        working-directory: tools
+        run: uv run --locked pytest
+      - name: Export the golden data
+        if: env.TOOLS == 'true'
+        working-directory: tools/melody-lab
+        run: uv run --locked export_golden.py
+      - name: Check the golden data is what the reference exports
+        if: env.TOOLS == 'true'
+        run: |
+          git add --intent-to-add fixtures/golden
+          if ! git diff --exit-code --stat -- fixtures/golden; then
+            git diff -- fixtures/golden | head -n 200
+            echo "::error::fixtures/golden isn't what tools/melody-lab/export_golden.py writes. Run it and commit the result."
+            exit 1
+          fi
+
+  scores:
+    needs: tools-changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TOOLS: ${{ needs.tools-changes.outputs.tools }}
+    steps:
+      - if: env.TOOLS == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Re-hash every score against catalog.json
+        if: env.TOOLS == 'true'
+        working-directory: catalog
+        run: |
+          set -o pipefail
+          jq -r '.[] | "\(.sha256)  \(.file)"' catalog.json | sha256sum --check --strict --quiet

@@ -7,12 +7,13 @@ Every GitHub Actions workflow, what starts it, and the checks a merge waits for.
 | `repository.yml` | Every PR, and every push to `staging` and `main` | `verify`, then `review` on a PR |
 | `pull-request.yml` | A PR opened, edited, pushed to or marked ready | `title`, `issue-link`, `fix-test`, `text` |
 | `web.yml` | Every PR, every push to `staging` and `main`, and by hand | `changes`, `check`, `e2e`, `deploy-staging`, `deploy-production` |
+| `tools.yml` | Every PR, every push to `staging` and `main`, and by hand | `tools-changes`, `reference`, `scores` |
 | `release-please.yml` | Every push to `main` | `release-please` |
 | `web-auth-secret.yml` | By hand only | `secret` |
 
 ## Required checks
 
-`staging` and `main` require `verify`, `title`, `issue-link`, `fix-test`, `text`, `changes`, `check` and `e2e`, and every review thread resolved. A required workflow has no `paths` filter, since a skipped one leaves its check pending: `web.yml`'s `changes` job decides instead, and its jobs still report when they skip their steps. `review` isn't required: a merge waits on its threads instead.
+`staging` and `main` require `verify`, `title`, `issue-link`, `fix-test`, `text`, `changes`, `check` and `e2e`, and every review thread resolved. A required workflow has no `paths` filter, since a skipped one leaves its check pending: `web.yml`'s `changes` job decides instead, and its jobs still report when they skip their steps. `tools.yml`'s `tools-changes` works the same way, so its `reference` and `scores` are ready to be required too. `review` isn't required: a merge waits on its threads instead.
 
 ## Repository
 
@@ -41,6 +42,14 @@ Each step that runs one of the web app's scripts names `working-directory: apps/
 
 **Each environment has its own token.** `CLOUDFLARE_API_TOKEN` is an environment secret in `staging` and in `production`, each a different token, and `CLOUDFLARE_ACCOUNT_ID` is a repository variable naming the SERP account, which `wrangler.jsonc` also names (`account_id`), so `wrangler` picks it on a machine whose login sees more than one account. If the two ever differ, `wrangler.jsonc` wins. Each environment's branch policy lets only its own branch deploy: `staging` from `staging`, `production` from `main`. Each token can edit every Worker in the account, so these policies are what keep other branches away from both tokens. With no token the deploy fails, so a green run at the tip always deployed and passed the smoke test. Since each is account-wide, making or rolling one is the owner's ([Secret Authority](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/agent-operations/secret-authority.md)).
 
+## Tools
+
+`tools.yml` checks the Python reference engine and the catalog importer, the `tools/` uv project ([the reference engine](../../tools/melody-lab/README.md)):
+
+- `tools-changes`: on a PR, whether anything they read changed (`tools`, `fixtures`, `catalog`, the web app's ship list, `.python-version` or the workflow). When nothing did, `reference` and `scores` skip their steps and still report.
+- `reference`: installs uv 0.7.2, the version that wrote `tools/uv.lock`, and the locked environment with Python 3.12.10 (`uv sync --locked`), runs the unit tests (`uv run pytest`), then runs `export_golden.py` and fails if `fixtures/golden` isn't byte for byte what it wrote, new files included, so the reference and the golden data can't drift apart. The export gives the same bytes on Linux and Windows.
+- `scores`: re-hashes every score `catalog/catalog.json` names against its `sha256`, so a changed or missing score fails.
+
 ## Release Please and the auth secret
 
 - **`release-please.yml`** keeps the release PR open on `main` ([Promotion and releases](releases.md)).
@@ -52,7 +61,7 @@ Dependabot (`.github/dependabot.yml`) opens one weekly PR of minor and patch npm
 
 ## Pinned actions
 
-Every workflow and the local action run each action at a commit, not a tag: a tag can be moved to new code, and these jobs hold Cloudflare's tokens, Claude's and a token that reads the private package. Each was pinned on 2026-10-27 to the commit its major tag named that day, so pinning changed no code that runs.
+Every workflow and the local action run each action at a commit, not a tag: a tag can be moved to new code, and these jobs hold Cloudflare's tokens, Claude's and a token that reads the private package. Each was pinned on 2026-10-27 to the commit its major tag named that day, so pinning changed no code that runs. `astral-sh/setup-uv` has no major tag, so it is pinned to the v10.3.0 release, the newest that was at least two weeks old that day.
 
 | Action | Commit | Version |
 | --- | --- | --- |
@@ -63,10 +72,11 @@ Every workflow and the local action run each action at a commit, not a tag: a ta
 | `actions/create-github-app-token` | `64ab729a6294000f5aa4a4bc0b73d1f32bc45510` | v3.3.0 |
 | `googleapis/release-please-action` | `5c625bfb5d1ff62eadeeb3772007f7f66fdcf071` | v4.4.1 |
 | `anthropics/claude-code-action` | `6b6870e649b5ff408753befeaee5fc7989d4e6a9` | v1.0.258 |
+| `astral-sh/setup-uv` | `1c37ad07a6a961277cf70c0d37d6f313000f5884` | v10.3.0 |
 
 ## Set up once, by the owner
 
 - **The package:** in `@serpcompany/verify`'s settings, Manage Actions access, add `serpcompany/farty.fm` with Read. Without it every install in CI fails, and `verify` says so.
 - **The review:** the Actions secret `CLAUDE_CODE_OAUTH_TOKEN`.
 - **The docs check's links into SERP's private repositories:** the variable `SERP_AGENT_APP_ID` and the secret `SERP_AGENT_PRIVATE_KEY`, at repository or organization level.
-- **The branch rules** in Required checks, above.
+- **The branch rules** in Required checks, above, with `reference` and `scores` added.

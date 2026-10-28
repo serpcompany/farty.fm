@@ -11,7 +11,7 @@ uv run export_golden.py    # writes the reference results to ../../fixtures/gold
 uv run pytest ..           # every unit test of the engine and the catalog importer
 ```
 
-Then open `out/listen/index.html` in a browser. Inputs: `../../fixtures/recordings/` (Fixture Library) and `../../catalog/` (Song Catalog).
+Then open `out/listen/index.html` in a browser. Inputs: `../../fixtures/recordings/` (Fixture Library) and `../../catalog/` (Song Catalog). CI runs the tests, exports the golden data and fails on any difference (`tools.yml`, [CI](../../docs/agents/ci.md)).
 
 | File | Role |
 | --- | --- |
