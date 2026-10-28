@@ -541,8 +541,8 @@ describe('forgetLibrary', () => {
     expect(changes).toEqual([{ reset: true }])
   })
 
-  // A guest's Recordings are kept (#203): an account's left here as a guest's would upload to the
-  // next account signed in to.
+  // A guest's library uploads when they sign in (#203, #237): an account's left here as a guest's
+  // would upload to the next account signed in to.
   it("keeps the library the account's when the clear fails", async () => {
     await page.sync.claimLibrary('user-a', 'a@example.com')
     const recording = await recorded()

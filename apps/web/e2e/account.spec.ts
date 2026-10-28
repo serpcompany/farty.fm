@@ -38,8 +38,9 @@ test("a guest's first Result offers the account step, and Not now goes where the
   await expect(step.getByTestId('account-step-guest')).toHaveText(
     'Without an account, your farts are gone when you close Farty.'
   )
-  // Turnstile's test widget, under the email, gives its token, and then a code can be sent.
-  await expect(step.getByTestId('turnstile').locator('iframe')).toBeVisible()
+  // Turnstile's test widget, under the email, gives its token, and only then can a code be sent.
+  // Its frame is in a closed shadow root, so the enabled Send code is what shows it passed.
+  await expect(step.getByTestId('turnstile')).toBeVisible()
   await expect(step.getByRole('button', { name: 'Send code' })).toBeEnabled()
   for (const control of [
     step.getByLabel('Email'),
@@ -575,6 +576,7 @@ test("a guest's Recordings from before #237 stay, while their Toot and their new
 
   // A Recording made since lasts only its visit, and the one from before stays.
   await recordAndSave(reopened, 1.5)
+  await expect(reopened.getByTestId('result-note')).toHaveText('G3')
   expect(await recordingsStored(reopened)).toBe(2)
   const again = await reopen(context, reopened)
   await expect(again.getByTestId('recording-row')).toHaveCount(1)

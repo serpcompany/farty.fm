@@ -70,7 +70,7 @@ async function claimOnOpen(account: Promise<Account>): Promise<void> {
 
 async function startVisit(account: Promise<Account>): Promise<void> {
   try {
-    // Whatever the session reads, and on a reload too: the visit this tab was in may be from before.
+    // Whatever the session reads, and on a reload too: this tab's visit may be from before #237.
     await noteKept().catch(() => {})
     // A reload continues this tab's visit. With storage blocked, Farty can't tell a reload from a
     // new visit, so it clears nothing.

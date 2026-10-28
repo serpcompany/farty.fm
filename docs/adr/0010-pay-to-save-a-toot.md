@@ -2,6 +2,8 @@
 
 Farty's first paywall (#204). The owner decided it on 2026-10-25: anyone can make and hear a Toot for free, and keeping one costs $0.99. There are still no ads (ADR 0008).
 
+**2026-10-28 (#237, ADR 0013):** there's no free guest Toot. Saving a Toot needs an account everywhere, Production's free saves included, since a payment belongs to an account: a guest's Save opens the account step, then Checkout where saving is paid, or saves straight away where it's free. The rest of this decision is unchanged.
+
 ## What Save means
 
 - **Preview is free.** Anyone, guest or signed in, can open an Unlocked Song in Song Creator, have the Toot made and play it, its notes and its Recordings, as often as they like.
@@ -26,7 +28,7 @@ Stripe's standard US card rate is 2.9% + 30Â¢, so a $0.99 payment pays about 33Â
 | --- | --- | --- |
 | Local run | As the build: paid, or free for a Production build | Test mode, or a stand-in for Checkout at `/dev/checkout/` when there's no Stripe key, for the e2e journeys and tap-throughs. It answers 404 anywhere else. |
 | Staging | Paid | Test mode. Until its keys are set, Save says payments aren't available. |
-| Production | Free, as before | Live mode, once the owner sets Stripe's live keys on Production's Worker; then `savingIsPaid` in `pricing.ts` changes, in its own PR. |
+| Production | Free, signed in (#237) | Live mode, once the owner sets Stripe's live keys on Production's Worker; then `savingIsPaid` in `pricing.ts` changes, in its own PR. |
 
 Production takes only live keys (`sk_live_`, `rk_live_`) and live events; Staging and local runs only test keys and test events (#213). A test key can't take real payments, and a live key can't be used outside Production.
 

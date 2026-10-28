@@ -103,7 +103,9 @@ test('a code is sent only with a Turnstile token, and the page reads the site ke
   expect(await sendCode(TURNSTILE_TEST_TOKEN)).toEqual({ status: 200, body: { success: true } })
 })
 
-test('a wrong code is refused, and only the five endpoints answer', async ({ page }) => {
+test('a wrong code is refused, and only the four endpoints and the site key answer', async ({
+  page
+}) => {
   await page.goto('/privacy/')
   const wrong = await call(page, 'POST', '/api/auth/sign-in/email-otp', {
     email: 'nobody@example.com',
