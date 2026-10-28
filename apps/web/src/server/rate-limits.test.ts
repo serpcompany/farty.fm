@@ -16,7 +16,7 @@ import { GET_SESSION_ENDPOINT, SEND_CODE_ENDPOINT, SIGN_IN_ENDPOINT } from './au
 import { serveAuthRequest } from './auth-request'
 import { clientLimitKey, consumeSlot, SITE_CODES_KEY } from './rate-limits'
 
-const { db, local, staging, mailCount, signIn, rows } = signInHarness()
+const { db, local, staging, mailed, mailCount, signIn, rows } = signInHarness()
 
 const insertSlot = 'INSERT INTO rate_limit (id, key, count, last_request) VALUES (?, ?, ?, ?)'
 
@@ -103,7 +103,33 @@ describe('code limits', () => {
     expect(await mailCount('fan@example.com')).toBe(20)
   })
 
-  it('spend per email and client, then per email, then site-wide, which counts only codes that go out', async () => {
+  it('send one IPv6 /48 30 codes an hour, so one network can’t spend the site’s', async () => {
+    const ask = (n: number, ip: string) => sendCode(local(), `fan${n}@example.com`, { ip })
+    for (let n = 1; n <= 35; n++) {
+      const response = await ask(n, `2001:db8:1:${n.toString(16)}::1`)
+      expect(await answer(response)).toEqual({ status: 200, body: { success: true } })
+    }
+    expect(await mailed()).toHaveLength(30)
+    expect(await rows('SELECT count FROM rate_limit WHERE key = ?', SITE_CODES_KEY)).toEqual([
+      { count: 30 }
+    ])
+    await ask(36, '2001:db8:2::1')
+    expect(await mailCount('fan36@example.com')).toBe(1)
+  })
+
+  it('send one IPv4 address 30 codes an hour', async () => {
+    const client = await clientLimitKey(SECRET, `198.51.100.1|${SEND_CODE_ENDPOINT}`)
+    for (let n = 1; n <= 35; n++) {
+      await sendCode(local(), `fan${n}@example.com`, { ip: '198.51.100.1' })
+      if (n % 10 === 0)
+        await db().prepare('DELETE FROM rate_limit WHERE key = ?').bind(client).run()
+    }
+    expect(await mailed()).toHaveLength(30)
+    await sendCode(local(), 'fan36@example.com', { ip: '198.51.100.2' })
+    expect(await mailCount('fan36@example.com')).toBe(1)
+  })
+
+  it('spend per email and client, then per email, then per network, then site-wide, which counts only codes that go out', async () => {
     const sent: Sent = []
     const env = staging(sent)
     const ask = async (email: string, client: number, times = 1) => {
@@ -179,7 +205,7 @@ describe('the rate_limit table', () => {
     expect(keys.length).toBeGreaterThanOrEqual(8)
     for (const key of keys) {
       expect(key).toMatch(
-        /^(client|email|email-client|sign-in-client)\|[0-9a-f]{64}$|^site\|send-code$/
+        /^(client|email|email-client|network|sign-in-client)\|[0-9a-f]{64}$|^site\|send-code$/
       )
     }
     expect(keys.join(' ')).not.toMatch(/203|2001|db8|fan|example/i)

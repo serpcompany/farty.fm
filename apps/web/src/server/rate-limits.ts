@@ -15,6 +15,7 @@ const HOUR = 60 * 60
 export const LIMITS = {
   codesPerEmailAndClient: { window: HOUR, max: 5 },
   codesPerEmail: { window: HOUR, max: 20 },
+  codesPerNetwork: { window: HOUR, max: 30 },
   codesSiteWide: { window: HOUR, max: 300 },
   signInsPerClient: { window: HOUR, max: 60 }
 } as const satisfies Record<string, SlotRule>
@@ -32,6 +33,15 @@ export async function emailClientLimitKey(
 ): Promise<string> {
   const value = `${email.toLowerCase()}\0${client}`
   return `email-client|${await keyedHash(secret, 'email-client-limit', value)}`
+}
+
+export function networkOf(client: string): string {
+  const groups = client.split(':')
+  return groups.length === 8 ? `${groups.slice(0, 3).join(':')}::/48` : client
+}
+
+export async function networkLimitKey(secret: string, client: string): Promise<string> {
+  return `network|${await keyedHash(secret, 'network-limit', networkOf(client))}`
 }
 
 export async function signInClientLimitKey(secret: string, client: string): Promise<string> {
