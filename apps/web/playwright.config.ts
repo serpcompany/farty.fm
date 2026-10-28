@@ -29,6 +29,11 @@ export default defineConfig({
   reporter: inCI ? [['list'], ['html', { open: 'never', outputFolder: 'e2e/report' }]] : [['list']],
   use: {
     baseURL,
+    // On macOS, full Chromium rather than chrome-headless-shell. macOS takes the shell, a bare
+    // executable, for an app of whatever launched it: from the Claude desktop app's shells, a
+    // second Claude, which loginwindow force-quits 32 s after launch, mid-test (#234). CI's Linux
+    // keeps the shell. `e2e/toots.spec.ts` passes the same `channel` to the browser it launches.
+    channel: process.platform === 'darwin' ? 'chromium' : undefined,
     httpCredentials: stagingPassword ? { username: 'pedos', password: stagingPassword } : undefined,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
