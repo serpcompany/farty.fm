@@ -48,6 +48,7 @@ const twinkle = song('twinkle')
 
 test('Toots are kept: made, found after a relaunch, renamed, and deleted', async ({
   playwright,
+  channel,
   headless,
   baseURL,
   httpCredentials,
@@ -60,7 +61,9 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
   test.setTimeout(300_000)
   const profile = testInfo.outputPath('profile')
   const launch = async (): Promise<BrowserContext> => {
+    // The config's browser: full Chromium on macOS, where the headless shell is force-quit at 32 s.
     const context = await playwright.chromium.launchPersistentContext(profile, {
+      channel,
       headless,
       baseURL,
       httpCredentials,
