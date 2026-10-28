@@ -17,8 +17,8 @@ export type PaymentsEnv = DeploymentEnv & {
 /**
  * How saving a Toot is paid for here:
  *
- * - `free`: where `savingIsPaid` says so: Production, and a Production build run locally. Saving
- *   needs no payment.
+ * - `free`: where `savingIsPaid` says saving is free. Saving needs no payment. Nowhere since #258,
+ *   and kept so that making saving free again is a change to `pricing.ts` alone.
  * - `stripe`: Stripe Checkout, live on Production and in test mode everywhere else (`livemode`).
  *   `webhookSecret` is null until it is set.
  * - `dev`: a local run on a local host with no Stripe key: `/dev/checkout/` stands in for
@@ -39,8 +39,8 @@ const WEBHOOK_SECRET = /^whsec_[A-Za-z0-9+/=]+$/
 /**
  * Payments for a request to `host` (the `Host` header, port included). Production takes only live
  * keys, and Staging and local runs only test keys, so a test key can't take real payments and a
- * live key can't be used outside Production. Going live is setting Production's keys, then
- * changing `savingIsPaid` (`paid`, which the tests replace).
+ * live key can't be used outside Production. Where saving is paid is `savingIsPaid` (`paid`, which
+ * the tests replace): everywhere, Production included (#258).
  */
 export function paymentsConfig(
   env: PaymentsEnv,

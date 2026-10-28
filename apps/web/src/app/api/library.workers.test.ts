@@ -20,8 +20,8 @@ import {
 // The library routes in workerd, with a real D1 and R2: uploads, the limits, deletes and their
 // tombstones, renames, and one user never reaching another's Recordings or Toots.
 
-// Saving a Toot is paid for on a local run (ADR 0010), which `payments.workers.test.ts` tests.
-// Here a Toot saves free, as on Production.
+// Saving a Toot is paid for everywhere (ADR 0010, #258), which `payments.workers.test.ts` tests.
+// Here a Toot saves free, as wherever `savingIsPaid` says saving is free (`free` in `stripe.ts`).
 vi.mock('@/server/toot-payments', async original => ({
   ...(await original<typeof import('@/server/toot-payments')>()),
   requestPayments: () => ({ kind: 'free' })

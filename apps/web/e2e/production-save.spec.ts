@@ -7,22 +7,26 @@ import {
   getUserMediaMs,
   waitForOpenMicrophone
 } from './fake-microphone'
+import { payAtTheDevCheckout } from './pay'
 import { skipWelcome } from './record'
 
-// Saving a Toot on Production, where it's free (ADR 0010, #213): signed in, Save to Toots saves at
-// once with no price and no checkout, two taps save one Toot, and the system Back leaves Song
-// Creator for Compose. Mary Had a Little Lamb unlocks with fixtures 095, 017, 022 and 002, as in
-// `compose.spec.ts`.
+// Saving a Toot on a Production build, where it costs $0.99 as everywhere (ADR 0010, #258): signed
+// in, Save to Toots shows the price and goes to the payment step, never a free save; two taps
+// start one checkout; and the Toot saves once it's paid, once. Mary Had a Little Lamb unlocks with
+// fixtures 095, 017, 022 and 002, as in `compose.spec.ts`.
 //
-// It runs on the Production build's own Worker, run locally with no `--env`, so sign-in has the dev
-// mailbox: `pnpm build:production`, then `E2E_SERVER=preview E2E_SITE_ENV=production`.
+// It runs on the Production build's own Worker, run locally with no `--env`: sign-in has the dev
+// mailbox, and with no Stripe key the payment step is the dev checkout (`paymentsConfig`), which
+// stands in for Stripe Checkout's page. `pnpm build:production`, then
+// `E2E_SERVER=preview E2E_SITE_ENV=production`. CI's e2e builds Staging, where this spec skips and
+// `song-creator.spec.ts` and `account.spec.ts` pay the same way.
 
 const production = process.env.E2E_SITE_ENV === 'production'
 
 test.use({ permissions: ['microphone'] })
 
 test.beforeEach(async ({ page }) => {
-  test.skip(!production, 'Saving is free only in a Production build (E2E_SITE_ENV=production)')
+  test.skip(!production, 'For a Production build (E2E_SITE_ENV=production)')
   await page.addInitScript(fakeMicrophone, { wavs: fixtureWavs(), delayMs: getUserMediaMs })
   await page.addInitScript(skipWelcome)
 })
@@ -41,12 +45,12 @@ async function accountToots(page: Page): Promise<string[]> {
   })
 }
 
-test('a signed-in save is free, saves one Toot for two taps, and Back leaves Song Creator', async ({
+test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot', async ({
   page
 }, testInfo) => {
   test.setTimeout(180_000)
   await page.goto('/profile/')
-  await signInByApi(page, newEmail(testInfo, 'free-save'))
+  await signInByApi(page, newEmail(testInfo, 'production-save'))
 
   // Four takes unlock Mary.
   await page.goto('/')
@@ -62,34 +66,40 @@ test('a signed-in save is free, saves one Toot for two taps, and Back leaves Son
   )
   await page.getByRole('button', { name: 'Done' }).click()
 
-  // Compose, then Song Creator, so the system Back has Compose to go back to.
   await tab(page, 'Compose').click()
   await expect(page).toHaveURL(/\/compose\/$/)
   await page.getByTestId('unlocked-songs').getByRole('link').click()
   await expect(page).toHaveURL(/\/compose\/mary\/$/)
   await expect(page.getByTestId('song-creator-state')).toBeVisible({ timeout: 60_000 })
 
-  // No price, and no checkout: two taps before the first is answered save one Toot.
+  // Save shows the price. Two taps before the first is answered go to the payment step once.
   const save = page.getByRole('button', { name: 'Save to Toots' })
-  await expect(save).toHaveText('Save to Toots')
-  const requests: string[] = []
-  page.on('request', request => requests.push(new URL(request.url()).pathname))
+  await expect(save).toHaveText('Save to Toots · $0.99')
+  const writes: string[] = []
+  page.on('request', request => {
+    const { pathname } = new URL(request.url())
+    if (request.method() === 'GET' || !/^\/api\/(toots|dev\/checkout)\//.test(pathname)) return
+    writes.push(`${request.method()} ${pathname.replace(/[0-9a-f-]{36}/, '{id}')}`)
+  })
   await save.evaluate(button => {
     ;(button as HTMLButtonElement).click()
     ;(button as HTMLButtonElement).click()
   })
-  await expect(page.getByRole('button', { name: 'Saved to Toots' })).toBeDisabled()
+  await payAtTheDevCheckout(page)
   await expect(page.getByText("Couldn't save this Toot.")).toHaveCount(0)
-  await expect(page).toHaveURL(/\/compose\/mary\/$/)
-  expect(requests.filter(path => path.includes('/checkout/'))).toEqual([])
 
-  // The account has it, once.
+  // The account has it, once, and the Toot went up only after it was paid for.
   await expect.poll(() => accountToots(page), { timeout: 30_000 }).toHaveLength(1)
   await page.waitForTimeout(1000)
   expect(await accountToots(page)).toHaveLength(1)
+  expect(writes).toEqual([
+    'POST /api/toots/{id}/checkout/',
+    'POST /api/dev/checkout/',
+    'PUT /api/toots/{id}/'
+  ])
 
-  // The system Back leaves Song Creator for Compose, and Toots has the one Toot.
-  await page.goBack()
+  // Back to Compose, and Toots has the one Toot.
+  await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
   await expect(page.getByRole('heading', { name: 'Unlocked · 1' })).toBeVisible()
   await tab(page, 'Toots').click()

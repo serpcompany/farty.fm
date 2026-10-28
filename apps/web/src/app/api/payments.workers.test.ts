@@ -21,7 +21,7 @@ import {
 
 // Paying to save a Toot (ADR 0010), in workerd with a real D1: a Toot uploads only once it's paid
 // for, through the dev checkout on a local run or Stripe Checkout (its API stubbed) with its
-// webhook. Saving stays free on Production.
+// webhook. Production pays the same way, in live mode (#258).
 
 /** What the Worker's env has on top of wrangler.jsonc's, as each test sets it. */
 const extraEnv = vi.hoisted(() => ({}) as Record<string, unknown>)
@@ -739,15 +739,68 @@ describe('on Staging', () => {
   })
 })
 
-describe('on Production', () => {
-  it('saves a Toot free, with no checkout', async () => {
+describe('on Production, where saving is paid too (#258)', () => {
+  beforeEach(() => {
     extraEnv.SITE_ENV = 'production'
+  })
+
+  const liveSession = (userId: string, tootId: string, fields: Partial<CheckoutSession> = {}) =>
+    sessionFor(userId, tootId, {
+      id: 'cs_live_first',
+      url: 'https://checkout.stripe.com/c/pay/cs_live_first',
+      livemode: true,
+      ...fields
+    })
+
+  it('pays through Stripe in live mode, with no dev checkout, and saves once paid', async () => {
+    extraEnv.STRIPE_SECRET_KEY = LIVE_KEY
     const a = await signUp('A')
-    const stripe = vi.spyOn(globalThis, 'fetch')
-    expect(await (await checkout(T1, a)).json()).toEqual({ paid: true })
+    expect(await (await save(T1, a)).json()).toEqual({ error: 'payment_required' })
+    const stripe = stubStripe(
+      liveSession(a.id, T1),
+      liveSession(a.id, T1, { status: 'complete', payment_status: 'paid' })
+    )
+    expect(await (await checkout(T1, a)).json()).toEqual({
+      url: 'https://checkout.stripe.com/c/pay/cs_live_first'
+    })
+    expect(new Headers(stripe.mock.calls[0][1]?.headers).get('authorization')).toBe(
+      `Bearer ${LIVE_KEY}`
+    )
+    expect((await payDev(T1, a)).status).toBe(404)
+    expect(devCheckoutServes(HOST)).toBe(false)
+    expect((await save(T1, a)).status).toBe(402)
+
+    // Back from Checkout, Stripe says it's paid, and the Toot saves once.
     expect(await paid(T1, a)).toBe(true)
     expect((await save(T1, a)).status).toBe(201)
-    expect((await payDev(T1, a)).status).toBe(404)
+    expect(stripe).toHaveBeenCalledTimes(2)
+  })
+
+  it('marks a Toot paid from a signed live event, never from a test one', async () => {
+    extraEnv.STRIPE_SECRET_KEY = LIVE_KEY
+    extraEnv.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET
+    const a = await signUp('A')
+    await startTootPayment(testDb(), a.id, T1, 'twinkle', 'cs_live_first', TOOT_PRICE)
+    const session = liveSession(a.id, T1, { status: 'complete', payment_status: 'paid' })
+    expect((await deliver(completed({ ...session, livemode: false }))).status).toBe(200)
+    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeNull()
+    expect((await deliver(completed(session))).status).toBe(200)
+    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
+    expect((await save(T1, a)).status).toBe(201)
+  })
+
+  it('takes no payment without a live key, and never stands in for Checkout', async () => {
+    const a = await signUp('A')
+    const stripe = vi.spyOn(globalThis, 'fetch')
+    for (const key of [undefined, TEST_KEY, 'rk_test_madeUpForTheTests']) {
+      extraEnv.STRIPE_SECRET_KEY = key
+      const refused = await checkout(T1, a)
+      expect(refused.status).toBe(503)
+      expect(await refused.json()).toEqual({ error: 'payments_unavailable' })
+      expect((await payDev(T1, a)).status).toBe(404)
+      expect(devCheckoutServes(HOST)).toBe(false)
+    }
+    expect((await save(T1, a)).status).toBe(402)
     expect(stripe).not.toHaveBeenCalled()
   })
 })
