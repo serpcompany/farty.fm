@@ -1,13 +1,18 @@
-import { expect, test } from '@playwright/test'
-import { recordAndSave, withFakeMicrophone } from './record'
+import { persistAsked, standInForPersist } from './database'
+import { offerInstallPrompt, prompted } from './install-prompt'
+import { g3Fart, recordG3, withFakeMicrophone } from './record'
+import {
+  controlledByTheServiceWorker,
+  errorsWhileOffline,
+  needsTheServiceWorker
+} from './service-worker'
+import { expect, test } from './test'
 
-// Fixture 090 is Melodic (G3). The install offer waits for the first saved Recording.
-withFakeMicrophone('090__carlosramon__17-pet__186119.wav')
+withFakeMicrophone(g3Fart)
 
 const iPhoneSafari =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1'
 
-/** A PNG's width and height, from its IHDR chunk. */
 function pngSize(png: Buffer): string {
   return `${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`
 }
@@ -15,7 +20,6 @@ function pngSize(png: Buffer): string {
 test('the manifest names Farty, opens it full screen, and has its icons', async ({ page }) => {
   await page.goto('/')
   const link = page.locator('link[rel="manifest"]')
-  // Without credentials, Chrome can't fetch it behind the Staging password.
   await expect(link).toHaveAttribute('crossorigin', 'use-credentials')
 
   const response = await page.request.get((await link.getAttribute('href')) ?? '')
@@ -36,25 +40,18 @@ test('the manifest names Farty, opens it full screen, and has its icons', async 
     expect(pngSize(await file.body()), icon.src).toBe(icon.sizes)
   }
 
-  // Chromium's own check, the one behind Android's Install app.
   const chromium = await page.context().newCDPSession(page)
   expect(await chromium.send('Page.getInstallabilityErrors')).toEqual({ installabilityErrors: [] })
 })
 
-test('the service worker opens the app shell offline', async ({ page, context }) => {
-  test.skip(
-    process.env.E2E_SERVER !== 'preview' && !process.env.E2E_BASE_URL,
-    'Only a build registers the service worker'
-  )
+test('the service worker opens the app shell offline', async ({ page, context, pageErrors }) => {
+  needsTheServiceWorker()
+  pageErrors.expect(...errorsWhileOffline, 'net::ERR_FAILED')
   await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
   await page.goto('/')
-  await page.waitForFunction(async () => {
-    await navigator.serviceWorker.ready
-    return navigator.serviceWorker.controller !== null
-  })
+  await controlledByTheServiceWorker(page)
 
   await context.setOffline(true)
-  // A file the shell never loaded fails offline, so what loads below came from the cache.
   const uncached = await page.evaluate(() =>
     fetch('/icons/maskable-512.png?never-fetched').then(
       () => 'loaded',
@@ -65,9 +62,7 @@ test('the service worker opens the app shell offline', async ({ page, context })
 
   await page.reload()
   await expect(page.getByTestId('record-button')).toBeVisible()
-  // The other tab, never opened before, loads from the cache too.
   await page.goto('/recordings/')
-  // Only the app's scripts show this, after they've read the (empty) Recordings.
   await expect(page.getByText('No Recordings yet')).toBeVisible()
   await page.getByRole('link', { name: 'Record', exact: true }).click()
   await expect(page).toHaveURL(/\/$/)
@@ -82,26 +77,12 @@ test.describe('on iPhone', () => {
   test('after the first saved Recording, says how to add Farty to the Home Screen, once', async ({
     page
   }) => {
-    await page.addInitScript(() => {
-      const asked = window as unknown as { keepAsked: boolean }
-      asked.keepAsked = false
-      navigator.storage.persisted = async () => false
-      navigator.storage.persist = async () => {
-        asked.keepAsked = true
-        return true
-      }
-    })
+    await page.addInitScript(standInForPersist)
     const card = page.getByRole('complementary', { name: 'Install Farty' })
 
-    await recordAndSave(page, 1.5)
-    await expect(page.getByTestId('result-note')).toHaveText('G3')
-    // Never over the new Recording's note.
+    await recordG3(page)
     await expect(card).toBeHidden()
-    // A guest's Recordings are kept (#203), so with the first one Farty asks the browser to keep
-    // them.
-    await expect
-      .poll(() => page.evaluate(() => (window as unknown as { keepAsked: boolean }).keepAsked))
-      .toBe(true)
+    await expect.poll(() => persistAsked(page)).toBe(true)
 
     await page.getByRole('button', { name: 'Done' }).click()
     await expect(page).toHaveURL(/\/recordings\/$/)
@@ -117,43 +98,23 @@ test.describe('on iPhone', () => {
 
 test.describe('on Android', () => {
   test.beforeEach(async ({ page }) => {
-    // Chrome fires beforeinstallprompt only for an installable site it trusts; this stands in.
-    await page.addInitScript(() => {
-      const prompted = window as unknown as { prompted: boolean }
-      prompted.prompted = false
-      // Offered until Farty's listener takes it, as Chrome offers it once the page is ready.
-      const offer = () => {
-        const event = Object.assign(new Event('beforeinstallprompt', { cancelable: true }), {
-          prompt: async () => {
-            prompted.prompted = true
-          }
-        })
-        window.dispatchEvent(event)
-        if (!event.defaultPrevented) setTimeout(offer, 100)
-      }
-      window.addEventListener('load', offer)
-    })
+    await page.addInitScript(offerInstallPrompt)
   })
 
   test('after the first saved Recording, offers Chrome’s install prompt', async ({ page }) => {
     const card = page.getByRole('complementary', { name: 'Install Farty' })
-
-    await recordAndSave(page, 1.5)
+    await recordG3(page)
     await page.getByRole('button', { name: 'Done' }).click()
     await card.getByRole('button', { name: 'Install app' }).click()
-    expect(await page.evaluate(() => (window as unknown as { prompted: boolean }).prompted)).toBe(
-      true
-    )
+    expect(await prompted(page)).toBe(true)
     await expect(card).toBeHidden()
   })
 
   test('hides the offer once Farty is installed', async ({ page }) => {
     const card = page.getByRole('complementary', { name: 'Install Farty' })
-
-    await recordAndSave(page, 1.5)
+    await recordG3(page)
     await page.getByRole('button', { name: 'Done' }).click()
     await expect(card.getByRole('button', { name: 'Install app' })).toBeVisible()
-    // Chrome fires this when Farty is installed, from its prompt or its own menu.
     await page.evaluate(() => window.dispatchEvent(new Event('appinstalled')))
     await expect(card).toBeHidden()
   })

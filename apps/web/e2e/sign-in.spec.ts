@@ -1,11 +1,8 @@
-import { expect, type Page, test } from '@playwright/test'
-
-// Sign-in end to end (#152), with no sign-in screen yet: the page itself calls the auth API, as
-// the app will, and reads its code from the dev mailbox, as a person reads their email.
+import type { Page } from '@playwright/test'
+import { expect, test } from './test'
 
 type Answer = { status: number; body: unknown }
 
-/** A request from the page itself, so the browser sends its own Origin and cookies. */
 function call(page: Page, method: 'GET' | 'POST', path: string, body?: unknown): Promise<Answer> {
   return page.evaluate(
     async ({ method, path, body }) => {
@@ -21,8 +18,10 @@ function call(page: Page, method: 'GET' | 'POST', path: string, body?: unknown):
 }
 
 test('a code from the dev mailbox signs in to the library, and signing out ends the session', async ({
-  page
+  page,
+  pageErrors
 }, testInfo) => {
+  pageErrors.expect('the server responded with a status of 401')
   const email = `fan-${testInfo.project.name}-${Date.now()}@example.com`
   await page.goto('/privacy/')
 
@@ -56,7 +55,6 @@ test('a code from the dev mailbox signs in to the library, and signing out ends 
     httpOnly: true,
     sameSite: 'Lax'
   })
-  // The library routes take the same session (src/server/session-user.ts).
   expect(await call(page, 'GET', '/api/library/')).toMatchObject({
     status: 200,
     body: { recordings: [], toots: [] }
@@ -67,7 +65,11 @@ test('a code from the dev mailbox signs in to the library, and signing out ends 
   expect((await call(page, 'GET', '/api/library/')).status).toBe(401)
 })
 
-test('a wrong code is refused, and only the four endpoints answer', async ({ page }) => {
+test('a wrong code is refused, and only the four endpoints answer', async ({
+  page,
+  pageErrors
+}) => {
+  pageErrors.expect(/the server responded with a status of 40[04]/)
   await page.goto('/privacy/')
   const wrong = await call(page, 'POST', '/api/auth/sign-in/email-otp', {
     email: 'nobody@example.com',

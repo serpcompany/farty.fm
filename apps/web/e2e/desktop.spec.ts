@@ -1,30 +1,20 @@
-import { expect, type Page, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { fakeMicrophone, microphone, waitForOpenMicrophone } from './fake-microphone'
 import { skipWelcome } from './record'
+import { comeBack, hero, pageSettled, pagesOutsideTheTabs } from './screens'
+import { expect, test } from './test'
 
-// On a computer, a wide window with a mouse, Farty is a phone app (#199): every tab is the product
-// page, and Download App shows a QR code to open Farty on a phone. Only the desktop project runs
-// this file.
-
-function hero(page: Page) {
-  return page.getByRole('heading', { name: 'Record your farts. Turn them into songs.', level: 1 })
-}
-
-/** The product page, with nothing that opens the app. */
 async function expectProductPage(page: Page) {
   await expect(hero(page)).toBeVisible()
-  // The app, its tabs included, is hidden.
   await expect(page.locator('#app')).toBeHidden()
   await expect(page.getByRole('navigation', { name: 'Tabs' })).toBeHidden()
   const lander = page.locator('#top')
-  // The only buttons are Download App's, in the top bar, the hero and the closing band.
   await expect(lander.getByRole('button')).toHaveText([
     'Download App',
     'Download App',
     'Download App'
   ])
-  // The links stay on the page, or go to Privacy and Support.
   const links = await lander
     .getByRole('link')
     .evaluateAll(all => all.map(link => link.getAttribute('href')))
@@ -73,7 +63,6 @@ test('widening a narrow window into the product page shuts the microphone', asyn
   await context.grantPermissions(['microphone'])
   await page.addInitScript(fakeMicrophone, { wavs: {}, delayMs: 0 })
   await page.addInitScript(skipWelcome, {})
-  // Narrower than 768px, a computer gets the phone app, and Record opens the microphone.
   await page.setViewportSize({ width: 700, height: 900 })
   await page.goto('/')
   await expect(page.getByTestId('record-button')).toBeVisible()
@@ -91,14 +80,8 @@ test('coming back to the page leaves the product page where it was', async ({ pa
   await expectProductPage(page)
   await page.getByRole('link', { name: 'FAQ' }).click()
   await expect(page).toHaveURL(/\/compose\/#faq$/)
-  for (const state of ['hidden', 'visible']) {
-    await page.evaluate(state => {
-      Object.defineProperty(document, 'visibilityState', { value: state, configurable: true })
-      document.dispatchEvent(new Event('visibilitychange'))
-    }, state)
-  }
-  // On a phone or tablet, coming back to a tab other than Record opens Record.
-  await page.waitForTimeout(500)
+  await comeBack(page)
+  await pageSettled(page)
   await expect(page).toHaveURL(/\/compose\/#faq$/)
 })
 
@@ -123,12 +106,12 @@ test('Download App shows a QR code for a phone; Escape closes it and gives focus
   }
 })
 
-test('the privacy, support and 404 pages stay pages, with no tabs', async ({ page }) => {
-  for (const [path, content] of [
-    ['/privacy/', page.getByRole('heading', { name: 'Privacy', level: 1 })],
-    ['/support/', page.getByRole('heading', { name: 'Support', level: 1 })],
-    ['/nope/', page.getByText('Page not found')]
-  ] as const) {
+test('the privacy, support and 404 pages stay pages, with no tabs', async ({
+  page,
+  pageErrors
+}) => {
+  pageErrors.expect('the server responded with a status of 404')
+  for (const [path, content] of pagesOutsideTheTabs(page)) {
     await page.goto(path)
     await expect(content).toBeVisible()
     await expect(hero(page)).toHaveCount(0)

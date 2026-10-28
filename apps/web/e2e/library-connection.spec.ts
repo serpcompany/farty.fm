@@ -1,22 +1,11 @@
-import { expect, type Page, test } from '@playwright/test'
-import {
-  fakeMicrophone,
-  fartAndRecord,
-  fixtureWavs,
-  getUserMediaMs,
-  waitForOpenMicrophone
-} from './fake-microphone'
-import { skipWelcome } from './record'
+import type { Page } from '@playwright/test'
+import { fartAndRecord, waitForOpenMicrophone, withFartingMicrophone } from './fake-microphone'
 import { onPhone } from './screens'
+import { expect, test } from './test'
 
-// A Farty tab left open while the phone sleeps can lose its IndexedDB connection: WebKit drops it
-// ("Connection to Indexed Database server lost"), and clearing site data closes it (#222). Saving
-// a Recording still works, on a fresh connection.
-
-/** An init script: keeps each IndexedDB connection the page opens, so the test can close it. */
 function keepConnections(): void {
   const connections: IDBDatabase[] = []
-  ;(window as unknown as { pedosConnections: IDBDatabase[] }).pedosConnections = connections
+  Object.assign(window, { pedosConnections: connections })
   const open = IDBFactory.prototype.open
   IDBFactory.prototype.open = function (this: IDBFactory, ...args: Parameters<IDBFactory['open']>) {
     const request = open.apply(this, args)
@@ -25,10 +14,6 @@ function keepConnections(): void {
   }
 }
 
-/**
- * Closes every connection the app holds. `announced` fires the `close` event too, as when the
- * browser closes one; without it, the app learns only when its next request fails.
- */
 function closeConnections(page: Page, { announced }: { announced: boolean }): Promise<number> {
   return page.evaluate(withEvent => {
     const connections = (window as unknown as { pedosConnections: IDBDatabase[] }).pedosConnections
@@ -41,12 +26,10 @@ function closeConnections(page: Page, { announced }: { announced: boolean }): Pr
 }
 
 test.describe('when the database connection is lost', () => {
-  test.use({ permissions: ['microphone'] })
   test.skip(({ viewport }) => !onPhone({ viewport }), 'Phone only')
+  withFartingMicrophone()
 
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(fakeMicrophone, { wavs: fixtureWavs(), delayMs: getUserMediaMs })
-    await page.addInitScript(skipWelcome)
     await page.addInitScript(keepConnections)
   })
 
@@ -61,7 +44,6 @@ test.describe('when the database connection is lost', () => {
       await page.getByRole('button', { name: 'Save' }).click()
       await expect(page.getByTestId('result-note')).toHaveText('G3')
 
-      // It's in the library.
       await page.getByRole('button', { name: 'Done', exact: true }).click()
       await expect(page).toHaveURL(/\/recordings\/$/)
       await expect(page.getByTestId('recording-row')).toHaveCount(1)

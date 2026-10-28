@@ -1,17 +1,10 @@
-import { expect, type Page, test } from '@playwright/test'
-import { skipWelcome, withFakeMicrophone } from './record'
-import { onPhone } from './screens'
+import type { Page } from '@playwright/test'
+import { g3Fart, recordingTimerShows, skipWelcome, withFakeMicrophone } from './record'
+import { hero, onPhone } from './screens'
+import { onABuild } from './service-worker'
+import { expect, test } from './test'
 
-// The product page at `/` on a touch tablet, until Farty is opened in this browser (#191). Phones
-// get Welcome instead, and download none of the lander's images. A computer gets the product page
-// on every tab (`desktop.spec.ts`).
-
-// Only the record flow's test records.
-withFakeMicrophone('090__carlosramon__17-pet__186119.wav')
-
-function hero(page: Page) {
-  return page.getByRole('heading', { name: 'Record your farts. Turn them into songs.', level: 1 })
-}
+withFakeMicrophone(g3Fart)
 
 function tabs(page: Page) {
   return page.getByRole('navigation', { name: 'Tabs' })
@@ -30,15 +23,13 @@ test.describe('on a touch tablet', () => {
     await page.goto('/')
     await expect(hero(page)).toBeVisible()
     await expect(tabs(page)).toBeHidden()
-    // Download App is for a computer only.
     await expect(page.getByRole('button', { name: 'Download App' })).toHaveCount(0)
 
-    // The hero's, between the header's and the closing band's.
-    await page.getByRole('button', { name: 'Open Farty' }).nth(1).click()
+    const openFartyInTheHero = page.getByRole('button', { name: 'Open Farty' }).nth(1)
+    await openFartyInTheHero.click()
     await expect(hero(page)).toBeHidden()
     await expect(tabs(page)).toBeVisible()
     await expect(page.getByTestId('record-button')).toBeVisible()
-    // The pressed button is hidden, so focus moves to the app rather than dropping to the page.
     await expect(app(page)).toBeFocused()
 
     await page.reload()
@@ -108,7 +99,7 @@ test.describe('on a touch tablet', () => {
     await page.getByTestId('record-button').click()
     await expect(page.getByTestId('recording-timer')).toBeVisible()
     await underTopBar('Recording')
-    await page.waitForTimeout(1000)
+    await recordingTimerShows(page, 1)
     await page.getByTestId('stop-button').click()
     await underTopBar('New Recording')
     await page.getByRole('button', { name: 'Save' }).click()
@@ -129,12 +120,10 @@ test('a phone gets Welcome, not the lander, and downloads none of its images', a
   viewport
 }) => {
   test.skip(!onPhone({ viewport }), 'Phone only')
-  // The context sees the service worker's requests too, such as its precache of `/`.
   const images: string[] = []
   context.on('request', request => {
     if (request.url().includes('/lander/')) images.push(request.url())
   })
-  // Every tab's page carries the lander, hidden, for a computer.
   await page.goto('/compose/')
   await expect(page.getByRole('button', { name: 'Allow microphone' })).toBeVisible()
   await expect(hero(page)).toBeHidden()
@@ -143,8 +132,7 @@ test('a phone gets Welcome, not the lander, and downloads none of its images', a
   await expect(page.getByRole('button', { name: 'Allow microphone' })).toBeVisible()
   await expect(hero(page)).toBeHidden()
   await page.waitForLoadState('networkidle')
-  // Only a build registers the service worker. Once it's ready, its install has precached `/`.
-  if (process.env.E2E_SERVER === 'preview' || process.env.E2E_BASE_URL) {
+  if (onABuild) {
     const kept = await page.evaluate(async () => {
       await navigator.serviceWorker.ready
       const urls: string[] = []

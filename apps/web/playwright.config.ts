@@ -8,8 +8,6 @@ const port = Number(process.env.E2E_PORT ?? (onProductionBuild ? 8787 : 3100))
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${port}`
 const inCI = Boolean(process.env.CI)
 
-// The preview runs the Staging gate (worker.ts), which reads its password from .dev.vars, and the
-// browser answers its prompt with the same password. `next dev` has no gate.
 const devVars = join(__dirname, '.dev.vars')
 const stagingPassword = existsSync(devVars)
   ? parseEnv(readFileSync(devVars, 'utf8')).STAGING_BASIC_AUTH_PASSWORD
@@ -18,12 +16,14 @@ if (onProductionBuild && !process.env.E2E_BASE_URL && !stagingPassword) {
   throw new Error('The preview asks for the Staging password: copy .dev.vars.example to .dev.vars')
 }
 
+const computerOnlySpec = 'desktop.spec.ts'
+
 export default defineConfig({
   testDir: 'e2e',
   outputDir: 'e2e/results',
   fullyParallel: true,
   forbidOnly: inCI,
-  retries: inCI ? 1 : 0,
+  retries: 0,
   workers: onProductionBuild ? 1 : undefined,
   expect: { timeout: 15_000 },
   reporter: inCI ? [['list'], ['html', { open: 'never', outputFolder: 'e2e/report' }]] : [['list']],
@@ -34,21 +34,18 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
   },
-  // The record journeys feed a fixture to Chromium's fake microphone, which only Chromium has.
   projects: [
-    // A computer has no app, only the product page (#199), so it runs only its own spec.
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
-      testMatch: 'desktop.spec.ts'
+      testMatch: computerOnlySpec
     },
-    // An iPad-size touch tablet, in Chromium: the app with the top bar, from 768px.
     {
       name: 'tablet',
       use: { ...devices['Galaxy Tab S4'], viewport: { width: 820, height: 1180 } },
-      testIgnore: 'desktop.spec.ts'
+      testIgnore: computerOnlySpec
     },
-    { name: 'phone', use: { ...devices['Pixel 7'] }, testIgnore: 'desktop.spec.ts' }
+    { name: 'phone', use: { ...devices['Pixel 7'] }, testIgnore: computerOnlySpec }
   ],
   webServer: process.env.E2E_BASE_URL
     ? undefined

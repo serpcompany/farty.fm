@@ -1,15 +1,22 @@
-import { expect, type Page, test } from '@playwright/test'
-import { recordAndSave, withFakeMicrophone } from './record'
+import type { Page } from '@playwright/test'
+import { all, write } from './database'
+import { g3Fart, recordG3, withFakeMicrophone } from './record'
+import { expect, test } from './test'
 
-// Fixture 090 is Melodic: its golden Recording Pitch is G3 (+13 cents).
-withFakeMicrophone('090__carlosramon__17-pet__186119.wav')
+withFakeMicrophone(g3Fart)
+
+type StoredRecording = { analysis: { state: string; analysis?: Record<string, unknown> } }
+
+async function storedAnalysis(page: Page): Promise<Record<string, unknown> | null> {
+  const [recording] = await all<StoredRecording>(page, 'recordings')
+  const { state, analysis } = recording?.analysis ?? {}
+  return state === 'analyzed' ? { ...analysis } : null
+}
 
 test('recording a Melodic fart shows its note, and it is still there after a reload', async ({
   page
 }) => {
-  await recordAndSave(page, 1.5)
-  await expect(page.getByTestId('result-note')).toHaveText('G3')
-
+  await recordG3(page)
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page).toHaveURL(/\/recordings\/$/)
   await expect(page.getByTestId('recording-row')).toHaveCount(1)
@@ -20,61 +27,20 @@ test('recording a Melodic fart shows its note, and it is still there after a rel
   await expect(page.getByTestId('recording-note')).toHaveText('G3')
 })
 
-/** The one stored Recording's analysis, read straight from IndexedDB. */
-async function storedAnalysis(page: Page): Promise<Record<string, unknown> | null> {
-  return page.evaluate(async () => {
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open('pedos')
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
-    const all = await new Promise<{ analysis: { state: string; analysis?: object } }[]>(
-      (resolve, reject) => {
-        const request = db.transaction('recordings').objectStore('recordings').getAll()
-        request.onsuccess = () => resolve(request.result)
-        request.onerror = () => reject(request.error)
-      }
-    )
-    db.close()
-    const analysis = all[0]?.analysis
-    return analysis?.state === 'analyzed' ? { ...analysis.analysis } : null
-  })
-}
-
 test('an analysis an older Recording Analysis made runs again on the next open', async ({
   page
 }) => {
-  await recordAndSave(page, 1.5)
-  await expect(page.getByTestId('result-note')).toHaveText('G3')
+  await recordG3(page)
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page.getByTestId('recording-row')).toHaveCount(1)
   const analyzed = await storedAnalysis(page)
   expect(typeof analyzed?.settleSeconds).toBe('number')
   expect(typeof analyzed?.version).toBe('number')
 
-  // As a release before #208 stored it: the same analysis, with no version (and, before #116,
-  // no settle time).
-  await page.evaluate(async () => {
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open('pedos')
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
-    const store = db.transaction('recordings', 'readwrite').objectStore('recordings')
-    await new Promise<void>((resolve, reject) => {
-      const request = store.getAll()
-      request.onsuccess = () => {
-        const [recording] = request.result
-        delete recording.analysis.analysis.settleSeconds
-        delete recording.analysis.analysis.version
-        const put = store.put(recording)
-        put.onsuccess = () => resolve()
-        put.onerror = () => reject(put.error)
-      }
-      request.onerror = () => reject(request.error)
-    })
-    db.close()
-  })
+  const [recording] = await all<StoredRecording>(page, 'recordings')
+  delete recording.analysis.analysis?.settleSeconds
+  delete recording.analysis.analysis?.version
+  await write(page, [{ store: 'recordings', value: recording }])
   expect(await storedAnalysis(page)).not.toHaveProperty('version')
 
   await page.reload()
