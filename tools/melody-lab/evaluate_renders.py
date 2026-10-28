@@ -128,7 +128,7 @@ def main():
     under = small_library_under_bar()
     if under:
         print(f"note: on the small library, golden reads unlocked Songs under {BAR['within_50c_of_fart_pct']}%"
-              f" within +-50 cents of their farts: {', '.join(under)} (fixtures/golden/README.md)")
+              f" within +-50 cents of their farts: {', '.join(under)} (fixtures/golden/port-tests.md)")
     sys.exit(1 if failures or set_problems else 0)
 
 

@@ -78,10 +78,6 @@
       "docs/design/screens.md": {
         "lines": 315,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "fixtures/golden/README.md": {
-        "lines": 362,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       }
     },
     "knownLargeFiles": {},

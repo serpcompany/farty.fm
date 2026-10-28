@@ -172,12 +172,12 @@ class Gates(unittest.TestCase):
             with self.subTest(name):
                 self.assertEqual(pdmx.padded_pickup_problems(meters, notes, 0.0), [])
 
-    def test_the_bar_is_the_readmes_bar(self):
+    def test_the_bar_is_the_docs_bar(self):
         golden = re.search(r"\*\*Renderer \(#41\)\*\* requires at least (\d+)% of notes within ±50 cents of "
-                           r"their fart's own pitch", (ROOT / "fixtures/golden/README.md").read_text(encoding="utf-8"))
+                           r"their fart's own pitch", (ROOT / "fixtures/golden/port-tests.md").read_text(encoding="utf-8"))
         gate = re.search(r"at least (\d+)% of notes within ±50 cents of their fart's own pitch, at least (\d+)% of "
                          r"onsets within ±50 ms, and no re-attacks", (HERE / "README.md").read_text(encoding="utf-8"))
-        self.assertIsNotNone(golden, "fixtures/golden/README.md no longer states the renderer's bar")
+        self.assertIsNotNone(golden, "fixtures/golden/port-tests.md no longer states the renderer's bar")
         self.assertIsNotNone(gate, "tools/catalog/README.md no longer states the render gate's bar")
         self.assertEqual(int(gate[1]), int(golden[1]))
         self.assertEqual(BAR, {"within_50c_of_fart_pct": int(golden[1]), "onsets_on_time_pct": int(gate[2]),
