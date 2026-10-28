@@ -7,13 +7,13 @@ import {
   deleteAccount,
   forgetAccount,
   libraryOwner,
+  offerStepAgain,
   problemOf,
   readSession,
-  offerStepAgain,
   readStepDraft,
   saveStepDraft,
-  setLibraryOwner,
   sendCode,
+  setLibraryOwner,
   setMarketingEmail,
   signIn,
   stopStepOffers,
@@ -68,7 +68,10 @@ describe('offerStepAgain', () => {
 describe('sendCode', () => {
   const sent = (response: Response) => {
     vi.stubGlobal('localStorage', memoryStorage())
-    vi.stubGlobal('fetch', vi.fn(async () => response))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => response)
+    )
     return sendCode('a@example.com', 'token')
   }
 
@@ -92,7 +95,10 @@ describe('sendCode', () => {
 
   it('sends with storage blocked, and remembers nothing', async () => {
     vi.stubGlobal('localStorage', blockedStorage())
-    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ success: true })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ success: true }))
+    )
     expect(await sendCode('a@example.com', 'token')).toMatchObject({ ok: true })
     expect(codeSentLately()).toBe(false)
   })

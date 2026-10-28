@@ -29,15 +29,18 @@ export default function PrivacyPage() {
           Your email is used for sign-in codes and for Farty news, which is on by default. You can
           unsubscribe from any email or on Profile. It&apos;s never sold.
         </li>
-        <li>
-          Before Farty sends a sign-in code, Cloudflare Turnstile checks that a person asked for it.
-          Cloudflare&apos;s use of what it reads from your browser is described in its{' '}
-          <a href="https://www.cloudflare.com/turnstile-privacy-policy/">
-            Turnstile privacy addendum
-          </a>
-          .
-        </li>
       </ul>
+
+      <h2>The account step</h2>
+      <p>
+        When the account step opens, such as after your first Result, Cloudflare Turnstile loads in
+        it, whether or not you make an account, and checks that a person asks for a sign-in code.
+        Cloudflare&apos;s use of what it reads from your browser is described in its{' '}
+        <a href="https://www.cloudflare.com/turnstile-privacy-policy/">
+          Turnstile privacy addendum
+        </a>
+        .
+      </p>
 
       <h2>Payments</h2>
       <p>

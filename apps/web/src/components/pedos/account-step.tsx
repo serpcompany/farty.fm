@@ -55,9 +55,12 @@ function Step() {
   const [siteKey, setSiteKey] = useState<string | null>(null)
   /** Turnstile's token for the next code. Each works once. */
   const [token, setToken] = useState<string | null>(null)
-  /** Bumped for a new widget, and so a new token: after each send, and back online. */
+  /** Bumped for a new widget, and so a new token: after each send, and on trying again. */
   const [widget, setWidget] = useState(0)
-  /** Turnstile couldn't load: it's tried again once the browser is online. */
+  /**
+   * The site key couldn't be read, or Turnstile couldn't load: Send code tries again, and so does
+   * coming back online.
+   */
   const [checkFailed, setCheckFailed] = useState(false)
   const heading = useRef<HTMLHeadingElement>(null)
   const emailField = useRef<HTMLInputElement>(null)
@@ -89,34 +92,42 @@ function Step() {
 
   useEffect(() => saveStepDraft({ phase, email }), [phase, email])
 
-  const readSiteKey = useEffectEvent(async () => {
+  const readSiteKey = async () => {
     const read = await turnstileSiteKey()
     if (read.ok) setSiteKey(read.value)
     else {
       setProblem(read.problem)
-      setCheckFailed(read.problem === 'failed')
+      setCheckFailed(true)
     }
-  })
+  }
+  const readSiteKeyOnShow = useEffectEvent(readSiteKey)
   const needsSiteKey = phase === 'email' && siteKey === null
   useEffect(() => {
-    if (needsSiteKey) void readSiteKey()
+    if (needsSiteKey) void readSiteKeyOnShow()
   }, [needsSiteKey])
+
+  /** Reads the site key again, or renders a new widget, after either failed. */
+  const checkAgain = () => {
+    setCheckFailed(false)
+    setProblem(null)
+    if (siteKey === null) void readSiteKey()
+    else setWidget(n => n + 1)
+  }
+  const checkAgainOnline = useEffectEvent(checkAgain)
 
   useEffect(() => {
     if (!checkFailed) return
-    const again = () => {
-      setCheckFailed(false)
-      setProblem(null)
-      if (siteKey === null) void readSiteKey()
-      else setWidget(n => n + 1)
-    }
+    const again = () => checkAgainOnline()
     window.addEventListener('online', again)
     return () => window.removeEventListener('online', again)
-  }, [checkFailed, siteKey])
+  }, [checkFailed])
 
   const send = async (event: FormEvent) => {
     event.preventDefault()
-    if (token === null) return
+    if (token === null) {
+      if (checkFailed) checkAgain()
+      return
+    }
     setBusy(true)
     setProblem(null)
     const losing = await unsavedBeforeSignIn(email).catch(() => 0)
@@ -237,7 +248,12 @@ function Step() {
                   }}
                 />
               )}
-              <Button type="submit" className="h-12 text-base" disabled={busy || token === null}>
+              {/* Without a token it waits for the widget, unless the check failed: then it tries again. */}
+              <Button
+                type="submit"
+                className="h-12 text-base"
+                disabled={busy || (token === null && !checkFailed)}
+              >
                 {busy ? <Spinner /> : 'Send code'}
               </Button>
             </form>

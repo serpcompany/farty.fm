@@ -449,6 +449,39 @@ test("Profile's Save to an account opens the step, which stays while they read t
   await expect(step).toBeHidden()
 })
 
+// Turnstile's site key read fails once (a 5xx while online), as a dropped request would: Send code
+// stays tappable and tries again, so the guest isn't left with only Not now.
+test("when Turnstile's check can't start, Send code tries again and sends the code", async ({
+  page
+}, testInfo) => {
+  await ownClient(page.context())
+  await page.addInitScript(skipWelcome)
+  let keyReads = 0
+  await page.route('**/api/auth/turnstile', route =>
+    keyReads++ === 0 ? route.fulfill({ status: 500, body: 'oops' }) : route.fallback()
+  )
+  await page.goto('/profile/')
+  await page.getByRole('button', { name: 'Save to an account' }).click()
+  const step = page.getByRole('dialog', { name: 'Keep your farts' })
+  await expect(step.getByRole('alert')).toHaveText(
+    "Couldn't reach Farty. Check your connection and try again."
+  )
+  const email = newEmail(testInfo, 'check-again')
+  await step.getByLabel('Email').fill(email)
+  const send = step.getByRole('button', { name: 'Send code' })
+  await expect(send).toBeEnabled()
+
+  await send.click()
+  await expect(step.getByRole('alert')).toBeHidden()
+  expect(keyReads).toBe(2)
+  // The test widget renders now, and passes.
+  await expect(step.getByTestId('turnstile')).toBeVisible()
+  await expect(send).toBeEnabled()
+  await send.click()
+  await expect(step.getByText(`We sent a 6-digit code to ${email}.`)).toBeVisible()
+  expect(await codeFor(page, email)).toMatch(/^\d{6}$/)
+})
+
 test("a guest's farts last the visit: they record and hear a Song, and Farty opens again with none", async ({
   page,
   context,
@@ -565,9 +598,14 @@ test("a guest's Recordings from before #237 stay, while their Toot and their new
     db.close()
   }, wav.toString('base64'))
 
-  // The first open with #237 notes the Recordings it keeps.
+  // The first open with #237 notes the Recordings it keeps. Told before #237 that Recordings stay,
+  // this guest is offered the step once more, at their next Result.
   await page.goto('/toots/')
   await expect(page.getByTestId('toot-row')).toHaveCount(1)
+  expect(await page.evaluate(() => localStorage.getItem('pedos.keptRecordings'))).toBe(
+    '["from-before"]'
+  )
+  expect(await page.evaluate(() => localStorage.getItem('pedos.accountStep'))).toBeNull()
   const reopened = await reopen(context, page)
   await expect(reopened.getByTestId('recording-row')).toHaveCount(1)
   expect(await recordingsStored(reopened, 'toots')).toBe(0)

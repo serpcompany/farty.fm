@@ -16,8 +16,10 @@
 #
 # Sign-in (#152), off localhost: the dev mailbox (/dev/mail/) is never served, the session endpoint
 # answers JSON, and a malformed sign-in gets a 400. Both need the environment's BETTER_AUTH_SECRET
-# (.github/workflows/web-auth-secret.yml); without it they get a 503. A local preview's sign-in is
-# the e2e journey's (e2e/sign-in.spec.ts). The dev checkout (/dev/checkout/, ADR 0010) is never served
+# (.github/workflows/web-auth-secret.yml); without it they get a 503. Turnstile's site key
+# (/api/auth/turnstile, #237) answers only when the environment has both TURNSTILE_SITE_KEY and
+# TURNSTILE_SECRET_KEY: without them no sign-in code is sent, and it gets a 503. A local preview's
+# sign-in is the e2e journey's (e2e/sign-in.spec.ts). The dev checkout (/dev/checkout/, ADR 0010) is never served
 # either.
 set -euo pipefail
 
@@ -307,6 +309,7 @@ if [[ ! "$base" =~ $local_base ]]; then
   eventually 'the session endpoint answers JSON' \
     answers /api/auth/get-session 200 application/json "${smoke[@]}"
   eventually 'a malformed sign-in from the site gets a 400' refuses_a_bad_sign_in
+  eventually 'Turnstile has its keys' answers /api/auth/turnstile 200 application/json "${smoke[@]}"
   if [[ "$env" == production ]]; then
     on_the_host "$canonical/" "a request at $canonical/ gets 200 with no password and no noindex" \
       serves "$canonical/" indexable

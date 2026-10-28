@@ -237,7 +237,10 @@ describe('openVisit', () => {
 
   /** The account step sends a sign-in code, as `sendNow` does. */
   async function sendACode(page: Page) {
-    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ success: true })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ success: true }))
+    )
     expect(await page.signIn.sendCode('a@example.com', 'token')).toMatchObject({ ok: true })
   }
 

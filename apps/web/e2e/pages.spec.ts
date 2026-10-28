@@ -15,8 +15,9 @@ test('the privacy page covers accounts, news email, Turnstile, guests, error rep
   await expect(
     page.getByText('Your Recordings and Toots stay in your browser on your device, and only until')
   ).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'The account step' })).toBeVisible()
   await expect(
-    page.getByText('Cloudflare Turnstile checks that a person asked for it')
+    page.getByText('When the account step opens, such as after your first Result, Cloudflare')
   ).toBeVisible()
   await expect(page.getByText('Delete account on Profile removes your email')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Error reports', exact: true })).toBeVisible()
