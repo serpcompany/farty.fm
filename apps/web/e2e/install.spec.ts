@@ -36,9 +36,11 @@ test('the manifest names Farty, opens it full screen, and has its icons', async 
     expect(pngSize(await file.body()), icon.src).toBe(icon.sizes)
   }
 
-  // Chromium's own check, the one behind Android's Install app.
+  // Chromium's own check, the one behind Android's Install app. Full Chromium, which macOS runs
+  // use (playwright.config.ts), also counts Playwright's off-the-record context against it.
   const chromium = await page.context().newCDPSession(page)
-  expect(await chromium.send('Page.getInstallabilityErrors')).toEqual({ installabilityErrors: [] })
+  const { installabilityErrors } = await chromium.send('Page.getInstallabilityErrors')
+  expect(installabilityErrors.filter(error => error.errorId !== 'in-incognito')).toEqual([])
 })
 
 test('the service worker opens the app shell offline', async ({ page, context }) => {
