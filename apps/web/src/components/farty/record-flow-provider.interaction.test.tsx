@@ -5,7 +5,13 @@ import { analyze } from '@/lib/analysis/client'
 import { MicrophoneDeniedError, MicrophoneReleasedError } from '@/lib/audio/microphone'
 import { stopPlayback } from '@/lib/audio/player'
 import { startTake, type Take } from '@/lib/audio/recorder'
-import { loadAudio, loadRecordings, saveAnalysis, saveRecording } from '@/lib/recording-store'
+import {
+  deleteRecording,
+  loadAudio,
+  loadRecordings,
+  saveAnalysis,
+  saveRecording
+} from '@/lib/recording-store'
 import type { Recording } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
@@ -18,6 +24,7 @@ vi.mock('@/lib/audio/recorder', () => ({ startTake: vi.fn() }))
 vi.mock('@/lib/recording-store', () => ({
   saveRecording: vi.fn(),
   saveAnalysis: vi.fn(),
+  deleteRecording: vi.fn(),
   loadAudio: vi.fn(),
   loadRecordings: vi.fn()
 }))
@@ -205,6 +212,19 @@ describe('RecordFlowProvider', () => {
     act(() => flow.closeFlow())
     expect(flow.flow).toBeNull()
     expect(releaseHold).toHaveBeenCalledOnce()
+  })
+
+  it('closes when its Recording leaves the library, so Record works again', async () => {
+    await recordAndStop()
+    await finishSaving()
+    expect(flow.flow).toMatchObject({ kind: 'result', id: 'r1' })
+
+    await act(() => library.deleteRecording('r1'))
+    expect(deleteRecording).toHaveBeenCalledWith('r1')
+    expect(flow.flow).toBeNull()
+    expect(flow.showsRecordFlow).toBe(false)
+    await act(() => flow.startRecording())
+    expect(startTake).toHaveBeenCalledTimes(2)
   })
 
   it('starts no take while Review shows', async () => {

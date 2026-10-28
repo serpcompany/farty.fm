@@ -184,6 +184,12 @@ export function RecordFlowProvider({ children }: { children: ReactNode }) {
     setFlow(null)
   }, [])
 
+  const flowRecordingId = flow && 'id' in flow ? flow.id : null
+  useEffect(() => {
+    if (flowRecordingId === null || recordings === null) return
+    if (!recordings.some(recording => recording.id === flowRecordingId)) closeFlow()
+  }, [flowRecordingId, recordings, closeFlow])
+
   const dismissProblem = useCallback(() => setProblem(null), [])
 
   const value = useMemo(

@@ -117,6 +117,10 @@ as a fake microphone.
   they are Record another and Done (`e2e/compose.spec.ts`, "saving farts unlocks Songs on Compose,
   and the Result says so"; `e2e/record-warm.spec.ts`, "the microphone stays open from Result to
   every screen after it").
+- A flow whose Recording leaves the library, because another tab signed out or a sync deleted it,
+  closes, so the tabs and Record work again
+  (`src/components/farty/record-flow-provider.interaction.test.tsx`, "closes when its Recording
+  leaves the library, so Record works again").
 - A guest's first Result offers the account step before going where they tapped
   ([Accounts](account.md#when-the-step-opens)). The first saved Recording brings the install offer
   once the flow closes ([Installing and offline](install.md#the-install-offer)).
