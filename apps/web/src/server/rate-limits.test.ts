@@ -14,7 +14,7 @@ import {
 
 import { GET_SESSION_ENDPOINT, SEND_CODE_ENDPOINT, SIGN_IN_ENDPOINT } from './auth-endpoints'
 import { serveAuthRequest } from './auth-request'
-import { clientLimitKey, consumeSlot, SITE_CODES_KEY } from './rate-limits'
+import { clientLimitKey, consumeSlot, networkLimitKey, SITE_CODES_KEY } from './rate-limits'
 
 const { db, local, staging, mailed, mailCount, signIn, rows } = signInHarness()
 
@@ -129,7 +129,18 @@ describe('code limits', () => {
     expect(await mailCount('fan36@example.com')).toBe(1)
   })
 
-  it('spend per email and client, then per email, then per network, then site-wide, which counts only codes that go out', async () => {
+  it('hold a network past its 30 before it spends anyone’s codes per email', async () => {
+    const ask = (email: string, n: number) =>
+      sendCode(local(), email, { ip: `2001:db8:1:${n.toString(16)}::1` })
+    for (let n = 1; n <= 30; n++) await ask(`fan${n}@example.com`, n)
+    expect(await mailed()).toHaveLength(30)
+    for (let n = 31; n <= 50; n++) await ask('member@example.com', n)
+    expect(await mailCount('member@example.com')).toBe(0)
+    await sendCode(local(), 'member@example.com', { ip: '198.51.100.1' })
+    expect(await mailCount('member@example.com')).toBe(1)
+  })
+
+  it('spend per email and client, then per network, then per email, then site-wide, which counts only codes that go out', async () => {
     const sent: Sent = []
     const env = staging(sent)
     const ask = async (email: string, client: number, times = 1) => {
@@ -140,6 +151,10 @@ describe('code limits', () => {
     }
     await ask('member@example.com', 1, 10)
     expect(sent).toHaveLength(5)
+    const network = await networkLimitKey(SECRET, '198.51.100.1')
+    expect(await rows('SELECT count FROM rate_limit WHERE key = ?', network)).toEqual([
+      { count: 5 }
+    ])
     for (const client of [2, 3, 4]) await ask('member@example.com', client, 5)
     expect(sent).toHaveLength(20)
     await ask('member@example.com', 5)

@@ -65,11 +65,11 @@ async function codeMayGoOut(
     (await consumeSlot(database, key, now, rule)).allowed
   const perClient = await emailClientLimitKey(settings.secret, address, client)
   if (!(await spend(perClient, LIMITS.codesPerEmailAndClient))) return false
+  const perNetwork = await networkLimitKey(settings.secret, client)
+  if (!(await spend(perNetwork, LIMITS.codesPerNetwork))) return false
   const perEmail = await emailLimitKey(settings.secret, address)
   if (!(await spend(perEmail, LIMITS.codesPerEmail))) return false
   if (settings.signupAllowlist?.has(address) === false) return false
-  const perNetwork = await networkLimitKey(settings.secret, client)
-  if (!(await spend(perNetwork, LIMITS.codesPerNetwork))) return false
   const site = await consumeSlot(database, SITE_CODES_KEY, now, LIMITS.codesSiteWide)
   if (!site.allowed) logSiteCodeLimit(site.retryAfter)
   return site.allowed
