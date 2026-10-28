@@ -20,13 +20,15 @@ const computerOnlySpec = 'desktop.spec.ts'
 
 export default defineConfig({
   testDir: 'e2e',
-  outputDir: 'e2e/results',
+  outputDir: 'test-results',
   fullyParallel: true,
   forbidOnly: inCI,
   retries: 0,
   workers: onProductionBuild ? 1 : undefined,
   expect: { timeout: 15_000 },
-  reporter: inCI ? [['list'], ['html', { open: 'never', outputFolder: 'e2e/report' }]] : [['list']],
+  reporter: inCI
+    ? [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]]
+    : [['list']],
   use: {
     baseURL,
     httpCredentials: stagingPassword ? { username: 'farty', password: stagingPassword } : undefined,

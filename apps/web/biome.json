@@ -8,8 +8,8 @@
       "!.next",
       "!.open-next",
       "!.wrangler",
-      "!e2e/results",
-      "!e2e/report",
+      "!test-results",
+      "!playwright-report",
       "!cloudflare-env.d.ts",
       "!drizzle"
     ]
