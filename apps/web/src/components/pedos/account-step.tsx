@@ -243,6 +243,8 @@ function Step() {
                   siteKey={siteKey}
                   onToken={setToken}
                   onFailed={() => {
+                    // A token it gave before failing may no longer pass: a tap tries again instead.
+                    setToken(null)
                     setProblem('failed')
                     setCheckFailed(true)
                   }}

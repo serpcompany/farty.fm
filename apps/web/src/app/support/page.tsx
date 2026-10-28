@@ -22,7 +22,7 @@ const questions = [
   },
   {
     q: 'Where are my Recordings? Can you recover them?',
-    a: 'Without an account, they’re gone when you close Farty, and we never receive them, so we can’t recover them. With a free account, they’re kept with your account, on any phone or tablet you sign in on.'
+    a: 'Without an account, they’re gone when you close Farty, except the ones you already had before this change. We never receive them, so we can’t recover them. With a free account, they’re kept with your account, on any phone or tablet you sign in on.'
   }
 ]
 

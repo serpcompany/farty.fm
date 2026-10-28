@@ -139,6 +139,22 @@ describe('Send code and Turnstile', () => {
     expect(sendButton().disabled).toBe(false)
   })
 
+  it('drops the token and renders a new widget on a tap when Turnstile fails after giving one', async () => {
+    const fetch = server(keyAnswer())
+    await render()
+    await act(async () => page.widgets[0].onToken('token-1'))
+    await act(async () => page.widgets[0].onFailed())
+    expect(sendButton().disabled).toBe(false)
+
+    await tapSend()
+    // The old token isn't sent: a new widget gives the next one.
+    expect(fetch.mock.calls.some(([url]) => String(url).includes('send-verification-otp'))).toBe(
+      false
+    )
+    expect(page.widgets).toHaveLength(2)
+    expect(sendButton().disabled).toBe(true)
+  })
+
   it('tries again when the browser comes back online', async () => {
     server(keyAnswer())
     await render()
