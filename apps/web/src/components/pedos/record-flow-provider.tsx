@@ -10,13 +10,9 @@ import {
   useRef,
   useState
 } from 'react'
+import { MicrophoneDeniedError, MicrophoneReleasedError } from '@/lib/audio/microphone'
 import { stopPlayback } from '@/lib/audio/player'
-import {
-  MicrophoneDeniedError,
-  MicrophoneReleasedError,
-  startTake,
-  type Take
-} from '@/lib/audio/recorder'
+import { startTake, type Take } from '@/lib/audio/recorder'
 import { songs } from '@/lib/catalog/songs.generated'
 import { type CoverageChanges, coverageChanges } from '@/lib/pitch-coverage'
 import { heardSomething, maximumTakeSeconds, type Recording } from '@/lib/recordings'

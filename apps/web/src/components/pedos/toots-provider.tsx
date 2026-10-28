@@ -12,7 +12,7 @@ import {
 } from 'react'
 import { forgetDecoded, stopPlayback } from '@/lib/audio/player'
 import { songs } from '@/lib/catalog/songs.generated'
-import { onLibraryChanged } from '@/lib/library-sync'
+import { onLibraryChanged } from '@/lib/library-changes'
 import { reportError } from '@/lib/telemetry/errors'
 import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
 import * as tootStore from '@/lib/toot-store'

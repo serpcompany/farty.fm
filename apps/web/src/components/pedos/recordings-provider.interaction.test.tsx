@@ -5,7 +5,7 @@ import { analyze } from '@/lib/analysis/client'
 import { upgradeAnalyses } from '@/lib/analysis-upgrade'
 import { play, stopPlayback } from '@/lib/audio/player'
 import { songs } from '@/lib/catalog/songs.generated'
-import { type LibraryChange, onLibraryChanged } from '@/lib/library-sync'
+import { type LibraryChange, onLibraryChanged } from '@/lib/library-changes'
 import * as store from '@/lib/recording-store'
 import type { Analysis, AnalysisState, Recording } from '@/lib/recordings'
 import { reportError } from '@/lib/telemetry/errors'
@@ -22,7 +22,7 @@ vi.mock('@/lib/recording-store', () => ({
 }))
 vi.mock('@/lib/analysis/client', () => ({ analyze: vi.fn() }))
 vi.mock('@/lib/analysis-upgrade', () => ({ upgradeAnalyses: vi.fn() }))
-vi.mock('@/lib/library-sync', () => ({ onLibraryChanged: vi.fn() }))
+vi.mock('@/lib/library-changes', () => ({ onLibraryChanged: vi.fn() }))
 vi.mock('@/lib/audio/player', () => ({ play: vi.fn(), stopPlayback: vi.fn() }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: vi.fn() }))
 vi.mock('@/lib/wav', () => ({

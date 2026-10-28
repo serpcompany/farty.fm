@@ -3,7 +3,7 @@
 import { Lock, Mic, Music } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { askForMicrophone } from '@/lib/audio/recorder'
+import { askForMicrophone } from '@/lib/audio/keep-microphone-open'
 import { useWelcome } from './welcome-provider'
 
 export function Welcome() {

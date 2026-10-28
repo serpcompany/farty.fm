@@ -10,6 +10,7 @@ export async function openLibraryPage() {
   vi.resetModules()
   return {
     sync: await import('@/lib/library-sync'),
+    changes: await import('@/lib/library-changes'),
     store: await import('@/lib/recording-store'),
     toots: await import('@/lib/toot-store')
   }

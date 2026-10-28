@@ -21,7 +21,7 @@ describe('reading the account', () => {
     library.account.add('recordings', recording, wav(5))
     library.account.add('toots', made, wav(6))
     const changes: LibraryChange[] = []
-    library.page.sync.onLibraryChanged(change => changes.push(change))
+    library.page.changes.onLibraryChanged(change => changes.push(change))
     await library.page.sync.syncOnce('user-a')
     expect(await library.page.store.loadRecordings()).toEqual([recording])
     expect(await library.page.toots.loadToots()).toEqual([made])
@@ -39,7 +39,7 @@ describe('reading the account', () => {
     await library.page.sync.syncOnce('user-a')
     library.account.remove('recordings', recording.id)
     const changes: LibraryChange[] = []
-    library.page.sync.onLibraryChanged(change => changes.push(change))
+    library.page.changes.onLibraryChanged(change => changes.push(change))
     await library.page.sync.syncOnce('user-a')
     expect(await library.page.store.loadRecordings()).toEqual([])
     expect(changes).toEqual([

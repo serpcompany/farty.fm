@@ -11,8 +11,6 @@ import { onQueued } from './outbox'
 import { sendOutbox } from './outbox-send'
 import { clearLibrary, download, withDb } from './recording-store'
 
-export { onLibraryChanged } from './library-changes'
-
 const syncLock = 'pedos-sync'
 
 async function withSyncLock<T>(job: () => Promise<T>): Promise<T> {

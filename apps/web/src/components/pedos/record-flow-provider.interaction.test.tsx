@@ -2,13 +2,9 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { analyze } from '@/lib/analysis/client'
+import { MicrophoneDeniedError, MicrophoneReleasedError } from '@/lib/audio/microphone'
 import { stopPlayback } from '@/lib/audio/player'
-import {
-  MicrophoneDeniedError,
-  MicrophoneReleasedError,
-  startTake,
-  type Take
-} from '@/lib/audio/recorder'
+import { startTake, type Take } from '@/lib/audio/recorder'
 import { loadAudio, loadRecordings, saveAnalysis, saveRecording } from '@/lib/recording-store'
 import type { Recording } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
@@ -18,11 +14,7 @@ import { PlaybackProvider } from './playback-provider'
 import { RecordFlowProvider, useRecordFlow } from './record-flow-provider'
 import { RecordingsProvider, useRecordings } from './recordings-provider'
 
-vi.mock('@/lib/audio/recorder', () => ({
-  MicrophoneDeniedError: class extends Error {},
-  MicrophoneReleasedError: class extends Error {},
-  startTake: vi.fn()
-}))
+vi.mock('@/lib/audio/recorder', () => ({ startTake: vi.fn() }))
 vi.mock('@/lib/recording-store', () => ({
   saveRecording: vi.fn(),
   saveAnalysis: vi.fn(),
@@ -32,7 +24,7 @@ vi.mock('@/lib/recording-store', () => ({
 vi.mock('@/lib/analysis/client', () => ({ analyze: vi.fn() }))
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
 vi.mock('@/lib/analysis-upgrade', () => ({ upgradeAnalyses: vi.fn() }))
-vi.mock('@/lib/library-sync', () => ({ onLibraryChanged: () => () => undefined }))
+vi.mock('@/lib/library-changes', () => ({ onLibraryChanged: () => () => undefined }))
 vi.mock('@/lib/audio/player', () => ({ play: vi.fn(), stopPlayback: vi.fn() }))
 vi.mock('@/lib/stale-build', () => ({ holdReload: vi.fn() }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: vi.fn() }))

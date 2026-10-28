@@ -3,7 +3,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { forgetDecoded, play, stopPlayback } from '@/lib/audio/player'
 import { songs } from '@/lib/catalog/songs.generated'
-import { type LibraryChange, onLibraryChanged } from '@/lib/library-sync'
+import { type LibraryChange, onLibraryChanged } from '@/lib/library-changes'
 import { reportError } from '@/lib/telemetry/errors'
 import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
 import * as tootStore from '@/lib/toot-store'
@@ -19,7 +19,7 @@ vi.mock('@/lib/toot-store', () => ({
   renameToot: vi.fn(),
   deleteToot: vi.fn()
 }))
-vi.mock('@/lib/library-sync', () => ({ onLibraryChanged: vi.fn() }))
+vi.mock('@/lib/library-changes', () => ({ onLibraryChanged: vi.fn() }))
 vi.mock('@/lib/audio/player', () => ({
   play: vi.fn(),
   stopPlayback: vi.fn(),

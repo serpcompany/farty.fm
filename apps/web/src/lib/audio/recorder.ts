@@ -17,9 +17,6 @@ import {
   releaseMicrophone
 } from './microphone'
 
-export { askForMicrophone, keepMicrophoneOpen } from './keep-microphone-open'
-export { MicrophoneDeniedError, MicrophoneReleasedError } from './microphone'
-
 export type Take = {
   stop(): Promise<PcmAudio>
   cancel(): void

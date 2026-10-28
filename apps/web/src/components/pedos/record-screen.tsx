@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { keepMicrophoneOpen } from '@/lib/audio/recorder'
+import { keepMicrophoneOpen } from '@/lib/audio/keep-microphone-open'
 import { desktop } from '@/lib/desktop'
 import { RecordButton } from './record-button'
 import { type RecordProblem, useRecordFlow } from './record-flow-provider'

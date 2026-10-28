@@ -24,7 +24,7 @@ describe('claimLibrary', () => {
     claimedBy('user-b')
     await recorded()
     const changes: LibraryChange[] = []
-    library.page.sync.onLibraryChanged(change => changes.push(change))
+    library.page.changes.onLibraryChanged(change => changes.push(change))
     expect(await library.page.sync.claimLibrary('user-a')).toBe(true)
     expect(await library.page.store.loadRecordings()).toEqual([])
     expect(await outbox()).toEqual([])
@@ -60,7 +60,7 @@ describe('forgetLibrary', () => {
     await library.page.sync.claimLibrary('user-a', 'a@example.com')
     await recorded()
     const changes: LibraryChange[] = []
-    library.page.sync.onLibraryChanged(change => changes.push(change))
+    library.page.changes.onLibraryChanged(change => changes.push(change))
     await library.page.sync.forgetLibrary()
     expect(localStorage.getItem('pedos.account')).toBeNull()
     expect(localStorage.getItem('pedos.account.email')).toBeNull()
@@ -100,7 +100,7 @@ describe('a guest who records, then signs in', () => {
     library.account.add('recordings', anotherBrowsersRecording(2), wav(6))
     library.account.add('recordings', anotherBrowsersRecording(3), wav(7))
     const changes: LibraryChange[] = []
-    library.page.sync.onLibraryChanged(change => changes.push(change))
+    library.page.changes.onLibraryChanged(change => changes.push(change))
 
     expect(await library.page.sync.claimLibrary('user-a', 'a@example.com')).toBe(true)
     await library.page.sync.syncOnce('user-a')
