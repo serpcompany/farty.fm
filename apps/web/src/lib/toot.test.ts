@@ -40,7 +40,6 @@ describe('noteCaption', () => {
   })
 
   it('names the note, its Recording and Recording Pitch, and the written length', () => {
-    // The fart plays raw, at its own pitch (ADR 0012), so the caption names no shift.
     const sounding = note.pitch - 2
     const length = noteSeconds(song, note).length.toFixed(1)
     const caption = noteCaption(song, arrangement, note, recording(sounding + 2.1))

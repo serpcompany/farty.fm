@@ -10,11 +10,6 @@ import {
   type Recording
 } from './recordings'
 
-/**
- * Steady noise at `rmsDb` dBFS, the same every run: white noise through a one-pole low-pass. The
- * default pole (0.97) is the test's room; 0 is white noise, and 0.995 a low rumble such as HVAC
- * or traffic.
- */
 function roomNoise(seconds: number, sampleRate: number, rmsDb: number, pole = 0.97): Float32Array {
   let seed = 7
   const random = () => {
@@ -33,7 +28,6 @@ function roomNoise(seconds: number, sampleRate: number, rmsDb: number, pole = 0.
 }
 
 describe('heardSomething', () => {
-  // 016, 019, 081 and 086 are shorter than the 0.5 s the old rule asked for.
   it.each(['016', '019', '081', '086'])('hears the short fart %s', async id => {
     const golden = goldenRecordings.find(g => g.id === id)
     if (!golden) throw new Error(`No fixture ${id}`)
@@ -57,8 +51,6 @@ describe('heardSomething', () => {
     expect(heardSomething(roomNoise(2, 48_000, rmsDb), 48_000)).toBe(false)
   })
 
-  // Steady noise reads as contrast by its bandwidth and the take's length (#159 review). A low
-  // rumble passes: a known false accept, which reaches Review, where analysis finds no steady note.
   it.each([
     { noise: 'white noise', pole: 0, seconds: 2, heard: false },
     { noise: 'white noise', pole: 0, seconds: 30, heard: false },
@@ -70,7 +62,6 @@ describe('heardSomething', () => {
     expect(heardSomething(roomNoise(seconds, 48_000, -40, pole), 48_000)).toBe(heard)
   })
 
-  /** Fixture `id` 20 dB quieter, in room noise at `roomDb` dBFS, after 300 ms of that room. */
   async function fartInRoom(id: string, roomDb: number) {
     const golden = goldenRecordings.find(g => g.id === id)
     if (!golden) throw new Error(`No fixture ${id}`)
@@ -105,7 +96,6 @@ describe('heardSomething', () => {
     const golden = goldenRecordings.find(g => g.id === '017')
     if (!golden) throw new Error('No fixture 017')
     const { samples, sampleRate } = await decoded(golden)
-    // 017 is the quietest fixture over its own floor.
     expect(levelContrast(samples, sampleRate)?.contrastDb).toBeGreaterThan(4)
     expect(levelContrast(roomNoise(2, 48_000, -40), 48_000)?.contrastDb).toBeLessThan(4)
   })

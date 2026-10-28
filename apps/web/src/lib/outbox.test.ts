@@ -17,8 +17,6 @@ describe('mergeOutbox', () => {
     })
   })
 
-  // The upload reads the Toot when it's sent, so the new title goes with it. A new version tells an
-  // upload already on its way that it carried the old one (`settle`).
   it('lets a rename ride in an upload, with a new version', () => {
     expect(mergeOutbox(queued('put'), 'toots', id, 'rename', stamp('v2'))).toEqual({
       ...queued('put'),

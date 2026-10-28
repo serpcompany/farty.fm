@@ -5,13 +5,8 @@ type FakeSource = { key: string; started: boolean; stopped: boolean; onended: ((
 
 const sources: FakeSource[] = []
 
-/**
- * Decodes that finish only when the test says so, like a Recording loading from IndexedDB, in the
- * order they began.
- */
 const pending: { key: string; finish: () => void }[] = []
 
-/** Finishes the `nth` decode of `key` still pending. */
 function finish(key: string, nth = 0): void {
   const waiting = pending.filter(p => p.key === key)[nth]
   if (!waiting) throw new Error(`no decode of ${key} pending`)
@@ -57,7 +52,6 @@ vi.mock('./context', () => ({
 
 const wav = (key: string) => async () => new TextEncoder().encode(key).buffer as ArrayBuffer
 
-/** Lets the awaits inside `play` run. */
 const settle = () => new Promise(resolve => setTimeout(resolve, 0))
 
 describe('the player', () => {
@@ -127,7 +121,6 @@ describe('the player', () => {
     await settle()
     const playingA2 = play('row-a', wav('row-a'), null, endedA2)
     await settle()
-    // Both plays of A share its one decode.
     expect(pending.map(p => p.key)).toEqual(['row-a', 'row-b'])
     finish('row-a')
     await Promise.all([playingA1, playingA2])

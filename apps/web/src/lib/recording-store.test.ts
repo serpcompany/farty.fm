@@ -3,13 +3,9 @@ import { forceCloseDatabase, IDBFactory } from 'fake-indexeddb'
 import { unwrap } from 'idb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-// One spy for every page's modules.
 const { reportError } = vi.hoisted(() => ({ reportError: vi.fn() }))
 vi.mock('./telemetry/errors', () => ({ reportError }))
 
-// A tab left asleep can lose its IndexedDB connection: WebKit drops it ("Connection to Indexed
-// Database server lost"), and clearing site data closes it (#222). Over a real IndexedDB
-// (fake-indexeddb), each page with fresh modules.
 describe('a lost database connection', () => {
   beforeEach(() => {
     vi.stubGlobal('indexedDB', new IDBFactory())
@@ -40,7 +36,6 @@ describe('a lost database connection', () => {
     const store = await page()
     await save(store)
     const first = await store.db()
-    // It takes the connection, though fake-indexeddb's types say its class.
     forceCloseDatabase(unwrap(first) as unknown as Parameters<typeof forceCloseDatabase>[0])
     const saved = await save(store)
     expect(saved.number).toBe(2)
@@ -52,7 +47,6 @@ describe('a lost database connection', () => {
   it('saves on a fresh connection when the one it had was closed without a word', async () => {
     const store = await page()
     await save(store)
-    // Closed with no `close` event, as a connection is that the page hasn't heard is lost.
     ;(await store.db()).close()
     const saved = await save(store)
     expect(saved.number).toBe(2)
@@ -98,18 +92,12 @@ describe('a lost database connection', () => {
     expect(reportError).not.toHaveBeenCalled()
   })
 
-  /**
-   * The next transaction on the page's connection commits, but the page hears its connection was
-   * lost instead, as WebKit can when the IndexedDB server goes away as a transaction completes.
-   */
   async function loseNextCompletion(store: Store) {
     const connection = unwrap(await store.db())
     const transaction = connection.transaction.bind(connection)
     connection.transaction = ((...args: Parameters<IDBDatabase['transaction']>) => {
       connection.transaction = transaction
       const tx = transaction(...args)
-      // idb listens for `complete`, `error` and `abort` as it wraps the transaction (`tx.done`):
-      // its `complete` hears an `error` instead. Whatever listens after it hears as usual.
       let failed: EventListenerOrEventListenerObject | null = null
       const listen = tx.addEventListener
       tx.addEventListener = ((type: string, listener: EventListenerOrEventListenerObject) => {
@@ -156,7 +144,6 @@ describe('a lost database connection', () => {
     expect(await toots.loadToots()).toEqual([toot])
     const outbox = await store.withDb(database => database.getAll('outbox'))
     expect(outbox.map(entry => entry.id)).toEqual([toot.id])
-    // Another Toot under its id still fails.
     await expect(toots.saveToot({ ...toot, title: 'Other' }, new ArrayBuffer(8))).rejects.toThrow()
     expect(reportError).not.toHaveBeenCalled()
   })

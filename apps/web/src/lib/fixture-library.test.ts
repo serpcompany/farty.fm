@@ -8,9 +8,6 @@ import { coverageOf } from './pitch-coverage'
 import type { Recording } from './recordings'
 import { decodeWav } from './wav'
 
-// The Fixture Library as the Staging build carries it: each fixture as the 16-bit WAV the app
-// keeps, analyzed in the app as a new Recording is. It must unlock what the reference unlocks.
-
 describe('the Fixture Library', () => {
   it('gives fixtures the iPhone app’s ids, which sort like fixture ids', () => {
     expect(fixtureRecordingId('090')).toBe('00000000-0000-0000-0000-000000000090')
@@ -48,8 +45,6 @@ describe('the Fixture Library', () => {
     for (const song of songs) {
       const coverage = coverageOf(song, recordings)
       const golden = goldenArrangement('full', song.id)
-      // 8 of the 12: each of the others has a note longer than any fixture near its pitch, played
-      // at its own length (ADR 0011, ADR 0012).
       expect(coverage.unlocked, song.id).toBe(
         !['jingle', 'row', 'amazing', 'auld'].includes(song.id)
       )

@@ -21,22 +21,10 @@ import {
 } from './pitch-coverage'
 import type { AnalysisState, Recording } from './recordings'
 
-// Pitch Coverage as the app reads it, checked against the reference engine's golden data and
-// ported from the iPhone app's `PitchCoverageTests` and `SongListingTests`.
-
-/**
- * The sample story's takes, in order: Melodic ones that unlock Songs, with 3 Noise-like takes
- * (018, 052, 055). The iPhone's story starts with 069 and ends with 002, which #208 made Melodic.
- * Since ADR 0011 a Recording has to be as long as the notes it plays, at its own length since ADR
- * 0012, so the short takes (086 is 0.24 s) unlock nothing on their own. Every Song the Fixture
- * Library unlocks plays 002 (1.80 s), the 9th take, where the first Songs unlock.
- */
 const story = ['018', '032', '090', '052', '094', '069', '017', '086', '002', '084', '013', '055']
-/** The Songs the whole Fixture Library leaves locked: each has a note longer than any fixture near it. */
 const lockedByAll = ['jingle', 'row', 'amazing', 'auld']
 const fixtureIds = goldenIndex.recordings
 
-/** A Recording of this fixture with the reference engine's analysis and its Fixture Library id. */
 function fixtureRecording(id: string, number: number): Recording {
   const golden = goldenRecording(id)
   const rate = goldenIndex.sample_rate
@@ -74,7 +62,6 @@ const song = (id: string): Song => {
   return found
 }
 
-/** The fixture id of a Fixture Library Recording id. */
 const fixtureId = (recordingId: string | undefined) => recordingId?.slice(-3)
 
 const listing = (recordings: Recording[], query = '', order: SongOrder = 'closestToUnlocking') =>
@@ -84,7 +71,6 @@ describe('Pitch Coverage against the reference engine', () => {
   it('unlocks 8 of the 12 Songs with the 24 Melodic fixtures', () => {
     expect(all.filter(r => coverageKey([r]) !== '[]')).toHaveLength(24)
     expect(songs).toHaveLength(12)
-    // Each fart plays at its own length (ADR 0012), so an Octave Move no longer doubles one.
     for (const s of songs) {
       expect(coverageOf(s, all).unlocked, s.id).toBe(!lockedByAll.includes(s.id))
     }
@@ -97,7 +83,6 @@ describe('Pitch Coverage against the reference engine', () => {
       const recordings = fixtures(subset.recordings)
       for (const want of subset.songs) {
         const catalogSong = songs.find(s => s.id === want.song)
-        // `ode-mutopia` is a second import of Ode to Joy that the app doesn't ship.
         if (!catalogSong) continue
         const label = `${subset.recordings.join(' ')} / ${want.song}`
         const coverage = coverageOf(catalogSong, recordings)
@@ -132,7 +117,6 @@ describe('Pitch Coverage against the reference engine', () => {
       if (fresh.length > 0) unlocks[take] = fresh
       for (const id of unlocked) before.add(id)
     }
-    // Amazing Grace still needs a 3 s fart near B3.
     expect(unlocks).toEqual({
       9: ['mary', 'ode', 'merryxmas'],
       10: ['birthday', 'frere'],
@@ -141,7 +125,6 @@ describe('Pitch Coverage against the reference engine', () => {
   })
 
   it('reads the coverage of locked Songs as the reference does', () => {
-    // 090 (0.48 s) is too short for any of Mary's notes, played at its own length.
     const mary = coverageOf(song('mary'), takes(3))
     expect(coverageSummary(mary)).toBe('1 of 4 notes covered')
     expect(mary.transposition).toBe(-28)
@@ -158,7 +141,6 @@ describe('Pitch Coverage against the reference engine', () => {
 
 describe('the Pitch Coverage rule', () => {
   let next = 0
-  /** A Melodic Recording at `pitch` that holds notes of 0.12 s and longer. */
   const melodic = (pitch: number): Recording => recording(pitch, 0.12)
   const recording = (
     pitch: number | null,
@@ -187,7 +169,6 @@ describe('the Pitch Coverage rule', () => {
           }
         : { state }
   })
-  /** One beat per pitch, at 60 bpm. */
   const test = (pitches: number[]): Song => ({
     id: 'test',
     title: 'Test',
@@ -331,13 +312,10 @@ describe('Compose’s listing', () => {
     )
     const ms = performance.now() - started
     expect(unlocked.length + locked.length).toBe(500)
-    // 41 rounds of 5 Unlocked Songs, then 4 of the next 8 Songs.
     expect(unlocked).toHaveLength(209)
     expect(ms).toBeLessThan(10_000)
   })
 
-  // The reference's `melody_fit().missing` on the same takes: each note with the shortest fart
-  // that would cover it (ADR 0011).
   it('names the missing notes with their octave and length', () => {
     expect(missingNotes(coverageOf(song('furelise'), ten))).toBe('F3 (1.4 s)')
     expect(missingNotes(coverageOf(song('jingle'), ten))).toBe('A2 (2.0 s)')
@@ -357,15 +335,12 @@ describe('Compose’s listing', () => {
   it('matches the catalog again only when the Melodic Recordings change', () => {
     const eight = takes(8)
     const noise = fixtures(['055'])
-    // A Noise-like Recording (055) changes nothing; the 9th take, a Melodic one, does.
     expect(coverageKey([...eight, ...noise])).toBe(coverageKey(eight))
     expect(coverageKey(takes(9))).not.toBe(coverageKey(eight))
     const analyzing: Recording = { ...takes(9)[8], analysis: { state: 'analyzing' } }
     expect(coverageKey([...eight, analyzing])).toBe(coverageKey(eight))
     expect(listing(eight).unlocked).toEqual([])
     expect(listing(takes(9)).unlocked.map(r => r.song.id)).toEqual(['mary', 'ode', 'merryxmas'])
-    // So does a settle time added on load to an analysis stored before #116: it moves Auto-map.
-    // The 2nd take, 032, is Melodic and settles in 0.128 s.
     const [first, second, ...rest] = eight
     if (second.analysis.state !== 'analyzed') throw new Error('The 2nd take is analyzed')
     const { settleSeconds, ...stored } = second.analysis.analysis
@@ -389,7 +364,6 @@ describe('what a save changed', () => {
     const changes = coverageChanges(songs, takes(4), [...takes(4), ...fixtures(['055'])])
     expect(changes.unlocked).toEqual([])
     expect(changes.improved).toEqual([])
-    // The first in catalog order of the locked Songs with the highest coverage, as on the iPhone.
     const locked = songRows(songs, takes(4)).filter(r => !r.coverage.unlocked)
     const best = Math.max(...locked.map(r => coverageFraction(r.coverage)))
     const closest = locked.find(r => coverageFraction(r.coverage) === best)
@@ -404,7 +378,6 @@ describe('what a save changed', () => {
 })
 
 describe('the fart length a Recording shows (#227)', () => {
-  /** A Melodic Recording at `midi` whose fart lasts `fart` seconds, in a take 1 s longer. */
   const take = (number: number, midi: number, fart: number): Recording => ({
     id: `take-${number}`,
     number,
@@ -431,17 +404,13 @@ describe('the fart length a Recording shows (#227)', () => {
     const recording = take(1, 60, 2.4)
     expect(fartSeconds(recording)).toBeCloseTo(2.4, 9)
     expect(formattedFartLength(recording)).toBe('2.4 s')
-    // Before analysis has found the fart, the whole take.
     expect(formattedFartLength({ ...recording, analysis: { state: 'analyzing' } })).toBe('3.4 s')
   })
 
   it('unlocks a locked Song once a fart near each missing note shows the length it needs', () => {
-    // Amazing Grace on the whole Fixture Library. Its F3 needs 3.0 s for a 2.975 s note, so a
-    // 2.96 s fart shows 2.9 s: rounded to the nearest, it would show 3.0 s and stay locked.
     const amazing = song('amazing')
     const { missing } = coverageOf(amazing, all)
     expect(missingNotes(coverageOf(amazing, all))).toBe('D3 (1.2 s) and F3 (3.0 s)')
-    // Each fart 3 semitones below its note.
     const near = (lengths: number[]) => missing.map((m, i) => take(100 + i, m.midi - 3, lengths[i]))
     const asNeeded = near(missing.map(m => m.seconds))
     expect(asNeeded.map(formattedFartLength)).toEqual(['1.2 s', '3.0 s'])

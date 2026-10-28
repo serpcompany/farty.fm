@@ -1,31 +1,17 @@
 import { ANALYSIS_VERSION } from './analysis/version'
 
-/** A Recording: one saved fart clip (see `CONTEXT.md`), as the web app keeps it. */
-
-/** What Recording Analysis found in a Recording, as the iPhone app's `SavedAnalysis`. */
 export type Analysis = {
-  /** Where the single clean gesture starts and ends in the file, in seconds. */
   gestureStartSeconds: number
   gestureEndSeconds: number
-  /** A second fart was cut off, so only the first one is used. */
   cutAtReattack: boolean
-  /** The pitch estimate before audition, as a MIDI note number, and its confidence (0…1). */
   pitchEstimateMidi: number | null
   pitchConfidence: number
-  /** The Recording Pitch as a fractional MIDI note number; null for a Noise-like Recording. */
   recordingPitchMidi: number | null
-  /** The shortest note the Recording holds on pitch, in seconds; null when Noise-like. */
   shortestNoteSeconds: number | null
-  /**
-   * When the Recording settles on its pitch, in seconds from the gesture start; null when
-   * Noise-like. Absent from an analysis stored before #116.
-   */
   settleSeconds?: number | null
-  /** The Recording Analysis version that made it (`ANALYSIS_VERSION`); absent before #208. */
   version?: number
 }
 
-/** Saving never waits for analysis (ADR 0002), so a Recording can be saved but not analyzed. */
 export type AnalysisState =
   | { state: 'analyzing' }
   | { state: 'notAnalyzed' }
@@ -33,13 +19,10 @@ export type AnalysisState =
 
 export type Recording = {
   id: string
-  /** Recordings are named "Recording 1, 2, …". */
   number: number
   createdAt: number
-  /** Length of the whole file, in seconds. */
   seconds: number
   sampleRate: number
-  /** Loudness bars for the waveform, each 0…1. */
   waveform: number[]
   analysis: AnalysisState
 }
@@ -48,17 +31,12 @@ export function recordingName(recording: Pick<Recording, 'number'>): string {
   return `Recording ${recording.number}`
 }
 
-/** The Recording Pitch, when the Recording has been analyzed as Melodic. */
 export function recordingPitch(recording: Recording): number | null {
   return recording.analysis.state === 'analyzed'
     ? recording.analysis.analysis.recordingPitchMidi
     : null
 }
 
-/**
- * Whether a Recording's stored analysis came from an older Recording Analysis, Melodic or not, so
- * `upgradeAnalyses` should run the current one on its audio.
- */
 export function needsReanalysis(recording: Recording): boolean {
   return (
     recording.analysis.state === 'analyzed' &&
@@ -70,10 +48,6 @@ export function firstFartUsed(recording: Recording): boolean {
   return recording.analysis.state === 'analyzed' && recording.analysis.analysis.cutAtReattack
 }
 
-/**
- * What replay plays: the fart itself, from where it starts to where it ends (before a second
- * fart, if there is one), or null for the whole file. The file itself is never cut.
- */
 export function replaySegment(recording: Recording): { start: number; end: number } | null {
   if (recording.analysis.state !== 'analyzed') return null
   const { gestureStartSeconds: start, gestureEndSeconds } = recording.analysis.analysis
@@ -82,35 +56,20 @@ export function replaySegment(recording: Recording): { start: number; end: numbe
   return { start, end }
 }
 
-/** A length the way rows and Review show it: "1.1 s". */
 export function formattedLength(seconds: number): string {
   return `${seconds.toFixed(1)} s`
 }
 
-/** Recording stops by itself after this long, as on the iPhone. */
 export const maximumTakeSeconds = 30
 
-/** A take's loudest 50 ms must reach this level… */
 const quietestFartDb = -50
-/** …and stand this far above the take's own room (its 10th-percentile 50 ms level). */
 const minimumContrastDb = 4
 
-/**
- * Whether a take holds a sound worth reviewing, judged from the audio: its loudest 50 ms level
- * against an absolute floor and against the take's own room. Silence and steady room noise fail.
- * The iPhone app and `tools/melody-lab/` have no such gate: the iPhone app rejects takes shorter
- * than 0.5 s, and the reference never rejects. A take shorter than one 50 ms window fails.
- */
 export function heardSomething(samples: Float32Array, sampleRate: number): boolean {
   const level = levelContrast(samples, sampleRate)
   return level !== null && level.peakDb >= quietestFartDb && level.contrastDb >= minimumContrastDb
 }
 
-/**
- * The peak and floor (10th percentile) of a take's 50 ms RMS level every 5 ms, in dBFS, and the
- * contrast between them. Only whole windows count, so the take's edges don't read as quiet room.
- * Null when the take is shorter than one window.
- */
 export function levelContrast(
   samples: Float32Array,
   sampleRate: number
@@ -118,7 +77,6 @@ export function levelContrast(
   const hop = Math.max(1, Math.trunc(0.005 * sampleRate))
   const frame = 10 * hop
   if (samples.length < frame) return null
-  // Running sums of squares, so each window costs two lookups.
   const energy = new Float64Array(samples.length + 1)
   for (let i = 0; i < samples.length; i++) energy[i + 1] = energy[i] + samples[i] * samples[i]
   const levels: number[] = []

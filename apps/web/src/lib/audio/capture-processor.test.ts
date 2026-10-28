@@ -15,7 +15,6 @@ type Processor = {
 const sampleRate = 48_000
 const quantum = 128
 
-/** The shipped worklet source, run against a stand-in for the audio thread. */
 function capture() {
   const sent: CaptureBatch[] = []
   class AudioWorkletProcessor {
@@ -35,8 +34,6 @@ function capture() {
   let next = 0
   return {
     sent,
-    /** Feeds `frames` of a ramp that counts samples from 1, so each one says where it came from. */
-    /** Returns what the last `process` call returned: false once the processor is done. */
     feed(frames: number): boolean {
       let running = true
       for (let done = 0; done < frames; done += quantum) {
@@ -56,7 +53,7 @@ const preRollFrames = Math.round(preRollSeconds * sampleRate)
 describe('capture processor', () => {
   it('starts a take with the last 300 ms before it, in the first quantum after the tap', () => {
     const c = capture()
-    c.feed(sampleRate) // a second of open microphone
+    c.feed(sampleRate)
     c.send({ type: 'start', take: 1 })
     expect(c.sent).toHaveLength(0)
     c.feed(quantum)
@@ -65,7 +62,6 @@ describe('capture processor', () => {
     expect(first.take).toBe(1)
     expect(first.done).toBe(false)
     expect(first.samples).toHaveLength(preRollFrames + quantum)
-    // Contiguous: the 300 ms before the tap, then the quantum after it.
     const startsAt = sampleRate - preRollFrames + 1
     expect(Array.from(first.samples)).toEqual(
       Array.from({ length: preRollFrames + quantum }, (_, i) => startsAt + i)

@@ -27,7 +27,6 @@ const userAgents = {
   androidFirefox: 'Mozilla/5.0 (Android 15; Mobile; rv:144.0) Gecko/144.0 Firefox/144.0',
   androidSamsung:
     'Mozilla/5.0 (Linux; Android 15; SAMSUNG SM-S931B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/28.0 Chrome/130.0.0.0 Mobile Safari/537.36',
-  // Chrome on an Android tablet asks for desktop sites by default.
   androidTabletDesktopSite:
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
   androidWebView:
@@ -49,12 +48,10 @@ type Browser = Parameters<typeof installRouteFor>[0]
 
 const touchScreen = { maxTouchPoints: 5, standalone: false, canPrompt: false }
 
-/** A touch-screen browser that isn't installed and hasn't offered Chrome's prompt. */
 function browser(userAgent: string, overrides: Partial<Browser> = {}) {
   return installRouteFor({ userAgent, ...touchScreen, ...overrides })
 }
 
-/** Profile's guide in a touch-screen browser that isn't installed and hasn't offered the prompt. */
 function guide(userAgent: string, overrides: Partial<Browser> = {}) {
   return installGuideFor({ userAgent, ...touchScreen, ...overrides })
 }
@@ -68,7 +65,6 @@ describe('installRouteFor', () => {
 
   it("offers nothing where Farty can't be added to the Home Screen", () => {
     expect(browser(userAgents.iPhoneInstagram)).toBeNull()
-    // In-app browsers that name their app, even beside "Safari/".
     for (const app of [
       'iPhoneGoogleApp',
       'iPhoneFacebook',
@@ -79,9 +75,7 @@ describe('installRouteFor', () => {
     ] as const) {
       expect(browser(userAgents[app]), app).toBeNull()
     }
-    // A Mac: the same user agent as an iPad, but no touch screen.
     expect(browser(userAgents.iPadSafari, { maxTouchPoints: 0 })).toBeNull()
-    // Android before Chrome offers its prompt, or after Farty is installed.
     expect(browser(userAgents.androidChrome)).toBeNull()
   })
 
@@ -138,12 +132,10 @@ describe('installGuideFor', () => {
   it('says to open Farty on a phone from a computer', () => {
     const mouse = { maxTouchPoints: 0 }
     expect(guide(userAgents.macSafari, mouse)).toBe('phone')
-    // A Mac's user agent is an iPad's: only touch tells them apart.
     expect(guide(userAgents.iPadSafari, mouse)).toBe('phone')
     expect(guide(userAgents.windowsChrome, mouse)).toBe('phone')
     expect(guide(userAgents.linuxFirefox, mouse)).toBe('phone')
     expect(guide(userAgents.androidTabletDesktopSite, mouse)).toBe('phone')
-    // A touch-screen Chromebook or Windows laptop is still a computer.
     expect(guide(userAgents.chromeOS)).toBe('phone')
     expect(guide(userAgents.windowsChrome)).toBe('phone')
   })

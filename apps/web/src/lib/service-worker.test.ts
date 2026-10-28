@@ -3,28 +3,24 @@ import { fileURLToPath } from 'node:url'
 import { runInNewContext } from 'node:vm'
 import { describe, expect, it } from 'vitest'
 
-// public/sw.js is a plain script, so it runs here against a fake network and Cache Storage.
 const source = readFileSync(fileURLToPath(new URL('../../public/sw.js', import.meta.url)), 'utf8')
 const origin = 'https://pedos.test'
 
 type Network = (url: string) => Response | 'offline'
 type Listener = (event: unknown) => void
 
-/** A same-origin response, as `fetch` gives the service worker. */
 function ok(body = ''): Response {
   const response = new Response(body, { status: 200 })
   Object.defineProperty(response, 'type', { value: 'basic' })
   return response
 }
 
-/** A same-origin error, such as a 403 or a 500. */
 function failed(status: number): Response {
   const response = new Response('Something went wrong', { status })
   Object.defineProperty(response, 'type', { value: 'basic' })
   return response
 }
 
-/** What the Staging password answers without credentials. */
 function locked(): Response {
   const response = new Response('Password required', {
     status: 401,
@@ -43,7 +39,6 @@ function startWorker(network: Network) {
       entries.set(url, response)
     },
     async match(url: string, options?: { ignoreSearch?: boolean }) {
-      // As the Cache API, a fragment never counts.
       const bare = (key: string) => (options?.ignoreSearch ? key.split('?')[0] : key.split('#')[0])
       const key = [...entries.keys()].find(k => bare(k) === bare(url))
       return key ? entries.get(key)?.clone() : undefined
@@ -95,7 +90,6 @@ function startWorker(network: Network) {
     await done
   }
 
-  /** Fires a fetch event. Resolves to undefined when the worker leaves the request alone. */
   async function request(path: string, init: { mode?: string; method?: string } = {}) {
     let answer: Promise<Response> | undefined
     const kept: Promise<unknown>[] = []
@@ -161,11 +155,9 @@ describe('the service worker', () => {
     expect(worker.kept()).toEqual(
       expect.arrayContaining(['/compose/mary/', '/_next/static/chunks/song.js'])
     )
-    // The list itself isn't a page or a shell file.
     expect(worker.kept()).not.toContain('/shell.json')
 
     online = false
-    // Compose opens a Song by client-side navigation, which falls back to a page load offline.
     expect(await (await worker.request('/compose/mary/', { mode: 'navigate' }))?.text()).toContain(
       'Mary'
     )
@@ -195,7 +187,6 @@ describe('the service worker', () => {
     const worker = startWorker(url => {
       if (!online) return 'offline'
       const response = ok(`script for ${url}`)
-      // A browser's response carries the URL it answered, fragment and all.
       Object.defineProperty(response, 'url', { value: url })
       return response
     })
@@ -261,12 +252,10 @@ describe('the service worker', () => {
     const answer = await worker.request(chunk)
     expect(answer?.status).toBe(200)
     expect(await answer?.text()).toBe(`first build's ${chunk}`)
-    // The render worker's script, which the worker keeps without its fragment.
     const script = await worker.request('/_next/static/chunks/turbopack-worker.js#params=song')
     expect(await script?.text()).toBe(
       "first build's /_next/static/chunks/turbopack-worker.js#params=render"
     )
-    // One it never kept is the server's 404.
     expect((await worker.request('/_next/static/chunks/never-loaded.js'))?.status).toBe(404)
   })
 
@@ -301,7 +290,6 @@ describe('the service worker', () => {
       '/recordings/': '<script src="/_next/static/chunks/recordings-b.js"></script>B recordings',
       '/songs/': '<script src="/_next/static/chunks/songs-b.js"></script>B songs'
     }
-    // Farty opens at the start page, and the tabs open by client-side navigation from there.
     await worker.request('/', { mode: 'navigate' })
 
     online = false
@@ -324,7 +312,6 @@ describe('the service worker', () => {
     await worker.request('/', { mode: 'navigate' })
     expect(worker.kept()).not.toContain('/recordings/')
 
-    // Back online a moment later, well inside the refresh interval.
     dropped = false
     await worker.request('/', { mode: 'navigate' })
     expect(worker.kept()).toContain('/recordings/')
@@ -347,7 +334,6 @@ describe('the service worker', () => {
     expect(worker.registration.unregistered).toBe(false)
     expect((await worker.request('/', { mode: 'navigate' }))?.status).toBe(401)
     expect(worker.kept()).toEqual([])
-    // So the next load reaches the browser's own password prompt, not the worker.
     expect(worker.registration.unregistered).toBe(true)
 
     online = false
