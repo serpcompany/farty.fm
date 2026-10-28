@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/serpcompany/farty.fm/compare/v1.7.0...v1.8.0) (2026-10-28)
+
+
+### Features
+
+* **web:** saving a Toot costs $0.99 on Production ([#258](https://github.com/serpcompany/farty.fm/issues/258)) ([#259](https://github.com/serpcompany/farty.fm/issues/259)) ([a786400](https://github.com/serpcompany/farty.fm/commit/a786400e1c473632125d5bd22f17244cd46b82ec))
+
 ## [1.7.0](https://github.com/serpcompany/farty.fm/compare/v1.6.0...v1.7.0) (2026-10-28)
 
 
