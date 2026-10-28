@@ -1,4 +1,14 @@
 {
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0
+  ],
   "beats_per_bar": 3,
   "bpm": 100,
   "file": "midi/pdmx-amazing.mid",
