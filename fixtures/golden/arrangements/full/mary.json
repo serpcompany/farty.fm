@@ -1,4 +1,50 @@
 {
+  "beats": [
+    {
+      "bar": 0,
+      "dur_beats": 4.0,
+      "recording": "009",
+      "render": {
+        "gain_db": -21.4,
+        "len_s": 0.976,
+        "start_s": 0.0
+      },
+      "start_beat": 0.0
+    },
+    {
+      "bar": 1,
+      "dur_beats": 4.0,
+      "recording": "018",
+      "render": {
+        "gain_db": -22.4,
+        "len_s": 0.143,
+        "start_s": 2.857
+      },
+      "start_beat": 4.0
+    },
+    {
+      "bar": 2,
+      "dur_beats": 4.0,
+      "recording": "052",
+      "render": {
+        "gain_db": -13.7,
+        "len_s": 0.297,
+        "start_s": 5.714
+      },
+      "start_beat": 8.0
+    },
+    {
+      "bar": 3,
+      "dur_beats": 4.0,
+      "recording": "055",
+      "render": {
+        "gain_db": -10.9,
+        "len_s": 0.168,
+        "start_s": 8.571
+      },
+      "start_beat": 12.0
+    }
+  ],
   "library": "full",
   "max_abs_shift_semitones": 10.43,
   "metrics": {
@@ -34,7 +80,7 @@
     },
     {
       "fart_cents": 0,
-      "heard_cents": 123,
+      "heard_cents": 133,
       "index": 1,
       "recording": "017",
       "render": {

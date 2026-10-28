@@ -704,4 +704,49 @@ describe('the rows a route keeps', () => {
     }
     expect(await rowsOf('recordings')).toEqual([`${a.id} ${R1}`, `${a.id} ${R2}`])
   })
+
+  it('keep the Recordings that play a Toot’s Beats (#262), and none when an older browser sends none', async () => {
+    const a = await signUp('A')
+    const T2 = '77777777-7777-4777-8777-777777777777'
+    const T3 = '88888888-8888-4888-8888-888888888888'
+    const arrangement = (fields: Record<string, unknown>) => ({
+      ...tootMetadata(T1).arrangement,
+      ...fields
+    })
+    const beats = ['00000000-0000-0000-0000-000000000065', R1]
+    for (const [id, fields] of [
+      [T1, { beatRecordings: beats }],
+      [T2, {}]
+    ] as const) {
+      const response = await api.put(
+        'toots',
+        id,
+        uploadBody(tootMetadata(id, { arrangement: arrangement(fields) }), wav()),
+        a
+      )
+      expect(response.status).toBe(201)
+    }
+    const response = await api.library(a)
+    const kept = new Map(
+      ((await response.json()) as { toots: { id: string; arrangement: unknown }[] }).toots.map(
+        t => [t.id, t.arrangement]
+      )
+    )
+    expect(kept.get(T1)).toEqual(arrangement({ beatRecordings: beats }))
+    expect(kept.get(T2)).toEqual(arrangement({}))
+    expect(kept.get(T2)).not.toHaveProperty('beatRecordings')
+
+    // Not a list, not item ids, or more than 128.
+    for (const beatRecordings of [R1, ['065'], Array.from({ length: 129 }, () => R1)]) {
+      const refused = await api.put(
+        'toots',
+        T3,
+        uploadBody(tootMetadata(T3, { arrangement: arrangement({ beatRecordings }) }), wav()),
+        a
+      )
+      expect(refused.status).toBe(400)
+      expect(await refused.json()).toEqual({ error: 'invalid_request' })
+    }
+    expect(await rowsOf('toots')).toEqual([`${a.id} ${T1}`, `${a.id} ${T2}`])
+  })
 })

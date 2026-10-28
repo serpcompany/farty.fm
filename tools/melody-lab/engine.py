@@ -4,6 +4,7 @@ Every sample in the output is a Recording's own waveform, played raw (ADR 0012):
 pitch and speed. The only operations are: trim to the detected sound, cut at the note's end,
 fade in/out, gain, and mixing. Nothing changes a fart's pitch or length: there is no
 resampling, oscillator, filter-resonator, looping, or granular re-triggering anywhere.
+Noise-like Recordings play the same way as Beats, one on each of the score's bar lines (ADR 0014).
 Recording Analysis still reads each fart back with its pitch held (variable_resample()) to
 decide whether it is Melodic and when it settles; no Song plays that read-back.
 """
@@ -539,22 +540,59 @@ def _cubic_read(x, pos):
     return ((c3 * f + c2) * f + c1) * f + x0
 
 
-def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_db=1.5, target_rms_db=-20):
+BEAT_DB = -15.0  # a Beat's level against a note's (target_rms_db), set by measurement (ADR 0014)
+
+
+@dataclass
+class Beat:
+    """A Beat (ADR 0014): a Noise-like Recording played raw at the start of a bar."""
+
+    bar: int  # the bar it starts: its index in melody.bar_lines
+    source_id: str
+    start: float  # beats: the bar line
+    dur: float  # beats: to the next bar line, or to the Song's end after the last one
+
+
+def plan_beats(melody, sources):
+    """Where the Noise-like Recordings among `sources` play (ADR 0014): one Beat at the start of
+    each bar, on the score's bar lines (melody.bar_lines), so a pickup, which isn't a bar, gets
+    none. Several take turns bar by bar in a fixed order, their ids sorted as melody_fit() sorts
+    Melodic ones: bar k plays number k mod n. A Beat lasts to the next bar line, the last one to
+    the Song's end. Empty when no source is Noise-like, so such a library renders as before.
+
+    Placement only: Pitch Coverage, unlocking and the Arrangement (melody_fit(), plan()) don't
+    change, so a Song still needs Melodic Recordings for its tune."""
+    noise = sorted(s.id for s in sources if not s.pitched)
+    if not noise:
+        return []
+    lines = melody.bar_lines
+    ends = list(lines[1:]) + [melody.length_beats]
+    return [Beat(k, noise[k % len(noise)], line, end - line) for k, (line, end) in enumerate(zip(lines, ends))]
+
+
+def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_db=1.5, target_rms_db=-20,
+           beats=(), beat_db=BEAT_DB):
     """Play each note's fart raw (ADR 0012): the Recording's gesture from its start, at its own
     pitch and speed, cut at the note's end (its written length less the gap, at least 60 ms) or
     where the fart ends, faded, set to a level and mixed. A note that starts on one of the score's
-    bar lines (melody.bar_lines) is set accent_db louder. A note's shift_semitones isn't used."""
+    bar lines (melody.bar_lines) is set accent_db louder. A note's shift_semitones isn't used.
+
+    `beats` (plan_beats()) play the same way after every note is mixed: each Beat's Recording raw
+    from its start, cut at the next bar line less the gap (at least 60 ms) or where the fart ends,
+    faded, set beat_db under a note's level with no accent, and mixed (ADR 0014). `events` holds
+    one event per note, in order, then one per Beat, which has a "beat" key (its bar) and no
+    "note_index"."""
     by_id = {s.id: s for s in sources}
     bpm = bpm or melody.bpm
     spb = 60 / bpm
     total = int((melody.length_beats * spb + 1.0) * SR)
     mix = np.zeros(total)
     events = []
-    for a in assignments:
-        n = melody.notes[a.note_index]
-        s = by_id[a.source_id]
-        start = int(n.start * spb * SR)
-        max_len = int(max(0.06, n.dur * spb - gap_ms / 1000) * SR)
+
+    def place(s, start_beat, dur_beats, extra_db):
+        """Mix the fart in at start_beat, cut to dur_beats less the gap; its start, length and gain."""
+        start = int(start_beat * spb * SR)
+        max_len = int(max(0.06, dur_beats * spb - gap_ms / 1000) * SR)
         seg = s.audio[:max_len].copy()
         fi, fo = int(0.003 * SR), int(min(0.03, len(seg) / SR / 3) * SR)
         env = np.ones(len(seg))
@@ -563,11 +601,18 @@ def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_d
             env[-fo:] *= np.linspace(1, 0, fo) ** 2
         seg = seg * env
         rms = np.sqrt(np.mean(seg[: int(0.25 * SR)] ** 2)) + 1e-9
-        on_downbeat = any(abs(n.start - line) < 1e-6 for line in melody.bar_lines)  # the score's own (melody.py)
-        gain_db = target_rms_db - 20 * np.log10(rms) + (accent_db if on_downbeat else 0)
+        gain_db = target_rms_db - 20 * np.log10(rms) + extra_db
         seg = seg * 10 ** (gain_db / 20)
         mix[start : start + len(seg)] += seg
-        events.append({**asdict(a), "start_s": round(start / SR, 3), "len_s": round(len(seg) / SR, 3), "gain_db": round(gain_db, 1)})
+        return {"start_s": round(start / SR, 3), "len_s": round(len(seg) / SR, 3), "gain_db": round(gain_db, 1)}
+
+    for a in assignments:
+        n = melody.notes[a.note_index]
+        on_downbeat = any(abs(n.start - line) < 1e-6 for line in melody.bar_lines)  # the score's own (melody.py)
+        placed = place(by_id[a.source_id], n.start, n.dur, accent_db if on_downbeat else 0)
+        events.append({**asdict(a), **placed})
+    for b in beats:
+        events.append({"beat": b.bar, "source_id": b.source_id, **place(by_id[b.source_id], b.start, b.dur, beat_db)})
     peak = np.abs(mix).max()
     mix = np.tanh(mix / peak * 1.2) / np.tanh(1.2) * 0.89  # gentle limiter, -1 dBFS peak
     return mix, events

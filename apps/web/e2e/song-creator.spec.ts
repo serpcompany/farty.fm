@@ -7,9 +7,10 @@ import { payAtTheDevCheckout } from './pay'
 
 // Song Creator on the Staging build, with the whole Fixture Library loaded: 8 of the 12 Songs are
 // unlocked (Songs play each fart raw, at its own length, ADR 0012). Each Song opens from
-// Compose, is made and starts playing, plays one tapped note, and
-// is paid for and saved (ADR 0010); the Toots are then read back from IndexedDB. Then a direct load, a failed render, a
-// locked and an unknown Song, and a Song opened offline.
+// Compose, is made and starts playing, plays one tapped note, lists the Noise-like Recordings
+// that play its Beats (ADR 0014), and is paid for and saved (ADR 0010); the Toots are then read
+// back from IndexedDB. Then a direct load, a failed render, a locked and an unknown Song, and a
+// Song opened offline.
 //
 // With E2E_EVIDENCE_DIR set, the test also writes each Toot's WAV, the time each took to make,
 // and screenshots there, for `evaluate_renders.py` and the PR.
@@ -37,6 +38,14 @@ const evidence = process.env.E2E_EVIDENCE_DIR ? resolve(process.env.E2E_EVIDENCE
  */
 const lockedSongs = ['jingle', 'row', 'amazing', 'auld']
 const unlockedSongs = songs.filter(s => !lockedSongs.includes(s.id))
+
+/**
+ * The Fixture Library's Noise-like Recordings (`fixtures/golden/index.json`): they take turns
+ * playing the Beats, one per bar (ADR 0014), so a Song uses as many as it has bars, at most these.
+ */
+const NOISE_LIKE_FIXTURES = 8
+const beatRecordingsOf = (song: (typeof songs)[number]) =>
+  Math.min(NOISE_LIKE_FIXTURES, song.bar_lines.length)
 
 test.beforeEach(async ({ request }) => {
   // `next dev` never shows the loader, even with fixtures left in public/ by a Staging build.
@@ -109,7 +118,13 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       const save = page.getByRole('button', { name: 'Save to Toots' })
       const noteView = page.getByTestId('note-view')
       const used = page.getByTestId('recording-used')
-      await expect(used).toHaveCount(song.pitches.length)
+      const beats = beatRecordingsOf(song)
+      await expect(used).toHaveCount(song.pitches.length + beats)
+      await expect(
+        page.getByText(
+          `${song.pitches.length + beats} of your Recordings: one per note, and ${beats} for the Beats`
+        )
+      ).toBeVisible()
       // Fixture 002, Recording 1: its fart's length, not its 4.2 s take's (#227).
       if (song.id === 'mary')
         await expect(used.getByRole('button', { name: /^Recording 1,/ })).toContainText('1.7 s')
@@ -138,6 +153,16 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       expect(alone.duration).toBeLessThan(whole.duration)
       const lowest = song.notes.filter(n => n.pitch === song.pitches[0]).length
       await expect(noteView.getByRole('button', { name: /, highlighted/ })).toHaveCount(lowest)
+
+      // The Beats' Recordings come last, labeled Beat. Tapping one plays it alone, and it plays
+      // no note.
+      const beatRows = used.filter({ has: page.getByRole('button', { name: /, Beat, / }) })
+      await expect(beatRows).toHaveCount(beats)
+      await expect(used.last()).toContainText('Beat')
+      await used.last().getByRole('button').click()
+      const beatAlone = await lastStart(page)
+      expect(beatAlone.duration).toBeLessThan(whole.duration)
+      await expect(noteView.getByRole('button', { name: /, highlighted/ })).toHaveCount(0)
 
       // Save asks for $0.99, then turns into a disabled "Saved to Toots" once it's paid. Two taps,
       // before it can go to the checkout, still make one Toot (checked below).
@@ -174,13 +199,19 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       r.onsuccess = () => resolve(r.result)
       r.onerror = () => reject(r.error)
     })
-    const all = await new Promise<{ id: string; songId: string; title: string; seconds: number }[]>(
-      (resolve, reject) => {
-        const r = db.transaction('toots').objectStore('toots').getAll()
-        r.onsuccess = () => resolve(r.result)
-        r.onerror = () => reject(r.error)
-      }
-    )
+    const all = await new Promise<
+      {
+        id: string
+        songId: string
+        title: string
+        seconds: number
+        arrangement: { beatRecordings?: string[] }
+      }[]
+    >((resolve, reject) => {
+      const r = db.transaction('toots').objectStore('toots').getAll()
+      r.onsuccess = () => resolve(r.result)
+      r.onerror = () => reject(r.error)
+    })
     db.close()
     return all
   })
@@ -188,6 +219,8 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
   for (const toot of toots) {
     const song = songs.find(s => s.id === toot.songId)
     expect(toot.title).toBe(song?.title)
+    // It keeps the Recordings that play its Beats.
+    expect(toot.arrangement.beatRecordings).toHaveLength(song ? beatRecordingsOf(song) : -1)
     const wav = await tootWav(page, toot.id)
     expect(wav.toString('ascii', 0, 4)).toBe('RIFF')
     expect(wav.toString('ascii', 8, 12)).toBe('WAVE')

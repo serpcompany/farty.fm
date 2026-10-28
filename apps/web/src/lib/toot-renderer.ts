@@ -1,5 +1,6 @@
 import type { Song } from '@/lib/catalog/song'
 import type { Arrangement } from '@/lib/engine/auto-map'
+import { beatRecordings } from '@/lib/engine/beats'
 import { renderInWorker } from '@/lib/engine/client'
 import type { RecordingToRender, RenderedSong } from '@/lib/engine/render-song'
 import type { Song as EngineSong } from '@/lib/engine/song'
@@ -27,23 +28,39 @@ export class TootError extends Error {
 export type Render = (
   song: EngineSong,
   arrangement: Arrangement,
-  recordings: readonly RecordingToRender[]
+  recordings: readonly RecordingToRender[],
+  beats: readonly string[]
 ) => Promise<RenderedSong>
 
-/** What a Toot keeps of Auto-map's Arrangement. */
-export function tootArrangement(arrangement: Arrangement): TootArrangement {
+/** What a Toot keeps of Auto-map's Arrangement, and of the Recordings that play its Beats. */
+export function tootArrangement(
+  arrangement: Arrangement,
+  beats: readonly string[] = []
+): TootArrangement {
   const recordingForPitch: Record<number, string> = {}
   for (const choice of arrangement.pitches) {
     if (choice.recordingId !== null) recordingForPitch[choice.songPitch] = choice.recordingId
   }
-  return { transposition: arrangement.transposition, recordingForPitch }
+  const kept = { transposition: arrangement.transposition, recordingForPitch }
+  return beats.length === 0 ? kept : { ...kept, beatRecordings: [...beats] }
+}
+
+/**
+ * The Recordings that play `song`'s Beats, in turn (ADR 0014): the analyzed Noise-like ones
+ * among `recordings`, in id order, as many as the Song has bars at most.
+ */
+export function beatRecordingsOf(song: Song, recordings: readonly Recording[]): string[] {
+  const noiseLike = recordings.flatMap(r =>
+    r.analysis.state === 'analyzed' && r.analysis.analysis.recordingPitchMidi === null ? [r.id] : []
+  )
+  return beatRecordings(song, noiseLike)
 }
 
 /**
  * Makes the Toot of `song`: the Arrangement Auto-map chooses on `recordings` (the one Compose
- * shows), rendered from each Recording it uses as the app stores it, a 16-bit WAV
- * (`loadAudio`), with the Recording's stored analysis. The Toot's audio is the render as a mono
- * 16-bit WAV.
+ * shows), with a Beat on each bar line from the Noise-like ones (`beatRecordingsOf`), rendered
+ * from each Recording it uses as the app stores it, a 16-bit WAV (`loadAudio`), with the
+ * Recording's stored analysis. The Toot's audio is the render as a mono 16-bit WAV.
  *
  * Throws a `TootError`: `locked` when the Song isn't unlocked, `couldNotMake` when a Recording's
  * audio or analysis is missing or the render fails. `id` is a new one unless given: the return
@@ -58,9 +75,10 @@ export async function makeToot(
 ): Promise<TootDraft> {
   const arrangement = arrangementOf(song, recordings)
   if (!arrangement.unlocked) throw new TootError('locked')
+  const beats = beatRecordingsOf(song, recordings)
   let rendered: RenderedSong
   try {
-    const used = [...new Set(arrangement.pitches.flatMap(c => c.recordingId ?? []))]
+    const used = [...new Set([...arrangement.pitches.flatMap(c => c.recordingId ?? []), ...beats])]
     const toRender = await Promise.all(
       used.map(async (id): Promise<RecordingToRender> => {
         const recording = recordings.find(r => r.id === id)
@@ -68,7 +86,7 @@ export async function makeToot(
         return { id, audio: decodeWav(await loadAudio(id)), analysis: recording.analysis.analysis }
       })
     )
-    rendered = await render(engineSong(song), arrangement, toRender)
+    rendered = await render(engineSong(song), arrangement, toRender, beats)
   } catch (error) {
     throw new TootError('couldNotMake', { cause: error })
   }
@@ -76,7 +94,7 @@ export async function makeToot(
   return {
     id,
     song,
-    arrangement: tootArrangement(arrangement),
+    arrangement: tootArrangement(arrangement, beats),
     seconds: samples.length / sampleRate,
     wav: encodeWav({ samples, sampleRate })
   }

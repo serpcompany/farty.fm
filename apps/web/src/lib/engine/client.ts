@@ -34,18 +34,26 @@ function renderWorker(): Worker {
 }
 
 /**
- * Plays `song` with `arrangement` (from `arrange`) on the Recordings it names, off the page's
- * thread. Each Recording's audio is copied to the worker; the caller keeps its own.
+ * Plays `song` with `arrangement` (from `arrange`) on the Recordings it names, and its Beats on
+ * `beats` (from `beatRecordings`), off the page's thread. Each Recording's audio is copied to the
+ * worker; the caller keeps its own.
  */
 export function renderInWorker(
   song: Song,
   arrangement: Arrangement,
-  recordings: readonly RecordingToRender[]
+  recordings: readonly RecordingToRender[],
+  beats: readonly string[] = []
 ): Promise<RenderedSong> {
   return new Promise((resolve, reject) => {
     const id = nextId++
     pending.set(id, { resolve, reject })
-    const request: RenderRequest = { id, song, arrangement, recordings: [...recordings] }
+    const request: RenderRequest = {
+      id,
+      song,
+      arrangement,
+      recordings: [...recordings],
+      beats: [...beats]
+    }
     renderWorker().postMessage(request)
   })
 }

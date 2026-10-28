@@ -1,12 +1,14 @@
 // Renders every Song with the full Fixture Library through the web engine, the way the app does it:
-// decode each fixture, run Recording Analysis, Auto-map, then render. The renders are for the
-// reference's checks (`tools/melody-lab/evaluate_renders.py`); nothing here ships.
+// decode each fixture, run Recording Analysis, Auto-map, then render, with the Noise-like
+// Recordings playing the Beats (ADR 0014). The renders are for the reference's checks
+// (`tools/melody-lab/evaluate_renders.py`); nothing here ships.
 //
 //   pnpm exec tsx scripts/render-songs.ts [out-dir]
 //
 // Writes `<song>.wav` (mono 32-bit float, 44.1 kHz: the renderer's exact output, which Web Audio
-// plays as it is) and `<song>.json` (the Song's bpm and transposition, and one event per note) to
-// `tools/melody-lab/out/web/` by default, then prints the render time per Song in Node.
+// plays as it is) and `<song>.json` (the Song's bpm and transposition, one event per note, and
+// one per Beat) to `tools/melody-lab/out/web/` by default, then prints the render time per Song in
+// Node.
 //
 // It first deletes the `.wav` and `.json` files already in the out dir, so no stale render is
 // measured again. It exits 1 if a Song that the golden Arrangement unlocks comes out locked.
@@ -15,6 +17,7 @@ import { join, resolve } from 'node:path'
 import { toAnalysis } from '../src/lib/analysis/port'
 import { analyzeRecording } from '../src/lib/analysis/recording-analysis'
 import { type Arrangement, arrange, autoMapRecording } from '../src/lib/engine/auto-map'
+import { beatRecordings } from '../src/lib/engine/beats'
 import {
   type RecordingToRender,
   renderFromRecordings,
@@ -104,15 +107,16 @@ async function main() {
   }
   const library = recordings.map(r => autoMapRecording(r.id, r.analysis))
   const melodic = library.filter(r => r.recordingPitchMidi !== null).map(r => r.id)
+  const noiseLike = library.filter(r => r.recordingPitchMidi === null).map(r => r.id)
   console.log(
     `${recordings.length} Recordings analysed in ${analysisMs.toFixed(0)} ms; ` +
-      `Melodic: ${melodic.join(' ')}`
+      `Melodic: ${melodic.join(' ')}; Noise-like: ${noiseLike.join(' ')}`
   )
 
+  // Every Recording, Melodic for the notes and Noise-like for the Beats.
   const sources = new Map<string, RenderSource>()
   const sourceMs = new Map<string, number>()
   for (const r of recordings) {
-    if (r.analysis.recordingPitchMidi === null) continue
     const { result, ms } = medianMs(() => renderSource(r.audio, r.analysis))
     sources.set(r.id, result)
     sourceMs.set(r.id, ms)
@@ -124,7 +128,7 @@ async function main() {
     .sort()
   const wronglyLocked: string[] = []
   console.log(
-    ['song', 'notes', 'T', 'arrange ms', 'render ms', 'worker ms', 'seconds']
+    ['song', 'notes', 'beats', 'T', 'arrange ms', 'render ms', 'worker ms', 'seconds']
       .map(c => c.padEnd(13))
       .join('')
   )
@@ -141,9 +145,11 @@ async function main() {
       continue
     }
     // `render ms` renders from Recordings already cut; `worker ms` is what the render
-    // worker runs for one request: cut every Recording the Arrangement uses, then render.
-    const rendered = medianMs(() => renderSong(song, arrangement, sources))
-    const worker = medianMs(() => renderFromRecordings(song, arrangement, recordings))
+    // worker runs for one request: cut every Recording the Arrangement and the Beats use, then
+    // render.
+    const beats = beatRecordings(song, noiseLike)
+    const rendered = medianMs(() => renderSong(song, arrangement, sources, beats))
+    const worker = medianMs(() => renderFromRecordings(song, arrangement, recordings, beats))
     const { samples, sampleRate, notes } = rendered.result
     writeFileSync(join(outDir, `${id}.wav`), floatWav(samples, sampleRate))
     const events = {
@@ -165,6 +171,13 @@ async function main() {
         start_s: round(n.startSample / sampleRate, 3),
         len_s: round(n.lengthSamples / sampleRate, 3),
         gain_db: round(n.gainDb, 1)
+      })),
+      beats: rendered.result.beats.map(b => ({
+        beat: b.bar,
+        source_id: b.recordingId,
+        start_s: round(b.startSample / sampleRate, 3),
+        len_s: round(b.lengthSamples / sampleRate, 3),
+        gain_db: round(b.gainDb, 1)
       }))
     }
     writeFileSync(join(outDir, `${id}.json`), `${JSON.stringify(events, null, 2)}\n`)
@@ -172,6 +185,7 @@ async function main() {
       [
         id,
         song.notes.length,
+        rendered.result.beats.length,
         arrangement.transposition,
         planned.ms.toFixed(1),
         rendered.ms.toFixed(0),
@@ -183,7 +197,7 @@ async function main() {
     )
   }
   const perSource = [...sourceMs].map(([id, ms]) => `${id} ${ms.toFixed(0)}`).join(', ')
-  console.log(`cut each Melodic Recording (ms, median of ${RUNS}): ${perSource}`)
+  console.log(`cut each Recording (ms, median of ${RUNS}): ${perSource}`)
   console.log(`wrote ${outDir}`)
   if (wronglyLocked.length > 0) {
     console.error(`locked here, but the golden Arrangement unlocks it: ${wronglyLocked.join(' ')}`)
