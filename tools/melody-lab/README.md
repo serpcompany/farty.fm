@@ -2,15 +2,16 @@
 
 Turns the approved Fixture Library Recordings into recognizable melodies, using only the Recordings' own audio.
 
+`tools/` is one [uv](https://docs.astral.sh/uv/) project for this engine and the [catalog importer](../catalog/README.md): `tools/pyproject.toml` pins every dependency, `tools/uv.lock` locks them all, and the root `.python-version` pins Python 3.12.10, the version `fixtures/golden/index.json` records. On first use `uv run` creates a virtual environment under `tools/` and installs the project in editable mode, which puts `melody-lab/` and `catalog/` on the import path, so `import engine` works from both folders and with `python -I`. The same commands work on Windows, macOS and Linux, from `tools/melody-lab`:
+
 ```sh
-uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requirements.txt
-.venv/bin/python run_all.py        # quick check: renders every Song and prints the metrics
-.venv/bin/python build.py          # renders every Song/version into out/listen/ (index.html + audio)
-.venv/bin/python export_golden.py  # writes the reference results to ../../fixtures/golden/ for the web app
-open out/listen/index.html
+uv run run_all.py          # quick check: renders every Song and prints the metrics
+uv run build.py            # renders every Song into out/listen/ (index.html + audio); needs ffmpeg
+uv run export_golden.py    # writes the reference results to ../../fixtures/golden/ for the web app
+uv run pytest ..           # every unit test of the engine and the catalog importer
 ```
 
-Inputs: `../../fixtures/recordings/` (Fixture Library) and `../../catalog/` (Song Catalog).
+Then open `out/listen/index.html` in a browser. Inputs: `../../fixtures/recordings/` (Fixture Library) and `../../catalog/` (Song Catalog).
 
 | File | Role |
 | --- | --- |
@@ -22,7 +23,7 @@ Inputs: `../../fixtures/recordings/` (Fixture Library) and `../../catalog/` (Son
 | `export_golden.py` | Writes the reference results (Recording Analysis, imported Songs, Arrangements, metrics) as deterministic JSON to `fixtures/golden/`; see its README |
 | `evaluate_renders.py` | Runs `evaluate.py` on renders made elsewhere (default `out/web/`, from `apps/web`'s `pnpm exec tsx scripts/render-songs.ts`), prints run_all.py's line next to the golden metrics, and fails a render below ADR 0012's bar or worse than golden, and the run when the renders aren't exactly the golden unlocked Arrangements (missing, extra or stale); `--against-reference` also prints the largest sample difference from the reference's own render |
 | `golden_cost.py` | Recomputes `plan()`'s cost for a given Arrangement from the golden data (how Auto-map tests check a tie-aware match); checks every golden Arrangement |
-| `test_needed_seconds.py` | Checks that the length a locked Song says it needs (`needed_seconds()`) unlocks it, for a fart 3 semitones or an octave from each missing note, on the golden data (`.venv/bin/python -I -m unittest discover -s . -p 'test_*.py'`) |
+| `test_needed_seconds.py` | Checks that the length a locked Song says it needs (`needed_seconds()`) unlocks it, for a fart 3 semitones or an octave from each missing note, on the golden data |
 | `plot_env.py` | Plots each Recording's loudness envelope with its detected gesture boundaries |
 
 The render path is only: trim, cut at the note's end, fade, gain, mix. Every fart plays raw, at its own pitch and speed (ADR 0012). No resampling, oscillators, resonators, loops, or granular re-triggering. `variable_resample()` only reads a Recording back with its pitch held for Recording Analysis (audition and settle time); no Song plays it.

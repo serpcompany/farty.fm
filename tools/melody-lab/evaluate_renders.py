@@ -1,6 +1,6 @@
 """Run the reference's checks (evaluate.py) on renders made outside the reference engine.
 
-    .venv/bin/python evaluate_renders.py [dir] [--against-reference]    # default dir: out/web
+    uv run evaluate_renders.py [dir] [--against-reference]    # default dir: out/web
 
 `dir` holds `<song>.wav` and `<song>.json` per Song, as `apps/web/scripts/render-songs.ts`
 writes them. The JSON has the Song's `bpm` and one event per note (`note_index`, `len_s`,

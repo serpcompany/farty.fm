@@ -14,7 +14,7 @@ Writes deterministic JSON to fixtures/golden/ (format and tolerances: fixtures/g
 Everything is computed by the lab's own functions (the same calls run_all.py makes); this
 script only rounds and writes. Running it twice gives byte-identical files.
 
-    .venv/bin/python export_golden.py
+    uv run export_golden.py
 """
 import hashlib
 import json

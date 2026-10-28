@@ -7,7 +7,7 @@ picked, so a port that picks the right cells but then maps a tied cell to the wr
 (say, every tied pitch to 013) would still report the golden cost. Recomputing from the
 returned Recording ids charges that mistake and rejects it.
 
-    .venv/bin/python golden_cost.py    # recomputes every golden Arrangement and compares
+    uv run golden_cost.py    # recomputes every golden Arrangement and compares
 """
 import json
 

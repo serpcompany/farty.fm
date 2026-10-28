@@ -4,7 +4,7 @@ Songs play every fart at its own length (ADR 0012), so its pitch doesn't change 
 needs. Runs melody_fit() on the golden Songs and Recordings in fixtures/golden/, without audio.
 `apps/web/src/lib/engine/auto-map.test.ts` checks the same on the web.
 
-    .venv/bin/python -I -m unittest discover -s . -p 'test_*.py'    # from tools/melody-lab
+    uv run pytest    # from tools/
 """
 import json
 import sys

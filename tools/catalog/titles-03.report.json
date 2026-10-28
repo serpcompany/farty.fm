@@ -1,6 +1,6 @@
 {
  "titles": "tools/catalog/titles-03.txt",
- "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-03.txt --tries 5",
+ "command": "uv run --project tools python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-03.txt --tries 5",
  "dataset": {
   "PDMX.csv": {
    "md5": "30392ccf38bb63ce70e7afae70f9c88c",

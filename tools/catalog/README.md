@@ -2,13 +2,14 @@
 
 Adds Songs to [`catalog/`](../../catalog/) in batches from PDMX (doi:10.5281/zenodo.15571083), keeping only the ones that pass the gates. Every Song is the cited score's own MIDI file; the import chooses only the excerpt and tempo ([ADR 0003](../../docs/adr/0003-songs-come-from-cited-scores.md)).
 
+It runs in the `tools/` uv project, beside the reference engine it imports ([setup](../melody-lab/README.md)). From the repository root, on Windows, macOS or Linux:
+
 ```sh
-cd tools/melody-lab && uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requirements.txt && cd ../..
-tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-01.txt
-tools/melody-lab/.venv/bin/python -I -m unittest discover -s tools/catalog -t tools/catalog
+uv run --project tools python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-01.txt
+uv run --project tools pytest tools/catalog
 ```
 
-The first run downloads `PDMX.csv` (225 MB) and `mid.tar.gz` (214 MB) into `~/.cache/pedos/pdmx/` and checks them against Zenodo's md5. Every run reads the MIDI files of the scores it tries from the archive (about 6 s), and keeps an extracted file only while it's byte for byte the archive's.
+`python -I` keeps the script's own folder and the environment's variables off the import path, since the dataset is untrusted input; the project's editable install still puts `tools/melody-lab` and `tools/catalog` on it. The first run downloads `PDMX.csv` (225 MB) and `mid.tar.gz` (214 MB) into `~/.cache/pedos/pdmx/` and checks them against Zenodo's md5. Every run reads the MIDI files of the scores it tries from the archive (about 6 s), and keeps an extracted file only while it's byte for byte the archive's.
 
 | File | Role |
 | --- | --- |

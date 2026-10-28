@@ -1,7 +1,7 @@
 """Tests for the PDMX import's picking and gate rules (pdmx.py), and for the importer's control
 flow (import_pdmx.py) on temporary files, with a stub renderer and no dataset.
 
-    tools/melody-lab/.venv/bin/python -I -m unittest discover -s tools/catalog -t tools/catalog
+    uv run --project tools pytest tools/catalog
 """
 import contextlib
 import hashlib

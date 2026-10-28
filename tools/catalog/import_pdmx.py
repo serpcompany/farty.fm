@@ -1,6 +1,6 @@
 """Batch-import Songs from PDMX into the Song Catalog, keeping only the ones that pass the gates.
 
-    tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-01.txt
+    uv run --project tools python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-01.txt
 
 For each title in the titles file it picks the best PDMX score, runs the gates, and tries the
 next best score when one fails, up to --tries scores. A score is picked for one title at most,
@@ -536,7 +536,7 @@ def main():
             song["reason"] = first_problem(r)
     run = {
         "titles": titles_file,
-        "command": f"tools/melody-lab/.venv/bin/python -I {TOOL} --titles {titles_file} --tries {args.tries}",
+        "command": f"uv run --project tools python -I {TOOL} --titles {titles_file} --tries {args.tries}",
         "dataset": {name: {k: v for k, v in d.items() if k != "path"} for name, d in dataset.items()},
         "library": f"{len(library)} Recordings, {sum(s.pitched for s in library)} Melodic",
         "picking": (f"title matches one of the Song's names (MATCHES order: {', '.join(pdmx.MATCHES)}); "

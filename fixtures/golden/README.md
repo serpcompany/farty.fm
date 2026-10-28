@@ -5,10 +5,10 @@ The answers of the approved Python reference engine ([`tools/melody-lab/`](../..
 Regenerate after any change to the lab, the Fixture Library or the catalog, and commit the result:
 
 ```sh
-cd tools/melody-lab && .venv/bin/python export_golden.py
+cd tools/melody-lab && uv run export_golden.py
 ```
 
-The script deletes and rewrites `index.json`, `recordings/`, `songs/`, `arrangements/` and `coverage.json`. It uses the same calls as `run_all.py` (`load_library`, `load_catalog`, `melody_fit`, `plan`, `render`, `evaluate`) and prints the same summary line per Song and library. Running it twice gives byte-identical files (keys sorted, floats rounded or written exactly). Other library versions may change low-order digits, which is why the tests below use tolerances. `requirements.txt` pins them, including soxr, which decides the decoded samples of the 48 kHz MP3s. `index.json` records the versions used.
+The script deletes and rewrites `index.json`, `recordings/`, `songs/`, `arrangements/` and `coverage.json`. It uses the same calls as `run_all.py` (`load_library`, `load_catalog`, `melody_fit`, `plan`, `render`, `evaluate`) and prints the same summary line per Song and library. Running it twice gives byte-identical files (keys sorted, floats rounded or written exactly). Other library versions may change low-order digits, which is why the tests below use tolerances. `tools/uv.lock` pins them, including soxr, which decides the decoded samples of the 48 kHz MP3s. `index.json` records the versions used.
 
 Rendered audio is not exported (too large). Swift renders are judged by running the same checks on their own output.
 
