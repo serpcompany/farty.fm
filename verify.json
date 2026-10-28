@@ -180,15 +180,7 @@
         "blocks": 1,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       },
-      "apps\\web\\src\\app\\api\\payments.workers.test.ts and apps\\web\\src\\server\\stripe.test.ts": {
-        "blocks": 1,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
       "apps\\web\\src\\db\\schema.ts and apps\\web\\src\\db\\schema.ts": {
-        "blocks": 1,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "apps\\web\\src\\server\\toot-payments.ts and apps\\web\\src\\server\\toot-payments.ts": {
         "blocks": 1,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       }
@@ -415,18 +407,6 @@
           "findings": 10,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/server/stripe.test.ts": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/server/stripe.ts": {
-          "findings": 16,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/server/toot-payments.ts": {
-          "findings": 16,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/server/wav-header.test.ts": {
           "findings": 1,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -452,10 +432,6 @@
       "deadcode": {
         "apps/web/src/server/email.ts": {
           "findings": 4,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/server/library.ts": {
-          "findings": 1,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
         "apps/web/src/server/require-user.ts": {
