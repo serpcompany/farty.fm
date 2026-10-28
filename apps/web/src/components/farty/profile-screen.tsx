@@ -324,10 +324,10 @@ function AccountSection() {
           </span>
         </li>
         <li>
-          <label htmlFor="pedos-news" className={row}>
+          <label htmlFor="farty-news" className={row}>
             Farty news
             <Switch
-              id="pedos-news"
+              id="farty-news"
               checked={account.marketingEmail}
               disabled={busy}
               onCheckedChange={on =>

@@ -20,8 +20,8 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   poweredByHeader: false,
   env: {
-    PEDOS_RELEASE: sha ? `${version}+${sha.slice(0, 7)}` : version,
-    PEDOS_ENVIRONMENT: siteEnv()
+    FARTY_RELEASE: sha ? `${version}+${sha.slice(0, 7)}` : version,
+    FARTY_ENVIRONMENT: siteEnv()
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders(process.env.NODE_ENV) }]

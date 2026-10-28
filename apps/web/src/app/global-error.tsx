@@ -1,6 +1,6 @@
 'use client'
 
-import { ErrorScreen } from '@/components/pedos/error-screen'
+import { ErrorScreen } from '@/components/farty/error-screen'
 import './globals.css'
 
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {

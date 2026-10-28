@@ -17,9 +17,9 @@ failures=0
 seen=''
 tries=5
 
-smoke=(-H 'x-pedos-smoke-test: 1')
-password=(-u 'pedos:stagingpassword')
-wrong_password=(-u 'pedos:wrong')
+smoke=(-H 'x-farty-smoke-test: 1')
+password=(-u 'farty:stagingpassword')
+wrong_password=(-u 'farty:wrong')
 challenge='www-authenticate: Basic realm="farty staging", charset="UTF-8"'
 static_file=/welcome-icon.png
 fixture_index=/fixtures/recordings/index.json

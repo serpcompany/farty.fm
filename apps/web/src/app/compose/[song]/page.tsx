@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { SongCreator } from '@/components/pedos/song-creator'
+import { SongCreator } from '@/components/farty/song-creator'
 import { songs } from '@/lib/catalog/songs.generated'
 
 export const dynamicParams = false

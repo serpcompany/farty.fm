@@ -163,7 +163,7 @@ async function prepareCapture(
 
 function captureGraph(context: AudioContext, stream: MediaStream) {
   const source = context.createMediaStreamSource(stream)
-  const node = new AudioWorkletNode(context, 'pedos-capture')
+  const node = new AudioWorkletNode(context, 'farty-capture')
   const mute = context.createGain()
   mute.gain.value = 0
   source.connect(node).connect(mute).connect(context.destination)

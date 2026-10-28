@@ -17,11 +17,11 @@ let reportedThisPage = 0
 let flushing = false
 
 function release(): string {
-  return process.env.PEDOS_RELEASE || 'unknown'
+  return process.env.FARTY_RELEASE || 'unknown'
 }
 
 function environment(): Environment {
-  const env = process.env.PEDOS_ENVIRONMENT
+  const env = process.env.FARTY_ENVIRONMENT
   return env === 'staging' || env === 'production' ? env : 'local'
 }
 

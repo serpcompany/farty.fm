@@ -21,20 +21,20 @@ async function deleteTootAudio(page: Page, songId: string): Promise<void> {
 async function breakTheStore(page: Page, method: 'get' | 'put', store: string) {
   await page.evaluate(
     ({ method, store }) => {
-      const broken = window as unknown as { pedosBroken: number; pedosMend: () => void }
-      broken.pedosBroken = 0
+      const broken = window as unknown as { fartyBroken: number; fartyMend: () => void }
+      broken.fartyBroken = 0
       type Method = (this: IDBObjectStore, ...args: unknown[]) => IDBRequest
       const prototype = IDBObjectStore.prototype as unknown as Record<typeof method, Method>
       const original = prototype[method]
       prototype[method] = function (...args) {
         if (this.name !== store) return original.apply(this, args)
-        broken.pedosBroken += 1
+        broken.fartyBroken += 1
         if (method === 'get') throw new DOMException('Broken for the test', 'UnknownError')
         const request = original.apply(this, args)
         this.transaction.abort()
         return request
       }
-      broken.pedosMend = () => {
+      broken.fartyMend = () => {
         prototype[method] = original
       }
     },
@@ -43,11 +43,11 @@ async function breakTheStore(page: Page, method: 'get' | 'put', store: string) {
 }
 
 function timesBroken(page: Page): Promise<number> {
-  return page.evaluate(() => (window as unknown as { pedosBroken: number }).pedosBroken)
+  return page.evaluate(() => (window as unknown as { fartyBroken: number }).fartyBroken)
 }
 
 async function mendTheStore(page: Page) {
-  await page.evaluate(() => (window as unknown as { pedosMend: () => void }).pedosMend())
+  await page.evaluate(() => (window as unknown as { fartyMend: () => void }).fartyMend())
 }
 
 test("a Toot whose audio is gone says so, and can't play; one the store fails for a moment is kept", async ({

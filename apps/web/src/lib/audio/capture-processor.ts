@@ -13,7 +13,7 @@ export function sendCommand(node: AudioWorkletNode, command: CaptureCommand): vo
 }
 
 export const captureProcessorSource = `
-class PedosCapture extends AudioWorkletProcessor {
+class FartyCapture extends AudioWorkletProcessor {
   constructor() {
     super()
     this.ring = new Float32Array(Math.max(1, Math.round(${preRollSeconds} * sampleRate)))
@@ -93,5 +93,5 @@ class PedosCapture extends AudioWorkletProcessor {
     return true
   }
 }
-registerProcessor('pedos-capture', PedosCapture)
+registerProcessor('farty-capture', FartyCapture)
 `

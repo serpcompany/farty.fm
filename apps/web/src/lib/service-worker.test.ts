@@ -4,7 +4,7 @@ import { runInNewContext } from 'node:vm'
 import { describe, expect, it } from 'vitest'
 
 const source = readFileSync(fileURLToPath(new URL('../../public/sw.js', import.meta.url)), 'utf8')
-const origin = 'https://pedos.test'
+const origin = 'https://farty.test'
 
 type Network = (url: string) => Response | 'offline'
 type Listener = (event: unknown) => void

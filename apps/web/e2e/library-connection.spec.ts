@@ -5,7 +5,7 @@ import { expect, test } from './test'
 
 function keepConnections(): void {
   const connections: IDBDatabase[] = []
-  Object.assign(window, { pedosConnections: connections })
+  Object.assign(window, { fartyConnections: connections })
   const open = IDBFactory.prototype.open
   IDBFactory.prototype.open = function (this: IDBFactory, ...args: Parameters<IDBFactory['open']>) {
     const request = open.apply(this, args)
@@ -16,7 +16,7 @@ function keepConnections(): void {
 
 function closeConnections(page: Page, { announced }: { announced: boolean }): Promise<number> {
   return page.evaluate(withEvent => {
-    const connections = (window as unknown as { pedosConnections: IDBDatabase[] }).pedosConnections
+    const connections = (window as unknown as { fartyConnections: IDBDatabase[] }).fartyConnections
     for (const connection of connections) {
       connection.close()
       if (withEvent) connection.dispatchEvent(new Event('close'))

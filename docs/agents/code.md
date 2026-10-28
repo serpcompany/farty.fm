@@ -28,7 +28,7 @@ Skipping a hook (`--no-verify`) only moves the failure to CI. A rule turned off 
 
 Agents' skills live in `.claude/skills/`:
 
-- [`verify-pedos-web`](../../.claude/skills/verify-pedos-web/SKILL.md): proves a web change works in the running app, at phone size, before review.
+- [`verify-web`](../../.claude/skills/verify-web/SKILL.md): proves a web change works in the running app, at phone size, before review.
 - [`pr-review`](../../.claude/skills/pr-review/SKILL.md): reviews a pull request against these rules. The Repository workflow's `review` job runs it on every pull request.
 
 ## When a change is done

@@ -48,7 +48,7 @@ async function openComposeWithTheFixtureLibrary(page: Page) {
 async function watchTap(page: Page) {
   await page.evaluate(() => {
     const tap: Tap = { tapped: 0, making: 0, ready: 0 }
-    Object.assign(window, { pedosTap: tap })
+    Object.assign(window, { fartyTap: tap })
     document.addEventListener('click', () => (tap.tapped = performance.now()), {
       capture: true,
       once: true
@@ -68,7 +68,7 @@ async function watchTap(page: Page) {
 }
 
 function tapTimes(page: Page): Promise<Tap> {
-  return page.evaluate(() => (window as unknown as { pedosTap: Tap }).pedosTap)
+  return page.evaluate(() => (window as unknown as { fartyTap: Tap }).fartyTap)
 }
 
 async function tapNote(noteView: Locator, note: Locator) {

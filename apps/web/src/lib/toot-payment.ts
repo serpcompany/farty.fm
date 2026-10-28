@@ -2,7 +2,7 @@ import { answer, send } from './library-api'
 import { savingIsPaid } from './pricing'
 
 export function saveAsksForPayment(): boolean {
-  const env = process.env.PEDOS_ENVIRONMENT
+  const env = process.env.FARTY_ENVIRONMENT
   return savingIsPaid(env === 'staging' || env === 'production' ? env : 'local')
 }
 

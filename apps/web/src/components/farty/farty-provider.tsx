@@ -7,7 +7,7 @@ import { RecordingsProvider } from './recordings-provider'
 import { TootsProvider } from './toots-provider'
 import { WelcomeProvider } from './welcome-provider'
 
-export function PedosProvider({ children }: { children: ReactNode }) {
+export function FartyProvider({ children }: { children: ReactNode }) {
   return (
     <WelcomeProvider>
       <PlaybackProvider>

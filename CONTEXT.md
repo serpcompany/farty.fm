@@ -2,7 +2,7 @@
 
 Farty is a web app (installable from the browser) that turns a person's fart recordings into recordings they can replay and Toots they can make: Songs played by their farts.
 
-It was called Pedos until 2026-10-22 (ADR 0009). Users only ever see Farty. Internal names keep Pedos: the repository, folders, code identifiers and the `pedos` browser database.
+It was called Pedos until 2026-10-22 (ADR 0009). Users only ever see Farty. Stored data, names another build shares and Cloudflare resources keep Pedos, such as the `pedos` browser database (ADR 0015).
 
 ## Recordings
 

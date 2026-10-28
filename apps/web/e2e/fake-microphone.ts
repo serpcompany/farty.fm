@@ -37,13 +37,13 @@ type FakeMicrophone = {
 
 declare global {
   interface Window {
-    pedosMic: FakeMicrophone
+    fartyMic: FakeMicrophone
   }
 }
 
 export const microphone = (page: Page) =>
   page.evaluate(() => {
-    const mic = window.pedosMic
+    const mic = window.fartyMic
     return {
       calls: mic.calls,
       calledAt: mic.calledAt,
@@ -100,8 +100,8 @@ export function fakeMicrophone({
     processorMs: [],
     sessions: []
   }
-  window.pedosMic = mic
-  Object.assign(window, { pedosMediaDevices: navigator.mediaDevices })
+  window.fartyMic = mic
+  Object.assign(window, { fartyMediaDevices: navigator.mediaDevices })
 
   let sessionType = 'auto'
   Object.defineProperty(navigator, 'audioSession', {
@@ -223,15 +223,15 @@ export function withFartingMicrophone({ farts = true, granted = true, welcomed =
 
 export async function fartAndRecord(page: Page, id = '090'): Promise<void> {
   await page.evaluate(fart => {
-    window.pedosMic.fartOnPress = fart
-    window.pedosMic.take = { id: -1, seconds: 0 }
+    window.fartyMic.fartOnPress = fart
+    window.fartyMic.take = { id: -1, seconds: 0 }
   }, id)
   const box = await page.getByTestId('record-button').boundingBox()
   if (!box) throw new Error('No Record button')
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await page.mouse.down()
   await expect
-    .poll(() => page.evaluate(() => window.pedosMic.fartPlayedSeconds()), { intervals: [10] })
+    .poll(() => page.evaluate(() => window.fartyMic.fartPlayedSeconds()), { intervals: [10] })
     .toBeGreaterThanOrEqual(pressSeconds)
   await page.mouse.up()
   await expect(page.getByTestId('stop-button')).toBeVisible()
@@ -239,7 +239,7 @@ export async function fartAndRecord(page: Page, id = '090'): Promise<void> {
     .poll(
       () =>
         page.evaluate(() => {
-          const mic = window.pedosMic
+          const mic = window.fartyMic
           return mic.take.seconds - mic.fartSeconds
         }),
       { intervals: [50], timeout: 15_000 }
@@ -286,6 +286,6 @@ export function lastClickToFirstBatch({
 
 export function interrupt(page: Page, type: 'mute' | 'unmute' | 'ended'): Promise<void> {
   return page.evaluate(event => {
-    for (const track of window.pedosMic.tracks) track.dispatchEvent(new Event(event))
+    for (const track of window.fartyMic.tracks) track.dispatchEvent(new Event(event))
   }, type)
 }

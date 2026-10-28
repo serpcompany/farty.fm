@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { TootScreen } from '@/components/pedos/toot-screen'
+import { TootScreen } from '@/components/farty/toot-screen'
 
 export const metadata: Metadata = { title: 'Toot · Farty' }
 

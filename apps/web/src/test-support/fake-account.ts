@@ -50,7 +50,7 @@ export function fakeAccount(userId = 'user-a') {
       }
     },
     fetch: async (input: string, init: RequestInit = {}): Promise<Response> => {
-      const url = new URL(input, 'https://pedos.test')
+      const url = new URL(input, 'https://farty.test')
       const method = init.method ?? 'GET'
       const library = new Headers(init.headers).get('x-pedos-library')
       const request: Sent = { method, path: url.pathname + url.search, library }

@@ -96,7 +96,7 @@ export function write(page: Page, writes: Write[], layout: Layout = {}): Promise
           transaction.onerror = () => reject(transaction.error)
         })
       }
-      if (layout.keepOpen) Object.assign(window, { pedosKeptDatabase: db })
+      if (layout.keepOpen) Object.assign(window, { fartyKeptDatabase: db })
       else db.close()
     },
     { writes, layout }
@@ -105,7 +105,7 @@ export function write(page: Page, writes: Write[], layout: Layout = {}): Promise
 
 export function closeKeptDatabase(page: Page): Promise<void> {
   return page.evaluate(() =>
-    (window as unknown as { pedosKeptDatabase: IDBDatabase }).pedosKeptDatabase.close()
+    (window as unknown as { fartyKeptDatabase: IDBDatabase }).fartyKeptDatabase.close()
   )
 }
 

@@ -38,7 +38,7 @@ SERP's [web stack](https://github.com/serpcompany/serp/blob/main/docs/engineerin
 
 ## Evidence
 
-What a PR shows, by kind of change (see [Verification cadence](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification-cadence.md)). The commands are in the table above, and the [`verify-pedos-web`](../../.claude/skills/verify-pedos-web/SKILL.md) skill runs them end to end.
+What a PR shows, by kind of change (see [Verification cadence](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification-cadence.md)). The commands are in the table above, and the [`verify-web`](../../.claude/skills/verify-web/SKILL.md) skill runs them end to end.
 
 - **Preview evidence** (any user-visible change): the author's tap-through on the local Workers build behind the Staging gate, at phone size.
 - **UI evidence:** the Playwright journeys (`pnpm test:e2e`, with `E2E_SERVER=preview` on the Workers build) and phone-size screenshots.

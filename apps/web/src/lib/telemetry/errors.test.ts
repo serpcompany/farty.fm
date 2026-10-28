@@ -35,8 +35,8 @@ beforeEach(() => {
   vi.stubGlobal('location', { pathname: '/compose/2f1c-my-secret-song/' })
   fetchMock = vi.fn(async () => new Response(null, { status: 204 }))
   vi.stubGlobal('fetch', fetchMock)
-  vi.stubEnv('PEDOS_RELEASE', '1.2.0+1bb4403')
-  vi.stubEnv('PEDOS_ENVIRONMENT', 'staging')
+  vi.stubEnv('FARTY_RELEASE', '1.2.0+1bb4403')
+  vi.stubEnv('FARTY_ENVIRONMENT', 'staging')
 })
 
 afterEach(() => {
@@ -71,7 +71,7 @@ describe('reportError', () => {
   })
 
   it('sends no cookie in Production, where no gate needs a password', async () => {
-    vi.stubEnv('PEDOS_ENVIRONMENT', 'production')
+    vi.stubEnv('FARTY_ENVIRONMENT', 'production')
     const { reportError } = await load()
     reportError('toot-make-failed', new TypeError('x'))
     await settle()

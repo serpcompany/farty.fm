@@ -2,7 +2,7 @@
 
 Farty turns fart Recordings into recognizable melodies, using only the Recordings themselves as sound. It's a web app at https://farty.fm that installs from the browser.
 
-Farty was called Pedos until 2026-10-22 ([ADR 0009](docs/adr/0009-rename-pedos-to-farty.md)). The repository's folders, Workers and stored data keep the old name.
+Farty was called Pedos until 2026-10-22 ([ADR 0009](docs/adr/0009-rename-pedos-to-farty.md)). Its stored data, Workers and databases keep the old name ([ADR 0015](docs/adr/0015-rename-the-code-names-from-pedos.md)).
 
 ## Explore
 

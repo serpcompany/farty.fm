@@ -10,7 +10,7 @@ Agents may merge: listed paths
 - `docs/**`, except `docs/adr/**` and `docs/agents/exceptions.md`
 - `apps/web/docs/**`
 - `apps/web/src/components/ui/**`
-- `apps/web/src/components/pedos/{compose-screen,download-qr,install-button,install-prompt,locked-song-sheet,note-view,pitch-strip,record-button,record-screen,recordings-screen,toot-screen,toots-screen,waveform,welcome}.tsx`
+- `apps/web/src/components/farty/{compose-screen,download-qr,install-button,install-prompt,locked-song-sheet,note-view,pitch-strip,record-button,record-screen,recordings-screen,toot-screen,toots-screen,waveform,welcome}.tsx`
 - `apps/web/public/**`, except `sw.js` and `_headers`
 
 A PR merges by an agent only when every file it changes is on that list. The owner merges every other PR, and only the owner changes these lines ([Verification Cadence](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification-cadence.md)).
@@ -25,7 +25,7 @@ A PR merges by an agent only when every file it changes is on that list. The own
 - **Finish gate:** `pnpm check` from the root, once, on the finished tree.
 - **The checks:** `pnpm verify`, or some checks on some paths: `pnpm verify comments,sizes <paths>`.
 - **Inner loop, the web app:** from `apps/web`, `pnpm typecheck`, `pnpm lint` and `pnpm exec vitest related --run <files>`.
-- **In the running app:** the [`verify-pedos-web`](.claude/skills/verify-pedos-web/SKILL.md) skill.
+- **In the running app:** the [`verify-web`](.claude/skills/verify-web/SKILL.md) skill.
 
 ## Codebase
 

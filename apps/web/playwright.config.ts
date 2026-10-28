@@ -29,7 +29,7 @@ export default defineConfig({
   reporter: inCI ? [['list'], ['html', { open: 'never', outputFolder: 'e2e/report' }]] : [['list']],
   use: {
     baseURL,
-    httpCredentials: stagingPassword ? { username: 'pedos', password: stagingPassword } : undefined,
+    httpCredentials: stagingPassword ? { username: 'farty', password: stagingPassword } : undefined,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'

@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next'
-import { AccountProvider } from '@/components/pedos/account-provider'
-import { AppShell } from '@/components/pedos/app-shell'
-import { DownloadQr } from '@/components/pedos/download-qr'
-import { InstallPrompt } from '@/components/pedos/install-prompt'
-import { PedosProvider } from '@/components/pedos/pedos-provider'
+import { AccountProvider } from '@/components/farty/account-provider'
+import { AppShell } from '@/components/farty/app-shell'
+import { DownloadQr } from '@/components/farty/download-qr'
+import { FartyProvider } from '@/components/farty/farty-provider'
+import { InstallPrompt } from '@/components/farty/install-prompt'
 import { siteOrigin } from '@/lib/site'
 import { welcomedKey } from '@/lib/welcomed'
 import './globals.css'
@@ -38,10 +38,10 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       </head>
       <body className="min-h-full">
         <AccountProvider>
-          <PedosProvider>
+          <FartyProvider>
             <AppShell qrCode={<DownloadQr />}>{children}</AppShell>
             <InstallPrompt />
-          </PedosProvider>
+          </FartyProvider>
         </AccountProvider>
       </body>
     </html>

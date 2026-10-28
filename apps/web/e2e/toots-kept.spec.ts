@@ -22,31 +22,31 @@ const mary = song('mary')
 const twinkle = song('twinkle')
 
 function countDecodesAndBacks(): void {
-  const counted = window as unknown as { pedosDecodes: number; pedosBacks: number }
-  counted.pedosDecodes = 0
+  const counted = window as unknown as { fartyDecodes: number; fartyBacks: number }
+  counted.fartyDecodes = 0
   const decode = BaseAudioContext.prototype.decodeAudioData
   BaseAudioContext.prototype.decodeAudioData = function (
     this: BaseAudioContext,
     ...args: Parameters<BaseAudioContext['decodeAudioData']>
   ) {
-    counted.pedosDecodes += 1
+    counted.fartyDecodes += 1
     return decode.apply(this, args)
   }
-  counted.pedosBacks = 0
+  counted.fartyBacks = 0
   const back = History.prototype.back
   History.prototype.back = function (this: History) {
-    counted.pedosBacks += 1
+    counted.fartyBacks += 1
     back.call(this)
   }
 }
 
-function counts(page: Page): Promise<{ pedosDecodes: number; pedosBacks: number }> {
+function counts(page: Page): Promise<{ fartyDecodes: number; fartyBacks: number }> {
   return page.evaluate(() => {
-    const { pedosDecodes, pedosBacks } = window as unknown as {
-      pedosDecodes: number
-      pedosBacks: number
+    const { fartyDecodes, fartyBacks } = window as unknown as {
+      fartyDecodes: number
+      fartyBacks: number
     }
-    return { pedosDecodes, pedosBacks }
+    return { fartyDecodes, fartyBacks }
   })
 }
 
@@ -271,7 +271,7 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     await lastSound(page)
     await page.getByRole('button', { name: `Play ${twinkle.title}` }).click()
     expect((await lastSound(page)).duration).toBeGreaterThan(5)
-    const { pedosDecodes: decodes } = await counts(page)
+    const { fartyDecodes: decodes } = await counts(page)
     const stopsBefore = await stops(page)
 
     await expect(page.getByRole('button', { name: `Stop ${twinkle.title}` })).toBeVisible()
@@ -286,7 +286,7 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
 
     await page.getByRole('button', { name: 'Play Lamb, in farts' }).click()
     expect((await lastSound(page)).duration).toBeGreaterThan(5)
-    expect((await counts(page)).pedosDecodes).toBe(decodes)
+    expect((await counts(page)).fartyDecodes).toBe(decodes)
     await page.getByRole('button', { name: 'Stop Lamb, in farts' }).click()
   })
 
@@ -300,13 +300,13 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     const confirm = dialog.getByRole('button', { name: 'Delete Toot' })
     await expectTappable(confirm)
     await expectTappable(dialog.getByRole('button', { name: 'Cancel' }))
-    const { pedosBacks: backs } = await counts(page)
+    const { fartyBacks: backs } = await counts(page)
     await confirm.evaluate(button => {
       ;(button as HTMLButtonElement).click()
       ;(button as HTMLButtonElement).click()
     })
     await expect(page).toHaveURL(/\/toots\/$/)
-    expect((await counts(page)).pedosBacks).toBe(backs + 1)
+    expect((await counts(page)).fartyBacks).toBe(backs + 1)
     await expect(page.getByText('Nothing yet')).toBeVisible()
     await expect(page.getByText('Make one in Compose.')).toBeVisible()
     expect(await all(page, 'toots')).toEqual([])

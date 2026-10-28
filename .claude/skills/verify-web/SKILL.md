@@ -1,9 +1,9 @@
 ---
-name: verify-pedos-web
-description: Prove a Pedos web feature works before review - start the app, check it is healthy, drive the feature with Playwright and a fixture as the fake microphone, take phone-size screenshots, and clean up. Use before marking a web PR ready, or when asked to tap through, verify or screenshot a web change.
+name: verify-web
+description: Prove a Farty web feature works before review - start the app, check it is healthy, drive the feature with Playwright and a fixture as the fake microphone, take phone-size screenshots, and clean up. Use before marking a web PR ready, or when asked to tap through, verify or screenshot a web change.
 ---
 
-# Verify the Pedos web app
+# Verify the Farty web app
 
 Run from `apps/web/`. Proof goes in `tmp/agent/` (git-ignored) and the PR cites it. Never run `pnpm deploy:*`: CI deploys Staging.
 

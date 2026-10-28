@@ -13,12 +13,12 @@ test.beforeEach(async ({ page, pageErrors }) => {
 })
 
 function countReportsStarted(): void {
-  const counted = window as unknown as { pedosReportsStarted: number }
-  counted.pedosReportsStarted = 0
+  const counted = window as unknown as { fartyReportsStarted: number }
+  counted.fartyReportsStarted = 0
   const fetch = window.fetch
   window.fetch = (input, init) => {
     if (String(input instanceof Request ? input.url : input).includes('/api/telemetry/')) {
-      counted.pedosReportsStarted += 1
+      counted.fartyReportsStarted += 1
     }
     return fetch(input, init)
   }
@@ -26,7 +26,7 @@ function countReportsStarted(): void {
 
 function reportsStarted(page: Page): Promise<number> {
   return page.evaluate(
-    () => (window as unknown as { pedosReportsStarted: number }).pedosReportsStarted
+    () => (window as unknown as { fartyReportsStarted: number }).fartyReportsStarted
   )
 }
 

@@ -2,7 +2,7 @@ import { timingSafeEqual } from 'node:crypto'
 
 export const stagingAccessChallenge = 'Basic realm="farty staging", charset="UTF-8"'
 export const environmentNoindex = 'noindex, nofollow'
-export const smokeTestHeader = 'x-pedos-smoke-test'
+export const smokeTestHeader = 'x-farty-smoke-test'
 
 const servedWithoutThePassword = new Set(['/robots.txt'])
 const postedWithoutThePassword = new Set(['/api/stripe/webhook/'])

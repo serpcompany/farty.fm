@@ -21,7 +21,7 @@ import type { AnalysisState, Recording } from './recordings'
 import { reportError } from './telemetry/errors'
 import type { Toot } from './toot'
 
-export interface PedosDB extends DBSchema {
+export interface FartyDB extends DBSchema {
   recordings: { key: string; value: Recording }
   audio: { key: string; value: ArrayBuffer }
   toots: { key: string; value: Toot }
@@ -41,7 +41,7 @@ const allStores = [
   'meta'
 ] as const
 
-export type LibraryDatabase = IDBPDatabase<PedosDB>
+export type LibraryDatabase = IDBPDatabase<FartyDB>
 
 export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
 
@@ -65,7 +65,7 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
 
 export function db(): Promise<LibraryDatabase> {
   if (opening) return opening
-  const thisOpening: Promise<LibraryDatabase> = openDB<PedosDB>('pedos', 3, {
+  const thisOpening: Promise<LibraryDatabase> = openDB<FartyDB>('pedos', 3, {
     upgrade(database, oldVersion, _newVersion, transaction) {
       if (oldVersion < 1) {
         database.createObjectStore('recordings', { keyPath: 'id' })
@@ -139,7 +139,7 @@ export function holds(stored: object, fields: object): boolean {
 }
 
 async function queueEverything(
-  transaction: IDBPTransaction<PedosDB, StoreNames<PedosDB>[], 'versionchange'>
+  transaction: IDBPTransaction<FartyDB, StoreNames<FartyDB>[], 'versionchange'>
 ): Promise<void> {
   const outbox = transaction.objectStore('outbox')
   const [recordings, toots] = await Promise.all([
@@ -165,7 +165,7 @@ async function queueEverything(
   )
 }
 
-type OutboxStore = IDBPObjectStore<PedosDB, StoreNames<PedosDB>[], 'outbox', 'readwrite'>
+type OutboxStore = IDBPObjectStore<FartyDB, StoreNames<FartyDB>[], 'outbox', 'readwrite'>
 
 export async function queue(
   outbox: OutboxStore,

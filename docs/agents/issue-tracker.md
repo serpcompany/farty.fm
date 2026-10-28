@@ -56,7 +56,7 @@ Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob
    - For audio, report measurements on the actual output (the `tools/melody-lab/evaluate.py` checks or their equivalents), not a description. For UI, attach phone-size screenshots from the tap-through.
 3. Keep test rounds few until launch. The web app's cadence:
    - **`pnpm check`** in `apps/web` on the PR's head commit: lint, types, unit tests and build. The Playwright journeys (`pnpm test:e2e`) belong to `web.yml` too. The author runs `pnpm check` and cites the result in the PR, plus the journeys when the change touches a screen, and `web.yml` runs them all again once the PR is ready.
-   - **Tap through yourself** before review: at phone size, on the local Workers build behind the Staging gate (the `verify-pedos-web` skill). The owner isn't asked to. After the merge, CI deploys Staging from `staging`'s tip, with a smoke test.
+   - **Tap through yourself** before review: at phone size, on the local Workers build behind the Staging gate (the `verify-web` skill). The owner isn't asked to. After the merge, CI deploys Staging from `staging`'s tip, with a smoke test.
    - Never run `pnpm deploy:*`; CI deploys Staging.
 4. One review. Follow the git workflow's review loop: a fresh review agent that didn't write the change posts findings as PR review comments marked **blocking** or **suggestion**, and the author replies on each. Record the outcome in the PR. A clean review is not owner acceptance.
 5. Update the branch from `staging`, then mark the PR ready. Merge it once [Who merges](releases.md) allows: squash-merge and delete the branch.

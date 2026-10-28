@@ -78,7 +78,7 @@ function parseAllowlist(value: unknown): ReadonlySet<string> | null {
   return emails.every(isEmail) ? new Set(emails) : null
 }
 
-const RESTART_SCOPED_SECRET = Symbol.for('pedos/ephemeral-auth-secret')
+const RESTART_SCOPED_SECRET = Symbol.for('farty/ephemeral-auth-secret')
 
 function restartScopedSecret(): string {
   const scope = globalThis as typeof globalThis & { [RESTART_SCOPED_SECRET]?: string }
