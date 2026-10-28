@@ -18,11 +18,16 @@ export function newEmail(testInfo: TestInfo, name: string): string {
 /**
  * Gives the context a client address of its own. Locally every request comes from 127.0.0.1, so
  * the tests would share one client's limit on sign-in codes (10 in 10 minutes); Cloudflare sets
- * this header itself, so only a local run can.
+ * this header itself, so only a local run can. Only Farty's own requests carry it: on every
+ * request, Chromium blocks Turnstile's script from Cloudflare (ERR_BLOCKED_BY_ORB).
  */
 export async function ownClient(context: BrowserContext): Promise<void> {
   const address = `10.${randomInt(256)}.${randomInt(256)}.${randomInt(1, 255)}`
-  await context.setExtraHTTPHeaders({ 'cf-connecting-ip': address })
+  await context.route(
+    url => url.hostname === 'localhost' || url.hostname === '127.0.0.1',
+    route =>
+      route.continue({ headers: { ...route.request().headers(), 'cf-connecting-ip': address } })
+  )
 }
 
 /** The newest sign-in code the dev mailbox holds for `email`, as a person reads their email. */
