@@ -84,6 +84,26 @@
           }
         }
       }
+    },
+    {
+      "includes": ["e2e/**/*.spec.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "@playwright/test": {
+                    "importNames": ["test", "expect"],
+                    "message": "Import test and expect from ./test, which fails a journey on any console error or page error the journey does not expect (docs/agents/web-gotchas.md, The journeys)."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }
