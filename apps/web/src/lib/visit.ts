@@ -1,4 +1,10 @@
-import { type Account, readSession } from './account'
+import {
+  type Account,
+  codeSentLately,
+  libraryOwner,
+  offerStepAgain,
+  readSession
+} from './account'
 import { claimLibrary, leftByAnAccount } from './library-sync'
 import { clearLibrary, clearVisit, recordingIds } from './recording-store'
 
@@ -36,6 +42,12 @@ export type OpenFacts = {
   firstOpen: boolean
   /** Farty is open in another tab, and this visit is that one's too. */
   otherTabOpen: boolean
+  /**
+   * A sign-in code went out from this browser and still works (`codeSentLately`): the guest is
+   * making the account that keeps these farts. A home-screen app that iOS ended while they read
+   * their code in Mail may open again with empty sessionStorage, as a new visit.
+   */
+  signingUp: boolean
 }
 
 /**
@@ -44,7 +56,12 @@ export type OpenFacts = {
  * nothing does.
  */
 export function clearsOnOpen(facts: OpenFacts): boolean {
-  return facts.account.status === 'signedOut' && !facts.firstOpen && !facts.otherTabOpen
+  return (
+    facts.account.status === 'signedOut' &&
+    !facts.firstOpen &&
+    !facts.otherTabOpen &&
+    !facts.signingUp
+  )
 }
 
 let opening: { account: Promise<Account>; library: Promise<void> } | null = null
@@ -78,13 +95,16 @@ async function startVisit(account: Promise<Account>): Promise<void> {
     const facts: OpenFacts = {
       account: await account,
       firstOpen: !hasFlag(() => localStorage, openedKey, false),
-      otherTabOpen: await anotherTabOpen()
+      otherTabOpen: await anotherTabOpen(),
+      signingUp: codeSentLately()
     }
-    if (clearsOnOpen(facts)) await ((await leftByAnAccount()) ? clearLibrary() : clearVisit(kept()))
+    // The visit has started before its clear, so a clear that throws leaves the last visit's farts
+    // for this one, and a reload keeps this visit's (the next new visit clears both).
+    setFlag(() => sessionStorage, visitKey)
     // The first open's grace is spent only on an open that reads as a guest's, where the step and
     // Profile say farts go at the end of the visit. Offline or unreachable, it waits for the next.
     if (facts.account.status === 'signedOut') setFlag(() => localStorage, openedKey)
-    setFlag(() => sessionStorage, visitKey)
+    if (clearsOnOpen(facts)) await ((await leftByAnAccount()) ? clearLibrary() : clearVisit(kept()))
   } catch {
     // A clear that failed leaves the last visit's farts. Farty still opens.
   } finally {
@@ -94,11 +114,15 @@ async function startVisit(account: Promise<Account>): Promise<void> {
 
 /**
  * The first open since #237 notes the Recordings this browser holds as kept. If it can't read
- * them, the next open tries again.
+ * them, the next open tries again. A guest who keeps some was told before #237 that Recordings
+ * stay, and has most likely had the step's one offer: it offers once more, at their next Result,
+ * before they lose what they make now.
  */
 async function noteKept(): Promise<void> {
   if (hasFlag(() => localStorage, keptKey, true)) return
-  localStorage.setItem(keptKey, JSON.stringify(await recordingIds()))
+  const ids = await recordingIds()
+  localStorage.setItem(keptKey, JSON.stringify(ids))
+  if (ids.length > 0 && libraryOwner() === null) offerStepAgain()
 }
 
 /** The kept Recordings' ids, or null when they can't be read, and then none is cleared. */

@@ -12,7 +12,8 @@ import { clearsOnOpen, type OpenFacts } from './visit'
 const guestsNewVisit: OpenFacts = {
   account: { status: 'signedOut' },
   firstOpen: false,
-  otherTabOpen: false
+  otherTabOpen: false,
+  signingUp: false
 }
 
 describe('clearsOnOpen', () => {
@@ -36,6 +37,10 @@ describe('clearsOnOpen', () => {
   it('keeps them while Farty is open in another tab', () => {
     expect(clearsOnOpen({ ...guestsNewVisit, otherTabOpen: true })).toBe(false)
   })
+
+  it('keeps them while the sign-in code sent from this browser still works', () => {
+    expect(clearsOnOpen({ ...guestsNewVisit, signingUp: true })).toBe(false)
+  })
 })
 
 // Each open over a real IndexedDB (fake-indexeddb) and a fake account (`test-library.ts`).
@@ -52,6 +57,7 @@ describe('openVisit', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.useRealTimers()
   })
 
   const signedOut = () => Response.json(null)
@@ -78,6 +84,7 @@ describe('openVisit', () => {
     vi.resetModules()
     const page = {
       visit: await import('./visit'),
+      signIn: await import('./account'),
       store: await import('./recording-store'),
       toots: await import('./toot-store'),
       sync: await import('./library-sync')
@@ -205,6 +212,68 @@ describe('openVisit', () => {
       tootAudio: [toot.id],
       outbox: [itemKey('recordings', recording.id), itemKey('toots', toot.id)].sort()
     })
+  })
+
+  // A clear can throw, such as when WebKit's lost IndexedDB connection fails twice (`withDb`). The
+  // visit has still started, so a reload keeps what the guest makes in it.
+  it("clears nothing on a reload after the clear at open failed, so this visit's Recordings stay", async () => {
+    pastFirstOpen()
+    const { recording: last } = await makeFarts(await open(signedOut))
+    const tab = memoryStorage()
+    vi.doMock('./library-sync', async importOriginal => ({
+      ...(await importOriginal<typeof import('./library-sync')>()),
+      leftByAnAccount: () => Promise.reject(new Error('library-connection-lost'))
+    }))
+    const failed = await open(signedOut, tab)
+    vi.doUnmock('./library-sync')
+    expect((await held(failed)).recordings).toEqual([last.id])
+    const { recording } = await makeFarts(failed)
+
+    const reloaded = await open(signedOut, tab)
+    expect((await held(reloaded)).recordings).toEqual([last.id, recording.id].sort())
+    // The next visit clears them both, since neither is kept.
+    expect((await held(await open(signedOut))).recordings).toEqual([])
+  })
+
+  /** The account step sends a sign-in code, as `sendNow` does. */
+  async function sendACode(page: Page) {
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ success: true })))
+    expect(await page.signIn.sendCode('a@example.com', 'token')).toMatchObject({ ok: true })
+  }
+
+  // A home-screen app that iOS ends while the guest reads their code in Mail may open again with
+  // empty sessionStorage: a new visit, which mustn't clear the farts they're signing up to keep.
+  it("keeps a guest's farts on a new visit while the code they were sent still works", async () => {
+    pastFirstOpen()
+    const page = await open(signedOut)
+    const { recording, toot } = await makeFarts(page)
+    await sendACode(page)
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(Date.now() + 9 * 60_000)
+    const relaunched = await open(signedOut)
+    expect(await held(relaunched)).toMatchObject({ recordings: [recording.id], toots: [toot.id] })
+    // Once the code no longer works, a new visit clears them as any guest's.
+    vi.setSystemTime(Date.now() + 2 * 60_000)
+    expect(await held(await open(signedOut))).toMatchObject({ recordings: [], toots: [] })
+  })
+
+  // Told before #237 that their Recordings stay, they get one more offer, at their next Result.
+  it.each([
+    ['offers the step once more to a guest whose Recordings are kept', 'guest', true, null],
+    ['leaves it for a guest with no Recordings to keep', 'guest', false, 'once'],
+    ["leaves it for an account's browser", 'account', true, 'done']
+  ] as const)('%s, as it first opens since #237', async (_, whose, farts, step) => {
+    pastFirstOpen()
+    const page = await open(whose === 'guest' ? signedOut : signedIn)
+    if (farts) await makeFartsBefore237(page)
+    else localStorage.removeItem('pedos.keptRecordings')
+    localStorage.setItem('pedos.accountStep', whose === 'guest' ? 'once' : 'done')
+    await open(whose === 'guest' ? signedOut : signedIn)
+    expect(localStorage.getItem('pedos.accountStep')).toBe(step)
+    // Only that first open: the next leaves the offer as it is.
+    localStorage.setItem('pedos.accountStep', 'once')
+    await open(signedOut)
+    expect(localStorage.getItem('pedos.accountStep')).toBe('once')
   })
 
   it("uploads a guest's Recordings as they sign in, those kept from before #237 included", async () => {

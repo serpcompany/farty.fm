@@ -189,10 +189,38 @@ export async function sendCode(email: string, token: string): Promise<Result<nul
       { email: email.trim(), type: 'sign-in' },
       { 'x-captcha-response': token }
     )
-    if (response.ok) return { ok: true, value: null }
-    return { ok: false, problem: await problemOf(response) }
+    if (!response.ok) return { ok: false, problem: await problemOf(response) }
+    noteCodeSent()
+    return { ok: true, value: null }
   } catch {
     return { ok: false, problem: 'failed' }
+  }
+}
+
+/**
+ * localStorage: when this browser last had a sign-in code sent, in ms since the epoch. While the
+ * code works, a guest's new visit keeps their farts (`clearsOnOpen` in `visit.ts`): a home-screen
+ * app that iOS ended while they read the code may open again as a new visit.
+ */
+const codeSentKey = 'pedos.codeSent'
+/** How long a sign-in code works: `SIGN_IN_CODE_MINUTES` in `src/server/email.ts`. */
+export const CODE_WORKS_MS = 10 * 60_000
+
+function noteCodeSent(): void {
+  try {
+    localStorage.setItem(codeSentKey, String(Date.now()))
+  } catch {
+    // Nothing to remember it in: a new visit clears as usual.
+  }
+}
+
+/** Whether a sign-in code sent from this browser still works. */
+export function codeSentLately(now = Date.now()): boolean {
+  try {
+    const sent = Number(localStorage.getItem(codeSentKey))
+    return sent > 0 && now >= sent && now - sent < CODE_WORKS_MS
+  } catch {
+    return false
   }
 }
 
@@ -260,9 +288,10 @@ export function setMarketingEmail(on: boolean, accountId: string): Promise<Accou
 }
 
 /**
- * When the account step offers itself (#150): after a Result's button, the first time; then only
- * from Profile, and at Save (#237). Remembered in `localStorage` as `pedos.accountStep`: absent,
- * `once` (offered) or `done` (signed in, or offered twice before #237, after a saved Toot).
+ * When the account step offers itself (#150): after a Result's button, the first time, and once
+ * more for a guest from before #237 (`offerStepAgain`); then only from Profile, and at Save
+ * (#237). Remembered in `localStorage` as `pedos.accountStep`: absent, `once` (offered) or `done`
+ * (signed in, or offered twice before #237, after a saved Toot).
  */
 const stepKey = 'pedos.accountStep'
 
@@ -277,6 +306,18 @@ export function takeStepOffer(): boolean {
     return true
   } catch {
     return false
+  }
+}
+
+/**
+ * The step offers itself once more, at the next Result: for a guest from before #237, who was
+ * told their Recordings stay (`noteKept` in `visit.ts`).
+ */
+export function offerStepAgain(): void {
+  try {
+    localStorage.removeItem(stepKey)
+  } catch {
+    // Nothing to forget: with storage blocked, the step never offers itself.
   }
 }
 
