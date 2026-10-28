@@ -1,19 +1,14 @@
 import { and, eq, isNotNull, isNull, sql } from 'drizzle-orm'
 
+import { d1Now } from './d1-clock'
 import type { Database } from './database'
 import { tootPayments } from './schema'
 
-// A user's Toot payments in D1 (ADR 0010). As in `library.ts`, every query takes the user's id and
-// filters on it.
-
 export type TootPaymentRow = typeof tootPayments.$inferSelect
-
-const d1Now = sql<number>`cast(unixepoch('subsec') * 1000 as integer)`
 
 const whereToot = (userId: string, tootId: string) =>
   and(eq(tootPayments.userId, userId), eq(tootPayments.tootId, tootId))
 
-/** The Toot's payment, paid or not, or null when none was started. */
 export async function tootPayment(
   db: Database,
   userId: string,
@@ -23,7 +18,6 @@ export async function tootPayment(
   return row ?? null
 }
 
-/** Whether the Toot is paid for. */
 export async function isTootPaid(db: Database, userId: string, tootId: string): Promise<boolean> {
   const rows = await db
     .select({ tootId: tootPayments.tootId })
@@ -32,10 +26,6 @@ export async function isTootPaid(db: Database, userId: string, tootId: string): 
   return rows.length === 1
 }
 
-/**
- * Records `checkoutSessionId` as the Toot's latest Checkout Session. A paid Toot keeps its row as
- * it is.
- */
 export async function startTootPayment(
   db: Database,
   userId: string,
@@ -65,10 +55,6 @@ export async function startTootPayment(
     })
 }
 
-/**
- * Marks the Toot paid by `checkoutSessionId`, once. Only a Toot whose payment was started here
- * (`startTootPayment`) can be: a user deleted since has no row. True when it is paid now.
- */
 export async function markTootPaid(
   db: Database,
   userId: string,

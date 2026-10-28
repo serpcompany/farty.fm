@@ -1,33 +1,13 @@
 import { captureEmail, type MailboxStore } from './dev-mailbox'
 import { type DeploymentEnv, deployment, isLocalHost } from './environment'
 
-/**
- * Where this request's email goes (SERP's transactional email standard), decided per request:
- *
- * 1. Staging or Production, with the `EMAIL` send binding and `EMAIL_FROM` naming the support
- *    address, sends through Cloudflare Email Sending. Staging's binding sends only to its test
- *    recipients (wrangler.jsonc).
- * 2. A local run with the `DEV_MAILBOX` KV binding, for a request to a local host, keeps the email
- *    in the dev mailbox (`/dev/mail/`) instead. A local run never sends.
- * 3. Anything else sends nothing, for a fixed reason.
- *
- * Logs say only what happened (`email_sent`, `email_captured`, `email_skipped`, `email_failed`)
- * and a fixed reason: never a recipient, a subject or a code.
- */
-
-/** The one address Farty sends from and receives at (Email Routing forwards it). */
 export const SUPPORT_EMAIL = 'support@farty.fm'
 
-/**
- * A sign-in code: its digits, how long it works and how many guesses it allows. Defined once, for
- * the auth config, this email and the sign-in screen (pinned together in `auth-config.test.ts`).
- */
 export const SIGN_IN_CODE_LENGTH = 6
 export const SIGN_IN_CODE_MINUTES = 10
 export const SIGN_IN_CODE_ATTEMPTS = 3
 
-/** The `send_email` binding's structured `send()`, the one method used here. */
-export type SendEmailBinding = { send(message: EmailMessageBuilder): Promise<unknown> }
+type SendEmailBinding = { send(message: EmailMessageBuilder): Promise<unknown> }
 
 export type EmailEnv = DeploymentEnv & {
   EMAIL?: unknown
@@ -35,7 +15,7 @@ export type EmailEnv = DeploymentEnv & {
   DEV_MAILBOX?: unknown
 }
 
-export type EmailOffReason =
+type EmailOffReason =
   | 'deployment_not_configured'
   | 'email_not_configured'
   | 'email_from_invalid'
@@ -46,7 +26,6 @@ export type EmailConfig =
   | { kind: 'capture'; mailbox: MailboxStore; from: EmailAddress }
   | { kind: 'off'; reason: EmailOffReason }
 
-/** Where email goes for a request to `host` (the `Host` header, port included). */
 export function emailConfig(env: EmailEnv, host: string | null): EmailConfig {
   const target = deployment(env)
   if (target.kind === 'misconfigured') return { kind: 'off', reason: 'deployment_not_configured' }
@@ -63,11 +42,6 @@ export function emailConfig(env: EmailEnv, host: string | null): EmailConfig {
   return { kind: 'capture', mailbox, from: { name: 'Farty', email: SUPPORT_EMAIL } }
 }
 
-/**
- * The dev mailbox: only in a local run that has the binding, and only for a request to a local
- * host. Staging and Production have no binding (src/db/deploy-config.test.ts), and a deployment
- * that had one still never reaches it here.
- */
 export function devMailboxStore(env: EmailEnv, host: string | null): MailboxStore | null {
   if (deployment(env).kind !== 'local' || !isLocalHost(host)) return null
   const store = env.DEV_MAILBOX as Partial<MailboxStore> | undefined
@@ -78,10 +52,8 @@ export function devMailboxStore(env: EmailEnv, host: string | null): MailboxStor
   return usable ? (store as MailboxStore) : null
 }
 
-/** `Farty <support@farty.fm>`: a display name, then the support address in angle brackets. */
 const SENDER = /^([^<>"\r\n]+?)\s*<([^<>\s]+)>$/
 
-/** `EMAIL_FROM` as a sender, only when its address is the support address. */
 export function parseSender(value: unknown): EmailAddress | null {
   const match = typeof value === 'string' ? SENDER.exec(value.trim()) : null
   if (!match) return null
@@ -94,8 +66,7 @@ function sendBinding(value: unknown): SendEmailBinding | null {
   return typeof binding?.send === 'function' ? (binding as SendEmailBinding) : null
 }
 
-/** The sign-in code email. The code is one unbroken run of digits, so a tap copies all of it. */
-export function signInCodeEmail(code: string): { subject: string; text: string; html: string } {
+function signInCodeEmail(code: string): { subject: string; text: string; html: string } {
   const minutes = `${SIGN_IN_CODE_MINUTES} minutes`
   return {
     subject: `${code} is your Farty sign-in code`,
@@ -114,19 +85,15 @@ export function signInCodeEmail(code: string): { subject: string; text: string; 
   }
 }
 
-/** What became of one email. */
-export type EmailOutcome = 'sent' | 'captured' | 'skipped' | 'failed'
+type EmailOutcome = 'sent' | 'captured' | 'skipped' | 'failed'
 
 export type EmailSender = {
-  /** Whether an email would go anywhere. A code request answers 503 when it wouldn't. */
   readonly available: boolean
-  /** Sends one sign-in code. It never throws: it answers how it went. */
   sendSignInCode(to: string, code: string): Promise<EmailOutcome>
 }
 
-export type EmailLog = (event: `email_${EmailOutcome}`, reason?: string) => void
+type EmailLog = (event: `email_${EmailOutcome}`, reason?: string) => void
 
-/** Email Sending's error codes, such as `E_SENDER_NOT_VERIFIED`; anything else is `send_error`. */
 const ERROR_CODE = /^E_[A-Z0-9_]{1,64}$/
 
 export function createEmailSender(

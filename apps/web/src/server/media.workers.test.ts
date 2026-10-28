@@ -3,8 +3,6 @@ import { describe, expect, it } from 'vitest'
 
 import { audioKey, deleteUserMedia, putAudioOnce, userPrefix } from './media'
 
-// R2 in workerd: the keys, and a key written once and never overwritten.
-
 const bytes = (...values: number[]) => new Uint8Array(values)
 
 describe('putAudioOnce', () => {
@@ -33,22 +31,27 @@ describe('putAudioOnce', () => {
   })
 })
 
+const R2_LISTING_PAGE = 1000
+const WRITING_A_PAGE_OF_KEYS_MS = 30_000
+
 describe('deleteUserMedia', () => {
-  it('deletes every key under the user’s prefix, past one page of the listing', async () => {
-    // More than one page of R2's listing (1,000 keys). Writing them takes a few seconds while
-    // other test files run, hence the longer timeout.
-    await Promise.all(
-      Array.from({ length: 1001 }, (_, i) =>
-        env.MEDIA.put(`users/userA/recordings/${i}.wav`, bytes(i % 256))
+  it(
+    'deletes every key under the user’s prefix, past one page of the listing',
+    async () => {
+      await Promise.all(
+        Array.from({ length: R2_LISTING_PAGE + 1 }, (_, i) =>
+          env.MEDIA.put(`users/userA/recordings/${i}.wav`, bytes(i % 256))
+        )
       )
-    )
-    await env.MEDIA.put('users/userAB/recordings/1.wav', bytes(1))
+      await env.MEDIA.put('users/userAB/recordings/1.wav', bytes(1))
 
-    await deleteUserMedia(env.MEDIA, 'userA')
+      await deleteUserMedia(env.MEDIA, 'userA')
 
-    const left = await env.MEDIA.list({ prefix: 'users/' })
-    expect(left.objects.map(object => object.key)).toEqual(['users/userAB/recordings/1.wav'])
-  }, 30_000)
+      const left = await env.MEDIA.list({ prefix: 'users/' })
+      expect(left.objects.map(object => object.key)).toEqual(['users/userAB/recordings/1.wav'])
+    },
+    WRITING_A_PAGE_OF_KEYS_MS
+  )
 })
 
 describe('userPrefix', () => {

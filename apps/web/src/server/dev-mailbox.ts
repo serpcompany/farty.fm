@@ -1,13 +1,5 @@
 import { z } from 'zod'
 
-/**
- * The dev mailbox: a local run keeps each email here, whole, instead of sending it, so sign-in
- * codes work without being logged. It is the top-level `DEV_MAILBOX` KV binding, which only local
- * runs have (Wrangler keeps it under `.wrangler/state/`), reached only through `devMailboxStore`
- * (`email.ts`). `/dev/mail/` lists it.
- */
-
-/** The KV methods the mailbox uses. */
 export type MailboxStore = Pick<KVNamespace, 'get' | 'put' | 'list'>
 
 export type CapturedEmail = {
@@ -21,11 +13,8 @@ export type CapturedEmail = {
 }
 
 const PREFIX = 'mail:'
-/** Old mail expires by itself after a week. */
 const KEEP_SECONDS = 7 * 24 * 60 * 60
-/** The page shows the newest 50. */
 const LIST_LIMIT = 50
-/** Keys sort newest first: the time until this far-off instant, zero-padded. */
 const LAST_INSTANT = 9_999_999_999_999
 
 const CAPTURED = z.object({
@@ -56,7 +45,6 @@ export async function captureEmail(
   })
 }
 
-/** The newest captured emails first. Entries that are gone or don't parse are left out. */
 export async function listCapturedEmails(store: MailboxStore): Promise<CapturedEmail[]> {
   const { keys } = await store.list({ prefix: PREFIX, limit: LIST_LIMIT })
   const values = await Promise.all(keys.map(({ name }) => store.get(name)))

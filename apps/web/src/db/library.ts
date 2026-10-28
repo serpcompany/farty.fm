@@ -2,25 +2,14 @@ import { and, count, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm'
 
 import type { Analysis } from '../lib/recordings'
 import type { TootArrangement } from '../lib/toot'
+import { d1Now } from './d1-clock'
 import type { Database } from './database'
 import { recordings, toots, user, verification } from './schema'
 
-// A user's library in D1: their Recordings and Toots, and their tombstones. Every query here takes
-// the session's user id and filters on it, so one user never reads or changes another's rows.
-
-/** A user's Recordings or their Toots, by the name of their table and their prefix in R2. */
 export type Kind = 'recordings' | 'toots'
 
 const tables = { recordings, toots }
 
-/**
- * Now, in epoch milliseconds, by D1's own clock. Every `updated_at` and `deleted_at` is written
- * with it, and D1 runs one statement at a time, so a row changed after a library read always has
- * an `updated_at` at or after that read's `cursor` (`libraryChanges`).
- */
-const d1Now = sql<number>`cast(unixepoch('subsec') * 1000 as integer)`
-
-/** A Recording to keep, as the browser uploads it. */
 export type NewRecording = {
   id: string
   number: number
@@ -32,7 +21,6 @@ export type NewRecording = {
   audioBytes: number
 }
 
-/** A Toot to keep, as the browser uploads it. */
 export type NewToot = {
   id: string
   title: string
@@ -43,8 +31,7 @@ export type NewToot = {
   audioBytes: number
 }
 
-/** Whether the user has this row, and whether it is a tombstone. */
-export type ItemStatus = 'live' | 'deleted' | null
+type ItemStatus = 'live' | 'deleted' | null
 
 const whereItem = (kind: Kind, userId: string, id: string) =>
   and(eq(tables[kind].userId, userId), eq(tables[kind].id, id))
@@ -60,7 +47,6 @@ function itemStatusQuery(db: Database, kind: Kind, userId: string, id: string) {
 const statusOf = (rows: { deletedAt: Date | null }[]): ItemStatus =>
   rows.length === 0 ? null : rows[0].deletedAt ? 'deleted' : 'live'
 
-/** The row's status, and how many live rows of this kind the user has. */
 export async function uploadState(
   db: Database,
   kind: Kind,
@@ -87,10 +73,6 @@ export async function itemStatus(
   return statusOf(await itemStatusQuery(db, kind, userId, id))
 }
 
-/**
- * Adds the Recording unless the user already has a row with its id or already has `limit` live
- * Recordings. One statement, so two uploads at once can't both pass the limit. True if added.
- */
 export async function insertRecording(
   db: Database,
   userId: string,
@@ -110,7 +92,6 @@ export async function insertRecording(
   return added.length === 1
 }
 
-/** Adds the Toot, as `insertRecording` adds a Recording. True if added. */
 export async function insertToot(
   db: Database,
   userId: string,
@@ -129,10 +110,6 @@ export async function insertToot(
   return added.length === 1
 }
 
-/**
- * Turns a live row into a tombstone. A Toot's title, the one thing a user types, is cleared.
- * Returns the row's status before: `live` if this call deleted it.
- */
 export async function tombstone(
   db: Database,
   kind: Kind,
@@ -155,15 +132,8 @@ export async function tombstone(
   return deleted.length === 1 ? 'live' : itemStatus(db, kind, userId, id)
 }
 
-/**
- * How long a tombstone stays: 30 days. A browser needs one only until its next library read, and a
- * signed-in browser reads on every open; a session ends after 7 days without one. A browser whose
- * last read is older than this gets the whole library instead (`full` in `GET /api/library/`), so
- * any retention is correct and this one only bounds the rows: the deletes of 30 days.
- */
 export const TOMBSTONE_RETENTION_MS = 30 * 24 * 60 * 60 * 1000
 
-/** Deletes the user's tombstones older than `TOMBSTONE_RETENTION_MS`, by D1's own clock. */
 export async function purgeTombstones(db: Database, userId: string): Promise<void> {
   const horizon = sql`${d1Now} - ${TOMBSTONE_RETENTION_MS}`
   const old = (kind: Kind) =>
@@ -178,7 +148,6 @@ export async function purgeTombstones(db: Database, userId: string): Promise<voi
   ])
 }
 
-/** Renames a live Toot; the last rename to arrive wins. Returns the row's status before. */
 export async function renameToot(
   db: Database,
   userId: string,
@@ -196,10 +165,6 @@ export async function renameToot(
 export type RecordingRow = typeof recordings.$inferSelect
 export type TootRow = typeof toots.$inferSelect
 
-/**
- * The user's rows changed at or after `since` (epoch milliseconds), tombstones included, and the
- * `cursor` to pass as the next `since`. A row can come back twice, never be missed.
- */
 export async function libraryChanges(
   db: Database,
   userId: string,
@@ -221,7 +186,6 @@ export async function libraryChanges(
   return { cursor: Number(clock[0].now), recordings: recordingRows, toots: tootRows }
 }
 
-/** Turns Farty news by email on or off. False if the user has no row. */
 export async function setMarketingEmail(
   db: Database,
   userId: string,
@@ -235,11 +199,6 @@ export async function setMarketingEmail(
   return updated.length === 1
 }
 
-/**
- * Deletes the user's row and any sign-in code still waiting for their email, in one batch. The
- * foreign keys' `on delete cascade` deletes their sessions, sign-in methods, Recordings and Toots
- * with the row. A code's row names the email (`sign-in-otp-<lowercased email>`), not the user.
- */
 export async function deleteUser(db: Database, userId: string): Promise<void> {
   const email = sql`(select ${user.email} from ${user} where ${user.id} = ${userId})`
   await db.batch([
