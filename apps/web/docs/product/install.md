@@ -100,6 +100,7 @@ The service worker registers only in a build, never on `pnpm dev`.
 
 ## Not checked
 
-- The install offer never shows on a computer.
+- The install offer never shows on a computer. Where Chrome offers its prompt there, only the
+  `desktop` media query in `globals.css` hides the offer, and only a real browser applies CSS.
 - That a Home Screen icon opens Farty, and the microphone on a real device: these need the owner's
   phone ([Evidence](../../AGENTS.md#evidence)).
