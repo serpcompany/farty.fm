@@ -1,18 +1,27 @@
 'use client'
 
-import { type FormEvent, useEffect, useRef, useState } from 'react'
+import { type FormEvent, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { readStepDraft, type SignInProblem, saveStepDraft, sendCode, signIn } from '@/lib/account'
+import {
+  readStepDraft,
+  type SignInProblem,
+  saveStepDraft,
+  sendCode,
+  signIn,
+  turnstileSiteKey
+} from '@/lib/account'
 import { unsavedBeforeSignIn } from '@/lib/library-sync'
 import { useAccount } from './account-provider'
+import { Turnstile } from './turnstile'
 
 const messages: Record<SignInProblem, string> = {
   invalidEmail: 'Enter a valid email address.',
   wrongCode: "That code isn't right. Check it and try again.",
   codeExpired: 'That code no longer works. Send a new one.',
   tooManyTries: 'Too many tries. Wait a few minutes, then try again.',
+  notChecked: "Couldn't check that you're a person. Try again.",
   unavailable: "Accounts aren't available right now.",
   failed: "Couldn't reach Farty. Check your connection and try again."
 }
@@ -20,9 +29,10 @@ const messages: Record<SignInProblem, string> = {
 /**
  * The account step (#155, the plan's §1), full screen over everything on a phone, and a card under
  * the top bar from 768px: an email, then the 6-digit code sent to it, which signs in or makes the
- * account. Not now says what a guest loses. A browser
- * whose session ended (`expired`) is asked to sign in again, and loses nothing. Signing in to
- * another account clears this device's farts not saved to the first: the step says so first.
+ * account. Sending the code needs Turnstile's check, under the email (#237). Not now says what a
+ * guest loses. A browser whose session ended (`expired`) is asked to sign in again, and loses
+ * nothing. Signing in to another account clears this device's farts not saved to the first: the
+ * step says so first.
  */
 export function AccountStep() {
   const { stepOpen } = useAccount()
@@ -41,6 +51,14 @@ function Step() {
   const [problem, setProblem] = useState<SignInProblem | null>(null)
   /** Farts this device would lose by signing in as `email`, shown before its code is sent. */
   const [unsaved, setUnsaved] = useState(0)
+  /** Turnstile's site key, read once the email shows. */
+  const [siteKey, setSiteKey] = useState<string | null>(null)
+  /** Turnstile's token for the next code. Each works once. */
+  const [token, setToken] = useState<string | null>(null)
+  /** Bumped for a new widget, and so a new token: after each send, and back online. */
+  const [widget, setWidget] = useState(0)
+  /** Turnstile couldn't load: it's tried again once the browser is online. */
+  const [checkFailed, setCheckFailed] = useState(false)
   const heading = useRef<HTMLHeadingElement>(null)
   const emailField = useRef<HTMLInputElement>(null)
   const codeField = useRef<HTMLInputElement>(null)
@@ -71,8 +89,34 @@ function Step() {
 
   useEffect(() => saveStepDraft({ phase, email }), [phase, email])
 
+  const readSiteKey = useEffectEvent(async () => {
+    const read = await turnstileSiteKey()
+    if (read.ok) setSiteKey(read.value)
+    else {
+      setProblem(read.problem)
+      setCheckFailed(read.problem === 'failed')
+    }
+  })
+  const needsSiteKey = phase === 'email' && siteKey === null
+  useEffect(() => {
+    if (needsSiteKey) void readSiteKey()
+  }, [needsSiteKey])
+
+  useEffect(() => {
+    if (!checkFailed) return
+    const again = () => {
+      setCheckFailed(false)
+      setProblem(null)
+      if (siteKey === null) void readSiteKey()
+      else setWidget(n => n + 1)
+    }
+    window.addEventListener('online', again)
+    return () => window.removeEventListener('online', again)
+  }, [checkFailed, siteKey])
+
   const send = async (event: FormEvent) => {
     event.preventDefault()
+    if (token === null) return
     setBusy(true)
     setProblem(null)
     const losing = await unsavedBeforeSignIn(email).catch(() => 0)
@@ -91,10 +135,13 @@ function Step() {
   }
 
   const sendNow = async () => {
+    if (token === null) return
     setUnsaved(0)
     setBusy(true)
     setProblem(null)
-    const sent = await sendCode(email)
+    const sent = await sendCode(email, token)
+    setToken(null)
+    setWidget(n => n + 1)
     setBusy(false)
     if (!sent.ok) {
       setProblem(sent.problem)
@@ -140,7 +187,7 @@ function Step() {
             <p className="text-muted-foreground">
               {again
                 ? 'Your session ended. Your farts stay on this device until you sign in.'
-                : 'Make a free account to keep your Recordings and Toots, even on a new phone.'}
+                : 'Make a free account to keep your farts.'}
             </p>
           </div>
 
@@ -154,7 +201,12 @@ function Step() {
               <Button ref={backButton} className="h-12 text-base" onClick={goBack}>
                 Go back
               </Button>
-              <Button variant="secondary" className="h-12 text-base" onClick={() => void sendNow()}>
+              <Button
+                variant="secondary"
+                className="h-12 text-base"
+                disabled={token === null}
+                onClick={() => void sendNow()}
+              >
                 Sign in anyway
               </Button>
             </div>
@@ -174,7 +226,18 @@ function Step() {
                 value={email}
                 onChange={event => setEmail(event.target.value)}
               />
-              <Button type="submit" className="h-12 text-base" disabled={busy}>
+              {siteKey && (
+                <Turnstile
+                  key={widget}
+                  siteKey={siteKey}
+                  onToken={setToken}
+                  onFailed={() => {
+                    setProblem('failed')
+                    setCheckFailed(true)
+                  }}
+                />
+              )}
+              <Button type="submit" className="h-12 text-base" disabled={busy || token === null}>
                 {busy ? <Spinner /> : 'Send code'}
               </Button>
             </form>
@@ -238,8 +301,7 @@ function Step() {
               className="text-center text-sm text-muted-foreground"
               data-testid="account-step-guest"
             >
-              Without an account, your Recordings stay only in this browser, and your Toots are gone
-              when you close Farty.
+              Without an account, your farts are gone when you close Farty.
             </p>
           )}
           <Button variant="secondary" className="h-12 text-base" onClick={skipStep}>

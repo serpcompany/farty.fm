@@ -11,6 +11,7 @@ import {
   registerServiceWorker
 } from '@/lib/install'
 import { onRecordingSaved } from '@/lib/recording-store'
+import { useAccount } from './account-provider'
 import { ShareSheetHint, useInstallRoute } from './install-button'
 import { usePedos } from './pedos-provider'
 
@@ -19,20 +20,21 @@ const offeredKey = 'pedos.installOffered'
 /**
  * Offers to install Farty once, after the first saved Recording, above the tabs. It hides when
  * it's closed or Farty is installed, and never shows on a computer, which has no app (#199). It
- * also registers the service worker and, once there's a Recording, asks the browser to keep
- * Farty's storage: a guest's Recordings are kept too (owner, 2026-10-25, #203).
+ * also registers the service worker and, signed in with a Recording, asks the browser to keep
+ * Farty's storage. A guest's farts last only the visit, so a guest's browser isn't asked (#237).
  */
 export function InstallPrompt() {
   const pedos = usePedos()
+  const { account } = useAccount()
   const route = useInstallRoute()
   const [open, setOpen] = useState(false)
 
   useEffect(registerServiceWorker, [])
 
-  const hasRecording = (pedos.recordings?.length ?? 0) > 0
+  const keeps = account.status === 'signedIn' && (pedos.recordings?.length ?? 0) > 0
   useEffect(() => {
-    if (hasRecording) void keepRecordings()
-  }, [hasRecording])
+    if (keeps) void keepRecordings()
+  }, [keeps])
 
   useEffect(
     () =>

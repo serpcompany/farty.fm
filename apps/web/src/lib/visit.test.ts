@@ -16,7 +16,7 @@ const guestsNewVisit: OpenFacts = {
 }
 
 describe('clearsOnOpen', () => {
-  it("clears a guest's Toots when a new visit opens", () => {
+  it("clears a guest's farts when a new visit opens", () => {
     expect(clearsOnOpen(guestsNewVisit)).toBe(true)
   })
 
@@ -128,57 +128,106 @@ describe('openVisit', () => {
 
   /** A browser that has had a guest's visit since a guest's Toots last only the visit. */
   const pastFirstOpen = () => localStorage.setItem('pedos.opened', '1')
+  /**
+   * Makes farts as a build from before #237 did: Farty hasn't opened since, so it hasn't noted
+   * which Recordings this browser keeps.
+   */
+  async function makeFartsBefore237(page: Page) {
+    const farts = await makeFarts(page)
+    localStorage.removeItem('pedos.keptRecordings')
+    return farts
+  }
+  const nothing = { recordings: [], audio: [], toots: [], tootAudio: [], outbox: [] }
 
-  it("keeps a guest's Recordings as a new visit opens, and clears their Toots", async () => {
+  it("clears a guest's Recordings, their audio and their Toots as a new visit opens", async () => {
     pastFirstOpen()
     const last = await open(signedOut)
     const { recording, toot } = await makeFarts(last)
     // Something waits to download for each, as for a library an account left (`forgetLibrary`
-    // clears those): the Toot's goes with it.
+    // clears those): each goes with its fart.
     const database = await last.store.db()
-    await database.put('downloads', { kind: 'recordings', id: recording.id }, 'recordings:x')
+    await database.put(
+      'downloads',
+      { kind: 'recordings', id: recording.id },
+      itemKey('recordings', recording.id)
+    )
     await database.put('downloads', { kind: 'toots', id: toot.id }, itemKey('toots', toot.id))
 
     const next = await open(signedOut)
     expect(next.account).toEqual({ status: 'signedOut' })
-    expect(await held(next)).toEqual({
-      recordings: [recording.id],
-      audio: [recording.id],
-      toots: [],
-      tootAudio: [],
-      outbox: [itemKey('recordings', recording.id)]
-    })
-    expect(await (await next.store.db()).getAllKeys('downloads')).toEqual(['recordings:x'])
-    expect(await next.store.loadAudio(recording.id)).toEqual(wav(1))
-    // Closed and opened again, and again: still there.
-    const after = await open(signedOut)
-    expect((await after.store.loadRecordings()).map(r => r.number)).toEqual([1])
+    expect(await held(next)).toEqual(nothing)
+    expect(await (await next.store.db()).getAllKeys('downloads')).toEqual([])
+    expect(await next.store.loadRecordings()).toEqual([])
   })
 
-  it('keeps the Toots through a reload', async () => {
+  it('keeps the Recordings a browser held from before #237, and clears those made since', async () => {
+    pastFirstOpen()
+    const { recording: before } = await makeFartsBefore237(await open(signedOut))
+    // The first open since: the last visit's Toot goes, and its Recording is kept from now on.
+    const first = await open(signedOut)
+    expect(JSON.parse(localStorage.getItem('pedos.keptRecordings') ?? '')).toEqual([before.id])
+    expect(await held(first)).toMatchObject({ recordings: [before.id], toots: [] })
+    const { recording: since } = await makeFarts(first)
+    expect(since.number).toBe(2)
+
+    const next = await open(signedOut)
+    expect(await held(next)).toEqual({
+      recordings: [before.id],
+      audio: [before.id],
+      toots: [],
+      tootAudio: [],
+      outbox: [itemKey('recordings', before.id)]
+    })
+    expect(await next.store.loadAudio(before.id)).toEqual(wav(1))
+    // Closed and opened again: still there.
+    const after = await open(signedOut)
+    expect((await after.store.loadRecordings()).map(r => r.id)).toEqual([before.id])
+  })
+
+  it('keeps every Recording when the kept ones can’t be read', async () => {
+    pastFirstOpen()
+    const { recording } = await makeFarts(await open(signedOut))
+    localStorage.setItem('pedos.keptRecordings', '{oops')
+    const next = await open(signedOut)
+    expect(await held(next)).toMatchObject({ recordings: [recording.id], toots: [] })
+  })
+
+  it('clears nothing on a reload', async () => {
     pastFirstOpen()
     const tab = memoryStorage()
     const first = await open(signedOut, tab)
-    const { toot } = await makeFarts(first)
+    const { recording, toot } = await makeFarts(first)
     const reloaded = await open(signedOut, tab)
-    expect((await held(reloaded)).toots).toEqual([toot.id])
+    expect(await held(reloaded)).toEqual({
+      recordings: [recording.id],
+      audio: [recording.id],
+      toots: [toot.id],
+      tootAudio: [toot.id],
+      outbox: [itemKey('recordings', recording.id), itemKey('toots', toot.id)].sort()
+    })
   })
 
-  it("makes a guest's kept Recordings the account's as a signed-in visit opens, and uploads them", async () => {
+  it("uploads a guest's Recordings as they sign in, those kept from before #237 included", async () => {
     pastFirstOpen()
-    const { recording } = await makeFarts(await open(signedOut))
-    // A later visit, then a sign-in.
-    await open(signedOut)
-    const signedInVisit = await open(signedIn)
+    const { recording: before } = await makeFartsBefore237(await open(signedOut))
+    // A later visit, which makes another, then signs in (reloaded here, in the same tab).
+    const tab = memoryStorage()
+    const { recording: since } = await makeFarts(await open(signedOut, tab))
+    const signedInVisit = await open(signedIn, tab)
     expect(localStorage.getItem('pedos.account')).toBe('user-a')
-    expect((await held(signedInVisit)).recordings).toEqual([recording.id])
+    expect((await held(signedInVisit)).recordings).toEqual([before.id, since.id].sort())
 
     await signedInVisit.sync.syncOnce('user-a')
-    expect(account.get('recordings', recording.id)?.wav).toEqual(wav(1))
-    const puts = account.sent.filter(sent => sent.method === 'PUT')
-    expect(puts).toEqual([
-      expect.objectContaining({ path: `/api/recordings/${recording.id}/`, library: 'user-a' })
-    ])
+    expect(account.get('recordings', before.id)?.wav).toEqual(wav(1))
+    expect(account.get('recordings', since.id)?.wav).toEqual(wav(1))
+    const puts = account.sent
+      .filter(sent => sent.method === 'PUT' && sent.path.startsWith('/api/recordings/'))
+      .map(sent => sent.path)
+    expect(puts.sort()).toEqual(
+      [`/api/recordings/${before.id}/`, `/api/recordings/${since.id}/`].sort()
+    )
+    // Signed in, a new visit keeps them all.
+    expect((await held(await open(signedIn))).recordings).toEqual([before.id, since.id].sort())
   })
 
   it("clears a library an account left as a guest's, from before #203, as a guest's visit opens", async () => {
@@ -191,13 +240,7 @@ describe('openVisit', () => {
     localStorage.removeItem('pedos.account')
 
     const guest = await open(signedOut)
-    expect(await held(guest)).toEqual({
-      recordings: [],
-      audio: [],
-      toots: [],
-      tootAudio: [],
-      outbox: []
-    })
+    expect(await held(guest)).toEqual(nothing)
     expect(await (await guest.store.db()).getAllKeys('meta')).toEqual([])
   })
 
@@ -209,13 +252,7 @@ describe('openVisit', () => {
 
     const mine = await open(signedIn)
     expect(localStorage.getItem('pedos.account')).toBe('user-a')
-    expect(await held(mine)).toEqual({
-      recordings: [],
-      audio: [],
-      toots: [],
-      tootAudio: [],
-      outbox: []
-    })
+    expect(await held(mine)).toEqual(nothing)
   })
 
   it("keeps an account's farts when its session has ended, and asks to sign in again", async () => {
@@ -230,9 +267,9 @@ describe('openVisit', () => {
   // Without sessionStorage, Farty can't tell a reload from a new visit.
   it('clears nothing when sessionStorage is blocked', async () => {
     pastFirstOpen()
-    const { toot } = await makeFarts(await open(signedOut))
+    const { recording, toot } = await makeFarts(await open(signedOut))
     const blocked = await open(signedOut, blockedStorage())
-    expect((await held(blocked)).toots).toEqual([toot.id])
+    expect(await held(blocked)).toMatchObject({ recordings: [recording.id], toots: [toot.id] })
   })
 
   // The first open's grace is for an open that can say Toots go at the end of the visit.
@@ -247,10 +284,10 @@ describe('openVisit', () => {
     const { recording, toot } = await makeFarts(unread)
     // Read at last: the warned open, which keeps what's here.
     const warned = await open(signedOut)
-    expect((await held(warned)).toots).toEqual([toot.id])
+    expect(await held(warned)).toMatchObject({ recordings: [recording.id], toots: [toot.id] })
     expect(localStorage.getItem('pedos.opened')).toBe('1')
     // The next visit is a guest's like any other.
     const next = await open(signedOut)
-    expect(await held(next)).toMatchObject({ recordings: [recording.id], toots: [] })
+    expect(await held(next)).toMatchObject({ recordings: [], toots: [] })
   })
 })

@@ -176,23 +176,23 @@ const SAVE_PROBLEMS = {
 }
 
 /**
- * The made Toot, with Save to Toots pinned above the tabs. Where saving is paid (ADR 0010), Save
- * asks for an account first, then goes to Checkout for this Toot; back from Checkout, it saves
- * the Toot once the server says it's paid. A Toot of this Song paid for and never saved is saved
- * instead of paying again. Where it's free, the first save may offer the account step once more
- * (#155).
+ * The made Toot, with Save to Toots pinned above the tabs. Saving needs an account everywhere
+ * (#237): a guest's Save opens the account step first, and carries on once it signs in. Where
+ * saving is paid (ADR 0010), Save goes to Checkout for this Toot; back from Checkout, it saves the
+ * Toot once the server says it's paid. A Toot of this Song paid for and never saved is saved
+ * instead of paying again. Where it's free, Save saves.
  */
 export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null }) {
   const pedos = usePedos()
-  const { account, stepOpen, offerStep, openStep, retry } = useAccount()
+  const { account, stepOpen, openStep, retry } = useAccount()
   const accountId = account.status === 'signedIn' ? account.id : null
   const isPaid = saveAsksForPayment()
   const isSaved = pedos.toot(draft.id) !== undefined
   const returnedPaid = isPaid && back?.done === true && back.tootId === draft.id
   const [busy, setBusy] = useState<'saving' | 'paying' | 'confirming' | null>(null)
   const [problem, setProblem] = useState<keyof typeof SAVE_PROBLEMS | null>(null)
-  /** Save opened the account step: once it signs in, on to Checkout. */
-  const [paysAfterSignIn, setPaysAfterSignIn] = useState(false)
+  /** Save opened the account step: once it signs in, on to Checkout, or to saving. */
+  const [savesAfterSignIn, setSavesAfterSignIn] = useState(false)
   /** A second tap, before the first one's answer, starts nothing. */
   const paying = useRef(false)
   // A new build's reload waits while this Toot is unsaved (`stale-build.ts`, #222).
@@ -204,7 +204,6 @@ export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn 
     setProblem(null)
     try {
       await pedos.saveToot(draft)
-      if (!isPaid) offerStep('toot')
       return true
     } catch (error) {
       reportError('toot-save-failed', error)
@@ -237,13 +236,14 @@ export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn 
       if (await save()) clearCheckoutReturn()
     } else setProblem(checkout.problem)
   }
-  const payAfterSignIn = useEffectEvent((accountId: string) => void pay(accountId))
+  /** Saves the Toot, paying first where saving is paid. */
+  const keep = (accountId: string) => void (isPaid ? pay(accountId) : save())
+  const keepAfterSignIn = useEffectEvent(keep)
 
   const tapSave = () => {
-    if (!isPaid) void save()
-    else if (accountId) void pay(accountId)
+    if (accountId) keep(accountId)
     else if (account.status === 'signedOut' || account.status === 'expired') {
-      setPaysAfterSignIn(true)
+      setSavesAfterSignIn(true)
       openStep()
     } else if (account.status === 'unreachable') {
       // The session couldn't be read, so it isn't known who is paying: read it again. Back from
@@ -252,7 +252,7 @@ export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn 
       retry()
     } else {
       // The session is still being read.
-      setProblem('failed')
+      setProblem(isPaid ? 'failed' : 'saveFailed')
     }
   }
 
@@ -261,14 +261,14 @@ export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn 
     if (accountId) setProblem(current => (current === 'unreachable' ? null : current))
   }, [accountId])
 
-  // The account step that Save opened: signed in, on to Checkout; Not now pays nothing.
+  // The account step that Save opened: signed in, on to Checkout or saving; Not now saves nothing.
   useEffect(() => {
-    if (!paysAfterSignIn) return
+    if (!savesAfterSignIn) return
     if (accountId) {
-      setPaysAfterSignIn(false)
-      payAfterSignIn(accountId)
-    } else if (!stepOpen) setPaysAfterSignIn(false)
-  }, [paysAfterSignIn, accountId, stepOpen])
+      setSavesAfterSignIn(false)
+      keepAfterSignIn(accountId)
+    } else if (!stepOpen) setSavesAfterSignIn(false)
+  }, [savesAfterSignIn, accountId, stepOpen])
 
   // Back to this page from Checkout's with the browser's Back, Save can be tapped again.
   useEffect(() => {

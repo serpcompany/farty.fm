@@ -24,8 +24,8 @@ import type { Toot } from './toot'
 /**
  * Recordings and Toots live in this browser, in IndexedDB (ADR 0001's local-first rule, on the
  * web). Metadata and audio are separate stores, so listing them never loads their audio. Without
- * an account the Recordings are kept and the Toots last only the visit (`visit.ts`). Signed in,
- * they are the account's working copy, kept in step with it by `library-sync.ts`.
+ * an account they last only the visit, but for the Recordings kept from before #237 (`visit.ts`).
+ * Signed in, they are the account's working copy, kept in step with it by `library-sync.ts`.
  */
 export interface PedosDB extends DBSchema {
   recordings: { key: string; value: Recording }
@@ -349,20 +349,41 @@ export async function clearLibrary(): Promise<void> {
   })
 }
 
+/** Every Recording's id in this browser. */
+export async function recordingIds(): Promise<string[]> {
+  return withDb(database => database.getAllKeys('recordings'))
+}
+
 /**
- * Deletes every Toot in this browser, with its audio and whatever waits to send or download for
- * it, together. The Recordings stay, with their outbox, so a sign-in still uploads them.
+ * Clears a guest's last visit (#237): every Toot, and every Recording but those `kept`, with their
+ * audio and whatever waits to send or download for them, together. With `kept` null, every
+ * Recording stays. Those that stay keep their outbox, so a sign-in still uploads them.
  */
-export async function clearToots(): Promise<void> {
+export async function clearVisit(kept: ReadonlySet<string> | null): Promise<void> {
   // Every key that starts `toots:` (`itemKey`).
   const forToots = IDBKeyRange.bound(itemKey('toots', ''), itemKey('toots', '\uffff'))
   await withDb(async database => {
-    const tx = database.transaction(['toots', 'tootAudio', 'outbox', 'downloads'], 'readwrite')
+    const tx = database.transaction(
+      ['toots', 'tootAudio', 'recordings', 'audio', 'outbox', 'downloads'],
+      'readwrite'
+    )
+    const recordings = tx.objectStore('recordings')
+    const audio = tx.objectStore('audio')
+    const outbox = tx.objectStore('outbox')
+    const downloads = tx.objectStore('downloads')
+    const held = kept ? [...(await recordings.getAllKeys()), ...(await audio.getAllKeys())] : []
+    const gone = new Set(held.filter(id => !kept?.has(id)))
     await Promise.all([
       tx.objectStore('toots').clear(),
       tx.objectStore('tootAudio').clear(),
-      tx.objectStore('outbox').delete(forToots),
-      tx.objectStore('downloads').delete(forToots),
+      outbox.delete(forToots),
+      downloads.delete(forToots),
+      ...[...gone].flatMap(id => [
+        recordings.delete(id),
+        audio.delete(id),
+        outbox.delete(itemKey('recordings', id)),
+        downloads.delete(itemKey('recordings', id))
+      ]),
       tx.done
     ])
   })
