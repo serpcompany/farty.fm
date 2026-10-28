@@ -33,11 +33,19 @@ function rememberWelcomed(): void {
   }
 }
 
+function welcomedBefore(): boolean {
+  try {
+    return localStorage.getItem(welcomedKey) !== null
+  } catch {
+    return false
+  }
+}
+
 export function WelcomeProvider({ children }: { children: ReactNode }) {
   const [showsWelcome, setShowsWelcome] = useState(false)
 
   useEffect(() => {
-    setShowsWelcome(localStorage.getItem(welcomedKey) === null)
+    setShowsWelcome(!welcomedBefore())
   }, [])
 
   const finishWelcome = useCallback(() => {

@@ -57,6 +57,16 @@ describe('WelcomeProvider', () => {
     expect(document.documentElement.hasAttribute('data-welcomed')).toBe(true)
   })
 
+  it('shows Welcome, without crashing, where storage can’t be read', async () => {
+    const read = vi.spyOn(localStorage, 'getItem').mockImplementation(() => {
+      throw new DOMException('Blocked', 'SecurityError')
+    })
+    await openFarty()
+
+    expect(read).toHaveBeenCalled()
+    expect(welcome.showsWelcome).toBe(true)
+  })
+
   it('finishes Welcome for this page load where storage is blocked', async () => {
     await openFarty()
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
