@@ -38,7 +38,7 @@ A PR merges by an agent only when every file it changes is on that list. The own
 - [`docs/agents/google-play.md`](docs/agents/google-play.md): the Play app, a Trusted Web Activity.
 - [`tools/melody-lab/README.md`](tools/melody-lab/README.md): the reference engine the web app is matched to. Its answers are the [golden data](fixtures/golden/README.md).
 - [`tools/catalog/README.md`](tools/catalog/README.md): importing Songs from PDMX, with their sources and licenses.
-- [`docs/design/app-map.md`](docs/design/app-map.md) and [`docs/design/screens.md`](docs/design/screens.md): the screens and their states.
+- [`apps/web/docs/product/`](apps/web/docs/product/README.md): what each area of the app does for a person, in each state, and the check that proves it.
 - [`docs/brand/README.md`](docs/brand/README.md): the logo and app icon.
 
 ## Decisions
