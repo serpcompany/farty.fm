@@ -5,6 +5,11 @@ search and sort. A locked Song opens a sheet saying what it needs, and an Unlock
 [Song Creator](song-creator.md). Why a Song needs farts as long as its notes is
 [ADR 0011](../../../../docs/adr/0011-unlocking-needs-farts-as-long-as-notes.md).
 
+## While the Recordings load
+
+- A spinner shows in place of the Songs (`src/components/farty/compose-screen.interaction.test.tsx`,
+  "shows a spinner while the Recordings load").
+
 ## Without Melodic Recordings
 
 - A card says "No Melodic Recordings yet" and to record a few farts with a clear note, and all 12
@@ -12,6 +17,8 @@ search and sort. A locked Song opens a sheet saying what it needs, and an Unlock
   Compose, and the Result says so"; `e2e/tabs.spec.ts`, "the app opens on Record, and every tab
   works before the first Recording"; `src/lib/pitch-coverage.test.ts`, "locks every Song, fewest
   notes first, without Melodic Recordings").
+- The card hides while a search is typed (`src/components/farty/compose-screen.interaction.test.tsx`,
+  "hides the No Melodic Recordings card while a search is typed").
 
 ## Locked Songs
 
@@ -28,6 +35,8 @@ search and sort. A locked Song opens a sheet saying what it needs, and an Unlock
   Record tab, and Close closes it (`e2e/compose.spec.ts`, "saving farts unlocks Songs on Compose,
   and the Result says so"; `e2e/fixture-library.spec.ts`, "loads the Fixture Library and unlocks
   every Song it is long enough for").
+- Hiding the page closes the sheet (`src/components/farty/compose-screen.interaction.test.tsx`,
+  "closes a locked Song’s sheet when the page is hidden").
 - A locked Song can't be played. Its address says it's locked ([Song Creator](song-creator.md)).
 
 ## Unlocked Songs
@@ -67,9 +76,3 @@ search and sort. A locked Song opens a sheet saying what it needs, and an Unlock
   fewest notes, and A–Z. Both keep the Unlocked and Locked sections (`e2e/compose.spec.ts`, "saving
   farts unlocks Songs on Compose, and the Result says so"; `src/lib/pitch-coverage.test.ts`, "puts
   the highest coverage first, then fewer notes"; "sorts A–Z within each section").
-
-## Not checked
-
-- The spinner while the Recordings load.
-- The "No Melodic Recordings yet" card hides while a search is typed.
-- Hiding the page closes a locked Song's sheet.
