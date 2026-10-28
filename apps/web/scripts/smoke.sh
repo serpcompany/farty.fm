@@ -94,12 +94,18 @@ answers() {
   [[ "${result%% *}" == "$want_status" && "${result#* }" == "$want_type"* ]]
 }
 
-# allows_the_microphone [curl options...]
-allows_the_microphone() {
-  local headers
-  headers=$(head_of "$base/" "$@")
+sends_security_headers() {
+  local path="$1" headers
+  shift
+  headers=$(head_of "$base$path" "$@")
   seen=$(head -n 1 <<<"$headers")
-  grep -qi '^permissions-policy: microphone=(self)' <<<"$headers"
+  grep -qi "^content-security-policy:.*frame-ancestors 'none'" <<<"$headers" &&
+    grep -qix 'x-content-type-options: nosniff' <<<"$headers" &&
+    grep -qix 'x-frame-options: deny' <<<"$headers" &&
+    grep -qi '^strict-transport-security: max-age=' <<<"$headers" &&
+    grep -qix 'referrer-policy: strict-origin-when-cross-origin' <<<"$headers" &&
+    grep -qi '^permissions-policy: microphone=(self)' <<<"$headers" &&
+    ! grep -qi '^x-powered-by:' <<<"$headers"
 }
 
 # refuses <url> [curl options...]: 401, the Basic challenge, and no-store.
@@ -240,8 +246,10 @@ done
 for icon in /icon.png /apple-icon.png "$static_file"; do
   eventually "$icon answers with a PNG" answers "$icon" 200 image/png "${smoke[@]}"
 done
-eventually 'Permissions-Policy allows the microphone for the site' \
-  allows_the_microphone "${smoke[@]}"
+for path in / "$static_file"; do
+  eventually "$path sends the security headers, and the microphone only for the site" \
+    sends_security_headers "$path" "${smoke[@]}"
+done
 eventually 'robots.txt answers without the password' robots_needs_no_password
 eventually "robots.txt lists the sitemap index on $canonical" lists_the_sitemap_index
 eventually "the sitemap index lists the pages sitemap on $canonical" \

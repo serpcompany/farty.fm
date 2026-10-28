@@ -17,7 +17,8 @@
     },
     "names": {
       ".dev.vars.example": "hash-lines",
-      "cf-typegen.env": "hash-lines"
+      "cf-typegen.env": "hash-lines",
+      "_headers": "hash-lines"
     }
   },
   "rules": {
@@ -40,7 +41,8 @@
           "src",
           "worker.ts",
           "e2e",
-          "scripts"
+          "scripts",
+          "next.config.ts"
         ],
         "testCode": "(\\.test\\.tsx?$|^e2e/|^src/test-support/)",
         "entries": [
@@ -49,7 +51,8 @@
           "^src/lib/[^/]+/worker\\.ts$",
           "^src/lib/catalog/generate\\.ts$",
           "^worker\\.ts$",
-          "^scripts/[^/]+\\.ts$"
+          "^scripts/[^/]+\\.ts$",
+          "^next\\.config\\.ts$"
         ],
         "runtime": {
           "path": "^(src/|worker\\.ts$)",
@@ -394,10 +397,6 @@
           "findings": 56,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/next.config.ts": {
-          "findings": 6,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/open-next-worker.d.ts": {
           "findings": 1,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -423,7 +422,7 @@
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
         "apps/web/scripts/smoke.sh": {
-          "findings": 45,
+          "findings": 44,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
         "apps/web/src/app/api/account/route.ts": {
