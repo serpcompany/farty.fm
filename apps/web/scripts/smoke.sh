@@ -1,24 +1,4 @@
 #!/usr/bin/env bash
-# Post-deploy smoke test: smoke.sh <base-url> <staging|production>
-#
-# <base-url> is the deploy's workers.dev host in CI, or a local preview. The checks send the smoke
-# test's header, which keeps a workers.dev host from redirecting and passes the Staging gate
-# without the password, keeping noindex.
-#
-# It checks that the pages and icons answer and the microphone is allowed for the site itself;
-# that canonicals, robots.txt and the sitemaps name the environment's own host; and the Staging
-# gate (worker.ts): a missing or wrong password is refused, except for robots.txt and the header,
-# only the password drops noindex, and the Fixture Library, which only Staging carries, needs the
-# password even with the header. Production has no gate, is indexable, allows crawling and carries
-# no Fixture Library. On a workers.dev host, a request without the header gets a 308 to the
-# environment's own host. Off localhost it checks that host too, and `www` for Production, unless
-# Bot Fight Mode blocks this machine there.
-#
-# Sign-in (#152), off localhost: the dev mailbox (/dev/mail/) is never served, the session endpoint
-# answers JSON, and a malformed sign-in gets a 400. Both need the environment's BETTER_AUTH_SECRET
-# (.github/workflows/web-auth-secret.yml); without it they get a 503. A local preview's sign-in is
-# the e2e journey's (e2e/sign-in.spec.ts). The dev checkout (/dev/checkout/, ADR 0010) is never served
-# either.
 set -euo pipefail
 
 usage='usage: smoke.sh <base-url> <staging|production>'
@@ -38,13 +18,10 @@ seen=''
 tries=5
 
 smoke=(-H 'x-pedos-smoke-test: 1')
-# Staging's public password, a plain variable in wrangler.jsonc. The gate ignores the username.
 password=(-u 'pedos:stagingpassword')
 wrong_password=(-u 'pedos:wrong')
 challenge='www-authenticate: Basic realm="farty staging", charset="UTF-8"'
-# A file Workers serves from `assets` (public/), not through Next as /icon.png is.
 static_file=/welcome-icon.png
-# The Fixture Library's index (scripts/fixture-library.ts), in the Staging build only.
 fixture_index=/fixtures/recordings/index.json
 
 pass() { echo "ok   $1"; }
@@ -53,8 +30,6 @@ fail() {
   failures=$((failures + 1))
 }
 
-# eventually <message> <check> [args...]: retries a check $tries times, 3 s apart, since a deploy
-# takes a few seconds to reach every location.
 eventually() {
   local message="$1" try
   shift
@@ -69,14 +44,12 @@ eventually() {
   fail "$message"
 }
 
-# head_of <url> [curl options...]: the status line and headers, without carriage returns.
 head_of() {
   local url="$1"
   shift
   curl -sS -o /dev/null -D - "$@" "$url" | tr -d '\r'
 }
 
-# body_of <url> [curl options...]: the body, without carriage returns.
 body_of() {
   local url="$1"
   shift
@@ -85,7 +58,6 @@ body_of() {
 
 status_in() { head -n 1 <<<"$1" | cut -d ' ' -f 2; }
 
-# answers <path> <status> <content type> [curl options...]
 answers() {
   local path="$1" want_status="$2" want_type="$3" result
   shift 3
@@ -108,7 +80,6 @@ sends_security_headers() {
     ! grep -qi '^x-powered-by:' <<<"$headers"
 }
 
-# refuses <url> [curl options...]: 401, the Basic challenge, and no-store.
 refuses() {
   local headers
   headers=$(head_of "$@")
@@ -118,8 +89,6 @@ refuses() {
     grep -qix 'cache-control: no-store' <<<"$headers"
 }
 
-# serves <url> <noindex|indexable> [curl options...]: 200 with no challenge, and with or without
-# X-Robots-Tag noindex.
 serves() {
   local url="$1" indexing="$2" headers
   shift 2
@@ -134,7 +103,6 @@ serves() {
   fi
 }
 
-# never_serves <url> [curl options...]: anything but 200.
 never_serves() {
   local headers
   headers=$(head_of "$@")
@@ -142,7 +110,6 @@ never_serves() {
   [[ "$(status_in "$headers")" != 200 ]]
 }
 
-# redirects <url> <location> [curl options...]: a 308 to <location>.
 redirects() {
   local url="$1" want="$2" headers
   shift 2
@@ -151,7 +118,6 @@ redirects() {
   [[ "$(status_in "$headers")" == 308 ]] && grep -qixF "location: $want" <<<"$headers"
 }
 
-# names_canonical <path> <url> [curl options...]: the page has one canonical link, to <url>.
 names_canonical() {
   local path="$1" want="$2" links
   shift 2
@@ -160,8 +126,6 @@ names_canonical() {
   [[ "$links" == "<link rel=\"canonical\" href=\"$want\"/>" ]]
 }
 
-# refuses_a_bad_sign_in: a sign-in with a malformed email, from the site's own origin, gets Better
-# Auth's 400 as JSON, so the request reached Better Auth and was refused there.
 refuses_a_bad_sign_in() {
   local result
   result=$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' "${smoke[@]}" \
@@ -173,7 +137,6 @@ refuses_a_bad_sign_in() {
 
 robots() { body_of "$base/robots.txt" "${smoke[@]}"; }
 
-# robots.txt answers even with a wrong password, which the smoke test's header doesn't pass.
 robots_needs_no_password() {
   local status
   status=$(curl -sS -o /dev/null -w '%{http_code}' "${smoke[@]}" "${wrong_password[@]}" \
@@ -189,7 +152,6 @@ lists_the_sitemap_index() {
   grep -qxF "Sitemap: $canonical/sitemap-index.xml" <<<"$body"
 }
 
-# robots_txt <allows|disallows>: the `User-Agent: *` group allows everything, or nothing.
 robots_txt() {
   local body
   body=$(robots)
@@ -208,7 +170,6 @@ gives_the_auditor_production_rules() {
   [[ "$body" == *$'User-Agent: AhrefsSiteAudit\nAllow: /\n'* ]]
 }
 
-# sitemap_lists <path> <url...>: the sitemap is XML and lists exactly these URLs, in order.
 sitemap_lists() {
   local path="$1" result locs
   shift
@@ -219,15 +180,12 @@ sitemap_lists() {
   [[ "$result" == '200 application/xml'* && "$locs" == "$* " ]]
 }
 
-# blocked <url>: Bot Fight Mode challenged this machine there, or Cloudflare refused it.
 blocked() {
   local headers
   headers=$(head_of "$1" || true)
   grep -qi '^cf-mitigated: *challenge' <<<"$headers" || [[ "$(status_in "$headers")" == 403 ]]
 }
 
-# on_the_host <url> <message> <check> [args...]: runs a check on a branded host, or skips it with
-# a warning when Bot Fight Mode blocks this machine there.
 on_the_host() {
   local url="$1" message="$2"
   shift 2
@@ -292,14 +250,12 @@ fi
 
 local_base='^https?://(localhost|127\.0\.0\.1|\[::1\])(:[0-9]+)?$'
 if [[ "$base" =~ $local_base && "$env" == staging ]]; then
-  # A local preview has no workers.dev redirect, so a request with no password meets the gate.
   for path in / "$static_file"; do
     eventually "$path with no password asks for the password" refuses "$base$path"
   done
 fi
 
 if [[ "$base" =~ ^https://[^/]+\.workers\.dev$ ]]; then
-  # A new deploy's hosts can take a little longer to answer.
   tries=10
   for path in /privacy/ /privacy; do
     eventually "$path on workers.dev, without the header, gets a 308 to $canonical/privacy/" \

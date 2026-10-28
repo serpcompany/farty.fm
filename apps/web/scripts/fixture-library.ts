@@ -1,14 +1,3 @@
-// The Fixture Library in the Staging build only. `fixtures/recordings/` never ships to regular
-// users (AGENTS.md), so Production is checked for it after every build.
-//
-//   pnpm exec tsx scripts/fixture-library.ts copy    # before the Staging build (build:staging)
-//   pnpm exec tsx scripts/fixture-library.ts remove  # before the Production build
-//   pnpm exec tsx scripts/fixture-library.ts check   # after it: exits 1 on any fixture or loader
-//
-// `copy` decodes each fixture as the tests do and writes it as `<id>.wav`, the mono 16-bit WAV the
-// app keeps every Recording in, with an `index.json`, to `public/fixtures/recordings/` (ignored by
-// git). The browser then adds them as Recordings without decoding MP3 itself. The service worker
-// never caches that path, and the Staging gate covers it.
 import { createHash } from 'node:crypto'
 import {
   existsSync,
@@ -30,11 +19,9 @@ const FIXTURES = join(APP, '../../fixtures/recordings')
 const OUT = join(APP, 'public/fixtures/recordings')
 const BUILD = join(APP, '.open-next')
 
-/** What a Production build must never carry: the loader's text and the fixtures' path. */
 const LOADER_TEXT = ['Load the Fixture Library', 'fixtures/recordings/']
 const AUDIO = new Set(['.wav', '.mp3', '.m4a', '.aac', '.caf', '.flac', '.ogg'])
 
-/** Every fixture in the manifest, in id order. */
 export function fixtures(): { id: string; filename: string }[] {
   const manifest = JSON.parse(readFileSync(join(FIXTURES, 'manifest.json'), 'utf8')) as {
     recordings: { id: string; filename: string }[]
@@ -44,7 +31,6 @@ export function fixtures(): { id: string; filename: string }[] {
     .sort((a, b) => a.id.localeCompare(b.id))
 }
 
-/** A fixture as the app keeps a Recording: mono 16-bit WAV at the file's own rate. */
 export async function fixtureWav(filename: string): Promise<ArrayBuffer> {
   const { samples, sampleRate } = await decodeFile(join(FIXTURES, filename))
   return encodeWav({ samples, sampleRate })
@@ -82,10 +68,6 @@ function files(dir: string): string[] {
 
 const sha256 = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex')
 
-/**
- * Exits 1 if the Workers build in `.open-next/` carries the Fixture Library: fixture audio, any
- * file under a `fixtures/` path, a copy of any file in `fixtures/recordings/`, or the loader.
- */
 function check(): void {
   if (!existsSync(BUILD)) {
     console.error('error: no .open-next/ build to check; run pnpm build:production first')

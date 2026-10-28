@@ -274,22 +274,6 @@
     },
     "baseline": {
       "comments": {
-        ".gitignore": {
-          "findings": 6,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/.dev.vars.example": {
-          "findings": 3,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/.gitignore": {
-          "findings": 13,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/drizzle.config.ts": {
-          "findings": 3,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/e2e/account.spec.ts": {
           "findings": 71,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -390,32 +374,8 @@
           "findings": 56,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/open-next-worker.d.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/open-next.config.ts": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/playwright.config.ts": {
           "findings": 5,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/public/sw.js": {
-          "findings": 40,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/scripts/fixture-library.ts": {
-          "findings": 15,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/scripts/render-songs.ts": {
-          "findings": 21,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/scripts/smoke.sh": {
-          "findings": 44,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
         "apps/web/src/app/api/account/route.ts": {
@@ -1134,18 +1094,6 @@
           "findings": 7,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/vitest.config.mts": {
-          "findings": 6,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/worker.ts": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/wrangler.jsonc": {
-          "findings": 29,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "tools/catalog/import_pdmx.py": {
           "findings": 27,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -1193,10 +1141,6 @@
       },
       "docs": {},
       "deadcode": {
-        "apps/web/package.json": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/components/pedos/pedos-provider.tsx": {
           "findings": 1,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"

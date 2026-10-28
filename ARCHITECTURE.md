@@ -16,12 +16,24 @@ The repository's parts, how data moves between them, and the layers the web app 
 
 `tools/melody-lab/export_golden.py` writes the reference's answers to `fixtures/golden/`. The web app's unit tests run its own Recording Analysis and engine on the same Recordings and Songs and compare: Recording Pitch must be bit-identical, which is why `src/lib/analysis/numeric.ts` rounds `exp2` and `log2` as numpy does. `src/lib/catalog/generate.ts` writes the Songs the app ships (`songs.generated.ts`) from the golden copy of each score, so no melody is typed by hand. A change to the reference changes the golden data in the same commit, and the web app follows it.
 
+The renders are checked the other way round: `apps/web/scripts/render-songs.ts [out-dir]` renders every Song through the web engine with the full Fixture Library, into the melody lab's git-ignored output folder by default. For each Song it writes the renderer's exact output as a 32-bit float WAV and its notes as JSON, for `tools/melody-lab/evaluate_renders.py` to measure. It fails when a Song that the golden Arrangement unlocks comes out locked.
+
 ## How data moves in the web app
 
 1. **Recording:** the microphone feeds an AudioWorklet (`src/lib/audio/`) with the browser's voice processing off. Saving writes the Recording to IndexedDB at once; nothing waits on analysis.
 2. **Recording Analysis** runs in a Web Worker (`src/lib/analysis/`) and is kept with the Recording.
 3. **Compose and Song Creator:** Pitch Coverage decides which Songs are unlocked. Auto-map chooses the Arrangement, and the renderer plays it with the Recordings, in its own Web Worker (`src/lib/engine/`). A saved result is a Toot.
 4. **An account** (optional) syncs the library: each save, rename and delete waits in an outbox with the change itself, and the sync sends it to the API (`src/app/api/`, `src/server/`), which keeps Recordings and Toots in D1 and their audio in R2. Saving a Toot is paid through Stripe Checkout ([Payments](docs/agents/payments.md)).
+
+## Offline: the service worker
+
+`public/sw.js` keeps the app shell so an installed Farty opens offline.
+
+- **Network first.** Every same-origin GET it handles goes to the network, so a deploy shows at once. The kept copy answers only offline, or when a deploy has removed an older build's `/_next/static/` file that a tab opened before the deploy still loads (#222). A build's files never change under the same name.
+- **What it keeps:** pages, scripts, styles, fonts and images, only from a whole same-origin 200 (never a redirect, an error or Staging's 401), up to 200 files, oldest first. It never keeps audio (Recordings live in IndexedDB), the Fixture Library (`/fixtures/`, internal only), or the lander's images (`/lander/`, desktop only, #191).
+- **The whole shell, ahead of time:** each online load of the start page (`/`), at most every five minutes, fetches the tabs it links to, each Song's page from `/shell.json`, and the scripts they load, including the Web Workers' own chunks. Every tab then opens offline right after install, even one never visited. A load that loses the connection part way tries again on the next start page.
+- **Staging's password:** a navigation answered with Staging's 401 unregisters the worker, since a browser won't ask for credentials on a worker's behalf. The next load asks for the password and registers it again.
+- **Versions:** the cache is `pedos-shell-v<version>`. Raise `version` when its contents change shape; a new worker deletes every other version's cache when it activates.
 
 ## The web app's layout
 

@@ -1,8 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "pedos-web",
-  // The SERP account, so `wrangler` picks it when a login sees more than one account. CI names the
-  // same account with the CLOUDFLARE_ACCOUNT_ID variable; if they ever differ, this one wins.
   "account_id": "cec5f04e1d18bcc65f2be0aefb04f059",
   "main": "worker.ts",
   "compatibility_date": "2026-09-28",
@@ -13,13 +11,9 @@
   },
   "observability": { "enabled": true },
   "upload_source_maps": true,
-  // A deploy without --env never goes public: only Staging and Production have workers.dev hosts.
   "workers_dev": false,
   "preview_urls": false,
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web" }],
-  // Accounts (#150): D1 through Drizzle (src/db/schema.ts, migrations in drizzle/), and the audio
-  // in R2. Local runs keep both in .wrangler/ (`pnpm db:migrate:local`); each environment below
-  // binds its own, and never these.
   "d1_databases": [
     {
       "binding": "DB",
@@ -31,13 +25,7 @@
     }
   ],
   "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "pedos-local", "remote": false }],
-  // The dev mailbox: local runs capture sign-in email here instead of sending it. Top level only,
-  // with no id. Never declare it under "env" (src/db/deploy-config.test.ts); Wrangler's warning
-  // that the environments lack it is the intended result.
   "kv_namespaces": [{ "binding": "DEV_MAILBOX" }],
-  // Error reports (#126, src/app/api/telemetry/route.ts): 30 a minute per client, keyed by
-  // cf-connecting-ip, which a browser in normal use never reaches. Each environment has its own
-  // namespace_id, so their counters are separate.
   "ratelimits": [
     {
       "name": "TELEMETRY_RATE_LIMIT",
@@ -47,12 +35,6 @@
   ],
   "env": {
     "staging": {
-      // The Staging gate's password (worker.ts). It is public, so it is a plain variable, not a
-      // secret. Production never has it; local runs set it in .dev.vars.
-      // Sign-in (#152, src/server/auth-config.ts): BETTER_AUTH_URL is the canonical origin, and
-      // only STAGING_SIGNUP_ALLOWLIST's emails (comma-separated, each also an allowed destination
-      // below) get codes. BETTER_AUTH_SECRET is a Worker secret, set by the web-auth-secret.yml
-      // workflow.
       "vars": {
         "SITE_ENV": "staging",
         "STAGING_BASIC_AUTH_PASSWORD": "stagingpassword",
@@ -60,9 +42,6 @@
         "EMAIL_FROM": "Farty <support@farty.fm>",
         "STAGING_SIGNUP_ALLOWLIST": "devin@serp.co"
       },
-      // Cloudflare Email Sending, from support@ only, and on Staging only to test recipients. The
-      // hosts, BETTER_AUTH_URL and the sender must match site.ts and SUPPORT_EMAIL
-      // (src/db/deploy-config.test.ts).
       "send_email": [
         {
           "name": "EMAIL",
@@ -70,20 +49,16 @@
           "allowed_destination_addresses": ["devin@serp.co"]
         }
       ],
-      // Every request runs the entry first, so the static files are behind the gate too.
       "assets": {
         "binding": "ASSETS",
         "directory": ".open-next/assets",
         "run_worker_first": true
       },
-      // CI's smoke test reaches each deploy on its workers.dev host, with its header. Every other
-      // request there gets a 308 to the environment's own host (src/lib/other-hosts.ts).
       "workers_dev": true,
       "preview_urls": false,
       "routes": [{ "pattern": "staging.farty.fm", "custom_domain": true }],
       "observability": { "enabled": true },
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-staging" }],
-      // Changed only by CI: `pnpm db:migrate:staging` runs before each deploy (web.yml).
       "d1_databases": [
         {
           "binding": "DB",
@@ -103,8 +78,6 @@
       ]
     },
     "production": {
-      // Sign-in (#152): as Staging's, with sign-up open to anyone. BETTER_AUTH_SECRET is a Worker
-      // secret, set by the web-auth-secret.yml workflow.
       "vars": {
         "SITE_ENV": "production",
         "BETTER_AUTH_URL": "https://farty.fm",
@@ -113,14 +86,12 @@
       "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["support@farty.fm"] }],
       "workers_dev": true,
       "preview_urls": false,
-      // `www` answers with a 308 to the apex (src/lib/other-hosts.ts).
       "routes": [
         { "pattern": "farty.fm", "custom_domain": true },
         { "pattern": "www.farty.fm", "custom_domain": true }
       ],
       "observability": { "enabled": true },
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "pedos-web-production" }],
-      // Changed only by CI: `pnpm db:migrate:production` runs before each deploy (web.yml).
       "d1_databases": [
         {
           "binding": "DB",
