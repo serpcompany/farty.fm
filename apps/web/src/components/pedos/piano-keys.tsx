@@ -52,53 +52,57 @@ export function PianoKeys({
     wasPlaced: midi === placed && midi !== selected
   })
   return (
-    <fieldset className="relative flex h-42 min-w-0 touch-manipulation">
+    // The fieldset only names the keys: Chrome lays a fieldset's children out in a box of its own,
+    // which doesn't take the fieldset's height, so the keys' layout is the div inside.
+    <fieldset className="min-w-0">
       <legend className="sr-only">Piano</legend>
-      {WHITE_STEPS.map(step => {
-        const midi = c + step
-        const { isSelected, wasPlaced } = state(midi)
-        return (
-          <button
-            key={midi}
-            type="button"
-            aria-label={noteName(midi)}
-            aria-pressed={isSelected}
-            onClick={() => onKey(midi)}
-            className={cn(
-              'flex min-w-0 flex-1 items-end justify-center rounded-b-[7px] border border-t-0 border-neutral-300 bg-white pb-2 text-[11px] text-neutral-500 outline-none not-first:-ml-px focus-visible:z-10 focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-neutral-200 dark:border-neutral-600 dark:bg-neutral-200 dark:active:bg-neutral-300',
-              step === 0 && 'font-semibold text-neutral-950',
-              wasPlaced && 'inset-ring-2 inset-ring-brand-strong',
-              isSelected &&
-                'border-brand-strong bg-brand-strong font-semibold text-white active:bg-brand-strong dark:border-brand-strong dark:bg-brand-strong dark:active:bg-brand-strong'
-            )}
-          >
-            {isSelected || step === 0 ? noteName(midi) : pitchClassNames[step]}
-          </button>
-        )
-      })}
-      {BLACK_KEYS.map(({ step, after }) => {
-        const midi = c + step
-        const { isSelected, wasPlaced } = state(midi)
-        const center = (after / WHITE_STEPS.length) * 100
-        return (
-          <button
-            key={midi}
-            type="button"
-            aria-label={noteName(midi)}
-            aria-pressed={isSelected}
-            onClick={() => onKey(midi)}
-            style={{ left: `${center - BLACK_WIDTH / 2}%`, width: `${BLACK_WIDTH}%` }}
-            className={cn(
-              'absolute top-0 z-20 flex h-3/5 items-end justify-center rounded-b-[5px] bg-neutral-900 pb-1.5 text-[10px] text-white shadow-[0_2px_0_rgb(0_0_0/0.25)] outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-neutral-700 dark:bg-neutral-950 dark:active:bg-neutral-700',
-              wasPlaced && 'inset-ring-2 inset-ring-brand-strong',
-              isSelected &&
-                'bg-brand-strong font-semibold active:bg-brand-strong dark:bg-brand-strong dark:active:bg-brand-strong'
-            )}
-          >
-            {isSelected ? noteName(midi) : ''}
-          </button>
-        )
-      })}
+      <div className="relative flex h-42 touch-manipulation">
+        {WHITE_STEPS.map(step => {
+          const midi = c + step
+          const { isSelected, wasPlaced } = state(midi)
+          return (
+            <button
+              key={midi}
+              type="button"
+              aria-label={noteName(midi)}
+              aria-pressed={isSelected}
+              onClick={() => onKey(midi)}
+              className={cn(
+                'flex min-w-0 flex-1 items-end justify-center rounded-b-[7px] border border-t-0 border-neutral-300 bg-white pb-2 text-[11px] text-neutral-500 outline-none not-first:-ml-px focus-visible:z-10 focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-neutral-200 dark:border-neutral-600 dark:bg-neutral-200 dark:active:bg-neutral-300',
+                step === 0 && 'font-semibold text-neutral-950',
+                wasPlaced && 'inset-ring-2 inset-ring-brand-strong',
+                isSelected &&
+                  'border-brand-strong bg-brand-strong font-semibold text-white active:bg-brand-strong dark:border-brand-strong dark:bg-brand-strong dark:active:bg-brand-strong'
+              )}
+            >
+              {isSelected || step === 0 ? noteName(midi) : pitchClassNames[step]}
+            </button>
+          )
+        })}
+        {BLACK_KEYS.map(({ step, after }) => {
+          const midi = c + step
+          const { isSelected, wasPlaced } = state(midi)
+          const center = (after / WHITE_STEPS.length) * 100
+          return (
+            <button
+              key={midi}
+              type="button"
+              aria-label={noteName(midi)}
+              aria-pressed={isSelected}
+              onClick={() => onKey(midi)}
+              style={{ left: `${center - BLACK_WIDTH / 2}%`, width: `${BLACK_WIDTH}%` }}
+              className={cn(
+                'absolute top-0 z-20 flex h-3/5 items-end justify-center rounded-b-[5px] bg-neutral-900 pb-1.5 text-[10px] text-white shadow-[0_2px_0_rgb(0_0_0/0.25)] outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-neutral-700 dark:bg-neutral-950 dark:active:bg-neutral-700',
+                wasPlaced && 'inset-ring-2 inset-ring-brand-strong',
+                isSelected &&
+                  'bg-brand-strong font-semibold active:bg-brand-strong dark:bg-brand-strong dark:active:bg-brand-strong'
+              )}
+            >
+              {isSelected ? noteName(midi) : ''}
+            </button>
+          )
+        })}
+      </div>
     </fieldset>
   )
 }
