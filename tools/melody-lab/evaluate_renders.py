@@ -4,9 +4,8 @@
 
 `dir` holds `<song>.wav` and `<song>.json` per Song, as `apps/web/scripts/render-songs.ts`
 writes them. The JSON has the Song's `bpm` and one event per note (`note_index`, `len_s`,
-`target_midi`, `source_id`), and one per Beat (ADR 0014), which the checks don't read: they
-measure the melody notes with the Beats sounding. Each render goes through `evaluate()` exactly
-as run_all.py calls it, with the reference's Recordings (`load_library()`) to read each fart's own pitch, prints
+`target_midi`, `source_id`). Each render goes through `evaluate()` exactly as run_all.py calls
+it, with the reference's Recordings (`load_library()`) to read each fart's own pitch, prints
 run_all.py's line, then the golden metrics for the same Song on the full library, and checks
 it:
 
@@ -23,8 +22,8 @@ The renders are the full library's only. Last it lists, for information, the sma
 unlocked golden Arrangements that pYIN reads under the bar (`fixtures/golden/README.md` says
 why).
 
-With --against-reference it also renders each Song with the reference (`plan` and `plan_beats`,
-then `render()` on `load_library()`) and prints the largest sample difference from it, for
+With --against-reference it also renders each Song with the reference (`plan`, then
+`render()` on `load_library()`) and prints the largest sample difference from it, for
 information.
 """
 import argparse
@@ -35,7 +34,7 @@ from pathlib import Path
 import librosa
 import numpy as np
 
-from engine import ROOT, SR, load_library, plan, plan_beats, render
+from engine import ROOT, SR, load_library, plan, render
 from evaluate import BAR, bar_problems, evaluate
 from melody import load_catalog
 
@@ -78,7 +77,7 @@ def small_library_under_bar():
 def against_reference(library, melody, audio):
     """How far a render is from the reference's own render of the same Song, sample by sample."""
     _, assignments = plan(melody, library)
-    reference, _ = render(melody, library, assignments, bpm=melody.bpm, beats=plan_beats(melody, library))
+    reference, _ = render(melody, library, assignments, bpm=melody.bpm)
     n = min(len(reference), len(audio))
     diff = np.abs(reference[:n].astype(np.float64) - audio[:n].astype(np.float64))
     worst = float(diff.max()) if n else 0.0

@@ -14,7 +14,7 @@ import { decodeWav, encodeWav } from './wav'
 
 // Song Creator's render on the Fixture Library as the app stores it: each fixture as a 16-bit
 // WAV, analyzed as a new Recording is. Through the render worker, a Toot is the engine's render
-// (#108) bit for bit, on the golden Arrangement and the golden Beats (ADR 0014).
+// (#108) bit for bit, on the golden Arrangement.
 
 const wavs = new Map<string, ArrayBuffer>()
 const recordings: Recording[] = []
@@ -62,14 +62,9 @@ describe('makeToot', () => {
       return fromWorker
     })
 
-    // The golden Beats' Recordings, in their turn order: each Noise-like fixture once.
-    const golden = goldenArrangement('full', song.id)
-    const beats = [...new Set((golden.beats ?? []).map(b => fixtureRecordingId(b.recording)))]
-    expect(beats.length).toBeGreaterThan(0)
-
     // The engine itself, on the same 16-bit WAVs and stored analyses.
     const arrangement = arrangementOf(song, recordings)
-    const used = new Set([...arrangement.pitches.map(c => c.recordingId), ...beats])
+    const used = new Set(arrangement.pitches.map(c => c.recordingId))
     const inputs = recordings
       .filter(r => used.has(r.id))
       .map(r => ({
@@ -77,36 +72,21 @@ describe('makeToot', () => {
         audio: decodeWav(wavs.get(r.id) as ArrayBuffer),
         analysis: r.analysis.state === 'analyzed' ? r.analysis.analysis : (null as never)
       }))
-    const engine = renderFromRecordings(engineSong(song), arrangement, inputs, beats)
-    expect(engine.beats).toHaveLength(song.bar_lines.length)
+    const engine = renderFromRecordings(engineSong(song), arrangement, inputs)
     expect(fromWorker?.samples).toEqual(engine.samples)
     // The Toot's audio is that render as a 16-bit WAV, byte for byte.
     expect(new Uint8Array(draft.wav)).toEqual(new Uint8Array(encodeWav(engine)))
     expect(draft.seconds).toBe(engine.samples.length / 44100)
 
-    // On the golden Arrangement, and keeping the Recordings that play the Beats.
+    // On the golden Arrangement.
+    const golden = goldenArrangement('full', song.id)
     expect(draft.arrangement.transposition).toBe(golden.transpose)
     for (const entry of golden.per_pitch) {
       expect(draft.arrangement.recordingForPitch[entry.song_pitch]).toBe(
         fixtureRecordingId(entry.recording as string)
       )
     }
-    expect(draft.arrangement.beatRecordings).toEqual(beats)
     expect(draft.song).toBe(song)
-  })
-
-  it('makes a Toot with no Beats, and stores none, without Noise-like Recordings', async () => {
-    const melodic = recordings.filter(
-      r => r.analysis.state === 'analyzed' && r.analysis.analysis.recordingPitchMidi !== null
-    )
-    const twinkle = songs.filter(s => s.id === 'twinkle')[0]
-    let beats: readonly string[] | undefined
-    const draft = await makeToot(twinkle, melodic, loadAudio, async (...args) => {
-      beats = args[3]
-      return renderInWorker(...args)
-    })
-    expect(beats).toEqual([])
-    expect(draft.arrangement).not.toHaveProperty('beatRecordings')
   })
 
   it('is locked without the Recordings to unlock the Song', async () => {

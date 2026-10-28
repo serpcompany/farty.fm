@@ -6,29 +6,10 @@ import {
   formattedTootLength,
   noteCaption,
   noteSeconds,
-  recordingsUsedSummary,
   type Toot,
   type TootArrangement,
   tootDetails
 } from './toot'
-
-describe('recordingsUsedSummary', () => {
-  const song = { pitches: [60, 62, 64, 65] }
-  const recordingForPitch = { 60: 'a', 62: 'b', 64: 'c', 65: 'd' }
-
-  it('counts one Recording per note', () => {
-    expect(recordingsUsedSummary(song, { transposition: 0, recordingForPitch })).toBe(
-      '4 of your Recordings, one per note'
-    )
-  })
-
-  it('adds the Recordings that play the Beats (ADR 0014)', () => {
-    const arrangement = { transposition: 0, recordingForPitch, beatRecordings: ['e', 'f'] }
-    expect(recordingsUsedSummary(song, arrangement)).toBe(
-      '6 of your Recordings: one per note, and 2 for the Beats'
-    )
-  })
-})
 
 describe('noteCaption', () => {
   const song = songs.find(s => s.id === 'mary') ?? songs[0]

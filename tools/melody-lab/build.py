@@ -59,8 +59,7 @@ def main():
         variants = {}
         for key, sources in (("raw", lib),):
             T, asg = engine.plan(m, sources)
-            y, ev = engine.render(m, sources, asg, bpm=m.bpm, beats=engine.plan_beats(m, sources))
-            ev = [e for e in ev if "beat" not in e]  # the melody's notes; the Beats are only heard
+            y, ev = engine.render(m, sources, asg, bpm=m.bpm)
             r = evaluate(y, m, ev, m.bpm, sources)
             variants[key] = {
                 "audio": encode(y, f"{c['id']}-{key}"),

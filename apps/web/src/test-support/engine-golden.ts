@@ -75,19 +75,6 @@ export interface GoldenArrangement {
     notes_with_retrigger: number
   } | null
   render_settings: { bpm: number } | null
-  /**
-   * Format 7 (ADR 0014): the Beats, one per bar line, played by the Noise-like Recordings in turn.
-   * Empty with no Noise-like Recordings; null when the Song is locked.
-   */
-  beats:
-    | {
-        bar: number
-        start_beat: number
-        dur_beats: number
-        recording: string
-        render: { start_s: number; len_s: number; gain_db: number }
-      }[]
-    | null
 }
 
 export function goldenArrangement(library: Library, song: string): GoldenArrangement {

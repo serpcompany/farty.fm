@@ -10,10 +10,6 @@ import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
 // Recording's own sample, scaled (ADR 0004): no resampling, oscillators, noise generators,
 // resonators, loops or granular re-triggering. Silent Recordings render silence.
 //
-// Noise-like Recordings play Beats (ADR 0014) the same way: each Beat plays its fart raw from a
-// bar line, cut at the next bar line, faded, set `BEAT_LEVEL_DB` from a note's level with no
-// accent, and mixed after every note.
-//
 // Plain TypeScript with no DOM or Web Audio, so it renders the same in every browser, in a Web
 // Worker and in Vitest. Web Audio only plays the result.
 
@@ -31,18 +27,13 @@ const NOTE_LEVEL_DB = -20
 const LEVEL_WINDOW_SECONDS = 0.25
 /** Extra gain for notes that start a bar (on one of the score's bar lines). */
 const DOWNBEAT_ACCENT_DB = 1.5
-/**
- * A Beat's level against a note's, so Beats sit under the melody: the reference's `BEAT_DB`, set
- * by measurement (ADR 0014).
- */
-export const BEAT_LEVEL_DB = -15
 /** Silence after the last beat, so the last note can ring out. */
 const TAIL_SECONDS = 1
 /** The limiter's drive and output peak (0.89 is about −1 dBFS). */
 const LIMITER_DRIVE = 1.2
 const LIMITER_PEAK = 0.89
 
-/** One Recording, ready to play notes (Melodic) or Beats (Noise-like). */
+/** One Melodic Recording, ready to play notes. */
 export interface RenderSource {
   /** The Recording's single clean gesture, mono at 44.1 kHz. */
   gesture: Float64Array
@@ -81,30 +72,12 @@ export function noteInBeats(
   }
 }
 
-/** One Beat (ADR 0014): a Noise-like Recording played raw from the start of a bar. */
-export interface RenderBeat {
-  source: RenderSource
-  /** The bar line it starts on, in seconds from the start of the Song. */
-  startSeconds: number
-  /** Seconds to the next bar line, or to the Song's end after the last one. */
-  lengthSeconds: number
-}
-
-/** A Beat as `songBeats` places it, in beats, converted to seconds exactly as a note is. */
-export function beatInBeats(
-  source: RenderSource,
-  beats: { start: number; dur: number; bpm: number }
-): RenderBeat {
-  const spb = 60 / beats.bpm
-  return { source, startSeconds: beats.start * spb, lengthSeconds: beats.dur * spb }
-}
-
 /** The length of a Song in seconds, for `render`. */
 export function songSeconds(lengthBeats: number, bpm: number): number {
   return lengthBeats * (60 / bpm)
 }
 
-/** Where and how loud a note or a Beat was placed. */
+/** Where and how loud a note was placed. */
 export interface PlacedNote {
   startSample: number
   lengthSamples: number
@@ -115,56 +88,41 @@ export interface RenderOutput {
   /** Mono, 44.1 kHz, peak at about −1 dBFS. */
   samples: Float32Array
   notes: PlacedNote[]
-  /** The Beats, in the order given. */
-  beats: PlacedNote[]
 }
 
 /**
- * Renders the notes, then the Beats, offline. The output is one second longer than `songSeconds`
- * (`songSeconds(lengthBeats, bpm)`). With no Beats it is the notes' render alone, as before Beats.
+ * Renders the notes offline. The output is one second longer than `songSeconds`
+ * (`songSeconds(lengthBeats, bpm)`).
  *
  * Synchronous and CPU-bound: run it in a Web Worker.
  */
-export function render(
-  notes: readonly RenderNote[],
-  songLengthSeconds: number,
-  beats: readonly RenderBeat[] = []
-): RenderOutput {
-  const mix = new Float64Array(Math.trunc((songLengthSeconds + TAIL_SECONDS) * RENDER_SAMPLE_RATE))
-  const placedNotes = notes.map(note => place(mix, note, note.downbeat ? DOWNBEAT_ACCENT_DB : 0))
-  const placedBeats = beats.map(beat => place(mix, beat, BEAT_LEVEL_DB))
-  return { samples: limit(mix), notes: placedNotes, beats: placedBeats }
-}
-
-/**
- * Mixes one fart into `mix` from `startSeconds`: the Recording's gesture from its start, cut at
- * the slot's end (its length less the gap, at least 60 ms) or where the fart ends, faded, and set
- * to the note level plus `extraDb`. A fart that runs past the end of the mix is clipped there.
- */
-function place(
-  mix: Float64Array,
-  slot: { source: RenderSource; startSeconds: number; lengthSeconds: number },
-  extraDb: number
-): PlacedNote {
+export function render(notes: readonly RenderNote[], songLengthSeconds: number): RenderOutput {
   const sr = RENDER_SAMPLE_RATE
-  const start = Math.trunc(slot.startSeconds * sr)
-  const maxLength = Math.trunc(
-    Math.max(SHORTEST_NOTE_SECONDS, slot.lengthSeconds - GAP_SECONDS) * sr
-  )
-  // The fart as recorded, cut at the slot's end, or shorter if the fart ends first.
-  const segment = slot.source.gesture.slice(0, maxLength)
-  applyFades(segment)
+  const mix = new Float64Array(Math.trunc((songLengthSeconds + TAIL_SECONDS) * sr))
+  const placed: PlacedNote[] = []
 
-  const measured = Math.min(segment.length, Math.trunc(LEVEL_WINDOW_SECONDS * sr))
-  const squares = new Float64Array(measured)
-  for (let i = 0; i < measured; i++) squares[i] = segment[i] * segment[i]
-  const rms = Math.sqrt(pairwiseSum(squares, 0, measured) / Math.max(1, measured)) + 1e-9
-  const gainDb = NOTE_LEVEL_DB - 20 * Math.log10(rms) + extraDb
-  const gain = 10 ** (gainDb / 20)
+  for (const note of notes) {
+    const start = Math.trunc(note.startSeconds * sr)
+    const maxLength = Math.trunc(
+      Math.max(SHORTEST_NOTE_SECONDS, note.lengthSeconds - GAP_SECONDS) * sr
+    )
+    // The fart as recorded, cut at the note's end, or shorter if the fart ends first.
+    const segment = note.source.gesture.slice(0, maxLength)
+    applyFades(segment)
 
-  const end = Math.min(mix.length, start + segment.length)
-  for (let i = start; i < end; i++) mix[i] += segment[i - start] * gain
-  return { startSample: start, lengthSamples: segment.length, gainDb }
+    const measured = Math.min(segment.length, Math.trunc(LEVEL_WINDOW_SECONDS * sr))
+    const squares = new Float64Array(measured)
+    for (let i = 0; i < measured; i++) squares[i] = segment[i] * segment[i]
+    const rms = Math.sqrt(pairwiseSum(squares, 0, measured) / Math.max(1, measured)) + 1e-9
+    const gainDb = NOTE_LEVEL_DB - 20 * Math.log10(rms) + (note.downbeat ? DOWNBEAT_ACCENT_DB : 0)
+    const gain = 10 ** (gainDb / 20)
+
+    const end = Math.min(mix.length, start + segment.length)
+    for (let i = start; i < end; i++) mix[i] += segment[i - start] * gain
+    placed.push({ startSample: start, lengthSamples: segment.length, gainDb })
+  }
+
+  return { samples: limit(mix), notes: placed }
 }
 
 /**
