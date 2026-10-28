@@ -7,6 +7,8 @@ deleted").
 
 ## Stats
 
+- While they load, a spinner (`src/components/farty/profile-screen.interaction.test.tsx`, "shows a
+  spinner while the stats load").
 - Recordings, Melodic Recordings, Notes collected, Songs unlocked ("8 of 12") and Toots, from what
   this browser holds (`e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch,
   renamed, and deleted").
@@ -50,6 +52,9 @@ On Staging's build only, for Internal Testers.
 - Its Recordings analyze as the reference does and unlock the Songs it does
   (`src/lib/fixture-library.test.ts`, "analyzes as the reference does and unlocks the Songs it does,
   as 16-bit WAV").
+- A build without it, as Production's is, has no Internal build section
+  (`src/components/farty/profile-screen.interaction.test.tsx`, "has no Fixture Library in a build
+  without it, as Production’s is").
 - Signed in, they upload to the account like any Recording (`e2e/sync.spec.ts`, "two browsers
   signed in to one account play each other's farts, and see each other's deletes").
 
@@ -79,7 +84,6 @@ On Staging's build only, for Internal Testers.
 
 ## Not checked
 
-- The spinner while the stats load.
-- Production's build has no Fixture Library section, and serves no fixture. No journey or unit test
-  checks it: `scripts/fixture-library.ts` fails a Production build that carries one, and
-  `scripts/smoke.sh` checks each Production deploy.
+- Production's build serves no fixture. Only a build shows it, so no journey or unit test checks it:
+  `scripts/fixture-library.ts` fails a Production build that carries one, and `scripts/smoke.sh`
+  checks each Production deploy.

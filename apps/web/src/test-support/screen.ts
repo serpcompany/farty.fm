@@ -49,6 +49,8 @@ export async function type(input: HTMLInputElement, value: string): Promise<void
   })
 }
 
+export const settle = () => act(() => new Promise(resolve => setTimeout(resolve, 0)))
+
 function setVisibility(state: 'hidden' | 'visible'): void {
   Object.defineProperty(document, 'visibilityState', { value: state, configurable: true })
   document.dispatchEvent(new Event('visibilitychange'))
