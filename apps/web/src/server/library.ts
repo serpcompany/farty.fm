@@ -8,6 +8,7 @@ import {
   itemStatus,
   type Kind,
   libraryChanges,
+  placeRecording,
   purgeTombstones,
   type RecordingRow,
   renameToot,
@@ -23,6 +24,7 @@ import type { Toot } from '@/lib/toot'
 
 import {
   isItemId,
+  parsePlacedPitch,
   parseRecording,
   parseTitle,
   parseToot,
@@ -71,6 +73,7 @@ function toRecording(row: RecordingRow): LibraryRecording {
     analysis: row.analysis
       ? { state: 'analyzed', analysis: row.analysis }
       : { state: 'notAnalyzed' },
+    placedPitch: row.placedPitch,
     audioBytes: row.audioBytes
   }
 }
@@ -261,6 +264,30 @@ export async function patchToot(
   if (before === null) return notFound()
   if (before === 'deleted') return gone()
   return Response.json({ id, title })
+}
+
+/**
+ * `PATCH /api/recordings/{id}/` with `{ placedPitch }`: places a Noise-like Recording on a note by
+ * ear, or takes it off with null (ADR 0015). The last to arrive wins. The analysis stays the
+ * upload's: each browser re-analyzes its own.
+ */
+export async function patchRecording(
+  { db }: Stores,
+  user: SessionUser,
+  id: string,
+  request: Request
+): Promise<Response> {
+  if (!isItemId(id)) return notFound()
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
+  const body = await readJson(request)
+  if (body instanceof Response) return body
+  const placedPitch = parsePlacedPitch((body.json as { placedPitch?: unknown } | null)?.placedPitch)
+  if (placedPitch === undefined) return apiError(400, 'invalid_request')
+  const before = await placeRecording(db, user.id, id, placedPitch)
+  if (before === null) return notFound()
+  if (before === 'deleted') return gone()
+  return Response.json({ id, placedPitch })
 }
 
 /**

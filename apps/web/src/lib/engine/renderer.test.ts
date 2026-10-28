@@ -156,11 +156,17 @@ describe('the render path from what the app stores', () => {
     expect(() => renderSong(song, unlocked, new Map())).toThrow(/No Recording plays pitch/)
   })
 
-  it('refuses a Noise-like Recording as a source', () => {
-    const g = goldenRecording('009')
-    expect(() =>
-      renderSource({ samples: new Float32Array(44100), sampleRate: 44100 }, storedAnalysis(g))
-    ).toThrow(/Melodic/)
+  it('cuts a Noise-like gesture too, for a fart placed by ear (ADR 0015)', async () => {
+    for (const id of ['009', '080']) {
+      const g = goldenRecording(id)
+      expect(g.recording_pitch_midi, id).toBeNull()
+      const file = await decoded(g)
+      const source = renderSource(
+        { samples: file.samples, sampleRate: file.sampleRate },
+        storedAnalysis(g)
+      )
+      expect(source.gesture, id).toEqual(await gestureBody(g))
+    }
   })
 })
 

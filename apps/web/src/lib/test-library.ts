@@ -46,6 +46,17 @@ export function fakeAccount(userId = 'user-a') {
         items.toots.set(id, { ...stored, item: { ...stored.item, title }, updatedAt: tick() })
       }
     },
+    /** What another browser did: places a Recording on a note, or takes it off. */
+    place(id: string, placedPitch: number | null) {
+      const stored = items.recordings.get(id)
+      if (stored) {
+        items.recordings.set(id, {
+          ...stored,
+          item: { ...stored.item, placedPitch },
+          updatedAt: tick()
+        })
+      }
+    },
     /** Its live item, or undefined. */
     get(kind: Kind, id: string) {
       const stored = items[kind].get(id)
@@ -119,9 +130,13 @@ export function fakeAccount(userId = 'user-a') {
     if (method === 'PATCH') {
       if (!stored) return error(404, 'not_found')
       if (stored.deletedAt) return error(410, 'deleted')
-      const { title } = JSON.parse(String(init.body))
-      items[kind].set(id, { ...stored, item: { ...stored.item, title }, updatedAt: tick() })
-      return Response.json({ id, title })
+      // A Toot's `{ title }` or a Recording's `{ placedPitch }`.
+      const changed =
+        kind === 'toots'
+          ? { title: JSON.parse(String(init.body)).title }
+          : { placedPitch: JSON.parse(String(init.body)).placedPitch }
+      items[kind].set(id, { ...stored, item: { ...stored.item, ...changed }, updatedAt: tick() })
+      return Response.json({ id, ...changed })
     }
     if (method === 'DELETE') {
       if (!stored) return error(404, 'not_found')

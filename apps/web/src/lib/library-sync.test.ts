@@ -372,6 +372,61 @@ describe('uploading', () => {
     expect(account.get('toots', saved.id)?.item).toMatchObject({ title: 'New' })
   })
 
+  it('places a Recording on the account, in its upload or after it (ADR 0015)', async () => {
+    const early = await recorded(1)
+    await page.store.placeRecording(early.id, 40)
+    // Not uploaded yet: the Placed Pitch goes in the upload.
+    expect(await outbox()).toEqual([expect.objectContaining({ id: early.id, op: 'put' })])
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: 40 })
+    expect(requests('PATCH')).toEqual([])
+    // Uploaded: moved, then taken off, it's sent once, as it is when sent.
+    await page.store.placeRecording(early.id, 41)
+    await page.store.placeRecording(early.id, null)
+    expect((await outbox()).map(e => e.op)).toEqual(['place'])
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: null })
+    expect(requests('PATCH').map(s => [s.path, s.library])).toEqual([
+      [`/api/recordings/${early.id}/`, 'user-a']
+    ])
+  })
+
+  it('places a Recording on the account that was placed while it uploaded', async () => {
+    const recording = await recorded(1)
+    account.intercept = async sent => {
+      if (sent.method === 'PUT') await page.store.placeRecording(recording.id, 52)
+      return undefined
+    }
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(account.get('recordings', recording.id)?.item).toMatchObject({ placedPitch: 52 })
+    expect(await outbox()).toEqual([])
+  })
+
+  // The account had it from an upload that was cut off, maybe before it was placed.
+  it('sends the Placed Pitch of a Recording the account already had', async () => {
+    const recording = await recorded(1)
+    await page.store.placeRecording(recording.id, 45)
+    account.add('recordings', { ...recording, placedPitch: null }, wav(1))
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(account.get('recordings', recording.id)?.item).toMatchObject({ placedPitch: 45 })
+  })
+
+  it('forgets a place the account refuses, and deletes here what it deleted', async () => {
+    const refused = await recorded(1)
+    const gone = await recorded(2)
+    await page.sync.uploadBeforeSignOut('user-a')
+    await page.store.placeRecording(refused.id, 40)
+    await page.store.placeRecording(gone.id, 40)
+    account.remove('recordings', gone.id)
+    account.intercept = sent =>
+      sent.method === 'PATCH' && sent.path.includes(refused.id)
+        ? Response.json({ error: 'invalid_request' }, { status: 400 })
+        : undefined
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(await outbox()).toEqual([])
+    expect((await page.store.loadRecordings()).map(r => r.id)).toEqual([refused.id])
+  })
+
   it('sends the delete of what reached the account, and nothing for what never did', async () => {
     const uploaded = await recorded(1)
     await page.sync.uploadBeforeSignOut('user-a')
@@ -453,6 +508,47 @@ describe('reading the account', () => {
     account.rename(made.id, 'B')
     await page.sync.syncOnce('user-a')
     expect((await page.toots.loadToots())[0].title).toBe('B')
+  })
+
+  it("applies another browser's Placed Pitch, keeping this browser's analysis (ADR 0015)", async () => {
+    const recording = theirs()
+    account.add('recordings', recording, wav(5))
+    await page.sync.syncOnce('user-a')
+    // This browser's own analysis, as each browser re-analyzes.
+    const analysis = { state: 'analyzing' } as const
+    await page.store.saveAnalysis(recording.id, analysis)
+    account.place(recording.id, 48)
+    const changes: LibraryChange[] = []
+    page.sync.onLibraryChanged(change => changes.push(change))
+    await page.sync.syncOnce('user-a')
+    const placed = { ...recording, analysis, placedPitch: 48 }
+    expect(await page.store.loadRecordings()).toEqual([placed])
+    expect(changes).toEqual([
+      { recordings: [placed], toots: [], deleted: { recordings: [], toots: [] } }
+    ])
+    // Read again unchanged, it changes nothing.
+    account.place(recording.id, 48)
+    changes.length = 0
+    await page.sync.syncOnce('user-a')
+    expect(changes).toEqual([])
+  })
+
+  it('keeps a Placed Pitch this browser is sending, and reads none from an older Worker as none', async () => {
+    const recording = theirs()
+    account.add('recordings', { ...recording, placedPitch: 40 }, wav(5))
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0].placedPitch).toBe(40)
+    refuse('PATCH', 503, 'unavailable')
+    await page.store.placeRecording(recording.id, 41)
+    account.place(recording.id, 42)
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0].placedPitch).toBe(41)
+    // A Worker from before #268 lists the Recording without a Placed Pitch.
+    account.intercept = null
+    await page.sync.syncOnce('user-a')
+    account.add('recordings', recording, wav(5))
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0].placedPitch).toBe(41)
   })
 
   // A browser away longer than tombstones are kept reads everything, and can't be told what went.

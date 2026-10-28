@@ -312,6 +312,32 @@ export async function saveAnalysis(id: string, analysis: AnalysisState): Promise
   return updated
 }
 
+/**
+ * Places a Noise-like Recording on a note by ear, or takes it off with null (ADR 0015), and queues
+ * the change for the account. The updated Recording, or null when it's gone.
+ */
+export async function placeRecording(
+  id: string,
+  placedPitch: number | null
+): Promise<Recording | null> {
+  const placed = await withDb(async database => {
+    const tx = database.transaction(['recordings', 'outbox'], 'readwrite')
+    const recordings = tx.objectStore('recordings')
+    const outbox = tx.objectStore('outbox')
+    const recording = await recordings.get(id)
+    // Awaited together, so a failed write's aborted transaction is never left unhandled.
+    if (!recording) {
+      await tx.done
+      return null
+    }
+    const updated: Recording = { ...recording, placedPitch }
+    await Promise.all([recordings.put(updated), queue(outbox, 'recordings', id, 'place'), tx.done])
+    return updated
+  })
+  if (placed) announceQueued()
+  return placed
+}
+
 /** A Recording's WAV: this browser's, or the account's, downloaded now if it hasn't been yet. */
 export async function loadAudio(id: string): Promise<ArrayBuffer> {
   const audio = await withDb(database => database.get('audio', id))

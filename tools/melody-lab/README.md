@@ -24,6 +24,7 @@ Inputs: `../../fixtures/recordings/` (Fixture Library) and `../../catalog/` (Son
 | `golden_cost.py` | Recomputes `plan()`'s cost for a given Arrangement from the golden data (how Auto-map tests check a tie-aware match); checks every golden Arrangement |
 | `test_needed_seconds.py` | Checks that the length a locked Song says it needs (`needed_seconds()`) unlocks it, for a fart 3 semitones or an octave from each missing note, on the golden data (`.venv/bin/python -I -m unittest discover -s . -p 'test_*.py'`) |
 | `test_bar_lines.py` | Checks `bar_lines`: a pickup, a bar split at a repeat, meter changes, 6/8, and an excerpt's own beats (the same command) |
+| `test_placed.py` | Checks a Noise-like Recording placed on a note by ear (`placed()`, ADR 0015): it counts as Melodic at that note, left out it changes nothing, and on the golden data Recording 080 placed on C2 unlocks three locked Songs (the same command) |
 | `plot_env.py` | Plots each Recording's loudness envelope with its detected gesture boundaries |
 
 The render path is only: trim, cut at the note's end, fade, gain, mix. Every fart plays raw, at its own pitch and speed (ADR 0012). No resampling, oscillators, resonators, loops, or granular re-triggering. `variable_resample()` only reads a Recording back with its pitch held for Recording Analysis (audition and settle time); no Song plays it.

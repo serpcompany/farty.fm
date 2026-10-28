@@ -50,7 +50,10 @@ const TIE = 1e-9
 export const LOWEST_TRANSPOSITION = -36
 export const HIGHEST_TRANSPOSITION = 24
 
-/** A Recording as Auto-map sees it. Only Melodic Recordings can play a pitch. */
+/**
+ * A Recording as Auto-map sees it. Only Melodic Recordings can play a pitch, and Placed Recordings,
+ * which come in as Melodic ones (`placedAutoMapRecording`).
+ */
 export interface AutoMapRecording {
   /** Ties between equally good Arrangements break on these ids, in code point order. */
   id: string
@@ -81,6 +84,33 @@ export function autoMapRecording(id: string, analysis: Analysis): AutoMapRecordi
     shortestNoteSeconds: analysis.shortestNoteSeconds,
     gestureSeconds: samples / sr,
     settleSeconds: analysis.settleSeconds ?? null
+  }
+}
+
+/**
+ * The shortest note a Placed Recording counts as holding on pitch, in seconds: the longest note
+ * the reference's `audition()` tries, so a fart placed by ear counts as the slowest Melodic
+ * Recording analysis accepts (ADR 0015). Shorter notes cost it `tooShortCost`, so Auto-map gives
+ * them to an analyzed fart at the same distance, but it still covers a pitch nothing else can.
+ */
+export const PLACED_SHORTEST_NOTE_SECONDS = 0.6
+
+/**
+ * A Noise-like Recording the user placed on `placedMidi` by ear, as Auto-map sees it (ADR 0015): a
+ * Melodic Recording at that note that holds it from `PLACED_SHORTEST_NOTE_SECONDS` and settles at
+ * once, at its own length. The reference's `placed()` makes the same `Source`. It still plays raw
+ * (ADR 0012), so the note only decides which pitches it may play.
+ */
+export function placedAutoMapRecording(
+  id: string,
+  analysis: Analysis,
+  placedMidi: number
+): AutoMapRecording {
+  return {
+    ...autoMapRecording(id, analysis),
+    recordingPitchMidi: placedMidi,
+    shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
+    settleSeconds: 0
   }
 }
 

@@ -48,6 +48,25 @@ describe('mergeOutbox', () => {
     }
   })
 
+  // A Recording's Placed Pitch (ADR 0015) queues like a Toot's title.
+  it('lets a place ride in an upload, and sends a second place as one', () => {
+    const recording = (op: OutboxOp, sent = false): OutboxEntry => ({
+      ...queued(op, sent),
+      key: `recordings:${id}`,
+      kind: 'recordings'
+    })
+    expect(mergeOutbox(recording('put'), 'recordings', id, 'place', stamp('v2'))).toEqual({
+      ...recording('put'),
+      version: 'v2'
+    })
+    expect(
+      mergeOutbox(recording('place', true), 'recordings', id, 'place', stamp('v2'))
+    ).toMatchObject({ op: 'place', sent: false, version: 'v2' })
+    expect(mergeOutbox(recording('place'), 'recordings', id, 'delete', stamp('v2'))).toMatchObject({
+      op: 'delete'
+    })
+  })
+
   it('sends a second rename as one, with a new version', () => {
     expect(mergeOutbox(queued('rename', true), 'toots', id, 'rename', stamp('v2'))).toMatchObject({
       op: 'rename',

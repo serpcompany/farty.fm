@@ -1,0 +1,1 @@
+ALTER TABLE `recordings` ADD `placed_pitch` integer;

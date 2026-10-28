@@ -26,7 +26,7 @@ export type LibraryChange =
   | { reset: true }
   | {
       reset?: false
-      /** Recordings now here that weren't, or with a new number. */
+      /** Recordings now here that weren't, or with a new number or Placed Pitch. */
       recordings: Recording[]
       /** Toots now here, or with a new title. */
       toots: Toot[]
@@ -181,6 +181,7 @@ const stops = ({ status, error }: api.Answer) =>
 type Taken =
   | { entry: OutboxEntry; op: 'put'; item: Recording | Toot; wav: ArrayBuffer }
   | { entry: OutboxEntry; op: 'rename'; title: string }
+  | { entry: OutboxEntry; op: 'place'; placedPitch: number | null }
   | { entry: OutboxEntry; op: 'delete' }
 
 /**
@@ -228,6 +229,15 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
       await Promise.all([outbox.put(entry), tx.done])
       return { entry, op: 'rename', title: toot.title }
     }
+    if (queued.op === 'place') {
+      const recording = await tx.objectStore('recordings').get(queued.id)
+      if (!recording) {
+        await outbox.delete(queued.key)
+        continue
+      }
+      await Promise.all([outbox.put(entry), tx.done])
+      return { entry, op: 'place', placedPitch: recording.placedPitch ?? null }
+    }
     await Promise.all([outbox.put(entry), tx.done])
     return { entry, op: 'delete' }
   }
@@ -237,17 +247,17 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
 
 /**
  * After a request for `sent` succeeded: done, unless the entry changed while it was on its way. A
- * Toot renamed during its upload is then renamed on the account (`then: 'rename'`), and a later
- * delete is sent next.
+ * Toot renamed, or a Recording placed, during its upload, or one the account already had
+ * (`then: 'update'`), is then renamed or placed on the account, and a later delete is sent next.
  */
-function settle(sent: OutboxEntry, then: 'done' | 'rename' = 'done'): Promise<void> {
+function settle(sent: OutboxEntry, then: 'done' | 'update' = 'done'): Promise<void> {
   return withDb(database => settleIn(database, sent, then))
 }
 
 async function settleIn(
   database: Database,
   sent: OutboxEntry,
-  then: 'done' | 'rename'
+  then: 'done' | 'update'
 ): Promise<void> {
   const tx = database.transaction('outbox', 'readwrite')
   const now = await tx.store.get(sent.key)
@@ -258,9 +268,11 @@ async function settleIn(
     // A delete queued during an upload or rename is sent next.
     if (sent.op === 'delete' && unchanged) await tx.store.delete(sent.key)
   } else if (sent.op === 'put') {
-    // A rename during the upload joined the queued upload (`mergeOutbox`), so it's sent now.
-    if (sent.kind === 'toots' && (then === 'rename' || !unchanged)) {
-      await tx.store.put({ ...now, op: 'rename', sent: false, version: crypto.randomUUID() })
+    // A rename or place during the upload joined the queued upload (`mergeOutbox`), so it's
+    // sent now.
+    if (then === 'update' || !unchanged) {
+      const op = sent.kind === 'toots' ? 'rename' : 'place'
+      await tx.store.put({ ...now, op, sent: false, version: crypto.randomUUID() })
     } else await tx.store.delete(sent.key)
   } else if (unchanged) await tx.store.delete(sent.key)
   await tx.done
@@ -289,9 +301,9 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
   if (taken.op === 'put') {
     const answer = await api.putItem(entry.kind, taken.item, taken.wav, accountId)
     if (stops(answer)) return 'stop'
-    // 200: the account had it already, maybe with an older title.
+    // 200: the account had it already, maybe with an older title or Placed Pitch.
     if (answer.status === 201 || answer.status === 200) {
-      await settle(entry, answer.status === 200 ? 'rename' : 'done')
+      await settle(entry, answer.status === 200 ? 'update' : 'done')
       return 'next'
     }
     if (answer.status === 410) {
@@ -306,6 +318,14 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
     if (stops(answer)) return 'stop'
     if (answer.status === 410) await deleteHere(entry.kind, entry.id)
     // Renamed; or not on the account, or a title it refuses, which no retry changes.
+    else await settle(entry)
+    return 'next'
+  }
+  if (taken.op === 'place') {
+    const answer = await api.placeRecording(entry.id, taken.placedPitch, accountId)
+    if (stops(answer)) return 'stop'
+    if (answer.status === 410) await deleteHere(entry.kind, entry.id)
+    // Placed; or not on the account, or a note it refuses, which no retry changes.
     else await settle(entry)
     return 'next'
   }
@@ -336,7 +356,8 @@ async function drain(accountId: string): Promise<boolean> {
 /**
  * Reads the account's changes since this browser's last read and applies them, in one
  * transaction. What this browser still has to send wins: a Recording or Toot it's deleting stays
- * deleted, and a Toot it's uploading or renaming keeps its title. A `full` answer lists everything
+ * deleted, a Toot it's uploading or renaming keeps its title, and a Recording it's uploading or
+ * placing keeps its Placed Pitch. A `full` answer lists everything
  * the account has, so what's here from the account and isn't listed was deleted there. Recordings
  * not uploaded yet are numbered after the rest (`renumberWaiting`). False when nothing was read.
  */
@@ -383,7 +404,19 @@ async function apply(database: Database, answer: api.LibraryChanges) {
 
   for (const { audioBytes: _, ...recording } of answer.recordings) {
     const key = itemKey('recordings', recording.id)
-    if (pending.get(key) === 'delete' || (await recordings.getKey(recording.id))) continue
+    const op = pending.get(key)
+    if (op === 'delete') continue
+    const here = await recordings.get(recording.id)
+    if (here) {
+      // Only its Placed Pitch changes (ADR 0015): the analysis stays this browser's own. A Worker
+      // from before #268 sends none, which changes nothing.
+      const placed = recording.placedPitch
+      if (op || placed === undefined || (here.placedPitch ?? null) === placed) continue
+      const moved = { ...here, placedPitch: placed }
+      await recordings.put(moved)
+      change.recordings.push(moved)
+      continue
+    }
     await Promise.all([
       recordings.put(recording),
       downloads.put({ kind: 'recordings', id: recording.id }, key)

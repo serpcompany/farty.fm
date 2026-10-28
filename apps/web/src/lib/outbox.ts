@@ -1,14 +1,17 @@
 // The outbox: what this browser still has to send to the account, one entry per Recording or
 // Toot, kept in IndexedDB beside them (`recording-store.ts`) and written in the same transaction
-// as the change it records. `library-sync.ts` sends it. Every save, rename and delete joins it,
-// a guest's too, so signing in sends what a guest kept: their Recordings, and this visit's Toots.
-// A guest's new visit clears the Toots' entries with the Toots (`visit.ts`).
+// as the change it records. `library-sync.ts` sends it. Every save, rename, place and delete
+// joins it, a guest's too, so signing in sends what a guest kept: their Recordings, and this
+// visit's Toots. A guest's new visit clears the Toots' entries with the Toots (`visit.ts`).
 
 /** A user's Recordings or their Toots, by the name of their store and their route. */
 export type Kind = 'recordings' | 'toots'
 
-/** What the server still needs: the item itself, a Toot's new title, or the delete. */
-export type OutboxOp = 'put' | 'rename' | 'delete'
+/**
+ * What the server still needs: the item itself, a Toot's new title, a Recording's Placed Pitch
+ * (ADR 0015), or the delete.
+ */
+export type OutboxOp = 'put' | 'rename' | 'place' | 'delete'
 
 export type OutboxEntry = {
   /** `{kind}:{id}` (`itemKey`). */
@@ -31,8 +34,9 @@ export const itemKey = (kind: Kind, id: string) => `${kind}:${id}`
 
 /**
  * The entry after `op` joins what's already queued for the same item, or null when nothing is
- * left to send. Data is read when it's sent, so a rename of a Toot whose upload hasn't gone out
- * is in the upload. A delete beats everything, and drops an upload no request has carried.
+ * left to send. Data is read when it's sent, so a rename of a Toot, or a place of a Recording,
+ * whose upload hasn't gone out is in the upload. A delete beats everything, and drops an upload
+ * no request has carried.
  */
 export function mergeOutbox(
   queued: OutboxEntry | undefined,
@@ -53,9 +57,9 @@ export function mergeOutbox(
   if (!queued) return fresh(op)
   if (queued.op === 'delete') return queued
   if (op === 'delete') return queued.op === 'put' && !queued.sent ? null : fresh('delete')
-  if (op === 'rename') {
-    // An upload that may have reached the server still uploads, then renames (`settle`).
-    return queued.op === 'put' ? { ...queued, version: now.version } : fresh('rename')
+  if (op === 'rename' || op === 'place') {
+    // An upload that may have reached the server still uploads, then renames or places (`settle`).
+    return queued.op === 'put' ? { ...queued, version: now.version } : fresh(op)
   }
   return queued
 }
