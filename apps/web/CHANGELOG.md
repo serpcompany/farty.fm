@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.7.0](https://github.com/serpcompany/farty.fm/compare/v1.6.0...v1.7.0) (2026-10-28)
+
+
+### Features
+
+* **web:** keeping Recordings needs a free account, with Turnstile on sign-up ([#237](https://github.com/serpcompany/farty.fm/issues/237)) ([#250](https://github.com/serpcompany/farty.fm/issues/250)) ([3cef3bc](https://github.com/serpcompany/farty.fm/commit/3cef3bc0152e98c797f845dbdb460ff487a24d5a))
+
+
+### Fixes
+
+* a paid Toot saves once, for its price, and Save recovers one that never saved ([#242](https://github.com/serpcompany/farty.fm/issues/242)) ([534b653](https://github.com/serpcompany/farty.fm/commit/534b653d07d311e4d20d82b6b80fe1053bccf908))
+* **catalog:** accents fall on the score's bar lines, so Happy Birthday stresses "birth" and "you" ([#251](https://github.com/serpcompany/farty.fm/issues/251)) ([c232b14](https://github.com/serpcompany/farty.fm/commit/c232b14d5bbdcacb0778a83df30cc5e8d1746303))
+* **e2e:** run the journeys in full Chromium on macOS, where the headless shell is force-quit at 32 s ([#249](https://github.com/serpcompany/farty.fm/issues/249)) ([22e6441](https://github.com/serpcompany/farty.fm/commit/22e6441cb1629ac52e79aaefe018fd706ef99908))
+* Record works again after one "Couldn't start recording" on iPhone ([#248](https://github.com/serpcompany/farty.fm/issues/248)) ([51b207c](https://github.com/serpcompany/farty.fm/commit/51b207c841f3b0b1cbc59e39001e8aa0c32f8af5))
+* **web:** Save says the user was charged when a paid Checkout doesn't match the Toot ([#246](https://github.com/serpcompany/farty.fm/issues/246)) ([2d66116](https://github.com/serpcompany/farty.fm/commit/2d661169ebcadbbac80cec95ae478f3845164d4a))
+
 ## [1.6.0](https://github.com/serpcompany/farty.fm/compare/v1.5.0...v1.6.0) (2026-10-27)
 
 
