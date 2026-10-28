@@ -16,6 +16,10 @@ withFakeMicrophone(g3Fart)
 test.skip(({ viewport }) => !onPhone({ viewport }), 'The account step is checked at phone size')
 test.describe.configure({ timeout: 150_000 })
 
+test.beforeEach(({ pageErrors }) => {
+  pageErrors.expect('the server responded with a status of 401')
+})
+
 test("an account's farts stay when its session ends: Farty asks to sign in again, or clears them", async ({
   page,
   context
