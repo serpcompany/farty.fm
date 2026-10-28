@@ -119,7 +119,8 @@ Each replaces the tab's screen with a message and a Reload button.
   page's gradient, the journeys measure the contrast from the pixels under the text.
 - With reduced motion asked for, nothing but a spinner moves for longer than a frame
   (`e2e/accessibility.spec.ts`, "with reduced motion, nothing but a spinner moves for longer than a
-  frame").
+  frame"), and a playing Toot's playhead hides (`e2e/song-creator.spec.ts`, "plays each Song with
+  your farts, plays a tapped note, and saves it as a Toot").
 
 ## Staging and Production
 

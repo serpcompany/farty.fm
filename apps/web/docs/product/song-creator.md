@@ -42,7 +42,8 @@ raw, at its own pitch and speed ([ADR 0005](../../../../docs/adr/0005-song-creat
   per note (`e2e/song-creator.spec.ts`, "plays each Song with your farts, plays a tapped note, and
   saves it as a Toot").
 - The note view draws each note as a bar in its pitch's color, with a playhead while the whole Toot
-  plays. A tap anywhere on it plays the nearest note alone, from the Toot's own audio at its written
+  plays; with reduced motion asked for, the playhead hides and the playing note still lights up. A
+  tap anywhere on it plays the nearest note alone, from the Toot's own audio at its written
   start and length, selects it, and says what it is: the note, the Recording and its Recording
   Pitch, and the written length, as "F3 · Recording 21 (G3) · 1.4 s" (`e2e/song-creator.spec.ts`,
   "plays each Song with your farts, plays a tapped note, and saves it as a Toot";

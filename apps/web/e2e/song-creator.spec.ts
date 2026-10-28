@@ -130,9 +130,13 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       })
 
       const whole = await expectTheWholeToot(page)
-      await expect(page.getByTestId('playhead')).toHaveCount(1)
-      if (out && unlocked.id === 'mary') {
-        await page.screenshot({ path: join(out, 'mary-playing.png') })
+      const playhead = page.getByTestId('playhead')
+      await expect(playhead).toHaveCount(1)
+      if (unlocked.id === 'mary') {
+        if (out) await page.screenshot({ path: join(out, 'mary-playing.png') })
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        await expect(playhead).toHaveCSS('display', 'none')
+        await page.emulateMedia({ reducedMotion: null })
       }
 
       const play = page.getByTestId('song-creator-play')
@@ -154,7 +158,7 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
         /^[A-G]♯?\d · Recording \d+ \([A-G]♯?\d\) · \d+\.\d s$/
       )
       await expect(page.getByTestId(`note ${index + 1}`)).toHaveAccessibleName(/, selected/)
-      await expect(page.getByTestId('playhead')).toHaveCount(0)
+      await expect(playhead).toHaveCount(0)
       const tapped = await lastSound(page)
       expect(tapped.duration).toBe(whole.duration)
       expect(tapped.args[1]).toBeCloseTo((note.start * 60) / unlocked.bpm, 3)

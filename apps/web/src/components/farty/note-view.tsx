@@ -151,7 +151,7 @@ export function NoteView({
               y={0}
               width={2}
               height={layout.height}
-              className="fill-foreground"
+              className="fill-foreground motion-reduce:hidden"
               data-testid="playhead"
             />
           )}
