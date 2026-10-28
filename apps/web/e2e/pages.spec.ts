@@ -20,6 +20,8 @@ test('the privacy page covers accounts, news email, Turnstile, guests, error rep
     page.getByText('When the account step opens, such as after your first Result, Cloudflare')
   ).toBeVisible()
   await expect(page.getByText('Delete account on Profile removes your email')).toBeVisible()
+  await expect(page.getByText('it first sends a code to your email')).toBeVisible()
+  await expect(page.getByText('when Delete account asks you for a new code')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Error reports', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Page views' })).toBeVisible()
   await expect(page.getByText('counts page views on every page of Farty')).toBeVisible()

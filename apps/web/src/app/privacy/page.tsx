@@ -34,8 +34,9 @@ export default function PrivacyPage() {
       <h2>The account step</h2>
       <p>
         When the account step opens, such as after your first Result, Cloudflare Turnstile loads in
-        it, whether or not you make an account, and checks that a person asks for a sign-in code.
-        Cloudflare&apos;s use of what it reads from your browser is described in its{' '}
+        it, whether or not you make an account, and checks that a person asks for a sign-in code. It
+        loads in the same way when Delete account asks you for a new code. Cloudflare&apos;s use of
+        what it reads from your browser is described in its{' '}
         <a href="https://www.cloudflare.com/turnstile-privacy-policy/">
           Turnstile privacy addendum
         </a>
@@ -95,9 +96,10 @@ export default function PrivacyPage() {
       <h2>Deleting your data</h2>
       <p>
         Delete account on Profile removes your email, Recordings, Toots and Farty&apos;s record of
-        your payments. Stripe keeps its own record of each payment. Without an account, delete a
-        Recording on the Recordings tab, or clear this site&apos;s data in your browser to remove
-        everything.
+        your payments. If you signed in more than 10 minutes before, it first sends a code to your
+        email, so only you can delete your account. Stripe keeps its own record of each payment.
+        Without an account, delete a Recording on the Recordings tab, or clear this site&apos;s data
+        in your browser to remove everything.
       </p>
 
       <h2>Children</h2>

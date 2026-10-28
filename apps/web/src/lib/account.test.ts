@@ -271,6 +271,19 @@ describe('deleteAccount and setMarketingEmail', () => {
     )
     expect(await change()).toBe('failed')
   })
+
+  it('deleteAccount says when the server asks for a new sign-in first', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ error: 'sign_in_again' }, { status: 403 }))
+    )
+    expect(await deleteAccount('user-a')).toBe('signInAgain')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ error: 'cross_origin' }, { status: 403 }))
+    )
+    expect(await deleteAccount('user-a')).toBe('failed')
+  })
 })
 
 describe('the step draft', () => {

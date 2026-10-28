@@ -12,7 +12,12 @@ export async function getSessionUser(request: Request): Promise<SessionUser | nu
   const token = cookie.match(new RegExp(`(?:^|;\\s*)${TEST_SESSION_COOKIE}=([^;]+)`))?.[1]
   if (!token) return null
   const rows = await createDatabase(env.DB)
-    .select({ id: user.id, email: user.email, marketingEmail: user.marketingEmail })
+    .select({
+      id: user.id,
+      email: user.email,
+      marketingEmail: user.marketingEmail,
+      signedInAt: session.createdAt
+    })
     .from(session)
     .innerJoin(user, eq(user.id, session.userId))
     .where(and(eq(session.token, token), gt(session.expiresAt, new Date())))

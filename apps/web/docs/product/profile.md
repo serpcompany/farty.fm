@@ -34,6 +34,9 @@ What the Account section shows depends on the account's state. Each action is in
 - Signed in: the email, the Farty news switch, Sign out and Delete account
   (`e2e/account-profile.spec.ts`, "Profile's account: the email, Farty news, and Sign out, which
   leaves nothing here").
+- Delete account with a sign-in 10 minutes old or more asks for a new email code first
+  ([Accounts](account.md#signed-in-on-profile); `e2e/account-profile.spec.ts`, "Delete account
+  after an old sign-in asks for a new code, then deletes the account").
 
 ## Internal build: the Fixture Library
 

@@ -25,7 +25,7 @@ import { tootPayment } from '@/db/payments'
 import type { Recording } from '@/lib/recordings'
 import type { Toot } from '@/lib/toot'
 
-import type { SessionUser } from './auth-session'
+import { type SessionUser, signedInRecently } from './auth-session'
 import { apiError, gone, notFound } from './http'
 import {
   isItemId,
@@ -298,6 +298,7 @@ export async function deleteAccount(
 ): Promise<Response> {
   const wrong = wrongLibrary(user, request)
   if (wrong) return wrong
+  if (!signedInRecently(user)) return apiError(403, 'sign_in_again')
   await deleteUserMedia(media, user.id)
   await deleteUser(db, user.id)
   await deleteUserMedia(media, user.id)

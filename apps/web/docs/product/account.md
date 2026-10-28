@@ -195,10 +195,32 @@ sign-in](../../../../docs/agents/accounts.md), how the library syncs in
   without a reload (`e2e/account-profile.spec.ts`, "Profile's account: the email, Farty news, and
   Sign out, which leaves nothing here"; "Sign out clears Farty's other tabs too, without a reload").
 - Delete account asks "Delete your account?": it deletes the email, Recordings and Toots on every
-  device and can't be undone. Then it leaves nothing here (`e2e/account-profile.spec.ts`, "Delete
-  account asks first, then deletes the account and leaves nothing here";
-  `src/app/api/account/route.workers.test.ts`, "deletes the user’s audio, then their row with their
-  sessions, Recordings, Toots and payments").
+  device and can't be undone. With a sign-in less than 10 minutes old, Delete deletes the account
+  straight away and leaves nothing here (`e2e/account-profile.spec.ts`, "Delete account asks first,
+  then deletes the account and leaves nothing here"; `src/app/api/account/route.workers.test.ts`,
+  "deletes the user’s audio, then their row with their sessions, Recordings, Toots and payments";
+  "deletes for a session signed in less than 10 minutes ago";
+  `src/components/farty/profile-screen.interaction.test.tsx`, "deletes straight after the confirm
+  with a recent sign-in, asking for no code").
+- A sign-in 10 minutes old or more can't delete the account, so a phone left signed in can't
+  delete it: the server refuses and deletes nothing. The age is the sign-in's own, which renewing
+  the session never moves (`src/app/api/account/route.workers.test.ts`, "refuses a session signed
+  in 10 minutes ago or more (403), and deletes nothing"; `src/server/auth-session.test.ts`, "reads
+  the time of the sign-in itself, which renewing the session never moves").
+- Profile then asks for a new code, as sign-in does: "To delete your account, sign in again. We'll
+  send a code to …", with Turnstile's check and Send code. Then "Enter the code we sent to … to
+  delete your account.", the Code field with focus, and Delete, which signs in with the code and
+  deletes the account (`e2e/account-profile.spec.ts`, "Delete account after an old sign-in asks
+  for a new code, then deletes the account"; `src/app/api/signed-in.workers.test.ts`, "refuses a
+  sign-in 10 minutes old, and deletes once a new code signs in again";
+  `src/components/farty/profile-screen.interaction.test.tsx`, "asks for a new code, sent to the
+  account’s email with Turnstile’s token, then deletes").
+- There, a wrong code, too many tries or a failed request say what sign-in says and delete
+  nothing, a code that no longer works goes back to Send code, and closing starts again from
+  "Delete your account?" (`src/components/farty/profile-screen.interaction.test.tsx`, "asks for a
+  new code, sent to the account’s email with Turnstile’s token, then deletes"; "says what went
+  wrong as sign-in does (%s), and deletes nothing"; "goes back to Send code when the code no longer
+  works"; "starts again from the confirm once closed").
 - When its request fails, Profile says "Couldn't sign out. Check your connection and try again.",
   "Couldn't delete your account. Check your connection and try again." or "Couldn't change Farty
   news. Try again." (`src/components/farty/profile-screen.interaction.test.tsx`, "says it couldn't
@@ -252,5 +274,8 @@ sign-in](../../../../docs/agents/accounts.md), how the library syncs in
 
 ## Not checked
 
+- No journey ages a real session past 10 minutes: the old sign-in journey answers its first delete
+  with the server's refusal itself, then sends, reads and signs in with a real code and deletes the
+  account for real. The Workers tests check the refusal on the server.
 - Nothing on screen says a Recording past the account's 300 hasn't reached it, and Sign out's "Not
   uploaded yet" counts it as waiting for a connection. A test would only hold that gap in place.

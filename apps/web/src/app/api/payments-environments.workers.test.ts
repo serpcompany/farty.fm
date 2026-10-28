@@ -77,7 +77,7 @@ describe('live and test mode', () => {
 describe('with saving free', () => {
   it('answers paid to checkout and payment, with no checkout and no Stripe', async () => {
     const a = await signUp('A')
-    const user = { id: a.id, email: a.email, marketingEmail: true }
+    const user = { id: a.id, email: a.email, marketingEmail: true, signedInAt: new Date() }
     const stripe = vi.spyOn(globalThis, 'fetch')
     const free: Payments = { kind: 'free' }
     const request = (path: string, init: RequestInit = {}) =>

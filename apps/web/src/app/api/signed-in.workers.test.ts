@@ -122,4 +122,23 @@ describe('DELETE /api/account/ with sign-in’s session', () => {
     expect(await verificationsFor('b@example.test')).toHaveLength(1)
     expect((await api.library(b)).status).toBe(200)
   })
+
+  it('refuses a sign-in 10 minutes old, and deletes once a new code signs in again', async () => {
+    const old = await signIn('a@example.test')
+    await testDb()
+      .update(session)
+      .set({ createdAt: new Date(Date.now() - 10 * 60_000) })
+      .where(eq(session.userId, old.id))
+
+    const refused = await api.deleteAccount(old)
+    expect(refused.status).toBe(403)
+    expect(await refused.json()).toEqual({ error: 'sign_in_again' })
+    expect(await testDb().select().from(user).where(eq(user.id, old.id))).toHaveLength(1)
+
+    const again = await signIn('a@example.test')
+    expect(again.id).toBe(old.id)
+    expect((await api.deleteAccount(again)).status).toBe(204)
+    expect(await testDb().select().from(user).where(eq(user.id, old.id))).toEqual([])
+    expect(await testDb().select().from(session).where(eq(session.userId, old.id))).toEqual([])
+  })
 })

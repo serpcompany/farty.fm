@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { markTootPaid, startTootPayment } from '@/db/payments'
 import { recordings, session, tootPayments, toots, user, verification } from '@/db/schema'
 import { TOOT_PRICE } from '@/lib/pricing'
+import { RECENT_SIGN_IN_MINUTES } from '@/server/auth-session'
 import { deleteAccount } from '@/server/library'
 import {
   api,
@@ -35,9 +36,15 @@ async function rowsOf(userId: string) {
 const deleteWith = (media: R2Bucket, { id, email }: { id: string; email: string }) =>
   deleteAccount(
     { db: testDb(), media },
-    { id, email, marketingEmail: true },
+    { id, email, marketingEmail: true, signedInAt: new Date() },
     new Request(`${ORIGIN}/api/account/`, { method: 'DELETE' })
   )
+
+const signedInAgo = (userId: string, ms: number) =>
+  testDb()
+    .update(session)
+    .set({ createdAt: new Date(Date.now() - ms) })
+    .where(eq(session.userId, userId))
 
 async function fill({ id, cookie }: { id: string; cookie: string }) {
   await api.put('recordings', R1, uploadBody(recordingMetadata(R1), wav()), { cookie })
@@ -200,6 +207,41 @@ describe('DELETE /api/account/', () => {
 
     const left = await testDb().select({ identifier: verification.identifier }).from(verification)
     expect(left).toEqual([{ identifier: 'sign-in-otp-b@example.test' }])
+  })
+
+  it('refuses a session signed in 10 minutes ago or more (403), and deletes nothing', async () => {
+    expect(RECENT_SIGN_IN_MINUTES).toBe(10)
+    const a = await signUp('A')
+    await fill(a)
+    const keys = await bucketKeys()
+    const before = await rowsOf(a.id)
+
+    for (const minutes of [10, 60, 6 * 24 * 60]) {
+      await signedInAgo(a.id, minutes * 60_000)
+      const refused = await api.deleteAccount({ ...a, library: a.id })
+      expect(refused.status).toBe(403)
+      expect(await refused.json()).toEqual({ error: 'sign_in_again' })
+      expect(refused.headers.get('cache-control')).toBe('private, no-store')
+    }
+
+    expect(await bucketKeys()).toEqual(keys)
+    expect(keys).toHaveLength(2)
+    expect(await rowsOf(a.id)).toEqual({
+      ...before,
+      sessions: [{ ...before.sessions[0], createdAt: expect.any(Date) }]
+    })
+  })
+
+  it('deletes for a session signed in less than 10 minutes ago', async () => {
+    const a = await signUp('A')
+    await fill(a)
+
+    await signedInAgo(a.id, 9 * 60_000)
+    const response = await api.deleteAccount({ ...a, library: a.id })
+
+    expect(response.status).toBe(204)
+    expect((await rowsOf(a.id)).users).toEqual([])
+    expect(await bucketKeys()).toEqual([])
   })
 
   it('answers a signed-out request with 401 and deletes nothing', async () => {

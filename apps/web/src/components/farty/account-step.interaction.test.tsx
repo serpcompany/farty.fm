@@ -1,12 +1,9 @@
 import { act } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { sendCode, signIn } from '@/lib/account'
+import { giveToken, siteKeyAnswer, widgets } from '@/test-support/fake-turnstile'
 import { button, closeScreens, pageText, show, tap, type } from '@/test-support/screen'
 import { AccountStep } from './account-step'
-
-type Widget = { siteKey: string; onToken(token: string | null): void; onFailed(): void }
-
-const page = vi.hoisted(() => ({ widgets: [] as Widget[] }))
 
 vi.mock('@/lib/account', async importOriginal => {
   const real = await importOriginal<typeof import('@/lib/account')>()
@@ -21,17 +18,7 @@ vi.mock('./account-provider', () => ({
     finishSignIn: vi.fn()
   })
 }))
-vi.mock('./turnstile', async () => {
-  const { useEffect } = await import('react')
-  return {
-    Turnstile: (props: Widget) => {
-      useEffect(() => {
-        page.widgets.push(props)
-      }, [])
-      return null
-    }
-  }
-})
+vi.mock('./turnstile', () => import('@/test-support/fake-turnstile'))
 
 function server(...siteKey: Response[]) {
   return vi.spyOn(globalThis, 'fetch').mockImplementation(async input => {
@@ -42,14 +29,11 @@ function server(...siteKey: Response[]) {
     return Response.json({ success: true })
   })
 }
-const keyAnswer = () => Response.json({ siteKey: '1x00000000000000000000AA' })
 
 const field = (id: string) => document.body.querySelector<HTMLInputElement>(`#${id}`)
 const problem = () => document.body.querySelector('[role="alert"]')?.textContent ?? null
 const codesSent = (fetch: ReturnType<typeof server>) =>
   fetch.mock.calls.filter(([url]) => String(url).includes('send-verification-otp'))
-const giveToken = (widget: number, token: string) =>
-  act(async () => page.widgets[widget].onToken(token))
 
 async function sendCodeTo(email: string) {
   const emailField = field('account-email')
@@ -60,7 +44,7 @@ async function sendCodeTo(email: string) {
 }
 
 beforeEach(() => {
-  page.widgets = []
+  widgets.length = 0
   sessionStorage.setItem(
     'pedos.accountStep.draft',
     JSON.stringify({ phase: 'email', email: 'a@example.test' })
@@ -82,7 +66,7 @@ describe('the account step', () => {
     ['unavailable', "Accounts aren't available right now."],
     ['failed', "Couldn't reach Farty. Check your connection and try again."]
   ] as const)('says what went wrong in words (%s)', async (code, words) => {
-    server(keyAnswer())
+    server(siteKeyAnswer())
     vi.mocked(sendCode).mockResolvedValueOnce({ ok: false, problem: code })
     await show(<AccountStep />)
     await sendCodeTo('farter@example.com')
@@ -92,7 +76,7 @@ describe('the account step', () => {
   })
 
   it('goes back to the Email field when the code no longer works', async () => {
-    server(keyAnswer())
+    server(siteKeyAnswer())
     vi.mocked(sendCode).mockResolvedValueOnce({ ok: true, value: null })
     vi.mocked(signIn).mockResolvedValueOnce({ ok: false, problem: 'codeExpired' })
     await show(<AccountStep />)
@@ -111,9 +95,9 @@ describe('the account step', () => {
 
 describe('Send code and Turnstile', () => {
   it("waits for the widget's token, then sends the code with it", async () => {
-    const fetch = server(keyAnswer())
+    const fetch = server(siteKeyAnswer())
     await show(<AccountStep />)
-    expect(page.widgets).toHaveLength(1)
+    expect(widgets).toHaveLength(1)
     expect(button('Send code').disabled).toBe(true)
 
     await giveToken(0, 'token-1')
@@ -125,10 +109,10 @@ describe('Send code and Turnstile', () => {
   })
 
   it("reads the site key again on a tap when it couldn't be read", async () => {
-    const fetch = server(new Response('oops', { status: 500 }), keyAnswer())
+    const fetch = server(new Response('oops', { status: 500 }), siteKeyAnswer())
     await show(<AccountStep />)
     expect(problem()).toBe("Couldn't reach Farty. Check your connection and try again.")
-    expect(page.widgets).toHaveLength(0)
+    expect(widgets).toHaveLength(0)
     expect(button('Send code').disabled).toBe(false)
 
     await tap(button('Send code'))
@@ -137,44 +121,44 @@ describe('Send code and Turnstile', () => {
     )
     expect(keyReads).toHaveLength(2)
     expect(problem()).toBeNull()
-    expect(page.widgets).toHaveLength(1)
+    expect(widgets).toHaveLength(1)
     expect(codesSent(fetch)).toHaveLength(0)
     expect(button('Send code').disabled).toBe(true)
   })
 
   it("renders a new widget on a tap when Turnstile couldn't load", async () => {
-    server(keyAnswer())
+    server(siteKeyAnswer())
     await show(<AccountStep />)
-    await act(async () => page.widgets[0].onFailed())
+    await act(async () => widgets[0].onFailed())
     expect(problem()).toBe("Couldn't reach Farty. Check your connection and try again.")
     expect(button('Send code').disabled).toBe(false)
 
     await tap(button('Send code'))
-    expect(page.widgets).toHaveLength(2)
+    expect(widgets).toHaveLength(2)
     expect(problem()).toBeNull()
     await giveToken(1, 'token-2')
     expect(button('Send code').disabled).toBe(false)
   })
 
   it('drops the token and renders a new widget on a tap when Turnstile fails after giving one', async () => {
-    const fetch = server(keyAnswer())
+    const fetch = server(siteKeyAnswer())
     await show(<AccountStep />)
     await giveToken(0, 'token-1')
-    await act(async () => page.widgets[0].onFailed())
+    await act(async () => widgets[0].onFailed())
     expect(button('Send code').disabled).toBe(false)
 
     await tap(button('Send code'))
     expect(codesSent(fetch)).toHaveLength(0)
-    expect(page.widgets).toHaveLength(2)
+    expect(widgets).toHaveLength(2)
     expect(button('Send code').disabled).toBe(true)
   })
 
   it('tries again when the browser comes back online', async () => {
-    server(keyAnswer())
+    server(siteKeyAnswer())
     await show(<AccountStep />)
-    await act(async () => page.widgets[0].onFailed())
+    await act(async () => widgets[0].onFailed())
     await act(async () => window.dispatchEvent(new Event('online')))
-    expect(page.widgets).toHaveLength(2)
+    expect(widgets).toHaveLength(2)
     expect(button('Send code').disabled).toBe(true)
   })
 })

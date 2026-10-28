@@ -191,7 +191,7 @@ export async function signOut(): Promise<boolean> {
   }
 }
 
-export type AccountChange = 'done' | 'otherAccount' | 'failed'
+export type AccountChange = 'done' | 'otherAccount' | 'signInAgain' | 'failed'
 
 async function changeAccount(accountId: string, init: RequestInit): Promise<AccountChange> {
   try {
@@ -199,12 +199,13 @@ async function changeAccount(accountId: string, init: RequestInit): Promise<Acco
     headers.set('x-pedos-library', accountId)
     const response = await fetch('/api/account/', { ...init, headers })
     if (response.ok) return 'done'
-    if (response.status !== 409) return 'failed'
     const error = await response
       .json()
       .then(body => (body as { error?: unknown } | null)?.error)
       .catch(() => undefined)
-    return error === 'wrong_account' ? 'otherAccount' : 'failed'
+    if (response.status === 409 && error === 'wrong_account') return 'otherAccount'
+    if (response.status === 403 && error === 'sign_in_again') return 'signInAgain'
+    return 'failed'
   } catch {
     return 'failed'
   }

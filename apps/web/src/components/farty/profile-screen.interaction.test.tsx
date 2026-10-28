@@ -1,8 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { Account } from '@/lib/account'
+import type { Account, AccountChange } from '@/lib/account'
 import type { Recording } from '@/lib/recordings'
 import type { Toot } from '@/lib/toot'
-import { button, closeScreens, dialogs, pageText, settle, show, tap } from '@/test-support/screen'
+import { giveToken, siteKeyAnswer, widgets } from '@/test-support/fake-turnstile'
+import {
+  button,
+  closeScreens,
+  dialogs,
+  pageText,
+  settle,
+  show,
+  tap,
+  type
+} from '@/test-support/screen'
 import { useAccount } from './account-provider'
 import { ProfileScreen } from './profile-screen'
 import { useRecordings } from './recordings-provider'
@@ -12,23 +22,27 @@ vi.mock('./account-provider', () => ({ useAccount: vi.fn() }))
 vi.mock('./fixture-library', () => ({ FixtureLibrary: () => <h2>Internal build</h2> }))
 vi.mock('./recordings-provider', () => ({ useRecordings: vi.fn() }))
 vi.mock('./toots-provider', () => ({ useToots: vi.fn() }))
+vi.mock('./turnstile', () => import('@/test-support/fake-turnstile'))
 
 const signedIn: Account = { status: 'signedIn', id: 'u1', email: 'a@b.c', marketingEmail: true }
 
+type DeleteAccount = () => Promise<AccountChange>
+
 const failing = {
   signOut: vi.fn(async () => 'failed'),
-  deleteAccount: vi.fn(async () => false),
   setMarketingEmail: vi.fn(async () => false)
 }
 
 function holding({
   recordings = [],
   toots = [],
-  account = signedIn
+  account = signedIn,
+  deleteAccount = async () => 'failed'
 }: {
   recordings?: Recording[] | null
   toots?: Toot[] | null
   account?: Account
+  deleteAccount?: DeleteAccount
 }) {
   vi.mocked(useRecordings).mockReturnValue({
     recordings,
@@ -37,9 +51,11 @@ function holding({
     songRows: []
   } as unknown as ReturnType<typeof useRecordings>)
   vi.mocked(useToots).mockReturnValue({ toots } as unknown as ReturnType<typeof useToots>)
-  vi.mocked(useAccount).mockReturnValue({ account, ...failing } as unknown as ReturnType<
-    typeof useAccount
-  >)
+  vi.mocked(useAccount).mockReturnValue({
+    account,
+    ...failing,
+    deleteAccount
+  } as unknown as ReturnType<typeof useAccount>)
   return <ProfileScreen version="1.0.0" />
 }
 
@@ -47,7 +63,11 @@ const inStats = (selector: string) =>
   document.body.querySelector(`section[aria-labelledby="profile-stats"] ${selector}`)
 const problem = () => document.body.querySelector('[role="alert"]')?.textContent
 
-afterEach(closeScreens)
+afterEach(() => {
+  closeScreens()
+  widgets.length = 0
+  vi.restoreAllMocks()
+})
 
 describe('Profile', () => {
   it('shows a spinner while the stats load', async () => {
@@ -99,5 +119,139 @@ describe('Profile', () => {
     expect(problem()).toBe(words)
     expect(dialogs()).toEqual([])
     expect(button('Sign out').disabled).toBe(false)
+  })
+
+  it('deletes straight after the confirm with a recent sign-in, asking for no code', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch')
+    const deleteAccount = vi.fn<DeleteAccount>(async () => 'done')
+    await show(holding({ deleteAccount }))
+    await tap(button('Delete account'))
+    await tap(button('Delete'))
+
+    expect(deleteAccount).toHaveBeenCalledTimes(1)
+    expect(fetch).not.toHaveBeenCalled()
+    expect(widgets).toEqual([])
+    expect(pageText()).not.toContain('sign in again')
+  })
+})
+
+const signInAnswers = {
+  wrong: () => Response.json({ code: 'INVALID_OTP' }, { status: 400 }),
+  expired: () => Response.json({ code: 'OTP_EXPIRED' }, { status: 400 }),
+  tooMany: () => new Response(null, { status: 429 }),
+  offline: () => Response.error(),
+  right: () => Response.json({ user: { id: 'u1', email: 'a@b.c' } })
+}
+
+function authServer(...signIns: (keyof typeof signInAnswers)[]) {
+  return vi.spyOn(globalThis, 'fetch').mockImplementation(async input => {
+    const url = String(input)
+    if (url.startsWith('/api/auth/turnstile')) return siteKeyAnswer()
+    if (!url.includes('/sign-in/email-otp')) return Response.json({ success: true })
+    const answer = signInAnswers[signIns.shift() ?? 'offline']()
+    if (answer.type === 'error') throw new TypeError('offline')
+    return answer
+  })
+}
+
+const sentTo = (fetch: ReturnType<typeof authServer>, path: string) =>
+  fetch.mock.calls
+    .filter(([url]) => String(url).includes(path))
+    .map(([, init]) => ({
+      body: JSON.parse(String(init?.body)),
+      captcha: new Headers(init?.headers).get('x-captcha-response')
+    }))
+
+const codeField = () => document.body.querySelector<HTMLInputElement>('#delete-account-code')
+
+async function confirmDelete(deleteAccount: DeleteAccount) {
+  await show(holding({ deleteAccount }))
+  await tap(button('Delete account'))
+  await tap(button('Delete'))
+}
+
+async function askForCode(deleteAccount: DeleteAccount) {
+  await confirmDelete(deleteAccount)
+  await giveToken(0, 'token-1')
+  await tap(button('Send code'))
+}
+
+async function enterCode(code: string) {
+  const field = codeField()
+  if (!field) throw new Error('No Code field')
+  await type(field, code)
+  await tap(button('Delete'))
+}
+
+describe('Delete account after an old sign-in', () => {
+  it('asks for a new code, sent to the account’s email with Turnstile’s token, then deletes', async () => {
+    const fetch = authServer('wrong', 'right')
+    const deleteAccount = vi
+      .fn<DeleteAccount>()
+      .mockResolvedValueOnce('signInAgain')
+      .mockResolvedValueOnce('done')
+    await confirmDelete(deleteAccount)
+
+    expect(pageText()).toContain(
+      "To delete your account, sign in again. We'll send a code to a@b.c."
+    )
+    expect(widgets).toHaveLength(1)
+    expect(button('Send code').disabled).toBe(true)
+    await giveToken(0, 'token-1')
+    await tap(button('Send code'))
+    expect(sentTo(fetch, '/send-verification-otp')).toEqual([
+      { body: { email: 'a@b.c', type: 'sign-in' }, captcha: 'token-1' }
+    ])
+    expect(pageText()).toContain('Enter the code we sent to a@b.c to delete your account.')
+    expect(document.activeElement).toBe(codeField())
+
+    await enterCode('000000')
+    expect(problem()).toBe("That code isn't right. Check it and try again.")
+    expect(deleteAccount).toHaveBeenCalledTimes(1)
+
+    await enterCode('123 456')
+    expect(sentTo(fetch, '/sign-in/email-otp').map(sent => sent.body)).toEqual([
+      { email: 'a@b.c', otp: '000000' },
+      { email: 'a@b.c', otp: '123 456' }
+    ])
+    expect(deleteAccount).toHaveBeenCalledTimes(2)
+  })
+
+  it.each([
+    ['tooMany', 'Too many tries. Wait a few minutes, then try again.'],
+    ['offline', "Couldn't reach Farty. Check your connection and try again."]
+  ] as const)('says what went wrong as sign-in does (%s), and deletes nothing', async (answer, words) => {
+    authServer(answer)
+    const deleteAccount = vi.fn<DeleteAccount>(async () => 'signInAgain')
+    await askForCode(deleteAccount)
+    await enterCode('123456')
+
+    expect(problem()).toBe(words)
+    expect(codeField()).not.toBeNull()
+    expect(deleteAccount).toHaveBeenCalledTimes(1)
+  })
+
+  it('goes back to Send code when the code no longer works', async () => {
+    authServer('expired')
+    const deleteAccount = vi.fn<DeleteAccount>(async () => 'signInAgain')
+    await askForCode(deleteAccount)
+    await enterCode('123456')
+
+    expect(problem()).toBe('That code no longer works. Send a new one.')
+    expect(codeField()).toBeNull()
+    expect(widgets).toHaveLength(2)
+    expect(button('Send code').disabled).toBe(true)
+    expect(deleteAccount).toHaveBeenCalledTimes(1)
+  })
+
+  it('starts again from the confirm once closed', async () => {
+    authServer()
+    await askForCode(vi.fn<DeleteAccount>(async () => 'signInAgain'))
+    await tap(button('Cancel'))
+    expect(dialogs()).toEqual([])
+
+    await tap(button('Delete account'))
+    expect(pageText()).toContain("It can't be undone.")
+    expect(codeField()).toBeNull()
   })
 })

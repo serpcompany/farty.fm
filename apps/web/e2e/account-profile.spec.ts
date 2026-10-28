@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { accountOf, newEmail, session, signInByApi } from './account'
+import { accountOf, codeFor, newEmail, session, signInByApi } from './account'
 import { stored } from './database'
 import { recordG3ToRecordings, skipWelcome, withFartingMicrophone } from './record'
 import { expectTappable, onPhone, tab } from './screens'
@@ -145,6 +145,53 @@ test('Delete account asks first, then deletes the account and leaves nothing her
   await expectSignedOutWithNothingHere(page)
   await expect(page).toHaveURL(/\/profile\/$/)
   await expect(page.getByTestId('stat-recordings')).toHaveText('Recordings0')
+  expect(await page.evaluate(async () => (await fetch('/api/library/')).status)).toBe(401)
+})
+
+test('Delete account after an old sign-in asks for a new code, then deletes the account', async ({
+  page,
+  pageErrors
+}, testInfo) => {
+  test.setTimeout(120_000)
+  pageErrors.expect(
+    'the server responded with a status of 403',
+    'the server responded with a status of 401'
+  )
+  const email = newEmail(testInfo, 'old-sign-in')
+  await signedInWithARecording(page, email)
+  const signInCode = await codeFor(page, email)
+  let refused = false
+  await page.route('**/api/account/', async route => {
+    if (route.request().method() !== 'DELETE' || refused) return route.fallback()
+    refused = true
+    await route.fulfill({ status: 403, json: { error: 'sign_in_again' } })
+  })
+
+  await page.getByRole('button', { name: 'Delete account' }).click()
+  const dialog = page.getByRole('alertdialog', { name: 'Delete your account?' })
+  await dialog.getByRole('button', { name: 'Delete' }).click()
+  await expect(dialog).toContainText(
+    `To delete your account, sign in again. We'll send a code to ${email}.`
+  )
+  const send = dialog.getByRole('button', { name: 'Send code' })
+  await expect(send).toBeEnabled()
+  await send.click()
+  await expect(dialog).toContainText(`Enter the code we sent to ${email} to delete your account.`)
+  let code = signInCode
+  await expect(async () => {
+    code = await codeFor(page, email)
+    expect(code).not.toBe(signInCode)
+  }).toPass({ timeout: 15_000 })
+  await expect(dialog.getByLabel('Code')).toBeFocused()
+  for (const name of ['Cancel', 'Delete']) {
+    await expectTappable(dialog.getByRole('button', { name }))
+  }
+  await page.screenshot({ path: testInfo.outputPath('delete-code.png') })
+
+  await dialog.getByLabel('Code').fill(code)
+  await dialog.getByRole('button', { name: 'Delete' }).click()
+  await expectSignedOutWithNothingHere(page)
+  await expect(page).toHaveURL(/\/profile\/$/)
   expect(await page.evaluate(async () => (await fetch('/api/library/')).status)).toBe(401)
 })
 

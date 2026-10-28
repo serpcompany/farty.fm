@@ -18,6 +18,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import { setSharing, useSharing } from '@/lib/telemetry/sharing'
 import { useAccount } from './account-provider'
+import { DeleteAccount } from './delete-account'
 import { InstallGuideCard, useInstallGuide } from './install-button'
 import { useRecordings } from './recordings-provider'
 import { useToots } from './toots-provider'
@@ -203,11 +204,9 @@ function SharingSection() {
 }
 
 function AccountSection() {
-  const { account, openStep, retry, signOut, deleteAccount, setMarketingEmail, clearDevice } =
-    useAccount()
+  const { account, openStep, retry, signOut, setMarketingEmail, clearDevice } = useAccount()
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
-  const [confirmsDelete, setConfirmsDelete] = useState(false)
   const [notUploaded, setNotUploaded] = useState(false)
   const [confirmsClear, setConfirmsClear] = useState(false)
 
@@ -224,13 +223,12 @@ function AccountSection() {
     if (result === 'failed') setProblem("Couldn't sign out. Check your connection and try again.")
   }
 
-  const run = async (action: () => Promise<boolean>, failure: string) => {
+  const changeNews = async (on: boolean) => {
     setBusy(true)
     setProblem(null)
-    const done = await action()
+    const done = await setMarketingEmail(on)
     setBusy(false)
-    if (!done) setProblem(failure)
-    return done
+    if (!done) setProblem("Couldn't change Farty news. Try again.")
   }
 
   if (account.status === 'checking') {
@@ -330,9 +328,7 @@ function AccountSection() {
               id="farty-news"
               checked={account.marketingEmail}
               disabled={busy}
-              onCheckedChange={on =>
-                void run(() => setMarketingEmail(on), "Couldn't change Farty news. Try again.")
-              }
+              onCheckedChange={on => void changeNews(on)}
             />
           </label>
         </li>
@@ -348,14 +344,13 @@ function AccountSection() {
           </button>
         </li>
         <li>
-          <button
-            type="button"
+          <DeleteAccount
             className={`${row} text-destructive`}
             disabled={busy}
-            onClick={() => setConfirmsDelete(true)}
-          >
-            Delete account
-          </button>
+            onFailed={() =>
+              setProblem("Couldn't delete your account. Check your connection and try again.")
+            }
+          />
         </li>
       </ul>
       {problem && (
@@ -363,36 +358,6 @@ function AccountSection() {
           {problem}
         </p>
       )}
-      <AlertDialog open={confirmsDelete} onOpenChange={open => !busy && setConfirmsDelete(open)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete your account?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This deletes your email, Recordings and Toots from Farty, on every device. It can't be
-              undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="h-11 text-base" disabled={busy}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              className="h-11 text-base"
-              disabled={busy}
-              onClick={async () => {
-                const deleted = await run(
-                  deleteAccount,
-                  "Couldn't delete your account. Check your connection and try again."
-                )
-                if (!deleted) setConfirmsDelete(false)
-              }}
-            >
-              {busy ? <Spinner /> : 'Delete'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
       <AlertDialog open={notUploaded} onOpenChange={open => !busy && setNotUploaded(open)}>
         <AlertDialogContent>
           <AlertDialogHeader>

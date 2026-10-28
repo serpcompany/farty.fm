@@ -12,6 +12,7 @@ import {
 import * as api from '@/lib/account'
 import {
   type Account,
+  type AccountChange,
   clearStepDraft,
   readSession,
   readStepDraft,
@@ -34,7 +35,7 @@ type AccountContext = {
   skipStep(): void
   finishSignIn(account: Account): void
   signOut(anyway?: boolean): Promise<SignOut>
-  deleteAccount(): Promise<boolean>
+  deleteAccount(): Promise<AccountChange>
   setMarketingEmail(on: boolean): Promise<boolean>
   clearDevice(): Promise<void>
 }
@@ -136,12 +137,12 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [accountId]
   )
 
-  const deleteAccount = useCallback(async () => {
-    if (!accountId) return false
+  const deleteAccount = useCallback(async (): Promise<AccountChange> => {
+    if (!accountId) return 'failed'
     const result = await api.deleteAccount(accountId)
     if (result === 'otherAccount') reopenAsSignedIn()
     else if (result === 'done') await leave()
-    return result !== 'failed'
+    return result
   }, [accountId])
 
   const setMarketingEmail = useCallback(

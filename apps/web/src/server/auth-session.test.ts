@@ -44,7 +44,8 @@ describe('local sign-in', () => {
     expect(await readSessionUser(request, local())).toEqual({
       id: user.id,
       email: 'fan@example.com',
-      marketingEmail: true
+      marketingEmail: true,
+      signedInAt: expect.any(Date)
     })
     expect(await rows('SELECT marketing_email FROM user')).toEqual([{ marketing_email: 1 }])
 
@@ -108,6 +109,30 @@ describe('local sign-in', () => {
     expect(session.status).toBe(200)
     const set = session.headers.getSetCookie().find(line => line.includes('session_token'))
     expect(set).toMatch(/Max-Age=604800/)
+  })
+
+  it('reads the time of the sign-in itself, which renewing the session never moves', async () => {
+    const before = Date.now()
+    const cookie = await signIn('fan@example.com')
+    const request = new Request(LOCAL, { headers: { cookie } })
+    const signedInAt = async () => (await readSessionUser(request, local()))?.signedInAt.getTime()
+    const signedIn = (await signedInAt()) ?? 0
+    expect(signedIn).toBeGreaterThanOrEqual(before)
+    expect(signedIn).toBeLessThanOrEqual(Date.now())
+
+    const twoDays = 2 * 86_400_000
+    await db()
+      .prepare('UPDATE session SET created_at = created_at - ?1, expires_at = expires_at - ?1')
+      .bind(twoDays)
+      .run()
+    const reading = Date.now()
+
+    expect(await signedInAt()).toBe(signedIn - twoDays)
+    const [row] = await rows<{ created_at: number; expires_at: number }>(
+      'SELECT created_at, expires_at FROM session'
+    )
+    expect(row.created_at).toBe(signedIn - twoDays)
+    expect(row.expires_at).toBeGreaterThanOrEqual(reading + SESSION_EXPIRES_SECONDS * 1000)
   })
 
   it('keeps no IP address or user agent with a session', async () => {
