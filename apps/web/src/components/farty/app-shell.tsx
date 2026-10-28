@@ -96,7 +96,11 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
               Close Farty in your other tabs to carry on.
             </output>
           )}
-          {libraryProblem ? <LibraryProblemScreen problem={libraryProblem} /> : children}
+          {libraryProblem && tab !== null ? (
+            <LibraryProblemScreen problem={libraryProblem} />
+          ) : (
+            children
+          )}
         </main>
         <nav
           aria-label="Tabs"

@@ -60,6 +60,9 @@ Each replaces the tab's screen with a message and a Reload button.
 - The browser won't let Farty read its storage: "Farty can’t open your library"
   (`src/components/farty/recordings-provider.interaction.test.tsx`, "says the library can’t be
   opened when the browser won’t let Farty read it").
+- The privacy, support and 404 pages need no library, so they still show
+  (`src/components/farty/app-shell.interaction.test.tsx`, "still shows the %s page, which needs no
+  library").
 - A connection to the database that the browser drops mid-visit is opened again, and the save that
   met it still works (`e2e/library-connection.spec.ts`, "saving a Recording still works (lost
   without a word)"; "saving a Recording still works (closed by the browser)";
