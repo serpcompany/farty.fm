@@ -100,14 +100,6 @@
       "apps/web/src/app/api/library.workers.test.ts": {
         "lines": 707,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "apps/web/src/server/auth-config.test.ts": {
-        "lines": 932,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "apps/web/src/server/auth-config.ts": {
-        "lines": 635,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       }
     },
     "allowedPauses": {},
@@ -193,14 +185,6 @@
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       },
       "apps\\web\\src\\db\\schema.ts and apps\\web\\src\\db\\schema.ts": {
-        "blocks": 1,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "apps\\web\\src\\server\\auth-config.test.ts and apps\\web\\src\\server\\auth-config.test.ts": {
-        "blocks": 1,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "apps\\web\\src\\server\\auth-config.ts and apps\\web\\src\\server\\stripe.test.ts": {
         "blocks": 1,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
       },
@@ -415,18 +399,6 @@
           "findings": 32,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/server/auth-config.test.ts": {
-          "findings": 24,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/server/auth-config.ts": {
-          "findings": 59,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/server/auth.ts": {
-          "findings": 4,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/server/dev-mailbox.ts": {
           "findings": 6,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -463,10 +435,6 @@
           "findings": 10,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/server/session-user.ts": {
-          "findings": 2,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/server/stripe.test.ts": {
           "findings": 2,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -491,10 +459,6 @@
           "findings": 13,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
         },
-        "apps/web/src/test-support/local-bindings.ts": {
-          "findings": 4,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/test-support/workers-entry.ts": {
           "findings": 2,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
@@ -510,14 +474,6 @@
       },
       "docs": {},
       "deadcode": {
-        "apps/web/src/server/auth-config.ts": {
-          "findings": 12,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
-        "apps/web/src/server/auth.ts": {
-          "findings": 1,
-          "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-        },
         "apps/web/src/server/email.ts": {
           "findings": 4,
           "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
