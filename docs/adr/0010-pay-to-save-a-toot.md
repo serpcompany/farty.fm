@@ -4,6 +4,8 @@ Farty's first paywall (#204). The owner decided it on 2026-10-25: anyone can mak
 
 **2026-10-28 (#237, ADR 0013):** there's no free guest Toot. Saving a Toot needs an account everywhere, Production's free saves included, since a payment belongs to an account: a guest's Save opens the account step, then Checkout where saving is paid, or saves straight away where it's free. The rest of this decision is unchanged.
 
+**2026-10-28 (#258):** saving is paid on Production too, in Stripe's live mode, now that the owner has set its live keys (owner: "Yes, open the PR that makes saving cost $0.99 on Production."). No environment saves free. `savingIsPaid` in `pricing.ts` is still the one switch, and the free path stays, so Production could save free again with a one-line change. Google Play's billing is still #114's, before the Play app ships.
+
 ## What Save means
 
 - **Preview is free.** Anyone, guest or signed in, can open an Unlocked Song in Song Creator, have the Toot made and play it, its notes and its Recordings, as often as they like.
@@ -26,9 +28,9 @@ Stripe's standard US card rate is 2.9% + 30Â¢, so a $0.99 payment pays about 33Â
 
 | Environment | Saving | Stripe |
 | --- | --- | --- |
-| Local run | As the build: paid, or free for a Production build | Test mode, or a stand-in for Checkout at `/dev/checkout/` when there's no Stripe key, for the e2e journeys and tap-throughs. It answers 404 anywhere else. |
+| Local run | Paid, for any build | Test mode, or a stand-in for Checkout at `/dev/checkout/` when there's no Stripe key, for the e2e journeys and tap-throughs. It answers 404 anywhere else. |
 | Staging | Paid | Test mode. Until its keys are set, Save says payments aren't available. |
-| Production | Free, signed in (#237) | Live mode, once the owner sets Stripe's live keys on Production's Worker; then `savingIsPaid` in `pricing.ts` changes, in its own PR. |
+| Production | Paid (#258) | Live mode, with the live keys the owner set on Production's Worker. Without them, Save says payments aren't available. |
 
 Production takes only live keys (`sk_live_`, `rk_live_`) and live events; Staging and local runs only test keys and test events (#213). A test key can't take real payments, and a live key can't be used outside Production.
 
@@ -44,6 +46,6 @@ Production takes only live keys (`sk_live_`, `rk_live_`) and live events; Stagin
 
 ## Consequences
 
-- Saving needs an account and Stripe. On Staging, Save fails until `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are set on its Worker. The steps are in `docs/agents/web.md`.
+- Saving needs an account and Stripe. On Staging and Production, Save fails until `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` of the environment's mode are set on its Worker. The steps are in `docs/agents/web.md`.
 - Deleting an account deletes its payment rows with it. Stripe keeps its own record of every payment.
 - Refunds are made in Stripe's dashboard, by hand. A refund doesn't remove the Toot.

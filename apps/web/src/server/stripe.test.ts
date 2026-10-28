@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { TOOT_PRICE } from '@/lib/pricing'
+import { savingIsPaid, TOOT_PRICE } from '@/lib/pricing'
 
 import {
   type CheckoutSession,
@@ -38,46 +38,72 @@ describe('paymentsConfig', () => {
     expect(paymentsConfig({}, null)).toEqual({ kind: 'off' })
   })
 
-  it('leaves saving free on Production', () => {
-    expect(paymentsConfig({ SITE_ENV: 'production' }, 'farty.fm')).toEqual({ kind: 'free' })
-    expect(
-      paymentsConfig({ SITE_ENV: 'production', STRIPE_SECRET_KEY: TEST_KEY }, 'farty.fm')
-    ).toEqual({ kind: 'free' })
-    expect(
-      paymentsConfig({ SITE_ENV: 'production', STRIPE_SECRET_KEY: LIVE_KEY }, 'farty.fm')
-    ).toEqual({ kind: 'free' })
-  })
-
-  it('leaves saving free on a local run of a Production build, as its Save does', () => {
-    vi.stubEnv('PEDOS_ENVIRONMENT', 'production')
-    expect(paymentsConfig({}, 'localhost:3071')).toEqual({ kind: 'free' })
-    vi.stubEnv('PEDOS_ENVIRONMENT', 'staging')
-    expect(paymentsConfig({}, 'localhost:3071')).toEqual({ kind: 'dev' })
-  })
-
-  describe('once saving is paid on Production', () => {
-    const paid = () => true
+  describe('on Production, where saving is paid (#258)', () => {
     const production = (key: unknown) =>
-      paymentsConfig({ SITE_ENV: 'production', STRIPE_SECRET_KEY: key }, 'farty.fm', paid)
+      paymentsConfig({ SITE_ENV: 'production', STRIPE_SECRET_KEY: key }, 'farty.fm')
 
     it('takes only a live key, in live mode', () => {
+      expect(savingIsPaid('production')).toBe(true)
       expect(production(LIVE_KEY)).toEqual({
         kind: 'stripe',
         secretKey: LIVE_KEY,
         webhookSecret: null,
         livemode: true
       })
-      expect(production('rk_live_madeUpForTheTests')).toMatchObject({ livemode: true })
+      expect(production('rk_live_madeUpForTheTests')).toMatchObject({
+        kind: 'stripe',
+        livemode: true
+      })
+      expect(
+        paymentsConfig(
+          {
+            SITE_ENV: 'production',
+            STRIPE_SECRET_KEY: LIVE_KEY,
+            STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET
+          },
+          'farty.fm'
+        )
+      ).toMatchObject({ kind: 'stripe', webhookSecret: WEBHOOK_SECRET, livemode: true })
     })
 
     it('turns payments off with a test key or none, and never stands in for Checkout', () => {
       for (const key of [TEST_KEY, 'rk_test_madeUp', undefined, '']) {
         expect(production(key)).toEqual({ kind: 'off' })
       }
-      expect(paymentsConfig({ SITE_ENV: 'production' }, 'localhost:8787', paid)).toEqual({
+      expect(paymentsConfig({ SITE_ENV: 'production' }, 'localhost:8787')).toEqual({
         kind: 'off'
       })
     })
+  })
+
+  it('pays on a local run of a Production build, as its Save does, never with a live key', () => {
+    vi.stubEnv('PEDOS_ENVIRONMENT', 'production')
+    expect(paymentsConfig({}, 'localhost:4158')).toEqual({ kind: 'dev' })
+    expect(paymentsConfig({ STRIPE_SECRET_KEY: TEST_KEY }, 'localhost:4158')).toEqual({
+      kind: 'stripe',
+      secretKey: TEST_KEY,
+      webhookSecret: null,
+      livemode: false
+    })
+    expect(paymentsConfig({ STRIPE_SECRET_KEY: LIVE_KEY }, 'localhost:4158')).toEqual({
+      kind: 'off'
+    })
+    vi.stubEnv('PEDOS_ENVIRONMENT', 'staging')
+    expect(paymentsConfig({}, 'localhost:3071')).toEqual({ kind: 'dev' })
+  })
+
+  it('saves free where `savingIsPaid` says so, so free saving comes back from pricing.ts alone', () => {
+    const free = vi.fn(() => false)
+    for (const key of [undefined, LIVE_KEY, TEST_KEY]) {
+      expect(
+        paymentsConfig({ SITE_ENV: 'production', STRIPE_SECRET_KEY: key }, 'farty.fm', free)
+      ).toEqual({ kind: 'free' })
+    }
+    expect(free).toHaveBeenLastCalledWith('production')
+    // A local run asks about the environment its build is for, as its Save does.
+    vi.stubEnv('PEDOS_ENVIRONMENT', 'production')
+    expect(paymentsConfig({}, 'localhost:3071', free)).toEqual({ kind: 'free' })
+    expect(free).toHaveBeenLastCalledWith('production')
   })
 
   it('uses Stripe in test mode on Staging, with the webhook secret once it is set', () => {
