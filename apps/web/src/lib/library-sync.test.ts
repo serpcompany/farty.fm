@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto'
 import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { LibraryChange } from './library-sync'
+import type { OutboxOp } from './outbox'
 import type { Recording } from './recordings'
 import { type FakeAccount, fakeAccount } from './test-library'
 import { blockedStorage, memoryStorage } from './test-storage'
@@ -177,6 +178,107 @@ describe('the outbox', () => {
     for (const name of ['recordings', 'outbox', 'downloads', 'meta'] as const) {
       expect(await database.count(name)).toBe(0)
     }
+  })
+})
+
+/** Writes a version 3 `pedos` database, as a browser on a build from before #268 left it. */
+async function version3(fill: (store: (name: string) => IDBObjectStore) => void, keepOpen = false) {
+  return new Promise<IDBDatabase>((resolve, reject) => {
+    const open = indexedDB.open('pedos', 3)
+    open.onupgradeneeded = () => {
+      const database = open.result
+      for (const name of ['recordings', 'toots'])
+        database.createObjectStore(name, { keyPath: 'id' })
+      database.createObjectStore('outbox', { keyPath: 'key' })
+      for (const name of ['audio', 'tootAudio', 'downloads', 'meta'])
+        database.createObjectStore(name)
+      fill(name => (open.transaction as IDBTransaction).objectStore(name))
+    }
+    open.onsuccess = () => {
+      if (!keepOpen) open.result.close()
+      resolve(open.result)
+    }
+    open.onerror = () => reject(open.error)
+  })
+}
+
+// Version 4 (#268) changes no store: it shuts out code from before #268, which sends an outbox
+// op it doesn't know, such as `place`, as a delete.
+describe('version 4', () => {
+  it('keeps Recordings, Toots, their WAVs, the outbox and what waits to download', async () => {
+    const recording = theirs(1)
+    const made = toot()
+    const queued = {
+      key: `toots:${made.id}`,
+      kind: 'toots',
+      id: made.id,
+      op: 'rename',
+      sent: false,
+      queuedAt: 1,
+      version: 'v'
+    }
+    await version3(tx => {
+      tx('recordings').put(recording)
+      tx('audio').put(wav(1), recording.id)
+      tx('toots').put(made)
+      tx('tootAudio').put(wav(2), made.id)
+      tx('outbox').put(queued)
+      tx('downloads').put({ kind: 'recordings', id: 'gone' }, 'recordings:gone')
+      tx('meta').put(123, 'cursor')
+    })
+    const database = await page.store.db()
+    expect(database.version).toBe(4)
+    expect(await page.store.loadRecordings()).toEqual([recording])
+    expect(bytes(await page.store.loadAudio(recording.id))).toEqual(bytes(wav(1)))
+    expect(await page.toots.loadToots()).toEqual([made])
+    expect(await database.getAll('outbox')).toEqual([queued])
+    expect(await database.count('downloads')).toBe(1)
+  })
+
+  it('reads the whole library once: an older tab skipped placements and moved the cursor past them', async () => {
+    claimedBy('user-a')
+    const recording = theirs(1)
+    account.add('recordings', { ...recording, placedPitch: 48 }, wav(1))
+    await version3(tx => {
+      tx('recordings').put(recording)
+      tx('audio').put(wav(1), recording.id)
+      // Past everything the account has: an older tab read the Placed Pitch and dropped it.
+      tx('meta').put(10 ** 13, 'cursor')
+    })
+    expect(await (await page.store.db()).get('meta', 'cursor')).toBe(0)
+    expect(await page.sync.leftByAnAccount()).toBe(true)
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0].placedPitch).toBe(48)
+    expect(account.sent.filter(s => s.method === 'GET').map(s => s.path)).toEqual([
+      '/api/library/?since=0'
+    ])
+    // Once: the next open reads since the new cursor.
+    page = await openPage()
+    await page.sync.syncOnce('user-a')
+    expect(account.sent.filter(s => s.method === 'GET').at(-1)?.path).not.toBe(
+      '/api/library/?since=0'
+    )
+  })
+
+  it("leaves a guest's library without a cursor", async () => {
+    await version3(store => store('recordings').put(theirs(1)))
+    expect(await page.sync.leftByAnAccount()).toBe(false)
+  })
+
+  it('closes a tab’s version 3 connection, which then can’t open the library again', async () => {
+    const recording = theirs(1)
+    const older = await version3(store => store('recordings').put(recording), true)
+    // What an older build's `blocking` does.
+    older.onversionchange = () => older.close()
+    expect((await page.store.db()).version).toBe(4)
+    expect(() => older.transaction('outbox')).toThrow()
+    const reopened = await new Promise<string>(resolve => {
+      const open = indexedDB.open('pedos', 3)
+      open.onsuccess = () => resolve('opened')
+      open.onerror = () => resolve(open.error?.name ?? '')
+    })
+    expect(reopened).toBe('VersionError')
+    expect(await page.store.loadRecordings()).toEqual([recording])
   })
 })
 
@@ -425,6 +527,24 @@ describe('uploading', () => {
     expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
     expect(await outbox()).toEqual([])
     expect((await page.store.loadRecordings()).map(r => r.id)).toEqual([refused.id])
+  })
+
+  // A later build's op, as `place` was to code from before #268, which sent it as a delete.
+  it('never sends an op it doesn’t know, and keeps it queued', async () => {
+    const recording = await recorded(1)
+    await page.sync.uploadBeforeSignOut('user-a')
+    await page.store.placeRecording(recording.id, 40)
+    const database = await page.store.db()
+    const [entry] = await database.getAll('outbox')
+    await database.put('outbox', { ...entry, op: 'later' as OutboxOp })
+    const toSend = await recorded(2)
+    const before = account.sent.length
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    expect(account.sent.slice(before).filter(s => s.path.includes(recording.id))).toEqual([])
+    expect(account.isDeleted('recordings', recording.id)).toBe(false)
+    expect(account.get('recordings', toSend.id)).toBeDefined()
+    expect(await outbox()).toEqual([expect.objectContaining({ id: recording.id, op: 'later' })])
+    expect((await page.store.loadRecordings()).map(r => r.id)).toContain(recording.id)
   })
 
   it('sends the delete of what reached the account, and nothing for what never did', async () => {

@@ -186,7 +186,8 @@ type Taken =
 
 /**
  * The oldest entry to send, marked sent in the same transaction that reads what it sends. A
- * Recording waits for its analysis. Null when nothing is left but `skip`.
+ * Recording waits for its analysis, and an op this code doesn't know is never sent. Null when
+ * nothing is left but those and `skip`.
  */
 function takeNext(skip: Set<string>): Promise<Taken | null> {
   return withDb(database => takeNextIn(database, skip))
@@ -238,8 +239,12 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
       await Promise.all([outbox.put(entry), tx.done])
       return { entry, op: 'place', placedPitch: recording.placedPitch ?? null }
     }
-    await Promise.all([outbox.put(entry), tx.done])
-    return { entry, op: 'delete' }
+    if (queued.op === 'delete') {
+      await Promise.all([outbox.put(entry), tx.done])
+      return { entry, op: 'delete' }
+    }
+    // An op this code doesn't know, from a later build: it stays queued for that build, and
+    // nothing is sent for it. Before #268 every other op went out as a delete.
   }
   await tx.done
   return null
