@@ -13,6 +13,8 @@ Agents run every `gh` command, and every `git` command that reaches GitHub, as s
 
 Use your own port so parallel agents don't collide. The examples use 4109.
 
+On Windows, run every step from the Workers build on in Linux: `bash scripts/linux.sh bash -c '<the steps>'`, since a Worker built on Windows answers 500 ([Tapping through](../../../docs/agents/web.md#tapping-through)).
+
 - **Inner loop:** `pnpm dev` (http://localhost:3000, no gate). `pnpm test:e2e` starts its own `next dev` on `E2E_PORT` (default 3100).
 - **Tap-through, on the local Workers build behind the Staging gate:**
   1. `cp .dev.vars.example .dev.vars` (git-ignored; it holds Staging's public password, `stagingpassword`).

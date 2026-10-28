@@ -18,19 +18,20 @@
     "names": {
       ".dev.vars.example": "hash-lines",
       "cf-typegen.env": "hash-lines",
-      "_headers": "hash-lines"
+      "_headers": "hash-lines",
+      "linux.Dockerfile": "dockerfile"
     }
   },
   "rules": {
     "comments": "docs/agents/code.md, The rules",
     "docs": "docs/agents/code.md, The rules",
     "sizes": "docs/agents/code.md, The rules",
-    "layers": "docs/agents/code.md, The rules",
+    "layers": "ARCHITECTURE.md, Layers",
     "waits": "docs/agents/code.md, The rules",
     "secrets": "docs/agents/code.md, The rules",
     "duplicates": "docs/agents/code.md, The rules",
     "deadcode": "docs/agents/code.md, The rules",
-    "dependencies": "docs/agents/code.md, The rules",
+    "dependencies": "ARCHITECTURE.md, Layers",
     "linters": "docs/agents/code.md, The checks"
   },
   "dependencies": {
@@ -73,14 +74,6 @@
   },
   "exceptions": {
     "knownLongDocs": {
-      "apps/web/AGENTS.md": {
-        "lines": 124,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
-      "docs/agents/web.md": {
-        "lines": 341,
-        "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"
-      },
       "docs/design/screens.md": {
         "lines": 315,
         "reason": "predates the check: recorded by serp-verify baseline on 2026-10-27"

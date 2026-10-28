@@ -43,7 +43,7 @@ Each step that runs one of the web app's scripts names `working-directory: apps/
 
 ## Release Please and the auth secret
 
-- **`release-please.yml`** keeps the release PR open on `main` ([Promotion and releases](web.md#promotion-and-releases)).
+- **`release-please.yml`** keeps the release PR open on `main` ([Promotion and releases](releases.md)).
 - **`web-auth-secret.yml`** sets `BETTER_AUTH_SECRET` on one environment's Worker, only when it has none, since a new secret signs everyone out. `openssl` writes the value straight into `wrangler secret put`, and nothing prints it. Run it from the environment's own branch, which its deployment rules require: `gh workflow run web-auth-secret.yml --ref staging -f environment=staging`, or `--ref main` and `production`.
 
 ## Dependencies

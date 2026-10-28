@@ -22,22 +22,11 @@ Run from `apps/web/`:
 | `pnpm build:staging`, `pnpm build:production` | The Workers build for one environment, into `.open-next/` |
 | `pnpm deploy:staging`, `pnpm deploy:production` | Build and deploy that environment's Worker, for a person in an emergency. Agents never run them. CI deploys Staging on every push to `staging`, and Production on every push to `main`, once the checks pass (`web.yml`). |
 | `scripts/smoke.sh <url> <staging\|production>` | The post-deploy smoke test, also run against a local preview |
+| `bash scripts/linux.sh <command>` | Runs a command in Linux, in Docker. On Windows the Workers build, preview and journeys need it ([detail](../../docs/agents/web.md#tapping-through)) |
 
 ## Layout
 
-- `src/lib/analysis/`: Recording Analysis, matched to the reference through `fixtures/golden/`. Plain TypeScript with no DOM or Web Audio, so it runs in the Web Worker (`worker.ts`) and in Vitest alike.
-- `src/lib/engine/`: Auto-map and the fart-only renderer, matched to the reference. Plain TypeScript, so it renders in its Web Worker (`worker.ts`) and in Vitest alike. `pnpm exec tsx scripts/render-songs.ts` renders every Song for `tools/melody-lab/evaluate_renders.py`.
-- `src/lib/audio/`: the microphone (an AudioWorklet, with the browser's voice processing off) and playback.
-- `src/lib/recording-store.ts`: the `pedos` IndexedDB database, with Recordings (`recording-store.ts`) and Toots (`toot-store.ts`), this browser's working copy. A guest keeps their Recordings, and their Toots last only the visit (owner, 2026-10-25, #203): each open reads the session, and a guest's new visit clears the last one's Toots (`visit.ts`).
-- `src/lib/library-sync.ts`, `outbox.ts`, `library-api.ts`: a signed-in browser's sync with the account (#156). Each save, rename and delete queues in the outbox with the change itself; the sync uploads it and reads the account's changes since its last read. `pedos.account` names the account the library is, and every library request names it (`x-pedos-library`), so a library never reads from, uploads to or deletes in another.
-- `src/lib/account.ts`, `src/components/pedos/account-provider.tsx`, `account-step.tsx`: the account from the browser (the sign-in API and `/api/account/`), and the account step after the first Result (#155).
-- `src/lib/toot.ts`, `toot-renderer.ts`: a Toot, a Song rendered with the user's Recordings in the render worker, as Song Creator makes it.
-- `src/lib/pricing.ts`, `toot-payment.ts`, `src/server/stripe.ts`, `toot-payments.ts`, `src/db/payments.ts`: paying $0.99 to save a Toot (ADR 0010, #204), through Stripe Checkout, or the dev checkout (`/dev/checkout/`) on a local run. [`docs/agents/web.md`](../../docs/agents/web.md#environments-and-deploys) has how it works and Stripe's setup.
-- `src/db/`: the D1 schema (Better Auth's tables, `recordings`, `toots` and `toot_payments`), `createDatabase()` over any D1 binding (`database.ts`, importable from tests) and `getDb()` for a request (`index.ts`, server-only), through Drizzle. Migrations are in `drizzle/`.
-- `src/app/api/`, `src/server/`: a signed-in user's library (Recordings, Toots and their WAVs in R2) and account. Every route outside `api/auth/`, `api/telemetry/` and `api/stripe/webhook/` is built with `userRoute` (`require-user.ts`): session, then `Origin` on writes, `private, no-store`. `every-route.workers.test.ts` fails a route that skips it.
-- `src/lib/telemetry/`, `src/app/api/telemetry/`: error reports (`reportError(code, error)`, a stable code and an allowlist, logged by the route), the app's only telemetry, off with Profile's switch or Global Privacy Control (#126). `/dev/telemetry/` sends a synthetic crash and handled error, except in Production.
-- `src/server/`: sign-in (#152), server-only behind `auth.ts`: Better Auth email codes (`auth-config.ts`), email and the dev mailbox (`email.ts`, `dev-mailbox.ts`, `/dev/mail/`). How it works and where it runs is in [`docs/agents/web.md`](../../docs/agents/web.md#environments-and-deploys).
-- `src/components/pedos/`: the screens, matching the iPhone app's. `src/components/ui/` stays stock shadcn.
+The web app's folders, how data moves through them and the layers it keeps are in [`ARCHITECTURE.md`](../../ARCHITECTURE.md).
 
 ## Where this differs from SERP's standards
 

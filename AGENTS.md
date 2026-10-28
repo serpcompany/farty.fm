@@ -29,8 +29,11 @@ A PR merges by an agent only when every file it changes is on that list. The own
 
 ## Codebase
 
-- [`apps/web/AGENTS.md`](apps/web/AGENTS.md): the web app's commands, layout and the evidence each change needs.
-- [`docs/agents/web.md`](docs/agents/web.md): environments, data, sign-in, payments, hosts, the Staging gate, promotion and releases, and the gotchas.
+- [`ARCHITECTURE.md`](ARCHITECTURE.md): the parts, how the web app stays matched to the reference, how data moves, the layout and the layers.
+- [`apps/web/AGENTS.md`](apps/web/AGENTS.md): the web app's commands and the evidence each change needs.
+- [`docs/agents/web.md`](docs/agents/web.md): environments, data, hosts, deploys, the smoke test, tapping through, and where the web app differs from SERP's standards.
+- [`docs/agents/accounts.md`](docs/agents/accounts.md), [`payments.md`](docs/agents/payments.md), [`staging-access.md`](docs/agents/staging-access.md) and [`releases.md`](docs/agents/releases.md): sign-in, paying to save a Toot, the Staging gate, and promotion, releases and who merges.
+- [`docs/agents/web-gotchas.md`](docs/agents/web-gotchas.md): what building the web app taught.
 - [`docs/agents/ci.md`](docs/agents/ci.md): every workflow, the checks a merge waits for, and the pinned actions.
 - [`docs/agents/google-play.md`](docs/agents/google-play.md): the Play app, a Trusted Web Activity.
 - [`tools/melody-lab/README.md`](tools/melody-lab/README.md): the reference engine the web app is matched to. Its answers are the [golden data](fixtures/golden/README.md).

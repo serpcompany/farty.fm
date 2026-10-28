@@ -8,11 +8,11 @@ The rules every change follows, the checks that hold them, and when a change is 
 - **A code file has at most 500 lines.** Split one that outgrows it by responsibility, into files named for what each does, in the change that grew it.
 - **No duplicate code.** No block of 50 tokens over 5 lines appears twice: move what the copies share into one function, type or test helper.
 - **Nothing unused stays.** No unused file, export or dependency, and nothing exported that only its own file uses.
-- **Imports point the way the layers allow.** `apps/web/biome.json` holds the web app's layers: `src/lib` never imports components or routes, and components never import routes.
+- **Imports point the way the layers allow,** as [`ARCHITECTURE.md`](../../ARCHITECTURE.md#layers) lists them with what enforces each.
 - **No secret is committed.** A secret lives where it is read (a Worker secret, a GitHub secret), never in the repository ([Secret Authority](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/agent-operations/secret-authority.md)).
 - **A fix comes with its test,** the one that fails without it. A test waits for a condition, never for a fixed time, and is never retried.
 - **Docs stay true.** A behavior change updates its doc in the same change. Every doc is reachable from `AGENTS.md` and keeps to its size budget.
-- **It works on every machine.** Scripts and commands run on macOS, Linux and Windows. On Windows that means Git Bash, which the hooks need too.
+- **It works on every machine.** Scripts and commands run on macOS, Linux and Windows. On Windows that means Git Bash, which the hooks need too, and the web app's Workers build, preview and journeys run in Docker through `apps/web/scripts/linux.sh` ([Tapping through](web.md#tapping-through)).
 
 ## The checks
 
