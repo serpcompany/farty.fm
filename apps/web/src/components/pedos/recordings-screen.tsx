@@ -1,6 +1,6 @@
 'use client'
 
-import { AudioLines, Play, Scissors, Square, Trash2 } from 'lucide-react'
+import { AudioLines, ChevronRight, Ear, Scissors, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
   AlertDialog,
@@ -17,32 +17,37 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { Spinner } from '@/components/ui/spinner'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
-import { loadAudio } from '@/lib/recording-store'
 import {
   firstFartUsed,
+  isNoiseLike,
+  placedPitch,
   type Recording,
   recordingName,
-  recordingPitch,
-  replaySegment
+  recordingPitch
 } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
-import { decodeWav } from '@/lib/wav'
-import { waveformLevels } from '@/lib/waveform'
 import { usePedos } from './pedos-provider'
+import { PlaceByEar } from './place-by-ear'
+import { PlayCircle, useReplayLevels } from './recording-replay'
 import { Waveform } from './waveform'
 
 /**
  * Every Recording, newest first, with its note and waveform, and how many notes you've
- * collected. Tap a row to play it. Matches the iPhone app's `RecordingsTab`.
+ * collected. Tap a row to play it. Matches the iPhone app's `RecordingsTab`, plus placing a
+ * Noise-like Recording on a note by ear (ADR 0015), which the web app alone has.
  */
 export function RecordingsScreen() {
   const pedos = usePedos()
   const [deleting, setDeleting] = useState<Recording | null>(null)
+  const [placing, setPlacing] = useState<string | null>(null)
 
-  // The page comes back on the Record tab, so the confirmation doesn't stay open.
+  // The page comes back on the Record tab, so the confirmation and the picker don't stay open.
   useEffect(() => {
     const visibilityChanged = () => {
-      if (document.visibilityState === 'hidden') setDeleting(null)
+      if (document.visibilityState === 'hidden') {
+        setDeleting(null)
+        setPlacing(null)
+      }
     }
     document.addEventListener('visibilitychange', visibilityChanged)
     return () => document.removeEventListener('visibilitychange', visibilityChanged)
@@ -92,12 +97,15 @@ export function RecordingsScreen() {
               <RecordingRow
                 key={recording.id}
                 recording={recording}
+                onPlace={() => setPlacing(recording.id)}
                 onDelete={() => setDeleting(recording)}
               />
             ))}
           </ul>
         </section>
       )}
+
+      <PlaceByEar recordingId={placing} onClose={() => setPlacing(null)} />
 
       <AlertDialog open={deleting !== null} onOpenChange={open => !open && setDeleting(null)}>
         <AlertDialogContent>
@@ -134,11 +142,23 @@ function counted(number: number, noun: string): string {
  * `RecordingsRow`, plus the length, which the iPhone only reads out: it is what a locked Song's
  * "Needs a fart near F3 (3.0 s)" is measured against (#227).
  */
-function RecordingRow({ recording, onDelete }: { recording: Recording; onDelete: () => void }) {
+function RecordingRow({
+  recording,
+  onPlace,
+  onDelete
+}: {
+  recording: Recording
+  /** Opens the place-by-ear picker, for a Noise-like Recording. */
+  onPlace: () => void
+  onDelete: () => void
+}) {
   const pedos = usePedos()
   const isPlaying = pedos.nowPlaying === recording.id
   const name = recordingName(recording)
   const levels = useReplayLevels(recording)
+  const pitch = recordingPitch(recording)
+  const placed = placedPitch(recording)
+  const noiseLike = isNoiseLike(recording)
 
   return (
     <li
@@ -146,36 +166,69 @@ function RecordingRow({ recording, onDelete }: { recording: Recording; onDelete:
       data-testid="recording-row"
     >
       <div className="flex items-center gap-1">
-        <button
-          type="button"
-          className="flex min-w-0 flex-1 items-center gap-3.5 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-          aria-label={[name, ...describe(recording)].join(', ')}
-          aria-pressed={isPlaying}
-          onClick={() => pedos.togglePlayback(recording)}
-        >
-          <PlayCircle isPlaying={isPlaying} />
-          <span className="flex min-w-0 flex-1 flex-col gap-2">
-            <span className="flex items-center justify-between gap-2">
-              <span className="font-semibold">{name}</span>
-              <Note recording={recording} />
-            </span>
-            <span className="flex items-center gap-2">
-              <Waveform levels={levels} isPlaying={isPlaying} className="h-[30px] min-w-0 flex-1" />
+        {/* A Noise-like Recording's note is a button of its own, over the row's top right. */}
+        <div className="relative min-w-0 flex-1">
+          <button
+            type="button"
+            className="flex w-full items-center gap-3.5 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            aria-label={[name, ...describe(recording)].join(', ')}
+            aria-pressed={isPlaying}
+            onClick={() => pedos.togglePlayback(recording)}
+          >
+            <PlayCircle isPlaying={isPlaying} />
+            <span className="flex min-w-0 flex-1 flex-col gap-2">
               <span
-                className="shrink-0 text-sm text-muted-foreground tabular-nums"
-                data-testid="recording-length"
+                className={cn(
+                  'flex h-8 items-center justify-between gap-2',
+                  noiseLike && (placed === null ? 'pr-28' : 'pr-20')
+                )}
               >
-                {formattedFartLength(recording)}
+                <span className="truncate font-semibold">{name}</span>
+                {pitch !== null && (
+                  <span
+                    className="rounded-full bg-muted px-3 py-1 font-semibold tabular-nums"
+                    data-testid="recording-note"
+                  >
+                    {noteName(pitch)}
+                  </span>
+                )}
               </span>
+              <span className="flex items-center gap-2">
+                <Waveform
+                  levels={levels}
+                  isPlaying={isPlaying}
+                  className="h-[30px] min-w-0 flex-1"
+                />
+                <span
+                  className="shrink-0 text-sm text-muted-foreground tabular-nums"
+                  data-testid="recording-length"
+                >
+                  {formattedFartLength(recording)}
+                </span>
+              </span>
+              {placed !== null && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Ear className="size-3.5" aria-hidden />
+                  Placed by ear
+                </span>
+              )}
+              {firstFartUsed(recording) && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Scissors className="size-3.5" aria-hidden />
+                  First fart used
+                </span>
+              )}
             </span>
-            {firstFartUsed(recording) && (
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Scissors className="size-3.5" aria-hidden />
-                First fart used
-              </span>
-            )}
-          </span>
-        </button>
+          </button>
+          {noiseLike && (
+            <PlaceButton
+              name={name}
+              placed={placed}
+              onClick={onPlace}
+              className="absolute top-0 right-0"
+            />
+          )}
+        </div>
         <Button variant="ghost" size="icon" aria-label={`Delete ${name}`} onClick={onDelete}>
           <Trash2 />
         </Button>
@@ -185,40 +238,50 @@ function RecordingRow({ recording, onDelete }: { recording: Recording; onDelete:
   )
 }
 
-/** The row's play button: a tinted circle, filled while playing. */
-function PlayCircle({ isPlaying }: { isPlaying: boolean }) {
-  const Icon = isPlaying ? Square : Play
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        'flex size-11 shrink-0 items-center justify-center rounded-full',
-        isPlaying ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'
-      )}
-    >
-      <Icon className="size-4 fill-current" />
-    </span>
-  )
-}
-
-/** The note in a pill, or "noise-like". */
-function Note({ recording }: { recording: Recording }) {
-  if (recording.analysis.state !== 'analyzed') return null
-  const pitch = recordingPitch(recording)
-  if (pitch === null) {
+/**
+ * A Noise-like Recording's note, which opens the place-by-ear picker: "noise-like ›" until it's
+ * placed, then the note it's placed on in a dashed pill (ADR 0015).
+ */
+function PlaceButton({
+  name,
+  placed,
+  onClick,
+  className
+}: {
+  name: string
+  placed: number | null
+  onClick: () => void
+  className?: string
+}) {
+  if (placed === null) {
     return (
-      <span className="text-sm text-muted-foreground" data-testid="recording-note">
+      <Button
+        variant="outline"
+        aria-haspopup="dialog"
+        aria-label={`${name} is noise-like. Place it on a note`}
+        onClick={onClick}
+        className={cn('gap-1 rounded-full pr-2 pl-3 font-normal text-muted-foreground', className)}
+        data-testid="recording-note"
+      >
         noise-like
-      </span>
+        <ChevronRight />
+      </Button>
     )
   }
   return (
-    <span
-      className="rounded-full bg-muted px-3 py-1 font-semibold tabular-nums"
+    <Button
+      variant="ghost"
+      aria-haspopup="dialog"
+      aria-label={`${noteName(placed)}, placed by ear. Move it or take it off`}
+      onClick={onClick}
+      className={cn(
+        'rounded-full border-[1.5px] border-dashed border-foreground/45 px-3 text-base font-semibold tabular-nums',
+        className
+      )}
       data-testid="recording-note"
     >
-      {noteName(pitch)}
-    </span>
+      {noteName(placed)}
+    </Button>
   )
 }
 
@@ -253,7 +316,10 @@ function Status({ recording }: { recording: Recording }) {
   }
 }
 
-/** What the row's button says after the name: "1.1 s, B3, first fart used". */
+/**
+ * What the row's button says after the name: "1.1 s, B3, first fart used", or "0.9 s, C3, placed
+ * by ear".
+ */
 function describe(recording: Recording): string[] {
   const parts = [formattedFartLength(recording)]
   switch (recording.analysis.state) {
@@ -265,37 +331,12 @@ function describe(recording: Recording): string[] {
       break
     case 'analyzed': {
       const pitch = recordingPitch(recording)
-      parts.push(pitch === null ? 'noise-like' : noteName(pitch))
+      const placed = placedPitch(recording)
+      if (pitch !== null) parts.push(noteName(pitch))
+      else if (placed !== null) parts.push(noteName(placed), 'placed by ear')
+      else parts.push('noise-like')
       if (firstFartUsed(recording)) parts.push('first fart used')
     }
   }
   return parts
-}
-
-/** 48 loudness bars of what replay plays, drawn again when the analysis finds the fart. */
-function useReplayLevels(recording: Recording): number[] {
-  const [levels, setLevels] = useState<number[]>([])
-  const segment = replaySegment(recording)
-  const start = segment?.start
-  const end = segment?.end
-  const { id } = recording
-
-  useEffect(() => {
-    let current = true
-    loadAudio(id)
-      .then(wav => {
-        const { samples, sampleRate } = decodeWav(wav)
-        const from = start === undefined ? 0 : Math.max(0, Math.floor(start * sampleRate))
-        const to = end === undefined ? samples.length : Math.floor(end * sampleRate)
-        if (current) setLevels(waveformLevels(samples.subarray(from, to), 48))
-      })
-      .catch(() => {
-        if (current) setLevels(Array(48).fill(0.05))
-      })
-    return () => {
-      current = false
-    }
-  }, [id, start, end])
-
-  return levels
 }

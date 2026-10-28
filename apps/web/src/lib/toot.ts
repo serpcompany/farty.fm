@@ -1,6 +1,6 @@
 import type { Song, SongNote } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
-import { formattedLength, type Recording, recordingName, recordingPitch } from '@/lib/recordings'
+import { formattedLength, type Recording, recordingName, songPitch } from '@/lib/recordings'
 
 // A Toot: a Song played by the user's Recordings, kept with its own audio (see `CONTEXT.md`). A
 // port of the iPhone app's `Toot.swift` and the parts of `Arrangement.swift` a Toot shows.
@@ -92,7 +92,8 @@ export function noteSeconds(
 /**
  * What a selected note shows: "A3 · Recording 20 (G♯3) · 0.4 s", or "A3 · Recording deleted ·
  * 0.4 s" once its Recording is gone. As `Arrangement.caption`, without its shift: Songs play each
- * fart raw, at its own pitch (ADR 0012).
+ * fart raw, at its own pitch (ADR 0012). A Noise-like Recording placed by ear shows its Placed
+ * Pitch (ADR 0015), and an unplaced one no note.
  */
 export function noteCaption(
   song: Song,
@@ -103,7 +104,7 @@ export function noteCaption(
   const name = noteName(soundingPitch(arrangement, note.pitch))
   const length = formattedLength(noteSeconds(song, note).length)
   if (!recording) return `${name} · Recording deleted · ${length}`
-  const pitch = recordingPitch(recording)
+  const pitch = songPitch(recording)
   if (pitch === null) return `${name} · ${recordingName(recording)} · ${length}`
   return `${name} · ${recordingName(recording)} (${noteName(pitch)}) · ${length}`
 }

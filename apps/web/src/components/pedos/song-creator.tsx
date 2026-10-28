@@ -12,7 +12,7 @@ import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import { TOOT_PRICE_LABEL } from '@/lib/pricing'
 import * as store from '@/lib/recording-store'
-import { type Recording, recordingName, recordingPitch } from '@/lib/recordings'
+import { type Recording, recordingName, songPitch } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
 import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/toot'
@@ -531,7 +531,7 @@ function RecordingUsedRow({
   const isPlaying = pedos.nowPlaying === recording.id
   const levels = useWholeLevels(recording.id)
   const name = recordingName(recording)
-  const pitch = recordingPitch(recording)
+  const pitch = songPitch(recording)
   const length = formattedFartLength(recording)
 
   return (

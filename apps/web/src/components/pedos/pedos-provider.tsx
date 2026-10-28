@@ -36,8 +36,8 @@ import {
   heardSomething,
   maximumTakeSeconds,
   type Recording,
-  recordingPitch,
-  replaySegment
+  replaySegment,
+  songPitch
 } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
@@ -97,7 +97,10 @@ export type ProfileStats = {
 type Pedos = {
   recordings: Recording[] | null
   recording(id: string): Recording | undefined
-  /** The Recordings with a Recording Pitch. */
+  /**
+   * The Recordings Songs can use on a note: those with a Recording Pitch, and Noise-like ones
+   * placed by ear (ADR 0015).
+   */
   melodicRecordings: Recording[]
   /** The notes of every Melodic Recording, octave included (G3, G♯3 and G4 are three notes). */
   collectedNotes: Set<number>
@@ -124,6 +127,11 @@ type Pedos = {
   togglePlayback(target: 'draft' | Recording): void
   stopPlayback(): void
   deleteRecording(id: string): Promise<void>
+  /**
+   * Places a Noise-like Recording on a MIDI note by ear, or takes it off with null (ADR 0015).
+   * Every Song uses it there at once; it still plays raw, at its own pitch.
+   */
+  placeRecording(id: string, placedPitch: number | null): void
   /**
    * Adds WAV files as Recordings with these ids, in order, then analyzes each in turn, as a new
    * Recording is: the Fixture Library in an internal build.
@@ -298,11 +306,12 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         setRecordings(list => {
           if (!list) return list
           const kept = list.filter(r => !deleted.recordings.includes(r.id))
-          // A Recording not uploaded yet may come back with a new number.
+          // A Recording not uploaded yet may come back with a new number, and one placed in
+          // another browser with its Placed Pitch. Its analysis stays this browser's.
           const fresh = new Map(added.map(r => [r.id, r]))
           const merged = kept.map(r => {
-            const renumbered = fresh.get(r.id)
-            return renumbered ? { ...r, number: renumbered.number } : r
+            const changed = fresh.get(r.id)
+            return changed ? { ...r, number: changed.number, placedPitch: changed.placedPitch } : r
           })
           const ids = new Set(kept.map(r => r.id))
           return [...merged, ...added.filter(r => !ids.has(r.id))].sort(
@@ -475,6 +484,14 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     setRecordings(list => list?.filter(r => r.id !== id) ?? null)
   }, [])
 
+  // As `renameToot`: the list, and so every Song's coverage, changes at once.
+  const placeRecording = useCallback((id: string, placedPitch: number | null) => {
+    setRecordings(list => list?.map(r => (r.id === id ? { ...r, placedPitch } : r)) ?? null)
+    store
+      .placeRecording(id, placedPitch)
+      .catch(error => reportError('recording-place-failed', error))
+  }, [])
+
   const importRecordings = useCallback(
     async (files: { id: string; wav: ArrayBuffer }[]) => {
       const added: Recording[] = []
@@ -598,10 +615,11 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     setTootPlayFailed(current => (current === id ? null : current))
   }, [])
 
-  const melodicRecordings = (recordings ?? []).filter(r => recordingPitch(r) !== null)
+  // A Noise-like Recording placed by ear counts at its Placed Pitch (ADR 0015).
+  const melodicRecordings = (recordings ?? []).filter(r => songPitch(r) !== null)
   const collectedNotes = new Set(
     melodicRecordings.flatMap(r => {
-      const pitch = recordingPitch(r)
+      const pitch = songPitch(r)
       return pitch === null ? [] : [nearestNote(pitch)]
     })
   )
@@ -649,6 +667,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     togglePlayback,
     stopPlayback,
     deleteRecording,
+    placeRecording,
     importRecordings,
     toots,
     tootsFailed,
