@@ -23,8 +23,9 @@ MAX_TRACKS = 2
 # MuseScore score id -> why.
 MISBARRED_SCORES = {
     "6064902": 'Happy Birthday in 3/4 from "Hap-": bars start on "Hap-" and "to", not "birth-" and "you"',
-    # When the Saints keeps this hand-picked score until the owner decides: the one correctly
-    # barred score that passes the gates (6133057) plays "saints" short, then rests 4 beats.
+    # When the Saints keeps this hand-picked score anyway, by decision (#232, comment 6459788077):
+    # the one correctly barred score that passes the gates (6133057) plays "saints" short, then
+    # rests 4 beats. The importer never picks it, so re-importing saints would replace it.
     "2030696": 'When the Saints in 4/4 with "Oh when the" in its first bar: "saints" falls on beat 3',
     "5893953": 'God Rest Ye in 4/4 from "God": bars start on "God" and "-ry", not "rest" and "gen-"',
     "20295": 'The Star-Spangled Banner in 3/4 from "O-": bars start on "O-" and "you", not "say" and "see"',

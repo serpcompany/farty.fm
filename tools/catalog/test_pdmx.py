@@ -117,7 +117,7 @@ class Picking(unittest.TestCase):
 
     def test_no_catalog_song_has_a_misbarred_score(self):
         for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
-            if entry["id"] == "saints":  # its hand-picked score stays until the owner decides (#232)
+            if entry["id"] == "saints":  # keeps its hand-picked misbarred score by decision (#232, comment 6459788077)
                 continue
             with self.subTest(song=entry["id"]):
                 self.assertNotIn(entry["source"].get("musescore_score_id"), pdmx.MISBARRED_SCORES)
