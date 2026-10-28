@@ -13,7 +13,8 @@ import { PlaybackProvider, recordingSound, usePlayback } from './playback-provid
 import { RecordingsProvider, useRecordings } from './recordings-provider'
 
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
-vi.mock('@/lib/recording-store', () => ({
+vi.mock('@/lib/recording-store', async importOriginal => ({
+  savedByANewerFarty: (await importOriginal<typeof store>()).savedByANewerFarty,
   loadRecordings: vi.fn(),
   loadAudio: vi.fn(),
   saveAnalysis: vi.fn(),
@@ -75,8 +76,9 @@ function Probe() {
 
 const settle = () => act(() => new Promise(resolve => setTimeout(resolve, 0)))
 
-async function open(recordings: Recording[]) {
-  vi.mocked(store.loadRecordings).mockResolvedValue(recordings)
+async function open(loaded: Recording[] | DOMException) {
+  if (Array.isArray(loaded)) vi.mocked(store.loadRecordings).mockResolvedValue(loaded)
+  else vi.mocked(store.loadRecordings).mockRejectedValue(loaded)
   root = createRoot(document.createElement('div'))
   await act(async () =>
     root.render(
@@ -108,6 +110,23 @@ beforeEach(() => {
 afterEach(() => act(() => root.unmount()))
 
 describe('RecordingsProvider', () => {
+  it('says Farty was updated when a newer Farty saved the library, and reports it', async () => {
+    const newer = new DOMException(
+      'The requested version is less than the existing one',
+      'VersionError'
+    )
+    await open(newer)
+
+    expect(library.libraryProblem).toBe('newer')
+    expect(reportError).toHaveBeenCalledWith('library-open-failed', newer)
+  })
+
+  it('says the library can’t be opened when the browser won’t let Farty read it', async () => {
+    await open(new DOMException('Blocked', 'SecurityError'))
+
+    expect(library.libraryProblem).toBe('unreadable')
+  })
+
   it('loads the Recordings, and analyzes again one whose analysis was cut off', async () => {
     const loaded = [saved(1, analyzedAt(55)), saved(2)]
     await open(loaded)

@@ -337,3 +337,11 @@ async function fetchDownload(kind: Kind, id: string): Promise<Download> {
     return wav
   })
 }
+
+export function savedByANewerFarty(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as { name?: unknown }).name === 'VersionError'
+  )
+}

@@ -20,9 +20,11 @@ import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { AccountStep } from './account-step'
 import { appMain, Lander } from './lander'
+import { LibraryProblemScreen } from './library-problem-screen'
 import { useTrackPages } from './previous-page'
 import { RecordFlow } from './record-flow'
 import { useRecordFlow } from './record-flow-provider'
+import { useRecordings } from './recordings-provider'
 import { Welcome } from './welcome'
 import { useWelcome } from './welcome-provider'
 
@@ -76,6 +78,7 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
   const { showsWelcome, finishWelcome } = useWelcome()
   const { showsRecordFlow, flow, capture } = useRecordFlow()
   const { stepOpen } = useAccount()
+  const { libraryProblem } = useRecordings()
   const waitsForOtherTabs = useWaitsForOtherTabs()
   const pathname = usePathname()
   const tab = tabOf(pathname)
@@ -111,7 +114,7 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
               Close Farty in your other tabs to carry on.
             </output>
           )}
-          {children}
+          {libraryProblem ? <LibraryProblemScreen problem={libraryProblem} /> : children}
         </main>
         <nav
           aria-label="Tabs"

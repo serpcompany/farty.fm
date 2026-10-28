@@ -7,6 +7,7 @@ const ERROR_CODES = [
   'analysis-failed',
   'toots-load-failed',
   'library-reload-failed',
+  'library-open-failed',
   'toot-audio-missing',
   'toot-audio-read-failed',
   'toot-rename-failed',

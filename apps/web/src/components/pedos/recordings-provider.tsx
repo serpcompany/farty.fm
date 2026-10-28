@@ -32,8 +32,11 @@ import { usePlayback } from './playback-provider'
 
 type RecordingFields = Parameters<typeof store.saveRecording>[0]
 
+export type LibraryProblem = 'newer' | 'unreadable'
+
 type Recordings = {
   recordings: Recording[] | null
+  libraryProblem: LibraryProblem | null
   recording(id: string): Recording | undefined
   melodicRecordings: Recording[]
   collectedNotes: Set<number>
@@ -83,7 +86,8 @@ function useSongRows(recordings: readonly Recording[]): SongRow[] {
 function useLibraryRecordings(
   setRecordings: Dispatch<SetStateAction<Recording[] | null>>,
   replace: (updated: Recording) => void,
-  analyze: (id: string) => Promise<Recording | null>
+  analyze: (id: string) => Promise<Recording | null>,
+  setLibraryProblem: (problem: LibraryProblem) => void
 ): void {
   const { stopPlaying } = usePlayback()
 
@@ -97,7 +101,11 @@ function useLibraryRecordings(
         }
         void upgradeAnalyses(loaded, analyzeAudio, replace)
       })
-  }, [setRecordings, replace, analyze])
+      .catch(error => {
+        reportError('library-open-failed', error)
+        setLibraryProblem(store.savedByANewerFarty(error) ? 'newer' : 'unreadable')
+      })
+  }, [setRecordings, replace, analyze, setLibraryProblem])
 
   useEffect(
     () =>
@@ -123,6 +131,7 @@ function useLibraryRecordings(
 
 export function RecordingsProvider({ children }: { children: ReactNode }) {
   const [recordings, setRecordings] = useState<Recording[] | null>(null)
+  const [libraryProblem, setLibraryProblem] = useState<LibraryProblem | null>(null)
   const latest = useRef<Recording[] | null>(null)
   useEffect(() => {
     latest.current = recordings
@@ -155,7 +164,7 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
     [replace]
   )
 
-  useLibraryRecordings(setRecordings, replace, analyze)
+  useLibraryRecordings(setRecordings, replace, analyze, setLibraryProblem)
 
   const reanalyze = useCallback(
     (id: string) => {
@@ -230,6 +239,7 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     (): Recordings => ({
       recordings,
+      libraryProblem,
       recording: id => recordings?.find(r => r.id === id),
       melodicRecordings,
       collectedNotes,
@@ -244,6 +254,7 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
     }),
     [
       recordings,
+      libraryProblem,
       melodicRecordings,
       collectedNotes,
       pitchClasses,
