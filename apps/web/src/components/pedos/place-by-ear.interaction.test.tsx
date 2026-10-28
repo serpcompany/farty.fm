@@ -1,3 +1,4 @@
+import type { DetachedWindowAPI } from 'happy-dom'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -176,7 +177,8 @@ describe('placing a Noise-like Recording by ear', () => {
 
     act(() => root?.unmount())
     document.body.replaceChildren()
-    window.happyDOM?.setViewport({ width: 375, height: 812 })
+    const happyDOM = (window as unknown as { happyDOM: DetachedWindowAPI }).happyDOM
+    happyDOM.setViewport({ width: 375, height: 812 })
     container = document.createElement('div')
     document.body.appendChild(container)
     root = createRoot(container)
