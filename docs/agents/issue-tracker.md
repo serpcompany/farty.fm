@@ -4,7 +4,7 @@ Issues for this repo live in GitHub Issues. Use the `gh` CLI for all operations;
 
 Agents act on GitHub only as serp-agent: every `gh` command below, and every `git` command that reaches GitHub (commit, fetch, push), runs through the `serp-github-app` skill's `gh.sh` and `git.sh`. Never use the owner's `gh` login, not even to read. See [Agent GitHub Identity](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/agent-harness/agent-github-identity.md). Calling `gh.sh` from zsh: see Shell gotchas in `docs/agents/web.md`.
 
-`gh` older than 2.82.1 fails on plain `gh issue view`, `gh pr view` and `gh pr edit` because GitHub removed Projects (classic). Upgrade with `brew upgrade gh`, or use the `--json` and `gh api` forms below, which work on any version.
+`gh` older than 2.82.1 fails on plain `gh issue view`, `gh pr view` and `gh pr edit` because GitHub removed Projects (classic). Upgrade it with the machine's package manager (`brew upgrade gh` on macOS, `winget upgrade GitHub.cli` on Windows, the distribution's own on Linux), or use the `--json` and `gh api` forms below, which work on any version.
 
 ## Conventions
 

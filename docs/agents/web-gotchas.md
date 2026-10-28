@@ -63,5 +63,5 @@ What the web app taught its builders, kept so the next change doesn't relearn it
 
 ## Shell gotchas
 
-- zsh has `noclobber` set: overwrite a file with `>|`, and use `bash -c` for `set -- $words` loops.
+- Where zsh has `noclobber` set, as on the macOS machine, overwrite a file with `>|`, and use `bash -c` for `set -- $words` loops.
 - To call `gh.sh` through a variable, keep only its path in it: `G=~/.claude/skills/serp-github-app/scripts/gh.sh; bash $G pr view <n>`. zsh doesn't word-split `$G`, so `G="bash <path>"; $G ...` fails: zsh looks for one command named `bash <path>`. Writing the whole `bash ~/.claude/skills/serp-github-app/scripts/gh.sh ...` call, as this page does, works too.

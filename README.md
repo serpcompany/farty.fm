@@ -4,6 +4,19 @@ Farty turns fart Recordings into recognizable melodies, using only the Recording
 
 Farty was called Pedos until 2026-10-22 ([ADR 0009](docs/adr/0009-rename-pedos-to-farty.md)). Its stored data, Workers and databases keep the old name ([ADR 0015](docs/adr/0015-rename-the-code-names-from-pedos.md)).
 
+## Run it
+
+On macOS, Linux or Windows (Git Bash), with Node 22 (`.node-version`) and Corepack. Installing reads SERP's private `@serpcompany/verify` from GitHub Packages, so your user-level `~/.npmrc` needs a GitHub token with `read:packages` for `npm.pkg.github.com`.
+
+```sh
+corepack enable
+pnpm install
+pnpm --filter farty-web dev   # http://localhost:3000
+pnpm check                    # the finish gate
+```
+
+The web app's other commands are in [its guide](apps/web/AGENTS.md). On Windows, the Workers build, its preview and the journeys run in Docker through `apps/web/scripts/linux.sh` ([Tapping through](docs/agents/web.md#tapping-through)). The Python tools use uv, from `tools/` (`uv run`).
+
 ## Explore
 
 - [The web app](apps/web/AGENTS.md): Next.js on Cloudflare Workers. Production is https://farty.fm and Staging is https://staging.farty.fm ([environments and deploys](docs/agents/web.md)).
