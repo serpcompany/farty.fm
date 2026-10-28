@@ -1,12 +1,12 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import type { Analysis } from '@/lib/recordings'
 import {
-  autoMapInput,
+  autoMapInputs,
   goldenArrangement,
   goldenRecording,
   goldenSong,
   libraries,
-  songIds
+  songIds,
+  storedAnalysis
 } from '@/test-support/engine-golden'
 import { decoded, type GoldenRecording, gestureBody, goldenIndex, row } from '@/test-support/golden'
 import { arrange } from './auto-map'
@@ -22,31 +22,12 @@ import {
   songSeconds
 } from './renderer'
 
-// The renderer on the golden inputs (each gesture from fixtures/golden), checked against the
-// reference's own placement of every note of the 9 unlocked Arrangements.
-// The audio itself is measured with the reference's evaluate() by
-// tools/melody-lab/evaluate_renders.py on the renders of scripts/render-songs.ts.
-
 const SR = RENDER_SAMPLE_RATE
-const library = libraries.full.map(autoMapInput)
+const library = autoMapInputs(libraries.full)
 const sources = new Map<string, RenderSource>()
 
 async function goldenSource(g: GoldenRecording): Promise<RenderSource> {
   return { gesture: await gestureBody(g) }
-}
-
-/** The analysis the app would store for a fixture, from the golden bounds. */
-function storedAnalysis(g: GoldenRecording): Analysis {
-  return {
-    gestureStartSeconds: g.gesture.start_sample / SR,
-    gestureEndSeconds: g.gesture.end_sample / SR,
-    cutAtReattack: g.gesture.cut_at_reattack,
-    pitchEstimateMidi: g.pitch_estimate_midi,
-    pitchConfidence: g.pitch_confidence,
-    recordingPitchMidi: g.recording_pitch_midi,
-    shortestNoteSeconds: g.shortest_note_s,
-    settleSeconds: g.settle_s
-  }
 }
 
 const round = (x: number, digits: number) => Number(x.toFixed(digits))
@@ -67,7 +48,6 @@ describe('the renderer places every note as the reference does', () => {
       const golden = goldenArrangement('full', id)
       const arrangement = arrange(song, library)
       if (!golden.unlocked) {
-        // A note longer than every fixture near its pitch (ADR 0011), played raw (ADR 0012).
         expect(arrangement.unlocked, id).toBe(false)
         expect(() => renderSong(song, arrangement, sources)).toThrow(/locked/)
         return
@@ -92,8 +72,8 @@ describe('the renderer places every note as the reference does', () => {
         expect(round(mine.lengthSamples / SR, 3), label).toBe(g.render.len_s)
         songGain = Math.max(songGain, Math.abs(mine.gainDb - g.render.gain_db))
       }
-      // gain_db is written to 0.1 dB, so it can't agree closer than 0.05.
-      expect(songGain, id).toBeLessThanOrEqual(0.05 + 1e-9)
+      const goldenGainRounding = 0.05
+      expect(songGain, id).toBeLessThanOrEqual(goldenGainRounding + 1e-9)
       worstGain = Math.max(worstGain, songGain)
 
       let peak = 0
@@ -150,7 +130,7 @@ describe('the render path from what the app stores', () => {
 
   it('refuses a locked Song, and a Recording it was not given', () => {
     const song = goldenSong('twinkle')
-    const locked = arrange(song, libraries.small.map(autoMapInput))
+    const locked = arrange(song, autoMapInputs(libraries.small))
     expect(() => renderSong(song, locked, sources)).toThrow(/locked: 3 of 6 notes covered/)
     const unlocked = arrange(song, library)
     expect(() => renderSong(song, unlocked, new Map())).toThrow(/No Recording plays pitch/)
@@ -192,13 +172,11 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
     const gain = 10 ** (placed.gainDb / 20)
     for (let i = 0; i < segment.length; i++) expected[22050 + i] += segment[i] * gain
     expect(out.samples).toEqual(limit(expected))
-    // Three semitones up, or an Octave Move down: the same fart, at its own pitch and speed.
     expect(at((g.recording_pitch_midi as number) + 3)).toEqual(out)
     expect(at((g.recording_pitch_midi as number) - 12)).toEqual(out)
   })
 
-  it('plays a fart shorter than its note whole, then leaves the rest silent', () => {
-    // 016 lasts 0.31 s, less than a 0.975 s half note at 120 bpm: it is never stretched.
+  it('plays a fart shorter than its note whole, unstretched, then leaves the rest silent', () => {
     const source = sources.get('016') as RenderSource
     const out = render([noteInBeats(source, 40, { start: 0, dur: 2, bpm: 120, beatsPerBar: 4 })], 1)
     const placed = out.notes[0]
@@ -222,16 +200,15 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
       1
     )
     expect(out.notes[0].lengthSamples).toBe(Math.trunc(0.06 * SR))
-    expect(out.samples[0]).toBe(0) // the fade-in starts at silence
-    expect(out.samples[out.notes[0].lengthSamples - 1]).toBe(0) // and the fade-out ends there
+    const fadeInStart = out.samples[0]
+    const fadeOutEnd = out.samples[out.notes[0].lengthSamples - 1]
+    expect(fadeInStart).toBe(0)
+    expect(fadeOutEnd).toBe(0)
   })
 })
 
-// Two Swift behaviors kept where the reference would fail. No golden Song reaches them, so these
-// use synthetic note placements.
-describe('where the reference would fail', () => {
+describe('where the reference would fail, as the Swift port did, on synthetic placements no golden Song reaches', () => {
   it('clips a note that runs past the end of the mix', () => {
-    // The note is the Recording trimmed, faded and scaled.
     const source = sources.get('013') as RenderSource
     const note = {
       source,
@@ -253,12 +230,12 @@ describe('where the reference would fail', () => {
     for (let i = placed.startSample; i < length; i++) {
       expected[i] += segment[i - placed.startSample] * gain
     }
-    expect(expected[length - 1]).not.toBe(0) // the note still plays in the last sample
+    const lastSample = expected[length - 1]
+    expect(lastSample).not.toBe(0)
     expect(out.samples).toEqual(limit(expected))
   })
 
-  it('clamps the fades on a segment shorter than the 3 ms fade-in', () => {
-    // 50 samples: the fade-in covers all 50 (not 132), and the fade-out a third of them, 16.
+  it('clamps the fades on a segment shorter than the 3 ms fade-in: all 50 samples fade in, and a third fade out', () => {
     const n = 50
     const segment = new Float64Array(n).fill(1)
     applyFades(segment)

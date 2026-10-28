@@ -1,19 +1,21 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 import {
   CONTOUR_TOLERANCE_MIDI,
   compareContour,
   decoded,
+  gestureBody,
   goldenIndex,
   goldenRecordings,
   row
 } from '../../test-support/golden'
-import { ANALYSIS_VERSION, analyzeRecording } from './recording-analysis'
+import { NOTE_LENGTHS } from './audition'
+import { sharedPyin } from './pyin'
+import { analyzeRecording } from './recording-analysis'
+import { ANALYSIS_SAMPLE_RATE } from './resample'
+import { ANALYSIS_VERSION } from './version'
 
 describe('analyzeRecording', () => {
-  // From each fixture file at its own rate (five MP3s are 48 kHz), through the public entry
-  // only: the same gestures, Melodic set, Recording Pitches (within 30 cents), shortest notes and
-  // contours as the reference (`EndToEndTests.swift`).
-  test('every fixture file matches the reference', async () => {
+  test('every fixture file, at its own sample rate, matches the reference end to end', async () => {
     const melodic: string[] = []
     let maxGestureSamples = 0
     let maxPitchCents = 0
@@ -69,7 +71,6 @@ describe('analyzeRecording', () => {
       if (golden.settle_s === null || a.settleSeconds === null) {
         expect.soft(a.settleSeconds, `${id}: settle time`).toBe(golden.settle_s)
       } else {
-        // Within 2 pYIN frames (`fixtures/golden/README.md`).
         expect
           .soft(Math.abs(a.settleSeconds - golden.settle_s), `${id}: settle time`)
           .toBeLessThanOrEqual((2 * 256) / 44_100)
@@ -77,7 +78,6 @@ describe('analyzeRecording', () => {
       expect
         .soft(Math.abs(a.pitchConfidence - golden.pitch_confidence), `${id}: confidence`)
         .toBeLessThan(1e-9)
-      // rms_db is written with 4 decimals.
       expect.soft(Math.abs(a.rmsDb - golden.rms_db), `${id}: rms dB`).toBeLessThanOrEqual(0.0001)
 
       const contour = compareContour(a.contourMidi, golden)
@@ -125,5 +125,27 @@ describe('analyzeRecording', () => {
     expect(a.melodic).toBe(false)
     expect(a.noiseLikeReason).toBe('no_steady_pitch')
     expect(a.gestureEndSample).toBeLessThanOrEqual(Math.ceil((length * 44_100) / rate))
+  })
+
+  test('runs pYIN over at most twice the Recording plus one read-back of each note length', async () => {
+    const golden = goldenRecordings.find(g => g.id === '059')
+    if (!golden) throw new Error('fixture 059 missing')
+    const gesture = await gestureBody(golden)
+    const fiveSecondGesture = Float32Array.from(
+      { length: 5 * ANALYSIS_SAMPLE_RATE },
+      (_, i) => gesture[i % gesture.length]
+    )
+    const pyinRuns = vi.spyOn(sharedPyin(), 'run')
+    try {
+      const a = analyzeRecording(fiveSecondGesture, ANALYSIS_SAMPLE_RATE)
+      expect(a.melodic).toBe(true)
+      const analyzed = pyinRuns.mock.calls.reduce((total, [y]) => total + y.length, 0)
+      const readBacks = NOTE_LENGTHS.reduce((total, seconds) => total + seconds, 0)
+      expect(analyzed).toBeLessThanOrEqual(
+        2 * fiveSecondGesture.length + Math.ceil(readBacks * ANALYSIS_SAMPLE_RATE)
+      )
+    } finally {
+      pyinRuns.mockRestore()
+    }
   })
 })
