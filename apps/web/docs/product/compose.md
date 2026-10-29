@@ -49,8 +49,8 @@ search and sort. A locked Song opens a sheet saying what it needs, and an Unlock
 ## What unlocks a Song
 
 - Each distinct pitch needs its own Melodic Recording within 3 semitones of it, or about an octave
-  away as an Octave Move, that lasts at least as long as that pitch's longest note. Noise-like and
-  unanalyzed Recordings count for nothing (`src/lib/pitch-coverage.test.ts`, "gives each pitch its
+  away as an Octave Move, that lasts at least as long as that pitch's longest note. Unanalyzed
+  Recordings, and Noise-like ones not placed by ear, count for nothing (`src/lib/pitch-coverage.test.ts`, "gives each pitch its
   own Recording"; "moves a Recording at most 3 semitones, or an octave with an Octave Move"; "covers
   nothing without Melodic Recordings"; "ignores Noise-like and unanalyzed Recordings"; "unlocks a
   locked Song once a fart near each missing note shows the length it needs").

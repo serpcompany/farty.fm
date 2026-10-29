@@ -60,8 +60,8 @@ export async function forgetLibrary(): Promise<void> {
   announceLibraryChange({ reset: true })
 }
 
-async function pullThenSend(accountId: string): Promise<void> {
-  if (await pullAccountChanges(accountId)) await sendOutbox(accountId)
+async function pullThenSend(accountId: string): Promise<boolean> {
+  return (await pullAccountChanges(accountId)) && (await sendOutbox(accountId))
 }
 
 export async function syncOnce(accountId: string): Promise<void> {
@@ -140,10 +140,13 @@ export function startSync(accountId: string, email: string, ready: Promise<void>
   }
 }
 
-export async function uploadBeforeSignOut(accountId: string): Promise<number> {
+export type LeftBeforeSignOut = { left: number; full: number }
+
+export async function uploadBeforeSignOut(accountId: string): Promise<LeftBeforeSignOut> {
   return withSyncLock(async () => {
-    if (readableLibraryOwner() === accountId) await pullThenSend(accountId)
-    return withDb(database => database.count('outbox'))
+    const reached = readableLibraryOwner() === accountId && (await pullThenSend(accountId))
+    const left = await withDb(database => database.count('outbox'))
+    return { left, full: reached ? await waitingForRoom() : 0 }
   })
 }
 

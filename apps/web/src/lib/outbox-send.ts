@@ -1,7 +1,7 @@
 import { readableLibraryOwner } from './account'
 import * as api from './library-api'
 import { announceLibraryChange } from './library-changes'
-import { announceSent, itemKey, type Kind, type OutboxEntry } from './outbox'
+import { announceSent, itemKey, type Kind, type OutboxEntry, waitsForRoom } from './outbox'
 import { audioStore, type LibraryDatabase, withDb } from './recording-store'
 import type { Recording } from './recordings'
 import type { Toot } from './toot'
@@ -124,6 +124,15 @@ async function waitForRoom(refused: OutboxEntry): Promise<void> {
   })
 }
 
+async function forgetFull(refused: OutboxEntry): Promise<void> {
+  await withDb(async database => {
+    const tx = database.transaction('outbox', 'readwrite')
+    const now = await tx.store.get(refused.key)
+    if (now?.accountFull) await tx.store.put({ ...now, accountFull: undefined })
+    await tx.done
+  })
+}
+
 async function deleteHere(kind: Kind, id: string): Promise<void> {
   const key = itemKey(kind, id)
   await withDb(async database => {
@@ -158,6 +167,7 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
       await waitForRoom(entry)
       return 'next'
     }
+    if (waitsForRoom(entry)) await forgetFull(entry)
     return 'refused'
   }
   if (taken.op === 'rename' || taken.op === 'place') {

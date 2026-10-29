@@ -27,7 +27,7 @@ test('a full account keeps a new Recording on this device and says so, without u
   await recordG3(page)
   await page.getByRole('button', { name: 'Done' }).click()
   const notice = page.getByText(
-    'Your account is full, so 1 Recording is only on this device. Delete some to make room.'
+    'Your account is full, so 1 Recording is only on this device. Delete some older ones to make room.'
   )
   await expect(notice).toBeVisible()
   await page.screenshot({ path: testInfo.outputPath('account-full-recordings.png') })
@@ -36,7 +36,7 @@ test('a full account keeps a new Recording on this device and says so, without u
   await page.getByRole('button', { name: 'Sign out' }).click()
   const dialog = page.getByRole('alertdialog', { name: 'Your account is full' })
   await expect(dialog).toContainText(
-    "1 fart on this device isn't in your account because it's full. Delete some to make room, or sign out now and lose it."
+    "1 fart on this device isn't in your account because it's full. Delete some older ones to make room, or sign out now and lose it."
   )
   const keep = dialog.getByRole('button', { name: 'Keep it' })
   for (const control of [keep, dialog.getByRole('button', { name: 'Sign out anyway' })]) {

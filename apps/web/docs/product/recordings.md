@@ -22,7 +22,8 @@ tab.
   and every Recording: "1 Melodic Recording across 1 note", "1 Recording" (`e2e/tabs.spec.ts`, "a
   Recording shows on the Recordings tab with its note, and playback stops on a tab change";
   `e2e/record-noise.spec.ts`, "recording a Noise-like fart says it has no steady note").
-- Each row has the Recording's name ("Recording 1"), its Recording Pitch or "noise-like", a
+- Each row has the Recording's name ("Recording 1"), its Recording Pitch, "noise-like", or the
+  Placed Pitch it was given by ear (see below), a
   waveform, the fart's length and, for a take that held more than one fart, "First fart used"
   (`e2e/tabs.spec.ts`, "a Recording shows on the Recordings tab with its note, and playback stops
   on a tab change"; `e2e/record-noise.spec.ts`, "recording a Noise-like fart says it has no steady
@@ -101,7 +102,7 @@ closest to (ADR 0015). It still plays as recorded: the note says only where Song
   analysis, and places nothing that is gone"; `src/lib/recordings.test.ts`, "counts for nothing
   while the Recording is Melodic, or not analyzed").
 - Signed in, the placement reaches the account, and another browser's placement shows here, even
-  in an open picker ([Accounts](account.md#sync)).
+  in an open picker ([Sync](sync.md)).
 
 ## Delete
 
@@ -135,12 +136,12 @@ closest to (ADR 0015). It still plays as recorded: the note says only where Song
 
 ## A full account
 
-An account keeps at most 300 Recordings. When to try again is in [Accounts](account.md#sync).
+An account keeps at most 300 Recordings. When to try again is in [Sync](sync.md).
 
 - While some Recordings can't upload because the account is full, a line under the title says so:
-  "Your account is full, so 2 Recordings are only on this device. Delete some to make room." It
-  counts down as they upload or are deleted, and goes once a delete here makes room, without a
-  reload (`src/components/farty/recordings-screen.interaction.test.tsx`, "says how many Recordings
+  "Your account is full, so 2 Recordings are only on this device. Delete some older ones to make
+  room." It goes once they've uploaded, which a delete here lets happen at once, without a reload
+  (`src/components/farty/recordings-screen.interaction.test.tsx`, "says how many Recordings
   wait for room while the account is full, until they upload"; `e2e/account-full.spec.ts`, "a full
   account keeps a new Recording on this device and says so, without uploading it again, then
   uploads it once a delete makes room").

@@ -216,7 +216,7 @@ function notUploadedWords({ full, waiting }: NotUploaded) {
   const farts = one ? "1 fart on this device isn't" : `${full} farts on this device aren't`
   return {
     title: 'Your account is full',
-    text: `${farts} in your account because it's full. Delete some to make room, or sign out now and lose ${one ? 'it' : 'them'}.`,
+    text: `${farts} in your account because it's full. Delete some older ones to make room, or sign out now and lose ${one ? 'it' : 'them'}.`,
     keep: one ? 'Keep it' : 'Keep them'
   }
 }

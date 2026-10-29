@@ -73,7 +73,8 @@ const rowNames = () =>
     row => row.getAttribute('aria-label')?.split(', ')[0]
   )
 
-const accountFull = () => document.body.querySelector('[data-testid="account-full"]')?.textContent
+const accountFull = () =>
+  document.body.querySelector('output [data-testid="account-full"]')?.textContent
 
 afterEach(() => {
   closeScreens()
@@ -108,7 +109,7 @@ describe('Recordings', () => {
     await showRecordings([saved(1), saved(2), saved(3)])
     await settle()
     expect(accountFull()).toBe(
-      'Your account is full, so 2 Recordings are only on this device. Delete some to make room.'
+      'Your account is full, so 2 Recordings are only on this device. Delete some older ones to make room.'
     )
     expect(vi.mocked(waitingForRoom).mock.calls).toEqual([['recordings']])
 
@@ -116,7 +117,7 @@ describe('Recordings', () => {
     await act(async () => announceQueued())
     await settle()
     expect(accountFull()).toBe(
-      'Your account is full, so 1 Recording is only on this device. Delete some to make room.'
+      'Your account is full, so 1 Recording is only on this device. Delete some older ones to make room.'
     )
 
     vi.mocked(waitingForRoom).mockResolvedValue(0)

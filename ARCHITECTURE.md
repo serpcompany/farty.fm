@@ -36,7 +36,7 @@ What the port in `src/lib/analysis/` and `src/lib/engine/` must reproduce, and w
 1. **Recording:** the microphone feeds an AudioWorklet (`src/lib/audio/`) with the browser's voice processing off. A take is kept only when it heard something: its loudest 50 ms reaches −50 dBFS and stands 4 dB above the take's own room (`heardSomething`), a gate the reference doesn't have. Saving writes the Recording to IndexedDB at once; nothing waits on analysis.
 2. **Recording Analysis** runs in a Web Worker (`src/lib/analysis/`) and is kept with the Recording.
 3. **Compose and Song Creator:** Pitch Coverage decides which Songs are unlocked. Auto-map chooses the Arrangement, and the renderer plays it with the Recordings, in its own Web Worker (`src/lib/engine/`). A saved result is a Toot.
-4. **An account** (free, and needed to keep farts past the visit, ADR 0013) syncs the library: each save, rename and delete waits in an outbox with the change itself, and the sync sends it to the API (`src/app/api/`, `src/server/`), which keeps Recordings and Toots in D1 and their audio in R2. Saving a Toot needs one, and is paid through Stripe Checkout ([Payments](docs/agents/payments.md)).
+4. **An account** (free, and needed to keep farts past the visit, ADR 0013) syncs the library: each save, rename, placement by ear and delete waits in an outbox with the change itself, and the sync sends it to the API (`src/app/api/`, `src/server/`), which keeps Recordings and Toots in D1 and their audio in R2. Saving a Toot needs one, and is paid through Stripe Checkout ([Payments](docs/agents/payments.md)).
 
 ## Offline: the service worker
 

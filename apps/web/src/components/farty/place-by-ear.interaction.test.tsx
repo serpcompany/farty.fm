@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Recording } from '@/lib/recordings'
 import { button, closeScreens, pageText, show, tap } from '@/test-support/screen'
 import { PlaceByEar } from './place-by-ear'
+import { recordingSound } from './playback-provider'
 
 const page = vi.hoisted(() => ({
   recording: undefined as Recording | undefined,
@@ -156,9 +157,14 @@ describe('placing a Noise-like Recording by ear', () => {
   })
 
   it('plays the fart from its play button', async () => {
-    await open(noiseLike())
+    const recording = noiseLike()
+    await open(recording)
     await tap(button('Play Recording 21, 0.9 s'))
-    expect(page.togglePlayback).toHaveBeenCalledWith(expect.objectContaining({ key: 'a' }))
+    expect(page.togglePlayback).toHaveBeenCalledWith({
+      ...recordingSound(recording),
+      wav: expect.any(Function)
+    })
+    expect(recordingSound(recording).segment).not.toBeNull()
   })
 
   it('stops the fart when it closes', async () => {

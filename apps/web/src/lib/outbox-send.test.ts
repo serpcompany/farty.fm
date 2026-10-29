@@ -20,7 +20,7 @@ describe('uploading', () => {
     const recording = await recorded(1)
     const saved = newToot()
     await library.page.toots.saveToot(saved, wav(9))
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(bytes(library.account.get('recordings', recording.id)?.wav)).toEqual(bytes(wav(1)))
     expect(bytes(library.account.get('toots', saved.id)?.wav)).toEqual(bytes(wav(9)))
     expect(library.account.get('toots', saved.id)?.item).toMatchObject({ title: saved.title })
@@ -30,7 +30,7 @@ describe('uploading', () => {
   it("never uploads a library that's another account's", async () => {
     claimedBy('user-b')
     await recorded()
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(1)
     await library.page.sync.syncOnce('user-a')
     expect(library.account.sent).toEqual([])
   })
@@ -48,10 +48,10 @@ describe('uploading', () => {
 
   it("waits for a Recording's analysis", async () => {
     const recording = await recorded(1, false)
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(1)
     expect(requests('PUT')).toEqual([])
     await library.page.store.saveAnalysis(recording.id, { state: 'notAnalyzed' })
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
   })
 
   it.each([
@@ -71,7 +71,7 @@ describe('uploading', () => {
     await recorded(1)
     await recorded(2)
     fail()
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(2)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(2)
     expect(requests('PUT')).toHaveLength(1)
   })
 
@@ -81,7 +81,7 @@ describe('uploading', () => {
   ])('uploads nothing until it has read the account: not when Farty %s', async (_, fail) => {
     await recorded(1)
     fail()
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(1)
     await library.page.sync.syncOnce('user-a')
     expect(requests('PUT')).toEqual([])
     expect(library.account.sent.map(s => s.library)).toEqual(
@@ -119,7 +119,7 @@ describe('uploading', () => {
     if (method === 'PATCH') await library.page.toots.renameToot(saved.id, 'Renamed')
     else await library.page.toots.deleteToot(saved.id)
     refuse(method, 409, 'wrong_account')
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(1)
     expect(await outbox()).toEqual([expect.objectContaining({ id: saved.id })])
   })
 
@@ -130,7 +130,7 @@ describe('uploading', () => {
       sent.path.includes(first.id)
         ? Response.json({ error: 'too_large' }, { status: 413 })
         : undefined
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(1)
     expect(library.account.get('recordings', second.id)).toBeDefined()
     expect(await outbox()).toEqual([expect.objectContaining({ id: first.id, op: 'put' })])
   })
@@ -142,14 +142,14 @@ describe('uploading', () => {
 
     expect((await library.page.store.loadRecordings()).map(r => r.id)).toEqual([recording.id])
     expect(await outbox()).toEqual([expect.objectContaining({ id: recording.id, op: 'put' })])
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(1)
   })
 
   it('deletes here what the account deleted', async () => {
     const recording = await recorded()
     library.account.add('recordings', recording, wav(1))
     library.account.remove('recordings', recording.id)
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(await library.page.store.loadRecordings()).toEqual([])
   })
 
@@ -160,7 +160,7 @@ describe('uploading', () => {
       if (sent.method === 'PUT') await library.page.toots.renameToot(saved.id, 'New')
       return undefined
     }
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(library.account.get('toots', saved.id)?.item).toMatchObject({ title: 'New' })
   })
 
@@ -168,7 +168,7 @@ describe('uploading', () => {
     const saved = newToot('New')
     library.account.add('toots', { ...saved, title: 'Old' }, wav(9))
     await library.page.toots.saveToot(saved, wav(9))
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(library.account.get('toots', saved.id)?.item).toMatchObject({ title: 'New' })
   })
 
@@ -176,13 +176,13 @@ describe('uploading', () => {
     const early = await recorded(1)
     await library.page.store.placeRecording(early.id, 40)
     expect(await outbox()).toEqual([expect.objectContaining({ id: early.id, op: 'put' })])
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(library.account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: 40 })
     expect(requests('PATCH')).toEqual([])
     await library.page.store.placeRecording(early.id, 41)
     await library.page.store.placeRecording(early.id, null)
     expect((await outbox()).map(e => e.op)).toEqual(['place'])
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(library.account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: null })
     expect(requests('PATCH').map(s => [s.path, s.library])).toEqual([
       [`/api/recordings/${early.id}/`, 'user-a']
@@ -195,7 +195,7 @@ describe('uploading', () => {
       if (sent.method === 'PUT') await library.page.store.placeRecording(recording.id, 52)
       return undefined
     }
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(library.account.get('recordings', recording.id)?.item).toMatchObject({
       placedPitch: 52
     })
@@ -206,7 +206,7 @@ describe('uploading', () => {
     const recording = await recorded(1)
     await library.page.store.placeRecording(recording.id, 45)
     library.account.add('recordings', { ...recording, placedPitch: null }, wav(1))
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(library.account.get('recordings', recording.id)?.item).toMatchObject({
       placedPitch: 45
     })
@@ -223,7 +223,7 @@ describe('uploading', () => {
       sent.method === 'PATCH' && sent.path.includes(refused.id)
         ? Response.json({ error: 'invalid_request' }, { status: 400 })
         : undefined
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(await outbox()).toEqual([])
     expect((await library.page.store.loadRecordings()).map(r => r.id)).toEqual([refused.id])
   })
@@ -237,7 +237,7 @@ describe('uploading', () => {
     await database.put('outbox', { ...entry, op: 'later' as OutboxOp })
     const toSend = await recorded(2)
     const before = library.account.sent.length
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(1)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(1)
     expect(library.account.sent.slice(before).filter(s => s.path.includes(recording.id))).toEqual(
       []
     )
@@ -253,7 +253,7 @@ describe('uploading', () => {
     const local = await recorded(2, false)
     await library.page.store.deleteRecording(uploaded.id)
     await library.page.store.deleteRecording(local.id)
-    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(library.account.isDeleted('recordings', uploaded.id)).toBe(true)
     expect(library.account.sent.filter(s => s.path.includes(local.id))).toEqual([])
   })
@@ -286,6 +286,16 @@ describe('an account with no room', () => {
     expect(await library.page.sync.waitingForRoom('recordings')).toBe(1)
     expect(await library.page.sync.waitingForRoom('toots')).toBe(0)
     expect(await library.page.sync.waitingForRoom()).toBe(1)
+  })
+
+  it('tells Sign out what waits for room only when it reached the account just now', async () => {
+    await recorded(1)
+    await recorded(2)
+    accountFullFor('recordings')
+    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toEqual({ left: 2, full: 2 })
+
+    library.account.offline = true
+    expect(await library.page.sync.uploadBeforeSignOut('user-a')).toEqual({ left: 2, full: 0 })
   })
 
   it('uploads none of that kind again until there may be room, and still uploads the other kind', async () => {
@@ -359,6 +369,19 @@ describe('an account with no room', () => {
     await library.page.sync.syncOnce('user-a')
     expect(requests('PUT')).toHaveLength(4)
     expect(await outbox()).toEqual([])
+  })
+
+  it('stops saying the account is full once the upload is refused for another reason', async () => {
+    await recorded(1)
+    accountFullFor('recordings')
+    await library.page.sync.syncOnce('user-a')
+    expect(await library.page.sync.waitingForRoom()).toBe(1)
+
+    refuse('PUT', 413, 'too_large')
+    await library.page.sync.claimLibrary('user-a')
+    await library.page.sync.syncOnce('user-a')
+    expect(await library.page.sync.waitingForRoom()).toBe(0)
+    expect(await outbox()).toHaveLength(1)
   })
 
   it('forgets a Recording deleted while it waits for room, with no request', async () => {

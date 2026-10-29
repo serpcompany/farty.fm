@@ -117,7 +117,7 @@ describe('the Toots tab', () => {
     await opened([saved('t1', 'First')], <TootsScreen />)
     await settle()
     expect(pageText()).toContain(
-      'Your account is full, so 1 Toot is only on this device. Delete some to make room.'
+      'Your account is full, so 1 Toot is only on this device. Delete some older ones to make room.'
     )
     expect(vi.mocked(waitingForRoom).mock.calls).toEqual([['toots']])
 

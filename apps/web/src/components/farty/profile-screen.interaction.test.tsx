@@ -145,13 +145,13 @@ describe('Sign out with farts not uploaded', () => {
     [
       'all with no room',
       { full: 2, waiting: 0 },
-      "Your account is full2 farts on this device aren't in your account because it's full. Delete some to make room, or sign out now and lose them.",
+      "Your account is full2 farts on this device aren't in your account because it's full. Delete some older ones to make room, or sign out now and lose them.",
       'Keep them'
     ],
     [
       'one with no room',
       { full: 1, waiting: 0 },
-      "Your account is full1 fart on this device isn't in your account because it's full. Delete some to make room, or sign out now and lose it.",
+      "Your account is full1 fart on this device isn't in your account because it's full. Delete some older ones to make room, or sign out now and lose it.",
       'Keep it'
     ],
     [

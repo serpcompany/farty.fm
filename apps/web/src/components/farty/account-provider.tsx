@@ -21,7 +21,7 @@ import {
   takeStepOffer
 } from '@/lib/account'
 import { keepRecordings } from '@/lib/install'
-import { forgetLibrary, startSync, uploadBeforeSignOut, waitingForRoom } from '@/lib/library-sync'
+import { forgetLibrary, startSync, uploadBeforeSignOut } from '@/lib/library-sync'
 import { openVisit } from '@/lib/visit'
 
 export type NotUploaded = { full: number; waiting: number }
@@ -129,11 +129,11 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(
     async (anyway = false): Promise<SignOut> => {
       if (!anyway && accountId) {
-        const left = await uploadBeforeSignOut(accountId).catch(() => 1)
-        if (left > 0) {
-          const full = await waitingForRoom().catch(() => 0)
-          return { full, waiting: left - full }
-        }
+        const { left, full } = await uploadBeforeSignOut(accountId).catch(() => ({
+          left: 1,
+          full: 0
+        }))
+        if (left > 0) return { full, waiting: left - full }
       }
       if (!(await api.signOut())) return 'failed'
       await leave()

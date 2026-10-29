@@ -31,11 +31,14 @@ function useWaitingForRoom(kind: Kind): number {
 
 export function AccountFullNotice({ kind }: { kind: Kind }) {
   const waiting = useWaitingForRoom(kind)
-  if (waiting === 0) return null
   const items = waiting === 1 ? `1 ${nouns[kind]} is` : `${waiting} ${nouns[kind]}s are`
   return (
-    <p className="px-4 pb-3 text-sm text-muted-foreground" data-testid="account-full">
-      Your account is full, so {items} only on this device. Delete some to make room.
-    </p>
+    <output className="block">
+      {waiting > 0 && (
+        <p className="px-4 pb-3 text-sm text-muted-foreground" data-testid="account-full">
+          Your account is full, so {items} only on this device. Delete some older ones to make room.
+        </p>
+      )}
+    </output>
   )
 }
