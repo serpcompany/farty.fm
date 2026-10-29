@@ -1,6 +1,6 @@
 # Retire the iPhone app's source
 
-The iPhone app stopped being built or released on 2026-10-06 (#103), after Apple rejected it (ADR 0007). Its source stayed in the repository as the web app's design authority and to hold golden format 2. The web app now does everything it did, and more: accounts, sync and paid saves. On 2026-10-27 the product owner retired it from the repository:
+The iPhone app stopped being built or released on 2026-10-06 (#103), after Apple rejected it (ADR 0007). Its source stayed in the repository as the web app's design authority and to hold golden format 2. The web app now does everything it did, and more: accounts, sync and paid saves. On 2026-10-27 Francis retired it from the repository:
 
 1. **Removed:** the Swift app (`ios/`), Recording Analysis in Swift (`RecordingAnalysisKit/`, with golden format 2), their workflow (`ios.yml`), the App Store submission (`docs/app-store/`), the per-PR screen evidence (`docs/evidence/`), the HTML design prototype (`docs/design/prototype/`), the iPhone app's `CHANGELOG.md` and `version.txt`, and fixture 021, which only golden format 2 read.
 2. **Kept in history** behind the annotated tag `archive-2026-10-27`, the last commit that has them. Read a file with `git show archive-2026-10-27:<path>`. The `v1.0.0` tag keeps the iPhone app's last release.

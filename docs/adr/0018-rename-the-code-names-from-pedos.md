@@ -1,6 +1,6 @@
 # Rename the code names from Pedos
 
-ADR 0009 renamed the app to Farty and kept every internal "pedos" name. On 2026-10-27 the owner chose to rename the code's names too, and to keep the names that stored data and running infrastructure depend on (D10 in the SERP alignment, #177, and part of #190).
+ADR 0009 renamed the app to Farty and kept every internal "pedos" name. On 2026-10-27 Francis chose to rename the code's names too, and to keep the names that stored data and running infrastructure depend on (D10 in the SERP alignment, #177, and part of #190).
 
 ## What changes
 
