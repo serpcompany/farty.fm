@@ -1,0 +1,195 @@
+name: Weekly maintenance
+
+on:
+  schedule:
+    - cron: "0 14 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-maintenance
+  cancel-in-progress: false
+
+jobs:
+  doc-gardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
+      id-token: write
+      packages: read
+    env:
+      HAS_CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+    steps:
+      - name: Skip while the CLAUDE_CODE_OAUTH_TOKEN secret isn't set
+        if: env.HAS_CLAUDE_TOKEN != 'true'
+        run: echo "::notice::CLAUDE_CODE_OAUTH_TOKEN isn't set, so the docs aren't gardened (docs/agents/ci.md, Weekly maintenance)."
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        if: env.HAS_CLAUDE_TOKEN == 'true'
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        if: env.HAS_CLAUDE_TOKEN == 'true'
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        if: env.HAS_CLAUDE_TOKEN == 'true'
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@serpcompany"
+
+      - name: Install the workspace, with @serpcompany/verify from GitHub Packages
+        if: env.HAS_CLAUDE_TOKEN == 'true'
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+
+      - name: List the docs whose named files changed after the doc did
+        if: env.HAS_CLAUDE_TOKEN == 'true'
+        working-directory: apps/web
+        run: mkdir -p ../../tmp && pnpm -s docs:report > ../../tmp/docs-report.md
+
+      - name: List the broken outside links in the docs
+        if: env.HAS_CLAUDE_TOKEN == 'true'
+        run: pnpm -s verify docs --external --report tmp/broken-links.md
+
+      - name: Note when doc gardening starts
+        if: env.HAS_CLAUDE_TOKEN == 'true'
+        run: echo "GARDENING_STARTED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
+      - name: Garden the docs with Claude
+        id: garden
+        if: env.HAS_CLAUDE_TOKEN == 'true'
+        uses: anthropics/claude-code-action@6b6870e649b5ff408753befeaee5fc7989d4e6a9
+        env:
+          CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"
+          BASH_DEFAULT_TIMEOUT_MS: "900000"
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          prompt: |
+            You are this repository's weekly doc gardener. Follow AGENTS.md and docs/agents/code.md.
+            Goal: docs that no longer match the code are fixed in one small pull request into staging.
+
+            0. First run `gh pr list --state open --search "weekly doc gardening in:title"`. If it
+               lists a pull request, stop and say that a gardening pull request is already open,
+               with its number.
+            1. Read tmp/docs-report.md, and tmp/broken-links.md if it exists. Your work list is the
+               docs the report lists, at most 8 from the top, and every broken outside link.
+            2. For each doc, read it and the files the report lists for it. Fix what is no longer
+               true and remove what no longer exists. Keep the doc's structure and its plain,
+               specific style. If a doc is still accurate, change nothing in it.
+            3. For each broken outside link, link to where the page moved, or remove the link if
+               the page is gone.
+            4. Edit only Markdown, and never docs/adr/ (ADRs record decisions; never rewrite them),
+               a CHANGELOG.md, docs/agents/exceptions.md, the "Agents may merge" lines of
+               AGENTS.md, or anything a tool generates (`*.report.md`, fixtures/golden/). Never
+               touch code, tests, workflows or config.
+            5. Run `pnpm -s verify docs`; it must pass.
+            6. If you changed nothing, stop and say "No doc drift found". Otherwise create the
+               branch docs/gardening-<YYYY-MM-DD>, commit with the message "docs: bring the docs
+               back in line with the code", push it, and open a pull request into staging titled
+               "docs: weekly doc gardening (<YYYY-MM-DD>)", with `--base staging`. Write its body to
+               tmp/pr-body.md first and pass it with `--body-file tmp/pr-body.md`. Its first line
+               is "No issue: the weekly doc gardening (docs/agents/ci.md, Weekly maintenance)."
+               Then: each doc you changed, what was wrong, and the files you checked it against;
+               each link you fixed or removed; then the docs you checked without changes.
+          claude_args: |
+            --model claude-sonnet-5-5
+            --max-turns 80
+            --strict-mcp-config
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(git:*),Bash(gh pr list:*),Bash(gh pr create:*),Bash(pnpm -s verify docs),Bash(date:*)"
+
+      - name: Keep the doc gardening transcript
+        if: always() && env.HAS_CLAUDE_TOKEN == 'true' && steps.garden.outputs.execution_file != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: doc-gardening-transcript
+          path: ${{ steps.garden.outputs.execution_file }}
+          retention-days: 7
+          overwrite: true
+
+      - name: Fail unless doc gardening opened a pull request or found nothing to fix
+        if: ${{ !cancelled() && steps.garden.outcome != 'skipped' }}
+        env:
+          EXECUTION_FILE: ${{ steps.garden.outputs.execution_file }}
+          CLAUDE_OUTCOME: ${{ steps.garden.outcome }}
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: node {0}
+        run: |
+          const fs = require('node:fs')
+          const clean = (value, max = 120) => String(value).replace(/[\r\n%]+/g, ' ').slice(0, max)
+          const fail = message => {
+            console.log(`::error title=Doc gardening didn't finish::${clean(message, 900)}`)
+            process.exit(1)
+          }
+          const readResult = () => {
+            const file = process.env.EXECUTION_FILE
+            if (!file || !fs.existsSync(file)) {
+              if (process.env.CLAUDE_OUTCOME === 'failure') fail("The Claude step failed before Claude ran, so it wrote no execution log: that step's own log says why.")
+              fail('Doc gardening wrote no execution log.')
+            }
+            let messages
+            try {
+              messages = JSON.parse(fs.readFileSync(file, 'utf8'))
+            } catch (error) {
+              fail(`The execution log isn't JSON: ${error.message}`)
+            }
+            if (!Array.isArray(messages)) fail("The execution log isn't a list of messages.")
+            const result = messages.filter(entry => entry?.type === 'result').at(-1)
+            if (!result) fail('The execution log has no result.')
+            return { messages, result }
+          }
+          const openGardeningPrs = async () => {
+            const api = `${process.env.GITHUB_API_URL || 'https://api.github.com'}/repos/${process.env.GITHUB_REPOSITORY}`
+            const response = await fetch(`${api}/pulls?state=open&base=staging&per_page=100`, {
+              headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            })
+            if (!response.ok) throw new Error(`GET /pulls returned ${response.status}`)
+            return (await response.json()).filter(pr => String(pr?.head?.ref).startsWith('docs/gardening-'))
+          }
+          const main = async () => {
+            const { messages, result } = readResult()
+            const said = String(result.result || '')
+            console.log(`Doc gardening: ${result.num_turns} turns, about $${Number(result.total_cost_usd || 0).toFixed(2)}. Claude said: ${clean(said || '(nothing)', 400)}`)
+            if (result.is_error) fail(`Doc gardening ended in an error: ${clean(said || result.subtype || 'no message', 400)}`)
+            const sets = messages.filter(entry => entry?.type === 'system' && entry.subtype === 'background_tasks_changed')
+            const running = (sets.at(-1)?.tasks || []).filter(task => task && !task.ambient)
+            if (running.length) fail(`Doc gardening ended with ${running.length} background task(s) still running.`)
+            const denied = [...new Set((result.permission_denials || []).map(denial =>
+              denial?.tool_input?.command ? `${denial.tool_name} (${clean(denial.tool_input.command)})` : String(denial?.tool_name)
+            ))]
+            const startedAt = Date.parse(process.env.GARDENING_STARTED_AT || '')
+            if (Number.isNaN(startedAt)) fail("GARDENING_STARTED_AT isn't set, so the check can't tell whether this run opened a pull request.")
+            let prs
+            try {
+              prs = await openGardeningPrs()
+            } catch (error) {
+              fail(`Couldn't list the open pull requests to check the outcome: ${error.message}`)
+            }
+            const opened = prs.filter(pr => Date.parse(pr.created_at) >= startedAt - 30 * 1000)
+            let outcome = null
+            if (opened.length > 0) outcome = `opened ${opened.map(pr => `#${pr.number}`).join(', ')}`
+            else if (/No doc drift found/i.test(said)) outcome = 'found no doc drift'
+            else if (prs.length > 0 && /already/i.test(said)) outcome = `left the open gardening pull request #${prs[0].number} alone`
+            if (!outcome) {
+              const reason = denied.length > 0 ? ` Claude was denied ${denied.join(', ')}; allow it in claude_args.` : ''
+              fail(`Doc gardening finished without opening a pull request or reporting "No doc drift found".${reason}`)
+            }
+            if (denied.length > 0) {
+              console.log(`::warning title=Doc gardening was denied tools::Claude was denied ${clean(denied.join(', '), 600)} but still ${outcome}. Allow it in claude_args if the job needs it.`)
+            }
+            console.log(`Doc gardening ${outcome}.`)
+          }
+          main().catch(error => fail(`The doc gardening check failed: ${error?.message}`))

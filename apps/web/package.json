@@ -26,6 +26,7 @@
     "build:production": "tsx scripts/fixture-library.ts remove && SITE_ENV=production NEXT_PUBLIC_FIXTURE_LIBRARY= opennextjs-cloudflare build && tsx scripts/fixture-library.ts check",
     "deploy:staging": "pnpm build:staging && opennextjs-cloudflare deploy --env staging",
     "deploy:production": "pnpm build:production && opennextjs-cloudflare deploy --env production",
+    "docs:report": "tsx scripts/docs-report.ts",
     "cf-typegen": "wrangler types --env-file scripts/cf-typegen.env --env-interface CloudflareEnv ./cloudflare-env.d.ts",
     "cf-typegen:check": "wrangler types --env-file scripts/cf-typegen.env --env-interface CloudflareEnv ./cloudflare-env.d.ts --check"
   },

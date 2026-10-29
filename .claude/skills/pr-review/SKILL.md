@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Review a pull request for real bugs, for acceptance criteria of its issue that it doesn't meet, and for breaches of this repository's rules (AGENTS.md, ARCHITECTURE.md, docs/agents/code.md, CONTEXT.md and apps/web/AGENTS.md). Reads every changed file, posts each new finding as an inline comment marked blocking or suggestion, and keeps one summary comment up to date. Re-reviews after every push without repeating earlier findings. The Repository workflow's review job runs it; run it locally with /pr-review <owner>/<repo>/pull/<number>.
+description: Review a pull request for real bugs, for acceptance criteria of its issue that it doesn't meet, and for breaches of this repository's rules (AGENTS.md, ARCHITECTURE.md, docs/agents/code.md, CONTEXT.md and apps/web/AGENTS.md). Reads every changed file, posts each new finding as an inline comment marked blocking or suggestion, and keeps one summary comment up to date. Re-reviews after every push without repeating earlier findings. The Code review workflow's review job runs it; run it locally with /pr-review <owner>/<repo>/pull/<number>.
 allowed-tools: Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh issue view:*), Write, mcp__github_inline_comment__create_inline_comment, Agent, Task, Read, Glob, Grep
 ---
 

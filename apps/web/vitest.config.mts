@@ -13,7 +13,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'node',
-          include: ['src/**/*.test.{ts,tsx}'],
+          include: ['src/**/*.test.{ts,tsx}', 'scripts/**/*.test.ts'],
           exclude: [...configDefaults.exclude, interactionTests, workersTests],
           testTimeout: 120_000,
           fileParallelism: false

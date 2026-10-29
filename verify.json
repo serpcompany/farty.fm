@@ -69,7 +69,7 @@
     },
     "github": {
       "exempt": {
-        ".claude/skills/pr-review/SKILL.md": "the Repository workflow's review job runs it, where its gh commands read the pull request with that job's own token"
+        ".claude/skills/pr-review/SKILL.md": "the Code review workflow's review job runs it, where its gh commands read the pull request with that job's own token"
       }
     }
   },

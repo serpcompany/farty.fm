@@ -4,12 +4,14 @@ Every GitHub Actions workflow, what starts it, and the checks a merge waits for.
 
 | Workflow | Starts on | Jobs |
 | --- | --- | --- |
-| `repository.yml` | Every PR, and every push to `staging` and `main` | `verify`, then `review` on a PR |
+| `repository.yml` | Every PR, and every push to `staging` and `main` | `verify` |
+| `code-review.yml` | A PR opened, pushed to, reopened or marked ready | `review` |
 | `pull-request.yml` | A PR opened, edited, pushed to or marked ready | `title`, `issue-link`, `fix-test`, `text` |
 | `web.yml` | Every PR, every push to `staging` and `main`, and by hand | `changes`, `check`, `e2e`, `deploy-staging`, `deploy-production` |
 | `tools.yml` | Every PR, every push to `staging` and `main`, and by hand | `tools-changes`, `reference`, `scores` |
 | `release-please.yml` | Every push to `main` | `release-please` |
 | `web-auth-secret.yml` | By hand only | `secret` |
+| `maintenance.yml` | Every Monday at 14:00 UTC, and by hand | `doc-gardening` |
 
 ## Required checks
 
@@ -18,7 +20,11 @@ Every GitHub Actions workflow, what starts it, and the checks a merge waits for.
 ## Repository
 
 - **`verify`** installs the workspace, with `@serpcompany/verify` from GitHub Packages, and runs `pnpm verify`: every SERP check, at the version the lockfile pins ([Verification](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification/README.md)). It checks out the commit with its parent, which it names `SERP_VERIFY_BASE`, so each exception list can only shrink against it. The docs check reads links into SERP's private repositories with the `serp-agent` app's short-lived token when `SERP_AGENT_APP_ID` and `SERP_AGENT_PRIVATE_KEY` are set, and with the job's own token otherwise.
-- **`review`** runs once `verify` passes, on a PR that isn't a draft or a bot's. It installs the review's scripts from the same package version outside the checkout, gives Claude the rules (`AGENTS.md`, `ARCHITECTURE.md`, `CONTEXT.md`, [`docs/agents/code.md`](code.md), `apps/web/AGENTS.md`, as they are on the base branch), the change since the last reviewed commit, its issue and the earlier findings, and runs the [`pr-review`](../../.claude/skills/pr-review/SKILL.md) skill. Claude posts findings inline, marked blocking or suggestion, and the job posts one summary comment. It skips with a notice until `CLAUDE_CODE_OAUTH_TOKEN` is set. It never reviews a PR that changes `repository.yml` itself, since Claude runs only from the default branch's copy of its workflow: a person reviews such a PR.
+## Code review
+
+`code-review.yml` is its own workflow, as SERP's [code review](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification/code-review/github-actions.md) standard sets, so a PR that changes `repository.yml` or another workflow is still reviewed.
+
+- **`review`** runs on a PR that isn't a draft or a bot's, beside `verify` rather than after it. It installs the review's scripts from the same package version outside the checkout, gives Claude the rules (`AGENTS.md`, `ARCHITECTURE.md`, `CONTEXT.md`, [`docs/agents/code.md`](code.md), `apps/web/AGENTS.md`, as they are on the base branch), the change since the last reviewed commit, its issue and the earlier findings, and runs the [`pr-review`](../../.claude/skills/pr-review/SKILL.md) skill. Claude posts findings inline, marked blocking or suggestion, and the job posts one summary comment. It skips with a notice until `CLAUDE_CODE_OAUTH_TOKEN` is set. It never reviews a PR that changes `code-review.yml` itself, since Claude runs only from the default branch's copy of its workflow: a person reviews such a PR.
 
 ## Pull request
 
@@ -55,6 +61,15 @@ Each step that runs one of the web app's scripts names `working-directory: apps/
 - **`release-please.yml`** keeps the release PR open on `main` ([Promotion and releases](releases.md)).
 - **`web-auth-secret.yml`** sets `BETTER_AUTH_SECRET` on one environment's Worker, only when it has none, since a new secret signs everyone out. `openssl` writes the value straight into `wrangler secret put`, and nothing prints it. Run it from the environment's own branch, which its deployment rules require: `gh workflow run web-auth-secret.yml --ref staging -f environment=staging`, or `--ref main` and `production`.
 
+## Weekly maintenance
+
+`maintenance.yml` keeps the docs true between changes, like zenbu's weekly maintenance. It runs every Monday, and by hand (`gh workflow run maintenance.yml --ref staging`). Its one job, `doc-gardening`, skips until `CLAUDE_CODE_OAUTH_TOKEN` is set:
+
+- **The work list** is built from the repository alone, under the git-ignored `tmp/`: `pnpm --filter farty-web docs:report` lists each doc whose named or linked code, config or test files changed after the doc was last edited, the most changed first (`apps/web/scripts/docs-report.ts`), and `pnpm verify docs --external` lists the broken outside links. ADRs, changelogs and generated reports aren't listed, and a link to another doc doesn't count, since that doc is checked itself.
+- **Claude** (Sonnet 5.5, at most 80 turns) takes up to eight of those docs and every broken link, checks each against the code, and fixes what's no longer true, in Markdown only: never an ADR, a changelog, `docs/agents/exceptions.md`, `AGENTS.md`'s merge list, code, tests, workflows or config. It runs `pnpm verify docs`, then opens one PR into `staging` from `docs/gardening-<date>`, titled `docs: weekly doc gardening (<date>)`, with a `No issue:` line, or says "No doc drift found". While a gardening PR is open, it opens no other.
+- **The last step passes only on an outcome:** a PR opened in this run, "No doc drift found", or an open gardening PR left alone. It fails when Claude left no log, ended in an error or with subagents running, or reached none of these, and keeps the transcript (`doc-gardening-transcript`).
+- **Its PR starts no checks by itself,** since `github-actions[bot]` opens it with the job's own token. Skim it, then close and reopen it, which starts every check and the review, and merge it once green. It changes only docs, but `AGENTS.md`, `ARCHITECTURE.md` and `apps/web/AGENTS.md` are off the agents' merge list, so a PR that touches one is the owner's to merge.
+
 ## Dependencies
 
 Dependabot (`.github/dependabot.yml`) opens one weekly PR of minor and patch npm updates, reading `@serpcompany/verify` through the repository's read grant on the package, and one for the actions below. A PR that moves an action updates its row in the table.
@@ -77,6 +92,6 @@ Every workflow and the local action run each action at a commit, not a tag: a ta
 ## Set up once, by the owner
 
 - **The package:** in `@serpcompany/verify`'s settings, Manage Actions access, add `serpcompany/farty.fm` with Read. Without it every install in CI fails, and `verify` says so.
-- **The review:** the Actions secret `CLAUDE_CODE_OAUTH_TOKEN`.
+- **The review and doc gardening:** the Actions secret `CLAUDE_CODE_OAUTH_TOKEN`.
 - **The docs check's links into SERP's private repositories:** the variable `SERP_AGENT_APP_ID` and the secret `SERP_AGENT_PRIVATE_KEY`, at repository or organization level.
 - **The branch rules** in Required checks, above, with `reference` and `scores` added.
