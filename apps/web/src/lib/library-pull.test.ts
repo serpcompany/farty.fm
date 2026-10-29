@@ -6,6 +6,7 @@ import {
   claimedBy,
   libraryHarness,
   newToot,
+  recordingFields,
   wav
 } from '@/test-support/library-page'
 
@@ -140,6 +141,23 @@ describe('reading the account', () => {
     library.account.add('recordings', recording, wav(5))
     await library.page.sync.syncOnce('user-a')
     expect((await library.page.store.loadRecordings())[0].placedPitch).toBe(41)
+  })
+
+  it('leaves an id the account lists as deleted to an upload waiting here, which the account may take back', async () => {
+    const recording = await recorded(1)
+    await library.page.sync.syncOnce('user-a')
+    await library.page.store.deleteRecording(recording.id)
+    await library.page.sync.syncOnce('user-a')
+    const again = await library.page.store.saveRecording(recordingFields, wav(1), recording.id)
+    await library.page.store.saveAnalysis(again.id, { state: 'notAnalyzed' })
+    library.account.intercept = sent =>
+      sent.method === 'PUT' && sent.path.includes(recording.id)
+        ? Response.json({ id: recording.id }, { status: 201 })
+        : undefined
+    await library.page.sync.syncOnce('user-a')
+
+    expect((await library.page.store.loadRecordings()).map(r => r.id)).toEqual([recording.id])
+    expect(requests('PUT').filter(s => s.path.includes(recording.id))).toHaveLength(2)
   })
 
   it("drops what the account no longer has after a full read, but not what's waiting to upload", async () => {

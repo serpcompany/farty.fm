@@ -86,6 +86,7 @@ async function apply(database: LibraryDatabase, answer: api.LibraryChanges) {
   }
   for (const kind of kinds) {
     for (const id of answer.deleted[kind]) {
+      if (pending.get(itemKey(kind, id)) === 'put') continue
       if (await tx.objectStore(kind).getKey(id)) await remove(kind, id)
       else await outbox.delete(itemKey(kind, id))
     }
