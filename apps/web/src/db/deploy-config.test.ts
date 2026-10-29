@@ -4,13 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { experimental_readRawConfig, unstable_readConfig } from 'wrangler'
 import { parse } from 'yaml'
 import { siteOrigin } from '../lib/site'
-import { TURNSTILE_TEST_SITE_KEY } from '../server/auth-config'
+import { TURNSTILE_TEST_SITE_KEY } from '../server/auth-settings'
 import { SUPPORT_EMAIL } from '../server/email'
-
-// Each deployed environment's own D1 and R2, its hosts and sender, and the guards that keep local
-// things local: the dev mailbox exists only at wrangler.jsonc's top level, which is never deployed,
-// and every command that deploys or changes a remote database names its environment with --env.
-// Without --env, Wrangler reads the top level.
 
 const path = (relative: string) => fileURLToPath(new URL(relative, import.meta.url))
 const CONFIG = path('../../wrangler.jsonc')
@@ -20,7 +15,6 @@ type Deployed = (typeof DEPLOYED)[number]
 
 type RawConfig = { env?: Record<string, unknown>; kv_namespaces?: { binding: string }[] }
 const raw = (): RawConfig => experimental_readRawConfig({ config: CONFIG }).rawConfig as RawConfig
-/** The config Wrangler uses for one environment, or for the top level. */
 type Resolved = {
   d1_databases: { database_id?: string }[]
   r2_buckets: unknown[]
@@ -44,14 +38,12 @@ const workflows: Record<string, { jobs: Record<string, Job> }> = Object.fromEntr
     .map(file => [file, parse(readFileSync(`${WORKFLOWS}${file}`, 'utf8'))])
 )
 
-/** The deployed environments whose config mentions the dev mailbox in any way. */
 function environmentsWithDevMailbox(config: RawConfig): string[] {
   return Object.entries(config.env ?? {})
     .filter(([, environment]) => JSON.stringify(environment).includes('DEV_MAILBOX'))
     .map(([name]) => name)
 }
 
-/** Each command in a script or a step's `run`. */
 function commandsIn(text: string): string[] {
   return text
     .split(/&&|\|\||;|\n/)
@@ -59,7 +51,6 @@ function commandsIn(text: string): string[] {
     .filter(Boolean)
 }
 
-/** A command that deploys a Worker, or reads or changes a remote D1, R2 or secret. */
 function reachesCloudflare(command: string): boolean {
   if (!/\b(wrangler|opennextjs-cloudflare)\b/.test(command)) return false
   return (
@@ -69,19 +60,16 @@ function reachesCloudflare(command: string): boolean {
   )
 }
 
-/** The environment a command names with --env, if any. */
 function environmentOf(command: string): string | undefined {
   return command.match(/--env[ =](\S+)/)?.[1]
 }
 
-/** Commands that reach Cloudflare without naming a deployed environment. */
 function commandsWithoutEnv(commands: string[]): string[] {
   return commands.filter(
     command => reachesCloudflare(command) && !DEPLOYED.includes(environmentOf(command) as Deployed)
   )
 }
 
-/** A step's commands, with each `pnpm <script>` replaced by that script's own commands. */
 function expand(command: string, seen = new Set<string>()): string[] {
   const script = command.match(/^pnpm (?:run )?([\w:-]+)$/)?.[1]
   if (!script || !(script in scripts) || seen.has(script)) return [command]
@@ -113,9 +101,6 @@ describe('each deployed environment', () => {
     expect(config.r2_buckets).toEqual([{ binding: 'MEDIA', bucket_name: `pedos-${env}` }])
   })
 
-  // site.ts and SUPPORT_EMAIL are the only places a host or the sender is spelled. Sign-in answers
-  // 503 (`auth_url_invalid`) when BETTER_AUTH_URL isn't the served origin, and Email Sending
-  // refuses a sender its binding doesn't allow, so a mismatch would show only after a deploy.
   it.each(DEPLOYED)('%s serves, signs in and sends on its own host from site.ts', env => {
     const config = resolved(env)
     const origin = siteOrigin(env) as string
@@ -131,8 +116,6 @@ describe('each deployed environment', () => {
     ])
   })
 
-  // Turnstile on sign-up (#237): a deployed environment with the always-pass test key would let
-  // anyone send codes. The secrets are Worker secrets, never in wrangler.jsonc.
   it('has its own Turnstile site key, and the top level Cloudflare’s test key', () => {
     const keys = [undefined, ...DEPLOYED].map(env => resolved(env).vars.TURNSTILE_SITE_KEY)
     expect(keys[0]).toBe(TURNSTILE_TEST_SITE_KEY)

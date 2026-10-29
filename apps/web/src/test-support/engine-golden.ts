@@ -1,8 +1,7 @@
-// The reference engine's golden Songs, Arrangements and Pitch Coverage, read from the repo, for the
-// Auto-map and renderer tests. Test input only (Node): nothing here ships.
 import { readFileSync } from 'node:fs'
 import type { AutoMapRecording } from '../lib/engine/auto-map'
 import type { Song } from '../lib/engine/song'
+import type { Analysis } from '../lib/recordings'
 import { type GoldenRecording, goldenRecordings, REPO_ROOT } from './golden'
 
 const GOLDEN_DIR = `${REPO_ROOT}/fixtures/golden`
@@ -22,8 +21,7 @@ export const libraries = index.libraries
 export const songIds = index.songs.map(s => s.id)
 export const tieGroups = index.tie_groups
 
-/** `fixtures/golden/songs/<id>.json`: the shape the engine takes. */
-export const goldenSongs = new Map(
+const goldenSongs = new Map(
   songIds.map(id => [id, readJson<Song>(`${GOLDEN_DIR}/songs/${id}.json`)])
 )
 
@@ -33,7 +31,6 @@ export function goldenSong(id: string): Song {
   return song
 }
 
-/** `fixtures/golden/arrangements/<library>/<song>.json`, as written by `export_golden.py`. */
 export interface GoldenArrangement {
   song: string
   library: Library
@@ -42,7 +39,6 @@ export interface GoldenArrangement {
   transpose: number
   octave_moves: number
   plan_cost: number
-  /** The notes no Recording covers, lowest first, and the shortest fart that would cover each. */
   missing: { target_midi: number; seconds: number }[]
   per_pitch: {
     song_pitch: number
@@ -59,16 +55,13 @@ export interface GoldenArrangement {
         recording: string
         shift_semitones: number
         heard_cents: number | null
-        /** How far the note sounds from its own fart played dry (ADR 0012). */
         fart_cents: number | null
         render: { start_s: number; len_s: number; gain_db: number }
       }[]
     | null
   metrics: {
     notes: number
-    /** The bar (ADR 0012): notes within ±50 cents of their fart's own pitch. */
     within_50c_of_fart_pct: number
-    /** Reported, not gated: notes within ±50 cents of the melody. */
     within_50c_pct: number
     contour_pct: number | null
     onsets_on_time_pct: number
@@ -81,7 +74,6 @@ export function goldenArrangement(library: Library, song: string): GoldenArrange
   return readJson<GoldenArrangement>(`${GOLDEN_DIR}/arrangements/${library}/${song}.json`)
 }
 
-/** One `coverage.json` entry: a Song's Pitch Coverage on a subset of the library. */
 export interface GoldenCoverage {
   song: string
   unlocked: boolean
@@ -105,12 +97,10 @@ export function goldenRecording(id: string): GoldenRecording {
   return r
 }
 
-/** The gesture length the reference measures: whole samples at 44.1 kHz. */
 export function gestureSeconds(r: GoldenRecording): number {
   return (r.gesture.end_sample - r.gesture.start_sample) / index.sample_rate
 }
 
-/** Auto-map's input from the golden analysis (Noise-like Recordings included, as in the app). */
 export function autoMapInput(id: string): AutoMapRecording {
   const r = goldenRecording(id)
   return {
@@ -119,5 +109,38 @@ export function autoMapInput(id: string): AutoMapRecording {
     shortestNoteSeconds: r.melodic ? r.shortest_note_s : null,
     gestureSeconds: gestureSeconds(r),
     settleSeconds: r.melodic ? r.settle_s : null
+  }
+}
+
+export function autoMapInputs(ids: readonly string[]): AutoMapRecording[] {
+  return ids.map(autoMapInput)
+}
+
+export function storedAnalysis(r: GoldenRecording): Analysis {
+  return {
+    gestureStartSeconds: r.gesture.start_sample / index.sample_rate,
+    gestureEndSeconds: r.gesture.end_sample / index.sample_rate,
+    cutAtReattack: r.gesture.cut_at_reattack,
+    pitchEstimateMidi: r.pitch_estimate_midi,
+    pitchConfidence: r.pitch_confidence,
+    recordingPitchMidi: r.recording_pitch_midi,
+    shortestNoteSeconds: r.shortest_note_s,
+    settleSeconds: r.settle_s
+  }
+}
+
+export function syntheticRecording(
+  id: string,
+  recordingPitchMidi: number,
+  { gestureSeconds = 2, shortestNoteSeconds = 0.1 } = {}
+): AutoMapRecording {
+  return { id, recordingPitchMidi, shortestNoteSeconds, gestureSeconds, settleSeconds: 0 }
+}
+
+export function seededRandom(seed: number): () => number {
+  let state = seed
+  return () => {
+    state = (state * 1103515245 + 12345) % 2 ** 31
+    return state / 2 ** 31
   }
 }

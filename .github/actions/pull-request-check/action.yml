@@ -1,0 +1,28 @@
+name: Pull request check
+description: One of SERP's pull request checks (title, issue-link, fix-test or text), run from the @serpcompany/verify version the lockfile pins.
+inputs:
+  check:
+    description: The check to run, title, issue-link, fix-test or text.
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+    - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+      with:
+        node-version-file: .node-version
+        cache: pnpm
+        registry-url: https://npm.pkg.github.com
+        scope: "@serpcompany"
+    - name: Install the root's packages, with @serpcompany/verify from GitHub Packages
+      shell: bash
+      env:
+        NODE_AUTH_TOKEN: ${{ github.token }}
+      run: pnpm install --frozen-lockfile --filter farty
+    - name: Run the ${{ inputs.check }} check
+      shell: bash
+      env:
+        CHECK: ${{ inputs.check }}
+        GITHUB_TOKEN: ${{ github.token }}
+        VERIFY_CONFIG_DIR: ${{ github.workspace }}
+      run: node node_modules/@serpcompany/verify/dist/pull-request/main.js "$CHECK"

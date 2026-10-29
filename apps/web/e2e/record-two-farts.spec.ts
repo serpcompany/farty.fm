@@ -1,11 +1,10 @@
-import { expect, test } from '@playwright/test'
-import { recordAndSave, withFakeMicrophone } from './record'
+import { recordAndSave, withFartingMicrophone } from './record'
+import { expect, test } from './test'
 
-// Fixture 084 holds two farts: the golden analysis keeps the first, at G♯3 (-17 cents).
-withFakeMicrophone('084__walter-odington__grim-fart__26216.wav')
+withFartingMicrophone()
 
 test('recording two farts keeps the first and says so', async ({ page }) => {
-  await recordAndSave(page, 3.5)
+  await recordAndSave(page, '084')
   await expect(page.getByTestId('result-note')).toHaveText('G♯3')
   await expect(page.getByText('We kept the first fart')).toBeVisible()
   await page.getByRole('button', { name: 'Done' }).click()

@@ -10,7 +10,6 @@ describe("Download App's QR code", () => {
   test.each([
     ['production', 'https://farty.fm'],
     ['staging', 'https://staging.farty.fm'],
-    // A local run has no host of its own, and a phone can't reach the computer's localhost.
     ['', 'https://farty.fm']
   ])("opens the build's own origin (SITE_ENV=%s)", (siteEnv, url) => {
     vi.stubEnv('SITE_ENV', siteEnv)
@@ -33,7 +32,6 @@ describe("Download App's QR code", () => {
     expect(data.every((row, y) => row.every((dark, x) => !dark || !(edge(x) || edge(y))))).toBe(
       true
     )
-    // Nothing else is in the path.
     expect(path.replace(/M\d+ \d+h\d+v1h-\d+z/g, '')).toBe('')
   })
 })

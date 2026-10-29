@@ -1,17 +1,18 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { forgetDecoded, play, stopPlayback } from './player'
 
-type FakeSource = { key: string; started: boolean; stopped: boolean; onended: (() => void) | null }
+type FakeSource = {
+  key: string
+  started: boolean
+  startedWith: number[]
+  stopped: boolean
+  onended: (() => void) | null
+}
 
 const sources: FakeSource[] = []
 
-/**
- * Decodes that finish only when the test says so, like a Recording loading from IndexedDB, in the
- * order they began.
- */
 const pending: { key: string; finish: () => void }[] = []
 
-/** Finishes the `nth` decode of `key` still pending. */
 function finish(key: string, nth = 0): void {
   const waiting = pending.filter(p => p.key === key)[nth]
   if (!waiting) throw new Error(`no decode of ${key} pending`)
@@ -35,14 +36,16 @@ vi.mock('./context', () => ({
       const source = {
         key: '',
         started: false,
+        startedWith: [] as number[],
         stopped: false,
         onended: null as (() => void) | null,
         set buffer(buffer: { key: string }) {
           source.key = buffer.key
         },
         connect: () => {},
-        start: () => {
+        start: (...at: number[]) => {
           source.started = true
+          source.startedWith = at
         },
         stop: () => {
           source.stopped = true
@@ -57,7 +60,6 @@ vi.mock('./context', () => ({
 
 const wav = (key: string) => async () => new TextEncoder().encode(key).buffer as ArrayBuffer
 
-/** Lets the awaits inside `play` run. */
 const settle = () => new Promise(resolve => setTimeout(resolve, 0))
 
 describe('the player', () => {
@@ -127,7 +129,6 @@ describe('the player', () => {
     await settle()
     const playingA2 = play('row-a', wav('row-a'), null, endedA2)
     await settle()
-    // Both plays of A share its one decode.
     expect(pending.map(p => p.key)).toEqual(['row-a', 'row-b'])
     finish('row-a')
     await Promise.all([playingA1, playingA2])
@@ -169,6 +170,22 @@ describe('the player', () => {
     await play('kept', load, null, () => {})
     expect(load).toHaveBeenCalledOnce()
     expect(sources.map(s => s.key)).toEqual(['kept', 'kept'])
+  })
+
+  test('a segment plays only that part: from its start, for its length', async () => {
+    const part = play('part', wav('part'), { start: 0.25, end: 0.75 }, () => {})
+    await settle()
+    finish('part')
+    await part
+    const whole = play('whole', wav('whole'), null, () => {})
+    await settle()
+    finish('whole')
+    await whole
+
+    expect(sources.map(s => [s.key, s.startedWith])).toEqual([
+      ['part', [0, 0.25, 0.5]],
+      ['whole', []]
+    ])
   })
 
   test("a sound that can't load says it's over", async () => {

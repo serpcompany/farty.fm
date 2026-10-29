@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next'
-import { AccountProvider } from '@/components/pedos/account-provider'
-import { AppShell } from '@/components/pedos/app-shell'
-import { DownloadQr } from '@/components/pedos/download-qr'
-import { InstallPrompt } from '@/components/pedos/install-prompt'
-import { PedosProvider } from '@/components/pedos/pedos-provider'
+import { AccountProvider } from '@/components/farty/account-provider'
+import { AppShell } from '@/components/farty/app-shell'
+import { DownloadQr } from '@/components/farty/download-qr'
+import { FartyProvider } from '@/components/farty/farty-provider'
+import { InstallPrompt } from '@/components/farty/install-prompt'
 import { siteOrigin } from '@/lib/site'
 import { welcomedKey } from '@/lib/welcomed'
 import './globals.css'
@@ -14,8 +14,6 @@ export const metadata: Metadata = {
   title: 'Farty',
   description: 'Record your farts and find the note in each one.',
   appleWebApp: { title: 'Farty', capable: true, statusBarStyle: 'default' },
-  // Each page's canonical is its own path on the environment's host. A local run has no host, so
-  // no canonical. The home page writes its own (page.tsx): Next would add a trailing slash.
   ...(origin ? { metadataBase: new URL(origin), alternates: { canonical: './' } } : {})
 }
 
@@ -29,28 +27,21 @@ export const viewport: Viewport = {
   ]
 }
 
+const markWelcomedBeforePaint = `try{localStorage.getItem(${JSON.stringify(welcomedKey)})!==null&&document.documentElement.setAttribute('data-welcomed','')}catch(e){}`
+
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    // The script marks a browser that has opened the app before paint, so on a touch tablet a
-    // returning visitor gets the app and a new one the lander, with no flash of the other. A computer
-    // always gets the lander, by CSS alone (`lander.tsx`).
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <head>
-        <script
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: a fixed string, run before paint.
-          dangerouslySetInnerHTML={{
-            __html: `try{localStorage.getItem(${JSON.stringify(welcomedKey)})!==null&&document.documentElement.setAttribute('data-welcomed','')}catch(e){}`
-          }}
-        />
-        {/* With credentials, so Chrome can fetch it behind the Staging password (#123). */}
+        <script>{markWelcomedBeforePaint}</script>
         <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
       </head>
       <body className="min-h-full">
         <AccountProvider>
-          <PedosProvider>
+          <FartyProvider>
             <AppShell qrCode={<DownloadQr />}>{children}</AppShell>
             <InstallPrompt />
-          </PedosProvider>
+          </FartyProvider>
         </AccountProvider>
       </body>
     </html>

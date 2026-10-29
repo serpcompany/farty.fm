@@ -1,11 +1,16 @@
-import 'fake-indexeddb/auto'
-import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { FakeAccount } from '@/test-support/fake-account'
+import {
+  newToot,
+  openLibraryPage,
+  saveRecordingOn,
+  stubLibraryBrowser,
+  wav
+} from '@/test-support/library-page'
+import { blockedStorage, memoryStorage } from '@/test-support/web-storage'
 import type { Account } from './account'
 import { itemKey } from './outbox'
 import type { Recording } from './recordings'
-import { type FakeAccount, fakeAccount } from './test-library'
-import { blockedStorage, memoryStorage } from './test-storage'
 import type { Toot } from './toot'
 import { clearsOnOpen, type OpenFacts } from './visit'
 
@@ -43,16 +48,11 @@ describe('clearsOnOpen', () => {
   })
 })
 
-// Each open over a real IndexedDB (fake-indexeddb) and a fake account (`test-library.ts`).
 describe('openVisit', () => {
   let account: FakeAccount
 
   beforeEach(() => {
-    vi.stubGlobal('indexedDB', new IDBFactory())
-    vi.stubGlobal('localStorage', memoryStorage())
-    // No Web Locks: no other tab is open.
-    vi.stubGlobal('navigator', {})
-    account = fakeAccount('user-a')
+    account = stubLibraryBrowser()
   })
 
   afterEach(() => {
@@ -65,10 +65,6 @@ describe('openVisit', () => {
     Response.json({ session: {}, user: { id, email: `${id}@example.com` } })
   const signedIn = signedInAs('user-a')
 
-  /**
-   * Opens Farty in a new tab (or `tab`, for a reload), with get-session answering `session` and
-   * the rest going to user-a's account. Resolves once the library can load.
-   */
   async function open(session: () => Response | Error, tab: Storage = memoryStorage()) {
     vi.stubGlobal('sessionStorage', tab)
     vi.stubGlobal(
@@ -80,14 +76,10 @@ describe('openVisit', () => {
         return answer
       })
     )
-    // `openVisit` starts once a page: fresh modules are a fresh page.
-    vi.resetModules()
     const page = {
+      ...(await openLibraryPage()),
       visit: await import('./visit'),
-      signIn: await import('./account'),
-      store: await import('./recording-store'),
-      toots: await import('./toot-store'),
-      sync: await import('./library-sync')
+      signIn: await import('./account')
     }
     const visit = page.visit.openVisit()
     await visit.library
@@ -96,30 +88,16 @@ describe('openVisit', () => {
 
   type Page = Awaited<ReturnType<typeof open>>
 
-  const wav = (n: number) => new Uint8Array([82, 73, 70, 70, n, n, n]).buffer
-
-  /** Saves a Recording, analyzed so it can upload, and a Toot made from it, as a person does. */
   async function makeFarts(page: Page): Promise<{ recording: Recording; toot: Toot }> {
-    const saved = await page.store.saveRecording(
-      { seconds: 1, sampleRate: 48_000, waveform: [0.5] },
-      wav(1)
-    )
-    const recording = (await page.store.saveAnalysis(saved.id, {
-      state: 'notAnalyzed'
-    })) as Recording
+    const recording = await saveRecordingOn(page)
     const toot: Toot = {
-      id: crypto.randomUUID(),
-      title: 'Mary Had a Little Lamb',
-      songId: 'mary-had-a-little-lamb',
-      createdAt: Date.now(),
-      seconds: 3,
+      ...newToot(),
       arrangement: { transposition: 0, recordingForPitch: { 55: recording.id } }
     }
     await page.toots.saveToot(toot, wav(9))
     return { recording, toot }
   }
 
-  /** What this browser holds: each store's keys. */
   async function held(page: Page) {
     const database = await page.store.db()
     const keys = async (name: 'recordings' | 'audio' | 'toots' | 'tootAudio' | 'outbox') =>
@@ -133,12 +111,7 @@ describe('openVisit', () => {
     }
   }
 
-  /** A browser that has had a guest's visit since a guest's Toots last only the visit. */
   const pastFirstOpen = () => localStorage.setItem('pedos.opened', '1')
-  /**
-   * Makes farts as a build from before #237 did: Farty hasn't opened since, so it hasn't noted
-   * which Recordings this browser keeps.
-   */
   async function makeFartsBefore237(page: Page) {
     const farts = await makeFarts(page)
     localStorage.removeItem('pedos.keptRecordings')
@@ -150,8 +123,6 @@ describe('openVisit', () => {
     pastFirstOpen()
     const last = await open(signedOut)
     const { recording, toot } = await makeFarts(last)
-    // Something waits to download for each, as for a library an account left (`forgetLibrary`
-    // clears those): each goes with its fart.
     const database = await last.store.db()
     await database.put(
       'downloads',
@@ -170,7 +141,6 @@ describe('openVisit', () => {
   it('keeps the Recordings a browser held from before #237, and clears those made since', async () => {
     pastFirstOpen()
     const { recording: before } = await makeFartsBefore237(await open(signedOut))
-    // The first open since: the last visit's Toot goes, and its Recording is kept from now on.
     const first = await open(signedOut)
     expect(JSON.parse(localStorage.getItem('pedos.keptRecordings') ?? '')).toEqual([before.id])
     expect(await held(first)).toMatchObject({ recordings: [before.id], toots: [] })
@@ -186,7 +156,6 @@ describe('openVisit', () => {
       outbox: [itemKey('recordings', before.id)]
     })
     expect(await next.store.loadAudio(before.id)).toEqual(wav(1))
-    // Closed and opened again: still there.
     const after = await open(signedOut)
     expect((await after.store.loadRecordings()).map(r => r.id)).toEqual([before.id])
   })
@@ -214,8 +183,6 @@ describe('openVisit', () => {
     })
   })
 
-  // A clear can throw, such as when WebKit's lost IndexedDB connection fails twice (`withDb`). The
-  // visit has still started, so a reload keeps what the guest makes in it.
   it("clears nothing on a reload after the clear at open failed, so this visit's Recordings stay", async () => {
     pastFirstOpen()
     const { recording: last } = await makeFarts(await open(signedOut))
@@ -231,11 +198,9 @@ describe('openVisit', () => {
 
     const reloaded = await open(signedOut, tab)
     expect((await held(reloaded)).recordings).toEqual([last.id, recording.id].sort())
-    // The next visit clears them both, since neither is kept.
     expect((await held(await open(signedOut))).recordings).toEqual([])
   })
 
-  /** The account step sends a sign-in code, as `sendNow` does. */
   async function sendACode(page: Page) {
     vi.stubGlobal(
       'fetch',
@@ -244,8 +209,6 @@ describe('openVisit', () => {
     expect(await page.signIn.sendCode('a@example.com', 'token')).toMatchObject({ ok: true })
   }
 
-  // A home-screen app that iOS ends while the guest reads their code in Mail may open again with
-  // empty sessionStorage: a new visit, which mustn't clear the farts they're signing up to keep.
   it("keeps a guest's farts on a new visit while the code they were sent still works", async () => {
     pastFirstOpen()
     const page = await open(signedOut)
@@ -255,12 +218,10 @@ describe('openVisit', () => {
     vi.setSystemTime(Date.now() + 9 * 60_000)
     const relaunched = await open(signedOut)
     expect(await held(relaunched)).toMatchObject({ recordings: [recording.id], toots: [toot.id] })
-    // Once the code no longer works, a new visit clears them as any guest's.
     vi.setSystemTime(Date.now() + 2 * 60_000)
     expect(await held(await open(signedOut))).toMatchObject({ recordings: [], toots: [] })
   })
 
-  // Told before #237 that their Recordings stay, they get one more offer, at their next Result.
   it.each([
     ['offers the step once more to a guest whose Recordings are kept', 'guest', true, null],
     ['leaves it for a guest with no Recordings to keep', 'guest', false, 'once'],
@@ -273,7 +234,6 @@ describe('openVisit', () => {
     localStorage.setItem('pedos.accountStep', whose === 'guest' ? 'once' : 'done')
     await open(whose === 'guest' ? signedOut : signedIn)
     expect(localStorage.getItem('pedos.accountStep')).toBe(step)
-    // Only that first open: the next leaves the offer as it is.
     localStorage.setItem('pedos.accountStep', 'once')
     await open(signedOut)
     expect(localStorage.getItem('pedos.accountStep')).toBe('once')
@@ -282,7 +242,6 @@ describe('openVisit', () => {
   it("uploads a guest's Recordings as they sign in, those kept from before #237 included", async () => {
     pastFirstOpen()
     const { recording: before } = await makeFartsBefore237(await open(signedOut))
-    // A later visit, which makes another, then signs in (reloaded here, in the same tab).
     const tab = memoryStorage()
     const { recording: since } = await makeFarts(await open(signedOut, tab))
     const signedInVisit = await open(signedIn, tab)
@@ -298,7 +257,6 @@ describe('openVisit', () => {
     expect(puts.sort()).toEqual(
       [`/api/recordings/${before.id}/`, `/api/recordings/${since.id}/`].sort()
     )
-    // Signed in, a new visit keeps them all.
     expect((await held(await open(signedIn))).recordings).toEqual([before.id, since.id].sort())
   })
 
@@ -308,7 +266,6 @@ describe('openVisit', () => {
     const { recording } = await makeFarts(signedInVisit)
     await signedInVisit.sync.syncOnce('user-a')
     expect(account.get('recordings', recording.id)).toBeDefined()
-    // A Sign out before #203 whose clear failed: the account forgotten, its library left.
     localStorage.removeItem('pedos.account')
 
     const guest = await open(signedOut)
@@ -336,7 +293,6 @@ describe('openVisit', () => {
     expect(await held(ended)).toMatchObject({ recordings: [recording.id], toots: [toot.id] })
   })
 
-  // Without sessionStorage, Farty can't tell a reload from a new visit.
   it('clears nothing when sessionStorage is blocked', async () => {
     pastFirstOpen()
     const { recording, toot } = await makeFarts(await open(signedOut))
@@ -344,7 +300,6 @@ describe('openVisit', () => {
     expect(await held(blocked)).toMatchObject({ recordings: [recording.id], toots: [toot.id] })
   })
 
-  // The first open's grace is for an open that can say Toots go at the end of the visit.
   it.each([
     ['answers 503', () => new Response('no secret', { status: 503 })],
     ['answers 500', () => new Response('oops', { status: 500 })],
@@ -354,11 +309,9 @@ describe('openVisit', () => {
     expect(unread.account).toEqual({ status: 'unreachable' })
     expect(localStorage.getItem('pedos.opened')).toBeNull()
     const { recording, toot } = await makeFarts(unread)
-    // Read at last: the warned open, which keeps what's here.
     const warned = await open(signedOut)
     expect(await held(warned)).toMatchObject({ recordings: [recording.id], toots: [toot.id] })
     expect(localStorage.getItem('pedos.opened')).toBe('1')
-    // The next visit is a guest's like any other.
     const next = await open(signedOut)
     expect(await held(next)).toMatchObject({ recordings: [], toots: [] })
   })

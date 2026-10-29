@@ -36,9 +36,7 @@ const EXPECTED_MELODIC = [
   '104'
 ]
 
-// #36: from the golden gesture, contour and estimate, the same shortest note for every Recording,
-// and so the same Melodic set (`AuditionTests.swift`).
-test('shortest notes match the golden data', async () => {
+test('from the golden gesture, contour and estimate, shortest notes and the Melodic set match the golden data', async () => {
   expect(goldenIndex.melodic_recordings).toEqual(EXPECTED_MELODIC)
   const melodic: string[] = []
   let matches = 0
@@ -46,7 +44,6 @@ test('shortest notes match the golden data', async () => {
   for (const golden of goldenRecordings) {
     const estimate = golden.pitch_estimate_midi
     if (estimate === null) {
-      // No estimate: Noise-like without audition.
       expect.soft(golden.shortest_note_s === null && !golden.melodic).toBe(true)
       matches++
       continue
@@ -76,9 +73,7 @@ test('shortest notes match the golden data', async () => {
   console.log(lines.join('\n'))
 })
 
-// The golden contour holds pYIN grid values rounded to 4 decimals. Snapping back to the grid
-// recovers exactly what the reference holds; this checks that it doesn't matter.
-test('the unsnapped golden contour gives the same shortest notes', async () => {
+test('the golden contour as written, rounded to 4 decimals and not snapped back to the pYIN grid, gives the same shortest notes', async () => {
   for (const golden of goldenRecordings) {
     const estimate = golden.pitch_estimate_midi
     if (estimate === null) continue
@@ -90,12 +85,9 @@ test('the unsnapped golden contour gives the same shortest notes', async () => {
   }
 })
 
-/** The settle time's tolerance (`fixtures/golden/README.md`): 2 pYIN frames of 256 samples. */
 const SETTLE_TOLERANCE_SECONDS = (2 * 256) / 44_100
 
-// #116: from the golden gesture, contour and Recording Pitch, the same settle time as the
-// reference's `settle_time()` for every Melodic Recording.
-test('settle times match the golden data', async () => {
+test('from the golden gesture, contour and Recording Pitch, settle times match the golden data', async () => {
   const lines = [row('id', 'settle s', 'golden', 'Δ frames')]
   let exact = 0
   let melodic = 0

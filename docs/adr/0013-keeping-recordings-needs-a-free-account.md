@@ -29,5 +29,5 @@ A guest still tries everything during a visit, and making an account is how they
 ## Consequences
 
 - A guest who closes Farty loses what they recorded. The step after the first Result, Not now, Profile, the lander and the privacy page say so.
-- Every environment needs Turnstile's keys to send codes: the site key in `wrangler.jsonc`'s `vars` and `TURNSTILE_SECRET_KEY` as a Worker secret. Without them sign-in still reads sessions, but no code is sent. Local runs use Cloudflare's test keys. The setup is in `docs/agents/web.md`.
+- Every environment needs Turnstile's keys to send codes: the site key in `wrangler.jsonc`'s `vars` and `TURNSTILE_SECRET_KEY` as a Worker secret. Without them sign-in still reads sessions, but no code is sent. Local runs use Cloudflare's test keys. The setup is in [Accounts and sign-in](../agents/accounts.md).
 - The account step loads Turnstile's script from `challenges.cloudflare.com` when it shows the email field.

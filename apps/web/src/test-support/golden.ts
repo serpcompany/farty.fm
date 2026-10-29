@@ -1,13 +1,10 @@
-// The Fixture Library and the reference engine's golden answers, read from the repo. Test input
-// only (Node): nothing here ships. Mirrors `GoldenData.swift`.
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import { type DecodedFile, decodeFile } from '../../scripts/decode-audio-file'
 import { hzToMidi, midiToHz } from '../lib/analysis/numeric'
 import { Pyin, sharedPyin } from '../lib/analysis/pyin'
 import { resampleToAnalysisRate } from '../lib/analysis/resample'
-import { type DecodedFile, decodeFile } from './decode'
 
-/** The repository root, four levels up from `apps/web/src/test-support/`. */
 export const REPO_ROOT = fileURLToPath(new URL('../../../../', import.meta.url)).replace(/\/$/, '')
 const RECORDINGS_DIR = `${REPO_ROOT}/fixtures/recordings`
 const GOLDEN_DIR = `${REPO_ROOT}/fixtures/golden`
@@ -19,7 +16,6 @@ export interface GoldenIndex {
   hop: number
 }
 
-/** `fixtures/golden/recordings/<id>.json`, as written by `export_golden.py`. */
 export interface GoldenRecording {
   id: string
   file: { name: string; sample_rate: number; channels: number; frames: number }
@@ -35,7 +31,6 @@ export interface GoldenRecording {
   pitch_confidence: number
   recording_pitch_midi: number | null
   shortest_note_s: number | null
-  /** Format 3 (#116): when the Recording settles on its pitch. Null when Noise-like. */
   settle_s: number | null
   melodic: boolean
   noise_like_reason: 'no_steady_pitch' | 'failed_audition' | null
@@ -50,7 +45,6 @@ export const goldenRecordings = goldenIndex.recordings.map(id =>
 )
 
 const decodes = new Map<string, Promise<DecodedFile>>()
-/** The fixture file decoded at its own rate (mono float32), once per test file. */
 export function decoded(golden: GoldenRecording): Promise<DecodedFile> {
   let d = decodes.get(golden.id)
   if (!d) {
@@ -60,23 +54,16 @@ export function decoded(golden: GoldenRecording): Promise<DecodedFile> {
   return d
 }
 
-/** The fixture on the reference's 44.1 kHz timeline. */
 export async function analysisAudio(golden: GoldenRecording): Promise<Float32Array> {
   const file = await decoded(golden)
   return resampleToAnalysisRate(file.samples, file.sampleRate)
 }
 
-/** The golden gesture of a fixture, cut from this package's own decode of the file. */
 export async function gestureBody(golden: GoldenRecording): Promise<Float64Array> {
   const y = await analysisAudio(golden)
   return Float64Array.from(y.subarray(golden.gesture.start_sample, golden.gesture.end_sample))
 }
 
-/**
- * The golden pitch contour in Hz, exactly as the reference engine holds it. Every voiced contour
- * value is a pYIN grid value (fmin × 2^(bin / 120), MIDI x.x259…) written with 4 decimals;
- * snapping it to its bin recovers the full-precision value.
- */
 export function goldenContourHz(golden: GoldenRecording): Float64Array {
   const base = hzToMidi(Pyin.fmin)
   const freqs = sharedPyin().freqs
@@ -90,13 +77,8 @@ export function goldenContourHz(golden: GoldenRecording): Float64Array {
   })
 }
 
-/**
- * The golden contour is rounded to 4 decimals of MIDI, so a voiced frame on the same pYIN bin can
- * differ from it by at most 0.00005 (0.005 cents).
- */
 export const CONTOUR_TOLERANCE_MIDI = 0.00005 + 1e-9
 
-/** Frame-by-frame agreement of a contour (MIDI, null when unvoiced) with the golden one. */
 export function compareContour(mine: (number | null)[], golden: GoldenRecording) {
   const theirs = golden.pitch_contour.midi
   let voicingAgrees = 0
@@ -110,7 +92,6 @@ export function compareContour(mine: (number | null)[], golden: GoldenRecording)
   return { frames: mine.length, voicingAgrees, maxDiffMidi }
 }
 
-/** Formats a table row with fixed-width columns. */
 export function row(...cells: unknown[]): string {
   return cells.map(cell => String(cell).padEnd(10)).join(' ')
 }

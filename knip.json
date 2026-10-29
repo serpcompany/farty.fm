@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {},
+    "apps/web": {
+      "entry": [
+        "open-next.config.ts",
+        "e2e/**/*.ts",
+        "scripts/*.ts",
+        "src/lib/catalog/generate.ts",
+        "src/lib/*/worker.ts",
+        "src/test-support/workers-entry.ts"
+      ],
+      "ignoreDependencies": [
+        "cloudflare"
+      ]
+    }
+  }
+}

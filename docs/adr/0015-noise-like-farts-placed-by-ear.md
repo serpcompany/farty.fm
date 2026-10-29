@@ -90,7 +90,7 @@ How these read:
 
 ## Consequences
 
-- **Web releases roll forward only past #268.** A build from before it can't open IndexedDB version 4, so a Cloudflare rollback past it leaves the library unopenable in every browser that opened #268's build, until a release rolls forward (`docs/agents/web.md`).
+- **Web releases roll forward only past #268.** A build from before it can't open IndexedDB version 4, so a Cloudflare rollback past it leaves the library unopenable in every browser that opened #268's build, until a release rolls forward (`docs/agents/releases.md`).
 - **Migration 0004 must apply before the Worker that reads it.** CI applies D1 migrations before each deploy (`web.yml`).
   - A Worker from before #268 ignores `placedPitch` in an upload, and its library read leaves it out, which a browser reads as no change.
   - Such a Worker answers 405 to the PATCH. The browser then drops it from the outbox, as it does for a note the account refuses, and keeps the placement itself.

@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { markTootPaid, startTootPayment } from '@/db/payments'
 import { recordings, session, tootPayments, toots, user, verification } from '@/db/schema'
 import { TOOT_PRICE } from '@/lib/pricing'
+import { RECENT_SIGN_IN_MINUTES } from '@/server/auth-session'
 import { deleteAccount } from '@/server/library'
 import {
   api,
@@ -17,8 +18,6 @@ import {
   uploadBody,
   wav
 } from '@/test-support/library-api'
-
-// The account routes in workerd, with a real D1 and R2.
 
 const R1 = '11111111-1111-4111-8111-111111111111'
 const T1 = '33333333-3333-4333-8333-333333333333'
@@ -34,9 +33,19 @@ async function rowsOf(userId: string) {
   }
 }
 
-const deleteRequest = () => new Request(`${ORIGIN}/api/account/`, { method: 'DELETE' })
+const deleteWith = (media: R2Bucket, { id, email }: { id: string; email: string }) =>
+  deleteAccount(
+    { db: testDb(), media },
+    { id, email, marketingEmail: true, signedInAt: new Date() },
+    new Request(`${ORIGIN}/api/account/`, { method: 'DELETE' })
+  )
 
-/** A Recording and a paid-for Toot (ADR 0010). */
+const signedInAgo = (userId: string, ms: number) =>
+  testDb()
+    .update(session)
+    .set({ createdAt: new Date(Date.now() - ms) })
+    .where(eq(session.userId, userId))
+
 async function fill({ id, cookie }: { id: string; cookie: string }) {
   await api.put('recordings', R1, uploadBody(recordingMetadata(R1), wav()), { cookie })
   await startTootPayment(testDb(), id, T1, 'twinkle', 'dev_test', TOOT_PRICE)
@@ -74,7 +83,6 @@ describe('PATCH /api/account/', () => {
     const a = await signUp('A')
     const b = await signUp('B')
 
-    // A page still showing B, after A signed in in another tab.
     const refused = await api.patchAccount({ marketingEmail: false }, { ...a, library: b.id })
 
     expect(refused.status).toBe(409)
@@ -107,9 +115,7 @@ describe('DELETE /api/account/', () => {
       tootPayments: []
     })
     expect(await bucketKeys(`users/${a.id}/`)).toEqual([])
-    // Signed out everywhere: the session went with the user.
     expect((await api.library(a)).status).toBe(401)
-    // Nobody else's account is touched.
     const others = await rowsOf(b.id)
     expect([others.users.length, others.sessions.length]).toEqual([1, 1])
     expect([others.recordings.length, others.toots.length]).toEqual([1, 1])
@@ -126,7 +132,6 @@ describe('DELETE /api/account/', () => {
     const keys = await bucketKeys()
     const before = [await rowsOf(a.id), await rowsOf(b.id)]
 
-    // A page still showing B, after A signed in in another tab.
     const refused = await api.deleteAccount({ ...a, library: b.id })
 
     expect(refused.status).toBe(409)
@@ -152,9 +157,7 @@ describe('DELETE /api/account/', () => {
       delete: () => Promise.reject(new Error('R2 is down'))
     } as unknown as R2Bucket
 
-    await expect(
-      deleteAccount({ db: testDb(), media: failing }, { id: a.id }, deleteRequest())
-    ).rejects.toThrow()
+    await expect(deleteWith(failing, a)).rejects.toThrow()
 
     expect((await rowsOf(a.id)).users).toHaveLength(1)
     expect((await api.deleteAccount(a)).status).toBe(204)
@@ -166,8 +169,6 @@ describe('DELETE /api/account/', () => {
     await fill(a)
     const late = `users/${a.id}/recordings/late.wav`
     let written = false
-    // R2 as an upload that passed its session check before the delete writes to it: its WAV
-    // lands once the first sweep has found nothing left.
     const racing = {
       list: async (options: R2ListOptions) => {
         const page = await env.MEDIA.list(options)
@@ -180,7 +181,7 @@ describe('DELETE /api/account/', () => {
       delete: (keys: string[]) => env.MEDIA.delete(keys)
     } as unknown as R2Bucket
 
-    await deleteAccount({ db: testDb(), media: racing }, { id: a.id }, deleteRequest())
+    await deleteWith(racing, a)
 
     expect(written).toBe(true)
     expect(await bucketKeys()).toEqual([])
@@ -198,7 +199,6 @@ describe('DELETE /api/account/', () => {
       createdAt: now,
       updatedAt: now
     })
-    // Sign-in names a code's row by the lowercased email; signUp's are `A@example.test`.
     await testDb()
       .insert(verification)
       .values([code('sign-in-otp-a@example.test'), code('sign-in-otp-b@example.test')])
@@ -207,6 +207,41 @@ describe('DELETE /api/account/', () => {
 
     const left = await testDb().select({ identifier: verification.identifier }).from(verification)
     expect(left).toEqual([{ identifier: 'sign-in-otp-b@example.test' }])
+  })
+
+  it('refuses a session signed in 10 minutes ago or more (403), and deletes nothing', async () => {
+    expect(RECENT_SIGN_IN_MINUTES).toBe(10)
+    const a = await signUp('A')
+    await fill(a)
+    const keys = await bucketKeys()
+    const before = await rowsOf(a.id)
+
+    for (const minutes of [10, 60, 6 * 24 * 60]) {
+      await signedInAgo(a.id, minutes * 60_000)
+      const refused = await api.deleteAccount({ ...a, library: a.id })
+      expect(refused.status).toBe(403)
+      expect(await refused.json()).toEqual({ error: 'sign_in_again' })
+      expect(refused.headers.get('cache-control')).toBe('private, no-store')
+    }
+
+    expect(await bucketKeys()).toEqual(keys)
+    expect(keys).toHaveLength(2)
+    expect(await rowsOf(a.id)).toEqual({
+      ...before,
+      sessions: [{ ...before.sessions[0], createdAt: expect.any(Date) }]
+    })
+  })
+
+  it('deletes for a session signed in less than 10 minutes ago', async () => {
+    const a = await signUp('A')
+    await fill(a)
+
+    await signedInAgo(a.id, 9 * 60_000)
+    const response = await api.deleteAccount({ ...a, library: a.id })
+
+    expect(response.status).toBe(204)
+    expect((await rowsOf(a.id)).users).toEqual([])
+    expect(await bucketKeys()).toEqual([])
   })
 
   it('answers a signed-out request with 401 and deletes nothing', async () => {

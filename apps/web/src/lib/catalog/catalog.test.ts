@@ -43,9 +43,7 @@ describe('the Song Catalog in the app', () => {
   })
 })
 
-// export_golden.py reads the same ship list (#225), so a Song can't ship without the golden data
-// the Auto-map and renderer tests check it against.
-describe('the golden data', () => {
+describe('the golden data, which export_golden.py writes for the same ship list', () => {
   const golden = `${REPO_ROOT}/fixtures/golden`
   const index = JSON.parse(readFileSync(`${golden}/index.json`, 'utf8')) as {
     songs: { id: string }[]

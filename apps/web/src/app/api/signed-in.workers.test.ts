@@ -8,8 +8,6 @@ import { listCapturedEmails } from '@/server/dev-mailbox'
 import { api, ORIGIN, recordingMetadata, testDb, uploadBody, wav } from '@/test-support/library-api'
 import { fakeSiteverify, TEST_TOKEN } from '@/test-support/turnstile'
 
-// The library routes with sign-in's own session (`src/server/session-user.ts` unmocked): signed in
-// through the real email-code flow and the dev mailbox, in workerd with a real D1, KV and R2.
 vi.unmock('@/server/session-user')
 
 const R1 = '11111111-1111-4111-8111-111111111111'
@@ -34,7 +32,6 @@ async function sendCode(email: string) {
   expect(response.status).toBe(200)
 }
 
-/** Signs in with an emailed code, and answers the session cookie and the user's id. */
 async function signIn(email: string): Promise<{ id: string; cookie: string }> {
   await sendCode(email)
   const mail = (await listCapturedEmails(bindings.DEV_MAILBOX)).find(m => m.to === email)
@@ -107,7 +104,6 @@ describe('DELETE /api/account/ with sign-in’s session', () => {
   it('deletes the user’s sessions and their waiting sign-in codes, and no one else’s', async () => {
     const a = await signIn('a@example.test')
     const b = await signIn('b@example.test')
-    // A second browser, then a code asked for and never used: two sessions and a waiting code.
     const aElsewhere = await signIn('a@example.test')
     await sendCode('a@example.test')
     await sendCode('b@example.test')
@@ -125,5 +121,24 @@ describe('DELETE /api/account/ with sign-in’s session', () => {
     expect(await sessionsOf(b.id)).toHaveLength(1)
     expect(await verificationsFor('b@example.test')).toHaveLength(1)
     expect((await api.library(b)).status).toBe(200)
+  })
+
+  it('refuses a sign-in 10 minutes old, and deletes once a new code signs in again', async () => {
+    const old = await signIn('a@example.test')
+    await testDb()
+      .update(session)
+      .set({ createdAt: new Date(Date.now() - 10 * 60_000) })
+      .where(eq(session.userId, old.id))
+
+    const refused = await api.deleteAccount(old)
+    expect(refused.status).toBe(403)
+    expect(await refused.json()).toEqual({ error: 'sign_in_again' })
+    expect(await testDb().select().from(user).where(eq(user.id, old.id))).toHaveLength(1)
+
+    const again = await signIn('a@example.test')
+    expect(again.id).toBe(old.id)
+    expect((await api.deleteAccount(again)).status).toBe(204)
+    expect(await testDb().select().from(user).where(eq(user.id, old.id))).toEqual([])
+    expect(await testDb().select().from(session).where(eq(session.userId, old.id))).toEqual([])
   })
 })

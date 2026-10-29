@@ -1,42 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import {
+  newCaptureProcessor,
+  renderQuantum as quantum,
+  captureSampleRate as sampleRate
+} from '@/test-support/capture-processor'
+import {
   batchFrames,
   type CaptureBatch,
   type CaptureCommand,
-  captureProcessorSource,
   preRollSeconds
 } from './capture-processor'
 
-type Processor = {
-  port: { onmessage: ((event: { data: CaptureCommand }) => void) | null }
-  process(inputs: Float32Array[][]): boolean
-}
-
-const sampleRate = 48_000
-const quantum = 128
-
-/** The shipped worklet source, run against a stand-in for the audio thread. */
 function capture() {
   const sent: CaptureBatch[] = []
-  class AudioWorkletProcessor {
-    port = { onmessage: (_: unknown) => {}, postMessage: (data: CaptureBatch) => sent.push(data) }
-  }
-  let Registered: (new () => Processor) | undefined
-  const register = (_name: string, processor: new () => Processor) => {
-    Registered = processor
-  }
-  new Function('AudioWorkletProcessor', 'registerProcessor', 'sampleRate', captureProcessorSource)(
-    AudioWorkletProcessor,
-    register,
-    sampleRate
-  )
-  if (!Registered) throw new Error('The source registered no processor')
-  const processor = new Registered()
+  const processor = newCaptureProcessor(data => sent.push(data))
   let next = 0
   return {
     sent,
-    /** Feeds `frames` of a ramp that counts samples from 1, so each one says where it came from. */
-    /** Returns what the last `process` call returned: false once the processor is done. */
     feed(frames: number): boolean {
       let running = true
       for (let done = 0; done < frames; done += quantum) {
@@ -56,7 +36,7 @@ const preRollFrames = Math.round(preRollSeconds * sampleRate)
 describe('capture processor', () => {
   it('starts a take with the last 300 ms before it, in the first quantum after the tap', () => {
     const c = capture()
-    c.feed(sampleRate) // a second of open microphone
+    c.feed(sampleRate)
     c.send({ type: 'start', take: 1 })
     expect(c.sent).toHaveLength(0)
     c.feed(quantum)
@@ -65,7 +45,6 @@ describe('capture processor', () => {
     expect(first.take).toBe(1)
     expect(first.done).toBe(false)
     expect(first.samples).toHaveLength(preRollFrames + quantum)
-    // Contiguous: the 300 ms before the tap, then the quantum after it.
     const startsAt = sampleRate - preRollFrames + 1
     expect(Array.from(first.samples)).toEqual(
       Array.from({ length: preRollFrames + quantum }, (_, i) => startsAt + i)

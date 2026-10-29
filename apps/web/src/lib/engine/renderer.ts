@@ -1,62 +1,30 @@
 import { pairwiseSum } from '@/lib/analysis/numeric'
 import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
 
-// Renders a Song played by Recordings: a port of the reference engine's `render()`
-// (`tools/melody-lab/engine.py`). Where the two differ, this follows the reference.
-//
-// Songs play farts raw (ADR 0012): every note plays its Recording's gesture from the start, at the
-// fart's own pitch and speed. Per note, the renderer cuts the gesture at the note's end, fades it
-// and sets its gain; then it mixes the notes and limits the peak. Every output sample is a
-// Recording's own sample, scaled (ADR 0004): no resampling, oscillators, noise generators,
-// resonators, loops or granular re-triggering. Silent Recordings render silence.
-//
-// Plain TypeScript with no DOM or Web Audio, so it renders the same in every browser, in a Web
-// Worker and in Vitest. Web Audio only plays the result.
-
-/** Output sample rate, the same as Recording Analysis. */
 export const RENDER_SAMPLE_RATE = ANALYSIS_SAMPLE_RATE
-/** Silence between consecutive notes: a note plays for its length minus this. */
 export const GAP_SECONDS = 0.025
-/** A note never plays shorter than this, even when its length minus the gap is shorter. */
 const SHORTEST_NOTE_SECONDS = 0.06
 const FADE_IN_SECONDS = 0.003
-/** The fade-out is this long, or a third of the note if that is shorter. Squared curve. */
 const LONGEST_FADE_OUT_SECONDS = 0.03
-/** Each note is set to this RMS level over its first `LEVEL_WINDOW_SECONDS`. */
 const NOTE_LEVEL_DB = -20
 const LEVEL_WINDOW_SECONDS = 0.25
-/** Extra gain for notes that start a bar (on one of the score's bar lines). */
 const DOWNBEAT_ACCENT_DB = 1.5
-/** Silence after the last beat, so the last note can ring out. */
 const TAIL_SECONDS = 1
-/** The limiter's drive and output peak (0.89 is about −1 dBFS). */
 const LIMITER_DRIVE = 1.2
 const LIMITER_PEAK = 0.89
 
-/** One Melodic Recording, ready to play notes. */
 export interface RenderSource {
-  /** The Recording's single clean gesture, mono at 44.1 kHz. */
   gesture: Float64Array
 }
 
-/** One note of the Song and the Recording that plays it (one row of an Arrangement). */
-export interface RenderNote {
+interface RenderNote {
   source: RenderSource
-  /** The note of the Song, in MIDI. The fart plays at its own pitch, not this one. */
   targetMidi: number
-  /** When the note starts, in seconds from the start of the Song. */
   startSeconds: number
-  /** The note's written length in seconds (beats × 60 / bpm). */
   lengthSeconds: number
-  /** The note starts a bar, so it is played slightly louder. */
   downbeat: boolean
 }
 
-/**
- * A note of a Song as the catalog writes it, in beats. Converts to seconds and finds downbeats
- * exactly like the reference, so notes land on the same samples: a note that starts on one of the
- * score's bar lines (`barLines`, the Song's `bar_lines`) starts a bar. A pickup isn't a bar.
- */
 export function noteInBeats(
   source: RenderSource,
   targetMidi: number,
@@ -72,30 +40,21 @@ export function noteInBeats(
   }
 }
 
-/** The length of a Song in seconds, for `render`. */
 export function songSeconds(lengthBeats: number, bpm: number): number {
   return lengthBeats * (60 / bpm)
 }
 
-/** Where and how loud a note was placed. */
-export interface PlacedNote {
+interface PlacedNote {
   startSample: number
   lengthSamples: number
   gainDb: number
 }
 
-export interface RenderOutput {
-  /** Mono, 44.1 kHz, peak at about −1 dBFS. */
+interface RenderOutput {
   samples: Float32Array
   notes: PlacedNote[]
 }
 
-/**
- * Renders the notes offline. The output is one second longer than `songSeconds`
- * (`songSeconds(lengthBeats, bpm)`).
- *
- * Synchronous and CPU-bound: run it in a Web Worker.
- */
 export function render(notes: readonly RenderNote[], songLengthSeconds: number): RenderOutput {
   const sr = RENDER_SAMPLE_RATE
   const mix = new Float64Array(Math.trunc((songLengthSeconds + TAIL_SECONDS) * sr))
@@ -106,7 +65,6 @@ export function render(notes: readonly RenderNote[], songLengthSeconds: number):
     const maxLength = Math.trunc(
       Math.max(SHORTEST_NOTE_SECONDS, note.lengthSeconds - GAP_SECONDS) * sr
     )
-    // The fart as recorded, cut at the note's end, or shorter if the fart ends first.
     const segment = note.source.gesture.slice(0, maxLength)
     applyFades(segment)
 
@@ -125,10 +83,6 @@ export function render(notes: readonly RenderNote[], songLengthSeconds: number):
   return { samples: limit(mix), notes: placed }
 }
 
-/**
- * Linear 3 ms fade-in and a squared fade-out of up to 30 ms (a third of the note if shorter), as
- * the reference's envelope: `np.linspace` ramps multiplied into a ones array, then into the note.
- */
 export function applyFades(segment: Float64Array): void {
   const sr = RENDER_SAMPLE_RATE
   const n = segment.length
@@ -143,14 +97,12 @@ export function applyFades(segment: Float64Array): void {
   for (let i = 0; i < n; i++) segment[i] *= envelope[i]
 }
 
-/** Element `i` of `np.linspace(start, stop, num)`: `i × step + start`, and `stop` exactly last. */
 function linspace(start: number, stop: number, num: number, i: number): number {
   if (num === 1) return start
   if (i === num - 1) return stop
   return i * ((stop - start) / (num - 1)) + start
 }
 
-/** The gentle tanh limiter: peak to about −1 dBFS. Silence stays silence. */
 export function limit(mix: Float64Array): Float32Array {
   let peak = 0
   for (const v of mix) peak = Math.max(peak, Math.abs(v))

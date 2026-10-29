@@ -1,27 +1,14 @@
-# Xcode / SwiftPM
-.derivedData/
-DerivedData/
-.build/
-.swiftpm/
-xcuserdata/
-*.xcuserstate
-*.xcresult/
-
-# XcodeGen output: generate it from ios/project.yml
-ios/*.xcodeproj/
-
-# Python
 .venv/
 __pycache__/
 
-# Generated output
 out/
 
-# The PDMX import's staging directory, left behind only if the run was killed (tools/catalog/import_pdmx.py)
 /catalog/.import-*/
 
-# Agents' proof files (tmp/agent/) and other scratch output
 tmp/
 
-# Local Worker secrets
 .dev.vars
+
+node_modules/
+
+.claude/worktrees/

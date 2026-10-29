@@ -13,10 +13,8 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'node',
-          include: ['src/**/*.test.{ts,tsx}'],
+          include: ['src/**/*.test.{ts,tsx}', 'scripts/**/*.test.ts'],
           exclude: [...configDefaults.exclude, interactionTests, workersTests],
-          // The golden tests analyze all 32 fixtures. One file at a time, so the timings in
-          // src/lib/analysis/timing.test.ts aren't measured while other files compete for the CPU.
           testTimeout: 120_000,
           fileParallelism: false
         }
@@ -30,14 +28,10 @@ export default defineConfig({
         }
       },
       {
-        // The API routes in workerd, with wrangler.jsonc's bindings and compatibility settings: a
-        // real D1 and R2, empty before every test, with drizzle/ applied
-        // (src/test-support/workers-setup.ts). Nothing touches .wrangler/.
         extends: true,
         plugins: [
           cloudflareTest(async () => ({
             wrangler: { configPath: './wrangler.jsonc' },
-            // wrangler.jsonc's own entry imports the OpenNext build; tests call the routes directly.
             main: './src/test-support/workers-entry.ts',
             miniflare: { bindings: { TEST_MIGRATIONS: await readD1Migrations('./drizzle') } }
           }))

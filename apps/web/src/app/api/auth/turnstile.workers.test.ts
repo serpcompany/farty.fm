@@ -2,14 +2,10 @@ import { env } from 'cloudflare:test'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as authRoute from '@/app/api/auth/[...all]/route'
-import { TURNSTILE_TEST_SECRET_KEY, TURNSTILE_TEST_SITE_KEY } from '@/server/auth-config'
+import { TURNSTILE_TEST_SECRET_KEY, TURNSTILE_TEST_SITE_KEY } from '@/server/auth-settings'
 import { listCapturedEmails } from '@/server/dev-mailbox'
 import { ORIGIN } from '@/test-support/library-api'
 import { fakeSiteverify, siteverifyCalls, TEST_TOKEN } from '@/test-support/turnstile'
-
-// Turnstile on sign-up (#237), through the route in workerd with wrangler.jsonc's top level: the
-// local run's test site key, and the test secret the code falls back to. A stand-in siteverify
-// (`fakeSiteverify`) passes the test token and refuses any other; the journeys use the real one.
 
 const bindings = env as unknown as { DEV_MAILBOX: KVNamespace }
 

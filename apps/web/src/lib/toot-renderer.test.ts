@@ -12,13 +12,8 @@ import type { Recording } from './recordings'
 import { makeToot, TootError } from './toot-renderer'
 import { decodeWav, encodeWav } from './wav'
 
-// Song Creator's render on the Fixture Library as the app stores it: each fixture as a 16-bit
-// WAV, analyzed as a new Recording is. Through the render worker, a Toot is the engine's render
-// (#108) bit for bit, on the golden Arrangement.
-
 const wavs = new Map<string, ArrayBuffer>()
 const recordings: Recording[] = []
-/** The stored WAV, as a fresh copy each time, as IndexedDB gives it. */
 const loadAudio = async (id: string) => {
   const wav = wavs.get(id)
   if (!wav) throw new Error(`No audio for ${id}`)
@@ -41,7 +36,6 @@ beforeAll(async () => {
       analysis: { state: 'analyzed', analysis: analyzeToAnalysis(samples, sampleRate) }
     })
   }
-  // The render worker, on this thread: `renderInWorker` posts to the real `engine/worker.ts`.
   const scope = new WorkerScope()
   vi.stubGlobal('self', scope)
   vi.stubGlobal('Worker', bridgedWorker(scope))
@@ -62,7 +56,6 @@ describe('makeToot', () => {
       return fromWorker
     })
 
-    // The engine itself, on the same 16-bit WAVs and stored analyses.
     const arrangement = arrangementOf(song, recordings)
     const used = new Set(arrangement.pitches.map(c => c.recordingId))
     const inputs = recordings
@@ -74,11 +67,9 @@ describe('makeToot', () => {
       }))
     const engine = renderFromRecordings(engineSong(song), arrangement, inputs)
     expect(fromWorker?.samples).toEqual(engine.samples)
-    // The Toot's audio is that render as a 16-bit WAV, byte for byte.
     expect(new Uint8Array(draft.wav)).toEqual(new Uint8Array(encodeWav(engine)))
     expect(draft.seconds).toBe(engine.samples.length / 44100)
 
-    // On the golden Arrangement.
     const golden = goldenArrangement('full', song.id)
     expect(draft.arrangement.transposition).toBe(golden.transpose)
     for (const entry of golden.per_pitch) {
@@ -93,8 +84,6 @@ describe('makeToot', () => {
     const error = await makeToot(songs[0], [], loadAudio).catch(e => e)
     expect(error).toBeInstanceOf(TootError)
     expect(error.reason).toBe('locked')
-    // Amazing Grace stays locked with the whole Fixture Library: its 2.98 s note outlasts every
-    // fixture (ADR 0011).
     const amazing = songs.filter(s => s.id === 'amazing')[0]
     const tooLong = await makeToot(amazing, recordings, loadAudio).catch(e => e)
     expect(tooLong).toBeInstanceOf(TootError)

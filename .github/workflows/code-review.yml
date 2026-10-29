@@ -1,0 +1,123 @@
+name: Code review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: >-
+      !github.event.pull_request.draft &&
+      !contains(fromJSON('["claude[bot]","dependabot[bot]","renovate[bot]"]'), github.event.pull_request.user.login)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
+      issues: read
+      id-token: write
+    env:
+      HAS_REVIEW_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      BASE_REF: ${{ github.event.pull_request.base.ref }}
+      SUMMARY_FILE: tmp/review-summary.md
+      SUMMARY_BOT: github-actions[bot]
+      REVIEW_BOT: claude[bot]
+      RULES: AGENTS.md ARCHITECTURE.md CONTEXT.md docs/agents/code.md apps/web/AGENTS.md
+    steps:
+      - name: Skip while the CLAUDE_CODE_OAUTH_TOKEN secret isn't set
+        if: env.HAS_REVIEW_TOKEN != 'true'
+        run: echo "::notice::CLAUDE_CODE_OAUTH_TOKEN isn't set, so Claude doesn't review this pull request."
+
+      - name: Check out the whole repository, with its history, at the pull request's head
+        if: env.HAS_REVIEW_TOKEN == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        if: env.HAS_REVIEW_TOKEN == 'true'
+        with:
+          node-version-file: .node-version
+          registry-url: https://npm.pkg.github.com
+          scope: "@serpcompany"
+
+      - name: Install the review's scripts, at the version the lockfile pins, outside the checkout
+        if: env.HAS_REVIEW_TOKEN == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./package.json').devDependencies['@serpcompany/verify']")
+          npm install --prefix "$RUNNER_TEMP/serp-verify" --no-save --no-package-lock --ignore-scripts "@serpcompany/verify@$version"
+          echo "REVIEW_SCRIPT=$RUNNER_TEMP/serp-verify/node_modules/@serpcompany/verify/dist/review/main.js" >> "$GITHUB_ENV"
+
+      - name: Find out whether the pull request changes this workflow
+        id: files
+        if: env.HAS_REVIEW_TOKEN == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node "$REVIEW_SCRIPT" changes
+
+      - name: Give the reviewer the rules, the change since the last review, its issue, and the earlier findings
+        id: context
+        if: steps.files.outputs.reviewable == 'true'
+        env:
+          CHANGE_DIR: ${{ github.workspace }}/tmp/review-change
+          CONTEXT_FILE: ${{ runner.temp }}/review-context.md
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node "$REVIEW_SCRIPT" context
+
+      - name: Review with Claude
+        id: review
+        if: steps.files.outputs.reviewable == 'true'
+        timeout-minutes: 20
+        uses: anthropics/claude-code-action@6b6870e649b5ff408753befeaee5fc7989d4e6a9
+        env:
+          CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: "claude[bot],serp-agent[bot],Copilot"
+          classify_inline_comments: "false"
+          prompt: "/pr-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+          claude_args: >-
+            --model claude-sonnet-5-5
+            --strict-mcp-config
+            --append-system-prompt-file ${{ runner.temp }}/review-context.md
+            --append-subagent-system-prompt-file ${{ runner.temp }}/review-context.md
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr view:*),Bash(gh issue view:*),Bash(git log:*),Bash(git diff:*),Bash(git show:*),Write,Agent,Task,Read,Glob,Grep"
+
+      - name: Post the summary, with the commit it reviewed
+        id: summary
+        if: steps.files.outputs.reviewable == 'true' && steps.review.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SUMMARY_ID: ${{ steps.context.outputs.summary_id }}
+        run: node "$REVIEW_SCRIPT" summary
+
+      - name: Keep the review transcript
+        if: always() && steps.review.outputs.execution_file != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: claude-review-transcript
+          path: ${{ steps.review.outputs.execution_file }}
+          retention-days: 7
+          overwrite: true
+
+      - name: Fail unless a review ran and was posted
+        if: ${{ !cancelled() && steps.files.outputs.reviewable == 'true' }}
+        env:
+          EXECUTION_FILE: ${{ steps.review.outputs.execution_file }}
+          REVIEW_OUTCOME: ${{ steps.review.outcome }}
+          POSTED: ${{ steps.summary.outputs.posted }}
+        run: node "$REVIEW_SCRIPT" verdict

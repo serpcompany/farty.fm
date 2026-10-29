@@ -3,19 +3,22 @@ import { fixtures, fixtureWav } from '../../scripts/fixture-library'
 import { goldenArrangement, goldenRecording } from '../test-support/engine-golden'
 import { analyzeToAnalysis } from './analysis/port'
 import { songs } from './catalog/songs.generated'
-import { fixtureRecordingId } from './fixture-library'
+import { fixtureRecordingId, isFixtureRecordingId } from './fixture-library'
 import { coverageOf } from './pitch-coverage'
 import type { Recording } from './recordings'
 import { decodeWav } from './wav'
-
-// The Fixture Library as the Staging build carries it: each fixture as the 16-bit WAV the app
-// keeps, analyzed in the app as a new Recording is. It must unlock what the reference unlocks.
 
 describe('the Fixture Library', () => {
   it('gives fixtures the iPhone app’s ids, which sort like fixture ids', () => {
     expect(fixtureRecordingId('090')).toBe('00000000-0000-0000-0000-000000000090')
     const ids = fixtures().map(f => fixtureRecordingId(f.id))
     expect(ids).toEqual([...ids].sort())
+  })
+
+  it('knows a fixture’s id from any other Recording’s', () => {
+    expect(fixtures().every(f => isFixtureRecordingId(fixtureRecordingId(f.id)))).toBe(true)
+    expect(isFixtureRecordingId(crypto.randomUUID())).toBe(false)
+    expect(isFixtureRecordingId('00000000-0000-0000-0000-00000000009a')).toBe(false)
   })
 
   it('has the 32 fixtures of the golden library', () => {
@@ -48,8 +51,6 @@ describe('the Fixture Library', () => {
     for (const song of songs) {
       const coverage = coverageOf(song, recordings)
       const golden = goldenArrangement('full', song.id)
-      // 8 of the 12: each of the others has a note longer than any fixture near its pitch, played
-      // at its own length (ADR 0011, ADR 0012).
       expect(coverage.unlocked, song.id).toBe(
         !['jingle', 'row', 'amazing', 'auld'].includes(song.id)
       )

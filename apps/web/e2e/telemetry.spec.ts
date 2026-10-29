@@ -1,22 +1,35 @@
-import { expect, type Page, type Request, test } from '@playwright/test'
-
-// Error reports (#126): what the browser sends to /api/telemetry/, and that Profile's switch and
-// Global Privacy Control stop it. Analytics are Cloudflare's automatic Web Analytics, at the edge:
-// nothing in the app to test.
-//
-// Most of it runs on Staging's build or `next dev`, which have the synthetic triggers on
-// /dev/telemetry/. With E2E_SITE_ENV=production, against the Production build's preview
-// (E2E_BASE_URL), only the check that the triggers' page is gone runs.
+import type { Page, Request } from '@playwright/test'
+import { errorsWhileOffline } from './service-worker'
+import { expect, test } from './test'
 
 const production = process.env.E2E_SITE_ENV === 'production'
 const SECRET = 'test@example.com'
 const SWITCH = 'Share anonymous error reports'
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, pageErrors }) => {
+  pageErrors.expect('A synthetic crash')
   await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
+  await page.addInitScript(countReportsStarted)
 })
 
-/** Every request this page makes to the error report route, from now on. */
+function countReportsStarted(): void {
+  const counted = window as unknown as { fartyReportsStarted: number }
+  counted.fartyReportsStarted = 0
+  const fetch = window.fetch
+  window.fetch = (input, init) => {
+    if (String(input instanceof Request ? input.url : input).includes('/api/telemetry/')) {
+      counted.fartyReportsStarted += 1
+    }
+    return fetch(input, init)
+  }
+}
+
+function reportsStarted(page: Page): Promise<number> {
+  return page.evaluate(
+    () => (window as unknown as { fartyReportsStarted: number }).fartyReportsStarted
+  )
+}
+
 function reportsFrom(page: Page): Request[] {
   const sent: Request[] = []
   page.on('request', request => {
@@ -25,9 +38,12 @@ function reportsFrom(page: Page): Request[] {
   return sent
 }
 
-/** Waits long enough for a report the page would send to have gone. */
-async function aMoment(page: Page) {
-  await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 300)))
+async function reportAHandledErrorAndCrash(page: Page): Promise<void> {
+  await page.goto('/dev/telemetry/')
+  await page.getByRole('button', { name: 'Report a handled error' }).click()
+  const crashed = page.waitForEvent('pageerror')
+  await page.getByRole('button', { name: 'Crash' }).click()
+  await crashed
 }
 
 async function turnSharingOff(page: Page) {
@@ -80,17 +96,19 @@ test.describe('error reports', () => {
 
   test('raised offline, a report waits on the device and goes once back online', async ({
     page,
-    context
+    context,
+    pageErrors
   }) => {
+    pageErrors.expect(...errorsWhileOffline)
     const sent = reportsFrom(page)
+    const queued = () =>
+      page.evaluate(() => JSON.parse(localStorage.getItem('pedos.telemetry.queue') ?? '[]'))
     await page.goto('/dev/telemetry/')
     await context.setOffline(true)
     await page.getByRole('button', { name: 'Report a handled error' }).click()
-    await aMoment(page)
+    await expect.poll(queued).toHaveLength(1)
+    expect(await reportsStarted(page)).toBe(0)
     expect(sent).toEqual([])
-    expect(
-      await page.evaluate(() => JSON.parse(localStorage.getItem('pedos.telemetry.queue') ?? '[]'))
-    ).toHaveLength(1)
 
     const delivered = page.waitForResponse(response => response.url().endsWith('/api/telemetry/'))
     await context.setOffline(false)
@@ -109,10 +127,8 @@ test.describe('error reports', () => {
     const row = page.locator('label[for="share-telemetry"]')
     expect((await row.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44)
 
-    await page.goto('/dev/telemetry/')
-    await page.getByRole('button', { name: 'Report a handled error' }).click()
-    await page.getByRole('button', { name: 'Crash' }).click()
-    await aMoment(page)
+    await reportAHandledErrorAndCrash(page)
+    expect(await reportsStarted(page)).toBe(0)
     expect(sent).toEqual([])
 
     await page.goto('/profile/')
@@ -130,10 +146,8 @@ test.describe('error reports', () => {
     await expect(share).toBeDisabled()
     await expect(page.getByText('Global Privacy Control')).toBeVisible()
 
-    await page.goto('/dev/telemetry/')
-    await page.getByRole('button', { name: 'Report a handled error' }).click()
-    await page.getByRole('button', { name: 'Crash' }).click()
-    await aMoment(page)
+    await reportAHandledErrorAndCrash(page)
+    expect(await reportsStarted(page)).toBe(0)
     expect(sent).toEqual([])
   })
 })

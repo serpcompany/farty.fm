@@ -1,0 +1,295 @@
+name: Claude
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened, assigned]
+
+jobs:
+  claude:
+    if: >-
+      github.event.sender.type != 'Bot' && (
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.review.author_association)) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)))
+    concurrency:
+      group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      packages: read
+    env:
+      HAS_CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+      BASE_BRANCH: staging
+      IS_PR: ${{ (github.event.issue.pull_request || github.event.pull_request) && 'true' || 'false' }}
+      ENTITY_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+    steps:
+      - name: Skip while the CLAUDE_CODE_OAUTH_TOKEN secret isn't set
+        if: env.HAS_CLAUDE_TOKEN != 'true'
+        run: echo "::notice::CLAUDE_CODE_OAUTH_TOKEN isn't set, so Claude doesn't answer (docs/agents/ci.md, @claude requests)."
+
+      - name: Skip a pull request from a fork
+        if: env.HAS_CLAUDE_TOKEN == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: node {0}
+        run: |
+          const fs = require('node:fs')
+          const answer = value => fs.appendFileSync(process.env.GITHUB_ENV, `ANSWER=${value}\n`)
+          const main = async () => {
+            if (process.env.IS_PR !== 'true') return answer(true)
+            const repo = process.env.GITHUB_REPOSITORY
+            const api = `${process.env.GITHUB_API_URL || 'https://api.github.com'}/repos/${repo}`
+            const response = await fetch(`${api}/pulls/${process.env.ENTITY_NUMBER}`, {
+              headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            })
+            if (!response.ok) throw new Error(`GET /pulls/${process.env.ENTITY_NUMBER} returned ${response.status}`)
+            const head = (await response.json())?.head?.repo?.full_name
+            if (head === repo) return answer(true)
+            console.log(`::notice::This pull request's branch is in ${head || 'a deleted fork'}, so Claude doesn't answer on it: checking it would run that fork's code with this repository's tokens, and Claude can't push to it (docs/agents/ci.md, @claude requests).`)
+            answer(false)
+          }
+          main().catch(error => {
+            console.log(`::error title=Couldn't read the pull request::${String(error?.message).replace(/[\r\n%]+/g, ' ')}`)
+            process.exit(1)
+          })
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        if: env.ANSWER == 'true'
+        with:
+          ref: ${{ env.IS_PR == 'true' && format('refs/pull/{0}/head', env.ENTITY_NUMBER) || env.BASE_BRANCH }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Fetch the branch it merges into, the base the shared checks compare verify.json with
+        if: env.ANSWER == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          base=$BASE_BRANCH
+          if [ "$IS_PR" = true ]; then
+            base=$(gh pr view "$ENTITY_NUMBER" --repo "$GITHUB_REPOSITORY" --json baseRefName --jq .baseRefName)
+          fi
+          git fetch --quiet --no-tags --depth=1 origin "+refs/heads/$base:refs/remotes/origin/$base"
+          echo "SERP_VERIFY_BASE=origin/$base" >> "$GITHUB_ENV"
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        if: env.ANSWER == 'true'
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        if: env.ANSWER == 'true'
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@serpcompany"
+
+      - name: Install the workspace, with @serpcompany/verify from GitHub Packages
+        if: env.ANSWER == 'true'
+        run: pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+
+      - name: Give Claude the repository rules
+        if: env.ANSWER == 'true'
+        run: |
+          cat > "$RUNNER_TEMP/claude-rules.md" <<'EOF'
+          Rules for this request, from the repository's .github/workflows/claude.yml:
+
+          - AGENTS.md is this repository's CLAUDE.md. Follow it, ARCHITECTURE.md, docs/agents/code.md, CONTEXT.md, and apps/web/AGENTS.md for the web app.
+          - Before you push, run `pnpm check`, and fix what it reports. If it still fails, push nothing and say why in your comment.
+          - This runner has no Cloudflare, Stripe or other deploy credentials, and runs no journeys (e2e). Never deploy or migrate a remote database. Say in your comment what you couldn't check here rather than claiming it works.
+          - Stage only the files you changed, by path: `git add <path>`. On a pull request the action resets .claude/, .mcp.json, and CLAUDE.md to the base branch's copies before you start, so `git add -A`, `git add .`, `git add -u`, or `git commit -a` would commit that reset and undo the pull request's own changes to those files. Never commit changes to them on a pull request.
+          - Push only to the branch your task names. Never push to staging or main.
+          EOF
+
+      - name: Note when Claude starts
+        if: env.ANSWER == 'true'
+        run: echo "CLAUDE_STARTED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
+      - name: Answer with Claude
+        id: claude
+        if: env.ANSWER == 'true'
+        uses: anthropics/claude-code-action@6b6870e649b5ff408753befeaee5fc7989d4e6a9
+        env:
+          CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"
+          BASH_DEFAULT_TIMEOUT_MS: "900000"
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          base_branch: ${{ env.BASE_BRANCH }}
+          claude_args: >-
+            --model claude-sonnet-5-5
+            --max-turns 60
+            --strict-mcp-config
+            --append-system-prompt-file ${{ runner.temp }}/claude-rules.md
+            --allowedTools "Bash(pnpm verify),Bash(pnpm verify *),Bash(pnpm check),Bash(pnpm --filter * check),Task,Read,Glob,Grep"
+            --disallowedTools "Bash(git add -A*),Bash(git add --all*),Bash(git add .),Bash(git add -u*),Bash(git add --update*),Bash(git commit -a*),Bash(git commit --all*)"
+
+      - name: Keep the transcript
+        if: always() && env.ANSWER == 'true' && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: claude-transcript
+          path: ${{ steps.claude.outputs.execution_file }}
+          retention-days: 7
+          overwrite: true
+
+      - name: Fail unless Claude pushed or replied
+        if: ${{ !cancelled() && steps.claude.outcome != 'skipped' }}
+        env:
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+          CLAUDE_OUTCOME: ${{ steps.claude.outcome }}
+          CLAUDE_BRANCH: ${{ steps.claude.outputs.branch_name }}
+          CLAUDE_BOT: "claude[bot]"
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: node {0}
+        run: |
+          const fs = require('node:fs')
+          const clean = (value, max = 120) => String(value).replace(/[\r\n%]+/g, ' ').slice(0, max)
+          const fail = message => {
+            console.log(`::error title=Claude didn't act on the request::${clean(message, 900)}`)
+            process.exit(1)
+          }
+          const tokenAdvice = result => result.api_error_status === 401 ? " The API refused the token (401), so renew the CLAUDE_CODE_OAUTH_TOKEN secret (docs/agents/ci.md, Set up once)." : ''
+          const readLog = () => {
+            const file = process.env.EXECUTION_FILE
+            if (!file || !fs.existsSync(file)) {
+              if (process.env.CLAUDE_OUTCOME === 'failure') fail("The Claude step failed before Claude ran, so it wrote no execution log: that step's own log says why.")
+              fail('Claude wrote no execution log, so it never ran. The action stops before Claude when the person who asked lacks write access, when the comment has no exact @claude mention, or when this workflow differs from the default branch\'s copy (the log then says "Skipping action due to workflow validation").')
+            }
+            let messages
+            try {
+              messages = JSON.parse(fs.readFileSync(file, 'utf8'))
+            } catch (error) {
+              fail(`The execution log isn't JSON: ${error.message}`)
+            }
+            if (!Array.isArray(messages)) fail("The execution log isn't a list of messages.")
+            const result = messages.filter(entry => entry?.type === 'result').at(-1)
+            if (!result) fail("The execution log has no result, so Claude didn't finish.")
+            return { messages, result }
+          }
+          const blocks = (messages, role, kind) =>
+            messages
+              .filter(entry => entry?.type === role && Array.isArray(entry.message?.content))
+              .flatMap(entry => entry.message.content)
+              .filter(block => block?.type === kind)
+          const countReplies = messages => {
+            const calls = new Set(
+              blocks(messages, 'assistant', 'tool_use')
+                .filter(block => block.name === 'mcp__github_comment__update_claude_comment')
+                .map(block => block.id)
+            )
+            return blocks(messages, 'user', 'tool_result').filter(block => calls.has(block.tool_use_id) && !block.is_error).length
+          }
+          const get = async path => {
+            const api = `${process.env.GITHUB_API_URL || 'https://api.github.com'}/repos/${process.env.GITHUB_REPOSITORY}`
+            const response = await fetch(`${api}${path}`, {
+              headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            })
+            if (response.status === 404) return null
+            if (!response.ok) throw new Error(`GET ${path.split('?')[0]} returned ${response.status}`)
+            return response.json()
+          }
+          const readPushedCommits = async startedAt => {
+            let branch = process.env.CLAUDE_BRANCH || ''
+            let ref = branch
+            if (!ref && process.env.IS_PR === 'true') {
+              const pr = await get(`/pulls/${process.env.ENTITY_NUMBER}`)
+              if (!pr) throw new Error(`pull request #${process.env.ENTITY_NUMBER} wasn't found`)
+              branch = pr.head.ref
+              ref = pr.head.sha
+            }
+            if (!ref) return { branch, onPullRequest: false, commits: [] }
+            const since = new Date(startedAt - 60 * 1000).toISOString()
+            const commits = (await get(`/commits?sha=${encodeURIComponent(ref)}&since=${encodeURIComponent(since)}&per_page=100`)) || []
+            const bot = process.env.CLAUDE_BOT || 'claude[bot]'
+            return {
+              branch,
+              onPullRequest: !process.env.CLAUDE_BRANCH,
+              commits: commits.filter(item => item?.commit?.author?.name === bot && Date.parse(item.commit.author.date) >= startedAt - 60 * 1000)
+            }
+          }
+          const readResetFiles = async commits => {
+            const reset = /^(\.claude\/|\.husky\/|\.mcp\.json$|\.claude\.json$|\.gitmodules$|\.ripgreprc$|CLAUDE\.md$|CLAUDE\.local\.md$)/
+            const touched = []
+            for (const item of commits.slice(0, 20)) {
+              const detail = await get(`/commits/${item.sha}`)
+              for (const changed of detail?.files || []) {
+                if (reset.test(String(changed.filename))) touched.push(`${changed.filename} in ${String(item.sha).slice(0, 7)}`)
+              }
+            }
+            return touched
+          }
+          const main = async () => {
+            const { messages, result } = readLog()
+            const models = Object.keys(result.modelUsage || {}).join(', ') || 'unknown'
+            const summary = `Claude: ${result.num_turns} turns in ${Math.round((result.duration_ms || 0) / 1000)}s, about $${Number(result.total_cost_usd || 0).toFixed(2)} (estimate), models: ${models}.`
+            console.log(summary)
+            if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${summary}\n`)
+            if (result.is_error) fail(`Claude ended in an error: ${clean(result.result || result.subtype || 'no message', 400)}${tokenAdvice(result)}`)
+            const sets = messages.filter(entry => entry?.type === 'system' && entry.subtype === 'background_tasks_changed')
+            const running = (sets.at(-1)?.tasks || []).filter(task => task && !task.ambient)
+            if (running.length) fail(`Claude ended with ${running.length} background task(s) still running.`)
+            const denied = [...new Set((result.permission_denials || []).map(denial =>
+              denial?.tool_input?.command ? `${denial.tool_name} (${clean(denial.tool_input.command)})` : String(denial?.tool_name)
+            ))]
+            const startedAt = Date.parse(process.env.CLAUDE_STARTED_AT || '')
+            if (Number.isNaN(startedAt)) fail("CLAUDE_STARTED_AT isn't set, so the check can't tell what this run pushed.")
+            let pushed
+            try {
+              pushed = await readPushedCommits(startedAt)
+            } catch (error) {
+              fail(`Couldn't read the branch to check what Claude pushed: ${error.message}`)
+            }
+            const replies = countReplies(messages)
+            if (pushed.commits.length === 0 && replies === 0) {
+              const reason = denied.length > 0 ? ` Claude was denied ${denied.join(', ')}; allow it in claude_args if requests need it.` : ''
+              fail(`Claude neither pushed a commit nor updated its comment.${reason} Claude's last message: ${clean(result.result || '(none)', 400)}`)
+            }
+            if (pushed.onPullRequest && pushed.commits.length > 0) {
+              let touched
+              try {
+                touched = await readResetFiles(pushed.commits)
+              } catch (error) {
+                fail(`Couldn't read the commits Claude pushed: ${error.message}`)
+              }
+              if (touched.length > 0) {
+                console.log(`::warning title=Claude changed files the action resets::Claude's commits change ${clean(touched.join(', '), 600)}. On a pull request the action resets these to the base branch's copies before Claude starts, so these changes may undo the pull request's own edits to them. Check them before merging.`)
+              }
+            }
+            const outcome = [
+              pushed.commits.length > 0 ? `pushed ${pushed.commits.length} commit(s) to ${pushed.branch}` : '',
+              replies > 0 ? 'replied in its comment' : ''
+            ].filter(Boolean).join(' and ')
+            if (denied.length > 0) {
+              console.log(`::warning title=Claude was denied tools::Claude was denied ${clean(denied.join(', '), 600)} but still ${outcome}. Allow it in claude_args if requests need it.`)
+            }
+            if (replies === 0) {
+              console.log("::warning title=Claude didn't reply::Claude pushed but never updated its comment, so the person who asked sees no summary.")
+            }
+            console.log(`Claude ${outcome}.`)
+          }
+          main().catch(error => fail(`The check failed: ${error?.message}`))

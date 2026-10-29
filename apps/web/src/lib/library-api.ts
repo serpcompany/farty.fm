@@ -1,16 +1,10 @@
 import type { Kind } from './outbox'
 import type { Recording } from './recordings'
+import { withinTimeout } from './timeout'
 import type { Toot } from './toot'
 
-// The account's library, from the browser: the routes in `src/app/api/` (`src/server/library.ts`).
-// Every call is same-origin, so the browser sends the session cookie and its own Origin, and names
-// the account the library is (`accountId`): the server refuses one that isn't the session's (409
-// `wrong_account`). Each answers its status, or 0 when Farty couldn't be reached in time.
-
-/** How long one request may take before it counts as unreachable: a Toot's WAV is up to 16 MB. */
 const REQUEST_TIMEOUT_MS = 60_000
 
-/** The header each call names its library's account in (`LIBRARY_HEADER` on the server). */
 const LIBRARY_HEADER = 'x-pedos-library'
 
 export type Answer = { status: number; error?: string }
@@ -20,17 +14,14 @@ export async function send(
   accountId: string,
   init: RequestInit = {}
 ): Promise<Response | null> {
-  // Not `AbortSignal.timeout`: a timer the tests can run.
-  const timeout = new AbortController()
-  const timer = setTimeout(() => timeout.abort(), REQUEST_TIMEOUT_MS)
   const headers = new Headers(init.headers)
   headers.set(LIBRARY_HEADER, accountId)
   try {
-    return await fetch(path, { ...init, headers, cache: 'no-store', signal: timeout.signal })
+    return await withinTimeout(REQUEST_TIMEOUT_MS, signal =>
+      fetch(path, { ...init, headers, cache: 'no-store', signal })
+    )
   } catch {
     return null
-  } finally {
-    clearTimeout(timer)
   }
 }
 
@@ -46,7 +37,6 @@ export async function answer(response: Response | null): Promise<Answer> {
     : { status: response.status }
 }
 
-/** Uploads a Recording or Toot and its WAV, as `accountId`'s library. */
 export async function putItem(
   kind: Kind,
   item: Recording | Toot,
@@ -59,36 +49,32 @@ export async function putItem(
   return answer(await send(`/api/${kind}/${item.id}/`, accountId, { method: 'PUT', body: form }))
 }
 
-export async function renameToot(id: string, title: string, accountId: string): Promise<Answer> {
+async function patch(path: string, accountId: string, fields: object): Promise<Answer> {
   return answer(
-    await send(`/api/toots/${id}/`, accountId, {
+    await send(path, accountId, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ title })
+      body: JSON.stringify(fields)
     })
   )
 }
 
-/** Places a Recording on a note by ear, or takes it off with null (ADR 0015). */
-export async function placeRecording(
+export function renameToot(id: string, title: string, accountId: string): Promise<Answer> {
+  return patch(`/api/toots/${id}/`, accountId, { title })
+}
+
+export function placeRecording(
   id: string,
   placedPitch: number | null,
   accountId: string
 ): Promise<Answer> {
-  return answer(
-    await send(`/api/recordings/${id}/`, accountId, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ placedPitch })
-    })
-  )
+  return patch(`/api/recordings/${id}/`, accountId, { placedPitch })
 }
 
 export async function deleteItem(kind: Kind, id: string, accountId: string): Promise<Answer> {
   return answer(await send(`/api/${kind}/${id}/`, accountId, { method: 'DELETE' }))
 }
 
-/** What `GET /api/library/` answers: the changes since `since`, or the whole library (`full`). */
 export type LibraryChanges = {
   cursor: number
   full: boolean
@@ -110,7 +96,6 @@ export async function getLibrary(
   }
 }
 
-/** A Recording's or Toot's WAV, as the account keeps it. */
 export async function getAudio(
   kind: Kind,
   id: string,

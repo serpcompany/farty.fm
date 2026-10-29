@@ -8,11 +8,6 @@ import type { Recording } from '@/lib/recordings'
 import type { TootArrangement, TootDraft } from '@/lib/toot'
 import { decodeWav, encodeWav } from '@/lib/wav'
 
-// Song Creator's render: an Unlocked Song played by the user's Recordings, as a Toot's audio. A
-// port of the iPhone app's `TootRenderer` and `makeToot`. The render itself is the engine's
-// (`engine/render-song.ts`), in its Web Worker; this module only feeds it what the app stores.
-
-/** Why a Toot wasn't made. As the iPhone app's `TootError`. */
 export class TootError extends Error {
   constructor(
     readonly reason: 'locked' | 'couldNotMake',
@@ -23,15 +18,13 @@ export class TootError extends Error {
   }
 }
 
-/** How a Song is rendered: the render worker in the app (`renderInWorker`). */
-export type Render = (
+type Render = (
   song: EngineSong,
   arrangement: Arrangement,
   recordings: readonly RecordingToRender[]
 ) => Promise<RenderedSong>
 
-/** What a Toot keeps of Auto-map's Arrangement. */
-export function tootArrangement(arrangement: Arrangement): TootArrangement {
+function tootArrangement(arrangement: Arrangement): TootArrangement {
   const recordingForPitch: Record<number, string> = {}
   for (const choice of arrangement.pitches) {
     if (choice.recordingId !== null) recordingForPitch[choice.songPitch] = choice.recordingId
@@ -39,16 +32,6 @@ export function tootArrangement(arrangement: Arrangement): TootArrangement {
   return { transposition: arrangement.transposition, recordingForPitch }
 }
 
-/**
- * Makes the Toot of `song`: the Arrangement Auto-map chooses on `recordings` (the one Compose
- * shows), rendered from each Recording it uses as the app stores it, a 16-bit WAV
- * (`loadAudio`), with the Recording's stored analysis. The Toot's audio is the render as a mono
- * 16-bit WAV.
- *
- * Throws a `TootError`: `locked` when the Song isn't unlocked, `couldNotMake` when a Recording's
- * audio or analysis is missing or the render fails. `id` is a new one unless given: the return
- * from Checkout makes the Toot it paid for again (ADR 0010).
- */
 export async function makeToot(
   song: Song,
   recordings: readonly Recording[],

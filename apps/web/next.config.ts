@@ -2,10 +2,10 @@ import { execFileSync } from 'node:child_process'
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
 import type { NextConfig } from 'next'
 import { version } from './package.json'
+import { securityHeaders } from './src/lib/security-headers'
 import { siteEnv } from './src/lib/site'
 
-/** The commit this build is from: CI's, else the checkout's, else none. */
-function commit(): string | null {
+function buildCommit(): string | null {
   if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA
   try {
     return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
@@ -14,22 +14,17 @@ function commit(): string | null {
   }
 }
 
-const sha = commit()
+const sha = buildCommit()
 
 const nextConfig: NextConfig = {
   trailingSlash: true,
-  // What every error report names (#126, src/lib/telemetry/): the release, as the version and
-  // commit, and the environment the build is for.
+  poweredByHeader: false,
   env: {
-    PEDOS_RELEASE: sha ? `${version}+${sha.slice(0, 7)}` : version,
-    PEDOS_ENVIRONMENT: siteEnv()
+    FARTY_RELEASE: sha ? `${version}+${sha.slice(0, 7)}` : version,
+    FARTY_ENVIRONMENT: siteEnv()
   },
-  // Staging's noindex isn't here: the Staging gate (worker.ts) adds it after the cache, and only
-  // to responses whose request didn't pass the password check.
   async headers() {
-    // The microphone is the whole app; nothing else on the page may ask for it.
-    const microphone = { key: 'Permissions-Policy', value: 'microphone=(self)' }
-    return [{ source: '/:path*', headers: [microphone] }]
+    return [{ source: '/:path*', headers: securityHeaders(process.env.NODE_ENV) }]
   }
 }
 

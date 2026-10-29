@@ -1,0 +1,20 @@
+extends:
+  - node_modules/@serpcompany/verify/configs/lefthook.yml
+
+pre-commit:
+  parallel: true
+  commands:
+    web:
+      root: apps/web/
+      glob: "*.{ts,tsx,js,mjs,cjs,json,jsonc,css}"
+      run: pnpm --silent --filter farty-web lint --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+
+pre-push:
+  commands:
+    web:
+      skip:
+        - run: git diff --quiet origin/staging...HEAD -- apps/web fixtures catalog package.json pnpm-lock.yaml pnpm-workspace.yaml
+      run: >-
+        pnpm --silent --filter farty-web lint &&
+        pnpm --silent --filter farty-web typecheck &&
+        pnpm --silent --filter farty-web test

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { TootsScreen } from '@/components/pedos/toots-screen'
+import { TootsScreen } from '@/components/farty/toots-screen'
 
 export const metadata: Metadata = { title: 'Toots · Farty' }
 

@@ -9,10 +9,7 @@ import {
 import { hzToMidi, roundHalfEven } from './numeric'
 import { analyzePitch } from './recording-pitch'
 
-// #35: from the golden gesture, the Recording Pitch estimate within ±30 cents and non-null for
-// exactly the same Recordings, the same rounded confidence, and the same contour
-// (`RecordingPitchTests.swift`; the contour check is this port's addition).
-test('estimates and contours match the golden data', async () => {
+test('from the golden gesture, estimates, confidences and contours match the golden data', async () => {
   let maxErrorCents = 0
   let bitExact = 0
   let estimates = 0

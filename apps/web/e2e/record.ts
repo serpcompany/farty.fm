@@ -1,52 +1,162 @@
-import { resolve } from 'node:path'
-import { expect, type Page, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './test'
 
-/**
- * An init script: skips Welcome and, unless `offersAccount`, the account step, which offers itself
- * once, after the first Result (`account.spec.ts`).
- */
-export function skipWelcome({ offersAccount = false } = {}): void {
+export const g3Fart = '090__carlosramon__17-pet__186119.wav'
+
+const pressSeconds = 0.15
+const takeBeyondFartSeconds = 1.3
+
+export function skipWelcome({ offersAccount = false, offersInstall = true } = {}): void {
+  const documentWithoutStorage = window.origin === 'null'
+  if (documentWithoutStorage) return
   localStorage.setItem('pedos.welcomed', '1')
   if (!offersAccount) localStorage.setItem('pedos.accountStep', 'done')
+  if (!offersInstall) localStorage.setItem('pedos.installOffered', '1')
 }
 
-/**
- * A Fixture Library Recording, played once into Chromium's fake microphone. The fake microphone
- * plays its file from the moment the stream opens. With permission granted, Record would open it
- * as soon as it shows, before the tap (#149), so permission isn't granted up front: the first tap
- * opens the microphone, and the file plays from then, before the app captures, so the take loses
- * its first tens of ms (60 ms on CI, #141). `--use-fake-ui-for-media-stream` still lets it open.
- * For a fart that's loud from its start, use `fake-microphone.ts`, as `compose.spec.ts` does.
- */
-export function withFakeMicrophone(fixture: string): void {
-  const file = resolve(__dirname, '../../../fixtures/recordings', fixture)
-  test.use({
-    launchOptions: {
-      args: [
-        '--use-fake-ui-for-media-stream',
-        '--use-fake-device-for-media-stream',
-        // %noloop plays the file once, then silence, like a single take.
-        `--use-file-for-fake-audio-capture=${file}%noloop`
-      ]
+export function withFartingMicrophone({ farts = true, granted = true, welcomed = true } = {}) {
+  test.use({ fakeMicrophone: { farts } })
+  if (granted) test.use({ permissions: ['microphone'] })
+  if (welcomed) {
+    test.beforeEach(async ({ context }) => {
+      await context.addInitScript(skipWelcome)
+    })
+  }
+}
+
+export const microphone = (page: Page) =>
+  page.evaluate(() => {
+    const mic = window.fartyMic
+    return {
+      calls: mic.calls,
+      calledAt: mic.calledAt,
+      opened: mic.tracks.length,
+      live: mic.tracks.filter(track => track.readyState === 'live').length,
+      clicks: mic.clicks,
+      batches: mic.batches,
+      fartEnergy: mic.fartEnergy,
+      nodes: mic.nodes,
+      closed: mic.closed,
+      flushed: mic.flushed,
+      processorLoads: mic.processorLoads,
+      processorMs: mic.processorMs,
+      sessions: mic.sessions
     }
   })
+
+export async function waitForOpenMicrophone(page: Page): Promise<void> {
+  await expect
+    .poll(async () => {
+      const mic = await microphone(page)
+      return mic.nodes - mic.closed
+    })
+    .toBe(1)
 }
 
-/**
- * Skips Welcome, records for `seconds`, stops, and saves the take. The account step stays out of
- * the way, as if already offered, unless `offersAccount` (`account.spec.ts`).
- */
+export async function startRecordingAFart(page: Page, id = '090'): Promise<void> {
+  await page.evaluate(fart => {
+    window.fartyMic.fartOnPress = fart
+    window.fartyMic.take = { id: -1, seconds: 0 }
+  }, id)
+  const box = await page.getByTestId('record-button').boundingBox()
+  if (!box) throw new Error('No Record button')
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await expect
+    .poll(() => page.evaluate(() => window.fartyMic.fartPlayedSeconds()), { intervals: [10] })
+    .toBeGreaterThanOrEqual(pressSeconds)
+  await page.mouse.up()
+  await expect(page.getByTestId('stop-button')).toBeVisible()
+}
+
+export async function stopPastTheFart(page: Page): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const mic = window.fartyMic
+          return mic.take.seconds - mic.fartSeconds
+        }),
+      { intervals: [50], timeout: 15_000 }
+    )
+    .toBeGreaterThanOrEqual(takeBeyondFartSeconds)
+  await page.getByTestId('stop-button').click()
+  await expect(page.getByRole('heading', { name: 'New Recording' })).toBeVisible()
+}
+
+export async function fartAndRecord(page: Page, id = '090'): Promise<void> {
+  await startRecordingAFart(page, id)
+  await stopPastTheFart(page)
+}
+
+export async function fartAndSave(page: Page, id = '090') {
+  await waitForOpenMicrophone(page)
+  await fartAndRecord(page, id)
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByTestId('result-note')).toBeVisible()
+  return microphone(page)
+}
+
 export async function recordAndSave(
   page: Page,
-  seconds: number,
+  fart = '090',
   { offersAccount = false } = {}
 ): Promise<void> {
   await page.addInitScript(skipWelcome, { offersAccount })
   await page.goto('/')
-  await page.getByTestId('record-button').click()
-  await expect(page.getByTestId('recording-timer')).toBeVisible()
-  await page.waitForTimeout(seconds * 1000)
-  await page.getByTestId('stop-button').click()
-  await expect(page.getByRole('heading', { name: 'New Recording' })).toBeVisible()
+  await waitForOpenMicrophone(page)
+  await fartAndRecord(page, fart)
   await page.getByRole('button', { name: 'Save' }).click()
+}
+
+export async function recordG3(page: Page, options?: { offersAccount?: boolean }): Promise<void> {
+  await recordAndSave(page, '090', options)
+  await expect(page.getByTestId('result-note')).toHaveText('G3')
+}
+
+export async function recordG3ToRecordings(page: Page): Promise<void> {
+  await recordG3(page)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+}
+
+export async function deleteRecording(page: Page, number: number): Promise<void> {
+  await page.getByRole('button', { name: `Delete Recording ${number}`, exact: true }).click()
+  await page
+    .getByRole('alertdialog', { name: `Delete Recording ${number}?` })
+    .getByRole('button', { name: 'Delete Recording' })
+    .click()
+}
+
+export async function tapRecord(page: Page, { saysStarting = false } = {}) {
+  await page.getByTestId('record-button').click()
+  if (saysStarting) await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
+  await expect(page.getByTestId('stop-button')).toBeVisible()
+  return microphone(page)
+}
+
+export async function tapOnSilence(page: Page): Promise<void> {
+  await tapRecord(page)
+  await page.getByTestId('stop-button').click()
+  await expect(page.getByTestId('record-status')).toHaveText("Didn't catch that. Try again.")
+}
+
+export function clickToFirstBatch(clicks: number[], batches: number[]): number[] {
+  return clicks.map(at => (batches.find(b => b >= at) ?? Number.POSITIVE_INFINITY) - at)
+}
+
+export function lastClickToFirstBatch({
+  clicks,
+  batches
+}: {
+  clicks: number[]
+  batches: number[]
+}) {
+  return clickToFirstBatch(clicks, batches).at(-1) ?? Number.POSITIVE_INFINITY
+}
+
+export function interrupt(page: Page, type: 'mute' | 'unmute' | 'ended'): Promise<void> {
+  return page.evaluate(event => {
+    for (const track of window.fartyMic.tracks) track.dispatchEvent(new Event(event))
+  }, type)
 }

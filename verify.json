@@ -1,0 +1,89 @@
+{
+  "$schema": "./node_modules/@serpcompany/verify/verify.schema.json",
+  "files": {
+    "generated": {
+      "pnpm-lock.yaml": "pnpm install",
+      "apps/web/CHANGELOG.md": "Release Please",
+      "apps/web/cloudflare-env.d.ts": "wrangler types (pnpm cf-typegen in apps/web)",
+      "apps/web/drizzle/**": "drizzle-kit (pnpm db:generate in apps/web)",
+      "apps/web/src/lib/catalog/songs.generated.ts": "src/lib/catalog/generate.ts (pnpm exec tsx src/lib/catalog/generate.ts in apps/web)",
+      "fixtures/golden/**/*.json": "the reference engine (tools/melody-lab/export_golden.py)",
+      "tools/catalog/titles-*.report.*": "the PDMX import (tools/catalog/import_pdmx.py)",
+      "tools/uv.lock": "uv lock (in tools/)"
+    },
+    "thirdParty": {
+      "catalog/midi/**": "the public-domain scores catalog/catalog.json cites, each with its source and license",
+      "fixtures/recordings/*.{mp3,wav}": "the Freesound uploads fixtures/recordings/manifest.json lists, each with its source and license",
+      "tools/catalog/testdata/*.mid": "PDMX scores the importer's tests read, as published"
+    },
+    "names": {
+      ".dev.vars.example": "hash-lines",
+      "cf-typegen.env": "hash-lines",
+      "_headers": "hash-lines",
+      "linux.Dockerfile": "dockerfile"
+    }
+  },
+  "rules": {
+    "comments": "docs/agents/code.md, The rules",
+    "docs": "docs/agents/code.md, The rules",
+    "sizes": "docs/agents/code.md, The rules",
+    "layers": "ARCHITECTURE.md, Layers",
+    "waits": "docs/agents/code.md, The rules",
+    "secrets": "docs/agents/code.md, The rules",
+    "duplicates": "docs/agents/code.md, The rules",
+    "deadcode": "docs/agents/code.md, The rules",
+    "dependencies": "ARCHITECTURE.md, Layers",
+    "linters": "docs/agents/code.md, The checks"
+  },
+  "dependencies": {
+    "parts": [
+      {
+        "folder": "apps/web",
+        "sources": [
+          "src",
+          "worker.ts",
+          "e2e",
+          "scripts",
+          "next.config.ts"
+        ],
+        "testCode": "(\\.test\\.tsx?$|^e2e/|^src/test-support/)",
+        "entries": [
+          "^src/app/(|.*/)(page|layout|route|not-found|global-not-found|error|global-error|loading|template|default|sitemap|robots|manifest|icon|opengraph-image)\\.tsx?$",
+          "^src/instrumentation-client\\.ts$",
+          "^src/lib/[^/]+/worker\\.ts$",
+          "^src/lib/catalog/generate\\.ts$",
+          "^worker\\.ts$",
+          "^scripts/[^/]+\\.ts$",
+          "^next\\.config\\.ts$"
+        ],
+        "runtime": {
+          "path": "^(src/|worker\\.ts$)",
+          "pathNot": "(\\.test\\.tsx?$|^e2e/|^src/test-support/|^src/lib/catalog/generate\\.ts$)"
+        }
+      }
+    ]
+  },
+  "docs": {
+    "skills": {
+      "catalog": "docs/agents/code.md"
+    },
+    "github": {
+      "exempt": {
+        ".claude/skills/pr-review/SKILL.md": "the Code review workflow's review job runs it, where its gh commands read the pull request with that job's own token"
+      }
+    }
+  },
+  "exceptions": {
+    "knownLongDocs": {},
+    "knownLargeFiles": {},
+    "allowedPauses": {},
+    "knownDuplicates": {},
+    "baseline": {
+      "comments": {},
+      "docs": {},
+      "deadcode": {},
+      "dependencies": {},
+      "linters": {}
+    }
+  }
+}

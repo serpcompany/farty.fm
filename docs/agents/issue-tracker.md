@@ -4,7 +4,7 @@ Issues for this repo live in GitHub Issues. Use the `gh` CLI for all operations;
 
 Agents act on GitHub only as serp-agent: every `gh` command below, and every `git` command that reaches GitHub (commit, fetch, push), runs through the `serp-github-app` skill's `gh.sh` and `git.sh`. Never use the owner's `gh` login, not even to read. See [Agent GitHub Identity](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/agent-harness/agent-github-identity.md). Calling `gh.sh` from zsh: see Shell gotchas in `docs/agents/web.md`.
 
-`gh` older than 2.82.1 fails on plain `gh issue view`, `gh pr view` and `gh pr edit` because GitHub removed Projects (classic). Upgrade with `brew upgrade gh`, or use the `--json` and `gh api` forms below, which work on any version.
+`gh` older than 2.82.1 fails on plain `gh issue view`, `gh pr view` and `gh pr edit` because GitHub removed Projects (classic). Upgrade it with the machine's package manager (`brew upgrade gh` on macOS, `winget upgrade GitHub.cli` on Windows, the distribution's own on Linux), or use the `--json` and `gh api` forms below, which work on any version.
 
 ## Conventions
 
@@ -48,7 +48,7 @@ The plan is the pinned Web MVP roadmap issue (#106). All roadmap issues are in t
 
 Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/git-workflow.md), and [Verification cadence](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification-cadence.md) for merging and deploys. Farty's own steps:
 
-1. Branch from `staging` as `issue-<n>-<short-slug>`. Name the branch correctly before opening a PR: renaming a PR's head branch closes the PR. `main` changes only by promotion from `staging` and by its release PR (`docs/agents/web.md`, Promotion and releases), never by a PR from a work branch.
+1. Branch from `staging` as `issue-<n>-<short-slug>`. Name the branch correctly before opening a PR: renaming a PR's head branch closes the PR. `main` changes only by promotion from `staging` and by its release PR ([Promotion and releases](releases.md)), never by a PR from a work branch.
 2. Open a small **draft** PR into `staging`.
    - The title is a Conventional Commit written for the user, for example `feat: show each Recording's pitch on the Recordings tab`.
    - The body starts with `Closes #<n>` and says what changed and what's deliberately not included.
@@ -56,15 +56,8 @@ Follow the SERP [git workflow standard](https://github.com/serpcompany/serp/blob
    - For audio, report measurements on the actual output (the `tools/melody-lab/evaluate.py` checks or their equivalents), not a description. For UI, attach phone-size screenshots from the tap-through.
 3. Keep test rounds few until launch. The web app's cadence:
    - **`pnpm check`** in `apps/web` on the PR's head commit: lint, types, unit tests and build. The Playwright journeys (`pnpm test:e2e`) belong to `web.yml` too. The author runs `pnpm check` and cites the result in the PR, plus the journeys when the change touches a screen, and `web.yml` runs them all again once the PR is ready.
-   - **Tap through yourself** before review: at phone size, on the local Workers build behind the Staging gate (the `verify-pedos-web` skill). The owner isn't asked to. After the merge, CI deploys Staging from `staging`'s tip, with a smoke test.
+   - **Tap through yourself** before review: at phone size, on the local Workers build behind the Staging gate (the `verify-web` skill). The owner isn't asked to. After the merge, CI deploys Staging from `staging`'s tip, with a smoke test.
    - Never run `pnpm deploy:*`; CI deploys Staging.
 4. One review. Follow the git workflow's review loop: a fresh review agent that didn't write the change posts findings as PR review comments marked **blocking** or **suggestion**, and the author replies on each. Record the outcome in the PR. A clean review is not owner acceptance.
-5. Update the branch from `staging`, then mark the PR ready. Merge it once `docs/agents/web.md` (Who merges) allows: squash-merge and delete the branch.
+5. Update the branch from `staging`, then mark the PR ready. Merge it once [Who merges](releases.md) allows: squash-merge and delete the branch.
    - After a merge, check the linked issue. A squash merge by an agent may not auto-close it; if it is still open, close it with `gh issue close <n> --comment "Shipped in #<pr>."`.
-
-## iOS history
-
-The iPhone app is no longer built or released (TestFlight releases stopped on 2026-10-06, #103). Its tests ran in two sets (`ios/scripts/run-tests.sh`), kept here as history:
-
-- **Quick set:** the unit tests, the Recording Analysis golden tests, the shipped-build test and the core record-flow UI tests, once when a PR was marked ready, and only when the PR changed what the iPhone app builds from (the paths in `ios.yml`).
-- **Full set:** every UI test, on pushes to `main`.

@@ -1,17 +1,15 @@
-/** What an uploaded WAV's header says. */
-export type WavHeader = { sampleRate: number; frames: number }
+type WavHeader = { sampleRate: number; frames: number }
 
-/** The sample rates a WAV may have: anything a browser's microphone or the renderer records at. */
 const MIN_SAMPLE_RATE = 8000
 const MAX_SAMPLE_RATE = 192_000
 
 const HEADER_BYTES = 44
+const FMT_CHUNK_BYTES = 16
+const PCM_FORMAT = 1
+const MONO = 1
+const BYTES_PER_SAMPLE = 2
+const BITS_PER_SAMPLE = 16
 
-/**
- * The header of a WAV exactly as Farty writes one (`encodeWav` in `src/lib/wav.ts`): a 44-byte
- * header of mono 16-bit PCM, whose RIFF and data sizes match the file, and at least one sample.
- * Null for anything else, so the bucket only ever holds audio the app can play.
- */
 export function readWavHeader(bytes: Uint8Array): WavHeader | null {
   if (bytes.byteLength <= HEADER_BYTES) return null
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
@@ -25,16 +23,16 @@ export function readWavHeader(bytes: Uint8Array): WavHeader | null {
     u32(4) === bytes.byteLength - 8 &&
     tag(8) === 'WAVE' &&
     tag(12) === 'fmt ' &&
-    u32(16) === 16 &&
-    u16(20) === 1 && // PCM
-    u16(22) === 1 && // mono
+    u32(16) === FMT_CHUNK_BYTES &&
+    u16(20) === PCM_FORMAT &&
+    u16(22) === MONO &&
     sampleRate >= MIN_SAMPLE_RATE &&
     sampleRate <= MAX_SAMPLE_RATE &&
-    u32(28) === sampleRate * 2 &&
-    u16(32) === 2 &&
-    u16(34) === 16 &&
+    u32(28) === sampleRate * BYTES_PER_SAMPLE &&
+    u16(32) === BYTES_PER_SAMPLE &&
+    u16(34) === BITS_PER_SAMPLE &&
     tag(36) === 'data' &&
     u32(40) === dataBytes &&
-    dataBytes % 2 === 0
-  return valid ? { sampleRate, frames: dataBytes / 2 } : null
+    dataBytes % BYTES_PER_SAMPLE === 0
+  return valid ? { sampleRate, frames: dataBytes / BYTES_PER_SAMPLE } : null
 }

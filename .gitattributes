@@ -1,2 +1,8 @@
-fixtures/golden/**/*.json linguist-generated=true
+* text=auto eol=lf
+
+pnpm-lock.yaml linguist-generated=true
 apps/web/cloudflare-env.d.ts linguist-generated=true
+apps/web/drizzle/** linguist-generated=true
+apps/web/src/lib/catalog/songs.generated.ts linguist-generated=true
+fixtures/golden/**/*.json linguist-generated=true
+tools/catalog/titles-*.report.* linguist-generated=true

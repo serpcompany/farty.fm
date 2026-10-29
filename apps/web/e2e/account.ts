@@ -1,26 +1,15 @@
 import { randomInt } from 'node:crypto'
-import { type BrowserContext, expect, type Page, type TestInfo } from '@playwright/test'
+import type { BrowserContext, Page, TestInfo } from '@playwright/test'
+import { uploaded } from './database'
+import { recordG3ToRecordings, skipWelcome } from './record'
+import { expect } from './test'
 
-// Accounts in the journeys (#155): sign-in codes come from the dev mailbox (`/dev/mail/`), which
-// only a local run without `--env` has, as on CI.
-
-/**
- * The token Turnstile's test widget gives (#237), which the test secret a local run uses accepts.
- * A request for a code without it is refused.
- */
 export const TURNSTILE_TEST_TOKEN = 'XXXX.DUMMY.TOKEN.XXXX'
 
-/** A new email for one test, so no two tests share an account or a code. */
 export function newEmail(testInfo: TestInfo, name: string): string {
   return `${name}-${testInfo.project.name}-${Date.now()}-${randomInt(1e6)}@example.com`
 }
 
-/**
- * Gives the context a client address of its own. Locally every request comes from 127.0.0.1, so
- * the tests would share one client's limit on sign-in codes (10 in 10 minutes); Cloudflare sets
- * this header itself, so only a local run can. Only Farty's own requests carry it: on every
- * request, Chromium blocks Turnstile's script from Cloudflare (ERR_BLOCKED_BY_ORB).
- */
 export async function ownClient(context: BrowserContext): Promise<void> {
   const address = `10.${randomInt(256)}.${randomInt(256)}.${randomInt(1, 255)}`
   await context.route(
@@ -30,7 +19,6 @@ export async function ownClient(context: BrowserContext): Promise<void> {
   )
 }
 
-/** The newest sign-in code the dev mailbox holds for `email`, as a person reads their email. */
 export async function codeFor(page: Page, email: string): Promise<string> {
   let code: string | undefined
   await expect(async () => {
@@ -45,11 +33,6 @@ export async function codeFor(page: Page, email: string): Promise<string> {
   return code as string
 }
 
-/**
- * Signs in to a new account with the page's own requests, as the account step makes them, with
- * Turnstile's test token. The page must be on Farty; reload it after, so Farty reads the session
- * as it opens.
- */
 export async function signInByApi(page: Page, email: string): Promise<void> {
   await ownClient(page.context())
   const post = (path: string, body: unknown) =>
@@ -71,9 +54,33 @@ export async function signInByApi(page: Page, email: string): Promise<void> {
   expect(await post('/api/auth/sign-in/email-otp', { email, otp })).toBe(200)
 }
 
-/** What the session says, from the page itself. */
 export function session(
   page: Page
 ): Promise<{ user: { email: string; marketingEmail: boolean } } | null> {
   return page.evaluate(async () => (await fetch('/api/auth/get-session')).json())
+}
+
+export function accountOf(page: Page): Promise<string | null> {
+  return page.evaluate(() => localStorage.getItem('pedos.account'))
+}
+
+export async function reopen(context: BrowserContext, page: Page): Promise<Page> {
+  await page.close()
+  const reopened = await context.newPage()
+  await reopened.goto('/recordings/')
+  return reopened
+}
+
+export async function expiredWithARecording(
+  page: Page,
+  context: BrowserContext,
+  email: string
+): Promise<Page> {
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, email)
+  await recordG3ToRecordings(page)
+  await uploaded(page)
+  await context.clearCookies()
+  return reopen(context, page)
 }

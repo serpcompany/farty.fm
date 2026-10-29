@@ -15,22 +15,24 @@ This is a single-context repository:
 ```text
 /
 ├── CONTEXT.md
+├── apps/web/               # the app: Farty on the web (Next.js on Cloudflare Workers)
 ├── catalog/                # Song Catalog: cited MIDI scores and provenance
 ├── fixtures/recordings/    # Fixture Library (internal only)
+├── fixtures/golden/        # the reference engine's answers, which the app must match
 ├── tools/melody-lab/       # Python reference engine and listening page
 ├── tools/catalog/          # batch import of Songs from PDMX, with its gates and reports
-├── docs/
-│   ├── adr/
-│   ├── agents/
-│   └── research/
-└── ios/                    # the app (created by the first build issue)
+└── docs/
+    ├── adr/
+    ├── agents/
+    └── research/
 ```
 
 ## Historical reference
 
-The first attempt and the pre-restart prototypes are preserved as git tags, not on `main`:
+Earlier work is preserved as git tags, not on the branches:
 
-- `archive/pedos-app-v1`: `main` before the restart, including `docs/research/prototypes/pedos-app-v1`.
+- `archive-2026-10-27`: the retired iPhone app, its Swift Recording Analysis and its App Store submission (ADR 0016). Read a file with `git show archive-2026-10-27:<path>`.
+- `archive/pedos-app-v1`: `main` before the restart, with its research prototypes.
 - `archive/prototype/*`, `archive/research/*`, `archive/codex/*`: the old prototype branches.
 
 Treat them as evidence, not specification. Pull forward what’s useful, revalidate old assumptions, and record anything newly accepted in `CONTEXT.md` or an ADR. Do not silently restore archived architecture or code.

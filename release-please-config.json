@@ -4,7 +4,7 @@
   "include-component-in-tag": false,
   "include-v-in-tag": true,
   "bump-minor-pre-major": true,
-  "pull-request-title-pattern": "release: Farty ${version}",
+  "pull-request-title-pattern": "chore: release Farty ${version}",
   "changelog-sections": [
     { "type": "feat", "section": "Features" },
     { "type": "fix", "section": "Fixes" },
@@ -14,8 +14,7 @@
     { "type": "test", "section": "Tests", "hidden": true },
     { "type": "build", "section": "Build", "hidden": true },
     { "type": "ci", "section": "CI", "hidden": true },
-    { "type": "chore", "section": "Chores", "hidden": true },
-    { "type": "release", "section": "Release", "hidden": true }
+    { "type": "chore", "section": "Chores", "hidden": true }
   ],
   "packages": {
     "apps/web": {

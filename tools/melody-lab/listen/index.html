@@ -301,7 +301,7 @@ footer { font-size: 12px; color: var(--muted); max-width: 80ch; }
     ctx.globalAlpha = 0.45;
     for (let b = 0; b <= g.beats; b++) ctx.fillRect(Math.round(x(b)), 4, 1, g.height - 26);
     ctx.globalAlpha = 1;
-    g.bars.forEach((b) => ctx.fillRect(Math.round(x(b)), 4, 1, g.height - 26)); // the score's bar lines
+    g.bars.forEach((b) => ctx.fillRect(Math.round(x(b)), 4, 1, g.height - 26));
     const now = audio.currentTime / g.spb;
     notes.forEach((n) => {
       const w = Math.max(3, n.dur * g.pxb - 2);

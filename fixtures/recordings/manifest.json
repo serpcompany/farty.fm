@@ -432,7 +432,7 @@
       "removedBy": "product-owner",
       "reason": "The owner listened to the whole library again and judged it not to sound like a real fart.",
       "issue": "https://github.com/serpcompany/farty.fm/issues/215",
-      "fileKeptFor": "The frozen iPhone app (golden format 2, RecordingAnalysisKit/Tests/GoldenFormat2/) still reads the file. Nothing else uses it."
+      "fileRetired": "2026-10-27, with the iPhone app (ADR 0013). Read it with git show archive-2026-10-27:fixtures/recordings/021__designerschoice__fartreal-samsung-galaxy-smartphone-cu-short-buzzing-fart-nichola__807507.mp3"
     }
   ]
 }
