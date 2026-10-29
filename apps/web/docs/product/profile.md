@@ -49,11 +49,11 @@ On Staging's build only, for Internal Testers.
   enough for"; `src/components/farty/recordings-provider.interaction.test.tsx`, "adds files as
   Recordings with their ids, then analyzes each"; `src/lib/fixture-library.test.ts`, "has the 32
   fixtures of the golden library").
-- A fixture deleted while signed in loads again and stays, because each load gives it a new id
-  that still sorts in fixture order, so Songs pick the same farts the reference does
-  (`e2e/fixture-library.spec.ts`, "a fixture deleted from the account loads again, and stays";
-  `src/lib/fixture-library.test.ts`, "gives each load of a fixture a new id, which sorts like
-  fixture ids").
+- A fixture deleted while signed in loads again and stays: everywhere but Production, the account
+  takes a fixture's Recording again after it was deleted (`e2e/fixture-library.spec.ts`, "a fixture
+  deleted from the account loads again, and stays"; `src/app/api/fixture-recordings.workers.test.ts`,
+  "uploads again %s, with its audio, while any other deleted Recording stays deleted"; "stays
+  deleted on Production, like every other Recording").
 - A load that fails says "The Fixture Library didn’t load. Try again." and can be tried again
   (`e2e/fixture-library.spec.ts`, "says when the Fixture Library did not load, and lets you try
   again").

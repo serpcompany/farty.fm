@@ -4,6 +4,7 @@ import { getDb } from '@/db'
 import type { Database } from '@/db/database'
 import {
   deleteUser,
+  forgetDeleted,
   type ItemStatus,
   insertPaidToot,
   insertRecording,
@@ -26,6 +27,7 @@ import type { Recording } from '@/lib/recordings'
 import type { Toot } from '@/lib/toot'
 
 import { type SessionUser, signedInRecently } from './auth-session'
+import { uploadsAgainOnceDeleted } from './fixture-recordings'
 import { apiError, gone, notFound } from './http'
 import {
   isItemId,
@@ -191,10 +193,12 @@ export async function putItem(
 
   const before = await uploadState(db, kind, user.id, id)
   if (before.status === 'live') return Response.json({ id }, { status: 200 })
-  if (before.status === 'deleted') return gone()
+  const again = before.status === 'deleted' && uploadsAgainOnceDeleted(kind, id)
+  if (before.status === 'deleted' && !again) return gone()
   const unpaid = paidOnly ? await unpaidTootRefusal(db, user, id) : null
   if (unpaid) return unpaid
   if (before.live >= LIMITS[kind].maxItems) return apiError(409, 'limit_reached')
+  if (again) await forgetDeleted(db, kind, user.id, id)
   return addWithAudio(kind, stores, user, id, upload.audio, add)
 }
 

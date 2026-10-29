@@ -3,31 +3,22 @@ import { fixtures, fixtureWav } from '../../scripts/fixture-library'
 import { goldenArrangement, goldenRecording } from '../test-support/engine-golden'
 import { analyzeToAnalysis } from './analysis/port'
 import { songs } from './catalog/songs.generated'
-import { fixtureRecordingId, isFixtureRecording, newFixtureRecordingId } from './fixture-library'
+import { fixtureRecordingId, isFixtureRecordingId } from './fixture-library'
 import { coverageOf } from './pitch-coverage'
 import type { Recording } from './recordings'
 import { decodeWav } from './wav'
 
 describe('the Fixture Library', () => {
-  it('gives each load of a fixture a new id, which sorts like fixture ids', () => {
-    const first = fixtures().map(f => newFixtureRecordingId(f.id))
-    const again = fixtures().map(f => newFixtureRecordingId(f.id))
-    expect(first).toEqual([...first].sort())
-    expect(again).toEqual([...again].sort())
-    for (const [i, fixture] of fixtures().entries()) {
-      expect(first[i]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
-      expect(first[i]).not.toBe(again[i])
-      expect(isFixtureRecording(first[i], fixture.id)).toBe(true)
-      expect(isFixtureRecording(again[i], fixture.id)).toBe(true)
-    }
+  it('gives fixtures the iPhone app’s ids, which sort like fixture ids', () => {
+    expect(fixtureRecordingId('090')).toBe('00000000-0000-0000-0000-000000000090')
+    const ids = fixtures().map(f => fixtureRecordingId(f.id))
+    expect(ids).toEqual([...ids].sort())
   })
 
-  it('knows a fixture by the iPhone app’s id too, and nothing else as it', () => {
-    expect(fixtureRecordingId('090')).toBe('00000000-0000-0000-0000-000000000090')
-    expect(isFixtureRecording(fixtureRecordingId('090'), '090')).toBe(true)
-    expect(isFixtureRecording(fixtureRecordingId('090'), '095')).toBe(false)
-    expect(isFixtureRecording(newFixtureRecordingId('095'), '090')).toBe(false)
-    expect(isFixtureRecording(crypto.randomUUID(), '090')).toBe(false)
+  it('knows a fixture’s id from any other Recording’s', () => {
+    expect(fixtures().every(f => isFixtureRecordingId(fixtureRecordingId(f.id)))).toBe(true)
+    expect(isFixtureRecordingId(crypto.randomUUID())).toBe(false)
+    expect(isFixtureRecordingId('00000000-0000-0000-0000-00000000009a')).toBe(false)
   })
 
   it('has the 32 fixtures of the golden library', () => {

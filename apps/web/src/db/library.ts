@@ -165,6 +165,17 @@ export async function tombstone(
   return deleted.length === 1 ? 'live' : itemStatus(db, kind, userId, id)
 }
 
+export async function forgetDeleted(
+  db: Database,
+  kind: Kind,
+  userId: string,
+  id: string
+): Promise<void> {
+  await db
+    .delete(tables[kind])
+    .where(and(whereItem(kind, userId, id), isNotNull(tables[kind].deletedAt)))
+}
+
 export const TOMBSTONE_RETENTION_MS = 30 * 24 * 60 * 60 * 1000
 
 export async function purgeTombstones(db: Database, userId: string): Promise<void> {
