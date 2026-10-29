@@ -6,6 +6,7 @@ Every GitHub Actions workflow, what starts it, and the checks a merge waits for.
 | --- | --- | --- |
 | `repository.yml` | Every PR, and every push to `staging` and `main` | `verify` |
 | `code-review.yml` | A PR opened, pushed to, reopened or marked ready | `review` |
+| `claude.yml` | `@claude` in an issue, a PR comment, a review or a review comment | `claude` |
 | `pull-request.yml` | A PR opened, edited, pushed to or marked ready | `title`, `issue-link`, `fix-test`, `text` |
 | `web.yml` | Every PR, every push to `staging` and `main`, and by hand | `changes`, `check`, `e2e`, `deploy-staging`, `deploy-production` |
 | `tools.yml` | Every PR, every push to `staging` and `main`, and by hand | `tools-changes`, `reference`, `scores` |
@@ -25,6 +26,17 @@ Every GitHub Actions workflow, what starts it, and the checks a merge waits for.
 `code-review.yml` is its own workflow, as SERP's [code review](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification/code-review/github-actions.md) standard sets, so a PR that changes `repository.yml` or another workflow is still reviewed.
 
 - **`review`** runs on a PR that isn't a draft or a bot's, beside `verify` rather than after it. It installs the review's scripts from the same package version outside the checkout, gives Claude the rules (`AGENTS.md`, `ARCHITECTURE.md`, `CONTEXT.md`, [`docs/agents/code.md`](code.md), `apps/web/AGENTS.md`, as they are on the base branch), the change since the last reviewed commit, its issue and the earlier findings, and runs the [`pr-review`](../../.claude/skills/pr-review/SKILL.md) skill. Claude posts findings inline, marked blocking or suggestion, and the job posts one summary comment. It skips with a notice until `CLAUDE_CODE_OAUTH_TOKEN` is set. It never reviews a PR that changes `code-review.yml` itself, since Claude runs only from the default branch's copy of its workflow: a person reviews such a PR.
+
+## @claude requests
+
+`claude.yml` answers `@claude` in an issue (its title or body, when opened or assigned), a PR comment, a review or a review comment, as zenbu's does. Only the repository's owners, members and collaborators can ask, never a bot, so Claude's own comments can't start it again. The repository is public, so the job checks who asked before it does anything, and it skips a PR whose branch is in a fork, whoever asks: checking it out would run the fork's code with this repository's tokens. One run per issue or PR goes at a time; a new request waits rather than cancelling it, and a third replaces the waiting one, so ask again after the first finishes.
+
+- **Where it works.** On a PR it checks out the PR's head and may push fixes to its branch, which starts a new review. On an issue it branches from `staging` and links a PR to open. It installs the workspace without install scripts or pnpmfile hooks, and fetches the branch the PR merges into as `SERP_VERIFY_BASE`, as `verify` does. The checkout keeps no token; the action sets up its own for pushing. It runs the PR's code, so ask only on a PR whose code you trust. A branch from before the root workspace (#177) has no root `package.json`, so merge `staging` into it first.
+- **The rules it follows.** A file appended to its system prompt says to follow `AGENTS.md`, `ARCHITECTURE.md`, [`code.md`](code.md), `CONTEXT.md` and `apps/web/AGENTS.md`; to run `pnpm check` before pushing, and to push nothing and say why if it still fails; that the runner has no deploy credentials and runs no journeys, so it says what it couldn't check; to stage files by path; and never to push to `staging` or `main`. Blanket adds (`git add -A`, `.`, `-u`, `git commit -a`) are refused: on a PR the action resets `.claude/`, `.mcp.json` and `CLAUDE.md` to the base branch's copies, and a blanket add would commit that reset.
+- **Its limits.** Sonnet 5.5, at most 60 turns, 45 minutes, and 15 minutes a command, with subagents in the foreground and no MCP servers. It keeps its transcript (`claude-transcript`).
+- **The check after it** passes when Claude replied in its comment or pushed, fails when it did neither, ended in an error or left subagents running, and warns when a commit changes a file the action resets, or when Claude pushed without replying.
+
+It runs with `CLAUDE_CODE_OAUTH_TOKEN`, and skips without it. Like the review, it runs only once its file matches the default branch's.
 
 ## Pull request
 
@@ -92,6 +104,6 @@ Every workflow and the local action run each action at a commit, not a tag: a ta
 ## Set up once, by the owner
 
 - **The package:** in `@serpcompany/verify`'s settings, Manage Actions access, add `serpcompany/farty.fm` with Read. Without it every install in CI fails, and `verify` says so.
-- **The review and doc gardening:** the Actions secret `CLAUDE_CODE_OAUTH_TOKEN`.
+- **The review, `@claude` and doc gardening:** the Actions secret `CLAUDE_CODE_OAUTH_TOKEN`.
 - **The docs check's links into SERP's private repositories:** the variable `SERP_AGENT_APP_ID` and the secret `SERP_AGENT_PRIVATE_KEY`, at repository or organization level.
 - **The branch rules** in Required checks, above, with `reference` and `scores` added.
