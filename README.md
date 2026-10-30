@@ -45,7 +45,7 @@ The melody engine itself is proven in Python (`tools/melody-lab/`). Next comes p
 | `apps/web/` | The Farty web app (Next.js on Cloudflare Workers) |
 | `ios/` | The SwiftUI iPhone app (no longer released) (XcodeGen project, unit and UI tests) |
 | `catalog/` | Song Catalog: cited public-domain scores and their provenance |
-| `fixtures/recordings/` | Fixture Library: 32 approved real fart Recordings (internal use only). `manifest.json`'s `removed` lists the ones the owner took out. |
+| `fixtures/recordings/` | Fixture Library: 38 approved real fart Recordings, 6 of them the owner's own (internal use only). `manifest.json`'s `removed` lists the ones the owner took out. |
 | `fixtures/golden/` | The reference engine's results, which the Swift port must match |
 | `RecordingAnalysisKit/` | Recording Analysis in Swift (trimming, Recording Pitch, audition), tested against `fixtures/golden/` |
 | `tools/melody-lab/` | Python reference melody engine and listening page |

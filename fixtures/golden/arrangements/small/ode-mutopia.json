@@ -6,14 +6,10 @@
     {
       "seconds": 1.1,
       "target_midi": 42
-    },
-    {
-      "seconds": 0.8,
-      "target_midi": 44
     }
   ],
   "notes": null,
-  "octave_moves": 0,
+  "octave_moves": 1,
   "per_pitch": [
     {
       "octave_move": false,
@@ -30,16 +26,16 @@
       "target_midi": 42
     },
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": -0.4259205936601731,
       "song_pitch": 71,
       "target_midi": 44
     },
     {
-      "octave_move": false,
-      "recording": "069",
-      "shift_semitones": 0.5740794063398269,
+      "octave_move": true,
+      "recording": "009",
+      "shift_semitones": 14.474079406339825,
       "song_pitch": 72,
       "target_midi": 45
     },
@@ -52,10 +48,10 @@
     }
   ],
   "pitch_coverage": {
-    "covered": 3,
+    "covered": 4,
     "total": 5
   },
-  "plan_cost": 51.877128072388636,
+  "plan_cost": 207.658514265781,
   "render_settings": null,
   "song": "ode-mutopia",
   "transpose": -27,

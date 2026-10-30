@@ -24,7 +24,7 @@ test('says when the Fixture Library did not load, and lets you try again', async
   await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
   await expect(library.getByRole('alert')).toHaveText('The Fixture Library didn’t load. Try again.')
   await expect(library.getByRole('button', { name: 'Load the Fixture Library' })).toBeEnabled()
-  await expect(library.getByTestId('fixture-library-count')).toHaveText('0 of 32')
+  await expect(library.getByTestId('fixture-library-count')).toHaveText('0 of 38')
 })
 
 test('loads the Fixture Library and unlocks every Song it is long enough for', async ({ page }) => {
@@ -33,12 +33,12 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
   await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
   await page.goto('/profile/')
   const library = page.getByTestId('fixture-library')
-  await expect(library.getByTestId('fixture-library-count')).toHaveText('0 of 32')
+  await expect(library.getByTestId('fixture-library-count')).toHaveText('0 of 38')
   await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
   await expect(library.getByRole('button', { name: 'Fixture Library loaded' })).toBeDisabled({
     timeout: 90_000
   })
-  await expect(library.getByTestId('fixture-library-count')).toHaveText('32 of 32')
+  await expect(library.getByTestId('fixture-library-count')).toHaveText('38 of 38')
 
   // A Recording shows its fart's length, rounded down, which "Needs" is measured against (#227).
   // Fixture 002 is Recording 1: a 4.039 s fart in a 4.2 s take, every burst of it (ADR 0016).
@@ -58,16 +58,17 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
   })
   await expect(page.getByTestId('locked-songs')).toHaveCount(0)
 
-  // Without Recording 1, Amazing Grace's 2.98 s note on E3 outlasts every fixture near it.
+  // Without Recording 1, Amazing Grace's 2.98 s note on E3 outlasts every fixture near it. It is
+  // the only Song locked: since #282 finds 009 and 080 Melodic, the rest have their notes.
   await recordings.click()
   await page.getByRole('button', { name: 'Delete Recording 1', exact: true }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete Recording' }).click()
   await expect(first).toHaveCount(0)
   await compose.click()
-  await expect(page.getByRole('heading', { name: 'Unlocked · 9' })).toBeVisible({
+  await expect(page.getByRole('heading', { name: 'Unlocked · 11' })).toBeVisible({
     timeout: 60_000
   })
-  await expect(page.getByRole('heading', { name: 'Locked · 3', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Locked · 1', exact: true })).toBeVisible()
   const amazing = page.getByRole('button', { name: 'Amazing Grace' })
   await expect(amazing).toHaveAccessibleDescription(
     'Locked. 5 of 6 notes covered. Needs E3 (3.0 s)'

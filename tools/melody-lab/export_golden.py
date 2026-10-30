@@ -274,7 +274,9 @@ def main():
                 f"octaveMoves={a['octave_moves']}"
             )
         songs.append({"id": c["id"], "title": c["title"], "notes": len(m.notes), "transpose": transposes, "unlocked": unlocked})
-    write("coverage.json", coverage_json(catalog, lib))
+    # The owner's farts (#295) stay out of the random subsets, so adding them left every subset as
+    # it was. They are Noise-like, so the Arrangements, which read only Melodic Recordings, are too.
+    write("coverage.json", coverage_json(catalog, [s for s in lib if manifest[s.id]["source"] != "owner"]))
 
     melodic = [s.id for s in lib if s.pitched]
     by_pitch = {}

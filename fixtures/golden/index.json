@@ -45,7 +45,13 @@
       "101",
       "102",
       "103",
-      "104"
+      "104",
+      "105",
+      "106",
+      "107",
+      "108",
+      "109",
+      "110"
     ],
     "small": [
       "002",
@@ -58,6 +64,7 @@
   },
   "melodic_recordings": [
     "002",
+    "009",
     "013",
     "016",
     "017",
@@ -66,6 +73,7 @@
     "032",
     "059",
     "069",
+    "080",
     "084",
     "086",
     "090",
@@ -114,7 +122,13 @@
     "101",
     "102",
     "103",
-    "104"
+    "104",
+    "105",
+    "106",
+    "107",
+    "108",
+    "109",
+    "110"
   ],
   "sample_rate": 44100,
   "songs": [
@@ -124,7 +138,7 @@
       "title": "Twinkle, Twinkle, Little Star",
       "transpose": {
         "full": -17,
-        "small": -27
+        "small": -36
       },
       "unlocked": {
         "full": true,
@@ -137,11 +151,11 @@
       "title": "Mary Had a Little Lamb",
       "transpose": {
         "full": -20,
-        "small": -32
+        "small": -35
       },
       "unlocked": {
         "full": true,
-        "small": false
+        "small": true
       }
     },
     {
@@ -163,7 +177,7 @@
       "title": "Frère Jacques",
       "transpose": {
         "full": -3,
-        "small": -11
+        "small": -18
       },
       "unlocked": {
         "full": true,
@@ -176,11 +190,11 @@
       "title": "When the Saints Go Marching In",
       "transpose": {
         "full": -11,
-        "small": -21
+        "small": -20
       },
       "unlocked": {
         "full": true,
-        "small": false
+        "small": true
       }
     },
     {
@@ -189,7 +203,7 @@
       "title": "Row, Row, Row Your Boat",
       "transpose": {
         "full": -20,
-        "small": -28
+        "small": -26
       },
       "unlocked": {
         "full": true,
@@ -214,8 +228,8 @@
       "notes": 16,
       "title": "Amazing Grace",
       "transpose": {
-        "full": -26,
-        "small": -22
+        "full": -28,
+        "small": -24
       },
       "unlocked": {
         "full": true,
@@ -228,7 +242,7 @@
       "title": "Für Elise",
       "transpose": {
         "full": -17,
-        "small": -30
+        "small": -29
       },
       "unlocked": {
         "full": true,

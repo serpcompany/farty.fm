@@ -40,18 +40,19 @@ export type Coverage = {
 }
 
 /**
- * Recordings as Auto-map reads them: analyzed ones with a Recording Pitch, and Noise-like ones the
- * user placed on a note, as Melodic Recordings at their Placed Pitch (ADR 0015).
+ * Recordings as Auto-map reads them: the ones the user placed on a note, as Melodic Recordings at
+ * their Placed Pitch (ADR 0015), even when a later analysis found a Recording Pitch (ADR 0017), and
+ * the other analyzed ones with a Recording Pitch.
  */
 function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[] {
   return recordings.flatMap(r => {
     if (r.analysis.state !== 'analyzed') return []
     const { analysis } = r.analysis
-    if (analysis.recordingPitchMidi !== null && analysis.shortestNoteSeconds !== null) {
-      return [autoMapRecording(r.id, analysis)]
-    }
     const placed = placedPitch(r)
-    return placed === null ? [] : [placedAutoMapRecording(r.id, analysis, placed)]
+    if (placed !== null) return [placedAutoMapRecording(r.id, analysis, placed)]
+    return analysis.recordingPitchMidi !== null && analysis.shortestNoteSeconds !== null
+      ? [autoMapRecording(r.id, analysis)]
+      : []
   })
 }
 
