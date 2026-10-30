@@ -19,6 +19,14 @@ test('recording a Noise-like fart says it has no steady note', async ({ page }) 
   )
 })
 
+test('a fart the current analysis found no note in offers no Re-scan (#282)', async ({ page }) => {
+  await recordAndSave(page, 2.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-note')).toHaveText('noise-like')
+  // Analysis is deterministic: a Re-scan could only find what this analysis found.
+  await expect(page.getByRole('button', { name: /^Re-scan/ })).toHaveCount(0)
+})
+
 test('a Noise-like fart can be placed on a note by ear, moved, and taken off (ADR 0015)', async ({
   page
 }) => {

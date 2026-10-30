@@ -295,6 +295,11 @@ export async function loadRecordings(): Promise<Recording[]> {
   return all.sort((a, b) => a.number - b.number)
 }
 
+/** One Recording as stored now, or null when it's gone. */
+export async function loadRecording(id: string): Promise<Recording | null> {
+  return (await withDb(database => database.get('recordings', id))) ?? null
+}
+
 /**
  * Saves a new Recording and its WAV audio together, numbered after the highest so far, and queues
  * its upload. A new Recording gets a random id; the Fixture Library gives its own

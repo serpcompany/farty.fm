@@ -108,6 +108,31 @@ def weighted_median(mids, w):
     return mids[order][np.searchsorted(cw, 0.5)]
 
 
+PITCH_WINDOW_S = 0.45  # the pitch estimate reads this much of the contour
+
+
+def estimate_pitch(f0, frame_rms, n_body, a):
+    """The Recording Pitch estimate over the PITCH_WINDOW_S from contour frame `a`: the
+    energy-weighted median of its voiced frames, and its confidence, their share of the window
+    (of the whole first burst, when that is shorter) x (1 - spread / 3), the spread
+    being their median distance from it. (None, confidence) below 4 voiced frames (confidence 0)
+    or MIN_PITCH_CONF. analyze_recording() reads the head (`a` = 0), and only when that finds no
+    pitch, the window from the first kept frame (#282)."""
+    window = int(PITCH_WINDOW_S * SR / HOP)
+    end = min(len(f0), a + window)
+    v = np.isfinite(f0[a:end])
+    # Counted as the head counts it, from either window: never against the frames left after `a`,
+    # or a few quiet frames at the end of a short first burst would be full coverage (#295).
+    coverage = v.sum() / max(1, window if n_body > PITCH_WINDOW_S * SR else len(f0))
+    if v.sum() < 4:
+        return None, 0.0
+    mids = librosa.hz_to_midi(f0[a:end][v])
+    med = weighted_median(mids, frame_rms[a:end][v])
+    spread = np.median(np.abs(mids - med))
+    conf = float(np.clip(coverage, 0, 1) * np.clip(1 - spread / 3, 0, 1))
+    return (float(med) if conf >= MIN_PITCH_CONF else None), conf
+
+
 def analyze_recording(rid, y):
     start, end, pitch_end, cut_at_reattack = note_segment(y)
     fart = y[start:end].astype(np.float64)
@@ -131,18 +156,15 @@ def analyze_recording(rid, y):
             m = np.where(np.abs(m - center) > FAR_FROM_CENTER, np.nan, m)
         f0 = librosa.midi_to_hz(m)
     # reference pitch: energy-weighted median of voiced frames in the first 450 ms
-    head = min(len(f0), int(0.45 * SR / HOP))
-    v = np.isfinite(f0[:head])
-    coverage = v.sum() / max(1, head if len(body) > 0.45 * SR else len(f0))
-    ref_midi, conf = None, 0.0
-    if v.sum() >= 4:
-        mids = librosa.hz_to_midi(f0[:head][v])
-        w = frame_rms[:head][v]
-        med = weighted_median(mids, w)
-        spread = np.median(np.abs(mids - med))
-        conf = float(np.clip(coverage, 0, 1) * np.clip(1 - spread / 3, 0, 1))
-        if conf >= MIN_PITCH_CONF:
-            ref_midi = float(med)
+    ref_midi, conf = estimate_pitch(f0, frame_rms, len(body), 0)
+    if ref_midi is None:
+        # The tone may come after the head (#282): try once more over the 450 ms from the
+        # contour's first kept frame. It never runs for a fart the head finds a pitch in.
+        kept = np.flatnonzero(np.isfinite(f0))
+        if len(kept) and kept[0] > 0:
+            later = estimate_pitch(f0, frame_rms, len(body), int(kept[0]))
+            if later[0] is not None:
+                ref_midi, conf = later
     src = Source(
         id=rid,
         cut_at_reattack=cut_at_reattack,
@@ -238,13 +260,13 @@ PLACED_MIN_NOTE_S = 0.6  # the shortest note a Placed Recording counts as readin
 
 
 def placed(src, midi):
-    """A Noise-like Recording placed on `midi` by ear (ADR 0015), as melody_fit() reads it: a
-    Melodic Recording whose Recording Pitch is that note. Nothing measured its pitch, so its
-    shortest note is audition()'s longest length, the slowest a Melodic Recording reads back
-    on, and it counts as settled from its start. render() plays it raw, like any fart: the note
-    is where it goes, never a pitch shift. The web's `placedAutoMapRecording()` makes the same."""
-    if src.pitched:
-        raise ValueError(f"{src.id} is Melodic: only a Noise-like Recording is placed by ear")
+    """A Recording placed on `midi` by ear (ADR 0015), as melody_fit() reads it: a Melodic
+    Recording whose Recording Pitch is that note. Only a Noise-like Recording is placed, but the
+    placement outlasts a later analysis that finds a Recording Pitch, and stays the one used: the
+    user chose it (ADR 0017). Nothing measured the fart on that note, so its shortest note is
+    audition()'s longest length, the slowest a Melodic Recording reads back on, and it counts as
+    settled from its start. render() plays it raw, like any fart: the note is where it goes, never
+    a pitch shift. The web's `placedAutoMapRecording()` makes the same."""
     return replace(src, ref_midi=float(midi), min_note_s=PLACED_MIN_NOTE_S, settle_s=0.0)
 
 

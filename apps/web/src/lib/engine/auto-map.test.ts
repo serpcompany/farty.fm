@@ -182,13 +182,14 @@ describe('Auto-map matches the golden Arrangements', () => {
     }
   }
 
-  it('unlocks all 13 Songs on the full library and none on the small one', () => {
+  it('unlocks all 13 Songs on the full library and 2 on the small one', () => {
     const unlocked = (library: Library) =>
       songIds.filter(id => arrange(goldenSong(id), inputs(libraries[library])).unlocked)
     // Every burst plays (ADR 0016), so the long notes jingle, row, amazing and auld need have
-    // farts long enough (ADR 0011). The small library's six are still too short.
+    // farts long enough (ADR 0011). The small library's six are still too short for those, and
+    // with 009 Melodic since the second pitch window (ADR 0017) they unlock mary and saints.
     expect(unlocked('full')).toEqual(songIds)
-    expect(unlocked('small')).toEqual([])
+    expect(unlocked('small')).toEqual(['mary', 'saints'])
   })
 })
 
@@ -323,7 +324,7 @@ describe('Auto-map inputs and terms', () => {
 
   it('leaves a Song locked, at the lowest transposition, when no Recording is Melodic', () => {
     const song = goldenSong('mary')
-    const noise = inputs(['009', '018', '052'])
+    const noise = inputs(['018', '052', '055'])
     expect(noise.every(r => r.recordingPitchMidi === null)).toBe(true)
     const a = arrange(song, noise)
     expect(a.transposition).toBe(LOWEST_TRANSPOSITION)
@@ -488,48 +489,54 @@ describe('Auto-map inputs and terms', () => {
 })
 
 describe('Placed Recordings (ADR 0015)', () => {
-  /** A golden Noise-like Recording's stored analysis. */
-  function noiseAnalysis(id: string): Analysis {
+  /** A golden Recording's stored analysis. */
+  function storedAnalysis(id: string): Analysis {
     const g = goldenRecording(id)
-    expect(g.melodic).toBe(false)
     return {
       gestureStartSeconds: g.gesture.start_sample / SR,
       gestureEndSeconds: g.gesture.end_sample / SR,
       cutAtReattack: g.gesture.cut_at_reattack,
       pitchEstimateMidi: g.pitch_estimate_midi,
       pitchConfidence: g.pitch_confidence,
-      recordingPitchMidi: null,
-      shortestNoteSeconds: null,
-      settleSeconds: null
+      recordingPitchMidi: g.melodic ? g.recording_pitch_midi : null,
+      shortestNoteSeconds: g.melodic ? g.shortest_note_s : null,
+      settleSeconds: g.melodic ? g.settle_s : null
     }
   }
   const C2 = 36
+  /** A golden Recording as Auto-map takes it placed on C2. */
+  const placedInput = (id: string) => ({
+    ...autoMapInput(id),
+    recordingPitchMidi: C2,
+    shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
+    settleSeconds: 0
+  })
 
   it('counts as Melodic at its note, at its own length, holding it from 0.6 s', () => {
-    expect(placedAutoMapRecording('080', noiseAnalysis('080'), C2)).toEqual({
-      ...autoMapInput('080'),
-      recordingPitchMidi: C2,
-      shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
-      settleSeconds: 0
-    })
+    expect(goldenRecording('065').melodic).toBe(false)
+    expect(placedAutoMapRecording('065', storedAnalysis('065'), C2)).toEqual(placedInput('065'))
     expect(PLACED_SHORTEST_NOTE_SECONDS).toBe(0.6)
   })
 
+  it('stays at its Placed Pitch when a later analysis finds a Recording Pitch (ADR 0017)', () => {
+    // 009 was Noise-like until the second pitch window found it near G1 (#282).
+    expect(storedAnalysis('009').recordingPitchMidi).toBeCloseTo(30.5259, 4)
+    expect(placedAutoMapRecording('009', storedAnalysis('009'), C2)).toEqual(placedInput('009'))
+  })
+
   // The same Arrangements as `tools/melody-lab/test_placed.py`.
-  it('covers a note nothing else does: 080 on C2 unlocks 2 Songs the library leaves locked without 002', () => {
-    const without002 = libraries.full.filter(id => id !== '002')
+  it('covers a note nothing else does: 065 on C2 unlocks 2 Songs the small library leaves locked', () => {
     const placed = [
-      ...inputs(without002.filter(id => id !== '080')),
-      placedAutoMapRecording('080', noiseAnalysis('080'), C2)
+      ...inputs(libraries.small),
+      placedAutoMapRecording('065', storedAnalysis('065'), C2)
     ]
     const expected = {
-      jingle: { covered: 5, total: 5, octaveMoves: 1, cost: 1172.7775, plays: 64 },
-      amazing: { covered: 5, total: 6, octaveMoves: 1, cost: 94.6438, plays: 62 },
-      auld: { covered: 7, total: 7, octaveMoves: 2, cost: 816.3033, plays: 65 }
+      jingle: { covered: 5, total: 5, octaveMoves: 2, cost: 260.0875, plays: 67 },
+      row: { covered: 6, total: 6, octaveMoves: 2, cost: 821.0865, plays: 67 }
     }
     for (const [id, e] of Object.entries(expected)) {
       const song = goldenSong(id)
-      expect(arrange(song, inputs(without002)).unlocked, id).toBe(false)
+      expect(arrange(song, inputs([...libraries.small, '065'])).unlocked, id).toBe(false)
       const a = arrange(song, placed)
       expect({ covered: a.covered, total: a.total, octaveMoves: a.octaveMoves }, id).toEqual({
         covered: e.covered,
@@ -538,7 +545,7 @@ describe('Placed Recordings (ADR 0015)', () => {
       })
       expect(a.cost, id).toBeCloseTo(e.cost, 3)
       expect(
-        a.pitches.filter(p => p.recordingId === '080').map(p => p.songPitch),
+        a.pitches.filter(p => p.recordingId === '065').map(p => p.songPitch),
         id
       ).toEqual([e.plays])
     }

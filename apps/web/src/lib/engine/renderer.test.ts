@@ -151,13 +151,13 @@ describe('the render path from what the app stores', () => {
   it('refuses a locked Song, and a Recording it was not given', () => {
     const song = goldenSong('twinkle')
     const locked = arrange(song, libraries.small.map(autoMapInput))
-    expect(() => renderSong(song, locked, sources)).toThrow(/locked: 3 of 6 notes covered/)
+    expect(() => renderSong(song, locked, sources)).toThrow(/locked: 4 of 6 notes covered/)
     const unlocked = arrange(song, library)
     expect(() => renderSong(song, unlocked, new Map())).toThrow(/No Recording plays pitch/)
   })
 
   it('cuts a Noise-like gesture too, for a fart placed by ear (ADR 0015)', async () => {
-    for (const id of ['009', '080']) {
+    for (const id of ['065', '081']) {
       const g = goldenRecording(id)
       expect(g.recording_pitch_midi, id).toBeNull()
       const file = await decoded(g)

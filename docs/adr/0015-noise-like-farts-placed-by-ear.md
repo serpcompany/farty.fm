@@ -6,6 +6,8 @@ Until #268 no Song used a Noise-like Recording: it sat on the Recordings tab, ma
 
 They chose design A of three ("letys go with design A"). They also chose the Recordings tab as the place, a piano note to compare with, leaving a fart out by default, and moving or removing a placement later.
 
+Update 2026-10-30 (#282, ADR 0017): a placement outlasts a Recording Pitch that a later analysis finds. The Placed Pitch stays and is the one used, since the user chose it by ear. That replaces rule 6's "If it finds the fart Melodic, its Recording Pitch is used and the placement is ignored". Rule 1 still holds: only a Noise-like Recording can be placed, and a placed one can still be moved or taken off. A second pitch window finds `009` and `080` Melodic, both at G1, below the picker's C2. The measurements below were taken while both were Noise-like. Rule 2's count is now 26 Melodic golden Recordings, from G1 to G4, and the picker stays C2 to B4.
+
 1. **Place it, or leave it out.**
    - On the Recordings tab, a Noise-like Recording's row has an outlined "noise-like ›" pill. It opens the picker (`place-by-ear.tsx`): a stock bottom Sheet on a phone, a centered Dialog from 48rem wide.
    - The picker has the fart's play button, waveform and length, one octave of piano keys with octave arrows, then "Place at E3" and "Leave it out".
