@@ -136,16 +136,23 @@ export function formattedLength(seconds: number): string {
 /** Recording stops by itself after this long, as on the iPhone. */
 export const maximumTakeSeconds = 30
 
-/** A take's loudest 50 ms must reach this level… */
-const quietestFartDb = -50
+/**
+ * A take's loudest 50 ms must reach this level… With the browser's voice processing off, a take
+ * is the microphone's raw level, so this is low: every fart in the Fixture Library whose loudest
+ * sample reaches -50 dBFS passes (#279). Below it is near-silence, which `atFullLevel` would only
+ * turn into loud hiss.
+ */
+const quietestFartDb = -70
 /** …and stand this far above the take's own room (its 10th-percentile 50 ms level). */
 const minimumContrastDb = 4
 
 /**
- * Whether a take holds a sound worth reviewing, judged from the audio: its loudest 50 ms level
- * against an absolute floor and against the take's own room. Silence and steady room noise fail.
- * The iPhone app and `tools/melody-lab/` have no such gate: the iPhone app rejects takes shorter
- * than 0.5 s, and the reference never rejects. A take shorter than one 50 ms window fails.
+ * Whether a take holds a sound worth reviewing, judged from the raw audio, before `atFullLevel`:
+ * its loudest 50 ms level against an absolute floor and against the take's own room. Silence,
+ * white noise and room noise fail at any level. A low rumble passes down to the -70 dBFS floor: a
+ * known false accept, which analysis finds no steady note in. The iPhone app and `tools/melody-lab/` have no such gate:
+ * the iPhone app rejects takes shorter than 0.5 s, and the reference never rejects. A take shorter
+ * than one 50 ms window fails.
  */
 export function heardSomething(samples: Float32Array, sampleRate: number): boolean {
   const level = levelContrast(samples, sampleRate)
@@ -176,4 +183,23 @@ export function levelContrast(
   const peakDb = levels[levels.length - 1]
   const floorDb = levels[Math.floor(levels.length * 0.1)]
   return { peakDb, floorDb, contrastDb: peakDb - floorDb }
+}
+
+/** The loudest sample of a take at full level: about -1 dBFS, as a rendered Song peaks. */
+const fullLevelPeak = 0.89
+
+/**
+ * A heard take turned up with one gain, so its loudest sample reaches `fullLevelPeak`. Review and
+ * the Recordings tab play the file as it is, so a raw take peaking at -40 dBFS would replay 39 dB
+ * quieter than a Song (#279). Only gain (ADR 0004), in float before the 16-bit save (ADR 0007):
+ * never turned down, and silence stays silence.
+ * Recording Analysis gives the same results on the Fixture Library either way, and a Song sets
+ * each note's level itself.
+ */
+export function atFullLevel(samples: Float32Array): Float32Array {
+  let peak = 0
+  for (const sample of samples) peak = Math.max(peak, Math.abs(sample))
+  if (!(peak > 0) || peak >= fullLevelPeak) return samples
+  const gain = fullLevelPeak / peak
+  return samples.map(sample => sample * gain)
 }

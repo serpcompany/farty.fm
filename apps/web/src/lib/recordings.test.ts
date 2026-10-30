@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { decoded, goldenRecordings } from '@/test-support/golden'
+import { analyzeRecording } from './analysis/recording-analysis'
 import { ANALYSIS_VERSION } from './analysis/version'
 import {
   type Analysis,
   type AnalysisState,
+  atFullLevel,
   HIGHEST_PLACED_PITCH,
   heardSomething,
   isNoiseLike,
@@ -39,6 +41,13 @@ function roomNoise(seconds: number, sampleRate: number, rmsDb: number, pole = 0.
   return out.map(v => v * gain)
 }
 
+/** `samples` turned so its loudest sample is at `peakDb` dBFS, as a quiet microphone takes it. */
+function atPeak(samples: Float32Array, peakDb: number): Float32Array {
+  const peak = samples.reduce((max, v) => Math.max(max, Math.abs(v)), 0)
+  const gain = 10 ** (peakDb / 20) / peak
+  return samples.map(v => v * gain)
+}
+
 describe('heardSomething', () => {
   // 016, 019, 081 and 086 are shorter than the 0.5 s the old rule asked for.
   it.each(['016', '019', '081', '086'])('hears the short fart %s', async id => {
@@ -60,21 +69,37 @@ describe('heardSomething', () => {
     expect(heardSomething(new Float32Array(96_000), 48_000)).toBe(false)
   })
 
-  it.each([-50, -40])('hears nothing in 2 s of room noise at %i dBFS', rmsDb => {
+  it.each([-70, -60, -50, -40])('hears nothing in 2 s of room noise at %i dBFS', rmsDb => {
     expect(heardSomething(roomNoise(2, 48_000, rmsDb), 48_000)).toBe(false)
+  })
+
+  it('hears every fart in the Fixture Library with its loudest sample at -50 dBFS (#279)', async () => {
+    for (const golden of goldenRecordings) {
+      const { samples, sampleRate } = await decoded(golden)
+      expect(heardSomething(atPeak(samples, -50), sampleRate), golden.id).toBe(true)
+    }
+  })
+
+  it('hears no fart with its loudest sample below -70 dBFS', async () => {
+    for (const golden of goldenRecordings) {
+      const { samples, sampleRate } = await decoded(golden)
+      expect(heardSomething(atPeak(samples, -70.5), sampleRate), golden.id).toBe(false)
+    }
   })
 
   // Steady noise reads as contrast by its bandwidth and the take's length (#159 review). A low
   // rumble passes: a known false accept, which reaches Review, where analysis finds no steady note.
+  // Since #279 lowered the floor, it passes down to -70 dBFS.
   it.each([
-    { noise: 'white noise', pole: 0, seconds: 2, heard: false },
-    { noise: 'white noise', pole: 0, seconds: 30, heard: false },
-    { noise: 'room noise', pole: 0.97, seconds: 2, heard: false },
-    { noise: 'room noise', pole: 0.97, seconds: 30, heard: false },
-    { noise: 'low rumble', pole: 0.995, seconds: 2, heard: true },
-    { noise: 'low rumble', pole: 0.995, seconds: 30, heard: true }
-  ])('$noise for $seconds s at -40 dBFS: heard is $heard', ({ pole, seconds, heard }) => {
-    expect(heardSomething(roomNoise(seconds, 48_000, -40, pole), 48_000)).toBe(heard)
+    { noise: 'white noise', pole: 0, seconds: 2, rmsDb: -40, heard: false },
+    { noise: 'white noise', pole: 0, seconds: 30, rmsDb: -40, heard: false },
+    { noise: 'room noise', pole: 0.97, seconds: 2, rmsDb: -40, heard: false },
+    { noise: 'room noise', pole: 0.97, seconds: 30, rmsDb: -40, heard: false },
+    { noise: 'low rumble', pole: 0.995, seconds: 2, rmsDb: -40, heard: true },
+    { noise: 'low rumble', pole: 0.995, seconds: 30, rmsDb: -40, heard: true },
+    { noise: 'low rumble', pole: 0.995, seconds: 2, rmsDb: -60, heard: true }
+  ])('$noise for $seconds s at $rmsDb dBFS: heard is $heard', ({ pole, seconds, rmsDb, heard }) => {
+    expect(heardSomething(roomNoise(seconds, 48_000, rmsDb, pole), 48_000)).toBe(heard)
   })
 
   /** Fixture `id` 20 dB quieter, in room noise at `roomDb` dBFS, after 300 ms of that room. */
@@ -115,6 +140,35 @@ describe('heardSomething', () => {
     // 017 is the quietest fixture over its own floor.
     expect(levelContrast(samples, sampleRate)?.contrastDb).toBeGreaterThan(4)
     expect(levelContrast(roomNoise(2, 48_000, -40), 48_000)?.contrastDb).toBeLessThan(4)
+  })
+})
+
+describe('atFullLevel', () => {
+  it('turns a quiet take up with one gain, so its loudest sample is at about -1 dBFS', () => {
+    const take = Float32Array.from([0.001, -0.004, 0.002, 0])
+    const loud = atFullLevel(take)
+    expect(loud.map(Math.abs).reduce((max, v) => Math.max(max, v), 0)).toBeCloseTo(0.89, 6)
+    loud.forEach((v, i) => {
+      expect(v).toBeCloseTo((take[i] * 0.89) / 0.004, 6)
+    })
+  })
+
+  it('never turns a take down, and leaves silence silent', () => {
+    const loud = Float32Array.from([0.5, -0.95, 0.2])
+    expect(atFullLevel(loud)).toBe(loud)
+    const silence = new Float32Array(480)
+    expect(atFullLevel(silence)).toBe(silence)
+  })
+
+  // A fart taken 50 dB down and turned up again is analyzed as the fart itself, so the golden
+  // answers (`fixtures/golden/`) still hold. Only the gesture's level, `rmsDb`, follows the gain.
+  it('gives Recording Analysis the same results on every fart in the Fixture Library', async () => {
+    for (const golden of goldenRecordings) {
+      const { samples, sampleRate } = await decoded(golden)
+      const asTaken = analyzeRecording(samples, sampleRate)
+      const turnedUp = analyzeRecording(atFullLevel(atPeak(samples, -50)), sampleRate)
+      expect({ ...turnedUp, rmsDb: 0 }, golden.id).toEqual({ ...asTaken, rmsDb: 0 })
+    }
   })
 })
 
