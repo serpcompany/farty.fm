@@ -15,6 +15,7 @@ import {
   mergeOutbox,
   type OutboxEntry,
   type OutboxOp,
+  type PlacedField,
   queueStamp
 } from './outbox'
 import type { AnalysisState, Recording, Trim } from './recordings'
@@ -278,11 +279,12 @@ export async function queue(
   outbox: OutboxStore,
   kind: Kind,
   id: string,
-  op: OutboxOp
+  op: OutboxOp,
+  fields: PlacedField[] = []
 ): Promise<void> {
   const key = itemKey(kind, id)
   const queued = await outbox.get(key)
-  const next = mergeOutbox(queued, kind, id, op, queueStamp())
+  const next = mergeOutbox(queued, kind, id, op, queueStamp(), fields)
   if (next) await outbox.put(next)
   else if (queued) await outbox.delete(key)
 }
@@ -385,7 +387,13 @@ export async function placeRecording(id: string, change: Placement): Promise<Rec
       return null
     }
     const updated: Recording = { ...recording, ...change }
-    await Promise.all([recordings.put(updated), queue(outbox, 'recordings', id, 'place'), tx.done])
+    // Only the fields this change names go to the account (`placedFields`).
+    const fields = (['placedPitch', 'trim'] as const).filter(field => change[field] !== undefined)
+    await Promise.all([
+      recordings.put(updated),
+      queue(outbox, 'recordings', id, 'place', fields),
+      tx.done
+    ])
     return updated
   })
   if (placed) announceQueued()

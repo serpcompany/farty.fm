@@ -7,7 +7,8 @@ import type { Trim } from './recordings'
 
 type Stored = { item: Record<string, unknown>; wav: ArrayBuffer | null; deletedAt: number | null }
 
-export type Sent = { method: string; path: string; library: string | null }
+/** A request this account got, with its JSON body (a PATCH's), if it had one. */
+export type Sent = { method: string; path: string; library: string | null; json?: unknown }
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -83,6 +84,7 @@ export function fakeAccount(userId = 'user-a') {
       const method = init.method ?? 'GET'
       const library = new Headers(init.headers).get('x-pedos-library')
       const request: Sent = { method, path: url.pathname + url.search, library }
+      if (typeof init.body === 'string') request.json = JSON.parse(init.body)
       sent.push(request)
       if (state.offline) throw new TypeError('Failed to fetch')
       const intercepted = await state.intercept?.(request)

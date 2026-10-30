@@ -316,6 +316,34 @@ describe('version 6', () => {
     })
     expect(reopened).toBe('VersionError')
   })
+
+  // On 1.10.0 the user moved the fart, offline or in a tab the new build shut out, before this
+  // browser ever kept the Trim another browser set. That `place` only ever meant the pitch.
+  it('sends a place queued by version 5 code as the Placed Pitch alone, keeping the Trim', async () => {
+    claimedBy('user-a')
+    const recording = { ...theirs(1), seconds: 3 }
+    const trim = { startSeconds: 0.8868, endSeconds: 2.0821 }
+    account.add('recordings', { ...recording, placedPitch: 36, trim }, wav(1))
+    await version5(tx => {
+      tx('recordings').put({ ...recording, placedPitch: 38 })
+      tx('audio').put(wav(1), recording.id)
+      tx('outbox').put({
+        key: `recordings:${recording.id}`,
+        kind: 'recordings',
+        id: recording.id,
+        op: 'place',
+        sent: false,
+        queuedAt: Date.now(),
+        version: crypto.randomUUID()
+      })
+      tx('meta').put(10 ** 13, 'cursor')
+    })
+    await page.sync.syncOnce('user-a')
+    expect(requests('PATCH').map(s => s.json)).toEqual([{ placedPitch: 38 }])
+    expect(account.get('recordings', recording.id)?.item).toMatchObject({ placedPitch: 38, trim })
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0]).toMatchObject({ placedPitch: 38, trim })
+  })
 })
 
 describe('claimLibrary', () => {
@@ -536,13 +564,69 @@ describe('uploading', () => {
     expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
     expect(account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: 40, trim })
     expect(requests('PATCH')).toEqual([])
-    // Uploaded: the Trim taken off is sent with the Placed Pitch as they are, and the WAV stays.
+    // Uploaded: the Trim taken off is sent alone, and the WAV stays.
     await page.store.placeRecording(early.id, { trim: null })
     expect((await outbox()).map(e => e.op)).toEqual(['place'])
     expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
     expect(account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: 40, trim: null })
     expect(bytes(account.get('recordings', early.id)?.wav)).toEqual(bytes(wav(1)))
-    expect(requests('PATCH')).toHaveLength(1)
+    expect(requests('PATCH').map(s => s.json)).toEqual([{ trim: null }])
+  })
+
+  // Each browser sends only the field it changed, so neither undoes the other's (ADR 0019).
+  it("sends a pitch-only change without the Trim, keeping another browser's Trim", async () => {
+    const recording = await recorded(1)
+    await page.sync.syncOnce('user-a')
+    const trim = { startSeconds: 0.2, endSeconds: 0.6 }
+    account.placeAndTrim(recording.id, { placedPitch: 36, trim })
+    await page.store.placeRecording(recording.id, { placedPitch: 38 })
+    await page.sync.syncOnce('user-a')
+    expect(requests('PATCH').map(s => s.json)).toEqual([{ placedPitch: 38 }])
+    expect(account.get('recordings', recording.id)?.item).toMatchObject({ placedPitch: 38, trim })
+    // This browser takes the account's Trim once nothing of its own is waiting.
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0]).toMatchObject({ placedPitch: 38, trim })
+  })
+
+  it("sends a trim-only change without the Placed Pitch, keeping another browser's newer one", async () => {
+    const recording = await recorded(1)
+    await page.store.placeRecording(recording.id, { placedPitch: 40 })
+    await page.sync.syncOnce('user-a')
+    account.place(recording.id, 45)
+    const trim = { startSeconds: 0.1, endSeconds: 0.5 }
+    await page.store.placeRecording(recording.id, { trim })
+    await page.sync.syncOnce('user-a')
+    expect(requests('PATCH').map(s => s.json)).toEqual([{ trim }])
+    expect(account.get('recordings', recording.id)?.item).toMatchObject({ placedPitch: 45, trim })
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0]).toMatchObject({ placedPitch: 45, trim })
+  })
+
+  // Offline, A trims and B moves the same fart; each change reaches the account whole.
+  it('keeps both changes when two browsers change different fields offline', async () => {
+    const recording = await recorded(1)
+    await page.sync.syncOnce('user-a')
+    const trim = { startSeconds: 0.3, endSeconds: 0.7 }
+    account.offline = true
+    await page.store.placeRecording(recording.id, { trim })
+    await page.sync.syncOnce('user-a')
+    // The other browser's pitch reaches the account first, then this one comes back online.
+    account.offline = false
+    account.place(recording.id, 50)
+    await page.sync.syncOnce('user-a')
+    expect(account.get('recordings', recording.id)?.item).toMatchObject({ placedPitch: 50, trim })
+    expect((await page.store.loadRecordings())[0]).toMatchObject({ placedPitch: 50, trim })
+    // A pitch change after a trim that hasn't gone out sends both, as this browser has them.
+    account.offline = true
+    await page.store.placeRecording(recording.id, { trim: null })
+    await page.store.placeRecording(recording.id, { placedPitch: 52 })
+    expect((await outbox()).map(e => e.fields)).toEqual([['placedPitch', 'trim']])
+    account.offline = false
+    await page.sync.syncOnce('user-a')
+    expect(account.get('recordings', recording.id)?.item).toMatchObject({
+      placedPitch: 52,
+      trim: null
+    })
   })
 
   it('trims a Recording on the account that was trimmed while it uploaded', async () => {

@@ -7,7 +7,7 @@ import {
   setLibraryOwner
 } from './account'
 import * as api from './library-api'
-import { itemKey, type Kind, type OutboxEntry, onQueued } from './outbox'
+import { itemKey, type Kind, type OutboxEntry, onQueued, placedFields } from './outbox'
 import { adoptTakes, releaseTakes } from './pad-take'
 import { audioStore, clearLibrary, download, type PedosDB, withDb } from './recording-store'
 import type { Recording, Trim } from './recordings'
@@ -301,7 +301,13 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
         continue
       }
       await Promise.all([outbox.put(entry), tx.done])
-      const placement = { placedPitch: recording.placedPitch ?? null, trim: recording.trim ?? null }
+      // Only the fields this browser changed, so it never sends back an old Trim or Placed
+      // Pitch over another browser's newer one (ADR 0019).
+      const placement: api.Placement = {}
+      for (const field of placedFields(queued)) {
+        if (field === 'placedPitch') placement.placedPitch = recording.placedPitch ?? null
+        else placement.trim = recording.trim ?? null
+      }
       return { entry, op: 'place', placement }
     }
     if (queued.op === 'delete') {
@@ -339,7 +345,7 @@ async function settleIn(
     if (sent.op === 'delete' && unchanged) await tx.store.delete(sent.key)
   } else if (sent.op === 'put') {
     // A rename or place during the upload joined the queued upload (`mergeOutbox`), so it's
-    // sent now.
+    // sent now, with the fields the place changed (`placedFields`).
     if (then === 'update' || !unchanged) {
       const op = sent.kind === 'toots' ? 'rename' : 'place'
       await tx.store.put({ ...now, op, sent: false, version: crypto.randomUUID() })
@@ -426,8 +432,8 @@ async function drain(accountId: string): Promise<boolean> {
 /**
  * Reads the account's changes since this browser's last read and applies them, in one
  * transaction. What this browser still has to send wins: a Recording or Toot it's deleting stays
- * deleted, a Toot it's uploading or renaming keeps its title, and a Recording it's uploading or
- * placing keeps its Placed Pitch. A `full` answer lists everything
+ * deleted, a Toot it's uploading or renaming keeps its title, a Recording it's uploading keeps its
+ * Placed Pitch and Trim, and one it's placing keeps the fields it changed. A `full` answer lists everything
  * the account has, so what's here from the account and isn't listed was deleted there. Recordings
  * not uploaded yet are numbered after the rest (`renumberWaiting`). False when nothing was read.
  */
@@ -457,7 +463,8 @@ async function apply(database: Database, answer: api.LibraryChanges) {
   const toots = tx.objectStore('toots')
   const downloads = tx.objectStore('downloads')
   const outbox = tx.objectStore('outbox')
-  const pending = new Map((await outbox.getAll()).map(entry => [entry.key, entry.op]))
+  const entries = new Map((await outbox.getAll()).map(entry => [entry.key, entry]))
+  const pending = new Map([...entries].map(([key, entry]) => [key, entry.op]))
   const change = {
     recordings: [] as Recording[],
     toots: [] as Toot[],
@@ -482,14 +489,19 @@ async function apply(database: Database, answer: api.LibraryChanges) {
     if (here) {
       // Only its Placed Pitch (ADR 0015) and Trim (ADR 0019) change: the analysis stays this
       // browser's own. A Worker from before #268 sends no Placed Pitch, and one from before #293
-      // no Trim, which changes neither.
+      // no Trim, which changes neither. A field this browser is still placing keeps its own
+      // value, and the other takes the account's, as another browser changed it (ADR 0019).
+      const entry = entries.get(key)
+      const held = entry?.op === 'place' ? placedFields(entry) : ['placedPitch', 'trim']
       const moved: Recording = { ...here }
-      if (recording.placedPitch !== undefined) moved.placedPitch = recording.placedPitch
-      if (recording.trim !== undefined) moved.trim = recording.trim
+      if (recording.placedPitch !== undefined && !(op && held.includes('placedPitch')))
+        moved.placedPitch = recording.placedPitch
+      if (recording.trim !== undefined && !(op && held.includes('trim')))
+        moved.trim = recording.trim
       const same =
         (here.placedPitch ?? null) === (moved.placedPitch ?? null) &&
         sameTrim(here.trim ?? null, moved.trim ?? null)
-      if (op || same) continue
+      if (same) continue
       await recordings.put(moved)
       change.recordings.push(moved)
       continue
