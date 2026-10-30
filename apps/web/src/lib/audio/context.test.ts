@@ -3,7 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // The shared AudioContext against a page that hides and shows. On iPhone a context that lived
 // through a hidden page can say it runs while its clock stands still (#280).
 
-/** A sound playing on a `FakeContext`. Like Chromium's, it never ends once its context closes. */
+/**
+ * A sound playing on a `FakeContext`. Like a browser's, a stop ends it only on a running context:
+ * on a suspended one the clock stands still, and once its context closes it never ends.
+ */
 class FakeSource {
   started = false
   stopped = false
@@ -16,7 +19,7 @@ class FakeSource {
   }
   stop() {
     this.stopped = true
-    if (this.context.state !== 'closed') this.onended?.()
+    if (this.context.state === 'running') this.onended?.()
   }
 }
 
@@ -26,9 +29,20 @@ class FakeContext {
   sources: FakeSource[] = []
   /** Decodes that finish only when the test says so. */
   decodes: (() => void)[] = []
-  close = vi.fn(async () => {
-    this.state = 'closed'
-  })
+  /** Settles the close. As in browsers, `state` says 'closed' only then, not when `close()` is called. */
+  finishClose = () => {}
+  close = vi.fn(
+    () =>
+      new Promise<void>(resolve => {
+        this.finishClose = () => {
+          this.state = 'closed'
+          resolve()
+        }
+      })
+  )
+  suspend() {
+    if (this.state !== 'closed') this.state = 'suspended'
+  }
   async resume() {
     if (this.state !== 'closed') this.state = 'running'
   }
@@ -155,9 +169,56 @@ describe('a sound on a context that is replaced', () => {
 
     setVisibility('visible')
     audioContext()
+    old.finishClose()
     old.decodes[0]?.()
     await playing
     expect(old.sources).toEqual([])
+    expect(ended).toHaveBeenCalledOnce()
+  })
+
+  // `state` lags `close()`: a load that finishes before the close settles still finds it running.
+  it('still loading when its close begins, never starts though the close has not settled', async () => {
+    const { audioContext, play } = await contextAndPlayer()
+    setVisibility('hidden')
+    const old = audioContext() as unknown as FakeContext
+    const ended = vi.fn()
+    const playing = play('toot', wav, null, ended)
+    await settle()
+
+    setVisibility('visible')
+    audioContext()
+    expect(old.state).not.toBe('closed')
+    old.decodes[0]?.()
+    await playing
+    expect(old.sources).toEqual([])
+    expect(ended).toHaveBeenCalledOnce()
+    old.finishClose()
+  })
+
+  // The app shell stops playback when the page hides, and on iPhone the hide suspends the context
+  // first: the stop waits for a clock that stands still, so `onended` never comes before the
+  // context is replaced and closed.
+  it('stopped while its context is suspended, says it is over once, and the close adds nothing', async () => {
+    const { audioContext, play, stopPlayback } = await contextAndPlayer()
+    const old = audioContext() as unknown as FakeContext
+    const ended = vi.fn()
+    const playing = play('toot', wav, null, ended)
+    await settle()
+    old.decodes[0]?.()
+    await playing
+    expect(old.sources[0]?.started).toBe(true)
+
+    setVisibility('hidden')
+    old.suspend()
+    stopPlayback()
+    expect(old.sources[0]?.stopped).toBe(true)
+    setVisibility('visible')
+    expect(audioContext()).not.toBe(old)
+    old.finishClose()
+    expect(ended).toHaveBeenCalledOnce()
+
+    // A late `onended`, had the stop come through after all, says nothing more.
+    old.sources[0]?.onended?.()
     expect(ended).toHaveBeenCalledOnce()
   })
 })

@@ -19,7 +19,7 @@ let watchingHides = false
 export function audioContext(): AudioContext {
   watchHides()
   const hidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
-  if (shared && shared.state !== 'closed') {
+  if (shared && !isClosed(shared)) {
     if (sharedAtHide === hides || hidden) return shared
     close(shared)
   }
@@ -40,7 +40,19 @@ export function whenClosing(stop: (context: BaseAudioContext) => void): void {
   closing.add(stop)
 }
 
+/** Every context `close` was called on. */
+const closed = new WeakSet<BaseAudioContext>()
+
+/**
+ * Whether `context` is closed or closing. Its `state` says 'closed' only once the close settles, so
+ * a sound that loads in between would start on it and never end.
+ */
+export function isClosed(context: BaseAudioContext): boolean {
+  return closed.has(context) || context.state === 'closed'
+}
+
 function close(context: AudioContext): void {
+  closed.add(context)
   for (const stop of closing) stop(context)
   context.close().catch(() => {})
 }
