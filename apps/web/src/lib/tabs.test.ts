@@ -18,6 +18,7 @@ describe('tabs', () => {
     ['/recordings', 'recordings'],
     ['/compose/', 'compose'],
     ['/compose/twinkle/', 'compose'],
+    ['/compose/pad/', 'compose'],
     ['/toots/', 'toots'],
     ['/toots/3f2a/', 'toots'],
     ['/profile/', 'profile']
