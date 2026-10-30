@@ -433,9 +433,10 @@ async function drain(accountId: string): Promise<boolean> {
  * Reads the account's changes since this browser's last read and applies them, in one
  * transaction. What this browser still has to send wins: a Recording or Toot it's deleting stays
  * deleted, a Toot it's uploading or renaming keeps its title, a Recording it's uploading keeps its
- * Placed Pitch and Trim, and one it's placing keeps the fields it changed. A `full` answer lists everything
- * the account has, so what's here from the account and isn't listed was deleted there. Recordings
- * not uploaded yet are numbered after the rest (`renumberWaiting`). False when nothing was read.
+ * Placed Pitch and Trim, and one it's placing keeps the fields it changed. A `full` answer lists
+ * everything the account has, so what's here from the account and isn't listed was deleted there.
+ * Recordings not uploaded yet are numbered after the rest (`renumberWaiting`). False when nothing
+ * was read.
  */
 async function pull(accountId: string): Promise<boolean> {
   const since = (await withDb(database => database.get('meta', 'cursor'))) ?? 0
