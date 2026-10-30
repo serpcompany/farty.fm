@@ -125,6 +125,20 @@ describe('analyzeRecording', () => {
     expect(JSON.parse(JSON.stringify(a))).toEqual(a)
   })
 
+  // #295: one of the owner's own farts (owner-3). Its first burst ends in 4 quiet frames at pYIN's
+  // 45 Hz floor, which the second pitch window read as a note at confidence 1. It has no note.
+  test("the owner's fart 107 has no note", async () => {
+    const golden = goldenRecordings.find(g => g.id === '107')
+    if (!golden) throw new Error('fixture 107 missing')
+    const file = await decoded(golden)
+    const a = analyzeRecording(file.samples, file.sampleRate)
+    expect(a.pitchEstimateMidi).toBeNull()
+    expect(a.recordingPitchMidi).toBeNull()
+    expect(a.melodic).toBe(false)
+    expect(a.noiseLikeReason).toBe('no_steady_pitch')
+    expect(a.pitchConfidence).toBe(0.09)
+  })
+
   test.each([
     ['empty', 0, 44_100],
     ['one hop of silence', 256, 48_000],

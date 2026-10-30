@@ -7,7 +7,7 @@ import {
   row
 } from '../../test-support/golden'
 import { hzToMidi, roundHalfEven } from './numeric'
-import { analyzePitch } from './recording-pitch'
+import { analyzePitch, estimate } from './recording-pitch'
 
 // #35: from the golden first burst, the Recording Pitch estimate within ±30 cents and non-null for
 // exactly the same Recordings, the same rounded confidence, and the same contour
@@ -67,4 +67,22 @@ test('estimates and contours match the golden data', async () => {
     `Contour: voicing agrees on ${framesAgreeing}/${framesTotal} frames; max |Δ| ${(maxContourMidi * 100).toFixed(4)} cents (golden contour is rounded to 0.005 cents)`
   )
   console.log(lines.join('\n'))
+})
+
+// #295, owner-3: a 0.257 s first burst (45 frames) voiced only in its last 4, at pYIN's 45 Hz floor
+// and 48 dB below the rest. The second window counts its coverage as the head does (4 of 45), so
+// it is no note. Counted against the 4 frames left, it was a note at confidence 1.
+test('a few quiet frames at the end of a short first burst are no note', () => {
+  const sr = 44100
+  const hop = 256
+  const body = new Float64Array(Math.trunc(0.257 * sr))
+  for (let i = 0; i < body.length; i++) {
+    const level = i < 41 * hop ? 0.5 : 0.5 * 10 ** (-48 / 20)
+    body[i] = level * Math.sin((2 * Math.PI * (i < 41 * hop ? 149 : 45) * i) / sr)
+  }
+  const f0 = new Float64Array(45).fill(Number.NaN)
+  for (let i = 41; i < 45; i++) f0[i] = 45
+  const found = estimate(body, f0)
+  expect(found.midi).toBeNull()
+  expect(found.confidence).toBeCloseTo(4 / 45, 6)
 })

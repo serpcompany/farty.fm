@@ -11,7 +11,7 @@ import {
   useState
 } from 'react'
 import { analyze } from '@/lib/analysis/client'
-import { upgradeAnalyses } from '@/lib/analysis-upgrade'
+import { type RescanResult, rescan, upgradeAnalyses } from '@/lib/analysis-upgrade'
 import { forgetDecoded, play, stopPlayback } from '@/lib/audio/player'
 import {
   MicrophoneDeniedError,
@@ -124,6 +124,9 @@ export function tootPlayback(tootId: string, note?: number): string {
   return note === undefined ? `toot:${tootId}` : `toot:${tootId}:note:${note}`
 }
 
+/** Where a Re-scan is: the Recording it is on, after `done` of `total`. */
+export type Rescanning = { recordingId: string; done: number; total: number }
+
 /**
  * What Profile counts, from what's in this browser. As the iPhone app's `ProfileStats`; unlocked
  * Songs follow Compose's Pitch Coverage.
@@ -143,8 +146,8 @@ type Pedos = {
   recordings: Recording[] | null
   recording(id: string): Recording | undefined
   /**
-   * The Recordings Songs can use on a note: those with a Recording Pitch, and Noise-like ones
-   * placed by ear (ADR 0015).
+   * The Recordings Songs can use on a note: those with a Recording Pitch, and those placed by ear
+   * (ADR 0015).
    */
   melodicRecordings: Recording[]
   /** The notes of every Melodic Recording, octave included (G3, G♯3 and G4 are three notes). */
@@ -179,6 +182,24 @@ type Pedos = {
    * Every Song uses it there at once; it still plays raw, at its own pitch.
    */
   placeRecording(id: string, placedPitch: number | null): void
+  /**
+   * The Re-scan running (#282): the Recording it is on, how many came before it, and how many it
+   * runs on; null when none runs.
+   */
+  rescanning: Rescanning | null
+  /**
+   * What the last Re-scan changed, kept until the next one starts, so a Re-scan that finishes
+   * while the Recordings tab is closed still says so there (#295); null before any, and while one
+   * runs.
+   */
+  rescanned: RescanResult | null
+  /**
+   * Re-scans the Recording if it has no note (`canRescan`): runs the current Recording Analysis on
+   * it again. Resolves with what changed. While a Re-scan runs, it waits for that one instead.
+   */
+  rescanRecording(id: string): Promise<RescanResult>
+  /** Re-scans every Recording with no note, one at a time, as `rescanRecording` does one. */
+  rescanAll(): Promise<RescanResult>
   /**
    * Adds WAV files as Recordings with these ids, in order, then analyzes each in turn, as a new
    * Recording is: the Fixture Library in an internal build.
@@ -240,6 +261,9 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const [tootPlayFailed, setTootPlayFailed] = useState<string | null>(null)
   const [playbackStart, setPlaybackStart] = useState<{ key: string; at: number } | null>(null)
   const [waitsForOtherTabs, setWaitsForOtherTabs] = useState(false)
+  const [rescanning, setRescanning] = useState<Rescanning | null>(null)
+  const [rescanned, setRescanned] = useState<RescanResult | null>(null)
+  const running = useRef<Promise<RescanResult> | null>(null)
   const savingToots = useRef(new Set<string>())
   /** Counts Toot plays, so only the latest one sets where the playhead starts. */
   const tootPlays = useRef(0)
@@ -571,6 +595,36 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       .catch(error => reportError('recording-place-failed', error))
   }, [])
 
+  // One Re-scan at a time; a second request waits for the one running.
+  const runRescan = useCallback(
+    (targets: (all: Recording[]) => Recording[]): Promise<RescanResult> => {
+      if (running.current) return running.current
+      setRescanned(null)
+      const run = rescan(
+        targets(latest.current ?? []),
+        analyze,
+        replace,
+        (recording, done, total) => setRescanning({ recordingId: recording.id, done, total })
+      )
+        .then(result => {
+          setRescanned(result)
+          return result
+        })
+        .finally(() => {
+          running.current = null
+          setRescanning(null)
+        })
+      running.current = run
+      return run
+    },
+    [replace]
+  )
+  const rescanRecording = useCallback(
+    (id: string) => runRescan(all => all.filter(r => r.id === id)),
+    [runRescan]
+  )
+  const rescanAll = useCallback(() => runRescan(all => all), [runRescan])
+
   const importRecordings = useCallback(
     async (files: { id: string; wav: ArrayBuffer }[]) => {
       const added: Recording[] = []
@@ -694,7 +748,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     setTootPlayFailed(current => (current === id ? null : current))
   }, [])
 
-  // A Noise-like Recording placed by ear counts at its Placed Pitch (ADR 0015).
+  // A Recording placed by ear counts at its Placed Pitch (ADR 0015, ADR 0017).
   const melodicRecordings = (recordings ?? []).filter(r => songPitch(r) !== null)
   const collectedNotes = new Set(
     melodicRecordings.flatMap(r => {
@@ -748,6 +802,10 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     stopPlayback,
     deleteRecording,
     placeRecording,
+    rescanning,
+    rescanned,
+    rescanRecording,
+    rescanAll,
     importRecordings,
     toots,
     tootsFailed,

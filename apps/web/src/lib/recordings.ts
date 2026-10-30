@@ -51,9 +51,10 @@ export type Recording = {
   analysis: AnalysisState
   /**
    * The Placed Pitch: the note the user placed this Recording on by ear, as a whole MIDI note
-   * number, while it is Noise-like (ADR 0015). Null or absent when it's left out, the default.
-   * Kept apart from `analysis`, so re-analysis never loses it, and ignored while the Recording is
-   * Melodic (`placedPitch`). Where Songs use the fart, never how it sounds: it plays raw.
+   * number, while it was Noise-like (ADR 0015). Null or absent when it's left out, the default.
+   * Kept apart from `analysis`, so a new analysis never loses it, and still used when one finds a
+   * Recording Pitch: the user chose it (ADR 0017). Where Songs use the fart, never how it sounds:
+   * it plays raw.
    */
   placedPitch?: number | null
 }
@@ -91,21 +92,22 @@ export function isNoiseLike(recording: Recording): boolean {
 }
 
 /**
- * The Placed Pitch, when the Recording is analyzed as Noise-like and the user placed it on a note;
- * otherwise null. A Recording that re-analysis finds Melodic uses its Recording Pitch instead.
+ * The Placed Pitch, when the Recording is analyzed and the user placed it on a note; otherwise
+ * null. Only a Noise-like Recording is placed, but a placement outlasts a later analysis that finds
+ * a Recording Pitch, a Re-scan among them (ADR 0017).
  */
 export function placedPitch(recording: Recording): number | null {
-  return isNoiseLike(recording) && isPlaceablePitch(recording.placedPitch)
+  return recording.analysis.state === 'analyzed' && isPlaceablePitch(recording.placedPitch)
     ? recording.placedPitch
     : null
 }
 
 /**
- * The note Songs use the Recording for: its Recording Pitch when Melodic, or its Placed Pitch when
- * Noise-like and placed; null when it plays no notes.
+ * The note Songs use the Recording for: its Placed Pitch when placed, otherwise its Recording Pitch
+ * when Melodic; null when it plays no notes.
  */
 export function songPitch(recording: Recording): number | null {
-  return recordingPitch(recording) ?? placedPitch(recording)
+  return placedPitch(recording) ?? recordingPitch(recording)
 }
 
 /**

@@ -18,9 +18,9 @@
     "start_sample": 9548
   },
   "id": "009",
-  "melodic": false,
-  "noise_like_reason": "no_steady_pitch",
-  "pitch_confidence": 0.1,
+  "melodic": true,
+  "noise_like_reason": null,
+  "pitch_confidence": 0.3,
   "pitch_contour": {
     "frames": 169,
     "hop": 256,
@@ -197,10 +197,10 @@
     ],
     "sample_rate": 44100
   },
-  "pitch_estimate_midi": null,
-  "recording_pitch_midi": null,
-  "recording_pitch_note": null,
+  "pitch_estimate_midi": 30.525920593660175,
+  "recording_pitch_midi": 30.525920593660175,
+  "recording_pitch_note": "G1-47",
   "rms_db": -13.9915,
-  "settle_s": null,
-  "shortest_note_s": null
+  "settle_s": 0.49342403628117915,
+  "shortest_note_s": 0.35
 }

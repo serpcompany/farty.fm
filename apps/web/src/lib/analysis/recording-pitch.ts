@@ -68,23 +68,52 @@ export function contour(body: Float64Array): Float64Array {
   return f0
 }
 
+/** How much of the contour the pitch estimate reads, in seconds (`PITCH_WINDOW_S`). */
+const PITCH_WINDOW_SECONDS = 0.45
+
 /**
- * Recording Pitch: the energy-weighted median of the voiced frames in the first 450 ms.
- * Confidence: coverage × (1 − spread / 3), spread being the median distance from it.
+ * Recording Pitch: the estimate over the first 450 ms (`estimateAt` from frame 0). Only when that
+ * finds none, the estimate over the 450 ms from the contour's first kept frame, since a fart's
+ * tone can come after its head (#282). A fart the head finds a pitch in never reaches the second.
  */
 export function estimate(
   body: Float64Array,
   f0: Float64Array
 ): { midi: number | null; confidence: number } {
+  const rms = frameRms(body, Pyin.frameLength, Pyin.hopLength)
+  const head = estimateAt(body.length, f0, rms, 0)
+  if (head.midi !== null) return head
+  const firstKept = f0.findIndex(Number.isFinite)
+  if (firstKept <= 0) return head
+  const later = estimateAt(body.length, f0, rms, firstKept)
+  return later.midi !== null ? later : head
+}
+
+/**
+ * The estimate over the 450 ms from contour frame `from` (`estimate_pitch()` in the reference):
+ * the energy-weighted median of its voiced frames, and its confidence, coverage × (1 − spread / 3).
+ * Coverage is their share of the window, or of the whole first burst when that is shorter than
+ * 450 ms; spread is their median distance from the median. No estimate below 4 voiced
+ * frames (confidence 0) or below `MINIMUM_CONFIDENCE`.
+ */
+function estimateAt(
+  bodyLength: number,
+  f0: Float64Array,
+  rms: Float64Array,
+  from: number
+): { midi: number | null; confidence: number } {
   const sr = ANALYSIS_SAMPLE_RATE
   const hop = Pyin.hopLength
-  const head = Math.min(f0.length, Math.trunc((0.45 * sr) / hop))
+  const window = Math.trunc((PITCH_WINDOW_SECONDS * sr) / hop)
+  const end = Math.min(f0.length, from + window)
   const voiced: number[] = []
-  for (let i = 0; i < head; i++) if (Number.isFinite(f0[i])) voiced.push(i)
-  const coverage = voiced.length / Math.max(1, body.length > 0.45 * sr ? head : f0.length)
+  for (let i = from; i < end; i++) if (Number.isFinite(f0[i])) voiced.push(i)
+  // Counted as the head counts it, from either window: never against the frames left after `from`,
+  // or a few quiet frames at the end of a short first burst would be full coverage (#295).
+  const frames = bodyLength > PITCH_WINDOW_SECONDS * sr ? window : f0.length
+  const coverage = voiced.length / Math.max(1, frames)
   if (voiced.length < 4) return { midi: null, confidence: 0 }
 
-  const rms = frameRms(body, Pyin.frameLength, hop)
   const mids = voiced.map(i => hzToMidi(f0[i]))
   const median = weightedMedian(
     mids,
