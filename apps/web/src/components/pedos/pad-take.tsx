@@ -5,7 +5,14 @@ import Link from 'next/link'
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { forgetTake, type KeptTake, keepTake, keptTake, keptTakes } from '@/lib/pad-take'
+import {
+  forgetTake,
+  type KeptTake,
+  keepForCheckout,
+  keepTake,
+  keptTake,
+  keptTakes
+} from '@/lib/pad-take'
 import {
   MAX_PERFORMANCE_SECONDS,
   MAX_TAPS,
@@ -39,7 +46,7 @@ type Take = {
   back: CheckoutReturn | null
   /** Made, it plays once: a take just stopped on a page in view. */
   plays: boolean
-  /** A kept take shown again on the Pad's open, let go if it can't be made. */
+  /** A kept take shown again on the Pad's open: where saving is free, let go if it can't be made. */
   restored: boolean
 }
 
@@ -62,8 +69,8 @@ export type PadTake = {
   tapped(at: number, recordingId: string): void
   /** Makes the Toot of a take that failed again. */
   retry(): void
-  /** Keeps the take made, before Checkout. False when this browser can't. */
-  keep(): boolean
+  /** Keeps the take made, before Checkout as `accountId`. False when this browser can't. */
+  keep(accountId: string): boolean
 }
 
 /**
@@ -73,8 +80,8 @@ export type PadTake = {
  * hidden. Back from Checkout the same Toot is made again with the id it was paid for. Opened, the
  * Pad shows the newest kept take again, ready to play, and where saving is paid it asks the account
  * about each kept take: one paid whose return never loaded is made again and saved, one whose
- * payment a save used is let go. A paid take that can't be made again is said and reported, for a
- * refund.
+ * payment a save used is let go, and nothing else is. A paid take that can't be made again is said
+ * and reported, for a refund. Only this library's takes are read (`pad-take.ts`).
  */
 export function usePadTake(): PadTake {
   const pedos = usePedos()
@@ -214,8 +221,10 @@ export function usePadTake(): PadTake {
     opened()
   }, [libraryRead])
 
-  // Where saving is paid, each kept take's payment: paid and unused (its return never loaded), the
-  // take is made again and saved, as back from Checkout; used by a save, it's let go.
+  // Where saving is paid, each kept take's payment, as D1 has it: paid and unused (its return never
+  // loaded), the take is made again and saved, as back from Checkout; used by a save, it's let go,
+  // and off the Pad if it's there. Unpaid, or not known, it stays kept: a payment whose webhook
+  // hasn't landed yet reads unpaid, and the next open asks again.
   const recover = useEffectEvent(async (accountId: string) => {
     for (const take of keptTakes()) {
       if (!replaceable()) return
@@ -225,8 +234,19 @@ export function usePadTake(): PadTake {
       }
       const state = await tootPaymentState(take.tootId, accountId)
       if (!replaceable()) return
-      if (state === 'used' || (state === 'unpaid' && !canMake(take))) forgetTake(take.tootId)
-      else if (state === 'unused') {
+      if (state === 'used') {
+        forgetTake(take.tootId)
+        const current = shown.current
+        if (current.kind === 'ready' && current.draft.id === take.tootId) {
+          pedos.stopPlayback()
+          setPhase({ kind: 'idle' })
+        } else if (
+          (current.kind === 'making' || current.kind === 'failed') &&
+          current.id === take.tootId
+        ) {
+          setPhase({ kind: 'idle' })
+        }
+      } else if (state === 'unused') {
         if (!canMake(take)) lose(take.tootId)
         else {
           const back = { tootId: take.tootId, done: true }
@@ -265,8 +285,9 @@ export function usePadTake(): PadTake {
         // "Couldn't make this Toot": reported by the error that caused it, such as a decode.
         reportError('toot-make-failed', error instanceof TootError ? (error.cause ?? error) : error)
         if (left) return
-        if (making.restored) {
-          // Shown again on the open, it's let go rather than failing on every open.
+        if (making.restored && !saveAsksForPayment()) {
+          // Shown again on the open where saving is free, it's let go rather than failing on every
+          // open. Where it's paid it may be paid for, so it stays kept, to try again.
           forgetTake(making.id)
           setPhase({ kind: 'idle' })
         } else setPhase({ ...making, kind: 'failed' })
@@ -293,7 +314,8 @@ export function usePadTake(): PadTake {
   const retry = () => {
     if (phase.kind === 'failed') setPhase({ ...phase, kind: 'making' })
   }
-  const keep = () => draft !== null && keepTake(draft.id, draft.performance)
+  const keep = (accountId: string) =>
+    draft !== null && keepForCheckout(draft.id, draft.performance, accountId)
 
   return { phase, elapsed, record, stop, tapped, retry, keep }
 }

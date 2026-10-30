@@ -8,6 +8,7 @@ import {
 } from './account'
 import * as api from './library-api'
 import { itemKey, type Kind, type OutboxEntry, onQueued } from './outbox'
+import { adoptTakes, releaseTakes } from './pad-take'
 import { audioStore, clearLibrary, download, type PedosDB, withDb } from './recording-store'
 import type { Recording } from './recordings'
 import type { Toot } from './toot'
@@ -125,10 +126,14 @@ export async function claimLibrary(accountId: string, email = ''): Promise<boole
   if (current === undefined) return false
   if (current !== accountId && current !== null && current !== legacyOwner) {
     await withSyncLock(clearLibrary)
+    // The other account's Sound Pad takes that never started a Checkout go with its library.
+    releaseTakes(current)
     emit({ reset: true })
   }
   try {
     setLibraryOwner(accountId, email)
+    // A guest's takes become the account's, as its Recordings do.
+    if (current === null || current === legacyOwner) adoptTakes(current, accountId)
     return true
   } catch {
     return false
@@ -179,6 +184,9 @@ export async function forgetLibrary(): Promise<void> {
     } catch {
       return
     }
+    // Its Sound Pad takes that never started a Checkout go too; those that did stay for it.
+    const left = owner()
+    if (left) releaseTakes(left)
     forgetAccount()
   })
   emit({ reset: true })

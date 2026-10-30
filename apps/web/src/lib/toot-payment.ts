@@ -81,13 +81,15 @@ export async function tootPaid(tootId: string, accountId: string): Promise<boole
 /**
  * A kept Sound Pad take's payment (ADR 0017): `unused`, paid and no save has used it, so the take
  * is made again and saved; `used`, paid and a save used it (or saving is free), so there's nothing
- * to save; `unpaid`. Null when Farty couldn't say, or a Worker from before this answer didn't.
+ * to save; `unpaid`, as far as D1 knows. Null when Farty couldn't say, or a Worker from before
+ * this answer didn't. It reads what's stored and never asks Stripe (`?check=stored`), so opening
+ * the Sound Pad never spends the checks a return from Checkout waits on.
  */
 export async function tootPaymentState(
   tootId: string,
   accountId: string
 ): Promise<'unpaid' | 'unused' | 'used' | null> {
-  const response = await send(`/api/toots/${tootId}/payment/`, accountId)
+  const response = await send(`/api/toots/${tootId}/payment/?check=stored`, accountId)
   if (!response?.ok) return null
   const body = (await response.json().catch(() => null)) as {
     paid?: unknown

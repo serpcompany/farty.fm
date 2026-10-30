@@ -221,7 +221,7 @@ export function SaveToToots({
 }: {
   draft: TootDraft
   back: CheckoutReturn | null
-  keep?: () => boolean
+  keep?: (accountId: string) => boolean
 }) {
   const pedos = usePedos()
   const { account, stepOpen, openStep, retry } = useAccount()
@@ -256,7 +256,7 @@ export function SaveToToots({
 
   const pay = async (accountId: string) => {
     if (paying.current) return
-    if (keepForCheckout && !keepForCheckout()) {
+    if (keepForCheckout && !keepForCheckout(accountId)) {
       setProblem('notKept')
       return
     }

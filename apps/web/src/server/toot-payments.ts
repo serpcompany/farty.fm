@@ -205,7 +205,8 @@ export async function startCheckout(
  * Checkout that never loaded saves a kept take only when it's `unused` (ADR 0017): with saving free
  * it's `paid` and never `unused`. Unpaid with a Stripe Checkout Session, it asks Stripe, so the
  * return from Checkout doesn't wait for the webhook, up to `PAYMENT_LIMITS.stripeChecks`; past it,
- * D1 alone answers.
+ * D1 alone answers. With `?check=stored` (the Sound Pad's check on open) D1 alone answers, so the
+ * open never spends the return's Stripe checks: a payment whose webhook hasn't landed reads unpaid.
  */
 export async function getTootPayment(
   { db }: Pick<Stores, 'db'>,
@@ -221,7 +222,13 @@ export async function getTootPayment(
   if (payments.kind === 'free') return answer(true)
   const payment = await tootPayment(db, user.id, id)
   if (payment?.paidAt) return answer(true, payment.savedAt === null)
-  if (payment && payments.kind === 'stripe' && isCheckoutSessionId(payment.checkoutSessionId)) {
+  const storedOnly = new URL(request.url).searchParams.get('check') === 'stored'
+  if (
+    payment &&
+    !storedOnly &&
+    payments.kind === 'stripe' &&
+    isCheckoutSessionId(payment.checkoutSessionId)
+  ) {
     if (!(await spend(db, user, 'stripeChecks')).allowed) return answer(false)
     try {
       const now = await paidAtStripe({ db }, payments.secretKey, user, payment)

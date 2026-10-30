@@ -277,6 +277,66 @@ test('records a take on the Pads, plays it back, and saves it as a Toot for $0.9
   if (out) await page.screenshot({ path: join(out, 'pad-toot-screen.png') })
 })
 
+test('saves a paid take on the next open when the return from Checkout never loaded, paying once', async ({
+  page
+}, testInfo) => {
+  test.setTimeout(150_000)
+  await page.goto('/profile/')
+  await signInByApi(page, newEmail(testInfo, 'pad-take-unreturned'))
+  await page.goto('/')
+  await recordAndSave(page, '095')
+  await page.getByRole('button', { name: 'Done' }).click()
+
+  await page.goto('/compose/pad/')
+  await expect(pad(page, 1)).toHaveAttribute('data-ready', 'true')
+  await page.getByTestId('pad-take-record').tap()
+  await pad(page, 1).tap()
+  await page.getByTestId('pad-take-stop').tap()
+  await expect(page.getByTestId('pad-toot-state')).toHaveText('Ready', { timeout: 60_000 })
+
+  // Every payment started, and every Pay.
+  const checkouts: string[] = []
+  page.on('request', request => {
+    const { pathname } = new URL(request.url())
+    if (request.method() !== 'POST') return
+    if (/^\/api\/toots\/[\w-]+\/checkout\/$/.test(pathname) || pathname === '/api/dev/checkout/')
+      checkouts.push(pathname)
+  })
+  // Pay goes through, but the page closes at Checkout: the return never loads.
+  let paidReturn = ''
+  await page.route('**/api/dev/checkout/', async route => {
+    const paid = await route.fetch({ maxRedirects: 0 })
+    expect(paid.status()).toBe(303)
+    paidReturn = paid.headers().location ?? ''
+    await route.fulfill({ contentType: 'text/html', body: '<p>Closed at Checkout</p>' })
+  })
+  await page.getByRole('button', { name: 'Save to Toots · $0.99' }).click()
+  await expect(page).toHaveURL(/\/dev\/checkout\/\?toot=[\w-]+$/)
+  const tootId = new URL(page.url()).searchParams.get('toot')
+  await page.getByRole('button', { name: 'Pay $0.99' }).click()
+  await expect(page.getByText('Closed at Checkout')).toBeVisible()
+  expect(paidReturn).toContain(`/compose/pad/?toot=${tootId}&checkout=done`)
+  await page.unroute('**/api/dev/checkout/')
+  expect(await toots(page)).toEqual([])
+
+  // Opened again, with no return: the Sound Pad saves the take it was paid for, by itself.
+  await page.goto('/compose/pad/')
+  await expect(page.getByRole('button', { name: 'Saved to Toots' })).toBeDisabled({
+    timeout: 60_000
+  })
+  const saved = await toots(page)
+  expect(saved.map(toot => toot.id)).toEqual([tootId])
+  expect(saved[0]).toMatchObject({ songId: null, title: 'Sound Pad' })
+  expect(await page.evaluate(() => localStorage.getItem('pedos.padTakes'))).toBeNull()
+
+  // Once: the next open has nothing to save, and nothing was paid again.
+  await page.goto('/compose/pad/')
+  await expect(pad(page, 1)).toHaveAttribute('data-ready', 'true')
+  await expect(page.getByTestId('pad-take-state')).toHaveText('Record')
+  expect((await toots(page)).map(toot => toot.id)).toEqual([tootId])
+  expect(checkouts).toEqual([`/api/toots/${tootId}/checkout/`, '/api/dev/checkout/'])
+})
+
 /** The Toots in this browser's IndexedDB. */
 function toots(page: Page): Promise<Kept[]> {
   return page.evaluate(async () => {

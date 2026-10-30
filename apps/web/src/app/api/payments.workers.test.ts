@@ -79,9 +79,9 @@ const checkout = (id: string, as: As, songId: unknown = 'twinkle') =>
     params(id)
   )
 
-const payment = (id: string, as: As) =>
+const payment = (id: string, as: As, query = '') =>
   paymentRoute.GET(
-    new Request(`${ORIGIN}/api/toots/${id}/payment/`, { headers: headersFor('GET', as) }),
+    new Request(`${ORIGIN}/api/toots/${id}/payment/${query}`, { headers: headersFor('GET', as) }),
     params(id)
   )
 
@@ -638,6 +638,39 @@ describe('with Stripe Checkout in test mode', () => {
       JSON.stringify({ event: 'stripe_paid_session_refused', session: 'cs_test_first' })
     )
     expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeNull()
+  })
+
+  it('answers the Sound Pad’s check on open from D1 alone, never asking Stripe (ADR 0017)', async () => {
+    const a = await signUp('A')
+    stubStripe(sessionFor(a.id, T1))
+    await checkout(T1, a)
+    vi.restoreAllMocks()
+    const stripe = vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(async () =>
+        Response.json(sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' }))
+      )
+    const checksSpent = () =>
+      env.DB.prepare('SELECT count FROM rate_limit WHERE key = ?')
+        .bind(`stripeChecks|${a.id}`)
+        .first<number>('count')
+    // Paid at Stripe, but no webhook yet: the open reads unpaid, and spends no Stripe check.
+    for (let i = 0; i < 3; i++) {
+      const opened = await payment(T1, a, '?check=stored')
+      expect(await opened.json()).toEqual({ paid: false, unused: false })
+    }
+    expect(stripe).not.toHaveBeenCalled()
+    expect(await checksSpent()).toBeNull()
+    // The return from Checkout still asks Stripe, which marks it paid in D1.
+    expect(await (await payment(T1, a)).json()).toEqual({ paid: true, unused: true })
+    expect(stripe).toHaveBeenCalledOnce()
+    expect(await checksSpent()).toBe(1)
+    // The next open reads that from D1.
+    expect(await (await payment(T1, a, '?check=stored')).json()).toEqual({
+      paid: true,
+      unused: true
+    })
+    expect(stripe).toHaveBeenCalledOnce()
   })
 
   it('asks Stripe only so often while a return waits, then answers from D1', async () => {
