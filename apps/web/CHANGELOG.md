@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.0](https://github.com/serpcompany/farty.fm/compare/v1.11.0...v1.12.0) (2026-10-30)
+
+
+### Features
+
+* **web:** playhead, scrub and Trim for Recordings ([#299](https://github.com/serpcompany/farty.fm/issues/299)) ([45b456c](https://github.com/serpcompany/farty.fm/commit/45b456ca15b71b8b2a3312470c6951a44e8b15e1))
+
 ## [1.11.0](https://github.com/serpcompany/farty.fm/compare/v1.10.0...v1.11.0) (2026-10-30)
 
 
