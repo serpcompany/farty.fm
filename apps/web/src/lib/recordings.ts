@@ -146,8 +146,9 @@ const minimumContrastDb = 4
  * than one 50 ms window fails.
  */
 export function heardSomething(samples: Float32Array, sampleRate: number): boolean {
-  const level = levelContrast(samples, sampleRate)
-  return level !== null && level.peakDb >= quietestFartDb && level.contrastDb >= minimumContrastDb
+  const levels = new TakeLevels(sampleRate)
+  levels.add(samples)
+  return levels.heard()
 }
 
 /**
@@ -155,25 +156,78 @@ export function heardSomething(samples: Float32Array, sampleRate: number): boole
  * contrast between them. Only whole windows count, so the take's edges don't read as quiet room.
  * Null when the take is shorter than one window.
  */
-export function levelContrast(
-  samples: Float32Array,
-  sampleRate: number
-): { peakDb: number; floorDb: number; contrastDb: number } | null {
-  const hop = Math.max(1, Math.trunc(0.005 * sampleRate))
-  const frame = 10 * hop
-  if (samples.length < frame) return null
-  // Running sums of squares, so each window costs two lookups.
-  const energy = new Float64Array(samples.length + 1)
-  for (let i = 0; i < samples.length; i++) energy[i + 1] = energy[i] + samples[i] * samples[i]
-  const levels: number[] = []
-  for (let start = 0; start + frame <= samples.length; start += hop) {
-    const meanSquare = Math.max(0, energy[start + frame] - energy[start]) / frame
-    levels.push(20 * Math.log10(Math.sqrt(meanSquare) + 1e-9))
+export function levelContrast(samples: Float32Array, sampleRate: number): LevelContrast | null {
+  const levels = new TakeLevels(sampleRate)
+  levels.add(samples)
+  return levels.contrast()
+}
+
+export type LevelContrast = { peakDb: number; floorDb: number; contrastDb: number }
+
+/**
+ * A take's 50 ms RMS levels every 5 ms, measured as its batches come in: what `heardSomething`
+ * judges, so Record's "Can't hear anything" over the take so far and its "Didn't catch that" at
+ * Stop never disagree (#281). Batch by batch it gives exactly what the whole take gives at once.
+ */
+export class TakeLevels {
+  private readonly hop: number
+  private readonly frame: number
+  /** The take's running sum of squares, and its value at each `hop` boundary so far. */
+  private sum = 0
+  private readonly sums: number[] = [0]
+  private untilBoundary: number
+  private readonly levels: number[] = []
+  private latestDb: number | null = null
+
+  constructor(sampleRate: number) {
+    this.hop = Math.max(1, Math.trunc(0.005 * sampleRate))
+    this.frame = 10 * this.hop
+    this.untilBoundary = this.hop
   }
-  levels.sort((a, b) => a - b)
-  const peakDb = levels[levels.length - 1]
-  const floorDb = levels[Math.floor(levels.length * 0.1)]
-  return { peakDb, floorDb, contrastDb: peakDb - floorDb }
+
+  /** Adds the take's next batch of samples. */
+  add(batch: Float32Array): void {
+    let loudest = Number.NEGATIVE_INFINITY
+    for (let i = 0; i < batch.length; i++) {
+      this.sum += batch[i] * batch[i]
+      this.untilBoundary -= 1
+      if (this.untilBoundary > 0) continue
+      this.untilBoundary = this.hop
+      this.sums.push(this.sum)
+      const end = this.sums.length - 1
+      // Each window ends on a boundary 10 hops after its start, so it costs two lookups.
+      if (end < 10) continue
+      const meanSquare = Math.max(0, this.sums[end] - this.sums[end - 10]) / this.frame
+      const db = 20 * Math.log10(Math.sqrt(meanSquare) + 1e-9)
+      this.levels.push(db)
+      loudest = Math.max(loudest, db)
+    }
+    if (loudest > Number.NEGATIVE_INFINITY) this.latestDb = loudest
+  }
+
+  /** `levelContrast` of the take so far. */
+  contrast(): LevelContrast | null {
+    if (this.levels.length === 0) return null
+    const sorted = Float64Array.from(this.levels).sort()
+    const peakDb = sorted[sorted.length - 1]
+    const floorDb = sorted[Math.floor(sorted.length * 0.1)]
+    return { peakDb, floorDb, contrastDb: peakDb - floorDb }
+  }
+
+  /** `heardSomething` of the take so far. */
+  heard(): boolean {
+    const level = this.contrast()
+    return level !== null && level.peakDb >= quietestFartDb && level.contrastDb >= minimumContrastDb
+  }
+
+  /**
+   * Record's live level, 0…1: the loudest 50 ms that ended in the latest batches, from 0 at the
+   * floor `heardSomething` ignores (-70 dBFS) to 1 at full scale.
+   */
+  get level(): number {
+    if (this.latestDb === null) return 0
+    return Math.min(1, Math.max(0, (this.latestDb - quietestFartDb) / -quietestFartDb))
+  }
 }
 
 /** The loudest sample of a take at full level: about -1 dBFS, as a rendered Song peaks. */
