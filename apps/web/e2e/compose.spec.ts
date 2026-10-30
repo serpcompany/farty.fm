@@ -71,15 +71,17 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(page.getByText('No Melodic Recordings yet')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Locked · 12' })).toBeVisible()
   const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb' })
+  // Which notes it needs depends on the take's settle time (two Arrangements nearly tie), so the
+  // journey checks the shape; `pitch-coverage.test.ts` pins the exact notes on the golden 095.
   await expect(mary).toHaveAccessibleDescription(
-    'Locked. 1 of 4 notes covered. Needs C2 (1.5 s), D2 (0.7 s), and 1 more'
+    /^Locked\. 1 of 4 notes covered\. Needs \S+ \(\d\.\d s\), \S+ \(\d\.\d s\), and 1 more$/
   )
 
-  // The locked Song's sheet names the notes it needs, and how long a fart each needs (ADR 0011):
-  // the reference's `melody_fit()` on 095 alone. Record goes to the Record tab.
+  // The locked Song's sheet names the notes it needs, and how long a fart each needs (ADR 0011).
+  // Record goes to the Record tab.
   await mary.click()
   await expect(sheet.getByTestId('locked-song-needs')).toHaveText(
-    'Needs a fart near C2 (1.5 s), D2 (0.7 s), and E2 (0.7 s).'
+    /^Needs a fart near \S+ \(\d\.\d s\), \S+ \(\d\.\d s\), and \S+ \(\d\.\d s\)\.$/
   )
   await expect(sheet.getByTestId('pitch-strip')).toHaveAccessibleName(
     /^Notes collected: F\. Needed: /
