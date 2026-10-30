@@ -21,12 +21,28 @@ export function audioContext(): AudioContext {
   const hidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
   if (shared && shared.state !== 'closed') {
     if (sharedAtHide === hides || hidden) return shared
-    shared.close().catch(() => {})
+    close(shared)
   }
   shared = new AudioContext()
   // One made while the page is hidden is replaced too, once it shows.
   sharedAtHide = hidden ? -1 : hides
   return shared
+}
+
+/** What stops the sounds playing on a context (`player.ts`), run before that context closes. */
+const closing = new Set<(context: BaseAudioContext) => void>()
+
+/**
+ * Has `stop` stop what plays on a context before the context closes. Closing it never ends a
+ * sound that plays on it: the sound's `onended` never fires, so it would count as playing for good.
+ */
+export function whenClosing(stop: (context: BaseAudioContext) => void): void {
+  closing.add(stop)
+}
+
+function close(context: AudioContext): void {
+  for (const stop of closing) stop(context)
+  context.close().catch(() => {})
 }
 
 function watchHides(): void {
@@ -49,7 +65,7 @@ function watchHides(): void {
 export function replaceAudioContext(context: AudioContext): void {
   if (shared !== context) return
   shared = null
-  context.close().catch(() => {})
+  close(context)
 }
 
 /**

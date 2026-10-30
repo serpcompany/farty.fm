@@ -466,6 +466,31 @@ test.describe("with the page's own microphone grant, as on iPhone", () => {
     expect(timings.at(-1)).toBeLessThan(100)
   })
 
+  // A sound can start while the page is hidden, such as a Toot that Song Creator plays once it's
+  // made. As the page shows, its context is replaced, and closing a context never ends what plays
+  // on it. The play here starts from a click while the page is hidden, to stand in for that.
+  test('a sound that started while the page was hidden ends as the page shows', async ({
+    page
+  }) => {
+    await page.goto('/')
+    await firstTap(page)
+    await fartAndRecord(page)
+    const play = page.getByTestId('review-play')
+    await expect(play).toHaveAccessibleName('Play')
+
+    await setVisibility(page, 'hidden')
+    await interrupt(page, 'mute')
+    await play.click()
+    await expect(play).toHaveAccessibleName('Stop')
+    await setVisibility(page, 'visible')
+    await interrupt(page, 'unmute')
+    await expect(play).toHaveAccessibleName('Play')
+
+    // It plays again, on the fresh context.
+    await play.click()
+    await expect(play).toHaveAccessibleName('Stop')
+  })
+
   // Never listening while hidden: an interruption that mutes the track as the person leaves, and
   // ends while they're away (a call on Android Chrome), lets the microphone go.
   test('a microphone that unmutes while the page is hidden is let go', async ({ page }) => {

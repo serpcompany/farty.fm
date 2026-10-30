@@ -21,6 +21,7 @@ function finish(key: string, nth = 0): void {
 
 vi.mock('./context', () => ({
   setPlaybackSession: () => {},
+  whenClosing: () => {},
   audioContext: () => ({
     destination: {},
     resume: async () => {},
