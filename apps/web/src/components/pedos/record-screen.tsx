@@ -53,8 +53,7 @@ export function RecordScreen() {
       {/* Balances the status line below, so the button stays centered. */}
       <div className="h-10" />
       <RecordButton
-        isRecording={false}
-        starting={pedos.capture.kind === 'starting'}
+        state={pedos.capture.kind === 'starting' ? 'starting' : 'record'}
         disabled={pedos.capture.kind !== 'idle'}
         onClick={() => void pedos.startRecording()}
       />

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.10.0](https://github.com/serpcompany/farty.fm/compare/v1.9.0...v1.10.0) (2026-10-30)
+
+
+### Features
+
+* **web:** play your farts on a Sound Pad ([#285](https://github.com/serpcompany/farty.fm/issues/285)) ([6d2bb50](https://github.com/serpcompany/farty.fm/commit/6d2bb50fd2432544f4afac83c4387a161fe56757))
+
+
+### Fixes
+
+* play the whole take on the Recordings tab, and every burst of a fart in Songs ([#286](https://github.com/serpcompany/farty.fm/issues/286)) ([4b92aa0](https://github.com/serpcompany/farty.fm/commit/4b92aa074cea7bc05759add869c0220311d6ecc9))
+* **web:** hear quiet takes and save them at full level ([#284](https://github.com/serpcompany/farty.fm/issues/284)) ([e120fc1](https://github.com/serpcompany/farty.fm/commit/e120fc1db038a3450cacf0ee257a50f8271dd55a))
+* **web:** the first Record tap after coming back to the app records ([#283](https://github.com/serpcompany/farty.fm/issues/283)) ([448b8d8](https://github.com/serpcompany/farty.fm/commit/448b8d874c0d692f2f4ec752cce48c0c7f6fc64d))
+
 ## [1.9.0](https://github.com/serpcompany/farty.fm/compare/v1.8.0...v1.9.0) (2026-10-30)
 
 
