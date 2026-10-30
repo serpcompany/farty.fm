@@ -87,7 +87,7 @@ The creation area where AI composes a new melody that is played using only the u
 _Avoid_: Farty AI, AI music
 
 **Sound Pad**:
-The creation area of twelve Pads, where the user plays their Recordings by tapping them, with several at once if they like. Each fart plays raw, trimmed only of the silence around it.
+The creation area of twelve Pads, where the user plays their Recordings by tapping them, with several at once if they like. Each fart plays raw, trimmed only of the silence and room noise around it, and starts where a Song starts it.
 _Avoid_: Sampler, soundboard, drum pad, launchpad
 
 **Pad**:
