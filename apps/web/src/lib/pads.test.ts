@@ -157,6 +157,33 @@ describe('soundingSpan', () => {
     expect(end / sampleRate).toBeGreaterThanOrEqual(golden.gesture.end_s)
   })
 
+  /** A burst at `level` from 0.2 s to 0.4 s, silence, then a 0.5 burst from 0.7 s to 1.0 s. */
+  function twoBursts(level: number) {
+    const samples = new Float32Array(Math.round(1.3 * rate))
+    const loud = take(0.7, 0.3, 0.3)
+    samples.set(loud.samples)
+    samples.set(take(0.2, 0.2, 0, level).samples)
+    return { samples, loud }
+  }
+
+  it('cuts a first fart more than 12 dB under the loudest, past a 50 ms gap, as a Song does (#298)', () => {
+    // −18 dB, 0.3 s before the loud burst: not the attack, and not joined to it.
+    const { samples, loud } = twoBursts(0.5 * 10 ** (-18 / 20))
+    const span = soundingSpan(samples, rate)
+    expect(span.start).toBe(soundingSpan(loud.samples, rate).start)
+    expect(span.start / rate).toBeGreaterThan(0.68)
+    expect(span.end).toBe(loud.to + 2_400)
+  })
+
+  it('keeps a first fart within 12 dB of the loudest: the attack is its own', () => {
+    const level = 0.5 * 10 ** (-3 / 20)
+    const { samples, loud } = twoBursts(level)
+    const span = soundingSpan(samples, rate)
+    expect(span.start).toBe(soundingSpan(take(0.2, 0.2, 0, level).samples, rate).start)
+    expect(span.start / rate).toBeLessThan(0.2)
+    expect(span.end).toBe(loud.to + 2_400)
+  })
+
   it('keeps a second, quieter fart', () => {
     const first = take(0.2, 0.2, 0.3)
     const second = take(0, 0.2, 0.2, 0.1)

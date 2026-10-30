@@ -87,10 +87,16 @@ export const PAD_PEAK = 0.5
 export type Span = { start: number; end: number }
 
 /**
- * Where a take sounds. Only the silence and room noise before and after goes:
+ * Where a take sounds:
  *
- * - It starts where a Song starts the fart (`fartStart`): at its quiet lead-in, the sound joined
- *   to its attack, so room noise before a longer gap doesn't make a tap sound late (#298).
+ * - It starts where a Song starts the fart (`fartStart`), so room noise before it doesn't make a
+ *   tap sound late (#298). On 5 ms frames, the attack is the first sound within 12 dB of the take's
+ *   loudest; its quiet lead-in is the sound within 30 dB of the loudest joined to the attack by
+ *   gaps of 50 ms or less, from 8 ms before. Everything before goes, as in a Song: silence and room
+ *   noise, but also a sound more than 12 dB under the loudest, even a fart, parted from the attack
+ *   by a gap of more than 50 ms, and anything more than 0.25 s before the fart's start (8 ms
+ *   before the attack). A first fart within 12 dB of the loudest is the attack itself, so it
+ *   stays.
  * - It ends just after its last 10 ms window within 30 dB of its loudest, so a second fart in the
  *   take stays (owner, 2026-10-30, #275).
  *
