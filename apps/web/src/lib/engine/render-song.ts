@@ -1,4 +1,4 @@
-import type { Analysis } from '@/lib/recordings'
+import type { Analysis, Trim } from '@/lib/recordings'
 import type { PcmAudio } from '@/lib/wav'
 import { type Arrangement, choiceForSongPitch } from './auto-map'
 import { renderSource } from './render-source'
@@ -79,11 +79,13 @@ export interface RecordingToRender {
   /** The whole Recording at its own sample rate, as Recording Analysis read it. */
   audio: PcmAudio
   analysis: Analysis
+  /** The Trim it plays, when `trimOf` gives one (ADR 0019). */
+  trim?: Trim | null
 }
 
 /**
  * The whole render from what the app stores: cuts each Recording the Arrangement uses to its
- * gesture, and renders. This is what the render worker runs.
+ * gesture, or its Trim, and renders. This is what the render worker runs.
  */
 export function renderFromRecordings(
   song: Song,
@@ -93,7 +95,7 @@ export function renderFromRecordings(
   const used = new Set(arrangement.pitches.map(c => c.recordingId))
   const sources = new Map<string, RenderSource>()
   for (const r of recordings) {
-    if (used.has(r.id)) sources.set(r.id, renderSource(r.audio, r.analysis))
+    if (used.has(r.id)) sources.set(r.id, renderSource(r.audio, r.analysis, r.trim ?? null))
   }
   return renderSong(song, arrangement, sources)
 }

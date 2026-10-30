@@ -206,13 +206,39 @@ describe('placing a Recording by ear (ADR 0015)', () => {
       new ArrayBuffer(8)
     )
     expect(saved.placedPitch).toBeUndefined()
-    expect(await store.placeRecording(saved.id, 48)).toEqual({ ...saved, placedPitch: 48 })
+    expect(await store.placeRecording(saved.id, { placedPitch: 48 })).toEqual({
+      ...saved,
+      placedPitch: 48
+    })
     await store.saveAnalysis(saved.id, noiseLike)
     const [loaded] = await store.loadRecordings()
     expect(loaded).toEqual({ ...saved, analysis: noiseLike, placedPitch: 48 })
-    expect((await store.placeRecording(saved.id, null))?.placedPitch).toBeNull()
-    expect(await store.placeRecording('gone', 40)).toBeNull()
+    expect((await store.placeRecording(saved.id, { placedPitch: null }))?.placedPitch).toBeNull()
+    expect(await store.placeRecording('gone', { placedPitch: 40 })).toBeNull()
     const outbox = await store.withDb(database => database.getAll('outbox'))
     expect(outbox.map(entry => [entry.id, entry.op])).toEqual([[saved.id, 'put']])
+  })
+
+  it('keeps a Trim beside the take, through a new analysis and a new note, until it is taken off (ADR 0019)', async () => {
+    vi.resetModules()
+    const store = await import('./recording-store')
+    const audio = new Uint8Array([1, 2, 3, 4]).buffer
+    const saved = await store.saveRecording(
+      { seconds: 1, sampleRate: 48_000, waveform: [0.5] },
+      audio
+    )
+    const trim = { startSeconds: 0.3, endSeconds: 0.7 }
+    expect(await store.placeRecording(saved.id, { placedPitch: 48, trim })).toEqual({
+      ...saved,
+      placedPitch: 48,
+      trim
+    })
+    await store.saveAnalysis(saved.id, noiseLike)
+    expect((await store.placeRecording(saved.id, { placedPitch: 50 }))?.trim).toEqual(trim)
+    const [loaded] = await store.loadRecordings()
+    expect(loaded).toEqual({ ...saved, analysis: noiseLike, placedPitch: 50, trim })
+    expect(await store.placeRecording(saved.id, { trim: null })).toEqual({ ...loaded, trim: null })
+    // The saved take never changes.
+    expect(new Uint8Array(await store.loadAudio(saved.id))).toEqual(new Uint8Array([1, 2, 3, 4]))
   })
 })

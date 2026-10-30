@@ -139,7 +139,7 @@ describe('version 5', () => {
 
     const { pads, store } = await openPage()
     const database = await store.db()
-    expect(database.version).toBe(5)
+    expect(database.version).toBe(store.DB_VERSION)
     expect([...database.objectStoreNames].sort()).toEqual([
       'audio',
       'downloads',
@@ -156,7 +156,8 @@ describe('version 5', () => {
     expect(bytes(await database.get('tootAudio', toot.id))).toEqual(bytes(wav(2)))
     expect(await database.getAll('outbox')).toEqual([queued])
     expect(await database.get('downloads', 'toots:gone')).toEqual({ kind: 'toots', id: 'gone' })
-    expect(await database.get('meta', 'cursor')).toBe(123)
+    // Version 6 (#293) reads the whole library again.
+    expect(await database.get('meta', 'cursor')).toBe(0)
     expect(await pads.loadPads()).toEqual(new Map())
   })
 })

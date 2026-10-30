@@ -1,7 +1,7 @@
 import { and, count, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm'
 
 import type { Performance } from '../lib/performance'
-import type { Analysis } from '../lib/recordings'
+import type { Analysis, Trim } from '../lib/recordings'
 import type { TootArrangement } from '../lib/toot'
 import type { Database } from './database'
 import { recordings, toots, user, verification } from './schema'
@@ -32,6 +32,8 @@ export type NewRecording = {
   analysis: Analysis | null
   /** The Placed Pitch, or null when left out (ADR 0015). */
   placedPitch: number | null
+  /** The Trim, or null when untrimmed (ADR 0019). */
+  trim: Trim | null
   audioBytes: number
 }
 
@@ -111,9 +113,10 @@ export async function insertRecording(
   const analysis = r.analysis === null ? null : JSON.stringify(r.analysis)
   const added = await db.all(sql`
     insert into recordings (user_id, id, number, created_at, seconds, sample_rate, waveform,
-      analysis, placed_pitch, audio_bytes, updated_at)
+      analysis, placed_pitch, trim_start_seconds, trim_end_seconds, audio_bytes, updated_at)
     select ${userId}, ${r.id}, ${r.number}, ${r.createdAt}, ${r.seconds}, ${r.sampleRate},
-      ${JSON.stringify(r.waveform)}, ${analysis}, ${r.placedPitch}, ${r.audioBytes}, ${d1Now}
+      ${JSON.stringify(r.waveform)}, ${analysis}, ${r.placedPitch},
+      ${r.trim?.startSeconds ?? null}, ${r.trim?.endSeconds ?? null}, ${r.audioBytes}, ${d1Now}
     where (select count(*) from recordings where user_id = ${userId} and deleted_at is null)
       < ${limit}
     on conflict do nothing
@@ -241,18 +244,32 @@ export async function renameToot(
 }
 
 /**
- * Places a live Recording on a note, or takes it off with null (ADR 0015); the last to arrive
- * wins. Returns the row's status before.
+ * What a PATCH changes on a Recording: its Placed Pitch (ADR 0015), its Trim (ADR 0019) or both,
+ * each null to take it off. A field left out stays as it is.
+ */
+export type Placement = { placedPitch?: number | null; trim?: Trim | null }
+
+/**
+ * Places a live Recording on a note and trims it, or takes either off with null; the last to
+ * arrive wins. Returns the row's status before.
  */
 export async function placeRecording(
   db: Database,
   userId: string,
   id: string,
-  placedPitch: number | null
+  change: Placement
 ): Promise<ItemStatus> {
+  const trim =
+    change.trim === undefined
+      ? {}
+      : {
+          trimStartSeconds: change.trim?.startSeconds ?? null,
+          trimEndSeconds: change.trim?.endSeconds ?? null
+        }
+  const placedPitch = change.placedPitch === undefined ? {} : { placedPitch: change.placedPitch }
   const placed = await db
     .update(recordings)
-    .set({ placedPitch, updatedAt: d1Now })
+    .set({ ...placedPitch, ...trim, updatedAt: d1Now })
     .where(and(whereItem('recordings', userId, id), isNull(recordings.deletedAt)))
     .returning({ id: recordings.id })
   return placed.length === 1 ? 'live' : itemStatus(db, 'recordings', userId, id)

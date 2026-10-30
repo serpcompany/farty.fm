@@ -6,7 +6,7 @@ import type { RecordingToRender, RenderedSong } from '@/lib/engine/render-song'
 import type { Song as EngineSong } from '@/lib/engine/song'
 import type { Performance } from '@/lib/performance'
 import { arrangementOf, engineSong } from '@/lib/pitch-coverage'
-import type { Recording } from '@/lib/recordings'
+import { type Recording, trimOf } from '@/lib/recordings'
 import type { PadTootDraft, SongTootDraft, TootArrangement } from '@/lib/toot'
 import { decodeWav, encodeWav } from '@/lib/wav'
 
@@ -46,8 +46,8 @@ export function tootArrangement(arrangement: Arrangement): TootArrangement {
 /**
  * Makes the Toot of `song`: the Arrangement Auto-map chooses on `recordings` (the one Compose
  * shows), rendered from each Recording it uses as the app stores it, a 16-bit WAV
- * (`loadAudio`), with the Recording's stored analysis. The Toot's audio is the render as a mono
- * 16-bit WAV.
+ * (`loadAudio`), with the Recording's stored analysis and its Trim (`trimOf`, ADR 0019). The
+ * Toot's audio is the render as a mono 16-bit WAV.
  *
  * Throws a `TootError`: `locked` when the Song isn't unlocked, `couldNotMake` when a Recording's
  * audio or analysis is missing or the render fails. `id` is a new one unless given: the return
@@ -69,7 +69,12 @@ export async function makeToot(
       used.map(async (id): Promise<RecordingToRender> => {
         const recording = recordings.find(r => r.id === id)
         if (recording?.analysis.state !== 'analyzed') throw new Error(`Recording ${id} is gone`)
-        return { id, audio: decodeWav(await loadAudio(id)), analysis: recording.analysis.analysis }
+        return {
+          id,
+          audio: decodeWav(await loadAudio(id)),
+          analysis: recording.analysis.analysis,
+          trim: trimOf(recording)
+        }
       })
     )
     rendered = await render(engineSong(song), arrangement, toRender)

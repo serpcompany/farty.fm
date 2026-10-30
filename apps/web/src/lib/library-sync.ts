@@ -10,7 +10,7 @@ import * as api from './library-api'
 import { itemKey, type Kind, type OutboxEntry, onQueued } from './outbox'
 import { adoptTakes, releaseTakes } from './pad-take'
 import { audioStore, clearLibrary, download, type PedosDB, withDb } from './recording-store'
-import type { Recording } from './recordings'
+import type { Recording, Trim } from './recordings'
 import type { Toot } from './toot'
 
 type Database = IDBPDatabase<PedosDB>
@@ -39,9 +39,9 @@ export type ItemChange = Exclude<LibraryChange, { reset: true }>
 
 /**
  * The Recordings a screen shows, `list`, after a sync's `change`: those deleted gone, new ones
- * added, and those changed with their new number and Placed Pitch, as a Recording not uploaded yet
- * may come back renumbered and one placed in another browser with its Placed Pitch. Each keeps
- * this browser's analysis. Oldest first.
+ * added, and those changed with their new number, Placed Pitch and Trim, as a Recording not
+ * uploaded yet may come back renumbered and one placed or trimmed in another browser with its
+ * Placed Pitch and Trim. Each keeps this browser's analysis. Oldest first.
  */
 export function recordingsAfter(list: readonly Recording[], change: ItemChange): Recording[] {
   const { recordings: added, deleted } = change
@@ -49,10 +49,18 @@ export function recordingsAfter(list: readonly Recording[], change: ItemChange):
   const fresh = new Map(added.map(r => [r.id, r]))
   const merged = kept.map(r => {
     const changed = fresh.get(r.id)
-    return changed ? { ...r, number: changed.number, placedPitch: changed.placedPitch } : r
+    return changed
+      ? { ...r, number: changed.number, placedPitch: changed.placedPitch, trim: changed.trim }
+      : r
   })
   const ids = new Set(kept.map(r => r.id))
   return [...merged, ...added.filter(r => !ids.has(r.id))].sort((a, b) => a.number - b.number)
+}
+
+/** Whether two Trims, or two takes with none, are the same. */
+function sameTrim(a: Trim | null, b: Trim | null): boolean {
+  if (a === null || b === null) return a === b
+  return a.startSeconds === b.startSeconds && a.endSeconds === b.endSeconds
 }
 
 const changes = new EventTarget()
@@ -237,7 +245,7 @@ const stops = ({ status, error }: api.Answer) =>
 type Taken =
   | { entry: OutboxEntry; op: 'put'; item: Recording | Toot; wav: ArrayBuffer }
   | { entry: OutboxEntry; op: 'rename'; title: string }
-  | { entry: OutboxEntry; op: 'place'; placedPitch: number | null }
+  | { entry: OutboxEntry; op: 'place'; placement: api.Placement }
   | { entry: OutboxEntry; op: 'delete' }
 
 /**
@@ -293,7 +301,8 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
         continue
       }
       await Promise.all([outbox.put(entry), tx.done])
-      return { entry, op: 'place', placedPitch: recording.placedPitch ?? null }
+      const placement = { placedPitch: recording.placedPitch ?? null, trim: recording.trim ?? null }
+      return { entry, op: 'place', placement }
     }
     if (queued.op === 'delete') {
       await Promise.all([outbox.put(entry), tx.done])
@@ -383,7 +392,7 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
     return 'next'
   }
   if (taken.op === 'place') {
-    const answer = await api.placeRecording(entry.id, taken.placedPitch, accountId)
+    const answer = await api.placeRecording(entry.id, taken.placement, accountId)
     if (stops(answer)) return 'stop'
     if (answer.status === 410) await deleteHere(entry.kind, entry.id)
     // Placed; or not on the account, or a note it refuses, which no retry changes.
@@ -471,11 +480,16 @@ async function apply(database: Database, answer: api.LibraryChanges) {
     if (op === 'delete') continue
     const here = await recordings.get(recording.id)
     if (here) {
-      // Only its Placed Pitch changes (ADR 0015): the analysis stays this browser's own. A Worker
-      // from before #268 sends none, which changes nothing.
-      const placed = recording.placedPitch
-      if (op || placed === undefined || (here.placedPitch ?? null) === placed) continue
-      const moved = { ...here, placedPitch: placed }
+      // Only its Placed Pitch (ADR 0015) and Trim (ADR 0019) change: the analysis stays this
+      // browser's own. A Worker from before #268 sends no Placed Pitch, and one from before #293
+      // no Trim, which changes neither.
+      const moved: Recording = { ...here }
+      if (recording.placedPitch !== undefined) moved.placedPitch = recording.placedPitch
+      if (recording.trim !== undefined) moved.trim = recording.trim
+      const same =
+        (here.placedPitch ?? null) === (moved.placedPitch ?? null) &&
+        sameTrim(here.trim ?? null, moved.trim ?? null)
+      if (op || same) continue
       await recordings.put(moved)
       change.recordings.push(moved)
       continue

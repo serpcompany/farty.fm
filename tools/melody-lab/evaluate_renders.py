@@ -1,6 +1,7 @@
 """Run the reference's checks (evaluate.py) on renders made outside the reference engine.
 
     .venv/bin/python evaluate_renders.py [dir] [--against-reference]    # default dir: out/web
+    .venv/bin/python evaluate_renders.py --scenario scenarios/trim-065.json [--against-reference]
 
 `dir` holds `<song>.wav` and `<song>.json` per Song, as `apps/web/scripts/render-songs.ts`
 writes them. The JSON has the Song's `bpm` and one event per note (`note_index`, `len_s`,
@@ -19,13 +20,20 @@ First it checks that `dir` holds exactly one render (`.json` and `.wav`) per gol
 that is unlocked (`fixtures/golden/arrangements/full/*.json`), and fails on a missing, extra or
 stale one. Exits 1 if any check fails. It changes nothing in the reference.
 
-The renders are the full library's only. Last it lists, for information, the small library's
+Without --scenario the renders are the full library's. Last it lists, for information, the small library's
 unlocked golden Arrangements that pYIN reads under the bar (`fixtures/golden/README.md` says
 why).
 
 With --against-reference it also renders each Song with the reference (`plan`, then
 `render()` on `load_library()`) and prints the largest sample difference from it, for
 information.
+
+With --scenario scenarios/<id>.json the renders are of that Scenario's library instead (as
+`render-songs.ts --scenario` makes them, into `out/web-<id>/` by default): the Fixture Library
+Recordings it lists, each trimmed (`trim_bounds()`, then `trimmed()`, ADR 0019) and placed by
+ear (`placed()`, ADR 0015) as it says. The expected renders are the Songs the reference unlocks
+with that library, each is checked against the bar only (golden is the full library's), and
+--against-reference renders with that library.
 """
 import argparse
 import json
@@ -35,25 +43,62 @@ from pathlib import Path
 import librosa
 import numpy as np
 
-from engine import ROOT, SR, load_library, plan, render
+from engine import (
+    AUDIO_DIR, MANIFEST, ROOT, SR, analyze_recording, load_library, melody_fit, placed, plan, render, trim_bounds,
+    trimmed,
+)
 from evaluate import BAR, bar_problems, evaluate
 from melody import load_catalog
 
 GOLDEN = ROOT / "fixtures/golden/arrangements/full"
 SMALL = ROOT / "fixtures/golden/arrangements/small"
+HERE = Path(__file__).resolve().parent
 
 
-def render_set_problems(out):
-    """What is wrong with the set of renders in `out`, against the golden unlocked Arrangements."""
+def golden_unlocked():
+    """The Songs whose golden Arrangement on the full library unlocks, and those it locks."""
     unlocked = {p.stem for p in GOLDEN.glob("*.json") if json.loads(p.read_text())["unlocked"]}
-    locked = {p.stem for p in GOLDEN.glob("*.json")} - unlocked
+    return unlocked, {p.stem for p in GOLDEN.glob("*.json")} - unlocked
+
+
+def load_scenario(path):
+    """A Scenario's library: the Fixture Library Recordings it lists, analyzed, each trimmed
+    between its handles (ADR 0019) and placed on its note (ADR 0015) where it says. Prints each
+    Trim, in samples of the decoded take."""
+    scenario = json.loads(Path(path).read_text())
+    manifest = {r["id"]: r for r in json.loads(MANIFEST.read_text())["recordings"]}
+    library = []
+    for rid in scenario["library"]:
+        y, _ = librosa.load(AUDIO_DIR / manifest[rid]["filename"], sr=SR, mono=True)
+        src = analyze_recording(rid, y)
+        if rid in scenario.get("trims", {}):
+            handles = scenario["trims"][rid]
+            start, end = trim_bounds(y, *handles)
+            print(f"{rid} trimmed between {handles[0]} and {handles[1]} s: samples {round(start * SR)}"
+                  f" to {round(end * SR)} ({start:.4f} to {end:.4f} s); analysis found {src.start} to {src.end}")
+            src = trimmed(src, y, start, end, placed_by_ear=rid in scenario.get("placed", {}))
+        if rid in scenario.get("placed", {}):
+            src = placed(src, scenario["placed"][rid])
+        library.append(src)
+    return scenario, library
+
+
+def scenario_unlocked(catalog, library):
+    """The golden Songs the reference unlocks with `library`, and those it leaves locked."""
+    songs = {p.stem for p in (ROOT / "fixtures/golden/songs").glob("*.json")}
+    unlocked = {sid for sid in songs if melody_fit(catalog[sid], library).unlocked}
+    return unlocked, songs - unlocked
+
+
+def render_set_problems(out, unlocked, locked):
+    """What is wrong with the set of renders in `out`, against the unlocked Songs."""
     jsons = {p.stem for p in out.glob("*.json")}
     wavs = {p.stem for p in out.glob("*.wav")}
     problems = []
     for stem in sorted(unlocked - jsons):
-        problems.append(f"{stem}: no render, but golden unlocks it")
+        problems.append(f"{stem}: no render, but it unlocks")
     for stem in sorted((jsons | wavs) - unlocked):
-        why = "golden locks it" if stem in locked else "not a golden Arrangement"
+        why = "it is locked" if stem in locked else "not a golden Arrangement"
         problems.append(f"{stem}: rendered, but {why}")
     for stem in sorted((jsons ^ wavs) & unlocked):
         problems.append(f"{stem}: {'.wav' if stem in jsons else '.json'} missing")
@@ -88,19 +133,27 @@ def against_reference(library, melody, audio):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("dir", nargs="?", type=Path, default=Path(__file__).resolve().parent / "out/web")
+    parser.add_argument("dir", nargs="?", type=Path)
     parser.add_argument("--against-reference", action="store_true",
                         help="also render each Song with the reference and print the largest sample difference")
+    parser.add_argument("--scenario", type=Path,
+                        help="the renders are of this Scenario's library (scenarios/<id>.json), not the full one")
     args = parser.parse_args()
-    out = args.dir
     catalog = {c["id"]: m for c, m in load_catalog()}
-    library = load_library()
-    renders, set_problems = render_set_problems(out)
+    if args.scenario:
+        scenario, library = load_scenario(args.scenario)
+        out = args.dir or HERE / f"out/web-{scenario['id']}"
+        unlocked, locked = scenario_unlocked(catalog, library)
+    else:
+        scenario, library = None, load_library()
+        out = args.dir or HERE / "out/web"
+        unlocked, locked = golden_unlocked()
+    renders, set_problems = render_set_problems(out, unlocked, locked)
     for problem in set_problems:
         print(f"FAIL: {problem}")
     if set_problems:
-        print(f"the renders in {out} are not exactly the golden unlocked Arrangements;"
-              " rerun apps/web's scripts/render-songs.ts")
+        expected = f"the Songs {scenario['id']} unlocks" if scenario else "the golden unlocked Arrangements"
+        print(f"the renders in {out} are not exactly {expected}; rerun apps/web's scripts/render-songs.ts")
     failures = []
     for stem in renders:
         path = out / f"{stem}.json"
@@ -116,6 +169,16 @@ def main():
             f" recs={r['distinct_recordings']} octaveMoves={events['octave_moves']}"
             f" sounding={r['sounding_pct']}% mostlySilent={r['notes_mostly_silent']}"
         )
+        if scenario:
+            if args.against_reference:
+                print(f"{'':12s} against the reference render: {against_reference(library, melody, audio)}")
+            plays = [n["source_id"] for n in events["notes"]]
+            print(f"{'':12s} plays " + ", ".join(f"{rid} on {plays.count(rid)}" for rid in sorted(set(plays))))
+            problems = bar_problems(r)
+            print(f"{'':12s} {'FAIL: ' + '; '.join(problems) if problems else 'PASS'}")
+            if problems:
+                failures.append(song)
+            continue
         golden = json.loads((GOLDEN / f"{song}.json").read_text())
         g = golden["metrics"]
         print(
@@ -152,7 +215,7 @@ def main():
     print(f"{len(renders) - len(failures)} of {len(renders)} renders pass" + (f"; failing: {' '.join(failures)}" if failures else ""))
     if set_problems:
         print(f"FAIL: {len(set_problems)} problem(s) with the set of renders (above)")
-    under = small_library_under_bar()
+    under = [] if scenario else small_library_under_bar()
     if under:
         print(f"note: on the small library, golden reads unlocked Songs under {BAR['within_50c_of_fart_pct']}%"
               f" within +-50 cents of their farts: {', '.join(under)} (fixtures/golden/README.md)")

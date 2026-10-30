@@ -305,6 +305,36 @@ def placed(src, midi):
     return replace(src, ref_midi=float(midi), min_note_s=PLACED_MIN_NOTE_S, settle_s=0.0)
 
 
+def trim_bounds(y, start_s, end_s):
+    """The Trim a person's handles keep (ADR 0019): the fart note_segment() finds between them,
+    as (start, end) in seconds of the decoded take `y`. The handles are cut at whole samples
+    (round(seconds x SR)); the start then moves to just before the level first gets within 12 dB
+    of the kept part's peak and the end to where it fades out, as ADR 0016 finds a Recording's
+    fart. So a Trim always lies within its handles, and its onset lands on the beat as an
+    untrimmed fart's does. The web's `trimBounds()` finds the same."""
+    a = max(0, min(len(y), round(start_s * SR)))
+    b = max(a, min(len(y), round(end_s * SR)))
+    if b - a < 2:
+        raise ValueError("a Trim keeps at least two samples")
+    start, end, _, _ = note_segment(y[a:b])
+    return (a + start) / SR, (a + end) / SR
+
+
+def trimmed(src, y, start_s, end_s, placed_by_ear=False):
+    """A Noise-like Recording with a Trim (ADR 0019): the same Recording, playing only
+    y[round(start_s x SR):round(end_s x SR)] of its decoded take `y`. Songs cut it there, and
+    melody_fit() counts that length; nothing re-reads its pitch, so placed() puts it on the note
+    it was placed on. `start_s` and `end_s` are a stored Trim, already found by trim_bounds().
+    A Recording placed by ear keeps its Trim when a later analysis finds a Recording Pitch, as it
+    keeps its Placed Pitch (ADR 0017), so `placed_by_ear` lets a Melodic one be trimmed. The
+    web's `trimOf()` gives the same."""
+    if src.pitched and not placed_by_ear:
+        raise ValueError(f"{src.id} is Melodic and not placed: only a Noise-like or placed Recording is trimmed")
+    a = max(0, min(len(y), round(start_s * SR)))
+    b = max(a, min(len(y), round(end_s * SR)))
+    return replace(src, audio=y[a:b].astype(np.float64), start=a, end=b, pitch_end=b)
+
+
 def too_short_cost(note_seconds, recording_seconds, shortest_note_s):
     """Cost of the notes a Recording plays too briefly to settle on its pitch.
 

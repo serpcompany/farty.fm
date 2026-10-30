@@ -3,7 +3,7 @@ import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ANALYSIS_VERSION } from './analysis/version'
 import { itemKey } from './outbox'
-import { type Analysis, needsReanalysis, type Recording, songPitch } from './recordings'
+import { type Analysis, needsReanalysis, type Recording, songPitch, trimOf } from './recordings'
 import { memoryStorage } from './test-storage'
 import { encodeWav, type PcmAudio } from './wav'
 
@@ -214,12 +214,9 @@ describe('rescan (#282)', () => {
     const melodic = await storedWith(1, fresh(0.12))
     const found = await storedWith(2, noNote)
     const still = await storedWith(3, noNote)
-    const placed = (await page.store.placeRecording(
-      (
-        await storedWith(4, noNote)
-      ).id,
-      48
-    )) as Recording
+    const placed = (await page.store.placeRecording((await storedWith(4, noNote)).id, {
+      placedPitch: 48
+    })) as Recording
     const analyzing = await page.store.saveRecording(
       { seconds: 0.01, sampleRate: 48_000, waveform: [0.5] },
       encodeWav(audio(5))
@@ -283,7 +280,7 @@ describe('rescan (#282)', () => {
     const first = await storedWith(1, noNote)
     const placedMeanwhile = await storedWith(2, noNote)
     const analyze = vi.fn(async () => {
-      await page.store.placeRecording(placedMeanwhile.id, 48)
+      await page.store.placeRecording(placedMeanwhile.id, { placedPitch: 48 })
       return stillNoNote
     })
 
@@ -345,7 +342,7 @@ describe('rescan (#282)', () => {
   it('skips one placed by ear while its own analysis runs, and keeps the Placed Pitch', async () => {
     const recording = await storedWith(1, noNote)
     const analyze = vi.fn(async () => {
-      await page.store.placeRecording(recording.id, 48)
+      await page.store.placeRecording(recording.id, { placedPitch: 48 })
       return fresh(0.12)
     })
     const updated = vi.fn()
@@ -424,12 +421,9 @@ describe('rescan (#282)', () => {
 
   it('keeps a Placed Pitch when a new analysis finds a Recording Pitch (ADR 0017)', async () => {
     const older = { ...noNote, version: ANALYSIS_VERSION - 1 }
-    const placed = (await page.store.placeRecording(
-      (
-        await storedWith(1, older)
-      ).id,
-      48
-    )) as Recording
+    const placed = (await page.store.placeRecording((await storedWith(1, older)).id, {
+      placedPitch: 48
+    })) as Recording
     expect(songPitch(placed)).toBe(48)
     const updated = vi.fn()
 
@@ -440,5 +434,45 @@ describe('rescan (#282)', () => {
     expect(now.analysis).toEqual({ state: 'analyzed', analysis: fresh(0.12) })
     expect(songPitch(now)).toBe(48)
     expect(updated).toHaveBeenCalledExactlyOnceWith(now)
+  })
+
+  it('keeps a Trim through a Re-scan, and uses it no more once the fart is Melodic (ADR 0019)', async () => {
+    const trim = { startSeconds: 0.002, endSeconds: 0.008 }
+    const trimmed = (await page.store.placeRecording((await storedWith(1, noNote)).id, {
+      trim
+    })) as Recording
+    expect(page.upgrade.canRescan(trimmed)).toBe(true)
+
+    await page.upgrade.rescan([trimmed], async () => stillNoNote, vi.fn())
+    const still = (await storedNow(trimmed.id)) as Recording
+    expect(still.trim).toEqual(trim)
+    expect(trimOf(still)).toEqual(trim)
+
+    // An older analysis again, and this time the Re-scan finds a note.
+    const older = (await page.store.saveAnalysis(trimmed.id, {
+      state: 'analyzed',
+      analysis: noNote
+    })) as Recording
+    const result = await page.upgrade.rescan([older], async () => fresh(0.12), vi.fn())
+    expect(result).toEqual({ scanned: 1, found: 1, failed: 0 })
+    const found = (await storedNow(trimmed.id)) as Recording
+    expect(found.trim).toEqual(trim)
+    expect(trimOf(found)).toBeNull()
+  })
+
+  it('keeps a placed Recording’s Trim in use when a new analysis finds a Recording Pitch', async () => {
+    const older = { ...noNote, version: ANALYSIS_VERSION - 1 }
+    const trim = { startSeconds: 0.002, endSeconds: 0.008 }
+    const placed = (await page.store.placeRecording((await storedWith(1, older)).id, {
+      placedPitch: 48,
+      trim
+    })) as Recording
+
+    await page.upgrade.upgradeAnalyses([placed], async () => fresh(0.12), vi.fn())
+
+    const now = (await storedNow(placed.id)) as Recording
+    expect(now.analysis).toEqual({ state: 'analyzed', analysis: fresh(0.12) })
+    expect(songPitch(now)).toBe(48)
+    expect(trimOf(now)).toEqual(trim)
   })
 })

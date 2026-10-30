@@ -3,6 +3,7 @@
 // are tested in workerd (`library.workers.test.ts`).
 
 import type { Kind } from './outbox'
+import type { Trim } from './recordings'
 
 type Stored = { item: Record<string, unknown>; wav: ArrayBuffer | null; deletedAt: number | null }
 
@@ -48,11 +49,15 @@ export function fakeAccount(userId = 'user-a') {
     },
     /** What another browser did: places a Recording on a note, or takes it off. */
     place(id: string, placedPitch: number | null) {
+      state.placeAndTrim(id, { placedPitch })
+    },
+    /** What another browser did: places or trims a Recording, or takes either off (ADR 0019). */
+    placeAndTrim(id: string, change: { placedPitch?: number | null; trim?: Trim | null }) {
       const stored = items.recordings.get(id)
       if (stored) {
         items.recordings.set(id, {
           ...stored,
-          item: { ...stored.item, placedPitch },
+          item: { ...stored.item, ...change },
           updatedAt: tick()
         })
       }
@@ -130,11 +135,14 @@ export function fakeAccount(userId = 'user-a') {
     if (method === 'PATCH') {
       if (!stored) return error(404, 'not_found')
       if (stored.deletedAt) return error(410, 'deleted')
-      // A Toot's `{ title }` or a Recording's `{ placedPitch }`.
+      // A Toot's `{ title }` or a Recording's `{ placedPitch, trim }`, either left out.
+      const body = JSON.parse(String(init.body))
       const changed =
         kind === 'toots'
-          ? { title: JSON.parse(String(init.body)).title }
-          : { placedPitch: JSON.parse(String(init.body)).placedPitch }
+          ? { title: body.title }
+          : Object.fromEntries(
+              ['placedPitch', 'trim'].filter(key => key in body).map(key => [key, body[key]])
+            )
       items[kind].set(id, { ...stored, item: { ...stored.item, ...changed }, updatedAt: tick() })
       return Response.json({ id, ...changed })
     }

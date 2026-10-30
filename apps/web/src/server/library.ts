@@ -25,7 +25,7 @@ import type { Toot, TootArrangement } from '@/lib/toot'
 
 import {
   isItemId,
-  parsePlacedPitch,
+  parsePlacement,
   parseRecording,
   parseTitle,
   parseToot,
@@ -75,6 +75,10 @@ function toRecording(row: RecordingRow): LibraryRecording {
       ? { state: 'analyzed', analysis: row.analysis }
       : { state: 'notAnalyzed' },
     placedPitch: row.placedPitch,
+    trim:
+      row.trimStartSeconds === null || row.trimEndSeconds === null
+        ? null
+        : { startSeconds: row.trimStartSeconds, endSeconds: row.trimEndSeconds },
     audioBytes: row.audioBytes
   }
 }
@@ -280,9 +284,10 @@ export async function patchToot(
 }
 
 /**
- * `PATCH /api/recordings/{id}/` with `{ placedPitch }`: places a Noise-like Recording on a note by
- * ear, or takes it off with null (ADR 0015). The last to arrive wins. The analysis stays the
- * upload's: each browser re-analyzes its own.
+ * `PATCH /api/recordings/{id}/` with `{ placedPitch, trim }`: places a Noise-like Recording on a
+ * note by ear (ADR 0015) and trims it (ADR 0019), or takes either off with null. Either may be left
+ * out, and stays as it is. The last to arrive wins. The analysis stays the upload's: each browser
+ * re-analyzes its own.
  */
 export async function patchRecording(
   { db }: Stores,
@@ -295,12 +300,12 @@ export async function patchRecording(
   if (wrong) return wrong
   const body = await readJson(request)
   if (body instanceof Response) return body
-  const placedPitch = parsePlacedPitch((body.json as { placedPitch?: unknown } | null)?.placedPitch)
-  if (placedPitch === undefined) return apiError(400, 'invalid_request')
-  const before = await placeRecording(db, user.id, id, placedPitch)
+  const placement = parsePlacement(body.json)
+  if (placement === null) return apiError(400, 'invalid_request')
+  const before = await placeRecording(db, user.id, id, placement)
   if (before === null) return notFound()
   if (before === 'deleted') return gone()
-  return Response.json({ id, placedPitch })
+  return Response.json({ id, ...placement })
 }
 
 /**

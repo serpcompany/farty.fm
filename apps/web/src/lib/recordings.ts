@@ -57,6 +57,55 @@ export type Recording = {
    * it plays raw.
    */
   placedPitch?: number | null
+  /**
+   * The Trim: the part of the take the user kept with the picker's handles, while it was
+   * Noise-like (ADR 0019). Null or absent when it plays the fart analysis found, the default. The
+   * saved take never changes. Kept apart from `analysis`, so re-analysis never loses it, and used
+   * only while `trimOf` says so.
+   */
+  trim?: Trim | null
+}
+
+/**
+ * Part of a take, in seconds of the whole file, at the 44.1 kHz samples analysis reads: the start
+ * and the end (exclusive). A Trim's bounds come from `trimBounds`.
+ */
+export type Trim = { startSeconds: number; endSeconds: number }
+
+/**
+ * The Trim, while the Recording is analyzed as Noise-like or placed on a note; otherwise null.
+ * The row, the picker and Songs then play only that part (ADR 0019). A Recording that re-analysis
+ * finds Melodic, and isn't placed, plays the fart analysis found, as before.
+ */
+export function trimOf(recording: Recording): Trim | null {
+  const trim = recording.trim
+  if (!trim || recording.analysis.state !== 'analyzed') return null
+  return isNoiseLike(recording) || placedPitch(recording) !== null ? trim : null
+}
+
+/** The part of the take the Recordings tab plays and draws: the Trim, or else the whole take. */
+export function playedPart(recording: Recording): Trim {
+  return trimOf(recording) ?? { startSeconds: 0, endSeconds: recording.seconds }
+}
+
+/** The fart Recording Analysis found in the take, or null before it's analyzed. */
+export function foundPart(recording: Recording): Trim | null {
+  if (recording.analysis.state !== 'analyzed') return null
+  const { gestureStartSeconds, gestureEndSeconds } = recording.analysis.analysis
+  return { startSeconds: gestureStartSeconds, endSeconds: gestureEndSeconds }
+}
+
+/** The fart Songs and the picker play: the Trim, or else the fart analysis found. */
+export function fartPart(recording: Recording): Trim | null {
+  return trimOf(recording) ?? foundPart(recording)
+}
+
+/** Whether two parts of a take are the same, to 5 ms: what a Trim's Reset and Save compare. */
+export function samePart(a: Trim, b: Trim): boolean {
+  return (
+    Math.abs(a.startSeconds - b.startSeconds) < 0.005 &&
+    Math.abs(a.endSeconds - b.endSeconds) < 0.005
+  )
 }
 
 /** The notes a Noise-like Recording can be placed on: C2 to B4 (ADR 0015). */

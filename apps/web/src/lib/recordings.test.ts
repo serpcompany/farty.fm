@@ -6,6 +6,7 @@ import {
   type Analysis,
   type AnalysisState,
   atFullLevel,
+  fartPart,
   HIGHEST_PLACED_PITCH,
   heardSomething,
   isNoiseLike,
@@ -17,7 +18,8 @@ import {
   type Recording,
   recordingPitch,
   songPitch,
-  TakeLevels
+  TakeLevels,
+  trimOf
 } from './recordings'
 
 /**
@@ -347,6 +349,25 @@ describe('a Placed Pitch (ADR 0015)', () => {
     expect(songPitch(found(48))).toBe(48)
     // Taken off, the Recording Pitch plays.
     expect(songPitch(found(null))).toBe(55.3)
+  })
+
+  it('keeps its Trim in use with it, and a Trim alone stops counting once Melodic (ADR 0019)', () => {
+    const trim = { startSeconds: 0.3, endSeconds: 0.9 }
+    const found = (placed: number | null): Recording => ({
+      ...noiseLike(placed),
+      trim,
+      analysis: {
+        state: 'analyzed',
+        analysis: { ...analysis, recordingPitchMidi: 55.3, shortestNoteSeconds: 0.12 }
+      }
+    })
+    expect(trimOf({ ...noiseLike(), trim })).toEqual(trim)
+    expect(trimOf(found(48))).toEqual(trim)
+    expect(fartPart(found(48))).toEqual(trim)
+    // Not placed, it plays the fart analysis found, and keeps the Trim for nothing.
+    expect(trimOf(found(null))).toBeNull()
+    expect(fartPart(found(null))).toEqual({ startSeconds: 0.01, endSeconds: 1.2 })
+    expect(found(null).trim).toEqual(trim)
   })
 
   it('counts for nothing while the Recording is not analyzed', () => {
