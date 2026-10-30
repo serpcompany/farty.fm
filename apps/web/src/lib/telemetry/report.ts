@@ -29,6 +29,10 @@ export const ERROR_CODES = [
   /** Song Creator's "Couldn't make this Toot". */
   'toot-make-failed',
   'toot-save-failed',
+  /** Reading or keeping which Recording each of the Sound Pad's Pads plays failed (#277). */
+  'pad-mapping-failed',
+  /** Loading or decoding a Pad's Recording failed, so the Pad can't play it (#277). */
+  'pad-sound-failed',
   /**
    * A read or write of the library failed on a lost IndexedDB connection, and again on a fresh
    * one (`withDb`, #222).
