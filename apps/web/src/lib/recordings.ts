@@ -148,8 +148,9 @@ const minimumContrastDb = 4
 
 /**
  * Whether a take holds a sound worth reviewing, judged from the raw audio, before `atFullLevel`:
- * its loudest 50 ms level against an absolute floor and against the take's own room. Silence and
- * steady room noise fail, at any level. The iPhone app and `tools/melody-lab/` have no such gate:
+ * its loudest 50 ms level against an absolute floor and against the take's own room. Silence,
+ * white noise and room noise fail at any level. A low rumble passes down to the -70 dBFS floor: a
+ * known false accept, which analysis finds no steady note in. The iPhone app and `tools/melody-lab/` have no such gate:
  * the iPhone app rejects takes shorter than 0.5 s, and the reference never rejects. A take shorter
  * than one 50 ms window fails.
  */
@@ -190,7 +191,8 @@ const fullLevelPeak = 0.89
 /**
  * A heard take turned up with one gain, so its loudest sample reaches `fullLevelPeak`. Review and
  * the Recordings tab play the file as it is, so a raw take peaking at -40 dBFS would replay 39 dB
- * quieter than a Song (#279). Only gain (ADR 0004): never turned down, and silence stays silence.
+ * quieter than a Song (#279). Only gain (ADR 0004), in float before the 16-bit save (ADR 0007):
+ * never turned down, and silence stays silence.
  * Recording Analysis gives the same results on the Fixture Library either way, and a Song sets
  * each note's level itself.
  */

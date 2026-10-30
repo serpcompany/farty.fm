@@ -79,8 +79,9 @@ test.describe('with microphone permission granted', () => {
     expect(onReview.sessions).toEqual(['play-and-record'])
     await page.getByRole('button', { name: 'Discard' }).click()
 
-    // Back on Record, the same microphone takes the next one.
-    await fartAndRecord(page)
+    // Back on Record, the same microphone takes the next one. 0.3 dB up, 090 peaks above the
+    // level `atFullLevel` turns a take up to (#279), so the take is saved at the fart's own level.
+    await fartAndRecord(page, '090', { gainDb: 0.3 })
     await page.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByTestId('result-note')).toHaveText('G3')
 
@@ -98,15 +99,16 @@ test.describe('with microphone permission granted', () => {
 
     // The saved take holds the whole fart, from before the click that started it.
     const take = await savedTake(page)
-    // The take is saved at full level (#279), so its energy is weighed at the fart's own level.
+    const energy = take.samples.reduce((sum, v) => sum + v * v, 0)
     const peak = take.samples.reduce((max, v) => Math.max(max, Math.abs(v)), 0)
-    const energy = take.samples.reduce((sum, v) => sum + v * v, 0) * (mic.fartPeak / peak) ** 2
     const onset = take.samples.findIndex(v => Math.abs(v) > 0.01) / take.sampleRate
     console.log(
-      `saved take: ${(take.samples.length / take.sampleRate).toFixed(2)} s, fart starts at ${onset.toFixed(3)} s, ${((100 * energy) / mic.fartEnergy).toFixed(1)}% of its energy kept`
+      `saved take: ${(take.samples.length / take.sampleRate).toFixed(2)} s, fart starts at ${onset.toFixed(3)} s, ${((100 * energy) / mic.fartEnergy).toFixed(1)}% of its energy kept, peak ${peak.toFixed(4)} (fart ${mic.fartPeak.toFixed(4)})`
     )
     // The take starts about 150 ms before the fart: the 300 ms pre-roll, less the press.
     expect(onset).toBeGreaterThan(0.05)
+    // Saved at the fart's own peak, so no gain was applied and the energy is the fart's own.
+    expect(peak).toBeCloseTo(mic.fartPeak, 3)
     expect(energy / mic.fartEnergy).toBeGreaterThan(0.97)
   })
 
