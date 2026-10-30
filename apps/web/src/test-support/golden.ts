@@ -28,6 +28,9 @@ export interface GoldenRecording {
     end_sample: number
     start_s: number
     end_s: number
+    /** Format 7 (ADR 0016): where the first burst ends, which the pitch is read from. */
+    pitch_end_sample: number
+    pitch_end_s: number
     cut_at_reattack: boolean
   }
   pitch_contour: { frames: number; hop: number; midi: (number | null)[] }
@@ -66,10 +69,19 @@ export async function analysisAudio(golden: GoldenRecording): Promise<Float32Arr
   return resampleToAnalysisRate(file.samples, file.sampleRate)
 }
 
-/** The golden gesture of a fixture, cut from this package's own decode of the file. */
+/**
+ * The golden gesture of a fixture, the whole fart as Songs play it, cut from this package's own
+ * decode of the file.
+ */
 export async function gestureBody(golden: GoldenRecording): Promise<Float64Array> {
   const y = await analysisAudio(golden)
   return Float64Array.from(y.subarray(golden.gesture.start_sample, golden.gesture.end_sample))
+}
+
+/** The golden first burst of a fixture, which its pitch is read from (ADR 0016). */
+export async function pitchBody(golden: GoldenRecording): Promise<Float64Array> {
+  const y = await analysisAudio(golden)
+  return Float64Array.from(y.subarray(golden.gesture.start_sample, golden.gesture.pitch_end_sample))
 }
 
 /**

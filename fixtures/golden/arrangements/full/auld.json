@@ -1,14 +1,431 @@
 {
   "library": "full",
-  "max_abs_shift_semitones": null,
-  "metrics": null,
-  "missing": [
+  "max_abs_shift_semitones": 10.13,
+  "metrics": {
+    "contour_pct": 64,
+    "distinct_recordings": 7,
+    "median_abs_cents": 137.4,
+    "notes": 29,
+    "notes_mostly_silent": 0,
+    "notes_with_retrigger": 0,
+    "notes_with_second_burst": 5,
+    "on_pitch_pct": 16,
+    "onsets_on_time_pct": 100,
+    "pitch_readable_pct": 100,
+    "sounding_pct": 96,
+    "within_50c_any_octave_pct": 10,
+    "within_50c_of_fart_pct": 100,
+    "within_50c_pct": 10
+  },
+  "missing": [],
+  "notes": [
     {
-      "seconds": 1.8,
+      "fart_cents": 0,
+      "heard_cents": -152,
+      "index": 0,
+      "recording": "002",
+      "render": {
+        "gain_db": 2.0,
+        "len_s": 0.875,
+        "start_s": 0.6
+      },
+      "shift_semitones": -0.43,
+      "song_pitch": 65,
+      "target_midi": 46
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 93,
+      "index": 1,
+      "recording": "002",
+      "render": {
+        "gain_db": 0.5,
+        "len_s": 0.275,
+        "start_s": 1.5
+      },
+      "shift_semitones": -0.43,
+      "song_pitch": 65,
+      "target_midi": 46
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -17,
+      "index": 2,
+      "recording": "002",
+      "render": {
+        "gain_db": 0.5,
+        "len_s": 0.575,
+        "start_s": 1.8
+      },
+      "shift_semitones": -0.43,
+      "song_pitch": 65,
+      "target_midi": 46
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 68,
+      "index": 3,
+      "recording": "032",
+      "render": {
+        "gain_db": 4.5,
+        "len_s": 0.575,
+        "start_s": 2.4
+      },
+      "shift_semitones": -0.83,
+      "song_pitch": 69,
+      "target_midi": 50
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 983,
+      "index": 4,
+      "recording": "091",
+      "render": {
+        "gain_db": -5.7,
+        "len_s": 0.875,
+        "start_s": 3.0
+      },
+      "shift_semitones": -10.13,
+      "song_pitch": 67,
+      "target_midi": 48
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 93,
+      "index": 5,
+      "recording": "002",
+      "render": {
+        "gain_db": 0.5,
+        "len_s": 0.275,
+        "start_s": 3.9
+      },
+      "shift_semitones": -0.43,
+      "song_pitch": 65,
+      "target_midi": 46
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 1023,
+      "index": 6,
+      "recording": "091",
+      "render": {
+        "gain_db": -7.2,
+        "len_s": 0.575,
+        "start_s": 4.2
+      },
+      "shift_semitones": -10.13,
+      "song_pitch": 67,
+      "target_midi": 48
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -137,
+      "index": 7,
+      "recording": "032",
+      "render": {
+        "gain_db": 4.6,
+        "len_s": 0.275,
+        "start_s": 4.8
+      },
+      "shift_semitones": -0.83,
+      "song_pitch": 69,
+      "target_midi": 50
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 1013,
+      "index": 8,
+      "recording": "091",
+      "render": {
+        "gain_db": -7.2,
+        "len_s": 0.275,
+        "start_s": 5.1
+      },
+      "shift_semitones": -10.13,
+      "song_pitch": 67,
+      "target_midi": 48
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -152,
+      "index": 9,
+      "recording": "002",
+      "render": {
+        "gain_db": 2.0,
+        "len_s": 0.875,
+        "start_s": 5.4
+      },
+      "shift_semitones": -0.43,
+      "song_pitch": 65,
+      "target_midi": 46
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 93,
+      "index": 10,
+      "recording": "002",
+      "render": {
+        "gain_db": 0.5,
+        "len_s": 0.275,
+        "start_s": 6.3
+      },
+      "shift_semitones": -0.43,
+      "song_pitch": 65,
+      "target_midi": 46
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 63,
+      "index": 11,
+      "recording": "032",
+      "render": {
+        "gain_db": 4.5,
+        "len_s": 0.575,
+        "start_s": 6.6
+      },
+      "shift_semitones": -0.83,
+      "song_pitch": 69,
+      "target_midi": 50
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 283,
+      "index": 12,
+      "recording": "013",
+      "render": {
+        "gain_db": -7.8,
+        "len_s": 0.575,
+        "start_s": 7.2
+      },
+      "shift_semitones": -2.83,
+      "song_pitch": 72,
+      "target_midi": 53
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -2127,
+      "index": 13,
+      "recording": "084",
+      "render": {
+        "gain_db": 1.1,
+        "len_s": 1.775,
+        "start_s": 7.8
+      },
+      "shift_semitones": -1.03,
+      "song_pitch": 74,
       "target_midi": 55
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 103,
+      "index": 14,
+      "recording": "084",
+      "render": {
+        "gain_db": -0.4,
+        "len_s": 0.575,
+        "start_s": 9.6
+      },
+      "shift_semitones": -1.03,
+      "song_pitch": 74,
+      "target_midi": 55
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 353,
+      "index": 15,
+      "recording": "013",
+      "render": {
+        "gain_db": -6.3,
+        "len_s": 0.875,
+        "start_s": 10.2
+      },
+      "shift_semitones": -2.83,
+      "song_pitch": 72,
+      "target_midi": 53
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 103,
+      "index": 16,
+      "recording": "032",
+      "render": {
+        "gain_db": 4.6,
+        "len_s": 0.275,
+        "start_s": 11.1
+      },
+      "shift_semitones": -0.83,
+      "song_pitch": 69,
+      "target_midi": 50
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 63,
+      "index": 17,
+      "recording": "032",
+      "render": {
+        "gain_db": 4.5,
+        "len_s": 0.575,
+        "start_s": 11.4
+      },
+      "shift_semitones": -0.83,
+      "song_pitch": 69,
+      "target_midi": 50
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -12,
+      "index": 18,
+      "recording": "002",
+      "render": {
+        "gain_db": 0.5,
+        "len_s": 0.575,
+        "start_s": 12.0
+      },
+      "shift_semitones": -0.43,
+      "song_pitch": 65,
+      "target_midi": 46
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 983,
+      "index": 19,
+      "recording": "091",
+      "render": {
+        "gain_db": -5.7,
+        "len_s": 0.875,
+        "start_s": 12.6
+      },
+      "shift_semitones": -10.13,
+      "song_pitch": 67,
+      "target_midi": 48
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 93,
+      "index": 20,
+      "recording": "002",
+      "render": {
+        "gain_db": 0.5,
+        "len_s": 0.275,
+        "start_s": 13.5
+      },
+      "shift_semitones": -0.43,
+      "song_pitch": 65,
+      "target_midi": 46
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 1023,
+      "index": 21,
+      "recording": "091",
+      "render": {
+        "gain_db": -7.2,
+        "len_s": 0.575,
+        "start_s": 13.8
+      },
+      "shift_semitones": -10.13,
+      "song_pitch": 67,
+      "target_midi": 48
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -132,
+      "index": 22,
+      "recording": "032",
+      "render": {
+        "gain_db": 4.6,
+        "len_s": 0.275,
+        "start_s": 14.4
+      },
+      "shift_semitones": -0.83,
+      "song_pitch": 69,
+      "target_midi": 50
+    },
+    {
+      "fart_cents": -1,
+      "heard_cents": 1023,
+      "index": 23,
+      "recording": "091",
+      "render": {
+        "gain_db": -7.2,
+        "len_s": 0.275,
+        "start_s": 14.7
+      },
+      "shift_semitones": -10.13,
+      "song_pitch": 67,
+      "target_midi": 48
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -147,
+      "index": 24,
+      "recording": "002",
+      "render": {
+        "gain_db": 2.0,
+        "len_s": 0.875,
+        "start_s": 15.0
+      },
+      "shift_semitones": -0.43,
+      "song_pitch": 65,
+      "target_midi": 46
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -217,
+      "index": 25,
+      "recording": "095",
+      "render": {
+        "gain_db": -0.4,
+        "len_s": 0.275,
+        "start_s": 15.9
+      },
+      "shift_semitones": 2.27,
+      "song_pitch": 62,
+      "target_midi": 43
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -297,
+      "index": 26,
+      "recording": "095",
+      "render": {
+        "gain_db": -0.4,
+        "len_s": 0.575,
+        "start_s": 16.2
+      },
+      "shift_semitones": 2.27,
+      "song_pitch": 62,
+      "target_midi": 43
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -57,
+      "index": 27,
+      "recording": "022",
+      "render": {
+        "gain_db": 8.1,
+        "len_s": 0.575,
+        "start_s": 16.8
+      },
+      "shift_semitones": 0.67,
+      "song_pitch": 60,
+      "target_midi": 41
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": 43,
+      "index": 28,
+      "recording": "002",
+      "render": {
+        "gain_db": 2.0,
+        "len_s": 1.775,
+        "start_s": 17.4
+      },
+      "shift_semitones": -0.43,
+      "song_pitch": 65,
+      "target_midi": 46
     }
   ],
-  "notes": null,
   "octave_moves": 1,
   "per_pitch": [
     {
@@ -33,16 +450,16 @@
       "target_midi": 46
     },
     {
-      "octave_move": false,
-      "recording": "032",
-      "shift_semitones": -2.8259205936601717,
+      "octave_move": true,
+      "recording": "091",
+      "shift_semitones": -10.125920593660162,
       "song_pitch": 67,
       "target_midi": 48
     },
     {
-      "octave_move": true,
-      "recording": "017",
-      "shift_semitones": 11.274079406339823,
+      "octave_move": false,
+      "recording": "032",
+      "shift_semitones": -0.8259205936601717,
       "song_pitch": 69,
       "target_midi": 50
     },
@@ -54,20 +471,22 @@
       "target_midi": 53
     },
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "octave_move": false,
+      "recording": "084",
+      "shift_semitones": -1.0259205936601745,
       "song_pitch": 74,
       "target_midi": 55
     }
   ],
   "pitch_coverage": {
-    "covered": 6,
+    "covered": 7,
     "total": 7
   },
-  "plan_cost": 156.22001442869418,
-  "render_settings": null,
+  "plan_cost": 147.90167224975065,
+  "render_settings": {
+    "bpm": 100
+  },
   "song": "auld",
   "transpose": -19,
-  "unlocked": false
+  "unlocked": true
 }

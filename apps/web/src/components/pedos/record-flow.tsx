@@ -6,8 +6,7 @@ import {
   CircleHelp,
   CirclePlay,
   CircleStop,
-  LockOpen,
-  Scissors
+  LockOpen
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useState } from 'react'
@@ -23,13 +22,7 @@ import {
   coverageSummary,
   type SongRow
 } from '@/lib/pitch-coverage'
-import {
-  firstFartUsed,
-  formattedLength,
-  type Recording,
-  recordingName,
-  recordingPitch
-} from '@/lib/recordings'
+import { formattedLength, type Recording, recordingName, recordingPitch } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { type Draft, usePedos } from './pedos-provider'
@@ -353,15 +346,6 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
             <p className="text-muted-foreground">
               It's saved. On the Recordings tab you can place it on a note by ear.
             </p>
-          </div>
-        )}
-        {firstFartUsed(recording) && (
-          <div className="space-y-1">
-            <p className="flex items-center justify-center gap-2 font-semibold">
-              <Scissors className="size-4" aria-hidden />
-              We kept the first fart
-            </p>
-            <p className="text-sm text-muted-foreground">We heard more than one.</p>
           </div>
         )}
         <Progress changes={changes} hasMelodicRecordings={pedos.melodicRecordings.length > 0} />

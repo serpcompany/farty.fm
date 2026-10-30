@@ -8,8 +8,10 @@
   },
   "gesture": {
     "cut_at_reattack": true,
-    "end_s": 0.843084,
-    "end_sample": 37180,
+    "end_s": 2.080272,
+    "end_sample": 91740,
+    "pitch_end_s": 0.843084,
+    "pitch_end_sample": 37180,
     "start_s": 0.590658,
     "start_sample": 26048
   },
@@ -71,7 +73,7 @@
   "pitch_estimate_midi": null,
   "recording_pitch_midi": null,
   "recording_pitch_note": null,
-  "rms_db": -33.6876,
+  "rms_db": -16.4182,
   "settle_s": null,
   "shortest_note_s": null
 }

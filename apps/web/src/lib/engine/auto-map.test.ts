@@ -182,13 +182,12 @@ describe('Auto-map matches the golden Arrangements', () => {
     }
   }
 
-  it('unlocks 9 of the 13 Songs on the full library and none on the small one', () => {
+  it('unlocks all 13 Songs on the full library and none on the small one', () => {
     const unlocked = (library: Library) =>
       songIds.filter(id => arrange(goldenSong(id), inputs(libraries[library])).unlocked)
-    // Played raw, each of these four has a note longer than any fixture near its pitch (ADR 0012),
-    // and the small library's six are short.
-    const locked = ['jingle', 'row', 'amazing', 'auld']
-    expect(unlocked('full')).toEqual(songIds.filter(id => !locked.includes(id)))
+    // Every burst plays (ADR 0016), so the long notes jingle, row, amazing and auld need have
+    // farts long enough (ADR 0011). The small library's six are still too short.
+    expect(unlocked('full')).toEqual(songIds)
     expect(unlocked('small')).toEqual([])
   })
 })
@@ -517,20 +516,20 @@ describe('Placed Recordings (ADR 0015)', () => {
   })
 
   // The same Arrangements as `tools/melody-lab/test_placed.py`.
-  it('covers a note nothing else does: 080 on C2 unlocks 3 Songs the full library leaves locked', () => {
+  it('covers a note nothing else does: 080 on C2 unlocks 2 Songs the library leaves locked without 002', () => {
+    const without002 = libraries.full.filter(id => id !== '002')
     const placed = [
-      ...inputs(libraries.full.filter(id => id !== '080')),
+      ...inputs(without002.filter(id => id !== '080')),
       placedAutoMapRecording('080', noiseAnalysis('080'), C2)
     ]
     const expected = {
-      jingle: { covered: 5, total: 5, octaveMoves: 1, cost: 1072.2936, plays: 64 },
-      row: { covered: 6, total: 6, octaveMoves: 0, cost: 602.4985, plays: 67 },
-      amazing: { covered: 5, total: 6, octaveMoves: 0, cost: 71.9576, plays: 62 },
-      auld: { covered: 7, total: 7, octaveMoves: 2, cost: 753.871, plays: 65 }
+      jingle: { covered: 5, total: 5, octaveMoves: 1, cost: 1172.7775, plays: 64 },
+      amazing: { covered: 5, total: 6, octaveMoves: 1, cost: 94.6438, plays: 62 },
+      auld: { covered: 7, total: 7, octaveMoves: 2, cost: 816.3033, plays: 65 }
     }
     for (const [id, e] of Object.entries(expected)) {
       const song = goldenSong(id)
-      expect(arrange(song, inputs(libraries.full)).unlocked, id).toBe(false)
+      expect(arrange(song, inputs(without002)).unlocked, id).toBe(false)
       const a = arrange(song, placed)
       expect({ covered: a.covered, total: a.total, octaveMoves: a.octaveMoves }, id).toEqual({
         covered: e.covered,

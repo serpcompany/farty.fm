@@ -9,7 +9,7 @@
     "soundfile": "0.14.0",
     "soxr": "1.1.0"
   },
-  "format_version": 6,
+  "format_version": 7,
   "generator": "tools/melody-lab/export_golden.py",
   "hop": 256,
   "libraries": {
@@ -123,7 +123,7 @@
       "notes": 28,
       "title": "Twinkle, Twinkle, Little Star",
       "transpose": {
-        "full": -20,
+        "full": -17,
         "small": -27
       },
       "unlocked": {
@@ -136,7 +136,7 @@
       "notes": 26,
       "title": "Mary Had a Little Lamb",
       "transpose": {
-        "full": -36,
+        "full": -20,
         "small": -32
       },
       "unlocked": {
@@ -149,11 +149,11 @@
       "notes": 26,
       "title": "Jingle Bells",
       "transpose": {
-        "full": -22,
+        "full": -19,
         "small": -20
       },
       "unlocked": {
-        "full": false,
+        "full": true,
         "small": false
       }
     },
@@ -162,7 +162,7 @@
       "notes": 32,
       "title": "Frère Jacques",
       "transpose": {
-        "full": -14,
+        "full": -3,
         "small": -11
       },
       "unlocked": {
@@ -175,7 +175,7 @@
       "notes": 31,
       "title": "When the Saints Go Marching In",
       "transpose": {
-        "full": -14,
+        "full": -11,
         "small": -21
       },
       "unlocked": {
@@ -188,11 +188,11 @@
       "notes": 27,
       "title": "Row, Row, Row Your Boat",
       "transpose": {
-        "full": -28,
+        "full": -20,
         "small": -28
       },
       "unlocked": {
-        "full": false,
+        "full": true,
         "small": false
       }
     },
@@ -201,7 +201,7 @@
       "notes": 30,
       "title": "Ode to Joy",
       "transpose": {
-        "full": -31,
+        "full": -14,
         "small": -27
       },
       "unlocked": {
@@ -214,11 +214,11 @@
       "notes": 16,
       "title": "Amazing Grace",
       "transpose": {
-        "full": -21,
+        "full": -26,
         "small": -22
       },
       "unlocked": {
-        "full": false,
+        "full": true,
         "small": false
       }
     },
@@ -227,7 +227,7 @@
       "notes": 32,
       "title": "Für Elise",
       "transpose": {
-        "full": -28,
+        "full": -17,
         "small": -30
       },
       "unlocked": {
@@ -244,7 +244,7 @@
         "small": -27
       },
       "unlocked": {
-        "full": false,
+        "full": true,
         "small": false
       }
     },
@@ -253,7 +253,7 @@
       "notes": 30,
       "title": "Ode to Joy (Mutopia SATB)",
       "transpose": {
-        "full": -31,
+        "full": -14,
         "small": -27
       },
       "unlocked": {
@@ -266,7 +266,7 @@
       "notes": 25,
       "title": "Happy Birthday",
       "transpose": {
-        "full": -14,
+        "full": -4,
         "small": -12
       },
       "unlocked": {
@@ -279,7 +279,7 @@
       "notes": 36,
       "title": "We Wish You a Merry Christmas",
       "transpose": {
-        "full": -23,
+        "full": -13,
         "small": -18
       },
       "unlocked": {

@@ -17,10 +17,6 @@ const questions = [
     a: 'Farty heard nothing louder than the room. Hold the phone closer, tap Record, and tap Stop after the fart.'
   },
   {
-    q: 'It says "We kept the first fart".',
-    a: 'Farty keeps the first fart in a Recording. Record one fart at a time.'
-  },
-  {
     q: 'Where are my Recordings? Can you recover them?',
     a: 'Without an account, they’re gone when you close Farty, except ones you made before October 28, 2026. We never receive them, so we can’t recover them. With a free account, they’re kept with your account, on any phone or tablet you sign in on.'
   }

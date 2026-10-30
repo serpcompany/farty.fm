@@ -1,7 +1,8 @@
 """Fart-only melody engine (proof).
 
 Every sample in the output is a Recording's own waveform, played raw (ADR 0012): at its own
-pitch and speed. The only operations are: trim to the detected sound, cut at the note's end,
+pitch and speed. The only operations are: trim the silence before and after the fart (every
+burst kept, ADR 0016), cut at the note's end,
 fade in/out, gain, and mixing. Nothing changes a fart's pitch or length: there is no
 resampling, oscillator, filter-resonator, looping, or granular re-triggering anywhere.
 Recording Analysis still reads each fart back with its pitch held (variable_resample()) to
@@ -34,17 +35,18 @@ FAR_FROM_CENTER = 6.0  # semitones: contour frames farther than this from the ge
 @dataclass
 class Source:
     id: str
-    cut_at_reattack: bool
-    audio: np.ndarray  # the single-attack note segment (onset-aligned), mono float
-    f0: np.ndarray  # per-hop smoothed f0 in Hz (nan = unvoiced) over `audio`
+    cut_at_reattack: bool  # the take holds a second burst, so the pitch is read from the first only
+    audio: np.ndarray  # the fart as Songs play it, every burst, silence trimmed (onset-aligned), mono float
+    f0: np.ndarray  # per-hop smoothed f0 in Hz (nan = unvoiced) over the first burst (`pitch_audio`)
     ref_midi: float | None  # the pitch a listener hears in the first part of the sound
     pitch_confidence: float  # 0..1
     rms_db: float
     min_note_s: float = 0.0  # shortest note this Recording reads back on-pitch
     settle_s: float = 0.0  # when its played pitch settles within 50 cents of ref_midi (settle_time())
-    start: int = 0  # gesture start, in samples of the decoded original file
-    end: int = 0  # gesture end (exclusive), in samples of the decoded original file
+    start: int = 0  # the fart's start, in samples of the decoded original file
+    end: int = 0  # the fart's end (exclusive), where it fades out, in samples of the decoded original file
     pitch_estimate: float | None = None  # ref_midi before audition() (kept when audition rejects it)
+    pitch_end: int = 0  # the first burst's end (exclusive), in samples of the decoded original file
 
     @property
     def pitched(self):
@@ -52,16 +54,27 @@ class Source:
 
     @property
     def seconds(self):
+        """The fart's own length, as Songs play it: the length rule and Auto-map's costs."""
         return len(self.audio) / SR
+
+    @property
+    def pitch_audio(self):
+        """The first burst, which Recording Analysis reads the pitch from (ADR 0016)."""
+        return self.audio[: max(0, self.pitch_end - self.start)]
 
 
 def note_segment(y):
-    """Find the single-attack part of a Recording that can act as one note.
+    """Find the fart in a Recording, and its first burst.
 
-    start: just before the level first gets within 12 dB of its peak, so slow swells don't
-           make the note sound late.
-    end:   the first clear re-attack (level dips >= 8 dB then rises >= 5 dB again), so one
-           note never contains a second audible 'brrt'; otherwise where the sound fades out.
+    start:     just before the level first gets within 12 dB of its peak, so slow swells don't
+               make the note sound late.
+    end:       where the sound fades out: after the last 50 ms level within 30 dB of the peak.
+               Songs play the fart from start to here, every burst included (ADR 0016).
+    pitch_end: the first clear re-attack (the level dips more than 6 dB below its running
+               maximum, then rises more than 4 dB, more than 60 ms in); otherwise `end`.
+               Recording Analysis reads the pitch from start to here only, so a second burst at
+               another pitch doesn't blur it (ADR 0016). Until ADR 0016 Songs stopped here too.
+    Returns (start, end, pitch_end, cut_at_reattack).
     """
     hop = int(0.005 * SR)
     fine = 20 * np.log10(librosa.feature.rms(y=y, frame_length=2 * hop, hop_length=hop)[0] + 1e-9)
@@ -83,8 +96,9 @@ def note_segment(y):
         if dip_i is not None and db[i] > db[dip_i] + 4 and (i - a0) * hop > 0.06 * SR:
             reattack_at = dip_i
             break
-    end = (reattack_at if reattack_at is not None else end_i) * hop + hop
-    return start, min(len(y), end), reattack_at is not None
+    end = min(len(y), end_i * hop + hop)
+    pitch_end = min(end, reattack_at * hop + hop) if reattack_at is not None else end
+    return start, end, pitch_end, reattack_at is not None
 
 
 def weighted_median(mids, w):
@@ -95,8 +109,9 @@ def weighted_median(mids, w):
 
 
 def analyze_recording(rid, y):
-    start, end, cut_at_reattack = note_segment(y)
-    body = y[start:end].astype(np.float64)
+    start, end, pitch_end, cut_at_reattack = note_segment(y)
+    fart = y[start:end].astype(np.float64)
+    body = fart[: pitch_end - start]  # the first burst: the pitch is read from it alone
 
     # Every frame pYIN calls voiced, attack included. A voiced-probability gate on top (0.05
     # until #208) dropped most attacks, so the renderer bent each note in from the attack's pitch.
@@ -131,14 +146,15 @@ def analyze_recording(rid, y):
     src = Source(
         id=rid,
         cut_at_reattack=cut_at_reattack,
-        audio=body,
+        audio=fart,
         f0=f0,
         ref_midi=ref_midi,
         pitch_confidence=round(conf, 2),
-        rms_db=float(20 * np.log10(np.sqrt(np.mean(body**2)) + 1e-9)),
+        rms_db=float(20 * np.log10(np.sqrt(np.mean(fart**2)) + 1e-9)),
         start=start,
         end=end,
         pitch_estimate=ref_midi,
+        pitch_end=pitch_end,
     )
     if src.pitched:
         src.min_note_s = audition(src)
@@ -153,15 +169,18 @@ def audition(src):
     """Read the Recording back with its pitch held on ref_midi (variable_resample()) for a few
     note lengths. Returns the shortest note length (s) that still reads within 40 cents, or
     None. Catches farts whose pitch only settles after the attack. Songs play farts raw since
-    ADR 0012; this read-back stayed as it was, so Melodic Recordings and Auto-map's picks did."""
+    ADR 0012; this read-back stayed as it was, so Melodic Recordings and Auto-map's picks did.
+    It reads the first burst only (pitch_audio), where the pitch was read (ADR 0016)."""
+    body = src.pitch_audio
+    seconds = len(body) / SR
     for length in (0.12, 0.2, 0.35, 0.6):
-        n = int(min(length, src.seconds) * SR)
-        seg = variable_resample(src.audio, src.f0, n, src.ref_midi)
+        n = int(min(length, seconds) * SR)
+        seg = variable_resample(body, src.f0, n, src.ref_midi)
         f0, voiced, _ = librosa.pyin(seg, fmin=45, fmax=900, sr=SR, frame_length=2048, hop_length=HOP)
         f = f0[voiced & np.isfinite(f0)]
         if len(f) >= 2 and abs(np.median(librosa.hz_to_midi(f)) - src.ref_midi) * 100 <= 40:
             return length
-        if length >= src.seconds:
+        if length >= seconds:
             break
     return None
 
@@ -171,26 +190,28 @@ SETTLE_RUN_FRAMES = 9  # 9 hops = 52 ms in a row on pitch
 
 
 def heard_cents(src):
-    """The whole gesture read back with its pitch held (as audition() does) by pYIN: cents
-    from ref_midi per hop, nan where unvoiced."""
-    seg = variable_resample(src.audio, src.f0, len(src.audio), src.ref_midi)
+    """The first burst (pitch_audio) read back with its pitch held (as audition() does) by
+    pYIN: cents from ref_midi per hop, nan where unvoiced."""
+    body = src.pitch_audio
+    seg = variable_resample(body, src.f0, len(body), src.ref_midi)
     f0, voiced, _ = librosa.pyin(seg, fmin=45, fmax=900, sr=SR, frame_length=2048, hop_length=HOP)
     ok = voiced & np.isfinite(f0)
     return np.where(ok, (librosa.hz_to_midi(np.where(ok, f0, 1.0)) - src.ref_midi) * 100, np.nan)
 
 
 def settle_time(src):
-    """Seconds from the gesture start until the Recording, played at its own pitch, is on pitch
+    """Seconds from the fart's start until the Recording, played at its own pitch, is on pitch
     and stays there: the first pYIN frame (centered at frame x 256 samples) that starts
-    SETTLE_RUN_FRAMES voiced frames in a row within SETTLE_CENTS of ref_midi. The Recording's
-    whole length if that never happens. Glides, scoops and slow starts that the pitch-held
-    read-back can't straighten show up here."""
+    SETTLE_RUN_FRAMES voiced frames in a row within SETTLE_CENTS of ref_midi, over the first
+    burst (heard_cents()). The first burst's whole length if that never happens. Glides, scoops
+    and slow starts that the pitch-held read-back can't straighten show up here."""
     heard = heard_cents(src)
+    seconds = len(src.pitch_audio) / SR
     on = np.abs(np.nan_to_num(heard, nan=np.inf)) <= SETTLE_CENTS
     for i in range(len(on) - SETTLE_RUN_FRAMES + 1):
         if on[i : i + SETTLE_RUN_FRAMES].all():
-            return min(src.seconds, i * HOP / SR)
-    return src.seconds
+            return min(seconds, i * HOP / SR)
+    return seconds
 
 
 def load_library(ids=None):
@@ -552,8 +573,8 @@ def _cubic_read(x, pos):
 
 
 def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_db=1.5, target_rms_db=-20):
-    """Play each note's fart raw (ADR 0012): the Recording's gesture from its start, at its own
-    pitch and speed, cut at the note's end (its written length less the gap, at least 60 ms) or
+    """Play each note's fart raw (ADR 0012): the Recording's fart from its start, every burst
+    included (ADR 0016), at its own pitch and speed, cut at the note's end (its written length less the gap, at least 60 ms) or
     where the fart ends, faded, set to a level and mixed. A note that starts on one of the score's
     bar lines (melody.bar_lines) is set accent_db louder. A note's shift_semitones isn't used."""
     by_id = {s.id: s for s in sources}

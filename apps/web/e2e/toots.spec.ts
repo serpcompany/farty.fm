@@ -4,7 +4,7 @@ import { newEmail, signInByApi } from './account'
 import { payToSave } from './pay'
 
 // The Toots tab, a Toot's screen and Profile, on the Staging build with the Fixture Library
-// loaded, so 8 of the 12 Songs are unlocked. The first test is the owner's check on a phone: make Toots,
+// loaded, so all 12 Songs are unlocked. The first test is the owner's check on a phone: make Toots,
 // quit, open Farty again and find them, then rename, delete a Recording a Toot uses, and delete
 // the Toots. Then a Toot whose audio is gone, Toots that fail to load, an unknown Toot, and a
 // Toot opened offline.
@@ -112,16 +112,16 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     await expect(page.getByTestId('stat-recordings')).toBeVisible()
   })
 
-  await test.step('the Fixture Library fills the stats, and 8 of the 12 Songs unlock', async () => {
+  await test.step('the Fixture Library fills the stats, and all 12 Songs unlock', async () => {
     await loadTheFixtureLibrary(page)
     const total = await page.getByTestId('fixture-library-count').textContent()
     recordings = total?.split(' of ')[1] ?? ''
     expect(Number(recordings)).toBeGreaterThan(0)
     await expect(page.getByTestId('stat-recordings')).toHaveText(`Recordings${recordings}`)
-    // Songs play each fart raw, at its own length (ADR 0012): Jingle Bells, Row, Row, Row Your
-    // Boat, Amazing Grace and Auld Lang Syne each have a note longer than any fixture near its pitch.
+    // Songs play each fart raw, every burst of it (ADR 0012, ADR 0016), so every Song has a fart
+    // as long as each of its notes near that note's pitch.
     await expect(page.getByTestId('stat-songs')).toHaveText(
-      `Songs unlocked${songs.length - 4} of ${songs.length}`
+      `Songs unlocked${songs.length} of ${songs.length}`
     )
     await expect(page.getByTestId('profile-new-user')).toHaveCount(0)
     // The same counts as the Recordings tab's.
@@ -249,7 +249,7 @@ test('Toots are kept: made, found after a relaunch, renamed, and deleted', async
     await expect(page.getByTestId('stat-toots')).toHaveText('Toots2')
     await expect(page.getByTestId('stat-recordings')).toHaveText(`Recordings${recordings}`)
     await expect(page.getByTestId('stat-songs')).toHaveText(
-      `Songs unlocked${songs.length - 4} of ${songs.length}`
+      `Songs unlocked${songs.length} of ${songs.length}`
     )
   })
 
