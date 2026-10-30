@@ -81,3 +81,53 @@ test('an analysis an older Recording Analysis made runs again on the next open',
   await expect(page.getByTestId('recording-note')).toHaveText('G3')
   await expect.poll(() => storedAnalysis(page), { timeout: 20_000 }).toEqual(analyzed)
 })
+
+test('Re-scan finds the note of a fart stored with no note (#282)', async ({ page }) => {
+  await recordAndSave(page, 1.5)
+  await expect(page.getByTestId('result-note')).toHaveText('G3')
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+  const analyzed = await storedAnalysis(page)
+
+  // As if the current Recording Analysis had found no note, as an older one did for fixtures 009
+  // and 080. The version stays, so the next open doesn't run it again: only Re-scan does.
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('pedos')
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    const store = db.transaction('recordings', 'readwrite').objectStore('recordings')
+    await new Promise<void>((resolve, reject) => {
+      const request = store.getAll()
+      request.onsuccess = () => {
+        const [recording] = request.result
+        Object.assign(recording.analysis.analysis, {
+          recordingPitchMidi: null,
+          shortestNoteSeconds: null,
+          settleSeconds: null
+        })
+        const put = store.put(recording)
+        put.onsuccess = () => resolve()
+        put.onerror = () => reject(put.error)
+      }
+      request.onerror = () => reject(request.error)
+    })
+    db.close()
+  })
+  await page.reload()
+  await expect(page.getByTestId('recording-note')).toHaveText('noise-like')
+  await expect(page.getByTestId('pitch-summary')).toHaveText(
+    /^0 Melodic Recordings across 0 notes\s*1 Recording$/
+  )
+
+  await page.getByRole('button', { name: 'Re-scan Recording 1' }).click()
+  await expect(page.getByTestId('rescan-status')).toHaveText('1 fart now has a note')
+  await expect(page.getByTestId('recording-note')).toHaveText('G3')
+  await expect(page.getByTestId('pitch-summary')).toHaveText(
+    /^1 Melodic Recording across 1 note\s*1 Recording$/
+  )
+  // Nothing has no note now, so nothing offers Re-scan.
+  await expect(page.getByRole('button', { name: /^Re-scan/ })).toHaveCount(0)
+  expect(await storedAnalysis(page)).toEqual(analyzed)
+})

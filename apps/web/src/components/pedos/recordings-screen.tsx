@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Spinner } from '@/components/ui/spinner'
+import { canRescan, type RescanResult, rescanSummary } from '@/lib/analysis-upgrade'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import {
@@ -33,12 +34,19 @@ import { Waveform } from './waveform'
 /**
  * Every Recording, newest first, with its note and waveform, and how many notes you've
  * collected. Tap a row to play it. Matches the iPhone app's `RecordingsTab`, plus placing a
- * Noise-like Recording on a note by ear (ADR 0015), which the web app alone has.
+ * Noise-like Recording on a note by ear (ADR 0015) and re-scanning one with no note, or all of
+ * them (#282), which the web app alone has.
  */
 export function RecordingsScreen() {
   const pedos = usePedos()
   const [deleting, setDeleting] = useState<Recording | null>(null)
   const [placing, setPlacing] = useState<string | null>(null)
+  // What the last Re-scan changed, until the screen closes.
+  const [rescanned, setRescanned] = useState<RescanResult | null>(null)
+  const rescanWith = (run: () => Promise<RescanResult>) => {
+    setRescanned(null)
+    void run().then(setRescanned)
+  }
 
   // The page comes back on the Record tab, so the confirmation and the picker don't stay open.
   useEffect(() => {
@@ -61,9 +69,35 @@ export function RecordingsScreen() {
   }
 
   const count = pedos.recordings.length
+  const noNote = pedos.recordings.filter(canRescan).length
+  const { rescanning } = pedos
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
-      <h1 className="pt-4 pb-3 text-3xl font-bold tracking-tight">Recordings</h1>
+      <div className="flex items-center justify-between gap-2 pt-4 pb-3">
+        <h1 className="text-3xl font-bold tracking-tight">Recordings</h1>
+        {(noNote > 0 || rescanning !== null) && (
+          <Button
+            variant="ghost"
+            className="h-11 text-base text-primary"
+            disabled={rescanning !== null}
+            onClick={() => rescanWith(pedos.rescanAll)}
+          >
+            Re-scan all
+          </Button>
+        )}
+      </div>
+      {/* Re-scan's progress, then what it changed. */}
+      <div aria-live="polite" data-testid="rescan-status">
+        {rescanning !== null && rescanning.total > 1 ? (
+          <p className="flex items-center gap-2 px-4 pb-3 text-sm text-muted-foreground">
+            <Spinner aria-hidden />
+            Re-scanning {rescanning.done + 1} of {rescanning.total}
+          </p>
+        ) : (
+          rescanned !== null &&
+          rescanning === null && <p className="px-4 pb-3 text-sm">{rescanSummary(rescanned)}</p>
+        )}
+      </div>
       {count === 0 ? (
         <Empty className="flex-1">
           <EmptyHeader>
@@ -97,6 +131,7 @@ export function RecordingsScreen() {
                 key={recording.id}
                 recording={recording}
                 onPlace={() => setPlacing(recording.id)}
+                onRescan={() => rescanWith(() => pedos.rescanRecording(recording.id))}
                 onDelete={() => setDeleting(recording)}
               />
             ))}
@@ -144,20 +179,24 @@ function counted(number: number, noun: string): string {
 function RecordingRow({
   recording,
   onPlace,
+  onRescan,
   onDelete
 }: {
   recording: Recording
-  /** Opens the place-by-ear picker, for a Noise-like Recording. */
+  /** Opens the place-by-ear picker, for a Noise-like or placed Recording. */
   onPlace: () => void
+  /** Re-scans it, for a Recording with no note. */
+  onRescan: () => void
   onDelete: () => void
 }) {
   const pedos = usePedos()
   const isPlaying = pedos.nowPlaying === recording.id
   const name = recordingName(recording)
   const levels = useReplayLevels(recording)
-  const pitch = recordingPitch(recording)
   const placed = placedPitch(recording)
-  const noiseLike = isNoiseLike(recording)
+  // A Placed Pitch stays in use when a new analysis finds a Recording Pitch (ADR 0017).
+  const placeable = placed !== null || isNoiseLike(recording)
+  const pitch = placed === null ? recordingPitch(recording) : null
 
   return (
     <li
@@ -165,7 +204,7 @@ function RecordingRow({
       data-testid="recording-row"
     >
       <div className="flex items-center gap-1">
-        {/* A Noise-like Recording's note is a button of its own, over the row's top right. */}
+        {/* A Noise-like or placed Recording's note is a button of its own, over the row's top right. */}
         <div className="relative min-w-0 flex-1">
           <button
             type="button"
@@ -179,7 +218,7 @@ function RecordingRow({
               <span
                 className={cn(
                   'flex h-8 items-center justify-between gap-2',
-                  noiseLike && (placed === null ? 'pr-28' : 'pr-20')
+                  placeable && (placed === null ? 'pr-28' : 'pr-20')
                 )}
               >
                 <span className="truncate font-semibold">{name}</span>
@@ -213,7 +252,7 @@ function RecordingRow({
               )}
             </span>
           </button>
-          {noiseLike && (
+          {placeable && (
             <PlaceButton
               name={name}
               placed={placed}
@@ -226,14 +265,14 @@ function RecordingRow({
           <Trash2 />
         </Button>
       </div>
-      <Status recording={recording} />
+      <Status recording={recording} onRescan={onRescan} />
     </li>
   )
 }
 
 /**
- * A Noise-like Recording's note, which opens the place-by-ear picker: "noise-like ›" until it's
- * placed, then the note it's placed on in a dashed pill (ADR 0015).
+ * A Noise-like or placed Recording's note, which opens the place-by-ear picker: "noise-like ›"
+ * until it's placed, then the note it's placed on in a dashed pill (ADR 0015).
  */
 function PlaceButton({
   name,
@@ -278,8 +317,8 @@ function PlaceButton({
   )
 }
 
-/** Analyzing, or not analyzed with Retry. */
-function Status({ recording }: { recording: Recording }) {
+/** Analyzing, not analyzed with Retry, or with no note and Re-scan (#282). */
+function Status({ recording, onRescan }: { recording: Recording; onRescan: () => void }) {
   const pedos = usePedos()
   // Lines up with the name, past the play button.
   const indent = 'pl-[3.625rem]'
@@ -305,7 +344,24 @@ function Status({ recording }: { recording: Recording }) {
         </div>
       )
     case 'analyzed':
-      return null
+      if (!canRescan(recording)) return null
+      return (
+        <div className={indent}>
+          {pedos.rescanning?.recordingId === recording.id ? (
+            <Spinner aria-label="Re-scanning" data-testid={`rescanning-${recording.number}`} />
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label={`Re-scan ${recordingName(recording)}`}
+              disabled={pedos.rescanning !== null}
+              onClick={onRescan}
+            >
+              Re-scan
+            </Button>
+          )}
+        </div>
+      )
   }
 }
 
@@ -324,8 +380,8 @@ function describe(recording: Recording): string[] {
     case 'analyzed': {
       const pitch = recordingPitch(recording)
       const placed = placedPitch(recording)
-      if (pitch !== null) parts.push(noteName(pitch))
-      else if (placed !== null) parts.push(noteName(placed), 'placed by ear')
+      if (placed !== null) parts.push(noteName(placed), 'placed by ear')
+      else if (pitch !== null) parts.push(noteName(pitch))
       else parts.push('noise-like')
     }
   }

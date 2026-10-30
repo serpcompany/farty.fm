@@ -11,6 +11,7 @@ import { midiToHz } from './numeric'
 
 const EXPECTED_MELODIC = [
   '002',
+  '009',
   '013',
   '016',
   '017',
@@ -19,6 +20,7 @@ const EXPECTED_MELODIC = [
   '032',
   '059',
   '069',
+  '080',
   '084',
   '086',
   '090',

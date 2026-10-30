@@ -255,17 +255,23 @@ describe('a Placed Pitch (ADR 0015)', () => {
     }
   })
 
-  it('counts for nothing while the Recording is Melodic, or not analyzed', () => {
-    const melodic: Recording = {
-      ...noiseLike(48),
+  it('stays in use when a new analysis finds a Recording Pitch (ADR 0017)', () => {
+    const found = (placed?: number | null): Recording => ({
+      ...noiseLike(placed),
       analysis: {
         state: 'analyzed',
         analysis: { ...analysis, recordingPitchMidi: 55.3, shortestNoteSeconds: 0.12 }
       }
-    }
-    expect(isNoiseLike(melodic)).toBe(false)
-    expect(placedPitch(melodic)).toBeNull()
-    expect(songPitch(melodic)).toBe(55.3)
+    })
+    expect(isNoiseLike(found(48))).toBe(false)
+    expect(recordingPitch(found(48))).toBe(55.3)
+    expect(placedPitch(found(48))).toBe(48)
+    expect(songPitch(found(48))).toBe(48)
+    // Taken off, the Recording Pitch plays.
+    expect(songPitch(found(null))).toBe(55.3)
+  })
+
+  it('counts for nothing while the Recording is not analyzed', () => {
     for (const state of ['analyzing', 'notAnalyzed'] as const) {
       const r: Recording = { ...noiseLike(48), analysis: { state } }
       expect(isNoiseLike(r)).toBe(false)

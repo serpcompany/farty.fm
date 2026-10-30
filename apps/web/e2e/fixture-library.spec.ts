@@ -58,16 +58,17 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
   })
   await expect(page.getByTestId('locked-songs')).toHaveCount(0)
 
-  // Without Recording 1, Amazing Grace's 2.98 s note on E3 outlasts every fixture near it.
+  // Without Recording 1, Amazing Grace's 2.98 s note on E3 outlasts every fixture near it. It is
+  // the only Song locked: since #282 finds 009 and 080 Melodic, the rest have their notes.
   await recordings.click()
   await page.getByRole('button', { name: 'Delete Recording 1', exact: true }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete Recording' }).click()
   await expect(first).toHaveCount(0)
   await compose.click()
-  await expect(page.getByRole('heading', { name: 'Unlocked · 9' })).toBeVisible({
+  await expect(page.getByRole('heading', { name: 'Unlocked · 11' })).toBeVisible({
     timeout: 60_000
   })
-  await expect(page.getByRole('heading', { name: 'Locked · 3', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Locked · 1', exact: true })).toBeVisible()
   const amazing = page.getByRole('button', { name: 'Amazing Grace' })
   await expect(amazing).toHaveAccessibleDescription(
     'Locked. 5 of 6 notes covered. Needs E3 (3.0 s)'

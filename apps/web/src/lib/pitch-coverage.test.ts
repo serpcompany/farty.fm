@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { coverageSubsets, goldenRecording } from '../test-support/engine-golden'
+import { coverageSubsets, goldenRecording, libraries } from '../test-support/engine-golden'
 import { goldenIndex } from '../test-support/golden'
 import type { Song } from './catalog/song'
 import { songs } from './catalog/songs.generated'
@@ -64,8 +64,7 @@ function fixtureRecording(id: string, number: number): Recording {
 const fixtures = (ids: readonly string[]) => ids.map((id, i) => fixtureRecording(id, i + 1))
 const all = fixtures(fixtureIds)
 /**
- * The Fixture Library without 002, which alone lasts 3 s: it leaves Jingle Bells, Amazing Grace
- * and Auld Lang Syne locked.
+ * The Fixture Library without 002, which alone lasts 3 s: it leaves Amazing Grace locked.
  */
 const without002 = all.filter(r => r.id !== fixtureRecordingId('002'))
 const takes = (count: number) => fixtures(story.slice(0, count))
@@ -84,8 +83,8 @@ const listing = (recordings: Recording[], query = '', order: SongOrder = 'closes
   songListing(sortRows(songRows(songs, recordings), order), query)
 
 describe('Pitch Coverage against the reference engine', () => {
-  it('unlocks all 12 Songs with the 24 Melodic fixtures', () => {
-    expect(all.filter(r => coverageKey([r]) !== '[]')).toHaveLength(24)
+  it('unlocks all 12 Songs with the 26 Melodic fixtures', () => {
+    expect(all.filter(r => coverageKey([r]) !== '[]')).toHaveLength(26)
     expect(songs).toHaveLength(12)
     // Each fart plays at its own length (ADR 0012), every burst of it (ADR 0016).
     for (const s of songs) {
@@ -257,53 +256,64 @@ describe('Placed Recordings (ADR 0015)', () => {
   /** `recordings` with the fixture's Recording given `placedPitch`. */
   const place = (recordings: Recording[], fixture: string, placed: number | null) =>
     recordings.map(r => (fixtureId(r.id) === fixture ? { ...r, placedPitch: placed } : r))
+  /** The golden small library, all six Melodic, and 065, Noise-like and 1.49 s long. */
+  const small = fixtures(libraries.small)
+  const with065 = fixtures([...libraries.small, '065'])
 
-  it('covers its note like a Melodic Recording: 080 on C2 unlocks 2 Songs the library leaves locked without 002', () => {
-    // 080 is Noise-like and 2.49 s long. The same Arrangements as `tools/melody-lab/test_placed.py`.
-    const placed = place(without002, '080', C2)
+  it('covers its note like a Melodic Recording: 065 on C2 unlocks 5 Songs the small library leaves locked', () => {
+    // The same Arrangements as `tools/melody-lab/test_placed.py`.
+    expect(listing(with065).unlocked.map(r => r.song.id)).toEqual(['mary', 'saints'])
+    const placed = place(with065, '065', C2)
     const { unlocked, locked } = listing(placed)
-    expect(unlocked).toHaveLength(11)
-    expect(locked.map(r => r.song.id)).toEqual(['amazing'])
-    // Still a 3 s note, now in another key.
-    expect(missingNotes(locked[0].coverage)).toBe('B2 (3.0 s)')
-    for (const id of ['jingle', 'auld']) {
+    expect(unlocked).toHaveLength(7)
+    expect(locked.map(r => r.song.id)).toContain('amazing')
+    for (const id of ['jingle', 'row']) {
       const coverage = coverageOf(song(id), placed)
       expect(coverage.unlocked, id).toBe(true)
-      expect([...coverage.recordingForPitch.values()].map(fixtureId), id).toContain('080')
+      expect([...coverage.recordingForPitch.values()].map(fixtureId), id).toContain('065')
     }
   })
 
-  it('counts for nothing left out, the default, or while the Recording is Melodic', () => {
-    expect(coverageKey(place(all, '080', null))).toBe(coverageKey(all))
-    // 002 is Melodic: a Placed Pitch on it is ignored, as after a re-analysis that finds a pitch.
-    expect(coverageKey(place(all, '002', C2))).toBe(coverageKey(all))
-    expect(collectedPitchClasses(place(all, '002', 37))).toEqual(collectedPitchClasses(all))
+  it('counts for nothing left out, the default', () => {
+    expect(coverageKey(place(all, '065', null))).toBe(coverageKey(all))
+  })
+
+  it('stays in use when a new analysis finds the Recording Melodic (ADR 0017)', () => {
+    // 009 was Noise-like until the second pitch window found it near G1 (#282).
+    expect(collectedPitchClasses(fixtures(['009']))).toEqual(new Set([7]))
+    expect(collectedPitchClasses(place(fixtures(['009']), '009', 37))).toEqual(new Set([1]))
+    expect(coverageKey(place(all, '009', C2))).not.toBe(coverageKey(all))
+    expect(coverageKey(place(all, '009', null))).toBe(coverageKey(all))
   })
 
   it('counts only a whole note from C2 to B4, as the picker offers', () => {
     for (const outside of [35, 72, 48.5, Number.NaN]) {
-      expect(coverageKey(place(all, '080', outside)), String(outside)).toBe(coverageKey(all))
+      expect(coverageKey(place(all, '065', outside)), String(outside)).toBe(coverageKey(all))
     }
-    expect(coverageKey(place(all, '080', 71))).not.toBe(coverageKey(all))
+    expect(coverageKey(place(all, '065', 71))).not.toBe(coverageKey(all))
   })
 
   it('matches the catalog again when the fart is placed, moved or taken off', () => {
-    const keys = [null, C2, C2 + 1, null].map(p => coverageKey(place(all, '080', p)))
+    const keys = [null, C2, C2 + 1, null].map(p => coverageKey(place(all, '065', p)))
     expect(new Set(keys).size).toBe(3)
     expect(keys[3]).toBe(keys[0])
   })
 
   it('collects the pitch class it is placed on', () => {
-    expect(collectedPitchClasses(place(fixtures(['080']), '080', 37))).toEqual(new Set([1]))
-    expect(collectedPitchClasses(fixtures(['080']))).toEqual(new Set())
+    expect(collectedPitchClasses(place(fixtures(['065']), '065', 37))).toEqual(new Set([1]))
+    expect(collectedPitchClasses(fixtures(['065']))).toEqual(new Set())
   })
 
   it('shows no unlock for a Noise-like save until it is placed', () => {
-    const before = without002.filter(r => fixtureId(r.id) !== '080')
-    const left = coverageChanges(songs, before, without002)
-    expect(left.unlocked).toEqual([])
-    const placed = coverageChanges(songs, before, place(without002, '080', C2))
-    expect(placed.unlocked.map(s => s.id)).toEqual(['jingle', 'auld'])
+    expect(coverageChanges(songs, small, with065).unlocked).toEqual([])
+    const placed = coverageChanges(songs, small, place(with065, '065', C2))
+    expect(placed.unlocked.map(s => s.id)).toEqual([
+      'jingle',
+      'row',
+      'ode',
+      'merryxmas',
+      'furelise'
+    ])
   })
 })
 
@@ -361,17 +371,13 @@ describe('Compose’s listing', () => {
     expect(none.unlocked.length + none.locked.length).toBe(0)
   })
 
-  it('unlocks all 12 Songs with the whole Fixture Library, and 9 without 002', () => {
+  it('unlocks all 12 Songs with the whole Fixture Library, and 11 without 002', () => {
     expect(listing(all).unlocked).toHaveLength(12)
     expect(listing(all).locked).toEqual([])
     const { unlocked, locked } = listing(without002)
-    expect(unlocked).toHaveLength(9)
-    expect(locked.map(r => r.song.id)).toEqual(['auld', 'amazing', 'jingle'])
-    expect(locked.map(r => missingNotes(r.coverage))).toEqual([
-      'A♯2 (1.8 s)',
-      'E3 (3.0 s)',
-      'F2 (2.0 s)'
-    ])
+    expect(unlocked).toHaveLength(11)
+    expect(locked.map(r => r.song.id)).toEqual(['amazing'])
+    expect(locked.map(r => missingNotes(r.coverage))).toEqual(['E3 (3.0 s)'])
   })
 
   it('locks every Song, fewest notes first, without Melodic Recordings', () => {
@@ -477,7 +483,7 @@ describe('what a save changed', () => {
   })
 
   it('has no Song closest to unlocking once every Song is unlocked', () => {
-    expect(coverageChanges(songs, without002, without002).closest?.song.id).toBe('auld')
+    expect(coverageChanges(songs, without002, without002).closest?.song.id).toBe('amazing')
     expect(coverageChanges(songs, all, all).closest).toBeNull()
   })
 })

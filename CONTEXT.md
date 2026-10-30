@@ -23,16 +23,20 @@ A Recording with no steady pitch, so it can't tell the listener which note it is
 _Avoid_: Bad Recording, unpitched fart
 
 **Placed Pitch**:
-The note, C2 to B4, that the user placed a Noise-like Recording on by ear, on the Recordings tab: the piano key they hear as closest to the fart. Set once per Recording, used in every Song, kept with the Recording and its account, and through a new analysis. The fart still plays raw (ADR 0012): the note says only where Songs use it, never how it sounds (ADR 0015).
+The note, C2 to B4, that the user placed a Noise-like Recording on by ear, on the Recordings tab: the piano key they hear as closest to the fart. Set once per Recording, used in every Song, kept with the Recording and its account, and through a new analysis. If a later analysis finds the fart a Recording Pitch, the Placed Pitch stays the one used, since the user chose it (ADR 0017). The fart still plays raw (ADR 0012): the note says only where Songs use it, never how it sounds (ADR 0015).
 _Avoid_: Tuned pitch, assigned pitch, Recording Pitch (that is the analyzed one)
 
 **Placed Recording**:
-A Noise-like Recording with a Placed Pitch. Songs, Pitch Coverage and Auto-map treat it as a Melodic Recording at its Placed Pitch. Leaving it out, the default, keeps it out of Songs.
+A Recording with a Placed Pitch, placed while it was Noise-like. Songs, Pitch Coverage and Auto-map treat it as a Melodic Recording at its Placed Pitch, even after a later analysis finds a Recording Pitch (ADR 0017). Leaving it out, the default, keeps a Noise-like Recording out of Songs.
 _Avoid_: Beat, tuned fart
 
 **Recording Pitch**:
-The note a Melodic Recording naturally sounds, octave included: G2 and G3 are different Recording Pitches. A Recording has a pitch; it never has a key.
+The note a Melodic Recording naturally sounds, octave included: G2 and G3 are different Recording Pitches. A Recording has a pitch; it never has a key. Recording Analysis reads it from the first 450 ms of the first burst or, when those have none, from the 450 ms where its pitch starts (ADR 0017).
 _Avoid_: Key, tone
+
+**Re-scan**:
+Running the current Recording Analysis again on a Recording with no note (Noise-like and not placed), from the Recordings tab: one Recording, or all of them one at a time. It says how many now have a note. It never changes a Placed Pitch, and it changes only this browser's analysis (ADR 0017).
+_Avoid_: Reanalysis, re-analyze, refresh
 
 ## Songs and Toots
 
