@@ -74,14 +74,14 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   // Which notes it needs depends on the take's settle time (two Arrangements nearly tie), so the
   // journey checks the shape; `pitch-coverage.test.ts` pins the exact notes on the golden 095.
   await expect(mary).toHaveAccessibleDescription(
-    /^Locked\. 1 of 4 notes covered\. Needs \S+ \(\d\.\d s\), \S+ \(\d\.\d s\), and 1 more$/
+    /^Locked\. 1 of 4 notes covered\. Needs [A-G]♯?\d \(\d\.\d s\), [A-G]♯?\d \(\d\.\d s\), and 1 more$/
   )
 
   // The locked Song's sheet names the notes it needs, and how long a fart each needs (ADR 0011).
   // Record goes to the Record tab.
   await mary.click()
   await expect(sheet.getByTestId('locked-song-needs')).toHaveText(
-    /^Needs a fart near \S+ \(\d\.\d s\), \S+ \(\d\.\d s\), and \S+ \(\d\.\d s\)\.$/
+    /^Needs a fart near [A-G]♯?\d \(\d\.\d s\), [A-G]♯?\d \(\d\.\d s\), and [A-G]♯?\d \(\d\.\d s\)\.$/
   )
   await expect(sheet.getByTestId('pitch-strip')).toHaveAccessibleName(
     /^Notes collected: F\. Needed: /
