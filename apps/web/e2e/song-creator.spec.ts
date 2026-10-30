@@ -5,8 +5,8 @@ import { songs } from '../src/lib/catalog/songs.generated'
 import { newEmail, signInByApi } from './account'
 import { payAtTheDevCheckout } from './pay'
 
-// Song Creator on the Staging build, with the whole Fixture Library loaded: 8 of the 12 Songs are
-// unlocked (Songs play each fart raw, at its own length, ADR 0012). Each Song opens from
+// Song Creator on the Staging build, with the whole Fixture Library loaded: all 12 Songs are
+// unlocked (Songs play each fart raw, every burst of it, ADR 0012 and ADR 0016). Each Song opens from
 // Compose, is made and starts playing, plays one tapped note, and
 // is paid for and saved (ADR 0010); the Toots are then read back from IndexedDB. Then a direct load, a failed render, a
 // locked and an unknown Song, and a Song opened offline.
@@ -32,11 +32,10 @@ declare global {
 const evidence = process.env.E2E_EVIDENCE_DIR ? resolve(process.env.E2E_EVIDENCE_DIR) : null
 
 /**
- * The Songs the whole Fixture Library unlocks: the reference's golden Arrangements. Each of the
- * others has a note longer than any fixture near its pitch (ADR 0011, ADR 0012).
+ * The Songs the whole Fixture Library unlocks: all of them, as the reference's golden Arrangements
+ * do, since Songs play every burst of a fart (ADR 0016).
  */
-const lockedSongs = ['jingle', 'row', 'amazing', 'auld']
-const unlockedSongs = songs.filter(s => !lockedSongs.includes(s.id))
+const unlockedSongs = songs
 
 test.beforeEach(async ({ request }) => {
   // `next dev` never shows the loader, even with fixtures left in public/ by a Staging build.
@@ -110,9 +109,10 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       const noteView = page.getByTestId('note-view')
       const used = page.getByTestId('recording-used')
       await expect(used).toHaveCount(song.pitches.length)
-      // Fixture 002, Recording 1: its fart's length, not its 4.2 s take's (#227).
+      // Fixture 084, Recording 18, two farts in one take: its fart's length, both bursts of it
+      // (ADR 0016), not its 2.6 s take's (#227).
       if (song.id === 'mary')
-        await expect(used.getByRole('button', { name: /^Recording 1,/ })).toContainText('1.7 s')
+        await expect(used.getByRole('button', { name: /^Recording 18,/ })).toContainText('1.9 s')
       for (const control of [back, play, save, noteView]) await expectTappable(control)
       for (const recording of await used.getByRole('button').all()) await expectTappable(recording)
 
@@ -340,7 +340,7 @@ async function listenToThePage(page: Page) {
   })
 }
 
-/** Loads the Fixture Library from Profile, then opens Compose with 8 of the 12 Songs unlocked. */
+/** Loads the Fixture Library from Profile, then opens Compose with all 12 Songs unlocked. */
 async function loadTheFixtureLibrary(page: Page) {
   const library = page.getByTestId('fixture-library')
   await library.getByRole('button', { name: 'Load the Fixture Library' }).click()

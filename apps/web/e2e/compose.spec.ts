@@ -12,9 +12,9 @@ import { skipWelcome } from './record'
 // `fake-microphone.ts`, which plays each fart as the person presses Record, all on one page.
 //
 // Mary Had a Little Lamb unlocks with fixtures 095 (F2), 017 (D♯2), 022 (E2) and 002 (A♯2), and
-// no Song unlocks before the fourth: the reference's `melody_fit()` on these four, the same picks
-// as on the whole Fixture Library. Songs play each fart raw, at its own length (ADR 0012), so
-// Mary's last note, 1.40 s long, needs 002 (1.80 s), the only fixture that long (ADR 0011).
+// no Song unlocks before the fourth: the reference's `melody_fit()` on these four. Songs play each
+// fart raw, at its own length (ADR 0012), so Mary's last note, 1.40 s long, needs 002 (4.04 s with
+// every burst, ADR 0016), the only one of the four that long (ADR 0011).
 
 test.use({ permissions: ['microphone'] })
 

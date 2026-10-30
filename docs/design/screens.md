@@ -71,8 +71,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
   - a big play button
   - the name ("Recording 7")
   - the note in a pill, with its octave ("G♯3"), or a quiet "noise-like" when the Recording has no steady pitch
-  - a full-width waveform of just the fart replay plays (`replaySegment`), not the silence around it; the whole file until it's analyzed
-  - "First fart used" when a second fart was cut off
+  - a full-width waveform of the whole take, which replay plays start to end, as recorded (ADR 0016). The iPhone app showed just the first fart (`replaySegment`) and "First fart used" when a second one was cut off; the web app has neither, since Songs play every burst too.
 **PRIMARY ACTION:** Play a Recording.
 **SECONDARY ACTIONS:** Swipe to delete (with confirmation).
 **STATES:**
@@ -118,7 +117,6 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Melodic, no unlock
 - Melodic with an unlock
 - Noise-like
-- Second fart cut off ("We kept the first fart")
 - **Error, save failed** (for example, storage full): "Couldn't save this Recording", with Try again and Discard
 - **Error, analysis failed:** "Saved, but we couldn't find its note", with Retry. The Recording stays on the Recordings tab as "not analyzed".
 **NAVIGATION TYPE:** Full-screen cover, step 3.

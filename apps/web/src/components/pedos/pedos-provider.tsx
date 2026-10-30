@@ -37,7 +37,6 @@ import {
   heardSomething,
   maximumTakeSeconds,
   type Recording,
-  replaySegment,
   songPitch
 } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
@@ -465,7 +464,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         // The draft isn't saved yet, so it's decoded fresh each time under a one-off key.
         void play(`draft-${crypto.randomUUID()}`, async () => wav, null, ended)
       } else {
-        void play(target.id, () => store.loadAudio(target.id), replaySegment(target), ended)
+        // The whole take, start to end, as recorded (ADR 0016).
+        void play(target.id, () => store.loadAudio(target.id), null, ended)
       }
     },
     [flow, nowPlaying]

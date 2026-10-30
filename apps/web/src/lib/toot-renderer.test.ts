@@ -93,10 +93,11 @@ describe('makeToot', () => {
     const error = await makeToot(songs[0], [], loadAudio).catch(e => e)
     expect(error).toBeInstanceOf(TootError)
     expect(error.reason).toBe('locked')
-    // Amazing Grace stays locked with the whole Fixture Library: its 2.98 s note outlasts every
-    // fixture (ADR 0011).
+    // Amazing Grace is locked without 002: its 2.98 s note outlasts every other fixture (ADR
+    // 0011). 002 lasts 4.04 s, every burst (ADR 0016).
     const amazing = songs.filter(s => s.id === 'amazing')[0]
-    const tooLong = await makeToot(amazing, recordings, loadAudio).catch(e => e)
+    const without002 = recordings.filter(r => r.id !== fixtureRecordingId('002'))
+    const tooLong = await makeToot(amazing, without002, loadAudio).catch(e => e)
     expect(tooLong).toBeInstanceOf(TootError)
     expect(tooLong.reason).toBe('locked')
   })
