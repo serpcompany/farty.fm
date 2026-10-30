@@ -91,7 +91,7 @@ vi.mock('@/lib/telemetry/errors', () => ({ reportError: mic.reportError }))
 vi.mock('./account-provider', () => ({ useAccount: () => ({ offerStep: () => false }) }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({}), usePathname: () => '/' }))
 
-const { PedosProvider, hintAfterMs, startVibrationMs } = await import('./pedos-provider')
+const { PedosProvider, hintAfterMs } = await import('./pedos-provider')
 const { RecordScreen } = await import('./record-screen')
 const { RecordFlow } = await import('./record-flow')
 
@@ -120,16 +120,17 @@ const batchFrames = 4096
 const batchMs = (batchFrames / sampleRate) * 1000
 
 let root: Root | null = null
-let starting: { resolve: (take: Take) => void } | null = null
+/** The take being started: `resolve` lets the microphone start, `interrupt` loses it. */
+let starting: { resolve: (take: Take) => void; interrupt: () => void } | null = null
 
 beforeEach(() => {
   vi.useFakeTimers({
     toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date']
   })
   mic.startTake.mockImplementation(
-    () =>
+    (onInterrupted: () => void) =>
       new Promise<Take>(resolve => {
-        starting = { resolve }
+        starting = { resolve, interrupt: onInterrupted }
       })
   )
 })
@@ -303,24 +304,44 @@ describe('Record’s states (#281)', () => {
     expect(byTestId('stop-button')).toBeNull()
   })
 
-  it('vibrates once as recording starts, where the browser can', async () => {
-    const vibrate = vi.fn(() => true)
-    vi.stubGlobal('navigator', { vibrate })
+  it('lets an interrupted take go: no level and no hint carry over to the next', async () => {
     await open()
-    await tapRecord()
-    expect(vibrate).not.toHaveBeenCalled()
-    const stand = standInTake()
-    stand.send(room(firstBatch))
-    await act(async () => starting?.resolve(stand.take))
-    expect(vibrate).toHaveBeenCalledTimes(1)
-    expect(vibrate).toHaveBeenCalledWith(startVibrationMs)
-  })
+    const timers = vi.spyOn(window, 'setTimeout')
+    const cleared = vi.spyOn(window, 'clearTimeout')
+    // A steady hum: it shows a level, but with no contrast it's a take Stop would refuse.
+    const hum = (length: number) => fart(length, -50)
+    const first = await startRecording(hum(firstBatch))
+    // About 1 s in, a call takes the microphone.
+    await sendFor(first, 1000, () => hum(batchFrames))
+    expect(level()).toBeGreaterThan(0)
+    await act(async () => starting?.interrupt())
+    expect(document.body.textContent).toContain('Recording stopped')
+    expect(byTestId('stop-button')).toBeNull()
+    // The take's 2 s hint timer is cleared with it.
+    const hintTimer =
+      timers.mock.results[timers.mock.calls.findIndex(([, ms]) => ms === hintAfterMs)]
+    expect(hintTimer?.value).toBeDefined()
+    expect(cleared).toHaveBeenCalledWith(hintTimer?.value)
 
-  it('records without vibrating where the browser has no vibration, as iPhone Safari', async () => {
-    vi.stubGlobal('navigator', {})
-    await open()
-    await startRecording()
+    // Recording again straight away. This take has sent nothing yet, so the level it shows is
+    // what the lost take left: nothing.
+    await tapRecord()
+    const second = standInTake()
+    await act(async () => starting?.resolve(second.take))
     expect(byTestId('stop-button')?.dataset.state).toBe('recording')
-    expect(mic.reportError).not.toHaveBeenCalled()
+    expect(level()).toBe(0)
+
+    // The lost take's 2 s hint, 1 s from now, would say it hears nothing. This take hears room,
+    // then a fart, so its own never does.
+    const hints: string[] = []
+    for (let sent = 0; sent < hintAfterMs + 500; sent += batchMs) {
+      await act(async () => {
+        second.send(sent < 500 ? room(batchFrames) : fart(batchFrames))
+        vi.advanceTimersByTime(batchMs)
+      })
+      hints.push(hint())
+    }
+    expect(hints.every(h => h === '')).toBe(true)
+    expect(byTestId('stop-button')?.dataset.state).toBe('recording')
   })
 })

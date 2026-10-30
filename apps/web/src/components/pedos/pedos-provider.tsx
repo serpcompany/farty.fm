@@ -66,8 +66,6 @@ export type Capture =
 
 /** How long a take records before Record says it can't hear anything, if it can't. */
 export const hintAfterMs = 2000
-/** The vibration as recording starts, where the browser can (`navigator.vibrate`), in ms. */
-export const startVibrationMs = 30
 
 /**
  * Record's live level, 0…1, from the take's batches (`TakeLevels.level`). It's kept outside React
@@ -439,6 +437,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       const levels = new TakeLevels(started.sampleRate)
       let judging = false
       const judge = () => {
+        // A take that has stopped or been lost never judges the one after it.
+        if (take.current !== current) return
         const hearsNothing = !levels.heard()
         setCapture(shown =>
           shown.kind === 'recording' && shown.hearsNothing !== hearsNothing
@@ -457,9 +457,15 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         judge()
       }, hintAfterMs)
       setCapture({ kind: 'recording', startedAt: current.startedAt, hearsNothing: false })
-      // No sound: it would be in the take. iPhone Safari has no vibration, so it gets none.
-      if ('vibrate' in navigator) navigator.vibrate(startVibrationMs)
     } catch (error) {
+      // Something failed after the take started: it stops capturing, rather than running on to
+      // its 30 s limit behind the idle screen.
+      const lost = take.current
+      if (lost) {
+        take.current = null
+        letGo(lost, inputLevel)
+        lost.take.cancel()
+      }
       setCapture({ kind: 'idle' })
       // The page was hidden, or widened into the product page, before the microphone opened.
       if (error instanceof MicrophoneReleasedError) return

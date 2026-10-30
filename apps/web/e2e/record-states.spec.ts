@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { firstBatchTimeoutMs } from '../src/lib/audio/recorder'
 import {
   fakeMicrophone,
   fartAndRecord,
@@ -10,15 +11,13 @@ import { skipWelcome } from './record'
 import { onPhone } from './screens'
 
 // Record's states (#281): getting ready until the take's audio reaches the page, recording with a
-// live level once it does, a hint when it hears nothing, and a vibration as it starts. The fake
-// microphone is in `fake-microphone.ts`.
+// live level once it does, and a hint when it hears nothing. The fake microphone is in
+// `fake-microphone.ts`.
 
 type Watch = {
   /** Capture batches held back from the app while `holding`, and delivered in order after. */
   holding: boolean
   held: (() => void)[]
-  /** Each `navigator.vibrate` call's duration. */
-  vibrations: number[]
   /** The level and the hint every 20 ms while Record records, and when (`performance.now()`). */
   levels: number[]
   hints: string[]
@@ -27,25 +26,17 @@ type Watch = {
 
 /**
  * An init script, after the fake microphone: holds the capture node's batches back from the app
- * while `pedosWatch.holding`, counts vibrations, and samples the level and the hint.
+ * while `pedosWatch.holding`, and samples the level and the hint.
  */
 function watchRecord(): void {
   const watch: Watch = {
     holding: false,
     held: [],
-    vibrations: [],
     levels: [],
     hints: [],
     times: []
   }
   ;(window as unknown as { pedosWatch: Watch }).pedosWatch = watch
-  Object.defineProperty(navigator, 'vibrate', {
-    configurable: true,
-    value: (pattern: number) => {
-      watch.vibrations.push(pattern)
-      return true
-    }
-  })
   const native = Object.getOwnPropertyDescriptor(MessagePort.prototype, 'onmessage')
   const Wrapped = window.AudioWorkletNode
   window.AudioWorkletNode = class extends Wrapped {
@@ -87,7 +78,6 @@ const watched = (page: Page) =>
     return {
       holding: watch.holding,
       held: watch.held.length,
-      vibrations: watch.vibrations,
       levels: watch.levels,
       hints: watch.hints,
       times: watch.times
@@ -107,12 +97,11 @@ test.describe('Record’s states', () => {
     await waitForOpenMicrophone(page)
   })
 
-  test('getting ready until audio reaches the page, then recording, with a vibration', async ({
-    page
-  }) => {
+  test('getting ready until audio reaches the page, then recording', async ({ page }) => {
     await page.evaluate(() => {
       ;(window as unknown as { pedosWatch: Watch }).pedosWatch.holding = true
     })
+    const heldSince = Date.now()
     await page.getByTestId('record-button').click()
     const button = page.getByRole('button', { name: 'Starting…' })
     await expect(button).toBeVisible()
@@ -120,11 +109,14 @@ test.describe('Record’s states', () => {
     await expect(button).toHaveAttribute('data-state', 'starting')
 
     // The capture node is sending, but none of it has reached the page: still getting ready.
+    // The hold-back must stay well under `firstBatchTimeoutMs` (3 s), after which the take gives
+    // up with "couldn't start". More than 5 batches is about 430 ms; a runner too slow for that
+    // margin fails the check below rather than flaking later.
     await expect.poll(async () => (await watched(page)).held).toBeGreaterThan(5)
     await expect(page.getByTestId('stop-button')).toHaveCount(0)
     await expect(page.getByTestId('recording-timer')).toHaveCount(0)
     await expect(page.getByTestId('input-level')).toHaveCount(0)
-    expect((await watched(page)).vibrations).toEqual([])
+    expect(Date.now() - heldSince).toBeLessThan(firstBatchTimeoutMs / 2)
 
     await page.evaluate(() => {
       const watch = (window as unknown as { pedosWatch: Watch }).pedosWatch
@@ -136,7 +128,6 @@ test.describe('Record’s states', () => {
     await expect(stop).toBeEnabled()
     await expect(page.getByTestId('recording-timer')).toHaveText('0:00')
     await expect(page.getByTestId('input-level')).toBeVisible()
-    expect((await watched(page)).vibrations).toEqual([30])
   })
 
   test('the level moves with the fart and falls back after it, with no hint', async ({ page }) => {

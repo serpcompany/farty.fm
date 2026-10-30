@@ -101,7 +101,7 @@ let takes = 0
 let keeping = false
 
 /** A take that hasn't sent its first batch by now, with the microphone open, didn't start. */
-const firstBatchTimeoutMs = 3000
+export const firstBatchTimeoutMs = 3000
 /**
  * How long after capture stops the page still opens the microphone without a tap: inside iPhone
  * Safari's 1 minute, with room for a slow `getUserMedia`. After it, the next Record tap opens it.
@@ -306,9 +306,10 @@ async function connect(openedIn: number, kept?: Microphone): Promise<Microphone>
     const take = capturing
     if (!take || event.data.take !== take.id) return
     take.chunks.push(event.data.samples)
-    take.listener?.(event.data.samples)
     take.began()
     if (event.data.done) take.finished?.()
+    // Last, so the level feed can never hold up the take's own start or stop.
+    take.listener?.(event.data.samples)
   }
   for (const track of stream.getAudioTracks()) {
     // A call or another app taking the microphone ends the track: a take in progress is lost.
