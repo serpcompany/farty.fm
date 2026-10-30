@@ -114,14 +114,16 @@ PITCH_WINDOW_S = 0.45  # the pitch estimate reads this much of the contour
 def estimate_pitch(f0, frame_rms, n_body, a):
     """The Recording Pitch estimate over the PITCH_WINDOW_S from contour frame `a`: the
     energy-weighted median of its voiced frames, and its confidence, their share of the window
-    (of what is left of the first burst, when that is shorter) x (1 - spread / 3), the spread
+    (of the whole first burst, when that is shorter) x (1 - spread / 3), the spread
     being their median distance from it. (None, confidence) below 4 voiced frames (confidence 0)
     or MIN_PITCH_CONF. analyze_recording() reads the head (`a` = 0), and only when that finds no
     pitch, the window from the first kept frame (#282)."""
     window = int(PITCH_WINDOW_S * SR / HOP)
     end = min(len(f0), a + window)
     v = np.isfinite(f0[a:end])
-    coverage = v.sum() / max(1, window if n_body - a * HOP > PITCH_WINDOW_S * SR else len(f0) - a)
+    # Counted as the head counts it, from either window: never against the frames left after `a`,
+    # or a few quiet frames at the end of a short first burst would be full coverage (#295).
+    coverage = v.sum() / max(1, window if n_body > PITCH_WINDOW_S * SR else len(f0))
     if v.sum() < 4:
         return None, 0.0
     mids = librosa.hz_to_midi(f0[a:end][v])

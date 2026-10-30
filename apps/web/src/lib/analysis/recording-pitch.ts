@@ -92,8 +92,8 @@ export function estimate(
 /**
  * The estimate over the 450 ms from contour frame `from` (`estimate_pitch()` in the reference):
  * the energy-weighted median of its voiced frames, and its confidence, coverage × (1 − spread / 3).
- * Coverage is their share of the window, or of the frames left when less than 450 ms of the
- * gesture is left; spread is their median distance from the median. No estimate below 4 voiced
+ * Coverage is their share of the window, or of the whole first burst when that is shorter than
+ * 450 ms; spread is their median distance from the median. No estimate below 4 voiced
  * frames (confidence 0) or below `MINIMUM_CONFIDENCE`.
  */
 function estimateAt(
@@ -108,7 +108,9 @@ function estimateAt(
   const end = Math.min(f0.length, from + window)
   const voiced: number[] = []
   for (let i = from; i < end; i++) if (Number.isFinite(f0[i])) voiced.push(i)
-  const frames = bodyLength - from * hop > PITCH_WINDOW_SECONDS * sr ? window : f0.length - from
+  // Counted as the head counts it, from either window: never against the frames left after `from`,
+  // or a few quiet frames at the end of a short first burst would be full coverage (#295).
+  const frames = bodyLength > PITCH_WINDOW_SECONDS * sr ? window : f0.length
   const coverage = voiced.length / Math.max(1, frames)
   if (voiced.length < 4) return { midi: null, confidence: 0 }
 

@@ -152,15 +152,54 @@ it('runs one Re-scan at a time, on the Recordings it is asked for', async () => 
   expect(page.rescan.mock.calls[0][0].map(r => r.id)).toEqual(['r18'])
   expect(pedos?.rescanning).toEqual({ recordingId: 'r18', done: 0, total: 1 })
 
+  expect(pedos?.rescanned).toBeNull()
+
   const found = { scanned: 1, found: 1, failed: 0 }
   await act(async () => finish(found))
   await expect(one).resolves.toEqual(found)
   await expect(all).resolves.toEqual(found)
   expect(pedos?.rescanning).toBeNull()
+  expect(pedos?.rescanned).toEqual(found)
 
   page.rescan.mockResolvedValueOnce({ scanned: 0, found: 0, failed: 0 })
   await act(async () => {
     await pedos?.rescanAll()
   })
   expect(page.rescan.mock.calls[1][0].map(r => r.id)).toEqual(['r18', 'r19'])
+  expect(pedos?.rescanned).toEqual({ scanned: 0, found: 0, failed: 0 })
+})
+
+it('keeps the last Re-scan’s result with no Recordings tab open, until the next one starts', async () => {
+  page.stored = [twoBursts]
+  let finish: (result: RescanResult) => void = () => {}
+  page.rescan.mockImplementation(
+    () =>
+      new Promise(resolve => {
+        finish = resolve
+      })
+  )
+  const { PedosProvider, usePedos } = await import('./pedos-provider')
+  let pedos: ReturnType<typeof usePedos> | undefined
+  function Probe() {
+    pedos = usePedos()
+    return null
+  }
+  await act(async () =>
+    root?.render(
+      <PedosProvider>
+        <Probe />
+      </PedosProvider>
+    )
+  )
+
+  await act(async () => void pedos?.rescanAll())
+  // The user leaves the Recordings tab while it runs: the result waits in the provider.
+  const found = { scanned: 1, found: 1, failed: 0 }
+  await act(async () => finish(found))
+  expect(pedos?.rescanned).toEqual(found)
+
+  await act(async () => void pedos?.rescanAll())
+  expect(pedos?.rescanned).toBeNull()
+  await act(async () => finish({ scanned: 1, found: 0, failed: 0 }))
+  expect(pedos?.rescanned).toEqual({ scanned: 1, found: 0, failed: 0 })
 })

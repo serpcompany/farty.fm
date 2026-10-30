@@ -35,7 +35,7 @@ The note a Melodic Recording naturally sounds, octave included: G2 and G3 are di
 _Avoid_: Key, tone
 
 **Re-scan**:
-Running the current Recording Analysis again on a Recording with no note (Noise-like and not placed), from the Recordings tab: one Recording, or all of them one at a time. It says how many now have a note. It never changes a Placed Pitch, and it changes only this browser's analysis (ADR 0017).
+Running the current Recording Analysis again on a Recording with no note (Noise-like and not placed) whose analysis an older Recording Analysis made, from the Recordings tab: one Recording, or all of them one at a time. It says how many now have a note. It never changes a Placed Pitch, and it changes only this browser's analysis (ADR 0017).
 _Avoid_: Reanalysis, re-analyze, refresh
 
 ## Songs and Toots

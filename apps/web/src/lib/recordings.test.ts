@@ -58,7 +58,7 @@ describe('heardSomething', () => {
   })
 
   it('hears every fart in the Fixture Library', async () => {
-    expect(goldenRecordings).toHaveLength(32)
+    expect(goldenRecordings).toHaveLength(38)
     for (const golden of goldenRecordings) {
       const { samples, sampleRate } = await decoded(golden)
       expect(heardSomething(samples, sampleRate), golden.id).toBe(true)

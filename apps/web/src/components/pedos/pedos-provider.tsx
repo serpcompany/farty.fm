@@ -141,6 +141,12 @@ type Pedos = {
    */
   rescanning: Rescanning | null
   /**
+   * What the last Re-scan changed, kept until the next one starts, so a Re-scan that finishes
+   * while the Recordings tab is closed still says so there (#295); null before any, and while one
+   * runs.
+   */
+  rescanned: RescanResult | null
+  /**
    * Re-scans the Recording if it has no note (`canRescan`): runs the current Recording Analysis on
    * it again. Resolves with what changed. While a Re-scan runs, it waits for that one instead.
    */
@@ -209,6 +215,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const [playbackStart, setPlaybackStart] = useState<{ key: string; at: number } | null>(null)
   const [waitsForOtherTabs, setWaitsForOtherTabs] = useState(false)
   const [rescanning, setRescanning] = useState<Rescanning | null>(null)
+  const [rescanned, setRescanned] = useState<RescanResult | null>(null)
   const running = useRef<Promise<RescanResult> | null>(null)
   const savingToots = useRef(new Set<string>())
   /** Counts Toot plays, so only the latest one sets where the playhead starts. */
@@ -506,15 +513,21 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const runRescan = useCallback(
     (targets: (all: Recording[]) => Recording[]): Promise<RescanResult> => {
       if (running.current) return running.current
+      setRescanned(null)
       const run = rescan(
         targets(latest.current ?? []),
         analyze,
         replace,
         (recording, done, total) => setRescanning({ recordingId: recording.id, done, total })
-      ).finally(() => {
-        running.current = null
-        setRescanning(null)
-      })
+      )
+        .then(result => {
+          setRescanned(result)
+          return result
+        })
+        .finally(() => {
+          running.current = null
+          setRescanning(null)
+        })
       running.current = run
       return run
     },
@@ -703,6 +716,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     deleteRecording,
     placeRecording,
     rescanning,
+    rescanned,
     rescanRecording,
     rescanAll,
     importRecordings,

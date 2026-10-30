@@ -19,25 +19,11 @@ test('recording a Noise-like fart says it has no steady note', async ({ page }) 
   )
 })
 
-test('Re-scan, of one fart or all, says when it finds no new note (#282)', async ({ page }) => {
+test('a fart the current analysis found no note in offers no Re-scan (#282)', async ({ page }) => {
   await recordAndSave(page, 2.5)
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page.getByTestId('recording-note')).toHaveText('noise-like')
-
-  const status = page.getByTestId('rescan-status')
-  await page.getByRole('button', { name: /^Re-scan Recording \d+$/ }).click()
-  await expect(status).toHaveText('No new notes')
-  await page.getByRole('button', { name: 'Re-scan all' }).click()
-  await expect(status).toHaveText('No new notes')
-  await expect(page.getByTestId('recording-note')).toHaveText('noise-like')
-
-  // Placed by ear, it has a note, so there's nothing to re-scan.
-  await page.getByRole('button', { name: /is noise-like\. Place it on a note$/ }).click()
-  const picker = page.getByTestId('place-by-ear')
-  await picker.getByRole('button', { name: 'E3', exact: true }).click()
-  await picker.getByRole('button', { name: 'Place at E3' }).click()
-  await expect(picker).toBeHidden()
-  await expect(page.getByTestId('recording-note')).toHaveText('E3')
+  // Analysis is deterministic: a Re-scan could only find what this analysis found.
   await expect(page.getByRole('button', { name: /^Re-scan/ })).toHaveCount(0)
 })
 

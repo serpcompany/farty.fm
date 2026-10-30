@@ -24,7 +24,7 @@ test('says when the Fixture Library did not load, and lets you try again', async
   await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
   await expect(library.getByRole('alert')).toHaveText('The Fixture Library didn’t load. Try again.')
   await expect(library.getByRole('button', { name: 'Load the Fixture Library' })).toBeEnabled()
-  await expect(library.getByTestId('fixture-library-count')).toHaveText('0 of 32')
+  await expect(library.getByTestId('fixture-library-count')).toHaveText('0 of 38')
 })
 
 test('loads the Fixture Library and unlocks every Song it is long enough for', async ({ page }) => {
@@ -33,12 +33,12 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
   await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
   await page.goto('/profile/')
   const library = page.getByTestId('fixture-library')
-  await expect(library.getByTestId('fixture-library-count')).toHaveText('0 of 32')
+  await expect(library.getByTestId('fixture-library-count')).toHaveText('0 of 38')
   await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
   await expect(library.getByRole('button', { name: 'Fixture Library loaded' })).toBeDisabled({
     timeout: 90_000
   })
-  await expect(library.getByTestId('fixture-library-count')).toHaveText('32 of 32')
+  await expect(library.getByTestId('fixture-library-count')).toHaveText('38 of 38')
 
   // A Recording shows its fart's length, rounded down, which "Needs" is measured against (#227).
   // Fixture 002 is Recording 1: a 4.039 s fart in a 4.2 s take, every burst of it (ADR 0016).

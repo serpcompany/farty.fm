@@ -1,5 +1,12 @@
-import { loadAudio, saveAnalysis } from './recording-store'
-import { type Analysis, needsReanalysis, type Recording, songPitch } from './recordings'
+import { loadAudio, loadRecording, saveAnalysis } from './recording-store'
+import {
+  type Analysis,
+  needsReanalysis,
+  placedPitch,
+  type Recording,
+  recordingPitch,
+  songPitch
+} from './recordings'
 import { reportError } from './telemetry/errors'
 import { decodeWav, type PcmAudio } from './wav'
 
@@ -43,20 +50,22 @@ export interface RescanResult {
 
 /**
  * Whether a Re-scan runs on the Recording: an analyzed one with no note, Noise-like and not placed
- * by ear. Analysis is deterministic and `upgradeAnalyses` keeps every analysis current, so a
- * Re-scan of any other Recording would find what it already has.
+ * by ear, whose analysis an older Recording Analysis made (`needsReanalysis`). Analysis is
+ * deterministic, so a Re-scan of any other Recording would find what it already has. Once
+ * `upgradeAnalyses` has brought every Recording to the current analysis, nothing can be re-scanned.
  */
 export function canRescan(recording: Recording): boolean {
-  return recording.analysis.state === 'analyzed' && songPitch(recording) === null
+  return needsReanalysis(recording) && songPitch(recording) === null
 }
 
 /**
  * Re-scan (#282): runs the current Recording Analysis again on each of `recordings` with no note
- * (`canRescan`), one at a time, as `upgradeAnalyses` does, whatever version made its analysis.
- * `scanning` gets each before it runs, with how many came before it and how many there are;
- * `updated` gets each once its fresh analysis is stored. The result counts the ones that went from
- * no note to a note. A Placed Pitch is never one: a placed Recording has a note, and a new analysis
- * keeps it (ADR 0017).
+ * (`canRescan`), one at a time, as `upgradeAnalyses` does. Before each, it reads the Recording
+ * again and skips one deleted or placed by ear since the run began: that one counts as neither
+ * scanned, found nor failed. `scanning` gets each before it runs, with how many came before it and
+ * how many there are; `updated` gets each once its fresh analysis is stored. The result counts the
+ * ones whose new analysis found a Recording Pitch: they went from no note to a note. A Placed Pitch
+ * is never one: a placed Recording has a note, and a new analysis keeps it (ADR 0017).
  *
  * This browser's copy only, like `upgradeAnalyses`: every browser of the account runs the same
  * analysis on the same audio. One that fails keeps its stored analysis and counts as failed.
@@ -68,14 +77,20 @@ export async function rescan(
   scanning: (recording: Recording, done: number, total: number) => void = () => {}
 ): Promise<RescanResult> {
   const targets = recordings.filter(canRescan)
-  const result: RescanResult = { scanned: targets.length, found: 0, failed: 0 }
-  for (const [done, recording] of targets.entries()) {
+  const result: RescanResult = { scanned: 0, found: 0, failed: 0 }
+  for (const [done, listed] of targets.entries()) {
+    const recording = await loadRecording(listed.id)
+    if (!recording || !canRescan(recording)) continue
     scanning(recording, done, targets.length)
     const saved = await reanalyze(recording, analyze)
+    // Deleted while it ran: its audio was gone, or its analysis had nowhere to go.
+    if (saved === null || (saved === 'failed' && !(await loadRecording(recording.id)))) continue
+    result.scanned++
     if (saved === 'failed') result.failed++
-    else if (saved) {
+    else {
       updated(saved)
-      if (songPitch(saved) !== null) result.found++
+      // Placed by ear while it ran: it has a note, but not one this analysis found.
+      if (recordingPitch(saved) !== null && placedPitch(saved) === null) result.found++
     }
   }
   return result

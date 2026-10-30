@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Spinner } from '@/components/ui/spinner'
-import { canRescan, type RescanResult, rescanSummary } from '@/lib/analysis-upgrade'
+import { canRescan, rescanSummary } from '@/lib/analysis-upgrade'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import {
@@ -41,12 +41,10 @@ export function RecordingsScreen() {
   const pedos = usePedos()
   const [deleting, setDeleting] = useState<Recording | null>(null)
   const [placing, setPlacing] = useState<string | null>(null)
-  // What the last Re-scan changed, until the screen closes.
-  const [rescanned, setRescanned] = useState<RescanResult | null>(null)
-  const rescanWith = (run: () => Promise<RescanResult>) => {
-    setRescanned(null)
-    void run().then(setRescanned)
-  }
+  // The last Re-scan's result goes into the live region after it opens, so a result that came
+  // while the tab was closed is announced when the user comes back, not only shown.
+  const [opened, setOpened] = useState(false)
+  useEffect(() => setOpened(true), [])
 
   // The page comes back on the Record tab, so the confirmation and the picker don't stay open.
   useEffect(() => {
@@ -70,7 +68,7 @@ export function RecordingsScreen() {
 
   const count = pedos.recordings.length
   const noNote = pedos.recordings.filter(canRescan).length
-  const { rescanning } = pedos
+  const { rescanning, rescanned } = pedos
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
       <div className="flex items-center justify-between gap-2 pt-4 pb-3">
@@ -80,7 +78,7 @@ export function RecordingsScreen() {
             variant="ghost"
             className="h-11 text-base text-primary"
             disabled={rescanning !== null}
-            onClick={() => rescanWith(pedos.rescanAll)}
+            onClick={() => void pedos.rescanAll()}
           >
             Re-scan all
           </Button>
@@ -94,6 +92,7 @@ export function RecordingsScreen() {
             Re-scanning {rescanning.done + 1} of {rescanning.total}
           </p>
         ) : (
+          opened &&
           rescanned !== null &&
           rescanning === null && <p className="px-4 pb-3 text-sm">{rescanSummary(rescanned)}</p>
         )}
@@ -131,7 +130,7 @@ export function RecordingsScreen() {
                 key={recording.id}
                 recording={recording}
                 onPlace={() => setPlacing(recording.id)}
-                onRescan={() => rescanWith(() => pedos.rescanRecording(recording.id))}
+                onRescan={() => void pedos.rescanRecording(recording.id)}
                 onDelete={() => setDeleting(recording)}
               />
             ))}
