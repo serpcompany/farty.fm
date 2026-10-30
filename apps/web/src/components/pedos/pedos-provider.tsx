@@ -38,7 +38,8 @@ import {
   heardSomething,
   maximumTakeSeconds,
   type Recording,
-  songPitch
+  songPitch,
+  TakeLevels
 } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
@@ -60,11 +61,55 @@ import { welcomedKey } from '@/lib/welcomed'
 /** A just-recorded take that hasn't been saved or discarded yet. */
 export type Draft = { audio: PcmAudio; seconds: number; waveform: number[] }
 
+/**
+ * Record's states (#281): getting the microphone ready, recording once its audio comes in, and
+ * finishing the take after Stop. `hearsNothing`: about 2 s in, the take so far is one
+ * `heardSomething` would refuse, so Record says it can't hear anything. The take goes on.
+ */
 export type Capture =
   | { kind: 'idle' }
   | { kind: 'starting' }
-  | { kind: 'recording'; startedAt: number }
-  | { kind: 'finishing' }
+  | { kind: 'recording'; startedAt: number; hearsNothing: boolean }
+  | { kind: 'finishing'; startedAt: number; stoppedAt: number }
+
+/** How long a take records before Record says it can't hear anything, if it can't. */
+export const hintAfterMs = 2000
+
+/**
+ * Record's live level, 0…1, from the take's batches (`TakeLevels.level`). It's kept outside React
+ * state, so only the level redraws with each batch: `useSyncExternalStore(subscribe, current)`.
+ */
+export type InputLevel = {
+  current(): number
+  subscribe(listener: () => void): () => void
+}
+
+function inputLevelStore(): InputLevel & { set(level: number): void } {
+  let level = 0
+  const listeners = new Set<() => void>()
+  return {
+    current: () => level,
+    subscribe(listener) {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+    set(next) {
+      if (next === level) return
+      level = next
+      for (const listener of listeners) listener()
+    }
+  }
+}
+
+/** The take being recorded, with its timers: the 30 s limit and the hint's 2 s. */
+type TakeInProgress = { take: Take; startedAt: number; limit: number; hint: number }
+
+/** Clears the take's timers and its level, as it stops or is lost. */
+function letGo(current: TakeInProgress, inputLevel: { set(level: number): void }): void {
+  clearTimeout(current.limit)
+  clearTimeout(current.hint)
+  inputLevel.set(0)
+}
 
 /** The full-screen record flow after Stop: Review, then Result, with their error states. */
 export type Flow =
@@ -118,6 +163,8 @@ type Pedos = {
   songRows: SongRow[]
   showsWelcome: boolean
   capture: Capture
+  /** The take's live level while recording; 0 otherwise. */
+  inputLevel: InputLevel
   flow: Flow | null
   problem: RecordProblem | null
   nowPlaying: NowPlaying
@@ -209,7 +256,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const savingToots = useRef(new Set<string>())
   /** Counts Toot plays, so only the latest one sets where the playhead starts. */
   const tootPlays = useRef(0)
-  const take = useRef<{ take: Take; limit: number } | null>(null)
+  const take = useRef<TakeInProgress | null>(null)
+  const [inputLevel] = useState(inputLevelStore)
   // The Recordings as last rendered, to compare Pitch Coverage after an analysis.
   const latest = useRef<Recording[] | null>(null)
   useEffect(() => {
@@ -350,8 +398,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     const current = take.current
     if (!current) return
     take.current = null
-    clearTimeout(current.limit)
-    setCapture({ kind: 'finishing' })
+    letGo(current, inputLevel)
+    setCapture({ kind: 'finishing', startedAt: current.startedAt, stoppedAt: Date.now() })
     const audio = await current.take.stop()
     setCapture({ kind: 'idle' })
     // Judged from the audio, pre-roll included, not from how long the take lasted.
@@ -369,7 +417,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         waveform: waveformLevels(samples, 40)
       }
     })
-  }, [])
+  }, [inputLevel])
 
   const startRecording = useCallback(async () => {
     if (capture.kind !== 'idle' || flow) return
@@ -381,7 +429,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         () => {
           // A call or another app took the microphone: the take is lost.
           if (!take.current) return
-          clearTimeout(take.current.limit)
+          letGo(take.current, inputLevel)
           take.current = null
           setCapture({ kind: 'idle' })
           setProblem('interrupted')
@@ -389,10 +437,48 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         // The first try stood still and the take tries once more: reported, though not shown.
         error => reportError('mic-start-retried', error)
       )
-      const limit = window.setTimeout(() => void stopRecording(), maximumTakeSeconds * 1000)
-      take.current = { take: started, limit }
-      setCapture({ kind: 'recording', startedAt: Date.now() })
+      // Audio is coming in: this is where Record shows it records.
+      const current: TakeInProgress = {
+        take: started,
+        startedAt: Date.now(),
+        limit: window.setTimeout(() => void stopRecording(), maximumTakeSeconds * 1000),
+        hint: 0
+      }
+      take.current = current
+      // The level and the hint follow the take's own batches (#281). The hint is the test Stop
+      // applies, on the take so far, so the two never disagree.
+      const levels = new TakeLevels(started.sampleRate)
+      let judging = false
+      const judge = () => {
+        // A take that has stopped or been lost never judges the one after it.
+        if (take.current !== current) return
+        const hearsNothing = !levels.heard()
+        setCapture(shown =>
+          shown.kind === 'recording' && shown.hearsNothing !== hearsNothing
+            ? { ...shown, hearsNothing }
+            : shown
+        )
+      }
+      started.listen(batch => {
+        if (take.current !== current) return
+        levels.add(batch)
+        inputLevel.set(levels.level)
+        if (judging) judge()
+      })
+      current.hint = window.setTimeout(() => {
+        judging = true
+        judge()
+      }, hintAfterMs)
+      setCapture({ kind: 'recording', startedAt: current.startedAt, hearsNothing: false })
     } catch (error) {
+      // Something failed after the take started: it stops capturing, rather than running on to
+      // its 30 s limit behind the idle screen.
+      const lost = take.current
+      if (lost) {
+        take.current = null
+        letGo(lost, inputLevel)
+        lost.take.cancel()
+      }
       setCapture({ kind: 'idle' })
       // The page was hidden, or widened into the product page, before the microphone opened.
       if (error instanceof MicrophoneReleasedError) return
@@ -400,7 +486,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       reportError(denied ? 'mic-denied' : 'mic-start-failed', error)
       setProblem(denied ? 'microphoneOff' : 'couldNotStart')
     }
-  }, [capture.kind, flow, stopRecording])
+  }, [capture.kind, flow, stopRecording, inputLevel])
 
   // A new build's reload waits for the take and the record flow after it to close
   // (`stale-build.ts`, #222).
@@ -671,6 +757,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     songRows: rows,
     showsWelcome,
     capture,
+    inputLevel,
     flow,
     problem,
     nowPlaying,
