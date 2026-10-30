@@ -205,11 +205,12 @@ type Pedos = {
    * Places a Noise-like Recording on a MIDI note by ear, or takes it off with null (ADR 0015), and
    * trims it to `handles`, or takes its Trim off with null (ADR 0019). A field
    * left out stays. Every Song uses it there at once; it still plays raw, at its own pitch.
+   * False when the fart between the handles couldn't be found, and then nothing changes.
    */
   placeRecording(
     id: string,
     change: { placedPitch?: number | null; handles?: Trim | null }
-  ): Promise<void>
+  ): Promise<boolean>
   /**
    * The Re-scan running (#282): the Recording it is on, how many came before it, and how many it
    * runs on; null when none runs.
@@ -648,7 +649,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
 
   // As `renameToot`: the list, and so every Song's coverage, changes at once. A Trim keeps the
   // handles as they are, and its fart is found first, in the analysis worker (`trimBounds`, ADR
-  // 0019).
+  // 0019). If that fails, nothing is saved and the picker says so.
   const placeRecording = useCallback(
     async (
       id: string,
@@ -659,12 +660,14 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         if (handles !== undefined) change.trim = handles && (await trimBetween(id, handles))
       } catch (error) {
         reportError('recording-trim-failed', error)
+        return false
       }
-      if (Object.keys(change).length === 0) return
+      if (Object.keys(change).length === 0) return true
       setRecordings(list => list?.map(r => (r.id === id ? { ...r, ...change } : r)) ?? null)
       await store
         .placeRecording(id, change)
         .catch(error => reportError('recording-place-failed', error))
+      return true
     },
     []
   )

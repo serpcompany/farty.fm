@@ -135,6 +135,8 @@ function Picker({
   // Where the handles are, and the fart the zoom frames: it follows them once a drag lets go.
   const [pending, setPending] = useState(current)
   const [framed, setFramed] = useState(current)
+  const [saving, setSaving] = useState(false)
+  const [failed, setFailed] = useState(false)
   const isPlaying = pedos.nowPlaying === recording.id
   const view = zoomView(framed, recording.seconds, trimming)
   const audio = useTake(recording)
@@ -161,12 +163,22 @@ function Picker({
     setPending(part)
     setFramed(part)
   }
-  const place = () => {
+  // A new Trim's fart is found before it's saved; if that fails, the picker stays open and says so.
+  const place = async () => {
     const change: { placedPitch?: number | null; handles?: Trim | null } = {}
     if (selected !== null && selected !== placed) change.placedPitch = selected
     if (!samePart(pending, current)) change.handles = samePart(pending, found) ? null : pending
-    if (Object.keys(change).length > 0) void pedos.placeRecording(recording.id, change)
-    onDone()
+    if (!change.handles) {
+      if (Object.keys(change).length > 0) void pedos.placeRecording(recording.id, change)
+      onDone()
+      return
+    }
+    setSaving(true)
+    setFailed(false)
+    const saved = await pedos.placeRecording(recording.id, change)
+    setSaving(false)
+    if (saved) onDone()
+    else setFailed(true)
   }
   const leave = () => {
     if (placed !== null) void pedos.placeRecording(recording.id, { placedPitch: null })
@@ -299,10 +311,15 @@ function Picker({
       />
 
       <div className="flex flex-col gap-2">
+        {failed && (
+          <p role="alert" className="text-sm text-destructive">
+            Couldn't save the trim. Try again.
+          </p>
+        )}
         <Button
           size="lg"
           className="h-12 w-full text-base"
-          disabled={!primary.enabled}
+          disabled={!primary.enabled || saving}
           onClick={place}
         >
           {primary.label}

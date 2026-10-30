@@ -21,6 +21,7 @@ const page = vi.hoisted(() => ({
   stored: [] as Recording[],
   placeRecording: vi.fn(async () => null),
   findTrim: vi.fn(),
+  reportError: vi.fn(),
   rescan:
     vi.fn<
       (
@@ -52,6 +53,7 @@ vi.mock('@/lib/library-sync', () => ({
 }))
 vi.mock('@/lib/analysis-upgrade', () => ({ upgradeAnalyses: async () => {}, rescan: page.rescan }))
 vi.mock('@/lib/analysis/client', () => ({ analyze: vi.fn(), findTrim: page.findTrim }))
+vi.mock('@/lib/telemetry/errors', () => ({ reportError: page.reportError }))
 
 /** Recording 18, a 3.5 s take whose fart has a second burst: the gesture is 0.4 s to 2.1 s. */
 const twoBursts: Recording = {
@@ -294,6 +296,25 @@ it('trims a Recording to its handles, with the fart found between them, and take
   await act(async () => pedos().placeRecording('r18', { handles: null }))
   expect(page.placeRecording).toHaveBeenLastCalledWith('r18', { trim: null })
   expect(page.findTrim).toHaveBeenCalledTimes(2)
+})
+
+it("saves nothing, and says it didn't, when the fart between the handles can't be found", async () => {
+  page.stored = [noiseLike]
+  const pedos = await mount()
+  page.findTrim.mockRejectedValueOnce(new Error('the analysis worker failed'))
+  let saved: boolean | undefined
+  await act(async () => {
+    saved = await pedos().placeRecording('r18', {
+      placedPitch: 40,
+      handles: { startSeconds: 0.3, endSeconds: 1.5 }
+    })
+  })
+  expect(saved).toBe(false)
+  expect(page.reportError).toHaveBeenCalledWith('recording-trim-failed', expect.any(Error))
+  // Not the Placed Pitch alone either: the picker stays open to try both again.
+  expect(page.placeRecording).not.toHaveBeenCalled()
+  expect(pedos().recording('r18')?.trim).toBeFalsy()
+  expect(pedos().recording('r18')?.placedPitch).toBeFalsy()
 })
 
 it('keeps a Trim saved while a Re-scan ran: the Re-scan changes only the analysis', async () => {

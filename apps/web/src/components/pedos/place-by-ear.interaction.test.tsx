@@ -14,7 +14,7 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
 const page = vi.hoisted(() => ({
   recording: undefined as Recording | undefined,
-  placeRecording: vi.fn(),
+  placeRecording: vi.fn(async (): Promise<boolean> => true),
   togglePlayback: vi.fn(),
   playRecording: vi.fn(),
   stopPlayback: vi.fn(),
@@ -263,6 +263,24 @@ describe('placing a Noise-like Recording by ear', () => {
     expect(readout()).toBe('0.00 s to 0.90 s')
     await tap('Remove trim')
     expect(page.placeRecording).toHaveBeenCalledWith('a', { handles: null })
+  })
+
+  it("stays open and says so when the trim can't be saved", async () => {
+    page.placeRecording.mockResolvedValueOnce(false)
+    await open(noiseLike())
+    await tap('Trim')
+    await press(handle('Where the fart ends'), 'ArrowLeft', true)
+    await tap('Save trim')
+    expect(onClose).not.toHaveBeenCalled()
+    expect(document.querySelector('[role="alert"]')?.textContent).toBe(
+      "Couldn't save the trim. Try again."
+    )
+
+    // The handles are still where they were, and a second try saves it.
+    expect(readout()).toBe('0.00 s to 0.80 s')
+    await tap('Save trim')
+    expect(page.placeRecording).toHaveBeenCalledTimes(2)
+    expect(onClose).toHaveBeenCalledOnce()
   })
 
   it('leaves a moved handle unsaved on Leave it out', async () => {
