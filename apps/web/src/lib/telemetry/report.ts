@@ -14,6 +14,8 @@ export const ERROR_CODES = [
   'unhandled-rejection',
   'mic-denied',
   'mic-start-failed',
+  /** A take's context stood still, and `startTake` tried once more by itself (#280). */
+  'mic-start-retried',
   'recording-save-failed',
   /** Keeping where a Noise-like Recording is placed by ear failed (ADR 0015). */
   'recording-place-failed',

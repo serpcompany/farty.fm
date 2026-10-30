@@ -1,13 +1,45 @@
 /**
  * One AudioContext for recording and playback. iPhone Safari allows only a few, so the app makes
- * one and keeps it. Record may make it before a tap, to load the capture processor, but it starts
- * only from a tap: Record, Play, or one that opens a screen which plays (`startAudioInTap`).
+ * one and keeps it until the page hides. Record may make it before a tap, to load the capture
+ * processor, but it starts only from a tap: Record, Play, or one that opens a screen which plays
+ * (`startAudioInTap`).
  */
 let shared: AudioContext | null = null
+/** How many times the page has hidden, and how many it had when `shared` was made. */
+let hides = 0
+let sharedAtHide = 0
+let watchingHides = false
 
+/**
+ * The shared context. One that lived through a hidden page is closed and replaced once the page
+ * shows: on iPhone it can say it runs while its clock stands still, so nothing it plays or records
+ * comes through. Production's reports since #247 were all that, on the first tap after the app
+ * came back, and a fresh context recorded (#280).
+ */
 export function audioContext(): AudioContext {
-  if (!shared || shared.state === 'closed') shared = new AudioContext()
+  watchHides()
+  const hidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
+  if (shared && shared.state !== 'closed') {
+    if (sharedAtHide === hides || hidden) return shared
+    shared.close().catch(() => {})
+  }
+  shared = new AudioContext()
+  // One made while the page is hidden is replaced too, once it shows.
+  sharedAtHide = hidden ? -1 : hides
   return shared
+}
+
+function watchHides(): void {
+  if (watchingHides || typeof document === 'undefined') return
+  watchingHides = true
+  const hid = () => {
+    hides += 1
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') hid()
+  })
+  // A page put in the back-forward cache.
+  window.addEventListener('pagehide', hid)
 }
 
 /**

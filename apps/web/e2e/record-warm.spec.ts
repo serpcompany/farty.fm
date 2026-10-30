@@ -39,6 +39,38 @@ function setVisibility(page: Page, state: 'hidden' | 'visible'): Promise<void> {
   }, state)
 }
 
+/**
+ * Breaks each context with a capture processor as the page hides, as iPhone Safari did: once a
+ * tap resumes it, it says it runs, but its clock stands still (#280). Add it after the fake
+ * microphone, whose AudioWorkletNode it wraps.
+ */
+function stallContextsOnHide(): void {
+  const contexts = new Set<BaseAudioContext>()
+  const Counted = window.AudioWorkletNode
+  window.AudioWorkletNode = class extends Counted {
+    constructor(...args: ConstructorParameters<typeof AudioWorkletNode>) {
+      super(...args)
+      if (args[1] === 'pedos-capture') contexts.add(args[0])
+    }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'hidden') return
+    for (const context of contexts) {
+      if (!(context instanceof AudioContext) || context.state === 'closed') continue
+      const close = context.close.bind(context)
+      let closed = false
+      void context.suspend()
+      Object.defineProperty(context, 'state', { get: () => (closed ? 'closed' : 'running') })
+      context.resume = async () => {}
+      context.close = () => {
+        closed = true
+        return close()
+      }
+    }
+    contexts.clear()
+  })
+}
+
 /** Longer than a hidden page that keeps listening keeps its microphone (`recorder.ts`). */
 const hiddenListeningMs = 1500
 /** Longer than a shown page waits for its muted microphone to unmute (`recorder.ts`). */
@@ -394,11 +426,43 @@ test.describe("with the page's own microphone grant, as on iPhone", () => {
     expect(mic.calls).toBe(1)
     expect(mic.opened).toBe(1)
     expect(mic.live).toBe(1)
-    expect(mic.closed).toBe(0)
+    // The stream moved onto a fresh context as the page showed: the old one's processor closed.
+    expect(mic.nodes).toBe(2)
+    expect(mic.closed).toBe(1)
     // The ring was emptied as the track muted, and again as it unmuted.
     expect(mic.flushed).toBeGreaterThanOrEqual(2)
     // The take after the page showed again captured at once, with its pre-roll.
     const timings = clickToFirstBatch(mic.clicks, mic.batches)
+    expect(timings.at(-1)).toBeLessThan(100)
+  })
+
+  // Production's only reports since #247: the first tap after the app came back, on a context that
+  // said it ran while its clock stood still (#280). A context that lived through the hide is
+  // replaced as the page shows, so this one is never used again.
+  test('the first tap after coming back records at once, though the old context stood still', async ({
+    page
+  }) => {
+    await page.addInitScript(stallContextsOnHide)
+    await page.goto('/')
+    await firstTap(page)
+
+    await setVisibility(page, 'hidden')
+    await interrupt(page, 'mute')
+    await page.waitForTimeout(hiddenListeningMs)
+    await setVisibility(page, 'visible')
+    await interrupt(page, 'unmute')
+    // The person taps a second after coming back, as both reports did.
+    await page.waitForTimeout(1000)
+    await fartAndRecord(page)
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByTestId('result-note')).toHaveText('G3')
+
+    const mic = await microphone(page)
+    // On the stream kept through the hide, so iPhone doesn't ask again (#222).
+    expect(mic.calls).toBe(1)
+    expect(mic.live).toBe(1)
+    const timings = clickToFirstBatch(mic.clicks, mic.batches)
+    console.log(`click → first capture batch after coming back (ms): ${timings.at(-1)?.toFixed(1)}`)
     expect(timings.at(-1)).toBeLessThan(100)
   })
 
@@ -435,7 +499,9 @@ test.describe("with the page's own microphone grant, as on iPhone", () => {
     const mic = await microphone(page)
     expect(mic.calls).toBe(1)
     expect(mic.live).toBe(1)
-    expect(mic.closed).toBe(0)
+    // On a fresh context: only the old one's processor closed (#280).
+    expect(mic.nodes).toBe(2)
+    expect(mic.closed).toBe(1)
     expect(mic.sessions.at(-1)).toBe('play-and-record')
   })
 
