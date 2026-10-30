@@ -10,6 +10,8 @@
     "cut_at_reattack": false,
     "end_s": 0.653515,
     "end_sample": 28820,
+    "lead_start_s": 0.0,
+    "lead_start_sample": 0,
     "pitch_end_s": 0.653515,
     "pitch_end_sample": 28820,
     "start_s": 0.0,

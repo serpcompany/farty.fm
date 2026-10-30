@@ -36,7 +36,7 @@ from melody import load_catalog
 GOLDEN = engine.ROOT / "fixtures/golden"
 SHIP_LIST = engine.ROOT / "apps/web/src/lib/catalog/ship-list.json"  # the Songs the web app ships
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")  # README.md is written by hand
-FORMAT_VERSION = 7  # 7: Songs play every burst, the pitch reads the first (ADR 0016); 6: Songs' `bar_lines` (#232); 5: Songs play farts raw (ADR 0012); 4: the length rule (#221)
+FORMAT_VERSION = 8  # 8: a fart's lead-in plays before its beat (#287); 7: Songs play every burst, the pitch reads the first (ADR 0016); 6: Songs' `bar_lines` (#232); 5: Songs play farts raw (ADR 0012); 4: the length rule (#221)
 COVERAGE_SEEDS = 10  # random subsets per size in coverage.json
 
 
@@ -105,6 +105,8 @@ def recording_json(entry, src):
             "pitch_end_sample": src.pitch_end,
             "pitch_end_s": num(src.pitch_end / engine.SR, 6),
             "cut_at_reattack": bool(src.cut_at_reattack),
+            "lead_start_sample": src.start - len(src.lead_in),
+            "lead_start_s": num((src.start - len(src.lead_in)) / engine.SR, 6),
         },
         "pitch_contour": {
             "sample_rate": engine.SR,
@@ -191,7 +193,7 @@ def arrangement_json(c, m, library, sources):
                 "shift_semitones": num(a.shift_semitones, 4),
                 "heard_cents": p["cents"],
                 "fart_cents": p["fart_cents"],
-                "render": {"start_s": e["start_s"], "len_s": e["len_s"], "gain_db": e["gain_db"]},
+                "render": {"start_s": e["start_s"], "len_s": e["len_s"], "gain_db": e["gain_db"], "lead_s": e["lead_s"]},
             }
         )
     return {

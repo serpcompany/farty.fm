@@ -14,6 +14,8 @@ Until #226 every note resampled its fart to the note's pitch and held it there, 
 
 Update 2026-10-30 (ADR 0016, #276): rendering trims only the silence around a fart. It no longer cuts a fart at its second burst: every burst plays, up to the note's end. "No second attack inside a note" now means one the note's own fart doesn't have: `evaluate.py` leaves out a re-attack within 30 ms of one in the dry stretch the note plays. Every app Song unlocks with the Fixture Library, and every unlocked catalog Song still passes the bar.
 
+Update 2026-10-30 (#287): a fart's quiet lead-in, from its first sound to its attack, plays just before the note's beat when the rest before the note has room, so the attack still lands on the beat. It never fills the 25 ms gap after a note, is never mixed over another fart and is cut at the Song's start. Rendering still only trims, cuts, fades, sets the level from the attack and mixes, at the fart's own pitch and speed. Every unlocked catalog Song still passes the bar with every onset on time. ADR 0016's update has the measurements, including why filling the gap was ruled out.
+
 `render()` and `evaluate.py` in `tools/melody-lab/` define this, and `apps/web/src/lib/engine/` matches them. `evaluate.py` measures fidelity with YIN frame by frame: on each note's loud frames, the pitch it reads in the render less the pitch it reads on the same frame of the dry fart, the stretch the note plays. The note is faithful when the median difference is within ±50 cents. The PDMX import's render gate (`tools/catalog/import_pdmx.py`) uses the same bar.
 
 ## Why

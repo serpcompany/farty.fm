@@ -26,6 +26,7 @@
       "recording": "002",
       "render": {
         "gain_db": 2.0,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 0.0
       },
@@ -40,6 +41,7 @@
       "recording": "002",
       "render": {
         "gain_db": 0.5,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 0.5
       },
@@ -54,6 +56,7 @@
       "recording": "002",
       "render": {
         "gain_db": 0.5,
+        "lead_s": 0.0,
         "len_s": 0.975,
         "start_s": 1.0
       },
@@ -68,6 +71,7 @@
       "recording": "002",
       "render": {
         "gain_db": 2.0,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 2.0
       },
@@ -82,6 +86,7 @@
       "recording": "002",
       "render": {
         "gain_db": 0.5,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 2.5
       },
@@ -96,6 +101,7 @@
       "recording": "002",
       "render": {
         "gain_db": 0.5,
+        "lead_s": 0.0,
         "len_s": 0.975,
         "start_s": 3.0
       },
@@ -110,6 +116,7 @@
       "recording": "002",
       "render": {
         "gain_db": 2.0,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 4.0
       },
@@ -124,6 +131,7 @@
       "recording": "032",
       "render": {
         "gain_db": 4.5,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 4.5
       },
@@ -138,6 +146,7 @@
       "recording": "095",
       "render": {
         "gain_db": -0.4,
+        "lead_s": 0.0,
         "len_s": 0.642,
         "start_s": 5.0
       },
@@ -152,6 +161,7 @@
       "recording": "022",
       "render": {
         "gain_db": 8.1,
+        "lead_s": 0.0,
         "len_s": 0.308,
         "start_s": 5.667
       },
@@ -166,6 +176,7 @@
       "recording": "002",
       "render": {
         "gain_db": 2.0,
+        "lead_s": 0.0,
         "len_s": 1.975,
         "start_s": 6.0
       },
@@ -180,6 +191,7 @@
       "recording": "069",
       "render": {
         "gain_db": -3.4,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 8.0
       },
@@ -194,6 +206,7 @@
       "recording": "069",
       "render": {
         "gain_db": -4.9,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 8.5
       },
@@ -208,6 +221,7 @@
       "recording": "069",
       "render": {
         "gain_db": -4.9,
+        "lead_s": 0.0,
         "len_s": 0.642,
         "start_s": 9.0
       },
@@ -222,6 +236,7 @@
       "recording": "069",
       "render": {
         "gain_db": -4.9,
+        "lead_s": 0.0,
         "len_s": 0.308,
         "start_s": 9.667
       },
@@ -236,6 +251,7 @@
       "recording": "069",
       "render": {
         "gain_db": -3.4,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 10.0
       },
@@ -250,6 +266,7 @@
       "recording": "002",
       "render": {
         "gain_db": 0.5,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 10.5
       },
@@ -264,6 +281,7 @@
       "recording": "002",
       "render": {
         "gain_db": 0.5,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 11.0
       },
@@ -278,6 +296,7 @@
       "recording": "002",
       "render": {
         "gain_db": 0.8,
+        "lead_s": 0.0,
         "len_s": 0.225,
         "start_s": 11.5
       },
@@ -292,6 +311,7 @@
       "recording": "002",
       "render": {
         "gain_db": 0.8,
+        "lead_s": 0.0,
         "len_s": 0.225,
         "start_s": 11.75
       },
@@ -306,6 +326,7 @@
       "recording": "002",
       "render": {
         "gain_db": 2.0,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 12.0
       },
@@ -320,6 +341,7 @@
       "recording": "022",
       "render": {
         "gain_db": 8.1,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 12.5
       },
@@ -334,6 +356,7 @@
       "recording": "022",
       "render": {
         "gain_db": 8.1,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 13.0
       },
@@ -348,6 +371,7 @@
       "recording": "002",
       "render": {
         "gain_db": 0.5,
+        "lead_s": 0.0,
         "len_s": 0.475,
         "start_s": 13.5
       },
@@ -362,6 +386,7 @@
       "recording": "022",
       "render": {
         "gain_db": 9.6,
+        "lead_s": 0.0,
         "len_s": 0.975,
         "start_s": 14.0
       },
@@ -376,6 +401,7 @@
       "recording": "032",
       "render": {
         "gain_db": 4.5,
+        "lead_s": 0.0,
         "len_s": 0.975,
         "start_s": 15.0
       },

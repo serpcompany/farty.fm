@@ -61,7 +61,7 @@ export interface GoldenArrangement {
         heard_cents: number | null
         /** How far the note sounds from its own fart played dry (ADR 0012). */
         fart_cents: number | null
-        render: { start_s: number; len_s: number; gain_db: number }
+        render: { start_s: number; len_s: number; gain_db: number; lead_s: number }
       }[]
     | null
   metrics: {
