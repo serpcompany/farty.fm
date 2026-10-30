@@ -1,4 +1,5 @@
 import { padSound } from '../pads'
+import { AudioNotDownloaded } from '../recording-store'
 import { audioContext, setPlaybackSession } from './context'
 
 // The Sound Pad's player (#277). Unlike the app's single player (`player.ts`), every tap plays a
@@ -25,13 +26,15 @@ export class PadAudioUnavailable extends Error {
 /**
  * Decodes Recording `id`'s audio on the shared AudioContext and trims it as a Pad plays it, once:
  * a later call gets the same sound. A failed one is tried again on the next call. It fails with
- * `PadAudioUnavailable` when `wav` can't get the audio, and with the decode's own error otherwise.
+ * `PadAudioUnavailable` only when `wav`'s download couldn't be fetched now (`AudioNotDownloaded`),
+ * and otherwise with the error itself: a database that can't be read, a Recording with no audio
+ * here or in the account, or a decode.
  */
 export function loadPadSound(id: string, wav: () => Promise<ArrayBuffer>): Promise<AudioBuffer> {
   let loading = sounds.get(id)
   if (!loading) {
     const audio = wav().catch(error => {
-      throw new PadAudioUnavailable(error)
+      throw error instanceof AudioNotDownloaded ? new PadAudioUnavailable(error) : error
     })
     const started = audio.then(async data => {
       const context = audioContext()

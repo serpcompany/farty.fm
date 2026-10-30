@@ -15,7 +15,13 @@ import * as store from '@/lib/recording-store'
 import { type Recording, recordingName, songPitch } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
-import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/toot'
+import {
+  noteCaption,
+  type SongToot,
+  type SongTootDraft,
+  soundingPitch,
+  type TootDraft
+} from '@/lib/toot'
 import {
   type CheckoutReturn,
   clearCheckoutReturn,
@@ -37,7 +43,7 @@ import { Waveform } from './waveform'
 
 type Phase =
   | { kind: 'making' }
-  | { kind: 'ready'; draft: TootDraft; back: CheckoutReturn | null }
+  | { kind: 'ready'; draft: SongTootDraft; back: CheckoutReturn | null }
   | { kind: 'locked' }
   | { kind: 'failed' }
 
@@ -173,6 +179,7 @@ const SAVE_PROBLEMS = {
   tooMany: "You've started a lot of payments. Try again later.",
   failed: "Couldn't start the payment.",
   notPaidYet: "Your payment hasn't come through yet. Tap Save to check again.",
+  notKept: "This take can't be saved in this browser: it can't keep the take while you pay.",
   unreachable: "Couldn't reach your account. Tap Save to try again."
 }
 
@@ -185,14 +192,37 @@ function heldByAnAccount(): boolean {
   }
 }
 
+/** The made Toot of a Song, with Save to Toots pinned above the tabs. */
+export function Ready({ draft, back }: { draft: SongTootDraft; back: CheckoutReturn | null }) {
+  return (
+    <>
+      <TootLayout toot={draft} song={draft.song} />
+      <SaveToToots draft={draft} back={back} />
+    </>
+  )
+}
+
 /**
- * The made Toot, with Save to Toots pinned above the tabs. Saving needs an account everywhere
- * (#237): a guest's Save opens the account step first, and carries on once it signs in. Where
- * saving is paid (ADR 0010), Save goes to Checkout for this Toot; back from Checkout, it saves the
- * Toot once the server says it's paid. A Toot of this Song paid for and never saved is saved
- * instead of paying again. Where it's free, Save saves, offline too in an account's browser.
+ * Save to Toots, pinned above the tabs, for a made Toot: of a Song (Song Creator), or of a Sound
+ * Pad Performance (the Sound Pad, ADR 0017). Saving needs an account everywhere (#237): a guest's
+ * Save opens the account step first, and carries on once it signs in. Where saving is paid
+ * (ADR 0010), Save goes to Checkout for this Toot; back from Checkout, it saves the Toot once the
+ * server says it's paid. A Toot of this Song paid for and never saved is saved instead of paying
+ * again. Where it's free, Save saves, offline too in an account's browser.
+ *
+ * `keep`, before Checkout, keeps what makes the Toot again back from it (the Sound Pad's take):
+ * false when this browser can't, and then Checkout isn't started, so nothing is paid for that
+ * can't be saved.
  */
-export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null }) {
+export function SaveToToots({
+  draft,
+  back,
+  keep: keepForCheckout
+}: {
+  draft: TootDraft
+  back: CheckoutReturn | null
+  keep?: (accountId: string) => boolean
+}) {
   const pedos = usePedos()
   const { account, stepOpen, openStep, retry } = useAccount()
   const accountId = account.status === 'signedIn' ? account.id : null
@@ -226,16 +256,20 @@ export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn 
 
   const pay = async (accountId: string) => {
     if (paying.current) return
+    if (keepForCheckout && !keepForCheckout(accountId)) {
+      setProblem('notKept')
+      return
+    }
     paying.current = true
     setBusy('paying')
     setProblem(null)
-    const checkout = await startCheckout(draft.id, draft.song.id, accountId)
+    const checkout = await startCheckout(draft.id, draft.song?.id ?? null, accountId)
     if (checkout.kind === 'pay') {
       // Off to Checkout: Save stays busy while the page goes.
       window.location.assign(checkout.url)
       return
     }
-    if (checkout.kind === 'paidToot') {
+    if (checkout.kind === 'paidToot' && draft.song) {
       // That Toot is made again and saved, as back from its Checkout. This one is left unpaid.
       window.location.replace(paidReturnPath(draft.song.id, checkout.tootId))
       return
@@ -244,7 +278,7 @@ export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn 
     setBusy(null)
     if (checkout.kind === 'paid') {
       if (await save()) clearCheckoutReturn()
-    } else setProblem(checkout.problem)
+    } else setProblem(checkout.kind === 'failed' ? checkout.problem : 'failed')
   }
   /** Saves the Toot, paying first where saving is paid. */
   const keep = (accountId: string) => void (isPaid ? pay(accountId) : save())
@@ -326,37 +360,34 @@ export function Ready({ draft, back }: { draft: TootDraft; back: CheckoutReturn 
   }, [back])
 
   return (
-    <>
-      <TootLayout toot={draft} song={draft.song} />
-      <div className="sticky bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] mt-auto md:bottom-0 bg-linear-to-t from-background from-70% to-transparent px-5 pt-5 pb-3">
-        <Button
-          className="h-12 w-full text-base"
-          disabled={isSaved || busy !== null || waitsForAccount}
-          onClick={tapSave}
-        >
-          {isSaved ? (
-            <>
-              <Check className="size-5" />
-              Saved to Toots
-            </>
-          ) : busy === 'confirming' || waitsForAccount ? (
-            <>
-              <Spinner className="size-5" />
-              Confirming payment…
-            </>
-          ) : isPaid ? (
-            `Save to Toots · ${TOOT_PRICE_LABEL}`
-          ) : (
-            'Save to Toots'
-          )}
-        </Button>
-        {shownProblem && (
-          <p className="pt-2 text-center text-sm text-muted-foreground">
-            {SAVE_PROBLEMS[shownProblem]}
-          </p>
+    <div className="sticky bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] mt-auto md:bottom-0 bg-linear-to-t from-background from-70% to-transparent px-5 pt-5 pb-3">
+      <Button
+        className="h-12 w-full text-base"
+        disabled={isSaved || busy !== null || waitsForAccount}
+        onClick={tapSave}
+      >
+        {isSaved ? (
+          <>
+            <Check className="size-5" />
+            Saved to Toots
+          </>
+        ) : busy === 'confirming' || waitsForAccount ? (
+          <>
+            <Spinner className="size-5" />
+            Confirming payment…
+          </>
+        ) : isPaid ? (
+          `Save to Toots · ${TOOT_PRICE_LABEL}`
+        ) : (
+          'Save to Toots'
         )}
-      </div>
-    </>
+      </Button>
+      {shownProblem && (
+        <p className="pt-2 text-center text-sm text-muted-foreground">
+          {SAVE_PROBLEMS[shownProblem]}
+        </p>
+      )}
+    </div>
   )
 }
 
@@ -378,7 +409,7 @@ export function TootLayout({
   isAudioMissing = false,
   children
 }: {
-  toot: TootDraft | Toot
+  toot: SongTootDraft | SongToot
   song: Song
   isAudioMissing?: boolean
   children?: ReactNode

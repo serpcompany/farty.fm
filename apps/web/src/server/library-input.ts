@@ -1,4 +1,5 @@
-import type { NewRecording, NewToot } from '@/db/library'
+import type { NewRecording, TootFields } from '@/db/library'
+import { isPerformance } from '@/lib/performance'
 import type { Analysis } from '@/lib/recordings'
 import type { TootArrangement } from '@/lib/toot'
 
@@ -212,19 +213,30 @@ function parseArrangement(value: unknown): TootArrangement | null {
   return { transposition: value.transposition, recordingForPitch }
 }
 
-/** The Toot as the browser keeps it (`Toot` in `src/lib/toot.ts`), or null. */
-export function parseToot(value: unknown, id: string): Omit<NewToot, 'audioBytes'> | null {
+/**
+ * The Toot as the browser keeps it (`Toot` in `src/lib/toot.ts`), or null: of a Song, with its
+ * Arrangement, or from the Sound Pad, with `songId: null`, no Arrangement and its Performance
+ * (ADR 0017). A browser on a release before #278 sends no `performance`.
+ */
+export function parseToot(value: unknown, id: string): TootFields | null {
   if (!isObject(value) || value.id !== id) return null
   const { songId, createdAt, seconds } = value
   const title = parseTitle(value.title)
+  if (title === null || !isTime(createdAt) || !isNumberIn(seconds, 0, MAX_SECONDS)) return null
+  const toot = { id, title, createdAt, seconds }
+  if (songId === null) {
+    const { arrangement, performance } = value
+    const valid = (arrangement === null || arrangement === undefined) && isPerformance(performance)
+    if (!valid) return null
+    // Only its own fields: a Performance's are checked, anything else beside them isn't kept.
+    const kept = { recordings: performance.recordings, taps: performance.taps }
+    return { ...toot, songId, arrangement: null, performance: kept }
+  }
   const arrangement = parseArrangement(value.arrangement)
   const valid =
-    title !== null &&
     typeof songId === 'string' &&
     /^[A-Za-z0-9_.-]{1,100}$/.test(songId) &&
-    isTime(createdAt) &&
-    isNumberIn(seconds, 0, MAX_SECONDS) &&
-    arrangement !== null
-  if (!valid) return null
-  return { id, title, songId, createdAt, seconds, arrangement }
+    arrangement !== null &&
+    (value.performance === null || value.performance === undefined)
+  return valid ? { ...toot, songId, arrangement, performance: null } : null
 }

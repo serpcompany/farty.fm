@@ -24,7 +24,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { songs } from '@/lib/catalog/songs.generated'
-import { type Toot, tootDetails } from '@/lib/toot'
+import { PAD_TOOT_TITLE, type Toot, tootDetails } from '@/lib/toot'
 import { cn } from '@/lib/utils'
 import { tootPlayback, usePedos } from './pedos-provider'
 
@@ -170,7 +170,10 @@ function TootRow({
 }) {
   const pedos = usePedos()
   const isPlaying = pedos.nowPlaying === tootPlayback(toot.id)
-  const songTitle = songs.find(song => song.id === toot.songId)?.title ?? ''
+  const songTitle =
+    toot.songId === null
+      ? PAD_TOOT_TITLE
+      : (songs.find(song => song.id === toot.songId)?.title ?? '')
   // Until the next play: the Toot is kept, and its play button tries again.
   const details =
     pedos.tootPlayFailed === toot.id ? `${songTitle} · Couldn't play` : tootDetails(toot, songTitle)

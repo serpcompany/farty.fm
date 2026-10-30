@@ -73,7 +73,7 @@ The Arrangement the app chooses on its own, giving each distinct pitch its own M
 _Avoid_: Smart choose, AI pick, best fit
 
 **Toot**:
-A saved result: a Song played with the user's Recordings, made in Song Creator. It keeps which Recording played each pitch. It is not a conventional song or a music release.
+A saved result, of one of two kinds: a Song played with the user's Recordings, made in Song Creator, which keeps which Recording played each pitch; or a Sound Pad Performance, which keeps which Pad's Recording was tapped and when (ADR 0017). It is not a conventional song or a music release.
 _Avoid_: Created Melody, Melody, Created Song, generated song, track, output
 
 ## Creation areas
@@ -93,6 +93,10 @@ _Avoid_: Sampler, soundboard, drum pad, launchpad
 **Pad**:
 One of the Sound Pad's buttons, holding one Recording of any kind, which a tap plays at once. The Pads start filled with the user's Recordings, lowest Recording Pitch first, and the user can put any Recording on any Pad. The browser keeps which Recording each Pad holds; a guest's Pads last the visit.
 _Avoid_: Button, slot, key
+
+**Performance**:
+What the Sound Pad records between Record and Stop: which Recording each tap played, and when, from the first tap, for up to 30 s. Stop makes it into a Toot, each tap's fart playing raw from its start (ADR 0017).
+_Avoid_: Sequence, pattern, loop, beat, track
 
 ## Testing
 

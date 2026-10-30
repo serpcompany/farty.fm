@@ -3,6 +3,7 @@ import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Account } from './account'
 import { itemKey } from './outbox'
+import type { Performance } from './performance'
 import type { Recording } from './recordings'
 import { type FakeAccount, fakeAccount } from './test-library'
 import { blockedStorage, memoryStorage } from './test-storage'
@@ -87,7 +88,8 @@ describe('openVisit', () => {
       signIn: await import('./account'),
       store: await import('./recording-store'),
       toots: await import('./toot-store'),
-      sync: await import('./library-sync')
+      sync: await import('./library-sync'),
+      takes: await import('./pad-take')
     }
     const visit = page.visit.openVisit()
     await visit.library
@@ -165,6 +167,58 @@ describe('openVisit', () => {
     expect(await held(next)).toEqual(nothing)
     expect(await (await next.store.db()).getAllKeys('downloads')).toEqual([])
     expect(await next.store.loadRecordings()).toEqual([])
+  })
+
+  // The Sound Pad's kept takes (ADR 0017): never one person's shown to another.
+  describe('the Sound Pad’s kept takes', () => {
+    const performance: Performance = {
+      recordings: ['00000000-0000-4000-8000-00000000000a'],
+      taps: [[0, 0]]
+    }
+    const T1 = '11111111-1111-4111-8111-111111111111'
+    const T2 = '22222222-2222-4222-8222-222222222222'
+    const T3 = '33333333-3333-4333-8333-333333333333'
+    const ids = (page: Page) => page.takes.keptTakes().map(take => take.tootId)
+
+    it('go as a guest’s new visit opens, and stay on a reload', async () => {
+      pastFirstOpen()
+      const tab = memoryStorage()
+      const last = await open(signedOut, tab)
+      last.takes.keepTake(T1, performance)
+      expect(ids(await open(signedOut, tab))).toEqual([T1])
+      expect(ids(await open(signedOut))).toEqual([])
+    })
+
+    it('join the account a guest signs in to, as its Recordings do', async () => {
+      pastFirstOpen()
+      const tab = memoryStorage()
+      ;(await open(signedOut, tab)).takes.keepTake(T1, performance)
+      const signedInVisit = await open(signedIn, tab)
+      expect(ids(signedInVisit)).toEqual([T1])
+    })
+
+    it('that never started a Checkout go with another account’s library; one that did stays for it', async () => {
+      const theirs = await open(signedInAs('user-b'))
+      theirs.takes.keepTake(T1, performance)
+      theirs.takes.keepForCheckout(T2, performance, 'user-b')
+      const mine = await open(signedIn)
+      expect(ids(mine)).toEqual([])
+      mine.takes.keepTake(T3, performance)
+      expect(ids(await open(signedInAs('user-b')))).toEqual([T2])
+    })
+
+    it('that never started a Checkout go on Sign out; one that did is back when the account is', async () => {
+      pastFirstOpen()
+      const signedInVisit = await open(signedIn)
+      signedInVisit.takes.keepTake(T1, performance)
+      signedInVisit.takes.keepForCheckout(T2, performance, 'user-a')
+      await signedInVisit.sync.forgetLibrary()
+      expect(localStorage.getItem('pedos.account')).toBeNull()
+      expect(ids(signedInVisit)).toEqual([])
+      // A guest's new visit keeps it, for the account alone.
+      expect(ids(await open(signedOut))).toEqual([])
+      expect(ids(await open(signedIn))).toEqual([T2])
+    })
   })
 
   it('keeps the Recordings a browser held from before #237, and clears those made since', async () => {

@@ -1,4 +1,6 @@
-import { index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { sql } from 'drizzle-orm'
+import { check, index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import type { Performance } from '../lib/performance'
 import type { Analysis } from '../lib/recordings'
 import type { TootArrangement } from '../lib/toot'
 
@@ -145,7 +147,11 @@ export const recordings = sqliteTable(
   ]
 )
 
-/** A Song played by the user's Recordings, with its own rendered audio. */
+/**
+ * A Song, or a Sound Pad Performance, played by the user's Recordings, with its own rendered audio.
+ * A Toot of a Song has its Song and Arrangement; a Sound Pad Toot has neither, and its
+ * Performance instead (ADR 0017).
+ */
 export const toots = sqliteTable(
   'toots',
   {
@@ -153,13 +159,16 @@ export const toots = sqliteTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     id: text('id').notNull(),
-    /** The Song's title until the user renames it. */
+    /** The Song's title, or "Sound Pad", until the user renames it. */
     title: text('title').notNull(),
-    songId: text('song_id').notNull(),
+    /** The catalog Song it plays. Null for a Sound Pad Toot. */
+    songId: text('song_id'),
     createdAt: timestamp('created_at').notNull(),
     seconds: real('seconds').notNull(),
     /** Which Recording plays each of the Song's pitches, and the transposition. */
-    arrangement: text('arrangement', { mode: 'json' }).$type<TootArrangement>().notNull(),
+    arrangement: text('arrangement', { mode: 'json' }).$type<TootArrangement>(),
+    /** What a Sound Pad Toot played: which Recording each tap played, and when. */
+    performance: text('performance', { mode: 'json' }).$type<Performance>(),
     /** The WAV's size in R2. */
     audioBytes: integer('audio_bytes').notNull(),
     updatedAt: timestamp('updated_at').notNull(),
@@ -167,7 +176,13 @@ export const toots = sqliteTable(
   },
   table => [
     primaryKey({ columns: [table.userId, table.id] }),
-    index('toots_user_id_updated_at_idx').on(table.userId, table.updatedAt)
+    index('toots_user_id_updated_at_idx').on(table.userId, table.updatedAt),
+    // Unqualified, so the check reads the same once the migration renames its table.
+    check(
+      'toots_song_or_performance',
+      sql`(song_id is not null and arrangement is not null and performance is null)
+        or (song_id is null and arrangement is null and performance is not null)`
+    )
   ]
 )
 

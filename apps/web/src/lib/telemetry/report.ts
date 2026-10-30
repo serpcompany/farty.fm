@@ -36,6 +36,12 @@ export const ERROR_CODES = [
   /** Loading or decoding a Pad's Recording failed, so the Pad can't play it (#277). */
   'pad-sound-failed',
   /**
+   * A Sound Pad take paid for couldn't be made again, back from Checkout or on the Pad's open: its
+   * kept take is gone, or it played a Recording deleted since (ADR 0017). Its payment is left
+   * unused, to refund.
+   */
+  'pad-paid-take-lost',
+  /**
    * A read or write of the library failed on a lost IndexedDB connection, and again on a fresh
    * one (`withDb`, #222).
    */
