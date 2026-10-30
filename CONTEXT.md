@@ -82,6 +82,14 @@ _Avoid_: Musical Fruit, standard song creator
 The creation area where AI composes a new melody that is played using only the user's Recordings. It adds no vocals, instruments, or backing tracks.
 _Avoid_: Farty AI, AI music
 
+**Sound Pad**:
+The creation area of twelve Pads, where the user plays their Recordings by tapping them, with several at once if they like. Each fart plays raw, trimmed only of the silence around it.
+_Avoid_: Sampler, soundboard, drum pad, launchpad
+
+**Pad**:
+One of the Sound Pad's buttons, holding one Recording of any kind, which a tap plays at once. The Pads start filled with the user's Recordings, lowest Recording Pitch first, and the user can put any Recording on any Pad. The browser keeps which Recording each Pad holds; a guest's Pads last the visit.
+_Avoid_: Button, slot, key
+
 ## Testing
 
 **Internal Tester**:

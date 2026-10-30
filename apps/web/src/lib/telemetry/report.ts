@@ -14,6 +14,8 @@ export const ERROR_CODES = [
   'unhandled-rejection',
   'mic-denied',
   'mic-start-failed',
+  /** A take's context stood still, and `startTake` tried once more by itself (#280). */
+  'mic-start-retried',
   'recording-save-failed',
   /** Keeping where a Noise-like Recording is placed by ear failed (ADR 0015). */
   'recording-place-failed',
@@ -29,6 +31,10 @@ export const ERROR_CODES = [
   /** Song Creator's "Couldn't make this Toot". */
   'toot-make-failed',
   'toot-save-failed',
+  /** Reading or keeping which Recording each of the Sound Pad's Pads plays failed (#277). */
+  'pad-mapping-failed',
+  /** Loading or decoding a Pad's Recording failed, so the Pad can't play it (#277). */
+  'pad-sound-failed',
   /**
    * A read or write of the library failed on a lost IndexedDB connection, and again on a fresh
    * one (`withDb`, #222).

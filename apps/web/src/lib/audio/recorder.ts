@@ -21,10 +21,18 @@ export class MicrophoneReleasedError extends Error {}
  * stopped, a running one that the stream stopped feeding it.
  */
 export class NoMicrophoneAudioError extends Error {
+  /**
+   * The context said it was running, but its clock stood still: Production's only reports since
+   * #247 (#280). A fresh context and stream recorded after it, so `startTake` tries once more.
+   */
+  readonly stoodStill: boolean
+
   constructor(context: AudioContext, clockAt: number) {
     super('No audio from the microphone')
     const state = String(context.state).replace(/[^a-z]/gi, '')
-    const clock = context.currentTime > clockAt ? 'Ran' : 'Stopped'
+    const clockRan = context.currentTime > clockAt
+    this.stoodStill = context.state === 'running' && !clockRan
+    const clock = clockRan ? 'Ran' : 'Stopped'
     this.name = `NoAudio${state.charAt(0).toUpperCase()}${state.slice(1)}Clock${clock}`
   }
 }
@@ -161,22 +169,35 @@ function captureStopped(): void {
  */
 export function openMicrophone(): Promise<Microphone> {
   if (microphone) return Promise.resolve(microphone)
-  if (!opening) {
-    const thisOpening = connect(generation)
-    opening = thisOpening
-    thisOpening.then(
-      opened => {
-        if (opening === thisOpening) {
-          opening = null
-          microphone = opened
-        }
-      },
-      () => {
-        if (opening === thisOpening) opening = null
+  return opening ?? open(connect(generation))
+}
+
+/** Makes `connecting` the microphone that's opening, and the open one once it connects. */
+function open(connecting: Promise<Microphone>): Promise<Microphone> {
+  opening = connecting
+  connecting.then(
+    opened => {
+      if (opening === connecting) {
+        opening = null
+        microphone = opened
       }
-    )
-  }
-  return opening
+    },
+    () => {
+      if (opening === connecting) opening = null
+    }
+  )
+  return connecting
+}
+
+/**
+ * Moves the open microphone onto the current context, keeping its stream: its context lived
+ * through a hidden page, so `audioContext()` has replaced it (#280). The stream is the one iPhone
+ * Safari kept through the hide, so the browser doesn't ask again (#222).
+ */
+function moveMicrophone(mic: Microphone): Promise<Microphone> {
+  if (microphone === mic) microphone = null
+  takeApart(mic)
+  return open(connect(generation, mic))
 }
 
 const microphoneConstraints: MediaStreamConstraints = {
@@ -188,26 +209,33 @@ const microphoneConstraints: MediaStreamConstraints = {
   }
 }
 
-async function connect(openedIn: number): Promise<Microphone> {
+/**
+ * Builds the capture graph on the current context, on a new stream, or on the stream of the
+ * `kept` microphone, whose graph is taken apart, with what it knew of the track.
+ */
+async function connect(openedIn: number, kept?: Microphone): Promise<Microphone> {
   const context = audioContext()
-  setMicrophoneSession(true)
   let stream: MediaStream
-  try {
-    stream = await navigator.mediaDevices.getUserMedia(microphoneConstraints)
-  } catch (error) {
-    if (openedIn !== generation) throw new MicrophoneReleasedError()
-    setMicrophoneSession(false)
-    if (error instanceof DOMException && error.name === 'NotAllowedError') {
-      throw new MicrophoneDeniedError()
+  if (kept) stream = kept.stream
+  else {
+    setMicrophoneSession(true)
+    try {
+      stream = await navigator.mediaDevices.getUserMedia(microphoneConstraints)
+    } catch (error) {
+      if (openedIn !== generation) throw new MicrophoneReleasedError()
+      setMicrophoneSession(false)
+      if (error instanceof DOMException && error.name === 'NotAllowedError') {
+        throw new MicrophoneDeniedError()
+      }
+      throw error
     }
-    throw error
+    granted = true
+    captureStarted()
   }
-  granted = true
-  captureStarted()
   // An interruption is heard from the moment the stream opens. One that comes while the capture
   // processor loads, which takes longest on a slow phone, is heard by the next tap too (#172).
-  let mutedWhileOpening = false
-  let endedWhileOpening = false
+  let mutedWhileOpening = kept?.silenced ?? false
+  let endedWhileOpening = kept?.ended ?? false
   for (const track of stream.getAudioTracks()) {
     track.onmute = () => {
       mutedWhileOpening = true
@@ -260,7 +288,8 @@ async function connect(openedIn: number): Promise<Microphone> {
     mute,
     ended: endedWhileOpening,
     silenced: mutedWhileOpening,
-    resumed: false,
+    // A kept stream's first take checks it hears something, as after any hide.
+    resumed: kept !== undefined,
     unwatch: () => context.removeEventListener('statechange', contextChanged)
   }
 
@@ -345,20 +374,25 @@ export function releaseMicrophone(): void {
   const closing = microphone
   microphone = null
   if (closing) {
-    closing.unwatch()
-    // Ends the processor, which would otherwise run on the audio thread until the page closes.
-    send(closing.node, { type: 'close' })
-    closing.source.disconnect()
-    closing.node.disconnect()
-    closing.mute.disconnect()
-    closing.node.port.onmessage = null
-    for (const track of closing.stream.getTracks()) {
-      track.onmute = track.onunmute = track.onended = null
-      track.stop()
-    }
+    takeApart(closing)
+    for (const track of closing.stream.getTracks()) track.stop()
   }
   if (wasOpen) captureStopped()
   setMicrophoneSession(false)
+}
+
+/** Takes `mic`'s graph apart and stops listening to its stream, which it leaves open. */
+function takeApart(mic: Microphone): void {
+  mic.unwatch()
+  // Ends the processor, which would otherwise run on the audio thread until the page closes.
+  send(mic.node, { type: 'close' })
+  mic.source.disconnect()
+  mic.node.disconnect()
+  mic.mute.disconnect()
+  mic.node.port.onmessage = null
+  for (const track of mic.stream.getTracks()) {
+    track.onmute = track.onunmute = track.onended = null
+  }
 }
 
 function send(node: AudioWorkletNode, command: CaptureCommand): void {
@@ -370,18 +404,42 @@ function send(node: AudioWorkletNode, command: CaptureCommand): void {
  * only starts audio then. It resolves once the first batch arrives, so audio is being captured,
  * and the take begins with the pre-roll from before the tap. `onInterrupted` runs if the
  * microphone is lost during the take.
+ *
+ * A take whose context stood still (`NoMicrophoneAudioError.stoodStill`) is tried once more, on a
+ * fresh stream and context, before it fails; `onRetry` hears about the first try (#280).
  */
-export async function startTake(onInterrupted: () => void): Promise<Take> {
+export async function startTake(
+  onInterrupted: () => void,
+  onRetry?: (error: NoMicrophoneAudioError) => void
+): Promise<Take> {
   // Before the first await, so it counts as part of the tap.
+  startContext()
+  try {
+    return await startOnce(onInterrupted)
+  } catch (error) {
+    if (!(error instanceof NoMicrophoneAudioError && error.stoodStill)) throw error
+    // `capture` let go of the stream and the context, so this opens both afresh.
+    onRetry?.(error)
+    startContext()
+    return startOnce(onInterrupted)
+  }
+}
+
+function startContext(): void {
   audioContext()
     .resume()
     .catch(() => {})
+}
+
+async function startOnce(onInterrupted: () => void): Promise<Take> {
   if (microphone && !capturing && interrupted(microphone)) releaseMicrophone()
   let mic = await openMicrophone()
-  // Tapped while it was opening, and interrupted then.
-  if (interrupted(mic) && !capturing) {
-    releaseMicrophone()
-    mic = await openMicrophone()
+  if (!capturing) {
+    // Tapped while it was opening, and interrupted then.
+    if (interrupted(mic)) {
+      releaseMicrophone()
+      mic = await openMicrophone()
+    } else if (mic.context !== audioContext()) mic = await moveMicrophone(mic)
   }
   const resumed = mic.resumed
   mic.resumed = false
@@ -553,6 +611,22 @@ function pageShown(): void {
     void openIfAllowed()
     return
   }
+  if (mic.context !== audioContext()) {
+    // Its context lived through the hide, so `audioContext` replaced it. The stream moves onto
+    // the fresh one now, so the first tap captures at once, with its pre-roll (#280).
+    moveMicrophone(mic).then(
+      moved => {
+        if (microphone === moved && document.visibilityState === 'visible') listenAgain(moved)
+      },
+      () => {}
+    )
+    return
+  }
+  listenAgain(mic)
+}
+
+/** Capture goes on with the kept stream once its track unmutes, or with a fresh one after it. */
+function listenAgain(mic: Microphone): void {
   if (!silent(mic)) {
     resumeCapture(mic)
     return

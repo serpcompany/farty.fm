@@ -364,14 +364,18 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     setProblem(null)
     setCapture({ kind: 'starting' })
     try {
-      const started = await startTake(() => {
-        // A call or another app took the microphone: the take is lost.
-        if (!take.current) return
-        clearTimeout(take.current.limit)
-        take.current = null
-        setCapture({ kind: 'idle' })
-        setProblem('interrupted')
-      })
+      const started = await startTake(
+        () => {
+          // A call or another app took the microphone: the take is lost.
+          if (!take.current) return
+          clearTimeout(take.current.limit)
+          take.current = null
+          setCapture({ kind: 'idle' })
+          setProblem('interrupted')
+        },
+        // The first try stood still and the take tries once more: reported, though not shown.
+        error => reportError('mic-start-retried', error)
+      )
       const limit = window.setTimeout(() => void stopRecording(), maximumTakeSeconds * 1000)
       take.current = { take: started, limit }
       setCapture({ kind: 'recording', startedAt: Date.now() })

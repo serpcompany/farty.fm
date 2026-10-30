@@ -47,6 +47,12 @@ export interface PedosDB extends DBSchema {
    * sets it back to 0 (`readEverythingAgain`).
    */
   meta: { key: string; value: number }
+  /**
+   * The Sound Pad's Recordings, by Pad (0 is the top left), as the user last assigned them
+   * (`pad-store.ts`). A Pad with none here fills from the Recordings on no Pad (`padMapping`).
+   * This browser's only: it never syncs, and a guest's lasts the visit. Since version 5.
+   */
+  pads: { key: number; value: string }
 }
 
 /** Every store: clearing this browser's library clears them all. */
@@ -57,7 +63,8 @@ const allStores = [
   'tootAudio',
   'outbox',
   'downloads',
-  'meta'
+  'meta',
+  'pads'
 ] as const
 
 /** Where each kind's WAVs are kept. */
@@ -67,7 +74,7 @@ export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
  * The `pedos` database's version. Web releases roll forward, not back, past a bump
  * (`docs/agents/web.md`).
  */
-export const DB_VERSION = 4
+export const DB_VERSION = 5
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
 
@@ -93,9 +100,10 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
 }
 
 /**
- * The app's database, upgraded to version 4 on first open. Version 1 held Recordings only, version
- * 2 added Toots, and version 3 the outbox. An upgrade keeps them, and one from before version 3
- * queues each to upload, since none has been (`queueEverything`).
+ * The app's database, upgraded to version 5 on first open. Version 1 held Recordings only, version
+ * 2 added Toots, version 3 the outbox and version 5 the Sound Pad's Pads (#277). An upgrade keeps
+ * them, and one from before version 3 queues each to upload, since none has been
+ * (`queueEverything`).
  *
  * Version 4 (#268) changes no store. It shuts out code from before #268, in a tab opened before
  * the deploy or after a rollback: that code reads an outbox op it doesn't know, such as `place`,
@@ -127,6 +135,7 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
         if (oldVersion >= 1) queueEverything(transaction).catch(() => {})
       }
       if (oldVersion === 3) readEverythingAgain(transaction).catch(() => {})
+      if (oldVersion < 5) database.createObjectStore('pads')
     },
     // An older version is open in another tab, and its code may never close it: the upgrade
     // waits until that tab closes.
@@ -396,7 +405,10 @@ export async function deleteItem(kind: Kind, id: string): Promise<void> {
   announceQueued()
 }
 
-/** Deletes every Recording and Toot in this browser, with their audio and outbox, together. */
+/**
+ * Deletes every Recording and Toot in this browser, with their audio and outbox, and the Sound
+ * Pad's Pads, together.
+ */
 export async function clearLibrary(): Promise<void> {
   await withDb(async database => {
     const tx = database.transaction(allStores, 'readwrite')
@@ -410,16 +422,17 @@ export async function recordingIds(): Promise<string[]> {
 }
 
 /**
- * Clears a guest's last visit (#237): every Toot, and every Recording but those `kept`, with their
- * audio and whatever waits to send or download for them, together. With `kept` null, every
- * Recording stays. Those that stay keep their outbox, so a sign-in still uploads them.
+ * Clears a guest's last visit (#237): every Toot, the Sound Pad's Pads, and every Recording but
+ * those `kept`, with their audio and whatever waits to send or download for them, together. With
+ * `kept` null, every Recording stays. Those that stay keep their outbox, so a sign-in still uploads
+ * them.
  */
 export async function clearVisit(kept: ReadonlySet<string> | null): Promise<void> {
   // Every key that starts `toots:` (`itemKey`).
   const forToots = IDBKeyRange.bound(itemKey('toots', ''), itemKey('toots', '\uffff'))
   await withDb(async database => {
     const tx = database.transaction(
-      ['toots', 'tootAudio', 'recordings', 'audio', 'outbox', 'downloads'],
+      ['toots', 'tootAudio', 'recordings', 'audio', 'outbox', 'downloads', 'pads'],
       'readwrite'
     )
     const recordings = tx.objectStore('recordings')
@@ -431,6 +444,7 @@ export async function clearVisit(kept: ReadonlySet<string> | null): Promise<void
     await Promise.all([
       tx.objectStore('toots').clear(),
       tx.objectStore('tootAudio').clear(),
+      tx.objectStore('pads').clear(),
       outbox.delete(forToots),
       downloads.delete(forToots),
       ...[...gone].flatMap(id => [

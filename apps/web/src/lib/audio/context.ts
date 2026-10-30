@@ -1,13 +1,73 @@
 /**
  * One AudioContext for recording and playback. iPhone Safari allows only a few, so the app makes
- * one and keeps it. Record may make it before a tap, to load the capture processor, but it starts
- * only from a tap: Record, Play, or one that opens a screen which plays (`startAudioInTap`).
+ * one and keeps it until the page hides. Record may make it before a tap, to load the capture
+ * processor, but it starts only from a tap: Record, Play, or one that opens a screen which plays
+ * (`startAudioInTap`).
  */
 let shared: AudioContext | null = null
+/** How many times the page has hidden, and how many it had when `shared` was made. */
+let hides = 0
+let sharedAtHide = 0
+let watchingHides = false
 
+/**
+ * The shared context. One that lived through a hidden page is closed and replaced once the page
+ * shows: on iPhone it can say it runs while its clock stands still, so nothing it plays or records
+ * comes through. Production's reports since #247 were all that, on the first tap after the app
+ * came back, and a fresh context recorded (#280).
+ */
 export function audioContext(): AudioContext {
-  if (!shared || shared.state === 'closed') shared = new AudioContext()
+  watchHides()
+  const hidden = typeof document !== 'undefined' && document.visibilityState === 'hidden'
+  if (shared && !isClosed(shared)) {
+    if (sharedAtHide === hides || hidden) return shared
+    close(shared)
+  }
+  shared = new AudioContext()
+  // One made while the page is hidden is replaced too, once it shows.
+  sharedAtHide = hidden ? -1 : hides
   return shared
+}
+
+/** What stops the sounds playing on a context (`player.ts`), run before that context closes. */
+const closing = new Set<(context: BaseAudioContext) => void>()
+
+/**
+ * Has `stop` stop what plays on a context before the context closes. Closing it never ends a
+ * sound that plays on it: the sound's `onended` never fires, so it would count as playing for good.
+ */
+export function whenClosing(stop: (context: BaseAudioContext) => void): void {
+  closing.add(stop)
+}
+
+/** Every context `close` was called on. */
+const closed = new WeakSet<BaseAudioContext>()
+
+/**
+ * Whether `context` is closed or closing. Its `state` says 'closed' only once the close settles, so
+ * a sound that loads in between would start on it and never end.
+ */
+export function isClosed(context: BaseAudioContext): boolean {
+  return closed.has(context) || context.state === 'closed'
+}
+
+function close(context: AudioContext): void {
+  closed.add(context)
+  for (const stop of closing) stop(context)
+  context.close().catch(() => {})
+}
+
+function watchHides(): void {
+  if (watchingHides || typeof document === 'undefined') return
+  watchingHides = true
+  const hid = () => {
+    hides += 1
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') hid()
+  })
+  // A page put in the back-forward cache.
+  window.addEventListener('pagehide', hid)
 }
 
 /**
@@ -17,7 +77,7 @@ export function audioContext(): AudioContext {
 export function replaceAudioContext(context: AudioContext): void {
   if (shared !== context) return
   shared = null
-  context.close().catch(() => {})
+  close(context)
 }
 
 /**
