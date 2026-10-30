@@ -35,7 +35,9 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-async function draw(playing: Trim | null) {
+const onTrim = vi.fn()
+
+async function draw(playing: Trim | null, trim?: Trim) {
   await act(async () =>
     root?.render(
       <ReplayWaveform
@@ -46,21 +48,23 @@ async function draw(playing: Trim | null) {
         label="Play Recording 3 from a spot"
         onPlayFrom={onPlayFrom}
         onScrubStart={onScrubStart}
+        trim={trim && { part: trim, onChange: onTrim }}
       />
     )
   )
-  const slider = document.querySelector<HTMLElement>('[role="slider"]')
+  const slider = document.querySelector<HTMLElement>('[data-testid="replay-waveform"]')
   if (!slider) throw new Error('no slider')
   slider.getBoundingClientRect = () => ({ left: 0, width: 200 }) as DOMRect
   return slider
 }
 
+const waveform = () => document.querySelector('[data-testid="replay-waveform"]') as HTMLElement
 const playhead = () => document.querySelector<HTMLElement>('[data-testid="playhead"]')
 const filled = () => document.querySelectorAll('.bg-primary').length
 
-async function pointer(target: HTMLElement, type: string, clientX: number) {
+async function pointer(target: HTMLElement, type: string, clientX: number, pointerType = 'mouse') {
   await act(async () => {
-    target.dispatchEvent(new PointerEvent(type, { clientX, button: 0, bubbles: true }))
+    target.dispatchEvent(new PointerEvent(type, { clientX, button: 0, bubbles: true, pointerType }))
   })
 }
 
@@ -76,7 +80,7 @@ it('is a slider named for its Recording, with no playhead until it plays', async
   expect(slider.getAttribute('aria-label')).toBe('Play Recording 3 from a spot')
   expect(slider.getAttribute('aria-valuemin')).toBe('1')
   expect(slider.getAttribute('aria-valuemax')).toBe('3')
-  expect(slider.getAttribute('aria-valuetext')).toBe('Play from a spot')
+  expect(slider.getAttribute('aria-valuetext')).toBe('1.00 s')
   expect(playhead()).toBeNull()
   expect(filled()).toBe(0)
 })
@@ -86,6 +90,8 @@ it('moves its playhead with the audio clock, filling the bars it has passed', as
   await draw({ startSeconds: 1, endSeconds: 3 })
   await frame()
   expect(playhead()?.style.left).toBe('25.500%')
+  // A screen reader hears where it plays.
+  expect(waveform().getAttribute('aria-valuetext')).toBe('1.51 s')
   // The bar the line is in fills as it enters.
   expect(filled()).toBe(13)
 
@@ -124,4 +130,43 @@ it('jumps a twelfth of the view with the arrow keys', async () => {
     slider.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
   })
   expect(onPlayFrom.mock.calls[0][0]).toBeCloseTo(1 + 2 / 12)
+})
+
+it('stops scrubbing without playing when the browser takes the touch for a scroll', async () => {
+  // A vertical pan over a `touch-pan-y` row sends pointercancel, not pointerup.
+  const slider = await draw(null)
+  await pointer(slider, 'pointerdown', 20, 'touch')
+  await pointer(slider, 'pointermove', 100, 'touch')
+  expect(playhead()?.style.left).toBe('50.000%')
+
+  await pointer(slider, 'pointercancel', 100, 'touch')
+  expect(playhead()).toBeNull()
+  expect(onPlayFrom).not.toHaveBeenCalled()
+  // Nothing is left listening: a later lift plays nothing.
+  await pointer(slider, 'pointerup', 150, 'touch')
+  expect(onPlayFrom).not.toHaveBeenCalled()
+})
+
+it("puts the Trim's handles beside the slider, each its own slider with arrow keys", async () => {
+  const slider = await draw(null, { startSeconds: 1.5, endSeconds: 2.5 })
+  const handles = [...document.querySelectorAll<HTMLElement>('[data-handle]')]
+  expect(handles.map(handle => handle.getAttribute('aria-label'))).toEqual([
+    'Where the fart starts',
+    'Where the fart ends'
+  ])
+  for (const handle of handles) {
+    expect(handle.getAttribute('role')).toBe('slider')
+    // A slider's children are presentational, so a handle is never inside the waveform's.
+    expect(slider.contains(handle)).toBe(false)
+  }
+  expect(handles[1].getAttribute('aria-valuetext')).toBe('2.50 s')
+
+  await act(async () => {
+    handles[1].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', shiftKey: true, bubbles: true })
+    )
+  })
+  expect(onTrim).toHaveBeenCalledWith({ startSeconds: 1.5, endSeconds: 2.4 }, true)
+  // The key moves the handle, not the play position.
+  expect(onPlayFrom).not.toHaveBeenCalled()
 })

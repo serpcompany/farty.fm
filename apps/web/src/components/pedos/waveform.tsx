@@ -48,8 +48,9 @@ const clamp = (value: number, low: number, high: number) => Math.min(high, Math.
  * a playhead line that follows `position` (the audio clock) while `playing` plays, and the bars it
  * has passed filled in. With `label`, it's a slider: a tap plays from that spot, a drag scrubs
  * and plays from where it lets go (`onPlayFrom`), and the arrow keys jump a twelfth of the view.
- * With `trim`, it also has the picker's handles, and with `window`, it's the small strip of the
- * whole take with a box where the view above sits.
+ * With `trim`, the picker's handles sit over it, beside the slider rather than inside it, since a
+ * slider's children are presentational to a screen reader. With `window`, it's the small strip of
+ * the whole take with a box where the view above sits.
  */
 export function ReplayWaveform({
   levels,
@@ -114,7 +115,6 @@ export function ReplayWaveform({
 
   const press = (event: PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return
-    if ((event.target as HTMLElement).closest('[data-handle]')) return
     const element = event.currentTarget
     const pointer = event.pointerId
     const x0 = event.clientX
@@ -145,7 +145,6 @@ export function ReplayWaveform({
 
   const key = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
-    if ((event.target as HTMLElement).closest('[data-handle]')) return
     event.preventDefault()
     const here = at ?? view.startSeconds
     const step = (event.key === 'ArrowLeft' ? -1 : 1) * (span / 12)
@@ -193,7 +192,6 @@ export function ReplayWaveform({
           style={{ left: percent(shown.startSeconds), width: width(shown) }}
         />
       )}
-      {trim && <TrimHandles view={view} {...trim} />}
       {x !== null && x >= 0 && x <= 1 && (
         <span
           className={cn(
@@ -217,26 +215,29 @@ export function ReplayWaveform({
       </div>
     )
   }
+  const here = at ?? view.startSeconds
   return (
-    <div
-      ref={box}
-      role="slider"
-      tabIndex={0}
-      aria-label={label}
-      aria-valuemin={Number(view.startSeconds.toFixed(2))}
-      aria-valuemax={Number(view.endSeconds.toFixed(2))}
-      aria-valuenow={Number((at ?? view.startSeconds).toFixed(2))}
-      aria-valuetext="Play from a spot"
-      className={cn(
-        base,
-        'cursor-pointer rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-        className
-      )}
-      onPointerDown={press}
-      onKeyDown={key}
-      data-testid="replay-waveform"
-    >
-      {drawn}
+    <div className={cn('relative min-w-0', className)}>
+      <div
+        ref={box}
+        role="slider"
+        tabIndex={0}
+        aria-label={label}
+        aria-valuemin={Number(view.startSeconds.toFixed(2))}
+        aria-valuemax={Number(view.endSeconds.toFixed(2))}
+        aria-valuenow={Number(here.toFixed(2))}
+        aria-valuetext={formattedTime(here)}
+        className={cn(
+          base,
+          'absolute inset-0 cursor-pointer rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50'
+        )}
+        onPointerDown={press}
+        onKeyDown={key}
+        data-testid="replay-waveform"
+      >
+        {drawn}
+      </div>
+      {trim && <TrimHandles view={view} {...trim} />}
     </div>
   )
 }
