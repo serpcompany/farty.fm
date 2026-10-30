@@ -16,7 +16,8 @@ import {
   placedPitch,
   type Recording,
   recordingPitch,
-  songPitch
+  songPitch,
+  TakeLevels
 } from './recordings'
 
 /**
@@ -140,6 +141,83 @@ describe('heardSomething', () => {
     // 017 is the quietest fixture over its own floor.
     expect(levelContrast(samples, sampleRate)?.contrastDb).toBeGreaterThan(4)
     expect(levelContrast(roomNoise(2, 48_000, -40), 48_000)?.contrastDb).toBeLessThan(4)
+  })
+})
+
+describe('TakeLevels, a take measured as it comes in (#281)', () => {
+  /** `take` in the batches the capture processor sends: pre-roll and a quantum, then 4096s. */
+  function inBatches(take: Float32Array, sampleRate: number): Float32Array[] {
+    const first = Math.round(0.3 * sampleRate) + 128
+    const batches = [take.subarray(0, first)]
+    for (let at = first; at < take.length; at += 4096) batches.push(take.subarray(at, at + 4096))
+    return batches
+  }
+
+  /** `levelContrast` as #279 shipped it, on the whole take at once: what the batches must match. */
+  function wholeTake(samples: Float32Array, sampleRate: number) {
+    const hop = Math.max(1, Math.trunc(0.005 * sampleRate))
+    const frame = 10 * hop
+    if (samples.length < frame) return null
+    const energy = new Float64Array(samples.length + 1)
+    for (let i = 0; i < samples.length; i++) energy[i + 1] = energy[i] + samples[i] * samples[i]
+    const levels: number[] = []
+    for (let start = 0; start + frame <= samples.length; start += hop) {
+      const meanSquare = Math.max(0, energy[start + frame] - energy[start]) / frame
+      levels.push(20 * Math.log10(Math.sqrt(meanSquare) + 1e-9))
+    }
+    levels.sort((a, b) => a - b)
+    const peakDb = levels[levels.length - 1]
+    const floorDb = levels[Math.floor(levels.length * 0.1)]
+    return { peakDb, floorDb, contrastDb: peakDb - floorDb }
+  }
+
+  it('gives exactly the whole take’s contrast, batch by batch, on every fart and its room', async () => {
+    for (const golden of goldenRecordings) {
+      const { samples, sampleRate } = await decoded(golden)
+      const room = roomNoise(samples.length / sampleRate, sampleRate, -60)
+      for (const take of [samples, atPeak(samples, -60), atPeak(samples, -75), room]) {
+        const expected = wholeTake(take, sampleRate)
+        const levels = new TakeLevels(sampleRate)
+        for (const batch of inBatches(take, sampleRate)) levels.add(batch)
+        expect(levels.contrast(), golden.id).toEqual(expected)
+        expect(levelContrast(take, sampleRate), golden.id).toEqual(expected)
+      }
+    }
+  })
+
+  it('so far, hears a fart only once it has come in, and room noise never', async () => {
+    const golden = goldenRecordings.find(g => g.id === '090')
+    if (!golden) throw new Error('No fixture 090')
+    const { samples, sampleRate } = await decoded(golden)
+    const room = roomNoise(2, sampleRate, -60)
+    const levels = new TakeLevels(sampleRate)
+    for (const batch of inBatches(room, sampleRate)) levels.add(batch)
+    expect(levels.heard()).toBe(false)
+    for (const batch of inBatches(samples, sampleRate)) levels.add(batch)
+    expect(levels.heard()).toBe(true)
+  })
+
+  it('gives a level from 0 at the -70 dBFS floor to 1 at full scale, from the latest batch', () => {
+    const sampleRate = 48_000
+    const levels = new TakeLevels(sampleRate)
+    expect(levels.level).toBe(0)
+    // Less than one 50 ms window: no level yet.
+    levels.add(new Float32Array(100).fill(0.5))
+    expect(levels.level).toBe(0)
+    levels.add(new Float32Array(4096).fill(1))
+    expect(levels.level).toBeCloseTo(1, 6)
+    // The first batch after a loud one still holds windows reaching back into it.
+    const at35 = new Float32Array(4096).fill(10 ** (-35 / 20))
+    levels.add(at35)
+    expect(levels.level).toBeCloseTo(1, 1)
+    levels.add(at35)
+    expect(levels.level).toBeCloseTo(0.5, 6)
+    const room = roomNoise(8192 / sampleRate, sampleRate, -80)
+    levels.add(room.subarray(0, 4096))
+    levels.add(room.subarray(4096))
+    expect(levels.level).toBe(0)
+    levels.add(new Float32Array(4096))
+    expect(levels.level).toBe(0)
   })
 })
 
