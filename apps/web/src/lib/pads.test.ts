@@ -169,10 +169,10 @@ describe('soundingSpan', () => {
         all += s * s
         if (i >= start && i < end) kept += s * s
       })
-      // 99.9% or more on every fixture but the owner's phone take `106` (#295): it keeps 99.66%,
-      // and what goes is room noise just under the 30 dB bar, in its first 0.28 s and last 0.68 s
-      // (its loudest cut window is 30.7 dB under its loudest).
-      expect(kept / all, at).toBeGreaterThan(0.995)
+      // 99.9% or more on every fixture but the owner's phone take `106` (#295), which keeps 99.66%:
+      // what its trim cuts is room noise just under the 30 dB bar, in its first 0.28 s and last
+      // 0.68 s (its loudest cut window is 30.9 dB under its loudest), not any of the fart.
+      expect(kept / all, at).toBeGreaterThan(golden.id === '106' ? 0.995 : 0.999)
     }
   })
 })
