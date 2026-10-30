@@ -10,11 +10,11 @@ import { skipWelcome } from './record'
 
 // The Sound Pad (#277), with two Recordings made through the fake microphone: 095 (F2) and 090
 // (G3). A probe notes each sound a Pad starts, and the press that started it, so the journey sees
-// playback start, raw, and how long after the press.
+// playback start, raw, at the Pads' one level, and how long after the press.
 
 test.use({ permissions: ['microphone'] })
 
-type Start = { at: number; rate: number; detune: number; seconds: number }
+type Start = { at: number; rate: number; detune: number; seconds: number; peak: number }
 type Probe = { presses: number[]; starts: Start[]; lit: number[] }
 
 /**
@@ -27,11 +27,17 @@ function padProbe(): void {
   document.addEventListener('pointerdown', event => probe.presses.push(event.timeStamp), true)
   const start = AudioBufferSourceNode.prototype.start
   AudioBufferSourceNode.prototype.start = function (...args) {
+    const at = performance.now()
+    let peak = 0
+    for (let c = 0; c < (this.buffer?.numberOfChannels ?? 0); c++) {
+      for (const s of this.buffer?.getChannelData(c) ?? []) peak = Math.max(peak, Math.abs(s))
+    }
     probe.starts.push({
-      at: performance.now(),
+      at,
       rate: this.playbackRate.value,
       detune: this.detune.value,
-      seconds: this.buffer?.duration ?? 0
+      seconds: this.buffer?.duration ?? 0,
+      peak
     })
     return start.apply(this, args)
   }
@@ -128,6 +134,8 @@ test('the Sound Pad fills with your farts, plays one at a tap, and keeps the Pad
   const tapped = await probe(page)
   expect(tapped.starts).toHaveLength(1)
   expect(tapped.starts[0]).toMatchObject({ rate: 1, detune: 0 })
+  // At the Pads' one level, peaking at 0.5 (−6 dBFS), so two at once can't clip.
+  expect(tapped.starts[0].peak).toBeCloseTo(0.5, 5)
   // 090's fart, trimmed of the silence around it: about half a second.
   expect(tapped.starts[0].seconds).toBeGreaterThan(0.45)
   expect(tapped.starts[0].seconds).toBeLessThan(0.6)
@@ -138,7 +146,9 @@ test('the Sound Pad fills with your farts, plays one at a tap, and keeps the Pad
   await resetProbe(page)
   await touchTogether(page, [pad(page, 1), pad(page, 3)])
   await expect.poll(async () => (await probe(page)).lit.sort()).toEqual([1, 3])
-  expect((await probe(page)).starts).toHaveLength(2)
+  const together = (await probe(page)).starts
+  expect(together).toHaveLength(2)
+  for (const started of together) expect(started.peak).toBeCloseTo(0.5, 5)
   await expect(page.locator('[data-playing]')).toHaveCount(0)
 
   // Kept in this browser: a reload shows the same Pads.

@@ -227,7 +227,7 @@ describe('version 4', () => {
       tx('meta').put(123, 'cursor')
     })
     const database = await page.store.db()
-    expect(database.version).toBe(page.store.DB_VERSION)
+    expect(database.version).toBe(5)
     expect(await page.store.loadRecordings()).toEqual([recording])
     expect(bytes(await page.store.loadAudio(recording.id))).toEqual(bytes(wav(1)))
     expect(await page.toots.loadToots()).toEqual([made])
@@ -270,7 +270,7 @@ describe('version 4', () => {
     const older = await version3(store => store('recordings').put(recording), true)
     // What an older build's `blocking` does.
     older.onversionchange = () => older.close()
-    expect((await page.store.db()).version).toBe(page.store.DB_VERSION)
+    expect((await page.store.db()).version).toBe(5)
     expect(() => older.transaction('outbox')).toThrow()
     const reopened = await new Promise<string>(resolve => {
       const open = indexedDB.open('pedos', 3)

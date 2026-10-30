@@ -74,6 +74,14 @@ const TAIL_SECONDS = 0.05
 const FADE_IN_SECONDS = 0.003
 const FADE_OUT_SECONDS = 0.03
 
+/**
+ * Where every Pad's sound peaks: 0.5, −6 dBFS. So every Pad plays at one level, and two at once
+ * can't clip: their sum stays within full scale. A fixed gain, set once per sound, as ADR 0004
+ * allows; no compressor or limiter. Since #284 a take is saved peaking at 0.89, so a Pad plays it
+ * about 5 dB under the Recordings tab.
+ */
+export const PAD_PEAK = 0.5
+
 /** A stretch of a take, in samples: `end` is exclusive. */
 export type Span = { start: number; end: number }
 
@@ -105,9 +113,22 @@ export function soundingSpan(samples: Float32Array, sampleRate: number): Span {
 }
 
 /**
+ * The fixed gain that puts a Pad's sound at `PAD_PEAK`: its loudest sample, on any channel, lands
+ * at 0.5. A silent sound keeps its level.
+ */
+export function padGain(channels: readonly Float32Array[]): number {
+  let peak = 0
+  for (const channel of channels) {
+    for (const sample of channel) peak = Math.max(peak, Math.abs(sample))
+  }
+  return peak > 0 ? PAD_PEAK / peak : 1
+}
+
+/**
  * What a Pad plays of a take, each channel: its sounding span (`soundingSpan`, read on the
- * channels' mix), faded in over 3 ms and out over 30 ms. Nothing else changes: the fart keeps its
- * own pitch, speed and level (ADR 0004, ADR 0012).
+ * channels' mix), faded in over 3 ms and out over 30 ms, at the one gain that peaks it at
+ * `PAD_PEAK` (`padGain`). Nothing else changes: the fart keeps its own pitch and speed (ADR 0004,
+ * ADR 0012).
  */
 export function padSound(
   channels: readonly Float32Array[],
@@ -122,10 +143,15 @@ export function padSound(
   const n = end - start
   const fadeIn = Math.min(n, Math.round(FADE_IN_SECONDS * sampleRate))
   const fadeOut = Math.min(n, Math.round(FADE_OUT_SECONDS * sampleRate))
-  return channels.map(channel => {
+  const faded = channels.map(channel => {
     const out = channel.slice(start, end)
     for (let i = 0; i < fadeIn; i++) out[i] *= i / fadeIn
     for (let i = 0; i < fadeOut; i++) out[n - 1 - i] *= i / fadeOut
     return out
   })
+  const gain = padGain(faded)
+  for (const out of faded) {
+    for (let i = 0; i < out.length; i++) out[i] *= gain
+  }
+  return faded
 }

@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { decoded, goldenRecordings } from '../test-support/golden'
 import { songs } from './catalog/songs.generated'
-import { assignPad, fillOrder, PAD_COUNT, padMapping, padSound, soundingSpan } from './pads'
+import {
+  assignPad,
+  fillOrder,
+  PAD_COUNT,
+  PAD_PEAK,
+  padGain,
+  padMapping,
+  padSound,
+  soundingSpan
+} from './pads'
 import type { Recording } from './recordings'
 
 // The Sound Pad (#277): which Recording each Pad plays, and how much of it.
@@ -165,8 +174,21 @@ describe('soundingSpan', () => {
   })
 })
 
+describe('padGain', () => {
+  it('puts the loudest sample, on any channel, at 0.5 (−6 dBFS)', () => {
+    expect(PAD_PEAK).toBe(0.5)
+    expect(padGain([Float32Array.of(0.1, -0.25), Float32Array.of(0.2, 0)])).toBe(2)
+    expect(padGain([Float32Array.of(0.5, -1)])).toBe(0.5)
+  })
+
+  it('leaves a silent sound as it is', () => {
+    expect(padGain([new Float32Array(10)])).toBe(1)
+    expect(padGain([])).toBe(1)
+  })
+})
+
 describe('padSound', () => {
-  it('plays the span as recorded, with only the 3 ms fade in and 30 ms fade out', async () => {
+  it('plays the span at one gain, with only the 3 ms fade in and 30 ms fade out', async () => {
     const golden = goldenRecordings.find(g => g.id === '098')
     if (!golden) throw new Error('fixture 098')
     const { samples, sampleRate } = await decoded(golden)
@@ -177,13 +199,36 @@ describe('padSound', () => {
     const fadeOut = Math.round(0.03 * sampleRate)
     expect(sound[0]).toBe(0)
     expect(sound.at(-1)).toBe(0)
-    // Between the fades, every sample is the take's own: no gain, pitch or speed change.
-    expect(sound.subarray(fadeIn, sound.length - fadeOut)).toEqual(
-      samples.subarray(start + fadeIn, end - fadeOut)
-    )
-    sound.subarray(0, fadeIn).forEach((s, i) => {
-      expect(Math.abs(s)).toBeLessThanOrEqual(Math.abs(samples[start + i]))
+    // Between the fades, every sample is the take's own times one gain: no pitch or speed change.
+    const gain = padGain([padSoundUngained(samples, start, end, fadeIn, fadeOut)])
+    expect(gain).not.toBe(1)
+    let worst = 0
+    sound.subarray(fadeIn, sound.length - fadeOut).forEach((s, i) => {
+      worst = Math.max(worst, Math.abs(s - samples[start + fadeIn + i] * gain))
     })
+    expect(worst).toBeLessThan(1e-6)
+    sound.subarray(0, fadeIn).forEach((s, i) => {
+      expect(Math.abs(s)).toBeLessThanOrEqual(Math.abs(samples[start + i] * gain) + 1e-6)
+    })
+  })
+
+  it('peaks every fixture at 0.5, so no two Pads at once go past full scale', async () => {
+    const sounds = await Promise.all(
+      goldenRecordings.map(async golden => {
+        const { samples, sampleRate } = await decoded(golden)
+        return padSound([samples], sampleRate)[0]
+      })
+    )
+    for (const sound of sounds) expect(peakOf(sound)).toBeCloseTo(PAD_PEAK, 6)
+    let loudest = 0
+    sounds.forEach((first, a) => {
+      for (const second of sounds.slice(a + 1)) {
+        const n = Math.min(first.length, second.length)
+        for (let i = 0; i < n; i++) loudest = Math.max(loudest, Math.abs(first[i] + second[i]))
+      }
+    })
+    expect(loudest).toBeGreaterThan(0.5)
+    expect(loudest).toBeLessThanOrEqual(1)
   })
 
   it('cuts each channel at the same span, read on their mix', () => {
@@ -196,3 +241,23 @@ describe('padSound', () => {
     expect(l.every(s => s === 0)).toBe(true)
   })
 })
+
+function peakOf(samples: Float32Array): number {
+  let peak = 0
+  for (const s of samples) peak = Math.max(peak, Math.abs(s))
+  return peak
+}
+
+/** The span with the fades and no gain: what `padGain` levels. */
+function padSoundUngained(
+  samples: Float32Array,
+  start: number,
+  end: number,
+  fadeIn: number,
+  fadeOut: number
+): Float32Array {
+  const out = samples.slice(start, end)
+  for (let i = 0; i < fadeIn; i++) out[i] *= i / fadeIn
+  for (let i = 0; i < fadeOut; i++) out[out.length - 1 - i] *= i / fadeOut
+  return out
+}

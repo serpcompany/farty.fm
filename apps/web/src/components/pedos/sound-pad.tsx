@@ -3,7 +3,7 @@
 import { AudioLines, Check, ChevronLeft, Plus, XIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import {
@@ -16,7 +16,13 @@ import {
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { startAudioInTap } from '@/lib/audio/context'
-import { keepPadSounds, loadPadSound, playPadSound, stopPadSounds } from '@/lib/audio/pad-player'
+import {
+  keepPadSounds,
+  loadPadSound,
+  PadAudioUnavailable,
+  playPadSound,
+  stopPadSounds
+} from '@/lib/audio/pad-player'
 import { loadPads, savePads } from '@/lib/pad-store'
 import { type AssignedPads, assignPad, PAD_COUNT, padMapping } from '@/lib/pads'
 import { noteName } from '@/lib/pitch'
@@ -49,6 +55,8 @@ export function SoundPad() {
   const [choosing, setChoosing] = useState<number | null>(null)
   /** Each Recording's Pad sound, once decoded, by Recording id. */
   const [sounds, setSounds] = useState<ReadonlyMap<string, AudioBuffer>>(new Map())
+  /** The Recordings whose Pad sound couldn't load, until a press tries again. */
+  const [failed, setFailed] = useState<ReadonlySet<string>>(new Set())
   /** How many sounds each Pad plays now. */
   const [playing, setPlaying] = useState<readonly number[]>(() => Array(PAD_COUNT).fill(0))
 
@@ -71,7 +79,21 @@ export function SoundPad() {
 
   const mapping = pedos.recordings && assigned ? padMapping(pedos.recordings, assigned) : null
 
-  // Every Pad's sound decodes as soon as it's on a Pad, so a tap only starts it.
+  // Every Pad's sound decodes as soon as it's on a Pad, so a tap only starts it. Audio this browser
+  // can't get yet, such as offline, isn't an error worth a report (as `upgradeAnalyses`); a sound
+  // that won't decode is.
+  const load = useCallback((id: string, left: () => boolean) => {
+    loadPadSound(id, () => loadAudio(id)).then(
+      sound => {
+        if (!left()) setSounds(current => new Map(current).set(id, sound))
+      },
+      error => {
+        if (left()) return
+        setFailed(current => new Set(current).add(id))
+        if (!(error instanceof PadAudioUnavailable)) reportError('pad-sound-failed', error)
+      }
+    )
+  }, [])
   const onPads = [...new Set(mapping)]
     .filter(id => id !== null)
     .sort()
@@ -84,21 +106,14 @@ export function SoundPad() {
         ? current
         : new Map([...current].filter(([id]) => ids.has(id)))
     )
+    // Every one loads again.
+    setFailed(current => (current.size === 0 ? current : new Set()))
     let left = false
-    for (const id of ids) {
-      loadPadSound(id, () => loadAudio(id)).then(
-        sound => {
-          if (!left) setSounds(current => new Map(current).set(id, sound))
-        },
-        error => {
-          if (!left) reportError('pad-sound-failed', error)
-        }
-      )
-    }
+    for (const id of ids) load(id, () => left)
     return () => {
       left = true
     }
-  }, [onPads])
+  }, [onPads, load])
 
   // Leaving the Sound Pad, or hiding the page, stops every Pad and closes the chooser.
   useEffect(() => {
@@ -126,11 +141,15 @@ export function SoundPad() {
       start(pad, sound)
       return
     }
-    // Not decoded yet: it plays once it is.
-    loadPadSound(id, () => loadAudio(id)).then(
-      decoded => start(pad, decoded),
-      error => reportError('pad-sound-failed', error)
-    )
+    // Not ready: the press is dropped, so presses never pile up and start together later. A sound
+    // that couldn't load tries again.
+    if (!failed.has(id)) return
+    setFailed(current => {
+      const next = new Set(current)
+      next.delete(id)
+      return next
+    })
+    load(id, () => false)
   }
   const assign = (pad: number, id: string) => {
     if (!mapping) return
@@ -189,7 +208,15 @@ export function SoundPad() {
                 <Pad
                   pad={pad}
                   recording={id === null ? undefined : pedos.recording(id)}
-                  ready={id !== null && sounds.has(id)}
+                  sound={
+                    id === null
+                      ? undefined
+                      : sounds.has(id)
+                        ? 'ready'
+                        : failed.has(id)
+                          ? 'unavailable'
+                          : 'loading'
+                  }
                   playing={playing[pad] > 0}
                   editing={editing}
                   onPlay={() => id !== null && play(pad, id)}
@@ -237,13 +264,14 @@ function BackToCompose() {
 
 /**
  * A Pad: its Recording's note (or "noise-like") and name, or a plus when it has none. It plays on
- * the press itself, not on the release, so each finger plays its own Pad at once. Editing, or
- * empty, a tap chooses its Recording instead.
+ * the press itself, not on the release, so each finger plays its own Pad at once. Until its sound
+ * is ready it shows a spinner and a press does nothing. Editing, or empty, a tap chooses its
+ * Recording instead.
  */
 function Pad({
   pad,
   recording,
-  ready,
+  sound,
   playing,
   editing,
   onPlay,
@@ -251,8 +279,11 @@ function Pad({
 }: {
   pad: number
   recording: Recording | undefined
-  /** Its sound is decoded, so a press plays it at once. */
-  ready: boolean
+  /**
+   * Its sound: decoded, so a press plays it at once; loading; or one that couldn't load, which a
+   * press tries again.
+   */
+  sound: 'ready' | 'loading' | 'unavailable' | undefined
   playing: boolean
   editing: boolean
   onPlay: () => void
@@ -264,7 +295,9 @@ function Pad({
   const label = [
     `Pad ${pad + 1}`,
     recording ? describe(recording) : 'Empty',
-    !plays && 'Choose its fart'
+    !plays && 'Choose its fart',
+    plays && sound === 'loading' && 'Loading',
+    plays && sound === 'unavailable' && 'Can’t play it yet'
   ]
     .filter(Boolean)
     .join('. ')
@@ -276,13 +309,15 @@ function Pad({
       aria-haspopup={plays ? undefined : 'dialog'}
       data-testid="pad"
       data-pad={pad + 1}
-      data-ready={ready || undefined}
+      data-ready={sound === 'ready' || undefined}
+      aria-busy={(plays && sound === 'loading') || undefined}
       data-playing={playing || undefined}
       className={cn(
-        'flex aspect-square touch-manipulation flex-col items-center justify-center gap-1 rounded-2xl bg-muted/60 p-2 text-center transition-colors duration-75 outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-3 focus-visible:ring-ring/50',
+        'relative flex aspect-square touch-manipulation flex-col items-center justify-center gap-1 rounded-2xl bg-muted/60 p-2 text-center transition-colors duration-75 outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-3 focus-visible:ring-ring/50',
         plays && 'active:bg-primary/25 data-playing:bg-primary/15',
         editing && 'border-2 border-dashed border-foreground/30',
-        !recording && 'text-muted-foreground'
+        !recording && 'text-muted-foreground',
+        plays && sound === 'unavailable' && 'opacity-50'
       )}
       onPointerDown={event => {
         if (plays && event.button === 0) onPlay()
@@ -299,6 +334,9 @@ function Pad({
       }}
       onContextMenu={event => event.preventDefault()}
     >
+      {plays && sound === 'loading' && (
+        <Spinner aria-hidden className="absolute top-2 right-2 size-3.5 text-muted-foreground" />
+      )}
       {recording ? (
         <>
           {pitch !== null ? (
