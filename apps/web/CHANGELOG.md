@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/serpcompany/farty.fm/compare/v1.8.0...v1.9.0) (2026-10-30)
+
+
+### Features
+
+* **web:** place a noise-like fart on a note by ear, or leave it out ([#269](https://github.com/serpcompany/farty.fm/issues/269)) ([8b8945d](https://github.com/serpcompany/farty.fm/commit/8b8945dbb19fea174ef1652ce5c4436a84f40ff7))
+
 ## [1.8.0](https://github.com/serpcompany/farty.fm/compare/v1.7.0...v1.8.0) (2026-10-28)
 
 
