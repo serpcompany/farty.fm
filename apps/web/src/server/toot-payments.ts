@@ -72,9 +72,15 @@ function catalogSong(songId: unknown) {
   return songs.find(song => song.id === songId) ?? null
 }
 
-/** Where Checkout comes back to: the Song's Song Creator, which makes the same Toot again. */
-function songCreatorUrl(request: Request, songId: string, tootId: string, done: boolean): string {
-  const url = new URL(`/compose/${songId}/`, servedOrigin(request))
+/**
+ * Where Checkout comes back to, which makes the same Toot again: the Song's Song Creator, or the
+ * Sound Pad for a Toot of its Performance (a null `songId`, ADR 0017).
+ */
+function returnUrl(request: Request, songId: string | null, tootId: string, done: boolean): string {
+  const url = new URL(
+    songId === null ? '/compose/pad/' : `/compose/${songId}/`,
+    servedOrigin(request)
+  )
   url.searchParams.set('toot', tootId)
   if (done) url.searchParams.set('checkout', 'done')
   return url.toString()
@@ -103,7 +109,8 @@ async function paidAtStripe(
 }
 
 /**
- * `POST /api/toots/{id}/checkout/` with `{ songId }`: where to pay to save the Toot. `{ url }`,
+ * `POST /api/toots/{id}/checkout/` with `{ songId }`, null for a Sound Pad Toot (ADR 0017): where
+ * to pay to save the Toot. `{ url }`,
  * Stripe Checkout's page (or `/dev/checkout/` on a local run), or `{ paid: true }` when there's
  * nothing to pay: it's paid already, it's saved, or saving is free here. An open Checkout Session
  * for the same Toot is reused, so two taps or two tabs can't pay twice. `{ paidToot }` names
@@ -127,8 +134,10 @@ export async function startCheckout(
   if (payments.kind === 'off') return unavailable()
   const body = await readJson(request)
   if (body instanceof Response) return body
-  const song = catalogSong((body.json as { songId?: unknown } | null)?.songId)
-  if (!song) return apiError(400, 'invalid_request')
+  const songId = (body.json as { songId?: unknown } | null)?.songId
+  // A Sound Pad Toot has no Song: it's never another Toot's paid-for twin, and returns to the Pad.
+  const song = songId === null ? null : catalogSong(songId)
+  if (songId !== null && !song) return apiError(400, 'invalid_request')
 
   const saved = await uploadState(db, 'toots', user.id, id)
   if (saved.status === 'live') return paid()
@@ -138,7 +147,7 @@ export async function startCheckout(
   if (payment?.savedAt) return apiError(410, 'deleted')
   if (payment?.paidAt) return paid()
   if (saved.live >= LIMITS.toots.maxItems) return apiError(409, 'limit_reached')
-  const unsaved = await paidUnsavedToot(db, user.id, song.id, id)
+  const unsaved = song && (await paidUnsavedToot(db, user.id, song.id, id))
   if (unsaved) return Response.json({ paidToot: unsaved })
   const slot = await spend(db, user, 'checkouts')
   if (!slot.allowed) {
@@ -151,10 +160,10 @@ export async function startCheckout(
     const sessionId = payment?.checkoutSessionId.startsWith('dev_')
       ? payment.checkoutSessionId
       : `dev_${crypto.randomUUID()}`
-    await startTootPayment(db, user.id, id, song.id, sessionId, TOOT_PRICE)
+    await startTootPayment(db, user.id, id, song?.id ?? null, sessionId, TOOT_PRICE)
     const url = new URL('/dev/checkout/', servedOrigin(request))
     url.searchParams.set('toot', id)
-    url.searchParams.set('song', song.id)
+    if (song) url.searchParams.set('song', song.id)
     return Response.json({ url: url.toString() })
   }
 
@@ -177,13 +186,13 @@ export async function startCheckout(
     const session = await createCheckoutSession(payments.secretKey, {
       userId: user.id,
       tootId: id,
-      songTitle: song.title,
-      successUrl: songCreatorUrl(request, song.id, id, true),
-      cancelUrl: songCreatorUrl(request, song.id, id, false),
+      songTitle: song?.title ?? null,
+      successUrl: returnUrl(request, song?.id ?? null, id, true),
+      cancelUrl: returnUrl(request, song?.id ?? null, id, false),
       replaces: earlier?.checkoutSessionId ?? null
     })
     if (!session.url) throw new StripeError(502)
-    await startTootPayment(db, user.id, id, song.id, session.id, TOOT_PRICE)
+    await startTootPayment(db, user.id, id, song?.id ?? null, session.id, TOOT_PRICE)
     return Response.json({ url: session.url })
   } catch (error) {
     return stripeFailed(error)
@@ -191,9 +200,13 @@ export async function startCheckout(
 }
 
 /**
- * `GET /api/toots/{id}/payment/`: `{ paid }`, whether the Toot is paid for. Unpaid with a Stripe
- * Checkout Session, it asks Stripe, so the return from Checkout doesn't wait for the webhook, up to
- * `PAYMENT_LIMITS.stripeChecks`; past it, D1 alone answers.
+ * `GET /api/toots/{id}/payment/`: `{ paid, unused }`, whether the Toot is paid for, and whether
+ * that is a payment of its own that no save has used yet. A Sound Pad opened after a return from
+ * Checkout that never loaded saves a kept take only when it's `unused` (ADR 0017): with saving free
+ * it's `paid` and never `unused`. Unpaid with a Stripe Checkout Session, it asks Stripe, so the
+ * return from Checkout doesn't wait for the webhook, up to `PAYMENT_LIMITS.stripeChecks`; past it,
+ * D1 alone answers. With `?check=stored` (the Sound Pad's check on open) D1 alone answers, so the
+ * open never spends the return's Stripe checks: a payment whose webhook hasn't landed reads unpaid.
  */
 export async function getTootPayment(
   { db }: Pick<Stores, 'db'>,
@@ -205,19 +218,27 @@ export async function getTootPayment(
   if (!isItemId(id)) return notFound()
   const wrong = wrongLibrary(user, request)
   if (wrong) return wrong
-  if (payments.kind === 'free') return paid()
+  const answer = (paid: boolean, unused = false) => Response.json({ paid, unused })
+  if (payments.kind === 'free') return answer(true)
   const payment = await tootPayment(db, user.id, id)
-  if (payment?.paidAt) return paid()
-  if (payment && payments.kind === 'stripe' && isCheckoutSessionId(payment.checkoutSessionId)) {
-    if (!(await spend(db, user, 'stripeChecks')).allowed) return Response.json({ paid: false })
+  if (payment?.paidAt) return answer(true, payment.savedAt === null)
+  const storedOnly = new URL(request.url).searchParams.get('check') === 'stored'
+  if (
+    payment &&
+    !storedOnly &&
+    payments.kind === 'stripe' &&
+    isCheckoutSessionId(payment.checkoutSessionId)
+  ) {
+    if (!(await spend(db, user, 'stripeChecks')).allowed) return answer(false)
     try {
       const now = await paidAtStripe({ db }, payments.secretKey, user, payment)
-      return Response.json({ paid: now?.paid ?? false })
+      // Not paid until now, so no save has used it.
+      return now?.paid ? answer(true, payment.savedAt === null) : answer(false)
     } catch (error) {
       return stripeFailed(error)
     }
   }
-  return Response.json({ paid: false })
+  return answer(false)
 }
 
 /** The events that say a Checkout Session is paid: by card or wallet, or by a slower method. */
@@ -276,9 +297,10 @@ export async function receiveStripeEvent(
 }
 
 /**
- * `POST /api/dev/checkout/`, a form with `toot` and `song`: the dev checkout's Pay. It marks the
- * Toot's dev payment paid and goes back to Song Creator, as Stripe's success URL would. 404
- * anywhere but a local run on a local host with no Stripe key.
+ * `POST /api/dev/checkout/`, a form with `toot` and `song`, or no `song` for a Sound Pad Toot: the
+ * dev checkout's Pay. It marks the Toot's dev payment paid and goes back to Song Creator, or the
+ * Sound Pad, as Stripe's success URL would. 404 anywhere but a local run on a local host with no
+ * Stripe key.
  */
 export async function payDevCheckout(
   { db }: Pick<Stores, 'db'>,
@@ -291,14 +313,15 @@ export async function payDevCheckout(
   if (body === null) return apiError(413, 'too_large')
   const form = new URLSearchParams(new TextDecoder().decode(body))
   const tootId = form.get('toot')
-  const song = catalogSong(form.get('song'))
-  if (!isItemId(tootId) || !song) return apiError(400, 'invalid_request')
+  const songId = form.get('song')
+  const song = songId === null ? null : catalogSong(songId)
+  if (!isItemId(tootId) || (songId !== null && !song)) return apiError(400, 'invalid_request')
   const payment = await tootPayment(db, user.id, tootId)
   if (!payment?.checkoutSessionId.startsWith('dev_')) return notFound()
   await markTootPaid(db, user.id, tootId, payment.checkoutSessionId)
   return new Response(null, {
     status: 303,
-    headers: { Location: songCreatorUrl(request, song.id, tootId, true) }
+    headers: { Location: returnUrl(request, song?.id ?? null, tootId, true) }
   })
 }
 

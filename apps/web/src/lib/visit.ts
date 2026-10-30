@@ -1,5 +1,6 @@
 import { type Account, codeSentLately, libraryOwner, offerStepAgain, readSession } from './account'
 import { claimLibrary, leftByAnAccount } from './library-sync'
+import { releaseTakes } from './pad-take'
 import { clearLibrary, clearVisit, recordingIds } from './recording-store'
 
 // A guest's farts last only the visit: keeping them needs a free account (owner, 2026-10-28, #237,
@@ -9,8 +10,11 @@ import { clearLibrary, clearVisit, recordingIds } from './recording-store'
 // when the guest makes an account. IndexedDB is the working copy, since sessionStorage is too
 // small for audio; a sessionStorage flag says this tab's visit has started. Signed in, the
 // browser's copy is the account's, and stays, also once the session has ended (`expired`). Sign
-// out clears it all (`forgetLibrary`), so a guest's library holds only what was made here as one;
-// one an account left anyway, from before #203, a guest's next visit clears whole.
+// out clears the library (`forgetLibrary`), so a guest's library holds only what was made here as
+// one; one an account left anyway, from before #203, a guest's next visit clears whole. The Sound
+// Pad's kept takes (`pad-take.ts`) aren't the library: Sign out lets go of the account's that
+// never started a Checkout, and keeps those that did for that account alone, since they may be
+// paid for (ADR 0017). A guest's new visit lets go of the last visit's.
 
 /** sessionStorage: this tab's visit has started, so opening again is a reload. */
 const visitKey = 'pedos.visit'
@@ -98,7 +102,11 @@ async function startVisit(account: Promise<Account>): Promise<void> {
     // The first open's grace is spent only on an open that reads as a guest's, where the step and
     // Profile say farts go at the end of the visit. Offline or unreachable, it waits for the next.
     if (facts.account.status === 'signedOut') setFlag(() => localStorage, openedKey)
-    if (clearsOnOpen(facts)) await ((await leftByAnAccount()) ? clearLibrary() : clearVisit(kept()))
+    if (clearsOnOpen(facts)) {
+      await ((await leftByAnAccount()) ? clearLibrary() : clearVisit(kept()))
+      // A guest never starts a Checkout (Save signs in first), so none of these is paid for.
+      releaseTakes(null)
+    }
   } catch {
     // A clear that failed leaves the last visit's farts. Farty still opens.
   } finally {

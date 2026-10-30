@@ -7,8 +7,9 @@ import { useEffect, useRef, useState } from 'react'
 import { buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { songs } from '@/lib/catalog/songs.generated'
-import type { Toot } from '@/lib/toot'
+import { PAD_TOOT_TITLE, type Toot } from '@/lib/toot'
 import { cn } from '@/lib/utils'
+import { PadTootLayout } from './pad-take'
 import { usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
 import { TootLayout } from './song-creator'
@@ -16,8 +17,9 @@ import { DeleteTootDialog, RenameTootDialog, TootMenu } from './toots-screen'
 
 /**
  * A Toot's screen, opened from the Toots tab: Song Creator's layout without Save, showing which
- * Recording played which notes. Rename and Delete are in its More menu. As the iPhone app's
- * `TootDetailView`. The Toot is `?id=`, so one page serves every Toot, offline too.
+ * Recording played which notes, or for a Sound Pad Toot its Play and what it played (ADR 0017).
+ * Rename and Delete are in its More menu. As the iPhone app's `TootDetailView`. The Toot is
+ * `?id=`, so one page serves every Toot, offline too.
  */
 export function TootScreen() {
   const id = useSearchParams().get('id') ?? ''
@@ -31,7 +33,7 @@ export function TootScreen() {
   const closing = useRef(false)
   const current = pedos.toot(id)
   const toot = current ?? (lastSeen?.id === id ? lastSeen : undefined)
-  const song = toot && songs.find(s => s.id === toot.songId)
+  const song = toot?.songId ? songs.find(s => s.id === toot.songId) : undefined
 
   useEffect(() => {
     if (current) setLastSeen(current)
@@ -79,7 +81,11 @@ export function TootScreen() {
           <>
             <div className="min-w-0 text-center">
               <h1 className="truncate font-semibold">{toot.title}</h1>
-              {song && <p className="truncate text-xs text-muted-foreground">{song.title}</p>}
+              {(song || toot.songId === null) && (
+                <p className="truncate text-xs text-muted-foreground">
+                  {song ? song.title : PAD_TOOT_TITLE}
+                </p>
+              )}
             </div>
             <TootMenu
               title={toot.title}
@@ -98,6 +104,17 @@ export function TootScreen() {
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
           {pedos.tootsFailed ? "Couldn't load your Toots." : "Couldn't find this Toot."}
         </p>
+      ) : toot.songId === null ? (
+        <div className="px-4">
+          <PadTootLayout toot={toot} isAudioMissing={toot.isAudioMissing}>
+            {toot.isAudioMissing && (
+              <p className="pt-1 text-xs text-muted-foreground" data-testid="toot-audio-missing">
+                This Toot's audio is missing. You can delete it and record it again on the Sound
+                Pad.
+              </p>
+            )}
+          </PadTootLayout>
+        </div>
       ) : !song ? (
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
           This Toot's Song isn't in Farty any more.

@@ -33,14 +33,14 @@ export async function isTootPaid(db: Database, userId: string, tootId: string): 
 }
 
 /**
- * Records `checkoutSessionId` as the latest Checkout Session for the Toot `tootId` of `songId`. A
- * paid Toot keeps its row as it is.
+ * Records `checkoutSessionId` as the latest Checkout Session for the Toot `tootId` of `songId`, or
+ * of a Sound Pad Performance with a null `songId` (ADR 0017). A paid Toot keeps its row as it is.
  */
 export async function startTootPayment(
   db: Database,
   userId: string,
   tootId: string,
-  songId: string,
+  songId: string | null,
   checkoutSessionId: string,
   price: { amount: number; currency: string }
 ): Promise<void> {

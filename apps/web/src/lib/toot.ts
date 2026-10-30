@@ -1,9 +1,11 @@
 import type { Song, SongNote } from '@/lib/catalog/song'
+import type { Performance } from '@/lib/performance'
 import { noteName } from '@/lib/pitch'
 import { formattedLength, type Recording, recordingName, songPitch } from '@/lib/recordings'
 
-// A Toot: a Song played by the user's Recordings, kept with its own audio (see `CONTEXT.md`). A
-// port of the iPhone app's `Toot.swift` and the parts of `Arrangement.swift` a Toot shows.
+// A Toot: a Song, or a Sound Pad Performance, played by the user's Recordings, kept with its own
+// audio (see `CONTEXT.md`). A port of the iPhone app's `Toot.swift` and the parts of
+// `Arrangement.swift` a Toot shows.
 
 /**
  * What a Toot keeps of its Arrangement: which Recording plays each of the Song's distinct pitches,
@@ -17,10 +19,13 @@ export type TootArrangement = {
 }
 
 /**
- * A Toot just made in Song Creator, not saved yet: its audio is a mono 16-bit WAV at the
- * renderer's rate. As the iPhone app's `TootDraft`.
+ * A Toot just made, not saved yet: its audio is a mono 16-bit WAV at the renderer's rate. Made in
+ * Song Creator from a Song, as the iPhone app's `TootDraft`, or on the Sound Pad from a
+ * Performance, with no Song (ADR 0017).
  */
-export type TootDraft = {
+export type TootDraft = SongTootDraft | PadTootDraft
+
+export type SongTootDraft = {
   id: string
   song: Song
   arrangement: TootArrangement
@@ -28,24 +33,40 @@ export type TootDraft = {
   wav: ArrayBuffer
 }
 
+export type PadTootDraft = {
+  id: string
+  song: null
+  performance: Performance
+  seconds: number
+  wav: ArrayBuffer
+}
+
+/** A Sound Pad Toot's title until the user renames it, and what its row says in a Song's place. */
+export const PAD_TOOT_TITLE = 'Sound Pad'
+
 /**
  * A saved Toot. Its audio is its own copy, kept by id beside it, so it still plays after a
- * Recording it used is deleted. As the iPhone app's `Toot`.
+ * Recording it used is deleted. As the iPhone app's `Toot`. A Toot of a Song keeps its
+ * Arrangement; a Toot from the Sound Pad has no Song and keeps its Performance (ADR 0017).
  */
-export type Toot = {
+export type Toot = SongToot | PadToot
+
+type SavedToot = {
   id: string
-  /** The Song's title until the user renames it. */
+  /** The Song's title, or `PAD_TOOT_TITLE`, until the user renames it. */
   title: string
-  songId: string
   createdAt: number
   seconds: number
-  arrangement: TootArrangement
   /**
    * Its audio was gone when the Toots loaded, or when it was played: it can't play. Worked out
    * then and never stored, as the iPhone app's `isAudioMissing`.
    */
   isAudioMissing?: boolean
 }
+
+export type SongToot = SavedToot & { songId: string; arrangement: TootArrangement }
+
+export type PadToot = SavedToot & { songId: null; arrangement: null; performance: Performance }
 
 /** A Toot's length as its row shows it: "0:17". As `formattedTootLength`. */
 export function formattedTootLength(seconds: number): string {

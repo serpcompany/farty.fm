@@ -1,5 +1,6 @@
 import { and, count, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm'
 
+import type { Performance } from '../lib/performance'
 import type { Analysis } from '../lib/recordings'
 import type { TootArrangement } from '../lib/toot'
 import type { Database } from './database'
@@ -34,16 +35,24 @@ export type NewRecording = {
   audioBytes: number
 }
 
-/** A Toot to keep, as the browser uploads it. */
-export type NewToot = {
+/**
+ * A Toot to keep, as the browser uploads it: of a Song, with its Arrangement, or from the Sound
+ * Pad, with its Performance and no Song (ADR 0017).
+ */
+export type NewToot = TootFields & { audioBytes: number }
+
+/** A Toot's fields as its upload's metadata carries them: all of `NewToot` but its audio's size. */
+export type TootFields = {
   id: string
   title: string
-  songId: string
   createdAt: number
   seconds: number
-  arrangement: TootArrangement
-  audioBytes: number
-}
+} & (
+  | { songId: string; arrangement: TootArrangement; performance: null }
+  | { songId: null; arrangement: null; performance: Performance }
+)
+
+const json = (value: object | null) => (value === null ? null : JSON.stringify(value))
 
 /** Whether the user has this row, and whether it is a tombstone. */
 export type ItemStatus = 'live' | 'deleted' | null
@@ -120,9 +129,9 @@ function tootInsert(db: Database, userId: string, t: NewToot, limit: number, pai
     : sql``
   return db.all(sql`
     insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
-      audio_bytes, updated_at)
+      performance, audio_bytes, updated_at)
     select ${userId}, ${t.id}, ${t.title}, ${t.songId}, ${t.createdAt}, ${t.seconds},
-      ${JSON.stringify(t.arrangement)}, ${t.audioBytes}, ${d1Now}
+      ${json(t.arrangement)}, ${json(t.performance)}, ${t.audioBytes}, ${d1Now}
     where (select count(*) from toots where user_id = ${userId} and deleted_at is null)
       < ${limit} ${payment}
     on conflict do nothing

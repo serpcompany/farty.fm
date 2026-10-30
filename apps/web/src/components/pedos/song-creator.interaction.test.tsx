@@ -3,7 +3,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Account } from '@/lib/account'
 import { songs } from '@/lib/catalog/songs.generated'
-import type { TootDraft } from '@/lib/toot'
+import type { SongTootDraft } from '@/lib/toot'
 import type { CheckoutReturn } from '@/lib/toot-payment'
 
 // Song Creator's Save where saving is paid (ADR 0010, #213), in a DOM: what Save says when
@@ -70,7 +70,7 @@ vi.mock('@/lib/toot-payment', async importOriginal => ({
 
 const song = songs.find(s => s.id === 'twinkle')
 if (!song) throw new Error('twinkle is in the catalog')
-const draft: TootDraft = {
+const draft: SongTootDraft = {
   id: TOOT,
   song,
   arrangement: { transposition: 0, recordingForPitch: {} },
@@ -131,6 +131,20 @@ describe('Save to Toots, where saving is paid', () => {
     await tapSave()
     expect(fetch).toHaveBeenCalledOnce()
     expect(container.textContent).toContain("Payments aren't available right now.")
+    expect(saveButton().disabled).toBe(false)
+  })
+
+  it('starts no Checkout when the take can’t be kept to make again back from it (ADR 0017)', async () => {
+    const fetch = checkoutAnswers({ url: 'https://checkout.stripe.com/c/pay/cs_test_a' })
+    const keep = vi.fn(() => false)
+    const { SaveToToots } = await import('./song-creator')
+    await act(async () => root?.render(<SaveToToots draft={draft} back={null} keep={keep} />))
+    await tapSave()
+    expect(keep).toHaveBeenCalledOnce()
+    expect(fetch).not.toHaveBeenCalled()
+    expect(container.textContent).toContain(
+      "This take can't be saved in this browser: it can't keep the take while you pay."
+    )
     expect(saveButton().disabled).toBe(false)
   })
 

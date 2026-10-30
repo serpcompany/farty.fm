@@ -768,6 +768,35 @@ describe('reading the account', () => {
   })
 })
 
+describe('libraryPulled', () => {
+  it('is the account once its changes are read, after the screens hear them, until the library is cleared', async () => {
+    await page.sync.claimLibrary('user-a', 'a@example.com')
+    account.add('recordings', theirs(), wav(5))
+    const heard: string[] = []
+    page.sync.onLibraryChanged(() => heard.push('change'))
+    page.sync.onLibraryPulled(() => heard.push(`pulled ${page.sync.libraryPulled()}`))
+    expect(page.sync.libraryPulled()).toBeNull()
+    await page.sync.syncOnce('user-a')
+    expect(page.sync.libraryPulled()).toBe('user-a')
+    expect(heard).toEqual(['change', 'pulled user-a'])
+    // Sign out clears it, so signing in again waits for the account's next read.
+    await page.sync.forgetLibrary()
+    expect(page.sync.libraryPulled()).toBeNull()
+  })
+
+  it('stays null when the read fails, and goes with another account’s claim', async () => {
+    await page.sync.claimLibrary('user-a')
+    refuse('GET', 503, 'unavailable')
+    await page.sync.syncOnce('user-a')
+    expect(page.sync.libraryPulled()).toBeNull()
+    account.intercept = () => undefined
+    await page.sync.syncOnce('user-a')
+    expect(page.sync.libraryPulled()).toBe('user-a')
+    await page.sync.claimLibrary('user-b')
+    expect(page.sync.libraryPulled()).toBeNull()
+  })
+})
+
 describe('forgetLibrary', () => {
   it('clears this browser, forgets whose library it was, and tells the other tabs', async () => {
     await page.sync.claimLibrary('user-a', 'a@example.com')
