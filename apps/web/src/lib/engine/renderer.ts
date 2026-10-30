@@ -40,7 +40,7 @@ export interface RenderSource {
   /** The Recording's single clean gesture, mono at 44.1 kHz. */
   gesture: Float64Array
   /**
-   * The fart's quiet lead-in, mono at 44.1 kHz: from its first sound up to the gesture
+   * The fart's quiet lead-in, mono at 44.1 kHz: the sound joined to the gesture's attack
    * (`leadInStart`, #287). It plays before the note's beat, so the attack still lands on it. Empty
    * when the fart opens loud.
    */

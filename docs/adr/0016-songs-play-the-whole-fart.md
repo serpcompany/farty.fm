@@ -104,13 +104,13 @@ The web engine's renders of the 13 golden Songs (`render-songs.ts`, then `evalua
 
 ## Update 2026-10-30: the lead-in plays before the beat (#287)
 
-The renderer now plays a fart's quiet lead-in just before its note's beat, so the attack still lands on the beat. The lead-in runs from the fart's first sound to its attack. The first sound is the first 5 ms frame within 30 dB of the peak, less 8 ms: the same 30 dB that ends the gesture, and the same frames and 8 ms that start it (`lead_in_start()` in `engine.py`, `leadInStart()` in `apps/web/src/lib/engine/render-source.ts`). A gap inside the lead-in is kept, as a gap between bursts is. The longest lead-ins on the Fixture Library are `022`'s 0.63 s, `013`'s 0.31 s, `009`'s 0.21 s, `032`'s and `084`'s 0.10 s and `098`'s 0.05 s. Every other fixture's is 0.015 s or less.
+The renderer now plays a fart's quiet lead-in just before its note's beat, so the attack still lands on the beat. The lead-in is the quiet sound joined to the fart's attack. From the attack's 5 ms frame, it walks back over every frame within 30 dB of the peak, and over quieter gaps of up to 50 ms. It starts 8 ms before the earliest such frame and is at most 0.25 s long. This uses the same 30 dB that ends the gesture, and the same frames and 8 ms that start it (`lead_in_start()` in `engine.py`, `leadInStart()` in `apps/web/src/lib/engine/render-source.ts`). The longest lead-ins on the Fixture Library are `013`'s and `022`'s 0.25 s (their quiet sound before the attack lasts 0.31 s and 0.63 s), `009`'s 0.21 s, `032`'s and `084`'s 0.10 s and `098`'s 0.05 s. Every other fixture's is 0.015 s or less. [Room noise](#room-noise) has why the lead-in has to be joined to the attack and why it's capped.
 
 This is placement and mixing only. Recording Analysis doesn't change: the gesture, the pitch body, audition, settle time and Auto-map stay as they are. The web renderer finds the lead-in in the saved audio each time it renders, so the stored Analysis keeps its fields and `ANALYSIS_VERSION` doesn't change. A note's level is still set from its attack: read from the start of a quiet lead-in, it would come out far too loud.
 
 Two decisions, measured on the reference:
 
-1. **A Song's first note cuts its lead-in at the Song's start.** There is no pre-roll. The playhead, and a note tapped on the Result, which plays its own slot of the Toot's audio, take the Song's first beat as the start of the audio, and a Toot stores only its audio. A pre-roll would need an offset stored and read everywhere a Toot plays. It would add 6.65 s of lead-in over 78 of the 118 unlocked catalog Songs, the most being `022`'s 0.63 s.
+1. **A Song's first note cuts its lead-in at the Song's start.** There is no pre-roll. The playhead, and a note tapped on the Result, which plays its own slot of the Toot's audio, take the Song's first beat as the start of the audio, and a Toot stores only its audio. A pre-roll would need an offset stored and read everywhere a Toot plays. It would add 5.34 s of lead-in over 78 of the 118 unlocked catalog Songs, at most 0.25 s each.
 2. **The lead-in plays only in a rest.** It reaches back no earlier than where the notes before it end as written or stop playing. So it never fills the 25 ms gap after a note, and it's never mixed over another fart.
 
 The rules tried for decision 2. The catalog is the 118 unlocked catalog Songs on the full Fixture Library. The 7 libraries are the Fixture Library with `009` placed on G3, less the Recordings that would take its notes, such as When the Saints without `002`, `032` and `022`.
@@ -119,10 +119,31 @@ The rules tried for decision 2. The catalog is the 118 unlocked catalog Songs on
 | --- | --- | --- | --- | --- | --- |
 | No lead-in (before) | 0 | 100% | 0 | 0 s | 0 of 7 |
 | Wherever it reaches, mixed over the note before | 22: 21 add a re-attack, 1 below fidelity | | | | |
-| Where the note before stops playing, filling the gap | 0 | 98% (`minuet-in-g`) | 2,893 | 41.15 s | 5 of 7, at 88 to 94% on time |
-| Where the note before ends as written (kept) | 0 | 100% | 89 of 3,697, in 38 Songs | 4.56 s | 0 of 7, at 97 to 100% on time |
+| Where the note before stops playing, filling the gap | 0 | 98% (`minuet-in-g`) | 2,893 | 40.66 s | 5 of 7, at 88 to 94% on time |
+| Where the note before ends as written (kept) | 0 | 100% | 89 of 3,697, in 38 Songs | 4.07 s | 0 of 7, at 97 to 100% on time |
 
 Filling the gap fails because `009`'s attack is a soft rumble. The onset detector finds it by the silent gap before it. With 25 ms of lead-in in the gap, the nearest onset to `009`'s beat falls 175 to 451 ms late. In a rest, `009` keeps its G3 opening. In When the Saints without `002`, `032` and `022`, `009` placed on G3 plays the first note, on the half beat at 0.2 s. So 0.2 s of its 0.21 s G3 opening plays before the beat, and the Song passes the bar with 97% of onsets on time. `test_lead_in.py` and `renderer.test.ts` check this case.
+
+### Room noise
+
+The first version of this rule took the lead-in from the first 5 ms frame within 30 dB of the peak, anywhere before the attack. The owner's 6 phone takes (fixtures `105` to `110`, #295) showed that this plays room noise. Each take holds 1 to 2.7 s of room before the fart, mostly more than 30 dB under its peak, with a few louder bumps. The first bump within 30 dB started the lead-in, so `106` would have played 1.98 s of room noise before its beat.
+
+Three rules were measured on the Fixture Library and the 6 takes. The table gives each lead-in in seconds. "Others" is the other 32 takes, compared with the first version.
+
+| Lead-in | `009` | `013` | `022` | `106` | `107` | `108` | `109` | Others |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| First frame within 30 dB (the first version) | 0.215 | 0.306 | 0.631 | 1.976 | 1.142 | 0.539 | 0.594 | |
+| Also 10 dB above the take's noise floor (its 10th-percentile frame) | 0.025 | 0 | 0 | 1.976 | 1.142 | 0.539 | 0.594 | |
+| Capped at 0.25 s | 0.215 | 0.25 | 0.25 | 0.25 | 0.25 | 0.25 | 0.25 | the same |
+| Joined to the attack, gaps up to 50 ms | 0.215 | 0.306 | 0.631 | 0.005 | 0.010 | 0 | 0 | the same |
+| Joined to the attack, and capped at 0.25 s (kept) | 0.215 | 0.25 | 0.25 | 0.005 | 0.010 | 0 | 0 | the same |
+
+- **Measuring against the noise floor fails both ways.** `009`'s G3 opening is its own quietest stretch: its 10th-percentile frame is 23 dB under its peak, and the opening runs 13 to 29 dB under. A margin of 6 to 15 dB above that floor cuts the opening to 0.08 s or less. `106`'s floor is 40 dB under its peak, so its noise bumps clear every margin up to 15 dB, and it still plays 1.6 s or more.
+- **A cap alone still plays noise.** On `106` to `109` it plays the last 0.25 s before the attack, and that stretch is all room noise, below the 30 dB line.
+- **Joining the lead-in to the attack separates the two.** A real lead-in runs into its attack. `009`'s opening, and `013`'s, `022`'s and `084`'s quiet sound, have no gap longer than 25 ms. Just before the attack of each of `106` to `109`, at least 0.25 s of room sits below the 30 dB line. Every gap limit from 25 to 200 ms gives the same lead-ins, to the millisecond, on all 38 takes. A limit of 0 ms cuts `084`'s 0.10 s to 0.015 s, so 50 ms sits safely inside that range.
+- **The cap is for a noisier room.** With `106`'s room noise raised 6 dB, the noise joins the attack and plays 0.30 s. Raised 10 dB, it plays 2.2 s. The cap keeps that to 0.25 s, which still holds `009`'s 0.215 s opening whole. It shortens only `013` and `022`, whose quiet sound sits at their own noise floor: pYIN finds a pitch in 0% and 9% of its frames, against 100% of `009`'s opening.
+
+The change from the first version moved no Song's results. `run_all.py` prints the same line for all 129 Songs. In the golden data only `013`'s and `022`'s `lead_start_sample` change, and no golden note's `lead_s` does. The 7 libraries with `009` placed give the same results. Over the catalog, the lead-ins played go from 4.56 s to 4.07 s, still on 89 notes.
 
 Before and after, the reference's `run_all.py` reports the same results on the catalog's 129 Songs. 118 pass, 11 are locked and none is below the bar. Every unlocked Song has 100% fidelity and 100% of its onsets on time, and no Song has a re-attack the renderer adds. Only `silvery-moon`'s sounding share moves, from 95% to 96%. Of the 13 golden Songs, only one note plays a lead-in: note 24 of When the Saints, after a 0.6 s rest, plays 2 ms of `101`'s lead-in. Every golden metric stays the same. Each of the web engine's 13 golden renders passes, before and after. Every note's heard and fart cents equal golden, and the largest sample difference from the reference's render is −98.0 dBFS.
 
@@ -130,5 +151,5 @@ Consequences:
 
 - **Most notes play as before.** Auto-map picks a fart at least as long as its pitch's longest note (ADR 0011), so legato notes leave only the gap and play no lead-in. A lead-in plays after a rest, or before a first note that doesn't start the Song. `009`'s G3 opening needs about 0.2 s of rest before its note. The app's Songs give that room only on When the Saints' first note (0.2 s), its note 24 (a 0.6 s rest) and Auld Lang Syne's first note (0.6 s).
 - **A tapped note plays its written slot.** On the Result, a tapped note plays from its beat, so it doesn't play its own lead-in. Because a lead-in plays only in a rest, a slot never holds the next note's lead-in.
-- **The golden data is format 8.** `gesture.lead_start_sample` and `lead_start_s` give the first sound, and each note's `render.lead_s` gives the lead-in played. The render's `start_s` is still the beat, and `len_s` is the fart played from there.
+- **The golden data is format 8.** `gesture.lead_start_sample` and `lead_start_s` give where the lead-in starts, and each note's `render.lead_s` gives the lead-in played. The render's `start_s` is still the beat, and `len_s` is the fart played from there.
 - ADR 0012 carries a dated note.

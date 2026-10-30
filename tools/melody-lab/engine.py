@@ -47,8 +47,9 @@ class Source:
     end: int = 0  # the fart's end (exclusive), where it fades out, in samples of the decoded original file
     pitch_estimate: float | None = None  # ref_midi before audition() (kept when audition rejects it)
     pitch_end: int = 0  # the first burst's end (exclusive), in samples of the decoded original file
-    # the fart's quiet lead-in: its first sound up to `start` (lead_in_start()), which Songs play
-    # before the note's beat so the attack still lands on it (#287); empty when the fart opens loud
+    # the fart's quiet lead-in: the sound joined to its attack, up to `start` (lead_in_start()),
+    # which Songs play before the note's beat so the attack still lands on it (#287); empty when
+    # the fart opens loud
     lead_in: np.ndarray = field(default_factory=lambda: np.zeros(0))
 
     @property
@@ -104,20 +105,33 @@ def note_segment(y):
     return start, end, pitch_end, reattack_at is not None
 
 
-LEAD_IN_DB = 30.0  # the first sound: the first 5 ms level within this of the peak, as note_segment()'s end (#287)
+LEAD_IN_DB = 30.0  # sound: a 5 ms level within this of the peak, as note_segment()'s end (#287)
+LEAD_IN_GAP_S = 0.05  # a quieter gap this long or shorter is kept inside the lead-in
+LEAD_IN_MAX_S = 0.25  # the longest lead-in: 009's 0.215 s G3 opening, and no more room noise
 
 
 def lead_in_start(y, start):
-    """Where the fart's first sound begins (#287): just before the first 5 ms level within
-    LEAD_IN_DB of the peak, as note_segment()'s `start` is just before the first within 12 dB.
-    Only silence comes before it, the way only silence comes after `end`; a quiet sound before
-    the attack, and any gap in it, is kept, the way every burst after it is (ADR 0016). The
-    stretch from here to `start` is the lead-in, which Songs play before the note's beat.
+    """Where the fart's lead-in begins (#287): the sound joined to its attack. From note_segment()'s
+    attack frame (the first 5 ms level within 12 dB of the peak), it walks back over every 5 ms
+    level within LEAD_IN_DB of the peak and over gaps below that of up to LEAD_IN_GAP_S, and starts
+    8 ms before the earliest such level, as `start` does before the attack. A sound before a
+    longer gap isn't the fart's: on the owner's room-noisy phone takes (105-110, #295) it's room
+    noise, up to 2 s of it. The lead-in is at most LEAD_IN_MAX_S, for a room loud enough to join
+    its noise to the attack. Songs play the stretch from here to `start` before the note's beat.
     Never after `start`."""
     hop = int(0.005 * SR)
     fine = 20 * np.log10(librosa.feature.rms(y=y, frame_length=2 * hop, hop_length=hop)[0] + 1e-9)
-    first = int(np.argmax(fine >= fine.max() - LEAD_IN_DB))
-    return min(start, max(0, first * hop - int(0.008 * SR)))
+    peak = fine.max()
+    attack = int(np.argmax(fine >= peak - 12))
+    first, below = attack, 0
+    for i in range(attack - 1, -1, -1):
+        if fine[i] >= peak - LEAD_IN_DB:
+            first, below = i, 0
+        else:
+            below += 1
+            if below > round(LEAD_IN_GAP_S / 0.005):
+                break
+    return min(start, max(0, first * hop - int(0.008 * SR), start - int(LEAD_IN_MAX_S * SR)))
 
 
 def weighted_median(mids, w):

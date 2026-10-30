@@ -1,6 +1,7 @@
 """A fart's quiet lead-in plays before its note's beat (#287): the attack lands on the beat, the
 lead-in plays just before it, in the rest before the note, never in the gap after the note before
-nor before the Song's start, and the level is still set from the attack. Runs render() on synthetic farts, and on Recording 009
+nor before the Song's start, and the level is still set from the attack. The lead-in is the sound
+joined to the attack, so room noise before a gap isn't, and it is at most 0.25 s. Runs render() on synthetic farts, and on Recording 009
 placed by ear on G3, whose G3 opening comes before its attack.
 `apps/web/src/lib/engine/renderer.test.ts` checks the same on the web.
 
@@ -49,12 +50,33 @@ class LeadInStart(unittest.TestCase):
         hop = int(0.005 * SR)
         attack = SR // 10 + SR // 5 - int(0.008 * SR)  # note_segment()'s start on this take
         start = lead_in_start(y, attack)
-        self.assertAlmostEqual(start / SR, 0.1 - 0.008, delta=hop / SR)  # its first sound, less 8 ms
+        self.assertAlmostEqual(start / SR, 0.1 - 0.008, delta=hop / SR)  # its quiet sound, from 8 ms before it
 
     def test_a_fart_that_opens_loud_has_a_frame_at_most(self):
         y = np.concatenate([np.zeros(SR // 10), np.full(SR // 2, 0.5)])
         attack = SR // 10 - int(0.008 * SR)
         self.assertLessEqual(attack - lead_in_start(y, attack), int(0.005 * SR))  # one 5 ms frame at most
+
+    def test_a_short_gap_stays_in_the_lead_in(self):
+        # a 30 ms dip 54 dB down inside the lead-in, as between two puffs of one fart
+        y = np.concatenate([np.zeros(SR // 10), np.full(SR // 10, 0.05), np.full(int(0.03 * SR), 0.001),
+                            np.full(SR // 20, 0.05), np.full(SR // 2, 0.5)])
+        attack = SR // 10 + SR // 10 + int(0.03 * SR) + SR // 20 - int(0.008 * SR)
+        self.assertAlmostEqual(lead_in_start(y, attack) / SR, 0.1 - 0.008, delta=0.005)
+
+    def test_a_sound_before_a_longer_gap_is_room_noise(self):
+        # As on the owner's phone takes (#295): a bump of room noise 20 dB down, then 0.3 s of quieter
+        # noise 40 dB down, then the fart. The bump isn't the fart's, so the lead-in is a frame at most.
+        y = np.concatenate([np.full(SR, 0.005), np.full(SR // 10, 0.05), np.full(int(0.3 * SR), 0.005),
+                            np.full(SR // 2, 0.5)])
+        attack = SR + SR // 10 + int(0.3 * SR) - int(0.008 * SR)
+        self.assertLessEqual(attack - lead_in_start(y, attack), int(0.005 * SR))
+
+    def test_the_lead_in_is_at_most_a_quarter_second(self):
+        # room noise loud enough (20 dB down) to join the attack, for 1 s before it
+        y = np.concatenate([np.full(SR, 0.05), np.full(SR // 2, 0.5)])
+        attack = SR - int(0.008 * SR)
+        self.assertEqual(attack - lead_in_start(y, attack), int(0.25 * SR))
 
 
 class Placement(unittest.TestCase):
@@ -106,8 +128,8 @@ class Placement(unittest.TestCase):
 
 
 class Recording009(unittest.TestCase):
-    """009 is Noise-like: its attack (0.217 s into the take) is a low rumble, but it opens on a
-    quieter G3 from about 0.03 s. Placed by ear on G3, a note with room before it plays that G3."""
+    """009's attack (0.217 s into the take) is a low rumble, but it opens on a quieter G3 from
+    about 0.03 s. Placed by ear on G3 (ADR 0015), a note with room before it plays that G3."""
 
     @classmethod
     def setUpClass(cls):
@@ -116,7 +138,6 @@ class Recording009(unittest.TestCase):
         cls.mix, cls.events = render(song([(1, 1)]), [cls.src], [Assignment(0, "009", G3, 0.0)])
 
     def test_its_lead_in_is_its_opening(self):
-        self.assertFalse(self.raw.pitched)
         self.assertAlmostEqual(len(self.src.lead_in) / SR, 0.215, delta=0.005)
         self.assertEqual(self.events[0]["lead_s"], round(len(self.src.lead_in) / SR, 3))  # all of it: a beat of room
 

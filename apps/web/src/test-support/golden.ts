@@ -32,7 +32,7 @@ export interface GoldenRecording {
     pitch_end_sample: number
     pitch_end_s: number
     cut_at_reattack: boolean
-    /** Format 8 (#287): where the fart's first sound begins, its lead-in running to `start_sample`. */
+    /** Format 8 (#287): where the fart's lead-in begins, running to `start_sample`. */
     lead_start_sample: number
     lead_start_s: number
   }
@@ -81,7 +81,7 @@ export async function gestureBody(golden: GoldenRecording): Promise<Float64Array
   return Float64Array.from(y.subarray(golden.gesture.start_sample, golden.gesture.end_sample))
 }
 
-/** The golden lead-in of a fixture, its first sound up to the gesture (#287). */
+/** The golden lead-in of a fixture, the quiet sound joined to the gesture (#287). */
 export async function leadInBody(golden: GoldenRecording): Promise<Float64Array> {
   const y = await analysisAudio(golden)
   return Float64Array.from(

@@ -4,8 +4,12 @@ import type { Analysis } from '@/lib/recordings'
 import type { PcmAudio } from '@/lib/wav'
 import type { RenderSource } from './renderer'
 
-/** The first sound: the first 5 ms level within this of the peak, as the gesture's end (#287). */
+/** Sound: a 5 ms level within this of the peak, as the gesture's end (#287). */
 const LEAD_IN_DB = 30
+/** A quieter gap this long or shorter is kept inside the lead-in. */
+const LEAD_IN_GAP_SECONDS = 0.05
+/** The longest lead-in: 009's 0.215 s G3 opening, and no more room noise. */
+const LEAD_IN_MAX_SECONDS = 0.25
 
 /**
  * What the renderer needs from a Melodic Recording, or a Noise-like one placed on a note by ear
@@ -31,11 +35,13 @@ export function renderSource(audio: PcmAudio, analysis: Analysis): RenderSource 
 }
 
 /**
- * Where the fart's first sound begins, in samples of the 44.1 kHz audio: `lead_in_start()` of the
- * reference engine (#287). On the 5 ms RMS envelope the gesture's start comes from, the first
- * frame within 30 dB of the peak, minus 8 ms, as the start is the first within 12 dB minus 8 ms.
- * Only silence comes before it, as only silence comes after the gesture's end; a quiet sound
- * before the attack, and any gap in it, is kept, as every burst after it is (ADR 0016). Never
+ * Where the fart's lead-in begins, in samples of the 44.1 kHz audio: `lead_in_start()` of the
+ * reference engine (#287), the sound joined to the attack. On the 5 ms RMS envelope the gesture's
+ * start comes from, it walks back from the attack's frame (the first within 12 dB of the peak)
+ * over every frame within 30 dB of the peak and over quieter gaps of up to 50 ms, and starts 8 ms
+ * before the earliest such frame, as the gesture starts 8 ms before the attack. A sound before a
+ * longer gap isn't the fart's: on the owner's room-noisy phone takes it's room noise, up to 2 s
+ * of it (#295). At most 0.25 s, for a room loud enough to join its noise to the attack. Never
  * after `start`.
  */
 export function leadInStart(y: Float32Array, start: number): number {
@@ -44,6 +50,20 @@ export function leadInStart(y: Float32Array, start: number): number {
   const fine = levelDb(y, 2 * hop, hop)
   let peak = Number.NEGATIVE_INFINITY
   for (const v of fine) if (v > peak) peak = v
-  const first = fine.findIndex(v => v >= peak - LEAD_IN_DB)
-  return Math.min(start, Math.max(0, first * hop - Math.trunc(0.008 * sr)))
+  const attack = fine.findIndex(v => v >= peak - 12)
+  const longestGap = Math.round(LEAD_IN_GAP_SECONDS / 0.005)
+  let first = attack
+  let below = 0
+  for (let i = attack - 1; i >= 0; i--) {
+    if (fine[i] >= peak - LEAD_IN_DB) {
+      first = i
+      below = 0
+    } else if (++below > longestGap) {
+      break
+    }
+  }
+  return Math.min(
+    start,
+    Math.max(0, first * hop - Math.trunc(0.008 * sr), start - Math.trunc(LEAD_IN_MAX_SECONDS * sr))
+  )
 }

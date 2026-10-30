@@ -18,7 +18,7 @@ import {
 } from '@/test-support/golden'
 import { arrange, placedAutoMapRecording } from './auto-map'
 import { renderFromRecordings, renderSong } from './render-song'
-import { renderSource } from './render-source'
+import { leadInStart, renderSource } from './render-source'
 import {
   applyFades,
   limit,
@@ -213,9 +213,10 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
     const placed = out.notes[0]
     expect(placed.startSample).toBe(22050)
     expect(placed.lengthSamples).toBe(Math.trunc(0.475 * SR))
-    // Its 0.306 s lead-in, whole: half a second before the beat has room for it (#287).
+    // Its lead-in, whole: half a second before the beat has room for it (#287). The quiet sound
+    // before 013's attack lasts 0.306 s, so it is cut to the longest lead-in, 0.25 s.
     expect(placed.leadSamples).toBe(source.leadIn.length)
-    expect(source.leadIn.length).toBe(13508)
+    expect(source.leadIn.length).toBe(11025)
 
     const expected = new Float64Array(out.samples.length)
     const segment = withLeadIn(source, placed)
@@ -359,6 +360,53 @@ describe("a fart's lead-in", () => {
     const body = (await gestureBody(g009)).subarray(0, 4410)
     const attack = rendered.samples.subarray(first.startSample, first.startSample + 4410)
     expect(correlation(attack, body)).toBeGreaterThan(0.99)
+  })
+})
+
+// The same takes as `LeadInStart` in tools/melody-lab/test_lead_in.py.
+describe('where a lead-in starts', () => {
+  /** A take of [seconds, level] stretches. */
+  const take = (...parts: [number, number][]) => {
+    const y = new Float32Array(parts.reduce((n, [s]) => n + Math.trunc(s * SR), 0))
+    let i = 0
+    for (const [s, level] of parts) {
+      y.fill(level, i, i + Math.trunc(s * SR))
+      i += Math.trunc(s * SR)
+    }
+    return y
+  }
+  const frame = Math.trunc(0.005 * SR)
+  const before = Math.trunc(0.008 * SR) // the gesture starts this long before the attack
+
+  it('takes a quiet sound before the attack, from 8 ms before it', () => {
+    const y = take([0.1, 0], [0.2, 0.05], [0.5, 0.5])
+    const attack = Math.trunc(0.3 * SR) - before
+    expect(Math.abs(leadInStart(y, attack) - (Math.trunc(0.1 * SR) - before))).toBeLessThan(frame)
+  })
+
+  it('takes a frame at most when the fart opens loud', () => {
+    const attack = Math.trunc(0.1 * SR) - before
+    expect(attack - leadInStart(take([0.1, 0], [0.5, 0.5]), attack)).toBeLessThanOrEqual(frame)
+  })
+
+  it('keeps a gap of up to 50 ms inside it', () => {
+    const y = take([0.1, 0], [0.1, 0.05], [0.03, 0.001], [0.05, 0.05], [0.5, 0.5])
+    const attack = Math.trunc(0.28 * SR) - before
+    expect(Math.abs(leadInStart(y, attack) - (Math.trunc(0.1 * SR) - before))).toBeLessThan(frame)
+  })
+
+  it('leaves out room noise before a longer gap', () => {
+    // As on the owner's phone takes (#295): a bump of room noise 20 dB down, then 0.3 s of
+    // quieter noise 40 dB down, then the fart.
+    const y = take([1, 0.005], [0.1, 0.05], [0.3, 0.005], [0.5, 0.5])
+    const attack = Math.trunc(1.4 * SR) - before
+    expect(attack - leadInStart(y, attack)).toBeLessThanOrEqual(frame)
+  })
+
+  it('is at most a quarter second', () => {
+    // Room noise loud enough (20 dB down) to join the attack, for 1 s before it.
+    const attack = SR - before
+    expect(attack - leadInStart(take([1, 0.05], [0.5, 0.5]), attack)).toBe(Math.trunc(0.25 * SR))
   })
 })
 
