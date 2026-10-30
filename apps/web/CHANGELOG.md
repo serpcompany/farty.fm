@@ -6,7 +6,6 @@
 ### Fixes
 
 * **web:** start a Pad where a Song starts its fart, not at room noise ([#298](https://github.com/serpcompany/farty.fm/issues/298)) ([#301](https://github.com/serpcompany/farty.fm/issues/301)) ([713f556](https://github.com/serpcompany/farty.fm/commit/713f556005d708be0a8ffe41eb4cdab847beada3))
-* **web:** start a Pad where a Song starts its fart, not at room noise ([#298](https://github.com/serpcompany/farty.fm/issues/298)) ([#301](https://github.com/serpcompany/farty.fm/issues/301)) ([6c40e24](https://github.com/serpcompany/farty.fm/commit/6c40e2480f13064a0452491f9ebb7f101bff10f6))
 
 ## [1.12.0](https://github.com/serpcompany/farty.fm/compare/v1.11.0...v1.12.0) (2026-10-30)
 
