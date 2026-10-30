@@ -596,10 +596,13 @@ describe('PATCH /api/recordings/{id}/ with a Trim (ADR 0019)', () => {
   // The handles the user left, and the fart found between them.
   const fart = { startSeconds: 0.8868, endSeconds: 2.0821 }
   const trim = { startSeconds: 0.8, endSeconds: 2.3, fart }
+  // A take 3 s long, as Recording 065's.
+  const uploadTake = (cookie: string) =>
+    api.put('recordings', R1, uploadBody(recordingMetadata(R1, { seconds: 3 }), wav()), { cookie })
 
   it('trims a Recording beside its note, keeps either when the other changes, and takes it off', async () => {
     const a = await signUp('A')
-    await upload('recordings', R1, a.cookie)
+    await uploadTake(a.cookie)
     const before = await library(a.cookie)
     await tick()
 
@@ -627,7 +630,7 @@ describe('PATCH /api/recordings/{id}/ with a Trim (ADR 0019)', () => {
 
   it('refuses a Trim that is not a part of a take (400), and changes nothing', async () => {
     const a = await signUp('A')
-    await upload('recordings', R1, a.cookie)
+    await uploadTake(a.cookie)
 
     const part = (startSeconds: unknown, endSeconds?: unknown) => ({
       startSeconds,
@@ -649,6 +652,9 @@ describe('PATCH /api/recordings/{id}/ with a Trim (ADR 0019)', () => {
       { trim: { ...part(0.2, 0.8), fart: { startSeconds: 0.1, endSeconds: 0.5 } } },
       { trim: { ...part(0.2, 0.8), fart: { startSeconds: 0.3, endSeconds: 0.9 } } },
       { trim: { ...part(0.2, 0.8), fart: { startSeconds: 0.5, endSeconds: 0.4 } } },
+      // Past the end of the 3 s take, by more than 10 ms (#299).
+      { trim: part(10, 11) },
+      { placedPitch: 36, trim: part(2, 3.02) },
       {}
     ]) {
       const answer = await api.placeAndTrim(R1, refused, a)
@@ -658,6 +664,17 @@ describe('PATCH /api/recordings/{id}/ with a Trim (ADR 0019)', () => {
     expect((await library(a.cookie)).recordings).toMatchObject([
       { id: R1, placedPitch: null, trim: null }
     ])
+    // To its last sample, which the browser can measure a little past `seconds`, it fits.
+    const toTheEnd = { ...part(2, 3.004), fart: { startSeconds: 2.1, endSeconds: 3.004 } }
+    expect((await api.placeAndTrim(R1, { trim: toTheEnd }, a)).status).toBe(200)
+  })
+
+  it('answers 404 and 410 for a Trim as for a Placed Pitch', async () => {
+    const a = await signUp('A')
+    await uploadTake(a.cookie)
+    expect((await api.placeAndTrim(R2, { trim }, a)).status).toBe(404)
+    expect((await api.delete('recordings', R1, a)).status).toBe(204)
+    expect((await api.placeAndTrim(R1, { trim }, a)).status).toBe(410)
   })
 })
 
@@ -844,6 +861,8 @@ describe('the rows a route keeps', () => {
 
     for (const refused of [
       { ...trim, startSeconds: 0.05, endSeconds: 0.05 },
+      // Past the end of the 0.1 s take (#299).
+      { ...trim, endSeconds: 0.2 },
       { startSeconds: 0.02, endSeconds: 0.09 },
       { startSeconds: 0.02 },
       'all'

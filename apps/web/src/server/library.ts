@@ -30,7 +30,8 @@ import {
   parseTitle,
   parseToot,
   readJson,
-  readUpload
+  readUpload,
+  TRIM_TOLERANCE_SECONDS
 } from './library-input'
 import { audioKey, deleteUserMedia, getMedia, putAudioOnce } from './media'
 import { apiError, type SessionUser } from './require-user'
@@ -316,9 +317,11 @@ export async function patchRecording(
   if (body instanceof Response) return body
   const placement = parsePlacement(body.json)
   if (placement === null) return apiError(400, 'invalid_request')
-  const before = await placeRecording(db, user.id, id, placement)
+  const before = await placeRecording(db, user.id, id, placement, TRIM_TOLERANCE_SECONDS)
   if (before === null) return notFound()
   if (before === 'deleted') return gone()
+  // A Trim past the end of the take (ADR 0019).
+  if (before === 'tooLong') return apiError(400, 'invalid_request')
   return Response.json({ id, ...placement })
 }
 

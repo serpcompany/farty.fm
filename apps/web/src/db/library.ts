@@ -254,14 +254,16 @@ export type Placement = { placedPitch?: number | null; trim?: RecordingTrim | nu
 
 /**
  * Places a live Recording on a note and trims it, or takes either off with null; the last to
- * arrive wins. Returns the row's status before.
+ * arrive wins. Returns the row's status before, or `tooLong` when the Trim reaches past the end of
+ * the take, more than `tolerance` seconds (#299), and nothing changed.
  */
 export async function placeRecording(
   db: Database,
   userId: string,
   id: string,
-  change: Placement
-): Promise<ItemStatus> {
+  change: Placement,
+  tolerance: number
+): Promise<ItemStatus | 'tooLong'> {
   const trim =
     change.trim === undefined
       ? {}
@@ -275,9 +277,17 @@ export async function placeRecording(
   const placed = await db
     .update(recordings)
     .set({ ...placedPitch, ...trim, updatedAt: d1Now })
-    .where(and(whereItem('recordings', userId, id), isNull(recordings.deletedAt)))
+    .where(
+      and(
+        whereItem('recordings', userId, id),
+        isNull(recordings.deletedAt),
+        change.trim ? gte(recordings.seconds, change.trim.endSeconds - tolerance) : undefined
+      )
+    )
     .returning({ id: recordings.id })
-  return placed.length === 1 ? 'live' : itemStatus(db, 'recordings', userId, id)
+  if (placed.length === 1) return 'live'
+  const status = await itemStatus(db, 'recordings', userId, id)
+  return status === 'live' ? 'tooLong' : status
 }
 
 export type RecordingRow = typeof recordings.$inferSelect

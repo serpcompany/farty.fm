@@ -176,6 +176,17 @@ function parsePart(value: unknown): Trim | undefined {
 }
 
 /**
+ * How far a Trim's handles may reach past the take's `seconds`: the browser measured those at the
+ * take's own sample rate, and the handles at the 44.1 kHz analysis reads, so a handle on the last
+ * sample can land a fraction of a millisecond past it.
+ */
+export const TRIM_TOLERANCE_SECONDS = 0.01
+
+/** Whether a Trim lies within a take `seconds` long. */
+export const trimFits = (trim: RecordingTrim, seconds: number) =>
+  trim.endSeconds <= seconds + TRIM_TOLERANCE_SECONDS
+
+/**
  * How far a Trim's fart may reach past its handles: `trimBounds` cuts the handles at whole
  * samples of the 44.1 kHz audio, so the fart can start half a sample before the start handle.
  */
@@ -183,7 +194,9 @@ const SAMPLE_TOLERANCE = 0.001
 
 /**
  * A Trim (ADR 0019): the handles the user left, seconds of the whole take, and `fart`, the fart
- * found between them; or null when untrimmed; undefined when it's neither.
+ * found between them; or null when untrimmed; undefined when it's neither. Whether it fits its
+ * take is checked against the take's `seconds` (`trimFits`): in the upload, or by the PATCH's
+ * update.
  */
 export function parseTrim(value: unknown): RecordingTrim | null | undefined {
   if (value === null) return null
@@ -243,7 +256,8 @@ export function parseRecording(
     waveform.every(level => isNumberIn(level, 0, 1)) &&
     analysis !== undefined &&
     placedPitch !== undefined &&
-    trim !== undefined
+    trim !== undefined &&
+    (trim === null || trimFits(trim, seconds))
   if (!valid) return null
   return { id, number, createdAt, seconds, sampleRate, waveform, analysis, placedPitch, trim }
 }
