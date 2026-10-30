@@ -80,6 +80,21 @@ describe('the kept takes', () => {
     expect(ids()).toEqual([...[6, 5, 4, 3, 2].map(tootOf), T1])
   })
 
+  it('never start a Checkout paid by another account than the library’s', () => {
+    // A shared phone: B's session ended, and A signs in to pay for a take of B's Recordings, which
+    // signing in as A clears.
+    libraryOf('userB')
+    keepTake(T1, performance)
+    expect(keepForCheckout(T1, performance, 'userA')).toBe(false)
+    expect(keptTakes()).toEqual([{ tootId: T1, performance, account: 'userB', checkout: false }])
+    // The library's own account, a guest's and one from before ids were kept can pay.
+    expect(keepForCheckout(T1, performance, 'userB')).toBe(true)
+    libraryOf(null)
+    expect(keepForCheckout(T2, performance, 'userA')).toBe(true)
+    libraryOf('1')
+    expect(keepForCheckout(T3, performance, 'userA')).toBe(true)
+  })
+
   it('let go of one take at a time, by its own Toot', () => {
     keepTake(T1, performance)
     keepTake(T2, performance)

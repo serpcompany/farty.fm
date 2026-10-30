@@ -95,6 +95,31 @@ export function onLibraryChanged(listener: (change: LibraryChange) => void): () 
   }
 }
 
+/**
+ * The account whose changes this page has read into this browser's library (a `pull` that worked),
+ * since the page opened or the library was last cleared: null until then. Before it, a Recording
+ * the account has may not be here yet, such as right after signing in again (#278).
+ */
+let pulledFor: string | null = null
+const pulls = new EventTarget()
+
+function setPulled(accountId: string | null): void {
+  if (pulledFor === accountId) return
+  pulledFor = accountId
+  pulls.dispatchEvent(new Event('change'))
+}
+
+/** The account this page's library has read the changes of, or null (`pulledFor`). */
+export function libraryPulled(): string | null {
+  return pulledFor
+}
+
+/** Calls `listener` when `libraryPulled` changes, in this tab. Returns a function that stops it. */
+export function onLibraryPulled(listener: () => void): () => void {
+  pulls.addEventListener('change', listener)
+  return () => pulls.removeEventListener('change', listener)
+}
+
 const syncLock = 'pedos-sync'
 
 /** Runs `job` while no other tab of this browser syncs, or at once without Web Locks. */
@@ -126,6 +151,7 @@ export async function claimLibrary(accountId: string, email = ''): Promise<boole
   if (current === undefined) return false
   if (current !== accountId && current !== null && current !== legacyOwner) {
     await withSyncLock(clearLibrary)
+    setPulled(null)
     // The other account's Sound Pad takes that never started a Checkout go with its library.
     releaseTakes(current)
     emit({ reset: true })
@@ -184,6 +210,7 @@ export async function forgetLibrary(): Promise<void> {
     } catch {
       return
     }
+    setPulled(null)
     // Its Sound Pad takes that never started a Checkout go too; those that did stay for it.
     const left = owner()
     if (left) releaseTakes(left)
@@ -405,7 +432,9 @@ async function pull(accountId: string): Promise<boolean> {
     change.toots.length +
     change.deleted.recordings.length +
     change.deleted.toots.length
+  // The screens hear what changed before they hear it's read.
   if (changed > 0) emit(change)
+  setPulled(accountId)
   return true
 }
 

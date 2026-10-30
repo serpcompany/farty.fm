@@ -1,4 +1,4 @@
-import { libraryOwner } from './account'
+import { legacyOwner, libraryOwner } from './account'
 import { isPerformance, type Performance } from './performance'
 
 // The Sound Pad's takes (#278), kept in this browser while they're unsaved, by Toot id: Checkout
@@ -93,12 +93,20 @@ export function keepTake(tootId: string, performance: Performance): boolean {
 /**
  * Keeps the take again before Save starts a Checkout for it, as the paying `accountId`'s. False
  * when it can't be kept: back from Checkout, it couldn't be made again, so Checkout isn't started.
+ * So is a take made in another account's library, as on a shared phone whose session ended and
+ * someone else signs in to pay: signing in clears that library, with the take's Recordings.
  */
 export function keepForCheckout(
   tootId: string,
   performance: Performance,
   accountId: string
 ): boolean {
+  try {
+    const whose = owner()
+    if (whose !== null && whose !== legacyOwner && whose !== accountId) return false
+  } catch {
+    return false
+  }
   return put({ tootId, performance, account: accountId, checkout: true })
 }
 

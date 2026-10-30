@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
+import { libraryPulled, onLibraryPulled } from '@/lib/library-sync'
 import {
   forgetTake,
   type KeptTake,
@@ -81,7 +82,8 @@ export type PadTake = {
  * Pad shows the newest kept take again, ready to play, and where saving is paid it asks the account
  * about each kept take: one paid whose return never loaded is made again and saved, one whose
  * payment a save used is let go, and nothing else is. A paid take that can't be made again is said
- * and reported, for a refund. Only this library's takes are read (`pad-take.ts`).
+ * and reported, for a refund: signed in, only once the account's changes are read, as its
+ * Recordings may still be on their way. Only this library's takes are read (`pad-take.ts`).
  */
 export function usePadTake(): PadTake {
   const pedos = usePedos()
@@ -93,6 +95,19 @@ export function usePadTake(): PadTake {
   const loaded = pedos.recordings !== null
   /** The library is read, so a kept take can be checked against its Recordings and Toots. */
   const libraryRead = loaded && pedos.toots !== null
+  /** The account whose changes this page's library has read (`libraryPulled`), or null. */
+  const [pulled, setPulled] = useState(libraryPulled)
+  useEffect(() => {
+    // A read that landed before this subscribed.
+    const update = () => setPulled(libraryPulled())
+    update()
+    return onLibraryPulled(update)
+  }, [])
+  /**
+   * A Recording missing here may still be on its way: signed in, the account's changes haven't been
+   * read since the page opened, as right after signing in again to a cleared library.
+   */
+  const mayArrive = accountId !== null && pulled !== accountId
   /** Record was pressed since the Pad opened: nothing kept takes its place any more. */
   const recorded = useRef(false)
   /** The phase, for a check that answers after it may have changed. */
@@ -165,12 +180,17 @@ export function usePadTake(): PadTake {
   const canMake = (take: KeptTake) =>
     take.performance.recordings.every(id => pedos.recording(id) !== undefined)
   /**
-   * What's on the Pad can give way to a kept take: nothing recorded, no Checkout return, and no
-   * lost take being said.
+   * A paid take with a Recording not here yet, saved as back from its Checkout `back` once the
+   * account's changes are read, or said to be lost if it's still missing then.
+   */
+  const awaiting = useRef<{ take: KeptTake; back: CheckoutReturn } | null>(null)
+  /**
+   * What's on the Pad can give way to a kept take: nothing recorded, no Checkout return, no paid
+   * take waiting for its Recordings, and no lost take being said.
    */
   const replaceable = () => {
     const current = shown.current
-    if (recorded.current) return false
+    if (recorded.current || awaiting.current) return false
     if (current.kind === 'idle') return !current.lost
     return current.kind !== 'recording' && current.back === null
   }
@@ -180,6 +200,29 @@ export function usePadTake(): PadTake {
     forgetTake(tootId)
     setPhase({ kind: 'idle', lost: true })
   }
+  /**
+   * Makes a paid take again, to save as back from its Checkout `back`. With a Recording missing
+   * it's lost, once the account's changes are read: before, the Recording may still arrive.
+   */
+  const makePaid = (take: KeptTake, back: CheckoutReturn) => {
+    if (canMake(take)) {
+      const made = { played: take.performance, id: take.tootId, back }
+      setPhase({ kind: 'making', ...made, plays: false, restored: false })
+    } else if (mayArrive) awaiting.current = { take, back }
+    else lose(take.tootId)
+  }
+  /** `makePaid` with what the Pad has now, for a check that answers later. */
+  const makePaidNow = useEffectEvent(makePaid)
+  const pulledNow = useEffectEvent(() => {
+    const waiting = awaiting.current
+    if (!waiting || mayArrive) return
+    awaiting.current = null
+    // Record pressed meanwhile: it stays kept, for the next open.
+    if (!recorded.current) makePaid(waiting.take, waiting.back)
+  })
+  useEffect(() => {
+    if (pulled) pulledNow()
+  }, [pulled])
 
   // Opened: back from Checkout, the take it was for is made again. Otherwise the newest kept take
   // is shown again, ready to play. A kept take whose Toot is saved is let go.
@@ -194,8 +237,13 @@ export function usePadTake(): PadTake {
         const take = { played: kept.performance, id: kept.tootId, back }
         setPhase({ kind: 'making', ...take, plays: false, restored: false })
         return
+      } else if (kept && back.done) {
+        // Paid for, with a Recording deleted since paying, or not read from the account yet.
+        clearCheckoutReturn()
+        makePaid(kept, back)
+        return
       } else if (back.done) {
-        // Paid for, and gone: storage cleared, or a Recording deleted, since paying.
+        // Paid for, and gone: storage cleared since paying.
         clearCheckoutReturn()
         lose(back.tootId)
         return
@@ -247,12 +295,7 @@ export function usePadTake(): PadTake {
           setPhase({ kind: 'idle' })
         }
       } else if (state === 'unused') {
-        if (!canMake(take)) lose(take.tootId)
-        else {
-          const back = { tootId: take.tootId, done: true }
-          const made = { played: take.performance, id: take.tootId, back }
-          setPhase({ kind: 'making', ...made, plays: false, restored: false })
-        }
+        makePaidNow(take, { tootId: take.tootId, done: true })
         return
       }
     }

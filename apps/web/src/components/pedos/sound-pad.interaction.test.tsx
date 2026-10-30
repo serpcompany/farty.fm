@@ -30,6 +30,9 @@ const page = vi.hoisted(() => ({
   /** Whether this build's saving is paid. */
   paid: false,
   account: { status: 'signedOut' } as Account,
+  /** The account whose changes this page has read (`libraryPulled`), and who hears it change. */
+  pulled: null as string | null,
+  onPulled: new Set<() => void>(),
   /** The ids of the saved Toots. */
   saved: new Set<string>()
 }))
@@ -62,18 +65,22 @@ const recording = recordingNumbered(A, 1)
 let recordings = [recording]
 
 vi.mock('./pedos-provider', () => ({
-  usePedos: () => ({
-    recordings,
-    recording: (id: string) => recordings.find(r => r.id === id),
-    makePadToot: page.makePadToot,
-    toggleTootPlayback: page.toggleTootPlayback,
-    stopPlayback: page.stopPlayback,
-    forgetToot: page.forgetToot,
-    toots: [],
-    toot: (id: string) => (page.saved.has(id) ? {} : undefined),
-    nowPlaying: null,
-    tootPlayFailed: null
-  }),
+  // As the provider's: the library as this render has it.
+  usePedos: () => {
+    const list = recordings
+    return {
+      recordings: list,
+      recording: (id: string) => list.find(r => r.id === id),
+      makePadToot: page.makePadToot,
+      toggleTootPlayback: page.toggleTootPlayback,
+      stopPlayback: page.stopPlayback,
+      forgetToot: page.forgetToot,
+      toots: [],
+      toot: (id: string) => (page.saved.has(id) ? {} : undefined),
+      nowPlaying: null,
+      tootPlayFailed: null
+    }
+  },
   tootPlayback: (id: string) => `toot:${id}`
 }))
 vi.mock('./account-provider', () => ({ useAccount: () => ({ account: page.account }) }))
@@ -105,6 +112,13 @@ vi.mock('@/lib/audio/context', () => ({ startAudioInTap: () => undefined }))
 vi.mock('@/lib/pad-store', () => ({ loadPads: async () => new Map(), savePads: async () => {} }))
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
 vi.mock('@/lib/recording-store', () => ({ loadAudio: () => new Promise(() => {}) }))
+vi.mock('@/lib/library-sync', () => ({
+  libraryPulled: () => page.pulled,
+  onLibraryPulled: (listener: () => void) => {
+    page.onPulled.add(listener)
+    return () => page.onPulled.delete(listener)
+  }
+}))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: page.reportError }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({}) }))
 
@@ -173,6 +187,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   page.paid = false
   page.account = { status: 'signedOut' }
+  page.pulled = null
   page.saved = new Set()
 })
 
@@ -268,6 +283,7 @@ describe('a take on the Sound Pad', () => {
   /** Saving is paid here, and the account is signed in, with this browser's library its. */
   const signedInWherePaid = () => {
     localStorage.setItem('pedos.account', 'userA')
+    page.pulled = 'userA'
     page.paid = true
     page.account = {
       status: 'signedIn',
@@ -552,6 +568,88 @@ describe('a take on the Sound Pad', () => {
       expect(kept()).toEqual([])
       await click('pad-take-record')
       expect(byTestId('pad-take-lost')).toBeNull()
+    })
+
+    describe('signed in again, before the account’s changes are read', () => {
+      // Sign out cleared this browser's library, and kept the take whose Save started a Checkout;
+      // signed in again as the same account, the Pad opens before its Recordings come back.
+      beforeEach(() => {
+        signedInWherePaid()
+        page.pulled = null
+        recordings = []
+        keepTakes(paying(PAID, one))
+        page.tootPaymentState.mockResolvedValue('unused')
+      })
+      /** The account's changes are read, bringing `brought`. */
+      async function pulled(brought: Recording[]) {
+        recordings = brought
+        page.pulled = 'userA'
+        await act(async () => {
+          for (const listener of page.onPulled) listener()
+        })
+      }
+
+      it('keeps a paid take whose Recordings aren’t here yet, and saves it once they are', async () => {
+        await open(Promise.resolve({} as AudioBuffer))
+        expect(page.tootPaymentState).toHaveBeenCalledWith(PAID, 'userA')
+        expect(page.makePadToot).not.toHaveBeenCalled()
+        expect(byTestId('pad-take-lost')).toBeNull()
+        expect(page.reportError).not.toHaveBeenCalled()
+        expect(kept()).toEqual([paying(PAID, one)])
+
+        await pulled([recording, recordingNumbered(B, 2)])
+        expect(page.makePadToot).toHaveBeenCalledExactlyOnceWith(one, PAID)
+        expect(lastSave()).toMatchObject({
+          draft: draftOf(one, PAID),
+          back: { tootId: PAID, done: true }
+        })
+        expect(byTestId('pad-take-lost')).toBeNull()
+        expect(kept()).toEqual([paying(PAID, one)])
+      })
+
+      it('saves it when they arrive before the account says it’s paid', async () => {
+        const answer = later<'unused'>()
+        page.tootPaymentState.mockReturnValue(answer.promise)
+        await open(Promise.resolve({} as AudioBuffer))
+        await pulled([recording])
+        await act(async () => answer.resolve('unused'))
+        expect(page.makePadToot).toHaveBeenCalledExactlyOnceWith(one, PAID)
+        expect(byTestId('pad-take-lost')).toBeNull()
+      })
+
+      it('says it’s lost, and reports it, once read without its Recording', async () => {
+        await open(Promise.resolve({} as AudioBuffer))
+        expect(byTestId('pad-take-lost')).toBeNull()
+        await pulled([recordingNumbered(B, 2)])
+        expect(page.makePadToot).not.toHaveBeenCalled()
+        expect(byTestId('pad-take-lost')?.textContent).toContain(lostSays)
+        expect(page.reportError).toHaveBeenCalledExactlyOnceWith('pad-paid-take-lost')
+        expect(kept()).toEqual([])
+      })
+
+      it('waits for them back from Checkout too', async () => {
+        page.tootPaymentState.mockReturnValue(new Promise(() => {}))
+        window.history.replaceState(null, '', `/compose/pad/?toot=${PAID}&checkout=done`)
+        await open(Promise.resolve({} as AudioBuffer))
+        expect(page.makePadToot).not.toHaveBeenCalled()
+        expect(byTestId('pad-take-lost')).toBeNull()
+        expect(kept()).toEqual([paying(PAID, one)])
+
+        await pulled([recording])
+        expect(page.makePadToot).toHaveBeenCalledExactlyOnceWith(one, PAID)
+        expect(lastSave()).toMatchObject({ back: { tootId: PAID, done: true } })
+      })
+
+      it('keeps a take it’s waiting for when Record is pressed meanwhile', async () => {
+        // Recorded here since signing in again.
+        recordings = [recordingNumbered(B, 2)]
+        await open(Promise.resolve({} as AudioBuffer))
+        await click('pad-take-record')
+        await pulled([recordingNumbered(B, 2)])
+        expect(byTestId('pad-take-lost')).toBeNull()
+        expect(page.reportError).not.toHaveBeenCalled()
+        expect(kept()).toEqual([paying(PAID, one)])
+      })
     })
 
     it('never takes the place of a take being recorded', async () => {
