@@ -340,7 +340,9 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
             <p className="text-2xl font-bold" data-testid="result-noise">
               No steady note this time
             </p>
-            <p className="text-muted-foreground">It's saved, but it can't play melody notes.</p>
+            <p className="text-muted-foreground">
+              It's saved. On the Recordings tab you can place it on a note by ear.
+            </p>
           </div>
         )}
         {firstFartUsed(recording) && (

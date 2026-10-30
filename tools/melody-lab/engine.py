@@ -9,7 +9,7 @@ decide whether it is Melodic and when it settles; no Song plays that read-back.
 """
 import json
 import math
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 
 import librosa
@@ -213,6 +213,18 @@ TOO_SHORT_COST = 8.0  # per note that sounds too briefly for the Recording to se
 TOO_SHORT_COST_PER_S = 400.0  # ... plus this per second it falls short (4 per 10 ms)
 TIE = 1e-9  # Arrangement costs this close are equal
 TRANSPOSITIONS = range(-36, 25)
+PLACED_MIN_NOTE_S = 0.6  # the shortest note a Placed Recording counts as reading back on (ADR 0015)
+
+
+def placed(src, midi):
+    """A Noise-like Recording placed on `midi` by ear (ADR 0015), as melody_fit() reads it: a
+    Melodic Recording whose Recording Pitch is that note. Nothing measured its pitch, so its
+    shortest note is audition()'s longest length, the slowest a Melodic Recording reads back
+    on, and it counts as settled from its start. render() plays it raw, like any fart: the note
+    is where it goes, never a pitch shift. The web's `placedAutoMapRecording()` makes the same."""
+    if src.pitched:
+        raise ValueError(f"{src.id} is Melodic: only a Noise-like Recording is placed by ear")
+    return replace(src, ref_midi=float(midi), min_note_s=PLACED_MIN_NOTE_S, settle_s=0.0)
 
 
 def too_short_cost(note_seconds, recording_seconds, shortest_note_s):

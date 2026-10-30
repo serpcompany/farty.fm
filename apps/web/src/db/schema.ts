@@ -128,6 +128,12 @@ export const recordings = sqliteTable(
     waveform: text('waveform', { mode: 'json' }).$type<number[]>().notNull(),
     /** What Recording Analysis found; null when the Recording couldn't be analyzed. */
     analysis: text('analysis', { mode: 'json' }).$type<Analysis>(),
+    /**
+     * The Placed Pitch: the MIDI note the user placed a Noise-like Recording on by ear, or null
+     * when left out (ADR 0015). Apart from `analysis`, which keeps the upload's, so it changes
+     * alone (`PATCH /api/recordings/{id}/`) and survives each browser's re-analysis.
+     */
+    placedPitch: integer('placed_pitch'),
     /** The WAV's size in R2. */
     audioBytes: integer('audio_bytes').notNull(),
     updatedAt: timestamp('updated_at').notNull(),

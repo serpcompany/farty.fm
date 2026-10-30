@@ -4,11 +4,12 @@ import {
   type AutoMapRecording,
   arrange,
   autoMapRecording,
-  type MissingNote
+  type MissingNote,
+  placedAutoMapRecording
 } from '@/lib/engine/auto-map'
 import type { Song as EngineSong } from '@/lib/engine/song'
 import { noteName, pitchClass } from '@/lib/pitch'
-import { formattedLength, type Recording, recordingPitch } from '@/lib/recordings'
+import { formattedLength, placedPitch, type Recording, songPitch } from '@/lib/recordings'
 
 // Pitch Coverage of the Song Catalog by the user's Recordings: a port of the iPhone app's
 // `PitchCoverage.swift` and `SongListing.swift`. Auto-map (`engine/auto-map.ts`) decides it; this
@@ -32,21 +33,26 @@ export type Coverage = {
   missing: MissingNote[]
   /** The Melodic Recording that covers each covered pitch, keyed by the Song's pitch (score key). */
   recordingForPitch: Map<number, string>
-  /** False when there are no Melodic Recordings at all. */
+  /** False when there are no Melodic Recordings at all, Placed Recordings included. */
   hasMelodicRecordings: boolean
   /** An Unlocked Song: every distinct pitch has its own Melodic Recording. */
   unlocked: boolean
 }
 
-/** Recordings as Auto-map reads them: only analyzed ones with a Recording Pitch can play. */
+/**
+ * Recordings as Auto-map reads them: analyzed ones with a Recording Pitch, and Noise-like ones the
+ * user placed on a note, as Melodic Recordings at their Placed Pitch (ADR 0015).
+ */
 function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[] {
-  return recordings.flatMap(r =>
-    r.analysis.state === 'analyzed' &&
-    r.analysis.analysis.recordingPitchMidi !== null &&
-    r.analysis.analysis.shortestNoteSeconds !== null
-      ? [autoMapRecording(r.id, r.analysis.analysis)]
-      : []
-  )
+  return recordings.flatMap(r => {
+    if (r.analysis.state !== 'analyzed') return []
+    const { analysis } = r.analysis
+    if (analysis.recordingPitchMidi !== null && analysis.shortestNoteSeconds !== null) {
+      return [autoMapRecording(r.id, analysis)]
+    }
+    const placed = placedPitch(r)
+    return placed === null ? [] : [placedAutoMapRecording(r.id, analysis, placed)]
+  })
 }
 
 /**
@@ -134,11 +140,11 @@ export function missingNotes(coverage: Coverage, limit?: number): string | null 
   return andList.format([...names.slice(0, limit), `${names.length - limit} more`])
 }
 
-/** The pitch classes (0 = C … 11 = B) of every Melodic Recording. */
+/** The pitch classes (0 = C … 11 = B) of every Melodic Recording and Placed Recording. */
 export function collectedPitchClasses(recordings: readonly Recording[]): Set<number> {
   return new Set(
     recordings.flatMap(r => {
-      const pitch = recordingPitch(r)
+      const pitch = songPitch(r)
       return pitch === null ? [] : [pitchClass(pitch)]
     })
   )
@@ -146,8 +152,9 @@ export function collectedPitchClasses(recordings: readonly Recording[]): Set<num
 
 /**
  * What Pitch Coverage reads from `recordings`, as a string: equal strings give equal coverage of
- * every Song, so the catalog is matched once per change to the Melodic Recordings (the iPhone
- * app's `CoverageCache`). Searching, sorting and Noise-like Recordings never change it.
+ * every Song, so the catalog is matched once per change to the Melodic and Placed Recordings (the
+ * iPhone app's `CoverageCache`). Searching, sorting and unplaced Noise-like Recordings never
+ * change it.
  */
 export function coverageKey(recordings: readonly Recording[]): string {
   return JSON.stringify(

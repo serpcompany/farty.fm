@@ -42,6 +42,26 @@ export type Recording = {
   /** Loudness bars for the waveform, each 0…1. */
   waveform: number[]
   analysis: AnalysisState
+  /**
+   * The Placed Pitch: the note the user placed this Recording on by ear, as a whole MIDI note
+   * number, while it is Noise-like (ADR 0015). Null or absent when it's left out, the default.
+   * Kept apart from `analysis`, so re-analysis never loses it, and ignored while the Recording is
+   * Melodic (`placedPitch`). Where Songs use the fart, never how it sounds: it plays raw.
+   */
+  placedPitch?: number | null
+}
+
+/** The notes a Noise-like Recording can be placed on: C2 to B4 (ADR 0015). */
+export const LOWEST_PLACED_PITCH = 36
+export const HIGHEST_PLACED_PITCH = 71
+
+/** Whether `value` is a note a Recording can be placed on. */
+export function isPlaceablePitch(value: unknown): value is number {
+  return (
+    Number.isInteger(value) &&
+    (value as number) >= LOWEST_PLACED_PITCH &&
+    (value as number) <= HIGHEST_PLACED_PITCH
+  )
 }
 
 export function recordingName(recording: Pick<Recording, 'number'>): string {
@@ -53,6 +73,32 @@ export function recordingPitch(recording: Recording): number | null {
   return recording.analysis.state === 'analyzed'
     ? recording.analysis.analysis.recordingPitchMidi
     : null
+}
+
+/** Whether the Recording has been analyzed as Noise-like. */
+export function isNoiseLike(recording: Recording): boolean {
+  return (
+    recording.analysis.state === 'analyzed' &&
+    recording.analysis.analysis.recordingPitchMidi === null
+  )
+}
+
+/**
+ * The Placed Pitch, when the Recording is analyzed as Noise-like and the user placed it on a note;
+ * otherwise null. A Recording that re-analysis finds Melodic uses its Recording Pitch instead.
+ */
+export function placedPitch(recording: Recording): number | null {
+  return isNoiseLike(recording) && isPlaceablePitch(recording.placedPitch)
+    ? recording.placedPitch
+    : null
+}
+
+/**
+ * The note Songs use the Recording for: its Recording Pitch when Melodic, or its Placed Pitch when
+ * Noise-like and placed; null when it plays no notes.
+ */
+export function songPitch(recording: Recording): number | null {
+  return recordingPitch(recording) ?? placedPitch(recording)
 }
 
 /**

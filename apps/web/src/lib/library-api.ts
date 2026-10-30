@@ -69,6 +69,21 @@ export async function renameToot(id: string, title: string, accountId: string): 
   )
 }
 
+/** Places a Recording on a note by ear, or takes it off with null (ADR 0015). */
+export async function placeRecording(
+  id: string,
+  placedPitch: number | null,
+  accountId: string
+): Promise<Answer> {
+  return answer(
+    await send(`/api/recordings/${id}/`, accountId, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ placedPitch })
+    })
+  )
+}
+
 export async function deleteItem(kind: Kind, id: string, accountId: string): Promise<Answer> {
   return answer(await send(`/api/${kind}/${id}/`, accountId, { method: 'DELETE' }))
 }

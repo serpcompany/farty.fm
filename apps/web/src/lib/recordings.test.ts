@@ -4,10 +4,17 @@ import { ANALYSIS_VERSION } from './analysis/version'
 import {
   type Analysis,
   type AnalysisState,
+  HIGHEST_PLACED_PITCH,
   heardSomething,
+  isNoiseLike,
+  isPlaceablePitch,
+  LOWEST_PLACED_PITCH,
   levelContrast,
   needsReanalysis,
-  type Recording
+  placedPitch,
+  type Recording,
+  recordingPitch,
+  songPitch
 } from './recordings'
 
 /**
@@ -149,5 +156,66 @@ describe('an analysis an older Recording Analysis made', () => {
     }
     expect(needsReanalysis(recording({ state: 'analyzing' }))).toBe(false)
     expect(needsReanalysis(recording({ state: 'notAnalyzed' }))).toBe(false)
+  })
+})
+
+describe('a Placed Pitch (ADR 0015)', () => {
+  const analysis: Analysis = {
+    gestureStartSeconds: 0.01,
+    gestureEndSeconds: 1.2,
+    cutAtReattack: false,
+    pitchEstimateMidi: null,
+    pitchConfidence: 0.1,
+    recordingPitchMidi: null,
+    shortestNoteSeconds: null,
+    settleSeconds: null
+  }
+  const noiseLike = (placed?: number | null): Recording => ({
+    id: 'r',
+    number: 1,
+    createdAt: 0,
+    seconds: 1.2,
+    sampleRate: 44_100,
+    waveform: [],
+    analysis: { state: 'analyzed', analysis },
+    ...(placed === undefined ? {} : { placedPitch: placed })
+  })
+
+  it('places a Noise-like Recording on a whole note from C2 to B4', () => {
+    expect([LOWEST_PLACED_PITCH, HIGHEST_PLACED_PITCH]).toEqual([36, 71])
+    for (const midi of [36, 48, 71]) {
+      expect(placedPitch(noiseLike(midi))).toBe(midi)
+      expect(songPitch(noiseLike(midi))).toBe(midi)
+      expect(recordingPitch(noiseLike(midi))).toBeNull()
+    }
+    for (const value of [35, 72, 48.5, Number.NaN, '48', null]) {
+      expect(isPlaceablePitch(value), String(value)).toBe(false)
+    }
+  })
+
+  it('is left out by default', () => {
+    for (const r of [noiseLike(), noiseLike(null)]) {
+      expect(isNoiseLike(r)).toBe(true)
+      expect(placedPitch(r)).toBeNull()
+      expect(songPitch(r)).toBeNull()
+    }
+  })
+
+  it('counts for nothing while the Recording is Melodic, or not analyzed', () => {
+    const melodic: Recording = {
+      ...noiseLike(48),
+      analysis: {
+        state: 'analyzed',
+        analysis: { ...analysis, recordingPitchMidi: 55.3, shortestNoteSeconds: 0.12 }
+      }
+    }
+    expect(isNoiseLike(melodic)).toBe(false)
+    expect(placedPitch(melodic)).toBeNull()
+    expect(songPitch(melodic)).toBe(55.3)
+    for (const state of ['analyzing', 'notAnalyzed'] as const) {
+      const r: Recording = { ...noiseLike(48), analysis: { state } }
+      expect(isNoiseLike(r)).toBe(false)
+      expect(songPitch(r)).toBeNull()
+    }
   })
 })

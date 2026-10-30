@@ -29,6 +29,8 @@ export type NewRecording = {
   sampleRate: number
   waveform: number[]
   analysis: Analysis | null
+  /** The Placed Pitch, or null when left out (ADR 0015). */
+  placedPitch: number | null
   audioBytes: number
 }
 
@@ -100,9 +102,9 @@ export async function insertRecording(
   const analysis = r.analysis === null ? null : JSON.stringify(r.analysis)
   const added = await db.all(sql`
     insert into recordings (user_id, id, number, created_at, seconds, sample_rate, waveform,
-      analysis, audio_bytes, updated_at)
+      analysis, placed_pitch, audio_bytes, updated_at)
     select ${userId}, ${r.id}, ${r.number}, ${r.createdAt}, ${r.seconds}, ${r.sampleRate},
-      ${JSON.stringify(r.waveform)}, ${analysis}, ${r.audioBytes}, ${d1Now}
+      ${JSON.stringify(r.waveform)}, ${analysis}, ${r.placedPitch}, ${r.audioBytes}, ${d1Now}
     where (select count(*) from recordings where user_id = ${userId} and deleted_at is null)
       < ${limit}
     on conflict do nothing
@@ -227,6 +229,24 @@ export async function renameToot(
     .where(and(whereItem('toots', userId, id), isNull(toots.deletedAt)))
     .returning({ id: toots.id })
   return renamed.length === 1 ? 'live' : itemStatus(db, 'toots', userId, id)
+}
+
+/**
+ * Places a live Recording on a note, or takes it off with null (ADR 0015); the last to arrive
+ * wins. Returns the row's status before.
+ */
+export async function placeRecording(
+  db: Database,
+  userId: string,
+  id: string,
+  placedPitch: number | null
+): Promise<ItemStatus> {
+  const placed = await db
+    .update(recordings)
+    .set({ placedPitch, updatedAt: d1Now })
+    .where(and(whereItem('recordings', userId, id), isNull(recordings.deletedAt)))
+    .returning({ id: recordings.id })
+  return placed.length === 1 ? 'live' : itemStatus(db, 'recordings', userId, id)
 }
 
 export type RecordingRow = typeof recordings.$inferSelect

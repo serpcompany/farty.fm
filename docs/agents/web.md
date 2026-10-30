@@ -55,7 +55,7 @@ The `gh` and `git` commands here run as the organization's app, through the `ser
   bash ~/.claude/skills/serp-github-app/scripts/gh.sh pr merge <n> --squash
   ```
 
-- **Web releases roll forward, not back.** From #168 on, the library is IndexedDB version 3, which an older build can't open (`VersionError`), so a Cloudflare rollback past it breaks the library in every browser that opened the newer build. Fix forward with a new release instead, and say so in a release PR's Merge Danger.
+- **Web releases roll forward, not back.** From #168 on, the library is IndexedDB version 3, and from #268 version 4, which an older build can't open (`VersionError`), so a Cloudflare rollback past either breaks the library in every browser that opened the newer build. Version 4 is there so a build from before #268 never sends a queued `place` as a delete. Fix forward with a new release instead, and say so in a release PR's Merge Danger.
 - **Merge `main` back into `staging`** at once after a release PR, a hotfix or a diverged promotion, so the next promotion still fast-forwards. It's a `main` → `staging` PR merged with a merge commit; a squash leaves `main` diverged. Open it before anything else merges into `staging`: its head is `main`, so it can't be brought up to date. `issue-link` exempts it. If something merged into `staging` first, close that PR and branch from `main` instead: merge `origin/staging` into the branch and open the branch → `staging` with a `No issue:` line, still merged with a merge commit. The branch's diff against `staging` should be only what `main` has and `staging` lacks, such as the version bump and changelog (#244).
 
   ```sh

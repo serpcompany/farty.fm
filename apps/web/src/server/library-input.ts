@@ -154,8 +154,19 @@ function parseAnalysis(value: unknown): Analysis | null | undefined {
 }
 
 /**
+ * A Placed Pitch (ADR 0015): a MIDI note number, or null when the Recording is left out; undefined
+ * when it's neither. Any MIDI note, not only the ones the picker offers (C2 to B4), so a later
+ * release can widen the picker and this Worker still keeps its uploads.
+ */
+export function parsePlacedPitch(value: unknown): number | null | undefined {
+  if (value === null) return null
+  return isIntegerIn(value, 0, 127) ? value : undefined
+}
+
+/**
  * The Recording as the browser keeps it (`Recording` in `src/lib/recordings.ts`), once its analysis
- * is done, or null. Its id must be the route's, and its sample rate its WAV's.
+ * is done, or null. Its id must be the route's, and its sample rate its WAV's. A browser on a
+ * release before #268 sends no `placedPitch`: it's left out.
  */
 export function parseRecording(
   value: unknown,
@@ -165,6 +176,7 @@ export function parseRecording(
   if (!isObject(value) || value.id !== id) return null
   const { number, createdAt, seconds, sampleRate, waveform } = value
   const analysis = parseAnalysis(value.analysis)
+  const placedPitch = value.placedPitch === undefined ? null : parsePlacedPitch(value.placedPitch)
   const valid =
     isIntegerIn(number, 1, 1_000_000) &&
     isTime(createdAt) &&
@@ -173,9 +185,10 @@ export function parseRecording(
     Array.isArray(waveform) &&
     waveform.length <= MAX_WAVEFORM_BARS &&
     waveform.every(level => isNumberIn(level, 0, 1)) &&
-    analysis !== undefined
+    analysis !== undefined &&
+    placedPitch !== undefined
   if (!valid) return null
-  return { id, number, createdAt, seconds, sampleRate, waveform, analysis }
+  return { id, number, createdAt, seconds, sampleRate, waveform, analysis, placedPitch }
 }
 
 /** A Toot's title: trimmed, and not empty. */
