@@ -6,6 +6,7 @@ import {
   fixtureWavs,
   getUserMediaMs,
   microphone,
+  savedTake,
   waitForOpenMicrophone
 } from './fake-microphone'
 import { skipWelcome } from './record'
@@ -76,32 +77,6 @@ const hiddenListeningMs = 1500
 /** Longer than a shown page waits for its muted microphone to unmute (`recorder.ts`). */
 const unmuteWaitMs = 2000
 
-/** The newest saved Recording's audio, as samples, from the app's IndexedDB. */
-function savedTake(page: Page): Promise<{ samples: number[]; sampleRate: number }> {
-  return page.evaluate(async () => {
-    const database = await new Promise<IDBDatabase>((done, fail) => {
-      const request = indexedDB.open('pedos')
-      request.onsuccess = () => done(request.result)
-      request.onerror = () => fail(request.error)
-    })
-    const all = await new Promise<ArrayBuffer[]>((done, fail) => {
-      const request = database.transaction('audio').objectStore('audio').getAll()
-      request.onsuccess = () => done(request.result)
-      request.onerror = () => fail(request.error)
-    })
-    database.close()
-    const wav = new DataView(all[all.length - 1])
-    const sampleRate = wav.getUint32(24, true)
-    let at = 12
-    while (String.fromCharCode(...new Uint8Array(wav.buffer, at, 4)) !== 'data') {
-      at += 8 + wav.getUint32(at + 4, true)
-    }
-    const length = wav.getUint32(at + 4, true) / 2
-    const samples = Array.from({ length }, (_, i) => wav.getInt16(at + 8 + 2 * i, true) / 0x8000)
-    return { samples, sampleRate }
-  })
-}
-
 test.describe('with microphone permission granted', () => {
   test.use({ permissions: ['microphone'] })
   // Audio timing doesn't depend on the screen size; phone size is how people record.
@@ -136,8 +111,9 @@ test.describe('with microphone permission granted', () => {
     expect(onReview.sessions).toEqual(['play-and-record'])
     await page.getByRole('button', { name: 'Discard' }).click()
 
-    // Back on Record, the same microphone takes the next one.
-    await fartAndRecord(page)
+    // Back on Record, the same microphone takes the next one. 0.3 dB up, 090 peaks above the
+    // level `atFullLevel` turns a take up to (#279), so the take is saved at the fart's own level.
+    await fartAndRecord(page, '090', { gainDb: 0.3 })
     await page.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByTestId('result-note')).toHaveText('G3')
 
@@ -156,12 +132,15 @@ test.describe('with microphone permission granted', () => {
     // The saved take holds the whole fart, from before the click that started it.
     const take = await savedTake(page)
     const energy = take.samples.reduce((sum, v) => sum + v * v, 0)
+    const peak = take.samples.reduce((max, v) => Math.max(max, Math.abs(v)), 0)
     const onset = take.samples.findIndex(v => Math.abs(v) > 0.01) / take.sampleRate
     console.log(
-      `saved take: ${(take.samples.length / take.sampleRate).toFixed(2)} s, fart starts at ${onset.toFixed(3)} s, ${((100 * energy) / mic.fartEnergy).toFixed(1)}% of its energy kept`
+      `saved take: ${(take.samples.length / take.sampleRate).toFixed(2)} s, fart starts at ${onset.toFixed(3)} s, ${((100 * energy) / mic.fartEnergy).toFixed(1)}% of its energy kept, peak ${peak.toFixed(4)} (fart ${mic.fartPeak.toFixed(4)})`
     )
     // The take starts about 150 ms before the fart: the 300 ms pre-roll, less the press.
     expect(onset).toBeGreaterThan(0.05)
+    // Saved at the fart's own peak, so no gain was applied and the energy is the fart's own.
+    expect(peak).toBeCloseTo(mic.fartPeak, 3)
     expect(energy / mic.fartEnergy).toBeGreaterThan(0.97)
   })
 

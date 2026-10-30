@@ -38,10 +38,12 @@ export type FakeMicrophone = {
   /** When each Record click and each capture batch happened (`performance.now()`). */
   clicks: number[]
   batches: number[]
-  /** The fixture id the next press on Record plays into the microphone. */
+  /** The fixture id the next press on Record plays into the microphone, and its gain. */
   fartOnPress: string | null
-  /** The last fart's energy (sum of squares) as the microphone played it. */
+  fartGain: number
+  /** The last fart's energy (sum of squares) and loudest sample, as the microphone played it. */
   fartEnergy: number
+  fartPeak: number
   /** Capture worklet nodes made, and how many were told to close or to empty their ring. */
   nodes: number
   closed: number
@@ -62,6 +64,7 @@ export const microphone = (page: Page) =>
       clicks: mic.clicks,
       batches: mic.batches,
       fartEnergy: mic.fartEnergy,
+      fartPeak: mic.fartPeak,
       nodes: mic.nodes,
       closed: mic.closed,
       flushed: mic.flushed,
@@ -102,7 +105,9 @@ export function fakeMicrophone({
     clicks: [],
     batches: [],
     fartOnPress: null,
+    fartGain: 1,
     fartEnergy: 0,
+    fartPeak: 0,
     nodes: 0,
     closed: 0,
     flushed: 0,
@@ -160,10 +165,15 @@ export function fakeMicrophone({
       const fart = mic.fartOnPress && farts[mic.fartOnPress]
       if (fart) {
         mic.fartOnPress = null
-        mic.fartEnergy = fart.getChannelData(0).reduce((sum, v) => sum + v * v, 0)
+        const level = context.createGain()
+        level.gain.value = mic.fartGain
+        mic.fartGain = 1
+        const samples = fart.getChannelData(0)
+        mic.fartEnergy = samples.reduce((sum, v) => sum + v * v, 0) * level.gain.value ** 2
+        mic.fartPeak = samples.reduce((max, v) => Math.max(max, Math.abs(v)), 0) * level.gain.value
         const source = context.createBufferSource()
         source.buffer = fart
-        source.connect(output)
+        source.connect(level).connect(output)
         source.start()
       }
     },
@@ -207,11 +217,19 @@ export function fixtureWavs(): Record<string, string> {
   )
 }
 
-/** Presses Record, playing fixture `id` from the press, and clicks on release. */
-export async function fartAndRecord(page: Page, id = '090'): Promise<void> {
-  await page.evaluate(fart => {
-    ;(window as unknown as { pedosMic: FakeMicrophone }).pedosMic.fartOnPress = fart
-  }, id)
+/**
+ * Presses Record, playing fixture `id` from the press, `gainDb` from its own level, and clicks on
+ * release.
+ */
+export async function fartAndRecord(page: Page, id = '090', { gainDb = 0 } = {}): Promise<void> {
+  await page.evaluate(
+    ({ fart, gain }) => {
+      const mic = (window as unknown as { pedosMic: FakeMicrophone }).pedosMic
+      mic.fartOnPress = fart
+      mic.fartGain = gain
+    },
+    { fart: id, gain: 10 ** (gainDb / 20) }
+  )
   const box = await page.getByTestId('record-button').boundingBox()
   if (!box) throw new Error('No Record button')
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
@@ -222,4 +240,30 @@ export async function fartAndRecord(page: Page, id = '090'): Promise<void> {
   await page.waitForTimeout(takeMs[id])
   await page.getByTestId('stop-button').click()
   await expect(page.getByRole('heading', { name: 'New Recording' })).toBeVisible()
+}
+
+/** The newest saved Recording's audio, as samples, from the app's IndexedDB. */
+export function savedTake(page: Page): Promise<{ samples: number[]; sampleRate: number }> {
+  return page.evaluate(async () => {
+    const database = await new Promise<IDBDatabase>((done, fail) => {
+      const request = indexedDB.open('pedos')
+      request.onsuccess = () => done(request.result)
+      request.onerror = () => fail(request.error)
+    })
+    const all = await new Promise<ArrayBuffer[]>((done, fail) => {
+      const request = database.transaction('audio').objectStore('audio').getAll()
+      request.onsuccess = () => done(request.result)
+      request.onerror = () => fail(request.error)
+    })
+    database.close()
+    const wav = new DataView(all[all.length - 1])
+    const sampleRate = wav.getUint32(24, true)
+    let at = 12
+    while (String.fromCharCode(...new Uint8Array(wav.buffer, at, 4)) !== 'data') {
+      at += 8 + wav.getUint32(at + 4, true)
+    }
+    const length = wav.getUint32(at + 4, true) / 2
+    const samples = Array.from({ length }, (_, i) => wav.getInt16(at + 8 + 2 * i, true) / 0x8000)
+    return { samples, sampleRate }
+  })
 }

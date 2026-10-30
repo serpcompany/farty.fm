@@ -33,6 +33,7 @@ import {
 } from '@/lib/pitch-coverage'
 import * as store from '@/lib/recording-store'
 import {
+  atFullLevel,
   heardSomething,
   maximumTakeSeconds,
   type Recording,
@@ -346,12 +347,14 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       setProblem('nothingHeard')
       return
     }
+    // Review, the saved file and replay get the take at full level (#279).
+    const samples = atFullLevel(audio.samples)
     setFlow({
       kind: 'review',
       draft: {
-        audio,
-        seconds: audio.samples.length / audio.sampleRate,
-        waveform: waveformLevels(audio.samples, 40)
+        audio: { samples, sampleRate: audio.sampleRate },
+        seconds: samples.length / audio.sampleRate,
+        waveform: waveformLevels(samples, 40)
       }
     })
   }, [])
