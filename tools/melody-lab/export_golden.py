@@ -157,7 +157,20 @@ def fit_json(fit):
     }
 
 
+def require_start_order(c, m):
+    """Raise unless the Song's notes start in strictly increasing order. engine.render() returns
+    its events in start order and the ports return theirs in the order given, so the golden rows
+    are paired with the notes by position only while the two orders are the same."""
+    for i in range(1, len(m.notes)):
+        if not m.notes[i].start > m.notes[i - 1].start:
+            raise ValueError(
+                f"{c['id']}: note {i} starts at beat {m.notes[i].start}, not after note {i - 1} at beat "
+                f"{m.notes[i - 1].start}; golden needs a Song's notes in strictly increasing start order"
+            )
+
+
 def arrangement_json(c, m, library, sources):
+    require_start_order(c, m)
     fit = engine.melody_fit(m, sources)
     pitch_of = {s.id: s.ref_midi for s in sources}
     per_pitch = []

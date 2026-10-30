@@ -126,6 +126,31 @@ class Placement(unittest.TestCase):
         _, events = render(song([(1, 1)]), [fart("a", 0.0, 0.5)], assign(["a"]))
         self.assertEqual((events[0]["start_s"], events[0]["len_s"], events[0]["lead_s"]), (1.0, 0.5, 0.0))
 
+    def test_notes_out_of_start_order_place_the_same(self):
+        # The same notes, written last first: each lead-in is still limited by the note that starts
+        # just before it, and the events come back in start order. renderer.test.ts gives the port
+        # the same notes in the same order, and it returns them in the order given.
+        order = [3, 1, 0, 2]
+        m = song([(self.M.notes[i].start, self.M.notes[i].dur) for i in order])
+        ids = ["a", "a", "b", "a"]
+        mix, events = render(m, [self.A, self.B], [Assignment(k, ids[i], 60, 0.0) for k, i in enumerate(order)])
+        self.assertEqual([e["note_index"] for e in events], [2, 1, 3, 0])
+        strip = lambda e: {k: v for k, v in e.items() if k != "note_index"}  # noqa: E731
+        self.assertEqual([strip(e) for e in events], [strip(e) for e in self.EVENTS])
+        self.assertTrue(np.array_equal(mix, self.MIX))
+
+    def test_a_fart_played_past_its_written_end_holds_back_the_next_lead_in(self):
+        # A 0.05-beat note still plays 60 ms of its fart, past its written end (1.05 s), so the next
+        # note's lead-in starts where that fart stops (1.06 s): 0.24 s of its 0.3 s, not 0.25 s.
+        mix, events = render(song([(1, 0.05), (1.3, 1)]), [self.A], assign(["a", "a"]))
+        played_end = int(1.0 * SR) + int(0.06 * SR)
+        self.assertGreater(played_end, int(1.05 * SR))
+        self.assertEqual(round(events[0]["len_s"] * SR), int(0.06 * SR))
+        self.assertEqual(events[1]["lead_s"], round((int(1.3 * SR) - played_end) / SR, 3))
+        self.assertEqual(events[1]["lead_s"], 0.24)
+        self.assertGreater(np.abs(mix[played_end + 200]), 0)  # the lead-in sounds from there
+        self.assertEqual(np.abs(mix[played_end - 1]), 0.0)  # where the short note's fade-out ends
+
 
 class Recording009(unittest.TestCase):
     """009's attack (0.217 s into the take) is a low rumble, but it opens on a quieter G3 from

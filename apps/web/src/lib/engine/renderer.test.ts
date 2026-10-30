@@ -178,7 +178,15 @@ describe('the render path from what the app stores', () => {
   })
 
   it('cuts a Noise-like gesture too, for a fart placed by ear (ADR 0015)', async () => {
-    for (const id of ['065', '081']) {
+    // Every Noise-like fixture, so with the Melodic ones above every golden lead_start_sample is
+    // checked, the owner's room-noisy phone takes 105 to 110 among them (#295).
+    const noiseLike = goldenIndex.recordings.filter(
+      id => !goldenIndex.melodic_recordings.includes(id)
+    )
+    expect(noiseLike).toEqual(
+      expect.arrayContaining(['065', '081', '105', '106', '107', '108', '109', '110'])
+    )
+    for (const id of noiseLike) {
       const g = goldenRecording(id)
       expect(g.recording_pitch_midi, id).toBeNull()
       const file = await decoded(g)
@@ -311,6 +319,39 @@ describe("a fart's lead-in", () => {
       if (n.leadSamples > 0) expect(first, `note ${i}`).toBe(n.startSample)
       else expect(first - n.startSample, `note ${i}`).toBeLessThanOrEqual(fadeIn)
     }
+  })
+
+  it('places notes given out of start order the same, and returns them in the order given', () => {
+    // The same notes, written last first, as the reference's test_lead_in.py gives them: each
+    // lead-in is still limited by the note that starts just before it.
+    const order = [3, 1, 0, 2]
+    const shuffled = render(
+      order.map(i => notes[i]),
+      5
+    )
+    expect(shuffled.notes).toEqual(order.map(i => out.notes[i]))
+    expect(shuffled.samples).toEqual(out.samples)
+  })
+
+  it('holds the next lead-in back until a fart played past its written end stops', () => {
+    // A 0.05-beat note still plays 60 ms of its fart, past its written end (1.05 s), so the next
+    // note's lead-in starts where that fart stops (1.06 s): 0.24 s of its 0.3 s, not 0.25 s.
+    const short = render(
+      (
+        [
+          [1, 0.05],
+          [1.3, 1]
+        ] as const
+      ).map(([start, dur]) => noteInBeats(a, 60, { start, dur, bpm: 60, barLines: [] })),
+      3
+    )
+    const playedEnd = at(1) + at(0.06)
+    expect(playedEnd).toBeGreaterThan(at(1.05))
+    expect(short.notes[0].lengthSamples).toBe(at(0.06))
+    expect(short.notes[1].leadSamples).toBe(at(1.3) - playedEnd)
+    expect(round(short.notes[1].leadSamples / SR, 3)).toBe(0.24)
+    expect(short.samples[playedEnd + 200]).not.toBe(0) // the lead-in sounds from there
+    expect(short.samples[playedEnd - 1]).toBe(0) // where the short note's fade-out ends
   })
 
   it('sets the level from the attack, not the quiet lead-in', () => {
