@@ -15,9 +15,10 @@ import {
   mergeOutbox,
   type OutboxEntry,
   type OutboxOp,
+  type PlacedField,
   queueStamp
 } from './outbox'
-import type { AnalysisState, Recording } from './recordings'
+import type { AnalysisState, Recording, RecordingTrim } from './recordings'
 import { reportError } from './telemetry/errors'
 import type { Toot } from './toot'
 
@@ -43,8 +44,8 @@ export interface PedosDB extends DBSchema {
    */
   downloads: { key: string; value: { kind: Kind; id: string } }
   /**
-   * `cursor`: the account's `cursor` as of this browser's last read. Since version 3; version 4
-   * sets it back to 0 (`readEverythingAgain`).
+   * `cursor`: the account's `cursor` as of this browser's last read. Since version 3; versions 4,
+   * 5 and 6 set it back to 0 (`readEverythingAgain`).
    */
   meta: { key: string; value: number }
   /**
@@ -74,7 +75,7 @@ export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
  * The `pedos` database's version. Web releases roll forward, not back, past a bump
  * (`docs/agents/web.md`).
  */
-export const DB_VERSION = 5
+export const DB_VERSION = 6
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
 
@@ -100,7 +101,7 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
 }
 
 /**
- * The app's database, upgraded to version 5 on first open. Version 1 held Recordings only, version
+ * The app's database, upgraded to version 6 on first open. Version 1 held Recordings only, version
  * 2 added Toots, version 3 the outbox and version 5 the Sound Pad's Pads (#277). An upgrade keeps
  * them, and one from before version 3 queues each to upload, since none has been
  * (`queueEverything`).
@@ -110,6 +111,12 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
  * as a delete, and would delete the Recording from the account. Version 4 closes its connection
  * (`blocking`), and it can't open version 3 again (`VersionError`). The upgrade also makes the
  * next sync read the whole library (`readEverythingAgain`).
+ *
+ * Version 6 (#293, ADR 0019) changes no store either: a Recording gains its Trim. It shuts out
+ * code from before Trims the same way, since that code would upload a `place` op without the Trim
+ * and settle it, and would read the account's Trims without keeping them while its cursor moves
+ * past them. Its upgrade reads the whole library again too, so this browser gets the Trims another
+ * one saved.
  *
  * One connection serves the page until the browser closes it, as WebKit can while the tab sleeps
  * (#222), or it fails to open: the next call then opens a fresh one. Reads and writes go through
@@ -134,7 +141,7 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
         // A failed write aborts the upgrade, and the open fails with it.
         if (oldVersion >= 1) queueEverything(transaction).catch(() => {})
       }
-      if (oldVersion === 3) readEverythingAgain(transaction).catch(() => {})
+      if (oldVersion >= 3) readEverythingAgain(transaction).catch(() => {})
       if (oldVersion < 5) database.createObjectStore('pads')
     },
     // An older version is open in another tab, and its code may never close it: the upgrade
@@ -249,7 +256,8 @@ async function queueEverything(
 /**
  * Sets the last read's `cursor` back to 0, where there is one, so the next sync reads the whole
  * library. A tab still on code from before #268 skipped another browser's Placed Pitch on a
- * Recording it had, and still moved the cursor past it: only a full read brings it. A library with
+ * Recording it had, and one from before #293 its Trim, and still moved the cursor past it: only a
+ * full read brings it. A library with
  * no cursor never read the account, and gets none, so `leftByAnAccount` still tells it apart.
  */
 async function readEverythingAgain(
@@ -271,11 +279,12 @@ export async function queue(
   outbox: OutboxStore,
   kind: Kind,
   id: string,
-  op: OutboxOp
+  op: OutboxOp,
+  fields: PlacedField[] = []
 ): Promise<void> {
   const key = itemKey(kind, id)
   const queued = await outbox.get(key)
-  const next = mergeOutbox(queued, kind, id, op, queueStamp())
+  const next = mergeOutbox(queued, kind, id, op, queueStamp(), fields)
   if (next) await outbox.put(next)
   else if (queued) await outbox.delete(key)
 }
@@ -356,13 +365,17 @@ export async function saveAnalysis(id: string, analysis: AnalysisState): Promise
 }
 
 /**
- * Places a Noise-like Recording on a note by ear, or takes it off with null (ADR 0015), and queues
- * the change for the account. The updated Recording, or null when it's gone.
+ * What the picker changes on a Recording: its Placed Pitch (ADR 0015) and its Trim (ADR 0019),
+ * either of them null to take it off. A field left out stays as it is.
  */
-export async function placeRecording(
-  id: string,
-  placedPitch: number | null
-): Promise<Recording | null> {
+export type Placement = { placedPitch?: number | null; trim?: RecordingTrim | null }
+
+/**
+ * Places a Noise-like Recording on a note by ear, or takes it off with null (ADR 0015), trims it
+ * or takes its Trim off (ADR 0019), and queues the change for the account. The updated Recording,
+ * or null when it's gone.
+ */
+export async function placeRecording(id: string, change: Placement): Promise<Recording | null> {
   const placed = await withDb(async database => {
     const tx = database.transaction(['recordings', 'outbox'], 'readwrite')
     const recordings = tx.objectStore('recordings')
@@ -373,8 +386,14 @@ export async function placeRecording(
       await tx.done
       return null
     }
-    const updated: Recording = { ...recording, placedPitch }
-    await Promise.all([recordings.put(updated), queue(outbox, 'recordings', id, 'place'), tx.done])
+    const updated: Recording = { ...recording, ...change }
+    // Only the fields this change names go to the account (`placedFields`).
+    const fields = (['placedPitch', 'trim'] as const).filter(field => change[field] !== undefined)
+    await Promise.all([
+      recordings.put(updated),
+      queue(outbox, 'recordings', id, 'place', fields),
+      tx.done
+    ])
     return updated
   })
   if (placed) announceQueued()

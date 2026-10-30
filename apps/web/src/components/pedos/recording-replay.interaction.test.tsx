@@ -5,7 +5,7 @@ import type { Recording } from '@/lib/recordings'
 import { encodeWav } from '@/lib/wav'
 
 // A Recording's replay waveform in a DOM: the whole take, start to end, whatever the analysis
-// found in it (ADR 0016).
+// found in it (ADR 0016), or just the part asked for, as a Trim (ADR 0019).
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean
@@ -79,4 +79,19 @@ it('draws the whole take, both bursts and the silence around them', async () => 
   expect(quarter(2)).toEqual(Array(12).fill(0.05))
   // 16-bit PCM: the second burst is half the first, to within a sample step.
   for (const level of quarter(3)) expect(level).toBeCloseTo(0.5, 4)
+})
+
+it('draws just the part asked for, scaled to its own loudest', async () => {
+  const { useReplayLevels } = await import('./recording-replay')
+  let levels: number[] = []
+  function Probe() {
+    levels = useReplayLevels(recording, { startSeconds: 0.5, endSeconds: 1 })
+    return null
+  }
+  await act(async () => root?.render(<Probe />))
+  await vi.waitFor(() => expect(levels).toHaveLength(48))
+
+  // The silence, then the second burst, which is now the loudest.
+  expect(levels.slice(0, 24)).toEqual(Array(24).fill(0.05))
+  expect(levels.slice(24)).toEqual(Array(24).fill(1))
 })

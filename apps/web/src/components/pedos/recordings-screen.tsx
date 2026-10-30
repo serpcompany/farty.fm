@@ -1,6 +1,6 @@
 'use client'
 
-import { AudioLines, ChevronRight, Ear, Trash2 } from 'lucide-react'
+import { AudioLines, ChevronRight, Ear, Scissors, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
   AlertDialog,
@@ -21,15 +21,17 @@ import { formattedFartLength } from '@/lib/pitch-coverage'
 import {
   isNoiseLike,
   placedPitch,
+  playedPart,
   type Recording,
   recordingName,
-  recordingPitch
+  recordingPitch,
+  trimOf
 } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
 import { usePedos } from './pedos-provider'
 import { PlaceByEar } from './place-by-ear'
 import { PlayCircle, useReplayLevels } from './recording-replay'
-import { Waveform } from './waveform'
+import { ReplayWaveform } from './waveform'
 
 /**
  * Every Recording, newest first, with its note and waveform, and how many notes you've
@@ -170,8 +172,9 @@ function counted(number: number, noun: string): string {
 }
 
 /**
- * A Recording: a big play button, its name, its note in a pill ("B3"), and the waveform of the
- * fart replay plays, without the silence around it, and the fart's length. Tap to play. Matches
+ * A Recording: a big play button, its name, its note in a pill ("B3"), the waveform of what replay
+ * plays, and the fart's length. Tap the row to play the whole take (ADR 0016), or its Trim when
+ * it has one (ADR 0019); tap or drag the waveform to play from a spot (#293). Matches
  * `RecordingsRow`, plus the length, which the iPhone only reads out: it is what a locked Song's
  * "Needs a fart near F3 (3.0 s)" is measured against (#227).
  */
@@ -191,11 +194,13 @@ function RecordingRow({
   const pedos = usePedos()
   const isPlaying = pedos.nowPlaying === recording.id
   const name = recordingName(recording)
-  const levels = useReplayLevels(recording)
+  const part = playedPart(recording)
+  const levels = useReplayLevels(recording, part)
   const placed = placedPitch(recording)
   // A Placed Pitch stays in use when a new analysis finds a Recording Pitch (ADR 0017).
   const placeable = placed !== null || isNoiseLike(recording)
   const pitch = placed === null ? recordingPitch(recording) : null
+  const trimmed = trimOf(recording) !== null
 
   return (
     <li
@@ -203,54 +208,78 @@ function RecordingRow({
       data-testid="recording-row"
     >
       <div className="flex items-center gap-1">
-        {/* A Noise-like or placed Recording's note is a button of its own, over the row's top right. */}
-        <div className="relative min-w-0 flex-1">
+        {/* The row's play button lies under it all; the waveform and a Noise-like or placed
+            Recording's note take their own taps. */}
+        <div className="relative flex min-w-0 flex-1 items-center gap-3.5">
           <button
             type="button"
-            className="flex w-full items-center gap-3.5 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="absolute inset-0 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             aria-label={[name, ...describe(recording)].join(', ')}
             aria-pressed={isPlaying}
             onClick={() => pedos.togglePlayback(recording)}
-          >
+          />
+          <span className="pointer-events-none relative">
             <PlayCircle isPlaying={isPlaying} />
-            <span className="flex min-w-0 flex-1 flex-col gap-2">
-              <span
-                className={cn(
-                  'flex h-8 items-center justify-between gap-2',
-                  placeable && (placed === null ? 'pr-28' : 'pr-20')
-                )}
-              >
-                <span className="truncate font-semibold">{name}</span>
-                {pitch !== null && (
-                  <span
-                    className="rounded-full bg-muted px-3 py-1 font-semibold tabular-nums"
-                    data-testid="recording-note"
-                  >
-                    {noteName(pitch)}
-                  </span>
-                )}
-              </span>
-              <span className="flex items-center gap-2">
-                <Waveform
-                  levels={levels}
-                  isPlaying={isPlaying}
-                  className="h-[30px] min-w-0 flex-1"
-                />
+          </span>
+          <span className="pointer-events-none relative flex min-w-0 flex-1 flex-col gap-2">
+            <span
+              className={cn(
+                'flex h-8 items-center justify-between gap-2',
+                placeable && (placed === null ? 'pr-28' : 'pr-20')
+              )}
+            >
+              <span className="truncate font-semibold">{name}</span>
+              {pitch !== null && (
                 <span
-                  className="shrink-0 text-sm text-muted-foreground tabular-nums"
-                  data-testid="recording-length"
+                  className="rounded-full bg-muted px-3 py-1 font-semibold tabular-nums"
+                  data-testid="recording-note"
                 >
-                  {formattedFartLength(recording)}
-                </span>
-              </span>
-              {placed !== null && (
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Ear className="size-3.5" aria-hidden />
-                  Placed by ear
+                  {noteName(pitch)}
                 </span>
               )}
             </span>
-          </button>
+            <span className="flex items-center gap-2">
+              <ReplayWaveform
+                levels={levels}
+                view={part}
+                playing={isPlaying ? pedos.playingPart : null}
+                position={pedos.playbackPosition}
+                label={`Play ${name} from a spot`}
+                onScrubStart={pedos.stopPlayback}
+                onPlayFrom={seconds => {
+                  if (part.endSeconds - seconds >= 0.02)
+                    pedos.playRecording(recording, {
+                      startSeconds: seconds,
+                      endSeconds: part.endSeconds
+                    })
+                }}
+                className="pointer-events-auto h-[30px] flex-1"
+              />
+              <span
+                className="shrink-0 text-sm text-muted-foreground tabular-nums"
+                data-testid="recording-length"
+              >
+                {formattedFartLength(recording)}
+              </span>
+            </span>
+            {(placed !== null || trimmed) && (
+              <span className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                {placed !== null && (
+                  <span className="inline-flex items-center gap-1">
+                    <Ear className="size-3.5" aria-hidden />
+                    Placed by ear
+                  </span>
+                )}
+                {placed !== null && trimmed && <span aria-hidden>·</span>}
+                {trimmed && (
+                  <span className="inline-flex items-center gap-1">
+                    <Scissors className="size-3.5" aria-hidden />
+                    Trimmed
+                  </span>
+                )}
+              </span>
+            )}
+          </span>
           {placeable && (
             <PlaceButton
               name={name}
@@ -365,7 +394,8 @@ function Status({ recording, onRescan }: { recording: Recording; onRescan: () =>
 }
 
 /**
- * What the row's button says after the name: "1.1 s, B3", or "0.9 s, C3, placed by ear".
+ * What the row's button says after the name: "1.1 s, B3", "0.9 s, C3, placed by ear", or
+ * "0.4 s, noise-like, trimmed".
  */
 function describe(recording: Recording): string[] {
   const parts = [formattedFartLength(recording)]
@@ -382,6 +412,7 @@ function describe(recording: Recording): string[] {
       if (placed !== null) parts.push(noteName(placed), 'placed by ear')
       else if (pitch !== null) parts.push(noteName(pitch))
       else parts.push('noise-like')
+      if (trimOf(recording)) parts.push('trimmed')
     }
   }
   return parts
