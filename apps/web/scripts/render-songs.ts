@@ -164,7 +164,8 @@ async function main() {
         target_midi: n.targetMidi,
         start_s: round(n.startSample / sampleRate, 3),
         len_s: round(n.lengthSamples / sampleRate, 3),
-        gain_db: round(n.gainDb, 1)
+        gain_db: round(n.gainDb, 1),
+        lead_s: round(n.leadSamples / sampleRate, 3)
       }))
     }
     writeFileSync(join(outDir, `${id}.json`), `${JSON.stringify(events, null, 2)}\n`)

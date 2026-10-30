@@ -12,8 +12,12 @@ export interface RenderedNote {
   recordingId: string
   /** The note it plays, as a MIDI note number (the Song's pitch plus the transposition). */
   targetMidi: number
+  /** The note's beat, where its fart's attack lands. */
   startSample: number
+  /** The fart played from the beat. */
   lengthSamples: number
+  /** The fart's lead-in played before the beat, ending at `startSample` (#287). */
+  leadSamples: number
   gainDb: number
 }
 

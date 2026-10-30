@@ -2,8 +2,8 @@
 
 Every sample in the output is a Recording's own waveform, played raw (ADR 0012): at its own
 pitch and speed. The only operations are: trim the silence before and after the fart (every
-burst kept, ADR 0016), cut at the note's end,
-fade in/out, gain, and mixing. Nothing changes a fart's pitch or length: there is no
+burst kept, ADR 0016, and its quiet lead-in played before the beat, #287), cut at the note's
+end, fade in/out, gain, and mixing. Nothing changes a fart's pitch or length: there is no
 resampling, oscillator, filter-resonator, looping, or granular re-triggering anywhere.
 Recording Analysis still reads each fart back with its pitch held (variable_resample()) to
 decide whether it is Melodic and when it settles; no Song plays that read-back.
@@ -47,6 +47,10 @@ class Source:
     end: int = 0  # the fart's end (exclusive), where it fades out, in samples of the decoded original file
     pitch_estimate: float | None = None  # ref_midi before audition() (kept when audition rejects it)
     pitch_end: int = 0  # the first burst's end (exclusive), in samples of the decoded original file
+    # the fart's quiet lead-in: the sound joined to its attack, up to `start` (lead_in_start()),
+    # which Songs play before the note's beat so the attack still lands on it (#287); empty when
+    # the fart opens loud
+    lead_in: np.ndarray = field(default_factory=lambda: np.zeros(0))
 
     @property
     def pitched(self):
@@ -101,6 +105,35 @@ def note_segment(y):
     return start, end, pitch_end, reattack_at is not None
 
 
+LEAD_IN_DB = 30.0  # sound: a 5 ms level within this of the peak, as note_segment()'s end (#287)
+LEAD_IN_GAP_S = 0.05  # a quieter gap this long or shorter is kept inside the lead-in
+LEAD_IN_MAX_S = 0.25  # the longest lead-in: 009's 0.215 s G3 opening, and no more room noise
+
+
+def lead_in_start(y, start):
+    """Where the fart's lead-in begins (#287): the sound joined to its attack. From note_segment()'s
+    attack frame (the first 5 ms level within 12 dB of the peak), it walks back over every 5 ms
+    level within LEAD_IN_DB of the peak and over gaps below that of up to LEAD_IN_GAP_S, and starts
+    8 ms before the earliest such level, as `start` does before the attack. A sound before a
+    longer gap isn't the fart's: on the owner's room-noisy phone takes (105-110, #295) it's room
+    noise, up to 2 s of it. The lead-in is at most LEAD_IN_MAX_S, for a room loud enough to join
+    its noise to the attack. Songs play the stretch from here to `start` before the note's beat.
+    Never after `start`."""
+    hop = int(0.005 * SR)
+    fine = 20 * np.log10(librosa.feature.rms(y=y, frame_length=2 * hop, hop_length=hop)[0] + 1e-9)
+    peak = fine.max()
+    attack = int(np.argmax(fine >= peak - 12))
+    first, below = attack, 0
+    for i in range(attack - 1, -1, -1):
+        if fine[i] >= peak - LEAD_IN_DB:
+            first, below = i, 0
+        else:
+            below += 1
+            if below > round(LEAD_IN_GAP_S / 0.005):
+                break
+    return min(start, max(0, first * hop - int(0.008 * SR), start - int(LEAD_IN_MAX_S * SR)))
+
+
 def weighted_median(mids, w):
     """The pitch below which half the weight lies."""
     order = np.argsort(mids)
@@ -136,6 +169,7 @@ def estimate_pitch(f0, frame_rms, n_body, a):
 def analyze_recording(rid, y):
     start, end, pitch_end, cut_at_reattack = note_segment(y)
     fart = y[start:end].astype(np.float64)
+    lead_in = y[lead_in_start(y, start) : start].astype(np.float64)
     body = fart[: pitch_end - start]  # the first burst: the pitch is read from it alone
 
     # Every frame pYIN calls voiced, attack included. A voiced-probability gate on top (0.05
@@ -177,6 +211,7 @@ def analyze_recording(rid, y):
         end=end,
         pitch_estimate=ref_midi,
         pitch_end=pitch_end,
+        lead_in=lead_in,
     )
     if src.pitched:
         src.min_note_s = audition(src)
@@ -598,31 +633,51 @@ def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_d
     """Play each note's fart raw (ADR 0012): the Recording's fart from its start, every burst
     included (ADR 0016), at its own pitch and speed, cut at the note's end (its written length less the gap, at least 60 ms) or
     where the fart ends, faded, set to a level and mixed. A note that starts on one of the score's
-    bar lines (melody.bar_lines) is set accent_db louder. A note's shift_semitones isn't used."""
+    bar lines (melody.bar_lines) is set accent_db louder. A note's shift_semitones isn't used.
+
+    The fart's attack lands on the note's beat. Its quiet lead-in (Source.lead_in) plays just
+    before it, in the rest before the note: as far back as it reaches, but never before the notes
+    before it end as written or stop playing, nor before the Song's start (#287). So it never fills
+    the gap between two notes and is never mixed over another fart: a lead-in in the gap hid the
+    next attack from the onset check on 5 of 7 libraries with 009 placed by ear. The level is
+    still set from the attack on.
+    An event's start_s is its beat, len_s the length from there and lead_s the lead-in played."""
     by_id = {s.id: s for s in sources}
     bpm = bpm or melody.bpm
     spb = 60 / bpm
     total = int((melody.length_beats * spb + 1.0) * SR)
     mix = np.zeros(total)
     events = []
-    for a in assignments:
+    played_to = 0  # where the notes placed so far end as written or stop playing, in samples
+    for a in sorted(assignments, key=lambda a: melody.notes[a.note_index].start):
         n = melody.notes[a.note_index]
         s = by_id[a.source_id]
         start = int(n.start * spb * SR)
         max_len = int(max(0.06, n.dur * spb - gap_ms / 1000) * SR)
-        seg = s.audio[:max_len].copy()
-        fi, fo = int(0.003 * SR), int(min(0.03, len(seg) / SR / 3) * SR)
+        body = s.audio[:max_len]
+        lead = min(len(s.lead_in), max(0, start - played_to))
+        seg = np.concatenate([s.lead_in[len(s.lead_in) - lead :], body])
+        fi, fo = int(0.003 * SR), int(min(0.03, len(body) / SR / 3) * SR)
         env = np.ones(len(seg))
         env[:fi] = np.linspace(0, 1, fi)
         if fo > 0:
             env[-fo:] *= np.linspace(1, 0, fo) ** 2
         seg = seg * env
-        rms = np.sqrt(np.mean(seg[: int(0.25 * SR)] ** 2)) + 1e-9
+        rms = np.sqrt(np.mean(seg[lead : lead + int(0.25 * SR)] ** 2)) + 1e-9
         on_downbeat = any(abs(n.start - line) < 1e-6 for line in melody.bar_lines)  # the score's own (melody.py)
         gain_db = target_rms_db - 20 * np.log10(rms) + (accent_db if on_downbeat else 0)
         seg = seg * 10 ** (gain_db / 20)
-        mix[start : start + len(seg)] += seg
-        events.append({**asdict(a), "start_s": round(start / SR, 3), "len_s": round(len(seg) / SR, 3), "gain_db": round(gain_db, 1)})
+        mix[start - lead : start + len(body)] += seg
+        played_to = max(played_to, start + len(body), int((n.start * spb + n.dur * spb) * SR))  # as the port sums seconds
+        events.append(
+            {
+                **asdict(a),
+                "start_s": round(start / SR, 3),
+                "len_s": round(len(body) / SR, 3),
+                "gain_db": round(gain_db, 1),
+                "lead_s": round(lead / SR, 3),
+            }
+        )
     peak = np.abs(mix).max()
     mix = np.tanh(mix / peak * 1.2) / np.tanh(1.2) * 0.89  # gentle limiter, -1 dBFS peak
     return mix, events

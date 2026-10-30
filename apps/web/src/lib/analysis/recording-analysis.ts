@@ -13,9 +13,9 @@ export type NoiseLikeReason = 'no_steady_pitch' | 'failed_audition'
 export interface RecordingAnalysis {
   version: number
   /**
-   * Start of the fart, in samples of the 44.1 kHz audio: just before its attack, so a quieter
-   * lead-in is trimmed too (#287). Songs play the fart from here to `gestureEndSample`, never cut
-   * at a second burst (ADR 0016).
+   * Start of the fart, in samples of the 44.1 kHz audio: just before its attack. Songs play the
+   * fart from here to `gestureEndSample` from the note's beat, never cut at a second burst (ADR
+   * 0016), and a quieter lead-in before it in the rest before the note (`renderSource`, #287).
    */
   gestureStartSample: number
   /** End of the fart (exclusive), where it fades out, in samples of the 44.1 kHz audio. */

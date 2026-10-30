@@ -36,7 +36,7 @@ from melody import load_catalog
 GOLDEN = engine.ROOT / "fixtures/golden"
 SHIP_LIST = engine.ROOT / "apps/web/src/lib/catalog/ship-list.json"  # the Songs the web app ships
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")  # README.md is written by hand
-FORMAT_VERSION = 7  # 7: Songs play every burst, the pitch reads the first (ADR 0016); 6: Songs' `bar_lines` (#232); 5: Songs play farts raw (ADR 0012); 4: the length rule (#221)
+FORMAT_VERSION = 8  # 8: a fart's lead-in plays before its beat (#287); 7: Songs play every burst, the pitch reads the first (ADR 0016); 6: Songs' `bar_lines` (#232); 5: Songs play farts raw (ADR 0012); 4: the length rule (#221)
 COVERAGE_SEEDS = 10  # random subsets per size in coverage.json
 
 
@@ -105,6 +105,8 @@ def recording_json(entry, src):
             "pitch_end_sample": src.pitch_end,
             "pitch_end_s": num(src.pitch_end / engine.SR, 6),
             "cut_at_reattack": bool(src.cut_at_reattack),
+            "lead_start_sample": src.start - len(src.lead_in),
+            "lead_start_s": num((src.start - len(src.lead_in)) / engine.SR, 6),
         },
         "pitch_contour": {
             "sample_rate": engine.SR,
@@ -155,7 +157,20 @@ def fit_json(fit):
     }
 
 
+def require_start_order(c, m):
+    """Raise unless the Song's notes start in strictly increasing order. engine.render() returns
+    its events in start order and the ports return theirs in the order given, so the golden rows
+    are paired with the notes by position only while the two orders are the same."""
+    for i in range(1, len(m.notes)):
+        if not m.notes[i].start > m.notes[i - 1].start:
+            raise ValueError(
+                f"{c['id']}: note {i} starts at beat {m.notes[i].start}, not after note {i - 1} at beat "
+                f"{m.notes[i - 1].start}; golden needs a Song's notes in strictly increasing start order"
+            )
+
+
 def arrangement_json(c, m, library, sources):
+    require_start_order(c, m)
     fit = engine.melody_fit(m, sources)
     pitch_of = {s.id: s.ref_midi for s in sources}
     per_pitch = []
@@ -191,7 +206,7 @@ def arrangement_json(c, m, library, sources):
                 "shift_semitones": num(a.shift_semitones, 4),
                 "heard_cents": p["cents"],
                 "fart_cents": p["fart_cents"],
-                "render": {"start_s": e["start_s"], "len_s": e["len_s"], "gain_db": e["gain_db"]},
+                "render": {"start_s": e["start_s"], "len_s": e["len_s"], "gain_db": e["gain_db"], "lead_s": e["lead_s"]},
             }
         )
     return {
