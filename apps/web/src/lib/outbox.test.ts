@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mergeOutbox, type OutboxEntry, type OutboxOp } from './outbox'
+import { mergeOutbox, type OutboxEntry, type OutboxOp, placedFields } from './outbox'
 
 const id = '11111111-1111-4111-8111-111111111111'
 const stamp = (version: string) => ({ at: 2, version })
@@ -55,16 +55,56 @@ describe('mergeOutbox', () => {
       key: `recordings:${id}`,
       kind: 'recordings'
     })
-    expect(mergeOutbox(recording('put'), 'recordings', id, 'place', stamp('v2'))).toEqual({
-      ...recording('put'),
-      version: 'v2'
-    })
+    expect(
+      mergeOutbox(recording('put'), 'recordings', id, 'place', stamp('v2'), ['placedPitch'])
+    ).toEqual({ ...recording('put'), version: 'v2', fields: ['placedPitch'] })
     expect(
       mergeOutbox(recording('place', true), 'recordings', id, 'place', stamp('v2'))
     ).toMatchObject({ op: 'place', sent: false, version: 'v2' })
     expect(mergeOutbox(recording('place'), 'recordings', id, 'delete', stamp('v2'))).toMatchObject({
       op: 'delete'
     })
+  })
+
+  // Each place records the fields it changed, so the PATCH sends only those (ADR 0019).
+  it('keeps the fields every place changed, in an upload or a place, sent or not', () => {
+    const recording = (
+      op: OutboxOp,
+      sent = false,
+      fields?: OutboxEntry['fields']
+    ): OutboxEntry => ({
+      ...queued(op, sent),
+      key: `recordings:${id}`,
+      kind: 'recordings',
+      ...(fields ? { fields } : {})
+    })
+    expect(mergeOutbox(undefined, 'recordings', id, 'place', stamp('v2'), ['trim'])).toMatchObject({
+      op: 'place',
+      fields: ['trim']
+    })
+    expect(mergeOutbox(recording('put'), 'recordings', id, 'place', stamp('v2'), ['trim'])).toEqual(
+      { ...recording('put'), version: 'v2', fields: ['trim'] }
+    )
+    expect(
+      mergeOutbox(recording('put', false, ['trim']), 'recordings', id, 'place', stamp('v3'), [
+        'placedPitch'
+      ])
+    ).toMatchObject({ op: 'put', fields: ['placedPitch', 'trim'] })
+    expect(
+      mergeOutbox(recording('place', true, ['trim']), 'recordings', id, 'place', stamp('v2'), [
+        'placedPitch'
+      ])
+    ).toMatchObject({ op: 'place', sent: false, fields: ['placedPitch', 'trim'] })
+  })
+
+  // Code from before #293 queued a place without fields: it only ever changed the Placed Pitch.
+  it('reads a place without fields as the Placed Pitch alone', () => {
+    const old: OutboxEntry = { ...queued('place'), key: `recordings:${id}`, kind: 'recordings' }
+    expect(placedFields(old)).toEqual(['placedPitch'])
+    expect(mergeOutbox(old, 'recordings', id, 'place', stamp('v2'), ['trim'])).toMatchObject({
+      fields: ['placedPitch', 'trim']
+    })
+    expect(placedFields({ ...old, op: 'put' })).toEqual([])
   })
 
   it('sends a second rename as one, with a new version', () => {

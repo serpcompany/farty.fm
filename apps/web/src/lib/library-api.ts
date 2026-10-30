@@ -1,5 +1,5 @@
 import type { Kind } from './outbox'
-import type { Recording } from './recordings'
+import type { Recording, Trim } from './recordings'
 import type { Toot } from './toot'
 
 // The account's library, from the browser: the routes in `src/app/api/` (`src/server/library.ts`).
@@ -69,17 +69,26 @@ export async function renameToot(id: string, title: string, accountId: string): 
   )
 }
 
-/** Places a Recording on a note by ear, or takes it off with null (ADR 0015). */
+/**
+ * A Recording's Placed Pitch (ADR 0015) and Trim (ADR 0019), as this browser has them now: only
+ * the ones it changed, so the account keeps another browser's change to the other.
+ */
+export type Placement = { placedPitch?: number | null; trim?: Trim | null }
+
+/**
+ * Places a Recording on a note by ear or trims it, or takes either off with null. A field left out
+ * stays as the account has it.
+ */
 export async function placeRecording(
   id: string,
-  placedPitch: number | null,
+  placement: Placement,
   accountId: string
 ): Promise<Answer> {
   return answer(
     await send(`/api/recordings/${id}/`, accountId, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ placedPitch })
+      body: JSON.stringify(placement)
     })
   )
 }

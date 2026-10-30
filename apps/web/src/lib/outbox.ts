@@ -13,6 +13,9 @@ export type Kind = 'recordings' | 'toots'
  */
 export type OutboxOp = 'put' | 'rename' | 'place' | 'delete'
 
+/** What a `place` changes on a Recording: its Placed Pitch (ADR 0015), its Trim (ADR 0019). */
+export type PlacedField = 'placedPitch' | 'trim'
+
 export type OutboxEntry = {
   /** `{kind}:{id}` (`itemKey`). */
   key: string
@@ -28,6 +31,13 @@ export type OutboxEntry = {
    * it was on its way (`settle` in `library-sync.ts`).
    */
   version: string
+  /**
+   * The fields a `place`, or a `place` riding in a `put`, changed, so the PATCH sends only those
+   * and leaves another browser's change to the other field on the account (ADR 0019). An entry
+   * without it was queued by code from before #293, whose `place` only ever changed the Placed
+   * Pitch (`placedFields`).
+   */
+  fields?: PlacedField[]
 }
 
 export const itemKey = (kind: Kind, id: string) => `${kind}:${id}`
@@ -43,7 +53,8 @@ export function mergeOutbox(
   kind: Kind,
   id: string,
   op: OutboxOp,
-  now: { at: number; version: string }
+  now: { at: number; version: string },
+  fields: PlacedField[] = []
 ): OutboxEntry | null {
   const fresh = (next: OutboxOp): OutboxEntry => ({
     key: itemKey(kind, id),
@@ -54,15 +65,37 @@ export function mergeOutbox(
     queuedAt: queued?.queuedAt ?? now.at,
     version: now.version
   })
-  if (!queued) return fresh(op)
+  if (!queued) return op === 'place' ? { ...fresh(op), fields: unionFields([], fields) } : fresh(op)
   if (queued.op === 'delete') return queued
   if (op === 'delete') return queued.op === 'put' && !queued.sent ? null : fresh('delete')
-  if (op === 'rename' || op === 'place') {
-    // An upload that may have reached the server still uploads, then renames or places (`settle`).
+  if (op === 'place') {
+    // A place joins what's queued, and keeps the fields it changed: a request already on its
+    // way may not arrive, and is then sent again with the later change.
+    const before = queued.op === 'put' ? (queued.fields ?? []) : placedFields(queued)
+    const merged = unionFields(before, fields)
+    // An upload that may have reached the server still uploads, then places (`settle`).
+    return queued.op === 'put'
+      ? { ...queued, version: now.version, fields: merged }
+      : { ...fresh(op), fields: merged }
+  }
+  if (op === 'rename') {
+    // An upload that may have reached the server still uploads, then renames (`settle`).
     return queued.op === 'put' ? { ...queued, version: now.version } : fresh(op)
   }
   return queued
 }
+
+/**
+ * The fields a queued `place` sends. One with none recorded was queued by code from before #293,
+ * which never saw a Trim, so it sends the Placed Pitch alone and leaves the account's Trim.
+ */
+export function placedFields(entry: OutboxEntry): PlacedField[] {
+  if (entry.op !== 'place') return entry.fields ?? []
+  return entry.fields ?? ['placedPitch']
+}
+
+const unionFields = (a: PlacedField[], b: PlacedField[]): PlacedField[] =>
+  (['placedPitch', 'trim'] as const).filter(field => a.includes(field) || b.includes(field))
 
 /** A new op's time and version. */
 export const queueStamp = () => ({ at: Date.now(), version: crypto.randomUUID() })

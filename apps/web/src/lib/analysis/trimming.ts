@@ -1,3 +1,4 @@
+import type { Trim } from '@/lib/recordings'
 import { ANALYSIS_SAMPLE_RATE } from './resample'
 
 /** The fart in a Recording and its first burst, in samples of the 44.1 kHz audio. */
@@ -53,6 +54,21 @@ export function noteSegment(y: Float32Array): Gesture {
   const end = Math.min(y.length, endI * hop + hop)
   const pitchEnd = reattackAt === undefined ? end : Math.min(end, reattackAt * hop + hop)
   return { start, end, pitchEnd, cutAtReattack: reattackAt !== undefined }
+}
+
+/**
+ * The Trim a person's handles keep (ADR 0019): `trim_bounds()` of the reference engine. The handles
+ * are cut at whole samples of the 44.1 kHz audio `y`, then `noteSegment` finds the fart between
+ * them: the start moves to just before the attack and the end to where it fades out. So a Trim
+ * always lies within its handles, and its onset lands on the beat as an untrimmed fart's does.
+ */
+export function trimBounds(y: Float32Array, startSeconds: number, endSeconds: number): Trim {
+  const sr = ANALYSIS_SAMPLE_RATE
+  const a = Math.max(0, Math.min(y.length, Math.round(startSeconds * sr)))
+  const b = Math.max(a, Math.min(y.length, Math.round(endSeconds * sr)))
+  if (b - a < 2) throw new Error('A Trim keeps at least two samples')
+  const { start, end } = noteSegment(y.subarray(a, b))
+  return { startSeconds: (a + start) / sr, endSeconds: (a + end) / sr }
 }
 
 /**

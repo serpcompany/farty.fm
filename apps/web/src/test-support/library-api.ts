@@ -184,6 +184,16 @@ export const api = {
       params({ id })
     ),
 
+  /** Sends `fields` as a Recording's PATCH: a Placed Pitch, a Trim or both (ADR 0019). */
+  placeAndTrim: (id: string, fields: unknown, as: As) =>
+    recordingRoute.PATCH(
+      request(`/api/recordings/${id}/`, 'PATCH', as, {
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(fields)
+      }),
+      params({ id })
+    ),
+
   /** Places a Recording on a note, or takes it off with null (`body` overrides the JSON sent). */
   place: (id: string, placedPitch: unknown, as: As, body?: string) =>
     recordingRoute.PATCH(

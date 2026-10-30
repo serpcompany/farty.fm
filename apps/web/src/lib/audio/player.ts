@@ -6,8 +6,18 @@ import { audioContext, isClosed, setPlaybackSession, whenClosing } from './conte
  */
 const decoded = new Map<string, Promise<AudioBuffer>>()
 
-/** The sound playing, and what tells its play it ended. */
-let current: { source: AudioBufferSourceNode; ended: () => void } | null = null
+/**
+ * The sound playing, what tells its play it ended, and where it plays: from `offset` to `end`
+ * seconds of its audio, started at `startedAt` on its context's clock.
+ */
+let current: {
+  source: AudioBufferSourceNode
+  ended: () => void
+  context: BaseAudioContext
+  startedAt: number
+  offset: number
+  end: number
+} | null = null
 
 /**
  * Counts every play and stop. A sound still loading when another starts, or when playback stops,
@@ -64,8 +74,15 @@ export async function play(
     const source = context.createBufferSource()
     source.buffer = buffer
     source.connect(context.destination)
+    const offset = segment ? Math.max(0, Math.min(segment.start, buffer.duration)) : 0
+    const end = segment ? Math.max(offset, Math.min(segment.end, buffer.duration)) : buffer.duration
+    const startedAt = context.currentTime
     const playing = {
       source,
+      context,
+      startedAt,
+      offset,
+      end,
       ended: () => {
         if (current === playing) current = null
         ended()
@@ -73,15 +90,26 @@ export async function play(
     }
     source.onended = playing.ended
     current = playing
-    if (segment) {
-      const start = Math.max(0, Math.min(segment.start, buffer.duration))
-      source.start(0, start, Math.max(0, Math.min(segment.end, buffer.duration) - start))
-    } else {
-      source.start()
-    }
+    // Started at once (0), which is `startedAt` on the context's clock.
+    if (segment) source.start(0, offset, end - offset)
+    else source.start()
   } catch {
     ended()
   }
+}
+
+/**
+ * Where the sound playing is, in seconds of its audio, by its context's clock: what a playhead
+ * follows, so it stays with the sound. The clock runs ahead of the speaker by the output's
+ * latency (`outputLatency`, 0.15 to 0.25 s on Bluetooth), so that's taken off where the browser
+ * reports it. Null while nothing plays, or a sound still loads.
+ */
+export function playbackPosition(): number | null {
+  if (!current) return null
+  const { context, startedAt, offset, end } = current
+  const reported = 'outputLatency' in context ? Number(context.outputLatency) : 0
+  const latency = Number.isFinite(reported) && reported > 0 ? reported : 0
+  return Math.min(end, offset + Math.max(0, context.currentTime - startedAt - latency))
 }
 
 export function stopPlayback(): void {

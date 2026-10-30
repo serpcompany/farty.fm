@@ -1,5 +1,5 @@
 import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
-import type { Analysis } from '@/lib/recordings'
+import type { Analysis, Trim } from '@/lib/recordings'
 import { minimumCost } from './assignment'
 import { type Song, secondsPerBeat } from './song'
 
@@ -98,20 +98,30 @@ export const PLACED_SHORTEST_NOTE_SECONDS = 0.6
 /**
  * A Noise-like Recording the user placed on `placedMidi` by ear, as Auto-map sees it (ADR 0015): a
  * Melodic Recording at that note that holds it from `PLACED_SHORTEST_NOTE_SECONDS` and settles at
- * once, at its own length. The reference's `placed()` makes the same `Source`. It still plays raw
- * (ADR 0012), so the note only decides which pitches it may play.
+ * once, at its own length, or its Trim's (ADR 0019). The reference's `placed()` makes the same
+ * `Source`, of `trimmed()` for a Trim. It still plays raw (ADR 0012), so the note only decides
+ * which pitches it may play.
  */
 export function placedAutoMapRecording(
   id: string,
   analysis: Analysis,
-  placedMidi: number
+  placedMidi: number,
+  trim: Trim | null = null
 ): AutoMapRecording {
+  const recording = autoMapRecording(id, analysis)
   return {
-    ...autoMapRecording(id, analysis),
+    ...recording,
     recordingPitchMidi: placedMidi,
     shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
+    gestureSeconds: trim === null ? recording.gestureSeconds : trimSeconds(trim),
     settleSeconds: 0
   }
+}
+
+/** A Trim's length in whole samples, as Songs cut it (`renderSource`), in seconds. */
+export function trimSeconds(trim: Trim): number {
+  const sr = ANALYSIS_SAMPLE_RATE
+  return (Math.round(trim.endSeconds * sr) - Math.round(trim.startSeconds * sr)) / sr
 }
 
 /** Which Recording plays one distinct Song pitch. */

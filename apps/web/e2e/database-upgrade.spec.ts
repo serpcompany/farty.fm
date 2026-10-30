@@ -78,7 +78,7 @@ test('upgrades a database from before Toots and keeps its Recordings', async ({ 
     return result
   })
   expect(stored).toEqual({
-    version: 5,
+    version: 6,
     stores: ['audio', 'downloads', 'meta', 'outbox', 'pads', 'recordings', 'tootAudio', 'toots'],
     recording: 7,
     audioBytes: wav.byteLength,
@@ -121,7 +121,7 @@ test('asks you to close Farty in your other tabs while one holds the old databas
     () =>
       new Promise<boolean>((resolve, reject) => {
         let wasBlocked = false
-        const request = indexedDB.open('pedos', 6)
+        const request = indexedDB.open('pedos', 7)
         request.onblocked = () => (wasBlocked = true)
         request.onsuccess = () => {
           request.result.close()

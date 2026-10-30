@@ -30,6 +30,10 @@ _Avoid_: Tuned pitch, assigned pitch, Recording Pitch (that is the analyzed one)
 A Recording with a Placed Pitch, placed while it was Noise-like. Songs, Pitch Coverage and Auto-map treat it as a Melodic Recording at its Placed Pitch, even after a later analysis finds a Recording Pitch (ADR 0017). Leaving it out, the default, keeps a Noise-like Recording out of Songs.
 _Avoid_: Beat, tuned fart
 
+**Trim**:
+The part of a Noise-like Recording's take the user kept with the picker's two handles. The Recordings tab and the picker then play exactly what's between the handles, and Songs play the fart found between them, whose length is the fart's length. The saved take never changes, and Remove trim brings the whole fart back. Kept with the Recording and its account, and through a new analysis, a Re-scan included; on a placed Recording it stays in use with the Placed Pitch (ADR 0017). It never changes the fart's pitch (ADR 0019).
+_Avoid_: Crop, edit, clip
+
 **Recording Pitch**:
 The note a Melodic Recording naturally sounds, octave included: G2 and G3 are different Recording Pitches. A Recording has a pitch; it never has a key. Recording Analysis reads it from the first 450 ms of the first burst or, when those have none, from the 450 ms where its pitch starts (ADR 0017).
 _Avoid_: Key, tone

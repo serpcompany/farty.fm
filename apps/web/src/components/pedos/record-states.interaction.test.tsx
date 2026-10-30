@@ -72,6 +72,7 @@ vi.mock('@/lib/analysis-upgrade', () => ({ upgradeAnalyses: async () => {} }))
 vi.mock('@/lib/audio/player', () => ({
   forgetDecoded: () => undefined,
   play: async () => {},
+  playbackPosition: () => null,
   stopPlayback: () => undefined
 }))
 vi.mock('@/lib/audio/context', () => ({ startAudioInTap: () => undefined }))

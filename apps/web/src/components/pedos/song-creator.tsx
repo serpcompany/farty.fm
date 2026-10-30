@@ -12,7 +12,7 @@ import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import { TOOT_PRICE_LABEL } from '@/lib/pricing'
 import * as store from '@/lib/recording-store'
-import { type Recording, recordingName, songPitch } from '@/lib/recordings'
+import { playedPart, type Recording, recordingName, songPitch } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
 import {
@@ -560,7 +560,7 @@ function RecordingUsedRow({
 }) {
   const pedos = usePedos()
   const isPlaying = pedos.nowPlaying === recording.id
-  const levels = useWholeLevels(recording.id)
+  const levels = usePlayedLevels(recording)
   const name = recordingName(recording)
   const pitch = songPitch(recording)
   const length = formattedFartLength(recording)
@@ -667,20 +667,28 @@ function PlaysBadge({ plays }: { plays: string }) {
   )
 }
 
-/** 16 loudness bars of the whole Recording, as the iPhone's Song Creator rows show it. */
-function useWholeLevels(id: string): number[] {
+/**
+ * 16 loudness bars of what the Recording plays, as the iPhone's Song Creator rows show it: the
+ * whole take, or its Trim (ADR 0019).
+ */
+function usePlayedLevels(recording: Recording): number[] {
   const [levels, setLevels] = useState<number[]>([])
+  const { id } = recording
+  const { startSeconds, endSeconds } = playedPart(recording)
   useEffect(() => {
     let left = false
     store
       .loadAudio(id)
       .then(wav => {
-        if (!left) setLevels(waveformLevels(decodeWav(wav).samples, 16))
+        const { samples, sampleRate } = decodeWav(wav)
+        const from = Math.round(startSeconds * sampleRate)
+        const to = Math.max(from, Math.round(endSeconds * sampleRate))
+        if (!left) setLevels(waveformLevels(samples.subarray(from, to), 16))
       })
       .catch(() => {})
     return () => {
       left = true
     }
-  }, [id])
+  }, [id, startSeconds, endSeconds])
   return levels
 }

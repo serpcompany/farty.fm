@@ -57,6 +57,73 @@ export type Recording = {
    * it plays raw.
    */
   placedPitch?: number | null
+  /**
+   * The Trim: the part of the take the user kept with the picker's handles, while it was
+   * Noise-like, and the fart found between them (ADR 0019). Null or absent when untrimmed, the
+   * default. The saved take never changes. Kept apart from `analysis`, so re-analysis never loses
+   * it, and used only while `trimOf` says so.
+   */
+  trim?: RecordingTrim | null
+}
+
+/**
+ * Part of a take, in seconds of the whole file, at the 44.1 kHz samples analysis reads: the start
+ * and the end (exclusive).
+ */
+export type Trim = { startSeconds: number; endSeconds: number }
+
+/**
+ * A Recording's Trim (ADR 0019): exactly where the user left the handles, which the row and the
+ * picker play, and `fart`, the fart `trimBounds` found between them, which Songs play so its onset
+ * lands on the beat. `fart` always lies within the handles.
+ */
+export type RecordingTrim = Trim & { fart: Trim }
+
+/**
+ * The Trim, while the Recording is analyzed as Noise-like or placed on a note; otherwise null.
+ * The row and the picker then play its handles, and Songs its fart (`songTrim`, ADR 0019). A
+ * Recording that re-analysis finds Melodic, and isn't placed, plays as analysis found it.
+ */
+export function trimOf(recording: Recording): RecordingTrim | null {
+  const trim = recording.trim
+  if (!trim || recording.analysis.state !== 'analyzed') return null
+  return isNoiseLike(recording) || placedPitch(recording) !== null ? trim : null
+}
+
+/** The part of the take Songs cut a trimmed Recording at: the fart between its handles. */
+export function songTrim(recording: Recording): Trim | null {
+  return trimOf(recording)?.fart ?? null
+}
+
+/** The handles of a Recording's Trim, as a plain part of its take, or null when untrimmed. */
+export function trimHandles(recording: Recording): Trim | null {
+  const trim = trimOf(recording)
+  return trim && { startSeconds: trim.startSeconds, endSeconds: trim.endSeconds }
+}
+
+/** The part of the take the Recordings tab plays and draws: the Trim, or else the whole take. */
+export function playedPart(recording: Recording): Trim {
+  return trimHandles(recording) ?? { startSeconds: 0, endSeconds: recording.seconds }
+}
+
+/** The fart Recording Analysis found in the take, or null before it's analyzed. */
+export function foundPart(recording: Recording): Trim | null {
+  if (recording.analysis.state !== 'analyzed') return null
+  const { gestureStartSeconds, gestureEndSeconds } = recording.analysis.analysis
+  return { startSeconds: gestureStartSeconds, endSeconds: gestureEndSeconds }
+}
+
+/** The fart the picker plays: the Trim's handles, or else the fart analysis found. */
+export function fartPart(recording: Recording): Trim | null {
+  return trimHandles(recording) ?? foundPart(recording)
+}
+
+/** Whether two parts of a take are the same, to 5 ms: what the picker's Reset and Save compare. */
+export function samePart(a: Trim, b: Trim): boolean {
+  return (
+    Math.abs(a.startSeconds - b.startSeconds) < 0.005 &&
+    Math.abs(a.endSeconds - b.endSeconds) < 0.005
+  )
 }
 
 /** The notes a Noise-like Recording can be placed on: C2 to B4 (ADR 0015). */

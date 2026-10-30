@@ -20,17 +20,18 @@ import {
 } from '@/db/library'
 import { tootPayment } from '@/db/payments'
 import type { Performance } from '@/lib/performance'
-import type { Recording } from '@/lib/recordings'
+import type { Recording, RecordingTrim } from '@/lib/recordings'
 import type { Toot, TootArrangement } from '@/lib/toot'
 
 import {
   isItemId,
-  parsePlacedPitch,
+  parsePlacement,
   parseRecording,
   parseTitle,
   parseToot,
   readJson,
-  readUpload
+  readUpload,
+  TRIM_TOLERANCE_SECONDS
 } from './library-input'
 import { audioKey, deleteUserMedia, getMedia, putAudioOnce } from './media'
 import { apiError, type SessionUser } from './require-user'
@@ -75,7 +76,25 @@ function toRecording(row: RecordingRow): LibraryRecording {
       ? { state: 'analyzed', analysis: row.analysis }
       : { state: 'notAnalyzed' },
     placedPitch: row.placedPitch,
+    trim: trimOfRow(row),
     audioBytes: row.audioBytes
+  }
+}
+
+/** A row's Trim (ADR 0019): its handles and its fart, or null unless it has all four. */
+function trimOfRow(row: RecordingRow): RecordingTrim | null {
+  const { trimStartSeconds, trimEndSeconds, trimFartStartSeconds, trimFartEndSeconds } = row
+  if (
+    trimStartSeconds === null ||
+    trimEndSeconds === null ||
+    trimFartStartSeconds === null ||
+    trimFartEndSeconds === null
+  )
+    return null
+  return {
+    startSeconds: trimStartSeconds,
+    endSeconds: trimEndSeconds,
+    fart: { startSeconds: trimFartStartSeconds, endSeconds: trimFartEndSeconds }
   }
 }
 
@@ -280,9 +299,10 @@ export async function patchToot(
 }
 
 /**
- * `PATCH /api/recordings/{id}/` with `{ placedPitch }`: places a Noise-like Recording on a note by
- * ear, or takes it off with null (ADR 0015). The last to arrive wins. The analysis stays the
- * upload's: each browser re-analyzes its own.
+ * `PATCH /api/recordings/{id}/` with `{ placedPitch, trim }`: places a Noise-like Recording on a
+ * note by ear (ADR 0015) and trims it (ADR 0019), or takes either off with null. Either may be left
+ * out, and stays as it is. The last to arrive wins. The analysis stays the upload's: each browser
+ * re-analyzes its own.
  */
 export async function patchRecording(
   { db }: Stores,
@@ -295,12 +315,14 @@ export async function patchRecording(
   if (wrong) return wrong
   const body = await readJson(request)
   if (body instanceof Response) return body
-  const placedPitch = parsePlacedPitch((body.json as { placedPitch?: unknown } | null)?.placedPitch)
-  if (placedPitch === undefined) return apiError(400, 'invalid_request')
-  const before = await placeRecording(db, user.id, id, placedPitch)
+  const placement = parsePlacement(body.json)
+  if (placement === null) return apiError(400, 'invalid_request')
+  const before = await placeRecording(db, user.id, id, placement, TRIM_TOLERANCE_SECONDS)
   if (before === null) return notFound()
   if (before === 'deleted') return gone()
-  return Response.json({ id, placedPitch })
+  // A Trim past the end of the take (ADR 0019).
+  if (before === 'tooLong') return apiError(400, 'invalid_request')
+  return Response.json({ id, ...placement })
 }
 
 /**

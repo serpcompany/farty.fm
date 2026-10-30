@@ -33,6 +33,8 @@ Update 2026-10-30 (#282, ADR 0017): a placement outlasts a Recording Pitch that 
    - A placement queues in the outbox as `place`, merged like a rename, and goes up as `PATCH /api/recordings/{id}/`.
    - A new analysis replaces the analysis and keeps the placement. If it finds the fart Melodic, its Recording Pitch is used and the placement is ignored. The account takes any MIDI note from 0 to 127, so a later release can widen the picker.
 
+   Update 2026-10-30 (ADR 0019, #293): the picker can also trim the fart. The `place` op and `PATCH /api/recordings/{id}/` now carry the Recording's Trim with its Placed Pitch, `{ placedPitch, trim }`, and either may be left out. The database goes to version 6 for the same reason as version 4, and its upgrade reads the whole library again.
+
 ## Why
 
 **The owner's words.** Design A has the biggest keys and the most stock parts. Trying an octave up or down takes one arrow tap.
