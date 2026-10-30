@@ -1,7 +1,7 @@
 'use client'
 
 import { Play, Square } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { loadAudio } from '@/lib/recording-store'
 import type { Recording, Trim } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
@@ -64,14 +64,32 @@ export function partLevels(take: PcmAudio, part: Trim): number[] {
 
 /**
  * The bars of `part` of the take, or of the whole take, as replay plays it. None while the take
- * loads.
+ * loads. Only the bars are kept: a row never holds its decoded take, which a library of a few
+ * hundred Recordings couldn't keep in a phone's memory (#299). The picker, which zooms on one
+ * take, keeps it (`useTake`).
  */
 export function useReplayLevels(recording: Recording, part?: Trim): number[] {
-  const take = useTake(recording)
+  const [drawn, setDrawn] = useState<{ id: string; levels: number[] } | null>(null)
+  const { id, sampleRate } = recording
   const start = part?.startSeconds ?? 0
   const end = part?.endSeconds ?? Number.POSITIVE_INFINITY
-  return useMemo(
-    () => (take ? partLevels(take, { startSeconds: start, endSeconds: end }) : []),
-    [take, start, end]
-  )
+
+  useEffect(() => {
+    let current = true
+    loadAudio(id)
+      .then(wav => decodeWav(wav))
+      .catch(() => ({ samples: new Float32Array(0), sampleRate }))
+      .then(take => {
+        const levels = partLevels(take, { startSeconds: start, endSeconds: end })
+        if (current) setDrawn({ id, levels })
+      })
+    return () => {
+      current = false
+    }
+  }, [id, sampleRate, start, end])
+
+  // A new part keeps the old bars until its own are drawn.
+  return drawn?.id === id ? drawn.levels : NO_LEVELS
 }
+
+const NO_LEVELS: number[] = []
