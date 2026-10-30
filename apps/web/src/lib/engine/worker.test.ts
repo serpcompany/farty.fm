@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { bridgedWorker, manualWorker, WorkerScope } from '../../test-support/fake-worker'
 import { decoded, goldenRecordings } from '../../test-support/golden'
-import { padSound } from '../pads'
+import { padSound, soundingSpan } from '../pads'
 import type { Analysis } from '../recordings'
 import { type Arrangement, arrange, autoMapRecording } from './auto-map'
 import type { RecordingToRender, RenderedSong } from './render-song'
@@ -132,6 +132,23 @@ describe('padSoundInWorker', () => {
     expect(sound.length).toBeGreaterThan(0)
     expect(sound).toEqual(padSound([samples], sampleRate)[0])
     expect(samples.buffer.byteLength).toBeGreaterThan(0)
+  })
+
+  it('cuts a 48 kHz take bit for bit padSound’s, from its lead-in at the take’s own rate', async () => {
+    // `106`, the owner's 48 kHz phone take: the worker resamples it to find the start and converts
+    // that start back to 48 kHz, which a 44.1 kHz take skips.
+    const golden = goldenRecordings.find(r => r.id === '106')
+    if (!golden) throw new Error('fixture 106')
+    const { samples, sampleRate } = await decoded(golden)
+    expect(sampleRate).toBe(48_000)
+    const scope = await startWorker()
+    vi.stubGlobal('Worker', bridgedWorker(scope))
+    const { padSoundInWorker } = await import('./client')
+    const [sound] = await padSoundInWorker([samples], sampleRate)
+    expect(sound).toEqual(padSound([samples], sampleRate)[0])
+    const { start, end } = soundingSpan(samples, sampleRate)
+    expect(start).toBe(Math.round((golden.gesture.lead_start_sample * sampleRate) / 44_100))
+    expect(sound).toHaveLength(end - start)
   })
 })
 
