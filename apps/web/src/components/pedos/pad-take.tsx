@@ -1,10 +1,11 @@
 'use client'
 
 import { CircleAlert, Play, Square } from 'lucide-react'
+import Link from 'next/link'
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { forgetTake, keepTake, keptTake } from '@/lib/pad-take'
+import { forgetTake, type KeptTake, keepTake, keptTake, keptTakes } from '@/lib/pad-take'
 import {
   MAX_PERFORMANCE_SECONDS,
   MAX_TAPS,
@@ -14,22 +15,42 @@ import {
 } from '@/lib/performance'
 import { reportError } from '@/lib/telemetry/errors'
 import { formattedTootLength, type PadToot, type PadTootDraft } from '@/lib/toot'
-import { type CheckoutReturn, clearCheckoutReturn, readCheckoutReturn } from '@/lib/toot-payment'
+import {
+  type CheckoutReturn,
+  clearCheckoutReturn,
+  readCheckoutReturn,
+  saveAsksForPayment,
+  tootPaymentState
+} from '@/lib/toot-payment'
 import { TootError } from '@/lib/toot-renderer'
 import { cn } from '@/lib/utils'
+import { useAccount } from './account-provider'
 import { tootPlayback, usePedos } from './pedos-provider'
 
 // The Sound Pad's take (#278, ADR 0017): Record, play the Pads, Stop, and the taps become a
 // Performance, made into a Toot in the render worker. Hearing it is free; Save to Toots saves it
 // as any Toot (ADR 0010).
 
+/** A take being made into its Toot `id`, or that couldn't be. */
+type Take = {
+  played: Performance
+  id: string
+  /** The return from Checkout it's made for, or a paid take saved on the Pad's open. */
+  back: CheckoutReturn | null
+  /** Made, it plays once: a take just stopped on a page in view. */
+  plays: boolean
+  /** A kept take shown again on the Pad's open, let go if it can't be made. */
+  restored: boolean
+}
+
 type Phase =
-  | { kind: 'idle' }
+  /** `lost`: a paid take couldn't be made again, which the Pad says. */
+  | { kind: 'idle'; lost?: boolean }
   /** `firstTapAt`: when the first tap played (`performance.now()`), the take's start. */
   | { kind: 'recording'; firstTapAt: number | null }
-  | { kind: 'making'; played: Performance; id?: string; back: CheckoutReturn | null }
+  | ({ kind: 'making' } & Take)
   | { kind: 'ready'; draft: PadTootDraft; back: CheckoutReturn | null }
-  | { kind: 'failed'; played: Performance; id?: string; back: CheckoutReturn | null }
+  | ({ kind: 'failed' } & Take)
 
 export type PadTake = {
   phase: Phase
@@ -41,31 +62,58 @@ export type PadTake = {
   tapped(at: number, recordingId: string): void
   /** Makes the Toot of a take that failed again. */
   retry(): void
+  /** Keeps the take made, before Checkout. False when this browser can't. */
+  keep(): boolean
 }
 
 /**
  * The Sound Pad's take: up to `MAX_PERFORMANCE_SECONDS` from its first tap, or `MAX_TAPS` taps,
- * then it stops by itself, as hiding the page does. Made, it plays once, and is kept in this
- * browser (`pad-take.ts`) until it's saved or another take is made, so back from Checkout the
- * same Toot is made again with the id it was paid for.
+ * then it stops by itself, as hiding the page does. Stopped, it's kept in this browser
+ * (`pad-take.ts`) until it's saved, by its Toot id, and made: it plays once, unless the page is
+ * hidden. Back from Checkout the same Toot is made again with the id it was paid for. Opened, the
+ * Pad shows the newest kept take again, ready to play, and where saving is paid it asks the account
+ * about each kept take: one paid whose return never loaded is made again and saved, one whose
+ * payment a save used is let go. A paid take that can't be made again is said and reported, for a
+ * refund.
  */
 export function usePadTake(): PadTake {
   const pedos = usePedos()
+  const { account } = useAccount()
+  const accountId = account.status === 'signedIn' ? account.id : null
   const [phase, setPhase] = useState<Phase>({ kind: 'idle' })
   const [elapsed, setElapsed] = useState(0)
   const taps = useRef<Tap[] | null>(null)
   const loaded = pedos.recordings !== null
+  /** The library is read, so a kept take can be checked against its Recordings and Toots. */
+  const libraryRead = loaded && pedos.toots !== null
+  /** Record was pressed since the Pad opened: nothing kept takes its place any more. */
+  const recorded = useRef(false)
+  /** The phase, for a check that answers after it may have changed. */
+  const shown = useRef(phase)
+  useEffect(() => {
+    shown.current = phase
+  }, [phase])
 
-  const stop = () => {
+  /** Stops the take, made into a Toot that plays once if `plays`. */
+  const stopTake = (plays: boolean) => {
     if (taps.current === null) return
     const played = performanceOf(taps.current)
     taps.current = null
-    setPhase(played ? { kind: 'making', played, back: null } : { kind: 'idle' })
+    if (!played) {
+      setPhase({ kind: 'idle' })
+      return
+    }
+    // Kept at once, so a page left before the Toot is made doesn't lose it.
+    const id = crypto.randomUUID()
+    keepTake(id, played)
+    setPhase({ kind: 'making', played, id, back: null, plays, restored: false })
   }
-  const stopByItself = useEffectEvent(stop)
+  const stop = () => stopTake(true)
+  const stopByItself = useEffectEvent(stopTake)
 
   const record = () => {
     pedos.stopPlayback()
+    recorded.current = true
     taps.current = []
     setElapsed(0)
     setPhase({ kind: 'recording', firstTapAt: null })
@@ -89,7 +137,7 @@ export function usePadTake(): PadTake {
     if (firstTapAt === null) return
     const tick = () => {
       const seconds = (window.performance.now() - firstTapAt) / 1000
-      if (seconds >= MAX_PERFORMANCE_SECONDS) stopByItself()
+      if (seconds >= MAX_PERFORMANCE_SECONDS) stopByItself(true)
       else setElapsed(seconds)
     }
     tick()
@@ -97,28 +145,110 @@ export function usePadTake(): PadTake {
     return () => clearInterval(timer)
   }, [firstTapAt])
 
-  // Hiding the page stops the take, as it stops the Pads.
+  // Hiding the page stops the take, as it stops the Pads. It's made, and waits to be played.
   useEffect(() => {
     const visibilityChanged = () => {
-      if (document.visibilityState === 'hidden') stopByItself()
+      if (document.visibilityState === 'hidden') stopByItself(false)
     }
     document.addEventListener('visibilitychange', visibilityChanged)
     return () => document.removeEventListener('visibilitychange', visibilityChanged)
   }, [])
 
-  // Back from Checkout for the kept take: the same Toot is made again. Any other return is gone.
-  useEffect(() => {
-    const back = readCheckoutReturn()
-    if (!back) return
-    const kept = keptTake()
-    if (kept?.tootId === back.tootId) {
-      setPhase({ kind: 'making', played: kept.performance, id: kept.tootId, back })
-    } else clearCheckoutReturn()
-  }, [])
+  /** Whether every Recording the take played is still in the library, so it can be made again. */
+  const canMake = (take: KeptTake) =>
+    take.performance.recordings.every(id => pedos.recording(id) !== undefined)
+  /**
+   * What's on the Pad can give way to a kept take: nothing recorded, no Checkout return, and no
+   * lost take being said.
+   */
+  const replaceable = () => {
+    const current = shown.current
+    if (recorded.current) return false
+    if (current.kind === 'idle') return !current.lost
+    return current.kind !== 'recording' && current.back === null
+  }
+  /** A paid take that can't be made again: said on the Pad, reported for a refund, let go. */
+  const lose = (tootId: string) => {
+    reportError('pad-paid-take-lost')
+    forgetTake(tootId)
+    setPhase({ kind: 'idle', lost: true })
+  }
 
-  const make = useEffectEvent((played: Performance, id?: string) => pedos.makePadToot(played, id))
+  // Opened: back from Checkout, the take it was for is made again. Otherwise the newest kept take
+  // is shown again, ready to play. A kept take whose Toot is saved is let go.
+  const opened = useEffectEvent(() => {
+    const back = readCheckoutReturn()
+    if (back) {
+      const kept = keptTake(back.tootId)
+      if (pedos.toot(back.tootId)) {
+        forgetTake(back.tootId)
+        clearCheckoutReturn()
+      } else if (kept && canMake(kept)) {
+        const take = { played: kept.performance, id: kept.tootId, back }
+        setPhase({ kind: 'making', ...take, plays: false, restored: false })
+        return
+      } else if (back.done) {
+        // Paid for, and gone: storage cleared, or a Recording deleted, since paying.
+        clearCheckoutReturn()
+        lose(back.tootId)
+        return
+      } else clearCheckoutReturn()
+    }
+    let restored = false
+    for (const take of keptTakes()) {
+      if (pedos.toot(take.tootId)) forgetTake(take.tootId)
+      else if (!canMake(take)) {
+        // Where saving is paid, the account says first whether it was paid for.
+        if (!saveAsksForPayment()) forgetTake(take.tootId)
+      } else if (!restored) {
+        restored = true
+        const { performance: played, tootId: id } = take
+        setPhase({ kind: 'making', played, id, back: null, plays: false, restored: true })
+      }
+    }
+  })
+  const isOpen = useRef(false)
+  useEffect(() => {
+    if (!libraryRead || isOpen.current) return
+    isOpen.current = true
+    opened()
+  }, [libraryRead])
+
+  // Where saving is paid, each kept take's payment: paid and unused (its return never loaded), the
+  // take is made again and saved, as back from Checkout; used by a save, it's let go.
+  const recover = useEffectEvent(async (accountId: string) => {
+    for (const take of keptTakes()) {
+      if (!replaceable()) return
+      if (pedos.toot(take.tootId)) {
+        forgetTake(take.tootId)
+        continue
+      }
+      const state = await tootPaymentState(take.tootId, accountId)
+      if (!replaceable()) return
+      if (state === 'used' || (state === 'unpaid' && !canMake(take))) forgetTake(take.tootId)
+      else if (state === 'unused') {
+        if (!canMake(take)) lose(take.tootId)
+        else {
+          const back = { tootId: take.tootId, done: true }
+          const made = { played: take.performance, id: take.tootId, back }
+          setPhase({ kind: 'making', ...made, plays: false, restored: false })
+        }
+        return
+      }
+    }
+  })
+  const isChecked = useRef(false)
+  useEffect(() => {
+    if (!libraryRead || !accountId || isChecked.current || !saveAsksForPayment()) return
+    isChecked.current = true
+    void recover(accountId)
+  }, [libraryRead, accountId])
+
+  const make = useEffectEvent((played: Performance, id: string) => pedos.makePadToot(played, id))
   const playOnce = useEffectEvent((draft: PadTootDraft) => {
-    // A page opened from a link or a reload can't start sound before a tap.
+    // Never while the page is hidden; and a page opened from a link or a reload can't start sound
+    // before a tap.
+    if (document.visibilityState === 'hidden') return
     if (navigator.userActivation?.hasBeenActive ?? true) pedos.toggleTootPlayback(draft)
   })
   const making = phase.kind === 'making' ? phase : null
@@ -128,15 +258,18 @@ export function usePadTake(): PadTake {
     make(making.played, making.id).then(
       draft => {
         if (left) return
-        keepTake(draft.id, draft.performance)
         setPhase({ kind: 'ready', draft, back: making.back })
-        // Back from Checkout, the take was heard already: it waits for a tap.
-        if (!making.back) playOnce(draft)
+        if (making.plays) playOnce(draft)
       },
       error => {
         // "Couldn't make this Toot": reported by the error that caused it, such as a decode.
         reportError('toot-make-failed', error instanceof TootError ? (error.cause ?? error) : error)
-        if (!left) setPhase({ ...making, kind: 'failed' })
+        if (left) return
+        if (making.restored) {
+          // Shown again on the open, it's let go rather than failing on every open.
+          forgetTake(making.id)
+          setPhase({ kind: 'idle' })
+        } else setPhase({ ...making, kind: 'failed' })
       }
     )
     return () => {
@@ -146,7 +279,8 @@ export function usePadTake(): PadTake {
 
   // Saved, the take isn't kept any more. Leaving the screen stops it and lets go of its audio.
   const { stopPlayback, forgetToot } = pedos
-  const draftId = phase.kind === 'ready' ? phase.draft.id : null
+  const draft = phase.kind === 'ready' ? phase.draft : null
+  const draftId = draft?.id ?? null
   const isSaved = draftId !== null && pedos.toot(draftId) !== undefined
   useEffect(() => {
     if (isSaved && draftId) forgetTake(draftId)
@@ -159,8 +293,9 @@ export function usePadTake(): PadTake {
   const retry = () => {
     if (phase.kind === 'failed') setPhase({ ...phase, kind: 'making' })
   }
+  const keep = () => draft !== null && keepTake(draft.id, draft.performance)
 
-  return { phase, elapsed, record, stop, tapped, retry }
+  return { phase, elapsed, record, stop, tapped, retry, keep }
 }
 
 /**
@@ -172,39 +307,51 @@ export function PadTakeControls({ take, disabled }: { take: PadTake; disabled: b
   if (phase.kind === 'idle' || phase.kind === 'recording') {
     const recording = phase.kind === 'recording'
     const started = recording && phase.firstTapAt !== null
+    const lost = phase.kind === 'idle' && phase.lost === true
     return (
-      <div className="flex items-center gap-4">
-        <button
-          type="button"
-          aria-label={recording ? 'Stop recording' : 'Record'}
-          data-testid={recording ? 'pad-take-stop' : 'pad-take-record'}
-          disabled={disabled}
-          className="flex size-14 shrink-0 items-center justify-center rounded-full border-4 border-muted outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
-          onClick={recording ? take.stop : take.record}
-        >
-          <span
-            aria-hidden
-            className={cn(
-              'bg-record transition-all duration-300',
-              recording ? 'size-5 rounded-[5px]' : 'size-10 rounded-full'
-            )}
-          />
-        </button>
-        <div className="min-w-0" aria-live="polite">
-          <p className="font-semibold tabular-nums" data-testid="pad-take-state">
-            {started
-              ? `${formattedTootLength(Math.floor(take.elapsed))} of ${formattedTootLength(MAX_PERFORMANCE_SECONDS)}`
-              : recording
-                ? 'Recording'
-                : 'Record'}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {started
-              ? 'Tap Stop to hear it.'
-              : recording
-                ? 'It starts at your first tap.'
-                : `Play up to ${MAX_PERFORMANCE_SECONDS} s, then hear it back.`}
-          </p>
+      <div className="flex flex-col gap-3">
+        {lost && (
+          <output className="block text-sm text-muted-foreground" data-testid="pad-take-lost">
+            Your payment went through, but this take couldn't be made again here.{' '}
+            <Link href="/support/" className="underline">
+              Contact support
+            </Link>{' '}
+            for a refund.
+          </output>
+        )}
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            aria-label={recording ? 'Stop recording' : 'Record'}
+            data-testid={recording ? 'pad-take-stop' : 'pad-take-record'}
+            disabled={disabled}
+            className="flex size-14 shrink-0 items-center justify-center rounded-full border-4 border-muted outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+            onClick={recording ? take.stop : take.record}
+          >
+            <span
+              aria-hidden
+              className={cn(
+                'bg-record transition-all duration-300',
+                recording ? 'size-5 rounded-[5px]' : 'size-10 rounded-full'
+              )}
+            />
+          </button>
+          <div className="min-w-0" aria-live="polite">
+            <p className="font-semibold tabular-nums" data-testid="pad-take-state">
+              {started
+                ? `${formattedTootLength(Math.floor(take.elapsed))} of ${formattedTootLength(MAX_PERFORMANCE_SECONDS)}`
+                : recording
+                  ? 'Recording'
+                  : 'Record'}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {started
+                ? 'Tap Stop to hear it.'
+                : recording
+                  ? 'It starts at your first tap.'
+                  : `Play up to ${MAX_PERFORMANCE_SECONDS} s, then hear it back.`}
+            </p>
+          </div>
         </div>
       </div>
     )

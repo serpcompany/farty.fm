@@ -200,9 +200,12 @@ export async function startCheckout(
 }
 
 /**
- * `GET /api/toots/{id}/payment/`: `{ paid }`, whether the Toot is paid for. Unpaid with a Stripe
- * Checkout Session, it asks Stripe, so the return from Checkout doesn't wait for the webhook, up to
- * `PAYMENT_LIMITS.stripeChecks`; past it, D1 alone answers.
+ * `GET /api/toots/{id}/payment/`: `{ paid, unused }`, whether the Toot is paid for, and whether
+ * that is a payment of its own that no save has used yet. A Sound Pad opened after a return from
+ * Checkout that never loaded saves a kept take only when it's `unused` (ADR 0017): with saving free
+ * it's `paid` and never `unused`. Unpaid with a Stripe Checkout Session, it asks Stripe, so the
+ * return from Checkout doesn't wait for the webhook, up to `PAYMENT_LIMITS.stripeChecks`; past it,
+ * D1 alone answers.
  */
 export async function getTootPayment(
   { db }: Pick<Stores, 'db'>,
@@ -214,19 +217,21 @@ export async function getTootPayment(
   if (!isItemId(id)) return notFound()
   const wrong = wrongLibrary(user, request)
   if (wrong) return wrong
-  if (payments.kind === 'free') return paid()
+  const answer = (paid: boolean, unused = false) => Response.json({ paid, unused })
+  if (payments.kind === 'free') return answer(true)
   const payment = await tootPayment(db, user.id, id)
-  if (payment?.paidAt) return paid()
+  if (payment?.paidAt) return answer(true, payment.savedAt === null)
   if (payment && payments.kind === 'stripe' && isCheckoutSessionId(payment.checkoutSessionId)) {
-    if (!(await spend(db, user, 'stripeChecks')).allowed) return Response.json({ paid: false })
+    if (!(await spend(db, user, 'stripeChecks')).allowed) return answer(false)
     try {
       const now = await paidAtStripe({ db }, payments.secretKey, user, payment)
-      return Response.json({ paid: now?.paid ?? false })
+      // Not paid until now, so no save has used it.
+      return now?.paid ? answer(true, payment.savedAt === null) : answer(false)
     } catch (error) {
       return stripeFailed(error)
     }
   }
-  return Response.json({ paid: false })
+  return answer(false)
 }
 
 /** The events that say a Checkout Session is paid: by card or wallet, or by a slower method. */

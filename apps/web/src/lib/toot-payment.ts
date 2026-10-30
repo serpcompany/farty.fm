@@ -78,6 +78,25 @@ export async function tootPaid(tootId: string, accountId: string): Promise<boole
   return typeof body?.paid === 'boolean' ? body.paid : null
 }
 
+/**
+ * A kept Sound Pad take's payment (ADR 0017): `unused`, paid and no save has used it, so the take
+ * is made again and saved; `used`, paid and a save used it (or saving is free), so there's nothing
+ * to save; `unpaid`. Null when Farty couldn't say, or a Worker from before this answer didn't.
+ */
+export async function tootPaymentState(
+  tootId: string,
+  accountId: string
+): Promise<'unpaid' | 'unused' | 'used' | null> {
+  const response = await send(`/api/toots/${tootId}/payment/`, accountId)
+  if (!response?.ok) return null
+  const body = (await response.json().catch(() => null)) as {
+    paid?: unknown
+    unused?: unknown
+  } | null
+  if (typeof body?.paid !== 'boolean' || typeof body.unused !== 'boolean') return null
+  return !body.paid ? 'unpaid' : body.unused ? 'unused' : 'used'
+}
+
 /** How long the return from Checkout waits for the payment: Stripe usually says in a second. */
 export const PAYMENT_WAIT = { tries: 15, intervalMs: 2000 }
 

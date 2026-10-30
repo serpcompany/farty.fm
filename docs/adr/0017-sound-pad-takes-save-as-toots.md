@@ -34,13 +34,16 @@ The owner decided four things on the issue:
    - The payment row has no Song (`toot_payments.song_id` is null). Stripe's product reads "Save your Sound Pad Toot", and the dev checkout takes no `song`.
    - Checkout returns to `/compose/pad/?toot=…`.
    - `PUT /api/toots/{id}/` refuses an unpaid Pad Toot with 402, as it refuses a Song's.
-6. **The take is kept across Checkout in this browser.**
-   - Once a take is made, its Performance and Toot id go into `localStorage` (`pedos.padTake`, `pad-take.ts`), replacing any earlier take. They hold only ids and times, never audio.
-   - Back from Checkout with the same id, the Sound Pad makes the same Toot again from them and saves it. It doesn't play it again, since it was heard already.
-   - A save, or a new take, lets the old one go. Storage that can't be read keeps nothing, and the take then lasts only the page.
-7. **No paid-unsaved reuse for Pad Toots.**
-   - Song Creator reuses a Toot of the same Song that was paid for and never saved (#213), because it can make that Toot again from the Song and the Recordings. The account never sees a Performance before it's saved, so it can't make a Pad Toot again elsewhere.
-   - A paid Pad Toot is never offered for a Song's, nor a Song's for the Sound Pad.
+6. **Takes are kept across Checkout in this browser, by Toot id.**
+   - Once a take stops, it gets its Toot id, and its Performance and id go into `localStorage` (`pedos.padTakes`, `pad-take.ts`), at most 5, the oldest let go first. A new take never takes a kept one's place. They hold only ids and times, never audio.
+   - A take stopped by hiding the page is made but never plays by itself, and neither does one made while the page is hidden. A phone coming back to Farty goes to Record (#130, as the iPhone app), so the Sound Pad, opened, shows the newest kept take again, ready to play. A kept take whose Toot is saved, or that can't be made where saving is free, is let go.
+   - Back from Checkout with a kept take's id, the Sound Pad makes the same Toot again from it and saves it. It doesn't play it again, since it was heard already.
+   - Save to Toots keeps the take again before Checkout. When this browser can't keep it (storage blocked or full), Checkout isn't started, and Save says the take can't be saved in this browser.
+   - A save lets the take go.
+7. **A paid take whose return never loaded is saved on the Sound Pad's next open.**
+   - Where saving is paid, the Sound Pad, opened in a signed-in browser, asks `GET /api/toots/{id}/payment/` about each kept take. Its `unused` says the Toot's own payment is paid and no save has used it. Such a take is made again and saved, as back from Checkout. A take whose payment a save used (saved or deleted somewhere else) is let go. With saving free the answer is never `unused`, so nothing is saved that nobody chose to save.
+   - A paid take that can't be made again (its kept take is gone, as with site data cleared, or it played a Recording deleted since) is said on the Pad: the payment went through and this take couldn't be made again, with Support for a refund. It's reported as `pad-paid-take-lost`, a code with no Toot id, and the paid, unused `toot_payments` row is what the owner refunds from.
+   - Song Creator reuses a Toot of the same Song paid for and never saved (#213), because the account can make it again from the Song. It never sees a Performance before it's saved, so there's no such reuse for Pad Toots: only this browser can make one again. A paid Pad Toot is never offered for a Song's, nor a Song's for the Sound Pad.
 8. **It's stored as Toots are.**
    - In D1, `toots.song_id` and `toots.arrangement` become nullable, beside a new JSON `performance` column. A `CHECK` holds a Toot to one or the other (migration 0005).
    - SQLite can't change a column's nullability in place, so 0005 rebuilds the table, as drizzle-kit wrote it. Its `INSERT` was edited by hand to leave out `performance`, which the old table doesn't have. `toots-migration.workers.test.ts` runs it on a D1 that already holds Toots, both live and deleted.
@@ -80,4 +83,5 @@ The owner decided four things on the issue:
 ## Consequences
 
 - A build from before #278 that syncs an account with a Pad Toot plays it from the Toots tab. It shows no Song name in the row, and its Toot screen says the Song isn't in Farty.
-- A Pad Toot paid for whose return from Checkout never loads (the page closed at Stripe) is saved only if its return address is opened later in the same browser, before another take. The Sound Pad opened without it doesn't ask the account whether the kept take was paid, so that payment goes unused and is refunded by hand (ADR 0010).
+- A Pad Toot paid for whose return from Checkout never loads (the page closed at Stripe) is saved on the Sound Pad's next open in the same browser, signed in. In another browser, or once this one's site data is cleared, it can't be made again: that payment goes unused and is refunded by hand (ADR 0010).
+- **No Worker rollback past this release.** A Worker from before it can't read a Pad Toot (`toToot` drops `performance`, so a new page's Pad Toot screen can't read its taps), and answers 400 to a checkout or save with a null `songId`. Migration 0005 can't be undone without losing Pad Toots, since the old table holds `song_id NOT NULL`. Releases roll forward (`docs/agents/web.md`), and the release PR that ships this says so in its Merge Danger.

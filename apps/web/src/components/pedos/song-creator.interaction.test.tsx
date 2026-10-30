@@ -134,6 +134,20 @@ describe('Save to Toots, where saving is paid', () => {
     expect(saveButton().disabled).toBe(false)
   })
 
+  it('starts no Checkout when the take can’t be kept to make again back from it (ADR 0017)', async () => {
+    const fetch = checkoutAnswers({ url: 'https://checkout.stripe.com/c/pay/cs_test_a' })
+    const keep = vi.fn(() => false)
+    const { SaveToToots } = await import('./song-creator')
+    await act(async () => root?.render(<SaveToToots draft={draft} back={null} keep={keep} />))
+    await tapSave()
+    expect(keep).toHaveBeenCalledOnce()
+    expect(fetch).not.toHaveBeenCalled()
+    expect(container.textContent).toContain(
+      "This take can't be saved in this browser: it can't keep the take while you pay."
+    )
+    expect(saveButton().disabled).toBe(false)
+  })
+
   it('says to try later past the checkout limit', async () => {
     checkoutAnswers({ error: 'rate_limited' }, 429)
     await render()

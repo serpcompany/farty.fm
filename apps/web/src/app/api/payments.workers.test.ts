@@ -212,6 +212,21 @@ describe('on a local run, with the dev checkout', () => {
     ])
   })
 
+  it('says a payment is unused until a save uses it, so a kept take saves only then (ADR 0017)', async () => {
+    const a = await signUp('A')
+    const answer = async (id: string) => (await payment(id, a)).json()
+    expect(await answer(T1)).toEqual({ paid: false, unused: false })
+    await checkout(T1, a, null)
+    expect(await answer(T1)).toEqual({ paid: false, unused: false })
+    await payDev(T1, a, null)
+    expect(await answer(T1)).toEqual({ paid: true, unused: true })
+    expect((await savePad(T1, a)).status).toBe(201)
+    expect(await answer(T1)).toEqual({ paid: true, unused: false })
+    // Deleted, its payment stays used.
+    expect((await api.delete('toots', T1, a)).status).toBe(204)
+    expect(await answer(T1)).toEqual({ paid: true, unused: false })
+  })
+
   it('never offers a paid Sound Pad Toot for a Song’s, or a Song’s for the Sound Pad', async () => {
     const a = await signUp('A')
     await checkout(T1, a, null)
@@ -542,7 +557,8 @@ describe('with Stripe Checkout in test mode', () => {
     await checkout(T1, a)
     expect(await paid(T1, a)).toBe(false)
     expect((await save(T1, a)).status).toBe(402)
-    expect(await paid(T1, a)).toBe(true)
+    // Paid at Stripe on this check: no save has used it yet.
+    expect(await (await payment(T1, a)).json()).toEqual({ paid: true, unused: true })
     expect((await save(T1, a)).status).toBe(201)
   })
 
@@ -811,7 +827,8 @@ describe('with saving free', () => {
     )
     expect(await started.json()).toEqual({ paid: true })
     const payment = await getTootPayment({ db: testDb() }, free, a, T1, request('payment'))
-    expect(await payment.json()).toEqual({ paid: true })
+    // Paid, but never a payment left unused: a kept Sound Pad take isn't saved by itself.
+    expect(await payment.json()).toEqual({ paid: true, unused: false })
     expect(await tootPayment(testDb(), a.id, T1)).toBeNull()
     expect(stripe).not.toHaveBeenCalled()
   })

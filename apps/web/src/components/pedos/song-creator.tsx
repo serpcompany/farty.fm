@@ -179,6 +179,7 @@ const SAVE_PROBLEMS = {
   tooMany: "You've started a lot of payments. Try again later.",
   failed: "Couldn't start the payment.",
   notPaidYet: "Your payment hasn't come through yet. Tap Save to check again.",
+  notKept: "This take can't be saved in this browser: it can't keep the take while you pay.",
   unreachable: "Couldn't reach your account. Tap Save to try again."
 }
 
@@ -208,8 +209,20 @@ export function Ready({ draft, back }: { draft: SongTootDraft; back: CheckoutRet
  * (ADR 0010), Save goes to Checkout for this Toot; back from Checkout, it saves the Toot once the
  * server says it's paid. A Toot of this Song paid for and never saved is saved instead of paying
  * again. Where it's free, Save saves, offline too in an account's browser.
+ *
+ * `keep`, before Checkout, keeps what makes the Toot again back from it (the Sound Pad's take):
+ * false when this browser can't, and then Checkout isn't started, so nothing is paid for that
+ * can't be saved.
  */
-export function SaveToToots({ draft, back }: { draft: TootDraft; back: CheckoutReturn | null }) {
+export function SaveToToots({
+  draft,
+  back,
+  keep: keepForCheckout
+}: {
+  draft: TootDraft
+  back: CheckoutReturn | null
+  keep?: () => boolean
+}) {
   const pedos = usePedos()
   const { account, stepOpen, openStep, retry } = useAccount()
   const accountId = account.status === 'signedIn' ? account.id : null
@@ -243,6 +256,10 @@ export function SaveToToots({ draft, back }: { draft: TootDraft; back: CheckoutR
 
   const pay = async (accountId: string) => {
     if (paying.current) return
+    if (keepForCheckout && !keepForCheckout()) {
+      setProblem('notKept')
+      return
+    }
     paying.current = true
     setBusy('paying')
     setProblem(null)

@@ -1,13 +1,16 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Account } from '@/lib/account'
 import type { Performance } from '@/lib/performance'
 import type { Recording } from '@/lib/recordings'
 import type { PadTootDraft, TootDraft } from '@/lib/toot'
 
 // The Sound Pad in a DOM: a press on a Pad whose sound isn't ready is dropped, never played later,
 // and audio this browser can't get yet isn't reported, while a sound that won't decode is. Record
-// keeps the presses that played as a Performance, made into a Toot to hear and save (#278).
+// keeps the presses that played as a Performance, made into a Toot to hear and save (#278): a take
+// stopped by hiding the page never plays by itself, and is there again on the next open; a paid
+// take is made again and saved, back from Checkout or on the next open, or said to be lost.
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean
@@ -22,7 +25,13 @@ const page = vi.hoisted(() => ({
   toggleTootPlayback: vi.fn(),
   stopPlayback: vi.fn(),
   forgetToot: vi.fn(),
-  saveToToots: vi.fn()
+  saveToToots: vi.fn(),
+  tootPaymentState: vi.fn(),
+  /** Whether this build's saving is paid. */
+  paid: false,
+  account: { status: 'signedOut' } as Account,
+  /** The ids of the saved Toots. */
+  saved: new Set<string>()
 }))
 
 const recordingNumbered = (id: string, number: number): Recording => ({
@@ -45,7 +54,10 @@ const recordingNumbered = (id: string, number: number): Recording => ({
     }
   }
 })
-const recording = recordingNumbered('a', 1)
+/** Recording ids, as the library's. */
+const A = '00000000-0000-4000-8000-00000000000a'
+const B = '00000000-0000-4000-8000-00000000000b'
+const recording = recordingNumbered(A, 1)
 /** The library: Recording 1, and for a take Recording 2 as well. */
 let recordings = [recording]
 
@@ -57,15 +69,22 @@ vi.mock('./pedos-provider', () => ({
     toggleTootPlayback: page.toggleTootPlayback,
     stopPlayback: page.stopPlayback,
     forgetToot: page.forgetToot,
-    toot: () => undefined,
+    toots: [],
+    toot: (id: string) => (page.saved.has(id) ? {} : undefined),
     nowPlaying: null,
     tootPlayFailed: null
   }),
   tootPlayback: (id: string) => `toot:${id}`
 }))
+vi.mock('./account-provider', () => ({ useAccount: () => ({ account: page.account }) }))
+vi.mock('@/lib/toot-payment', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/toot-payment')>()),
+  saveAsksForPayment: () => page.paid,
+  tootPaymentState: page.tootPaymentState
+}))
 // Save to Toots, as Song Creator's: its payment is tested there.
 vi.mock('./song-creator', () => ({
-  SaveToToots: (props: { draft: TootDraft; back: unknown }) => {
+  SaveToToots: (props: { draft: TootDraft; back: unknown; keep?: () => boolean }) => {
     page.saveToToots(props)
     return <button type="button">Save to Toots</button>
   }
@@ -131,11 +150,30 @@ function later<T>() {
   return { promise, resolve }
 }
 
+/** Fakes the page going to the background (`hidden`) and coming back (`visible`). */
+async function setVisibility(state: 'hidden' | 'visible') {
+  Object.defineProperty(document, 'visibilityState', { value: state, configurable: true })
+  await act(async () => {
+    document.dispatchEvent(new Event('visibilitychange'))
+  })
+}
+
+/** Leaves the Sound Pad, as a phone coming back to Farty does (it goes to Record). */
+function leave() {
+  act(() => root?.unmount())
+  root = null
+  document.body.replaceChildren()
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
+  page.paid = false
+  page.account = { status: 'signedOut' }
+  page.saved = new Set()
 })
 
 afterEach(() => {
+  Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true })
   act(() => root?.unmount())
   root = null
   document.body.replaceChildren()
@@ -185,8 +223,13 @@ describe('a press on a Pad', () => {
 
 describe('a take on the Sound Pad', () => {
   const ID = '11111111-1111-4111-8111-111111111111'
+  const PAID = '22222222-2222-4222-8222-222222222222'
+  const USED = '33333333-3333-4333-8333-333333333333'
   beforeEach(() => {
-    recordings = [recording, recordingNumbered('b', 2)]
+    recordings = [recording, recordingNumbered(B, 2)]
+    page.makePadToot.mockImplementation(async (performance: Performance, id: string) =>
+      draftOf(performance, id)
+    )
   })
   afterEach(() => {
     recordings = [recording]
@@ -198,10 +241,36 @@ describe('a take on the Sound Pad', () => {
     seconds: 1.2,
     wav: new ArrayBuffer(0)
   })
+  const one: Performance = { recordings: [A], taps: [[0, 0]] }
+  /** A take that played a Recording no longer in the library. */
+  const ofDeleted: Performance = {
+    recordings: ['00000000-0000-4000-8000-00000000000f'],
+    taps: [[0, 0]]
+  }
+  const kept = () => JSON.parse(localStorage.getItem('pedos.padTakes') ?? '[]')
+  const keepTakes = (...takes: { tootId: string; performance: Performance }[]) =>
+    localStorage.setItem('pedos.padTakes', JSON.stringify(takes))
+  const lastSave = () => page.saveToToots.mock.lastCall?.[0]
+  const lostSays = "Your payment went through, but this take couldn't be made again here."
+  /** Saving is paid here, and the account is signed in. */
+  const signedInWherePaid = () => {
+    page.paid = true
+    page.account = {
+      status: 'signedIn',
+      id: 'userA',
+      email: 'a@example.test',
+      marketingEmail: false
+    }
+  }
+
+  /** Records a take of one tap on Pad 1. */
+  async function recordOneTap() {
+    await click('pad-take-record')
+    await press(1, window.performance.now())
+  }
 
   it('keeps what played from Record to Stop, timed from the first tap, then plays its Toot', async () => {
     await open(Promise.resolve({} as AudioBuffer))
-    page.makePadToot.mockImplementation(async (performance: Performance) => draftOf(performance))
     // Before Record, a press plays and isn't kept.
     await press(1, 500)
     expect(byTestId('pad-take-state')?.textContent).toBe('Record')
@@ -219,28 +288,35 @@ describe('a take on the Sound Pad', () => {
     await click('pad-take-stop')
 
     const played: Performance = {
-      recordings: ['a', 'b'],
+      recordings: [A, B],
       taps: [
         [0, 0],
         [0.25, 1],
         [0.6, 0]
       ]
     }
-    expect(page.makePadToot).toHaveBeenCalledWith(played, undefined)
+    const id: string = page.makePadToot.mock.lastCall?.[1]
+    expect(page.makePadToot).toHaveBeenCalledWith(played, expect.any(String))
     expect(byTestId('pad-toot-state')?.textContent).toBe('Ready')
     expect(document.body.textContent).toContain('0:01 · 3 taps of 2 Recordings')
     // Made, it plays once, and Save to Toots saves it.
-    expect(page.toggleTootPlayback).toHaveBeenCalledWith(draftOf(played))
-    expect(page.saveToToots).toHaveBeenLastCalledWith({ draft: draftOf(played), back: null })
-    // Kept for the return from Checkout.
-    expect(JSON.parse(localStorage.getItem('pedos.padTake') ?? 'null')).toEqual({
-      tootId: ID,
-      performance: played
+    expect(page.toggleTootPlayback).toHaveBeenCalledWith(draftOf(played, id))
+    expect(lastSave()).toEqual({
+      draft: draftOf(played, id),
+      back: null,
+      keep: expect.any(Function)
     })
+    // Kept by its Toot id, for the return from Checkout.
+    expect(kept()).toEqual([{ tootId: id, performance: played }])
+    expect(lastSave().keep()).toBe(true)
 
+    // A new take keeps the last one too.
     await click('pad-take-again')
     expect(byTestId('pad-take-state')?.textContent).toBe('Recording')
     expect(document.body.textContent).not.toContain('Save to Toots')
+    await press(1, window.performance.now())
+    await click('pad-take-stop')
+    expect(kept()).toHaveLength(2)
   })
 
   it('is nothing when Stop comes before a tap', async () => {
@@ -249,42 +325,187 @@ describe('a take on the Sound Pad', () => {
     await click('pad-take-stop')
     expect(page.makePadToot).not.toHaveBeenCalled()
     expect(byTestId('pad-take-state')?.textContent).toBe('Record')
+    expect(kept()).toEqual([])
   })
 
   it('says it couldn’t be made, and reports why', async () => {
     await open(Promise.resolve({} as AudioBuffer))
     const broken = new Error('Rendering failed')
     page.makePadToot.mockRejectedValue(broken)
-    await click('pad-take-record')
-    await press(1, window.performance.now())
+    await recordOneTap()
     await click('pad-take-stop')
     expect(document.body.textContent).toContain("Couldn't make this Toot.")
     expect(page.reportError).toHaveBeenCalledWith('toot-make-failed', broken)
   })
 
-  it('is made again with the id it was paid for, back from Checkout, without playing', async () => {
-    const played: Performance = {
-      recordings: ['00000000-0000-4000-8000-00000000000a'],
-      taps: [[0, 0]]
-    }
-    localStorage.setItem('pedos.padTake', JSON.stringify({ tootId: ID, performance: played }))
-    window.history.replaceState(null, '', `/compose/pad/?toot=${ID}&checkout=done`)
-    page.makePadToot.mockImplementation(async (performance: Performance, id: string) =>
-      draftOf(performance, id)
-    )
+  it('can’t be kept for Checkout when storage won’t keep it', async () => {
     await open(Promise.resolve({} as AudioBuffer))
-    expect(page.makePadToot).toHaveBeenCalledWith(played, ID)
-    expect(page.toggleTootPlayback).not.toHaveBeenCalled()
-    expect(page.saveToToots).toHaveBeenLastCalledWith({
-      draft: draftOf(played),
-      back: { tootId: ID, done: true }
+    await recordOneTap()
+    await click('pad-take-stop')
+    const setItem = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError')
+    })
+    expect(lastSave().keep()).toBe(false)
+    setItem.mockRestore()
+  })
+
+  describe('stopped by hiding the page', () => {
+    it('is made, and never plays while hidden or by itself after', async () => {
+      await open(Promise.resolve({} as AudioBuffer))
+      await recordOneTap()
+      await setVisibility('hidden')
+      expect(page.makePadToot).toHaveBeenCalledWith(one, expect.any(String))
+      expect(byTestId('pad-toot-state')?.textContent).toBe('Ready')
+      await setVisibility('visible')
+      expect(byTestId('pad-toot-state')?.textContent).toBe('Ready')
+      expect(page.toggleTootPlayback).not.toHaveBeenCalled()
+      // Ready to play with a tap.
+      await click('pad-toot-play')
+      expect(page.toggleTootPlayback).toHaveBeenCalledOnce()
+    })
+
+    it('never plays when the page hides while it’s made', async () => {
+      const made = later<PadTootDraft>()
+      page.makePadToot.mockReturnValue(made.promise)
+      await open(Promise.resolve({} as AudioBuffer))
+      await recordOneTap()
+      await click('pad-take-stop')
+      await setVisibility('hidden')
+      await act(async () => made.resolve(draftOf(one)))
+      expect(byTestId('pad-toot-state')?.textContent).toBe('Ready')
+      expect(page.toggleTootPlayback).not.toHaveBeenCalled()
+    })
+
+    it('is there again, ready to play, when the Pad opens after a phone comes back on Record', async () => {
+      const made = later<PadTootDraft>()
+      page.makePadToot.mockReturnValueOnce(made.promise)
+      await open(Promise.resolve({} as AudioBuffer))
+      await recordOneTap()
+      await setVisibility('hidden')
+      const id: string = page.makePadToot.mock.lastCall?.[1]
+      await setVisibility('visible')
+      // The phone goes to Record before the take is made.
+      leave()
+      await act(async () => made.resolve(draftOf(one, id)))
+
+      await open(Promise.resolve({} as AudioBuffer))
+      expect(page.makePadToot).toHaveBeenLastCalledWith(one, id)
+      expect(byTestId('pad-toot-state')?.textContent).toBe('Ready')
+      expect(lastSave()).toMatchObject({ draft: draftOf(one, id), back: null })
+      expect(page.toggleTootPlayback).not.toHaveBeenCalled()
     })
   })
 
-  it('isn’t made back from Checkout for another take, and the return is cleared', async () => {
-    window.history.replaceState(null, '', `/compose/pad/?toot=${ID}&checkout=done`)
-    await open(Promise.resolve({} as AudioBuffer))
-    expect(page.makePadToot).not.toHaveBeenCalled()
-    expect(window.location.search).toBe('')
+  describe('opened again', () => {
+    it('shows the newest kept take, and lets go of one saved or that can’t be made', async () => {
+      keepTakes(
+        { tootId: ID, performance: one },
+        { tootId: PAID, performance: ofDeleted },
+        { tootId: USED, performance: one }
+      )
+      page.saved.add(USED)
+      await open(Promise.resolve({} as AudioBuffer))
+      expect(page.makePadToot).toHaveBeenCalledOnce()
+      expect(page.makePadToot).toHaveBeenCalledWith(one, ID)
+      expect(byTestId('pad-toot-state')?.textContent).toBe('Ready')
+      expect(page.toggleTootPlayback).not.toHaveBeenCalled()
+      expect(kept()).toEqual([{ tootId: ID, performance: one }])
+      // Saving is free here: nothing asks the account.
+      expect(page.tootPaymentState).not.toHaveBeenCalled()
+    })
+
+    it('saves a paid take whose return from Checkout never loaded, and lets go of a used one', async () => {
+      signedInWherePaid()
+      keepTakes({ tootId: PAID, performance: one }, { tootId: USED, performance: one })
+      page.tootPaymentState.mockImplementation(async (id: string) =>
+        id === PAID ? 'unused' : 'used'
+      )
+      await open(Promise.resolve({} as AudioBuffer))
+      expect(page.tootPaymentState).toHaveBeenCalledWith(USED, 'userA')
+      expect(page.tootPaymentState).toHaveBeenCalledWith(PAID, 'userA')
+      expect(page.makePadToot).toHaveBeenLastCalledWith(one, PAID)
+      // Saved as back from its Checkout.
+      expect(lastSave()).toMatchObject({
+        draft: draftOf(one, PAID),
+        back: { tootId: PAID, done: true }
+      })
+      expect(page.toggleTootPlayback).not.toHaveBeenCalled()
+      expect(kept()).toEqual([{ tootId: PAID, performance: one }])
+    })
+
+    it('keeps an unpaid take, and saves nothing it wasn’t paid for', async () => {
+      signedInWherePaid()
+      keepTakes({ tootId: ID, performance: one })
+      page.tootPaymentState.mockResolvedValue('unpaid')
+      await open(Promise.resolve({} as AudioBuffer))
+      expect(lastSave()).toMatchObject({ draft: draftOf(one, ID), back: null })
+      expect(kept()).toEqual([{ tootId: ID, performance: one }])
+    })
+
+    it('says a paid take whose Recording was deleted can’t be made again, and reports it', async () => {
+      signedInWherePaid()
+      keepTakes({ tootId: PAID, performance: ofDeleted })
+      page.tootPaymentState.mockResolvedValue('unused')
+      await open(Promise.resolve({} as AudioBuffer))
+      expect(page.makePadToot).not.toHaveBeenCalled()
+      expect(byTestId('pad-take-lost')?.textContent).toContain(lostSays)
+      // A known code and nothing else: the paid, unused payment is what's refunded.
+      expect(page.reportError).toHaveBeenCalledExactlyOnceWith('pad-paid-take-lost')
+      expect(kept()).toEqual([])
+      await click('pad-take-record')
+      expect(byTestId('pad-take-lost')).toBeNull()
+    })
+
+    it('never takes the place of a take being recorded', async () => {
+      signedInWherePaid()
+      const answer = later<'unused'>()
+      page.tootPaymentState.mockReturnValue(answer.promise)
+      keepTakes({ tootId: PAID, performance: one })
+      await open(Promise.resolve({} as AudioBuffer))
+      // The kept take is shown again; Record again starts a new one.
+      await click('pad-take-again')
+      await press(1, window.performance.now())
+      await act(async () => answer.resolve('unused'))
+      expect(byTestId('pad-take-state')?.textContent).toBe('0:00 of 0:30')
+      expect(kept()).toEqual([{ tootId: PAID, performance: one }])
+    })
+  })
+
+  describe('back from Checkout', () => {
+    it('is made again with the id it was paid for, without playing', async () => {
+      keepTakes({ tootId: ID, performance: one }, { tootId: PAID, performance: one })
+      window.history.replaceState(null, '', `/compose/pad/?toot=${ID}&checkout=done`)
+      await open(Promise.resolve({} as AudioBuffer))
+      expect(page.makePadToot).toHaveBeenCalledExactlyOnceWith(one, ID)
+      expect(page.toggleTootPlayback).not.toHaveBeenCalled()
+      expect(lastSave()).toMatchObject({ draft: draftOf(one), back: { tootId: ID, done: true } })
+    })
+
+    it('says a paid take that isn’t kept any more couldn’t be made again, and reports it', async () => {
+      window.history.replaceState(null, '', `/compose/pad/?toot=${ID}&checkout=done`)
+      await open(Promise.resolve({} as AudioBuffer))
+      expect(page.makePadToot).not.toHaveBeenCalled()
+      expect(window.location.search).toBe('')
+      expect(byTestId('pad-take-lost')?.textContent).toContain(lostSays)
+      expect(page.reportError).toHaveBeenCalledExactlyOnceWith('pad-paid-take-lost')
+    })
+
+    it('says so too when the paid take played a Recording deleted since', async () => {
+      keepTakes({ tootId: ID, performance: ofDeleted })
+      window.history.replaceState(null, '', `/compose/pad/?toot=${ID}&checkout=done`)
+      await open(Promise.resolve({} as AudioBuffer))
+      expect(page.makePadToot).not.toHaveBeenCalled()
+      expect(byTestId('pad-take-lost')?.textContent).toContain(lostSays)
+      expect(page.reportError).toHaveBeenCalledExactlyOnceWith('pad-paid-take-lost')
+      expect(kept()).toEqual([])
+    })
+
+    it('clears a cancelled return for a take not kept, and says nothing', async () => {
+      window.history.replaceState(null, '', `/compose/pad/?toot=${ID}`)
+      await open(Promise.resolve({} as AudioBuffer))
+      expect(window.location.search).toBe('')
+      expect(byTestId('pad-take-lost')).toBeNull()
+      expect(page.reportError).not.toHaveBeenCalled()
+    })
   })
 })

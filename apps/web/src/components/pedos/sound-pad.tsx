@@ -243,7 +243,7 @@ export function SoundPad() {
         </div>
       )}
       {take.phase.kind === 'ready' && (
-        <SaveToToots draft={take.phase.draft} back={take.phase.back} />
+        <SaveToToots draft={take.phase.draft} back={take.phase.back} keep={take.keep} />
       )}
 
       <PadChooser
