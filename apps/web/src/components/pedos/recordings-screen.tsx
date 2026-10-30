@@ -1,6 +1,6 @@
 'use client'
 
-import { AudioLines, ChevronRight, Ear, Scissors, Trash2 } from 'lucide-react'
+import { AudioLines, ChevronRight, Ear, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
   AlertDialog,
@@ -18,7 +18,6 @@ import { Spinner } from '@/components/ui/spinner'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import {
-  firstFartUsed,
   isNoiseLike,
   placedPitch,
   type Recording,
@@ -212,12 +211,6 @@ function RecordingRow({
                   Placed by ear
                 </span>
               )}
-              {firstFartUsed(recording) && (
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Scissors className="size-3.5" aria-hidden />
-                  First fart used
-                </span>
-              )}
             </span>
           </button>
           {noiseLike && (
@@ -317,8 +310,7 @@ function Status({ recording }: { recording: Recording }) {
 }
 
 /**
- * What the row's button says after the name: "1.1 s, B3, first fart used", or "0.9 s, C3, placed
- * by ear".
+ * What the row's button says after the name: "1.1 s, B3", or "0.9 s, C3, placed by ear".
  */
 function describe(recording: Recording): string[] {
   const parts = [formattedFartLength(recording)]
@@ -335,7 +327,6 @@ function describe(recording: Recording): string[] {
       if (pitch !== null) parts.push(noteName(pitch))
       else if (placed !== null) parts.push(noteName(placed), 'placed by ear')
       else parts.push('noise-like')
-      if (firstFartUsed(recording)) parts.push('first fart used')
     }
   }
   return parts

@@ -2,14 +2,14 @@ import { expect, test } from 'vitest'
 import {
   CONTOUR_TOLERANCE_MIDI,
   compareContour,
-  gestureBody,
   goldenRecordings,
+  pitchBody,
   row
 } from '../../test-support/golden'
 import { hzToMidi, roundHalfEven } from './numeric'
 import { analyzePitch } from './recording-pitch'
 
-// #35: from the golden gesture, the Recording Pitch estimate within ±30 cents and non-null for
+// #35: from the golden first burst, the Recording Pitch estimate within ±30 cents and non-null for
 // exactly the same Recordings, the same rounded confidence, and the same contour
 // (`RecordingPitchTests.swift`; the contour check is this port's addition).
 test('estimates and contours match the golden data', async () => {
@@ -21,7 +21,7 @@ test('estimates and contours match the golden data', async () => {
   let maxContourMidi = 0
   const lines = [row('id', 'estimate', 'golden', 'Δ cents', 'conf', 'golden', 'voicing', 'max Δ')]
   for (const golden of goldenRecordings) {
-    const pitch = analyzePitch(await gestureBody(golden))
+    const pitch = analyzePitch(await pitchBody(golden))
     const contour = Array.from(pitch.f0, f => (Number.isFinite(f) ? hzToMidi(f) : null))
     const agreement = compareContour(contour, golden)
     framesTotal += agreement.frames

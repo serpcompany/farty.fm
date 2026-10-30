@@ -61,7 +61,7 @@ export interface AutoMapRecording {
   recordingPitchMidi: number | null
   /** The shortest note the Recording plays on pitch, in seconds; null when Noise-like. */
   shortestNoteSeconds: number | null
-  /** The length of the Recording's single clean gesture, in seconds. */
+  /** The length of the fart Songs play, every burst of it (ADR 0016), in seconds. */
   gestureSeconds: number
   /**
    * When the Recording settles on its pitch, in seconds from the gesture start. Null when not

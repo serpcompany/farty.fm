@@ -41,12 +41,21 @@ describe('analyzeRecording', () => {
 
       const startError = a.gestureStartSample - golden.gesture.start_sample
       const endError = a.gestureEndSample - golden.gesture.end_sample
-      maxGestureSamples = Math.max(maxGestureSamples, Math.abs(startError), Math.abs(endError))
+      const pitchEndError = a.pitchEndSample - golden.gesture.pitch_end_sample
+      maxGestureSamples = Math.max(
+        maxGestureSamples,
+        Math.abs(startError),
+        Math.abs(endError),
+        Math.abs(pitchEndError)
+      )
       expect
         .soft(Math.abs(a.gestureStartSeconds - golden.gesture.start_s), `${id}: start`)
         .toBeLessThanOrEqual(0.01)
       expect
         .soft(Math.abs(a.gestureEndSeconds - golden.gesture.end_s), `${id}: end`)
+        .toBeLessThanOrEqual(0.01)
+      expect
+        .soft(Math.abs(a.pitchEndSeconds - golden.gesture.pitch_end_s), `${id}: pitch end`)
         .toBeLessThanOrEqual(0.01)
       expect.soft(a.cutAtReattack, `${id}: cut at re-attack`).toBe(golden.gesture.cut_at_reattack)
 

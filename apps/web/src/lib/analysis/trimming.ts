@@ -1,23 +1,31 @@
 import { ANALYSIS_SAMPLE_RATE } from './resample'
 
-/** The single clean gesture of a Recording, in samples of the 44.1 kHz audio. */
+/** The fart in a Recording and its first burst, in samples of the 44.1 kHz audio. */
 export interface Gesture {
   start: number
-  /** Exclusive. */
+  /** Where the fart fades out, exclusive. Songs play it from `start` to here, every burst. */
   end: number
-  /** The gesture ends at a second attack rather than where the sound fades out. */
+  /**
+   * Where its first burst ends, exclusive: `end` unless the take holds a second burst. Recording
+   * Analysis reads the pitch from `start` to here only, so a second burst can't blur it.
+   */
+  pitchEnd: number
+  /** The take holds a second burst, so the pitch is read from the first burst only. */
   cutAtReattack: boolean
 }
 
 /**
- * Automatic trimming: `note_segment()` of the reference engine (`Trimming.noteSegment` in Swift).
- * Finds the single-attack part of a Recording that can act as one note.
+ * Automatic trimming: `note_segment()` of the reference engine. Finds the fart in a Recording, with
+ * only the silence before and after it trimmed, and its first burst (ADR 0016). Swift's
+ * `Trimming.noteSegment` is frozen at the first burst.
  *
  * - Start: on a 5 ms RMS envelope, the first frame within 12 dB of the peak, minus 8 ms, so slow
  *   swells don't make the note sound late.
- * - End: on a 50 ms RMS envelope (fast flutter is smoothed away), the first slow re-attack: a dip
- *   of more than 6 dB below the running maximum, then a rise of more than 4 dB, more than 60 ms
- *   after the start. Otherwise where the level falls 30 dB below its peak.
+ * - End: on a 50 ms RMS envelope (fast flutter is smoothed away), after the last frame within
+ *   30 dB of its peak. A second burst is kept.
+ * - Pitch end: on the same envelope, the first slow re-attack: a dip of more than 6 dB below the
+ *   running maximum, then a rise of more than 4 dB, more than 60 ms after the start. Otherwise the
+ *   end.
  */
 export function noteSegment(y: Float32Array): Gesture {
   const sr = ANALYSIS_SAMPLE_RATE
@@ -42,8 +50,9 @@ export function noteSegment(y: Float32Array): Gesture {
       break
     }
   }
-  const end = (reattackAt ?? endI) * hop + hop
-  return { start, end: Math.min(y.length, end), cutAtReattack: reattackAt !== undefined }
+  const end = Math.min(y.length, endI * hop + hop)
+  const pitchEnd = reattackAt === undefined ? end : Math.min(end, reattackAt * hop + hop)
+  return { start, end, pitchEnd, cutAtReattack: reattackAt !== undefined }
 }
 
 /**

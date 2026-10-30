@@ -48,11 +48,9 @@ describe('the Fixture Library', () => {
     for (const song of songs) {
       const coverage = coverageOf(song, recordings)
       const golden = goldenArrangement('full', song.id)
-      // 8 of the 12: each of the others has a note longer than any fixture near its pitch, played
-      // at its own length (ADR 0011, ADR 0012).
-      expect(coverage.unlocked, song.id).toBe(
-        !['jingle', 'row', 'amazing', 'auld'].includes(song.id)
-      )
+      // All 12: since every burst plays (ADR 0016), a fixture near each pitch is as long as its
+      // longest note (ADR 0011).
+      expect(coverage.unlocked, song.id).toBe(true)
       expect(coverage.unlocked, song.id).toBe(golden.unlocked)
       expect(coverage.transposition, song.id).toBe(golden.transpose)
       for (const entry of golden.per_pitch) {

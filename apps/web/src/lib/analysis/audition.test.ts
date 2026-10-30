@@ -1,9 +1,9 @@
 import { expect, test } from 'vitest'
 import {
-  gestureBody,
   goldenContourHz,
   goldenIndex,
   goldenRecordings,
+  pitchBody,
   row
 } from '../../test-support/golden'
 import { NOTE_LENGTHS, readBackCents, settleTime, shortestNote } from './audition'
@@ -36,7 +36,7 @@ const EXPECTED_MELODIC = [
   '104'
 ]
 
-// #36: from the golden gesture, contour and estimate, the same shortest note for every Recording,
+// #36: from the golden first burst, contour and estimate, the same shortest note for every Recording,
 // and so the same Melodic set (`AuditionTests.swift`).
 test('shortest notes match the golden data', async () => {
   expect(goldenIndex.melodic_recordings).toEqual(EXPECTED_MELODIC)
@@ -51,7 +51,7 @@ test('shortest notes match the golden data', async () => {
       matches++
       continue
     }
-    const body = await gestureBody(golden)
+    const body = await pitchBody(golden)
     const f0 = goldenContourHz(golden)
     const shortest = shortestNote(body, f0, estimate)
     if (shortest === golden.shortest_note_s) matches++
@@ -85,7 +85,7 @@ test('the unsnapped golden contour gives the same shortest notes', async () => {
     const f0 = Float64Array.from(golden.pitch_contour.midi, m =>
       m === null ? Number.NaN : midiToHz(m)
     )
-    const shortest = shortestNote(await gestureBody(golden), f0, estimate)
+    const shortest = shortestNote(await pitchBody(golden), f0, estimate)
     expect.soft(shortest, `${golden.id} with the 4-decimal contour`).toBe(golden.shortest_note_s)
   }
 })
@@ -93,7 +93,7 @@ test('the unsnapped golden contour gives the same shortest notes', async () => {
 /** The settle time's tolerance (`fixtures/golden/README.md`): 2 pYIN frames of 256 samples. */
 const SETTLE_TOLERANCE_SECONDS = (2 * 256) / 44_100
 
-// #116: from the golden gesture, contour and Recording Pitch, the same settle time as the
+// #116: from the golden first burst, contour and Recording Pitch, the same settle time as the
 // reference's `settle_time()` for every Melodic Recording.
 test('settle times match the golden data', async () => {
   const lines = [row('id', 'settle s', 'golden', 'Δ frames')]
@@ -106,7 +106,7 @@ test('settle times match the golden data', async () => {
     }
     melodic++
     const settle = settleTime(
-      await gestureBody(golden),
+      await pitchBody(golden),
       goldenContourHz(golden),
       golden.recording_pitch_midi as number
     )

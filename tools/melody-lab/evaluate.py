@@ -9,7 +9,10 @@ recorded and on time:
   stretch of the dry Recording on the same frames (fart_cents()). A render that moves a
   fart's pitch more than 50 cents on more than 6% of notes fails it;
 - timing: at least 95% of onsets within +-50 ms (`onsets_on_time_pct`), and no second attack
-  inside a note (`notes_with_retrigger`).
+  inside a note that the fart doesn't have itself (`notes_with_retrigger`). A fart with several
+  bursts plays them all up to the note's end (ADR 0016), so a note can hold the fart's own
+  second burst (`notes_with_second_burst`, reported): a re-attack in the render counts only
+  where the dry stretch the note plays has none within REATTACK_MATCH_S of it.
 
 Reported, not gated: how far each note sounds from the melody (`median_abs_cents`,
 `within_50c_pct`), and the contour score (`contour_pct`): the share of the melody's
@@ -27,12 +30,16 @@ BAR = {"within_50c_of_fart_pct": 94, "onsets_on_time_pct": 95, "notes_with_retri
 FART_CENTS = 50  # a note is faithful when it sounds this close to its fart's own pitch
 
 
-def has_reattack(seg):
-    """Same definition the engine uses: on a 50 ms-smoothed level, a dip of >= 6 dB followed
-    by a rise of >= 4 dB after the first 60 ms = a second audible attack inside one note."""
+REATTACK_MATCH_S = 0.03  # a render's re-attack this close to one in the dry stretch is the fart's own
+
+
+def first_reattack(seg):
+    """Seconds into `seg` of its first second attack, or None. Same definition the engine uses
+    (note_segment()'s first burst): on a 50 ms-smoothed level, a dip of >= 6 dB followed by a
+    rise of >= 4 dB after the first 60 ms = a second audible attack inside one note."""
     hop = int(0.005 * SR)
     if len(seg) < 20 * hop:
-        return False
+        return None
     db = 20 * np.log10(librosa.feature.rms(y=seg, frame_length=10 * hop, hop_length=hop)[0] + 1e-9)
     a0 = int(np.argmax(db >= db.max() - 12))
     run_max, dip = db[a0], None
@@ -42,8 +49,13 @@ def has_reattack(seg):
         if db[i] < run_max - 6 and (dip is None or db[i] < db[dip]):
             dip = i
         if dip is not None and db[i] > db[dip] + 4 and (i - a0) * hop > 0.06 * SR:
-            return True
-    return False
+            return i * hop / SR
+    return None
+
+
+def has_reattack(seg):
+    """Whether `seg` holds a second audible attack (first_reattack())."""
+    return first_reattack(seg) is not None
 
 
 ON_PITCH_CENTS = 50
@@ -167,7 +179,7 @@ def evaluate(audio, melody, events, bpm, sources):
 
     per_note, errors, faithful, heard_midi, sounding = [], [], [], [], []
     dry_cache = {}
-    retrigger_notes = 0
+    retrigger_notes = second_burst_notes = 0
     for e in events:
         n = melody.notes[e["note_index"]]
         s = n.start * spb
@@ -188,7 +200,11 @@ def evaluate(audio, melody, events, bpm, sources):
         first = start_sample // HOP - DRY_PAD // HOP  # the render frame of the dry read's frame 0
         off_fart = fart_cents(f_yin, sounding_frames(t, db, s, heard_len), dry_cache[key], first)
         faithful.append(off_fart is not None and abs(off_fart) <= FART_CENTS)
-        retrigger_notes += has_reattack(audio[int(s * SR): int((s + heard_len) * SR)])
+        # a second attack the renderer made: one the dry stretch doesn't have at that point
+        heard_at = first_reattack(audio[int(s * SR): int((s + heard_len) * SR)])
+        own_at = first_reattack(g[:n_samples])
+        second_burst_notes += own_at is not None
+        retrigger_notes += heard_at is not None and (own_at is None or abs(heard_at - own_at) > REATTACK_MATCH_S)
         # the note's whole slot: its written length less the gap before the next note
         slot = max(0.06, n.dur * spb - GAP_S)
         sounding.append(sounding_share(audio[int(s * SR): int(s * SR) + int(slot * SR)]))
@@ -211,6 +227,7 @@ def evaluate(audio, melody, events, bpm, sources):
         "within_50c_of_fart_pct": round(100 * sum(faithful) / n_notes),
         "onsets_on_time_pct": round(100 * matched / n_notes),
         "notes_with_retrigger": retrigger_notes,
+        "notes_with_second_burst": second_burst_notes,
         "pitch_readable_pct": round(100 * len(errors) / n_notes),
         "within_50c_pct": round(100 * np.sum(np.abs(errors) <= 50) / n_notes),
         "within_50c_any_octave_pct": round(100 * np.sum(np.abs(pc_err) <= 50) / n_notes),

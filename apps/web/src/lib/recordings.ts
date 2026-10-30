@@ -4,10 +4,16 @@ import { ANALYSIS_VERSION } from './analysis/version'
 
 /** What Recording Analysis found in a Recording, as the iPhone app's `SavedAnalysis`. */
 export type Analysis = {
-  /** Where the single clean gesture starts and ends in the file, in seconds. */
+  /**
+   * Where the fart starts and ends in the file, in seconds: the take less the silence before and
+   * after it, every burst kept. Songs play this much (ADR 0016).
+   */
   gestureStartSeconds: number
   gestureEndSeconds: number
-  /** A second fart was cut off, so only the first one is used. */
+  /**
+   * The take holds a second burst, so the pitch was read from the first burst only. Before
+   * version 4 (ADR 0016), Songs also played only the first.
+   */
   cutAtReattack: boolean
   /** The pitch estimate before audition, as a MIDI note number, and its confidence (0…1). */
   pitchEstimateMidi: number | null
@@ -110,22 +116,6 @@ export function needsReanalysis(recording: Recording): boolean {
     recording.analysis.state === 'analyzed' &&
     (recording.analysis.analysis.version ?? 0) < ANALYSIS_VERSION
   )
-}
-
-export function firstFartUsed(recording: Recording): boolean {
-  return recording.analysis.state === 'analyzed' && recording.analysis.analysis.cutAtReattack
-}
-
-/**
- * What replay plays: the fart itself, from where it starts to where it ends (before a second
- * fart, if there is one), or null for the whole file. The file itself is never cut.
- */
-export function replaySegment(recording: Recording): { start: number; end: number } | null {
-  if (recording.analysis.state !== 'analyzed') return null
-  const { gestureStartSeconds: start, gestureEndSeconds } = recording.analysis.analysis
-  const end = Math.min(gestureEndSeconds, recording.seconds)
-  if (start >= end || (start <= 0 && end >= recording.seconds)) return null
-  return { start, end }
 }
 
 /** A length the way rows and Review show it: "1.1 s". */

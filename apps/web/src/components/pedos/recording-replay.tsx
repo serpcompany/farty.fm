@@ -3,13 +3,13 @@
 import { Play, Square } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { loadAudio } from '@/lib/recording-store'
-import { type Recording, replaySegment } from '@/lib/recordings'
+import type { Recording } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
 import { decodeWav } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 
 // What a Recording's row and the place-by-ear picker show of its replay: the play button and the
-// waveform of what replay plays.
+// waveform of the whole take, which replay plays start to end (ADR 0016).
 
 /** The play button: a tinted circle, filled while playing. */
 export function PlayCircle({ isPlaying }: { isPlaying: boolean }) {
@@ -27,22 +27,16 @@ export function PlayCircle({ isPlaying }: { isPlaying: boolean }) {
   )
 }
 
-/** 48 loudness bars of what replay plays, drawn again when the analysis finds the fart. */
+/** 48 loudness bars of the whole take, as replay plays it. */
 export function useReplayLevels(recording: Recording): number[] {
   const [levels, setLevels] = useState<number[]>([])
-  const segment = replaySegment(recording)
-  const start = segment?.start
-  const end = segment?.end
   const { id } = recording
 
   useEffect(() => {
     let current = true
     loadAudio(id)
       .then(wav => {
-        const { samples, sampleRate } = decodeWav(wav)
-        const from = start === undefined ? 0 : Math.max(0, Math.floor(start * sampleRate))
-        const to = end === undefined ? samples.length : Math.floor(end * sampleRate)
-        if (current) setLevels(waveformLevels(samples.subarray(from, to), 48))
+        if (current) setLevels(waveformLevels(decodeWav(wav).samples, 48))
       })
       .catch(() => {
         if (current) setLevels(Array(48).fill(0.05))
@@ -50,7 +44,7 @@ export function useReplayLevels(recording: Recording): number[] {
     return () => {
       current = false
     }
-  }, [id, start, end])
+  }, [id])
 
   return levels
 }
