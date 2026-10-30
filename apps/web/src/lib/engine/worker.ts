@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+import { padSound } from '@/lib/pads'
 import type { Performance } from '@/lib/performance'
 import type { Arrangement } from './auto-map'
 import { type PerformanceRecording, renderPerformance } from './render-performance'
@@ -20,12 +21,29 @@ export interface PerformanceRenderRequest {
   recordings: PerformanceRecording[]
 }
 
-export type RenderRequest = SongRenderRequest | PerformanceRenderRequest
+/** A take's channels to cut as a Pad plays them (`padSound`, #298), at their own rate. */
+export interface PadSoundRequest {
+  id: number
+  pad: { channels: Float32Array[]; sampleRate: number }
+}
 
-/** Renders Songs and Performances off the page's thread. One request at a time, answered by id. */
+export type RenderRequest = SongRenderRequest | PerformanceRenderRequest | PadSoundRequest
+
+/**
+ * Renders Songs and Performances, and cuts Pads' sounds, off the page's thread. One request at a
+ * time, answered by id.
+ */
 self.onmessage = (event: MessageEvent<RenderRequest>) => {
   const request = event.data
   try {
+    if ('pad' in request) {
+      const channels = padSound(request.pad.channels, request.pad.sampleRate)
+      self.postMessage(
+        { id: request.id, rendered: channels },
+        channels.map(channel => channel.buffer)
+      )
+      return
+    }
     const rendered =
       'performance' in request
         ? renderPerformance(request.performance, request.recordings)

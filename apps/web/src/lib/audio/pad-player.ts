@@ -1,12 +1,15 @@
-import { padSound } from '../pads'
+import { padSoundInWorker } from '../engine/client'
 import { AudioNotDownloaded } from '../recording-store'
 import { audioContext, setPlaybackSession } from './context'
 
 // The Sound Pad's player (#277). Unlike the app's single player (`player.ts`), every tap plays a
-// sound of its own, so taps overlap and mix. Each Pad's sound is decoded, trimmed and set to the Pads' level ahead, so a
-// tap only starts a buffer: no decode, no await.
+// sound of its own, so taps overlap and mix. Each Pad's sound is decoded, trimmed and set to the
+// Pads' level ahead, so a tap only starts a buffer: no decode, no await.
 
-/** Each Recording's Pad sound, by Recording id: decoded and trimmed once (`padSound`). */
+/**
+ * Each Recording's Pad sound, by Recording id: decoded and trimmed once (`padSound`, in the render
+ * worker, since finding where the fart starts can take a resampling).
+ */
 const sounds = new Map<string, Promise<AudioBuffer>>()
 
 /** The sounds playing now, every Pad's. */
@@ -28,7 +31,7 @@ export class PadAudioUnavailable extends Error {
  * a later call gets the same sound. A failed one is tried again on the next call. It fails with
  * `PadAudioUnavailable` only when `wav`'s download couldn't be fetched now (`AudioNotDownloaded`),
  * and otherwise with the error itself: a database that can't be read, a Recording with no audio
- * here or in the account, or a decode.
+ * here or in the account, a decode, or the trim in the render worker.
  */
 export function loadPadSound(id: string, wav: () => Promise<ArrayBuffer>): Promise<AudioBuffer> {
   let loading = sounds.get(id)
@@ -42,7 +45,7 @@ export function loadPadSound(id: string, wav: () => Promise<ArrayBuffer>): Promi
       const channels = Array.from({ length: decoded.numberOfChannels }, (_, c) =>
         decoded.getChannelData(c)
       )
-      const trimmed = padSound(channels, decoded.sampleRate)
+      const trimmed = await padSoundInWorker(channels, decoded.sampleRate)
       const sound = new AudioBuffer({
         length: Math.max(1, trimmed[0].length),
         numberOfChannels: trimmed.length,
