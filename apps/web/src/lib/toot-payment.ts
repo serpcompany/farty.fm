@@ -1,10 +1,11 @@
 import { answer, send } from './library-api'
 import { builtFor, savingIsPaid } from './pricing'
 
-// Paying to save a Toot, from the browser (ADR 0010): Song Creator starts a Checkout for the Toot
-// (`/api/toots/{id}/checkout/`), the browser goes to Stripe's page, and Stripe sends it back to
-// the Song's Song Creator with the Toot's id, which makes the same Toot again and saves it once
-// the server says it's paid (`/api/toots/{id}/payment/`).
+// Paying to save a Toot, from the browser (ADR 0010): Song Creator, or the Sound Pad for a Toot of
+// its Performance (ADR 0016), starts a Checkout for the Toot (`/api/toots/{id}/checkout/`), the
+// browser goes to Stripe's page, and Stripe sends it back to the screen it came from with the
+// Toot's id, which makes the same Toot again and saves it once the server says it's paid
+// (`/api/toots/{id}/payment/`).
 
 /** Whether this build's Save to Toots asks for a payment first: the environment it's built for. */
 export function saveAsksForPayment(): boolean {
@@ -30,10 +31,13 @@ function isCheckoutPage(url: string): boolean {
   return origin === window.location.origin && pathname === '/dev/checkout/'
 }
 
-/** Starts paying to save the Toot `tootId` of `songId`, as `accountId`. */
+/**
+ * Starts paying to save the Toot `tootId` of `songId`, or of a Sound Pad Performance with a null
+ * `songId`, as `accountId`.
+ */
 export async function startCheckout(
   tootId: string,
-  songId: string,
+  songId: string | null,
   accountId: string
 ): Promise<Checkout> {
   const response = await send(`/api/toots/${tootId}/checkout/`, accountId, {
@@ -96,8 +100,8 @@ export type CheckoutReturn = { tootId: string; done: boolean }
 const TOOT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 /**
- * Song Creator's address after Checkout: `?toot=<id>&checkout=done` once paid, `?toot=<id>` when
- * cancelled. Null for any other.
+ * Song Creator's or the Sound Pad's address after Checkout: `?toot=<id>&checkout=done` once paid,
+ * `?toot=<id>` when cancelled. Null for any other.
  */
 export function readCheckoutReturn(search = window.location.search): CheckoutReturn | null {
   const params = new URLSearchParams(search)

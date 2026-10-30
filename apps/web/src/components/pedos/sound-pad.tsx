@@ -38,13 +38,16 @@ import {
 import { reportError } from '@/lib/telemetry/errors'
 import { cn } from '@/lib/utils'
 import { openVisit } from '@/lib/visit'
+import { PadTakeControls, usePadTake } from './pad-take'
 import { usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
+import { SaveToToots } from './song-creator'
 
 /**
  * The Sound Pad (#277): twelve Pads, each playing one of the user's Recordings at a tap, raw, as
  * recorded. Taps overlap and mix, a finger per Pad. The Pads start filled with the Recordings,
  * lowest note first; Edit puts any Recording on any Pad, kept in this browser (`pad-store.ts`).
+ * Record keeps what the Pads play as a take, to hear and save as a Toot (#278, `pad-take.tsx`).
  * Inside the Compose tab, like Song Creator.
  */
 export function SoundPad() {
@@ -59,6 +62,8 @@ export function SoundPad() {
   const [failed, setFailed] = useState<ReadonlySet<string>>(new Set())
   /** How many sounds each Pad plays now. */
   const [playing, setPlaying] = useState<readonly number[]>(() => Array(PAD_COUNT).fill(0))
+  const take = usePadTake()
+  const recording = take.phase.kind === 'recording'
 
   // After the visit's clear, so a guest's new visit never reads the last one's Pads.
   useEffect(() => {
@@ -135,10 +140,13 @@ export function SoundPad() {
     playPadSound(sound, () => counted(pad, -1))
     counted(pad, 1)
   }
-  const play = (pad: number, id: string) => {
+  /** Plays the Pad's sound, pressed at `at` (the event's `timeStamp`), kept while recording. */
+  const play = (pad: number, id: string, at: number) => {
     const sound = sounds.get(id)
     if (sound) {
       start(pad, sound)
+      // The take keeps what was heard: only a press that played.
+      take.tapped(at, id)
       return
     }
     // Not ready: the press is dropped, so presses never pile up and start together later. A sound
@@ -166,7 +174,7 @@ export function SoundPad() {
       <header className="grid grid-cols-[4.5rem_1fr_4.5rem] items-center gap-2 px-2 pt-2 pb-3">
         <BackToCompose />
         <h1 className="truncate text-center font-semibold">Sound Pad</h1>
-        {loaded && hasRecordings && (
+        {loaded && hasRecordings && !recording && (
           <Button
             variant="ghost"
             className="h-11 justify-self-end px-3 text-base"
@@ -199,7 +207,11 @@ export function SoundPad() {
       {loaded && hasRecordings && (
         <div className="flex flex-col gap-3 px-4 pb-6">
           <p className="text-center text-sm text-muted-foreground" aria-live="polite">
-            {editing ? 'Tap a Pad to choose its fart.' : 'Tap the Pads to play your farts.'}
+            {editing
+              ? 'Tap a Pad to choose its fart.'
+              : recording
+                ? 'Recording what you play.'
+                : 'Tap the Pads to play your farts.'}
           </p>
           <ul className="grid grid-cols-3 gap-3 md:grid-cols-4" data-testid="pads">
             {mapping.map((id, pad) => (
@@ -219,13 +231,19 @@ export function SoundPad() {
                   }
                   playing={playing[pad] > 0}
                   editing={editing}
-                  onPlay={() => id !== null && play(pad, id)}
+                  onPlay={at => id !== null && play(pad, id, at)}
                   onChoose={() => setChoosing(pad)}
                 />
               </li>
             ))}
           </ul>
+          <div className="pt-3">
+            <PadTakeControls take={take} disabled={editing} />
+          </div>
         </div>
+      )}
+      {take.phase.kind === 'ready' && (
+        <SaveToToots draft={take.phase.draft} back={take.phase.back} />
       )}
 
       <PadChooser
@@ -286,7 +304,8 @@ function Pad({
   sound: 'ready' | 'loading' | 'unavailable' | undefined
   playing: boolean
   editing: boolean
-  onPlay: () => void
+  /** Plays it, pressed at `at`: the event's `timeStamp`. */
+  onPlay: (at: number) => void
   onChoose: () => void
 }) {
   const plays = recording !== undefined && !editing
@@ -320,7 +339,7 @@ function Pad({
         plays && sound === 'unavailable' && 'opacity-50'
       )}
       onPointerDown={event => {
-        if (plays && event.button === 0) onPlay()
+        if (plays && event.button === 0) onPlay(event.timeStamp)
       }}
       onClick={event => {
         if (!plays) {
@@ -330,7 +349,7 @@ function Pad({
         // The release is what a touch browser counts as a tap that may start audio.
         startAudioInTap()
         // From the keyboard: Enter or Space.
-        if (event.detail === 0) onPlay()
+        if (event.detail === 0) onPlay(event.timeStamp)
       }}
       onContextMenu={event => event.preventDefault()}
     >

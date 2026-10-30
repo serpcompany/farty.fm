@@ -22,6 +22,7 @@ import {
 import type { Song } from '@/lib/catalog/song'
 import { songs } from '@/lib/catalog/songs.generated'
 import { onLibraryChanged, recordingsAfter } from '@/lib/library-sync'
+import type { Performance } from '@/lib/performance'
 import { nearestNote } from '@/lib/pitch'
 import {
   type CoverageChanges,
@@ -42,8 +43,15 @@ import {
 } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
-import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
-import { makeToot as renderToot } from '@/lib/toot-renderer'
+import {
+  noteSeconds,
+  PAD_TOOT_TITLE,
+  type PadTootDraft,
+  type SongTootDraft,
+  type Toot,
+  type TootDraft
+} from '@/lib/toot'
+import { makePadToot as renderPadToot, makeToot as renderToot } from '@/lib/toot-renderer'
 import * as tootStore from '@/lib/toot-store'
 import { openVisit } from '@/lib/visit'
 import { decodeWav, encodeWav, type PcmAudio } from '@/lib/wav'
@@ -147,7 +155,12 @@ type Pedos = {
    * Makes the Toot of an Unlocked Song in the render worker: Song Creator. Throws a `TootError`.
    * `id` is a new one unless given, as when Checkout comes back for the Toot it paid for.
    */
-  makeToot(song: Song, id?: string): Promise<TootDraft>
+  makeToot(song: Song, id?: string): Promise<SongTootDraft>
+  /**
+   * Makes the Toot of a Sound Pad Performance in the render worker (ADR 0016). Throws a
+   * `TootError`. `id` is a new one unless given, as `makeToot`'s.
+   */
+  makePadToot(performance: Performance, id?: string): Promise<PadTootDraft>
   /** Keeps a made Toot, once: saving it again does nothing. */
   saveToot(draft: TootDraft): Promise<void>
   /**
@@ -509,18 +522,32 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     [recordings]
   )
 
+  const makePadToot = useCallback(
+    (performance: Performance, id?: string) =>
+      renderPadToot(performance, recordings ?? [], store.loadAudio, undefined, id),
+    [recordings]
+  )
+
   const saveToot = useCallback(
     async (draft: TootDraft) => {
       if (toots?.some(t => t.id === draft.id) || savingToots.current.has(draft.id)) return
       savingToots.current.add(draft.id)
-      const toot: Toot = {
-        id: draft.id,
-        title: draft.song.title,
-        songId: draft.song.id,
-        createdAt: Date.now(),
-        seconds: draft.seconds,
-        arrangement: draft.arrangement
-      }
+      const saved = { id: draft.id, createdAt: Date.now(), seconds: draft.seconds }
+      const toot: Toot =
+        draft.song === null
+          ? {
+              ...saved,
+              title: PAD_TOOT_TITLE,
+              songId: null,
+              arrangement: null,
+              performance: draft.performance
+            }
+          : {
+              ...saved,
+              title: draft.song.title,
+              songId: draft.song.id,
+              arrangement: draft.arrangement
+            }
       try {
         await tootStore.saveToot(toot, draft.wav)
         setToots(list => [toot, ...(list ?? [])])
@@ -662,6 +689,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     tootsFailed,
     toot: id => toots?.find(t => t.id === id),
     makeToot,
+    makePadToot,
     saveToot,
     toggleTootPlayback,
     tootPlayFailed,

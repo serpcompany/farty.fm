@@ -18,6 +18,7 @@ import {
 import {
   api,
   ORIGIN,
+  padTootMetadata,
   signUp,
   testDb,
   tootMetadata,
@@ -84,18 +85,25 @@ const payment = (id: string, as: As) =>
     params(id)
   )
 
-const payDev = (toot: string, as: As, song = 'twinkle') =>
+/** The dev checkout's Pay, for a Toot of `song`, or with no `song` for a Sound Pad Toot. */
+const payDev = (toot: string, as: As, song: string | null = 'twinkle') =>
   devCheckoutRoute.POST(
     new Request(`${ORIGIN}/api/dev/checkout/`, {
       method: 'POST',
       headers: headersFor('POST', as, { 'content-type': 'application/x-www-form-urlencoded' }),
-      body: new URLSearchParams({ toot, song })
+      body: new URLSearchParams(song === null ? { toot } : { toot, song })
     }),
     { params: Promise.resolve({}) }
   )
 
 const save = (id: string, as: As) =>
   api.put('toots', id, uploadBody(tootMetadata(id), wav()), as, {
+    headers: { host: as.host ?? HOST }
+  })
+
+/** Saves the Sound Pad Toot `id` (ADR 0016). */
+const savePad = (id: string, as: As) =>
+  api.put('toots', id, uploadBody(padTootMetadata(id), wav()), as, {
     headers: { host: as.host ?? HOST }
   })
 
@@ -180,12 +188,63 @@ describe('on a local run, with the dev checkout', () => {
     expect(await paid(T1, a)).toBe(false)
   })
 
+  it('saves a Sound Pad Toot once it is paid for, back to the Sound Pad (ADR 0016)', async () => {
+    const a = await signUp('A')
+    expect(await (await savePad(T1, a)).json()).toEqual({ error: 'payment_required' })
+    expect((await savePad(T1, a)).status).toBe(402)
+
+    const started = await checkout(T1, a, null)
+    expect(started.status).toBe(200)
+    expect(await started.json()).toEqual({ url: `${ORIGIN}/dev/checkout/?toot=${T1}` })
+    expect(await tootPayment(testDb(), a.id, T1)).toMatchObject({ songId: null, paidAt: null })
+    expect((await savePad(T1, a)).status).toBe(402)
+
+    const paying = await payDev(T1, a, null)
+    expect(paying.status).toBe(303)
+    expect(paying.headers.get('location')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}&checkout=done`)
+    expect(await paid(T1, a)).toBe(true)
+    expect((await savePad(T1, a)).status).toBe(201)
+    expect((await tootPayment(testDb(), a.id, T1))?.savedAt).toBeInstanceOf(Date)
+    expect(await (await checkout(T1, a, null)).json()).toEqual({ paid: true })
+    const library = (await (await api.library(a)).json()) as { toots: unknown[] }
+    expect(library.toots).toMatchObject([
+      { id: T1, songId: null, arrangement: null, performance: padTootMetadata(T1).performance }
+    ])
+  })
+
+  it('never offers a paid Sound Pad Toot for a Song’s, or a Song’s for the Sound Pad', async () => {
+    const a = await signUp('A')
+    await checkout(T1, a, null)
+    await payDev(T1, a, null)
+    // T1, paid, was never saved: a Toot of a Song pays as usual.
+    expect(await (await checkout(T2, a)).json()).toEqual({
+      url: `${ORIGIN}/dev/checkout/?toot=${T2}&song=twinkle`
+    })
+    await payDev(T2, a)
+    // T2, paid, was never saved: a new Sound Pad Toot pays as usual too.
+    expect(await (await checkout(T3, a, null)).json()).toEqual({
+      url: `${ORIGIN}/dev/checkout/?toot=${T3}`
+    })
+  })
+
   it('refuses a checkout for a bad id, an unknown Song, or another library', async () => {
     const a = await signUp('A')
     expect((await checkout('not-a-toot', a)).status).toBe(404)
     expect(await (await checkout(T1, a, 'no-such-song')).json()).toEqual({
       error: 'invalid_request'
     })
+    // No Song is a Sound Pad Toot only when it says so: `songId: null`.
+    const noSongId = await checkoutRoute.POST(
+      new Request(`${ORIGIN}/api/toots/${T1}/checkout/`, {
+        method: 'POST',
+        headers: headersFor('POST', a, { 'content-type': 'application/json' }),
+        body: '{}'
+      }),
+      params(T1)
+    )
+    expect(noSongId.status).toBe(400)
+    expect((await checkout(T1, a, '')).status).toBe(400)
+    expect((await payDev(T1, a, 'no-such-song')).status).toBe(400)
     expect((await checkout(T1, { ...a, library: 'userB' })).status).toBe(409)
     expect((await checkout(T1, {})).status).toBe(401)
   })
@@ -402,6 +461,26 @@ describe('with Stripe Checkout in test mode', () => {
       checkoutSessionId: 'cs_test_first',
       amount: 99,
       currency: 'usd',
+      paidAt: null
+    })
+  })
+
+  it('starts a Checkout Session for a Sound Pad Toot, back to the Sound Pad (ADR 0016)', async () => {
+    const a = await signUp('A')
+    const stripe = stubStripe(sessionFor(a.id, T1))
+    expect(await (await checkout(T1, a, null)).json()).toEqual({
+      url: 'https://checkout.stripe.com/c/pay/cs_test_first'
+    })
+    const sent = stripe.mock.calls[0][1]?.body as URLSearchParams
+    expect(sent.get('line_items[0][price_data][product_data][name]')).toBe(
+      'Save your Sound Pad Toot'
+    )
+    expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('99')
+    expect(sent.get('success_url')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}&checkout=done`)
+    expect(sent.get('cancel_url')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}`)
+    expect(await tootPayment(testDb(), a.id, T1)).toMatchObject({
+      songId: null,
+      checkoutSessionId: 'cs_test_first',
       paidAt: null
     })
   })

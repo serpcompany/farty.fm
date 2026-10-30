@@ -115,6 +115,27 @@ export function tootMetadata(id: string, fields: Record<string, unknown> = {}) {
   }
 }
 
+/** A Sound Pad Toot as the browser keeps it (ADR 0016): no Song, and its Performance. */
+export function padTootMetadata(id: string, fields: Record<string, unknown> = {}) {
+  return {
+    id,
+    title: 'Sound Pad',
+    songId: null,
+    createdAt: Date.UTC(2026, 9, 30),
+    seconds: 0.1,
+    arrangement: null,
+    performance: {
+      recordings: ['00000000-0000-0000-0000-000000000090', '00000000-0000-0000-0000-000000000084'],
+      taps: [
+        [0, 0],
+        [0.25, 1],
+        [0.5, 0]
+      ]
+    },
+    ...fields
+  }
+}
+
 /** The body a browser uploads: the item's JSON and its WAV. */
 export function uploadBody(metadata: unknown, audio: Uint8Array): FormData {
   const form = new FormData()

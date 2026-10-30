@@ -3,7 +3,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Account } from '@/lib/account'
 import { songs } from '@/lib/catalog/songs.generated'
-import type { TootDraft } from '@/lib/toot'
+import type { SongTootDraft } from '@/lib/toot'
 import type { CheckoutReturn } from '@/lib/toot-payment'
 
 // Song Creator's Save where saving is paid (ADR 0010, #213), in a DOM: what Save says when
@@ -70,7 +70,7 @@ vi.mock('@/lib/toot-payment', async importOriginal => ({
 
 const song = songs.find(s => s.id === 'twinkle')
 if (!song) throw new Error('twinkle is in the catalog')
-const draft: TootDraft = {
+const draft: SongTootDraft = {
   id: TOOT,
   song,
   arrangement: { transposition: 0, recordingForPitch: {} },

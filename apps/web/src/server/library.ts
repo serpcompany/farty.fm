@@ -19,8 +19,9 @@ import {
   uploadState
 } from '@/db/library'
 import { tootPayment } from '@/db/payments'
+import type { Performance } from '@/lib/performance'
 import type { Recording } from '@/lib/recordings'
-import type { Toot } from '@/lib/toot'
+import type { Toot, TootArrangement } from '@/lib/toot'
 
 import {
   isItemId,
@@ -78,16 +79,28 @@ function toRecording(row: RecordingRow): LibraryRecording {
   }
 }
 
+/**
+ * A Toot row as the browser keeps it: of a Song, with its Arrangement, or from the Sound Pad, with
+ * its Performance (ADR 0016). The table's check (`toots_song_or_performance`) keeps every row one
+ * or the other.
+ */
 function toToot(row: TootRow): LibraryToot {
-  return {
+  const saved = {
     id: row.id,
     title: row.title,
-    songId: row.songId,
     createdAt: row.createdAt.getTime(),
     seconds: row.seconds,
-    arrangement: row.arrangement,
     audioBytes: row.audioBytes
   }
+  if (row.songId === null) {
+    return {
+      ...saved,
+      songId: null,
+      arrangement: null,
+      performance: row.performance as Performance
+    }
+  }
+  return { ...saved, songId: row.songId, arrangement: row.arrangement as TootArrangement }
 }
 
 const notFound = () => apiError(404, 'not_found')

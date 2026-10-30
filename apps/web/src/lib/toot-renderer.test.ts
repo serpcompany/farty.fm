@@ -4,12 +4,14 @@ import { goldenArrangement } from '../test-support/engine-golden'
 import { bridgedWorker, WorkerScope } from '../test-support/fake-worker'
 import { analyzeToAnalysis } from './analysis/port'
 import { songs } from './catalog/songs.generated'
-import { renderInWorker } from './engine/client'
+import { renderInWorker, renderPerformanceInWorker } from './engine/client'
+import { type RenderedPerformance, renderPerformance } from './engine/render-performance'
 import { type RenderedSong, renderFromRecordings } from './engine/render-song'
 import { fixtureRecordingId } from './fixture-library'
+import type { Performance } from './performance'
 import { arrangementOf, engineSong } from './pitch-coverage'
 import type { Recording } from './recordings'
-import { makeToot, TootError } from './toot-renderer'
+import { makePadToot, makeToot, TootError } from './toot-renderer'
 import { decodeWav, encodeWav } from './wav'
 
 // Song Creator's render on the Fixture Library as the app stores it: each fixture as a 16-bit
@@ -111,6 +113,70 @@ describe('makeToot', () => {
 
   it("can't be made when the render fails", async () => {
     const error = await makeToot(songs[0], recordings, loadAudio, () =>
+      Promise.reject(new Error('Rendering failed'))
+    ).catch(e => e)
+    expect(error).toBeInstanceOf(TootError)
+    expect(error.reason).toBe('couldNotMake')
+    expect(error.cause.message).toBe('Rendering failed')
+  })
+})
+
+describe('makePadToot', () => {
+  const played = (): Performance => ({
+    recordings: [recordings[0].id, recordings[1].id],
+    taps: [
+      [0, 0],
+      [0.25, 1],
+      [0.6, 0]
+    ]
+  })
+
+  it('renders the Performance as the engine does on the same WAVs (ADR 0016)', async () => {
+    const performance = played()
+    let fromWorker: RenderedPerformance | undefined
+    const draft = await makePadToot(
+      performance,
+      recordings,
+      loadAudio,
+      async (...args) => {
+        fromWorker = await renderPerformanceInWorker(...args)
+        return fromWorker
+      },
+      'the-paid-id'
+    )
+    const engine = renderPerformance(
+      performance,
+      performance.recordings.map(id => ({
+        id,
+        audio: decodeWav(wavs.get(id) as ArrayBuffer)
+      }))
+    )
+    expect(fromWorker?.samples).toEqual(engine.samples)
+    expect(new Uint8Array(draft.wav)).toEqual(new Uint8Array(encodeWav(engine)))
+    expect(draft).toMatchObject({
+      id: 'the-paid-id',
+      song: null,
+      performance,
+      seconds: engine.samples.length / 44100
+    })
+  })
+
+  it("can't be made when a Recording it plays is gone", async () => {
+    const error = await makePadToot(played(), recordings.slice(1), loadAudio).catch(e => e)
+    expect(error).toBeInstanceOf(TootError)
+    expect(error.reason).toBe('couldNotMake')
+  })
+
+  it("can't be made when a Recording's audio is gone", async () => {
+    const error = await makePadToot(played(), recordings, async () => {
+      throw new Error('No audio')
+    }).catch(e => e)
+    expect(error).toBeInstanceOf(TootError)
+    expect(error.reason).toBe('couldNotMake')
+  })
+
+  it("can't be made when the render fails", async () => {
+    const error = await makePadToot(played(), recordings, loadAudio, () =>
       Promise.reject(new Error('Rendering failed'))
     ).catch(e => e)
     expect(error).toBeInstanceOf(TootError)

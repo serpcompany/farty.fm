@@ -376,12 +376,28 @@ export async function placeRecording(
   return placed
 }
 
-/** A Recording's WAV: this browser's, or the account's, downloaded now if it hasn't been yet. */
+/**
+ * A Recording's audio that waits for its download, which couldn't be fetched now, such as offline:
+ * expected, and tried again on the next read.
+ */
+export class AudioNotDownloaded extends Error {
+  constructor(id: string) {
+    super(`Recording ${id}'s audio couldn't be downloaded now`)
+    this.name = 'AudioNotDownloaded'
+  }
+}
+
+/**
+ * A Recording's WAV: this browser's, or the account's, downloaded now if it hasn't been yet. Fails
+ * with `AudioNotDownloaded` when the download can't be fetched now, and with an error of its own
+ * when there's no audio for it, here or in the account.
+ */
 export async function loadAudio(id: string): Promise<ArrayBuffer> {
   const audio = await withDb(database => database.get('audio', id))
   if (audio) return audio
   const downloaded = await download('recordings', id)
   if (downloaded instanceof ArrayBuffer) return downloaded
+  if (downloaded === 'failed') throw new AudioNotDownloaded(id)
   throw new Error(`No audio for Recording ${id}`)
 }
 
