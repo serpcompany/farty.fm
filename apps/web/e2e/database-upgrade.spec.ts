@@ -3,9 +3,9 @@ import { resolve } from 'node:path'
 import { expect, test } from '@playwright/test'
 
 // A browser that used Farty before Toots has version 1 of the `pedos` database: Recordings and
-// their audio only. The app upgrades it to version 4, which adds the Toots (version 2) and the
-// sync's outbox (version 3), shuts code from before #268 out of the outbox (version 4), keeps every
-// Recording, and queues each one to upload.
+// their audio only. The app upgrades it to version 5, which adds the Toots (version 2) and the
+// sync's outbox (version 3), shuts code from before #268 out of the outbox (version 4), adds the
+// Sound Pad's Pads (version 5), keeps every Recording, and queues each one to upload.
 
 test('upgrades a database from before Toots and keeps its Recordings', async ({ page }) => {
   const wav = readFileSync(
@@ -78,8 +78,8 @@ test('upgrades a database from before Toots and keeps its Recordings', async ({ 
     return result
   })
   expect(stored).toEqual({
-    version: 4,
-    stores: ['audio', 'downloads', 'meta', 'outbox', 'recordings', 'tootAudio', 'toots'],
+    version: 5,
+    stores: ['audio', 'downloads', 'meta', 'outbox', 'pads', 'recordings', 'tootAudio', 'toots'],
     recording: 7,
     audioBytes: wav.byteLength,
     queued: 'put'
@@ -121,7 +121,7 @@ test('asks you to close Farty in your other tabs while one holds the old databas
     () =>
       new Promise<boolean>((resolve, reject) => {
         let wasBlocked = false
-        const request = indexedDB.open('pedos', 5)
+        const request = indexedDB.open('pedos', 6)
         request.onblocked = () => (wasBlocked = true)
         request.onsuccess = () => {
           request.result.close()

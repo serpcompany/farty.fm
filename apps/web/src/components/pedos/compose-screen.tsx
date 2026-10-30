@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowUpDown, ChevronRight, Lock, Music2, Search } from 'lucide-react'
+import { ArrowUpDown, ChevronRight, LayoutGrid, Lock, Music2, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useId, useState } from 'react'
@@ -103,6 +103,7 @@ export function ComposeScreen() {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
+          {query === '' && <SoundPadRow />}
           {pedos.melodicRecordings.length === 0 && query === '' && (
             <Empty className="rounded-xl bg-muted/60 p-6">
               <EmptyHeader>
@@ -173,6 +174,25 @@ function Section({
       </h2>
       <ul className="divide-y overflow-hidden rounded-xl bg-muted/60">{children}</ul>
     </section>
+  )
+}
+
+/** The Sound Pad's way in (#277), above the Songs: it plays any Recording, so it's never locked. */
+function SoundPadRow() {
+  return (
+    <Link
+      href="/compose/pad/"
+      // A Pad plays on the press, which a touch browser doesn't count as a tap that starts audio.
+      onClick={startAudioInTap}
+      className="flex min-h-11 items-center gap-3 rounded-xl bg-muted/60 px-4 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
+    >
+      <LayoutGrid className="size-5 shrink-0 text-primary" aria-hidden />
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span>Sound Pad</span>
+        <span className="text-sm text-muted-foreground">Tap your farts to play them</span>
+      </span>
+      <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
+    </Link>
   )
 }
 
