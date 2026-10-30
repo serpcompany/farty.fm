@@ -100,12 +100,16 @@ export async function play(
 
 /**
  * Where the sound playing is, in seconds of its audio, by its context's clock: what a playhead
- * follows, so it stays with the sound. Null while nothing plays, or a sound still loads.
+ * follows, so it stays with the sound. The clock runs ahead of the speaker by the output's
+ * latency (`outputLatency`, 0.15 to 0.25 s on Bluetooth), so that's taken off where the browser
+ * reports it. Null while nothing plays, or a sound still loads.
  */
 export function playbackPosition(): number | null {
   if (!current) return null
   const { context, startedAt, offset, end } = current
-  return Math.min(end, offset + Math.max(0, context.currentTime - startedAt))
+  const reported = 'outputLatency' in context ? Number(context.outputLatency) : 0
+  const latency = Number.isFinite(reported) && reported > 0 ? reported : 0
+  return Math.min(end, offset + Math.max(0, context.currentTime - startedAt - latency))
 }
 
 export function stopPlayback(): void {

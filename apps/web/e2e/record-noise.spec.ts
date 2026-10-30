@@ -1,5 +1,26 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
 import { recordAndSave, withFakeMicrophone } from './record'
+
+/**
+ * A finger's press, drag and lift, as touch events through the DevTools protocol: Chromium turns
+ * them into pointer events with `pointerType` "touch", as on a phone. `page.mouse` sends a mouse's.
+ */
+async function touchDrag(page: Page, from: Point, to: Point, lift: () => Promise<void>) {
+  const cdp = await page.context().newCDPSession(page)
+  const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', points: Point[]) =>
+    cdp.send('Input.dispatchTouchEvent', { type, touchPoints: points })
+  await touch('touchStart', [from])
+  for (let i = 1; i <= 5; i++) {
+    const x = from.x + ((to.x - from.x) * i) / 5
+    await touch('touchMove', [{ x, y: from.y + ((to.y - from.y) * i) / 5 }])
+  }
+  // The test looks before the finger lifts.
+  await lift()
+  await touch('touchEnd', [])
+  await cdp.detach()
+}
+
+type Point = { x: number; y: number }
 
 // Fixture 065 is Noise-like: the golden analysis finds no steady pitch.
 withFakeMicrophone('065__reino93__fart-7__324626.wav')
@@ -89,6 +110,20 @@ test('a Noise-like fart can be trimmed in the picker, and the row then plays jus
   await expect(row.getByTestId('playhead')).toBeVisible()
   await page.mouse.up()
   const play = page.getByRole('button', { name: /^Recording 1, \d+\.\d s, noise-like$/ })
+  await expect(play).toHaveAttribute('aria-pressed', 'true')
+  await expect(play).toHaveAttribute('aria-pressed', 'false', { timeout: 10_000 })
+
+  // A finger scrubs the same way: across the row, which pans only up and down (`touch-pan-y`).
+  const middle = box.y + box.height / 2
+  await touchDrag(
+    page,
+    { x: box.x + 10, y: middle },
+    { x: box.x + box.width * 0.6, y: middle },
+    async () => {
+      await expect(row.getByTestId('playhead')).toBeVisible()
+      await expect(play).toHaveAttribute('aria-pressed', 'false')
+    }
+  )
   await expect(play).toHaveAttribute('aria-pressed', 'true')
   await expect(play).toHaveAttribute('aria-pressed', 'false', { timeout: 10_000 })
 

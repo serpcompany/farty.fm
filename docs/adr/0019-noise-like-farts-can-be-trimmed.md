@@ -7,10 +7,10 @@ Until #293 a Recording's waveform didn't move while it played. That held on its 
 They chose design B of #293's mockups the same day and settled the following:
 
 1. **A playhead follows replay.**
-   - While a Recording plays, a pink line crosses its waveform and fills the bars behind it. This happens on its row and in the picker. The line follows the player's audio clock (`playbackPosition()` in `audio/player.ts`).
+   - While a Recording plays, a pink line crosses its waveform and fills the bars behind it. This happens on its row and in the picker. The line follows the player's audio clock (`playbackPosition()` in `audio/player.ts`), less the output's latency where the browser reports it (`outputLatency`, large on Bluetooth).
    - A tap on the waveform plays from that spot. A drag of more than 6 px scrubs: the line follows the finger, and letting go plays from there.
    - A row plays to the end of what it plays. The picker plays to the fart's end, or, from a spot after it, to the end of the take.
-   - For a screen reader the waveform is a slider ("Play Recording 3 from a spot"), and the arrow keys move a twelfth of it.
+   - For a screen reader the waveform is a slider ("Play Recording 3 from a spot") that says where it plays ("1.51 s"), and the arrow keys move a twelfth of it. The Trim handles are sliders beside it, not inside it.
 2. **The picker zooms to the fart.**
    - Its waveform shows the fart with a little of the take on either side. Under it, the whole take is drawn small, with a box where the zoom is.
    - Its play button plays just the fart: the one analysis found, or what's between the handles.
@@ -18,6 +18,7 @@ They chose design B of #293's mockups the same day and settled the following:
    - The picker's Trim button shows two handles, "Where the fart starts" and "Where the fart ends", with a readout ("0.89 s to 2.08 s"). A handle moves in 0.01 s steps, and the two stay at least 0.05 s apart.
    - "Save trim" keeps the Trim: exactly where the handles are. So does "Place at E3" or "Move to G2" when the handles have moved. If the Trim can't be saved, the picker stays open and says so.
    - "Reset" puts the handles back on the fart Farty found. With them there, "Remove trim" takes the Trim off.
+   - A Trim saved in another browser while the picker is open moves the handles to it, unless the user has moved them here.
    - Only a Noise-like or placed Recording can be trimmed, since only those have the picker (ADR 0017). A Trim stays whether the fart is placed or left out.
 4. **A Trim plays everywhere.**
    - The row plays and draws only the Trim's handles, and says "Trimmed" under the name. The picker plays them too, so what the user heard before saving is what the row plays.

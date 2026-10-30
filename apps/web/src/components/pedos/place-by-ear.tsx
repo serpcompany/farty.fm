@@ -137,6 +137,15 @@ function Picker({
   const [framed, setFramed] = useState(current)
   const [saving, setSaving] = useState(false)
   const [failed, setFailed] = useState(false)
+  // A Trim from another browser moves the handles too, unless the user has moved them here.
+  const [seen, setSeen] = useState(current)
+  if (!samePart(seen, current)) {
+    setSeen(current)
+    if (samePart(pending, seen)) {
+      setPending(current)
+      setFramed(current)
+    }
+  }
   const isPlaying = pedos.nowPlaying === recording.id
   const view = zoomView(framed, recording.seconds, trimming)
   const audio = useTake(recording)

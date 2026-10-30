@@ -15,6 +15,9 @@ const sources: FakeSource[] = []
 /** The fake context's clock, in seconds: the test moves it. */
 let clock = 0
 
+/** The fake context's `outputLatency`, in seconds, or undefined where a browser doesn't report it. */
+let latency: number | undefined
+
 /**
  * Decodes that finish only when the test says so, like a Recording loading from IndexedDB, in the
  * order they began.
@@ -36,6 +39,9 @@ vi.mock('./context', () => ({
   audioContext: () => ({
     get currentTime() {
       return clock
+    },
+    get outputLatency() {
+      return latency
     },
     destination: {},
     resume: async () => {},
@@ -83,6 +89,7 @@ describe('the player', () => {
     sources.length = 0
     pending.length = 0
     clock = 0
+    latency = undefined
   })
 
   test('says where the sound playing is by the audio clock, from where it started to its end', async () => {
@@ -101,6 +108,22 @@ describe('the player', () => {
     expect(playbackPosition()).toBe(0.75)
     stopPlayback()
     expect(playbackPosition()).toBeNull()
+  })
+
+  test('holds the playhead back by the latency the output reports, as on Bluetooth', async () => {
+    clock = 5
+    latency = 0.2
+    const playing = play('late', wav('late'), { start: 0.25, end: 0.75 }, () => {})
+    await settle()
+    finish('late')
+    await playing
+    // Until the first sound reaches the speaker, the playhead waits where it starts.
+    clock = 5.1
+    expect(playbackPosition()).toBe(0.25)
+    clock = 5.3
+    expect(playbackPosition()).toBeCloseTo(0.35, 9)
+    clock = 9
+    expect(playbackPosition()).toBe(0.75)
   })
 
   test("a sound still loading when playback stops never starts, and says it's over", async () => {

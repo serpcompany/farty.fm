@@ -283,6 +283,27 @@ describe('placing a Noise-like Recording by ear', () => {
     expect(onClose).toHaveBeenCalledOnce()
   })
 
+  it('moves its handles to a Trim another browser saved, unless they were moved here', async () => {
+    const trim = {
+      startSeconds: 0.2,
+      endSeconds: 0.6,
+      fart: { startSeconds: 0.25, endSeconds: 0.55 }
+    }
+    await open(noiseLike())
+    await tap('Trim')
+    expect(readout()).toBe('0.00 s to 0.90 s')
+    await open(noiseLike(undefined, trim))
+    expect(readout()).toBe('0.20 s to 0.60 s')
+    // Nothing to save: the handles are where the Trim is.
+    expect(button('Tap a key to choose a note').disabled).toBe(true)
+
+    // Handles moved here stay where the user left them.
+    await press(handle('Where the fart ends'), 'ArrowLeft', true)
+    await open(noiseLike(undefined, { ...trim, endSeconds: 0.7 }))
+    expect(readout()).toBe('0.20 s to 0.50 s')
+    expect(button('Save trim').disabled).toBe(false)
+  })
+
   it('leaves a moved handle unsaved on Leave it out', async () => {
     await open(noiseLike())
     await tap('Trim')
