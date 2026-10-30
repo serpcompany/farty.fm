@@ -157,6 +157,17 @@ describe('Pitch Coverage against the reference engine', () => {
     expect(auld.transposition).toBe(-20)
     expect(missingNotes(auld)).toBe('A2 (1.8 s)')
   })
+
+  it('reads Mary on 095 alone as the compose journey expects (#288)', () => {
+    // The journey's take of 095 can settle differently from the golden analysis, and with 095
+    // alone Mary's two Arrangements nearly tie, so the journey accepts either Arrangement's note
+    // names. This pins the golden answer: G covers G2, and C2, D2 and E2 are needed.
+    const mary = coverageOf(song('mary'), fixtures(['095']))
+    expect(coverageSummary(mary)).toBe('1 of 4 notes covered')
+    expect(mary.transposition).toBe(-36)
+    expect(missingNotes(mary)).toBe('C2 (1.5 s), D2 (0.7 s), and E2 (0.7 s)')
+    expect(missingNotes(mary, 2)).toBe('C2 (1.5 s), D2 (0.7 s), and 1 more')
+  })
 })
 
 describe('the Pitch Coverage rule', () => {
