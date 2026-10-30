@@ -297,6 +297,106 @@ describe('rescan (#282)', () => {
     expect(now.analysis).toEqual({ state: 'analyzed', analysis: noNote })
   })
 
+  it('skips one deleted while its own analysis runs, and counts it nowhere', async () => {
+    const recording = await storedWith(1, noNote)
+    const analyze = vi.fn(async () => {
+      await page.store.deleteRecording(recording.id)
+      return fresh(0.12)
+    })
+    const updated = vi.fn()
+
+    const result = await page.upgrade.rescan([recording], analyze, updated)
+
+    expect(analyze).toHaveBeenCalledOnce()
+    expect(result).toEqual({ scanned: 0, found: 0, failed: 0 })
+    expect(updated).not.toHaveBeenCalled()
+    expect(reportError).not.toHaveBeenCalled()
+    expect(await storedNow(recording.id)).toBeUndefined()
+  })
+
+  it('skips one deleted while its audio downloads, and counts it nowhere', async () => {
+    const recording = await storedWith(1, noNote)
+    // An account Recording whose WAV this browser hasn't downloaded: it's deleted meanwhile, and
+    // the account answers 503.
+    localStorage.setItem('pedos.account', 'user-a')
+    const database = await page.store.db()
+    await database.delete('audio', recording.id)
+    await database.put(
+      'downloads',
+      { kind: 'recordings', id: recording.id },
+      itemKey('recordings', recording.id)
+    )
+    vi.mocked(fetch).mockImplementationOnce(async () => {
+      await page.store.deleteRecording(recording.id)
+      return new Response(null, { status: 503 })
+    })
+    const analyze = vi.fn(async () => fresh(0.12))
+    const updated = vi.fn()
+
+    const result = await page.upgrade.rescan([recording], analyze, updated)
+
+    expect(fetch).toHaveBeenCalled()
+    expect(analyze).not.toHaveBeenCalled()
+    expect(result).toEqual({ scanned: 0, found: 0, failed: 0 })
+    expect(updated).not.toHaveBeenCalled()
+    expect(await storedNow(recording.id)).toBeUndefined()
+  })
+
+  it('skips one placed by ear while its own analysis runs, and keeps the Placed Pitch', async () => {
+    const recording = await storedWith(1, noNote)
+    const analyze = vi.fn(async () => {
+      await page.store.placeRecording(recording.id, 48)
+      return fresh(0.12)
+    })
+    const updated = vi.fn()
+
+    const result = await page.upgrade.rescan([recording], analyze, updated)
+
+    expect(result).toEqual({ scanned: 0, found: 0, failed: 0 })
+    expect(page.upgrade.rescanSummary(result)).toBe('No new notes')
+    const now = (await storedNow(recording.id)) as Recording
+    expect(now.placedPitch).toBe(48)
+    expect(now.analysis).toEqual({ state: 'analyzed', analysis: fresh(0.12) })
+    expect(updated).toHaveBeenCalledExactlyOnceWith(now)
+  })
+
+  it('counts one the database can’t read again as one it couldn’t read, and goes on', async () => {
+    const unreadable = await storedWith(1, noNote)
+    const failing = await storedWith(2, noNote)
+    const next = await storedWith(3, noNote)
+    // This browser's database fails to read `unreadable` at all, and `failing` after its analysis.
+    let failingReads = 0
+    vi.resetModules()
+    vi.doMock('./recording-store', async importOriginal => {
+      const actual = await importOriginal<typeof import('./recording-store')>()
+      return {
+        ...actual,
+        loadRecording: async (id: string) => {
+          if (id === unreadable.id || (id === failing.id && ++failingReads > 1)) {
+            throw new Error('IndexedDB read failed')
+          }
+          return actual.loadRecording(id)
+        }
+      }
+    })
+    const { rescan, rescanSummary } = await import('./analysis-upgrade')
+    vi.doUnmock('./recording-store')
+    const analyze = vi.fn(async (pcm: PcmAudio) => {
+      if (Math.abs(pcm.samples[0] - 0.2) < 0.01) throw new Error('Analysis failed')
+      return fresh(0.2)
+    })
+    const updated = vi.fn()
+
+    const run = rescan([unreadable, failing, next], analyze, updated)
+
+    await expect(run).resolves.toEqual({ scanned: 3, found: 1, failed: 2 })
+    expect(analyze).toHaveBeenCalledTimes(2)
+    expect(updated.mock.calls.map(([r]) => r.id)).toEqual([next.id])
+    expect(await storedNow(unreadable.id)).toEqual(unreadable)
+    expect(await storedNow(failing.id)).toEqual(failing)
+    expect(rescanSummary(await run)).toBe('1 fart now has a note. 2 couldn’t be read')
+  })
+
   it('counts one it can’t re-scan, keeps its analysis, and goes on', async () => {
     const failing = await storedWith(1, noNote)
     const next = await storedWith(2, noNote)

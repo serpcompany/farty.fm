@@ -61,14 +61,16 @@ export function canRescan(recording: Recording): boolean {
 /**
  * Re-scan (#282): runs the current Recording Analysis again on each of `recordings` with no note
  * (`canRescan`), one at a time, as `upgradeAnalyses` does. Before each, it reads the Recording
- * again and skips one deleted or placed by ear since the run began: that one counts as neither
- * scanned, found nor failed. `scanning` gets each before it runs, with how many came before it and
- * how many there are; `updated` gets each once its fresh analysis is stored. The result counts the
- * ones whose new analysis found a Recording Pitch: they went from no note to a note. A Placed Pitch
- * is never one: a placed Recording has a note, and a new analysis keeps it (ADR 0017).
+ * again and skips one deleted or placed by ear since the run began, or while its own analysis
+ * runs: that one counts as neither scanned, found nor failed. `scanning` gets each before it runs,
+ * with how many came before it and how many there are; `updated` gets each once its fresh analysis
+ * is stored. The result counts the ones whose new analysis found a Recording Pitch: they went from
+ * no note to a note. A Placed Pitch is never one: a placed Recording has a note, and a new analysis
+ * keeps it (ADR 0017).
  *
  * This browser's copy only, like `upgradeAnalyses`: every browser of the account runs the same
- * analysis on the same audio. One that fails keeps its stored analysis and counts as failed.
+ * analysis on the same audio. One that fails, including one the database can't read again, keeps
+ * its stored analysis and counts as failed, and the run goes on: it never rejects.
  */
 export async function rescan(
   recordings: Recording[],
@@ -79,19 +81,34 @@ export async function rescan(
   const targets = recordings.filter(canRescan)
   const result: RescanResult = { scanned: 0, found: 0, failed: 0 }
   for (const [done, listed] of targets.entries()) {
-    const recording = await loadRecording(listed.id)
+    let recording: Recording | null
+    try {
+      recording = await loadRecording(listed.id)
+    } catch {
+      // This browser's database couldn't read it: one it couldn't read, and the run goes on.
+      result.scanned++
+      result.failed++
+      continue
+    }
     if (!recording || !canRescan(recording)) continue
     scanning(recording, done, targets.length)
     const saved = await reanalyze(recording, analyze)
-    // Deleted while it ran: its audio was gone, or its analysis had nowhere to go.
-    if (saved === null || (saved === 'failed' && !(await loadRecording(recording.id)))) continue
-    result.scanned++
-    if (saved === 'failed') result.failed++
-    else {
-      updated(saved)
-      // Placed by ear while it ran: it has a note, but not one this analysis found.
-      if (recordingPitch(saved) !== null && placedPitch(saved) === null) result.found++
+    if (saved === 'failed') {
+      // Deleted or placed by ear while it ran, so its audio was gone or it has a note: skipped. A
+      // check that can't read it counts it as failed, as it still may be there.
+      const now = await loadRecording(recording.id).catch(() => recording)
+      if (!now || !canRescan(now)) continue
+      result.scanned++
+      result.failed++
+      continue
     }
+    // Deleted while it ran: its analysis had nowhere to go.
+    if (saved === null) continue
+    updated(saved)
+    // Placed by ear while it ran: it has a note, but not one this analysis found.
+    if (placedPitch(saved) !== null) continue
+    result.scanned++
+    if (recordingPitch(saved) !== null) result.found++
   }
   return result
 }
