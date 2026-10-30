@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.11.0](https://github.com/serpcompany/farty.fm/compare/v1.10.0...v1.11.0) (2026-10-30)
+
+
+### Features
+
+* **web/engine:** play a fart's quiet lead-in before the beat ([#287](https://github.com/serpcompany/farty.fm/issues/287)) ([#297](https://github.com/serpcompany/farty.fm/issues/297)) ([e8e2cbb](https://github.com/serpcompany/farty.fm/commit/e8e2cbb591f96dd76490a9f6de70d9a8bbaa93f9))
+* **web:** find notes that start late, and re-scan Recordings with no note ([#282](https://github.com/serpcompany/farty.fm/issues/282)) ([#295](https://github.com/serpcompany/farty.fm/issues/295)) ([0e2075b](https://github.com/serpcompany/farty.fm/commit/0e2075b7fc3ecb919ffd8d542d66c90b6582e98f))
+* **web:** record a Sound Pad take and save it as a Toot ([#291](https://github.com/serpcompany/farty.fm/issues/291)) ([c22cd45](https://github.com/serpcompany/farty.fm/commit/c22cd45ee7f38b776a38d27525e75b6cb284fcb1))
+* **web:** Record shows the moment it starts listening, with a live level ([#289](https://github.com/serpcompany/farty.fm/issues/289)) ([d9bcead](https://github.com/serpcompany/farty.fm/commit/d9bcead25a0cc894bb3460c8e67b08ce9c87c8da))
+
 ## [1.10.0](https://github.com/serpcompany/farty.fm/compare/v1.9.0...v1.10.0) (2026-10-30)
 
 
