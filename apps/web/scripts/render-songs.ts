@@ -10,11 +10,26 @@
 //
 // It first deletes the `.wav` and `.json` files already in the out dir, so no stale render is
 // measured again. It exits 1 if a Song that the golden Arrangement unlocks comes out locked.
+//
+//   pnpm exec tsx scripts/render-songs.ts --scenario ../../tools/melody-lab/scenarios/trim-065.json [out-dir]
+//
+// renders with a Scenario's library instead, into `tools/melody-lab/out/web-<id>/` by default: the
+// fixtures it lists, each trimmed between its handles (`trimBounds`, ADR 0019) and placed on its
+// note by ear (ADR 0015) as the app does it. `evaluate_renders.py --scenario` checks them; nothing
+// is compared with golden here.
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { toAnalysis } from '../src/lib/analysis/port'
 import { analyzeRecording } from '../src/lib/analysis/recording-analysis'
-import { type Arrangement, arrange, autoMapRecording } from '../src/lib/engine/auto-map'
+import { ANALYSIS_SAMPLE_RATE, resampleToAnalysisRate } from '../src/lib/analysis/resample'
+import { trimBounds } from '../src/lib/analysis/trimming'
+import {
+  type Arrangement,
+  type AutoMapRecording,
+  arrange,
+  autoMapRecording,
+  placedAutoMapRecording
+} from '../src/lib/engine/auto-map'
 import {
   type RecordingToRender,
   renderFromRecordings,
@@ -32,7 +47,23 @@ const SONGS = join(ROOT, 'fixtures/golden/songs')
 const GOLDEN_ARRANGEMENTS = join(ROOT, 'fixtures/golden/arrangements/full')
 const RUNS = 5
 
-const outDir = resolve(process.argv[2] ?? join(ROOT, 'tools/melody-lab/out/web'))
+/** A Scenario (`tools/melody-lab/scenarios/`): fixtures, where each is placed, and its handles. */
+type Scenario = {
+  id: string
+  library: string[]
+  placed?: Record<string, number>
+  trims?: Record<string, [number, number]>
+}
+
+const args = process.argv.slice(2)
+const scenarioAt = args.indexOf('--scenario')
+const scenario: Scenario | null =
+  scenarioAt === -1 ? null : JSON.parse(readFileSync(resolve(args[scenarioAt + 1]), 'utf8'))
+const outArg = args.filter((_, i) => i !== scenarioAt && i !== scenarioAt + 1)[0]
+const outDir = resolve(
+  outArg ??
+    join(ROOT, scenario ? `tools/melody-lab/out/web-${scenario.id}` : 'tools/melody-lab/out/web')
+)
 
 function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b)
@@ -96,24 +127,46 @@ async function main() {
   const recordings: RecordingToRender[] = []
   let analysisMs = 0
   for (const { id, filename } of fixtures()) {
+    if (scenario && !scenario.library.includes(id)) continue
     const file = await decodeFile(join(FIXTURES, filename))
     const audio = { samples: file.samples, sampleRate: file.sampleRate }
     const { result, ms } = time(() => toAnalysis(analyzeRecording(audio.samples, audio.sampleRate)))
     analysisMs += ms
-    recordings.push({ id, audio, analysis: result })
+    const handles = scenario?.trims?.[id]
+    if (!handles) {
+      recordings.push({ id, audio, analysis: result })
+      continue
+    }
+    // As the picker's Save trim finds it, in the analysis worker.
+    const y = resampleToAnalysisRate(audio.samples, audio.sampleRate)
+    const fart = trimBounds(y, handles[0], handles[1])
+    const trim = { startSeconds: handles[0], endSeconds: handles[1], fart }
+    const sr = ANALYSIS_SAMPLE_RATE
+    console.log(
+      `${id} trimmed between ${handles[0]} and ${handles[1]} s: samples ` +
+        `${Math.round(fart.startSeconds * sr)} to ${Math.round(fart.endSeconds * sr)} ` +
+        `(${fart.startSeconds.toFixed(4)} to ${fart.endSeconds.toFixed(4)} s); analysis found ` +
+        `${Math.round(result.gestureStartSeconds * sr)} to ${Math.round(result.gestureEndSeconds * sr)}`
+    )
+    recordings.push({ id, audio, analysis: result, trim })
   }
-  const library = recordings.map(r => autoMapRecording(r.id, r.analysis))
-  const melodic = library.filter(r => r.recordingPitchMidi !== null).map(r => r.id)
+  // As `autoMapRecordings` in `pitch-coverage.ts` reads them: Melodic ones, and placed ones.
+  const library: AutoMapRecording[] = recordings.flatMap(r => {
+    const placed = scenario?.placed?.[r.id]
+    if (placed !== undefined)
+      return [placedAutoMapRecording(r.id, r.analysis, placed, r.trim?.fart)]
+    return r.analysis.recordingPitchMidi === null ? [] : [autoMapRecording(r.id, r.analysis)]
+  })
   console.log(
     `${recordings.length} Recordings analysed in ${analysisMs.toFixed(0)} ms; ` +
-      `Melodic: ${melodic.join(' ')}`
+      `Melodic or placed: ${library.map(r => r.id).join(' ')}`
   )
 
   const sources = new Map<string, RenderSource>()
   const sourceMs = new Map<string, number>()
   for (const r of recordings) {
-    if (r.analysis.recordingPitchMidi === null) continue
-    const { result, ms } = medianMs(() => renderSource(r.audio, r.analysis))
+    if (!library.some(l => l.id === r.id)) continue
+    const { result, ms } = medianMs(() => renderSource(r.audio, r.analysis, r.trim ?? null))
     sources.set(r.id, result)
     sourceMs.set(r.id, ms)
   }
@@ -137,7 +190,7 @@ async function main() {
         `${id.padEnd(13)}locked: ${arrangement.covered} of ${arrangement.total} notes covered, ` +
           `needs ${arrangement.missingNotes.map(m => `${m.midi} (${m.seconds.toFixed(1)} s)`).join(' ')}`
       )
-      if (goldenUnlocks(id)) wronglyLocked.push(id)
+      if (!scenario && goldenUnlocks(id)) wronglyLocked.push(id)
       continue
     }
     // `render ms` renders from Recordings already cut; `worker ms` is what the render
@@ -184,7 +237,7 @@ async function main() {
     )
   }
   const perSource = [...sourceMs].map(([id, ms]) => `${id} ${ms.toFixed(0)}`).join(', ')
-  console.log(`cut each Melodic Recording (ms, median of ${RUNS}): ${perSource}`)
+  console.log(`cut each Melodic or placed Recording (ms, median of ${RUNS}): ${perSource}`)
   console.log(`wrote ${outDir}`)
   if (wronglyLocked.length > 0) {
     console.error(`locked here, but the golden Arrangement unlocks it: ${wronglyLocked.join(' ')}`)

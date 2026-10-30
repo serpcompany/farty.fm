@@ -1,0 +1,7 @@
+{
+  "id": "trim-065",
+  "about": "ADR 0019's measurement: the small library's Melodic Recordings and Noise-like 065, placed on C2 and trimmed with handles at 0.8 and 2.3 s, which keep its two loud bursts and drop the blip 0.3 s before them. Mary Had a Little Lamb and When the Saints Go Marching In unlock and play the trimmed 065.",
+  "library": ["002", "016", "022", "065", "069", "090"],
+  "placed": { "065": 36 },
+  "trims": { "065": [0.8, 2.3] }
+}

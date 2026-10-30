@@ -118,8 +118,8 @@ describe.each<Kind>(['recordings', 'toots'])('PUT /api/%s/{id}/', kind => {
     expect(await put.json()).toEqual({ id: R1 })
     expect(await bucketKeys()).toEqual([`users/${a.id}/${kind}/${R1}.wav`])
     const listed = await library(a.cookie)
-    // A Recording sent without a Placed Pitch is listed as left out (ADR 0015).
-    const left = kind === 'recordings' ? { placedPitch: null } : {}
+    // A Recording sent without a Placed Pitch is listed as left out (ADR 0015), and untrimmed.
+    const left = kind === 'recordings' ? { placedPitch: null, trim: null } : {}
     expect(listed[kind]).toEqual([{ ...metadata(kind, R1), ...left, audioBytes: audio.byteLength }])
     const played = await api.audio(kind, R1, a)
     expect(played.status).toBe(200)
@@ -592,6 +592,92 @@ describe('PATCH /api/recordings/{id}/ (ADR 0015)', () => {
   })
 })
 
+describe('PATCH /api/recordings/{id}/ with a Trim (ADR 0019)', () => {
+  // The handles the user left, and the fart found between them.
+  const fart = { startSeconds: 0.8868, endSeconds: 2.0821 }
+  const trim = { startSeconds: 0.8, endSeconds: 2.3, fart }
+  // A take 3 s long, as Recording 065's.
+  const uploadTake = (cookie: string) =>
+    api.put('recordings', R1, uploadBody(recordingMetadata(R1, { seconds: 3 }), wav()), { cookie })
+
+  it('trims a Recording beside its note, keeps either when the other changes, and takes it off', async () => {
+    const a = await signUp('A')
+    await uploadTake(a.cookie)
+    const before = await library(a.cookie)
+    await tick()
+
+    const trimmed = await api.placeAndTrim(R1, { placedPitch: 36, trim }, a)
+    expect(trimmed.status).toBe(200)
+    expect(await trimmed.json()).toEqual({ id: R1, placedPitch: 36, trim })
+    expect((await library(a.cookie, before.cursor)).recordings).toEqual([
+      { ...before.recordings[0], placedPitch: 36, trim, audioBytes: expect.any(Number) }
+    ])
+
+    // A browser from before #293 sends only a Placed Pitch: the Trim stays.
+    expect((await api.place(R1, 40, a)).status).toBe(200)
+    expect((await library(a.cookie)).recordings).toMatchObject([{ placedPitch: 40, trim }])
+    expect((await api.placeAndTrim(R1, { trim: null }, a)).status).toBe(200)
+    expect((await library(a.cookie)).recordings).toMatchObject([{ placedPitch: 40, trim: null }])
+    const [row] = await testDb().select().from(recordings).where(eq(recordings.userId, a.id))
+    expect([
+      row.trimStartSeconds,
+      row.trimEndSeconds,
+      row.trimFartStartSeconds,
+      row.trimFartEndSeconds
+    ]).toEqual([null, null, null, null])
+    expect(row.analysis).toEqual(recordingMetadata(R1).analysis.analysis)
+  })
+
+  it('refuses a Trim that is not a part of a take (400), and changes nothing', async () => {
+    const a = await signUp('A')
+    await uploadTake(a.cookie)
+
+    const part = (startSeconds: unknown, endSeconds?: unknown) => ({
+      startSeconds,
+      endSeconds,
+      fart: { startSeconds, endSeconds }
+    })
+    for (const refused of [
+      { trim: part(1, 1) },
+      { trim: part(1.2, 0.4) },
+      { trim: part(-0.1, 1) },
+      { trim: part(0, 3601) },
+      { trim: part('0', 1) },
+      { trim: part(0) },
+      { trim: [0, 1] },
+      { trim: 1 },
+      { placedPitch: 36, trim: part(1, 0) },
+      // A fart missing, or outside its handles.
+      { trim: { startSeconds: 0.2, endSeconds: 0.8 } },
+      { trim: { ...part(0.2, 0.8), fart: { startSeconds: 0.1, endSeconds: 0.5 } } },
+      { trim: { ...part(0.2, 0.8), fart: { startSeconds: 0.3, endSeconds: 0.9 } } },
+      { trim: { ...part(0.2, 0.8), fart: { startSeconds: 0.5, endSeconds: 0.4 } } },
+      // Past the end of the 3 s take, by more than 10 ms (#299).
+      { trim: part(10, 11) },
+      { placedPitch: 36, trim: part(2, 3.02) },
+      {}
+    ]) {
+      const answer = await api.placeAndTrim(R1, refused, a)
+      expect(answer.status, JSON.stringify(refused)).toBe(400)
+      expect(await answer.json()).toEqual({ error: 'invalid_request' })
+    }
+    expect((await library(a.cookie)).recordings).toMatchObject([
+      { id: R1, placedPitch: null, trim: null }
+    ])
+    // To its last sample, which the browser can measure a little past `seconds`, it fits.
+    const toTheEnd = { ...part(2, 3.004), fart: { startSeconds: 2.1, endSeconds: 3.004 } }
+    expect((await api.placeAndTrim(R1, { trim: toTheEnd }, a)).status).toBe(200)
+  })
+
+  it('answers 404 and 410 for a Trim as for a Placed Pitch', async () => {
+    const a = await signUp('A')
+    await uploadTake(a.cookie)
+    expect((await api.placeAndTrim(R2, { trim }, a)).status).toBe(404)
+    expect((await api.delete('recordings', R1, a)).status).toBe(204)
+    expect((await api.placeAndTrim(R1, { trim }, a)).status).toBe(410)
+  })
+})
+
 describe('writes from another site', () => {
   it('are refused (403) and change nothing, even with the session cookie', async () => {
     const a = await signUp('A')
@@ -745,6 +831,50 @@ describe('the rows a route keeps', () => {
       )
       expect(refused.status).toBe(400)
       expect(await refused.json()).toEqual({ error: 'invalid_request' })
+    }
+    expect(await rowsOf('recordings')).toEqual([`${a.id} ${R1}`, `${a.id} ${R2}`])
+  })
+
+  it('keep the Trim (ADR 0019), and none when an older browser sends none', async () => {
+    const a = await signUp('A')
+    const R3 = '66666666-6666-4666-8666-666666666666'
+    const trim = {
+      startSeconds: 0.02,
+      endSeconds: 0.09,
+      fart: { startSeconds: 0.03, endSeconds: 0.08 }
+    }
+    for (const [id, fields] of [
+      [R1, { placedPitch: 40, trim }],
+      [R2, {}]
+    ] as const) {
+      const response = await api.put(
+        'recordings',
+        id,
+        uploadBody(recordingMetadata(id, fields), wav()),
+        a
+      )
+      expect(response.status).toBe(201)
+    }
+    const kept = new Map((await library(a.cookie)).recordings.map(r => [r.id, r]))
+    expect(kept.get(R1)).toMatchObject({ placedPitch: 40, trim })
+    expect(kept.get(R2)).toMatchObject({ trim: null })
+
+    for (const refused of [
+      { ...trim, startSeconds: 0.05, endSeconds: 0.05 },
+      // Past the end of the 0.1 s take (#299).
+      { ...trim, endSeconds: 0.2 },
+      { startSeconds: 0.02, endSeconds: 0.09 },
+      { startSeconds: 0.02 },
+      'all'
+    ]) {
+      const response = await api.put(
+        'recordings',
+        R3,
+        uploadBody(recordingMetadata(R3, { trim: refused }), wav()),
+        a
+      )
+      expect(response.status).toBe(400)
+      expect(await response.json()).toEqual({ error: 'invalid_request' })
     }
     expect(await rowsOf('recordings')).toEqual([`${a.id} ${R1}`, `${a.id} ${R2}`])
   })

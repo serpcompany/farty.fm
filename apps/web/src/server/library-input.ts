@@ -1,6 +1,6 @@
-import type { NewRecording, TootFields } from '@/db/library'
+import type { NewRecording, Placement, TootFields } from '@/db/library'
 import { isPerformance } from '@/lib/performance'
-import type { Analysis } from '@/lib/recordings'
+import type { Analysis, RecordingTrim, Trim } from '@/lib/recordings'
 import type { TootArrangement } from '@/lib/toot'
 
 import { apiError } from './require-user'
@@ -164,10 +164,77 @@ export function parsePlacedPitch(value: unknown): number | null | undefined {
   return isIntegerIn(value, 0, 127) ? value : undefined
 }
 
+/** Part of a take, in seconds, starting before it ends; undefined when it isn't one. */
+function parsePart(value: unknown): Trim | undefined {
+  if (!isObject(value)) return undefined
+  const { startSeconds, endSeconds } = value
+  const valid =
+    isNumberIn(startSeconds, 0, MAX_SECONDS) &&
+    isNumberIn(endSeconds, 0, MAX_SECONDS) &&
+    startSeconds < endSeconds
+  return valid ? { startSeconds, endSeconds } : undefined
+}
+
+/**
+ * How far a Trim's handles may reach past the take's `seconds`: the browser measured those at the
+ * take's own sample rate, and the handles at the 44.1 kHz analysis reads, so a handle on the last
+ * sample can land a fraction of a millisecond past it.
+ */
+export const TRIM_TOLERANCE_SECONDS = 0.01
+
+/** Whether a Trim lies within a take `seconds` long. */
+export const trimFits = (trim: RecordingTrim, seconds: number) =>
+  trim.endSeconds <= seconds + TRIM_TOLERANCE_SECONDS
+
+/**
+ * How far a Trim's fart may reach past its handles: `trimBounds` cuts the handles at whole
+ * samples of the 44.1 kHz audio, so the fart can start half a sample before the start handle.
+ */
+const SAMPLE_TOLERANCE = 0.001
+
+/**
+ * A Trim (ADR 0019): the handles the user left, seconds of the whole take, and `fart`, the fart
+ * found between them; or null when untrimmed; undefined when it's neither. Whether it fits its
+ * take is checked against the take's `seconds` (`trimFits`): in the upload, or by the PATCH's
+ * update.
+ */
+export function parseTrim(value: unknown): RecordingTrim | null | undefined {
+  if (value === null) return null
+  if (!isObject(value)) return undefined
+  const handles = parsePart(value)
+  const fart = parsePart(value.fart)
+  if (!handles || !fart) return undefined
+  const within =
+    fart.startSeconds >= handles.startSeconds - SAMPLE_TOLERANCE &&
+    fart.endSeconds <= handles.endSeconds + SAMPLE_TOLERANCE
+  return within ? { ...handles, fart } : undefined
+}
+
+/**
+ * What `PATCH /api/recordings/{id}/` changes: a Placed Pitch, a Trim or both, each null to take it
+ * off, and a field left out stays. Null when it changes neither, or either is invalid. A browser on
+ * a release before #293 sends no Trim.
+ */
+export function parsePlacement(value: unknown): Placement | null {
+  if (!isObject(value)) return null
+  const placement: Placement = {}
+  if (value.placedPitch !== undefined) {
+    const placedPitch = parsePlacedPitch(value.placedPitch)
+    if (placedPitch === undefined) return null
+    placement.placedPitch = placedPitch
+  }
+  if (value.trim !== undefined) {
+    const trim = parseTrim(value.trim)
+    if (trim === undefined) return null
+    placement.trim = trim
+  }
+  return Object.keys(placement).length > 0 ? placement : null
+}
+
 /**
  * The Recording as the browser keeps it (`Recording` in `src/lib/recordings.ts`), once its analysis
  * is done, or null. Its id must be the route's, and its sample rate its WAV's. A browser on a
- * release before #268 sends no `placedPitch`: it's left out.
+ * release before #268 sends no `placedPitch`, and one before #293 no `trim`: each is left out.
  */
 export function parseRecording(
   value: unknown,
@@ -178,6 +245,7 @@ export function parseRecording(
   const { number, createdAt, seconds, sampleRate, waveform } = value
   const analysis = parseAnalysis(value.analysis)
   const placedPitch = value.placedPitch === undefined ? null : parsePlacedPitch(value.placedPitch)
+  const trim = value.trim === undefined ? null : parseTrim(value.trim)
   const valid =
     isIntegerIn(number, 1, 1_000_000) &&
     isTime(createdAt) &&
@@ -187,9 +255,11 @@ export function parseRecording(
     waveform.length <= MAX_WAVEFORM_BARS &&
     waveform.every(level => isNumberIn(level, 0, 1)) &&
     analysis !== undefined &&
-    placedPitch !== undefined
+    placedPitch !== undefined &&
+    trim !== undefined &&
+    (trim === null || trimFits(trim, seconds))
   if (!valid) return null
-  return { id, number, createdAt, seconds, sampleRate, waveform, analysis, placedPitch }
+  return { id, number, createdAt, seconds, sampleRate, waveform, analysis, placedPitch, trim }
 }
 
 /** A Toot's title: trimmed, and not empty. */

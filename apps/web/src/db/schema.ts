@@ -136,6 +136,16 @@ export const recordings = sqliteTable(
      * alone (`PATCH /api/recordings/{id}/`) and survives each browser's re-analysis.
      */
     placedPitch: integer('placed_pitch'),
+    /**
+     * The Trim: the part of the whole take the user kept with the handles, from and to these
+     * seconds, and the fart found between them, which Songs play; all four null when untrimmed
+     * (ADR 0019). The WAV never changes. Like `placedPitch`, it changes alone and survives each
+     * browser's re-analysis.
+     */
+    trimStartSeconds: real('trim_start_seconds'),
+    trimEndSeconds: real('trim_end_seconds'),
+    trimFartStartSeconds: real('trim_fart_start_seconds'),
+    trimFartEndSeconds: real('trim_fart_end_seconds'),
     /** The WAV's size in R2. */
     audioBytes: integer('audio_bytes').notNull(),
     updatedAt: timestamp('updated_at').notNull(),

@@ -19,6 +19,8 @@ export const ERROR_CODES = [
   'recording-save-failed',
   /** Keeping where a Noise-like Recording is placed by ear failed (ADR 0015). */
   'recording-place-failed',
+  /** Finding the fart between a Trim's handles failed (ADR 0019). */
+  'recording-trim-failed',
   /** Decoding, analyzing or saving the analysis of a Recording failed. */
   'analysis-failed',
   'toots-load-failed',
