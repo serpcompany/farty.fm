@@ -1,6 +1,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { bridgedWorker, manualWorker, WorkerScope } from '../../test-support/fake-worker'
 import { decoded, goldenRecordings } from '../../test-support/golden'
+import { padSound } from '../pads'
 import type { Analysis } from '../recordings'
 import { type Arrangement, arrange, autoMapRecording } from './auto-map'
 import type { RecordingToRender, RenderedSong } from './render-song'
@@ -9,7 +10,8 @@ import type { Song } from './song'
 import type { RenderRequest } from './worker'
 
 // The render worker (`worker.ts`) and the page's side of it (`client.ts`): requests answered by
-// id, the audio moved to the page rather than copied, and every way a render can fail.
+// id, the audio moved to the page rather than copied, and every way a render can fail. It also cuts
+// the Sound Pad's sounds (#298).
 
 /** One Melodic fixture with its golden analysis, and a one-note Song on its nearest note. */
 let recording: RecordingToRender
@@ -98,6 +100,38 @@ describe('the render worker', () => {
     })
     expect(message).toEqual({ id: 3, error: 'Song is locked: 0 of 1 notes covered' })
     expect(transfer).toEqual([])
+  })
+
+  it('cuts a Pad’s sound as padSound does, and transfers each channel', async () => {
+    const scope = await startWorker()
+    const { samples, sampleRate } = recording.audio
+    const { message, transfer } = await ask(scope, {
+      id: 5,
+      pad: { channels: [samples, samples], sampleRate }
+    })
+    expect(message.id).toBe(5)
+    expect(message.error).toBeUndefined()
+    const channels = message.rendered as unknown as Float32Array[]
+    expect(channels).toHaveLength(2)
+    expect(transfer).toEqual(channels.map(channel => channel.buffer))
+    expect(channels.every(channel => channel.buffer.byteLength === 0)).toBe(true)
+  })
+})
+
+describe('padSoundInWorker', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
+  it('cuts a Pad’s sound off the page’s thread, bit for bit padSound’s, and the page keeps its audio', async () => {
+    const scope = await startWorker()
+    vi.stubGlobal('Worker', bridgedWorker(scope))
+    const { padSoundInWorker } = await import('./client')
+    const { samples, sampleRate } = recording.audio
+    const [sound] = await padSoundInWorker([samples], sampleRate)
+    expect(sound.length).toBeGreaterThan(0)
+    expect(sound).toEqual(padSound([samples], sampleRate)[0])
+    expect(samples.buffer.byteLength).toBeGreaterThan(0)
   })
 })
 

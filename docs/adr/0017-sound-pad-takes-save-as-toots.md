@@ -23,6 +23,7 @@ The owner decided four things on the issue:
    - The account checks every Performance it's given (`isPerformance` in `parseToot`): at least one tap, at most 1000, in time order from 0 to 30 s, each tap pointing at a Recording it names, and every Recording it names played.
 3. **The render plays each tap as its Pad does** (`engine/render-performance.ts`, in the render worker).
    - Each Recording is resampled once to 44.1 kHz, the render's rate and its only resampling. `padSound` then trims it to its sounding span, fades its ends, and sets its peak to `PAD_PEAK`.
+   - Update 2026-10-31 (#298): the sounding span starts where a Song starts the fart, at its lead-in (`leadInStart`, ADR 0016's #287 update), and still ends 50 ms after the last 10 ms window within 30 dB of the loudest. Until then it started at the take's first 10 ms window within 30 dB, which on a noisy phone take is room noise: `106`'s Pad played 1.98 s of it before the fart, and now starts 5 ms before it. A Pad and its Toot play the same span. The Pad player finds it in the render worker (`padSoundInWorker`), since a take at another rate is resampled to 44.1 kHz to find it.
    - Each tap's sound starts at `round(at × 44100)` and the taps add up. Nothing loops, stretches, re-triggers or limits.
    - The Toot is as long as from the first tap to the end of the last sound.
 4. **One more gain, only when the farts together would clip.** Two Pads peak at 1.0 together, and a 16-bit WAV holds up to 32767/32768.

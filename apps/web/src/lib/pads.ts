@@ -1,3 +1,6 @@
+import { ANALYSIS_SAMPLE_RATE, resampleToAnalysisRate } from './analysis/resample'
+import { noteSegment } from './analysis/trimming'
+import { leadInStart } from './engine/render-source'
 import { type Recording, songPitch } from './recordings'
 
 // The Sound Pad (#277): a grid of Pads, each playing one of the user's Recordings when tapped,
@@ -59,15 +62,13 @@ export function assignPad(shown: PadMapping, pad: number, id: string): Map<numbe
   return kept
 }
 
-/** The trim reads the take in windows this long. */
+/** The trim finds where a take's sound ends in windows this long. */
 const WINDOW_SECONDS = 0.01
 /**
  * A window sounds when its level is within this many dB of the loudest window's: Recording
- * Analysis' rule for where a fart ends (`noteSegment`), used at both ends.
+ * Analysis' rule for where a fart ends (`noteSegment`).
  */
 const BELOW_PEAK_DB = 30
-/** Kept before the first window that sounds, so a fart's soft start isn't lost. */
-const LEAD_SECONDS = 0.01
 /** Kept after the last window that sounds, for its tail. */
 const TAIL_SECONDS = 0.05
 /** The fades, as Songs' renderer has them: 3 ms in, and up to 30 ms out (linear here). */
@@ -86,9 +87,15 @@ export const PAD_PEAK = 0.5
 export type Span = { start: number; end: number }
 
 /**
- * Where a take sounds: from just before its first 10 ms window within 30 dB of its loudest, to
- * just after its last. Only the silence before and after goes: a second fart in the take stays
- * (owner, 2026-10-30, #275). A take with no sound at all is kept whole.
+ * Where a take sounds. Only the silence and room noise before and after goes:
+ *
+ * - It starts where a Song starts the fart (`fartStart`): at its quiet lead-in, the sound joined
+ *   to its attack, so room noise before a longer gap doesn't make a tap sound late (#298).
+ * - It ends just after its last 10 ms window within 30 dB of its loudest, so a second fart in the
+ *   take stays (owner, 2026-10-30, #275).
+ *
+ * A take with no sound at all is kept whole. A take at another rate than 44.1 kHz is resampled to
+ * find the start, which takes about 10 ms a second of audio: run it off the page's thread.
  */
 export function soundingSpan(samples: Float32Array, sampleRate: number): Span {
   const window = Math.max(1, Math.round(WINDOW_SECONDS * sampleRate))
@@ -104,12 +111,23 @@ export function soundingSpan(samples: Float32Array, sampleRate: number): Span {
   const peak = power.reduce((loudest, p) => Math.max(loudest, p), 0)
   if (!(peak > 0)) return { start: 0, end: samples.length }
   const floor = peak * 10 ** (-BELOW_PEAK_DB / 10)
-  const first = power.findIndex(p => p >= floor)
   const last = power.findLastIndex(p => p >= floor)
   return {
-    start: Math.max(0, first * window - Math.round(LEAD_SECONDS * sampleRate)),
+    start: fartStart(samples, sampleRate),
     end: Math.min(samples.length, (last + 1) * window + Math.round(TAIL_SECONDS * sampleRate))
   }
+}
+
+/**
+ * Where a Song starts this take's fart, in the take's own samples: where its lead-in begins
+ * (`leadInStart`, the reference's `lead_in_start()`, #287), found as Songs find it, on the take at
+ * 44.1 kHz from the attack Recording Analysis finds (`noteSegment`). That is up to 0.25 s of quiet
+ * sound joined to the attack, then 8 ms more. One rule for Songs and Pads (#298).
+ */
+function fartStart(samples: Float32Array, sampleRate: number): number {
+  const y = resampleToAnalysisRate(samples, sampleRate)
+  const start = leadInStart(y, noteSegment(y).start)
+  return Math.round((start * sampleRate) / ANALYSIS_SAMPLE_RATE)
 }
 
 /**
@@ -128,7 +146,8 @@ export function padGain(channels: readonly Float32Array[]): number {
  * What a Pad plays of a take, each channel: its sounding span (`soundingSpan`, read on the
  * channels' mix), faded in over 3 ms and out over 30 ms, at the one gain that peaks it at
  * `PAD_PEAK` (`padGain`). Nothing else changes: the fart keeps its own pitch and speed (ADR 0004,
- * ADR 0012).
+ * ADR 0012). The span can take a resampling to find, so run it off the page's thread: the Sound
+ * Pad cuts its sounds in the render worker (`padSoundInWorker`).
  */
 export function padSound(
   channels: readonly Float32Array[],

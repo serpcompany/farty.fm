@@ -135,11 +135,26 @@ describe('soundingSpan', () => {
     return { samples, from, to }
   }
 
-  it('cuts the silence before and after, keeping 10 ms before and 50 ms after', () => {
+  it('cuts the silence before and after, from 8 ms before the first 5 ms frame that sounds, to 50 ms after', () => {
     const { samples, from, to } = take(0.4, 0.3, 0.6)
     const span = soundingSpan(samples, rate)
-    expect(span.start).toBe(from - 480)
+    // The first 10 ms frame (5 ms apart) to reach the burst starts up to 10 ms before it.
+    expect(from - span.start).toBeGreaterThanOrEqual(0.008 * rate)
+    expect(from - span.start).toBeLessThanOrEqual(0.018 * rate)
     expect(span.end).toBe(to + 2_400)
+  })
+
+  it('starts a noisy take’s Pad at its fart, not at the room noise before it (#298)', async () => {
+    const golden = goldenRecordings.find(g => g.id === '106')
+    if (!golden) throw new Error('fixture 106')
+    const { samples, sampleRate } = await decoded(golden)
+    const { start, end } = soundingSpan(samples, sampleRate)
+    // The owner's phone take: its fart runs from 2.262 s to 2.454 s, after 2 s of room noise with
+    // bumps within 30 dB of its loudest. Until #298 its Pad started at 0.28 s, 1.98 s early.
+    const early = golden.gesture.start_s - start / sampleRate
+    expect(early).toBeGreaterThanOrEqual(0)
+    expect(early).toBeLessThan(0.05)
+    expect(end / sampleRate).toBeGreaterThanOrEqual(golden.gesture.end_s)
   })
 
   it('keeps a second, quieter fart', () => {
@@ -155,13 +170,17 @@ describe('soundingSpan', () => {
     expect(soundingSpan(new Float32Array(rate), rate)).toEqual({ start: 0, end: rate })
   })
 
-  it('keeps every fixture’s fart and nearly all its sound', async () => {
+  it('starts every fixture’s Pad where a Song starts its fart, and keeps the rest of its sound', async () => {
+    const lessThanAll: string[] = []
     for (const golden of goldenRecordings) {
       const { samples, sampleRate } = await decoded(golden)
       const { start, end } = soundingSpan(samples, sampleRate)
       const at = `fixture ${golden.id}`
-      // Recording Analysis' gesture, to the 10 ms window.
-      expect(start / sampleRate, at).toBeLessThanOrEqual(golden.gesture.start_s + 0.01)
+      // The reference's lead_in_start() (#287), at the take's own rate: the gesture's start, or its
+      // quiet lead-in before that.
+      const leadIn = Math.round((golden.gesture.lead_start_sample * sampleRate) / 44_100)
+      expect(start, at).toBe(leadIn)
+      // Recording Analysis' gesture's end, to the 10 ms window.
       expect(end / sampleRate, at).toBeGreaterThanOrEqual(golden.gesture.end_s - 0.01)
       let all = 0
       let kept = 0
@@ -169,11 +188,15 @@ describe('soundingSpan', () => {
         all += s * s
         if (i >= start && i < end) kept += s * s
       })
-      // 99.9% or more on every fixture but the owner's phone take `106` (#295), which keeps 99.66%:
-      // what its trim cuts is room noise just under the 30 dB bar, in its first 0.28 s and last
-      // 0.68 s (its loudest cut window is 30.9 dB under its loudest), not any of the fart.
-      expect(kept / all, at).toBeGreaterThan(golden.id === '106' ? 0.995 : 0.999)
+      if (kept / all < 0.999) lessThanAll.push(golden.id)
     }
+    // Every fixture keeps 99.9% of its energy or more, but where its Pad leaves out what a Song
+    // leaves out before the fart (#298). `013` (99.69%) and `022` (98.16%) start 0.25 s before
+    // their attack, the longest lead-in, so 0.06 s and 0.38 s of their quiet sound go: it sits at
+    // their own noise floor (ADR 0016, Room noise). The owner's phone takes `106` (98.74%), `107`
+    // (99.76%), `108` (99.67%) and `109` (99.81%) leave out the room noise before their fart, past
+    // 0.5 to 1.5 s of quiet: 1.98 s, 1.14 s, 0.55 s and 0.60 s more than before.
+    expect(lessThanAll).toEqual(['013', '022', '106', '107', '108', '109'])
   })
 })
 
@@ -239,8 +262,13 @@ describe('padSound', () => {
     const right = new Float32Array(48_000)
     for (let i = 24_000; i < 28_800; i++) right[i] = 0.5
     const [l, r] = padSound([left, right], 48_000)
+    const { start, end } = soundingSpan(
+      right.map(s => s / 2),
+      48_000
+    )
     expect(l).toHaveLength(r.length)
-    expect(r.length).toBe(4_800 + 480 + 2_400)
+    expect(r.length).toBe(end - start)
+    expect(end).toBe(28_800 + 2_400)
     expect(l.every(s => s === 0)).toBe(true)
   })
 })
