@@ -64,7 +64,7 @@ The `gh` and `git` commands here run as the organization's app, through the `ser
   bash ~/.claude/skills/serp-github-app/scripts/gh.sh pr merge <n> --merge
   ```
 
-- **A change the release left out.** If a work commit merged into `staging` before the merge-back, it reaches `main` only inside the merge-back's merge commits, and Release Please leaves it out of the release PR (#301 inside #306). To bring it back, add an override with the missing commit's Conventional Commit line to the merged merge-back PR's body. Then re-run the latest Release Please run on `main` (`gh.sh run rerun <id>`), since the workflow runs only on a push to `main`:
+- **A change the release left out.** When a release PR leaves out a change that's on `main`, check whether it merged into `staging` before the merge-back. If so, the branch-from-`main` route above brought it to `main` only inside merge commits, and Release Please doesn't see it (#301 inside #306). To bring it back, add an override to the merged merge-back PR's body with the missing commit's squash subject from `staging`, `(#n)` included. Then re-run the latest Release Please run on `main` (`gh.sh run rerun <id>`), since the workflow runs only on a push to `main`:
 
   ```text
   BEGIN_COMMIT_OVERRIDE
@@ -73,6 +73,7 @@ The `gh` and `git` commands here run as the organization's app, through the `ser
   ```
 
   The override stands for every commit in that PR, so the release PR lists the line once per merge commit. Before merging, remove the duplicates from `apps/web/CHANGELOG.md` on its `release-please--…` branch and from its body (#307).
+
 - **Who merges.** Before the MVP, agents merge every PR as serp-agent: work PRs, release PRs and merge-back PRs. A work PR merges once a fresh review has no open blocking finding, the cited local `pnpm check` on its head is green and the required checks pass; a release or merge-back PR once the required checks pass. Agents also tap through user-visible changes themselves. The owner isn't asked to merge, review or tap through, only to choose between design options, to set the keys Secret Authority leaves to the owner, and for what the hard limits forbid. The owner allowed all of this on 2026-10-21 (#106). After the MVP, SERP's standard applies: merging a release PR publishes, so it needs the owner's explicit go-ahead, and the owner merges or arms every PR that no `Agents may merge` line covers.
 
 ## Tapping through
