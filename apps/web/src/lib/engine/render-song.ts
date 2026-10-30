@@ -1,4 +1,4 @@
-import type { Analysis, Trim } from '@/lib/recordings'
+import type { Analysis, RecordingTrim } from '@/lib/recordings'
 import type { PcmAudio } from '@/lib/wav'
 import { type Arrangement, choiceForSongPitch } from './auto-map'
 import { renderSource } from './render-source'
@@ -79,8 +79,8 @@ export interface RecordingToRender {
   /** The whole Recording at its own sample rate, as Recording Analysis read it. */
   audio: PcmAudio
   analysis: Analysis
-  /** The fart its Trim keeps, when `songTrim` gives one (ADR 0019). */
-  trim?: Trim | null
+  /** Its Trim, when `trimOf` gives one: Songs play the fart between the handles (ADR 0019). */
+  trim?: RecordingTrim | null
 }
 
 /**

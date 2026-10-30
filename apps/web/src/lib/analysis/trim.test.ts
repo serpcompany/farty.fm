@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { autoMapRecording, placedAutoMapRecording, trimSeconds } from '@/lib/engine/auto-map'
-import { renderSource } from '@/lib/engine/render-source'
+import { leadInStart, renderSource } from '@/lib/engine/render-source'
 import type { Analysis } from '@/lib/recordings'
 import { analysisAudio, decoded, goldenRecordings } from '../../test-support/golden'
 import { ANALYSIS_SAMPLE_RATE } from './resample'
@@ -79,14 +79,29 @@ describe('a trimmed Recording in Songs', () => {
     settleSeconds: null
   }
   const trim = { startSeconds: 39108 / sr, endSeconds: 91820 / sr }
+  const handles = { startSeconds: 0.8, endSeconds: 2.3, fart: trim }
 
-  it('is cut at the Trim, not where analysis found the fart', async () => {
+  it('is cut at the fart between the handles, not where analysis found the fart', async () => {
     const file = await decoded(golden065)
     const audio = { samples: file.samples, sampleRate: file.sampleRate }
     const y = await analysisAudio(golden065)
-    const cut = renderSource(audio, analysis, trim).gesture
+    const cut = renderSource(audio, analysis, handles).gesture
     expect(cut).toEqual(Float64Array.from(y.subarray(39108, 91820)))
     expect(renderSource(audio, analysis).gesture).toHaveLength(91740 - 26048)
+  })
+
+  it('finds its lead-in between the handles, never before the start handle (#287)', async () => {
+    const file = await decoded(golden065)
+    const audio = { samples: file.samples, sampleRate: file.sampleRate }
+    const y = await analysisAudio(golden065)
+    const a = Math.round(0.8 * sr)
+    const { leadIn } = renderSource(audio, analysis, handles)
+    const from = 39108 - leadIn.length
+    expect(from).toBe(a + leadInStart(y.subarray(a, Math.round(2.3 * sr)), 39108 - a))
+    expect(from).toBeGreaterThanOrEqual(a)
+    expect(leadIn).toEqual(Float64Array.from(y.subarray(from, 39108)))
+    // Untrimmed, the lead-in is found in the whole take, before the blip.
+    expect(26048 - renderSource(audio, analysis).leadIn.length).toBeLessThan(a)
   })
 
   it("counts the Trim's length, on the note it was placed on", () => {

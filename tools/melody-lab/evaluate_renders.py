@@ -76,7 +76,7 @@ def load_scenario(path):
             start, end = trim_bounds(y, *handles)
             print(f"{rid} trimmed between {handles[0]} and {handles[1]} s: samples {round(start * SR)}"
                   f" to {round(end * SR)} ({start:.4f} to {end:.4f} s); analysis found {src.start} to {src.end}")
-            src = trimmed(src, y, start, end, placed_by_ear=rid in scenario.get("placed", {}))
+            src = trimmed(src, y, start, end, placed_by_ear=rid in scenario.get("placed", {}), handles=handles)
         if rid in scenario.get("placed", {}):
             src = placed(src, scenario["placed"][rid])
         library.append(src)

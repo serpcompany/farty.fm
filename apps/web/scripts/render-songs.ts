@@ -139,12 +139,13 @@ async function main() {
     }
     // As the picker's Save trim finds it, in the analysis worker.
     const y = resampleToAnalysisRate(audio.samples, audio.sampleRate)
-    const trim = trimBounds(y, handles[0], handles[1])
+    const fart = trimBounds(y, handles[0], handles[1])
+    const trim = { startSeconds: handles[0], endSeconds: handles[1], fart }
     const sr = ANALYSIS_SAMPLE_RATE
     console.log(
       `${id} trimmed between ${handles[0]} and ${handles[1]} s: samples ` +
-        `${Math.round(trim.startSeconds * sr)} to ${Math.round(trim.endSeconds * sr)} ` +
-        `(${trim.startSeconds.toFixed(4)} to ${trim.endSeconds.toFixed(4)} s); analysis found ` +
+        `${Math.round(fart.startSeconds * sr)} to ${Math.round(fart.endSeconds * sr)} ` +
+        `(${fart.startSeconds.toFixed(4)} to ${fart.endSeconds.toFixed(4)} s); analysis found ` +
         `${Math.round(result.gestureStartSeconds * sr)} to ${Math.round(result.gestureEndSeconds * sr)}`
     )
     recordings.push({ id, audio, analysis: result, trim })
@@ -152,7 +153,8 @@ async function main() {
   // As `autoMapRecordings` in `pitch-coverage.ts` reads them: Melodic ones, and placed ones.
   const library: AutoMapRecording[] = recordings.flatMap(r => {
     const placed = scenario?.placed?.[r.id]
-    if (placed !== undefined) return [placedAutoMapRecording(r.id, r.analysis, placed, r.trim)]
+    if (placed !== undefined)
+      return [placedAutoMapRecording(r.id, r.analysis, placed, r.trim?.fart)]
     return r.analysis.recordingPitchMidi === null ? [] : [autoMapRecording(r.id, r.analysis)]
   })
   console.log(

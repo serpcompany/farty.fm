@@ -31,8 +31,9 @@ They chose design B of #293's mockups the same day and settled the following:
    - Reset puts the handles back on the fart analysis found, and with them there, "Remove trim" takes the Trim off. That is the only way a Trim is dropped.
 6. **Songs cut a trimmed fart at its Trim.**
    - `renderSource()` cuts the Recording at the samples of the fart between the handles (`songTrim()`) instead of at the fart analysis found. The per-note cut, fade, gain and 25 ms gap stay as ADR 0012 set them.
+   - The fart's quiet lead-in, which Songs play before the beat (#287), is found between the handles too: `leadInStart()` on the part they keep, as `trimBounds()` finds the fart there. So nothing before the start handle ever plays. Found in the whole take, `065`'s would start at 0.637 s, before a handle at 0.8 s. Between the handles it has none.
    - Auto-map counts that fart's length (`placedAutoMapRecording()` with `trimSeconds()`), and so does Pitch Coverage (`fartSeconds()`).
-   - In the reference, `trimmed()` makes the same `Source` and `test_trim.py` checks it.
+   - In the reference, `trimmed(..., handles=)` makes the same `Source`, lead-in included, and `test_trim.py` checks it.
    - A Trim is a cut of the Recording, played at its own pitch and speed. Songs stay fart-only (ADR 0004, ADR 0012).
 7. **A Trim doesn't re-read pitch.**
    - A Noise-like Recording has no Recording Pitch to read again, and a Trim never changes a Placed Pitch.
@@ -69,7 +70,7 @@ The scenario `tools/melody-lab/scenarios/trim-065.json` uses the small library's
 | When the Saints Go Marching In | passes. 7 notes mostly silent, sounding 78%, contour 19% | passes. 0 notes mostly silent, sounding 91%, contour 33%, typical distance 512.6 cents |
 | Row, Row, Row Your Boat | passes. 7 notes mostly silent, sounding 77% | locked: it needs a 1.5 s fart on F2, and the Trim is 1.20 s |
 
-Both trimmed renders hold every note within 50 cents of its fart (100%), with 100% of onsets on time. The web render matches the reference's to 3.35e-06 on Mary (−109.5 dBFS) and 1.63e-06 on Saints (−115.7 dBFS). The untrimmed notes that fall mostly silent are short ones that play the blip and then the gap. Trimming makes the fart shorter, so a Song that needs a long note from it can lock, as Row does here. Remove trim brings the whole fart back.
+Both trimmed renders hold every note within 50 cents of its fart (100%), with 100% of onsets on time. Measured again after #287's lead-in landed, the trimmed renders are unchanged, since `065` has no lead-in between its handles. The web render matches the reference's to 3.35e-06 on Mary (−109.5 dBFS) and 1.63e-06 on Saints (−115.7 dBFS). The untrimmed notes that fall mostly silent are short ones that play the blip and then the gap. Trimming makes the fart shorter, so a Song that needs a long note from it can lock, as Row does here. Remove trim brings the whole fart back.
 
 Untrimmed Recordings render as before: the web engine's renders of the 13 golden Songs all pass `evaluate_renders.py --against-reference`, and the largest sample difference from the reference's render is −98.0 dBFS.
 

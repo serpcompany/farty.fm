@@ -20,7 +20,8 @@ HERE = Path(__file__).resolve().parent
 sys.path[:0] = [str(HERE)]
 
 from engine import (  # noqa: E402
-    AUDIO_DIR, MANIFEST, PLACED_MIN_NOTE_S, SR, melody_fit, note_segment, placed, trim_bounds, trimmed,
+    AUDIO_DIR, MANIFEST, PLACED_MIN_NOTE_S, SR, analyze_recording, lead_in_start, melody_fit, note_segment,
+    placed, trim_bounds, trimmed,
 )
 from test_needed_seconds import INDEX, SONGS, golden_source, melody  # noqa: E402
 
@@ -94,6 +95,35 @@ class Trimmed(unittest.TestCase):
         t = trimmed(self.noise, y, 100 / SR, 400 / SR)
         np.testing.assert_array_equal(t.audio, y[100:400])
         self.assertEqual((t.start, t.end, t.seconds), (100, 400, 300 / SR))
+
+    def test_finds_its_lead_in_between_the_handles(self):
+        # A quiet lead-in 60 ms before the fart's attack (#287), and the blip 0.6 s before that.
+        y = burst(0.20, 0.23, 0.1) + burst(0.74, 0.80, 0.02) + burst(0.80, 1.40)
+        start, end = trim_bounds(y, 0.5, 1.9)
+        t = trimmed(self.noise, y, start, end, handles=(0.5, 1.9))
+        a = round(start * SR)
+        self.assertEqual(a - len(t.lead_in), round(0.5 * SR) + lead_in_start(y[round(0.5 * SR) : round(1.9 * SR)], a - round(0.5 * SR)))
+        np.testing.assert_array_equal(t.lead_in, y[a - len(t.lead_in) : a])
+        # It reaches back to the quiet sound, 8 ms before it, and no further.
+        self.assertAlmostEqual(len(t.lead_in) / SR, start - 0.74 + 0.008, delta=0.006)
+
+        # A start handle inside that sound cuts the lead-in there: nothing before a handle plays.
+        start, end = trim_bounds(y, 0.77, 1.9)
+        t = trimmed(self.noise, y, start, end, handles=(0.77, 1.9))
+        self.assertGreaterEqual(round(start * SR) - len(t.lead_in), round(0.77 * SR))
+        self.assertGreater(len(t.lead_in), 0)
+
+        # Without its handles, a Trim has no room for one.
+        self.assertEqual(len(trimmed(self.noise, y, start, end).lead_in), 0)
+
+    def test_on_065_the_lead_in_never_reaches_the_blip(self):
+        # Untrimmed, 065's fart starts at the blip. Trimmed at 0.8 s, nothing before 0.8 s plays.
+        y = fixture("065")
+        src = analyze_recording("065", y)
+        start, end = trim_bounds(y, 0.8, 2.3)
+        t = trimmed(src, y, start, end, handles=(0.8, 2.3))
+        self.assertGreaterEqual(t.start - len(t.lead_in), round(0.8 * SR))
+        self.assertLess(src.start - len(src.lead_in), round(0.8 * SR))
 
     def test_keeps_the_note_it_was_placed_on(self):
         t = placed(trimmed(self.noise, self.take, 39108 / SR, 91820 / SR), C2)

@@ -320,19 +320,30 @@ def trim_bounds(y, start_s, end_s):
     return (a + start) / SR, (a + end) / SR
 
 
-def trimmed(src, y, start_s, end_s, placed_by_ear=False):
+def trimmed(src, y, start_s, end_s, placed_by_ear=False, handles=None):
     """A Noise-like Recording with a Trim (ADR 0019): the same Recording, playing only
     y[round(start_s x SR):round(end_s x SR)] of its decoded take `y`. Songs cut it there, and
     melody_fit() counts that length; nothing re-reads its pitch, so placed() puts it on the note
-    it was placed on. `start_s` and `end_s` are a stored Trim, already found by trim_bounds().
+    it was placed on. `start_s` and `end_s` are the fart a stored Trim keeps, already found by
+    trim_bounds() between the Trim's `handles` (start, end, in seconds).
+    Its lead-in (#287) is found between the handles too: lead_in_start() on the part they keep,
+    as trim_bounds() finds the fart there, so Songs never play what's before the start handle.
+    Without `handles` there is no room before the fart, and no lead-in.
     A Recording placed by ear keeps its Trim when a later analysis finds a Recording Pitch, as it
     keeps its Placed Pitch (ADR 0017), so `placed_by_ear` lets a Melodic one be trimmed. The
-    web's `trimOf()` gives the same."""
+    web's `trimOf()` and `renderSource()` give the same."""
     if src.pitched and not placed_by_ear:
         raise ValueError(f"{src.id} is Melodic and not placed: only a Noise-like or placed Recording is trimmed")
     a = max(0, min(len(y), round(start_s * SR)))
     b = max(a, min(len(y), round(end_s * SR)))
-    return replace(src, audio=y[a:b].astype(np.float64), start=a, end=b, pitch_end=b)
+    lead_from = a
+    if handles is not None:
+        ha = max(0, min(len(y), round(handles[0] * SR)))
+        hb = max(ha, min(len(y), round(handles[1] * SR)))
+        if ha <= a <= hb:
+            lead_from = ha + lead_in_start(y[ha:hb], a - ha)
+    lead_in = y[lead_from:a].astype(np.float64)
+    return replace(src, audio=y[a:b].astype(np.float64), start=a, end=b, pitch_end=b, lead_in=lead_in)
 
 
 def too_short_cost(note_seconds, recording_seconds, shortest_note_s):

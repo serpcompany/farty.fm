@@ -1,6 +1,6 @@
 import { ANALYSIS_SAMPLE_RATE, resampleToAnalysisRate } from '@/lib/analysis/resample'
 import { levelDb } from '@/lib/analysis/trimming'
-import type { Analysis, Trim } from '@/lib/recordings'
+import type { Analysis, RecordingTrim } from '@/lib/recordings'
 import type { PcmAudio } from '@/lib/wav'
 import type { RenderSource } from './renderer'
 
@@ -15,10 +15,12 @@ const LEAD_IN_MAX_SECONDS = 0.25
  * What the renderer needs from a Melodic Recording, or a Noise-like one placed on a note by ear
  * (ADR 0015): its gesture, cut from the Recording's audio at the stored analysis's bounds, the
  * whole fart with every burst and only the silence around it trimmed (ADR 0016), and the quiet
- * lead-in before it, which Songs play before the note's beat (#287). With a Trim it is cut at
- * the fart found between the Trim's handles instead (`songTrim`, ADR 0019), which `trimBounds`
- * found when the Trim was saved. Songs play the fart raw (ADR 0012), so nothing else is needed,
- * not even its pitch: which Recordings play is Auto-map's to decide.
+ * lead-in before it, which Songs play before the note's beat (#287). With a Trim (`trimOf`, ADR
+ * 0019) it is cut at the fart found between the Trim's handles instead, which `trimBounds` found
+ * when the Trim was saved, and its lead-in is found between the handles too, as `trimmed()` in
+ * the reference finds it: nothing before the start handle plays. Songs play the fart raw (ADR
+ * 0012), so nothing else is needed, not even its pitch: which Recordings play is Auto-map's to
+ * decide.
  *
  * `audio` is the whole Recording at its own sample rate, the input `analyzeRecording` took. The
  * lead-in is found here, from that audio, so the stored analysis doesn't change.
@@ -27,18 +29,33 @@ const LEAD_IN_MAX_SECONDS = 0.25
 export function renderSource(
   audio: PcmAudio,
   analysis: Analysis,
-  trim: Trim | null = null
+  trim: RecordingTrim | null = null
 ): RenderSource {
   const y = resampleToAnalysisRate(audio.samples, audio.sampleRate)
   const sr = ANALYSIS_SAMPLE_RATE
-  const from = trim?.startSeconds ?? analysis.gestureStartSeconds
-  const to = trim?.endSeconds ?? analysis.gestureEndSeconds
+  const from = trim?.fart.startSeconds ?? analysis.gestureStartSeconds
+  const to = trim?.fart.endSeconds ?? analysis.gestureEndSeconds
   const start = Math.min(y.length, Math.round(from * sr))
   const end = Math.min(y.length, Math.max(start, Math.round(to * sr)))
   return {
     gesture: Float64Array.from(y.subarray(start, end)),
-    leadIn: Float64Array.from(y.subarray(leadInStart(y, start), start))
+    leadIn: Float64Array.from(
+      y.subarray(trim ? trimLeadInStart(y, start, trim) : leadInStart(y, start), start)
+    )
   }
+}
+
+/**
+ * Where a trimmed fart's lead-in begins: `leadInStart` on the part the Trim's handles keep, as
+ * `trimBounds` finds the fart there, so it never reaches before the start handle. `start` when
+ * the fart isn't between the handles.
+ */
+function trimLeadInStart(y: Float32Array, start: number, trim: RecordingTrim): number {
+  const sr = ANALYSIS_SAMPLE_RATE
+  const a = Math.max(0, Math.min(y.length, Math.round(trim.startSeconds * sr)))
+  const b = Math.max(a, Math.min(y.length, Math.round(trim.endSeconds * sr)))
+  if (start < a || start > b) return start
+  return a + leadInStart(y.subarray(a, b), start - a)
 }
 
 /**
