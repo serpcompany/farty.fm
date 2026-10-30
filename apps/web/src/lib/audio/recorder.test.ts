@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { errorName } from '@/lib/telemetry/report'
 import { type CaptureBatch, type CaptureCommand, captureProcessorSource } from './capture-processor'
+import type { Take } from './recorder'
 
 // The recorder against a stand-in for the browser: getUserMedia, an AudioContext whose clock the
 // test runs, the shipped capture processor on that clock, and a page that hides and shows. A
@@ -367,5 +368,37 @@ describe('a take whose stream feeds the graph nothing', () => {
     expect(second.take).not.toBeNull()
     expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledTimes(2)
     expect(world.streams[0].track.readyState).toBe('ended')
+  })
+})
+
+describe('a take’s batches, which feed Record’s level (#281)', () => {
+  it('reach its listener from the first, with the pre-roll, as the take keeps them', async () => {
+    const { startTake } = await recorder()
+    // The first tap opens the microphone; the next one has its pre-roll.
+    ;(await tap(startTake)).take?.cancel()
+    let take: Take | null = null
+    void startTake(() => {}).then(started => {
+      take = started
+    })
+    await vi.advanceTimersByTimeAsync(500)
+    const started = take as Take | null
+    if (!started) throw new Error('The take didn’t start')
+    expect(started.sampleRate).toBe(sampleRate)
+
+    const heard: Float32Array[] = []
+    started.listen(batch => heard.push(batch))
+    // The batches so far come at once: the first starts with the pre-roll.
+    const soFar = heard.length
+    expect(soFar).toBeGreaterThan(0)
+    expect(heard[0].length).toBeGreaterThan(0.25 * sampleRate)
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(heard.length).toBeGreaterThan(soFar)
+    expect(heard.slice(soFar).every(batch => batch.length === 4096)).toBe(true)
+
+    const stopping = started.stop()
+    await vi.advanceTimersByTimeAsync(10)
+    const audio = await stopping
+    // Every batch the take keeps, and nothing else.
+    expect(heard.reduce((sum, batch) => sum + batch.length, 0)).toBe(audio.samples.length)
   })
 })

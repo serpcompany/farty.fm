@@ -8,6 +8,13 @@ import { stopPlayback } from './player'
 export type Take = {
   stop(): Promise<PcmAudio>
   cancel(): void
+  readonly sampleRate: number
+  /**
+   * Hands `listener` each batch of the take the capture processor sends the page: those so far,
+   * from the first, then each as it arrives. Record's live level and its hint are fed from them
+   * (#281). Nothing is added to the take.
+   */
+  listen(listener: (batch: Float32Array) => void): void
 }
 
 export class MicrophoneDeniedError extends Error {}
@@ -64,6 +71,8 @@ type Microphone = {
 type Capturing = {
   id: number
   chunks: Float32Array[]
+  /** Hears each batch as it arrives (`Take.listen`). */
+  listener: ((batch: Float32Array) => void) | null
   began(): void
   finished: (() => void) | null
   lost(): void
@@ -297,6 +306,7 @@ async function connect(openedIn: number, kept?: Microphone): Promise<Microphone>
     const take = capturing
     if (!take || event.data.take !== take.id) return
     take.chunks.push(event.data.samples)
+    take.listener?.(event.data.samples)
     take.began()
     if (event.data.done) take.finished?.()
   }
@@ -471,6 +481,7 @@ async function capture(
   const take: Capturing = {
     id,
     chunks: [],
+    listener: null,
     began: () => begin(),
     finished: null,
     lost: () => {
@@ -509,6 +520,11 @@ async function capture(
 
   return {
     first: take.chunks[0],
+    sampleRate: mic.context.sampleRate,
+    listen(listener) {
+      for (const chunk of take.chunks) listener(chunk)
+      take.listener = listener
+    },
     async stop() {
       if (capturing === take) {
         // Ask the processor for its last partial batch.

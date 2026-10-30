@@ -155,23 +155,33 @@ function FlowButton({
   )
 }
 
-/** Recording: the big button as Stop, with its pulse and the timer. */
+/**
+ * Recording: the big button as Stop, with its pulse, the live level and the timer, and "Can't hear
+ * anything" above it while the take so far is one Stop would refuse (#281). Finishing after Stop,
+ * the button dims and the timer holds.
+ */
 function RecordingStep() {
   const pedos = usePedos()
-  const startedAt = pedos.capture.kind === 'recording' ? pedos.capture.startedAt : null
+  const { capture } = pedos
+  const recording = capture.kind === 'recording'
+  const startedAt = recording || capture.kind === 'finishing' ? capture.startedAt : null
+  const stoppedAt = capture.kind === 'finishing' ? capture.stoppedAt : null
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
+    if (!recording) return
     const timer = setInterval(() => setNow(Date.now()), 250)
     return () => clearInterval(timer)
-  }, [])
-  const seconds = startedAt ? Math.max(0, Math.floor((now - startedAt) / 1000)) : 0
+  }, [recording])
+  const seconds = startedAt ? Math.max(0, Math.floor(((stoppedAt ?? now) - startedAt) / 1000)) : 0
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-7">
-      <div className="h-10" />
+      <output className="flex h-10 items-center text-muted-foreground" data-testid="recording-hint">
+        {recording && capture.hearsNothing && "Can't hear anything. Move closer."}
+      </output>
       <RecordButton
-        isRecording
-        disabled={pedos.capture.kind !== 'recording'}
+        state={recording ? 'recording' : 'finishing'}
+        level={pedos.inputLevel}
         onClick={() => void pedos.stopRecording()}
       />
       <p className="h-10 text-4xl tabular-nums" data-testid="recording-timer">
