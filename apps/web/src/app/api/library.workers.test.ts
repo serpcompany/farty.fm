@@ -787,7 +787,7 @@ describe('the rows a route keeps', () => {
   })
 })
 
-describe('Sound Pad Toots (ADR 0016)', () => {
+describe('Sound Pad Toots (ADR 0017)', () => {
   const pad = padTootMetadata(T1)
   const { performance } = pad
   const put = (metadata: unknown, cookie: string, id = T1) =>

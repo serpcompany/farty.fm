@@ -74,7 +74,7 @@ function catalogSong(songId: unknown) {
 
 /**
  * Where Checkout comes back to, which makes the same Toot again: the Song's Song Creator, or the
- * Sound Pad for a Toot of its Performance (a null `songId`, ADR 0016).
+ * Sound Pad for a Toot of its Performance (a null `songId`, ADR 0017).
  */
 function returnUrl(request: Request, songId: string | null, tootId: string, done: boolean): string {
   const url = new URL(
@@ -109,7 +109,7 @@ async function paidAtStripe(
 }
 
 /**
- * `POST /api/toots/{id}/checkout/` with `{ songId }`, null for a Sound Pad Toot (ADR 0016): where
+ * `POST /api/toots/{id}/checkout/` with `{ songId }`, null for a Sound Pad Toot (ADR 0017): where
  * to pay to save the Toot. `{ url }`,
  * Stripe Checkout's page (or `/dev/checkout/` on a local run), or `{ paid: true }` when there's
  * nothing to pay: it's paid already, it's saved, or saving is free here. An open Checkout Session

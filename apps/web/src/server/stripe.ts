@@ -140,7 +140,7 @@ async function stripeRequest(
 export type NewCheckout = {
   userId: string
   tootId: string
-  /** The Song's title, or null for a Sound Pad Toot (ADR 0016). */
+  /** The Song's title, or null for a Sound Pad Toot (ADR 0017). */
   songTitle: string | null
   successUrl: string
   cancelUrl: string

@@ -101,7 +101,7 @@ const save = (id: string, as: As) =>
     headers: { host: as.host ?? HOST }
   })
 
-/** Saves the Sound Pad Toot `id` (ADR 0016). */
+/** Saves the Sound Pad Toot `id` (ADR 0017). */
 const savePad = (id: string, as: As) =>
   api.put('toots', id, uploadBody(padTootMetadata(id), wav()), as, {
     headers: { host: as.host ?? HOST }
@@ -188,7 +188,7 @@ describe('on a local run, with the dev checkout', () => {
     expect(await paid(T1, a)).toBe(false)
   })
 
-  it('saves a Sound Pad Toot once it is paid for, back to the Sound Pad (ADR 0016)', async () => {
+  it('saves a Sound Pad Toot once it is paid for, back to the Sound Pad (ADR 0017)', async () => {
     const a = await signUp('A')
     expect(await (await savePad(T1, a)).json()).toEqual({ error: 'payment_required' })
     expect((await savePad(T1, a)).status).toBe(402)
@@ -465,7 +465,7 @@ describe('with Stripe Checkout in test mode', () => {
     })
   })
 
-  it('starts a Checkout Session for a Sound Pad Toot, back to the Sound Pad (ADR 0016)', async () => {
+  it('starts a Checkout Session for a Sound Pad Toot, back to the Sound Pad (ADR 0017)', async () => {
     const a = await signUp('A')
     const stripe = stubStripe(sessionFor(a.id, T1))
     expect(await (await checkout(T1, a, null)).json()).toEqual({

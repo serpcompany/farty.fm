@@ -19,7 +19,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
 // The dev checkout (ADR 0010): what Stripe Checkout's page is on a local run with no Stripe key,
 // for the e2e journeys and tap-throughs. Pay marks the Toot paid (`POST /api/dev/checkout/`) and
-// goes back to Song Creator, or the Sound Pad for a Toot with no `song` (ADR 0016), as Stripe
+// goes back to Song Creator, or the Sound Pad for a Toot with no `song` (ADR 0017), as Stripe
 // would. It answers 404 anywhere but a local run on a local
 // host, so never on Staging or Production.
 export default async function DevCheckoutPage({ searchParams }: { searchParams: SearchParams }) {

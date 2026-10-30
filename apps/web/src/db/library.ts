@@ -37,7 +37,7 @@ export type NewRecording = {
 
 /**
  * A Toot to keep, as the browser uploads it: of a Song, with its Arrangement, or from the Sound
- * Pad, with its Performance and no Song (ADR 0016).
+ * Pad, with its Performance and no Song (ADR 0017).
  */
 export type NewToot = TootFields & { audioBytes: number }
 

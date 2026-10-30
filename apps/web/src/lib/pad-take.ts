@@ -2,7 +2,7 @@ import { isPerformance, type Performance } from './performance'
 
 // The Sound Pad's last take (#278), kept in this browser while it's unsaved: Checkout leaves the
 // page, and back from it the Pad makes the same Toot again from it, with the id it was paid for
-// (ADR 0010, ADR 0016), as Song Creator makes a Song's again. Only Recording ids and times, never
+// (ADR 0010, ADR 0017), as Song Creator makes a Song's again. Only Recording ids and times, never
 // audio. Storage that can't be read keeps nothing: the take then lasts the page.
 
 const KEY = 'pedos.padTake'

@@ -6,7 +6,7 @@ import { decoded, goldenRecordings, row } from '@/test-support/golden'
 import { type PerformanceRecording, renderPerformance, tapSound } from './render-performance'
 import { RENDER_SAMPLE_RATE } from './renderer'
 
-// A Sound Pad Performance's render (#278, ADR 0016) on real fixtures: each tap's fart starts at
+// A Sound Pad Performance's render (#278, ADR 0017) on real fixtures: each tap's fart starts at
 // the tap's time, to the sample at 44.1 kHz, and the output is nothing but the Recordings' own
 // samples, trimmed, faded, at one gain and mixed (ADR 0004, ADR 0012). Measured, as
 // `tools/melody-lab/evaluate.py` measures Songs: the onsets by cross-correlation with each fart,

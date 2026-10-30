@@ -2,7 +2,7 @@ import { answer, send } from './library-api'
 import { builtFor, savingIsPaid } from './pricing'
 
 // Paying to save a Toot, from the browser (ADR 0010): Song Creator, or the Sound Pad for a Toot of
-// its Performance (ADR 0016), starts a Checkout for the Toot (`/api/toots/{id}/checkout/`), the
+// its Performance (ADR 0017), starts a Checkout for the Toot (`/api/toots/{id}/checkout/`), the
 // browser goes to Stripe's page, and Stripe sends it back to the screen it came from with the
 // Toot's id, which makes the same Toot again and saves it once the server says it's paid
 // (`/api/toots/{id}/payment/`).

@@ -150,7 +150,7 @@ export const recordings = sqliteTable(
 /**
  * A Song, or a Sound Pad Performance, played by the user's Recordings, with its own rendered audio.
  * A Toot of a Song has its Song and Arrangement; a Sound Pad Toot has neither, and its
- * Performance instead (ADR 0016).
+ * Performance instead (ADR 0017).
  */
 export const toots = sqliteTable(
   'toots',

@@ -17,7 +17,7 @@ import { DeleteTootDialog, RenameTootDialog, TootMenu } from './toots-screen'
 
 /**
  * A Toot's screen, opened from the Toots tab: Song Creator's layout without Save, showing which
- * Recording played which notes, or for a Sound Pad Toot its Play and what it played (ADR 0016).
+ * Recording played which notes, or for a Sound Pad Toot its Play and what it played (ADR 0017).
  * Rename and Delete are in its More menu. As the iPhone app's `TootDetailView`. The Toot is
  * `?id=`, so one page serves every Toot, offline too.
  */

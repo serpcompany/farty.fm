@@ -1,7 +1,7 @@
 import { maximumTakeSeconds } from './recordings'
 
 // A Performance (#278): what the user played on the Sound Pad while it recorded, kept by a Toot
-// made from it (ADR 0016). It plays only the Recordings it names, each tap raw from its start.
+// made from it (ADR 0017). It plays only the Recordings it names, each tap raw from its start.
 
 /** The longest Performance, from its first tap: as long as a take (`maximumTakeSeconds`). */
 export const MAX_PERFORMANCE_SECONDS = maximumTakeSeconds

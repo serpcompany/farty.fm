@@ -19,7 +19,7 @@ import { TootError } from '@/lib/toot-renderer'
 import { cn } from '@/lib/utils'
 import { tootPlayback, usePedos } from './pedos-provider'
 
-// The Sound Pad's take (#278, ADR 0016): Record, play the Pads, Stop, and the taps become a
+// The Sound Pad's take (#278, ADR 0017): Record, play the Pads, Stop, and the taps become a
 // Performance, made into a Toot in the render worker. Hearing it is free; Save to Toots saves it
 // as any Toot (ADR 0010).
 

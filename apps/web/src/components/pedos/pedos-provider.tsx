@@ -156,7 +156,7 @@ type Pedos = {
    */
   makeToot(song: Song, id?: string): Promise<SongTootDraft>
   /**
-   * Makes the Toot of a Sound Pad Performance in the render worker (ADR 0016). Throws a
+   * Makes the Toot of a Sound Pad Performance in the render worker (ADR 0017). Throws a
    * `TootError`. `id` is a new one unless given, as `makeToot`'s.
    */
   makePadToot(performance: Performance, id?: string): Promise<PadTootDraft>

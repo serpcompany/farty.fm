@@ -5,7 +5,7 @@ import { expect, type Page } from '@playwright/test'
 
 /**
  * The dev checkout is open: its Pay, and back to Song Creator, or with `from: 'pad'` to the Sound
- * Pad (ADR 0016), which saves the Toot.
+ * Pad (ADR 0017), which saves the Toot.
  */
 export async function payAtTheDevCheckout(
   page: Page,

@@ -1,7 +1,7 @@
 import { applyD1Migrations, type D1Migration, env, reset } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
 
-// Migration 0005 (#278, ADR 0016) rebuilds `toots` so a Toot can have no Song: `song_id` and
+// Migration 0005 (#278, ADR 0017) rebuilds `toots` so a Toot can have no Song: `song_id` and
 // `arrangement` may be null, beside a new `performance`. Its INSERT is edited by hand (the old
 // table has no `performance`), so here it runs on a D1 that already holds Toots, as Staging's and
 // Production's do, and every row comes through as it was.

@@ -81,7 +81,7 @@ function toRecording(row: RecordingRow): LibraryRecording {
 
 /**
  * A Toot row as the browser keeps it: of a Song, with its Arrangement, or from the Sound Pad, with
- * its Performance (ADR 0016). The table's check (`toots_song_or_performance`) keeps every row one
+ * its Performance (ADR 0017). The table's check (`toots_song_or_performance`) keeps every row one
  * or the other.
  */
 function toToot(row: TootRow): LibraryToot {

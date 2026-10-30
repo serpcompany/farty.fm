@@ -132,7 +132,7 @@ describe('makePadToot', () => {
     ]
   })
 
-  it('renders the Performance as the engine does on the same WAVs (ADR 0016)', async () => {
+  it('renders the Performance as the engine does on the same WAVs (ADR 0017)', async () => {
     const performance = played()
     let fromWorker: RenderedPerformance | undefined
     const draft = await makePadToot(

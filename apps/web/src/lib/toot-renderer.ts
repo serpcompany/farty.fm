@@ -93,7 +93,7 @@ export type RenderPerformance = (
 ) => Promise<RenderedPerformance>
 
 /**
- * Makes the Toot of a Sound Pad `performance` (ADR 0016): each Recording it plays, as the app
+ * Makes the Toot of a Sound Pad `performance` (ADR 0017): each Recording it plays, as the app
  * stores it (`loadAudio`), rendered in the render worker (`renderPerformance`). The Toot's audio
  * is the render as a mono 16-bit WAV. Throws a `couldNotMake` `TootError` when a Recording it
  * plays is gone or its audio can't be read, or the render fails. `id` is a new one unless given:

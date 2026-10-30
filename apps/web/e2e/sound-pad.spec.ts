@@ -16,7 +16,7 @@ import { skipWelcome } from './record'
 // (G3). A probe notes each sound a Pad starts, and the press that started it, so the journey sees
 // playback start, raw, at the Pads' one level, and how long after the press. Then a take (#278):
 // what the Pads play from Record to Stop, heard back, paid for at the dev checkout and saved as a
-// Toot (ADR 0016).
+// Toot (ADR 0017).
 //
 // With E2E_EVIDENCE_DIR set, the take's journey also writes its Toot's WAV, its presses and
 // screenshots there, for the PR.

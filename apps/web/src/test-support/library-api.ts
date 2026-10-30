@@ -115,7 +115,7 @@ export function tootMetadata(id: string, fields: Record<string, unknown> = {}) {
   }
 }
 
-/** A Sound Pad Toot as the browser keeps it (ADR 0016): no Song, and its Performance. */
+/** A Sound Pad Toot as the browser keeps it (ADR 0017): no Song, and its Performance. */
 export function padTootMetadata(id: string, fields: Record<string, unknown> = {}) {
   return {
     id,

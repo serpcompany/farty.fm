@@ -216,7 +216,7 @@ function parseArrangement(value: unknown): TootArrangement | null {
 /**
  * The Toot as the browser keeps it (`Toot` in `src/lib/toot.ts`), or null: of a Song, with its
  * Arrangement, or from the Sound Pad, with `songId: null`, no Arrangement and its Performance
- * (ADR 0016). A browser on a release before #278 sends no `performance`.
+ * (ADR 0017). A browser on a release before #278 sends no `performance`.
  */
 export function parseToot(value: unknown, id: string): TootFields | null {
   if (!isObject(value) || value.id !== id) return null

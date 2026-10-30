@@ -4,7 +4,7 @@ import type { Performance } from '@/lib/performance'
 import type { PcmAudio } from '@/lib/wav'
 import { RENDER_SAMPLE_RATE } from './renderer'
 
-// A Sound Pad Performance as audio (#278, ADR 0016): each tap plays its Recording as a Pad plays
+// A Sound Pad Performance as audio (#278, ADR 0017): each tap plays its Recording as a Pad plays
 // it, raw from its start, and the taps mix. Fart-only (ADR 0004, ADR 0012): the one resampling is
 // to the render's rate, and the rest is the Pad's trim, fades and gain, and the mix.
 
