@@ -15,10 +15,10 @@ const LEAD_IN_MAX_SECONDS = 0.25
  * What the renderer needs from a Melodic Recording, or a Noise-like one placed on a note by ear
  * (ADR 0015): its gesture, cut from the Recording's audio at the stored analysis's bounds, the
  * whole fart with every burst and only the silence around it trimmed (ADR 0016), and the quiet
- * lead-in before it, which Songs play before the note's beat (#287). With a Trim (`trimOf`, ADR
- * 0019) it is cut at the Trim's bounds instead, which `trimBounds` already found. Songs play the
- * fart raw (ADR 0012), so nothing else is needed, not even its pitch: which Recordings play is
- * Auto-map's to decide.
+ * lead-in before it, which Songs play before the note's beat (#287). With a Trim it is cut at
+ * the fart found between the Trim's handles instead (`songTrim`, ADR 0019), which `trimBounds`
+ * found when the Trim was saved. Songs play the fart raw (ADR 0012), so nothing else is needed,
+ * not even its pitch: which Recordings play is Auto-map's to decide.
  *
  * `audio` is the whole Recording at its own sample rate, the input `analyzeRecording` took. The
  * lead-in is found here, from that audio, so the stored analysis doesn't change.

@@ -31,7 +31,7 @@ A Recording with a Placed Pitch, placed while it was Noise-like. Songs, Pitch Co
 _Avoid_: Beat, tuned fart
 
 **Trim**:
-The part of a Noise-like Recording's take the user kept with the picker's two handles: the fart found between them. The Recordings tab, the picker and Songs then play only that part, and its length is the fart's length. The saved take never changes, and Remove trim brings the whole fart back. Kept with the Recording and its account, and through a new analysis, a Re-scan included; on a placed Recording it stays in use with the Placed Pitch (ADR 0017). It never changes the fart's pitch (ADR 0019).
+The part of a Noise-like Recording's take the user kept with the picker's two handles. The Recordings tab and the picker then play exactly what's between the handles, and Songs play the fart found between them, whose length is the fart's length. The saved take never changes, and Remove trim brings the whole fart back. Kept with the Recording and its account, and through a new analysis, a Re-scan included; on a placed Recording it stays in use with the Placed Pitch (ADR 0017). It never changes the fart's pitch (ADR 0019).
 _Avoid_: Crop, edit, clip
 
 **Recording Pitch**:

@@ -437,7 +437,11 @@ describe('rescan (#282)', () => {
   })
 
   it('keeps a Trim through a Re-scan, and uses it no more once the fart is Melodic (ADR 0019)', async () => {
-    const trim = { startSeconds: 0.002, endSeconds: 0.008 }
+    const trim = {
+      startSeconds: 0.002,
+      endSeconds: 0.008,
+      fart: { startSeconds: 0.002, endSeconds: 0.008 }
+    }
     const trimmed = (await page.store.placeRecording((await storedWith(1, noNote)).id, {
       trim
     })) as Recording
@@ -462,7 +466,11 @@ describe('rescan (#282)', () => {
 
   it('keeps a placed Recording’s Trim in use when a new analysis finds a Recording Pitch', async () => {
     const older = { ...noNote, version: ANALYSIS_VERSION - 1 }
-    const trim = { startSeconds: 0.002, endSeconds: 0.008 }
+    const trim = {
+      startSeconds: 0.002,
+      endSeconds: 0.008,
+      fart: { startSeconds: 0.002, endSeconds: 0.008 }
+    }
     const placed = (await page.store.placeRecording((await storedWith(1, older)).id, {
       placedPitch: 48,
       trim

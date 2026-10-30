@@ -227,7 +227,11 @@ describe('placing a Recording by ear (ADR 0015)', () => {
       { seconds: 1, sampleRate: 48_000, waveform: [0.5] },
       audio
     )
-    const trim = { startSeconds: 0.3, endSeconds: 0.7 }
+    const trim = {
+      startSeconds: 0.3,
+      endSeconds: 0.7,
+      fart: { startSeconds: 0.3, endSeconds: 0.7 }
+    }
     expect(await store.placeRecording(saved.id, { placedPitch: 48, trim })).toEqual({
       ...saved,
       placedPitch: 48,

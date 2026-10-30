@@ -2,7 +2,7 @@ import type { DetachedWindowAPI } from 'happy-dom'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Recording, Trim } from '@/lib/recordings'
+import type { Recording, RecordingTrim } from '@/lib/recordings'
 
 // The place-by-ear picker (ADR 0015) in a DOM: the octave it opens on and its bounds, the piano
 // note a key plays, what Place, Move, Leave it out and Take it off keep, and its Trim (ADR 0019).
@@ -40,7 +40,7 @@ vi.mock('./piano-keys', async importOriginal => ({
 vi.mock('@/lib/recording-store', () => ({ loadAudio: () => new Promise(() => {}) }))
 
 /** Recording 21, Noise-like, placed on `placedPitch` or not, and trimmed to `trim` or not. */
-function noiseLike(placedPitch?: number, trim?: Trim): Recording {
+function noiseLike(placedPitch?: number, trim?: RecordingTrim): Recording {
   return {
     id: 'a',
     number: 21,
@@ -248,7 +248,13 @@ describe('placing a Noise-like Recording by ear', () => {
   })
 
   it('opens a trimmed fart on its Trim, and Reset then Remove trim takes it off', async () => {
-    await open(noiseLike(48, { startSeconds: 0.2, endSeconds: 0.6 }))
+    await open(
+      noiseLike(48, {
+        startSeconds: 0.2,
+        endSeconds: 0.6,
+        fart: { startSeconds: 0.25, endSeconds: 0.55 }
+      })
+    )
     expect(button('Placed at C3').disabled).toBe(true)
     await tap('Trim')
     expect(readout()).toBe('0.20 s to 0.60 s')

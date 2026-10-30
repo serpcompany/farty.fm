@@ -20,7 +20,7 @@ import {
 } from '@/db/library'
 import { tootPayment } from '@/db/payments'
 import type { Performance } from '@/lib/performance'
-import type { Recording } from '@/lib/recordings'
+import type { Recording, RecordingTrim } from '@/lib/recordings'
 import type { Toot, TootArrangement } from '@/lib/toot'
 
 import {
@@ -75,11 +75,25 @@ function toRecording(row: RecordingRow): LibraryRecording {
       ? { state: 'analyzed', analysis: row.analysis }
       : { state: 'notAnalyzed' },
     placedPitch: row.placedPitch,
-    trim:
-      row.trimStartSeconds === null || row.trimEndSeconds === null
-        ? null
-        : { startSeconds: row.trimStartSeconds, endSeconds: row.trimEndSeconds },
+    trim: trimOfRow(row),
     audioBytes: row.audioBytes
+  }
+}
+
+/** A row's Trim (ADR 0019): its handles and its fart, or null unless it has all four. */
+function trimOfRow(row: RecordingRow): RecordingTrim | null {
+  const { trimStartSeconds, trimEndSeconds, trimFartStartSeconds, trimFartEndSeconds } = row
+  if (
+    trimStartSeconds === null ||
+    trimEndSeconds === null ||
+    trimFartStartSeconds === null ||
+    trimFartEndSeconds === null
+  )
+    return null
+  return {
+    startSeconds: trimStartSeconds,
+    endSeconds: trimEndSeconds,
+    fart: { startSeconds: trimFartStartSeconds, endSeconds: trimFartEndSeconds }
   }
 }
 

@@ -35,15 +35,14 @@ import {
 import * as store from '@/lib/recording-store'
 import {
   atFullLevel,
-  foundPart,
   heardSomething,
   maximumTakeSeconds,
   type Recording,
-  samePart,
+  type RecordingTrim,
   songPitch,
   TakeLevels,
   type Trim,
-  trimOf
+  trimHandles
 } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
@@ -204,7 +203,7 @@ type Pedos = {
   deleteRecording(id: string): Promise<void>
   /**
    * Places a Noise-like Recording on a MIDI note by ear, or takes it off with null (ADR 0015), and
-   * trims it to the fart between `handles`, or takes its Trim off with null (ADR 0019). A field
+   * trims it to `handles`, or takes its Trim off with null (ADR 0019). A field
    * left out stays. Every Song uses it there at once; it still plays raw, at its own pitch.
    */
   placeRecording(
@@ -282,14 +281,13 @@ export function usePedos(): Pedos {
 }
 
 /**
- * The Trim the picker's `handles` keep in a Recording's take: the fart between them, as Recording
- * Analysis finds a fart (`trimBounds`, ADR 0019), or null when that is the fart analysis found.
+ * The Trim the picker's `handles` keep in a Recording's take (ADR 0019): the handles exactly, which
+ * the row and the picker play, and the fart between them, found as Recording Analysis finds a fart
+ * (`trimBounds`), which Songs play.
  */
-async function trimBetween(id: string, handles: Trim): Promise<Trim | null> {
-  const [recording] = (await store.loadRecordings()).filter(r => r.id === id)
-  const trim = await findTrim(decodeWav(await store.loadAudio(id)), handles)
-  const found = recording && foundPart(recording)
-  return found && samePart(trim, found) ? null : trim
+async function trimBetween(id: string, handles: Trim): Promise<RecordingTrim> {
+  const fart = await findTrim(decodeWav(await store.loadAudio(id)), handles)
+  return { startSeconds: handles.startSeconds, endSeconds: handles.endSeconds, fart }
 }
 
 /** The app's state and actions, mirroring the iPhone app's `AppModel`. */
@@ -629,7 +627,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         return
       }
       if (target !== 'draft') {
-        playRecording(target, part ?? trimOf(target))
+        playRecording(target, part ?? trimHandles(target))
         return
       }
       const ended = () => setNowPlaying(current => (current === key ? null : current))
@@ -648,9 +646,9 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     setRecordings(list => list?.filter(r => r.id !== id) ?? null)
   }, [])
 
-  // As `renameToot`: the list, and so every Song's coverage, changes at once. A Trim is found
-  // first, in the analysis worker: the fart between the handles (`trimBounds`, ADR 0019), or none
-  // when that is the fart analysis found.
+  // As `renameToot`: the list, and so every Song's coverage, changes at once. A Trim keeps the
+  // handles as they are, and its fart is found first, in the analysis worker (`trimBounds`, ADR
+  // 0019).
   const placeRecording = useCallback(
     async (
       id: string,

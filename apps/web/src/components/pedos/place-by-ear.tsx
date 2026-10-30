@@ -112,7 +112,8 @@ export function PlaceByEar({
 /**
  * The fart, the octave, the keys and the buttons. The key picked starts at the placed note. The
  * waveform zooms to the fart, with the whole take drawn small underneath, and Trim shows handles
- * to keep just part of it (#293, ADR 0019). Play plays the fart between them.
+ * to keep just part of it (#293, ADR 0019). Play plays what's between them, which is what a saved
+ * Trim keeps and its row plays.
  */
 function Picker({
   recording,

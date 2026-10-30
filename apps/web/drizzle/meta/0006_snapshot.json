@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "82b0f7b9-6556-4ed9-a0fe-c53846dc65b1",
+  "id": "a4f47d85-5a50-42cc-8ba5-a143180a1711",
   "prevId": "70ebe2d4-cf66-4888-bfe0-45aa522416fe",
   "tables": {
     "account": {
@@ -255,6 +255,20 @@
         },
         "trim_end_seconds": {
           "name": "trim_end_seconds",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "trim_fart_start_seconds": {
+          "name": "trim_fart_start_seconds",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "trim_fart_end_seconds": {
+          "name": "trim_fart_end_seconds",
           "type": "real",
           "primaryKey": false,
           "notNull": false,

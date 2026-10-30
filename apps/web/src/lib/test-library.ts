@@ -3,7 +3,7 @@
 // are tested in workerd (`library.workers.test.ts`).
 
 import type { Kind } from './outbox'
-import type { Trim } from './recordings'
+import type { RecordingTrim } from './recordings'
 
 type Stored = { item: Record<string, unknown>; wav: ArrayBuffer | null; deletedAt: number | null }
 
@@ -53,7 +53,7 @@ export function fakeAccount(userId = 'user-a') {
       state.placeAndTrim(id, { placedPitch })
     },
     /** What another browser did: places or trims a Recording, or takes either off (ADR 0019). */
-    placeAndTrim(id: string, change: { placedPitch?: number | null; trim?: Trim | null }) {
+    placeAndTrim(id: string, change: { placedPitch?: number | null; trim?: RecordingTrim | null }) {
       const stored = items.recordings.get(id)
       if (stored) {
         items.recordings.set(id, {

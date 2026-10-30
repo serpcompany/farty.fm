@@ -10,7 +10,7 @@ import {
 } from '@/lib/engine/auto-map'
 import type { Song as EngineSong } from '@/lib/engine/song'
 import { noteName, pitchClass } from '@/lib/pitch'
-import { formattedLength, placedPitch, type Recording, songPitch, trimOf } from '@/lib/recordings'
+import { formattedLength, placedPitch, type Recording, songPitch, songTrim } from '@/lib/recordings'
 
 // Pitch Coverage of the Song Catalog by the user's Recordings: a port of the iPhone app's
 // `PitchCoverage.swift` and `SongListing.swift`. Auto-map (`engine/auto-map.ts`) decides it; this
@@ -50,7 +50,7 @@ function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[]
     if (r.analysis.state !== 'analyzed') return []
     const { analysis } = r.analysis
     const placed = placedPitch(r)
-    if (placed !== null) return [placedAutoMapRecording(r.id, analysis, placed, trimOf(r))]
+    if (placed !== null) return [placedAutoMapRecording(r.id, analysis, placed, songTrim(r))]
     return analysis.recordingPitchMidi !== null && analysis.shortestNoteSeconds !== null
       ? [autoMapRecording(r.id, analysis)]
       : []
@@ -59,12 +59,12 @@ function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[]
 
 /**
  * How long a Recording's fart lasts, in seconds: its single clean gesture, without the silence
- * around it, or its Trim (ADR 0019), which is the length the unlock rule measures (ADR 0011, ADR
- * 0012). Before analysis has found the fart, the whole take.
+ * around it, or the fart found between its Trim's handles (ADR 0019), which is the length the
+ * unlock rule measures (ADR 0011, ADR 0012). Before analysis has found the fart, the whole take.
  */
 export function fartSeconds(recording: Recording): number {
   if (recording.analysis.state !== 'analyzed') return recording.seconds
-  const trim = trimOf(recording)
+  const trim = songTrim(recording)
   return trim === null
     ? autoMapRecording(recording.id, recording.analysis.analysis).gestureSeconds
     : trimSeconds(trim)

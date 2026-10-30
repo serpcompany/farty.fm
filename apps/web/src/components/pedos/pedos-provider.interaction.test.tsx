@@ -252,7 +252,9 @@ it('keeps the last Re-scan’s result with no Recordings tab open, until the nex
 
 it("plays a trimmed Recording's Trim, and the part a scrub asks for", async () => {
   const pedos = await mount()
-  const trimmed = { ...noiseLike, trim: { startSeconds: 0.5, endSeconds: 1.2 } }
+  // It plays the handles the user set, not the fart Songs cut between them.
+  const fart = { startSeconds: 0.6, endSeconds: 1.1 }
+  const trimmed = { ...noiseLike, trim: { startSeconds: 0.5, endSeconds: 1.2, fart } }
   await act(async () => pedos().togglePlayback(trimmed))
   expect(lastSegment()).toEqual({ start: 0.5, end: 1.2 })
   expect(pedos().playingPart).toEqual({ startSeconds: 0.5, endSeconds: 1.2 })
@@ -266,25 +268,28 @@ it("plays a trimmed Recording's Trim, and the part a scrub asks for", async () =
   expect(lastSegment()).toBeNull()
 })
 
-it('trims a Recording to the fart found between the handles, and takes the Trim off', async () => {
+it('trims a Recording to its handles, with the fart found between them, and takes the Trim off', async () => {
   page.stored = [noiseLike]
   const pedos = await mount()
   const handles = { startSeconds: 0.3, endSeconds: 1.5 }
-  page.findTrim.mockResolvedValueOnce({ startSeconds: 0.45, endSeconds: 1.4 })
+  const fart = { startSeconds: 0.45, endSeconds: 1.4 }
+  page.findTrim.mockResolvedValueOnce(fart)
   await act(async () => pedos().placeRecording('r18', { handles }))
 
   const [pcm, sent] = page.findTrim.mock.calls[0] as [{ sampleRate: number }, unknown]
   expect(pcm.sampleRate).toBe(48000)
   expect(sent).toEqual(handles)
-  expect(page.placeRecording).toHaveBeenCalledWith('r18', {
-    trim: { startSeconds: 0.45, endSeconds: 1.4 }
-  })
-  expect(pedos().recording('r18')?.trim).toEqual({ startSeconds: 0.45, endSeconds: 1.4 })
+  expect(page.placeRecording).toHaveBeenCalledWith('r18', { trim: { ...handles, fart } })
+  expect(pedos().recording('r18')?.trim).toEqual({ ...handles, fart })
 
-  // Handles around the fart analysis found keep no Trim.
-  page.findTrim.mockResolvedValueOnce({ startSeconds: 0.401, endSeconds: 2.099 })
+  // Handles around the fart analysis found still keep a Trim: exactly the handles (#299 S5).
+  const found = { startSeconds: 0.401, endSeconds: 2.099 }
+  page.findTrim.mockResolvedValueOnce(found)
   await act(async () => pedos().placeRecording('r18', { placedPitch: 40, handles }))
-  expect(page.placeRecording).toHaveBeenLastCalledWith('r18', { placedPitch: 40, trim: null })
+  expect(page.placeRecording).toHaveBeenLastCalledWith('r18', {
+    placedPitch: 40,
+    trim: { ...handles, fart: found }
+  })
 
   await act(async () => pedos().placeRecording('r18', { handles: null }))
   expect(page.placeRecording).toHaveBeenLastCalledWith('r18', { trim: null })
@@ -294,8 +299,9 @@ it('trims a Recording to the fart found between the handles, and takes the Trim 
 it('keeps a Trim saved while a Re-scan ran: the Re-scan changes only the analysis', async () => {
   page.stored = [noiseLike]
   const pedos = await mount()
-  const trim = { startSeconds: 0.45, endSeconds: 1.4 }
-  page.findTrim.mockResolvedValueOnce(trim)
+  const fart = { startSeconds: 0.45, endSeconds: 1.4 }
+  const trim = { startSeconds: 0.3, endSeconds: 1.5, fart }
+  page.findTrim.mockResolvedValueOnce(fart)
   await act(async () =>
     pedos().placeRecording('r18', { handles: { startSeconds: 0.3, endSeconds: 1.5 } })
   )

@@ -1,6 +1,6 @@
 import type { NewRecording, Placement, TootFields } from '@/db/library'
 import { isPerformance } from '@/lib/performance'
-import type { Analysis, Trim } from '@/lib/recordings'
+import type { Analysis, RecordingTrim, Trim } from '@/lib/recordings'
 import type { TootArrangement } from '@/lib/toot'
 
 import { apiError } from './require-user'
@@ -164,13 +164,8 @@ export function parsePlacedPitch(value: unknown): number | null | undefined {
   return isIntegerIn(value, 0, 127) ? value : undefined
 }
 
-/**
- * A Trim (ADR 0019): the seconds of the whole take the user kept, or null when untrimmed;
- * undefined when it's neither. Not checked against the take's length, which the browser measured
- * at another sample rate: a later bound is only that a Recording is shorter than an hour.
- */
-export function parseTrim(value: unknown): Trim | null | undefined {
-  if (value === null) return null
+/** Part of a take, in seconds, starting before it ends; undefined when it isn't one. */
+function parsePart(value: unknown): Trim | undefined {
   if (!isObject(value)) return undefined
   const { startSeconds, endSeconds } = value
   const valid =
@@ -178,6 +173,28 @@ export function parseTrim(value: unknown): Trim | null | undefined {
     isNumberIn(endSeconds, 0, MAX_SECONDS) &&
     startSeconds < endSeconds
   return valid ? { startSeconds, endSeconds } : undefined
+}
+
+/**
+ * How far a Trim's fart may reach past its handles: `trimBounds` cuts the handles at whole
+ * samples of the 44.1 kHz audio, so the fart can start half a sample before the start handle.
+ */
+const SAMPLE_TOLERANCE = 0.001
+
+/**
+ * A Trim (ADR 0019): the handles the user left, seconds of the whole take, and `fart`, the fart
+ * found between them; or null when untrimmed; undefined when it's neither.
+ */
+export function parseTrim(value: unknown): RecordingTrim | null | undefined {
+  if (value === null) return null
+  if (!isObject(value)) return undefined
+  const handles = parsePart(value)
+  const fart = parsePart(value.fart)
+  if (!handles || !fart) return undefined
+  const within =
+    fart.startSeconds >= handles.startSeconds - SAMPLE_TOLERANCE &&
+    fart.endSeconds <= handles.endSeconds + SAMPLE_TOLERANCE
+  return within ? { ...handles, fart } : undefined
 }
 
 /**

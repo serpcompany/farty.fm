@@ -593,7 +593,9 @@ describe('PATCH /api/recordings/{id}/ (ADR 0015)', () => {
 })
 
 describe('PATCH /api/recordings/{id}/ with a Trim (ADR 0019)', () => {
-  const trim = { startSeconds: 0.8868, endSeconds: 2.0821 }
+  // The handles the user left, and the fart found between them.
+  const fart = { startSeconds: 0.8868, endSeconds: 2.0821 }
+  const trim = { startSeconds: 0.8, endSeconds: 2.3, fart }
 
   it('trims a Recording beside its note, keeps either when the other changes, and takes it off', async () => {
     const a = await signUp('A')
@@ -614,7 +616,12 @@ describe('PATCH /api/recordings/{id}/ with a Trim (ADR 0019)', () => {
     expect((await api.placeAndTrim(R1, { trim: null }, a)).status).toBe(200)
     expect((await library(a.cookie)).recordings).toMatchObject([{ placedPitch: 40, trim: null }])
     const [row] = await testDb().select().from(recordings).where(eq(recordings.userId, a.id))
-    expect([row.trimStartSeconds, row.trimEndSeconds]).toEqual([null, null])
+    expect([
+      row.trimStartSeconds,
+      row.trimEndSeconds,
+      row.trimFartStartSeconds,
+      row.trimFartEndSeconds
+    ]).toEqual([null, null, null, null])
     expect(row.analysis).toEqual(recordingMetadata(R1).analysis.analysis)
   })
 
@@ -622,16 +629,26 @@ describe('PATCH /api/recordings/{id}/ with a Trim (ADR 0019)', () => {
     const a = await signUp('A')
     await upload('recordings', R1, a.cookie)
 
+    const part = (startSeconds: unknown, endSeconds?: unknown) => ({
+      startSeconds,
+      endSeconds,
+      fart: { startSeconds, endSeconds }
+    })
     for (const refused of [
-      { trim: { startSeconds: 1, endSeconds: 1 } },
-      { trim: { startSeconds: 1.2, endSeconds: 0.4 } },
-      { trim: { startSeconds: -0.1, endSeconds: 1 } },
-      { trim: { startSeconds: 0, endSeconds: 3601 } },
-      { trim: { startSeconds: '0', endSeconds: 1 } },
-      { trim: { startSeconds: 0 } },
+      { trim: part(1, 1) },
+      { trim: part(1.2, 0.4) },
+      { trim: part(-0.1, 1) },
+      { trim: part(0, 3601) },
+      { trim: part('0', 1) },
+      { trim: part(0) },
       { trim: [0, 1] },
       { trim: 1 },
-      { placedPitch: 36, trim: { startSeconds: 1, endSeconds: 0 } },
+      { placedPitch: 36, trim: part(1, 0) },
+      // A fart missing, or outside its handles.
+      { trim: { startSeconds: 0.2, endSeconds: 0.8 } },
+      { trim: { ...part(0.2, 0.8), fart: { startSeconds: 0.1, endSeconds: 0.5 } } },
+      { trim: { ...part(0.2, 0.8), fart: { startSeconds: 0.3, endSeconds: 0.9 } } },
+      { trim: { ...part(0.2, 0.8), fart: { startSeconds: 0.5, endSeconds: 0.4 } } },
       {}
     ]) {
       const answer = await api.placeAndTrim(R1, refused, a)
@@ -804,7 +821,11 @@ describe('the rows a route keeps', () => {
   it('keep the Trim (ADR 0019), and none when an older browser sends none', async () => {
     const a = await signUp('A')
     const R3 = '66666666-6666-4666-8666-666666666666'
-    const trim = { startSeconds: 0.25, endSeconds: 0.75 }
+    const trim = {
+      startSeconds: 0.02,
+      endSeconds: 0.09,
+      fart: { startSeconds: 0.03, endSeconds: 0.08 }
+    }
     for (const [id, fields] of [
       [R1, { placedPitch: 40, trim }],
       [R2, {}]
@@ -821,7 +842,12 @@ describe('the rows a route keeps', () => {
     expect(kept.get(R1)).toMatchObject({ placedPitch: 40, trim })
     expect(kept.get(R2)).toMatchObject({ trim: null })
 
-    for (const refused of [{ startSeconds: 0.5, endSeconds: 0.5 }, { startSeconds: 0.2 }, 'all']) {
+    for (const refused of [
+      { ...trim, startSeconds: 0.05, endSeconds: 0.05 },
+      { startSeconds: 0.02, endSeconds: 0.09 },
+      { startSeconds: 0.02 },
+      'all'
+    ]) {
       const response = await api.put(
         'recordings',
         R3,

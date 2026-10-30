@@ -18,6 +18,7 @@ import {
   type Recording,
   recordingPitch,
   songPitch,
+  songTrim,
   TakeLevels,
   trimOf
 } from './recordings'
@@ -352,7 +353,11 @@ describe('a Placed Pitch (ADR 0015)', () => {
   })
 
   it('keeps its Trim in use with it, and a Trim alone stops counting once Melodic (ADR 0019)', () => {
-    const trim = { startSeconds: 0.3, endSeconds: 0.9 }
+    const trim = {
+      startSeconds: 0.3,
+      endSeconds: 0.9,
+      fart: { startSeconds: 0.35, endSeconds: 0.8 }
+    }
     const found = (placed: number | null): Recording => ({
       ...noiseLike(placed),
       trim,
@@ -363,7 +368,9 @@ describe('a Placed Pitch (ADR 0015)', () => {
     })
     expect(trimOf({ ...noiseLike(), trim })).toEqual(trim)
     expect(trimOf(found(48))).toEqual(trim)
-    expect(fartPart(found(48))).toEqual(trim)
+    // The picker plays the handles, and Songs the fart between them.
+    expect(fartPart(found(48))).toEqual({ startSeconds: 0.3, endSeconds: 0.9 })
+    expect(songTrim(found(48))).toEqual(trim.fart)
     // Not placed, it plays the fart analysis found, and keeps the Trim for nothing.
     expect(trimOf(found(null))).toBeNull()
     expect(fartPart(found(null))).toEqual({ startSeconds: 0.01, endSeconds: 1.2 })

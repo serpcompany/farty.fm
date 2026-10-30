@@ -79,7 +79,7 @@ export interface RecordingToRender {
   /** The whole Recording at its own sample rate, as Recording Analysis read it. */
   audio: PcmAudio
   analysis: Analysis
-  /** The Trim it plays, when `trimOf` gives one (ADR 0019). */
+  /** The fart its Trim keeps, when `songTrim` gives one (ADR 0019). */
   trim?: Trim | null
 }
 

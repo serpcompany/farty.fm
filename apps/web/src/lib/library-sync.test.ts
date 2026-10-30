@@ -295,7 +295,11 @@ describe('version 6', () => {
   it('reads the whole library once, for the Trims an older tab dropped, and shuts that tab out', async () => {
     claimedBy('user-a')
     const recording = theirs(1)
-    const trim = { startSeconds: 0.25, endSeconds: 0.75 }
+    const trim = {
+      startSeconds: 0.25,
+      endSeconds: 0.75,
+      fart: { startSeconds: 0.25, endSeconds: 0.75 }
+    }
     account.add('recordings', { ...recording, placedPitch: 48, trim }, wav(1))
     const older = await version5(tx => {
       tx('recordings').put({ ...recording, placedPitch: 48 })
@@ -322,7 +326,11 @@ describe('version 6', () => {
   it('sends a place queued by version 5 code as the Placed Pitch alone, keeping the Trim', async () => {
     claimedBy('user-a')
     const recording = { ...theirs(1), seconds: 3 }
-    const trim = { startSeconds: 0.8868, endSeconds: 2.0821 }
+    const trim = {
+      startSeconds: 0.8868,
+      endSeconds: 2.0821,
+      fart: { startSeconds: 0.8868, endSeconds: 2.0821 }
+    }
     account.add('recordings', { ...recording, placedPitch: 36, trim }, wav(1))
     await version5(tx => {
       tx('recordings').put({ ...recording, placedPitch: 38 })
@@ -559,7 +567,11 @@ describe('uploading', () => {
 
   it('trims a Recording on the account, in its upload or after it, keeping the take (ADR 0019)', async () => {
     const early = await recorded(1)
-    const trim = { startSeconds: 0.25, endSeconds: 0.75 }
+    const trim = {
+      startSeconds: 0.25,
+      endSeconds: 0.75,
+      fart: { startSeconds: 0.25, endSeconds: 0.75 }
+    }
     await page.store.placeRecording(early.id, { placedPitch: 40, trim })
     expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
     expect(account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: 40, trim })
@@ -577,7 +589,11 @@ describe('uploading', () => {
   it("sends a pitch-only change without the Trim, keeping another browser's Trim", async () => {
     const recording = await recorded(1)
     await page.sync.syncOnce('user-a')
-    const trim = { startSeconds: 0.2, endSeconds: 0.6 }
+    const trim = {
+      startSeconds: 0.2,
+      endSeconds: 0.6,
+      fart: { startSeconds: 0.2, endSeconds: 0.6 }
+    }
     account.placeAndTrim(recording.id, { placedPitch: 36, trim })
     await page.store.placeRecording(recording.id, { placedPitch: 38 })
     await page.sync.syncOnce('user-a')
@@ -593,7 +609,11 @@ describe('uploading', () => {
     await page.store.placeRecording(recording.id, { placedPitch: 40 })
     await page.sync.syncOnce('user-a')
     account.place(recording.id, 45)
-    const trim = { startSeconds: 0.1, endSeconds: 0.5 }
+    const trim = {
+      startSeconds: 0.1,
+      endSeconds: 0.5,
+      fart: { startSeconds: 0.1, endSeconds: 0.5 }
+    }
     await page.store.placeRecording(recording.id, { trim })
     await page.sync.syncOnce('user-a')
     expect(requests('PATCH').map(s => s.json)).toEqual([{ trim }])
@@ -606,7 +626,11 @@ describe('uploading', () => {
   it('keeps both changes when two browsers change different fields offline', async () => {
     const recording = await recorded(1)
     await page.sync.syncOnce('user-a')
-    const trim = { startSeconds: 0.3, endSeconds: 0.7 }
+    const trim = {
+      startSeconds: 0.3,
+      endSeconds: 0.7,
+      fart: { startSeconds: 0.3, endSeconds: 0.7 }
+    }
     account.offline = true
     await page.store.placeRecording(recording.id, { trim })
     await page.sync.syncOnce('user-a')
@@ -631,7 +655,11 @@ describe('uploading', () => {
 
   it('trims a Recording on the account that was trimmed while it uploaded', async () => {
     const recording = await recorded(1)
-    const trim = { startSeconds: 0.1, endSeconds: 0.4 }
+    const trim = {
+      startSeconds: 0.1,
+      endSeconds: 0.4,
+      fart: { startSeconds: 0.1, endSeconds: 0.4 }
+    }
     account.intercept = async sent => {
       if (sent.method === 'PUT') await page.store.placeRecording(recording.id, { trim })
       return undefined
@@ -848,7 +876,11 @@ describe('reading the account', () => {
     account.add('recordings', recording, wav(5))
     await page.sync.syncOnce('user-a')
     const shown = [{ ...recording, analysis: { state: 'analyzing' } as const }]
-    const trim = { startSeconds: 0.2, endSeconds: 0.6 }
+    const trim = {
+      startSeconds: 0.2,
+      endSeconds: 0.6,
+      fart: { startSeconds: 0.2, endSeconds: 0.6 }
+    }
     account.placeAndTrim(recording.id, { trim })
     const changes: LibraryChange[] = []
     page.sync.onLibraryChanged(change => changes.push(change))
@@ -865,7 +897,9 @@ describe('reading the account', () => {
 
     refuse('PATCH', 503, 'unavailable')
     await page.store.placeRecording(recording.id, { trim: null })
-    account.placeAndTrim(recording.id, { trim: { startSeconds: 0.3, endSeconds: 0.5 } })
+    account.placeAndTrim(recording.id, {
+      trim: { startSeconds: 0.3, endSeconds: 0.5, fart: { startSeconds: 0.3, endSeconds: 0.5 } }
+    })
     await page.sync.syncOnce('user-a')
     expect((await page.store.loadRecordings())[0].trim).toBeNull()
     // A Worker from before #293 lists the Recording without a Trim: it stays.

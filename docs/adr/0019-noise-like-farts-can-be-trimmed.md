@@ -13,23 +13,24 @@ They chose design B of #293's mockups the same day and settled the following:
    - For a screen reader the waveform is a slider ("Play Recording 3 from a spot"), and the arrow keys move a twelfth of it.
 2. **The picker zooms to the fart.**
    - Its waveform shows the fart with a little of the take on either side. Under it, the whole take is drawn small, with a box where the zoom is.
-   - Its play button plays just the fart: the one analysis found, or the Trim.
+   - Its play button plays just the fart: the one analysis found, or what's between the handles.
 3. **Trim keeps part of a Noise-like fart.**
    - The picker's Trim button shows two handles, "Where the fart starts" and "Where the fart ends", with a readout ("0.89 s to 2.08 s"). A handle moves in 0.01 s steps, and the two stay at least 0.05 s apart.
-   - "Save trim" keeps the Trim. So does "Place at E3" or "Move to G2" when the handles have moved.
+   - "Save trim" keeps the Trim: exactly where the handles are. So does "Place at E3" or "Move to G2" when the handles have moved. If the Trim can't be saved, the picker stays open and says so.
    - "Reset" puts the handles back on the fart Farty found. With them there, "Remove trim" takes the Trim off.
    - Only a Noise-like or placed Recording can be trimmed, since only those have the picker (ADR 0017). A Trim stays whether the fart is placed or left out.
 4. **A Trim plays everywhere.**
-   - The row plays and draws only the Trim, and says "Trimmed" under the name. The picker and Songs play the Trim too.
-   - The fart's length on screen and the length rule (ADR 0011) measure the Trim.
+   - The row plays and draws only the Trim's handles, and says "Trimmed" under the name. The picker plays them too, so what the user heard before saving is what the row plays.
+   - Songs play the fart found between the handles (rule 5). The fart's length on the row and the length rule (ADR 0011) measure that fart, the part Songs play.
    - This is the one exception to ADR 0016's "the Recordings tab plays the whole take". An untrimmed Recording behaves as before.
-5. **The handles say where to look; the fart is found between them.**
+5. **Songs find the fart between the handles.**
    - `trimBounds()` in `analysis/trimming.ts`, like `trim_bounds()` in the reference's `engine.py`, cuts the take at the handles, at whole samples of the 44.1 kHz audio. It then finds the fart in that part as `noteSegment()` finds a Recording's fart (ADR 0016). The start moves to just before the attack, the first 5 ms frame within 12 dB of the part's peak, less 8 ms. The end moves to where the fart fades out.
-   - So a Trim always lies within its handles, and its onset lands on the beat as an untrimmed fart's does.
-   - The Trim found is the one stored, so the handles open there next time. When it is the fart analysis found, to within 5 ms, nothing is stored (`samePart()`).
+   - So the fart Songs play always lies within the handles, and its onset lands on the beat as an untrimmed fart's does.
+   - Save stores both: the handles exactly as the user left them, and the fart found between them (`RecordingTrim`, with `fart`), found once in the analysis worker when the Trim is saved. The handles open where the user left them next time. A Trim is stored even when its fart is the one analysis found: the handles still change what the row plays.
+   - Reset puts the handles back on the fart analysis found, and with them there, "Remove trim" takes the Trim off. That is the only way a Trim is dropped.
 6. **Songs cut a trimmed fart at its Trim.**
-   - `renderSource()` cuts the Recording at the Trim's samples instead of at the fart analysis found. The per-note cut, fade, gain and 25 ms gap stay as ADR 0012 set them.
-   - Auto-map counts the Trim's length (`placedAutoMapRecording()` with `trimSeconds()`), and so does Pitch Coverage (`fartSeconds()`).
+   - `renderSource()` cuts the Recording at the samples of the fart between the handles (`songTrim()`) instead of at the fart analysis found. The per-note cut, fade, gain and 25 ms gap stay as ADR 0012 set them.
+   - Auto-map counts that fart's length (`placedAutoMapRecording()` with `trimSeconds()`), and so does Pitch Coverage (`fartSeconds()`).
    - In the reference, `trimmed()` makes the same `Source` and `test_trim.py` checks it.
    - A Trim is a cut of the Recording, played at its own pitch and speed. Songs stay fart-only (ADR 0004, ADR 0012).
 7. **A Trim doesn't re-read pitch.**
@@ -38,9 +39,9 @@ They chose design B of #293's mockups the same day and settled the following:
    - If a new analysis finds the fart Melodic, the Trim goes with the Placed Pitch (`trimOf()`). On a placed Recording both stay in use, since a placement outlasts a Recording Pitch found later (ADR 0017). On one that isn't placed, the Trim is kept but not used, and the fart plays as analysis found it. In the reference, `trimmed(..., placed_by_ear=True)` trims a Melodic Recording that is placed.
    - A Re-scan reads the whole take, never the Trim, as every analysis does.
 8. **The saved take never changes, and the Trim is stored beside it.**
-   - A Trim is `{ startSeconds, endSeconds }`: seconds of the whole take, at the 44.1 kHz samples analysis reads, with the end exclusive (`Trim` in `recordings.ts`).
+   - A Trim is `{ startSeconds, endSeconds, fart: { startSeconds, endSeconds } }`: the handles and the fart between them, in seconds of the whole take, at the 44.1 kHz samples analysis reads, with each end exclusive (`RecordingTrim` in `recordings.ts`).
    - **IndexedDB.** `trim` is an optional field on the Recording, a Trim or null, kept apart from its analysis.
-   - **D1.** `recordings` has nullable `trim_start_seconds` and `trim_end_seconds` columns (`real`, migration 0006, after #291's 0005). A Recording has both or neither.
+   - **D1.** `recordings` has nullable `trim_start_seconds`, `trim_end_seconds`, `trim_fart_start_seconds` and `trim_fart_end_seconds` columns (`real`, migration 0006, after #291's 0005). A Recording has all four or none. The server refuses a Trim whose fart isn't within its handles.
    - **Sync.** A Trim goes through the same outbox op as a Placed Pitch, `place`, merged like a rename. The entry records which fields changed (`fields` on the outbox entry), and a later `place` adds its fields to them (`mergeOutbox()`). When the op is sent, `PATCH /api/recordings/{id}/` uploads the Recording's current value of only those fields. The PATCH takes either field or both, and a field left out stays as it is. So a pitch change never sends back this browser's old Trim over another browser's newer one, and a trim never resends an old Placed Pitch. An entry without `fields` was queued by code from before #293, whose `place` only ever changed the Placed Pitch, so it sends `{ placedPitch }` alone (`placedFields()`). While a `place` waits, the library read keeps this browser's value of the fields it changed and takes the account's for the other. An upload carries `trim` too, and the library read returns it.
    - **`DB_VERSION` moves to 6,** with no store changed. Code from before #293 shares the browser's database, and it would undo or skip Trims. It would send a `place` op that a current tab queued for a Trim as `{ placedPitch }` alone, and settle it, so the Trim never reaches the account. It would also read the account's changes without keeping their Trims, and move its cursor past them. Version 6 shuts that code out as version 4 did (ADR 0015): its connection closes, and it can't open the library again (`VersionError`). The upgrade also sets the cursor back to 0 (`readEverythingAgain`), so each browser reads its whole library once, with the Trims another browser saved.
 

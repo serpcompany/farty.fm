@@ -18,7 +18,7 @@ import {
   type PlacedField,
   queueStamp
 } from './outbox'
-import type { AnalysisState, Recording, Trim } from './recordings'
+import type { AnalysisState, Recording, RecordingTrim } from './recordings'
 import { reportError } from './telemetry/errors'
 import type { Toot } from './toot'
 
@@ -368,7 +368,7 @@ export async function saveAnalysis(id: string, analysis: AnalysisState): Promise
  * What the picker changes on a Recording: its Placed Pitch (ADR 0015) and its Trim (ADR 0019),
  * either of them null to take it off. A field left out stays as it is.
  */
-export type Placement = { placedPitch?: number | null; trim?: Trim | null }
+export type Placement = { placedPitch?: number | null; trim?: RecordingTrim | null }
 
 /**
  * Places a Noise-like Recording on a note by ear, or takes it off with null (ADR 0015), trims it
