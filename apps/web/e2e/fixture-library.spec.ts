@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test'
 
 // The Fixture Library loader on Profile, in the Staging build only (`pnpm build:staging` copies the
-// fixtures and turns the loader on). Loading it unlocks 11 of the 12 Songs: Amazing Grace's 2.98 s
-// note outlasts every fixture, even moved down an octave (ADR 0011).
+// fixtures and turns the loader on). Loading it unlocks all 12 Songs, since Songs play every burst
+// of a fart (ADR 0016). Without fixture 002, Amazing Grace's 2.98 s note outlasts every fixture
+// near it (ADR 0011).
 
 test.beforeEach(async ({ request }) => {
   // `next dev` never shows the loader, even with fixtures left in public/ by a Staging build.
@@ -39,33 +40,38 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
   })
   await expect(library.getByTestId('fixture-library-count')).toHaveText('32 of 32')
 
-  // A Recording shows its fart's length, rounded down, which "Needs" is measured against (#227):
-  // fixture 002 is Recording 1, a 1.799 s fart in a 4.2 s take.
-  await page
-    .getByRole('navigation', { name: 'Tabs' })
-    .getByRole('link', { name: 'Recordings', exact: true })
-    .click()
+  // A Recording shows its fart's length, rounded down, which "Needs" is measured against (#227).
+  // Fixture 002 is Recording 1: a 4.039 s fart in a 4.2 s take, every burst of it (ADR 0016).
+  const tabs = page.getByRole('navigation', { name: 'Tabs' })
+  const recordings = tabs.getByRole('link', { name: 'Recordings', exact: true })
+  const compose = tabs.getByRole('link', { name: 'Compose', exact: true })
+  await recordings.click()
   const first = page
     .getByTestId('recording-row')
     .filter({ has: page.getByRole('button', { name: /^Recording 1,/ }) })
-  await expect(first.getByTestId('recording-length')).toHaveText('1.7 s')
+  await expect(first.getByTestId('recording-length')).toHaveText('4.0 s')
 
-  await page
-    .getByRole('navigation', { name: 'Tabs' })
-    .getByRole('link', { name: 'Compose', exact: true })
-    .click()
-  // Songs play each fart raw, at its own length (ADR 0012), so Jingle Bells, Row, Row, Row Your
-  // Boat, Amazing Grace and Auld Lang Syne each have a note longer than any fixture near its pitch.
-  await expect(page.getByRole('heading', { name: 'Unlocked · 8' })).toBeVisible({
+  // Songs play every burst of a fart (ADR 0016), so the whole library unlocks all 12 Songs.
+  await compose.click()
+  await expect(page.getByRole('heading', { name: 'Unlocked · 12' })).toBeVisible({
     timeout: 60_000
   })
-  await expect(page.getByRole('heading', { name: 'Locked · 4', exact: true })).toBeVisible()
+  await expect(page.getByTestId('locked-songs')).toHaveCount(0)
+
+  // Without Recording 1, Amazing Grace's 2.98 s note on E3 outlasts every fixture near it.
+  await recordings.click()
+  await page.getByRole('button', { name: 'Delete Recording 1', exact: true }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Delete Recording' }).click()
+  await expect(first).toHaveCount(0)
+  await compose.click()
+  await expect(page.getByRole('heading', { name: 'Unlocked · 9' })).toBeVisible({
+    timeout: 60_000
+  })
+  await expect(page.getByRole('heading', { name: 'Locked · 3', exact: true })).toBeVisible()
   const amazing = page.getByRole('button', { name: 'Amazing Grace' })
   await expect(amazing).toHaveAccessibleDescription(
-    'Locked. 4 of 6 notes covered. Needs D3 (1.2 s) and F3 (3.0 s)'
+    'Locked. 5 of 6 notes covered. Needs E3 (3.0 s)'
   )
   await amazing.click()
-  await expect(page.getByTestId('locked-song-needs')).toHaveText(
-    'Needs a fart near D3 (1.2 s) and F3 (3.0 s).'
-  )
+  await expect(page.getByTestId('locked-song-needs')).toHaveText('Needs a fart near E3 (3.0 s).')
 })

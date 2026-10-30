@@ -15,6 +15,8 @@ Update 2026-10-28 (ADR 0012, #226): Songs play every fart raw, so the rule uses 
 
 Update 2026-10-28 (#227): the Recordings screen and Song Creator show each Recording's fart length, the gesture this rule measures, not the whole take. They round it down to 0.1 s, as the length in 3 is rounded up, so a fart shown as long as a missing note says is long enough for it.
 
+Update 2026-10-30 (ADR 0016, #276): the gesture is now the whole fart, every burst kept, so ten fixtures last longer (`002` 1.80 to 4.04 s, `084` 0.64 to 1.97 s). With the Fixture Library 32 more catalog Songs unlock, among them the 4 app Songs that were locked, so all 12 app Songs unlock. The Recordings screen still shows the gesture's length, now with every burst.
+
 The reference engine (`fills()` and `needed_seconds()` in `tools/melody-lab/engine.py`) defines the rule, and Auto-map in `apps/web/src/lib/engine/auto-map.ts` matches it. `fixtures/golden/` (format 4) records each locked Song's `missing` notes with their lengths.
 
 ## Why

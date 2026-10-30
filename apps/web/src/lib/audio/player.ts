@@ -1,4 +1,4 @@
-import { audioContext, setPlaybackSession } from './context'
+import { audioContext, isClosed, setPlaybackSession, whenClosing } from './context'
 
 /**
  * Each sound's decode, by key, so replaying doesn't decode again and taps during a decode share it.
@@ -6,7 +6,8 @@ import { audioContext, setPlaybackSession } from './context'
  */
 const decoded = new Map<string, Promise<AudioBuffer>>()
 
-let current: AudioBufferSourceNode | null = null
+/** The sound playing, and what tells its play it ended. */
+let current: { source: AudioBufferSourceNode; ended: () => void } | null = null
 
 /**
  * Counts every play and stop. A sound still loading when another starts, or when playback stops,
@@ -21,9 +22,10 @@ export type Segment = { start: number; end: number }
 
 /**
  * Plays `wav` (or just `segment` of it, in seconds), like the iPhone app's single player.
- * `onEnded` runs when the sound finishes, when `stopPlayback` stops it or its load, or when it
- * can't load. Starting another sound stops this one without calling its `onEnded`: the later play
- * now owns the player, even when it plays the same Recording.
+ * `onEnded` runs once: when the sound finishes, when `stopPlayback` stops it or its load, when its
+ * context closes (`whenClosing`), or when it can't load. Starting another sound stops this one
+ * without calling its `onEnded`: the later play now owns the player, even when it plays the same
+ * Recording.
  */
 export async function play(
   key: string,
@@ -53,18 +55,24 @@ export async function play(
       decoding = started
     }
     const buffer = await decoding
-    if (request !== requests) {
+    // A context closed or closing since the load began, as one replaced after a hide
+    // (`audioContext`), plays nothing: a sound started on it would never end.
+    if (request !== requests || isClosed(context)) {
       ended()
       return
     }
     const source = context.createBufferSource()
     source.buffer = buffer
     source.connect(context.destination)
-    source.onended = () => {
-      if (current === source) current = null
-      ended()
+    const playing = {
+      source,
+      ended: () => {
+        if (current === playing) current = null
+        ended()
+      }
     }
-    current = source
+    source.onended = playing.ended
+    current = playing
     if (segment) {
       const start = Math.max(0, Math.min(segment.start, buffer.duration))
       source.start(0, start, Math.max(0, Math.min(segment.end, buffer.duration) - start))
@@ -78,11 +86,31 @@ export async function play(
 
 export function stopPlayback(): void {
   requests += 1
+  endCurrent()
+}
+
+// Closing a context never fires `onended` on what plays on it, so the sound is stopped and its end
+// reported here first.
+whenClosing(context => {
+  if (current?.source.context === context) endCurrent()
+})
+
+/**
+ * Stops the sound playing and reports its end here, not from `onended`: a stop on a suspended
+ * context, as on iPhone when the page hides, waits for a clock that stands still, and if the
+ * context then closes, `onended` never fires.
+ */
+function endCurrent(): void {
   if (!current) return
-  const source = current
+  const { source, ended } = current
   current = null
-  // onended still fires, which tells the caller playback stopped.
-  source.stop()
+  source.onended = null
+  try {
+    source.stop()
+  } catch {
+    // It had already stopped.
+  }
+  ended()
 }
 
 export function forgetDecoded(key: string): void {

@@ -12,6 +12,8 @@ Until #226 every note resampled its fart to the note's pitch and held it there, 
    - **Timing:** at least 95% of onsets within ±50 ms, and no second attack inside a note. Unchanged.
    - **Reported, not gated:** per Song, the typical distance from the melody (`median_abs_cents`, pYIN's per-note median) and a contour score (`contour_pct`): the share of the melody's note-to-note steps that the render moves the same way.
 
+Update 2026-10-30 (ADR 0016, #276): rendering trims only the silence around a fart. It no longer cuts a fart at its second burst: every burst plays, up to the note's end. "No second attack inside a note" now means one the note's own fart doesn't have: `evaluate.py` leaves out a re-attack within 30 ms of one in the dry stretch the note plays. Every app Song unlocks with the Fixture Library, and every unlocked catalog Song still passes the bar.
+
 `render()` and `evaluate.py` in `tools/melody-lab/` define this, and `apps/web/src/lib/engine/` matches them. `evaluate.py` measures fidelity with YIN frame by frame: on each note's loud frames, the pitch it reads in the render less the pitch it reads on the same frame of the dry fart, the stretch the note plays. The note is faithful when the median difference is within ±50 cents. The PDMX import's render gate (`tools/catalog/import_pdmx.py`) uses the same bar.
 
 ## Why
