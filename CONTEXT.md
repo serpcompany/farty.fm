@@ -11,7 +11,7 @@ A single fart audio clip captured and saved by a user. One Recording must not co
 _Avoid_: Sample, sound, track, clip
 
 **Recording Analysis**:
-The characteristics derived once from a saved Recording and preserved with it, such as its gesture and its pitch. The gesture is the whole fart, every burst of it, with only the silence before and after trimmed: Songs play it. The pitch is read from its first burst, so a second one can't blur it (ADR 0016). The saved file stays the whole take, and the Recordings tab plays all of it. Saving and playback never wait on it.
+The characteristics derived once from a saved Recording and preserved with it, such as its gesture and its pitch. The gesture is the whole fart, every burst of it, from just before its attack to where it fades out, so a quieter lead-in before the attack is trimmed too (#287). It is never cut at a second burst. Songs play it. The pitch is read from its first burst, so a second one can't blur it (ADR 0016). The saved file stays the whole take, and the Recordings tab plays all of it. Saving and playback never wait on it.
 _Avoid_: Live analysis, reanalysis
 
 **Melodic Recording**:

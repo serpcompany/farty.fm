@@ -5,8 +5,9 @@ import { ANALYSIS_VERSION } from './analysis/version'
 /** What Recording Analysis found in a Recording, as the iPhone app's `SavedAnalysis`. */
 export type Analysis = {
   /**
-   * Where the fart starts and ends in the file, in seconds: the take less the silence before and
-   * after it, every burst kept. Songs play this much (ADR 0016).
+   * Where the fart starts and ends in the file, in seconds: from just before its attack (a quieter
+   * lead-in is trimmed too, #287) to where it fades out, never cut at a second burst. Songs play
+   * this much (ADR 0016).
    */
   gestureStartSeconds: number
   gestureEndSeconds: number

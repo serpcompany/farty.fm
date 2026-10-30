@@ -7,10 +7,10 @@ Until #276, Recording Analysis cut each Recording to a "single clean gesture" (A
 They chose this outcome the same day:
 
 1. **The Recordings tab plays the whole take.** Every Recording plays start to end, as recorded, and its waveform shows the whole file. The saved file was already the whole take, and it stays that way.
-2. **Songs play every burst.** In Songs a fart is trimmed only of the silence around it, and never cut short at a second burst. A Recording with several bursts plays them all, up to the note's end. The renderer's per-note cut, fade, gain and 25 ms gap stay as ADR 0012 set them. The gesture now runs from the attack to the fade-out: it ends after the last 50 ms level within 30 dB of the peak.
+2. **Songs play every burst.** In Songs a fart is never cut short at a second burst. It starts at its attack (decision 4), so a quieter lead-in is trimmed with the silence before it (#287). A Recording with several bursts plays them all, up to the note's end. The renderer's per-note cut, fade, gain and 25 ms gap stay as ADR 0012 set them. The gesture now runs from the attack to the fade-out: it ends after the last 50 ms level within 30 dB of the peak.
 3. **The pitch is read from the first burst.** Recording Analysis keeps two extents. The *pitch body* runs from the attack to the first slow re-attack (today's cut, `pitch_end`). The pitch contour, Recording Pitch, audition and settle time read only the pitch body. The *gesture* is what Songs play, and what the length rule (ADR 0011) and Auto-map measure. `rms_db` is the whole gesture's.
 4. **The attack still starts the fart.** The start stays the first 5 ms frame within 12 dB of the peak, less 8 ms. The start is not moved back to the first sound above the silence (see Why).
-5. **The bar counts only re-attacks the renderer adds.** ADR 0012's "no second attack inside a note" now means a second attack that the note's own fart doesn't have. `evaluate.py` counts a re-attack in a note (`notes_with_retrigger`) only when the dry stretch the note plays has none within 30 ms of it (`REATTACK_MATCH_S`). A new count, `notes_with_second_burst`, reports the notes whose fart plays a second burst of its own.
+5. **The bar counts only re-attacks the renderer adds.** ADR 0012's "no second attack inside a note" now means a second attack that the note's own fart doesn't have. `evaluate.py` finds every re-attack in a note's render and every re-attack in the dry stretch of the note's own fart, and counts the note (`notes_with_retrigger`) when any re-attack in the render has none in the dry stretch within 30 ms of it (`REATTACK_MATCH_S`, `added_reattacks()`). So a fart re-triggered after its own second burst still counts. A new count, `notes_with_second_burst`, reports the notes whose fart plays a second burst of its own.
 
 `note_segment()` in `tools/melody-lab/engine.py` defines both extents, and `apps/web/src/lib/analysis/trimming.ts` matches it (`Gesture.end` and `Gesture.pitchEnd`).
 
@@ -43,7 +43,7 @@ Playing a lead-in before the beat, so that the attack still lands on it, would k
 
 ### The bar
 
-Under ADR 0012's bar, which counts every re-attack heard in a note, playing every burst fails 102 of the 118 unlocked Songs. Each failure is a fart's own second burst, which the owner now wants played. The new bar still catches what it was for: a re-attack the renderer makes, such as a fart re-triggered inside a note. No unlocked Song has one.
+Under ADR 0012's bar, which counts every re-attack heard in a note, playing every burst fails 102 of the 118 unlocked Songs. Each failure is a fart's own second burst, which the owner now wants played. The new bar still catches what it was for: a re-attack the renderer makes, such as a fart re-triggered inside a note, before or after the fart's own second burst (`test_reattack.py`). No unlocked Song has one.
 
 ### What moves on the Fixture Library
 

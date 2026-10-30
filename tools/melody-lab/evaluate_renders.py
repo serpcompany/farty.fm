@@ -10,7 +10,8 @@ run_all.py's line, then the golden metrics for the same Song on the full library
 it:
 
 - the bar (evaluate.BAR, ADR 0012): at least 94% of notes within +-50 cents of their fart's
-  own pitch, at least 95% of onsets within +-50 ms, and no second attack inside a note;
+  own pitch, at least 95% of onsets within +-50 ms, and no second attack inside a note
+  that the note's own fart doesn't have (ADR 0016);
 - no worse than golden on within_50c_of_fart_pct, onsets_on_time_pct and
   notes_with_retrigger.
 
