@@ -33,7 +33,7 @@ Analysis is deterministic, so running the same analysis again finds the same thi
 | Recording | Window from | Recording Pitch | Confidence, head → second window | Audition (40-cent bar) | Settles at | YIN over the window's kept frames | YIN over all the window's frames |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `009` | 0.290 s | MIDI 30.53, G1 −47 cents | 0.10 → 0.30 | Passes at 0.35 s (+0 cents). 0.12 s reads +2,130 cents, and 0.2 s is unvoiced | 0.493 s | −0.5 cents, 43% within 50 cents (30 frames) | +183 cents, 27% (77 frames) |
-| `080` | 0.488 s | MIDI 31.33, G1 +33 cents | 0.00 → 0.71 | Passes at 0.6 s (+30 cents). Shorter lengths read 880 to 900 cents off | 0.488 s | −4.8 cents, 49% (66 frames) | −4.5 cents, 42% (77 frames) |
+| `080` | 0.488 s | MIDI 31.33, G1 +33 cents | 0.00 → 0.71 | Passes at 0.6 s (+30 cents). Shorter lengths read 880 to 900 cents off | 0.488 s | −4.8 cents, 48% (32 of 66 frames) | −4.5 cents, 42% (77 frames) |
 
 - The YIN columns are the median distance of `evaluate.py`'s `yin_frames()` from the Recording Pitch, and the share of frames within 50 cents of it. The kept frames are the ones the estimate reads. Over the whole first burst YIN reads `009` +506 cents off (169 frames) and `080` +89 cents (341 frames).
 
