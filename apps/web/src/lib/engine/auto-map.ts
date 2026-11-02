@@ -189,7 +189,9 @@ export function arrange(song: Song, recordings: readonly AutoMapRecording[]): Ar
   for (const p of pitches) {
     const notes = song.notes.filter(n => n.pitch === p)
     weight.push(pythonSum(notes.map(n => n.dur)))
-    noteSeconds.push(notes.map(n => n.dur * spb - GAP_SECONDS))
+    // A note shorter than the gap has no time left to sound, not a negative time: a negative one
+    // made `unsettledCost` about -1e8 a note, so `solve`'s penalties no longer ranked choices (#332).
+    noteSeconds.push(notes.map(n => Math.max(0, n.dur * spb - GAP_SECONDS)))
     longest.push(Math.max(...noteSeconds[noteSeconds.length - 1]))
   }
 
@@ -292,10 +294,11 @@ export function fills(recordingSeconds: number, longestNoteSeconds: number): boo
 /**
  * The shortest Recording, at its own pitch, that covers a pitch whose longest note lasts
  * `longestNoteSeconds`: `NOTE_FILL` × that, rounded up to 0.1 s ("Needs a fart near F3 (1.2 s)").
- * The 1e-9 keeps float noise from adding 0.1 s to an exact tenth, as the reference does.
+ * The 1e-9 keeps float noise from adding 0.1 s to an exact tenth, as the reference does. A note
+ * shorter than the gap needs 0 s, not the −0 that `Math.ceil` gives (Python's `math.ceil` gives 0).
  */
 export function neededSeconds(longestNoteSeconds: number): number {
-  return Math.ceil(NOTE_FILL * longestNoteSeconds * 10 - 1e-9) / 10
+  return Math.max(0, Math.ceil(NOTE_FILL * longestNoteSeconds * 10 - 1e-9) / 10)
 }
 
 /**
@@ -455,7 +458,8 @@ class Table {
   /**
    * The best choice for the pitches after `fixed` (Recording indexes or null, in pitch order), as
    * one assignment problem. Penalties larger than any cost make it minimise uncovered pitches
-   * first, then Octave Moves, then cost.
+   * first, then Octave Moves, then cost. Costs are never negative, so `bound` is at least any
+   * choice's cost.
    */
   solve(fixed: readonly (number | null)[]): { key: Key; choice: (number | null)[] } {
     const first = fixed.length
@@ -512,6 +516,9 @@ class Table {
           break
         }
       }
+      // The last solve was optimal, so one of its choices for pitch i is too. Without one, the
+      // next pitch's Recording would land on this pitch.
+      if (fixed.length === i) throw new Error(`Auto-map found no optimal choice for pitch ${i}`)
     }
     return fixed
   }
