@@ -55,6 +55,8 @@ function handles(request) {
   // offline, so the worker neither precaches them from `/`'s markup nor keeps them. Phones never
   // download them.
   if (url.pathname.startsWith('/lander/')) return false
+  // Shared links (ADR 0020): once a link is stopped or taken down, no copy of its page opens.
+  if (url.pathname.startsWith('/u/')) return false
   if (request.mode === 'navigate') return true
   if (catalogFile.test(url.pathname)) return true
   return url.pathname !== '/sw.js' && shellFile.test(url.pathname)

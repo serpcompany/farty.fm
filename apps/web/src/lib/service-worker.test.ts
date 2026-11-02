@@ -422,6 +422,8 @@ describe('the service worker', () => {
       expect(await worker.request(path), path).toBeUndefined()
     }
     expect(await worker.request('/', { mode: 'navigate', method: 'POST' })).toBeUndefined()
+    // A shared Recording's page: a stopped link never opens from a copy (ADR 0020).
+    expect(await worker.request('/u/maya/r/8k2fq3m9x1ab/', { mode: 'navigate' })).toBeUndefined()
     expect(worker.kept()).toEqual([])
   })
 
