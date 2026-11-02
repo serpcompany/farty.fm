@@ -291,3 +291,89 @@ Jana Gana Mana | the same as Indian National Anthem: India's Prevention of Insul
 
 # An offensive title
 Le petit negre | an offensive title
+
+# Reviewed for batch 05 (#324): the top 200 of the ranking after batch 04, read against each title's Artist in ranking.md.
+# Under copyright, or unsure (batch 05)
+The Free Software Song | under copyright: Richard Stallman, 1990s
+Limehouse Blues | under copyright: lyricist Douglas Furber (died 1961), 1922
+Thy Word Is a Lamp unto My Feet | under copyright: Amy Grant and Michael W. Smith, 1984, share the title; unsure which the scores carry
+Kumbaya | unsure: first published in the 1930s and arranged in 1958 (Peter, Paul and Mary)
+L'Eau vive | under copyright: Guy Béart, 1958
+Gallo Ciego | under copyright: Agustín Bardi (died 1963)
+Shortnin' Bread | unsure: the common tune is Jacques Wolfe's 1928 setting (died 1973)
+Xochipitzahuatl | unsure of the composer and date
+The Bluebell Polka | unsure of the composer and date; probably 20th century
+Funkerlied | unsure: a German song of the 1930s or 1940s
+Tom Dooley | unsure: the common tune is the Kingston Trio's 1958 arrangement
+Black Is The Colour | under copyright: John Jacob Niles (died 1980), 1930s
+Midnight On The Water | unsure: Luke Thomasson's 1920s fiddle tune, composer's death date unknown
+Will Ye Go Lassie Go | under copyright: Francis McPeake (died 1971), 1957
+Molly On The Shore | under copyright: Percy Grainger (died 1961)
+Byssan lull | unsure: Evert Taube (died 1976) is its named author
+Teu Santo Nome | under copyright: a modern worship song by Adoradores Novo Tempo
+The Fields of Athenry | under copyright: Pete St John, 1979
+Stern über Bethlehem | unsure: Alfred Hans Zoller, 1960s
+Swanee | under copyright: George Gershwin (died 1937) with lyricist Irving Caesar (died 1996), 1919
+79th's Farewell to Gibraltar | unsure of the composer's death date (a Pipe Major MacDonald)
+Russian Sailor's Dance | under copyright: Reinhold Glière (died 1956), 1927
+Hilf o Himmel | unsure of the composer and date
+Raglan Road | under copyright: Patrick Kavanagh (died 1967), 1946
+Mistletoe Waltz | unsure of the composer and date
+Road to the Isles | unsure: lyricist Kenneth MacLeod died in 1955 and the tune's composer is unclear
+Blessed Be the Name | unsure: Matt Redman's "Blessed Be Your Name" (2002) and older hymns share the title
+Red is the Rose | under copyright: lyrics of the 1970s on the Loch Lomond air
+Michael Turner's Waltz | unsure of the composer and date; the score's artist is Mozart
+Salzburg | unsure: the title names several hymn tunes and pieces
+
+# Not one tune (batch 05)
+Bwv 1005 | a whole multi-movement work (Violin Sonata No. 3)
+Ich habe genug BWV 82 | a whole cantata
+Musikalisches Würfelspiel K.516f | a dice game that builds many minuets
+Arabesque | many pieces share the title (Debussy has two, Schumann and Burgmuller one each)
+Easter Hymn | many pieces share the title (Mascagni, Lyra Davidica and others)
+Sehnsucht | many songs share the title (Schubert alone set several)
+Basic Blues | a generic title, no one piece
+Memes | not a piece
+Wanderers Nachtlied | many songs set the poem (Schubert, Hauptmann and others)
+New Year's Day | a generic title (a hymn text, U2 and others)
+Romance d'amour | many pieces share the title
+Revelation | a generic title, no one piece we can tell
+Benedicamus Domino | many chants and settings share the title
+Tantum ergo Sacramentum | many settings share the title
+Mazurka Op.1 No.1 | many composers have an Op. 1 No. 1 mazurka
+Warschauer Mazurka | names no one piece we can tell
+Sangen | a generic title ("The Song"), no one piece we can tell
+
+# The same tune as a Song in the catalog (batch 05)
+Tochter Zion freue dich | the same tune as See the Conqu'ring Hero comes (Handel, Judas Maccabaeus)
+Alphabet Song | the same tune as Twinkle, Twinkle, Little Star
+
+# More for batch 05, from the titles that moved up (#324)
+Moscow Nights | under copyright: Vasily Solovyov-Sedoi (died 1979), 1955
+Alabama Jubilee | under copyright: lyricist Jack Yellen (died 1991), 1915
+Mood Indigo | under copyright: Duke Ellington (died 1974), 1930
+Eu Sei Que Vou Te Amar | under copyright: Antonio Carlos Jobim (died 1994), 1959
+The Whiffenpoof Song | under copyright: lyricist Meade Minnigerode (died 1967), 1909
+The Christmas Stars Are Shining | unsure of the composer and date
+My Paddle's | unsure of the composer and date; a camp song of the 1900s
+Waltz Facile | unsure of the composer and date
+My Dream Of You | unsure: a generic title, no one piece we can tell
+Bears in the Moonlight | unsure of the composer and date; probably modern
+James' | under copyright: Pat Metheny (living), 1990s
+Apollo Myth And Legend | under copyright: Rob Romeyn, modern
+Menuett and Trio | not one tune: many pieces share the title (Mozart has dozens)
+Humoresque | not one tune: many pieces share the title (Dvorak, Tchaikovsky, Schumann and others)
+Breton tune | not one tune: names no piece
+The Rake | not one tune: a generic title many tunes share
+Jig | not one tune: a generic title
+Caledonia | not one tune: Dougie MacLean's song (1977) and a hymn tune share the title
+Carnevale Di Venezia | the same tune as Carnival of Venice
+Oh Suzana | the same tune as Oh! Susanna
+Off to California | unsure: James Hill's tune, composer's death date unknown
+Lacrymosa | not one tune: many Requiems share the movement's title
+Beale St. Blues | under copyright: W. C. Handy (died 1958), 1917
+Chariots of Fire | under copyright: Vangelis, 1981
+The Unquiet Grave | unsure: the score is Gryphon's 1970s arrangement
+Night Walk | unsure: a modern piece by Rhythm Tengoku
+Baa Baa Black Sheep | the same tune as Twinkle, Twinkle, Little Star
+Pick a bale of cotton | unsure: known from Lead Belly's 1930s recordings and arrangements
