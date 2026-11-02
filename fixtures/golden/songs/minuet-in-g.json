@@ -1,0 +1,267 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 144,
+  "file": "midi/pdmx-minuet-in-g.mid",
+  "id": "minuet-in-g",
+  "import_args": {
+    "bpm": 144,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "minuet-in-g",
+    "chord_tones_dropped": 2,
+    "inner_voice_onsets_dropped": 6,
+    "note_count": 43,
+    "overlaps_clipped": 8,
+    "source_file": "catalog/midi/pdmx-minuet-in-g.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 17.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 20.5
+    },
+    {
+      "dur": 0.16666666666666666,
+      "pitch": 71,
+      "start": 21.0
+    },
+    {
+      "dur": 0.16666666666666666,
+      "pitch": 72,
+      "start": 21.166666666666668
+    },
+    {
+      "dur": 0.16666666666666666,
+      "pitch": 71,
+      "start": 21.333333333333332
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 21.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 21.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 26.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    66,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    78,
+    79
+  ],
+  "sha256": "d5c71150ee923895a6bfc271ae454366a360e7d70a9d7f021d3a77969b02caf9",
+  "title": "Minuet in G"
+}

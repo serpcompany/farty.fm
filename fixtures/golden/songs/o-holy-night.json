@@ -1,0 +1,164 @@
+{
+  "bar_lines": [
+    3.0,
+    9.0,
+    15.0,
+    21.0,
+    27.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 105,
+  "file": "midi/pdmx-o-holy-night.mid",
+  "id": "o-holy-night",
+  "import_args": {
+    "bpm": 105,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "o-holy-night",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 24,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-o-holy-night.mid",
+    "tempo_changes_ignored": 4,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 2.5
+    },
+    {
+      "dur": 2.5,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 8.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 14.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 17.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 20.5
+    },
+    {
+      "dur": 5.0,
+      "pitch": 62,
+      "start": 21.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 29.5
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    74
+  ],
+  "sha256": "cd491834b45066ccbb9f0cee62102bc2cb8f6fe0d97b44b157bf5aba2b4bc33f",
+  "title": "O Holy Night"
+}

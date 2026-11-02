@@ -116,11 +116,14 @@ describe('the renderer places every note as the reference does', () => {
       expect(songGain, id).toBeLessThanOrEqual(0.05 + 1e-9)
       worstGain = Math.max(worstGain, songGain)
 
+      // One check over every sample: an expect per sample is millions of calls across the catalog.
       let peak = 0
+      let notFinite = 0
       for (const s of rendered.samples) {
-        expect(Number.isFinite(s)).toBe(true)
-        peak = Math.max(peak, Math.abs(s))
+        if (!Number.isFinite(s)) notFinite++
+        else peak = Math.max(peak, Math.abs(s))
       }
+      expect(notFinite, id).toBe(0)
       expect(peak).toBeCloseTo(0.89, 6)
       lines.push(row(id, song.notes.length, songGain.toFixed(3), ms.toFixed(0)))
     })

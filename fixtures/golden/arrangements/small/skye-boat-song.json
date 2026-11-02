@@ -1,0 +1,66 @@
+{
+  "library": "small",
+  "max_abs_shift_semitones": null,
+  "metrics": null,
+  "missing": [
+    {
+      "seconds": 1.5,
+      "target_midi": 39
+    }
+  ],
+  "notes": null,
+  "octave_moves": 3,
+  "per_pitch": [
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 74,
+      "target_midi": 39
+    },
+    {
+      "octave_move": true,
+      "recording": "090",
+      "shift_semitones": -14.225920593660177,
+      "song_pitch": 76,
+      "target_midi": 41
+    },
+    {
+      "octave_move": true,
+      "recording": "009",
+      "shift_semitones": 13.474079406339825,
+      "song_pitch": 79,
+      "target_midi": 44
+    },
+    {
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": 1.574079406339827,
+      "song_pitch": 81,
+      "target_midi": 46
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": 1.5740794063398198,
+      "song_pitch": 83,
+      "target_midi": 48
+    },
+    {
+      "octave_move": true,
+      "recording": "022",
+      "shift_semitones": 10.674079406339814,
+      "song_pitch": 86,
+      "target_midi": 51
+    }
+  ],
+  "pitch_coverage": {
+    "covered": 5,
+    "total": 6
+  },
+  "plan_cost": 1069.3340581099912,
+  "render_settings": null,
+  "song": "skye-boat-song",
+  "transpose": -35,
+  "unlocked": false
+}

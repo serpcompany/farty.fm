@@ -45,12 +45,12 @@ describe('the Fixture Library', () => {
         analysis: { state: 'analyzed', analysis }
       })
     }
-    for (const song of songs) {
+    for (const [i, song] of songs.entries()) {
       const coverage = coverageOf(song, recordings)
       const golden = goldenArrangement('full', song.id)
-      // All 12: since every burst plays (ADR 0016), a fixture near each pitch is as long as its
-      // longest note (ADR 0011).
-      expect(coverage.unlocked, song.id).toBe(true)
+      // The iPhone app's 12, first on the ship list, all unlock: since every burst plays (ADR
+      // 0016), a fixture near each of their pitches is as long as its longest note (ADR 0011).
+      if (i < 12) expect(coverage.unlocked, song.id).toBe(true)
       expect(coverage.unlocked, song.id).toBe(golden.unlocked)
       expect(coverage.transposition, song.id).toBe(golden.transpose)
       for (const entry of golden.per_pitch) {

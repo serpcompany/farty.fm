@@ -14,7 +14,8 @@ import { onPhone } from './screens'
 // Unlocked Song's row and on a locked Song's sheet, the Favorites filter with search inside it,
 // the "Favorites first" order, both kept over a reload, and the heart in Song Creator.
 //
-// Mary Had a Little Lamb unlocks with fixtures 095, 017, 022 and 002 (`compose.spec.ts`).
+// Mary Had a Little Lamb unlocks with fixtures 095, 017, 022 and 002, with 4 more Songs, and Hot
+// Cross Buns at the third (`compose.spec.ts`).
 
 test.use({ permissions: ['microphone'] })
 
@@ -53,19 +54,26 @@ test('favorites Songs, filters and sorts by them, and keeps them over a reload',
   await signInByApi(page, newEmail(testInfo, 'favorites'))
   await page.reload()
 
-  // Four takes unlock Mary.
+  // Four takes unlock Mary and 4 more Songs; the third unlocks Hot Cross Buns, and a Result
+  // that unlocks offers Done, not Record another (`compose.spec.ts`).
   await tab(page, 'Record').click()
   for (const id of ['095', '017', '022', '002']) {
     await waitForOpenMicrophone(page)
     await fartAndRecord(page, id)
     await page.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByTestId('result-note')).toBeVisible()
-    if (id !== '002') await page.getByRole('button', { name: 'Record another' }).click()
+    if (id === '017' || id === '095') {
+      await page.getByRole('button', { name: 'Record another' }).click()
+    } else if (id === '022') {
+      await expect(page.getByTestId('result-progress')).toContainText('You unlocked Hot Cross Buns')
+      await page.getByRole('button', { name: 'Done' }).click()
+      await tab(page, 'Record').click()
+    }
   }
-  await expect(page.getByTestId('result-progress')).toContainText(`You unlocked ${MARY}`)
+  await expect(page.getByTestId('result-progress')).toContainText(`${MARY} · `)
   await page.getByRole('button', { name: 'Done' }).click()
   await tab(page, 'Compose').click()
-  await expect(page.getByRole('heading', { name: 'Unlocked · 1', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Unlocked · 6', exact: true })).toBeVisible()
 
   // No favorites yet: the filter says how to add one.
   const filter = page.getByRole('button', { name: 'Favorites', exact: true })

@@ -1,0 +1,187 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-liberty-bell.mid",
+  "id": "liberty-bell",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "liberty-bell",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 27,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-liberty-bell.mid",
+    "tempo_changes_ignored": 2,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.5,
+      "pitch": 64,
+      "start": 0.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 1.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 3.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 8.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 9.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 10.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 64,
+      "start": 12.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 13.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 15.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 20.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 77,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 23.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 73,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 29.5
+    }
+  ],
+  "pitches": [
+    64,
+    65,
+    66,
+    67,
+    73,
+    74,
+    75,
+    76,
+    77
+  ],
+  "sha256": "a3de9534e98538d218df3a6a1178296479aeb441fb6e594ac2adb311c4cf6cdf",
+  "title": "The Liberty Bell"
+}
