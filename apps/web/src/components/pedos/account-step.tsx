@@ -41,8 +41,9 @@ export function AccountStep() {
 }
 
 function Step() {
-  const { account, skipStep, finishSignIn } = useAccount()
+  const { account, skipStep, finishSignIn, stepReason } = useAccount()
   const again = account.status === 'expired'
+  const toShare = stepReason === 'share' && !again
   const [draft] = useState(readStepDraft)
   const [phase, setPhase] = useState(draft?.phase ?? 'email')
   const [email, setEmail] = useState(draft?.email ?? '')
@@ -193,12 +194,14 @@ function Step() {
               tabIndex={-1}
               className="text-3xl font-bold tracking-tight outline-none"
             >
-              {again ? 'Sign in again' : 'Keep your farts'}
+              {again ? 'Sign in again' : toShare ? 'Make a free account' : 'Keep your farts'}
             </h1>
             <p className="text-muted-foreground">
               {again
                 ? 'Your session ended. Your farts stay on this device until you sign in.'
-                : 'Make a free account to keep your farts.'}
+                : toShare
+                  ? 'You need one to share. It keeps your farts too.'
+                  : 'Make a free account to keep your farts.'}
             </p>
           </div>
 

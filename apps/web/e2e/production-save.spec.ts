@@ -52,23 +52,26 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
   await page.goto('/profile/')
   await signInByApi(page, newEmail(testInfo, 'production-save'))
 
-  // Four takes unlock Mary.
+  // Four takes unlock Mary, and Hot Cross Buns and 4 more Songs (#229).
   await page.goto('/')
   for (const id of ['095', '017', '022', '002']) {
     await waitForOpenMicrophone(page)
     await fartAndRecord(page, id)
     await page.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByTestId('result-note')).toBeVisible()
-    if (id !== '002') await page.getByRole('button', { name: 'Record another' }).click()
+    if (id === '002') break
+    if (id === '022') {
+      // It unlocks Hot Cross Buns, so its Result has Done, not Record another.
+      await page.getByRole('button', { name: 'Done' }).click()
+      await tab(page, 'Record').click()
+    } else await page.getByRole('button', { name: 'Record another' }).click()
   }
-  await expect(page.getByTestId('result-progress')).toContainText(
-    'You unlocked Mary Had a Little Lamb'
-  )
+  await expect(page.getByTestId('result-progress')).toContainText('You unlocked 5 Songs')
   await page.getByRole('button', { name: 'Done' }).click()
 
   await tab(page, 'Compose').click()
   await expect(page).toHaveURL(/\/compose\/$/)
-  await page.getByTestId('unlocked-songs').getByRole('link').click()
+  await page.getByTestId('unlocked-songs').locator('[data-song="mary"]').getByRole('link').click()
   await expect(page).toHaveURL(/\/compose\/mary\/$/)
   await expect(page.getByTestId('song-creator-state')).toBeVisible({ timeout: 60_000 })
 
@@ -101,7 +104,8 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
   // Back to Compose, and Toots has the one Toot.
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
-  await expect(page.getByRole('heading', { name: 'Unlocked · 1' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Unlocked · 6', exact: true })).toBeVisible()
   await tab(page, 'Toots').click()
-  await expect(page.getByText('Mary Had a Little Lamb')).toHaveCount(1)
+  // The row's title only: the line under it starts with the Song's title too (`tootDetails`).
+  await expect(page.getByText('Mary Had a Little Lamb', { exact: true })).toHaveCount(1)
 })

@@ -21,6 +21,7 @@ import {
   uploadState
 } from '@/db/library'
 import { tootPayment } from '@/db/payments'
+import { removeShare } from '@/db/sharing'
 import type { Performance } from '@/lib/performance'
 import type { Recording, RecordingTrim } from '@/lib/recordings'
 import type { Toot, TootArrangement } from '@/lib/toot'
@@ -72,7 +73,7 @@ export type LibraryRecording = Recording & { audioBytes: number }
 /** A Toot, as the browser keeps it, with its audio's size. */
 export type LibraryToot = Toot & { audioBytes: number }
 
-function toRecording(row: RecordingRow): LibraryRecording {
+export function toRecording(row: RecordingRow): LibraryRecording {
   return {
     id: row.id,
     number: row.number,
@@ -298,7 +299,8 @@ export async function putItem(
  * `DELETE /api/{recordings|toots}/{id}/`: leaves a tombstone, so other browsers delete it too, then
  * deletes the WAV. Deleting a tombstone again deletes the WAV again, so a retry finishes the job.
  * Each delete also purges the user's tombstones older than `TOMBSTONE_RETENTION_MS`, so they
- * number at most the deletes of that long.
+ * number at most the deletes of that long. It stops sharing the item too (ADR 0020), so its link
+ * stays down even if the item ever came back.
  */
 export async function deleteItem(
   kind: Kind,
@@ -312,6 +314,7 @@ export async function deleteItem(
   if (wrong) return wrong
   const before = await tombstone(db, kind, user.id, id)
   if (before === null) return notFound()
+  await removeShare(db, user.id, kind, id)
   await media.delete(audioKey(user.id, kind, id))
   await purgeTombstones(db, user.id)
   return new Response(null, { status: 204 })

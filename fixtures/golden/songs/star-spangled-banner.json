@@ -1,0 +1,217 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-star-spangled-banner.mid",
+  "id": "star-spangled-banner",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "star-spangled-banner",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 33,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-star-spangled-banner.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 0.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 58,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 3.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 6.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 6.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 12.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 15.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 18.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 58,
+      "start": 23.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 24.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 58,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 28.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 30.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 30.75
+    }
+  ],
+  "pitches": [
+    58,
+    62,
+    64,
+    65,
+    67,
+    69,
+    70,
+    72,
+    74
+  ],
+  "sha256": "aae5feec413a249fad2505c4cac801ce6f299465c1bc4283b53a98e78e153c16",
+  "title": "The Star-Spangled Banner"
+}

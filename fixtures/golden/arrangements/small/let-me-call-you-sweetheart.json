@@ -1,0 +1,99 @@
+{
+  "library": "small",
+  "max_abs_shift_semitones": null,
+  "metrics": null,
+  "missing": [
+    {
+      "seconds": 1.0,
+      "target_midi": 44
+    },
+    {
+      "seconds": 1.0,
+      "target_midi": 48
+    },
+    {
+      "seconds": 1.0,
+      "target_midi": 49
+    },
+    {
+      "seconds": 0.5,
+      "target_midi": 51
+    }
+  ],
+  "notes": null,
+  "octave_moves": 1,
+  "per_pitch": [
+    {
+      "octave_move": false,
+      "recording": "022",
+      "shift_semitones": 0.6740794063398141,
+      "song_pitch": 66,
+      "target_midi": 41
+    },
+    {
+      "octave_move": true,
+      "recording": "009",
+      "shift_semitones": 12.474079406339825,
+      "song_pitch": 68,
+      "target_midi": 43
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 69,
+      "target_midi": 44
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": -0.4259205936601802,
+      "song_pitch": 71,
+      "target_midi": 46
+    },
+    {
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": 2.574079406339827,
+      "song_pitch": 72,
+      "target_midi": 47
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 73,
+      "target_midi": 48
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 74,
+      "target_midi": 49
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 76,
+      "target_midi": 51
+    },
+    {
+      "octave_move": false,
+      "recording": "090",
+      "shift_semitones": -2.2259205936601774,
+      "song_pitch": 78,
+      "target_midi": 53
+    }
+  ],
+  "pitch_coverage": {
+    "covered": 5,
+    "total": 9
+  },
+  "plan_cost": 45.65231858431258,
+  "render_settings": null,
+  "song": "let-me-call-you-sweetheart",
+  "transpose": -25,
+  "unlocked": false
+}

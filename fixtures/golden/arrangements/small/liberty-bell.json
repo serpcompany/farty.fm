@@ -1,0 +1,99 @@
+{
+  "library": "small",
+  "max_abs_shift_semitones": null,
+  "metrics": null,
+  "missing": [
+    {
+      "seconds": 0.8,
+      "target_midi": 33
+    },
+    {
+      "seconds": 0.8,
+      "target_midi": 34
+    },
+    {
+      "seconds": 0.8,
+      "target_midi": 35
+    },
+    {
+      "seconds": 0.8,
+      "target_midi": 44
+    }
+  ],
+  "notes": null,
+  "octave_moves": 0,
+  "per_pitch": [
+    {
+      "octave_move": false,
+      "recording": "009",
+      "shift_semitones": 1.4740794063398255,
+      "song_pitch": 64,
+      "target_midi": 32
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 65,
+      "target_midi": 33
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 66,
+      "target_midi": 34
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 67,
+      "target_midi": 35
+    },
+    {
+      "octave_move": false,
+      "recording": "022",
+      "shift_semitones": 0.6740794063398141,
+      "song_pitch": 73,
+      "target_midi": 41
+    },
+    {
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": -2.425920593660173,
+      "song_pitch": 74,
+      "target_midi": 42
+    },
+    {
+      "octave_move": false,
+      "recording": "016",
+      "shift_semitones": 2.674079406339814,
+      "song_pitch": 75,
+      "target_midi": 43
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 76,
+      "target_midi": 44
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": -1.4259205936601802,
+      "song_pitch": 77,
+      "target_midi": 45
+    }
+  ],
+  "pitch_coverage": {
+    "covered": 5,
+    "total": 9
+  },
+  "plan_cost": 83.96088398851943,
+  "render_settings": null,
+  "song": "liberty-bell",
+  "transpose": -32,
+  "unlocked": false
+}

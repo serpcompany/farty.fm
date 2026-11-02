@@ -11,8 +11,8 @@ describe('the Song Catalog in the app', () => {
     expect(renderCatalog(sources)).toBe(readFileSync(outputPath, 'utf8'))
   })
 
-  test("holds the iPhone app's 12 Songs, in its order", () => {
-    expect(songs.map(s => s.id)).toEqual([
+  test("holds the iPhone app's 12 Songs first, in its order", () => {
+    expect(songs.slice(0, 12).map(s => s.id)).toEqual([
       'twinkle',
       'mary',
       'jingle',
@@ -26,6 +26,16 @@ describe('the Song Catalog in the app', () => {
       'furelise',
       'auld'
     ])
+  })
+
+  // #229: every Song in catalog/ then, but the second Ode to Joy. Songs added since ship once
+  // they're on the ship list.
+  test('then the rest of the catalog, in its order, but ode-mutopia', () => {
+    const ids = songs.map(s => s.id)
+    expect(ids).toHaveLength(128)
+    expect(ids).not.toContain('ode-mutopia')
+    const catalogOrder = sources.catalog.map(e => e.id).filter(id => ids.slice(12).includes(id))
+    expect(ids.slice(12)).toEqual(catalogOrder)
   })
 
   test.each(songs)('$id has the golden notes and its cited source', song => {
@@ -78,6 +88,12 @@ describe('the generator', () => {
       golden: (id: string) => ({ ...sources.golden(id), sha256: '0'.repeat(64) })
     }
     expect(() => renderCatalog(changed, ['mary'])).toThrow(/cited score/)
+  })
+
+  test('quotes a title with an apostrophe as Biome does', () => {
+    expect(renderCatalog(sources, ['teddy-bears-picnic'])).toContain(
+      `title: "The Teddy Bears' Picnic",`
+    )
   })
 
   test('refuses a source it has no line for', () => {

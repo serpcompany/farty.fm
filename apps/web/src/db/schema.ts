@@ -1,5 +1,14 @@
 import { sql } from 'drizzle-orm'
-import { check, index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import {
+  check,
+  index,
+  integer,
+  primaryKey,
+  real,
+  sqliteTable,
+  text,
+  uniqueIndex
+} from 'drizzle-orm/sqlite-core'
 import type { Performance } from '../lib/performance'
 import type { Analysis } from '../lib/recordings'
 import type { TootArrangement } from '../lib/toot'
@@ -14,7 +23,7 @@ const flag = (name: string) => integer(name, { mode: 'boolean' })
 // Better Auth's tables, as its `drizzleAdapter(db, { provider: 'sqlite' })` finds them: each export
 // is named after its model, and each property after Better Auth's field. Better Auth writes every
 // `created_at` and `updated_at` itself, so they have no defaults. Deleting a user deletes their
-// sessions, sign-in methods, Recordings, Toots, Favorite Songs and Toot payments.
+// sessions, sign-in methods, Recordings, Toots, Favorite Songs, Toot payments, Handles and shares.
 
 /** A person with an account. A first sign-in with an email code creates one. */
 export const user = sqliteTable('user', {
@@ -90,8 +99,9 @@ export const verification = sqliteTable(
 
 /**
  * Rate-limit counters, kept in D1 because each Worker isolate has its own memory: Better Auth's
- * and sign-in's own (`consumeSlot` in `src/server/auth-config.ts`). Each `key` is a label and an
- * HMAC, never an email or IP address, and `last_request` is when the row's window ends, in epoch
+ * and sign-in's own (`consumeSlot` in `src/server/auth-config.ts`), and Report's
+ * (`REPORT_LIMITS`). Each `key` is a label and an HMAC, or a shared item's account and item ids,
+ * never an email or IP address, and `last_request` is when the row's window ends, in epoch
  * milliseconds. Every spend first deletes the rows whose window has ended, through the index on
  * `last_request`, so it never reads the live rows.
  */
@@ -255,4 +265,62 @@ export const tootPayments = sqliteTable(
     savedAt: timestamp('saved_at')
   },
   table => [primaryKey({ columns: [table.userId, table.tootId] })]
+)
+
+// Sharing (ADR 0020): nothing is public until its owner shares it. A shared item's page and audio
+// are found by joining `shares` to the owner's Handle and to the live item, so Stop sharing,
+// deleting the item or deleting the account takes the link down.
+
+/**
+ * A user's Handle: the name in their links, `farty.fm/u/<handle>/…`, picked the first time they
+ * share. Lowercase, unique and checked against a block list (`src/lib/handle.ts`).
+ */
+export const handles = sqliteTable('handles', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  handle: text('handle').notNull().unique(),
+  createdAt: timestamp('created_at').notNull()
+})
+
+/**
+ * A shared item: one row while its owner shares it, keyed by a random id that is the link's
+ * (`/u/<handle>/r/<id>/`). Stop sharing and deleting the item delete the row, so sharing again
+ * makes a new link. `taken_down_at` is set by Farty after a report (docs/agents/web.md), and keeps
+ * the row, so the item can't be shared again.
+ */
+export const shares = sqliteTable(
+  'shares',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: ['recordings', 'toots'] }).notNull(),
+    itemId: text('item_id').notNull(),
+    createdAt: timestamp('created_at').notNull(),
+    takenDownAt: timestamp('taken_down_at')
+  },
+  table => [
+    uniqueIndex('shares_user_id_kind_item_id_idx').on(table.userId, table.kind, table.itemId)
+  ]
+)
+
+/**
+ * A report of a shared item, from its page's Report, for Farty to check. It names the share and
+ * the item, never who reported it. Deleting the owner's account deletes it.
+ */
+export const shareReports = sqliteTable(
+  'share_reports',
+  {
+    id: text('id').primaryKey(),
+    shareId: text('share_id').notNull(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: ['recordings', 'toots'] }).notNull(),
+    itemId: text('item_id').notNull(),
+    createdAt: timestamp('created_at').notNull()
+  },
+  table => [index('share_reports_created_at_idx').on(table.createdAt)]
 )

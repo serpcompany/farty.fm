@@ -1,0 +1,151 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-scarborough-fair.mid",
+  "id": "scarborough-fair",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "scarborough-fair",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 20,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-scarborough-fair.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 5.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 7.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 8.0
+    },
+    {
+      "dur": 2.8541666666666665,
+      "pitch": 64,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 14.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 20.0
+    },
+    {
+      "dur": 3.7916666666666665,
+      "pitch": 71,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 26.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    64,
+    66,
+    67,
+    69,
+    71,
+    73,
+    74,
+    76
+  ],
+  "sha256": "42a744739cd6e80ff7821dad53c86247bd42fb9f7a5c2d2ba283fbed5b50e6da",
+  "title": "Scarborough Fair"
+}

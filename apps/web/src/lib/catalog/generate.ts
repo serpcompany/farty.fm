@@ -49,8 +49,9 @@ function readJson<T>(path: string): T {
 }
 
 /**
- * The Songs the app ships, in the iPhone app's order, from `ship-list.json`. A Song added to
- * `catalog/` doesn't ship until it's on this list. The Mutopia Ode to Joy (`ode-mutopia`) stays
+ * The Songs the app ships, from `ship-list.json`: the iPhone app's 12 in its order, then the rest
+ * of the catalog in its order (#229). A Song added to `catalog/` doesn't ship until it's on this
+ * list. The Mutopia Ode to Joy (`ode-mutopia`) stays
  * out: it's the same tune as `ode`, kept in the catalog to exercise the reference engine's
  * importer. `tools/melody-lab/export_golden.py` reads the same file, so every Song on it has
  * golden data.
@@ -78,9 +79,35 @@ function sourceLine(entry: CatalogEntry): string {
   throw new Error(`Song ${entry.id} has a source this script has no line for; add one here`)
 }
 
+/** `text` as a string literal, quoted as Biome writes it: in double quotes if it has an apostrophe. */
 function quoted(text: string): string {
-  if (/['\\\n]/.test(text)) throw new Error(`can't quote ${JSON.stringify(text)}`)
-  return `'${text}'`
+  const quote = text.includes("'") ? '"' : "'"
+  if (/[\\\n]/.test(text) || text.includes(quote))
+    throw new Error(`can't quote ${JSON.stringify(text)}`)
+  return `${quote}${text}${quote}`
+}
+
+/**
+ * `key: [values],` as Biome writes it: on one line if it fits in 100 columns, else the values fill
+ * the lines between the brackets.
+ */
+function numbers(indent: string, key: string, values: readonly number[]): string[] {
+  const width = 100
+  const line = `${indent}${key}: [${values.join(', ')}],`
+  if (line.length <= width) return [line]
+  const inner = `${indent}  `
+  const lines: string[] = []
+  let current = ''
+  for (const [i, value] of values.entries()) {
+    const item = i < values.length - 1 ? `${value},` : `${value}`
+    if (current !== '' && `${inner}${current} ${item}`.length > width) {
+      lines.push(`${inner}${current}`)
+      current = item
+    } else {
+      current = current === '' ? item : `${current} ${item}`
+    }
+  }
+  return [`${indent}${key}: [`, ...lines, `${inner}${current}`, `${indent}],`]
 }
 
 function song(entry: CatalogEntry, golden: GoldenSong): string[] {
@@ -105,9 +132,9 @@ function song(entry: CatalogEntry, golden: GoldenSong): string[] {
     `    title: ${quoted(entry.title)},`,
     `    source: ${quoted(sourceLine(entry))},`,
     `    bpm: ${golden.bpm},`,
-    `    bar_lines: [${golden.bar_lines.join(', ')}],`,
+    ...numbers('    ', 'bar_lines', golden.bar_lines),
     `    length_beats: ${golden.length_beats},`,
-    `    pitches: [${pitches.join(', ')}],`,
+    ...numbers('    ', 'pitches', pitches),
     '    notes: [',
     ...notes.map(
       (n, i) =>

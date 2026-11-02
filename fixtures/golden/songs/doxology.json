@@ -1,0 +1,127 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-doxology.mid",
+  "id": "doxology",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "doxology",
+    "chord_tones_dropped": 2,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 16,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-doxology.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 43,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 43,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 42,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 40,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 38,
+      "start": 7.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 43,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 45,
+      "start": 10.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 47,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 47,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 47,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 47,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 45,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 43,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 48,
+      "start": 22.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 47,
+      "start": 24.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 45,
+      "start": 26.0
+    }
+  ],
+  "pitches": [
+    38,
+    40,
+    42,
+    43,
+    45,
+    47,
+    48
+  ],
+  "sha256": "ab0b81f084e7d3dd3f745cd2ddd685680e9fc2e70b5f55eda56ab9bda2e9ee07",
+  "title": "Old Hundredth"
+}

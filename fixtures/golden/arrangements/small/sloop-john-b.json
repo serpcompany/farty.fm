@@ -1,0 +1,59 @@
+{
+  "library": "small",
+  "max_abs_shift_semitones": null,
+  "metrics": null,
+  "missing": [
+    {
+      "seconds": 2.0,
+      "target_midi": 39
+    }
+  ],
+  "notes": null,
+  "octave_moves": 0,
+  "per_pitch": [
+    {
+      "octave_move": false,
+      "recording": "009",
+      "shift_semitones": 1.4740794063398255,
+      "song_pitch": 60,
+      "target_midi": 32
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 67,
+      "target_midi": 39
+    },
+    {
+      "octave_move": false,
+      "recording": "022",
+      "shift_semitones": 0.6740794063398141,
+      "song_pitch": 69,
+      "target_midi": 41
+    },
+    {
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": -2.425920593660173,
+      "song_pitch": 70,
+      "target_midi": 42
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": -2.42592059366018,
+      "song_pitch": 72,
+      "target_midi": 44
+    }
+  ],
+  "pitch_coverage": {
+    "covered": 4,
+    "total": 5
+  },
+  "plan_cost": 226.04414709407808,
+  "render_settings": null,
+  "song": "sloop-john-b",
+  "transpose": -28,
+  "unlocked": false
+}

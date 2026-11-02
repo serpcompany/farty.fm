@@ -1,0 +1,185 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-ding-dong-merrily.mid",
+  "id": "ding-dong-merrily",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "ding-dong-merrily",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 28,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-ding-dong-merrily.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 19.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 69,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 28.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    69,
+    71,
+    73,
+    74,
+    76
+  ],
+  "sha256": "69b1666e81f9770ca28c90a9d10cd906eaa26df1a466baacc85cbb66c44e4c0d",
+  "title": "Ding Dong Merrily on High"
+}

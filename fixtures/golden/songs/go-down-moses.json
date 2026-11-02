@@ -1,0 +1,192 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0,
+    32.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-go-down-moses.mid",
+  "id": "go-down-moses",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "go-down-moses",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 29,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-go-down-moses.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 33.5,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.6666666666666666,
+      "pitch": 72,
+      "start": 9.0
+    },
+    {
+      "dur": 2.3333333333333335,
+      "pitch": 69,
+      "start": 9.666666666666666
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 14.5
+    },
+    {
+      "dur": 3.5,
+      "pitch": 69,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 21.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 24.5
+    },
+    {
+      "dur": 2.5,
+      "pitch": 69,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 30.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 31.5
+    }
+  ],
+  "pitches": [
+    64,
+    66,
+    68,
+    69,
+    71,
+    72
+  ],
+  "sha256": "08a47583fe1cfa646381074378630b56592b5bee176c90b94301601c2629ba4f",
+  "title": "Go Down, Moses"
+}

@@ -1,0 +1,49 @@
+{
+  "library": "full",
+  "max_abs_shift_semitones": null,
+  "metrics": null,
+  "missing": [
+    {
+      "seconds": 5.0,
+      "target_midi": 72
+    },
+    {
+      "seconds": 5.0,
+      "target_midi": 76
+    }
+  ],
+  "notes": null,
+  "octave_moves": 0,
+  "per_pitch": [
+    {
+      "octave_move": false,
+      "recording": "059",
+      "shift_semitones": -0.425920593660166,
+      "song_pitch": 62,
+      "target_midi": 67
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 67,
+      "target_midi": 72
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 71,
+      "target_midi": 76
+    }
+  ],
+  "pitch_coverage": {
+    "covered": 1,
+    "total": 3
+  },
+  "plan_cost": 3.7643377169097434,
+  "render_settings": null,
+  "song": "taps",
+  "transpose": 5,
+  "unlocked": false
+}

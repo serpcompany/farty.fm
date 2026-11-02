@@ -30,6 +30,7 @@ import { cn } from '@/lib/utils'
 import { usePedos } from './pedos-provider'
 import { RecordingReview } from './record-flow'
 import { PlayCircle, useReplayLevels } from './recording-replay'
+import { SharedMark, ShareRecordingButton, useShares } from './share-recording'
 import { ReplayWaveform } from './waveform'
 
 /**
@@ -43,6 +44,7 @@ export function RecordingsScreen() {
   const [deleting, setDeleting] = useState<Recording | null>(null)
   const [editing, setEditing] = useState<string | null>(null)
   const edited = editing === null ? undefined : pedos.recording(editing)
+  const shares = useShares()
   // The last Re-scan's result goes into the live region after it opens, so a result that came
   // while the tab was closed is announced when the user comes back, not only shown.
   const [opened, setOpened] = useState(false)
@@ -148,7 +150,10 @@ export function RecordingsScreen() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleting && recordingName(deleting)}?</AlertDialogTitle>
-            <AlertDialogDescription>This can't be undone.</AlertDialogDescription>
+            <AlertDialogDescription>
+              {deleting && shares?.links.has(deleting.id) && 'Its link stops working too. '}
+              This can't be undone.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -201,6 +206,7 @@ function RecordingRow({
   const levels = useReplayLevels(recording, part)
   const placed = placedPitch(recording)
   const trimmed = trimOf(recording) !== null
+  const shared = useShares()?.links.has(recording.id) ?? false
 
   return (
     <li
@@ -249,7 +255,7 @@ function RecordingRow({
                 {formattedFartLength(recording)}
               </span>
             </span>
-            {(placed !== null || trimmed) && (
+            {(placed !== null || trimmed || shared) && (
               <span className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                 {placed !== null && (
                   <span className="inline-flex items-center gap-1">
@@ -264,6 +270,8 @@ function RecordingRow({
                     Trimmed
                   </span>
                 )}
+                {shared && (placed !== null || trimmed) && <span aria-hidden>·</span>}
+                {shared && <SharedMark />}
               </span>
             )}
           </span>
@@ -277,6 +285,7 @@ function RecordingRow({
         >
           <Pencil />
         </Button>
+        <ShareRecordingButton recording={recording} name={name} />
         <Button variant="ghost" size="icon" aria-label={`Delete ${name}`} onClick={onDelete}>
           <Trash2 />
         </Button>

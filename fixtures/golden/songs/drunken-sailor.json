@@ -1,0 +1,229 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 144,
+  "file": "midi/pdmx-drunken-sailor.mid",
+  "id": "drunken-sailor",
+  "import_args": {
+    "bpm": 144,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "drunken-sailor",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 36,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-drunken-sailor.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 1.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 17.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 57,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    55,
+    57,
+    59,
+    60,
+    62,
+    64,
+    66,
+    67,
+    69
+  ],
+  "sha256": "9b5dcf6bbf4d26f806bf53d1c5257fbf12fda3cdb4e3f76de16e725da40b3310",
+  "title": "Drunken Sailor"
+}
