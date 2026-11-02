@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto'
 import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { LibraryChanges } from './library-api'
 import type { LibraryChange } from './library-sync'
 import type { OutboxOp } from './outbox'
 import type { Recording } from './recordings'
@@ -20,7 +21,8 @@ async function openPage() {
   return {
     sync: await import('./library-sync'),
     store: await import('./recording-store'),
-    toots: await import('./toot-store')
+    toots: await import('./toot-store'),
+    favorites: await import('./favorite-store')
   }
 }
 
@@ -187,8 +189,12 @@ type Fill = (store: (name: string) => IDBObjectStore) => void
 const version3 = (fill: Fill, keepOpen = false) => olderDatabase(3, fill, keepOpen)
 /** Writes a version 5 `pedos` database, as a browser on a build from before #293 left it. */
 const version5 = (fill: Fill, keepOpen = false) => olderDatabase(5, fill, keepOpen)
+/** Writes a version 6 `pedos` database, as a browser on a build from before #313 left it. */
+const version6 = (fill: Fill, keepOpen = false) => olderDatabase(6, fill, keepOpen)
+/** Writes a version 7 `pedos` database, as a browser on a build from before #314 left it. */
+const version7 = (fill: Fill, keepOpen = false) => olderDatabase(7, fill, keepOpen)
 
-async function olderDatabase(version: 3 | 5, fill: Fill, keepOpen: boolean) {
+async function olderDatabase(version: 3 | 5 | 6 | 7, fill: Fill, keepOpen: boolean) {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const open = indexedDB.open('pedos', version)
     open.onupgradeneeded = () => {
@@ -198,7 +204,8 @@ async function olderDatabase(version: 3 | 5, fill: Fill, keepOpen: boolean) {
       database.createObjectStore('outbox', { keyPath: 'key' })
       for (const name of ['audio', 'tootAudio', 'downloads', 'meta'])
         database.createObjectStore(name)
-      if (version === 5) database.createObjectStore('pads')
+      if (version >= 5) database.createObjectStore('pads')
+      if (version >= 7) database.createObjectStore('favorites')
       fill(name => (open.transaction as IDBTransaction).objectStore(name))
     }
     open.onsuccess = () => {
@@ -351,6 +358,278 @@ describe('version 6', () => {
     expect(account.get('recordings', recording.id)?.item).toMatchObject({ placedPitch: 38, trim })
     await page.sync.syncOnce('user-a')
     expect((await page.store.loadRecordings())[0]).toMatchObject({ placedPitch: 38, trim })
+  })
+})
+
+// Version 7 (#313) adds the Favorite Songs: code from before them would read the account's
+// without keeping them while its cursor moved past them.
+describe('version 7', () => {
+  it('adds the Favorite Songs, keeps the rest, reads the whole library once and shuts out older tabs', async () => {
+    claimedBy('user-a')
+    const recording = theirs(1)
+    account.add('recordings', recording, wav(1))
+    account.setFavorite('twinkle', true)
+    const older = await version6(tx => {
+      tx('recordings').put(recording)
+      tx('audio').put(wav(1), recording.id)
+      tx('pads').put(recording.id, 0)
+      tx('meta').put(10 ** 13, 'cursor')
+    }, true)
+    older.onversionchange = () => older.close()
+    const database = await page.store.db()
+    expect(database.version).toBe(page.store.DB_VERSION)
+    expect([...database.objectStoreNames]).toContain('favorites')
+    expect(await database.get('meta', 'cursor')).toBe(0)
+    expect(await database.get('pads', 0)).toBe(recording.id)
+    expect(() => older.transaction('outbox')).toThrow()
+    await page.sync.syncOnce('user-a')
+    expect(await page.favorites.loadFavorites()).toEqual(['twinkle'])
+    expect(await page.store.loadRecordings()).toEqual([recording])
+    const reopened = await new Promise<string>(resolve => {
+      const open = indexedDB.open('pedos', 6)
+      open.onsuccess = () => resolve('opened')
+      open.onerror = () => resolve(open.error?.name ?? '')
+    })
+    expect(reopened).toBe('VersionError')
+  })
+})
+
+// Version 8 (#314) changes no store: it shuts out code from before names, which would send a
+// `place` without the name and settle it, and drop the account's names while its cursor moved on.
+describe('version 8', () => {
+  it('keeps the Favorite Songs and their queue, reads the names once and shuts out older tabs', async () => {
+    claimedBy('user-a')
+    const recording = theirs(1)
+    account.add('recordings', { ...recording, placedPitch: 45, name: 'Big one' }, wav(1))
+    const older = await version7(tx => {
+      tx('recordings').put({ ...recording, placedPitch: 48 })
+      tx('audio').put(wav(1), recording.id)
+      tx('favorites').put(Date.now(), 'twinkle')
+      for (const [kind, id, op, fields] of [
+        ['favorites', 'twinkle', 'put', undefined],
+        ['recordings', recording.id, 'place', ['placedPitch']]
+      ] as const)
+        tx('outbox').put({
+          key: `${kind}:${id}`,
+          kind,
+          id,
+          op,
+          sent: false,
+          queuedAt: Date.now(),
+          version: crypto.randomUUID(),
+          ...(fields ? { fields } : {})
+        })
+      tx('meta').put(10 ** 13, 'cursor')
+    }, true)
+    older.onversionchange = () => older.close()
+    const database = await page.store.db()
+    expect(database.version).toBe(8)
+    expect(await database.get('meta', 'cursor')).toBe(0)
+    expect(await page.favorites.loadFavorites()).toEqual(['twinkle'])
+    expect((await outbox()).map(entry => entry.key).sort()).toEqual(
+      [`favorites:twinkle`, `recordings:${recording.id}`].sort()
+    )
+    expect(() => older.transaction('outbox')).toThrow()
+    await page.sync.syncOnce('user-a')
+    // The place version 7 code queued only ever meant the Placed Pitch: it keeps the name.
+    expect(requests('PATCH').map(s => s.json)).toEqual([{ placedPitch: 48 }])
+    expect(account.favorites()).toEqual(['twinkle'])
+    expect(account.get('recordings', recording.id)?.item).toMatchObject({
+      placedPitch: 48,
+      name: 'Big one'
+    })
+    expect(await outbox()).toEqual([])
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0]).toMatchObject({
+      placedPitch: 48,
+      name: 'Big one'
+    })
+    expect(await page.favorites.loadFavorites()).toEqual(['twinkle'])
+    const reopened = await new Promise<string>(resolve => {
+      const open = indexedDB.open('pedos', 7)
+      open.onsuccess = () => resolve('opened')
+      open.onerror = () => resolve(open.error?.name ?? '')
+    })
+    expect(reopened).toBe('VersionError')
+  })
+
+  it('sends a name and a Favorite Song queued together, each alone', async () => {
+    claimedBy('user-a')
+    const mine = await recorded(1)
+    await page.sync.syncOnce('user-a')
+    account.place(mine.id, 45)
+    await page.store.placeRecording(mine.id, { name: 'Squeaker' })
+    await page.favorites.setFavorite('twinkle', true)
+    await page.sync.syncOnce('user-a')
+    expect(requests('PATCH').map(s => s.json)).toEqual([{ name: 'Squeaker' }])
+    expect(account.favorites()).toEqual(['twinkle'])
+    expect(account.get('recordings', mine.id)?.item).toMatchObject({
+      placedPitch: 45,
+      name: 'Squeaker'
+    })
+    expect(await outbox()).toEqual([])
+  })
+})
+
+describe('Favorite Songs (#313)', () => {
+  const favorites = () => page.favorites.loadFavorites().then(ids => ids.sort())
+
+  it('keeps each tap here and queues it, a tap undoing an unsent one leaving nothing', async () => {
+    await page.favorites.setFavorite('twinkle', true)
+    await page.favorites.setFavorite('mary', true)
+    await page.favorites.setFavorite('mary', false)
+    // Already as asked: nothing changes.
+    await page.favorites.setFavorite('twinkle', true)
+    expect(await favorites()).toEqual(['twinkle'])
+    expect((await outbox()).map(e => [e.key, e.op])).toEqual([['favorites:twinkle', 'put']])
+  })
+
+  it('tells this tab when they change, and nothing when a tap changes nothing', async () => {
+    const heard: string[] = []
+    const stop = page.favorites.onFavoritesChanged(() => heard.push('change'))
+    await page.favorites.setFavorite('twinkle', true)
+    await page.favorites.setFavorite('twinkle', true)
+    stop()
+    await page.favorites.setFavorite('twinkle', false)
+    expect(heard).toEqual(['change'])
+  })
+
+  it("sends each to the account, naming the library's account, and isn't counted as a fart", async () => {
+    claimedBy('user-a')
+    await page.favorites.setFavorite('twinkle', true)
+    await page.favorites.setFavorite('mary', true)
+    await page.favorites.setFavorite('ode', true)
+    await page.favorites.setFavorite('ode', false)
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(account.favorites()).toEqual(['mary', 'twinkle'])
+    expect(await outbox()).toEqual([])
+    // In the order queued, or by Song id for taps in the same millisecond.
+    // Ode's heart, on and off again before either went out, sends nothing.
+    expect(
+      account.sent
+        .filter(s => s.path.startsWith('/api/favorites/'))
+        .map(s => `${s.method} ${s.path} ${s.library}`)
+        .sort()
+    ).toEqual(['PUT /api/favorites/mary/ user-a', 'PUT /api/favorites/twinkle/ user-a'])
+  })
+
+  it('sends a tap made while the last one was on its way', async () => {
+    claimedBy('user-a')
+    await page.favorites.setFavorite('twinkle', true)
+    account.intercept = async sent => {
+      if (sent.method !== 'PUT') return undefined
+      account.intercept = null
+      // Taken off again while the favorite is on its way.
+      await page.favorites.setFavorite('twinkle', false)
+      return undefined
+    }
+    await page.sync.syncOnce('user-a')
+    expect(account.favorites()).toEqual([])
+    expect(await favorites()).toEqual([])
+    expect(await outbox()).toEqual([])
+  })
+
+  it('keeps a tap queued while the account is unreachable, and drops one refused at the limit', async () => {
+    claimedBy('user-a')
+    await page.favorites.setFavorite('twinkle', true)
+    account.offline = true
+    await page.sync.syncOnce('user-a')
+    expect(await outbox()).toHaveLength(1)
+    account.offline = false
+    await page.sync.syncOnce('user-a')
+    expect(account.favorites()).toEqual(['twinkle'])
+    expect(await outbox()).toEqual([])
+
+    // At the limit, a retry changes nothing, so it isn't sent again on every sync.
+    await page.favorites.setFavorite('mary', true)
+    refuse('PUT', 409, 'limit_reached')
+    await page.sync.syncOnce('user-a')
+    expect(await outbox()).toEqual([])
+    account.intercept = null
+    const before = account.sent.length
+    await page.sync.syncOnce('user-a')
+    expect(account.sent.slice(before).filter(s => s.method === 'PUT')).toEqual([])
+    expect(account.favorites()).toEqual(['twinkle'])
+  })
+
+  it("brings another browser's, and takes off what it took off, telling the screens", async () => {
+    claimedBy('user-a')
+    account.setFavorite('twinkle', true)
+    account.setFavorite('mary', true)
+    const heard: string[] = []
+    page.favorites.onFavoritesChanged(() => heard.push('change'))
+    await page.sync.syncOnce('user-a')
+    expect(await favorites()).toEqual(['mary', 'twinkle'])
+    expect(heard).toEqual(['change'])
+
+    account.setFavorite('mary', false)
+    await page.sync.syncOnce('user-a')
+    expect(await favorites()).toEqual(['twinkle'])
+    // Nothing changed: the screens hear nothing.
+    await page.sync.syncOnce('user-a')
+    expect(heard).toEqual(['change', 'change'])
+  })
+
+  it('keeps a tap this browser is still sending over what the account read', async () => {
+    claimedBy('user-a')
+    account.setFavorite('twinkle', true)
+    await page.sync.syncOnce('user-a')
+    account.offline = true
+    await page.favorites.setFavorite('twinkle', false)
+    await page.favorites.setFavorite('mary', true)
+    account.offline = false
+    account.setFavorite('mary', false)
+    // The read comes before the send: it mustn't undo either tap.
+    account.intercept = sent => (sent.method === 'GET' ? undefined : Response.error())
+    await page.sync.syncOnce('user-a')
+    expect(await favorites()).toEqual(['mary'])
+  })
+
+  it("drops what the account no longer has after a full read, but not what's waiting to send", async () => {
+    claimedBy('user-a')
+    account.setFavorite('twinkle', true)
+    account.setFavorite('mary', true)
+    await page.sync.syncOnce('user-a')
+    account.offline = true
+    await page.favorites.setFavorite('ode', true)
+    account.offline = false
+    account.setFavorite('mary', false)
+    account.expireTombstones()
+    account.advance(31 * 24 * 60 * 60 * 1000)
+    account.intercept = sent => (sent.method === 'GET' ? undefined : Response.error())
+    await page.sync.syncOnce('user-a')
+    expect(await favorites()).toEqual(['ode', 'twinkle'])
+  })
+
+  it('changes none after a read from a Worker from before #313, which sends none', async () => {
+    claimedBy('user-a')
+    await page.favorites.setFavorite('twinkle', true)
+    await page.sync.syncOnce('user-a')
+    const older = async (sent: { method: string; path: string }) => {
+      if (sent.method !== 'GET') return undefined
+      account.intercept = null
+      const answer: LibraryChanges = await (await account.fetch(sent.path)).json()
+      const { favorites: _, deleted, ...read } = answer
+      account.intercept = older
+      const { favorites: __, ...deletedBefore } = deleted
+      return Response.json({ ...read, full: true, deleted: deletedBefore })
+    }
+    account.intercept = older
+    await page.sync.syncOnce('user-a')
+    expect(await favorites()).toEqual(['twinkle'])
+  })
+
+  it('go with the library at sign-out, and with another account’s claim', async () => {
+    await page.sync.claimLibrary('user-a', 'a@example.com')
+    await page.favorites.setFavorite('twinkle', true)
+    await page.sync.forgetLibrary()
+    expect(await favorites()).toEqual([])
+
+    await page.sync.claimLibrary('user-a', 'a@example.com')
+    await page.favorites.setFavorite('mary', true)
+    await page.sync.claimLibrary('user-b', 'b@example.com')
+    expect(await favorites()).toEqual([])
+    expect(await outbox()).toEqual([])
   })
 })
 
@@ -1147,6 +1426,37 @@ describe('a guest who records, then signs in', () => {
   })
 })
 
+describe('a guest who favorites Songs, then signs in (#313)', () => {
+  it('keeps them over the next visit, and sends them to the account once it is theirs', async () => {
+    await page.favorites.setFavorite('twinkle', true)
+    await page.favorites.setFavorite('mary', true)
+    await page.favorites.setFavorite('ode', true)
+    await page.favorites.setFavorite('ode', false)
+    await recorded(1)
+    account.setFavorite('jingle', true)
+    // Marked on another device; this guest's heart on and off again never reached it.
+    account.setFavorite('ode', true)
+    // A guest's new visit clears their farts, and keeps their Favorite Songs.
+    await page.store.clearVisit(new Set())
+    expect(await page.store.loadRecordings()).toEqual([])
+    expect((await page.favorites.loadFavorites()).sort()).toEqual(['mary', 'twinkle'])
+    // Never sent as a guest's.
+    expect(account.sent).toEqual([])
+
+    expect(await page.sync.claimLibrary('user-a', 'a@example.com')).toBe(true)
+    await page.sync.syncOnce('user-a')
+
+    expect(account.favorites()).toEqual(['jingle', 'mary', 'ode', 'twinkle'])
+    expect((await page.favorites.loadFavorites()).sort()).toEqual([
+      'jingle',
+      'mary',
+      'ode',
+      'twinkle'
+    ])
+    expect(await outbox()).toEqual([])
+  })
+})
+
 describe('unsavedBeforeSignIn', () => {
   it('counts the farts not uploaded that signing in to another account would clear', async () => {
     await page.sync.claimLibrary('user-a', 'a@example.com')
@@ -1169,5 +1479,11 @@ describe('unsavedBeforeSignIn', () => {
     claimedBy('user-a')
     await recorded(1)
     expect(await page.sync.unsavedBeforeSignIn('a@example.com')).toBe(1)
+  })
+
+  it('counts no Favorite Song, which is no fart', async () => {
+    await page.sync.claimLibrary('user-a', 'a@example.com')
+    await page.favorites.setFavorite('twinkle', true)
+    expect(await page.sync.unsavedBeforeSignIn('b@example.com')).toBe(0)
   })
 })

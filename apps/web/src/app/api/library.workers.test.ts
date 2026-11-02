@@ -49,7 +49,7 @@ type Library = {
   full: boolean
   recordings: { id: string; number: number; analysis?: unknown }[]
   toots: { id: string; title: string }[]
-  deleted: { recordings: string[]; toots: string[] }
+  deleted: { recordings: string[]; toots: string[]; favorites: string[] }
 }
 
 async function library(cookie: string, since?: number): Promise<Library> {
@@ -276,7 +276,7 @@ describe('every library request names its library’s account', () => {
     const kept = await library(b.cookie)
     expect(kept.recordings).toMatchObject([{ id: R1 }])
     expect(kept.toots).toMatchObject([{ id: T1, title: 'Twinkle Twinkle Little Star' }])
-    expect(kept.deleted).toEqual({ recordings: [], toots: [] })
+    expect(kept.deleted).toEqual({ recordings: [], toots: [], favorites: [] })
 
     // Naming B's own library, each goes through.
     const asB = { cookie: b.cookie, library: b.id }
@@ -420,7 +420,7 @@ describe('deletes and GET /api/library/?since=', () => {
     await tick()
     const first = await library(a.cookie)
     expect(first.recordings.map(r => r.id).sort()).toEqual([R1, R2])
-    expect(first.deleted).toEqual({ recordings: [], toots: [] })
+    expect(first.deleted).toEqual({ recordings: [], toots: [], favorites: [] })
     await tick()
 
     expect((await api.delete('recordings', R1, a)).status).toBe(204)
@@ -429,12 +429,12 @@ describe('deletes and GET /api/library/?since=', () => {
     const changes = await library(a.cookie, first.cursor)
     expect(changes.recordings).toEqual([])
     expect(changes.toots).toEqual([])
-    expect(changes.deleted).toEqual({ recordings: [R1], toots: [T1] })
+    expect(changes.deleted).toEqual({ recordings: [R1], toots: [T1], favorites: [] })
     expect(changes.cursor).toBeGreaterThanOrEqual(first.cursor)
     // A browser that has never read the library sees only what is live, and the tombstones.
     const everything = await library(a.cookie)
     expect(everything.recordings.map(r => r.id)).toEqual([R2])
-    expect(everything.deleted).toEqual({ recordings: [R1], toots: [T1] })
+    expect(everything.deleted).toEqual({ recordings: [R1], toots: [T1], favorites: [] })
     expect(await bucketKeys()).toEqual([`users/${a.id}/recordings/${R2}.wav`])
     expect((await api.audio('recordings', R1, a)).status).toBe(404)
     // The Toot's title, the one thing a user types, is gone with it.
@@ -501,6 +501,23 @@ describe('deletes and GET /api/library/?since=', () => {
     expect((await library(a.cookie, cursor - 30 * DAY - 1000)).full).toBe(true)
     expect((await library(a.cookie, cursor - 30 * DAY + 60_000)).full).toBe(false)
     expect((await library(a.cookie, cursor)).full).toBe(false)
+  })
+
+  // The browser drops what a full read doesn't list (#313 found it listed only what changed since).
+  it('lists the whole library in a full read, also what last changed before its since', async () => {
+    const a = await signUp('A')
+    expect((await upload('recordings', R1, a.cookie)).status).toBe(201)
+    await env.DB.prepare(
+      `update recordings set updated_at = updated_at - ?1 where user_id = ?2 and id = ?3`
+    )
+      .bind(40 * DAY, a.id, R1)
+      .run()
+    const { cursor } = await library(a.cookie)
+
+    const away = await library(a.cookie, cursor - 31 * DAY)
+    expect(away.full).toBe(true)
+    expect(away.recordings.map(r => r.id)).toEqual([R1])
+    expect((await library(a.cookie, cursor - 29 * DAY)).recordings).toEqual([])
   })
 
   it('refuses a since that is not epoch milliseconds (400)', async () => {
@@ -762,7 +779,7 @@ describe('writes from another site', () => {
     const after = await library(a.cookie)
     expect(after.recordings.map(r => r.id)).toEqual([R1])
     expect(after.toots).toMatchObject([{ id: T1, title: 'Twinkle Twinkle Little Star' }])
-    expect(after.deleted).toEqual({ recordings: [], toots: [] })
+    expect(after.deleted).toEqual({ recordings: [], toots: [], favorites: [] })
     expect(await bucketKeys()).toEqual([
       `users/${a.id}/recordings/${R1}.wav`,
       `users/${a.id}/toots/${T1}.wav`

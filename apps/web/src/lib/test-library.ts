@@ -17,6 +17,8 @@ export function fakeAccount(userId = 'user-a') {
     recordings: new Map(),
     toots: new Map()
   }
+  /** Favorite Songs (#313), by Song id: when each last changed, and whether it was taken off. */
+  const favorites = new Map<string, { deletedAt: number | null; updatedAt: number }>()
   // As D1's clock: past the 30 days tombstones are kept, so a read since 0 is `full`.
   let now = 40 * DAY
   const tick = () => {
@@ -75,6 +77,17 @@ export function fakeAccount(userId = 'user-a') {
       return stored && !stored.deletedAt ? stored : undefined
     },
     isDeleted: (kind: Kind, id: string) => Boolean(items[kind].get(id)?.deletedAt),
+    /** What another browser did: marks a Favorite Song, or takes it off with `on` false. */
+    setFavorite(songId: string, on: boolean) {
+      const at = tick()
+      favorites.set(songId, { deletedAt: on ? null : at, updatedAt: at })
+    },
+    /** The account's live Favorite Songs, sorted. */
+    favorites: () =>
+      [...favorites]
+        .filter(([, f]) => !f.deletedAt)
+        .map(([songId]) => songId)
+        .sort(),
     /** Moves the account's clock on. */
     advance(ms: number) {
       now += ms
@@ -84,6 +97,7 @@ export function fakeAccount(userId = 'user-a') {
       for (const kind of ['recordings', 'toots'] as const) {
         for (const [id, stored] of items[kind]) if (stored.deletedAt) items[kind].delete(id)
       }
+      for (const [songId, f] of favorites) if (f.deletedAt) favorites.delete(songId)
     },
     fetch: async (input: string, init: RequestInit = {}): Promise<Response> => {
       const url = new URL(input, 'https://pedos.test')
@@ -103,7 +117,10 @@ export function fakeAccount(userId = 'user-a') {
     const error = (status: number, code: string) => Response.json({ error: code }, { status })
     if (library !== null && library !== userId) return error(409, 'wrong_account')
     if (url.pathname === '/api/library/') {
-      const since = Number(url.searchParams.get('since') ?? '0')
+      const asked = Number(url.searchParams.get('since') ?? '0')
+      const full = asked < now - 30 * DAY
+      // A full read lists the whole library, as `getLibrary` does.
+      const since = full ? 0 : asked
       const changed = (kind: Kind) => [...items[kind].values()].filter(s => s.updatedAt >= since)
       const live = (kind: Kind) =>
         changed(kind)
@@ -113,13 +130,34 @@ export function fakeAccount(userId = 'user-a') {
         changed(kind)
           .filter(s => s.deletedAt)
           .map(s => s.item.id)
+      const favoritesSince = [...favorites].filter(([, f]) => f.updatedAt >= since)
       return Response.json({
         cursor: now,
-        full: since < now - 30 * DAY,
+        full,
         recordings: live('recordings'),
         toots: live('toots'),
-        deleted: { recordings: deleted('recordings'), toots: deleted('toots') }
+        favorites: favoritesSince.filter(([, f]) => !f.deletedAt).map(([songId]) => songId),
+        deleted: {
+          recordings: deleted('recordings'),
+          toots: deleted('toots'),
+          favorites: favoritesSince.filter(([, f]) => f.deletedAt).map(([songId]) => songId)
+        }
       })
+    }
+    const favorite = url.pathname.match(/^\/api\/favorites\/([^/]+)\/$/)
+    if (favorite) {
+      const songId = decodeURIComponent(favorite[1])
+      const was = favorites.get(songId)
+      if (method === 'PUT') {
+        if (was && !was.deletedAt) return Response.json({ songId }, { status: 200 })
+        favorites.set(songId, { deletedAt: null, updatedAt: tick() })
+        return Response.json({ songId }, { status: 201 })
+      }
+      if (method === 'DELETE') {
+        if (was && !was.deletedAt) favorites.set(songId, { deletedAt: tick(), updatedAt: now })
+        return new Response(null, { status: 204 })
+      }
+      return error(405, 'method_not_allowed')
     }
     const match = url.pathname.match(/^\/api\/(recordings|toots)\/([^/]+)\/(audio\/)?$/)
     if (!match) return error(404, 'not_found')

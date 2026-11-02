@@ -3,9 +3,10 @@ import { resolve } from 'node:path'
 import { expect, test } from '@playwright/test'
 
 // A browser that used Farty before Toots has version 1 of the `pedos` database: Recordings and
-// their audio only. The app upgrades it to version 5, which adds the Toots (version 2) and the
+// their audio only. The app upgrades it to version 8, which adds the Toots (version 2) and the
 // sync's outbox (version 3), shuts code from before #268 out of the outbox (version 4), adds the
-// Sound Pad's Pads (version 5), keeps every Recording, and queues each one to upload.
+// Sound Pad's Pads (version 5) and the Favorite Songs (version 7), lets a Recording carry its name
+// (version 8, #314), keeps every Recording, and queues each one to upload.
 
 test('upgrades a database from before Toots and keeps its Recordings', async ({ page }) => {
   const wav = readFileSync(
@@ -78,11 +79,98 @@ test('upgrades a database from before Toots and keeps its Recordings', async ({ 
     return result
   })
   expect(stored).toEqual({
-    version: 7,
-    stores: ['audio', 'downloads', 'meta', 'outbox', 'pads', 'recordings', 'tootAudio', 'toots'],
+    version: 8,
+    stores: [
+      'audio',
+      'downloads',
+      'favorites',
+      'meta',
+      'outbox',
+      'pads',
+      'recordings',
+      'tootAudio',
+      'toots'
+    ],
     recording: 7,
     audioBytes: wav.byteLength,
     queued: 'put'
+  })
+})
+
+// A browser on a build with Favorite Songs and before names (#314) has version 7. The upgrade to
+// version 8 changes no store: it keeps the Recordings, their audio and the Favorite Songs.
+test('upgrades a database from before names and keeps its Recordings and Favorite Songs', async ({
+  page
+}) => {
+  const wav = readFileSync(
+    resolve(__dirname, '../../../fixtures/recordings', '090__carlosramon__17-pet__186119.wav')
+  )
+
+  await page.goto('/robots.txt')
+  await page.evaluate(async base64 => {
+    localStorage.setItem('pedos.welcomed', '1')
+    const audio = Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('pedos', 7)
+      request.onupgradeneeded = () => {
+        for (const name of ['recordings', 'toots'])
+          request.result.createObjectStore(name, { keyPath: 'id' })
+        request.result.createObjectStore('outbox', { keyPath: 'key' })
+        for (const name of ['audio', 'tootAudio', 'downloads', 'meta', 'pads', 'favorites'])
+          request.result.createObjectStore(name)
+      }
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    const transaction = db.transaction(['recordings', 'audio', 'favorites'], 'readwrite')
+    transaction.objectStore('recordings').put({
+      id: 'before-names',
+      number: 4,
+      createdAt: Date.now(),
+      seconds: 0.5,
+      sampleRate: 44100,
+      waveform: [],
+      analysis: { state: 'notAnalyzed' }
+    })
+    transaction.objectStore('audio').put(audio, 'before-names')
+    transaction.objectStore('favorites').put(Date.now(), 'twinkle-twinkle-little-star')
+    await new Promise((resolve, reject) => {
+      transaction.oncomplete = resolve
+      transaction.onerror = () => reject(transaction.error)
+    })
+    db.close()
+  }, wav.toString('base64'))
+
+  await page.goto('/recordings/')
+  await expect(page.getByTestId('recording-row')).toHaveCount(1)
+  await expect(page.getByTestId('recording-row')).toContainText('Recording 4')
+
+  const stored = await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('pedos')
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    const keys = (store: string) =>
+      new Promise<IDBValidKey[]>((resolve, reject) => {
+        const request = db.transaction(store).objectStore(store).getAllKeys()
+        request.onsuccess = () => resolve(request.result)
+        request.onerror = () => reject(request.error)
+      })
+    const result = {
+      version: db.version,
+      recordings: await keys('recordings'),
+      audio: await keys('audio'),
+      favorites: await keys('favorites')
+    }
+    db.close()
+    return result
+  })
+  expect(stored).toEqual({
+    version: 8,
+    recordings: ['before-names'],
+    audio: ['before-names'],
+    favorites: ['twinkle-twinkle-little-star']
   })
 })
 
@@ -121,7 +209,7 @@ test('asks you to close Farty in your other tabs while one holds the old databas
     () =>
       new Promise<boolean>((resolve, reject) => {
         let wasBlocked = false
-        const request = indexedDB.open('pedos', 8)
+        const request = indexedDB.open('pedos', 9)
         request.onblocked = () => (wasBlocked = true)
         request.onsuccess = () => {
           request.result.close()

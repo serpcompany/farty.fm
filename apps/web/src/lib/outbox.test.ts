@@ -121,4 +121,74 @@ describe('mergeOutbox', () => {
       version: 'v2'
     })
   })
+
+  // A Favorite Song (#313): the browser's last tap is what the account gets.
+  describe('a Favorite Song', () => {
+    const song = 'twinkle'
+    const favorite = (op: OutboxOp, sent = false): OutboxEntry => ({
+      key: `favorites:${song}`,
+      kind: 'favorites',
+      id: song,
+      op,
+      sent,
+      queuedAt: 1,
+      version: 'v1'
+    })
+
+    it('queues a favorite or an unfavorite on its own', () => {
+      expect(mergeOutbox(undefined, 'favorites', song, 'put', stamp('v2'))).toEqual({
+        ...favorite('put'),
+        queuedAt: 2,
+        version: 'v2'
+      })
+      expect(mergeOutbox(undefined, 'favorites', song, 'delete', stamp('v2'))).toMatchObject({
+        op: 'delete'
+      })
+    })
+
+    // Unlike a Recording's, a delete after a put that went out is still sent, and a put after a
+    // delete too: the earlier request may be on its way and fail, so only the last op is sure to
+    // arrive.
+    it('lets the last op win once an earlier one went out, keeping its place in the queue', () => {
+      expect(mergeOutbox(favorite('put', true), 'favorites', song, 'delete', stamp('v2'))).toEqual({
+        ...favorite('delete'),
+        version: 'v2',
+        reached: true
+      })
+      expect(mergeOutbox(favorite('delete', true), 'favorites', song, 'put', stamp('v2'))).toEqual({
+        ...favorite('put'),
+        version: 'v2',
+        reached: true
+      })
+    })
+
+    // A guest's heart on, then off: the put never went out, so a delete would only take the Song
+    // off an account that marked it on another device.
+    it('leaves nothing to send when a tap undoes one no request carried', () => {
+      expect(mergeOutbox(favorite('put'), 'favorites', song, 'delete', stamp('v2'))).toBeNull()
+      expect(mergeOutbox(favorite('delete'), 'favorites', song, 'put', stamp('v2'))).toBeNull()
+    })
+
+    it('remembers across later taps that an earlier op went out', () => {
+      const off = mergeOutbox(favorite('put', true), 'favorites', song, 'delete', stamp('v2'))
+      const on = mergeOutbox(off ?? undefined, 'favorites', song, 'put', stamp('v3'))
+      expect(on).toEqual({ ...favorite('put'), version: 'v3', reached: true })
+      expect(mergeOutbox(on ?? undefined, 'favorites', song, 'delete', stamp('v4'))).toEqual({
+        ...favorite('delete'),
+        version: 'v4',
+        reached: true
+      })
+    })
+
+    it('keeps the same op queued as it is, or sends it again once it went out', () => {
+      expect(mergeOutbox(favorite('put'), 'favorites', song, 'put', stamp('v2'))).toEqual(
+        favorite('put')
+      )
+      expect(mergeOutbox(favorite('put', true), 'favorites', song, 'put', stamp('v2'))).toEqual({
+        ...favorite('put'),
+        version: 'v2',
+        reached: true
+      })
+    })
+  })
 })

@@ -69,7 +69,7 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
     timeout: 60_000
   })
   await expect(page.getByRole('heading', { name: 'Locked · 1', exact: true })).toBeVisible()
-  const amazing = page.getByRole('button', { name: 'Amazing Grace' })
+  const amazing = page.getByRole('button', { name: 'Amazing Grace', exact: true })
   await expect(amazing).toHaveAccessibleDescription(
     'Locked. 5 of 6 notes covered. Needs E3 (3.0 s)'
   )
