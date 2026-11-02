@@ -495,6 +495,48 @@ describe('Auto-map inputs and terms', () => {
     expect(silentCost([0.3], 0.4)).toBe(0)
   })
 
+  // #332: a note shorter than the gap sounds for no time, not a negative time. A 0.02-beat ornament
+  // at 120 bpm is 10 ms, under the 25 ms gap. `test_short_notes.py` checks the same in the reference.
+  const ornamentSong = (notes: Song['notes']): Song => ({
+    bpm: 120,
+    bar_lines: [0],
+    length_beats: notes.reduce((end, n) => Math.max(end, n.start + n.dur), 0),
+    notes
+  })
+  const ornamentFart = (id: string, recordingPitchMidi: number) => ({
+    id,
+    recordingPitchMidi,
+    shortestNoteSeconds: 0.1,
+    gestureSeconds: exactly(1),
+    settleSeconds: 0.05
+  })
+
+  it('leaves one of two ornaments on one Recording uncovered, honestly', () => {
+    // Before #332 this crashed, here and in the reference, as Bolero's ornaments did.
+    const song = ornamentSong([
+      { start: 0, dur: 0.02, pitch: 60 },
+      { start: 0.02, dur: 0.02, pitch: 61 }
+    ])
+    const a = arrange(song, [ornamentFart('a', 60)])
+    expect(a).toMatchObject({ transposition: 0, octaveMoves: 0, covered: 1, total: 2 })
+    expect(a.pitches.map(c => c.recordingId)).toEqual(['a', null])
+    // too short to settle, with nothing played unsettled
+    expect(a.cost).toBe(8 + 400 * 0.1)
+    expect(a.missingNotes).toEqual([{ midi: 61, seconds: 0 }])
+  })
+
+  it('gives an ornament its own Recording', () => {
+    // Before #332 the ornament was left uncovered and the other note moved an octave.
+    const song = ornamentSong([
+      { start: 0, dur: 0.02, pitch: 60 },
+      { start: 0.02, dur: 1, pitch: 66 }
+    ])
+    const a = arrange(song, [ornamentFart('a', 60), ornamentFart('b', 66)])
+    expect(a).toMatchObject({ transposition: 0, octaveMoves: 0, unlocked: true })
+    expect(a.pitches.map(c => c.recordingId)).toEqual(['a', 'b'])
+    expect(a.cost).toBeCloseTo(8 + 400 * 0.1 + (20 * 0.05) / (0.5 - 0.025), 9)
+  })
+
   it('orders ids by code point', () => {
     expect(['b', 'a', '10', '9', 'Z', 'é', '😀', 'ｚ'].sort(compareIds)).toEqual([
       '10',
