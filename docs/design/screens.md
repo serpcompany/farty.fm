@@ -43,17 +43,18 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **HOW USER GETS HERE:** Tab 3 (Record), in the center of the tab bar. Opens on launch, and whenever the app comes back to the foreground, unless Review or Result is open.
 **WHAT'S ON THE SCREEN:**
 - **Idle:** one big red button and nothing else
-- **Recording:** full screen over the tabs: the button as a Stop square with a pulse, and a timer
+- **Recording:** full screen over the tabs: the button as a Stop square with a pulse, and a timer. On the web (#314) the whole screen turns red, with a big "Recording" and a pulsing dot, a timer in tenths, the take's waveform drawing live, and a white Stop button. It turns red only once the take's audio reaches the page (#281), with a short buzz where the browser can vibrate (not Safari on iPhone).
 **PRIMARY ACTION:** Tap to record, tap again to stop.
 **SECONDARY ACTIONS:** None.
 **STATES:**
 - Idle
-- Starting (web)
+- Getting the mic ready (web)
 - Recording
 - Microphone off (alert)
 - **Error, couldn't start:** "Couldn't start recording", with Try again
 - **Error, interrupted** (a call or another app took the microphone): "Recording stopped. Nothing was saved.", with Try again
-- **Starting:** on the web, a tap before the microphone is open (the first tap before permission, or a tap as the screen opens) shows "Starting…" on the button until audio comes in. Once Record has shown, the microphone stays open for the rest of the launch while the page shows, through Review, Result and the other tabs, so later taps capture at once, with the 300 ms before the tap.
+- **Getting the mic ready:** on the web, a tap shows a grey "Getting the mic ready…" screen with a spinner over the tabs until the take's audio comes in, then turns red. It's seen on a tap before the microphone is open (the first tap before permission, or a tap as the screen opens). Once Record has shown, the microphone stays open for the rest of the launch while the page shows, through Review, Result and the other tabs, so later taps capture at once, with the 300 ms before the tap, and turn red within a frame or two.
+- **Can't hear anything:** on the web, after about 2 s of recording with nothing louder than the room, the red screen says "Can't hear anything. Move closer." and goes on recording.
 - **Nothing heard:** a take with nothing louder than the room goes straight back to Idle with "Didn't catch that. Try again." and nothing to save. On the web, its loudest 50 ms must reach -50 dBFS and stand at least 4 dB above the take's own room (its 10th-percentile 50 ms level), so short farts count. The iPhone app still turns away takes shorter than 0.5 s.
 **NAVIGATION TYPE:** Tab.
 **PATTERN CHOICE:** Recording fills the screen over the tabs, and Stop goes on to Review in the same full-screen cover. Apple's HIG says not to disable tab bar buttons; a modal may cover them.
