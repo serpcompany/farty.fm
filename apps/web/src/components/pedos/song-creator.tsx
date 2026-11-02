@@ -36,6 +36,7 @@ import { cn } from '@/lib/utils'
 import { decodeWav } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 import { useAccount } from './account-provider'
+import { FavoriteButton } from './favorite-button'
 import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
@@ -129,6 +130,7 @@ export function SongCreator({ song }: { song: Song }) {
           <h1 className="truncate font-semibold">{song.title}</h1>
           <p className="truncate text-xs text-muted-foreground">{song.source}</p>
         </div>
+        <FavoriteButton song={song} />
       </header>
 
       {phase.kind === 'making' && (

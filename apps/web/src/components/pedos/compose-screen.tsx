@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowUpDown, ChevronRight, LayoutGrid, Lock, Music2, Search } from 'lucide-react'
+import { ArrowUpDown, ChevronRight, Heart, LayoutGrid, Lock, Music2, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useId, useState } from 'react'
@@ -27,13 +27,38 @@ import {
   songListing,
   sortRows
 } from '@/lib/pitch-coverage'
+import { cn } from '@/lib/utils'
+import { FavoriteButton, useFavorites } from './favorite-button'
 import { LockedSongSheet } from './locked-song-sheet'
 import { usePedos } from './pedos-provider'
 
 const orders: { value: SongOrder; label: string }[] = [
   { value: 'closestToUnlocking', label: 'Closest to unlocking' },
-  { value: 'alphabetical', label: 'A–Z' }
+  { value: 'alphabetical', label: 'A–Z' },
+  { value: 'favoritesFirst', label: 'Favorites first' }
 ]
+
+// The order and the Favorites filter this browser chose last (#313).
+const orderKey = 'pedos.composeOrder'
+const onlyFavoritesKey = 'pedos.composeFavorites'
+
+function readChoice(key: string): string | null {
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+function keepChoice(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value)
+  } catch {
+    // The choice lasts this page, then.
+  }
+}
+
+const noFavorites: ReadonlySet<string> = new Set()
 
 /**
  * Compose: the Song Catalog with each Song's Pitch Coverage. Open an Unlocked Song in Song
@@ -45,7 +70,16 @@ export function ComposeScreen() {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [order, setOrder] = useState<SongOrder>('closestToUnlocking')
+  const [onlyFavorites, setOnlyFavorites] = useState(false)
   const [lockedSong, setLockedSong] = useState<Song | null>(null)
+  const favorites = useFavorites()
+
+  // Read after the first render, which the server rendered without them.
+  useEffect(() => {
+    const kept = readChoice(orderKey)
+    if (orders.some(o => o.value === kept)) setOrder(kept as SongOrder)
+    setOnlyFavorites(readChoice(onlyFavoritesKey) === 'true')
+  }, [])
 
   // The page comes back on the Record tab, so the sheet doesn't stay open.
   useEffect(() => {
@@ -56,30 +90,58 @@ export function ComposeScreen() {
     return () => document.removeEventListener('visibilitychange', visibilityChanged)
   }, [])
 
-  const listing = songListing(sortRows(pedos.songRows, order), query)
+  const listing = songListing(
+    sortRows(pedos.songRows, order, favorites ?? noFavorites),
+    query,
+    onlyFavorites ? (favorites ?? noFavorites) : null
+  )
   const isEmpty = listing.unlocked.length === 0 && listing.locked.length === 0
+  // The whole catalog, or the search within it: the Sound Pad and the first steps show with it.
+  const showsAll = query === '' && !onlyFavorites
 
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
       <div className="flex items-center justify-between gap-2 pt-4 pb-3">
         <h1 className="text-3xl font-bold tracking-tight">Compose</h1>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon" className="size-11" aria-label="Sort" />}
-            data-testid="sort-songs"
+        <div className="flex items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11 aria-pressed:bg-muted"
+            aria-label="Favorites"
+            aria-pressed={onlyFavorites}
+            data-testid="favorites-filter"
+            onClick={() => {
+              setOnlyFavorites(!onlyFavorites)
+              keepChoice(onlyFavoritesKey, String(!onlyFavorites))
+            }}
           >
-            <ArrowUpDown />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-auto">
-            <DropdownMenuRadioGroup value={order} onValueChange={value => setOrder(value)}>
-              {orders.map(({ value, label }) => (
-                <DropdownMenuRadioItem key={value} value={value} className="py-2 text-base">
-                  {label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <Heart className={cn(onlyFavorites && 'fill-current text-primary')} />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={<Button variant="ghost" size="icon" className="size-11" aria-label="Sort" />}
+              data-testid="sort-songs"
+            >
+              <ArrowUpDown />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-auto">
+              <DropdownMenuRadioGroup
+                value={order}
+                onValueChange={value => {
+                  setOrder(value)
+                  keepChoice(orderKey, value)
+                }}
+              >
+                {orders.map(({ value, label }) => (
+                  <DropdownMenuRadioItem key={value} value={value} className="py-2 text-base">
+                    {label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <div className="relative pb-4">
@@ -97,14 +159,14 @@ export function ComposeScreen() {
         />
       </div>
 
-      {pedos.recordings === null ? (
+      {pedos.recordings === null || favorites === null ? (
         <div className="flex flex-1 items-center justify-center">
           <Spinner />
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          {query === '' && <SoundPadRow />}
-          {pedos.melodicRecordings.length === 0 && query === '' && (
+          {showsAll && <SoundPadRow />}
+          {pedos.melodicRecordings.length === 0 && showsAll && (
             <Empty className="rounded-xl bg-muted/60 p-6">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -131,7 +193,20 @@ export function ComposeScreen() {
               ))}
             </Section>
           )}
-          {isEmpty && (
+          {isEmpty && onlyFavorites && query === '' && (
+            <Empty className="pt-16" data-testid="no-favorites">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Heart />
+                </EmptyMedia>
+                <EmptyTitle>No Favorites yet</EmptyTitle>
+                <EmptyDescription>
+                  Tap the heart on a Song to add it to your Favorites.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
+          {isEmpty && (!onlyFavorites || query !== '') && (
             <Empty className="pt-16">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -199,12 +274,12 @@ function SoundPadRow() {
 /** An Unlocked Song: its title and "Ready". It opens in Song Creator. */
 function UnlockedSongRow({ song }: { song: Song }) {
   return (
-    <li data-testid="song-row" data-song={song.id}>
+    <li data-testid="song-row" data-song={song.id} className="flex items-center">
       <Link
         href={`/compose/${song.id}/`}
         // Song Creator plays the Toot once it's made: the tap starts the sound it needs.
         onClick={startAudioInTap}
-        className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset active:bg-muted"
+        className="flex min-h-11 min-w-0 flex-1 items-center justify-between gap-3 py-3 pr-1 pl-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset active:bg-muted"
       >
         <span>{song.title}</span>
         <span className="flex items-center gap-1 text-muted-foreground">
@@ -212,6 +287,7 @@ function UnlockedSongRow({ song }: { song: Song }) {
           <ChevronRight className="size-4" aria-hidden />
         </span>
       </Link>
+      <FavoriteButton song={song} className="mr-1" />
     </li>
   )
 }
@@ -226,10 +302,10 @@ function LockedSongRow({ row, onOpen }: { row: SongRow; onOpen: () => void }) {
   const missing = missingNotes(coverage, 2)
   const needs = missing === null ? null : `Needs ${missing}`
   return (
-    <li data-testid="song-row" data-song={song.id}>
+    <li data-testid="song-row" data-song={song.id} className="flex items-center">
       <button
         type="button"
-        className="flex w-full items-baseline gap-3 px-4 py-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset active:bg-muted"
+        className="flex min-w-0 flex-1 items-baseline gap-3 py-3 pr-1 pl-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset active:bg-muted"
         aria-label={song.title}
         aria-describedby={valueId}
         onClick={onOpen}
@@ -247,6 +323,7 @@ function LockedSongRow({ row, onOpen }: { row: SongRow; onOpen: () => void }) {
           {['Locked', coverageSummary(coverage), needs].filter(Boolean).join('. ')}
         </span>
       </button>
+      <FavoriteButton song={song} className="mr-1" />
     </li>
   )
 }

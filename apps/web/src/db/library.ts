@@ -4,10 +4,11 @@ import type { Performance } from '../lib/performance'
 import type { Analysis, RecordingTrim } from '../lib/recordings'
 import type { TootArrangement } from '../lib/toot'
 import type { Database } from './database'
-import { recordings, toots, user, verification } from './schema'
+import { favoriteSongs, recordings, toots, user, verification } from './schema'
 
-// A user's library in D1: their Recordings and Toots, and their tombstones. Every query here takes
-// the session's user id and filters on it, so one user never reads or changes another's rows.
+// A user's library in D1: their Recordings, Toots and Favorite Songs, and their tombstones. Every
+// query here takes the session's user id and filters on it, so one user never reads or changes
+// another's rows.
 
 /** A user's Recordings or their Toots, by the name of their table and their prefix in R2. */
 export type Kind = 'recordings' | 'toots'
@@ -227,8 +228,68 @@ export async function purgeTombstones(db: Database, userId: string): Promise<voi
     )
   await db.batch([
     db.delete(recordings).where(old('recordings')),
-    db.delete(toots).where(old('toots'))
+    db.delete(toots).where(old('toots')),
+    db
+      .delete(favoriteSongs)
+      .where(
+        and(
+          eq(favoriteSongs.userId, userId),
+          isNotNull(favoriteSongs.deletedAt),
+          lt(favoriteSongs.updatedAt, horizon)
+        )
+      )
   ])
+}
+
+/**
+ * Marks a Song a Favorite Song, or one taken off again, unless the user already has `limit` live
+ * ones. One statement, so two at once can't both pass the limit. True if this call marked it;
+ * false when it already was, or at the limit.
+ */
+export async function favoriteSong(
+  db: Database,
+  userId: string,
+  songId: string,
+  limit: number
+): Promise<boolean> {
+  const added = await db.all(sql`
+    insert into favorite_songs (user_id, song_id, created_at, updated_at)
+    select ${userId}, ${songId}, ${d1Now}, ${d1Now}
+    where (select count(*) from favorite_songs where user_id = ${userId} and deleted_at is null)
+      < ${limit}
+    on conflict (user_id, song_id) do update set deleted_at = null, updated_at = ${d1Now}
+      where favorite_songs.deleted_at is not null
+    returning song_id`)
+  return added.length === 1
+}
+
+/** Whether the Song is one of the user's live Favorite Songs. */
+export async function isFavoriteSong(db: Database, userId: string, songId: string) {
+  const rows = await db
+    .select({ songId: favoriteSongs.songId })
+    .from(favoriteSongs)
+    .where(
+      and(
+        eq(favoriteSongs.userId, userId),
+        eq(favoriteSongs.songId, songId),
+        isNull(favoriteSongs.deletedAt)
+      )
+    )
+  return rows.length === 1
+}
+
+/** Takes a Favorite Song off, leaving a tombstone. Nothing when it isn't one. */
+export async function unfavoriteSong(db: Database, userId: string, songId: string): Promise<void> {
+  await db
+    .update(favoriteSongs)
+    .set({ deletedAt: d1Now, updatedAt: d1Now })
+    .where(
+      and(
+        eq(favoriteSongs.userId, userId),
+        eq(favoriteSongs.songId, songId),
+        isNull(favoriteSongs.deletedAt)
+      )
+    )
 }
 
 /** Renames a live Toot; the last rename to arrive wins. Returns the row's status before. */
@@ -292,6 +353,7 @@ export async function placeRecording(
 
 export type RecordingRow = typeof recordings.$inferSelect
 export type TootRow = typeof toots.$inferSelect
+export type FavoriteSongRow = { songId: string; deletedAt: Date | null }
 
 /**
  * The user's rows changed at or after `since` (epoch milliseconds), tombstones included, and the
@@ -301,9 +363,14 @@ export async function libraryChanges(
   db: Database,
   userId: string,
   since: number
-): Promise<{ cursor: number; recordings: RecordingRow[]; toots: TootRow[] }> {
+): Promise<{
+  cursor: number
+  recordings: RecordingRow[]
+  toots: TootRow[]
+  favoriteSongs: FavoriteSongRow[]
+}> {
   const after = new Date(since)
-  const [clock, recordingRows, tootRows] = await db.batch([
+  const [clock, recordingRows, tootRows, favoriteRows] = await db.batch([
     db.select({ now: d1Now }).from(user).where(eq(user.id, userId)),
     db
       .select()
@@ -312,10 +379,19 @@ export async function libraryChanges(
     db
       .select()
       .from(toots)
-      .where(and(eq(toots.userId, userId), gte(toots.updatedAt, after)))
+      .where(and(eq(toots.userId, userId), gte(toots.updatedAt, after))),
+    db
+      .select({ songId: favoriteSongs.songId, deletedAt: favoriteSongs.deletedAt })
+      .from(favoriteSongs)
+      .where(and(eq(favoriteSongs.userId, userId), gte(favoriteSongs.updatedAt, after)))
   ])
   if (clock.length === 0) throw new Error('The signed-in user has no row')
-  return { cursor: Number(clock[0].now), recordings: recordingRows, toots: tootRows }
+  return {
+    cursor: Number(clock[0].now),
+    recordings: recordingRows,
+    toots: tootRows,
+    favoriteSongs: favoriteRows
+  }
 }
 
 /** Turns Farty news by email on or off. False if the user has no row. */
@@ -334,8 +410,8 @@ export async function setMarketingEmail(
 
 /**
  * Deletes the user's row and any sign-in code still waiting for their email, in one batch. The
- * foreign keys' `on delete cascade` deletes their sessions, sign-in methods, Recordings and Toots
- * with the row. A code's row names the email (`sign-in-otp-<lowercased email>`), not the user.
+ * foreign keys' `on delete cascade` deletes their sessions, sign-in methods, Recordings, Toots
+ * and Favorite Songs with the row. A code's row names the email (`sign-in-otp-<lowercased email>`), not the user.
  */
 export async function deleteUser(db: Database, userId: string): Promise<void> {
   const email = sql`(select ${user.email} from ${user} where ${user.id} = ${userId})`

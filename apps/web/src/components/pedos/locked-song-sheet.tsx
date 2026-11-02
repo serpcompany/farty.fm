@@ -13,6 +13,7 @@ import {
   coverageSummary,
   missingNotes
 } from '@/lib/pitch-coverage'
+import { FavoriteButton } from './favorite-button'
 import { usePedos } from './pedos-provider'
 import { PitchStrip } from './pitch-strip'
 
@@ -51,6 +52,8 @@ export function LockedSongSheet({
           <SheetTitle className="text-center font-semibold">{shown?.title}</SheetTitle>
         </SheetHeader>
         {coverage && <Body coverage={coverage} onRecord={onRecord} />}
+        {/* A locked Song can be a Favorite Song too (#313). */}
+        {shown && <FavoriteButton song={shown} className="absolute top-1.5 left-1.5" />}
         <SheetClose
           render={
             <Button variant="ghost" size="icon" className="absolute top-1.5 right-1.5 size-11" />
