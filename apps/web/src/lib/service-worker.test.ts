@@ -110,11 +110,14 @@ function startWorker(network: Network) {
     return response
   }
 
-  const kept = (name = 'pedos-shell-v1') =>
+  const kept = (name = 'pedos-shell-v2') =>
     [...(stores.get(name)?.keys() ?? [])].map(url => url.replace(origin, ''))
 
   return { lifecycle, request, kept, caches, registration }
 }
+
+/** A build's Song Catalog, named by its content (src/lib/catalog/generate.ts). */
+const catalog = '/catalog/songs-6a1cebdbfde22ed7.json'
 
 const startPage = `<html><head>
 <link rel="icon" href="/icon.png?a1b2" sizes="512x512">
@@ -145,31 +148,82 @@ describe('the service worker', () => {
     ])
   })
 
-  it("keeps each Song's page from /shell.json, and the files it loads, when it installs", async () => {
+  it('keeps the one Song page from /shell.json, the files it loads and the Song Catalog, when it installs', async () => {
     let online = true
     const worker = startWorker(url => {
       if (!online) return 'offline'
       const path = url.replace(origin, '')
       if (path === '/') return ok(startPage)
-      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/mary/'] }))
-      if (path === '/compose/mary/') {
-        return ok('<script src="/_next/static/chunks/song.js"></script>Mary')
+      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
+      if (path === '/compose/song/') {
+        return ok(
+          `<link rel="preload" href="${catalog}" as="fetch" crossorigin="anonymous"/><script src="/_next/static/chunks/song.js"></script>Song page`
+        )
       }
+      if (path === catalog) return ok('[{"id":"mary"}]')
       return ok('file')
     })
     await worker.lifecycle('install')
     expect(worker.kept()).toEqual(
-      expect.arrayContaining(['/compose/mary/', '/_next/static/chunks/song.js'])
+      expect.arrayContaining(['/compose/song/', '/_next/static/chunks/song.js', catalog])
     )
-    // The list itself isn't a page or a shell file.
+    // The list itself isn't a page or a shell file, and no Song has a page of its own.
     expect(worker.kept()).not.toContain('/shell.json')
+    expect(worker.kept()).not.toContain('/compose/mary/')
 
     online = false
-    // Compose opens a Song by client-side navigation, which falls back to a page load offline.
-    expect(await (await worker.request('/compose/mary/', { mode: 'navigate' }))?.text()).toContain(
+    // Compose opens a Song by client-side navigation, which falls back to a page load offline:
+    // every Song's page opens on the one Song page, which reads the Song from its address.
+    for (const path of ['/compose/mary/', '/compose/twinkle', '/compose/not-a-song/?from=link']) {
+      const answer = await worker.request(path, { mode: 'navigate' })
+      expect(await answer?.text(), path).toContain('Song page')
+    }
+    expect(await (await worker.request('/_next/static/chunks/song.js'))?.text()).toBe('file')
+    expect(await (await worker.request(catalog))?.text()).toBe('[{"id":"mary"}]')
+    // Anything else it never kept is still offline.
+    for (const path of ['/compose/mary/notes/', '/toots/mary/']) {
+      await expect(worker.request(path, { mode: 'navigate' }), path).rejects.toThrow(
+        'Failed to fetch'
+      )
+    }
+  })
+
+  it("answers offline with a Song's own page once it was loaded, over the one Song page", async () => {
+    let online = true
+    const worker = startWorker(url => {
+      if (!online) return 'offline'
+      const path = url.replace(origin, '')
+      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
+      if (path === '/compose/song/') return ok('Song page')
+      if (path === '/compose/mary/') return ok('Mary')
+      return ok('file')
+    })
+    await worker.lifecycle('install')
+    await worker.request('/compose/mary/', { mode: 'navigate' })
+
+    online = false
+    expect(await (await worker.request('/compose/mary/', { mode: 'navigate' }))?.text()).toBe(
       'Mary'
     )
-    expect(await (await worker.request('/_next/static/chunks/song.js'))?.text()).toBe('file')
+    expect(await (await worker.request('/compose/twinkle/', { mode: 'navigate' }))?.text()).toBe(
+      'Song page'
+    )
+  })
+
+  it("answers an older build's Song Catalog with the copy it kept, once a deploy has taken it off the server", async () => {
+    let deployed = false
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      if (deployed && path.startsWith('/catalog/')) return failed(404)
+      return ok(`first build's ${path}`)
+    })
+    await worker.request(catalog)
+    deployed = true
+    const answer = await worker.request(catalog)
+    expect(answer?.status).toBe(200)
+    expect(await answer?.text()).toBe(`first build's ${catalog}`)
+    // One it never kept is the server's 404.
+    expect((await worker.request('/catalog/songs-0000000000000000.json'))?.status).toBe(404)
   })
 
   it("keeps the scripts that the scripts load by name, such as the workers' chunks", async () => {
@@ -215,15 +269,15 @@ describe('the service worker', () => {
       const path = url.replace(origin, '')
       if (path === '/') return ok(startPage)
       if (path === '/shell.json') {
-        return dropped ? 'offline' : ok(JSON.stringify({ pages: ['/compose/mary/'] }))
+        return dropped ? 'offline' : ok(JSON.stringify({ pages: ['/compose/song/'] }))
       }
       return ok('file')
     })
     await worker.request('/', { mode: 'navigate' })
-    expect(worker.kept()).not.toContain('/compose/mary/')
+    expect(worker.kept()).not.toContain('/compose/song/')
     dropped = false
     await worker.request('/', { mode: 'navigate' })
-    expect(worker.kept()).toContain('/compose/mary/')
+    expect(worker.kept()).toContain('/compose/song/')
   })
 
   it('fetches pages from the network first, and answers from the cache offline', async () => {
@@ -373,10 +427,10 @@ describe('the service worker', () => {
 
   it("deletes the other versions' caches when a new worker activates", async () => {
     const worker = startWorker(() => ok())
-    await worker.caches.open('pedos-shell-v0')
     await worker.caches.open('pedos-shell-v1')
+    await worker.caches.open('pedos-shell-v2')
     await worker.caches.open('someone-elses-cache')
     await worker.lifecycle('activate')
-    expect(await worker.caches.keys()).toEqual(['pedos-shell-v1', 'someone-elses-cache'])
+    expect(await worker.caches.keys()).toEqual(['pedos-shell-v2', 'someone-elses-cache'])
   })
 })

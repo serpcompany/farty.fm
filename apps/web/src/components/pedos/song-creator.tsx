@@ -2,7 +2,7 @@
 
 import { Check, ChevronLeft, CircleAlert, Play, Square, Trash2 } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
@@ -48,21 +48,36 @@ type Phase =
   | { kind: 'locked' }
   | { kind: 'failed' }
 
+/** What a Song's page shows of it before the Song Catalog loads (#322): which Song it is. */
+export type SongHeading = Pick<Song, 'id' | 'title' | 'source'>
+
 /**
  * Song Creator: hear an Unlocked Song played by your Recordings, and keep it as a Toot. It's not
  * an editor: nothing here changes the Arrangement (ADR 0005). As the iPhone app's
  * `SongCreatorView`.
+ *
+ * The Song's notes come from the Song Catalog the browser fetches (`usePedos().songs`); its page
+ * gives only its `heading`, which shows until then.
  */
-export function SongCreator({ song }: { song: Song }) {
+export function SongCreator({ id, heading }: { id: string; heading?: SongHeading }) {
   const pedos = usePedos()
   const router = useRouter()
+  const song = pedos.song(id)
+  const shown = song ?? heading
   const [phase, setPhase] = useState<Phase>({ kind: 'making' })
   /** Bumped by Try again, to make the Toot again. */
   const [attempt, setAttempt] = useState(0)
-  const loaded = pedos.recordings !== null
+  const loaded = pedos.recordings !== null && song !== undefined
+  // The catalog didn't load, or has no Song of this id.
+  const view =
+    song === undefined && pedos.songsFailed
+      ? 'failed'
+      : song === undefined && pedos.songs !== null
+        ? 'missing'
+        : phase.kind
 
   // Back from Checkout, the same Toot is made again, with the id it was paid for (ADR 0010).
-  const make = useEffectEvent(async () => {
+  const make = useEffectEvent(async (song: Song) => {
     const back = readCheckoutReturn()
     return { draft: await pedos.makeToot(song, back?.tootId), back }
   })
@@ -71,13 +86,13 @@ export function SongCreator({ song }: { song: Song }) {
     if (navigator.userActivation?.hasBeenActive ?? true) pedos.toggleTootPlayback(draft)
   })
 
-  // Makes the Toot once the Recordings have loaded, then plays it once. Leaving the screen
-  // before it's made drops it; coming back makes it again.
+  // Makes the Toot once the Recordings and the Song have loaded, then plays it once. Leaving the
+  // screen before it's made drops it; coming back makes it again.
   // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` is what Try again changes.
   useEffect(() => {
-    if (!loaded) return
+    if (!loaded || !song) return
     let left = false
-    make().then(
+    make(song).then(
       ({ draft, back }) => {
         if (left) return
         setPhase({ kind: 'ready', draft, back })
@@ -127,30 +142,38 @@ export function SongCreator({ song }: { song: Song }) {
           <ChevronLeft className="size-6" />
         </Link>
         <div className="min-w-0 text-center">
-          <h1 className="truncate font-semibold">{song.title}</h1>
-          <p className="truncate text-xs text-muted-foreground">{song.source}</p>
+          <h1 className="truncate font-semibold">{shown?.title}</h1>
+          <p className="truncate text-xs text-muted-foreground">{shown?.source}</p>
         </div>
-        <FavoriteButton song={song} />
+        {shown && <FavoriteButton song={shown} />}
       </header>
 
-      {phase.kind === 'making' && (
+      {view === 'making' && (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
           <Spinner className="size-6" />
           <p>Making your Toot…</p>
         </div>
       )}
-      {phase.kind === 'locked' && (
+      {view === 'missing' && (
+        <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
+          Couldn't find this Song.
+        </p>
+      )}
+      {view === 'locked' && (
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
           This Song is locked. Record the notes it needs to unlock it.
         </p>
       )}
-      {phase.kind === 'failed' && (
+      {view === 'failed' && (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-          <p className="text-muted-foreground">Couldn't make this Toot.</p>
+          <p className="text-muted-foreground">
+            {pedos.songsFailed ? "Couldn't load the Songs." : "Couldn't make this Toot."}
+          </p>
           <Button
             variant="outline"
             className="h-11 px-5 text-base"
             onClick={() => {
+              if (pedos.songsFailed) pedos.reloadSongs()
               setPhase({ kind: 'making' })
               setAttempt(a => a + 1)
             }}
@@ -159,9 +182,21 @@ export function SongCreator({ song }: { song: Song }) {
           </Button>
         </div>
       )}
-      {phase.kind === 'ready' && <Ready draft={phase.draft} back={phase.back} />}
+      {view === 'ready' && phase.kind === 'ready' && (
+        <Ready draft={phase.draft} back={phase.back} />
+      )}
     </div>
   )
+}
+
+/**
+ * Song Creator for the Song the address names: the page the service worker answers a Song's page
+ * with offline, when it kept no copy of that page (`/compose/song/`, public/sw.js). It knows the
+ * Song only once the catalog loads.
+ */
+export function SongCreatorFromAddress() {
+  const id = /^\/compose\/([^/]+)/.exec(usePathname())?.[1] ?? ''
+  return <SongCreator id={id} />
 }
 
 /** What Save says when it didn't save the Toot. */
