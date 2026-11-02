@@ -4,9 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Take } from '@/lib/audio/recorder'
 import type { PcmAudio } from '@/lib/wav'
 
-// Record's states in a DOM, with the real PedosProvider and a stand-in microphone (#281): getting
-// ready until the take's audio comes in, then recording with the level its batches give, the
-// "Can't hear anything" hint that agrees with Stop's verdict, and finishing after Stop.
+// Record's states in a DOM, with the real PedosProvider and a stand-in microphone (#281, #314):
+// the grey "Getting the mic ready" screen until the take's audio comes in, then the red Recording
+// screen with a timer in tenths and the waveform its batches draw, the "Can't hear anything" hint
+// that agrees with Stop's verdict, and finishing after Stop.
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean
@@ -161,8 +162,12 @@ async function open() {
 }
 
 const byTestId = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`)
-const level = () => Number(byTestId('input-level')?.dataset.level)
+/** The live waveform's newest bar, and how many bars it has drawn. */
+const level = () => Number(byTestId('live-waveform')?.dataset.level)
+const bars = () => Number(byTestId('live-waveform')?.dataset.bars)
 const hint = () => byTestId('recording-hint')?.textContent ?? ''
+const timer = () => byTestId('recording-timer')?.textContent
+const dialog = () => document.querySelector('[role="dialog"]')?.getAttribute('aria-label')
 
 async function tapRecord() {
   const button = byTestId('record-button')
@@ -193,39 +198,94 @@ async function sendFor(
   }
 }
 
-describe('Record’s states (#281)', () => {
-  it('says Starting… until the take’s audio comes in, and only then records', async () => {
+describe('Record’s states (#281, #314)', () => {
+  it('shows Getting the mic ready until the take’s audio comes in, and only then turns red', async () => {
+    const vibrate = vi.fn(() => true)
+    Object.defineProperty(window.navigator, 'vibrate', { configurable: true, value: vibrate })
     await open()
+    // Never red before the audio: watched on every change to the page, not only at the checks.
+    const shown: string[] = []
+    const seen = new MutationObserver(() => {
+      const state = byTestId('recording-screen')?.dataset.state
+      if (state && shown[shown.length - 1] !== state) shown.push(state)
+    })
+    seen.observe(document.body, { subtree: true, childList: true, attributes: true })
+
     await tapRecord()
-    const button = byTestId('record-button')
-    expect(button?.getAttribute('aria-label')).toBe('Starting…')
-    expect(button?.dataset.state).toBe('starting')
-    expect((button as HTMLButtonElement).disabled).toBe(true)
+    expect(dialog()).toBe('Getting the mic ready')
+    expect(byTestId('record-getting-ready')?.textContent).toContain('Getting the mic ready…')
+    expect(byTestId('record-getting-ready')?.textContent).toContain(
+      "The screen turns red when it's recording."
+    )
+    expect(byTestId('recording-screen')).toBeNull()
     expect(byTestId('stop-button')).toBeNull()
     expect(byTestId('recording-timer')).toBeNull()
+    expect(byTestId('live-waveform')).toBeNull()
+    expect((byTestId('record-button') as HTMLButtonElement).disabled).toBe(true)
 
-    // The microphone takes its time: still getting ready.
+    // The microphone takes its time: still getting ready, and no buzz yet.
     await act(async () => vi.advanceTimersByTime(1500))
-    expect(byTestId('stop-button')).toBeNull()
+    expect(byTestId('record-getting-ready')).not.toBeNull()
+    expect(byTestId('recording-screen')).toBeNull()
+    expect(shown).toEqual([])
+    expect(vibrate).not.toHaveBeenCalled()
 
     const stand = standInTake()
     stand.send(room(firstBatch))
     await act(async () => starting?.resolve(stand.take))
+    expect(dialog()).toBe('Recording')
+    expect(byTestId('record-getting-ready')).toBeNull()
+    const screen = byTestId('recording-screen')
+    expect(screen?.dataset.state).toBe('recording')
+    expect(screen?.textContent).toContain('Recording')
+    expect(screen?.closest('[role="dialog"]')?.className).toContain('bg-record-screen')
     const stop = byTestId('stop-button')
     expect(stop?.dataset.state).toBe('recording')
     expect(stop?.getAttribute('aria-label')).toBe('Stop')
     expect((stop as HTMLButtonElement).disabled).toBe(false)
-    expect(byTestId('recording-timer')?.textContent).toBe('0:00')
+    expect(timer()).toBe('0:00.0')
     expect(hint()).toBe('')
+    // The phone buzzes once, as it turns red.
+    expect(vibrate).toHaveBeenCalledTimes(1)
+    expect(vibrate).toHaveBeenCalledWith(40)
+    seen.disconnect()
+    expect(shown).toEqual(['recording'])
+    Reflect.deleteProperty(window.navigator, 'vibrate')
   })
 
-  it('moves the level with the take’s batches', async () => {
+  it('never turns red when the microphone fails to start', async () => {
+    await open()
+    await tapRecord()
+    expect(byTestId('record-getting-ready')).not.toBeNull()
+    await act(async () => {
+      // A start that fails before any audio: the stand-in rejects as `startTake` would.
+      starting?.resolve(Promise.reject(new Error('no audio')) as unknown as Take)
+    })
+    expect(byTestId('recording-screen')).toBeNull()
+    expect(byTestId('record-getting-ready')).toBeNull()
+    expect(document.body.textContent).toContain("Couldn't start recording")
+  })
+
+  it('counts the timer in tenths', async () => {
+    await open()
+    await startRecording()
+    await act(async () => vi.advanceTimersByTime(1250))
+    expect(timer()).toBe('0:01.2')
+    // Up to the 30 s limit.
+    await act(async () => vi.advanceTimersByTime(23_400 - 1250))
+    expect(timer()).toBe('0:23.4')
+  })
+
+  it('draws the take’s waveform live: a bar per 50 ms, tall for the fart, flat for the room', async () => {
     await open()
     const stand = await startRecording()
-    // The room under the -70 dBFS floor shows no level.
+    // The first batch, 0.3 s of pre-roll: six bars, and the room under the -70 dBFS floor draws
+    // them flat.
+    expect(bars()).toBe(6)
     expect(level()).toBe(0)
 
     await act(async () => stand.send(fart(batchFrames, -20)))
+    expect(bars()).toBeGreaterThan(6)
     const loud = level()
     expect(loud).toBeGreaterThan(0.6)
     expect(loud).toBeLessThan(0.8)
@@ -239,6 +299,8 @@ describe('Record’s states (#281)', () => {
     await act(async () => stand.send(room(batchFrames)))
     await act(async () => stand.send(room(batchFrames)))
     expect(level()).toBe(0)
+    // The bars so far, in order: 0.3 s of pre-roll and five batches.
+    expect(bars()).toBe(Math.floor((firstBatch + 5 * batchFrames) / (0.05 * sampleRate)))
   })
 
   it('says it can’t hear anything after 2 s of room, without stopping the take', async () => {
@@ -256,7 +318,7 @@ describe('Record’s states (#281)', () => {
     // A fart comes in: the hint goes, and the take carries on.
     await sendFor(stand, 300, () => fart(batchFrames))
     expect(hint()).toBe('')
-    expect(byTestId('recording-timer')?.textContent).toBe('0:02')
+    expect(timer()).toBe('0:02.5')
   })
 
   it('agrees with Stop: a take it can’t hear is the one Stop refuses', async () => {
@@ -285,27 +347,30 @@ describe('Record’s states (#281)', () => {
     expect(byTestId('review-play')).not.toBeNull()
   })
 
-  it('dims the button and holds the timer while the take finishes after Stop', async () => {
+  it('dims Stop and holds the timer and waveform while the take finishes after Stop', async () => {
     await open()
     const stand = await startRecording()
     await sendFor(stand, 3100, () => fart(batchFrames))
-    expect(byTestId('recording-timer')?.textContent).toBe('0:03')
+    expect(timer()).toBe('0:03.1')
+    const drawn = bars()
 
     await act(async () => byTestId('stop-button')?.click())
     const stop = byTestId('stop-button')
     expect(stop?.dataset.state).toBe('finishing')
     expect((stop as HTMLButtonElement).disabled).toBe(true)
-    expect(byTestId('input-level')).toBeNull()
+    expect(byTestId('recording-screen')?.dataset.state).toBe('finishing')
     expect(hint()).toBe('')
 
     await act(async () => vi.advanceTimersByTime(3000))
-    expect(byTestId('recording-timer')?.textContent).toBe('0:03')
+    expect(timer()).toBe('0:03.1')
+    expect(bars()).toBe(drawn)
 
     await act(async () => stand.finish())
     expect(byTestId('stop-button')).toBeNull()
+    expect(byTestId('recording-screen')).toBeNull()
   })
 
-  it('lets an interrupted take go: no level and no hint carry over to the next', async () => {
+  it('lets an interrupted take go: no waveform and no hint carry over to the next', async () => {
     await open()
     const timers = vi.spyOn(window, 'setTimeout')
     const cleared = vi.spyOn(window, 'clearTimeout')
@@ -324,12 +389,14 @@ describe('Record’s states (#281)', () => {
     expect(hintTimer?.value).toBeDefined()
     expect(cleared).toHaveBeenCalledWith(hintTimer?.value)
 
-    // Recording again straight away. This take has sent nothing yet, so the level it shows is
+    // Recording again straight away. This take has sent nothing yet, so the waveform it shows is
     // what the lost take left: nothing.
     await tapRecord()
+    expect(byTestId('live-waveform')).toBeNull()
     const second = standInTake()
     await act(async () => starting?.resolve(second.take))
     expect(byTestId('stop-button')?.dataset.state).toBe('recording')
+    expect(bars()).toBe(0)
     expect(level()).toBe(0)
 
     // The lost take's 2 s hint, 1 s from now, would say it hears nothing. This take hears room,

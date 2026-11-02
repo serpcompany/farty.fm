@@ -246,7 +246,7 @@ export class TakeLevels {
   private readonly sums: number[] = [0]
   private untilBoundary: number
   private readonly levels: number[] = []
-  private latestDb: number | null = null
+  private readonly barLevels: number[] = []
 
   constructor(sampleRate: number) {
     this.hop = Math.max(1, Math.trunc(0.005 * sampleRate))
@@ -256,7 +256,6 @@ export class TakeLevels {
 
   /** Adds the take's next batch of samples. */
   add(batch: Float32Array): void {
-    let loudest = Number.NEGATIVE_INFINITY
     for (let i = 0; i < batch.length; i++) {
       this.sum += batch[i] * batch[i]
       this.untilBoundary -= 1
@@ -269,9 +268,10 @@ export class TakeLevels {
       const meanSquare = Math.max(0, this.sums[end] - this.sums[end - 10]) / this.frame
       const db = 20 * Math.log10(Math.sqrt(meanSquare) + 1e-9)
       this.levels.push(db)
-      loudest = Math.max(loudest, db)
+      // Every 10th window starts where the last one ended: one bar per 50 ms of the take.
+      if (end % 10 === 0)
+        this.barLevels.push(Math.min(1, Math.max(0, (db - quietestFartDb) / -quietestFartDb)))
     }
-    if (loudest > Number.NEGATIVE_INFINITY) this.latestDb = loudest
   }
 
   /** `levelContrast` of the take so far. */
@@ -290,12 +290,11 @@ export class TakeLevels {
   }
 
   /**
-   * Record's live level, 0…1: the loudest 50 ms that ended in the latest batches, from 0 at the
-   * floor `heardSomething` ignores (-70 dBFS) to 1 at full scale.
+   * Record's live waveform (#314): the level of each 50 ms of the take so far, in order, from 0 at
+   * the floor `heardSomething` ignores (-70 dBFS) to 1 at full scale. Room noise draws nothing.
    */
-  get level(): number {
-    if (this.latestDb === null) return 0
-    return Math.min(1, Math.max(0, (this.latestDb - quietestFartDb) / -quietestFartDb))
+  get bars(): readonly number[] {
+    return this.barLevels
   }
 }
 
