@@ -46,7 +46,7 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
 
 ## Tables
 
-Migration `0007_sharing`:
+Migration `0008_sharing`:
 
 - `handles`: `user_id` (primary key, on delete cascade), `handle` (unique), `created_at`.
 - `shares`: `id` (the share id), `user_id` (on delete cascade), `kind` (`recordings`, and `toots` from #317), `item_id`, `created_at`, `taken_down_at`. One per user, kind and item.

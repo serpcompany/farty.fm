@@ -149,7 +149,8 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     const id = path.split('/')[4]
     const picture = await other.request.get(imageOf(id))
     expect(picture.status()).toBe(404)
-    expect(picture.headers()['cache-control']).toBe('private, no-cache')
+    // Next adds no-store and the rest to a 404 of its own.
+    expect(picture.headers()['cache-control']).toMatch(/^private, no-cache\b/)
   }
 
   await test.step('someone signed out opens the link and plays it', async () => {
@@ -217,8 +218,10 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
 
   await test.step('shared again, the new link is gone once the Recording is deleted', async () => {
     await page.getByRole('button', { name: 'Share Recording 1' }).click()
-    await expect.poll(() => page.evaluate(() => window.__shared.length)).toBe(2)
-    const again = new URL((await page.evaluate(() => window.__shared[1].url)) ?? '').pathname
+    // This page's own share sheet, since it loaded /recordings/: the new link only.
+    await expect.poll(() => page.evaluate(() => window.__shared.length)).toBe(1)
+    const again = new URL((await page.evaluate(() => window.__shared[0].url)) ?? '').pathname
+    expect(again).toMatch(new RegExp(`^/u/${handle}/r/[0-9a-z]{12}/$`))
     expect(again).not.toBe(link)
     expect((await other.goto(again))?.status()).toBe(200)
     expect((await other.request.get(imageOf(again.split('/')[4]))).status()).toBe(200)
