@@ -67,9 +67,9 @@ import { welcomedKey } from '@/lib/welcomed'
 export type Draft = { audio: PcmAudio; seconds: number; waveform: number[] }
 
 /**
- * Record's states (#281): getting the microphone ready, recording once its audio comes in, and
- * finishing the take after Stop. `hearsNothing`: about 2 s in, the take so far is one
- * `heardSomething` would refuse, so Record says it can't hear anything. The take goes on.
+ * Record's states (#281, #314): getting the microphone ready, recording once its audio comes in
+ * (never before), and finishing the take after Stop. `hearsNothing`: about 2 s in, the take so far
+ * is one `heardSomething` would refuse, so Record says it can't hear anything. The take goes on.
  */
 export type Capture =
   | { kind: 'idle' }
@@ -81,26 +81,30 @@ export type Capture =
 export const hintAfterMs = 2000
 
 /**
- * Record's live level, 0…1, from the take's batches (`TakeLevels.level`). It's kept outside React
- * state, so only the level redraws with each batch: `useSyncExternalStore(subscribe, current)`.
+ * Record's live waveform (#314): the take so far, one bar per 50 ms, 0…1 (`TakeLevels.bars`).
+ * It's kept outside React state, so only the waveform redraws with each batch:
+ * `useSyncExternalStore(subscribe, bars)`. Empty between takes.
  */
-export type InputLevel = {
-  current(): number
+export type LiveTake = {
+  bars(): readonly number[]
   subscribe(listener: () => void): () => void
 }
 
-function inputLevelStore(): InputLevel & { set(level: number): void } {
-  let level = 0
+const noBars: readonly number[] = []
+
+function liveTakeStore(): LiveTake & { set(bars: readonly number[]): void } {
+  let bars = noBars
   const listeners = new Set<() => void>()
   return {
-    current: () => level,
+    bars: () => bars,
     subscribe(listener) {
       listeners.add(listener)
       return () => listeners.delete(listener)
     },
     set(next) {
-      if (next === level) return
-      level = next
+      if (next.length === bars.length) return
+      // A copy, so each change is a new snapshot.
+      bars = next.length === 0 ? noBars : next.slice()
       for (const listener of listeners) listener()
     }
   }
@@ -109,11 +113,19 @@ function inputLevelStore(): InputLevel & { set(level: number): void } {
 /** The take being recorded, with its timers: the 30 s limit and the hint's 2 s. */
 type TakeInProgress = { take: Take; startedAt: number; limit: number; hint: number }
 
-/** Clears the take's timers and its level, as it stops or is lost. */
-function letGo(current: TakeInProgress, inputLevel: { set(level: number): void }): void {
+/** Clears the take's timers, as it stops or is lost. */
+function letGo(current: TakeInProgress): void {
   clearTimeout(current.limit)
   clearTimeout(current.hint)
-  inputLevel.set(0)
+}
+
+/** A short buzz as Record starts recording, where the browser can (not Safari on iPhone). */
+function buzz(): void {
+  try {
+    if ('vibrate' in window.navigator) window.navigator.vibrate(40)
+  } catch {
+    // A browser that refuses it: the red screen still shows Record records.
+  }
 }
 
 /**
@@ -174,8 +186,8 @@ type Pedos = {
   songRows: SongRow[]
   showsWelcome: boolean
   capture: Capture
-  /** The take's live level while recording; 0 otherwise. */
-  inputLevel: InputLevel
+  /** The take's live waveform while recording and finishing; empty otherwise. */
+  liveTake: LiveTake
   flow: Flow | null
   problem: RecordProblem | null
   nowPlaying: NowPlaying
@@ -340,7 +352,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const [draftAnalyzed, setDraftAnalyzed] = useState<{ draft: Draft; state: AnalysisState } | null>(
     null
   )
-  const [inputLevel] = useState(inputLevelStore)
+  const [liveTake] = useState(liveTakeStore)
   // The Recordings as last rendered, to compare Pitch Coverage after an analysis.
   const latest = useRef<Recording[] | null>(null)
   useEffect(() => {
@@ -486,9 +498,11 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     const current = take.current
     if (!current) return
     take.current = null
-    letGo(current, inputLevel)
+    letGo(current)
+    // The waveform holds while the take finishes.
     setCapture({ kind: 'finishing', startedAt: current.startedAt, stoppedAt: Date.now() })
     const audio = await current.take.stop()
+    liveTake.set(noBars)
     setCapture({ kind: 'idle' })
     // Judged from the audio, pre-roll included, not from how long the take lasted.
     if (audio.samples.length === 0 || !heardSomething(audio.samples, audio.sampleRate)) {
@@ -505,20 +519,22 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         waveform: waveformLevels(samples, 40)
       }
     })
-  }, [inputLevel])
+  }, [liveTake])
 
   const startRecording = useCallback(async () => {
     if (capture.kind !== 'idle' || flow) return
     stopPlayback()
     setProblem(null)
+    liveTake.set(noBars)
     setCapture({ kind: 'starting' })
     try {
       const started = await startTake(
         () => {
           // A call or another app took the microphone: the take is lost.
           if (!take.current) return
-          letGo(take.current, inputLevel)
+          letGo(take.current)
           take.current = null
+          liveTake.set(noBars)
           setCapture({ kind: 'idle' })
           setProblem('interrupted')
         },
@@ -533,7 +549,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         hint: 0
       }
       take.current = current
-      // The level and the hint follow the take's own batches (#281). The hint is the test Stop
+      // The waveform and the hint follow the take's own batches (#281). The hint is the test Stop
       // applies, on the take so far, so the two never disagree.
       const levels = new TakeLevels(started.sampleRate)
       let judging = false
@@ -550,7 +566,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       started.listen(batch => {
         if (take.current !== current) return
         levels.add(batch)
-        inputLevel.set(levels.level)
+        liveTake.set(levels.bars)
         if (judging) judge()
       })
       current.hint = window.setTimeout(() => {
@@ -558,15 +574,17 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         judge()
       }, hintAfterMs)
       setCapture({ kind: 'recording', startedAt: current.startedAt, hearsNothing: false })
+      buzz()
     } catch (error) {
       // Something failed after the take started: it stops capturing, rather than running on to
       // its 30 s limit behind the idle screen.
       const lost = take.current
       if (lost) {
         take.current = null
-        letGo(lost, inputLevel)
+        letGo(lost)
         lost.take.cancel()
       }
+      liveTake.set(noBars)
       setCapture({ kind: 'idle' })
       // The page was hidden, or widened into the product page, before the microphone opened.
       if (error instanceof MicrophoneReleasedError) return
@@ -574,7 +592,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       reportError(denied ? 'mic-denied' : 'mic-start-failed', error)
       setProblem(denied ? 'microphoneOff' : 'couldNotStart')
     }
-  }, [capture.kind, flow, stopRecording, inputLevel])
+  }, [capture.kind, flow, stopRecording, liveTake])
 
   // A new build's reload waits for the take and the record flow after it to close
   // (`stale-build.ts`, #222).
@@ -970,7 +988,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     songRows: rows,
     showsWelcome,
     capture,
-    inputLevel,
+    liveTake,
     flow,
     problem,
     nowPlaying,

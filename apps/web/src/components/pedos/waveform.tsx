@@ -32,6 +32,40 @@ export function Waveform({
   )
 }
 
+/** More bars than the widest Recording screen shows: the rest scrolled off to the left. */
+const LIVE_BARS_SHOWN = 120
+
+/**
+ * A take's waveform drawing live as it comes in (#314): one bar per 50 ms, 0…1, the newest at the
+ * right, the older ones scrolling off to the left, over a centre line. Drawn in the text colour.
+ */
+export function LiveWaveform({ bars, className }: { bars: readonly number[]; className?: string }) {
+  const shown = bars.slice(-LIVE_BARS_SHOWN)
+  const offset = bars.length - shown.length
+  return (
+    <div
+      aria-hidden
+      data-testid="live-waveform"
+      data-bars={bars.length}
+      data-level={(bars[bars.length - 1] ?? 0).toFixed(3)}
+      className={cn(
+        "relative flex items-center justify-end gap-[2px] overflow-hidden before:absolute before:inset-x-0 before:top-1/2 before:h-px before:bg-current before:opacity-30 before:content-['']",
+        className
+      )}
+    >
+      {shown.map((level, i) => (
+        <span
+          // A bar keeps its place in the take, so its index there is a stable key.
+          // biome-ignore lint/suspicious/noArrayIndexKey: bars only append
+          key={offset + i}
+          className="relative min-h-[3px] w-1 shrink-0 rounded-full bg-current"
+          style={{ height: `${(level * 100).toFixed(1)}%` }}
+        />
+      ))}
+    </div>
+  )
+}
+
 /** How far a press moves, in CSS pixels, before it scrubs rather than taps. */
 const SCRUB_PIXELS = 6
 

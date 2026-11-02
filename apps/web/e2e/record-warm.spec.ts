@@ -253,7 +253,7 @@ test.describe('with microphone permission granted', () => {
     // The app empties the capture ring: it heard the interruption.
     await expect.poll(async () => (await microphone(page)).flushed).toBe(1)
     await page.getByTestId('record-button').click()
-    await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
+    await expect(page.getByTestId('record-getting-ready')).toBeVisible()
     await expect(page.getByTestId('stop-button')).toBeVisible()
     const mic = await microphone(page)
     console.log(
@@ -336,7 +336,7 @@ test.describe('with microphone permission granted', () => {
       expect((await microphone(page)).nodes).toBe(0)
       await interrupt(page, event)
       await page.getByTestId('record-button').click()
-      await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
+      await expect(page.getByTestId('record-getting-ready')).toBeVisible()
       await page.evaluate(() =>
         (window as unknown as { loadCaptureProcessor: () => void }).loadCaptureProcessor()
       )
@@ -349,11 +349,11 @@ test.describe('with microphone permission granted', () => {
     })
   }
 
-  test('the button says Starting… until audio comes in', async ({ page }) => {
+  test('Getting the mic ready shows until audio comes in', async ({ page }) => {
     await page.goto('/')
     // Tapped before the microphone has opened.
     await page.getByTestId('record-button').click()
-    await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
+    await expect(page.getByTestId('record-getting-ready')).toBeVisible()
     await expect(page.getByTestId('stop-button')).toBeVisible()
     expect((await microphone(page)).calls).toBe(1)
   })
@@ -537,7 +537,7 @@ test.describe("with the page's own microphone grant, as on iPhone", () => {
 
     // The tap opens it.
     await page.getByTestId('record-button').click()
-    await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
+    await expect(page.getByTestId('record-getting-ready')).toBeVisible()
     await expect(page.getByTestId('stop-button')).toBeVisible()
     const mic = await microphone(page)
     expect(mic.calls).toBe(2)
@@ -591,7 +591,7 @@ test.describe('before microphone permission is granted', () => {
     await page.waitForTimeout(getUserMediaMs + 200)
     expect((await microphone(page)).calls).toBe(0)
     await page.getByTestId('record-button').click()
-    await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
+    await expect(page.getByTestId('record-getting-ready')).toBeVisible()
     await expect(page.getByTestId('stop-button')).toBeVisible()
     const mic = await microphone(page)
     expect(mic.calls).toBe(1)

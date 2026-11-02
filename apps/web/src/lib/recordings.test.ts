@@ -191,6 +191,10 @@ describe('TakeLevels, a take measured as it comes in (#281)', () => {
         for (const batch of inBatches(take, sampleRate)) levels.add(batch)
         expect(levels.contrast(), golden.id).toEqual(expected)
         expect(levelContrast(take, sampleRate), golden.id).toEqual(expected)
+        // The live waveform's bars too.
+        const whole = new TakeLevels(sampleRate)
+        whole.add(take)
+        expect(levels.bars, golden.id).toEqual(whole.bars)
       }
     }
   })
@@ -207,27 +211,30 @@ describe('TakeLevels, a take measured as it comes in (#281)', () => {
     expect(levels.heard()).toBe(true)
   })
 
-  it('gives a level from 0 at the -70 dBFS floor to 1 at full scale, from the latest batch', () => {
+  it('gives a bar per 50 ms, from 0 at the -70 dBFS floor to 1 at full scale (#314)', () => {
     const sampleRate = 48_000
+    const window = 2400
     const levels = new TakeLevels(sampleRate)
-    expect(levels.level).toBe(0)
-    // Less than one 50 ms window: no level yet.
-    levels.add(new Float32Array(100).fill(0.5))
-    expect(levels.level).toBe(0)
-    levels.add(new Float32Array(4096).fill(1))
-    expect(levels.level).toBeCloseTo(1, 6)
-    // The first batch after a loud one still holds windows reaching back into it.
-    const at35 = new Float32Array(4096).fill(10 ** (-35 / 20))
-    levels.add(at35)
-    expect(levels.level).toBeCloseTo(1, 1)
-    levels.add(at35)
-    expect(levels.level).toBeCloseTo(0.5, 6)
-    const room = roomNoise(8192 / sampleRate, sampleRate, -80)
-    levels.add(room.subarray(0, 4096))
-    levels.add(room.subarray(4096))
-    expect(levels.level).toBe(0)
-    levels.add(new Float32Array(4096))
-    expect(levels.level).toBe(0)
+    expect(levels.bars).toEqual([])
+    // Less than one 50 ms window: no bar yet.
+    levels.add(new Float32Array(100).fill(1))
+    expect(levels.bars).toEqual([])
+    levels.add(new Float32Array(window - 100).fill(1))
+    expect(levels.bars).toHaveLength(1)
+    expect(levels.bars[0]).toBeCloseTo(1, 6)
+    // A bar covers its own 50 ms only, whatever the batches were.
+    const at35 = new Float32Array(window).fill(10 ** (-35 / 20))
+    levels.add(at35.subarray(0, 1000))
+    levels.add(at35.subarray(1000))
+    expect(levels.bars).toHaveLength(2)
+    expect(levels.bars[1]).toBeCloseTo(0.5, 6)
+    // Room under the floor, and silence, draw nothing.
+    levels.add(roomNoise((2 * window) / sampleRate, sampleRate, -80))
+    levels.add(new Float32Array(window))
+    expect(levels.bars.slice(2)).toEqual([0, 0, 0])
+    // A take's length in bars: whole 50 ms only.
+    levels.add(new Float32Array(window - 1))
+    expect(levels.bars).toHaveLength(5)
   })
 })
 

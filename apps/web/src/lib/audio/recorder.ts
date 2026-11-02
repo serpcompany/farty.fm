@@ -11,7 +11,7 @@ export type Take = {
   readonly sampleRate: number
   /**
    * Hands `listener` each batch of the take the capture processor sends the page: those so far,
-   * from the first, then each as it arrives. Record's live level and its hint are fed from them
+   * from the first, then each as it arrives. Record's live waveform and its hint are fed from them
    * (#281). Nothing is added to the take.
    */
   listen(listener: (batch: Float32Array) => void): void
