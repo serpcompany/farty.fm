@@ -102,6 +102,20 @@ _Avoid_: Button, slot, key
 What the Sound Pad records between Record and Stop: which Recording each tap played, and when, from the first tap, for up to 30 s. Stop makes it into a Toot, each tap's fart playing raw from its start (ADR 0017).
 _Avoid_: Sequence, pattern, loop, beat, track
 
+## Sharing
+
+**Handle**:
+The name a user's links carry, as in `farty.fm/u/<handle>/r/<id>`. The user picks it the first time they share: 3 to 20 lowercase letters, numbers or `_`, unique, and not on Farty's block list. It is the only thing about the user a Shared Recording shows. Only a user with an account has one (ADR 0020).
+_Avoid_: Username, display name, screen name
+
+**Shared Recording**:
+A Recording its owner has shared by link, which anyone with the link can open and play, signed in or not, without the link being listed anywhere. The page shows the Handle, the Recording's name, note, length and waveform, and plays the part of the fart its row plays. Stop sharing, deleting the Recording, deleting the account, or Farty taking it down after a Report ends the link for everyone; sharing it again makes a new link (ADR 0020). A Shared Toot works the same way, for a saved Toot.
+_Avoid_: Public Recording, post, upload, published Recording
+
+**Friend**:
+Another user, found by their Handle, who has accepted a friend request from the user, or whose request the user accepted. Either can remove the other. Friends see each other's profile page of what they've shared (#319; not built yet).
+_Avoid_: Follower, contact, connection
+
 ## Testing
 
 **Internal Tester**:

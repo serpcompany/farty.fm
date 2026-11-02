@@ -20,6 +20,7 @@ import { setSharing, useSharing } from '@/lib/telemetry/sharing'
 import { useAccount } from './account-provider'
 import { InstallGuideCard, useInstallGuide } from './install-button'
 import { usePedos } from './pedos-provider'
+import { useShares } from './share-recording'
 
 /**
  * The Fixture Library loader, in internal builds only: `build:staging` sets
@@ -224,6 +225,8 @@ function AccountSection() {
   /** Some farts haven't reached the account: wait, or sign out anyway. */
   const [notUploaded, setNotUploaded] = useState(false)
   const [confirmsClear, setConfirmsClear] = useState(false)
+  /** The Handle picked the first time a Recording was shared (ADR 0020). */
+  const handle = useShares()?.handle ?? null
 
   const [signingOut, setSigningOut] = useState(false)
 
@@ -276,7 +279,7 @@ function AccountSection() {
       <>
         <ul className={list}>
           <li>
-            <button type="button" className={row} onClick={openStep}>
+            <button type="button" className={row} onClick={() => openStep()}>
               {account.status === 'expired' ? 'Sign in again' : 'Save to an account'}
               <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
             </button>
@@ -338,6 +341,14 @@ function AccountSection() {
             {account.email}
           </span>
         </li>
+        {handle && (
+          <li className="flex min-h-11 items-center justify-between gap-4 px-4 py-2.5">
+            <span>Handle</span>
+            <span className="min-w-0 truncate text-muted-foreground" data-testid="account-handle">
+              @{handle}
+            </span>
+          </li>
+        )}
         <li>
           {/* The whole row toggles the switch, so it's a full-size target. */}
           <label htmlFor="pedos-news" className={row}>
@@ -384,8 +395,8 @@ function AccountSection() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete your account?</AlertDialogTitle>
             <AlertDialogDescription>
-              This deletes your email, Recordings and Toots from Farty, on every device. It can't be
-              undone.
+              This deletes your email, Recordings and Toots from Farty, on every device, and your
+              shared links stop working. It can't be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

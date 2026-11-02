@@ -140,6 +140,22 @@ Saving a Toot is paid on Staging in Stripe's test mode, and on Production in liv
 
 Most updates ship by deploying the site, with no new upload. Upload a new `.aab` (raise `appVersionCode`) only when `android/twa-manifest.json` changes.
 
+## Reports and take-downs
+
+A shared Recording's page has Report (#316, ADR 0020). Each report is a row in D1's `share_reports` (the share, its owner, the item and when; nothing about who reported) and a `share_reported` line in the Worker's logs with the link's id: query `event = share_reported`, or read the table. Nobody is emailed. A link takes at most 5 reports a day and the site 300 an hour (`REPORT_LIMITS` in `src/server/sharing.ts`).
+
+**The owner takes one down** in the Cloudflare dashboard, under D1, `pedos-production` (or `pedos-staging`), Console. Agents never write to a remote database.
+
+```sql
+-- Newest reports first, with the link each names.
+SELECT r.created_at, r.share_id, h.handle, r.kind, r.item_id FROM share_reports r
+  JOIN handles h ON h.user_id = r.user_id ORDER BY r.created_at DESC LIMIT 20;
+-- Take one down: its page, image and audio answer 404 from the next request.
+UPDATE shares SET taken_down_at = unixepoch() * 1000 WHERE id = '<share_id>';
+```
+
+A link taken down stays down: its row is kept, so the owner can't share that Recording again (403 `taken_down`), and neither Stop sharing nor deleting the Recording removes it. To put it back, set `taken_down_at` to `NULL`. Deleting the account removes it, with the reports.
+
 ## Gotchas learned in slice 1
 
 - `apps/web` isn't `"type": "module"`, so Playwright compiles `e2e/` as CommonJS. Use `__dirname`, not `import.meta`.
