@@ -1,0 +1,167 @@
+{
+  "bar_lines": [
+    0.5,
+    3.5,
+    6.5,
+    9.5,
+    12.5,
+    15.5,
+    18.5,
+    21.5
+  ],
+  "beats_per_bar": 3,
+  "bpm": 144,
+  "file": "midi/pdmx-farmer-in-the-dell.mid",
+  "id": "farmer-in-the-dell",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 144,
+    "max_beats": 30.5
+  },
+  "import_report": {
+    "catalog_id": "farmer-in-the-dell",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 24,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-farmer-in-the-dell.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 24.354166666666668,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 1.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.0
+    },
+    {
+      "dur": 1.4166666666666667,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 7.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 9.0
+    },
+    {
+      "dur": 1.4166666666666667,
+      "pitch": 68,
+      "start": 9.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 12.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 21.0
+    },
+    {
+      "dur": 2.8541666666666665,
+      "pitch": 64,
+      "start": 21.5
+    }
+  ],
+  "pitches": [
+    59,
+    64,
+    66,
+    68,
+    71,
+    73
+  ],
+  "sha256": "d3ecffc27b745a1fb8920dc636fa8a3da8607471d006728058b0b45d48e36e20",
+  "title": "The Farmer in the Dell"
+}

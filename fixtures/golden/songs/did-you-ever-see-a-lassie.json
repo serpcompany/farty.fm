@@ -1,0 +1,220 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-did-you-ever-see-a-lassie.mid",
+  "id": "did-you-ever-see-a-lassie",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "did-you-ever-see-a-lassie",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 34,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-did-you-ever-see-a-lassie.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 0.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 3.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 12.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 15.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    62,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76
+  ],
+  "sha256": "7d9c90ec8cd5fa1bdf86469c9180af6f985cc637c4698faf53db5a98552036b2",
+  "title": "Did You Ever See a Lassie"
+}

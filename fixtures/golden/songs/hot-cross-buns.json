@@ -1,0 +1,213 @@
+{
+  "bar_lines": [
+    0.0,
+    2.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0,
+    12.0,
+    14.0
+  ],
+  "beats_per_bar": 2,
+  "bpm": 72,
+  "file": "midi/pdmx-hot-cross-buns.mid",
+  "id": "hot-cross-buns",
+  "import_args": {
+    "bpm": 72,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "hot-cross-buns",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 34,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-hot-cross-buns.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 16.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 0.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 3.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 4.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 4.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 4.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 4.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 5.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 5.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 5.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 11.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 12.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 12.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 12.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 13.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 13.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 13.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 15.0
+    }
+  ],
+  "pitches": [
+    65,
+    67,
+    69
+  ],
+  "sha256": "ea44192d88a651b36e7a466a156bb211caa51962114d2c244230a934fc53842c",
+  "title": "Hot Cross Buns"
+}

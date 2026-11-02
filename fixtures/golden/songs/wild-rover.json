@@ -1,0 +1,171 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 144,
+  "file": "midi/pdmx-wild-rover.mid",
+  "id": "wild-rover",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 144,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "wild-rover",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 24,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-wild-rover.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 7.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 64,
+      "start": 7.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 9.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 64,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 61,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 24.0
+    },
+    {
+      "dur": 3.7916666666666665,
+      "pitch": 62,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    57,
+    59,
+    61,
+    62,
+    64,
+    66,
+    67,
+    69
+  ],
+  "sha256": "5b7dbf2cb5e60d37c854e2f6d95fc117fc863babd62799c2093772a095170e64",
+  "title": "The Wild Rover"
+}

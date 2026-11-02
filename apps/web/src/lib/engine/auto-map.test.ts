@@ -182,14 +182,37 @@ describe('Auto-map matches the golden Arrangements', () => {
     }
   }
 
-  it('unlocks all 13 Songs on the full library and 2 on the small one', () => {
-    const unlocked = (library: Library) =>
-      songIds.filter(id => arrange(goldenSong(id), inputs(libraries[library])).unlocked)
+  it('unlocks all but 5 Songs on the full library, and the 13 from before #229, 2 of those on the small one', () => {
+    const locked = (library: Library, ids: readonly string[] = songIds) =>
+      ids.filter(id => !arrange(goldenSong(id), inputs(libraries[library])).unlocked)
     // Every burst plays (ADR 0016), so the long notes jingle, row, amazing and auld need have
     // farts long enough (ADR 0011). The small library's six are still too short for those, and
     // with 009 Melodic since the second pitch window (ADR 0017) they unlock mary and saints.
-    expect(unlocked('full')).toEqual(songIds)
-    expect(unlocked('small')).toEqual(['mary', 'saints'])
+    const before229 = [
+      'twinkle',
+      'mary',
+      'jingle',
+      'frere',
+      'saints',
+      'row',
+      'ode',
+      'amazing',
+      'furelise',
+      'auld',
+      'ode-mutopia',
+      'birthday',
+      'merryxmas'
+    ]
+    expect(locked('full', before229)).toEqual([])
+    expect(before229.filter(id => locked('small', [id]).length === 0)).toEqual(['mary', 'saints'])
+    // Each of these needs a fart longer than any fixture near one of its notes (ADR 0011).
+    expect(locked('full')).toEqual([
+      'silent-night',
+      'joy-to-the-world',
+      'away-in-a-manger',
+      'daisy-bell',
+      'taps'
+    ])
   })
 })
 

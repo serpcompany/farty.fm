@@ -1,0 +1,204 @@
+{
+  "bar_lines": [
+    0.0,
+    2.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0,
+    12.0,
+    14.0,
+    16.0,
+    18.0,
+    20.0,
+    22.0,
+    24.0,
+    26.0,
+    28.0,
+    30.0
+  ],
+  "beats_per_bar": 2,
+  "bpm": 120,
+  "file": "midi/pdmx-pack-up-your-troubles.mid",
+  "id": "pack-up-your-troubles",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32,
+    "start_beat": 24
+  },
+  "import_report": {
+    "catalog_id": "pack-up-your-troubles",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 29,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-pack-up-your-troubles.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1,
+      2
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 3.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 7.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 10.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 60,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 27.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 67,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    57,
+    58,
+    60,
+    62,
+    64,
+    65,
+    67,
+    69
+  ],
+  "sha256": "17733f75cacabd317e32e0b38b7b924129af74b655174026db064fd2f704387e",
+  "title": "Pack Up Your Troubles in Your Old Kit-Bag"
+}

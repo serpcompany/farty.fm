@@ -1,0 +1,142 @@
+{
+  "bar_lines": [
+    2.0,
+    6.0,
+    10.0,
+    14.0,
+    18.0,
+    22.0,
+    26.0,
+    30.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-red-river-valley.mid",
+  "id": "red-river-valley",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "red-river-valley",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 19,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-red-river-valley.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 15.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 19.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 23.0
+    },
+    {
+      "dur": 8.0,
+      "pitch": 69,
+      "start": 24.0
+    }
+  ],
+  "pitches": [
+    62,
+    67,
+    69,
+    71,
+    72,
+    74
+  ],
+  "sha256": "81a6cdf8ef1d3c8f5beabbcca5e5c75010325eb0d563d5dc83251a58ae86efda",
+  "title": "Red River Valley"
+}

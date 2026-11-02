@@ -1,0 +1,73 @@
+{
+  "library": "small",
+  "max_abs_shift_semitones": null,
+  "metrics": null,
+  "missing": [
+    {
+      "seconds": 0.3,
+      "target_midi": 50
+    }
+  ],
+  "notes": null,
+  "octave_moves": 1,
+  "per_pitch": [
+    {
+      "octave_move": false,
+      "recording": "022",
+      "shift_semitones": 0.6740794063398141,
+      "song_pitch": 64,
+      "target_midi": 41
+    },
+    {
+      "octave_move": false,
+      "recording": "016",
+      "shift_semitones": 2.674079406339814,
+      "song_pitch": 66,
+      "target_midi": 43
+    },
+    {
+      "octave_move": true,
+      "recording": "009",
+      "shift_semitones": 14.474079406339825,
+      "song_pitch": 68,
+      "target_midi": 45
+    },
+    {
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": 1.574079406339827,
+      "song_pitch": 69,
+      "target_midi": 46
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": 1.5740794063398198,
+      "song_pitch": 71,
+      "target_midi": 48
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 73,
+      "target_midi": 50
+    },
+    {
+      "octave_move": false,
+      "recording": "090",
+      "shift_semitones": -2.2259205936601774,
+      "song_pitch": 76,
+      "target_midi": 53
+    }
+  ],
+  "pitch_coverage": {
+    "covered": 6,
+    "total": 7
+  },
+  "plan_cost": 857.0051162315694,
+  "render_settings": null,
+  "song": "mulberry-bush",
+  "transpose": -23,
+  "unlocked": false
+}
