@@ -14,6 +14,7 @@ import {
   type Kind,
   mergeOutbox,
   type OutboxEntry,
+  type OutboxKind,
   type OutboxOp,
   type PlacedField,
   queueStamp
@@ -45,7 +46,7 @@ export interface PedosDB extends DBSchema {
   downloads: { key: string; value: { kind: Kind; id: string } }
   /**
    * `cursor`: the account's `cursor` as of this browser's last read. Since version 3; versions 4,
-   * 5 and 6 set it back to 0 (`readEverythingAgain`).
+   * 5, 6 and 7 set it back to 0 (`readEverythingAgain`).
    */
   meta: { key: string; value: number }
   /**
@@ -54,6 +55,12 @@ export interface PedosDB extends DBSchema {
    * This browser's only: it never syncs, and a guest's lasts the visit. Since version 5.
    */
   pads: { key: number; value: string }
+  /**
+   * The Favorite Songs (#313), by Song id, each with when it was marked here. A guest's stay
+   * across visits, unlike their farts, and go to the account they sign in with; an account's are
+   * its working copy, cleared with its library at sign-out. Since version 7.
+   */
+  favorites: { key: string; value: number }
 }
 
 /** Every store: clearing this browser's library clears them all. */
@@ -65,7 +72,8 @@ const allStores = [
   'outbox',
   'downloads',
   'meta',
-  'pads'
+  'pads',
+  'favorites'
 ] as const
 
 /** Where each kind's WAVs are kept. */
@@ -75,7 +83,7 @@ export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
  * The `pedos` database's version. Web releases roll forward, not back, past a bump
  * (`docs/agents/web.md`).
  */
-export const DB_VERSION = 6
+export const DB_VERSION = 7
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
 
@@ -101,10 +109,10 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
 }
 
 /**
- * The app's database, upgraded to version 6 on first open. Version 1 held Recordings only, version
- * 2 added Toots, version 3 the outbox and version 5 the Sound Pad's Pads (#277). An upgrade keeps
- * them, and one from before version 3 queues each to upload, since none has been
- * (`queueEverything`).
+ * The app's database, upgraded to version 7 on first open. Version 1 held Recordings only, version
+ * 2 added Toots, version 3 the outbox, version 5 the Sound Pad's Pads (#277) and version 7 the
+ * Favorite Songs (#313). An upgrade keeps them, and one from before version 3 queues each to
+ * upload, since none has been (`queueEverything`).
  *
  * Version 4 (#268) changes no store. It shuts out code from before #268, in a tab opened before
  * the deploy or after a rollback: that code reads an outbox op it doesn't know, such as `place`,
@@ -117,6 +125,11 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
  * and settle it, and would read the account's Trims without keeping them while its cursor moves
  * past them. Its upgrade reads the whole library again too, so this browser gets the Trims another
  * one saved.
+ *
+ * Version 7 (#313) shuts out code from before Favorite Songs the same way: that code would read the
+ * account's Favorite Songs without keeping them while its cursor moves past them, and would send
+ * an outbox entry for one as a Recording's. Its upgrade reads the whole library again, which
+ * brings the Favorite Songs another browser marked.
  *
  * One connection serves the page until the browser closes it, as WebKit can while the tab sleeps
  * (#222), or it fails to open: the next call then opens a fresh one. Reads and writes go through
@@ -143,6 +156,7 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
       }
       if (oldVersion >= 3) readEverythingAgain(transaction).catch(() => {})
       if (oldVersion < 5) database.createObjectStore('pads')
+      if (oldVersion < 7) database.createObjectStore('favorites')
     },
     // An older version is open in another tab, and its code may never close it: the upgrade
     // waits until that tab closes.
@@ -270,14 +284,14 @@ async function readEverythingAgain(
 type OutboxStore = IDBPObjectStore<PedosDB, StoreNames<PedosDB>[], 'outbox', 'readwrite'>
 
 /**
- * Adds `op` on a Recording or Toot to the outbox, in the transaction that makes the change, so the
- * change and its entry are written together or not at all. A write names `outbox` before its
- * first request: a store asked for once a request has aborted the transaction throws there and
- * then, leaving the requests already made, and `tx.done`, unhandled.
+ * Adds `op` on a Recording, Toot or Favorite Song to the outbox, in the transaction that makes the
+ * change, so the change and its entry are written together or not at all. A write names `outbox`
+ * before its first request: a store asked for once a request has aborted the transaction throws
+ * there and then, leaving the requests already made, and `tx.done`, unhandled.
  */
 export async function queue(
   outbox: OutboxStore,
-  kind: Kind,
+  kind: OutboxKind,
   id: string,
   op: OutboxOp,
   fields: PlacedField[] = []

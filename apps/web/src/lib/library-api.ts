@@ -97,13 +97,24 @@ export async function deleteItem(kind: Kind, id: string, accountId: string): Pro
   return answer(await send(`/api/${kind}/${id}/`, accountId, { method: 'DELETE' }))
 }
 
-/** What `GET /api/library/` answers: the changes since `since`, or the whole library (`full`). */
+/** Marks a Song a Favorite Song on the account (#313), or takes it off with `on` false. */
+export async function setFavorite(songId: string, on: boolean, accountId: string): Promise<Answer> {
+  const path = `/api/favorites/${encodeURIComponent(songId)}/`
+  return answer(await send(path, accountId, { method: on ? 'PUT' : 'DELETE' }))
+}
+
+/**
+ * What `GET /api/library/` answers: the changes since `since`, or the whole library (`full`). A
+ * Worker from before #313 sends no Favorite Songs.
+ */
 export type LibraryChanges = {
   cursor: number
   full: boolean
   recordings: (Recording & { audioBytes?: number })[]
   toots: (Toot & { audioBytes?: number })[]
-  deleted: { recordings: string[]; toots: string[] }
+  /** The Favorite Songs marked since, by Song id. */
+  favorites?: string[]
+  deleted: { recordings: string[]; toots: string[]; favorites?: string[] }
 }
 
 export async function getLibrary(
