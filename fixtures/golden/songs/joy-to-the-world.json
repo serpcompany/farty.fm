@@ -1,0 +1,124 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-joy-to-the-world.mid",
+  "id": "joy-to-the-world",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "joy-to-the-world",
+    "chord_tones_dropped": 2,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 15,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-joy-to-the-world.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 84,
+      "start": 0.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 83,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 3.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 79,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 7.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 10.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 15.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 81,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 19.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 83,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 83,
+      "start": 23.0
+    },
+    {
+      "dur": 7.0,
+      "pitch": 84,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 84,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    72,
+    74,
+    76,
+    77,
+    79,
+    81,
+    83,
+    84
+  ],
+  "sha256": "e96a0f50a07c0cf2deb59ca5e0564571ca815ac8b6adb30c45fb762d9d4adb58",
+  "title": "Joy to the World"
+}

@@ -3,11 +3,12 @@ import { join, resolve } from 'node:path'
 import { expect, type Locator, type Page, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { newEmail, signInByApi } from './account'
+import { songsTheFixtureLibraryUnlocks } from './golden'
 import { payAtTheDevCheckout } from './pay'
 
-// Song Creator on the Staging build, with the whole Fixture Library loaded: all 12 Songs are
-// unlocked (Songs play each fart raw, every burst of it, ADR 0012 and ADR 0016). Each Song opens from
-// Compose, is made and starts playing, plays one tapped note, and
+// Song Creator on the Staging build, with the whole Fixture Library loaded, which unlocks most Songs
+// (`golden.ts`; Songs play each fart raw, every burst of it, ADR 0012 and ADR 0016). Each of the
+// journey's Songs opens from Compose, is made and starts playing, plays one tapped note, and
 // is paid for and saved (ADR 0010); the Toots are then read back from IndexedDB. Then a direct load, a failed render, a
 // locked and an unknown Song, and a Song opened offline.
 //
@@ -32,10 +33,11 @@ declare global {
 const evidence = process.env.E2E_EVIDENCE_DIR ? resolve(process.env.E2E_EVIDENCE_DIR) : null
 
 /**
- * The Songs the whole Fixture Library unlocks: all of them, as the reference's golden Arrangements
- * do, since Songs play every burst of a fart (ADR 0016).
+ * The Songs the journey makes a Toot of: the iPhone app's 12, first on the ship list, and Hot Cross
+ * Buns, the first of the catalog Songs Compose lists since #229. Making a Toot of every Song would
+ * take the journey past its time limit; the unit tests check every Song against the golden data.
  */
-const unlockedSongs = songs
+const journeySongs = songs.slice(0, 13)
 
 test.beforeEach(async ({ request }) => {
   // `next dev` never shows the loader, even with fixtures left in public/ by a Staging build.
@@ -68,7 +70,9 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
   if (out) await page.screenshot({ path: join(out, 'compose.png') })
 
   const timings: { song: string; tapToReadyMs: number; makingMs: number }[] = []
-  for (const song of unlockedSongs) {
+  expect(journeySongs.map(s => s.id).at(-1)).toBe('hot-cross-buns')
+  expect(journeySongs.every(s => songsTheFixtureLibraryUnlocks.includes(s))).toBe(true)
+  for (const song of journeySongs) {
     await test.step(song.id, async () => {
       const link = page
         .getByTestId('unlocked-songs')
@@ -184,7 +188,7 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
     db.close()
     return all
   })
-  expect(toots.map(t => t.songId).sort()).toEqual(unlockedSongs.map(s => s.id).sort())
+  expect(toots.map(t => t.songId).sort()).toEqual(journeySongs.map(s => s.id).sort())
   for (const toot of toots) {
     const song = songs.find(s => s.id === toot.songId)
     expect(toot.title).toBe(song?.title)
@@ -340,7 +344,7 @@ async function listenToThePage(page: Page) {
   })
 }
 
-/** Loads the Fixture Library from Profile, then opens Compose with all 12 Songs unlocked. */
+/** Loads the Fixture Library from Profile, then opens Compose with the Songs it unlocks. */
 async function loadTheFixtureLibrary(page: Page) {
   const library = page.getByTestId('fixture-library')
   await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
@@ -352,7 +356,10 @@ async function loadTheFixtureLibrary(page: Page) {
     .getByRole('link', { name: 'Compose', exact: true })
     .click()
   await expect(
-    page.getByRole('heading', { name: `Unlocked · ${unlockedSongs.length}` })
+    page.getByRole('heading', {
+      name: `Unlocked · ${songsTheFixtureLibraryUnlocks.length}`,
+      exact: true
+    })
   ).toBeVisible({
     timeout: 60_000
   })

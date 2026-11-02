@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { songs } from '../src/lib/catalog/songs.generated'
 import {
   fakeMicrophone,
   fartAndRecord,
@@ -11,10 +12,11 @@ import { skipWelcome } from './record'
 // Compose and the Result screen, with Recordings made through the fake microphone in
 // `fake-microphone.ts`, which plays each fart as the person presses Record, all on one page.
 //
-// Mary Had a Little Lamb unlocks with fixtures 095 (F2), 017 (D♯2), 022 (E2) and 002 (A♯2), and
-// no Song unlocks before the fourth: the reference's `melody_fit()` on these four. Songs play each
-// fart raw, at its own length (ADR 0012), so Mary's last note, 1.40 s long, needs 002 (4.04 s with
-// every burst, ADR 0016), the only one of the four that long (ADR 0011).
+// Mary Had a Little Lamb unlocks with fixtures 095 (F2), 017 (D♯2), 022 (E2) and 002 (A♯2), with 4
+// more Songs, and only Hot Cross Buns unlocks before the fourth, at the third: the reference's
+// `melody_fit()` on these four. Songs play each fart raw, at its own length (ADR 0012), so Mary's
+// last note, 1.40 s long, needs 002 (4.04 s with every burst, ADR 0016), the only one of the four
+// that long (ADR 0011).
 
 test.use({ permissions: ['microphone'] })
 
@@ -43,11 +45,13 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   // Before any Recording, every Song is locked and Compose says how to start.
   await page.goto('/compose/')
   await expect(page.getByText('No Melodic Recordings yet')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Locked · 12' })).toBeVisible()
+  const locked = (count: number) =>
+    page.getByRole('heading', { name: `Locked · ${count}`, exact: true })
+  await expect(locked(songs.length)).toBeVisible()
   await expect(page.getByRole('heading', { name: /^Unlocked/ })).toHaveCount(0)
 
   // A locked Song's sheet: no Melodic Recordings yet.
-  await page.getByRole('button', { name: 'Mary Had a Little Lamb' }).click()
+  await page.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true }).click()
   const sheet = page.getByRole('dialog', { name: 'Mary Had a Little Lamb' })
   await expect(sheet.getByTestId('locked-song-needs')).toHaveText(
     'Record a fart with a clear note to start.'
@@ -69,8 +73,8 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
 
   await tab(page, 'Compose').click()
   await expect(page.getByText('No Melodic Recordings yet')).toHaveCount(0)
-  await expect(page.getByRole('heading', { name: 'Locked · 12' })).toBeVisible()
-  const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb' })
+  await expect(locked(songs.length)).toBeVisible()
+  const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true })
   // Which notes it needs depends on the take's settle time (two Arrangements nearly tie), so the
   // journey checks the shape; `pitch-coverage.test.ts` pins the exact notes on the golden 095.
   await expect(mary).toHaveAccessibleDescription(
@@ -90,17 +94,20 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(sheet).toBeHidden()
   await expect(page.getByTestId('record-button')).toBeVisible()
 
-  // Three more takes; the fourth unlocks Mary.
-  for (const id of ['017', '022']) {
-    await recordAndSave(page, id)
-    await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
-    await page.getByRole('button', { name: 'Record another' }).click()
-  }
+  // Three more takes: the third unlocks Hot Cross Buns, and the fourth Mary and 4 more Songs.
+  await recordAndSave(page, '017')
+  await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
+  await page.getByRole('button', { name: 'Record another' }).click()
+  await recordAndSave(page, '022')
+  await expect(page.getByTestId('result-progress')).toContainText('You unlocked Hot Cross Buns')
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page).toHaveURL(/\/recordings\/$/)
+  await tab(page, 'Record').click()
   await recordAndSave(page, '002')
 
-  await expect(page.getByTestId('result-progress')).toContainText(
-    'You unlocked Mary Had a Little Lamb'
-  )
+  // More than 2 unlocks are counted, then listed in the catalog's order, where Mary comes first.
+  await expect(page.getByTestId('result-progress')).toContainText('You unlocked 5 Songs')
+  await expect(page.getByTestId('result-progress')).toContainText('Mary Had a Little Lamb · ')
   // After an unlock, Try it opens the Song in Song Creator, and Done goes to Recordings.
   await expect(page.getByRole('button', { name: 'Record another' })).toHaveCount(0)
   await expectTappable(page.getByRole('button', { name: 'Done' }))
@@ -134,9 +141,12 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   // A reload continues a guest's visit (`visit.ts`), so from here Compose and Recordings read the
   // four Recordings back from storage.
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Unlocked · 1' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Locked · 11' })).toBeVisible()
-  const unlocked = page.getByTestId('unlocked-songs').getByRole('link')
+  await expect(page.getByRole('heading', { name: 'Unlocked · 6', exact: true })).toBeVisible()
+  await expect(locked(songs.length - 6)).toBeVisible()
+  const unlocked = page
+    .getByTestId('unlocked-songs')
+    .locator('[data-song="mary"]')
+    .getByRole('link')
   await expect(unlocked).toHaveText('Mary Had a Little LambReady')
   await expectTappable(unlocked)
   await unlocked.click()
@@ -160,7 +170,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await page.getByRole('menuitemradio', { name: 'A–Z' }).click()
   await expect(page.getByTestId('locked-songs').getByTestId('song-row').first()).toHaveAttribute(
     'data-song',
-    'amazing'
+    'all-through-the-night'
   )
 })
 

@@ -27,6 +27,16 @@ const loadAudio = async (id: string) => {
   return wav.slice(0)
 }
 
+/**
+ * Whether two renders hold the same bytes, bit for bit. One comparison of the whole buffer:
+ * `toEqual` walks every sample, minutes across the catalog's Songs.
+ */
+function sameBytes(a: ArrayBufferView | ArrayBuffer | undefined, b: ArrayBufferView | ArrayBuffer) {
+  const bytes = (v: ArrayBufferView | ArrayBuffer) =>
+    ArrayBuffer.isView(v) ? Buffer.from(v.buffer, v.byteOffset, v.byteLength) : Buffer.from(v)
+  return a !== undefined && a.constructor === b.constructor && bytes(a).equals(bytes(b))
+}
+
 beforeAll(async () => {
   for (const [i, { id, filename }] of fixtures().entries()) {
     const wav = await fixtureWav(filename)
@@ -75,9 +85,10 @@ describe('makeToot', () => {
         analysis: r.analysis.state === 'analyzed' ? r.analysis.analysis : (null as never)
       }))
     const engine = renderFromRecordings(engineSong(song), arrangement, inputs)
-    expect(fromWorker?.samples).toEqual(engine.samples)
+    expect(fromWorker?.samples.length).toBe(engine.samples.length)
+    expect(sameBytes(fromWorker?.samples, engine.samples), song.id).toBe(true)
     // The Toot's audio is that render as a 16-bit WAV, byte for byte.
-    expect(new Uint8Array(draft.wav)).toEqual(new Uint8Array(encodeWav(engine)))
+    expect(sameBytes(draft.wav, encodeWav(engine)), song.id).toBe(true)
     expect(draft.seconds).toBe(engine.samples.length / 44100)
 
     // On the golden Arrangement.

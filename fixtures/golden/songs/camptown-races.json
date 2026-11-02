@@ -1,0 +1,160 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 116,
+  "file": "midi/pdmx-camptown-races.mid",
+  "id": "camptown-races",
+  "import_args": {
+    "bpm": 116,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "camptown-races",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 23,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-camptown-races.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 8.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 62,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 12.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 62,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 22.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 27.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 60,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    67,
+    69
+  ],
+  "sha256": "562e9cb8c407e2413491784af929d78b49e85aca7359c7c9a9ba6d1386f9890f",
+  "title": "Camptown Races"
+}

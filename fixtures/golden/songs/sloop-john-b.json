@@ -1,0 +1,155 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-sloop-john-b.mid",
+  "id": "sloop-john-b",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "sloop-john-b",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 22,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-sloop-john-b.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 8.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 16.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 19.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 20.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 23.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 67,
+      "start": 25.0
+    }
+  ],
+  "pitches": [
+    60,
+    67,
+    69,
+    70,
+    72
+  ],
+  "sha256": "163de23b9f1b04bb93a8247b5b3e632b3fc8b5b8b418b6081dbca1f79dcec1e1",
+  "title": "Sloop John B"
+}

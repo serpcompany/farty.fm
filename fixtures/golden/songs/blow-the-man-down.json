@@ -1,0 +1,163 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-blow-the-man-down.mid",
+  "id": "blow-the-man-down",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "blow-the-man-down",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 23,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-blow-the-man-down.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 8.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 14.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 15.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 23.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 26.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 28.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    65,
+    67,
+    69
+  ],
+  "sha256": "c97be83e600b3ebe21d38c22db87c23ee82cbe4f51c2e9a218b926b901d6526b",
+  "title": "Blow the Man Down"
+}

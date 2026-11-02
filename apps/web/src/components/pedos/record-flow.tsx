@@ -9,7 +9,7 @@ import {
   LockOpen
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Progress as CoverageBar } from '@/components/ui/progress'
@@ -27,20 +27,26 @@ import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { type Draft, usePedos } from './pedos-provider'
 import { PitchStrip } from './pitch-strip'
-import { RecordButton } from './record-button'
-import { Waveform } from './waveform'
+import { LiveWaveform, Waveform } from './waveform'
 
 /**
- * The full-screen cover over the tabs from the start of a take: Recording, then Review and
- * Result, with their error states. Matches the iPhone app's `RecordFlowView`.
+ * The full-screen cover over the tabs from the tap on Record: getting the mic ready, Recording,
+ * then Review and Result, with their error states. Matches the iPhone app's `RecordFlowView`.
  */
 export function RecordFlow() {
   const pedos = usePedos()
   const { flow, capture } = pedos
 
+  if (!flow && capture.kind === 'starting') {
+    return (
+      <Cover label="Getting the mic ready">
+        <GettingReady />
+      </Cover>
+    )
+  }
   if (!flow && (capture.kind === 'recording' || capture.kind === 'finishing')) {
     return (
-      <Cover>
+      <Cover label="Recording" tone="record">
         <RecordingStep />
       </Cover>
     )
@@ -93,17 +99,32 @@ function recordingTitle(recording: Recording | undefined): string {
   return recording ? recordingName(recording) : ''
 }
 
+/** A cover's dialog always has a name: its shown `title`, or else a `label` for screen readers. */
+type CoverName = { title: string; label?: never } | { title?: never; label: string }
+
 /**
  * Full screen on a phone. From 768px, a card in the page under the top bar, which stays in view.
+ * `tone="record"`: the whole cover red, while Record records (#314).
  */
-function Cover({ title, children }: { title?: string; children: ReactNode }) {
+function Cover({
+  title,
+  label,
+  tone,
+  children
+}: CoverName & {
+  tone?: 'record'
+  children: ReactNode
+}) {
   return (
     <div className="contents md:fixed md:inset-x-0 md:top-[calc(4rem+1px)] md:bottom-0 md:z-40 md:flex md:items-center md:justify-center md:bg-background md:p-6">
       <div
         role="dialog"
         aria-modal
-        aria-label={title ?? 'Recording'}
-        className="fixed inset-0 z-40 flex flex-col bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:static md:h-full md:max-h-[44rem] md:w-full md:max-w-md md:rounded-3xl md:border md:py-3 md:shadow-sm"
+        aria-label={title ?? label}
+        className={cn(
+          'fixed inset-0 z-40 flex flex-col bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:static md:h-full md:max-h-[44rem] md:w-full md:max-w-md md:rounded-3xl md:border md:py-3 md:shadow-sm',
+          tone === 'record' && 'bg-record-screen text-record-foreground md:border-transparent'
+        )}
       >
         <header className="flex h-12 shrink-0 items-center justify-center px-4">
           {title && <h1 className="font-semibold">{title}</h1>}
@@ -149,37 +170,98 @@ function FlowButton({
 }
 
 /**
- * Recording: the big button as Stop, with its pulse, the live level and the timer, and "Can't hear
- * anything" above it while the take so far is one Stop would refuse (#281). Finishing after Stop,
- * the button dims and the timer holds.
+ * Getting the mic ready (#314): grey, with a ring spinning where the Record button was, from the
+ * tap until the take's audio comes in. Never red before then.
+ */
+function GettingReady() {
+  return (
+    <div
+      className="flex flex-1 flex-col items-center justify-center gap-8 px-7 pb-24 text-center"
+      data-testid="record-getting-ready"
+    >
+      <span
+        aria-hidden
+        className="relative grid size-50 place-items-center rounded-full border-[6px] border-muted-foreground/20"
+      >
+        <span className="absolute -inset-[6px] rounded-full border-[6px] border-transparent border-t-muted-foreground motion-safe:animate-spin" />
+        <span className="size-41 rounded-full bg-muted-foreground/15" />
+      </span>
+      <output className="flex flex-col gap-2">
+        <span className="text-3xl font-bold tracking-tight text-balance">
+          Getting the mic ready…
+        </span>
+        <span className="text-lg text-muted-foreground">
+          The screen turns red when it's recording.
+        </span>
+      </output>
+    </div>
+  )
+}
+
+/** A take's length so far, to the tenth: "0:03.4". */
+function timerText(tenths: number): string {
+  const seconds = Math.floor(tenths / 10)
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}.${tenths % 10}`
+}
+
+/**
+ * Recording (#314): the whole screen red from the moment the take's audio comes in, with a large
+ * "Recording", a timer counting tenths, the take's waveform drawing live, and Stop. "Can't hear
+ * anything" shows under the waveform while the take so far is one Stop would refuse (#281).
+ * Finishing after Stop, Stop dims and the timer and waveform hold.
  */
 function RecordingStep() {
   const pedos = usePedos()
-  const { capture } = pedos
+  const { capture, liveTake } = pedos
   const recording = capture.kind === 'recording'
   const startedAt = recording || capture.kind === 'finishing' ? capture.startedAt : null
   const stoppedAt = capture.kind === 'finishing' ? capture.stoppedAt : null
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
     if (!recording) return
-    const timer = setInterval(() => setNow(Date.now()), 250)
+    const timer = setInterval(() => setNow(Date.now()), 100)
     return () => clearInterval(timer)
   }, [recording])
-  const seconds = startedAt ? Math.max(0, Math.floor(((stoppedAt ?? now) - startedAt) / 1000)) : 0
+  const bars = useSyncExternalStore(liveTake.subscribe, liveTake.bars, liveTake.bars)
+  const tenths = startedAt ? Math.max(0, Math.floor(((stoppedAt ?? now) - startedAt) / 100)) : 0
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-7">
-      <output className="flex h-10 items-center text-muted-foreground" data-testid="recording-hint">
+    <div
+      className="flex flex-1 flex-col items-center px-5 pb-6"
+      data-testid="recording-screen"
+      data-state={capture.kind}
+    >
+      <p className="flex items-center gap-3.5 text-5xl font-extrabold tracking-tight">
+        <span
+          aria-hidden
+          className={cn('size-5 rounded-full bg-current', recording && 'motion-safe:animate-pulse')}
+        />
+        Recording
+      </p>
+      <p
+        className="mt-1.5 text-7xl font-semibold tracking-tight tabular-nums"
+        data-testid="recording-timer"
+      >
+        {timerText(tenths)}
+      </p>
+      <LiveWaveform bars={bars} className="mt-8 h-44 w-full" />
+      <output className="flex h-10 items-center font-medium" data-testid="recording-hint">
         {recording && capture.hearsNothing && "Can't hear anything. Move closer."}
       </output>
-      <RecordButton
-        state={recording ? 'recording' : 'finishing'}
-        level={pedos.inputLevel}
-        onClick={() => void pedos.stopRecording()}
-      />
-      <p className="h-10 text-4xl tabular-nums" data-testid="recording-timer">
-        {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}
-      </p>
+      <div className="mt-auto flex flex-col items-center gap-3 text-lg font-semibold">
+        <Button
+          variant="ghost"
+          aria-label="Stop"
+          data-testid="stop-button"
+          data-state={recording ? 'recording' : 'finishing'}
+          disabled={!recording}
+          onClick={() => void pedos.stopRecording()}
+          className="size-29 rounded-full bg-record-foreground p-0 ring-[9px] ring-record-foreground/30 hover:bg-record-foreground dark:hover:bg-record-foreground active:not-aria-[haspopup]:translate-y-0 active:scale-[0.97]"
+        >
+          <span aria-hidden className="size-10.5 rounded-[10px] bg-record-screen" />
+        </Button>
+        <span aria-hidden>Stop</span>
+      </div>
     </div>
   )
 }

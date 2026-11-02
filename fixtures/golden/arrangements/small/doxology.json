@@ -1,0 +1,77 @@
+{
+  "library": "small",
+  "max_abs_shift_semitones": null,
+  "metrics": null,
+  "missing": [
+    {
+      "seconds": 1.5,
+      "target_midi": 49
+    },
+    {
+      "seconds": 1.0,
+      "target_midi": 50
+    }
+  ],
+  "notes": null,
+  "octave_moves": 2,
+  "per_pitch": [
+    {
+      "octave_move": false,
+      "recording": "022",
+      "shift_semitones": -0.3259205936601859,
+      "song_pitch": 38,
+      "target_midi": 40
+    },
+    {
+      "octave_move": true,
+      "recording": "009",
+      "shift_semitones": 11.474079406339825,
+      "song_pitch": 40,
+      "target_midi": 42
+    },
+    {
+      "octave_move": true,
+      "recording": "090",
+      "shift_semitones": -11.225920593660177,
+      "song_pitch": 42,
+      "target_midi": 44
+    },
+    {
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": 0.5740794063398269,
+      "song_pitch": 43,
+      "target_midi": 45
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": 0.5740794063398198,
+      "song_pitch": 45,
+      "target_midi": 47
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 47,
+      "target_midi": 49
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 48,
+      "target_midi": 50
+    }
+  ],
+  "pitch_coverage": {
+    "covered": 5,
+    "total": 7
+  },
+  "plan_cost": 69.77149905420539,
+  "render_settings": null,
+  "song": "doxology",
+  "transpose": 2,
+  "unlocked": false
+}
