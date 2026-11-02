@@ -8,7 +8,7 @@ export const PUT = userRoute<Params>((user, request, { id }) =>
   putItem('recordings', requestStores(), user, id, request)
 )
 
-/** Places a Noise-like Recording on a note, or takes it off (`{ placedPitch }`). */
+/** Changes a Recording's note, Trim or name, or takes any of them off (`{ placedPitch, trim, name }`). */
 export const PATCH = userRoute<Params>((user, request, { id }) =>
   patchRecording(requestStores(), user, id, request)
 )

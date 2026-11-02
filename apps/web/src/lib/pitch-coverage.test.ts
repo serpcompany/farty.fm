@@ -24,7 +24,7 @@ import {
   songRows,
   sortRows
 } from './pitch-coverage'
-import type { AnalysisState, Recording } from './recordings'
+import { type AnalysisState, NO_NOTE, type Recording } from './recordings'
 
 // Pitch Coverage as the app reads it, checked against the reference engine's golden data and
 // ported from the iPhone app's `PitchCoverageTests` and `SongListingTests`. The ported tests read
@@ -332,7 +332,7 @@ describe('Placed Recordings (ADR 0015)', () => {
     expect(coverageKey(place(all, '009', null))).toBe(coverageKey(all))
   })
 
-  it('counts only a whole note from C2 to B4, as the picker offers', () => {
+  it('counts only a whole note from C2 to B4, as the review offers', () => {
     for (const outside of [35, 72, 48.5, Number.NaN]) {
       expect(coverageKey(place(all, '065', outside)), String(outside)).toBe(coverageKey(all))
     }
@@ -348,6 +348,13 @@ describe('Placed Recordings (ADR 0015)', () => {
   it('collects the pitch class it is placed on', () => {
     expect(collectedPitchClasses(place(fixtures(['065']), '065', 37))).toEqual(new Set([1]))
     expect(collectedPitchClasses(fixtures(['065']))).toEqual(new Set())
+  })
+
+  it('leaves a Melodic Recording out with "No note": 002 out locks Amazing Grace (#314)', () => {
+    const left = place(all, '002', NO_NOTE)
+    expect(coverageKey(left)).toBe(coverageKey(without002))
+    expect(iPhoneListing(left).locked.map(r => r.song.id)).toEqual(['amazing'])
+    expect(coverageKey(place(all, '002', null))).toBe(coverageKey(all))
   })
 
   it('shows no unlock for a Noise-like save until it is placed', () => {
@@ -634,6 +641,13 @@ describe('the fart length a Recording shows (#227)', () => {
     expect(formattedFartLength(recording)).toBe('2.4 s')
     // Before analysis has found the fart, the whole take.
     expect(formattedFartLength({ ...recording, analysis: { state: 'analyzing' } })).toBe('3.4 s')
+  })
+
+  it('is its Trim’s fart once trimmed, Melodic or not (#314)', () => {
+    const fart = { startSeconds: 0.6, endSeconds: 1.8 }
+    const trimmed = { ...take(1, 60, 2.4), trim: { startSeconds: 0.55, endSeconds: 1.9, fart } }
+    expect(formattedFartLength(trimmed)).toBe('1.2 s')
+    expect(coverageKey([trimmed])).not.toBe(coverageKey([take(1, 60, 2.4)]))
   })
 
   it('unlocks a locked Song once a fart near each missing note shows the length it needs', () => {

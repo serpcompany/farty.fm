@@ -51,7 +51,7 @@ export async function analyze(audio: PcmAudio): Promise<Analysis> {
   return analysis
 }
 
-/** The Trim the picker's handles keep in `audio` (`trimBounds`, ADR 0019). */
+/** The Trim the review's handles keep in `audio` (`trimBounds`, ADR 0019). */
 export async function findTrim(audio: PcmAudio, handles: Trim): Promise<Trim> {
   const { trim } = await ask(audio, handles)
   if (!trim) throw new Error('Trim failed')

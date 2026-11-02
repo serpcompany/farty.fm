@@ -43,17 +43,18 @@ const icons: Record<Tab, LucideIcon> = {
  */
 export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: ReactNode }) {
   const pedos = usePedos()
-  const { stopPlayback, showsRecordFlow, finishWelcome, flow, capture } = pedos
+  const { stopPlayback, showsRecordFlow, finishWelcome, flow, capture, reviewOpen } = pedos
   // Reading the sign-in code in another app hides the page: the step stays where it was.
   const { stepOpen } = useAccount()
   const pathname = usePathname()
   const router = useRouter()
   const tab = tabOf(pathname)
   // While getting the mic ready, Recording, Review, Result (`record-flow.tsx`) or the account step
-  // shows: each covers the tabs from the tap on Record.
+  // shows: each covers the tabs from the tap on Record. So does a saved Recording's review.
   const stepsOpen =
     stepOpen ||
     flow !== null ||
+    reviewOpen ||
     capture.kind === 'starting' ||
     capture.kind === 'recording' ||
     capture.kind === 'finishing'
@@ -130,8 +131,8 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
         {!sharedPage && (
           <nav
             aria-label="Tabs"
-            // The record flow and the account step leave the top bar in view from 768px,
-            // but, as on a phone, the tabs wait until they close.
+            // The record flow, a Recording's review and the account step leave the top bar in
+            // view from 768px, but, as on a phone, the tabs wait until they close.
             inert={stepsOpen}
             className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:top-0 md:bottom-auto md:border-t-0 md:border-b"
           >
