@@ -3,7 +3,7 @@
 import { ArrowUpDown, ChevronRight, Heart, LayoutGrid, Lock, Music2, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type ReactNode, useEffect, useId, useState } from 'react'
+import { type ReactNode, useEffect, useId, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -22,41 +22,15 @@ import {
   coverageFraction,
   coverageSummary,
   missingNotes,
-  type SongOrder,
   type SongRow,
   songListing,
   sortRows
 } from '@/lib/pitch-coverage'
 import { cn } from '@/lib/utils'
+import { songOrders, useComposeChoices } from './compose-choices'
 import { FavoriteButton, useFavorites } from './favorite-button'
 import { LockedSongSheet } from './locked-song-sheet'
 import { usePedos } from './pedos-provider'
-
-const orders: { value: SongOrder; label: string }[] = [
-  { value: 'closestToUnlocking', label: 'Closest to unlocking' },
-  { value: 'alphabetical', label: 'A–Z' },
-  { value: 'favoritesFirst', label: 'Favorites first' }
-]
-
-// The order and the Favorites filter this browser chose last (#313).
-const orderKey = 'pedos.composeOrder'
-const onlyFavoritesKey = 'pedos.composeFavorites'
-
-function readChoice(key: string): string | null {
-  try {
-    return localStorage.getItem(key)
-  } catch {
-    return null
-  }
-}
-
-function keepChoice(key: string, value: string) {
-  try {
-    localStorage.setItem(key, value)
-  } catch {
-    // The choice lasts this page, then.
-  }
-}
 
 const noFavorites: ReadonlySet<string> = new Set()
 
@@ -69,17 +43,9 @@ export function ComposeScreen() {
   const pedos = usePedos()
   const router = useRouter()
   const [query, setQuery] = useState('')
-  const [order, setOrder] = useState<SongOrder>('closestToUnlocking')
-  const [onlyFavorites, setOnlyFavorites] = useState(false)
+  const { order, chooseOrder, onlyFavorites, chooseOnlyFavorites } = useComposeChoices()
   const [lockedSong, setLockedSong] = useState<Song | null>(null)
   const favorites = useFavorites()
-
-  // Read after the first render, which the server rendered without them.
-  useEffect(() => {
-    const kept = readChoice(orderKey)
-    if (orders.some(o => o.value === kept)) setOrder(kept as SongOrder)
-    setOnlyFavorites(readChoice(onlyFavoritesKey) === 'true')
-  }, [])
 
   // The page comes back on the Record tab, so the sheet doesn't stay open.
   useEffect(() => {
@@ -90,12 +56,20 @@ export function ComposeScreen() {
     return () => document.removeEventListener('visibilitychange', visibilityChanged)
   }, [])
 
-  const listing = songListing(
-    sortRows(pedos.songRows, order, favorites ?? noFavorites),
-    query,
-    onlyFavorites ? (favorites ?? noFavorites) : null
+  // A heart tap sorts and filters again only when the order or the filter uses the favorites.
+  const sortFavorites = order === 'favoritesFirst' ? (favorites ?? noFavorites) : noFavorites
+  const sorted = useMemo(
+    () => sortRows(pedos.songRows, order, sortFavorites),
+    [pedos.songRows, order, sortFavorites]
   )
-  const isEmpty = listing.unlocked.length === 0 && listing.locked.length === 0
+  const only = onlyFavorites ? (favorites ?? noFavorites) : null
+  const listing = useMemo(() => songListing(sorted, query, only), [sorted, query, only])
+  const empty: 'none' | 'noFavorites' | 'noResults' =
+    listing.unlocked.length > 0 || listing.locked.length > 0
+      ? 'none'
+      : onlyFavorites && query === ''
+        ? 'noFavorites'
+        : 'noResults'
   // The whole catalog, or the search within it: the Sound Pad and the first steps show with it.
   const showsAll = query === '' && !onlyFavorites
 
@@ -111,10 +85,7 @@ export function ComposeScreen() {
             aria-label="Favorites"
             aria-pressed={onlyFavorites}
             data-testid="favorites-filter"
-            onClick={() => {
-              setOnlyFavorites(!onlyFavorites)
-              keepChoice(onlyFavoritesKey, String(!onlyFavorites))
-            }}
+            onClick={() => chooseOnlyFavorites(!onlyFavorites)}
           >
             <Heart className={cn(onlyFavorites && 'fill-current text-primary')} />
           </Button>
@@ -126,14 +97,8 @@ export function ComposeScreen() {
               <ArrowUpDown />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-auto">
-              <DropdownMenuRadioGroup
-                value={order}
-                onValueChange={value => {
-                  setOrder(value)
-                  keepChoice(orderKey, value)
-                }}
-              >
-                {orders.map(({ value, label }) => (
+              <DropdownMenuRadioGroup value={order} onValueChange={chooseOrder}>
+                {songOrders.map(({ value, label }) => (
                   <DropdownMenuRadioItem key={value} value={value} className="py-2 text-base">
                     {label}
                   </DropdownMenuRadioItem>
@@ -193,7 +158,7 @@ export function ComposeScreen() {
               ))}
             </Section>
           )}
-          {isEmpty && onlyFavorites && query === '' && (
+          {empty === 'noFavorites' && (
             <Empty className="pt-16" data-testid="no-favorites">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -206,7 +171,7 @@ export function ComposeScreen() {
               </EmptyHeader>
             </Empty>
           )}
-          {isEmpty && (!onlyFavorites || query !== '') && (
+          {empty === 'noResults' && (
             <Empty className="pt-16">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
