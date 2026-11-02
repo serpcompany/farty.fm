@@ -85,6 +85,25 @@ describe('the library with sign-in’s session', () => {
     expect(body.recordings.map(recording => recording.id)).toEqual([R1])
   })
 
+  // A guest's Favorite Songs wait in their browser's outbox, and go to the account they sign up
+  // with, in the order they were tapped (#313; the browser's side is in `library-sync.test.ts`).
+  it('keeps a guest’s Favorite Songs on the account they sign up with', async () => {
+    const guest = await signIn('guest@example.test')
+    const other = await signIn('other@example.test')
+    const library = { library: guest.id }
+
+    // Favorited Twinkle, Mary and Ode to Joy, then took Ode to Joy off again.
+    expect((await api.favorite('twinkle', { ...guest, ...library })).status).toBe(201)
+    expect((await api.favorite('mary', { ...guest, ...library })).status).toBe(201)
+    expect((await api.favorite('ode', { ...guest, ...library })).status).toBe(201)
+    expect((await api.unfavorite('ode', { ...guest, ...library })).status).toBe(204)
+
+    const read = (await (await api.library(guest)).json()) as { favorites: string[] }
+    expect(read.favorites.sort()).toEqual(['mary', 'twinkle'])
+    const others = (await (await api.library(other)).json()) as { favorites: string[] }
+    expect(others.favorites).toEqual([])
+  })
+
   it('answers 503, not 401, when sign-in isn’t set up here', async () => {
     const a = await signIn('a@example.test')
     bindings.SITE_ENV = 'neither'

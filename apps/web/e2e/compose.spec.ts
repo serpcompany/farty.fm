@@ -47,7 +47,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(page.getByRole('heading', { name: /^Unlocked/ })).toHaveCount(0)
 
   // A locked Song's sheet: no Melodic Recordings yet.
-  await page.getByRole('button', { name: 'Mary Had a Little Lamb' }).click()
+  await page.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true }).click()
   const sheet = page.getByRole('dialog', { name: 'Mary Had a Little Lamb' })
   await expect(sheet.getByTestId('locked-song-needs')).toHaveText(
     'Record a fart with a clear note to start.'
@@ -70,7 +70,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await tab(page, 'Compose').click()
   await expect(page.getByText('No Melodic Recordings yet')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Locked · 12' })).toBeVisible()
-  const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb' })
+  const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true })
   // Which notes it needs depends on the take's settle time (two Arrangements nearly tie), so the
   // journey checks the shape; `pitch-coverage.test.ts` pins the exact notes on the golden 095.
   await expect(mary).toHaveAccessibleDescription(

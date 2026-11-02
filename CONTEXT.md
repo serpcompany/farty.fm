@@ -64,6 +64,10 @@ _Avoid_: Progress, completion
 A Song whose Pitch Coverage is complete: every distinct pitch has its own Melodic Recording, near enough in pitch and long enough for its longest note.
 _Avoid_: Available song, playable song
 
+**Favorite Song**:
+A Song the user marked in Compose, kept with their account.
+_Avoid_: Liked song, starred song, saved song
+
 **Arrangement**:
 Which Recording plays each note of a melody. Each Recording plays raw, at its own pitch and speed (ADR 0012), so a Toot sounds near the melody, not on it.
 _Avoid_: Mapping, mix, assignment

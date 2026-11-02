@@ -2,6 +2,7 @@ import { getDb } from '@/db'
 import type { Database } from '@/db/database'
 import {
   deleteUser,
+  favoriteSong,
   insertPaidToot,
   insertRecording,
   insertToot,
@@ -16,6 +17,7 @@ import {
   TOMBSTONE_RETENTION_MS,
   type TootRow,
   tombstone,
+  unfavoriteSong,
   uploadState
 } from '@/db/library'
 import { tootPayment } from '@/db/payments'
@@ -58,6 +60,12 @@ export const LIMITS: Record<Kind, { maxAudioBytes: number; maxItems: number }> =
   recordings: { maxAudioBytes: 6 * 1024 * 1024, maxItems: 300 },
   toots: { maxAudioBytes: 16 * 1024 * 1024, maxItems: 300 }
 }
+
+/**
+ * How many Favorite Songs one user can keep (#313): well past the catalog's planned 1,000+ Songs
+ * (#312), so only a client gone wrong reaches it. A row is about 150 bytes.
+ */
+export const FAVORITE_SONGS_LIMIT = 5000
 
 /** A Recording, as the browser keeps it, with its audio's size. */
 export type LibraryRecording = Recording & { audioBytes: number }
@@ -141,8 +149,9 @@ export function wrongLibrary(user: SessionUser, request: Request): Response | nu
 
 /**
  * `GET /api/library/?since=`: what changed since the `cursor` an earlier answer gave (everything
- * without `since`), with the ids of Recordings and Toots deleted since. `full` says the answer
- * lists every live Recording and Toot: `since` is older than the tombstones are kept, so a browser
+ * without `since`), with the ids of Recordings and Toots deleted since, and the Favorite Songs
+ * marked and taken off since (#313), by Song id. `full` says the answer lists every live
+ * Recording, Toot and Favorite Song: `since` is older than the tombstones are kept, so a browser
  * drops what it holds from the account that isn't listed. 409 when `LIBRARY_HEADER` names another
  * account (`wrong_account`), as for every library route.
  */
@@ -151,17 +160,68 @@ export async function getLibrary({ db }: Stores, user: SessionUser, request: Req
   if (wrong) return wrong
   const since = new URL(request.url).searchParams.get('since') ?? '0'
   if (!/^\d{1,15}$/.test(since)) return apiError(400, 'invalid_request')
-  const changes = await libraryChanges(db, user.id, Number(since))
+  let changes = await libraryChanges(db, user.id, Number(since))
+  // Older than the tombstones kept, a read can't say what went: it lists the whole library, and the
+  // browser drops what isn't listed.
+  const full = Number(since) < changes.cursor - TOMBSTONE_RETENTION_MS
+  if (full && Number(since) > 0) changes = await libraryChanges(db, user.id, 0)
   const live = <T extends { deletedAt: Date | null }>(rows: T[]) => rows.filter(r => !r.deletedAt)
   const deleted = (rows: { id: string; deletedAt: Date | null }[]) =>
     rows.filter(r => r.deletedAt).map(r => r.id)
   return Response.json({
     cursor: changes.cursor,
-    full: Number(since) < changes.cursor - TOMBSTONE_RETENTION_MS,
+    full,
     recordings: live(changes.recordings).map(toRecording),
     toots: live(changes.toots).map(toToot),
-    deleted: { recordings: deleted(changes.recordings), toots: deleted(changes.toots) }
+    favorites: live(changes.favoriteSongs).map(f => f.songId),
+    deleted: {
+      recordings: deleted(changes.recordings),
+      toots: deleted(changes.toots),
+      favorites: changes.favoriteSongs.filter(f => f.deletedAt).map(f => f.songId)
+    }
   })
+}
+
+/** A catalog Song's id, as a Toot's `songId` is checked (`parseToot`). */
+const isSongId = (id: string) => /^[A-Za-z0-9_.-]{1,100}$/.test(id)
+
+/**
+ * `PUT /api/favorites/{songId}/`: marks the Song a Favorite Song (#313). 201 once marked, 200 if
+ * it already was, 409 at the limit, or when `LIBRARY_HEADER` names another account
+ * (`wrong_account`). The Song isn't checked against the catalog, which the browser has.
+ */
+export async function putFavorite(
+  { db }: Stores,
+  user: SessionUser,
+  songId: string,
+  request: Request
+): Promise<Response> {
+  if (!isSongId(songId)) return notFound()
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
+  const marked = await favoriteSong(db, user.id, songId, FAVORITE_SONGS_LIMIT)
+  if (marked === 'added') return Response.json({ songId }, { status: 201 })
+  if (marked === 'kept') return Response.json({ songId }, { status: 200 })
+  return apiError(409, 'limit_reached')
+}
+
+/**
+ * `DELETE /api/favorites/{songId}/`: takes a Favorite Song off, leaving a tombstone so other
+ * browsers take it off too. 204 whether or not it was one, so a retry, or a guest's favorite and
+ * unfavorite sent at sign-in, settles. It purges old tombstones, as a Recording's delete does.
+ */
+export async function deleteFavorite(
+  { db }: Stores,
+  user: SessionUser,
+  songId: string,
+  request: Request
+): Promise<Response> {
+  if (!isSongId(songId)) return notFound()
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
+  await unfavoriteSong(db, user.id, songId)
+  await purgeTombstones(db, user.id)
+  return new Response(null, { status: 204 })
 }
 
 /**

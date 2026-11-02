@@ -1,4 +1,4 @@
-import type { IDBPDatabase } from 'idb'
+import type { IDBPDatabase, IDBPObjectStore, StoreNames } from 'idb'
 import {
   forgetAccount,
   legacyOwner,
@@ -6,6 +6,7 @@ import {
   libraryOwnerEmail,
   setLibraryOwner
 } from './account'
+import { favoritesChanged } from './favorite-store'
 import * as api from './library-api'
 import { itemKey, type Kind, type OutboxEntry, onQueued, placedFields } from './outbox'
 import { adoptTakes, releaseTakes } from './pad-take'
@@ -20,6 +21,7 @@ type Database = IDBPDatabase<PedosDB>
 // the last one (`GET /api/library/?since=`) brings what other browsers did, deletes included. A
 // Recording's or Toot's WAV moves as it is, in both directions: nothing re-renders it (ADR 0004).
 // Everything that sends or applies runs under one Web Lock, so the tabs of a browser take turns.
+// Favorite Songs (#313) sync the same way, by Song id, with no audio.
 
 /** What a sync changed in this browser's library, for the screens showing it. */
 export type LibraryChange =
@@ -201,7 +203,7 @@ export async function unsavedBeforeSignIn(email: string): Promise<number> {
   }
   if (ownerEmail !== null && ownerEmail === email.trim().toLowerCase()) return 0
   const queued = await withDb(database => database.getAll('outbox'))
-  return queued.filter(entry => entry.op === 'put').length
+  return queued.filter(entry => entry.op === 'put' && entry.kind !== 'favorites').length
 }
 
 /**
@@ -243,10 +245,12 @@ const stops = ({ status, error }: api.Answer) =>
   (status === 409 && error === 'wrong_account')
 
 type Taken =
-  | { entry: OutboxEntry; op: 'put'; item: Recording | Toot; wav: ArrayBuffer }
-  | { entry: OutboxEntry; op: 'rename'; title: string }
-  | { entry: OutboxEntry; op: 'place'; placement: api.Placement }
-  | { entry: OutboxEntry; op: 'delete' }
+  | { entry: OutboxEntry; kind: Kind; op: 'put'; item: Recording | Toot; wav: ArrayBuffer }
+  | { entry: OutboxEntry; kind: 'toots'; op: 'rename'; title: string }
+  | { entry: OutboxEntry; kind: 'recordings'; op: 'place'; placement: api.Placement }
+  | { entry: OutboxEntry; kind: Kind; op: 'delete' }
+  /** A Favorite Song marked (`on`), or taken off. */
+  | { entry: OutboxEntry; op: 'favorite'; on: boolean }
 
 /**
  * The oldest entry to send, marked sent in the same transaction that reads what it sends. A
@@ -268,10 +272,17 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
     .sort((a, b) => a.queuedAt - b.queuedAt)
   for (const queued of entries) {
     const entry = { ...queued, sent: true }
+    const kind = queued.kind
+    if (kind === 'favorites') {
+      // A Favorite Song is sent as it is here now: its last op (`mergeOutbox`).
+      if (queued.op !== 'put' && queued.op !== 'delete') continue
+      await Promise.all([outbox.put(entry), tx.done])
+      return { entry, op: 'favorite', on: queued.op === 'put' }
+    }
     if (queued.op === 'put') {
       const [item, wav] = await Promise.all([
-        tx.objectStore(queued.kind).get(queued.id),
-        tx.objectStore(audioStore[queued.kind]).get(queued.id)
+        tx.objectStore(kind).get(queued.id),
+        tx.objectStore(audioStore[kind]).get(queued.id)
       ])
       if (!item || !wav) {
         // Nothing left to upload.
@@ -283,7 +294,7 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
         continue
       }
       await Promise.all([outbox.put(entry), tx.done])
-      return { entry, op: 'put', item, wav }
+      return { entry, kind, op: 'put', item, wav }
     }
     if (queued.op === 'rename') {
       const toot = await tx.objectStore('toots').get(queued.id)
@@ -292,7 +303,7 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
         continue
       }
       await Promise.all([outbox.put(entry), tx.done])
-      return { entry, op: 'rename', title: toot.title }
+      return { entry, kind: 'toots', op: 'rename', title: toot.title }
     }
     if (queued.op === 'place') {
       const recording = await tx.objectStore('recordings').get(queued.id)
@@ -308,11 +319,11 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
         if (field === 'placedPitch') placement.placedPitch = recording.placedPitch ?? null
         else placement.trim = recording.trim ?? null
       }
-      return { entry, op: 'place', placement }
+      return { entry, kind: 'recordings', op: 'place', placement }
     }
     if (queued.op === 'delete') {
       await Promise.all([outbox.put(entry), tx.done])
-      return { entry, op: 'delete' }
+      return { entry, kind, op: 'delete' }
     }
     // An op this code doesn't know, from a later build: it stays queued for that build, and
     // nothing is sent for it. Before #268 every other op went out as a delete.
@@ -340,6 +351,9 @@ async function settleIn(
   const unchanged = now?.version === sent.version
   if (!now) {
     // A sign-out or the account's delete cleared it meanwhile.
+  } else if (sent.kind === 'favorites') {
+    // A tap during the request is sent next.
+    if (unchanged) await tx.store.delete(sent.key)
   } else if (now.op === 'delete') {
     // A delete queued during an upload or rename is sent next.
     if (sent.op === 'delete' && unchanged) await tx.store.delete(sent.key)
@@ -374,8 +388,16 @@ async function deleteHere(kind: Kind, id: string): Promise<void> {
 
 async function send(taken: Taken, accountId: string): Promise<Sent> {
   const { entry } = taken
+  if (taken.op === 'favorite') {
+    const answer = await api.setFavorite(entry.id, taken.on, accountId)
+    if (stops(answer)) return 'stop'
+    // Kept; or refused, at the limit or for a Song id the account doesn't take, which no retry
+    // changes. The heart stays here until a full read drops what the account doesn't list.
+    await settle(entry)
+    return 'next'
+  }
   if (taken.op === 'put') {
-    const answer = await api.putItem(entry.kind, taken.item, taken.wav, accountId)
+    const answer = await api.putItem(taken.kind, taken.item, taken.wav, accountId)
     if (stops(answer)) return 'stop'
     // 200: the account had it already, maybe with an older title or Placed Pitch.
     if (answer.status === 201 || answer.status === 200) {
@@ -383,7 +405,7 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
       return 'next'
     }
     if (answer.status === 410) {
-      await deleteHere(entry.kind, entry.id)
+      await deleteHere(taken.kind, entry.id)
       return 'next'
     }
     // At the limit, or refused: it stays here, and in the outbox.
@@ -392,7 +414,7 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
   if (taken.op === 'rename') {
     const answer = await api.renameToot(entry.id, taken.title, accountId)
     if (stops(answer)) return 'stop'
-    if (answer.status === 410) await deleteHere(entry.kind, entry.id)
+    if (answer.status === 410) await deleteHere(taken.kind, entry.id)
     // Renamed; or not on the account, or a title it refuses, which no retry changes.
     else await settle(entry)
     return 'next'
@@ -400,12 +422,12 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
   if (taken.op === 'place') {
     const answer = await api.placeRecording(entry.id, taken.placement, accountId)
     if (stops(answer)) return 'stop'
-    if (answer.status === 410) await deleteHere(entry.kind, entry.id)
+    if (answer.status === 410) await deleteHere(taken.kind, entry.id)
     // Placed; or not on the account, or a note it refuses, which no retry changes.
     else await settle(entry)
     return 'next'
   }
-  const answer = await api.deleteItem(entry.kind, entry.id, accountId)
+  const answer = await api.deleteItem(taken.kind, entry.id, accountId)
   if (stops(answer)) return 'stop'
   // Deleted, or never on the account.
   await settle(entry)
@@ -442,7 +464,8 @@ async function pull(accountId: string): Promise<boolean> {
   const since = (await withDb(database => database.get('meta', 'cursor'))) ?? 0
   const answer = await api.getLibrary(since, accountId)
   if (!('cursor' in answer) || owner() !== accountId) return false
-  const change = await withDb(database => apply(database, answer))
+  const { favoritesMoved, ...change } = await withDb(database => apply(database, answer))
+  if (favoritesMoved) favoritesChanged()
   const changed =
     change.recordings.length +
     change.toots.length +
@@ -454,10 +477,13 @@ async function pull(accountId: string): Promise<boolean> {
   return true
 }
 
-/** Applies what the account read (`pull`), in one transaction. What it changed here. */
+/**
+ * Applies what the account read (`pull`), in one transaction. What it changed here, and whether the
+ * Favorite Songs changed.
+ */
 async function apply(database: Database, answer: api.LibraryChanges) {
   const tx = database.transaction(
-    ['recordings', 'audio', 'toots', 'tootAudio', 'downloads', 'outbox', 'meta'],
+    ['recordings', 'audio', 'toots', 'tootAudio', 'downloads', 'outbox', 'meta', 'favorites'],
     'readwrite'
   )
   const recordings = tx.objectStore('recordings')
@@ -546,6 +572,7 @@ async function apply(database: Database, answer: api.LibraryChanges) {
       }
     }
   }
+  const favoritesMoved = await applyFavorites(tx.objectStore('favorites'), answer, pending)
   const listed = new Set(answer.recordings.map(r => r.id))
   const waits = (r: Recording) =>
     pending.get(itemKey('recordings', r.id)) === 'put' && !listed.has(r.id)
@@ -554,7 +581,41 @@ async function apply(database: Database, answer: api.LibraryChanges) {
     change.recordings.push(renumbered)
   }
   await Promise.all([tx.objectStore('meta').put(answer.cursor, 'cursor'), tx.done])
-  return change
+  return { ...change, favoritesMoved }
+}
+
+/**
+ * Applies the account's Favorite Songs (#313) in `apply`'s transaction: those marked or taken off
+ * in another browser, and, in a `full` read, those it no longer has. A Song this browser is still
+ * sending keeps its own. A Worker from before #313 sends none, and changes none. True if any
+ * changed here.
+ */
+async function applyFavorites(
+  favorites: IDBPObjectStore<PedosDB, StoreNames<PedosDB>[], 'favorites', 'readwrite'>,
+  answer: api.LibraryChanges,
+  pending: Map<string, string>
+): Promise<boolean> {
+  const sending = (songId: string) => pending.has(itemKey('favorites', songId))
+  let moved = false
+  for (const songId of answer.favorites ?? []) {
+    if (sending(songId) || (await favorites.getKey(songId)) !== undefined) continue
+    await favorites.put(Date.now(), songId)
+    moved = true
+  }
+  for (const songId of answer.deleted.favorites ?? []) {
+    if (sending(songId) || (await favorites.getKey(songId)) === undefined) continue
+    await favorites.delete(songId)
+    moved = true
+  }
+  if (answer.full && answer.favorites) {
+    const listed = new Set(answer.favorites)
+    for (const songId of await favorites.getAllKeys()) {
+      if (listed.has(songId) || sending(songId)) continue
+      await favorites.delete(songId)
+      moved = true
+    }
+  }
+  return moved
 }
 
 /**
@@ -672,12 +733,14 @@ export function startSync(accountId: string, email: string, ready: Promise<void>
 
 /**
  * Before signing out: reads the account's changes and sends what's left in the outbox, after any
- * sync already running. The number of entries still waiting: none means everything this browser
- * made is on the account.
+ * sync already running. The number of farts' entries still waiting: none means every Recording
+ * and Toot this browser made is on the account. A Favorite Song still waiting isn't a fart, and
+ * isn't counted.
  */
 export async function uploadBeforeSignOut(accountId: string): Promise<number> {
   return withSyncLock(async () => {
     if (owner() === accountId) await pullThenDrain(accountId)
-    return withDb(database => database.count('outbox'))
+    const waiting = await withDb(database => database.getAll('outbox'))
+    return waiting.filter(entry => entry.kind !== 'favorites').length
   })
 }
