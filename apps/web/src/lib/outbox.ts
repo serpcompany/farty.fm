@@ -45,6 +45,11 @@ export type OutboxEntry = {
    * Pitch (`placedFields`).
    */
   fields?: PlacedField[]
+  /**
+   * A Favorite Song's: a request for an earlier op on it went out, so the account may have that
+   * op even though a later tap replaced it here (`mergeOutbox`).
+   */
+  reached?: boolean
 }
 
 export const itemKey = (kind: OutboxKind, id: string) => `${kind}:${id}`
@@ -53,8 +58,10 @@ export const itemKey = (kind: OutboxKind, id: string) => `${kind}:${id}`
  * The entry after `op` joins what's already queued for the same item, or null when nothing is
  * left to send. Data is read when it's sent, so a rename of a Toot, or a place of a Recording,
  * whose upload hasn't gone out is in the upload. A delete beats everything, and drops an upload
- * no request has carried. A Favorite Song's last op wins, and is always sent: one before it may be
- * on its way, and may not arrive.
+ * no request has carried. A Favorite Song's last op wins, and is sent once an earlier one may have
+ * reached the account: that one may be on its way, and may not arrive. A tap that undoes one no
+ * request carried leaves nothing to send, so a guest's heart on and off again never takes the Song
+ * off an account that marked it elsewhere.
  */
 export function mergeOutbox(
   queued: OutboxEntry | undefined,
@@ -73,7 +80,12 @@ export function mergeOutbox(
     queuedAt: queued?.queuedAt ?? now.at,
     version: now.version
   })
-  if (kind === 'favorites') return queued?.op === op && !queued.sent ? queued : fresh(op)
+  if (kind === 'favorites') {
+    if (queued?.op === op && !queued.sent) return queued
+    const reached = Boolean(queued?.sent || queued?.reached)
+    if (queued && queued.op !== op && !reached) return null
+    return reached ? { ...fresh(op), reached } : fresh(op)
+  }
   if (!queued) return op === 'place' ? { ...fresh(op), fields: unionFields([], fields) } : fresh(op)
   if (queued.op === 'delete') return queued
   if (op === 'delete') return queued.op === 'put' && !queued.sent ? null : fresh('delete')

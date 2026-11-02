@@ -394,17 +394,14 @@ describe('version 7', () => {
 describe('Favorite Songs (#313)', () => {
   const favorites = () => page.favorites.loadFavorites().then(ids => ids.sort())
 
-  it('keeps each tap here and queues it, the last one winning', async () => {
+  it('keeps each tap here and queues it, a tap undoing an unsent one leaving nothing', async () => {
     await page.favorites.setFavorite('twinkle', true)
     await page.favorites.setFavorite('mary', true)
     await page.favorites.setFavorite('mary', false)
     // Already as asked: nothing changes.
     await page.favorites.setFavorite('twinkle', true)
     expect(await favorites()).toEqual(['twinkle'])
-    expect((await outbox()).map(e => [e.key, e.op]).sort()).toEqual([
-      ['favorites:mary', 'delete'],
-      ['favorites:twinkle', 'put']
-    ])
+    expect((await outbox()).map(e => [e.key, e.op])).toEqual([['favorites:twinkle', 'put']])
   })
 
   it('tells this tab when they change, and nothing when a tap changes nothing', async () => {
@@ -427,16 +424,13 @@ describe('Favorite Songs (#313)', () => {
     expect(account.favorites()).toEqual(['mary', 'twinkle'])
     expect(await outbox()).toEqual([])
     // In the order queued, or by Song id for taps in the same millisecond.
+    // Ode's heart, on and off again before either went out, sends nothing.
     expect(
       account.sent
         .filter(s => s.path.startsWith('/api/favorites/'))
         .map(s => `${s.method} ${s.path} ${s.library}`)
         .sort()
-    ).toEqual([
-      'DELETE /api/favorites/ode/ user-a',
-      'PUT /api/favorites/mary/ user-a',
-      'PUT /api/favorites/twinkle/ user-a'
-    ])
+    ).toEqual(['PUT /api/favorites/mary/ user-a', 'PUT /api/favorites/twinkle/ user-a'])
   })
 
   it('sends a tap made while the last one was on its way', async () => {
@@ -455,20 +449,27 @@ describe('Favorite Songs (#313)', () => {
     expect(await outbox()).toEqual([])
   })
 
-  it('keeps a tap queued while the account is unreachable, or refuses it at the limit', async () => {
+  it('keeps a tap queued while the account is unreachable, and drops one refused at the limit', async () => {
     claimedBy('user-a')
     await page.favorites.setFavorite('twinkle', true)
     account.offline = true
     await page.sync.syncOnce('user-a')
     expect(await outbox()).toHaveLength(1)
     account.offline = false
-    refuse('PUT', 409, 'limit_reached')
-    await page.sync.syncOnce('user-a')
-    expect(await outbox()).toEqual([expect.objectContaining({ key: 'favorites:twinkle' })])
-    account.intercept = null
     await page.sync.syncOnce('user-a')
     expect(account.favorites()).toEqual(['twinkle'])
     expect(await outbox()).toEqual([])
+
+    // At the limit, a retry changes nothing, so it isn't sent again on every sync.
+    await page.favorites.setFavorite('mary', true)
+    refuse('PUT', 409, 'limit_reached')
+    await page.sync.syncOnce('user-a')
+    expect(await outbox()).toEqual([])
+    account.intercept = null
+    const before = account.sent.length
+    await page.sync.syncOnce('user-a')
+    expect(account.sent.slice(before).filter(s => s.method === 'PUT')).toEqual([])
+    expect(account.favorites()).toEqual(['twinkle'])
   })
 
   it("brings another browser's, and takes off what it took off, telling the screens", async () => {
@@ -1299,6 +1300,8 @@ describe('a guest who favorites Songs, then signs in (#313)', () => {
     await page.favorites.setFavorite('ode', false)
     await recorded(1)
     account.setFavorite('jingle', true)
+    // Marked on another device; this guest's heart on and off again never reached it.
+    account.setFavorite('ode', true)
     // A guest's new visit clears their farts, and keeps their Favorite Songs.
     await page.store.clearVisit(new Set())
     expect(await page.store.loadRecordings()).toEqual([])
@@ -1309,8 +1312,13 @@ describe('a guest who favorites Songs, then signs in (#313)', () => {
     expect(await page.sync.claimLibrary('user-a', 'a@example.com')).toBe(true)
     await page.sync.syncOnce('user-a')
 
-    expect(account.favorites()).toEqual(['jingle', 'mary', 'twinkle'])
-    expect((await page.favorites.loadFavorites()).sort()).toEqual(['jingle', 'mary', 'twinkle'])
+    expect(account.favorites()).toEqual(['jingle', 'mary', 'ode', 'twinkle'])
+    expect((await page.favorites.loadFavorites()).sort()).toEqual([
+      'jingle',
+      'mary',
+      'ode',
+      'twinkle'
+    ])
     expect(await outbox()).toEqual([])
   })
 })

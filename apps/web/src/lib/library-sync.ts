@@ -391,9 +391,8 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
   if (taken.op === 'favorite') {
     const answer = await api.setFavorite(entry.id, taken.on, accountId)
     if (stops(answer)) return 'stop'
-    // At the limit: it stays here, and in the outbox.
-    if (answer.status === 409) return 'refused'
-    // Kept; or a Song id the account refuses, which no retry changes.
+    // Kept; or refused, at the limit or for a Song id the account doesn't take, which no retry
+    // changes. The heart stays here until a full read drops what the account doesn't list.
     await settle(entry)
     return 'next'
   }

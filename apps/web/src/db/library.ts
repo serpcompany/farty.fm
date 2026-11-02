@@ -243,39 +243,44 @@ export async function purgeTombstones(db: Database, userId: string): Promise<voi
 
 /**
  * Marks a Song a Favorite Song, or one taken off again, unless the user already has `limit` live
- * ones. One statement, so two at once can't both pass the limit. True if this call marked it;
- * false when it already was, or at the limit.
+ * ones. The mark and the read of what came of it run in one batch, which D1 runs as one
+ * transaction, so neither two at once nor a DELETE between them gets a wrong answer: `added` if
+ * this call marked it, `kept` when it already was one, `limit` when the user has `limit` already.
  */
 export async function favoriteSong(
   db: Database,
   userId: string,
   songId: string,
   limit: number
-): Promise<boolean> {
-  const added = await db.all(sql`
-    insert into favorite_songs (user_id, song_id, created_at, updated_at)
-    select ${userId}, ${songId}, ${d1Now}, ${d1Now}
-    where (select count(*) from favorite_songs where user_id = ${userId} and deleted_at is null)
-      < ${limit}
-    on conflict (user_id, song_id) do update set deleted_at = null, updated_at = ${d1Now}
-      where favorite_songs.deleted_at is not null
-    returning song_id`)
-  return added.length === 1
-}
-
-/** Whether the Song is one of the user's live Favorite Songs. */
-export async function isFavoriteSong(db: Database, userId: string, songId: string) {
-  const rows = await db
-    .select({ songId: favoriteSongs.songId })
-    .from(favoriteSongs)
-    .where(
-      and(
-        eq(favoriteSongs.userId, userId),
-        eq(favoriteSongs.songId, songId),
-        isNull(favoriteSongs.deletedAt)
+): Promise<'added' | 'kept' | 'limit'> {
+  const [added, live] = await db.batch([
+    db
+      .insert(favoriteSongs)
+      .select(
+        sql`select ${userId}, ${songId}, ${d1Now}, ${d1Now}, null
+          where (select count(*) from ${favoriteSongs}
+            where ${favoriteSongs.userId} = ${userId} and ${favoriteSongs.deletedAt} is null)
+            < ${limit}`
       )
-    )
-  return rows.length === 1
+      .onConflictDoUpdate({
+        target: [favoriteSongs.userId, favoriteSongs.songId],
+        set: { deletedAt: null, updatedAt: d1Now },
+        setWhere: isNotNull(favoriteSongs.deletedAt)
+      })
+      .returning({ songId: favoriteSongs.songId }),
+    db
+      .select({ songId: favoriteSongs.songId })
+      .from(favoriteSongs)
+      .where(
+        and(
+          eq(favoriteSongs.userId, userId),
+          eq(favoriteSongs.songId, songId),
+          isNull(favoriteSongs.deletedAt)
+        )
+      )
+  ])
+  if (added.length === 1) return 'added'
+  return live.length === 1 ? 'kept' : 'limit'
 }
 
 /** Takes a Favorite Song off, leaving a tombstone. Nothing when it isn't one. */

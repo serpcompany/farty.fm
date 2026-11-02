@@ -6,7 +6,6 @@ import {
   insertPaidToot,
   insertRecording,
   insertToot,
-  isFavoriteSong,
   itemStatus,
   type Kind,
   libraryChanges,
@@ -63,10 +62,10 @@ export const LIMITS: Record<Kind, { maxAudioBytes: number; maxItems: number }> =
 }
 
 /**
- * How many Favorite Songs one user can keep (#313): far more than the catalog's Songs, so only a
- * client gone wrong reaches it.
+ * How many Favorite Songs one user can keep (#313): well past the catalog's planned 1,000+ Songs
+ * (#312), so only a client gone wrong reaches it. A row is about 150 bytes.
  */
-export const FAVORITE_SONGS_LIMIT = 1000
+export const FAVORITE_SONGS_LIMIT = 5000
 
 /** A Recording, as the browser keeps it, with its audio's size. */
 export type LibraryRecording = Recording & { audioBytes: number }
@@ -200,10 +199,9 @@ export async function putFavorite(
   if (!isSongId(songId)) return notFound()
   const wrong = wrongLibrary(user, request)
   if (wrong) return wrong
-  if (await favoriteSong(db, user.id, songId, FAVORITE_SONGS_LIMIT)) {
-    return Response.json({ songId }, { status: 201 })
-  }
-  if (await isFavoriteSong(db, user.id, songId)) return Response.json({ songId }, { status: 200 })
+  const marked = await favoriteSong(db, user.id, songId, FAVORITE_SONGS_LIMIT)
+  if (marked === 'added') return Response.json({ songId }, { status: 201 })
+  if (marked === 'kept') return Response.json({ songId }, { status: 200 })
   return apiError(409, 'limit_reached')
 }
 
