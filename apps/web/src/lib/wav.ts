@@ -9,6 +9,19 @@ export function encodeWav({ samples, sampleRate }: PcmAudio): ArrayBuffer {
   const dataBytes = samples.length * 2
   const buffer = new ArrayBuffer(44 + dataBytes)
   const view = new DataView(buffer)
+  new Uint8Array(buffer).set(wavHeader(sampleRate, dataBytes))
+  for (let i = 0; i < samples.length; i++) {
+    // Scaled by 32768 and rounded, the inverse of how decoders (and decodeWav) read 16-bit PCM.
+    const value = Math.round(samples[i] * 0x8000)
+    view.setInt16(44 + i * 2, Math.max(-0x8000, Math.min(0x7fff, value)), true)
+  }
+  return buffer
+}
+
+/** The 44-byte header of a mono 16-bit PCM WAV of `dataBytes` of samples. */
+export function wavHeader(sampleRate: number, dataBytes: number): Uint8Array<ArrayBuffer> {
+  const header = new Uint8Array(44)
+  const view = new DataView(header.buffer)
   const ascii = (offset: number, text: string) => {
     for (let i = 0; i < text.length; i++) view.setUint8(offset + i, text.charCodeAt(i))
   }
@@ -25,12 +38,7 @@ export function encodeWav({ samples, sampleRate }: PcmAudio): ArrayBuffer {
   view.setUint16(34, 16, true)
   ascii(36, 'data')
   view.setUint32(40, dataBytes, true)
-  for (let i = 0; i < samples.length; i++) {
-    // Scaled by 32768 and rounded, the inverse of how decoders (and decodeWav) read 16-bit PCM.
-    const value = Math.round(samples[i] * 0x8000)
-    view.setInt16(44 + i * 2, Math.max(-0x8000, Math.min(0x7fff, value)), true)
-  }
-  return buffer
+  return header
 }
 
 /** Reads a WAV this module wrote, or any PCM (8/16/24/32-bit) or 32-bit float WAV, as mono. */

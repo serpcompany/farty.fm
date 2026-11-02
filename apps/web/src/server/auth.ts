@@ -2,7 +2,12 @@ import 'server-only'
 
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
-import { readSessionUser, type SessionUser, serveAuthRequest } from './auth-config'
+import {
+  readSessionUser,
+  resolveAuthSettings,
+  type SessionUser,
+  serveAuthRequest
+} from './auth-config'
 import { type CapturedEmail, listCapturedEmails } from './dev-mailbox'
 import { devMailboxStore } from './email'
 
@@ -25,6 +30,15 @@ export function handleAuthRequest(request: Request): Promise<Response> {
  */
 export function getSessionUser(request: Request): Promise<SessionUser | null> {
   return readSessionUser(request, getCloudflareContext().env)
+}
+
+/**
+ * This environment's sign-in secret, for keyed hashes outside sign-in (a Report's limit), or null
+ * when sign-in isn't set up here.
+ */
+export function authSecret(): string | null {
+  const resolved = resolveAuthSettings(getCloudflareContext().env)
+  return resolved.ok ? resolved.settings.secret : null
 }
 
 /** The dev mailbox's emails, newest first, or null anywhere but a local run on a local host. */

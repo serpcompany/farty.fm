@@ -509,7 +509,10 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
     pitches = sorted({n.pitch for n in melody.notes})
     spb = 60 / melody.bpm
     weight = {p: sum(n.dur for n in melody.notes if n.pitch == p) for p in pitches}
-    note_seconds = {p: [n.dur * spb - GAP_S for n in melody.notes if n.pitch == p] for p in pitches}
+    # A note shorter than GAP_S has no slot left, not a negative one: a negative slot made
+    # unsettled_cost() about -1e8 a note (it divides by max(1e-9, slot)), so solve()'s penalties
+    # no longer ranked choices and Bolero's ornaments crashed smallest_ids() (#332).
+    note_seconds = {p: [max(0.0, n.dur * spb - GAP_S) for n in melody.notes if n.pitch == p] for p in pitches}
     longest = {p: max(note_seconds[p]) for p in pitches}
 
     def cells(t):  # cells[i][j]: (Octave Move?, cost) of pitch i on Recording j, or None
@@ -542,7 +545,8 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
     def solve(table, fixed=()):
         """Best choice for the pitches after `fixed` (Recording indexes or None, in pitch
         order), as one assignment problem: penalties larger than any cost make it minimise
-        uncovered pitches first, then Octave Moves, then cost."""
+        uncovered pitches first, then Octave Moves, then cost. Costs are never negative, so
+        `bound` is at least any choice's cost."""
         rows = table[len(fixed) :]
         cols = [j for j in range(len(pitched)) if j not in fixed]
         bound = sum(max((c[1] for c in row if c is not None), default=0.0) for row in rows)
@@ -578,6 +582,9 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
                 if optimal(solve(table, fixed + [j])[0]):
                     fixed.append(j)
                     break
+            else:  # the last solve() was optimal, so one of its choices for pitch i is too.
+                # Without one, the next pitch's Recording would land on this pitch (#332).
+                raise AssertionError(f"no optimal choice for Song pitch {pitches[i]}")
         return fixed
 
     fits = []
