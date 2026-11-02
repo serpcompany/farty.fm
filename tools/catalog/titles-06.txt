@@ -1,0 +1,202 @@
+# The top 200 tune titles of tools/catalog/ranking.md, not yet in the catalog or tried, written by
+# tools/catalog/rank_pdmx.py --batch 200 --out tools/catalog/titles-06.txt (#312). Each title's only name is
+# the one the ranking counted scores by. Review of its import (#324) pulled 3 titles, now in
+# excluded-titles.txt: Christmas Is Coming, Eri gia tutta mia, Here We Come A-Caroling.
+# id | catalog title
+befiehl-du-deine-wege | Befiehl du deine Wege
+infant-holy-infant-lowly | Infant Holy Infant Lowly
+an-alarch | An Alarc'h
+have-thine-own-way-lord | Have Thine Own Way Lord
+lord-lovats-lament | Lord Lovat's Lament
+tomorrow-shall-be-my-dancing-day | Tomorrow Shall Be My Dancing Day
+speed-the-plough | Speed the Plough
+childgrove | Childgrove
+crested-hens | Crested Hens
+american-patrol | American Patrol
+sussex-carol | Sussex carol
+battle-of-the-somme | Battle of the Somme
+fra-tutte-le-pene | Fra tutte le pene
+hole-in-the-wall | Hole in the Wall
+ill-tell-me-ma | I'll Tell Me Ma
+whistling-rufus | Whistling Rufus
+illumina-oculos-meos | Illumina oculos meos
+black-nag | The Black Nag
+blackthorn-stick | The Blackthorn Stick
+hector-the-hero | Hector The Hero
+toyland | Toyland
+land-of-the-silver-birch | Land of the Silver Birch
+sailors-wife | The Sailor's Wife
+tu-scendi-dalle-stelle | Tu Scendi Dalle Stelle
+black-is-the-color-of-my-true-loves-hair | Black is the Color (of my True Love's Hair)
+my-faith-looks-up-to-thee | My Faith Looks Up To Thee
+princess-royal | Princess Royal
+ballydesmond-polka | Ballydesmond Polka
+drive-the-cold-winter-away | Drive the Cold Winter Away
+grimstock | Grimstock
+i-skovens-dybe-stille-ro | I skovens dybe stille ro
+tant-que-vivray | Tant que vivray
+rakes-of-kildare | The Rakes of Kildare
+smash-the-windows | Smash the Windows
+whiskey-youre-the-devil | Whiskey You're the Devil
+ershter-vals | Ershter Vals
+fairy-dance | The Fairy Dance
+goddesses | Goddesses
+praise-my-soul-the-king-of-heaven | Praise my Soul the King of Heaven
+angeline-the-baker | Angeline the Baker
+jesus-thou-joy-of-loving-hearts | Jesus Thou Joy of Loving Hearts
+nei-campi-e-nelle-selve | Nei campi e nelle selve
+glorious-things-of-thee-are-spoken | Glorious Things of Thee Are Spoken
+salve-regina-d-811 | Salve Regina D. 811
+coilsfield-house | Coilsfield House
+when-laura-smiles | When Laura Smiles
+boars-head-carol | The Boar's Head Carol
+le-piccadilly | Le piccadilly
+canon-in-c | Canon in C
+ebenezer | Ebenezer
+kimer-i-klokker | Kimer I klokker
+lily-of-the-valley | Lily Of The Valley
+eileen-aroon | Eileen Aroon
+parsons-farewell | Parson's Farewell
+bucks-of-oranmore | The Bucks Of Oranmore
+bonnie-lass-o-bon-accord | The Bonnie Lass O' Bon Accord
+dry-hands | Dry Hands
+black-mountain-rag | Black Mountain Rag
+duke-of-yorks-march | Duke of York's March
+salt-creek | Salt Creek
+chinquapin-hunting | Chinquapin Hunting
+gay-gordons | The Gay Gordons
+sheebeg-and-sheemore | Sheebeg and Sheemore
+christ-whose-glory-fills-the-skies | Christ whose glory fills the skies
+hen-wlad-fy-nhadau | Hen Wlad Fy Nhadau
+black-raven | Black Raven
+day-of-wrath | Day Of Wrath
+frohlich-soll-mein-herze-springen | Fröhlich Soll Mein Herze Springen
+patapan | Patapan
+drunken-piper | The Drunken Piper
+bobby-shaftoe | Bobby Shaftoe
+saddle-the-pony | Saddle the Pony
+rimsky-korsakov-harmonic-exercises-strict-melodic-figuration | Rimsky-Korsakov Harmonic Exercises Strict Melodic Figuration
+sellengers-round | Sellenger's Round
+logan-water | Logan Water
+blaydon-races | Blaydon Races
+bring-a-torch-jeanette-isabella | Bring a Torch Jeanette Isabella
+quand-jetais-chez-mon-pere | Quand j'étais chez mon père
+salamanca | The Salamanca
+barren-rocks-of-aden | The Barren Rocks of Aden
+fishers-hornpipe | Fisher's Hornpipe
+miss-sarah-drummond-of-perth | Miss Sarah Drummond Of Perth
+bwv-772 | Bwv 772
+ned-of-the-hill | Ned Of The Hill
+gathering-peascods | Gathering Peascods
+horlepiep | Horlepiep
+banish-misfortune | Banish Misfortune
+deil-amang-the-tailors | The Deil Amang the Tailors
+miss-gordon-of-gight | Miss Gordon of Gight
+roddy-mccorley | Roddy McCorley
+stingo | Stingo
+colonel-fraser | Colonel Fraser
+there-is-a-fountain-filled-with-blood | There is a fountain filled with blood
+lyke-wake-dirge | The Lyke Wake Dirge
+strike-the-bell | Strike The Bell
+hail-columbia | Hail Columbia
+will-ye-no-come-back-again | Will Ye No' Come Back Again
+carolans-concerto | Carolan's Concerto
+humors-of-whiskey | The Humors of Whiskey
+snow-lay-on-the-ground | The Snow Lay On The Ground
+dargason | Dargason
+newcastle | Newcastle
+fairest-lord-jesus | Fairest Lord Jesus
+money-musk | Money Musk
+campbells-are-coming | The Campbells are Coming
+me-zo-ganet-e-kreiz-ar-mor | Me Zo Ganet E Kreiz Ar Mor
+let-all-mortal-flesh-keep-silence | Let all mortal flesh keep silence
+beauty-of-the-north | The Beauty of the North
+la-mourisque | La Mourisque
+billy-in-the-lowground | Billy in the Lowground
+johnny-i-hardly-knew-ye | Johnny I Hardly Knew Ye
+nathaniel-gows-lament-for-the-death-of-his-brother | Nathaniel Gow's Lament for the Death of His Brother
+durangs-hornpipe | Durang's Hornpipe
+mrs-judge | Mrs. Judge
+rufty-tufty | Rufty Tufty
+afton-water | Afton Water
+king-williams-march | King William's March
+wounded-hussar | The Wounded Hussar
+roxburgh-castle | Roxburgh Castle
+ballet-cclxviii | Ballet Cclxviii
+boyne-hunt | The Boyne Hunt
+mr-beveridges-maggot | Mr.Beveridge's Maggot.
+alas-and-did-my-savior-bleed | Alas and Did My Savior Bleed
+lady-mary-ramsay | Lady Mary Ramsay
+hunt-the-squirrel | Hunt the Squirrel
+den-fromme-helena | Den Fromme Helena
+female-saylor | The Female Saylor
+miss-lyall | Miss Lyall
+paddy-orafferty | Paddy O'Rafferty
+a-solis-ortus-cardine | A solis ortus cardine
+boys-of-bluehill | The Boys of Bluehill
+deep-river | Deep river
+tailor-and-the-mouse | The Tailor and the Mouse
+mestertyven-arve-brakars-halling | Mestertyven Arve Brakars Halling
+bonnie-at-morn | Bonnie at Morn
+where-the-bee-sucks | Where the bee sucks
+apples-in-winter | Apples in Winter
+mary-had-a-baby | Mary Had A Baby
+lass-of-richmond-hill | The Lass of Richmond Hill
+marquis-of-huntlys-highland-fling | The Marquis of Huntly's Highland Fling
+fairy-queen | The Fairy Queen
+bobbing-joe | Bobbing Joe
+gentle-maiden | The Gentle Maiden
+meeting-of-the-waters | Meeting of the Waters
+paddy-whack | Paddy Whack
+johnny-has-gone-for-a-soldier | Johnny has gone for a soldier
+out-on-the-ocean | Out On The Ocean
+christ-was-born-on-christmas-day | Christ Was Born On Christmas Day
+see-amid-the-winters-snow | See amid the winter's snow
+jesus-the-very-thought-of-thee | Jesus the Very Thought of Thee
+pentland-hills | Pentland Hills
+high-level-hornpipe | The High Level Hornpipe
+ocarolans-receipt-for-drinking | O'Carolan's Receipt for Drinking
+a-nation-once-again | A Nation Once Again
+down-the-burn-davie | Down the Burn Davie
+smiths-a-gallant-fireman | The Smith's A Gallant Fireman
+for-ireland-i-wont-say-her-name | For Ireland I Won't Say Her Name
+king-of-the-pipers | The King of the Pipers
+my-darling-asleep | My Darling Asleep
+malhao | Malhão
+black-eyed-susan | Black Eyed Susan
+miss-hamilton | Miss Hamilton
+crossing-to-ireland | Crossing to Ireland
+resurrexi | Resurrexi
+braes-o-balquhidder | The Braes o' Balquhidder
+christus-der-ist-mein-leben | Christus der ist mein Leben
+donkey-riding | Donkey Riding
+highland-mary | Highland Mary
+lindisfarne | Lindisfarne
+christians-awake-salute-the-happy-morn | Christians Awake Salute The Happy Morn
+cold-and-raw | Cold and Raw
+forty-days-and-forty-nights | Forty Days and Forty Nights
+glenlivet | Glenlivet
+money-in-both-pockets | Money in Both Pockets
+planxty-fanny-power | Planxty Fanny Power
+prince-rupert | Prince Rupert
+when-the-tide-comes-in | When the Tide Comes In
+hills-of-glenorchy | The Hills Of Glenorchy
+persian-dance | The Persian Dance
+wild-geese | The Wild Geese
+beggar-boy | The Beggar Boy
+duke-of-gloucesters-march | The Duke of Gloucester's March
+juice-of-barley | Juice of Barley
+all-round-my-hat | All Round My Hat
+castle-of-dromore | The Castle Of Dromore
+eternal-father-strong-to-save | Eternal Father Strong To Save
+picking-of-sticks | Picking Of Sticks.
+si-hei-lwli-mabi | Si hei lwli mabi
+corellis-maggot | Corelli's Maggot
+stool-of-repentance | The Stool of Repentance
+vexilla-regis | Vexilla Regis
+yellow-haired-laddie | The Yellow Haired Laddie
+black-rogue | The Black Rogue
+my-love-shes-but-a-lassie-yet | My Love She's But A Lassie Yet
+emperor-of-the-moon | Emperor of the Moon
+hearts-ease | Hearts Ease
+hickory-jack | Hickory Jack
