@@ -130,14 +130,15 @@ function buzz(): void {
 
 /**
  * The full-screen record flow after Stop: Review, then Result, with their error states. A save
- * that failed keeps what the review changed, for Try again.
+ * that failed keeps what the review changed, for Try again. `trimFailed`: the take was saved, but
+ * the fart between the review's handles couldn't be found, so it has no Trim.
  */
 export type Flow =
   | { kind: 'review'; draft: Draft }
   | { kind: 'saveFailed'; draft: Draft; review: ReviewChange }
   | { kind: 'analyzing'; id: string }
   | { kind: 'analysisFailed'; id: string }
-  | { kind: 'result'; id: string; changes: CoverageChanges }
+  | { kind: 'result'; id: string; changes: CoverageChanges; trimFailed?: boolean }
 
 export type RecordProblem = 'microphoneOff' | 'couldNotStart' | 'interrupted' | 'nothingHeard'
 
@@ -194,6 +195,9 @@ type Pedos = {
   isSaving: boolean
   /** Recording, Review or Result is on screen, full screen over the tabs. */
   showsRecordFlow: boolean
+  /** A saved Recording's review, from its pencil, is open over the tabs (#314). */
+  reviewOpen: boolean
+  setReviewOpen(open: boolean): void
   finishWelcome(): void
   startRecording(): Promise<void>
   stopRecording(): Promise<void>
@@ -336,6 +340,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>(null)
   const [playingPart, setPlayingPart] = useState<Trim | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [reviewOpen, setReviewOpen] = useState(false)
   const [toots, setToots] = useState<Toot[] | null>(null)
   const [tootsFailed, setTootsFailed] = useState(false)
   const [tootPlayFailed, setTootPlayFailed] = useState<string | null>(null)
@@ -392,12 +397,13 @@ export function PedosProvider({ children }: { children: ReactNode }) {
    * The Result screen after analysis, with what the Recording changed in the Song Catalog's Pitch
    * Coverage: the iPhone app's `analyze()` compares the Recordings before and after it.
    */
-  const resultOf = useCallback((analyzed: Recording): Flow => {
+  const resultOf = useCallback((analyzed: Recording, trimFailed = false): Flow => {
     const others = (latest.current ?? []).filter(r => r.id !== analyzed.id)
     return {
       kind: 'result',
       id: analyzed.id,
-      changes: coverageChanges(songs, others, [...others, analyzed])
+      changes: coverageChanges(songs, others, [...others, analyzed]),
+      ...(trimFailed ? { trimFailed } : {})
     }
   }, [])
 
@@ -699,8 +705,11 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       setRecordings(list => [...(list ?? []), saved])
       setFlow({ kind: 'analyzing', id: saved.id })
       letGoOfDraft()
-      // The Trim's fart is found in the analysis worker, after the take's analysis.
-      if (changes.handles) await placeRecording(saved.id, { handles: changes.handles })
+      // The Trim's fart is found in the analysis worker, after the take's analysis. If it isn't
+      // found, the take stays whole, and Result says so.
+      const trimmed = changes.handles
+        ? await placeRecording(saved.id, { handles: changes.handles })
+        : true
       const state = await session.analysis
       const kept = await store.saveAnalysis(saved.id, state).catch(error => {
         reportError('analysis-failed', error)
@@ -714,7 +723,9 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           ? kept
           : null
         : await runAnalysis(saved.id)
-      const next: Flow = analyzed ? resultOf(analyzed) : { kind: 'analysisFailed', id: saved.id }
+      const next: Flow = analyzed
+        ? resultOf(analyzed, !trimmed)
+        : { kind: 'analysisFailed', id: saved.id }
       setFlow(current =>
         current?.kind === 'analyzing' && current.id === saved.id ? next : current
       )
@@ -994,6 +1005,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     nowPlaying,
     isSaving,
     showsRecordFlow: capture.kind !== 'idle' || flow !== null,
+    reviewOpen,
+    setReviewOpen,
     finishWelcome,
     startRecording,
     stopRecording,

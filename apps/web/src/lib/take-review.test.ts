@@ -53,8 +53,9 @@ describe('the review’s note', () => {
     expect(reviewNote(finding(), null)).toEqual({ kind: 'finding' })
     expect(reviewNote(melodic(), null)).toEqual({ kind: 'note', midi: 55 })
     expect(reviewNote(noiseLike(), null)).toEqual({ kind: 'none' })
+    // Analysis failed: it couldn't find the note, which isn't "No note".
     expect(reviewNote(melodic({ analysis: { state: 'notAnalyzed' } }), null)).toEqual({
-      kind: 'none'
+      kind: 'notFound'
     })
     // What the user picked shows at once, finding or not.
     expect(reviewNote(finding(), 43)).toEqual({ kind: 'note', midi: 43 })

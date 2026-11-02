@@ -19,7 +19,8 @@ const page = vi.hoisted(() => ({
   rescanning: null as Rescanning | null,
   rescanned: null as RescanResult | null,
   rescanAll: vi.fn<() => Promise<RescanResult>>(),
-  rescanRecording: vi.fn<(id: string) => Promise<RescanResult>>()
+  rescanRecording: vi.fn<(id: string) => Promise<RescanResult>>(),
+  setReviewOpen: vi.fn<(open: boolean) => void>()
 }))
 
 vi.mock('./pedos-provider', () => ({
@@ -32,7 +33,8 @@ vi.mock('./pedos-provider', () => ({
     rescanning: page.rescanning,
     rescanned: page.rescanned,
     rescanAll: page.rescanAll,
-    rescanRecording: page.rescanRecording
+    rescanRecording: page.rescanRecording,
+    setReviewOpen: page.setReviewOpen
   })
 }))
 vi.mock('@/lib/recording-store', () => ({ loadAudio: () => new Promise(() => {}) }))
@@ -94,9 +96,9 @@ async function show(
   await act(async () => root?.render(<RecordingsScreen />))
 }
 
-/** The button whose accessible name or text is `name`, or undefined. */
+/** The button whose accessible name or text is `name`, or undefined. The review is a portal. */
 function findButton(name: string): HTMLButtonElement | undefined {
-  return [...container.querySelectorAll('button')].find(
+  return [...document.querySelectorAll('button')].find(
     b => b.getAttribute('aria-label') === name || b.textContent === name
   )
 }
@@ -223,5 +225,30 @@ describe('a Recording’s note and review on the Recordings tab (#314)', () => {
 
     await act(async () => button('Cancel').click())
     expect(document.querySelector('[role="dialog"]')).toBeNull()
+  })
+
+  it('opens its review as a modal: focus moves in, Escape is Cancel, focus goes back', async () => {
+    await show([{ ...melodic, name: 'Squeaker' }])
+    const pencil = button('Edit Squeaker')
+    pencil.focus()
+    await act(async () => pencil.click())
+    const review = document.querySelector<HTMLElement>('[role="dialog"]')
+    expect(review?.getAttribute('aria-modal')).toBe('true')
+    // The tabs wait while it's open (`app-shell.tsx`).
+    expect(page.setReviewOpen).toHaveBeenLastCalledWith(true)
+    await act(async () => new Promise(resolve => setTimeout(resolve, 50)))
+    expect(review?.contains(document.activeElement)).toBe(true)
+    // The rows under it are out of reach while it's open.
+    expect(pencil.closest('[inert], [aria-hidden="true"]')).not.toBeNull()
+
+    await act(async () =>
+      document.activeElement?.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+      )
+    )
+    await act(async () => new Promise(resolve => setTimeout(resolve, 50)))
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    expect(page.setReviewOpen).toHaveBeenLastCalledWith(false)
+    expect(document.activeElement).toBe(pencil)
   })
 })

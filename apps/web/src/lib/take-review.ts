@@ -22,14 +22,22 @@ import {
  */
 export type NoteChoice = number | 'none' | null
 
-/** What the review's note says: still finding it, a note, or "No note". */
-export type ReviewNote = { kind: 'finding' } | { kind: 'note'; midi: number } | { kind: 'none' }
+/**
+ * What the review's note says: still finding it, a note, "No note", or that analysis failed, so
+ * it couldn't find one, as Result says.
+ */
+export type ReviewNote =
+  | { kind: 'finding' }
+  | { kind: 'note'; midi: number }
+  | { kind: 'none' }
+  | { kind: 'notFound' }
 
 /** What the review shows for `choice` on a take analyzed as far as `recording` says. */
 export function reviewNote(recording: Recording, choice: NoteChoice): ReviewNote {
   if (choice === 'none') return { kind: 'none' }
   if (choice !== null) return { kind: 'note', midi: choice }
   if (recording.analysis.state === 'analyzing') return { kind: 'finding' }
+  if (recording.analysis.state === 'notAnalyzed') return { kind: 'notFound' }
   const found = foundNote(recording)
   return found === null ? { kind: 'none' } : { kind: 'note', midi: found }
 }

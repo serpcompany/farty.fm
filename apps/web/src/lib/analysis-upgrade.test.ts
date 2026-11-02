@@ -3,7 +3,14 @@ import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ANALYSIS_VERSION } from './analysis/version'
 import { itemKey } from './outbox'
-import { type Analysis, needsReanalysis, type Recording, songPitch, trimOf } from './recordings'
+import {
+  type Analysis,
+  NO_NOTE,
+  needsReanalysis,
+  type Recording,
+  songPitch,
+  trimOf
+} from './recordings'
 import { memoryStorage } from './test-storage'
 import { encodeWav, type PcmAudio } from './wav'
 
@@ -193,6 +200,15 @@ describe('rescan (#282)', () => {
     await page.upgrade.rescan([older], async () => stillNoNote, vi.fn())
 
     expect(page.upgrade.canRescan((await storedNow(older.id)) as Recording)).toBe(false)
+  })
+
+  it('offers no Re-scan on a fart left out with "No note" (#314)', async () => {
+    // An older analysis found its note, but the user left it out: Songs have no note for it, and a
+    // Re-scan would only find that note again.
+    const leftOut = { ...(await storedWith(1)), placedPitch: NO_NOTE }
+    expect(needsReanalysis(leftOut)).toBe(true)
+    expect(songPitch(leftOut)).toBeNull()
+    expect(page.upgrade.canRescan(leftOut)).toBe(false)
   })
 
   it('re-scans one Recording with no note, and counts it when it now has a note', async () => {

@@ -18,8 +18,9 @@ const sampleRate = 48000
 
 const page = vi.hoisted(() => ({
   startTake: vi.fn(),
-  /** Each analysis asked for, to finish with `found`. */
+  /** Each analysis asked for, to finish with `found`, or fail. */
   analyses: [] as ((found: unknown) => void)[],
+  failures: [] as ((error: Error) => void)[],
   findTrim: vi.fn(),
   playPianoNote: vi.fn(),
   saved: null as Recording | null,
@@ -40,7 +41,11 @@ vi.mock('@/lib/audio/recorder', async importOriginal => {
   }
 })
 vi.mock('@/lib/analysis/client', () => ({
-  analyze: () => new Promise(resolve => page.analyses.push(resolve)),
+  analyze: () =>
+    new Promise((resolve, reject) => {
+      page.analyses.push(resolve)
+      page.failures.push(reject)
+    }),
   findTrim: page.findTrim
 }))
 vi.mock('@/lib/analysis-upgrade', () => ({ upgradeAnalyses: async () => {} }))
@@ -130,6 +135,7 @@ function Edit({ id }: { id: string }) {
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] })
   page.analyses = []
+  page.failures = []
   page.saved = null
   page.wav = null
   page.stored = []
@@ -189,7 +195,14 @@ async function recordTake() {
 
 /** Analysis of the take on review finds `analysis`. */
 async function analysisFinds(analysis: Analysis | null) {
+  page.failures.shift()
   await act(async () => page.analyses.shift()?.(analysis))
+}
+
+/** Analysis of the take on review fails, as when the worker throws. */
+async function analysisFails() {
+  page.analyses.shift()
+  await act(async () => page.failures.shift()?.(new Error('the analysis worker failed')))
 }
 
 const byTestId = (id: string) => document.querySelector<HTMLElement>(`[data-testid="${id}"]`)
@@ -356,6 +369,32 @@ describe('the review after Stop (#314)', () => {
     })
   })
 
+  it('says on Result when the fart between the handles couldn’t be found to trim', async () => {
+    await recordTake()
+    await analysisFinds(found)
+    await nudge('end', 'ArrowLeft')
+    page.findTrim.mockRejectedValueOnce(new Error('no fart'))
+    await tap('Save')
+    // Saved whole: no Trim, and Result says so, as the pencil's review does.
+    expect(page.placeRecording).not.toHaveBeenCalled()
+    expect(text('result-note')).toBe('G3')
+    expect(text('result-trim-failed')).toBe(
+      "Couldn't save the trim, so it's kept whole. Trim it again from the Recordings tab."
+    )
+  })
+
+  it('says it couldn’t find the note when analysis fails, as Result does', async () => {
+    await recordTake()
+    await analysisFails()
+    expect(text('review-note')).toBe('Not found')
+    expect(text('review-caption')).toBe("We couldn't find its note. Tap a key if you hear one.")
+    expect(button('No note').getAttribute('aria-pressed')).toBe('false')
+    // Not saved yet: Retry comes on Result.
+    expect(() => button('Retry')).toThrow()
+    await tap('Save')
+    expect(document.body.textContent).toContain("Saved, but we couldn't find its note")
+  })
+
   it('throws the take away with Discard, saving nothing', async () => {
     await recordTake()
     await tap('Discard')
@@ -420,6 +459,17 @@ describe('a saved Recording’s review (#314)', () => {
     )
     await tap('Save')
     expect(page.placeRecording).toHaveBeenCalledWith('r7', { name: null })
+  })
+
+  it('says it couldn’t find the note when not analyzed, with Retry, as Result does', async () => {
+    await edit({ ...saved, placedPitch: null, analysis: { state: 'notAnalyzed' } })
+    expect(text('review-note')).toBe('Not found')
+    expect(text('review-caption')).toBe(
+      "We couldn't find its note. Tap a key if you hear one, or Retry"
+    )
+    await tap('Retry')
+    expect(page.analyses).toHaveLength(1)
+    expect(text('review-note')).toBe('Finding note…')
   })
 
   it('trims a Melodic Recording, and stays open saying so when the fart can’t be found', async () => {

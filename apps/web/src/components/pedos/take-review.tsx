@@ -219,7 +219,8 @@ export function TakeReview({
                 'flex h-[50px] items-center gap-2.5 font-bold tracking-tight tabular-nums',
                 note.kind === 'note' && 'text-[46px]',
                 note.kind === 'none' && 'text-[34px] text-muted-foreground',
-                note.kind === 'finding' && 'text-2xl font-semibold text-muted-foreground'
+                (note.kind === 'finding' || note.kind === 'notFound') &&
+                  'text-2xl font-semibold text-muted-foreground'
               )}
               data-testid="review-note"
             >
@@ -228,7 +229,9 @@ export function TakeReview({
                 ? noteName(note.midi)
                 : note.kind === 'none'
                   ? 'No note'
-                  : 'Finding note…'}
+                  : note.kind === 'notFound'
+                    ? 'Not found'
+                    : 'Finding note…'}
             </p>
           </div>
           <Button
@@ -281,7 +284,14 @@ export function TakeReview({
           aria-live="polite"
           data-testid="review-caption"
         >
-          <Caption note={note} heard={heard} recording={recording} onBack={backToFound} />
+          <Caption
+            note={note}
+            heard={heard}
+            recording={recording}
+            onBack={backToFound}
+            // As Result does, once the take is saved.
+            onRetry={target === 'draft' ? undefined : () => void pedos.retryAnalysis(target.id)}
+          />
         </p>
       </section>
 
@@ -307,28 +317,41 @@ export function TakeReview({
   )
 }
 
-/** What the note means for Songs, and the way back to the note analysis found. */
+/**
+ * What the note means for Songs, the way back to the note analysis found, and Retry when analysis
+ * failed on a saved Recording.
+ */
 function Caption({
   note,
   heard,
   recording,
-  onBack
+  onBack,
+  onRetry
 }: {
   note: ReviewNote
   heard: number | null
   recording: Recording
   onBack: () => void
+  onRetry?: () => void
 }) {
-  const back = (label: string) => (
+  const link = (label: string, onClick: () => void) => (
     <button
       type="button"
       className="rounded-sm font-semibold text-brand-strong outline-none focus-visible:ring-3 focus-visible:ring-ring/50 dark:text-brand"
-      onClick={onBack}
+      onClick={onClick}
     >
       {label}
     </button>
   )
+  const back = (label: string) => link(label, onBack)
   if (note.kind === 'finding') return "You can save now. The note shows here once it's found."
+  if (note.kind === 'notFound') {
+    return onRetry ? (
+      <>We couldn't find its note. Tap a key if you hear one, or {link('Retry', onRetry)}</>
+    ) : (
+      "We couldn't find its note. Tap a key if you hear one."
+    )
+  }
   if (note.kind === 'none') {
     if (heard !== null) {
       return (
@@ -338,9 +361,10 @@ function Caption({
         </>
       )
     }
-    return recording.analysis.state === 'analyzing'
-      ? 'Songs leave it out. Tap a key to give it a note.'
-      : 'No steady note found, so Songs leave it out. Tap a key if you hear one.'
+    // Only analysis that ran can say it found no steady note.
+    return recording.analysis.state === 'analyzed'
+      ? 'No steady note found, so Songs leave it out. Tap a key if you hear one.'
+      : 'Songs leave it out. Tap a key to give it a note.'
   }
   if (heard === null) return 'Set by you. Tap another key to change it.'
   if (note.midi === heard) {

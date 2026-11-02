@@ -171,3 +171,40 @@ test('a Noise-like fart can be trimmed in its review, and the row then plays jus
   await expect(row).not.toContainText('Trimmed')
   await expect.poll(seconds).toBe(whole)
 })
+
+test('a Recording’s review is a modal: focus moves in and stays in, Escape is Cancel, focus goes back (#314)', async ({
+  page
+}) => {
+  await recordAndSave(page, 2.5)
+  await page.getByRole('button', { name: 'Done' }).click()
+  // By its tag: under the modal, the tabs are hidden from screen readers too.
+  const tabs = page.locator('nav[aria-label="Tabs"]')
+  const pencil = page.getByRole('button', { name: 'Edit Recording 1' })
+  await pencil.focus()
+  await page.keyboard.press('Enter')
+  const review = page.getByRole('dialog', { name: 'Recording 1' })
+  await expect(review).toBeVisible()
+  // The tabs wait under it, as for the record flow, from 768px too, where the top bar shows.
+  await expect(tabs).toHaveAttribute('inert', '')
+  const inReview = () => review.evaluate(el => el.contains(document.activeElement))
+  await expect.poll(inReview).toBe(true)
+  // Tab goes round its controls, and never reaches the rows or the tabs under it. Going round, it
+  // passes a focus guard that sends focus straight back in.
+  for (let i = 0; i < 40; i++) {
+    await page.keyboard.press('Tab')
+    await expect.poll(inReview, { message: `Tab ${i + 1}`, timeout: 2000 }).toBe(true)
+  }
+  await page.keyboard.press('Escape')
+  await expect(review).toBeHidden()
+  await expect(pencil).toBeFocused()
+  await expect(tabs).not.toHaveAttribute('inert', '')
+
+  // Escape, like Cancel, keeps nothing the review changed.
+  await page.keyboard.press('Enter')
+  await review.getByRole('button', { name: 'E3', exact: true }).click()
+  await expect(review.getByTestId('review-note')).toHaveText('E3')
+  await page.keyboard.press('Escape')
+  await expect(review).toBeHidden()
+  await expect(pencil).toBeFocused()
+  await expect(page.getByTestId('recording-note')).toHaveText('No note')
+})

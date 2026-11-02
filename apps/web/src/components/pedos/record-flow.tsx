@@ -1,5 +1,6 @@
 'use client'
 
+import { Dialog } from '@base-ui/react/dialog'
 import { AudioWaveform, CircleAlert, CircleHelp, LockOpen } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useState, useSyncExternalStore } from 'react'
@@ -83,7 +84,7 @@ export function RecordFlow() {
       if (!recording) return null
       return (
         <Cover title={recordingName(recording)}>
-          <Result recording={recording} changes={flow.changes} />
+          <Result recording={recording} changes={flow.changes} trimFailed={flow.trimFailed} />
         </Cover>
       )
     }
@@ -99,32 +100,53 @@ type CoverName = { title: string; label?: never } | { title?: never; label: stri
 
 /**
  * Full screen on a phone. From 768px, a card in the page under the top bar, which stays in view.
- * `tone="record"`: the whole cover red, while Record records (#314).
+ * `tone="record"`: the whole cover red, while Record records (#314). With `onClose`, a modal
+ * dialog, as a saved Recording's review is: focus moves in and stays in, Escape calls `onClose`,
+ * and focus goes back to what opened it.
  */
 function Cover({
   title,
   label,
   tone,
+  onClose,
   children
 }: CoverName & {
   tone?: 'record'
+  onClose?: () => void
   children: ReactNode
 }) {
+  const page =
+    'contents md:fixed md:inset-x-0 md:top-[calc(4rem+1px)] md:bottom-0 md:z-40 md:flex md:items-center md:justify-center md:bg-background md:p-6'
+  const card = cn(
+    'fixed inset-0 z-40 flex flex-col bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] outline-none md:static md:h-full md:max-h-[44rem] md:w-full md:max-w-md md:rounded-3xl md:border md:py-3 md:shadow-sm',
+    tone === 'record' && 'bg-record-screen text-record-foreground md:border-transparent'
+  )
+  const content = (
+    <>
+      <header className="flex h-12 shrink-0 items-center justify-center px-4">
+        {title && <h1 className="font-semibold">{title}</h1>}
+      </header>
+      <div className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col">{children}</div>
+    </>
+  )
+  if (onClose) {
+    // A tap beside the card doesn't close it: that would throw the user's changes away.
+    return (
+      <Dialog.Root open disablePointerDismissal onOpenChange={open => !open && onClose()}>
+        <Dialog.Portal>
+          <div className={page}>
+            <Dialog.Popup aria-modal aria-label={title ?? label} className={card}>
+              {content}
+            </Dialog.Popup>
+          </div>
+        </Dialog.Portal>
+      </Dialog.Root>
+    )
+  }
   return (
-    <div className="contents md:fixed md:inset-x-0 md:top-[calc(4rem+1px)] md:bottom-0 md:z-40 md:flex md:items-center md:justify-center md:bg-background md:p-6">
-      <div
-        role="dialog"
-        aria-modal
-        aria-label={title ?? label}
-        className={cn(
-          'fixed inset-0 z-40 flex flex-col bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:static md:h-full md:max-h-[44rem] md:w-full md:max-w-md md:rounded-3xl md:border md:py-3 md:shadow-sm',
-          tone === 'record' && 'bg-record-screen text-record-foreground md:border-transparent'
-        )}
-      >
-        <header className="flex h-12 shrink-0 items-center justify-center px-4">
-          {title && <h1 className="font-semibold">{title}</h1>}
-        </header>
-        <div className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col">{children}</div>
+    <div className={page}>
+      <div role="dialog" aria-modal aria-label={title ?? label} className={card}>
+        {content}
       </div>
     </div>
   )
@@ -305,7 +327,7 @@ function Review({ draft }: { draft: Draft }) {
 /**
  * A saved Recording's review, from the pencil on its row (#314): the same screen as after Stop,
  * with Cancel and Save. Save changes only what the user changed, and waits only to find the fart
- * between moved handles (ADR 0019).
+ * between moved handles (ADR 0019). Escape is Cancel.
  */
 export function RecordingReview({
   recording,
@@ -315,10 +337,16 @@ export function RecordingReview({
   onClose: () => void
 }) {
   const pedos = usePedos()
+  const { setReviewOpen } = pedos
   const review = useTakeReview(recording)
   const audio = useTake(recording)
   const [saving, setSaving] = useState(false)
   const [failed, setFailed] = useState(false)
+  // The tabs wait while it's open, as they do for the record flow.
+  useEffect(() => {
+    setReviewOpen(true)
+    return () => setReviewOpen(false)
+  }, [setReviewOpen])
   const close = () => {
     if (pedos.nowPlaying === recording.id) pedos.stopPlayback()
     onClose()
@@ -339,7 +367,7 @@ export function RecordingReview({
     else setFailed(true)
   }
   return (
-    <Cover title={recordingName({ number: recording.number, name: review.name })}>
+    <Cover title={recordingName({ number: recording.number, name: review.name })} onClose={close}>
       <TakeReview review={review} target={recording} audio={audio} />
       {failed && (
         <p role="alert" className="px-5 pb-2 text-sm text-destructive">
@@ -450,9 +478,18 @@ function AnalysisFailed({ id }: { id: string }) {
 
 /**
  * Result: the note you just made, and what it unlocked. Matches the iPhone app's `ResultView`. The
- * first time, each button opens the account step before it goes where it was tapped (#155).
+ * first time, each button opens the account step before it goes where it was tapped (#155). When
+ * the review's Trim couldn't be saved, it says so, as the pencil's review does.
  */
-function Result({ recording, changes }: { recording: Recording; changes: CoverageChanges }) {
+function Result({
+  recording,
+  changes,
+  trimFailed
+}: {
+  recording: Recording
+  changes: CoverageChanges
+  trimFailed?: boolean
+}) {
   const pedos = usePedos()
   const finish = useFinishFlow()
   const { offerStep } = useAccount()
@@ -484,6 +521,11 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
               It's saved. Songs leave it out until you give it a note from the Recordings tab.
             </p>
           </div>
+        )}
+        {trimFailed && (
+          <p role="alert" className="text-sm text-destructive" data-testid="result-trim-failed">
+            Couldn't save the trim, so it's kept whole. Trim it again from the Recordings tab.
+          </p>
         )}
         <Progress changes={changes} hasMelodicRecordings={pedos.melodicRecordings.length > 0} />
       </div>
