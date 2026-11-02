@@ -59,6 +59,8 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
     capture.kind === 'finishing'
   // On a touch tablet, `/` is the lander until Farty is opened in this browser (`lander.tsx`).
   const atLander = pathname === '/'
+  // A shared link's page (ADR 0020) has its own top bar, with Get Farty, and no tabs.
+  const sharedPage = pathname.startsWith('/u/')
   useTrackPages()
 
   // On a touch tablet, any other tab's URL, such as a Song's link, opens the app and counts as
@@ -103,7 +105,8 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
       {/* From 768px the tab bar is a top bar with the name, and the page is a wider column. */}
       <div
         className={cn(
-          'flex min-h-dvh flex-col overflow-x-clip md:pt-16',
+          'flex min-h-dvh flex-col overflow-x-clip',
+          !sharedPage && 'md:pt-16',
           atLander && 'md:unwelcomed:hidden',
           tab !== null && 'desktop:hidden'
         )}
@@ -112,7 +115,10 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
           id={appMain}
           // Focusable only from script: the lander's Open Farty moves focus here (`lander.tsx`).
           tabIndex={-1}
-          className="mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] pb-20 outline-none md:max-w-2xl md:pt-6 md:pb-12"
+          className={cn(
+            'mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] outline-none md:max-w-2xl',
+            sharedPage ? 'pb-[env(safe-area-inset-bottom)]' : 'pb-20 md:pt-6 md:pb-12'
+          )}
         >
           {pedos.waitsForOtherTabs && (
             <output className="block px-4 pt-4 text-center text-muted-foreground">
@@ -121,58 +127,60 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
           )}
           {children}
         </main>
-        <nav
-          aria-label="Tabs"
-          // The record flow and the account step leave the top bar in view from 768px,
-          // but, as on a phone, the tabs wait until they close.
-          inert={stepsOpen}
-          className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:top-0 md:bottom-auto md:border-t-0 md:border-b"
-        >
-          <div className="contents md:mx-auto md:flex md:h-16 md:max-w-5xl md:items-center md:justify-between md:px-6">
-            <Link
-              href="/"
-              className="hidden rounded-md text-lg font-bold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:flex md:h-11 md:items-center md:gap-2.5"
-            >
-              <Image
-                src="/icons/icon-192.png"
-                alt=""
-                width={32}
-                height={32}
-                // A small static PNG; Workers has no image optimizer configured.
-                unoptimized
-                className="rounded-lg"
-              />
-              Farty
-            </Link>
-            {/* A computer has no app, so its privacy, support and 404 pages link only home. */}
-            <ul
-              className={cn(
-                'mx-auto flex max-w-md md:mx-0 md:max-w-none md:gap-1 desktop:hidden',
-                stepsOpen && 'md:opacity-50'
-              )}
-            >
-              {tabs.map(({ id, href, label }) => {
-                const current = id === tab
-                const Icon = icons[id]
-                return (
-                  <li key={id} className="flex-1 md:flex-none">
-                    <Link
-                      href={href}
-                      aria-current={current ? 'page' : undefined}
-                      className={cn(
-                        'flex h-14 flex-col items-center justify-center gap-0.5 text-xs font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:h-11 md:flex-row md:gap-2 md:rounded-md md:px-3 md:text-sm',
-                        current ? 'text-foreground md:bg-muted' : 'text-muted-foreground'
-                      )}
-                    >
-                      <Icon className="size-6 md:size-5" aria-hidden />
-                      {label}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        </nav>
+        {!sharedPage && (
+          <nav
+            aria-label="Tabs"
+            // The record flow and the account step leave the top bar in view from 768px,
+            // but, as on a phone, the tabs wait until they close.
+            inert={stepsOpen}
+            className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:top-0 md:bottom-auto md:border-t-0 md:border-b"
+          >
+            <div className="contents md:mx-auto md:flex md:h-16 md:max-w-5xl md:items-center md:justify-between md:px-6">
+              <Link
+                href="/"
+                className="hidden rounded-md text-lg font-bold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:flex md:h-11 md:items-center md:gap-2.5"
+              >
+                <Image
+                  src="/icons/icon-192.png"
+                  alt=""
+                  width={32}
+                  height={32}
+                  // A small static PNG; Workers has no image optimizer configured.
+                  unoptimized
+                  className="rounded-lg"
+                />
+                Farty
+              </Link>
+              {/* A computer has no app, so its privacy, support and 404 pages link only home. */}
+              <ul
+                className={cn(
+                  'mx-auto flex max-w-md md:mx-0 md:max-w-none md:gap-1 desktop:hidden',
+                  stepsOpen && 'md:opacity-50'
+                )}
+              >
+                {tabs.map(({ id, href, label }) => {
+                  const current = id === tab
+                  const Icon = icons[id]
+                  return (
+                    <li key={id} className="flex-1 md:flex-none">
+                      <Link
+                        href={href}
+                        aria-current={current ? 'page' : undefined}
+                        className={cn(
+                          'flex h-14 flex-col items-center justify-center gap-0.5 text-xs font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:h-11 md:flex-row md:gap-2 md:rounded-md md:px-3 md:text-sm',
+                          current ? 'text-foreground md:bg-muted' : 'text-muted-foreground'
+                        )}
+                      >
+                        <Icon className="size-6 md:size-5" aria-hidden />
+                        {label}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          </nav>
+        )}
         <RecordFlow />
         <AccountStep />
         {/* Only on the tabs, so the privacy, support and 404 pages are always readable. */}
