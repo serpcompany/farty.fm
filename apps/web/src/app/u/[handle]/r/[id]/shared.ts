@@ -4,8 +4,8 @@ import { cache } from 'react'
 import { getDb } from '@/db'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
-import { playedPart, recordingName, songPitch, type Trim } from '@/lib/recordings'
-import { findSharedRecording } from '@/server/sharing'
+import { recordingName, songPitch, type Trim } from '@/lib/recordings'
+import { findSharedRecording, sharedPart } from '@/server/sharing'
 
 /** What a shared Recording's page, and its link image, show of it: nothing private. */
 export type SharedView = {
@@ -18,8 +18,8 @@ export type SharedView = {
   /** "1.1 s": its fart's length, as its row shows it. */
   length: string
   /**
-   * The audio its link serves, from 0: its Trim, or else the whole take, cut on its own
-   * (`sharedAudio`), so none of the take outside it is public.
+   * The audio its link serves, from 0: its stored Trim, or else the whole take, cut on its own
+   * (`sharedPart`, `sharedAudio`), so none of the take outside it is public.
    */
   part: Trim
   /** The loudness bars of `part`, from the upload, each 0…1. */
@@ -35,7 +35,7 @@ export const sharedView = cache(async (handle: string, id: string): Promise<Shar
   if (!shared) return null
   const { recording } = shared
   const pitch = songPitch(recording)
-  const part = playedPart(recording)
+  const part = sharedPart(recording)
   return {
     handle: shared.handle,
     shareId: shared.shareId,

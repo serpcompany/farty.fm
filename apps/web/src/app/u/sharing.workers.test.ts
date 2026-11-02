@@ -6,7 +6,7 @@ import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
 import * as sharesRoute from '@/app/api/share/route'
 import { rateLimit, shareReports, shares } from '@/db/schema'
 import { encodeWav } from '@/lib/wav'
-import { findSharedRecording, sharedAudioCacheKey } from '@/server/sharing'
+import { findSharedRecording, partFrames, sharedAudioCacheKey, sharedPart } from '@/server/sharing'
 import { readWavHeader } from '@/server/wav-header'
 import {
   type As,
@@ -71,10 +71,11 @@ const share = {
       params({ handle, id })
     )
   },
-  /** A report from the page, by the reporter at `ip`. */
-  report: (url: string, origin: string | null = ORIGIN, ip = '203.0.113.1') => {
+  /** A report from the page, by the reporter at `ip`, or with no `cf-connecting-ip` when null. */
+  report: (url: string, origin: string | null = ORIGIN, ip: string | null = '203.0.113.1') => {
     const { handle, id } = linkParts(url)
-    const headers = new Headers({ 'cf-connecting-ip': ip })
+    const headers = new Headers()
+    if (ip !== null) headers.set('cf-connecting-ip', ip)
     if (origin !== null) headers.set('origin', origin)
     return reportRoute.POST(
       new Request(`${url}report/`, { method: 'POST', headers }),
@@ -295,6 +296,46 @@ describe('Sharing a Recording', () => {
       expect(await framesOf(await share.audio(alice.url))).toEqual(range(0, RATE))
     })
 
+    /** `name`, sharing `R1` uploaded with `fields` (its Trim, its analysis) and never placed. */
+    async function uploadedSharer(name: string, fields: Record<string, unknown>) {
+      const alice = await signUp(name)
+      expect((await share.pick(name, alice)).status).toBe(201)
+      const metadata = recordingMetadata(R1, { seconds: 1, sampleRate: RATE, ...fields })
+      const uploaded = await api.put('recordings', R1, uploadBody(metadata, take()), alice)
+      expect(uploaded.status).toBe(201)
+      const { url } = (await (await share.put(R1, alice)).json()) as { url: string }
+      return { ...alice, url }
+    }
+
+    it('serves only a stored Trim, even before analysis or once analysis finds a pitch', async () => {
+      // Not yet analyzed: the Recordings tab plays the whole take, but the link serves the Trim.
+      const notAnalyzed = await uploadedSharer('alice', {
+        analysis: { state: 'notAnalyzed' },
+        trim: trimmed(0.25, 0.5)
+      })
+      expect(await framesOf(await share.audio(notAnalyzed.url))).toEqual(range(2000, 4000))
+
+      // Melodic and not placed, as a Re-scan that finds a pitch leaves a Noise-like one.
+      const melodic = await uploadedSharer('bob', { trim: trimmed(0.5, 0.625) })
+      const { handle, id } = linkParts(melodic.url)
+      const shared = await findSharedRecording(testDb(), handle, id)
+      if (!shared) throw new Error('Not shared')
+      expect(shared.recording.placedPitch ?? null).toBeNull()
+      expect(sharedPart(shared.recording)).toEqual({ startSeconds: 0.5, endSeconds: 0.625 })
+      expect(await framesOf(await share.audio(melodic.url))).toEqual(range(4000, 5000))
+    })
+
+    it('serves the whole take of a Recording with no stored Trim', async () => {
+      const alice = await uploadedSharer('alice', { analysis: { state: 'notAnalyzed' } })
+      expect(await framesOf(await share.audio(alice.url))).toEqual(range(0, RATE))
+    })
+
+    it('serves a Trim of an odd number of frames as a WAV of its own', async () => {
+      // 0.25 s to 0.250375 s at 8 kHz: 3 frames, 6 bytes of data.
+      const alice = await trimmedSharer(trimmed(0.25, 0.250375))
+      expect(await framesOf(await share.audio(alice.url))).toEqual(range(2000, 2003))
+    })
+
     it('keys the cached copy by the R2 key and the Trim', () => {
       const request = new Request(`${ORIGIN}/u/alice/r/x/audio/`)
       const key = (from: number, to: number) =>
@@ -485,10 +526,63 @@ describe('Reporting a shared Recording', () => {
     expect(await testDb().select().from(shareReports)).toHaveLength(5)
   })
 
+  it('puts every report with no client address in one shared bucket, still capped', async () => {
+    const alice = await sharer('alice')
+    const bob = await sharer('bob')
+    const carol = await sharer('carol')
+    for (const link of [alice, bob]) {
+      for (let i = 0; i < 5; i++) {
+        expect((await share.report(link.url, ORIGIN, null)).status).toBe(204)
+      }
+    }
+    expect((await share.report(carol.url, ORIGIN, null)).status).toBe(429)
+    expect(await testDb().select().from(shareReports)).toHaveLength(10)
+    const reporters = await testDb()
+      .select({ key: rateLimit.key, count: rateLimit.count })
+      .from(rateLimit)
+      .where(like(rateLimit.key, 'share-reporter|%'))
+    expect(reporters).toEqual([
+      { key: expect.stringMatching(/^share-reporter\|[0-9a-f]+$/), count: 10 }
+    ])
+    // A reporter with an address is a bucket of its own.
+    expect((await share.report(carol.url)).status).toBe(204)
+  })
+
   it('goes with the account', async () => {
     const alice = await sharer('alice')
     await share.report(alice.url)
     await api.deleteAccount(alice)
     expect(await testDb().select().from(shareReports)).toEqual([])
+  })
+})
+
+describe('The frames a shared Trim covers', () => {
+  // A take of 1 s at 8 kHz: 8,000 frames.
+  const frames = (startSeconds: number, endSeconds: number, sampleRate = 8000, total = 8000) =>
+    partFrames({ startSeconds, endSeconds }, sampleRate, total)
+
+  it('starts at the first frame for a Trim at 0', () => {
+    expect(frames(0, 0.25)).toEqual({ start: 0, end: 2000 })
+    expect(frames(0, 1)).toEqual({ start: 0, end: 8000 })
+  })
+
+  it('ends at the last frame for a Trim at the end, or past it by the tolerance', () => {
+    expect(frames(0.75, 1)).toEqual({ start: 6000, end: 8000 })
+    expect(frames(0.995, 1.01)).toEqual({ start: 7960, end: 8000 })
+    expect(frames(1.005, 1.01)).toEqual({ start: 7999, end: 8000 })
+  })
+
+  it('rounds each end to its nearest frame, at an odd rate or an odd number of frames', () => {
+    // 0.5 s at 11,025 Hz is frame 5,512.5: rounded up.
+    expect(frames(0, 0.5, 11025, 11025)).toEqual({ start: 0, end: 5513 })
+    expect(frames(0.5, 1, 8000, 8001)).toEqual({ start: 4000, end: 8000 })
+    expect(frames(0.5, 2, 8000, 8001)).toEqual({ start: 4000, end: 8001 })
+    expect(frames(0.25, 0.250375)).toEqual({ start: 2000, end: 2003 })
+  })
+
+  it('covers one frame for an empty or inverted Trim', () => {
+    expect(frames(0.5, 0.5)).toEqual({ start: 4000, end: 4001 })
+    expect(frames(0.5, 0.25)).toEqual({ start: 4000, end: 4001 })
+    expect(frames(1, 1)).toEqual({ start: 7999, end: 8000 })
   })
 })

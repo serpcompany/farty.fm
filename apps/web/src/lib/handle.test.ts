@@ -24,7 +24,7 @@ describe('Handles', () => {
     }
   })
 
-  it("can't hold Farty's own name anywhere, or start or end with a staff word", () => {
+  it("can't hold Farty's own name anywhere, or a staff word as a word of its own", () => {
     const passing = [
       'farty_official',
       'fartyteam',
@@ -38,11 +38,16 @@ describe('Handles', () => {
       'admin_maya',
       'maya_admin',
       'official_gus',
-      'support99',
       'staff_pick',
       'team_gus',
       'gus_t34m',
-      '4dm1n_gus'
+      '4dm1n_gus',
+      'farty_team',
+      'team',
+      'staff',
+      'support_farty',
+      'admin',
+      'ad_min'
     ]
     for (const handle of passing) expect(handleProblem(handle), handle).toBe('blocked')
     const ordinary = [
@@ -56,9 +61,17 @@ describe('Handles', () => {
       'sir_toots_alot',
       'steamboat',
       'my_staffy_dog',
-      'badminton'
+      'badminton',
+      'steam',
+      'teammate',
+      'teamaker',
+      'toot_teamwork',
+      'support99',
+      'staffan'
     ]
     for (const handle of ordinary) expect(handleProblem(handle), handle).toBeNull()
+    // `.` isn't allowed in a Handle at all, so this one is refused before the block list.
+    expect(handleProblem('pedos.admin')).toBe('chars')
   })
 
   it("can't hold a slur, even with digits for letters, but fart words and lookalikes are fine", () => {

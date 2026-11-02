@@ -14,7 +14,7 @@ import {
   shareOf
 } from '@/db/sharing'
 import { handleProblem, normalizeHandle, suggestHandle } from '@/lib/handle'
-import { playedPart, type Recording, type Trim } from '@/lib/recordings'
+import type { Recording, Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
 import { wavHeader } from '@/lib/wav'
 
@@ -188,6 +188,19 @@ export async function findSharedRecording(
 }
 
 /**
+ * The part of a shared Recording its link serves, and its page draws: the handles of its stored
+ * Trim, whenever it has one, or else the whole take. Unlike `playedPart`, a stored Trim counts
+ * whatever analysis found, so a Re-scan that finds a pitch never makes the audio its owner cut
+ * off public.
+ */
+export function sharedPart(recording: Recording): Trim {
+  const trim = recording.trim
+  return trim
+    ? { startSeconds: trim.startSeconds, endSeconds: trim.endSeconds }
+    : { startSeconds: 0, endSeconds: recording.seconds }
+}
+
+/**
  * Where the shared audio's copy is kept in this data center's cache: by its R2 key, which is
  * written once, and the part of it served, so a changed Trim never serves the old cut.
  */
@@ -242,12 +255,12 @@ async function cutWav(
 }
 
 /**
- * `GET /u/<handle>/r/<id>/audio/`: the part of the shared Recording its page plays (its Trim, or
- * else the whole take) as a WAV of its own, for anyone with the link. The rest of the take is
- * never served. Every request checks the share in D1 first, so a link that stopped working never
- * plays, then the WAV comes from this data center's cache, or from R2 into it. The browser
- * revalidates every time (`no-cache`, with the ETag), and nothing between keeps it (`private`), so
- * a link taken down is down at once.
+ * `GET /u/<handle>/r/<id>/audio/`: the part of the shared Recording its page plays (`sharedPart`)
+ * as a WAV of its own, for anyone with the link. The rest of the take is never served. Every
+ * request checks the share in D1 first, so a link that stopped working never plays, then the WAV
+ * comes from this data center's cache, or from R2 into it. The browser revalidates every time
+ * (`no-cache`, with the ETag), and nothing between keeps it (`private`), so a link taken down is
+ * down at once.
  */
 export async function sharedAudio(
   { db, media }: Stores,
@@ -258,7 +271,7 @@ export async function sharedAudio(
   const shared = await findSharedRecording(db, handle, shareId)
   if (!shared) return apiError(404, 'not_found')
   const key = audioKey(shared.row.share.userId, 'recordings', shared.row.recording.id)
-  const part = playedPart(shared.recording)
+  const part = sharedPart(shared.recording)
   const cache = workersCache()
   const cacheKey = sharedAudioCacheKey(request, key, part)
   let copy = await cache?.match(cacheKey)

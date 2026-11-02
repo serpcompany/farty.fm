@@ -134,7 +134,11 @@ const unswapped = (text: string) => text.replace(/[013457]/g, digit => LOOKALIKE
 /** Farty's own names: no Handle holds one anywhere, so `farty_official` and `f4rty1` are refused. */
 const OWN_NAMES = ['farty', 'pedos']
 
-/** Words that make a name pass for staff: no Handle starts or ends with one (`pedos_admin`). */
+/**
+ * Words that make a name pass for staff: refused as the whole Handle, or as a whole word of it
+ * between `_`, `.` or `-` (`maya_admin`, `t34m_gus`), but fine inside an ordinary word (`steam`,
+ * `teammate`, `badminton`).
+ */
 const STAFF_WORDS = ['admin', 'official', 'support', 'staff', 'team']
 
 /** A Handle as its reserved names are checked: no `_`, `.` or `-`, and digit swaps undone. */
@@ -147,7 +151,8 @@ function passesForFarty(handle: string): boolean {
     RESERVED.has(handle) ||
     RESERVED.has(name) ||
     OWN_NAMES.some(word => name.includes(word)) ||
-    STAFF_WORDS.some(word => name.startsWith(word) || name.endsWith(word))
+    STAFF_WORDS.includes(name) ||
+    handle.split(/[_.-]/).some(word => STAFF_WORDS.includes(reservedForm(word)))
   )
 }
 
