@@ -1,11 +1,13 @@
-import { eq } from 'drizzle-orm'
+import { eq, like } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 
 import * as handleRoute from '@/app/api/handle/route'
 import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
 import * as sharesRoute from '@/app/api/share/route'
 import { rateLimit, shareReports, shares } from '@/db/schema'
-import { findSharedRecording } from '@/server/sharing'
+import { encodeWav } from '@/lib/wav'
+import { findSharedRecording, sharedAudioCacheKey } from '@/server/sharing'
+import { readWavHeader } from '@/server/wav-header'
 import {
   type As,
   api,
@@ -69,14 +71,34 @@ const share = {
       params({ handle, id })
     )
   },
-  report: (url: string, origin: string | null = ORIGIN) => {
+  /** A report from the page, by the reporter at `ip`. */
+  report: (url: string, origin: string | null = ORIGIN, ip = '203.0.113.1') => {
     const { handle, id } = linkParts(url)
-    const headers = origin === null ? undefined : { origin }
+    const headers = new Headers({ 'cf-connecting-ip': ip })
+    if (origin !== null) headers.set('origin', origin)
     return reportRoute.POST(
       new Request(`${url}report/`, { method: 'POST', headers }),
       params({ handle, id })
     )
   }
+}
+
+/** The slots spent of `rate_limit`'s row `key`, or null when it has none. */
+async function slots(key: string): Promise<number | null> {
+  const [row] = await testDb()
+    .select({ count: rateLimit.count })
+    .from(rateLimit)
+    .where(eq(rateLimit.key, key))
+  return row?.count ?? null
+}
+
+/** The slots spent of each `rate_limit` row whose key is `LIKE` `pattern`. */
+async function slotsLike(pattern: string): Promise<number[]> {
+  const rows = await testDb()
+    .select({ count: rateLimit.count })
+    .from(rateLimit)
+    .where(like(rateLimit.key, pattern))
+  return rows.map(row => row.count)
 }
 
 function linkParts(url: string): { handle: string; id: string } {
@@ -212,6 +234,80 @@ describe('Sharing a Recording', () => {
     expect(new Uint8Array(await cached.arrayBuffer())).toEqual(wav())
   })
 
+  describe('of a trimmed Recording', () => {
+    // A take of 1 s at 8 kHz whose every sample is its own frame's number, so a cut says which
+    // frames it holds.
+    const RATE = 8000
+    const take = () => {
+      const samples = Float32Array.from({ length: RATE }, (_, i) => i / 0x8000)
+      return new Uint8Array(encodeWav({ samples, sampleRate: RATE }))
+    }
+    const trimmed = (startSeconds: number, endSeconds: number) => ({
+      startSeconds,
+      endSeconds,
+      fart: { startSeconds, endSeconds }
+    })
+
+    async function trimmedSharer(trim: ReturnType<typeof trimmed>) {
+      const alice = await signUp('alice')
+      expect((await share.pick('alice', alice)).status).toBe(201)
+      const metadata = recordingMetadata(R1, { seconds: 1, sampleRate: RATE })
+      const uploaded = await api.put('recordings', R1, uploadBody(metadata, take()), alice)
+      expect(uploaded.status).toBe(201)
+      expect((await api.placeAndTrim(R1, { placedPitch: 52, trim }, alice)).status).toBe(200)
+      const { url } = (await (await share.put(R1, alice)).json()) as { url: string }
+      return { ...alice, url }
+    }
+
+    /** The frames a shared WAV holds, once its header is checked: each sample's own number. */
+    async function framesOf(response: Response): Promise<number[]> {
+      expect(response.status).toBe(200)
+      const bytes = new Uint8Array(await response.arrayBuffer())
+      const header = readWavHeader(bytes)
+      expect(header?.sampleRate).toBe(RATE)
+      expect(Number(response.headers.get('content-length'))).toBe(bytes.byteLength)
+      const view = new DataView(bytes.buffer, bytes.byteOffset + 44)
+      return Array.from({ length: header?.frames ?? 0 }, (_, i) => view.getInt16(i * 2, true))
+    }
+
+    const range = (start: number, end: number) =>
+      Array.from({ length: end - start }, (_, i) => start + i)
+
+    it('serves only the Trim, never the audio trimmed off', async () => {
+      const alice = await trimmedSharer(trimmed(0.25, 0.5))
+      // readWavHeader checks the RIFF and data sizes against the bytes: 2,000 frames, and only
+      // frames 2,000 to 3,999 of the take.
+      expect(await framesOf(await share.audio(alice.url))).toEqual(range(2000, 4000))
+    })
+
+    it('serves the new cut once the Trim changes, not the cached one', async () => {
+      const alice = await trimmedSharer(trimmed(0.25, 0.5))
+      const first = await share.audio(alice.url)
+      expect(await framesOf(first)).toEqual(range(2000, 4000))
+
+      expect((await api.placeAndTrim(R1, { trim: trimmed(0.5, 0.625) }, alice)).status).toBe(200)
+      const second = await share.audio(alice.url)
+      expect(second.headers.get('etag')).not.toBe(first.headers.get('etag'))
+      expect(await framesOf(second)).toEqual(range(4000, 5000))
+
+      // Untrimmed, the whole take.
+      expect((await api.placeAndTrim(R1, { trim: null }, alice)).status).toBe(200)
+      expect(await framesOf(await share.audio(alice.url))).toEqual(range(0, RATE))
+    })
+
+    it('keys the cached copy by the R2 key and the Trim', () => {
+      const request = new Request(`${ORIGIN}/u/alice/r/x/audio/`)
+      const key = (from: number, to: number) =>
+        sharedAudioCacheKey(request, 'users/a/recordings/r.wav', {
+          startSeconds: from,
+          endSeconds: to
+        }).url
+      expect(key(0.25, 0.5)).not.toBe(key(0.25, 0.625))
+      expect(key(0.25, 0.5)).not.toBe(key(0.3, 0.5))
+      expect(key(0.25, 0.5)).toBe(key(0.25, 0.5))
+    })
+  })
+
   it('shows the page only the Recording, with the link as its id', async () => {
     const alice = await sharer('alice')
     const { handle, id } = linkParts(alice.url)
@@ -317,18 +413,76 @@ describe('Reporting a shared Recording', () => {
     expect(await testDb().select().from(shareReports)).toEqual([])
   })
 
-  it('keeps a few reports a day per link', async () => {
+  it('keeps a few reports a day per Recording, and answers 429 past them', async () => {
     const alice = await sharer('alice')
-    for (let i = 0; i < 7; i++) expect((await share.report(alice.url)).status).toBe(204)
-    const { id } = linkParts(alice.url)
-    const rows = await testDb().select().from(shareReports).where(eq(shareReports.shareId, id))
-    expect(rows).toHaveLength(5)
-    // Reports past the link's few don't spend the site's, so one link can't block the rest.
-    const [site] = await testDb()
-      .select({ count: rateLimit.count })
-      .from(rateLimit)
-      .where(eq(rateLimit.key, 'share_report'))
-    expect(site?.count).toBe(5)
+    for (let i = 0; i < 5; i++) {
+      expect((await share.report(alice.url, ORIGIN, `203.0.113.${i}`)).status).toBe(204)
+    }
+    const refused = await share.report(alice.url, ORIGIN, '203.0.113.9')
+    expect(refused.status).toBe(429)
+    expect(await refused.json()).toEqual({ error: 'too_many_reports' })
+    expect(await testDb().select().from(shareReports)).toHaveLength(5)
+    // The refused report spent nothing: not the site's, nor its reporter's.
+    expect(await slots('share_report')).toBe(5)
+    expect(await slotsLike('share-reporter|%')).toEqual([1, 1, 1, 1, 1])
+  })
+
+  it("doesn't start a Recording's reports over when it's shared again under a new link", async () => {
+    const alice = await sharer('alice')
+    for (let i = 0; i < 5; i++) {
+      expect((await share.report(alice.url, ORIGIN, `203.0.113.${i}`)).status).toBe(204)
+    }
+    // Stop sharing, then Share again: a new link, as a script churning links would make.
+    expect((await share.stop(R1, alice)).status).toBe(204)
+    const again = (await (await share.put(R1, alice)).json()) as { url: string }
+    expect(again.url).not.toBe(alice.url)
+    expect((await share.report(again.url, ORIGIN, '198.51.100.1')).status).toBe(429)
+    expect(await testDb().select().from(shareReports)).toHaveLength(5)
+    expect(await slots('share_report')).toBe(5)
+  })
+
+  it('keeps a few reports an hour per reporter, so one client cannot spend the site', async () => {
+    const alice = await sharer('alice')
+    const bob = await sharer('bob')
+    const carol = await sharer('carol')
+    for (const link of [alice, bob]) {
+      for (let i = 0; i < 5; i++) expect((await share.report(link.url)).status).toBe(204)
+    }
+    // The same client's 11th report this hour is refused, and spends none of carol's link.
+    expect((await share.report(carol.url)).status).toBe(429)
+    expect(await slotsLike('share_report_item|usercarol|%')).toEqual([])
+    expect(await slots('share_report')).toBe(10)
+    // Anyone else's report of it still counts.
+    expect((await share.report(carol.url, ORIGIN, '198.51.100.7')).status).toBe(204)
+    // Neither the address nor anything else of the reporter is kept.
+    const keys = (await testDb().select({ key: rateLimit.key }).from(rateLimit)).map(r => r.key)
+    expect(keys.join(' ')).not.toMatch(/203\.0\.113|198\.51\.100/)
+  })
+
+  it("answers 429 when the site has had too many, and spends no link's or reporter's slot", async () => {
+    const alice = await sharer('alice')
+    const now = Date.now()
+    await testDb()
+      .insert(rateLimit)
+      .values({
+        id: crypto.randomUUID(),
+        key: 'share_report',
+        count: 300,
+        lastRequest: now + 60 * 60 * 1000
+      })
+    expect((await share.report(alice.url)).status).toBe(429)
+    expect(await testDb().select().from(shareReports)).toEqual([])
+    expect(await slotsLike('share_report_item|%')).toEqual([])
+    expect(await slotsLike('share-reporter|%')).toEqual([])
+
+    // Once the site's hour is over, the link's reports are all still there to keep.
+    await testDb()
+      .update(rateLimit)
+      .set({ lastRequest: now - 1 })
+    for (let i = 0; i < 5; i++) {
+      expect((await share.report(alice.url, ORIGIN, `203.0.113.${i}`)).status).toBe(204)
+    }
+    expect(await testDb().select().from(shareReports)).toHaveLength(5)
   })
 
   it('goes with the account', async () => {

@@ -19,25 +19,25 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
    - Stop sharing deletes the share, and sharing again makes a new id, so a link that was stopped never works again.
 4. **Unlisted: anyone with the link, and nothing else.**
    - The page, its image and its audio need no account. Nothing lists a link: there's no profile page until #319, every shared page is `noindex, nofollow` with no canonical, and the sitemaps leave `/u/` out.
-   - It shows the Handle, the Recording's name, its note (a Placed Pitch counts), its length and the waveform of the part it plays, which is what its row plays: the fart Farty found or its Trim (ADR 0019). Nothing else of the account: no email, no other Recordings.
+   - It shows the Handle, the Recording's name, its note (a Placed Pitch counts), its length and the waveform of the part it plays, which is what its row plays: its Trim (ADR 0019), or else the whole take. Nothing else of the account: no email, no other Recordings.
    - Nothing is public until the user shares. A Recording that was never shared, or whose share stopped, answers the same 404 as one that never existed.
 5. **Each request checks D1.**
    - The page, `opengraph-image` and `audio/` each look up the share, its owner's Handle and the live Recording (`sharedRecording()` in `src/db/sharing.ts`). A share stopped or taken down, a Recording deleted (its tombstone) and an account deleted (`on delete cascade`) all fail the lookup, at once and alike.
    - So nothing that could outlive the link is kept anywhere between: the page and its image are `private, no-cache`, and the service worker never handles `/u/` (`public/sw.js`).
 6. **Audio through the Worker, never a public bucket.**
-   - `GET /u/<handle>/r/<id>/audio/` checks the share, then serves the WAV from this data center's Workers cache, keyed by its R2 key, or from R2 into it. R2 keys are written once (`media.ts`), so the copy is never stale.
+   - `GET /u/<handle>/r/<id>/audio/` checks the share, then serves only the part the page plays, its Trim or else the whole take, as a WAV of its own: a plain cut of its frames, read from R2 as a byte range under a fresh header. Audio trimmed off is never served. The cut comes from this data center's Workers cache, keyed by its R2 key and the Trim, or from R2 into it. R2 keys are written once (`media.ts`), and a changed Trim is a new key, so the copy is never stale.
    - The browser gets `private, no-cache` with an ETag, so each play revalidates against D1 (a 304 when nothing changed), and a link stopped or taken down never plays again.
    - The page fetches it only on Play and plays it with the app's player, from where its row would start, at its own pitch and speed (ADR 0004, ADR 0012).
 7. **Link previews: a title and an image drawn per request.**
    - `og:title` is "Recording 3 by @maya", `og:description` "A G3 fart on Farty. Tap to play.", with `summary_large_image` for X.
-   - `opengraph-image.tsx` draws a 1200 by 630 PNG with `next/og`: Farty's pink and icon, the note, the name, "A fart by @maya" and the waveform's bars. It reads D1 like the page, so a stopped link's image is gone too, and Next's default year-long cache is replaced by `private, no-cache`. The bundled font has no ♯, and a missing glyph makes `next/og` fetch one from Google Fonts on the request, so the image spells a sharp `#`.
+   - `opengraph-image.tsx` draws a 1200 by 630 PNG with `next/og`: Farty's pink and icon, the note, the name, "A fart by @maya" and the waveform's bars. It reads D1 like the page, so a stopped link's image is gone too, and Next's default (`public, max-age=0, must-revalidate` in Next 16.3) is replaced by `private, no-cache`. The bundled font has no ♯, and a missing glyph makes `next/og` fetch one from Google Fonts on the request, so the image spells a sharp `#`.
 8. **Share, then the share sheet.**
    - On a Recording's row, Share puts the link on the phone's share sheet (`navigator.share`), or copies it where there's none. A row that is shared says "Shared", and its button opens Share link and Stop sharing.
    - When the browser has spent the tap's activation on the requests before the sheet (a `NotAllowedError`), a "Your link is ready" dialog offers the sheet on a fresh tap.
    - Stop sharing asks first: "The link stops working for everyone who has it. Sharing it again makes a new link." Deleting a shared Recording, or the account, says its links stop working too.
 9. **Report, on every shared page, reaches Farty in D1.**
    - Report asks first, then `POST /u/<handle>/r/<id>/report/`, from Farty's own origin only. Each report is a `share_reports` row (the share, its owner, the item, when) and a `share_reported` log line. Nothing about the person who reported is kept.
-   - A link keeps at most 5 a day and the site 300 an hour (`REPORT_LIMITS`, counted in `rate_limit`), so a script can't fill D1. Over a link's 5, a report is still thanked and not kept.
+   - A reporter keeps at most 10 an hour, a Recording 5 a day whichever link it's shared under, and the site 300 an hour (`REPORT_LIMITS`, counted in `rate_limit`), so one client can't spend the site's and a script can't fill D1. The reporter's row is keyed by an HMAC of their `cf-connecting-ip`, never the address. A report spends a slot of each only when all three have one, and past any of them it answers 429, which the page says.
    - The owner takes a link down by setting its share's `taken_down_at` in the D1 console (`docs/agents/web.md`, Reports and take-downs). A share taken down stays: Stop sharing and deleting the Recording leave it, and sharing that Recording again answers 403 `taken_down`.
 10. **The shared page is option A, the Player.**
     - The fart comes first: "@maya shared a Recording", the name, the note, a big waveform that plays from a tap, and Play. The app's tab bar isn't on it; its own top bar has Farty and Get Farty.

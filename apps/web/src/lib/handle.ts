@@ -131,8 +131,28 @@ const LOOKALIKES: Record<string, string> = {
 
 const unswapped = (text: string) => text.replace(/[013457]/g, digit => LOOKALIKES[digit] ?? digit)
 
+/** Farty's own names: no Handle holds one anywhere, so `farty_official` and `f4rty1` are refused. */
+const OWN_NAMES = ['farty', 'pedos']
+
+/** Words that make a name pass for staff: no Handle starts or ends with one (`pedos_admin`). */
+const STAFF_WORDS = ['admin', 'official', 'support', 'staff', 'team']
+
+/** A Handle as its reserved names are checked: no `_`, `.` or `-`, and digit swaps undone. */
+const reservedForm = (handle: string) =>
+  handle.replace(/[_.-]/g, '').replace(/[01345]/g, digit => LOOKALIKES[digit] ?? digit)
+
+function passesForFarty(handle: string): boolean {
+  const name = reservedForm(handle)
+  return (
+    RESERVED.has(handle) ||
+    RESERVED.has(name) ||
+    OWN_NAMES.some(word => name.includes(word)) ||
+    STAFF_WORDS.some(word => name.startsWith(word) || name.endsWith(word))
+  )
+}
+
 function isBlocked(handle: string): boolean {
-  if (RESERVED.has(handle) || RESERVED.has(handle.replace(/_/g, ''))) return true
+  if (passesForFarty(handle)) return true
   const plain = unswapped(handle.replace(/_/g, ''))
   if (HATEFUL_ANYWHERE.some(word => plain.includes(word))) return true
   const words = [plain, ...handle.split('_').map(unswapped)]

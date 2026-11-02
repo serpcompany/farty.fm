@@ -201,7 +201,7 @@ export function SharedRecordingPage({
 /** Report, on every shared page: asks first, then sends it to Farty, who checks each one. */
 function Report({ what, action }: { what: string; action: string }) {
   const [asking, setAsking] = useState(false)
-  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'failed' | 'limited'>('idle')
 
   if (state === 'sent') {
     return (
@@ -226,6 +226,11 @@ function Report({ what, action }: { what: string; action: string }) {
           Couldn't send the report. Check your connection and try again.
         </p>
       )}
+      {state === 'limited' && (
+        <p role="alert" className="text-sm text-destructive">
+          Too many reports right now. Try again later.
+        </p>
+      )}
       <AlertDialog open={asking} onOpenChange={open => state !== 'sending' && setAsking(open)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -245,7 +250,7 @@ function Report({ what, action }: { what: string; action: string }) {
                 setState('sending')
                 const response = await fetch(action, { method: 'POST' }).catch(() => null)
                 setAsking(false)
-                setState(response?.ok ? 'sent' : 'failed')
+                setState(response?.ok ? 'sent' : response?.status === 429 ? 'limited' : 'failed')
               }}
             >
               Report

@@ -135,9 +135,30 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
   await listenToSounds(viewer)
   const other = await viewer.newPage()
 
+  /** A link image's path, with the link's id swapped for `id`. */
+  let imagePath = ''
+  const imageOf = (id: string) => imagePath.replace(/\/r\/[0-9a-z]{12}\//, `/r/${id}/`)
+  /** A link's page, audio and image all answer the not-found response. */
+  const expectGone = async (path: string) => {
+    const response = await other.goto(path)
+    expect(response?.status()).toBe(404)
+    await expect(
+      other.getByRole('heading', { name: "This link doesn't work any more" })
+    ).toBeVisible()
+    expect((await other.request.get(`${path}audio/`)).status()).toBe(404)
+    const id = path.split('/')[4]
+    const picture = await other.request.get(imageOf(id))
+    expect(picture.status()).toBe(404)
+    expect(picture.headers()['cache-control']).toBe('private, no-cache')
+  }
+
   await test.step('someone signed out opens the link and plays it', async () => {
     const response = await other.goto(link)
     expect(response?.status()).toBe(200)
+    // Nothing between keeps the page: a link that stops working stops at once.
+    const pageCache = response?.headers()['cache-control'] ?? ''
+    expect(pageCache).toContain('private')
+    expect(pageCache).toContain('no-cache')
     await expect(other.getByText(`@${handle} shared a Recording`)).toBeVisible()
     await expect(other.getByRole('heading', { name: 'Recording 1' })).toBeVisible()
     await expect(other.getByTestId('shared-note')).toHaveText('G3')
@@ -154,9 +175,12 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     await expect(meta('og:title')).toHaveAttribute('content', `Recording 1 by @${handle}`)
     await expect(meta('twitter:card')).toHaveAttribute('content', 'summary_large_image')
     const image = await meta('og:image').getAttribute('content')
-    const picture = await other.request.get(new URL(image ?? '').pathname)
+    imagePath = new URL(image ?? '').pathname + new URL(image ?? '').search
+    expect(imagePath).toContain(link)
+    const picture = await other.request.get(imagePath)
     expect(picture.status()).toBe(200)
     expect(picture.headers()['content-type']).toBe('image/png')
+    expect(picture.headers()['cache-control']).toBe('private, no-cache')
     expect((await picture.body()).byteLength).toBeGreaterThan(10_000)
     await testInfo.attach('og-image', { body: await picture.body(), contentType: 'image/png' })
 
@@ -184,13 +208,25 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     await expect(dialog.getByRole('heading', { name: 'Stop sharing Recording 1?' })).toBeVisible()
     await dialog.getByRole('button', { name: 'Stop sharing' }).click()
     await expect(page.getByTestId('recording-shared')).toHaveCount(0)
+    await expectGone(link)
+  })
 
-    const response = await other.goto(link)
-    expect(response?.status()).toBe(404)
-    await expect(
-      other.getByRole('heading', { name: "This link doesn't work any more" })
-    ).toBeVisible()
-    expect((await other.request.get(`${link}audio/`)).status()).toBe(404)
+  await test.step('a link nobody shared is gone too', async () => {
+    await expectGone(`/u/${handle}/r/000000000000/`)
+  })
+
+  await test.step('shared again, the new link is gone once the Recording is deleted', async () => {
+    await page.getByRole('button', { name: 'Share Recording 1' }).click()
+    await expect.poll(() => page.evaluate(() => window.__shared.length)).toBe(2)
+    const again = new URL((await page.evaluate(() => window.__shared[1].url)) ?? '').pathname
+    expect(again).not.toBe(link)
+    expect((await other.goto(again))?.status()).toBe(200)
+    expect((await other.request.get(imageOf(again.split('/')[4]))).status()).toBe(200)
+
+    await page.getByRole('button', { name: 'Delete Recording 1' }).click()
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Delete Recording' }).click()
+    await uploaded(page)
+    await expectGone(again)
   })
 
   await viewer.close()

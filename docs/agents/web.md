@@ -142,7 +142,7 @@ Most updates ship by deploying the site, with no new upload. Upload a new `.aab`
 
 ## Reports and take-downs
 
-A shared Recording's page has Report (#316, ADR 0020). Each report is a row in D1's `share_reports` (the share, its owner, the item and when; nothing about who reported) and a `share_reported` line in the Worker's logs with the link's id: query `event = share_reported`, or read the table. Nobody is emailed. A link takes at most 5 reports a day and the site 300 an hour (`REPORT_LIMITS` in `src/server/sharing.ts`).
+A shared Recording's page has Report (#316, ADR 0020). Each report is a row in D1's `share_reports` (the share, its owner, the item and when; nothing about who reported) and a `share_reported` line in the Worker's logs with the link's id: query `event = share_reported`, or read the table. Nobody is emailed. A reporter gets at most 10 an hour, a Recording 5 a day (whichever link it is shared under) and the site 300 an hour (`REPORT_LIMITS` in `src/server/sharing.ts`); past any of them a report answers 429.
 
 **The owner takes one down** in the Cloudflare dashboard, under D1, `pedos-production` (or `pedos-staging`), Console. Agents never write to a remote database.
 

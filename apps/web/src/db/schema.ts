@@ -100,10 +100,10 @@ export const verification = sqliteTable(
 /**
  * Rate-limit counters, kept in D1 because each Worker isolate has its own memory: Better Auth's
  * and sign-in's own (`consumeSlot` in `src/server/auth-config.ts`), and Report's
- * (`REPORT_LIMITS`). Each `key` is a label and an HMAC or a link's id, never an email or IP
- * address, and `last_request` is when the row's window ends, in epoch milliseconds. Every spend
- * first deletes the rows whose window has ended, through the index on `last_request`, so it never
- * reads the live rows.
+ * (`REPORT_LIMITS`). Each `key` is a label and an HMAC, or a shared item's account and item ids,
+ * never an email or IP address, and `last_request` is when the row's window ends, in epoch
+ * milliseconds. Every spend first deletes the rows whose window has ended, through the index on
+ * `last_request`, so it never reads the live rows.
  */
 export const rateLimit = sqliteTable(
   'rate_limit',

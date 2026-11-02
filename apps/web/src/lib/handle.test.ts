@@ -22,7 +22,43 @@ describe('Handles', () => {
     for (const handle of ['farty', 'admin', 'support', 'api', 'app', 'help', 'far_ty', 'privacy']) {
       expect(handleProblem(handle), handle).toBe('blocked')
     }
-    expect(handleProblem('farty_fan')).toBeNull()
+  })
+
+  it("can't hold Farty's own name anywhere, or start or end with a staff word", () => {
+    const passing = [
+      'farty_official',
+      'fartyteam',
+      'farty_support',
+      'f4rty',
+      'farty1',
+      'f_a_r_t_y',
+      'pedos_admin',
+      'p3d05',
+      'the_farty_fan',
+      'admin_maya',
+      'maya_admin',
+      'official_gus',
+      'support99',
+      'staff_pick',
+      'team_gus',
+      'gus_t34m',
+      '4dm1n_gus'
+    ]
+    for (const handle of passing) expect(handleProblem(handle), handle).toBe('blocked')
+    const ordinary = [
+      'maya',
+      'gus',
+      'fart_king',
+      'fartmaster',
+      'toot_toot',
+      'maya_k',
+      'm_9',
+      'sir_toots_alot',
+      'steamboat',
+      'my_staffy_dog',
+      'badminton'
+    ]
+    for (const handle of ordinary) expect(handleProblem(handle), handle).toBeNull()
   })
 
   it("can't hold a slur, even with digits for letters, but fart words and lookalikes are fine", () => {
@@ -35,7 +71,8 @@ describe('Handles', () => {
   })
 
   it('are suggested from the email, padded or cut to fit', () => {
-    expect(suggestHandle('Maya.K+farty@example.com')).toBe('mayakfarty')
+    expect(suggestHandle('Maya.K+fart@example.com')).toBe('mayakfart')
+    expect(suggestHandle('farty.fan@example.com')).toBe('')
     expect(suggestHandle('jo@example.com')).toBe('jofart')
     expect(suggestHandle(`${'a'.repeat(30)}@example.com`)).toBe('a'.repeat(20))
     expect(suggestHandle('admin@example.com')).toBe('')

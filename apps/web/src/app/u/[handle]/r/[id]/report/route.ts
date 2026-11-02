@@ -1,4 +1,6 @@
+import { authSecret } from '@/server/auth'
 import { requestStores } from '@/server/library'
+import { apiError } from '@/server/require-user'
 import { reportShare } from '@/server/sharing'
 
 // Public, outside `src/app/api/`: anyone on a shared Recording's page can report it (ADR 0020).
@@ -12,7 +14,11 @@ export async function POST(
   const { handle, id } = await params
   let response: Response
   try {
-    response = await reportShare(requestStores(), request, handle, id)
+    // The reporter's limit is keyed by an HMAC under sign-in's secret: none here, no reports.
+    const secret = authSecret()
+    response = secret
+      ? await reportShare(requestStores(), request, handle, id, secret)
+      : apiError(503, 'unavailable')
   } catch {
     console.error('POST share report failed')
     response = Response.json({ error: 'server_error' }, { status: 500 })

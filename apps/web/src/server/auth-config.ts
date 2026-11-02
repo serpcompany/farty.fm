@@ -266,12 +266,22 @@ export async function clientLimitKey(secret: string, betterAuthKey: string): Pro
   return `client|${await keyedHash(secret, 'client-limit', betterAuthKey)}`
 }
 
+/** A reporter's row for Reports an hour (`REPORT_LIMITS` in `src/server/sharing.ts`). */
+export async function reporterLimitKey(secret: string, client: string): Promise<string> {
+  return `share-reporter|${await keyedHash(secret, 'share-reporter-limit', client)}`
+}
+
 /** The site's one row for code emails. */
 export const SITE_CODES_KEY = 'site|send-code'
 
 /** The client Better Auth's limiter sees: `cf-connecting-ip`, an IPv6 address cut to its /64. */
 function clientOf(request: Request | undefined, options: BetterAuthOptions): string {
   return (request && getIP(request, options)) || 'no-trusted-ip'
+}
+
+/** A request's client as sign-in's limits see it, for a limit outside sign-in. */
+export function requestClient(request: Request): string {
+  return clientOf(request, { advanced: { ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] } } })
 }
 
 export type SlotResult = { allowed: boolean; retryAfter: number | null }
@@ -305,6 +315,47 @@ export async function consumeSlot(
   if (spent.results.length > 0) return { allowed: true, retryAfter: null }
   const ends = row.results[0]?.last_request ?? now + window * 1000
   return { allowed: false, retryAfter: Math.max(1, Math.ceil((ends - now) / 1000)) }
+}
+
+/** One of the limits `consumeSlots` checks: its `rate_limit` key and its rule. */
+export type Slot = { key: string; rule: SlotRule }
+
+/**
+ * Spends one slot of every limit in `slots` only when each has one left, in one statement, so a
+ * request one limit refuses never spends another's: all or nothing. As `consumeSlot`, each row's
+ * window starts at its first slot, and the rows whose window has ended are deleted first.
+ */
+export async function consumeSlots(
+  database: D1Database,
+  slots: Slot[],
+  now: number
+): Promise<boolean> {
+  const values = slots.map((_, i) => `(?${i * 4 + 1}, ?${i * 4 + 2}, ?${i * 4 + 3}, ?${i * 4 + 4})`)
+  const bindings = slots.flatMap(({ key, rule }) => [
+    crypto.randomUUID(),
+    key,
+    now + rule.window * 1000,
+    rule.max
+  ])
+  // SQLite reads the whole SELECT before it writes a row, since it reads `rate_limit` itself, so
+  // the check sees every count as it was before this spend.
+  const [, spent] = await database.batch<{ count: number }>([
+    database.prepare('DELETE FROM rate_limit WHERE last_request <= ?1').bind(now),
+    database
+      .prepare(
+        `WITH slot (id, key, ends, max) AS (VALUES ${values.join(', ')})
+         INSERT INTO rate_limit (id, key, count, last_request)
+         SELECT id, key, 1, ends FROM slot
+         WHERE NOT EXISTS (
+           SELECT 1 FROM slot AS full JOIN rate_limit ON rate_limit.key = full.key
+           WHERE rate_limit.count >= full.max
+         )
+         ON CONFLICT (key) DO UPDATE SET count = rate_limit.count + 1
+         RETURNING count`
+      )
+      .bind(...bindings)
+  ])
+  return spent.results.length === slots.length
 }
 
 /**

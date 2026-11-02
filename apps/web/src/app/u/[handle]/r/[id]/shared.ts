@@ -17,7 +17,10 @@ export type SharedView = {
   note: string | null
   /** "1.1 s": its fart's length, as its row shows it. */
   length: string
-  /** The part replay plays: its Trim, or the whole take. */
+  /**
+   * The audio its link serves, from 0: its Trim, or else the whole take, cut on its own
+   * (`sharedAudio`), so none of the take outside it is public.
+   */
   part: Trim
   /** The loudness bars of `part`, from the upload, each 0…1. */
   levels: number[]
@@ -39,7 +42,7 @@ export const sharedView = cache(async (handle: string, id: string): Promise<Shar
     name: recordingName(recording),
     note: pitch === null ? null : noteName(pitch),
     length: formattedFartLength(recording),
-    part,
+    part: { startSeconds: 0, endSeconds: part.endSeconds - part.startSeconds },
     levels: partBars(recording.waveform, recording.seconds, part)
   }
 })

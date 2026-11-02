@@ -14,14 +14,16 @@ import {
   shareOf
 } from '@/db/sharing'
 import { handleProblem, normalizeHandle, suggestHandle } from '@/lib/handle'
-import type { Recording } from '@/lib/recordings'
+import { playedPart, type Recording, type Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
+import { wavHeader } from '@/lib/wav'
 
-import { consumeSlot, type SlotRule } from './auth-config'
+import { consumeSlots, reporterLimitKey, requestClient, type SlotRule } from './auth-config'
 import { type Stores, toRecording, wrongLibrary } from './library'
 import { isItemId, readJson } from './library-input'
 import { audioKey } from './media'
 import { apiError, type SessionUser } from './require-user'
+import { HEADER_BYTES, wavHeaderOf } from './wav-header'
 
 // Sharing (ADR 0020). The owner's routes, under `src/app/api/` with `userRoute`: their Handle, and
 // sharing or stopping sharing one of their own Recordings. The public routes, under
@@ -185,9 +187,14 @@ export async function findSharedRecording(
   return { handle: row.handle, shareId, recording: { ...recording, id: shareId }, row }
 }
 
-/** Where the shared audio's copy is kept in this data center's cache: by its R2 key. */
-const cacheKey = (request: Request, key: string) =>
-  new Request(new URL(`/__shared-audio/${key}`, request.url))
+/**
+ * Where the shared audio's copy is kept in this data center's cache: by its R2 key, which is
+ * written once, and the part of it served, so a changed Trim never serves the old cut.
+ */
+export const sharedAudioCacheKey = (request: Request, key: string, part: Trim) =>
+  new Request(
+    new URL(`/__shared-audio/${key}?from=${part.startSeconds}&to=${part.endSeconds}`, request.url)
+  )
 
 /** The Workers cache, where there is one (not in `next dev`). */
 function workersCache(): Cache | null {
@@ -197,11 +204,50 @@ function workersCache(): Cache | null {
 }
 
 /**
- * `GET /u/<handle>/r/<id>/audio/`: the shared Recording's WAV, for anyone with the link. Every
- * request checks the share in D1 first, so a link that stopped working never plays, then the WAV
- * comes from this data center's cache, or from R2 into it. Its key is written once, so the copy is
- * never stale. The browser revalidates every time (`no-cache`, with the ETag), and nothing
- * between keeps it (`private`), so a link taken down is down at once.
+ * The frames `[start, end)` of a take of `frames` at `sampleRate` that `part` covers, each end at
+ * its nearest frame: at least one.
+ */
+export function partFrames(
+  part: Trim,
+  sampleRate: number,
+  frames: number
+): { start: number; end: number } {
+  const start = Math.min(frames - 1, Math.max(0, Math.round(part.startSeconds * sampleRate)))
+  const end = Math.min(frames, Math.max(start + 1, Math.round(part.endSeconds * sampleRate)))
+  return { start, end }
+}
+
+/**
+ * The part of the WAV at `key` that `part` covers, as a WAV of its own: a plain cut of its frames,
+ * read from R2 as a range, under a fresh header. Nothing outside `part` is read. Null when the
+ * object is gone or isn't a WAV as Farty writes one.
+ */
+async function cutWav(
+  media: R2Bucket,
+  key: string,
+  part: Trim
+): Promise<{ bytes: Uint8Array<ArrayBuffer>; etag: string } | null> {
+  const head = await media.get(key, { range: { offset: 0, length: HEADER_BYTES } })
+  if (!head) return null
+  const header = wavHeaderOf(new Uint8Array(await head.arrayBuffer()), head.size)
+  if (!header) return null
+  const { start, end } = partFrames(part, header.sampleRate, header.frames)
+  const length = (end - start) * 2
+  const body = await media.get(key, { range: { offset: HEADER_BYTES + start * 2, length } })
+  if (!body) return null
+  const bytes = new Uint8Array(HEADER_BYTES + length)
+  bytes.set(wavHeader(header.sampleRate, length))
+  bytes.set(new Uint8Array(await body.arrayBuffer()), HEADER_BYTES)
+  return { bytes, etag: `"${body.etag}-${start}-${end}"` }
+}
+
+/**
+ * `GET /u/<handle>/r/<id>/audio/`: the part of the shared Recording its page plays (its Trim, or
+ * else the whole take) as a WAV of its own, for anyone with the link. The rest of the take is
+ * never served. Every request checks the share in D1 first, so a link that stopped working never
+ * plays, then the WAV comes from this data center's cache, or from R2 into it. The browser
+ * revalidates every time (`no-cache`, with the ETag), and nothing between keeps it (`private`), so
+ * a link taken down is down at once.
  */
 export async function sharedAudio(
   { db, media }: Stores,
@@ -212,21 +258,22 @@ export async function sharedAudio(
   const shared = await findSharedRecording(db, handle, shareId)
   if (!shared) return apiError(404, 'not_found')
   const key = audioKey(shared.row.share.userId, 'recordings', shared.row.recording.id)
+  const part = playedPart(shared.recording)
   const cache = workersCache()
-  let copy = await cache?.match(cacheKey(request, key))
+  const cacheKey = sharedAudioCacheKey(request, key, part)
+  let copy = await cache?.match(cacheKey)
   if (!copy) {
-    const object = await media.get(key)
-    if (!object) return apiError(404, 'not_found')
-    const bytes = await object.arrayBuffer()
-    copy = new Response(bytes, {
+    const cut = await cutWav(media, key, part)
+    if (!cut) return apiError(404, 'not_found')
+    copy = new Response(cut.bytes, {
       headers: {
         'Content-Type': 'audio/wav',
-        'Content-Length': String(bytes.byteLength),
-        ETag: object.httpEtag,
+        'Content-Length': String(cut.bytes.byteLength),
+        ETag: cut.etag,
         'Cache-Control': 'public, max-age=86400'
       }
     })
-    await cache?.put(cacheKey(request, key), copy.clone())
+    await cache?.put(cacheKey, copy.clone())
   }
   const etag = copy.headers.get('ETag') ?? ''
   const headers = { ETag: etag, 'Cache-Control': 'private, no-cache' }
@@ -243,26 +290,39 @@ export async function sharedAudio(
 }
 
 /**
- * How many reports Farty keeps, each a row in `rate_limit`: a few per link a day, since one is
- * enough for Farty to look, and a cap for the whole site, so a script can't fill D1.
+ * How many reports Farty keeps, each a row in `rate_limit` (`consumeSlots`): a few per reporter an
+ * hour, so one client can't spend the site's; a few per Recording a day, since one is enough for
+ * Farty to look, and sharing it again under a new link doesn't start them over; and a cap for the
+ * whole site, so a script can't fill D1. A report spends a slot of each only when all three have
+ * one, so a refused report never spends a link's.
  */
 export const REPORT_LIMITS = {
-  perShare: { window: 24 * 60 * 60, max: 5 },
+  perReporter: { window: 60 * 60, max: 10 },
+  perRecording: { window: 24 * 60 * 60, max: 5 },
   siteWide: { window: 60 * 60, max: 300 }
 } satisfies Record<string, SlotRule>
+
+/** The site's one row for Reports. */
+export const SITE_REPORTS_KEY = 'share_report'
+
+/** A shared item's row for Reports, whichever link it's shared under: its owner's and its own id. */
+export const itemReportsKey = (share: { userId: string; kind: Kind; itemId: string }) =>
+  `share_report_item|${share.userId}|${share.kind}|${share.itemId}`
 
 /**
  * `POST /u/<handle>/r/<id>/report/`: anyone's report of a shared Recording, from its page. It keeps
  * a row in `share_reports` naming the share and the item, never the reporter, and logs
- * `share_reported` with the link's id, for Farty to check (docs/agents/web.md). 204 once kept, or
- * when the link already has its day's reports; 403 from another site, 404 when the link doesn't
- * work, 429 when the site has had too many.
+ * `share_reported` with the link's id, for Farty to check (docs/agents/web.md). 204 once kept; 403
+ * from another site, 404 when the link doesn't work, 429 `too_many_reports` past any of
+ * `REPORT_LIMITS`. The reporter's limit is keyed by an HMAC of their `cf-connecting-ip` under
+ * `secret`, never the address.
  */
 export async function reportShare(
   { db }: Stores,
   request: Request,
   handle: string,
-  shareId: string
+  shareId: string,
+  secret: string
 ): Promise<Response> {
   if (request.headers.get('origin') !== servedOrigin(request)) {
     return apiError(403, 'cross_origin')
@@ -270,16 +330,19 @@ export async function reportShare(
   const shared = await findSharedRecording(db, handle, shareId)
   if (!shared) return apiError(404, 'not_found')
   const now = Date.now()
-  // The link's own limit first, so reports of one link past its day's few never spend the site's.
-  const perShare = await consumeSlot(
+  const allowed = await consumeSlots(
     db.$client,
-    `share_report|${shareId}`,
-    now,
-    REPORT_LIMITS.perShare
+    [
+      {
+        key: await reporterLimitKey(secret, requestClient(request)),
+        rule: REPORT_LIMITS.perReporter
+      },
+      { key: itemReportsKey(shared.row.share), rule: REPORT_LIMITS.perRecording },
+      { key: SITE_REPORTS_KEY, rule: REPORT_LIMITS.siteWide }
+    ],
+    now
   )
-  if (!perShare.allowed) return new Response(null, { status: 204 })
-  const site = await consumeSlot(db.$client, 'share_report', now, REPORT_LIMITS.siteWide)
-  if (!site.allowed) return apiError(429, 'too_many_reports')
+  if (!allowed) return apiError(429, 'too_many_reports')
   await addReport(db, shared.row.share, crypto.randomUUID(), new Date(now))
   console.warn(JSON.stringify({ event: 'share_reported', shareId, kind: 'recordings' }))
   return new Response(null, { status: 204 })

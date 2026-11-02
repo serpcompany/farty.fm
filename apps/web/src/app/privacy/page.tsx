@@ -50,7 +50,9 @@ export default function PrivacyPage() {
         </li>
         <li>
           Anyone can report a shared Recording. Farty keeps which link was reported and when, and
-          nothing about who reported it, and may take the link down.
+          nothing about who reported it, and may take the link down. To limit how many reports one
+          device can send, it keeps a scrambled code made from your IP address for an hour, never
+          the address itself.
         </li>
       </ul>
 
