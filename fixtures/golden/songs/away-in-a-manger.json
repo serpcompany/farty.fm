@@ -1,0 +1,151 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 80,
+  "file": "midi/pdmx-away-in-a-manger.mid",
+  "id": "away-in-a-manger",
+  "import_args": {
+    "bpm": 80,
+    "max_beats": 30,
+    "start_beat": 93
+  },
+  "import_report": {
+    "catalog_id": "away-in-a-manger",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 20,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-away-in-a-manger.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 1,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 2.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 57,
+      "start": 3.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 60,
+      "start": 6.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 11.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 62,
+      "start": 12.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 20.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 58,
+      "start": 23.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 60,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 26.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 57,
+      "start": 27.0
+    }
+  ],
+  "pitches": [
+    57,
+    58,
+    60,
+    62,
+    64,
+    65,
+    67
+  ],
+  "sha256": "1a1aee0e05ab013595145d05875970ccca686e9ef9ea69fb38be43314ca60731",
+  "title": "Away in a Manger"
+}

@@ -1,0 +1,242 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    8.0,
+    11.0,
+    14.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0,
+    30.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-shenandoah.mid",
+  "id": "shenandoah",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "shenandoah",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 38,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-shenandoah.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 1.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 7.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 11.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 18.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 20.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 22.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 66,
+      "start": 23.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 23.75
+    },
+    {
+      "dur": 3.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 27.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 27.75
+    },
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 29.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    57,
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    73,
+    74
+  ],
+  "sha256": "9debab040925dbbd4d0395ff2e2090807ddb2c93ff2c53014a9055567693c33c",
+  "title": "Shenandoah"
+}

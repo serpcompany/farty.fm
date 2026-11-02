@@ -227,15 +227,17 @@ test.describe('with microphone permission granted', () => {
     await stillOpen()
     await tabs.getByRole('link', { name: 'Record', exact: true }).click()
 
+    // 022 unlocks Hot Cross Buns (#229), so Result offers Done, not Record another.
     await recordAndSave('022')
-    await page.getByRole('button', { name: 'Record another', exact: true }).click()
-    await expect(page.getByTestId('record-button')).toBeEnabled()
+    await expect(page.getByTestId('result-progress')).toContainText('You unlocked Hot Cross Buns')
+    await page.getByRole('button', { name: 'Done', exact: true }).click()
+    await expect(page).toHaveURL(/\/recordings\/$/)
+    await tabs.getByRole('link', { name: 'Record', exact: true }).click()
 
-    // Try it: on to Song Creator, which plays the Toot in the microphone's session.
+    // Try it: on to Song Creator, which plays the Toot in the microphone's session. 002 unlocks
+    // Mary and 4 more Songs, and Try it opens the first, Mary.
     await recordAndSave('002')
-    await expect(page.getByTestId('result-progress')).toContainText(
-      'You unlocked Mary Had a Little Lamb'
-    )
+    await expect(page.getByTestId('result-progress')).toContainText('You unlocked 5 Songs')
     await page.getByRole('button', { name: 'Try it', exact: true }).click()
     await expect(page).toHaveURL(/\/compose\/mary\/$/)
     // The Toot is playing, so its sound has chosen its session.

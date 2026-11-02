@@ -1,0 +1,174 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-o-come-all-ye-faithful.mid",
+  "id": "o-come-all-ye-faithful",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32,
+    "start_beat": 4
+  },
+  "import_report": {
+    "catalog_id": "o-come-all-ye-faithful",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 25,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-o-come-all-ye-faithful.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 31.999999999999996,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 3.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 15.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 19.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 26.0
+    },
+    {
+      "dur": 0.6041666666666666,
+      "pitch": 76,
+      "start": 27.0
+    },
+    {
+      "dur": 0.3958333333333333,
+      "pitch": 72,
+      "start": 27.604166666666668
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 28.0
+    },
+    {
+      "dur": 1.6041666666666667,
+      "pitch": 69,
+      "start": 30.0
+    },
+    {
+      "dur": 0.3958333333333333,
+      "pitch": 67,
+      "start": 31.604166666666664
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    77
+  ],
+  "sha256": "050bed1664bdbc294ef9c25b92326c470deccdf3348c5f8cbec8eafde74c6bee",
+  "title": "O Come, All Ye Faithful"
+}

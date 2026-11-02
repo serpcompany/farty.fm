@@ -1,0 +1,258 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 72,
+  "file": "midi/pdmx-wayfaring-stranger.mid",
+  "id": "wayfaring-stranger",
+  "import_args": {
+    "bpm": 72,
+    "max_beats": 30,
+    "start_beat": 16
+  },
+  "import_report": {
+    "catalog_id": "wayfaring-stranger",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 41,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-wayfaring-stranger.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1,
+      2
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 2.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 8.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 20.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 23.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 64,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 26.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 29.5
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76
+  ],
+  "sha256": "84753d5e011a5e2506e4c787e244aff8272ca9bf724bf6ec83a17c286ecc351a",
+  "title": "Wayfaring Stranger"
+}

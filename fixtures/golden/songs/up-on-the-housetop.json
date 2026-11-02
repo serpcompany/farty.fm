@@ -1,0 +1,201 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-up-on-the-housetop.mid",
+  "id": "up-on-the-housetop",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "up-on-the-housetop",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 31,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-up-on-the-housetop.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 29.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 60,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    67,
+    69
+  ],
+  "sha256": "76f0d682ebb43851c88d24c1b89c039b3de4fd1b2e373c7ab896ed05d9ee46b2",
+  "title": "Up on the Housetop"
+}

@@ -1,0 +1,120 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0,
+    32.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 72,
+  "file": "midi/pdmx-taps.mid",
+  "id": "taps",
+  "import_args": {
+    "bpm": 72,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "taps",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 15,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-taps.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 34.0,
+  "notes": [
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 3.5
+    },
+    {
+      "dur": 6.0,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 11.5
+    },
+    {
+      "dur": 6.0,
+      "pitch": 71,
+      "start": 12.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 20.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 23.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 27.5
+    },
+    {
+      "dur": 6.0,
+      "pitch": 71,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    62,
+    67,
+    71
+  ],
+  "sha256": "b1f1b70280662cb5c6105666282584c969cbcbbc3ad7f76da9f87cad87631b82",
+  "title": "Taps"
+}
