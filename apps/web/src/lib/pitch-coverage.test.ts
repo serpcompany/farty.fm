@@ -90,8 +90,13 @@ const fixtureId = (recordingId: string | undefined) => recordingId?.slice(-3)
 /** The iPhone app's Songs, the first on the ship list (#229). */
 const iPhone = songs.slice(0, 12)
 
-const listing = (recordings: Recording[], query = '', order: SongOrder = 'closestToUnlocking') =>
-  songListing(sortRows(songRows(songs, recordings), order), query)
+const listing = (
+  recordings: Recording[],
+  query = '',
+  order: SongOrder = 'closestToUnlocking',
+  favorites: ReadonlySet<string> = new Set(),
+  only: ReadonlySet<string> | null = null
+) => songListing(sortRows(songRows(songs, recordings), order, favorites), query, only)
 /** Compose's listing of the iPhone app's Songs only, as the iPhone's tests read it. */
 const iPhoneListing = (recordings: Recording[], order: SongOrder = 'closestToUnlocking') =>
   songListing(sortRows(songRows(iPhone, recordings), order), '')
@@ -410,6 +415,54 @@ describe('Compose’s listing', () => {
     expect(listing(ten, '  ')).toEqual(listing(ten))
     const none = listing(ten, 'zzz')
     expect(none.unlocked.length + none.locked.length).toBe(0)
+  })
+
+  describe('Favorite Songs (#313)', () => {
+    const ids = (rows: { song: Song }[]) => rows.map(r => r.song.id)
+    // Two Unlocked Songs and a locked one on the first 10 takes.
+    const favorites = new Set(['twinkle', 'mary', 'birthday'])
+
+    it('puts Favorite Songs first, each part closest to unlocking', () => {
+      const closest = listing(ten)
+      const { unlocked, locked } = listing(ten, '', 'favoritesFirst', favorites)
+      expect(ids(unlocked)).toEqual([
+        'mary',
+        'twinkle',
+        ...ids(closest.unlocked).filter(id => !favorites.has(id))
+      ])
+      expect(ids(locked)).toEqual([
+        'birthday',
+        ...ids(closest.locked).filter(id => !favorites.has(id))
+      ])
+    })
+
+    it('sorts closest to unlocking when there are no Favorite Songs', () => {
+      expect(listing(ten, '', 'favoritesFirst')).toEqual(listing(ten))
+    })
+
+    it('filters to Favorite Songs, keeping both sections and the order', () => {
+      const { unlocked, locked } = listing(ten, '', 'closestToUnlocking', favorites, favorites)
+      expect(ids(unlocked)).toEqual(['mary', 'twinkle'])
+      expect(ids(locked)).toEqual(['birthday'])
+      const az = listing(ten, '', 'alphabetical', favorites, favorites)
+      expect(ids(az.unlocked)).toEqual(['mary', 'twinkle'])
+    })
+
+    it('searches within the filter', () => {
+      expect(
+        ids(listing(ten, 'little', 'closestToUnlocking', favorites, favorites).unlocked)
+      ).toEqual(['mary', 'twinkle'])
+      const twinkle = listing(ten, 'TWINKLE', 'closestToUnlocking', favorites, new Set(['mary']))
+      expect(twinkle.unlocked.length + twinkle.locked.length).toBe(0)
+    })
+
+    it('shows nothing with no Favorite Songs, and ignores ids not in the catalog', () => {
+      const none = listing(ten, '', 'closestToUnlocking', new Set(), new Set())
+      expect(none.unlocked.length + none.locked.length).toBe(0)
+      const gone = listing(ten, '', 'closestToUnlocking', new Set(), new Set(['gone', 'mary']))
+      expect(ids(gone.unlocked)).toEqual(['mary'])
+      expect(gone.locked).toEqual([])
+    })
   })
 
   it('unlocks the Songs the reference does with the whole Fixture Library', () => {

@@ -186,24 +186,37 @@ export function songRows(songs: readonly Song[], recordings: readonly Recording[
 }
 
 /** How Compose orders Songs within each section. */
-export type SongOrder = 'closestToUnlocking' | 'alphabetical'
+export type SongOrder = 'closestToUnlocking' | 'alphabetical' | 'favoritesFirst'
 
 const titles = new Intl.Collator('en', { numeric: true })
 
+const closestToUnlocking = (a: SongRow, b: SongRow) => {
+  const x = coverageFraction(a.coverage)
+  const y = coverageFraction(b.coverage)
+  if (x !== y) return y - x
+  return a.coverage.total - b.coverage.total
+}
+
+const alphabetical = (a: SongRow, b: SongRow) => titles.compare(a.song.title, b.song.title)
+
 /**
  * `rows`, given in catalog order, sorted by `order`. Closest to unlocking puts the highest Pitch
- * Coverage first and, among equals, Songs with fewer notes. Ties keep catalog order.
+ * Coverage first and, among equals, Songs with fewer notes. Favorites first puts the Favorite Songs
+ * (ids in `favorites`) first, each part closest to unlocking. Ties keep catalog order.
  */
-export function sortRows(rows: readonly SongRow[], order: SongOrder): SongRow[] {
+export function sortRows(
+  rows: readonly SongRow[],
+  order: SongOrder,
+  favorites: ReadonlySet<string> = new Set()
+): SongRow[] {
   const compare =
-    order === 'closestToUnlocking'
-      ? (a: SongRow, b: SongRow) => {
-          const x = coverageFraction(a.coverage)
-          const y = coverageFraction(b.coverage)
-          if (x !== y) return y - x
-          return a.coverage.total - b.coverage.total
-        }
-      : (a: SongRow, b: SongRow) => titles.compare(a.song.title, b.song.title)
+    order === 'alphabetical'
+      ? alphabetical
+      : order === 'favoritesFirst'
+        ? (a: SongRow, b: SongRow) =>
+            Number(favorites.has(b.song.id)) - Number(favorites.has(a.song.id)) ||
+            closestToUnlocking(a, b)
+        : closestToUnlocking
   // Array sort is stable, so ties keep catalog order.
   return [...rows].sort(compare)
 }
@@ -218,11 +231,18 @@ export type SongListing = { unlocked: SongRow[]; locked: SongRow[] }
 
 /**
  * The rows, already sorted, whose title contains `query` anywhere, ignoring case and accents. An
- * empty or blank query matches every Song.
+ * empty or blank query matches every Song. With `only`, Compose's Favorites filter, just the Songs
+ * whose ids it holds.
  */
-export function songListing(sorted: readonly SongRow[], query: string): SongListing {
+export function songListing(
+  sorted: readonly SongRow[],
+  query: string,
+  only: ReadonlySet<string> | null = null
+): SongListing {
   const q = folded(query.trim())
-  const rows = q === '' ? sorted : sorted.filter(r => folded(r.song.title).includes(q))
+  const rows = sorted.filter(
+    r => (only === null || only.has(r.song.id)) && (q === '' || folded(r.song.title).includes(q))
+  )
   return {
     unlocked: rows.filter(r => r.coverage.unlocked),
     locked: rows.filter(r => !r.coverage.unlocked)

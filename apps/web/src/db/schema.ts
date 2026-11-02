@@ -14,7 +14,7 @@ const flag = (name: string) => integer(name, { mode: 'boolean' })
 // Better Auth's tables, as its `drizzleAdapter(db, { provider: 'sqlite' })` finds them: each export
 // is named after its model, and each property after Better Auth's field. Better Auth writes every
 // `created_at` and `updated_at` itself, so they have no defaults. Deleting a user deletes their
-// sessions, sign-in methods, Recordings, Toots and Toot payments.
+// sessions, sign-in methods, Recordings, Toots, Favorite Songs and Toot payments.
 
 /** A person with an account. A first sign-in with an email code creates one. */
 export const user = sqliteTable('user', {
@@ -193,6 +193,29 @@ export const toots = sqliteTable(
       sql`(song_id is not null and arrangement is not null and performance is null)
         or (song_id is null and arrangement is null and performance is not null)`
     )
+  ]
+)
+
+/**
+ * A Favorite Song: a catalog Song the user marked in Compose (#313), by the Song's id, which stays
+ * with the account and no catalog row. Taking it off leaves a tombstone (`deleted_at`), as a
+ * deleted Recording does, so another browser's read since then takes it off there too, and
+ * favoriting it again clears the tombstone.
+ */
+export const favoriteSongs = sqliteTable(
+  'favorite_songs',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    songId: text('song_id').notNull(),
+    createdAt: timestamp('created_at').notNull(),
+    updatedAt: timestamp('updated_at').notNull(),
+    deletedAt: timestamp('deleted_at')
+  },
+  table => [
+    primaryKey({ columns: [table.userId, table.songId] }),
+    index('favorite_songs_user_id_updated_at_idx').on(table.userId, table.updatedAt)
   ]
 )
 

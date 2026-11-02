@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:test'
 
 import * as accountRoute from '@/app/api/account/route'
+import * as favoriteRoute from '@/app/api/favorites/[id]/route'
 import * as libraryRoute from '@/app/api/library/route'
 import * as recordingAudioRoute from '@/app/api/recordings/[id]/audio/route'
 import * as recordingRoute from '@/app/api/recordings/[id]/route'
@@ -213,7 +214,15 @@ export const api = {
       noParams
     ),
 
-  deleteAccount: (as: As) => accountRoute.DELETE(request('/api/account/', 'DELETE', as), noParams)
+  deleteAccount: (as: As) => accountRoute.DELETE(request('/api/account/', 'DELETE', as), noParams),
+
+  /** Marks a Song a Favorite Song (#313). */
+  favorite: (songId: string, as: As) =>
+    favoriteRoute.PUT(request(`/api/favorites/${songId}/`, 'PUT', as), params({ id: songId })),
+
+  /** Takes a Favorite Song off. */
+  unfavorite: (songId: string, as: As) =>
+    favoriteRoute.DELETE(request(`/api/favorites/${songId}/`, 'DELETE', as), params({ id: songId }))
 }
 
 /** Every key in the bucket, sorted. */
