@@ -1,0 +1,283 @@
+# Tune titles the ranking (rank_pdmx.py) leaves out, one `Title | why` a line, compared as the importer
+# compares names. Added by whoever builds a batch, after reading the top of ranking.md:
+#   - under copyright: first published in 1931 or later, or an author died after 1955: the composer,
+#     or a lyricist whose words were written with the music (as titles-02.txt counts them). PDMX takes a
+#     score's license from its uploader, and an uploader can't put someone else's song in the public
+#     domain (ADR 0003, #312).
+#   - not one tune: a collection, an opera or suite, a title many pieces share, or one that names no
+#     piece we can tell.
+#   - the same tune as a Song in the catalog or a better-ranked title, under another name.
+#   - the importer's pick isn't the tune most of its scores carry, as titles-02.txt found.
+#   - an offensive title.
+# Reviewed for batch 04 (#312): the top 250 of the ranking, titles titles-02.txt left out for a
+# later batch or because the importer's pick isn't the tune, and the picks of titles-04.txt's first
+# import whose MuseScore artist or composer wasn't the tune's.
+
+# Under copyright
+Toss A Coin To Your Witcher | under copyright: Sonya Belousova and Giona Ostinelli, 2019
+Libertango | under copyright: Astor Piazzolla, 1974
+You Are My Sunshine | under copyright: Jimmie Davis and Charles Mitchell, 1940
+Katyusha | under copyright: Matvey Blanter, 1938
+Fly me to the moon | under copyright: Bart Howard, 1954
+Perfect | under copyright: Ed Sheeran, 2017
+Whiplash | under copyright: Hank Levy, 1973
+Por Una Cabeza | under copyright: Carlos Gardel, 1935
+Cavatina | under copyright: Stanley Myers, 1970
+Once Upon a Time in The West | under copyright: Ennio Morricone, 1968
+Oblivion | under copyright: Astor Piazzolla, 1982
+Heart and Soul | under copyright: Hoagy Carmichael, 1938
+Soviet National Anthem | under copyright: Alexander Alexandrov, 1944
+Waltz No. 2 | under copyright: Dmitri Shostakovich (died 1975)
+I Giorni | under copyright: Ludovico Einaudi, 2001
+Memory | under copyright: Andrew Lloyd Webber, 1981
+Minecraft | under copyright: C418, 2011
+Sweden | under copyright: C418, 2011
+Aria Math | under copyright: C418, 2013
+Wet Hands | under copyright: C418, 2011
+White Christmas | under copyright: Irving Berlin, 1942
+Hallelujah | under copyright: Leonard Cohen, 1984
+New York New York | under copyright: John Kander, 1977
+Wave | under copyright: Antonio Carlos Jobim, 1967
+The Girl from Ipanema | under copyright: Antonio Carlos Jobim, 1962
+Chega De Saudade | under copyright: Antonio Carlos Jobim, 1958
+Aguas de marco | under copyright: Antonio Carlos Jobim, 1972
+Adagio for Strings | under copyright: Samuel Barber, 1936
+Linus & Lucy | under copyright: Vince Guaraldi, 1964
+Goodbye Pork Pie Hat | under copyright: Charles Mingus, 1959
+Do You Hear The People Sing | under copyright: Claude-Michel Schonberg, 1980
+On my Own | under copyright: Claude-Michel Schonberg, 1980
+Sick of Losing soulmates | under copyright: dodie, 2016
+Straight No Chaser | under copyright: Thelonious Monk, 1951
+The Sound of Silence | under copyright: Paul Simon, 1964
+How Great is Our God | under copyright: Chris Tomlin, 2004
+Lord of the Dance | under copyright: Sydney Carter, 1963 (or Ronan Hardiman, 1996)
+Petit Papa Noel | under copyright: Henri Martinet, 1946
+Take Five | under copyright: Paul Desmond, 1959
+State Anthem of the Russian Federation | under copyright: Alexander Alexandrov, 1944
+The Galway Girl | under copyright: Steve Earle, 2000
+Guantanamera | under copyright: Joseito Fernandez (died 1979)
+El dia que me quieras | under copyright: Carlos Gardel, 1935
+Let her go | under copyright: Passenger, 2012
+Cantaloupe Island | under copyright: Herbie Hancock, 1964
+Watermelon Man | under copyright: Herbie Hancock, 1962
+Black Orpheus | under copyright: Luiz Bonfa, 1959
+Kiss The Rain | under copyright: Yiruma, 2003
+Mi General Augusto Pinochet | under copyright: 1970s
+Girassol | under copyright: Priscilla Alcantara, 2019
+The Jody Grind | under copyright: Horace Silver, 1966
+Adios Nonino | under copyright: Astor Piazzolla, 1959
+Daydreaming | under copyright: 21st century
+Schon Rosmarin | under copyright: Fritz Kreisler (died 1962)
+The Trail of the Lonesome Pine | under copyright: Harry Carroll (died 1962)
+Rosa | under copyright: Pixinguinha (died 1973)
+Naima | under copyright: John Coltrane, 1959
+Route 66 | under copyright: Bobby Troup, 1946
+Sherlock Main theme | under copyright: David Arnold and Michael Price, 2010
+Strasbourg St. Denis | under copyright: Roy Hargrove, 2008
+Sicilienne | under copyright: likely by Samuel Dushkin (died 1976), credited to Maria Theresia von Paradis
+Wir sind die Moorsoldaten | under copyright: Rudi Goguel, 1933
+Suliko | under copyright: Varenka Tsereteli (died 1963)
+Blues for Alice | under copyright: Charlie Parker, 1951
+Freddie Freeloader | under copyright: Miles Davis, 1959
+So What | under copyright: Miles Davis, 1959
+Streets of London | under copyright: Ralph McTell, 1969
+The Night We Met | under copyright: Lord Huron, 2015
+End of the Universe | under copyright: Gooseworx, 21st century
+Halloween | under copyright: John Carpenter, 1978 (or another piece of that name)
+Sweet Home Chicago | under copyright: Robert Johnson, 1936
+Power Over Me | under copyright: Dermot Kennedy, 2019
+Supermarket Flowers | under copyright: Ed Sheeran, 2017
+St Louis Blues | under copyright: W. C. Handy (died 1958)
+Take Me Out To The Ball Game | under copyright: Albert Von Tilzer (died 1956)
+Conversao | under copyright: Andre Valadao, 21st century
+St. James Infirmary | under copyright: claimed by Irving Mills, 1929 (died 1985)
+Lassus Trombone | under copyright: Henry Fillmore (died 1956)
+Misty | under copyright: Erroll Garner, 1954
+Flower of Scotland | under copyright: Roy Williamson, 1967
+Highland Cathedral | under copyright: Ulrich Roever and Michael Korb, 1982
+Old Rugged Cross | under copyright: George Bennard (died 1958)
+Flourish For Wind Band | under copyright: Ralph Vaughan Williams (died 1958)
+Wild Mountain Thyme | under copyright: Francis McPeake, 1957
+Puff the Magic Dragon | under copyright: Peter Yarrow, 1963
+Take the 'A' Train | under copyright: Billy Strayhorn, 1939
+How Great Thou Art | under copyright: Stuart K. Hine's hymn, 1949
+The Irish Rover | under copyright: authorship unclear, often credited to J. M. Crofts in the 20th century
+Zum Gali Gali | under copyright: 20th-century song, authorship unclear
+Memory from Cats | under copyright: Andrew Lloyd Webber, 1981
+All I Ask of You | under copyright: Andrew Lloyd Webber, 1986
+The Impossible Dream | under copyright: Mitch Leigh, 1965
+Remember Me | under copyright: Kristen Anderson-Lopez and Robert Lopez, 2017
+Perfect - Ed Sheeran | under copyright: Ed Sheeran, 2017
+Hallelujah - Leonard Cohen | under copyright: Leonard Cohen, 1984
+Minecraft Wet Hands | under copyright: C418, 2011
+Untitled 1 | under copyright: C418, 2011
+Shostakovich Waltz No. 2 | under copyright: Dmitri Shostakovich (died 1975)
+Christmas Lullaby | under copyright: John Rutter, living
+Lullaby of Birdland | under copyright: George Shearing, 1952
+Chicken Reel | under copyright: Joseph M. Daly (died 1968)
+The Chicken | under copyright: Pee Wee Ellis, 1969
+Tiger Rag | under copyright: Nick LaRocca of the Original Dixieland Jass Band (died 1961)
+Tachanka | under copyright: Konstantin Listov, 1937
+I'll Fly Away | under copyright: Albert E. Brumley (died 1977)
+Talijanska | under copyright: its scores credit Goran Bregovic, living
+Happiness | under copyright: its scores credit Fullmetal Alchemist, 21st century
+Ievan Polkka | under copyright: Eino Kettunen's song (died 1964); scores follow Loituma's 1995 version
+Banana boat song | under copyright: scores follow Harry Belafonte's 1956 version
+Patria | under copyright: Ruben Blades, 1985
+Pai Nosso | under copyright: its scores credit Georgy Rimsky-Korsakov (died 1965)
+Honeybee | under copyright: The Head and the Heart, 21st century
+One Too Many | under copyright: Tom Brier, living
+Still Alive | under copyright: Jonathan Coulton, 2007
+Ashokan Farewell | under copyright: Jay Ungar, 1982
+Stardust | under copyright: Hoagy Carmichael (died 1981)
+Syeeda's Song Flute | under copyright: John Coltrane, 1959
+Giant Steps | under copyright: John Coltrane, 1959
+Glory to Hong Kong | under copyright: 2019
+The Beauty Is | under copyright: Adam Guettel, 2005
+Seria's Gate | under copyright: Neople's game music, 21st century
+Corcovado | under copyright: Antonio Carlos Jobim, 1960
+Erev shel shoshanim | under copyright: Yosef Hadar, 1957
+Summertime | under copyright: George Gershwin, 1935
+Oceans Where Feet May Fail | under copyright: Hillsong United, 2013
+Buddy Bolden Stomp | under copyright: Sidney Bechet (died 1959)
+The Wild Mountain Thyme 2 | under copyright: Francis McPeake, 1957
+O Sole Mio | under copyright: co-composer Alfredo Mazzucchi (died 1972); titles-02.txt left it for a later batch
+Cielito Lindo | under copyright: Quirino Mendoza y Cortes (died 1957); titles-02.txt left it out
+When Irish Eyes Are Smiling | under copyright: lyricist George Graff (died 1973); titles-02.txt left it out
+Bye Bye Blackbird | under copyright: Ray Henderson, 1926 (died 1970); titles-02.txt left it out
+O mio babbino caro | under copyright: librettist Giovacchino Forzano (died 1970); titles-02.txt left it out
+Gottingen | under copyright: Barbara, 1964
+We are one | under copyright: its scores credit cartoon music, 20th or 21st century
+The Call | under copyright: Regina Spektor, 2008
+Calypso | under copyright: Jan Holdstock, 20th century
+House of the Rising Sun | under copyright: the importer picks The Animals' arrangement (Alan Price, 1964), the tune most scores follow
+Was wollen wir trinken | under copyright: it is Son ar chistr, words by Jean-Bernard and Jean-Marie Prima (1929), its tune's origin unclear
+
+# Not one tune
+Nocturnes Op.9 | not one tune: a set of three nocturnes (Nocturne Op. 9 No. 2 is its own title)
+Children's Corner | not one tune: a suite of six pieces
+2 Arabesques | not one tune: a set of two pieces
+Gaspard de la nuit | not one tune: a suite of three pieces
+Orchestral Suite No.3 in D major BWV 1068 | not one tune: a suite (its Air is in the catalog)
+Pictures at an Exhibition | not one tune: a suite
+L'Arlesienne | not one tune: a suite
+9 Kleine Praludien BWV 924-932 | not one tune: a set of nine preludes
+Etudes Tableaux Op 39 | not one tune: a set of nine studies
+4 Lieder Op.27 | not one tune: a set of four songs
+Siegfried | not one tune: an opera
+La Traviata | not one tune: an opera
+Die Meistersinger Von Nurnberg | not one tune: an opera
+Phoenix | not one tune: names no piece we can tell
+Victory | not one tune: names no piece we can tell
+Romance | not one tune: many pieces share the title
+Tarantella | not one tune: many pieces share the title
+Chorale | not one tune: many pieces share the title
+America | not one tune: several songs share the title
+Chopin Prelude | not one tune: Chopin wrote 24 preludes and more
+Boogie Woogie | not one tune: a style
+The Boogie | not one tune: names no piece we can tell
+Rigadoon | not one tune: many pieces share the title
+Lullaby | not one tune: many pieces share the title
+Wiegenlied | not one tune: several lullabies share the title (Brahms' Lullaby is in the catalog)
+Four Seasons | not one tune: a set of four concertos
+Menuett | not one tune: many pieces share the title
+The Russian Dance | not one tune: names no piece we can tell
+Russian folk song | not one tune: many pieces share the title
+Symphony No. 5 | not one tune: several composers' fifth symphonies share the title
+Symphony No. 9 | not one tune: several composers' ninth symphonies share the title
+Symphony No.1 | not one tune: several composers' first symphonies share the title
+Mazurka | not one tune: many pieces share the title
+Vienna | not one tune: several pieces share the title
+Spanish Dance | not one tune: many pieces share the title
+Waltz | not one tune: many pieces share the title
+The King | not one tune: names no piece we can tell
+Samba | not one tune: a style
+No. 5 | not one tune: names no piece we can tell
+Saraband | not one tune: many pieces share the title
+Sonata in C Major | not one tune: many sonatas share the title
+Violin Sonata | not one tune: many sonatas share the title
+Snake Pit | not one tune: names no piece we can tell
+Matilda | not one tune: several songs share the title
+Duet | not one tune: many pieces share the title
+The Farewell | not one tune: several pieces share the title
+Air | not one tune: many pieces share the title
+The Trumpet | not one tune: names no piece we can tell
+The WISHING WELL | not one tune: names no piece we can tell
+Funeral March | not one tune: several pieces share the title
+Cavalleria rusticana | not one tune: an opera
+Les Pecheurs de Perles | not one tune: an opera
+Judas Maccabeus | not one tune: an oratorio (its See, the Conquering Hero Comes is its own title)
+Missa XI Orbis factor | not one tune: a mass
+Missa Orbis Factor | not one tune: a mass
+Ancient Greek Scales | not one tune: a scale exercise
+Symphony No. 2 | not one tune: several composers' second symphonies share the title
+Romanza | not one tune: many pieces share the title
+Minuet | not one tune: many pieces share the title
+The Wanderer | not one tune: several pieces share the title
+Brian Boru | not one tune: Julian Edwards' 1896 opera or Brian Boru's March
+The American | not one tune: names no piece we can tell
+Batucada | not one tune: a style
+Concerto Grosso | not one tune: many concertos share the title
+Untitled | not one tune: names no piece
+Unknown | not one tune: names no piece
+The Traditional | not one tune: names no piece
+Quodlibet | not one tune: many pieces share the title
+Hornpipe | not one tune: many pieces share the title
+Bourree | not one tune: many pieces share the title
+Musette | not one tune: many pieces share the title
+Souvenir | not one tune: many pieces share the title
+Minueto | not one tune: many pieces share the title
+Cradle Song | not one tune: many pieces share the title
+Kyrie eleison | not one tune: many settings share the title
+Allegro Assai | not one tune: many movements share the title
+Sonata 2 | not one tune: many sonatas share the title
+Free | not one tune: names no piece we can tell
+Emma | not one tune: names no piece we can tell
+The Messenger | not one tune: names no piece we can tell
+The Madrigal | not one tune: names no piece we can tell
+Russian March | not one tune: names no piece we can tell
+Praise the Lord! | not one tune: several hymns share the title
+
+# The same tune as a Song in the catalog or a better-ranked title
+J S Bach Toccata and Fugue in D Minor BWV 565 | the same tune as Toccata and Fugue in D Minor
+Herz und Mund und Tat und Leben BWV 147 | the same tune as Jesu, Joy of Man's Desiring
+Ode a Alegria | the same tune as Ode to Joy
+Inno alla Gioia | the same tune as Ode to Joy
+Freude schoner Gotterfunken | the same tune as Ode to Joy
+Ode an die Freude | the same tune as Ode to Joy
+Himno de la Alegria | the same tune as Ode to Joy
+Joyful Joyful We Adore Thee | the same tune as Ode to Joy
+Joyeux anniversaire | the same tune as Happy Birthday
+Drink to me only | the same tune as Drink to Me Only with Thine Eyes
+Tico Tico | the same tune as Tico Tico no Fuba
+Menuet in G major (BWV Anh. 114) | the same tune as Minuet in G
+Sally Gardens | the same tune as Down by the Salley Gardens
+Mon beau sapin | the same tune as O Christmas Tree
+Ah vous dirais-je Maman | the same tune as Twinkle, Twinkle, Little Star
+Green Sleeves | the same tune as Greensleeves
+Hatikvah | the same tune as Hatikva
+Carols of the Bells | the same tune as Carol of the Bells
+Cantata 147 | the same tune as Jesu, Joy of Man's Desiring
+L'Internationale | the same tune as The Internationale
+Nettleton | the same tune as Come Thou Fount
+Cranham | the same tune as In the Bleak Midwinter
+Pavane | the same tune as Pavane Op. 50
+Fratelli d'Italia | the same tune as Inno di Mameli
+Danubio Azul | the same tune as The Blue Danube
+Bruder Jakob | the same tune as Frere Jacques
+Ah! vous dirai-je maman | the same tune as Twinkle, Twinkle, Little Star
+Twinkle | the same tune as Twinkle, Twinkle, Little Star
+Menuet in G | the same tune as Minuet in G
+See the Conquering Hero comes | the same tune as See the Conqu'ring hero comes
+
+# The importer's pick isn't the tune (titles-02.txt, titles-04.txt)
+Carioca | the importer picks Vincent Youmans's Carioca (1933, under copyright), not Ernesto Nazareth's (titles-04.txt)
+Blue Bird | the importer picks an unnamed BLUE BIRD; Stanford's partsong and the Naruto opening (2008) share the title (titles-04.txt)
+October | the importer picks an unnamed October with 2 views, not Tchaikovsky's (titles-04.txt)
+Go Tell It on the Mountain | the importer's pick is an accompaniment or a one-note ostinato (titles-02.txt)
+Molly Malone | the importer's pick is an accompaniment or a one-note ostinato (titles-02.txt)
+The Ash Grove | the importer's pick is an accompaniment or a one-note ostinato (titles-02.txt)
+Here We Come A-Wassailing | the importer's pick sets another tune of the same name (titles-02.txt)
+
+# An offensive title
+Le petit negre | an offensive title
