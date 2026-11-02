@@ -66,20 +66,26 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
     page.getByRole('heading', { name: `Locked · ${songs.length - unlocked}`, exact: true })
   ).toBeVisible()
 
-  // Without Recording 1, Amazing Grace's 2.98 s note on E3 outlasts every fixture near it, and 11
-  // more Songs lock, as `pitch-coverage.test.ts` reads the golden analysis.
+  // Without Recording 1, Amazing Grace's 2.98 s note on E3 outlasts every fixture near it, and it
+  // is one of 11 Songs that lock. The golden data has no answer for the library without 002, so
+  // `pitch-coverage.test.ts` checks this count with the app's rule on the golden analysis ('locks
+  // 11 more of the catalog's Songs without 002').
+  const lockedWithout002 = 11
   await recordings.click()
   await page.getByRole('button', { name: 'Delete Recording 1', exact: true }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete Recording' }).click()
   await expect(first).toHaveCount(0)
   await compose.click()
   await expect(
-    page.getByRole('heading', { name: `Unlocked · ${unlocked - 11}`, exact: true })
+    page.getByRole('heading', { name: `Unlocked · ${unlocked - lockedWithout002}`, exact: true })
   ).toBeVisible({
     timeout: 60_000
   })
   await expect(
-    page.getByRole('heading', { name: `Locked · ${songs.length - unlocked + 11}`, exact: true })
+    page.getByRole('heading', {
+      name: `Locked · ${songs.length - unlocked + lockedWithout002}`,
+      exact: true
+    })
   ).toBeVisible()
   const amazing = page.getByRole('button', { name: 'Amazing Grace', exact: true })
   await expect(amazing).toHaveAccessibleDescription(

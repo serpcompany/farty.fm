@@ -106,5 +106,6 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
   await expect(page).toHaveURL(/\/compose\/$/)
   await expect(page.getByRole('heading', { name: 'Unlocked · 6', exact: true })).toBeVisible()
   await tab(page, 'Toots').click()
-  await expect(page.getByText('Mary Had a Little Lamb')).toHaveCount(1)
+  // The row's title only: the line under it starts with the Song's title too (`tootDetails`).
+  await expect(page.getByText('Mary Had a Little Lamb', { exact: true })).toHaveCount(1)
 })

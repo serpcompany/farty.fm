@@ -481,6 +481,16 @@ describe('Compose’s listing', () => {
     expect(locked.map(r => missingNotes(r.coverage))).toEqual(['E3 (3.0 s)'])
   })
 
+  it('locks 11 more of the catalog’s Songs without 002, Amazing Grace among them', () => {
+    // `e2e/fixture-library.spec.ts` deletes 002 and expects Compose to lock these 11 more.
+    const ids = (rows: { song: Song }[]) => rows.map(r => r.song.id)
+    const withAll = new Set(ids(listing(all).locked))
+    const lockedNow = ids(listing(without002).locked).filter(id => !withAll.has(id))
+    expect(lockedNow).toHaveLength(11)
+    expect(lockedNow).toContain('amazing')
+    expect(listing(without002).unlocked.every(r => !withAll.has(r.song.id))).toBe(true)
+  })
+
   it('locks every Song, fewest notes first, without Melodic Recordings', () => {
     const { unlocked, locked } = listing(fixtures(['018']))
     expect(unlocked).toHaveLength(0)
