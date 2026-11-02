@@ -1,8 +1,8 @@
 import { and, eq, isNull } from 'drizzle-orm'
 
 import type { Database } from './database'
-import type { Kind, RecordingRow } from './library'
-import { handles, recordings, shareReports, shares, user } from './schema'
+import type { Kind, RecordingRow, TootRow } from './library'
+import { handles, recordings, shareReports, shares, toots, user } from './schema'
 
 // Sharing in D1 (ADR 0020): Handles, shares and reports. The owner's queries take the session's
 // user id and filter on it, so one user never shares or stops sharing another's item. The public
@@ -140,6 +140,36 @@ export async function sharedRecording(
         isNull(shares.takenDownAt),
         eq(handles.handle, handle),
         isNull(recordings.deletedAt)
+      )
+    )
+  return rows[0] ?? null
+}
+
+/** A shared Toot, as anyone with its link finds it. */
+export type SharedTootRow = { share: ShareRow; handle: string; toot: TootRow }
+
+/**
+ * The saved Toot shared at `/u/<handle>/t/<shareId>/`, as `sharedRecording` finds a Recording: only
+ * while it's shared under that Handle, not taken down, and not deleted. A Toot is in `toots` only
+ * once it's saved, so an unsaved one is never found.
+ */
+export async function sharedToot(
+  db: Database,
+  handle: string,
+  shareId: string
+): Promise<SharedTootRow | null> {
+  const rows = await db
+    .select({ share: shares, handle: handles.handle, toot: toots })
+    .from(shares)
+    .innerJoin(handles, eq(handles.userId, shares.userId))
+    .innerJoin(toots, and(eq(toots.userId, shares.userId), eq(toots.id, shares.itemId)))
+    .where(
+      and(
+        eq(shares.id, shareId),
+        eq(shares.kind, 'toots'),
+        isNull(shares.takenDownAt),
+        eq(handles.handle, handle),
+        isNull(toots.deletedAt)
       )
     )
   return rows[0] ?? null

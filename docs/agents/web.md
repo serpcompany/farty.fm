@@ -142,7 +142,7 @@ Most updates ship by deploying the site, with no new upload. Upload a new `.aab`
 
 ## Reports and take-downs
 
-A shared Recording's page has Report (#316, ADR 0020). Each report is a row in D1's `share_reports` (the share, its owner, the item and when; nothing about who reported) and a `share_reported` line in the Worker's logs with the link's id: query `event = share_reported`, or read the table. Nobody is emailed. A reporter gets at most 10 an hour, a Recording 5 a day (whichever link it is shared under) and the site 300 an hour (`REPORT_LIMITS` in `src/server/sharing.ts`); past any of them a report answers 429.
+A shared Recording's or Toot's page has Report (#316, #317, ADR 0020). Each report is a row in D1's `share_reports` (the share, its owner, the item and when; nothing about who reported) and a `share_reported` line in the Worker's logs with the link's id: query `event = share_reported`, or read the table. Nobody is emailed. A reporter gets at most 10 an hour, a Recording or Toot 5 a day (whichever link it is shared under) and the site 300 an hour, Recordings and Toots counted together (`REPORT_LIMITS` in `src/server/sharing.ts`); past any of them a report answers 429.
 
 **The owner takes one down** in the Cloudflare dashboard, under D1, `pedos-production` (or `pedos-staging`), Console. Agents never write to a remote database.
 
@@ -154,7 +154,7 @@ SELECT r.created_at, r.share_id, h.handle, r.kind, r.item_id FROM share_reports 
 UPDATE shares SET taken_down_at = unixepoch() * 1000 WHERE id = '<share_id>';
 ```
 
-A link taken down stays down: its row is kept, so the owner can't share that Recording again (403 `taken_down`), and neither Stop sharing nor deleting the Recording removes it. To put it back, set `taken_down_at` to `NULL`. Deleting the account removes it, with the reports.
+A link taken down stays down: its row is kept, so the owner can't share that Recording or Toot again (403 `taken_down`), and neither Stop sharing nor deleting it removes it. To put it back, set `taken_down_at` to `NULL`. Deleting the account removes it, with the reports.
 
 ## Gotchas learned in slice 1
 

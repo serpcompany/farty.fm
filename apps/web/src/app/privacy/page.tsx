@@ -34,10 +34,11 @@ export default function PrivacyPage() {
       <h2>Sharing</h2>
       <ul>
         <li>
-          Nothing you record is public unless you share it. When you share a Recording, anyone with
-          its link can open it, signed in or not, and play it. The page shows your handle, the
-          Recording&apos;s name, note, length and waveform, and nothing else about you: never your
-          email or your other Recordings.
+          Nothing you record is public unless you share it. When you share a Recording or a saved
+          Toot, anyone with its link can open it, signed in or not, and play it. The page shows your
+          handle, the Recording&apos;s name, note, length and waveform, or the Toot&apos;s name,
+          Song, length and waveform, and nothing else about you: never your email or your other
+          Recordings and Toots.
         </li>
         <li>
           Links aren&apos;t listed anywhere and search engines are asked not to index them, but
@@ -45,14 +46,15 @@ export default function PrivacyPage() {
         </li>
         <li>You pick your handle the first time you share. It shows on every link you share.</li>
         <li>
-          Stop sharing, deleting the Recording or deleting your account makes the link stop working
-          for everyone. Apps that already showed a preview of the link may keep their copy of it.
+          Stop sharing, deleting the Recording or Toot, or deleting your account makes the link stop
+          working for everyone. Apps that already showed a preview of the link may keep their copy
+          of it.
         </li>
         <li>
-          Anyone can report a shared Recording. Farty keeps which link was reported and when, and
-          nothing about who reported it, and may take the link down. To limit how many reports one
-          device can send, it keeps a scrambled code made from your IP address for an hour, never
-          the address itself.
+          Anyone can report a shared Recording or Toot. Farty keeps which link was reported and
+          when, and nothing about who reported it, and may take the link down. To limit how many
+          reports one device can send, it keeps a scrambled code made from your IP address for an
+          hour, never the address itself.
         </li>
       </ul>
 

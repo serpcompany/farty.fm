@@ -44,6 +44,19 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
     - Signed out, Get Farty sits under the player with "Record your own farts and turn them into songs. Free, no app store." Signed in, the top bar says Open Farty and the block isn't there. Both open `/` until #318.
     - A link that doesn't work says "This link doesn't work any more. It was taken down or deleted." with Get Farty, and answers 404.
 
+## Toots (#317)
+
+A saved Toot shares the same way, through the same Handle, `shares` rows (`kind` `toots`), checks and Report. Only what differs:
+
+- **Saved Toots only.** A Toot shares once it is in the account, which it reaches only once paid for (ADR 0010). Song Creator's unpaid preview has no Share, and a Toot that was never saved, or is still in the outbox, answers 404 like a Recording. Share sits in a saved Toot's header and in each Toots row's ⋯ menu, not on the row itself.
+- **The link is `/u/<handle>/t/<share id>/`.** A Recording's id under `t/`, or a Toot's under `r/`, answers 404.
+- **The page shows the Toot's title, the Song it plays, its length and the waveform of its saved audio.** A Sound Pad Toot's Song line says "Sound Pad". The catalog names no composer, so the page doesn't either.
+- **The audio is the saved WAV as stored**, the whole file, from the Workers cache by its R2 key or from R2 into it, with the same `private, no-cache` and ETag. Nothing is rendered for the link.
+- **The waveform is drawn on the server** from that WAV (60 bars, `sharedTootLevels`), after the D1 check, and cached by its R2 key, since a Toot's row keeps no bars of its own.
+- **Link preview:** `og:title` is "Mary Had a Little Lamb by @maya", `og:description` "Mary Had a Little Lamb, played on farts. Tap to play." (a Sound Pad Toot's "A fart song on Farty. Tap to play."), and the image says "A fart song by @maya", with no note.
+- **Report limits are shared with Recordings:** the same 10 an hour per reporter and 300 an hour for the site count both, and a Toot gets 5 a day like a Recording.
+- Deleting a shared Toot says its link stops working too.
+
 ## Tables
 
 Migration `0008_sharing`:
