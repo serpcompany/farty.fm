@@ -377,3 +377,12 @@ The Unquiet Grave | unsure: the score is Gryphon's 1970s arrangement
 Night Walk | unsure: a modern piece by Rhythm Tengoku
 Baa Baa Black Sheep | the same tune as Twinkle, Twinkle, Little Star
 Pick a bale of cotton | unsure: known from Lead Belly's 1930s recordings and arrangements
+
+# Pulled from titles-05.txt after review of its first import (#324)
+Tochter Zion | the same tune as See the Conqu'ring Hero comes (Handel, Judas Maccabaeus)
+Bolero | the importer picks a score by Trung Hieu Ngo with no composer, not Ravel's; the title is shared
+Lo How A Rose | the importer picks Sufjan Stevens's arrangement (2010s), not the traditional tune
+How Firm a Foundation | the importer picks a score titled "Give Thanks", a modern worship song (Henry Smith, 1978)
+Canticum trium puerorum | the importer picks "11. Viva la musica (Canon a 3)", not the canticle
+The Chicago | the importer picks Fred Fisher's "Chicago" (1922), not Alfred Mortimer's march
+Indian Queen | the importer picks Purcell's Indian Queen (opera), not Playford's dance

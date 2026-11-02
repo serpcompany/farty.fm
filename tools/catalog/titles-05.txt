@@ -1,6 +1,8 @@
 # The top 200 tune titles of tools/catalog/ranking.md, not yet in the catalog or tried, written by
 # tools/catalog/rank_pdmx.py --batch 200 --out tools/catalog/titles-05.txt (#312). Each title's only name is
-# the one the ranking counted scores by.
+# the one the ranking counted scores by. Review of its import (#324) pulled 7 titles, now in
+# excluded-titles.txt: Tochter Zion, Bolero, Lo How A Rose, How Firm a Foundation, Canticum trium
+# puerorum, The Chicago, Indian Queen.
 # id | catalog title
 moments-musicaux-opus-94-no-3-in-f-minor | Moments Musicaux Opus 94 No. 3 in F minor
 ave-maria-bach-gounod | Ave Maria Bach-Gounod
@@ -21,7 +23,6 @@ sweet-nightingale | Sweet Nightingale
 sankt-martin-ritt-durch-schnee-und-wind | Sankt Martin ritt durch Schnee und Wind
 macphersons-lament | MacPherson's Lament
 o-the-deep-deep-love-of-jesus | O the Deep Deep Love of Jesus
-canticum-trium-puerorum | Canticum trium puerorum
 in-darkness-let-me-dwell | In darkness let me dwell
 asperges-me-domine | Asperges me Domine
 bourree-in-e-minor | Bourrée in E Minor
@@ -32,7 +33,6 @@ arrival-of-the-queen-of-sheba | The Arrival Of The Queen Of Sheba
 alta-trinita-beata | Alta Trinita beata
 over-the-waves | Over the Waves
 maple-leaf-forever | The Maple Leaf Forever
-bolero | Bolero
 while-shepherds-watched-their-flocks-by-night | While shepherds watched their flocks by night
 fantasia-and-fugue-in-a-minor-bwv-944 | Fantasia and Fugue in A minor BWV 944
 rio-grande | Rio Grande
@@ -47,7 +47,6 @@ come-back-to-sorrento | Come Back To Sorrento
 lord-enthroned-in-heavenly-splendour | Lord enthroned in heavenly splendour
 i-shall-not-be-moved | I Shall Not Be Moved
 calon-lan | Calon Lan
-tochter-zion | Tochter Zion
 sangerhilsen | Sangerhilsen
 trumpet-hornpipe | The Trumpet Hornpipe
 geh-aus-mein-herz-und-suche-freud | Geh aus mein Herz und suche Freud
@@ -66,7 +65,6 @@ lead-me-lord | Lead Me Lord
 einigkeit-und-recht-und-freiheit | Einigkeit und Recht und Freiheit
 sarabande-de-haendel | Sarabande de Haendel
 banks-of-green-willow | Banks of Green Willow
-how-firm-a-foundation | How Firm a Foundation
 o-du-frohliche | O du frohliche
 bethena | Bethena
 niel-gows-lament-for-the-death-of-his-second-wife | Niel Gow's Lament for the Death of his Second Wife
@@ -91,7 +89,6 @@ mermaid | The Mermaid
 rights-of-man | The Rights of Man
 an-die-musik-d-547 | An die Musik D.547
 high-germany | High Germany
-indian-queen | Indian Queen
 tarantella-siciliana | Tarantella Siciliana
 down-in-the-valley | Down in the valley
 foggy-dew | The Foggy Dew
@@ -114,7 +111,6 @@ king-of-the-faeries | King of the Faeries
 drop-drop-slow-tears | Drop drop slow tears
 du-gamla-du-fria | Du Gamla Du Fria
 i-need-thee-every-hour | I Need Thee Every Hour
-lo-how-a-rose | Lo How A Rose
 cantique-de-jean-racine-op-11 | Cantique de Jean Racine Op. 11
 wer-ein-liebchen-hat-gefunden | Wer ein liebchen hat gefunden
 kings-of-orient | Kings Of Orient
@@ -159,7 +155,6 @@ aus-tiefer-not-schrei-ich-zu-dir | Aus tiefer Not schrei ich zu dir
 schonster-herr-jesu | Schönster Herr Jesu
 quen-a-omagen-da-virgen | Quen a omagen da Virgen
 aftnen-er-stille | Aftnen er stille
-chicago | The Chicago
 ajde-jano | Ajde Jano
 green-hills-of-tyrol | Green Hills of Tyrol
 aus-meines-herzens-grunde | Aus Meines Herzens Grunde
