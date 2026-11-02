@@ -29,7 +29,8 @@ const problems: Record<
 }
 
 /**
- * The Record tab: one big red button. Matches the iPhone app's `RecordTab`. Once it shows, the
+ * The Record tab: one big red button. Matches the iPhone app's `RecordTab`. A tap opens the
+ * Recording screen over it (`record-flow.tsx`). Once the tab shows, the
  * microphone stays open for the rest of the launch (`keepMicrophoneOpen`). A computer shows the
  * product page instead (`lander.tsx`), so there the microphone stays shut, and widening a narrow
  * window into the product page lets it go (#199).
@@ -53,7 +54,6 @@ export function RecordScreen() {
       {/* Balances the status line below, so the button stays centered. */}
       <div className="h-10" />
       <RecordButton
-        state={pedos.capture.kind === 'starting' ? 'starting' : 'record'}
         disabled={pedos.capture.kind !== 'idle'}
         onClick={() => void pedos.startRecording()}
       />
