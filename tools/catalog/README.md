@@ -19,6 +19,8 @@ The first run downloads `PDMX.csv` (225 MB) and `mid.tar.gz` (214 MB) into `~/.c
 | `titles-NN.report.md`, `.json` | The batch's pass/fail report for every title, and every score tried |
 | `rank_pdmx.py` | Ranks the tune titles not yet tried by how popular their scores are, and writes the next batch |
 | `test_rank_pdmx.py` | Unit tests for the ranking |
+| `flag_picks.py` | After an import, lists the batch's passing picks whose own genre, tags or artist look modern |
+| `test_flag_picks.py` | Unit tests for the flags |
 | `ranking.md` | The ranking: the top 1,500 titles not yet tried, and why the others are left out |
 | `excluded-titles.txt` | Titles the ranking leaves out by hand, one `Title \| why` a line: under copyright, not one tune, or the same tune under another name |
 
@@ -30,7 +32,16 @@ From `titles-04.txt` on, a batch is the top of the ranking (#312):
 tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py --batch 150 --out tools/catalog/titles-05.txt
 ```
 
-A tune title's scores are the ones the import would match for a Song of that name and its license gate accepts, so arrangements of one tune count under one title. Titles rank by those scores' views in all, then ratings in all, then mean rating. Titles already in the catalog or in any titles file are left out, so a title that failed stays failed, as are titles with one score, titles no score of which can be picked, composer or collection names, and the same tune under a longer, shorter or translated name. PDMX takes a score's license from its uploader, and many recent songs are marked public domain, so the ranking also leaves out titles whose scores have no MuseScore genre or mostly a modern one (pop, rock, soundtrack and the like), or whose named artists don't agree on one piece. What's left still holds songs under copyright and titles that aren't one tune: read the top of `ranking.md` before each batch, add them to `excluded-titles.txt` with the reason, and run it again. Neither the batch file nor the Songs imported from it count as tried while `--out` names it, so it can be written again even after its import. After the import, compare each passing score's MuseScore artist and composer (`artist_name` and `composer_name` in `PDMX.csv`) with the title's Artist in `ranking.md`: a pick by someone else may be another piece of the same name, or under copyright. Add those to `excluded-titles.txt`, write the batch and import it again. Then run without `--out` to bring `ranking.md` up to date.
+A tune title's scores are the ones the import would match for a Song of that name and its license gate accepts, so arrangements of one tune count under one title. Titles rank by those scores' views in all, then ratings in all, then mean rating. Titles already in the catalog or in any titles file are left out, so a title that failed stays failed, as are titles with one score, titles no score of which can be picked, composer or collection names, and the same tune under a longer, shorter or translated name. PDMX takes a score's license from its uploader, and many recent songs are marked public domain, so the ranking also leaves out titles whose scores have no MuseScore genre or mostly a modern one (pop, rock, soundtrack and the like), or whose named artists don't agree on one piece. What's left still holds songs under copyright and titles that aren't one tune: read the top of `ranking.md` before each batch, add them to `excluded-titles.txt` with the reason, and run it again. Neither the batch file nor the Songs imported from it count as tried while `--out` names it, so it can be written again even after its import. After the import, check the picks two ways:
+
+```sh
+tools/melody-lab/.venv/bin/python -I tools/catalog/flag_picks.py --titles tools/catalog/titles-05.txt
+```
+
+1. It lists each passing pick whose own MuseScore genre, tags or artist look modern (rock, soundtrack, Disney, "Misc Soundtrack" and the like). A title can pass the ranking's genre rule while the importer picks its one modern arrangement, as Misirlou's pick was Dick Dale's. Check each one listed.
+2. Compare each passing score's MuseScore artist and composer (`artist_name` and `composer_name` in `PDMX.csv`) with the title's Artist in `ranking.md`: a pick by someone else may be another piece of the same name, or under copyright.
+
+Add the titles to pull to `excluded-titles.txt` with the reason, delete their lines from the batch file, note them in its header, and import it again, so the catalog and the report match the batch file. Then run `rank_pdmx.py` without `--out` to bring `ranking.md` up to date.
 
 ## Picking
 

@@ -1,6 +1,7 @@
 # The top 150 tune titles of tools/catalog/ranking.md, not yet in the catalog or tried, written by
 # tools/catalog/rank_pdmx.py --batch 150 --out tools/catalog/titles-04.txt (#312). Each title's only name is
-# the one the ranking counted scores by.
+# the one the ranking counted scores by. Review of its import (#325) pulled 5 titles, now in
+# excluded-titles.txt: El Condor Pasa, Misirlou, Lavender's Blue, Dido's Lament, Indian National Anthem.
 # id | catalog title
 maple-leaf-rag | Maple Leaf Rag
 piano-sonata-no-16-in-c-major-k-545 | Piano Sonata No.16 in C major K.545
@@ -21,7 +22,6 @@ nocturne-op-9-no-2 | Nocturne Op 9 No 2
 gaudeamus-igitur | Gaudeamus Igitur
 reverie | Rêverie
 brahms-intermezzo-op-118-no-2 | Brahms Intermezzo Op. 118 No. 2
-el-condor-pasa | El Condor Pasa
 uti-var-hage | Uti vår hage
 clarinet-concerto-in-a-major-k-622 | Clarinet Concerto in A major K.622
 piano-sonatina-in-c-major-op-20-no-1 | Piano Sonatina in C major Op.20 No.1
@@ -35,7 +35,6 @@ chopin-nocturne-in-e-minor-op-72-no-1 | Chopin Nocturne in E Minor Op. 72 No. 1
 vedro-con-mio-diletto | Vedro con mio diletto
 toss-the-feathers | Toss the Feathers
 lacrimosa | Lacrimosa
-misirlou | Misirlou
 prelude-in-c-major | Prelude in C Major
 cavalleria-rusticana-intermezzo | Cavalleria Rusticana Intermezzo
 swan | The Swan
@@ -52,13 +51,11 @@ blue-bells-of-scotland | Blue Bells of Scotland
 tourdion | Tourdion
 pini-di-roma | Pini Di Roma
 ich-steh-an-deiner-krippen-hier | Ich steh an Deiner Krippen hier
-lavenders-blue | Lavender's Blue
 12th-street-rag | 12th Street Rag
 hatikva | Hatikva
 toccata-in-e-minor-bwv-914 | Toccata in e minor BWV 914
 bwv-1004-violin-partita-no-2-in-d-minor | BWV 1004 Violin Partita No.2 in D minor
 internationale | The Internationale
-didos-lament | Dido's Lament
 a-la-nanita-nana | A La Nanita Nana
 flight-of-the-bumblebee | Flight of the Bumblebee
 god-of-mercy-and-compassion | God of Mercy and Compassion
@@ -150,5 +147,4 @@ o-splendor-of-gods-glory-bright | O Splendor of God's glory bright
 aloha-oe | Aloha Oe
 rockingham | Rockingham
 i-sing-the-mighty-power-of-god | I Sing the Mighty Power of God
-indian-national-anthem | Indian National Anthem
 mille-regretz | Mille regretz

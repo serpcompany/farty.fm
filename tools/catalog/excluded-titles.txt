@@ -9,9 +9,11 @@
 #   - the same tune as a Song in the catalog or a better-ranked title, under another name.
 #   - the importer's pick isn't the tune most of its scores carry, as titles-02.txt found.
 #   - an offensive title.
+#   - a national anthem a law protects from disrespect.
 # Reviewed for batch 04 (#312): the top 250 of the ranking, titles titles-02.txt left out for a
 # later batch or because the importer's pick isn't the tune, and the picks of titles-04.txt's first
-# import whose MuseScore artist or composer wasn't the tune's.
+# import whose MuseScore artist or composer wasn't the tune's. Pulled from titles-04.txt after review
+# (#325): Misirlou, El Condor Pasa, Lavender's Blue, Dido's Lament and Indian National Anthem.
 
 # Under copyright
 Toss A Coin To Your Witcher | under copyright: Sonya Belousova and Giona Ostinelli, 2019
@@ -152,6 +154,8 @@ The Call | under copyright: Regina Spektor, 2008
 Calypso | under copyright: Jan Holdstock, 20th century
 House of the Rising Sun | under copyright: the importer picks The Animals' arrangement (Alan Price, 1964), the tune most scores follow
 Was wollen wir trinken | under copyright: it is Son ar chistr, words by Jean-Bernard and Jean-Marie Prima (1929), its tune's origin unclear
+Misirlou | under copyright: credited to Nick Roubanis (1941, renewed 1969), and the importer picks Dick Dale's arrangement (1962) https://en.wikipedia.org/wiki/Misirlou
+El Condor Pasa | under copyright: Daniel Alomia Robles, first published in the US in 1933 https://en.wikipedia.org/wiki/El_C%C3%B3ndor_Pasa_(song)
 
 # Not one tune
 Nocturnes Op.9 | not one tune: a set of three nocturnes (Nocturne Op. 9 No. 2 is its own title)
@@ -271,13 +275,19 @@ Menuet in G | the same tune as Minuet in G
 See the Conquering Hero comes | the same tune as See the Conqu'ring hero comes
 
 # The importer's pick isn't the tune (titles-02.txt, titles-04.txt)
-Carioca | the importer picks Vincent Youmans's Carioca (1933, under copyright), not Ernesto Nazareth's (titles-04.txt)
-Blue Bird | the importer picks an unnamed BLUE BIRD; Stanford's partsong and the Naruto opening (2008) share the title (titles-04.txt)
-October | the importer picks an unnamed October with 2 views, not Tchaikovsky's (titles-04.txt)
+Carioca | the importer picks Vincent Youmans's Carioca (1933, under copyright), not Ernesto Nazareth's (dropped from titles-04.txt after its first import)
+Blue Bird | the importer picks an unnamed BLUE BIRD; Stanford's partsong and the Naruto opening (2008) share the title (dropped from titles-04.txt after its first import)
+October | the importer picks an unnamed October with 2 views, not Tchaikovsky's (dropped from titles-04.txt after its first import)
+Dido's Lament | the importer picks "Thy Hand, Belinda", the recitative before "When I am laid in earth" (pulled from titles-04.txt after review) https://musescore.com/score/5721755
+Lavender's Blue | the importer picks an arrangement from Disney's Cinderella (2015, Patrick Doyle), not the traditional tune (pulled from titles-04.txt after review) https://musescore.com/score/976786
 Go Tell It on the Mountain | the importer's pick is an accompaniment or a one-note ostinato (titles-02.txt)
 Molly Malone | the importer's pick is an accompaniment or a one-note ostinato (titles-02.txt)
 The Ash Grove | the importer's pick is an accompaniment or a one-note ostinato (titles-02.txt)
 Here We Come A-Wassailing | the importer's pick sets another tune of the same name (titles-02.txt)
+
+# A national anthem a law protects from disrespect
+Indian National Anthem | India's Prevention of Insults to National Honour Act, 1971, s.3 (pulled from titles-04.txt after review) https://en.wikipedia.org/wiki/Prevention_of_Insults_to_National_Honour_Act,_1971
+Jana Gana Mana | the same as Indian National Anthem: India's Prevention of Insults to National Honour Act, 1971, s.3 https://en.wikipedia.org/wiki/Jana_Gana_Mana
 
 # An offensive title
 Le petit negre | an offensive title

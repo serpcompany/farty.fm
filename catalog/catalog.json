@@ -4117,37 +4117,6 @@
   }
  },
  {
-  "id": "el-condor-pasa",
-  "title": "El Condor Pasa",
-  "file": "midi/pdmx-el-condor-pasa.mid",
-  "sha256": "bd00c2f59850f5347175f42518b450c98535b509bfc8c987dc5bf49b512a4c02",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/17/51/QmZWjKAuzEYAzR9FSwCQPZbjQQLjbJSJ8PiSvtaiXQ1UgE.mid",
-   "musescore_score_id": "5956778",
-   "musescore_url": "https://musescore.com/score/5956778",
-   "score_title": "EL CONDOR PASA",
-   "composer": "NA",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "460"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 28.5,
-   "beats_per_bar": 4
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-04.txt"
-  }
- },
- {
   "id": "uti-var-hage",
   "title": "Uti vår hage",
   "file": "midi/pdmx-uti-var-hage.mid",
@@ -4349,36 +4318,6 @@
    "rating": "4.66",
    "n_ratings": "3",
    "n_views": "127"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-04.txt"
-  }
- },
- {
-  "id": "misirlou",
-  "title": "Misirlou",
-  "file": "midi/pdmx-misirlou.mid",
-  "sha256": "3f2be9e0122198ddd71ff7d943a68ea654f3af39d6564d5c06915aa7c10742f3",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/16/45/QmYTrMnu1wWnKcxXbDpVCyaDPGq3GiPQ7GTbKvnDXg7Ya4.mid",
-   "musescore_score_id": "163451",
-   "musescore_url": "https://musescore.com/score/163451",
-   "score_title": "Misirlou",
-   "composer": "NA",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.9",
-   "n_ratings": "8",
-   "n_views": "6097"
   },
   "retrieved": "2026-10-25",
   "render": {
@@ -4794,36 +4733,6 @@
   }
  },
  {
-  "id": "lavenders-blue",
-  "title": "Lavender's Blue",
-  "file": "midi/pdmx-lavenders-blue.mid",
-  "sha256": "67de5d3e3d7d679eaf68180876dd38d5a8f620dd39ce9410e2e7fd1c9e4232f9",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/13/27/QmVJhKEJ7eio1MEPaWiZ6ztGgnPs21NsiRkm1YffHawfHU.mid",
-   "musescore_score_id": "976786",
-   "musescore_url": "https://musescore.com/score/976786",
-   "score_title": "Lavender's Blue",
-   "composer": "Arr. Camille Blecher",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.68",
-   "n_ratings": "41",
-   "n_views": "6925"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 30
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-04.txt"
-  }
- },
- {
   "id": "12th-street-rag",
   "title": "12th Street Rag",
   "file": "midi/pdmx-12th-street-rag.mid",
@@ -4878,37 +4787,6 @@
    "bpm": 120,
    "max_beats": 29,
    "beats_per_bar": 4
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-04.txt"
-  }
- },
- {
-  "id": "didos-lament",
-  "title": "Dido's Lament",
-  "file": "midi/pdmx-didos-lament.mid",
-  "sha256": "29e7cb2020a63de82a8559b2e1665b0acc1bd9a962a90f2e25691b0f1da41e77",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/1/55/QmbYTYuHQ8qJfKbtKDrXwDSsqoiiuJ1o7gQiJwKETKztGV.mid",
-   "musescore_score_id": "5721755",
-   "musescore_url": "https://musescore.com/score/5721755",
-   "score_title": "Thy Hand Belinda Si Maior - Henry Purcell",
-   "composer": "Music By: Henry Purcell",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.39",
-   "n_ratings": "7",
-   "n_views": "827"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 72,
-   "start_beat": 0.5,
-   "max_beats": 31.5
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -6843,36 +6721,6 @@
    "bpm": 120,
    "max_beats": 29,
    "beats_per_bar": 4
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-04.txt"
-  }
- },
- {
-  "id": "indian-national-anthem",
-  "title": "Indian National Anthem",
-  "file": "midi/pdmx-indian-national-anthem.mid",
-  "sha256": "7d49c75860c6e4dee06e33bdc3fbc64b7486530aa3596e4612a93dbe9d8c6c1b",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/2/42/Qmcs7GhSrbib4Tsh2vkowkCrPWk9bm3NgMTJ9vNthVtdbh.mid",
-   "musescore_score_id": "5858350",
-   "musescore_url": "https://musescore.com/score/5858350",
-   "score_title": "Indian National Anthem",
-   "composer": "Rabindranath Tagore",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.47",
-   "n_ratings": "14",
-   "n_views": "613"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 92,
-   "max_beats": 32
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",

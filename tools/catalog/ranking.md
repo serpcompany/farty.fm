@@ -18,8 +18,8 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
   - 2519: mostly a title head: a composer or collection
   - 891: mostly a modern genre: likely under copyright
   - 874: no one artist for most of its scores: several pieces share the title
-  - 347: in the catalog or tried already
-  - 258: in excluded-titles.txt
+  - 342: in the catalog or tried already
+  - 263: in excluded-titles.txt
   - 228: the same tune as a better-ranked or tried title
   - 22: every spelling of the title is garbled
 
