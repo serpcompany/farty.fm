@@ -221,9 +221,9 @@ describe('every deploy and remote migration', () => {
 
 describe('E2E', () => {
   it('applies the migrations to the local database before the journeys', () => {
-    const steps = workflows['web.yml'].jobs.e2e.steps ?? []
+    const steps = workflows['web.yml'].jobs['e2e-shard'].steps ?? []
     const migrate = steps.findIndex(step => step.run === 'pnpm db:migrate:local')
-    const journeys = steps.findIndex(step => step.run === 'pnpm test:e2e')
+    const journeys = steps.findIndex(step => /^pnpm test:e2e\b/.test(step.run ?? ''))
     expect(migrate).toBeGreaterThanOrEqual(0)
     expect(journeys).toBeGreaterThan(migrate)
     expect(scripts['db:migrate:local']).toMatch(/--local\b/)
