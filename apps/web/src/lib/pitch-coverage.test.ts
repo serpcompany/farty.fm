@@ -353,7 +353,7 @@ describe('Placed Recordings (ADR 0015)', () => {
   it('leaves a Melodic Recording out with "No note": 002 out locks Amazing Grace (#314)', () => {
     const left = place(all, '002', NO_NOTE)
     expect(coverageKey(left)).toBe(coverageKey(without002))
-    expect(listing(left).locked.map(r => r.song.id)).toEqual(['amazing'])
+    expect(iPhoneListing(left).locked.map(r => r.song.id)).toEqual(['amazing'])
     expect(coverageKey(place(all, '002', null))).toBe(coverageKey(all))
   })
 
