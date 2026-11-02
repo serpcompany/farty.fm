@@ -8,6 +8,20 @@ They chose design A of three ("letys go with design A"). They also chose the Rec
 
 Update 2026-10-30 (#282, ADR 0017): a placement outlasts a Recording Pitch that a later analysis finds. The Placed Pitch stays and is the one used, since the user chose it by ear. That replaces rule 6's "If it finds the fart Melodic, its Recording Pitch is used and the placement is ignored". Rule 1 still holds: only a Noise-like Recording can be placed, and a placed one can still be moved or taken off. A second pitch window finds `009` and `080` Melodic, both at G1, below the picker's C2. The measurements below were taken while both were Noise-like. Rule 2's count is now 26 Melodic golden Recordings, from G1 to G4, and the picker stays C2 to B4.
 
+Update 2026-11-03 (#314): the picker is gone, and any Recording's note can be changed. Each take has one review (`take-review.tsx`), right after Stop and from a Recording's pencil on the Recordings tab. It shows the whole take with Trim handles (ADR 0019), the note above one octave of piano keys from C2 to B4 with octave arrows, a "No note" button, and the Recording's name. This replaces rules 1 to 3 where they differ:
+
+- **Rule 1.** Any Recording can be placed, not only a Noise-like one. A key plays its piano note and makes it the note.
+  - On a Melodic Recording the note analysis found is ringed while another is picked, and "Back to G3" returns to it. Picking the found note stores no Placed Pitch, so the Recording follows its analysis again.
+  - "No note" leaves a Recording out of Songs. A Noise-like one keeps no Placed Pitch, as before. A Melodic one is stored with the Placed Pitch −1 (`NO_NOTE`), which `songPitch()` reads as no note.
+  - The row's pill shows the note Songs use: "G3", "No note", or "Finding…" while analysis runs. "Placed by ear" stays under the name of a placed one.
+  - A new take's review saves its Placed Pitch with the Recording, and Save never waits for analysis (ADR 0002).
+- **Rule 2.** The keys open on the octave of the note shown, or on octave 3.
+- **Rule 3.** The piano note sounds only in the review. It never reaches a Song, a Toot or a render.
+- **Rules 4 to 6** hold for a Melodic Recording placed on another note: Auto-map reads it at its Placed Pitch from 0.6 s, settled from its start. The reference's `placed()` takes any Recording. The account takes −1 as well as 0 to 127.
+- **The Result screen** says "No note" instead of "No steady note this time", since a fart the user left out can have a steady note. Its next line says Songs leave it out until it gets a note from the Recordings tab.
+
+Measured on `scenarios/review-melodic.json`, with `069` (G♯2 +43 c) placed on A2 and two Melodic farts trimmed: When the Saints Go Marching In passes the bar. ADR 0019's update has the numbers.
+
 1. **Place it, or leave it out.**
    - On the Recordings tab, a Noise-like Recording's row has an outlined "noise-like ›" pill. It opens the picker (`place-by-ear.tsx`): a stock bottom Sheet on a phone, a centered Dialog from 48rem wide.
    - The picker has the fart's play button, waveform and length, one octave of piano keys with octave arrows, then "Place at E3" and "Leave it out".
@@ -102,4 +116,4 @@ How these read:
   - This happens only when the page is newer than the Worker that answers, for example after a Worker rollback.
 - A saved Toot keeps its audio. Its note captions show a Recording's Placed Pitch as it is now.
 - The iPhone app doesn't have this. It is web only (ADR 0007).
-- The Result screen still says "No steady note this time". Its next line said the fart can't play melody notes; it now says it can be placed on a note by ear on the Recordings tab. Placing happens only there, and the Support page says how.
+- The Result screen still says "No steady note this time". Its next line said the fart can't play melody notes; it now says it can be placed on a note by ear on the Recordings tab. Placing happens only there, and the Support page says how. (Since #314 it says "No note", and a note is changed in the review.)

@@ -314,7 +314,7 @@ it("saves nothing, and says it didn't, when the fart between the handles can't b
   })
   expect(saved).toBe(false)
   expect(page.reportError).toHaveBeenCalledWith('recording-trim-failed', expect.any(Error))
-  // Not the Placed Pitch alone either: the picker stays open to try both again.
+  // Not the Placed Pitch alone either: the review stays open to try both again.
   expect(page.placeRecording).not.toHaveBeenCalled()
   expect(pedos().recording('r18')?.trim).toBeFalsy()
   expect(pedos().recording('r18')?.placedPitch).toBeFalsy()

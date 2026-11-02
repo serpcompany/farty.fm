@@ -85,8 +85,8 @@ export function formattedFartLength(recording: Recording): string {
   return formattedFartSeconds(fartSeconds(recording))
 }
 
-/** A fart `seconds` long as rows show it, rounded down: what the picker shows for its handles. */
-export function formattedFartSeconds(seconds: number): string {
+/** A fart `seconds` long as rows show it, rounded down. */
+function formattedFartSeconds(seconds: number): string {
   return formattedLength(Math.floor(seconds * 10 + 1e-9) / 10)
 }
 

@@ -1,9 +1,8 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Analysis } from '@/lib/analysis/recording-analysis'
 import type { Take } from '@/lib/audio/recorder'
-import type { AnalysisState, Recording, Trim } from '@/lib/recordings'
+import type { Analysis, AnalysisState, Recording, Trim } from '@/lib/recordings'
 import { encodeWav, type PcmAudio } from '@/lib/wav'
 
 // A take's review in a DOM, with the real PedosProvider (#314): after Stop, it saves before

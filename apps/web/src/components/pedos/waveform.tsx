@@ -36,9 +36,9 @@ export function Waveform({
 const SCRUB_PIXELS = 6
 
 /** The shortest fart a Trim's handles leave between them, in seconds. */
-export const SHORTEST_TRIM_SECONDS = 0.05
+const SHORTEST_TRIM_SECONDS = 0.05
 
-/** A time in a take as the picker reads it out: "1.20 s". */
+/** A time in a take as the review reads it out: "1.20 s". */
 export const formattedTime = (seconds: number) => `${seconds.toFixed(2)} s`
 
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value))
@@ -48,9 +48,8 @@ const clamp = (value: number, low: number, high: number) => Math.min(high, Math.
  * a playhead line that follows `position` (the audio clock) while `playing` plays, and the bars it
  * has passed filled in. With `label`, it's a slider: a tap plays from that spot, a drag scrubs
  * and plays from where it lets go (`onPlayFrom`), and the arrow keys jump a twelfth of the view.
- * With `trim`, the picker's handles sit over it, beside the slider rather than inside it, since a
- * slider's children are presentational to a screen reader. With `window`, it's the small strip of
- * the whole take with a box where the view above sits.
+ * With `trim`, the review's Trim handles sit over it, beside the slider rather than inside it,
+ * since a slider's children are presentational to a screen reader.
  */
 export function ReplayWaveform({
   levels,
@@ -58,12 +57,10 @@ export function ReplayWaveform({
   playing,
   position,
   dim,
-  window: shown,
   label,
   onPlayFrom,
   onScrubStart,
   trim,
-  small = false,
   className
 }: {
   levels: number[]
@@ -74,14 +71,11 @@ export function ReplayWaveform({
   position: () => number | null
   /** Bars outside it draw dimmer: the take around the fart. */
   dim?: Trim
-  window?: Trim
   label?: string
   onPlayFrom?: (seconds: number) => void
   /** A press became a scrub: playback stops while it scrubs. */
   onScrubStart?: () => void
   trim?: { part: Trim; onChange: (part: Trim, done: boolean) => void }
-  /** The thin strip under the picker's waveform: no fill, a thinner line. */
-  small?: boolean
   className?: string
 }) {
   const box = useRef<HTMLDivElement>(null)
@@ -151,24 +145,15 @@ export function ReplayWaveform({
     onPlayFrom?.(clamp(here + step, view.startSeconds, view.endSeconds))
   }
 
-  const percent = (seconds: number) =>
-    `${(((seconds - view.startSeconds) / span) * 100).toFixed(3)}%`
-  const width = (part: Trim) =>
-    `${(((part.endSeconds - part.startSeconds) / span) * 100).toFixed(3)}%`
   const bar = span / Math.max(1, levels.length)
   const drawn = (
     <>
-      <span
-        className={cn(
-          'pointer-events-none absolute inset-0 flex items-center',
-          small ? 'gap-px' : 'gap-[2px]'
-        )}
-      >
+      <span className="pointer-events-none absolute inset-0 flex items-center gap-[2px]">
         {levels.map((level, i) => {
           const mid = view.startSeconds + (i + 0.5) * bar
           const dimmed = dim && (mid < dim.startSeconds || mid > dim.endSeconds)
           const played =
-            !small && scrubAt === null && from !== null && now !== null
+            scrubAt === null && from !== null && now !== null
               ? mid + bar / 2 >= from && mid - bar / 2 <= now
               : false
           return (
@@ -177,8 +162,7 @@ export function ReplayWaveform({
               // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length, static list
               key={i}
               className={cn(
-                'min-w-0 flex-1 rounded-full',
-                small ? 'min-h-px' : 'min-h-[2px]',
+                'min-w-0 flex-1 rounded-full min-h-[2px]',
                 played ? 'bg-primary' : dimmed ? 'bg-muted-foreground/30' : 'bg-muted-foreground/60'
               )}
               style={{ height: `${Math.max(level, 0.05) * 100}%` }}
@@ -186,22 +170,11 @@ export function ReplayWaveform({
           )
         })}
       </span>
-      {shown && (
-        <span
-          className="pointer-events-none absolute -top-1 -bottom-1 rounded-sm border-[1.5px] border-foreground/55"
-          style={{ left: percent(shown.startSeconds), width: width(shown) }}
-        />
-      )}
       {x !== null && x >= 0 && x <= 1 && (
         <span
-          className={cn(
-            'pointer-events-none absolute z-[3] rounded-full bg-brand-strong dark:bg-brand',
-            small
-              ? '-top-[3px] -bottom-[3px] -ml-[0.75px] w-[1.5px]'
-              : '-top-[5px] -bottom-[5px] -ml-px w-[2px]'
-          )}
+          className="pointer-events-none absolute z-[3] -top-[5px] -bottom-[5px] -ml-px w-[2px] rounded-full bg-brand-strong dark:bg-brand"
           style={{ left: `${(x * 100).toFixed(3)}%` }}
-          data-testid={small ? undefined : 'playhead'}
+          data-testid="playhead"
         />
       )}
     </>
@@ -243,7 +216,7 @@ export function ReplayWaveform({
 }
 
 /**
- * The picker's Trim handles over the zoomed waveform (ADR 0019): a pink frame around the part
+ * The review's Trim handles over the whole take (ADR 0019): a pink frame around the part
  * kept, the rest shaded, and a handle at each end. Drag one, or focus it and use the arrow keys
  * (a hundredth of a second, a tenth with Shift).
  */

@@ -6,6 +6,22 @@ Until #293 a Recording's waveform didn't move while it played. That held on its 
 
 They chose design B of #293's mockups the same day and settled the following:
 
+Update 2026-11-03 (#314): any Recording can be trimmed, Melodic ones included, in its review, which replaces the picker (ADR 0015's update). This changes the rules below:
+
+- **Rules 2 and 3.** The review shows the whole take, with the handles on the fart analysis found, or on the whole take until analysis finds it. There is no Trim button: the handles are always there. Their length shows beside Play, which plays between them. "Reset" puts them back on the fart analysis found. Save keeps a Trim when the handles have moved, and takes it off when they are back on that fart: there is no "Remove trim". Each arrow key moves a handle 0.01 s, and with Shift, 0.1 s.
+- **A new take.** On a new take, the handles move to the fart analysis finds as it lands, unless the user has moved them. Save keeps the Recording at once, then its Trim, found between the handles in the analysis worker.
+- **Rule 3's last point and rule 7.** Any Recording can be trimmed, so `trimOf()` returns any Recording's Trim, and a Melodic Recording's Trim is always in use. A Trim still never re-reads pitch: a trimmed Melodic Recording keeps its Recording Pitch, shortest note and settle time, and Auto-map counts the Trim's length (`autoMapRecording()` with the Trim). In the reference, `trimmed()` takes any Recording, and its `placed_by_ear` is gone.
+
+Measured with `evaluate_renders.py --against-reference --scenario`. `scenarios/review-melodic.json` is `trim-065.json`'s library with `002` trimmed to 0.4 to 1.8 s and `022` to 0.9 to 1.9 s, which moves each fart's start later, and `069` placed on A2:
+
+| | `trim-065` (before: Melodic Recordings as analysis found them) | `review-melodic` (after) |
+| --- | --- | --- |
+| Mary Had a Little Lamb | passes. 100% of notes within 50 cents of their fart, 100% on time, 0 re-attacks, sounding 85% | locked: it needs a 1.5 s E2, and `022`'s Trim is 1.0 s |
+| When the Saints Go Marching In | passes. Transposition −21, 100% within 50 cents of their fart, 100% on time, 0 re-attacks, sounding 91%, 0 mostly silent | passes. Transposition −24, 100% within 50 cents of their fart, 100% on time, 0 re-attacks, sounding 92%, 1 mostly silent. It plays `002` on 7 notes, `022` on 9 and `069` on 6 |
+| Web render against the reference's | Mary −109.5 dBFS, Saints −115.7 dBFS | Saints −107.4 dBFS |
+
+The web renders of `trim-065` are byte for byte the same before and after #314. On the full library, untrimmed, the web engine's renders of the 13 golden Songs all pass and equal golden note for note, and the largest sample difference from the reference's render is still −98.0 dBFS.
+
 1. **A playhead follows replay.**
    - While a Recording plays, a pink line crosses its waveform and fills the bars behind it. This happens on its row and in the picker. The line follows the player's audio clock (`playbackPosition()` in `audio/player.ts`), less the output's latency where the browser reports it (`outputLatency`, large on Bluetooth).
    - A tap on the waveform plays from that spot. A drag of more than 6 px scrubs: the line follows the finger, and letting go plays from there.
@@ -88,3 +104,4 @@ The outbox keeps one entry per item, and a newer op replaces an older one (`merg
 - A saved Toot keeps its audio. A Trim saved later doesn't change it.
 - The iPhone app doesn't have this. It is web only (ADR 0007), and Swift stays frozen.
 - ADR 0015 and ADR 0016 carry dated notes where this changes them.
+- Since #314 the title's "Noise-like" no longer limits it: any Recording can be trimmed (the update above).

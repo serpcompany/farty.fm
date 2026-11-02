@@ -137,7 +137,7 @@ async function main() {
       recordings.push({ id, audio, analysis: result })
       continue
     }
-    // As the picker's Save trim finds it, in the analysis worker.
+    // As the review's Save finds it, in the analysis worker.
     const y = resampleToAnalysisRate(audio.samples, audio.sampleRate)
     const fart = trimBounds(y, handles[0], handles[1])
     const trim = { startSeconds: handles[0], endSeconds: handles[1], fart }

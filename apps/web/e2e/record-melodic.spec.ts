@@ -148,7 +148,7 @@ test('Re-scan finds the note of a fart the open’s upgrade couldn’t read (#28
       page.evaluate(() => (window as unknown as { heldAudioReads: number }).heldAudioReads)
     )
     .toBeGreaterThanOrEqual(2)
-  await expect(page.getByTestId('recording-note')).toHaveText('noise-like')
+  await expect(page.getByTestId('recording-note')).toHaveText('No note')
   await expect(page.getByTestId('pitch-summary')).toHaveText(
     /^0 Melodic Recordings across 0 notes\s*1 Recording$/
   )

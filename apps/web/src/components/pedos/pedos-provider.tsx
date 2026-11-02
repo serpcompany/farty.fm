@@ -684,16 +684,18 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       // The Trim's fart is found in the analysis worker, after the take's analysis.
       if (changes.handles) await placeRecording(saved.id, { handles: changes.handles })
       const state = await session.analysis
-      const kept =
-        state.state === 'analyzed'
-          ? await store.saveAnalysis(saved.id, state).catch(error => {
-              reportError('analysis-failed', error)
-              return null
-            })
-          : null
+      const kept = await store.saveAnalysis(saved.id, state).catch(error => {
+        reportError('analysis-failed', error)
+        return null
+      })
       if (kept) replace(kept)
-      // Analysis at Stop failed: it runs once more on the saved take.
-      const analyzed = kept ?? (await runAnalysis(saved.id))
+      // Analysis at Stop failed: the Recording is kept as not analyzed, and Retry runs it again. If
+      // keeping its analysis failed, analysis runs once more on the saved take.
+      const analyzed = kept
+        ? kept.analysis.state === 'analyzed'
+          ? kept
+          : null
+        : await runAnalysis(saved.id)
       const next: Flow = analyzed ? resultOf(analyzed) : { kind: 'analysisFailed', id: saved.id }
       setFlow(current =>
         current?.kind === 'analyzing' && current.id === saved.id ? next : current

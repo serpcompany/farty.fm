@@ -76,7 +76,7 @@ export type Trim = { startSeconds: number; endSeconds: number }
 
 /**
  * A Recording's Trim (ADR 0019): exactly where the user left the handles, which the row and the
- * picker play, and `fart`, the fart `trimBounds` found between them, which Songs play so its onset
+ * review play, and `fart`, the fart `trimBounds` found between them, which Songs play so its onset
  * lands on the beat. `fart` always lies within the handles.
  */
 export type RecordingTrim = Trim & { fart: Trim }

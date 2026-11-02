@@ -455,7 +455,7 @@ test.describe("with the page's own microphone grant, as on iPhone", () => {
     await firstTap(page)
     await fartAndRecord(page)
     const play = page.getByTestId('review-play')
-    await expect(play).toHaveAccessibleName('Play')
+    await expect(play).toHaveAccessibleName(/^Play/)
 
     await setVisibility(page, 'hidden')
     await interrupt(page, 'mute')
@@ -463,7 +463,7 @@ test.describe("with the page's own microphone grant, as on iPhone", () => {
     await expect(play).toHaveAccessibleName('Stop')
     await setVisibility(page, 'visible')
     await interrupt(page, 'unmute')
-    await expect(play).toHaveAccessibleName('Play')
+    await expect(play).toHaveAccessibleName(/^Play/)
 
     // It plays again, on the fresh context.
     await play.click()

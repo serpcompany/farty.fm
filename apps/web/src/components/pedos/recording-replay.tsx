@@ -8,9 +8,8 @@ import { cn } from '@/lib/utils'
 import { decodeWav, type PcmAudio } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 
-// What a Recording's row and the place-by-ear picker show of its replay: the play button and the
-// waveform of the part replay plays: the whole take (ADR 0016), or its Trim (ADR 0019), or the
-// stretch around the fart the picker zooms to.
+// What a Recording's row and its review show of its replay: the play button and the waveform of
+// the part replay plays: the whole take (ADR 0016), or its Trim (ADR 0019).
 
 /** How many bars a replay waveform draws. */
 export const REPLAY_BARS = 48
@@ -65,7 +64,7 @@ export function partLevels(take: PcmAudio, part: Trim): number[] {
 /**
  * The bars of `part` of the take, or of the whole take, as replay plays it. None while the take
  * loads. Only the bars are kept: a row never holds its decoded take, which a library of a few
- * hundred Recordings couldn't keep in a phone's memory (#299). The picker, which zooms on one
+ * hundred Recordings couldn't keep in a phone's memory (#299). The review, which shows one
  * take, keeps it (`useTake`).
  */
 export function useReplayLevels(recording: Recording, part?: Trim): number[] {

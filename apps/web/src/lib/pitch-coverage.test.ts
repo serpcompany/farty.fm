@@ -297,7 +297,7 @@ describe('Placed Recordings (ADR 0015)', () => {
     expect(coverageKey(place(all, '009', null))).toBe(coverageKey(all))
   })
 
-  it('counts only a whole note from C2 to B4, as the picker offers', () => {
+  it('counts only a whole note from C2 to B4, as the review offers', () => {
     for (const outside of [35, 72, 48.5, Number.NaN]) {
       expect(coverageKey(place(all, '065', outside)), String(outside)).toBe(coverageKey(all))
     }
