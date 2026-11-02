@@ -18,7 +18,7 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
    - `/u/<handle>/r/<share id>/`, where the share id is 12 random characters of lowercase Crockford base 32 (60 bits, `newShareId()`). It can't be guessed from another link and says nothing of the Recording's own id.
    - Stop sharing deletes the share, and sharing again makes a new id, so a link that was stopped never works again.
 4. **Unlisted: anyone with the link, and nothing else.**
-   - The page, its image and its audio need no account. Nothing lists a link: there's no profile page until #319, every shared page is `noindex, nofollow` with no canonical, and the sitemaps leave `/u/` out.
+   - The page, its image and its audio need no account. Nothing lists a link: there's no profile page until #319 (which lists a user's shares on it, ADR 0021), every shared page is `noindex, nofollow` with no canonical, and the sitemaps leave `/u/` out.
    - It shows the Handle, the Recording's name, its note (a Placed Pitch counts), its length and the waveform of the part it plays, which is what its row plays: its Trim (ADR 0019), or else the whole take. Nothing else of the account: no email, no other Recordings.
    - Nothing is public until the user shares. A Recording that was never shared, or whose share stopped, answers the same 404 as one that never existed.
 5. **Each request checks D1.**

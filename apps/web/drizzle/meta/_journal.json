@@ -64,6 +64,13 @@
       "when": 1793654278030,
       "tag": "0008_sharing",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1793660309196,
+      "tag": "0009_friends",
+      "breakpoints": true
     }
   ]
 }

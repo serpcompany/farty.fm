@@ -40,19 +40,28 @@ export default function PrivacyPage() {
           email or your other Recordings.
         </li>
         <li>
-          Links aren&apos;t listed anywhere and search engines are asked not to index them, but
-          anyone you send one to can pass it on.
+          What you share is listed on your page, farty.fm/u/your handle, which anyone can open.
+          Search engines are asked not to index links or pages, but anyone you send one to can pass
+          it on.
         </li>
-        <li>You pick your handle the first time you share. It shows on every link you share.</li>
+        <li>
+          You pick your handle the first time you share or add a friend. It shows on every link you
+          share and on your page.
+        </li>
+        <li>
+          Friends: anyone with an account can send you a friend request by your handle. Farty keeps
+          who asked whom and who your friends are, and shows them only to the two of you. Removing a
+          friend doesn&apos;t tell them.
+        </li>
         <li>
           Stop sharing, deleting the Recording or deleting your account makes the link stop working
           for everyone. Apps that already showed a preview of the link may keep their copy of it.
         </li>
         <li>
-          Anyone can report a shared Recording. Farty keeps which link was reported and when, and
-          nothing about who reported it, and may take the link down. To limit how many reports one
-          device can send, it keeps a scrambled code made from your IP address for an hour, never
-          the address itself.
+          Anyone can report a shared Recording or a page. Farty keeps which link or page was
+          reported and when, and nothing about who reported it, and may take the link down. To limit
+          how many reports one device can send, it keeps a scrambled code made from your IP address
+          for an hour, never the address itself.
         </li>
       </ul>
 
@@ -119,10 +128,10 @@ export default function PrivacyPage() {
 
       <h2>Deleting your data</h2>
       <p>
-        Delete account on Profile removes your email, Recordings, Toots, handle, shared links and
-        Farty&apos;s record of your payments. Stripe keeps its own record of each payment. Without
-        an account, delete a Recording on the Recordings tab, or clear this site&apos;s data in your
-        browser to remove everything.
+        Delete account on Profile removes your email, Recordings, Toots, handle, shared links,
+        friends and friend requests, and Farty&apos;s record of your payments. Stripe keeps its own
+        record of each payment. Without an account, delete a Recording on the Recordings tab, or
+        clear this site&apos;s data in your browser to remove everything.
       </p>
 
       <h2>Children</h2>
