@@ -1,6 +1,12 @@
 import type { NewRecording, Placement, TootFields } from '@/db/library'
 import { isPerformance } from '@/lib/performance'
-import type { Analysis, RecordingTrim, Trim } from '@/lib/recordings'
+import {
+  type Analysis,
+  MAXIMUM_NAME_LENGTH,
+  NO_NOTE,
+  type RecordingTrim,
+  type Trim
+} from '@/lib/recordings'
 import type { TootArrangement } from '@/lib/toot'
 
 import { apiError } from './require-user'
@@ -155,13 +161,26 @@ function parseAnalysis(value: unknown): Analysis | null | undefined {
 }
 
 /**
- * A Placed Pitch (ADR 0015): a MIDI note number, or null when the Recording is left out; undefined
- * when it's neither. Any MIDI note, not only the ones the picker offers (C2 to B4), so a later
- * release can widen the picker and this Worker still keeps its uploads.
+ * A Placed Pitch (ADR 0015): a MIDI note number, `NO_NOTE` when the user left the Recording out of
+ * Songs (#314), or null when it follows its analysis; undefined when it's none of them. Any MIDI
+ * note, not only the ones the review offers (C2 to B4), so a later release can widen the keys and
+ * this Worker still keeps its uploads.
  */
 export function parsePlacedPitch(value: unknown): number | null | undefined {
-  if (value === null) return null
+  if (value === null || value === NO_NOTE) return value
   return isIntegerIn(value, 0, 127) ? value : undefined
+}
+
+/**
+ * A Recording's name (#314): trimmed, at most `MAXIMUM_NAME_LENGTH` long, or null when it has none,
+ * which an empty one means too; undefined when it's neither.
+ */
+export function parseName(value: unknown): string | null | undefined {
+  if (value === null) return null
+  if (typeof value !== 'string') return undefined
+  const name = value.trim()
+  if (name.length > MAXIMUM_NAME_LENGTH) return undefined
+  return name.length > 0 ? name : null
 }
 
 /** Part of a take, in seconds, starting before it ends; undefined when it isn't one. */
@@ -211,9 +230,9 @@ export function parseTrim(value: unknown): RecordingTrim | null | undefined {
 }
 
 /**
- * What `PATCH /api/recordings/{id}/` changes: a Placed Pitch, a Trim or both, each null to take it
- * off, and a field left out stays. Null when it changes neither, or either is invalid. A browser on
- * a release before #293 sends no Trim.
+ * What `PATCH /api/recordings/{id}/` changes: a Placed Pitch, a Trim, a name or any of them, each
+ * null to take it off, and a field left out stays. Null when it changes none, or one is invalid. A
+ * browser on a release before #293 sends no Trim, and one before #314 no name.
  */
 export function parsePlacement(value: unknown): Placement | null {
   if (!isObject(value)) return null
@@ -228,13 +247,19 @@ export function parsePlacement(value: unknown): Placement | null {
     if (trim === undefined) return null
     placement.trim = trim
   }
+  if (value.name !== undefined) {
+    const name = parseName(value.name)
+    if (name === undefined) return null
+    placement.name = name
+  }
   return Object.keys(placement).length > 0 ? placement : null
 }
 
 /**
  * The Recording as the browser keeps it (`Recording` in `src/lib/recordings.ts`), once its analysis
  * is done, or null. Its id must be the route's, and its sample rate its WAV's. A browser on a
- * release before #268 sends no `placedPitch`, and one before #293 no `trim`: each is left out.
+ * release before #268 sends no `placedPitch`, one before #293 no `trim`, and one before #314 no
+ * `name`: each is left out.
  */
 export function parseRecording(
   value: unknown,
@@ -246,6 +271,7 @@ export function parseRecording(
   const analysis = parseAnalysis(value.analysis)
   const placedPitch = value.placedPitch === undefined ? null : parsePlacedPitch(value.placedPitch)
   const trim = value.trim === undefined ? null : parseTrim(value.trim)
+  const name = value.name === undefined ? null : parseName(value.name)
   const valid =
     isIntegerIn(number, 1, 1_000_000) &&
     isTime(createdAt) &&
@@ -257,9 +283,10 @@ export function parseRecording(
     analysis !== undefined &&
     placedPitch !== undefined &&
     trim !== undefined &&
-    (trim === null || trimFits(trim, seconds))
+    (trim === null || trimFits(trim, seconds)) &&
+    name !== undefined
   if (!valid) return null
-  return { id, number, createdAt, seconds, sampleRate, waveform, analysis, placedPitch, trim }
+  return { id, number, createdAt, seconds, sampleRate, waveform, analysis, placedPitch, trim, name }
 }
 
 /** A Toot's title: trimmed, and not empty. */

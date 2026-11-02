@@ -1,6 +1,6 @@
 'use client'
 
-import { AudioLines, ChevronRight, Ear, Scissors, Trash2 } from 'lucide-react'
+import { AudioLines, Ear, Pencil, Scissors, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
   AlertDialog,
@@ -19,41 +19,41 @@ import { canRescan, rescanSummary } from '@/lib/analysis-upgrade'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import {
-  isNoiseLike,
   placedPitch,
   playedPart,
   type Recording,
   recordingName,
-  recordingPitch,
+  songPitch,
   trimOf
 } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
 import { usePedos } from './pedos-provider'
-import { PlaceByEar } from './place-by-ear'
+import { RecordingReview } from './record-flow'
 import { PlayCircle, useReplayLevels } from './recording-replay'
 import { ReplayWaveform } from './waveform'
 
 /**
  * Every Recording, newest first, with its note and waveform, and how many notes you've
- * collected. Tap a row to play it. Matches the iPhone app's `RecordingsTab`, plus placing a
- * Noise-like Recording on a note by ear (ADR 0015) and re-scanning one with no note, or all of
- * them (#282), which the web app alone has.
+ * collected. Tap a row to play it. Matches the iPhone app's `RecordingsTab`, plus each
+ * Recording's review behind its pencil, to trim it, change its note and rename it (#314), and
+ * re-scanning one with no note, or all of them (#282), which the web app alone has.
  */
 export function RecordingsScreen() {
   const pedos = usePedos()
   const [deleting, setDeleting] = useState<Recording | null>(null)
-  const [placing, setPlacing] = useState<string | null>(null)
+  const [editing, setEditing] = useState<string | null>(null)
+  const edited = editing === null ? undefined : pedos.recording(editing)
   // The last Re-scan's result goes into the live region after it opens, so a result that came
   // while the tab was closed is announced when the user comes back, not only shown.
   const [opened, setOpened] = useState(false)
   useEffect(() => setOpened(true), [])
 
-  // The page comes back on the Record tab, so the confirmation and the picker don't stay open.
+  // The page comes back on the Record tab, so the confirmation and the review don't stay open.
   useEffect(() => {
     const visibilityChanged = () => {
       if (document.visibilityState === 'hidden') {
         setDeleting(null)
-        setPlacing(null)
+        setEditing(null)
       }
     }
     document.addEventListener('visibilitychange', visibilityChanged)
@@ -131,7 +131,7 @@ export function RecordingsScreen() {
               <RecordingRow
                 key={recording.id}
                 recording={recording}
-                onPlace={() => setPlacing(recording.id)}
+                onEdit={() => setEditing(recording.id)}
                 onRescan={() => void pedos.rescanRecording(recording.id)}
                 onDelete={() => setDeleting(recording)}
               />
@@ -140,7 +140,9 @@ export function RecordingsScreen() {
         </section>
       )}
 
-      <PlaceByEar recordingId={placing} onClose={() => setPlacing(null)} />
+      {edited && (
+        <RecordingReview key={edited.id} recording={edited} onClose={() => setEditing(null)} />
+      )}
 
       <AlertDialog open={deleting !== null} onOpenChange={open => !open && setDeleting(null)}>
         <AlertDialogContent>
@@ -172,21 +174,22 @@ function counted(number: number, noun: string): string {
 }
 
 /**
- * A Recording: a big play button, its name, its note in a pill ("B3"), the waveform of what replay
- * plays, and the fart's length. Tap the row to play the whole take (ADR 0016), or its Trim when
- * it has one (ADR 0019); tap or drag the waveform to play from a spot (#293). Matches
- * `RecordingsRow`, plus the length, which the iPhone only reads out: it is what a locked Song's
- * "Needs a fart near F3 (3.0 s)" is measured against (#227).
+ * A Recording: a big play button, its name, its note in a pill ("B3", "No note" or "Finding…"),
+ * the waveform of what replay plays, and the fart's length. Tap the row to play the whole take
+ * (ADR 0016), or its Trim when it has one (ADR 0019); tap or drag the waveform to play from a spot
+ * (#293); tap the pencil for its review (#314). Matches `RecordingsRow`, plus the length, which
+ * the iPhone only reads out: it is what a locked Song's "Needs a fart near F3 (3.0 s)" is measured
+ * against (#227).
  */
 function RecordingRow({
   recording,
-  onPlace,
+  onEdit,
   onRescan,
   onDelete
 }: {
   recording: Recording
-  /** Opens the place-by-ear picker, for a Noise-like or placed Recording. */
-  onPlace: () => void
+  /** Opens its review: Trim, note and name (#314). */
+  onEdit: () => void
   /** Re-scans it, for a Recording with no note. */
   onRescan: () => void
   onDelete: () => void
@@ -197,9 +200,6 @@ function RecordingRow({
   const part = playedPart(recording)
   const levels = useReplayLevels(recording, part)
   const placed = placedPitch(recording)
-  // A Placed Pitch stays in use when a new analysis finds a Recording Pitch (ADR 0017).
-  const placeable = placed !== null || isNoiseLike(recording)
-  const pitch = placed === null ? recordingPitch(recording) : null
   const trimmed = trimOf(recording) !== null
 
   return (
@@ -208,8 +208,7 @@ function RecordingRow({
       data-testid="recording-row"
     >
       <div className="flex items-center gap-1">
-        {/* The row's play button lies under it all; the waveform and a Noise-like or placed
-            Recording's note take their own taps. */}
+        {/* The row's play button lies under it all; the waveform takes its own taps. */}
         <div className="relative flex min-w-0 flex-1 items-center gap-3.5">
           <button
             type="button"
@@ -222,21 +221,9 @@ function RecordingRow({
             <PlayCircle isPlaying={isPlaying} />
           </span>
           <span className="pointer-events-none relative flex min-w-0 flex-1 flex-col gap-2">
-            <span
-              className={cn(
-                'flex h-8 items-center justify-between gap-2',
-                placeable && (placed === null ? 'pr-28' : 'pr-20')
-              )}
-            >
+            <span className="flex h-8 items-center justify-between gap-2">
               <span className="truncate font-semibold">{name}</span>
-              {pitch !== null && (
-                <span
-                  className="rounded-full bg-muted px-3 py-1 font-semibold tabular-nums"
-                  data-testid="recording-note"
-                >
-                  {noteName(pitch)}
-                </span>
-              )}
+              <NotePill recording={recording} />
             </span>
             <span className="flex items-center gap-2">
               <ReplayWaveform
@@ -280,15 +267,16 @@ function RecordingRow({
               </span>
             )}
           </span>
-          {placeable && (
-            <PlaceButton
-              name={name}
-              placed={placed}
-              onClick={onPlace}
-              className="absolute top-0 right-0"
-            />
-          )}
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={`Edit ${name}`}
+          aria-haspopup="dialog"
+          onClick={onEdit}
+        >
+          <Pencil />
+        </Button>
         <Button variant="ghost" size="icon" aria-label={`Delete ${name}`} onClick={onDelete}>
           <Trash2 />
         </Button>
@@ -299,64 +287,35 @@ function RecordingRow({
 }
 
 /**
- * A Noise-like or placed Recording's note, which opens the place-by-ear picker: "noise-like ›"
- * until it's placed, then the note it's placed on in a dashed pill (ADR 0015).
+ * The note Songs use the Recording on, in a pill: "B3", "No note" when they leave it out, or
+ * "Finding…" while analysis runs. Nothing while it's not analyzed: Retry says so.
  */
-function PlaceButton({
-  name,
-  placed,
-  onClick,
-  className
-}: {
-  name: string
-  placed: number | null
-  onClick: () => void
-  className?: string
-}) {
-  if (placed === null) {
-    return (
-      <Button
-        variant="outline"
-        aria-haspopup="dialog"
-        aria-label={`${name} is noise-like. Place it on a note`}
-        onClick={onClick}
-        className={cn('gap-1 rounded-full pr-2 pl-3 font-normal text-muted-foreground', className)}
-        data-testid="recording-note"
-      >
-        noise-like
-        <ChevronRight />
-      </Button>
-    )
-  }
+function NotePill({ recording }: { recording: Recording }) {
+  const { state } = recording.analysis
+  if (state === 'notAnalyzed') return null
+  const pitch = songPitch(recording)
+  const text = state === 'analyzing' ? 'Finding…' : pitch === null ? 'No note' : noteName(pitch)
   return (
-    <Button
-      variant="ghost"
-      aria-haspopup="dialog"
-      aria-label={`${noteName(placed)}, placed by ear. Move it or take it off`}
-      onClick={onClick}
+    <span
       className={cn(
-        'rounded-full border-[1.5px] border-dashed border-foreground/45 px-3 text-base font-semibold tabular-nums',
-        className
+        'shrink-0 rounded-full bg-muted px-3 py-1 tabular-nums',
+        pitch === null ? 'text-sm text-muted-foreground' : 'font-semibold'
       )}
       data-testid="recording-note"
     >
-      {noteName(placed)}
-    </Button>
+      {text}
+    </span>
   )
 }
 
-/** Analyzing, not analyzed with Retry, or with no note and Re-scan (#282). */
+/** Not analyzed with Retry, or with no note and Re-scan (#282). */
 function Status({ recording, onRescan }: { recording: Recording; onRescan: () => void }) {
   const pedos = usePedos()
   // Lines up with the name, past the play button.
   const indent = 'pl-[3.625rem]'
   switch (recording.analysis.state) {
     case 'analyzing':
-      return (
-        <div className={indent}>
-          <Spinner aria-label="Analyzing" data-testid={`analyzing-${recording.number}`} />
-        </div>
-      )
+      return null
     case 'notAnalyzed':
       return (
         <div className={cn('flex items-center gap-2.5', indent)}>
@@ -395,7 +354,7 @@ function Status({ recording, onRescan }: { recording: Recording; onRescan: () =>
 
 /**
  * What the row's button says after the name: "1.1 s, B3", "0.9 s, C3, placed by ear", or
- * "0.4 s, noise-like, trimmed".
+ * "0.4 s, No note, trimmed".
  */
 function describe(recording: Recording): string[] {
   const parts = [formattedFartLength(recording)]
@@ -407,11 +366,9 @@ function describe(recording: Recording): string[] {
       parts.push('not analyzed')
       break
     case 'analyzed': {
-      const pitch = recordingPitch(recording)
-      const placed = placedPitch(recording)
-      if (placed !== null) parts.push(noteName(placed), 'placed by ear')
-      else if (pitch !== null) parts.push(noteName(pitch))
-      else parts.push('noise-like')
+      const pitch = songPitch(recording)
+      parts.push(pitch === null ? 'No note' : noteName(pitch))
+      if (placedPitch(recording) !== null) parts.push('placed by ear')
       if (trimOf(recording)) parts.push('trimmed')
     }
   }

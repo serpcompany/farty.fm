@@ -5,12 +5,18 @@ import {
   arrange,
   autoMapRecording,
   type MissingNote,
-  placedAutoMapRecording,
-  trimSeconds
+  placedAutoMapRecording
 } from '@/lib/engine/auto-map'
 import type { Song as EngineSong } from '@/lib/engine/song'
 import { noteName, pitchClass } from '@/lib/pitch'
-import { formattedLength, placedPitch, type Recording, songPitch, songTrim } from '@/lib/recordings'
+import {
+  formattedLength,
+  isLeftOut,
+  placedPitch,
+  type Recording,
+  songPitch,
+  songTrim
+} from '@/lib/recordings'
 
 // Pitch Coverage of the Song Catalog by the user's Recordings: a port of the iPhone app's
 // `PitchCoverage.swift` and `SongListing.swift`. Auto-map (`engine/auto-map.ts`) decides it; this
@@ -43,16 +49,17 @@ export type Coverage = {
 /**
  * Recordings as Auto-map reads them: the ones the user placed on a note, as Melodic Recordings at
  * their Placed Pitch (ADR 0015), even when a later analysis found a Recording Pitch (ADR 0017), and
- * the other analyzed ones with a Recording Pitch.
+ * the other analyzed ones with a Recording Pitch, each at its Trim's length (ADR 0019). None the
+ * user left out with "No note" (`isLeftOut`, #314).
  */
 function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[] {
   return recordings.flatMap(r => {
-    if (r.analysis.state !== 'analyzed') return []
+    if (r.analysis.state !== 'analyzed' || isLeftOut(r)) return []
     const { analysis } = r.analysis
     const placed = placedPitch(r)
     if (placed !== null) return [placedAutoMapRecording(r.id, analysis, placed, songTrim(r))]
     return analysis.recordingPitchMidi !== null && analysis.shortestNoteSeconds !== null
-      ? [autoMapRecording(r.id, analysis)]
+      ? [autoMapRecording(r.id, analysis, songTrim(r))]
       : []
   })
 }
@@ -64,10 +71,8 @@ function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[]
  */
 export function fartSeconds(recording: Recording): number {
   if (recording.analysis.state !== 'analyzed') return recording.seconds
-  const trim = songTrim(recording)
-  return trim === null
-    ? autoMapRecording(recording.id, recording.analysis.analysis).gestureSeconds
-    : trimSeconds(trim)
+  return autoMapRecording(recording.id, recording.analysis.analysis, songTrim(recording))
+    .gestureSeconds
 }
 
 /**

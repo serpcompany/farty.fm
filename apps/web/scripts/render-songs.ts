@@ -155,7 +155,9 @@ async function main() {
     const placed = scenario?.placed?.[r.id]
     if (placed !== undefined)
       return [placedAutoMapRecording(r.id, r.analysis, placed, r.trim?.fart)]
-    return r.analysis.recordingPitchMidi === null ? [] : [autoMapRecording(r.id, r.analysis)]
+    return r.analysis.recordingPitchMidi === null
+      ? []
+      : [autoMapRecording(r.id, r.analysis, r.trim?.fart)]
   })
   console.log(
     `${recordings.length} Recordings analysed in ${analysisMs.toFixed(0)} ms; ` +

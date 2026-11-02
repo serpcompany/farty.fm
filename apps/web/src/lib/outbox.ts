@@ -9,12 +9,18 @@ export type Kind = 'recordings' | 'toots'
 
 /**
  * What the server still needs: the item itself, a Toot's new title, a Recording's Placed Pitch
- * (ADR 0015), or the delete.
+ * (ADR 0015), Trim (ADR 0019) or name (#314), or the delete.
  */
 export type OutboxOp = 'put' | 'rename' | 'place' | 'delete'
 
-/** What a `place` changes on a Recording: its Placed Pitch (ADR 0015), its Trim (ADR 0019). */
-export type PlacedField = 'placedPitch' | 'trim'
+/**
+ * What a `place` changes on a Recording: its Placed Pitch (ADR 0015), its Trim (ADR 0019), its
+ * name (#314).
+ */
+export type PlacedField = 'placedPitch' | 'trim' | 'name'
+
+/** Every `PlacedField`, in the order a PATCH sends them. */
+export const placedFieldNames = ['placedPitch', 'trim', 'name'] as const satisfies PlacedField[]
 
 export type OutboxEntry = {
   /** `{kind}:{id}` (`itemKey`). */
@@ -33,7 +39,7 @@ export type OutboxEntry = {
   version: string
   /**
    * The fields a `place`, or a `place` riding in a `put`, changed, so the PATCH sends only those
-   * and leaves another browser's change to the other field on the account (ADR 0019). An entry
+   * and leaves another browser's change to the others on the account (ADR 0019). An entry
    * without it was queued by code from before #293, whose `place` only ever changed the Placed
    * Pitch (`placedFields`).
    */
@@ -95,7 +101,7 @@ export function placedFields(entry: OutboxEntry): PlacedField[] {
 }
 
 const unionFields = (a: PlacedField[], b: PlacedField[]): PlacedField[] =>
-  (['placedPitch', 'trim'] as const).filter(field => a.includes(field) || b.includes(field))
+  placedFieldNames.filter(field => a.includes(field) || b.includes(field))
 
 /** A new op's time and version. */
 export const queueStamp = () => ({ at: Date.now(), version: crypto.randomUUID() })

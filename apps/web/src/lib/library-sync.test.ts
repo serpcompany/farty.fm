@@ -622,6 +622,60 @@ describe('uploading', () => {
     expect((await page.store.loadRecordings())[0]).toMatchObject({ placedPitch: 45, trim })
   })
 
+  it('names a Recording on the account, in its upload or after it, sending the name alone (#314)', async () => {
+    const early = await recorded(1)
+    await page.store.placeRecording(early.id, { placedPitch: -1, name: 'Squeaker' })
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(account.get('recordings', early.id)?.item).toMatchObject({
+      placedPitch: -1,
+      name: 'Squeaker'
+    })
+    expect(requests('PATCH')).toEqual([])
+    // Another browser moves it; this one renames it, and sends only the name.
+    account.place(early.id, 45)
+    await page.store.placeRecording(early.id, { name: 'Big one' })
+    await page.sync.syncOnce('user-a')
+    expect(requests('PATCH').map(s => s.json)).toEqual([{ name: 'Big one' }])
+    expect(account.get('recordings', early.id)?.item).toMatchObject({
+      placedPitch: 45,
+      name: 'Big one'
+    })
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0]).toMatchObject({
+      placedPitch: 45,
+      name: 'Big one'
+    })
+  })
+
+  it("applies another browser's name, on the screen's Recordings too, but not over one it is sending", async () => {
+    const recording = theirs()
+    account.add('recordings', recording, wav(5))
+    await page.sync.syncOnce('user-a')
+    const shown = [{ ...recording, analysis: { state: 'analyzing' } as const }]
+    account.placeAndTrim(recording.id, { name: 'From the phone' })
+    const changes: LibraryChange[] = []
+    page.sync.onLibraryChanged(change => changes.push(change))
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0].name).toBe('From the phone')
+    const [change] = changes
+    if (!change || change.reset) throw new Error('no change')
+    expect(page.sync.recordingsAfter(shown, change)).toEqual([
+      { ...shown[0], name: 'From the phone' }
+    ])
+
+    refuse('PATCH', 503, 'unavailable')
+    await page.store.placeRecording(recording.id, { name: 'Mine' })
+    account.placeAndTrim(recording.id, { name: 'Theirs' })
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0].name).toBe('Mine')
+    // A Worker from before #314 lists the Recording without a name: it stays.
+    account.intercept = null
+    await page.sync.syncOnce('user-a')
+    account.add('recordings', recording, wav(5))
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0].name).toBe('Mine')
+  })
+
   // Offline, A trims and B moves the same fart; each change reaches the account whole.
   it('keeps both changes when two browsers change different fields offline', async () => {
     const recording = await recorded(1)

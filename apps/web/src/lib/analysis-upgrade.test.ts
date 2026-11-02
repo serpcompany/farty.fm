@@ -436,7 +436,7 @@ describe('rescan (#282)', () => {
     expect(updated).toHaveBeenCalledExactlyOnceWith(now)
   })
 
-  it('keeps a Trim through a Re-scan, and uses it no more once the fart is Melodic (ADR 0019)', async () => {
+  it('keeps a Trim through a Re-scan, and still uses it once the fart is Melodic (#314)', async () => {
     const trim = {
       startSeconds: 0.002,
       endSeconds: 0.008,
@@ -461,7 +461,7 @@ describe('rescan (#282)', () => {
     expect(result).toEqual({ scanned: 1, found: 1, failed: 0 })
     const found = (await storedNow(trimmed.id)) as Recording
     expect(found.trim).toEqual(trim)
-    expect(trimOf(found)).toBeNull()
+    expect(trimOf(found)).toEqual(trim)
   })
 
   it('keeps a placed Recording’s Trim in use when a new analysis finds a Recording Pitch', async () => {

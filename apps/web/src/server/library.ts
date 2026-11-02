@@ -77,6 +77,7 @@ function toRecording(row: RecordingRow): LibraryRecording {
       : { state: 'notAnalyzed' },
     placedPitch: row.placedPitch,
     trim: trimOfRow(row),
+    name: row.name,
     audioBytes: row.audioBytes
   }
 }
@@ -299,10 +300,10 @@ export async function patchToot(
 }
 
 /**
- * `PATCH /api/recordings/{id}/` with `{ placedPitch, trim }`: places a Noise-like Recording on a
- * note by ear (ADR 0015) and trims it (ADR 0019), or takes either off with null. Either may be left
- * out, and stays as it is. The last to arrive wins. The analysis stays the upload's: each browser
- * re-analyzes its own.
+ * `PATCH /api/recordings/{id}/` with `{ placedPitch, trim, name }`: places a Recording on a note by
+ * ear or leaves it out of Songs (ADR 0015), trims it (ADR 0019) and names it (#314), or takes any
+ * of them off with null. Any may be left out, and stays as it is. The last to arrive wins. The
+ * analysis stays the upload's: each browser re-analyzes its own.
  */
 export async function patchRecording(
   { db }: Stores,

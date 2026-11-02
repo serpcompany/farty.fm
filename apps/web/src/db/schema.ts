@@ -120,7 +120,7 @@ export const recordings = sqliteTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     id: text('id').notNull(),
-    /** Named "Recording {number}". */
+    /** Named "Recording {number}" until the user gives it a `name`. */
     number: integer('number').notNull(),
     createdAt: timestamp('created_at').notNull(),
     /** The whole file's length. */
@@ -131,9 +131,10 @@ export const recordings = sqliteTable(
     /** What Recording Analysis found; null when the Recording couldn't be analyzed. */
     analysis: text('analysis', { mode: 'json' }).$type<Analysis>(),
     /**
-     * The Placed Pitch: the MIDI note the user placed a Noise-like Recording on by ear, or null
-     * when left out (ADR 0015). Apart from `analysis`, which keeps the upload's, so it changes
-     * alone (`PATCH /api/recordings/{id}/`) and survives each browser's re-analysis.
+     * The Placed Pitch: the MIDI note the user placed a Recording on by ear, -1 (`NO_NOTE`) when
+     * they left it out of Songs, or null when it follows its analysis (ADR 0015). Apart from
+     * `analysis`, which keeps the upload's, so it changes alone (`PATCH /api/recordings/{id}/`)
+     * and survives each browser's re-analysis.
      */
     placedPitch: integer('placed_pitch'),
     /**
@@ -146,6 +147,11 @@ export const recordings = sqliteTable(
     trimEndSeconds: real('trim_end_seconds'),
     trimFartStartSeconds: real('trim_fart_start_seconds'),
     trimFartEndSeconds: real('trim_fart_end_seconds'),
+    /**
+     * The name the user gave the Recording, or null for "Recording {number}" (#314). Like
+     * `placedPitch`, it changes alone.
+     */
+    name: text('name'),
     /** The WAV's size in R2. */
     audioBytes: integer('audio_bytes').notNull(),
     updatedAt: timestamp('updated_at').notNull(),

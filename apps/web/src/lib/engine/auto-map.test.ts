@@ -550,6 +550,34 @@ describe('Placed Recordings (ADR 0015)', () => {
       ).toEqual([e.plays])
     }
   })
+
+  // The same as `test_melody_fit_counts_a_melodic_trim` in `tools/melody-lab/test_trim.py`.
+  it('counts a trimmed Melodic Recording at its note and its Trim’s length (#314)', () => {
+    const trimmed002 = (seconds: number) =>
+      autoMapRecording('002', storedAnalysis('002'), {
+        startSeconds: 0.15,
+        endSeconds: 0.15 + seconds
+      })
+    // A Trim keeps the Recording Pitch, shortest note and settle time; only the length changes.
+    expect(trimmed002(1.5)).toEqual({ ...autoMapInput('002'), gestureSeconds: 1.5 })
+    // Mary plays 002 (4.04 s, B♭2) on its 1.4 s notes. Trimmed to 1.5 s it still covers them;
+    // trimmed to 0.5 s it is too short for them, and another fart, or none, must.
+    const noise = placedAutoMapRecording('065', storedAnalysis('065'), C2, {
+      startSeconds: 39108 / SR,
+      endSeconds: 91820 / SR
+    })
+    const small = inputs(['002', '016', '022', '069', '090'])
+    const plays002 = (recordings: typeof small) =>
+      arrange(goldenSong('mary'), [...recordings, noise]).pitches.some(p => p.recordingId === '002')
+    expect(plays002(small)).toBe(true)
+    for (const [seconds, plays] of [
+      [1.5, true],
+      [0.5, false]
+    ] as const) {
+      const cut = small.map(r => (r.id === '002' ? trimmed002(seconds) : r))
+      expect(plays002(cut), String(seconds)).toBe(plays)
+    }
+  })
 })
 
 describe('the assignment solver', () => {

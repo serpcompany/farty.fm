@@ -1,13 +1,6 @@
 'use client'
 
-import {
-  AudioWaveform,
-  CircleAlert,
-  CircleHelp,
-  CirclePlay,
-  CircleStop,
-  LockOpen
-} from 'lucide-react'
+import { AudioWaveform, CircleAlert, CircleHelp, LockOpen } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -22,13 +15,14 @@ import {
   coverageSummary,
   type SongRow
 } from '@/lib/pitch-coverage'
-import { formattedLength, type Recording, recordingName, recordingPitch } from '@/lib/recordings'
+import { type Recording, recordingName, songPitch } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { type Draft, usePedos } from './pedos-provider'
 import { PitchStrip } from './pitch-strip'
 import { RecordButton } from './record-button'
-import { Waveform } from './waveform'
+import { useTake } from './recording-replay'
+import { TakeReview, useTakeReview } from './take-review'
 
 /**
  * The full-screen cover over the tabs from the start of a take: Recording, then Review and
@@ -108,7 +102,7 @@ function Cover({ title, children }: { title?: string; children: ReactNode }) {
         <header className="flex h-12 shrink-0 items-center justify-center px-4">
           {title && <h1 className="font-semibold">{title}</h1>}
         </header>
-        <div className="mx-auto flex w-full max-w-md flex-1 flex-col md:min-h-0">{children}</div>
+        <div className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col">{children}</div>
       </div>
     </div>
   )
@@ -184,27 +178,27 @@ function RecordingStep() {
   )
 }
 
-/** Review: hear the take before keeping it. Save or Discard. */
+/**
+ * Review (#314): the take's review, as soon as Stop finishes, while analysis finds its note. Save
+ * keeps it at once, with what the review changed (ADR 0002); Discard throws it away.
+ */
 function Review({ draft }: { draft: Draft }) {
   const pedos = usePedos()
-  const isPlaying = pedos.nowPlaying === 'draft'
+  // The take as the Recording it will be: numbered after the last, analyzed as far as it's got.
+  const number = (pedos.recordings ?? []).reduce((highest, r) => Math.max(highest, r.number), 0) + 1
+  const take: Recording = {
+    id: 'draft',
+    number,
+    createdAt: 0,
+    seconds: draft.seconds,
+    sampleRate: draft.audio.sampleRate,
+    waveform: draft.waveform,
+    analysis: pedos.draftAnalysis ?? { state: 'analyzing' }
+  }
+  const review = useTakeReview(take)
   return (
     <>
-      <div className="flex flex-1 flex-col items-center justify-center gap-7 px-6">
-        <Waveform levels={draft.waveform} isPlaying={isPlaying} className="h-24 w-full" />
-        <p className="text-2xl text-muted-foreground tabular-nums">
-          {formattedLength(draft.seconds)}
-        </p>
-        <Button
-          variant="ghost"
-          aria-label={isPlaying ? 'Stop' : 'Play'}
-          data-testid="review-play"
-          className="size-20 rounded-full p-0 [&_svg:not([class*='size-'])]:size-18"
-          onClick={() => pedos.togglePlayback('draft')}
-        >
-          {isPlaying ? <CircleStop strokeWidth={1.25} /> : <CirclePlay strokeWidth={1.25} />}
-        </Button>
-      </div>
+      <TakeReview review={review} target="draft" audio={draft.audio} />
       <FlowButtons
         secondary={
           <FlowButton variant="secondary" onClick={pedos.discardDraft}>
@@ -215,13 +209,73 @@ function Review({ draft }: { draft: Draft }) {
           <FlowButton
             variant="primary"
             disabled={pedos.isSaving}
-            onClick={() => void pedos.saveDraft()}
+            onClick={() => void pedos.saveDraft(review.change())}
           >
             Save
           </FlowButton>
         }
       />
     </>
+  )
+}
+
+/**
+ * A saved Recording's review, from the pencil on its row (#314): the same screen as after Stop,
+ * with Cancel and Save. Save changes only what the user changed, and waits only to find the fart
+ * between moved handles (ADR 0019).
+ */
+export function RecordingReview({
+  recording,
+  onClose
+}: {
+  recording: Recording
+  onClose: () => void
+}) {
+  const pedos = usePedos()
+  const review = useTakeReview(recording)
+  const audio = useTake(recording)
+  const [saving, setSaving] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const close = () => {
+    if (pedos.nowPlaying === recording.id) pedos.stopPlayback()
+    onClose()
+  }
+  const save = async () => {
+    const change = review.change()
+    // The note and the name save at once.
+    if (change.handles === undefined) {
+      if (Object.keys(change).length > 0) void pedos.placeRecording(recording.id, change)
+      close()
+      return
+    }
+    setSaving(true)
+    setFailed(false)
+    const saved = await pedos.placeRecording(recording.id, change)
+    setSaving(false)
+    if (saved) close()
+    else setFailed(true)
+  }
+  return (
+    <Cover title={recordingName({ number: recording.number, name: review.name })}>
+      <TakeReview review={review} target={recording} audio={audio} />
+      {failed && (
+        <p role="alert" className="px-5 pb-2 text-sm text-destructive">
+          Couldn't save the trim. Try again.
+        </p>
+      )}
+      <FlowButtons
+        secondary={
+          <FlowButton variant="secondary" onClick={close}>
+            Cancel
+          </FlowButton>
+        }
+        primary={
+          <FlowButton variant="primary" disabled={saving} onClick={() => void save()}>
+            Save
+          </FlowButton>
+        }
+      />
+    </Cover>
   )
 }
 
@@ -320,7 +374,7 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
   const finish = useFinishFlow()
   const { offerStep } = useAccount()
   const go = (href: string) => offerStep(() => finish(href))
-  const pitch = recordingPitch(recording)
+  const pitch = songPitch(recording)
 
   return (
     <>
@@ -340,11 +394,11 @@ function Result({ recording, changes }: { recording: Recording; changes: Coverag
         ) : (
           <div className="flex flex-col items-center gap-2">
             <AudioWaveform className="size-16 text-muted-foreground" aria-hidden />
-            <p className="text-2xl font-bold" data-testid="result-noise">
-              No steady note this time
+            <p className="text-2xl font-bold" data-testid="result-no-note">
+              No note
             </p>
             <p className="text-muted-foreground">
-              It's saved. On the Recordings tab you can place it on a note by ear.
+              It's saved. Songs leave it out until you give it a note from the Recordings tab.
             </p>
           </div>
         )}

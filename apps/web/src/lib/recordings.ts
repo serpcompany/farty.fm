@@ -1,4 +1,5 @@
 import { ANALYSIS_VERSION } from './analysis/version'
+import { nearestNote } from './pitch'
 
 /** A Recording: one saved fart clip (see `CONTEXT.md`), as the web app keeps it. */
 
@@ -40,7 +41,7 @@ export type AnalysisState =
 
 export type Recording = {
   id: string
-  /** Recordings are named "Recording 1, 2, …". */
+  /** Recordings are named "Recording 1, 2, …" until the user names one (`recordingName`). */
   number: number
   createdAt: number
   /** Length of the whole file, in seconds. */
@@ -50,20 +51,21 @@ export type Recording = {
   waveform: number[]
   analysis: AnalysisState
   /**
-   * The Placed Pitch: the note the user placed this Recording on by ear, as a whole MIDI note
-   * number, while it was Noise-like (ADR 0015). Null or absent when it's left out, the default.
-   * Kept apart from `analysis`, so a new analysis never loses it, and still used when one finds a
-   * Recording Pitch: the user chose it (ADR 0017). Where Songs use the fart, never how it sounds:
-   * it plays raw.
+   * The Placed Pitch: the note the user gave this Recording by ear on its review, as a whole MIDI
+   * note number (ADR 0015), or `NO_NOTE` when they left it out of Songs though analysis found a
+   * note (#314). Null or absent when it follows analysis, the default. Kept apart from `analysis`,
+   * so a new analysis never loses it, and still used when one finds another note: the user chose
+   * it (ADR 0017). Where Songs use the fart, never how it sounds: it plays raw.
    */
   placedPitch?: number | null
   /**
-   * The Trim: the part of the take the user kept with the picker's handles, while it was
-   * Noise-like, and the fart found between them (ADR 0019). Null or absent when untrimmed, the
-   * default. The saved take never changes. Kept apart from `analysis`, so re-analysis never loses
-   * it, and used only while `trimOf` says so.
+   * The Trim: the part of the take the user kept with the review's handles, and the fart found
+   * between them (ADR 0019). Null or absent when untrimmed, the default. The saved take never
+   * changes. Kept apart from `analysis`, so re-analysis never loses it.
    */
   trim?: RecordingTrim | null
+  /** The name the user gave it on its review (#314); null or absent for "Recording {number}". */
+  name?: string | null
 }
 
 /**
@@ -80,14 +82,11 @@ export type Trim = { startSeconds: number; endSeconds: number }
 export type RecordingTrim = Trim & { fart: Trim }
 
 /**
- * The Trim, while the Recording is analyzed as Noise-like or placed on a note; otherwise null.
- * The row and the picker then play its handles, and Songs its fart (`songTrim`, ADR 0019). A
- * Recording that re-analysis finds Melodic, and isn't placed, plays as analysis found it.
+ * The Trim, on any Recording (#314); null when untrimmed. The row and the review play its handles,
+ * and Songs its fart (`songTrim`, ADR 0019).
  */
 export function trimOf(recording: Recording): RecordingTrim | null {
-  const trim = recording.trim
-  if (!trim || recording.analysis.state !== 'analyzed') return null
-  return isNoiseLike(recording) || placedPitch(recording) !== null ? trim : null
+  return recording.trim ?? null
 }
 
 /** The part of the take Songs cut a trimmed Recording at: the fart between its handles. */
@@ -113,12 +112,7 @@ export function foundPart(recording: Recording): Trim | null {
   return { startSeconds: gestureStartSeconds, endSeconds: gestureEndSeconds }
 }
 
-/** The fart the picker plays: the Trim's handles, or else the fart analysis found. */
-export function fartPart(recording: Recording): Trim | null {
-  return trimHandles(recording) ?? foundPart(recording)
-}
-
-/** Whether two parts of a take are the same, to 5 ms: what the picker's Reset and Save compare. */
+/** Whether two parts of a take are the same, to 5 ms: what the review's Reset and Save compare. */
 export function samePart(a: Trim, b: Trim): boolean {
   return (
     Math.abs(a.startSeconds - b.startSeconds) < 0.005 &&
@@ -126,7 +120,7 @@ export function samePart(a: Trim, b: Trim): boolean {
   )
 }
 
-/** The notes a Noise-like Recording can be placed on: C2 to B4 (ADR 0015). */
+/** The notes a Recording can be placed on: C2 to B4 (ADR 0015). */
 export const LOWEST_PLACED_PITCH = 36
 export const HIGHEST_PLACED_PITCH = 71
 
@@ -139,8 +133,28 @@ export function isPlaceablePitch(value: unknown): value is number {
   )
 }
 
-export function recordingName(recording: Pick<Recording, 'number'>): string {
-  return `Recording ${recording.number}`
+/**
+ * The Placed Pitch that leaves a Recording out of Songs though analysis found a note: its review's
+ * "No note" (#314). A Noise-like Recording is left out without it.
+ */
+export const NO_NOTE = -1
+
+/** Whether the user left the Recording out of Songs with "No note" (`NO_NOTE`). */
+export function isLeftOut(recording: Pick<Recording, 'placedPitch'>): boolean {
+  return recording.placedPitch === NO_NOTE
+}
+
+/** The longest name a Recording takes (#314). */
+export const MAXIMUM_NAME_LENGTH = 40
+
+/** What a Recording is called until the user names it: "Recording 12". */
+export function defaultName(number: number): string {
+  return `Recording ${number}`
+}
+
+/** The Recording's name: the one the user gave it, or else "Recording {number}". */
+export function recordingName(recording: Pick<Recording, 'number' | 'name'>): string {
+  return recording.name?.trim() || defaultName(recording.number)
 }
 
 /** The Recording Pitch, when the Recording has been analyzed as Melodic. */
@@ -160,8 +174,8 @@ export function isNoiseLike(recording: Recording): boolean {
 
 /**
  * The Placed Pitch, when the Recording is analyzed and the user placed it on a note; otherwise
- * null. Only a Noise-like Recording is placed, but a placement outlasts a later analysis that finds
- * a Recording Pitch, a Re-scan among them (ADR 0017).
+ * null, `NO_NOTE` among them. Any Recording can be placed (#314), and a placement outlasts a later
+ * analysis, a Re-scan among them (ADR 0017).
  */
 export function placedPitch(recording: Recording): number | null {
   return recording.analysis.state === 'analyzed' && isPlaceablePitch(recording.placedPitch)
@@ -171,10 +185,17 @@ export function placedPitch(recording: Recording): number | null {
 
 /**
  * The note Songs use the Recording for: its Placed Pitch when placed, otherwise its Recording Pitch
- * when Melodic; null when it plays no notes.
+ * when Melodic; null when it plays no notes, or the user left it out (`NO_NOTE`).
  */
 export function songPitch(recording: Recording): number | null {
+  if (isLeftOut(recording)) return null
   return placedPitch(recording) ?? recordingPitch(recording)
+}
+
+/** The note analysis found, as the review names it: the Recording Pitch's nearest; or null. */
+export function foundNote(recording: Recording): number | null {
+  const pitch = recordingPitch(recording)
+  return pitch === null ? null : nearestNote(pitch)
 }
 
 /**

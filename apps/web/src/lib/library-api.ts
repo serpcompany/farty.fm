@@ -70,14 +70,18 @@ export async function renameToot(id: string, title: string, accountId: string): 
 }
 
 /**
- * A Recording's Placed Pitch (ADR 0015) and Trim (ADR 0019), as this browser has them now: only
- * the ones it changed, so the account keeps another browser's change to the other.
+ * A Recording's Placed Pitch (ADR 0015), Trim (ADR 0019) and name (#314), as this browser has them
+ * now: only the ones it changed, so the account keeps another browser's change to the others.
  */
-export type Placement = { placedPitch?: number | null; trim?: Trim | null }
+export type Placement = {
+  placedPitch?: number | null
+  trim?: Trim | null
+  name?: string | null
+}
 
 /**
- * Places a Recording on a note by ear or trims it, or takes either off with null. A field left out
- * stays as the account has it.
+ * Places a Recording on a note by ear, trims it or names it, or takes any of them off with null.
+ * A field left out stays as the account has it.
  */
 export async function placeRecording(
   id: string,
