@@ -99,6 +99,9 @@ function recordingTitle(recording: Recording | undefined): string {
   return recording ? recordingName(recording) : ''
 }
 
+/** A cover's dialog always has a name: its shown `title`, or else a `label` for screen readers. */
+type CoverName = { title: string; label?: never } | { title?: never; label: string }
+
 /**
  * Full screen on a phone. From 768px, a card in the page under the top bar, which stays in view.
  * `tone="record"`: the whole cover red, while Record records (#314).
@@ -108,10 +111,7 @@ function Cover({
   label,
   tone,
   children
-}: {
-  title?: string
-  /** The dialog's name when it has no title. */
-  label?: string
+}: CoverName & {
   tone?: 'record'
   children: ReactNode
 }) {

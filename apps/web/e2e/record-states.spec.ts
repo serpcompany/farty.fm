@@ -129,6 +129,8 @@ test.describe('Record’s states', () => {
     await page.getByTestId('record-button').click()
     await expect(page.getByRole('dialog', { name: 'Getting the mic ready' })).toBeVisible()
     await expect(page.getByTestId('record-getting-ready')).toContainText('Getting the mic ready…')
+    // The grey screen covers the tabs as the red one does: out of reach until the flow closes.
+    await expect(page.getByRole('navigation', { name: 'Tabs' })).toHaveAttribute('inert', '')
 
     // The capture node is sending, but none of it has reached the app: still getting ready.
     // The hold-back must stay well under `firstBatchTimeoutMs` (3 s), after which the take gives

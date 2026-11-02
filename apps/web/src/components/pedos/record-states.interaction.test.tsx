@@ -145,7 +145,16 @@ afterEach(async () => {
   vi.useRealTimers()
   vi.unstubAllGlobals()
   vi.clearAllMocks()
+  // Removed here, so a failed check can't leave a stubbed buzz to the next test.
+  Reflect.deleteProperty(window.navigator, 'vibrate')
 })
+
+/** Stands in for the phone's buzz (`navigator.vibrate`), which jsdom lacks. */
+function stubVibrate() {
+  const vibrate = vi.fn(() => true)
+  Object.defineProperty(window.navigator, 'vibrate', { configurable: true, value: vibrate })
+  return vibrate
+}
 
 async function open() {
   const container = document.createElement('div')
@@ -200,8 +209,7 @@ async function sendFor(
 
 describe('Record’s states (#281, #314)', () => {
   it('shows Getting the mic ready until the take’s audio comes in, and only then turns red', async () => {
-    const vibrate = vi.fn(() => true)
-    Object.defineProperty(window.navigator, 'vibrate', { configurable: true, value: vibrate })
+    const vibrate = stubVibrate()
     await open()
     // Never red before the audio: watched on every change to the page, not only at the checks.
     const shown: string[] = []
@@ -250,10 +258,10 @@ describe('Record’s states (#281, #314)', () => {
     expect(vibrate).toHaveBeenCalledWith(40)
     seen.disconnect()
     expect(shown).toEqual(['recording'])
-    Reflect.deleteProperty(window.navigator, 'vibrate')
   })
 
-  it('never turns red when the microphone fails to start', async () => {
+  it('never turns red, or buzzes, when the microphone fails to start', async () => {
+    const vibrate = stubVibrate()
     await open()
     await tapRecord()
     expect(byTestId('record-getting-ready')).not.toBeNull()
@@ -264,6 +272,7 @@ describe('Record’s states (#281, #314)', () => {
     expect(byTestId('recording-screen')).toBeNull()
     expect(byTestId('record-getting-ready')).toBeNull()
     expect(document.body.textContent).toContain("Couldn't start recording")
+    expect(vibrate).not.toHaveBeenCalled()
   })
 
   it('counts the timer in tenths', async () => {

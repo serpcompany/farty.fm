@@ -291,7 +291,8 @@ export class TakeLevels {
 
   /**
    * Record's live waveform (#314): the level of each 50 ms of the take so far, in order, from 0 at
-   * the floor `heardSomething` ignores (-70 dBFS) to 1 at full scale. Room noise draws nothing.
+   * the floor `heardSomething` ignores (-70 dBFS) to 1 at full scale. Only a room under -70 dBFS
+   * draws nothing: a real room at -60 to -50 dBFS draws a low band, about 0.14 to 0.29 high.
    */
   get bars(): readonly number[] {
     return this.barLevels

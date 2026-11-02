@@ -49,10 +49,14 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
   const pathname = usePathname()
   const router = useRouter()
   const tab = tabOf(pathname)
-  // While Recording, Review, Result (`record-flow.tsx`) or the account step shows, but not while
-  // the microphone is still opening, when the Record screen and its tabs are still there.
+  // While getting the mic ready, Recording, Review, Result (`record-flow.tsx`) or the account step
+  // shows: each covers the tabs from the tap on Record.
   const stepsOpen =
-    stepOpen || flow !== null || capture.kind === 'recording' || capture.kind === 'finishing'
+    stepOpen ||
+    flow !== null ||
+    capture.kind === 'starting' ||
+    capture.kind === 'recording' ||
+    capture.kind === 'finishing'
   // On a touch tablet, `/` is the lander until Farty is opened in this browser (`lander.tsx`).
   const atLander = pathname === '/'
   useTrackPages()
@@ -119,7 +123,7 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
         </main>
         <nav
           aria-label="Tabs"
-          // Recording, Review, Result and the account step leave the top bar in view from 768px,
+          // The record flow and the account step leave the top bar in view from 768px,
           // but, as on a phone, the tabs wait until they close.
           inert={stepsOpen}
           className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:top-0 md:bottom-auto md:border-t-0 md:border-b"
