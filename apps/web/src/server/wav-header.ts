@@ -5,7 +5,7 @@ export type WavHeader = { sampleRate: number; frames: number }
 const MIN_SAMPLE_RATE = 8000
 const MAX_SAMPLE_RATE = 192_000
 
-const HEADER_BYTES = 44
+export const HEADER_BYTES = 44
 
 /**
  * The header of a WAV exactly as Farty writes one (`encodeWav` in `src/lib/wav.ts`): a 44-byte
@@ -13,16 +13,24 @@ const HEADER_BYTES = 44
  * Null for anything else, so the bucket only ever holds audio the app can play.
  */
 export function readWavHeader(bytes: Uint8Array): WavHeader | null {
-  if (bytes.byteLength <= HEADER_BYTES) return null
-  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
-  const tag = (offset: number) => String.fromCharCode(...bytes.subarray(offset, offset + 4))
+  return wavHeaderOf(bytes.subarray(0, HEADER_BYTES), bytes.byteLength)
+}
+
+/**
+ * `readWavHeader` from the file's first 44 bytes, `head`, and its size in bytes, `fileBytes`: what
+ * a ranged read from R2 gives.
+ */
+export function wavHeaderOf(head: Uint8Array, fileBytes: number): WavHeader | null {
+  if (fileBytes <= HEADER_BYTES || head.byteLength < HEADER_BYTES) return null
+  const view = new DataView(head.buffer, head.byteOffset, HEADER_BYTES)
+  const tag = (offset: number) => String.fromCharCode(...head.subarray(offset, offset + 4))
   const u16 = (offset: number) => view.getUint16(offset, true)
   const u32 = (offset: number) => view.getUint32(offset, true)
-  const dataBytes = bytes.byteLength - HEADER_BYTES
+  const dataBytes = fileBytes - HEADER_BYTES
   const sampleRate = u32(24)
   const valid =
     tag(0) === 'RIFF' &&
-    u32(4) === bytes.byteLength - 8 &&
+    u32(4) === fileBytes - 8 &&
     tag(8) === 'WAVE' &&
     tag(12) === 'fmt ' &&
     u32(16) === 16 &&

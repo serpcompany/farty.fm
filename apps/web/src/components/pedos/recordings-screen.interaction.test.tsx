@@ -35,6 +35,10 @@ vi.mock('./pedos-provider', () => ({
   })
 }))
 vi.mock('@/lib/recording-store', () => ({ loadAudio: () => new Promise(() => {}) }))
+// Each row's Share (ADR 0020) reads the account: a guest's, which has no shares to read.
+vi.mock('./account-provider', () => ({
+  useAccount: () => ({ account: { status: 'signedOut' }, openStep: () => {} })
+}))
 
 const analysis = (recordingPitchMidi: number | null, version = 5): Analysis => ({
   gestureStartSeconds: 0,
