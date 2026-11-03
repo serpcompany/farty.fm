@@ -3,7 +3,7 @@
 import { Check, ChevronRight, Flag, Link2Off, Play, Square } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,9 +22,10 @@ import { useAccount } from './account-provider'
 import { useStartGetFarty } from './get-farty'
 import { ReplayWaveform } from './waveform'
 
-// A shared Recording's page, `/u/<handle>/r/<id>/` (ADR 0020): what anyone with the link sees,
-// signed in or not, in any browser. The fart comes first: who shared it, its name and note, a big
-// waveform and Play. Get Farty sits under the player and in the top bar. The prototype's option A.
+// A shared Recording's page, `/u/<handle>/r/<id>/`, and a shared Toot's, `/u/<handle>/t/<id>/`
+// (ADR 0020): what anyone with the link sees, signed in or not, in any browser. The fart comes
+// first: who shared it, its name and its note or Song, a big waveform and Play. Get Farty sits
+// under the player and in the top bar. The prototype's option A.
 
 /** Farty's brand button, behind white text, as the lander's. */
 const brand = 'bg-brand-strong text-white hover:bg-brand-strong/90'
@@ -105,12 +106,100 @@ export function SharedRecordingPage({
   shareId,
   name,
   note,
+  ...player
+}: SharedRecordingProps) {
+  return (
+    <SharedItemPage
+      what="Recording"
+      handle={handle}
+      shareId={shareId}
+      base={`/u/${handle}/r/${shareId}/`}
+      name={name}
+      {...player}
+    >
+      {note && (
+        <p className="mt-2.5">
+          <span
+            className="inline-block rounded-full bg-muted px-3 py-1 font-semibold tabular-nums"
+            data-testid="shared-note"
+          >
+            {note}
+          </span>
+        </p>
+      )}
+    </SharedItemPage>
+  )
+}
+
+export type SharedTootProps = {
+  handle: string
+  shareId: string
+  title: string
+  /** The Song it plays, or "Sound Pad", or null for a Song that isn't in Farty any more. */
+  song: string | null
+  /** "0:18". */
+  length: string
+  seconds: number
+  levels: number[]
+}
+
+/** The shared Toot: who shared it, its title and Song, the waveform, Play, Get Farty, Report. */
+export function SharedTootPage({
+  handle,
+  shareId,
+  title,
+  song,
+  length,
+  seconds,
+  levels
+}: SharedTootProps) {
+  return (
+    <SharedItemPage
+      what="Toot"
+      handle={handle}
+      shareId={shareId}
+      base={`/u/${handle}/t/${shareId}/`}
+      name={title}
+      length={length}
+      part={{ startSeconds: 0, endSeconds: seconds }}
+      levels={levels}
+    >
+      {song && (
+        <p className="mt-1.5 text-[15px] text-muted-foreground" data-testid="shared-song">
+          {song}
+        </p>
+      )}
+    </SharedItemPage>
+  )
+}
+
+/**
+ * A shared item's page: who shared it, its name and `children` (a Recording's note, a Toot's Song),
+ * the waveform and Play, Get Farty, and Report. `base` is the page's own path, which its audio and
+ * Report are under.
+ */
+function SharedItemPage({
+  what,
+  handle,
+  shareId,
+  base,
+  name,
   length,
   part,
-  levels
-}: SharedRecordingProps) {
+  levels,
+  children
+}: {
+  what: 'Recording' | 'Toot'
+  handle: string
+  shareId: string
+  base: string
+  name: string
+  length: string
+  part: Trim
+  levels: number[]
+  children?: ReactNode
+}) {
   const { account } = useAccount()
-  const base = `/u/${handle}/r/${shareId}/`
   const [playing, setPlaying] = useState<Trim | null>(null)
   const [unplayable, setUnplayable] = useState(false)
 
@@ -156,19 +245,10 @@ export function SharedRecordingPage({
           >
             @{handle}
           </Link>{' '}
-          shared a Recording
+          shared a {what}
         </p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight">{name}</h1>
-        {note && (
-          <p className="mt-2.5">
-            <span
-              className="inline-block rounded-full bg-muted px-3 py-1 font-semibold tabular-nums"
-              data-testid="shared-note"
-            >
-              {note}
-            </span>
-          </p>
-        )}
+        {children}
 
         <div className="mt-5 grid gap-4 rounded-3xl bg-muted/60 px-4 pt-5 pb-4">
           <ReplayWaveform
@@ -223,7 +303,7 @@ export function SharedRecordingPage({
         </Link>
 
         <div className="mt-3 flex justify-center">
-          <Report what="Recording" action={`${base}report/`} />
+          <Report what={what} action={`${base}report/`} />
         </div>
       </div>
     </div>

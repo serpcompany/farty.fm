@@ -14,7 +14,7 @@
   }
  },
  "library": "38 Recordings, 26 Melodic",
- "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 2 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 3 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
  "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
@@ -7625,10 +7625,11 @@
      "sha256": "3fc4686a76e90cf25f1d06b7e32223424aa97142e65eb520a1aca6ebf3718b92",
      "render": {
       "bpm": 120,
-      "max_beats": 32
+      "start_beat": 3,
+      "max_beats": 29
      },
      "import_report": {
-      "track_used": 1,
+      "track_used": 0,
       "tracks_with_notes": [
        0,
        1
@@ -7637,30 +7638,30 @@
       "inner_voice_onsets_dropped": 0,
       "overlaps_clipped": 0,
       "tempo_changes_ignored": 2,
-      "note_count": 32
+      "note_count": 25
      },
-     "track_notes": 208,
-     "range_semitones": 1,
-     "distinct_pitches": 2,
-     "pitch_coverage": "2 of 2",
+     "track_notes": 158,
+     "range_semitones": 10,
+     "distinct_pitches": 7,
+     "pitch_coverage": "7 of 7",
      "metrics": {
-      "notes": 32,
+      "notes": 25,
       "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
-      "notes_with_second_burst": 8,
+      "notes_with_second_burst": 5,
       "pitch_readable_pct": 100,
-      "within_50c_pct": 25,
-      "within_50c_any_octave_pct": 25,
-      "median_abs_cents": 197.4,
-      "contour_pct": 0,
-      "distinct_recordings": 2,
-      "on_pitch_pct": 22,
-      "sounding_pct": 98,
+      "within_50c_pct": 48,
+      "within_50c_any_octave_pct": 48,
+      "median_abs_cents": 52.4,
+      "contour_pct": 86,
+      "distinct_recordings": 7,
+      "on_pitch_pct": 32,
+      "sounding_pct": 95,
       "notes_mostly_silent": 0,
-      "transpose": -18,
+      "transpose": -11,
       "octave_moves": 0,
-      "max_abs_shift_semitones": 0.57
+      "max_abs_shift_semitones": 2.57
      }
     }
    ],

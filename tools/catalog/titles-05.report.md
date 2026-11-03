@@ -9,7 +9,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools
 **135 of 187 titles pass** and are in `catalog/catalog.json`; 52 fail. Imported Songs don't ship until they're on the app's ship list.
 
 - Dataset: PDMX, doi:10.5281/zenodo.15571083. `PDMX.csv` md5 `30392ccf38bb63ce70e7afae70f9c88c` and `mid.tar.gz` md5 `d920a21b2fcd99a56d9c381b39debbb2`, both equal to Zenodo's; downloaded 2026-10-25.
-- Picking: title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 2 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first
+- Picking: title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 3 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first
 - Gates: license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm
 - Render bar: in50cFart >= 94%, onTime >= 95%, re-attacks <= 0, with the full Fixture Library (38 Recordings, 26 Melodic).
 
@@ -110,7 +110,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools
 | Caro Mio Ben | pass | [1772666](https://musescore.com/score/1772666) | title | publicdomain | 0.0 | 631 | 24 | 13 | 0 of 98 | 9 of 9 | 100% | 100% | 0 |  |
 | The Mountains Of Mourne | pass | [4958888](https://musescore.com/score/4958888) | title | publicdomain | 4.49 | 71 | 29 | 9 | 0 of 92 | 6 of 6 | 100% | 100% | 0 |  |
 | New Doxology | fail | [5796062](https://musescore.com/score/5796062) | title | publicdomain | 0.0 | 41 | 19 | 12 | 175 of 220 |  |  |  |  | none of the 1 best scores passed; the best: sanity: the importer dropped 175 chord tones and inner-voice onsets, 80% of the track's notes (at most 10%) |
-| O Sacred Head Now Wounded | pass | [461931](https://musescore.com/score/461931) | title | publicdomain | 0.0 | 359 | 32 | 1 | 0 of 208 | 2 of 2 | 100% | 100% | 0 |  |
+| O Sacred Head Now Wounded | pass | [461931](https://musescore.com/score/461931) | title | publicdomain | 0.0 | 359 | 25 | 10 | 0 of 158 | 7 of 7 | 100% | 100% | 0 |  |
 | Fie nay prithee John | pass | [4687787](https://musescore.com/score/4687787) | title | publicdomain | 0.0 | 6 | 45 | 19 | 0 of 73 | 12 of 12 | 100% | 100% | 0 |  |
 | Over in the Glory Land | pass | [1351046](https://musescore.com/score/1351046) | title | cc-zero | 0.0 | 438 | 17 | 9 | 0 of 174 | 5 of 5 | 100% | 100% | 0 |  |
 | The Black Velvet Band | pass | [4705772](https://musescore.com/score/4705772) | title | publicdomain | 0.0 | 61 | 26 | 12 | 0 of 111 | 8 of 8 | 100% | 100% | 0 |  |

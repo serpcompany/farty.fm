@@ -26,6 +26,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { PAD_TOOT_TITLE, type Toot, tootDetails } from '@/lib/toot'
 import { cn } from '@/lib/utils'
 import { tootPlayback, usePedos } from './pedos-provider'
+import { type ShareFlow, ShareMenuItems, useShare, useShares } from './share-recording'
 
 /** Where a Toot's screen is: one page for every Toot, since a Toot's id is made on the device. */
 export function tootPage(id: string): string {
@@ -34,8 +35,8 @@ export function tootPage(id: string): string {
 
 /**
  * Every Toot, newest first. Tap a row's play button to play it, or the row to open it; its More
- * menu renames or deletes it (the iPhone app's long-press and swipe). As the iPhone app's
- * `TootsTab`.
+ * menu shares, renames or deletes it (the iPhone app's long-press and swipe; Share is ADR 0020's).
+ * As the iPhone app's `TootsTab`.
  */
 export function TootsScreen() {
   const pedos = usePedos()
@@ -188,6 +189,7 @@ function TootRow({
   const details =
     pedos.tootPlayFailed === toot.id ? `${songTitle} · Couldn't play` : tootDetails(toot, songTitle)
   const Icon = toot.isAudioMissing ? TriangleAlert : isPlaying ? Square : Play
+  const share = useShare({ kind: 'toots', id: toot.id, name: toot.title })
 
   return (
     <li
@@ -218,18 +220,28 @@ function TootRow({
           {details}
         </span>
       </Link>
-      <TootMenu title={toot.title} onRename={onRename} onDelete={onDelete} />
+      <TootMenu
+        title={toot.title}
+        // A Toot that can't play here has nothing to share, but once shared (from another
+        // device, say) its link plays from the account, so Share link and Stop sharing stay.
+        share={toot.isAudioMissing && !share.link ? undefined : share}
+        onRename={onRename}
+        onDelete={onDelete}
+      />
+      {share.dialogs}
     </li>
   )
 }
 
-/** Rename and Delete, behind More. */
+/** Rename and Delete, behind More, and on a Toots row, Share first. */
 export function TootMenu({
   title,
+  share,
   onRename,
   onDelete
 }: {
   title: string
+  share?: ShareFlow
   onRename: () => void
   onDelete: () => void
 }) {
@@ -248,6 +260,7 @@ export function TootMenu({
         <Ellipsis className="size-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto">
+        {share && <ShareMenuItems flow={share} />}
         <DropdownMenuItem className="min-h-11 px-3 text-base" onClick={onRename}>
           <Pencil />
           Rename
@@ -319,12 +332,15 @@ export function DeleteTootDialog({
   onClose: () => void
   onDelete: (toot: Toot) => void
 }) {
+  const shared = useShares()?.tootLinks.has(toot?.id ?? '') ?? false
   return (
     <AlertDialog open={toot !== null} onOpenChange={open => !open && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete {toot?.title}?</AlertDialogTitle>
-          <AlertDialogDescription>This can't be undone.</AlertDialogDescription>
+          <AlertDialogDescription>
+            {shared && 'Its link stops working too. '}This can't be undone.
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel className="h-11 text-base">Cancel</AlertDialogCancel>

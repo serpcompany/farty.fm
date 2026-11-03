@@ -17,7 +17,7 @@ export async function POST(
     // The reporter's limit is keyed by an HMAC under sign-in's secret: none here, no reports.
     const secret = authSecret()
     response = secret
-      ? await reportShare(requestStores(), request, handle, id, secret)
+      ? await reportShare('recordings', requestStores(), request, handle, id, secret)
       : apiError(503, 'unavailable')
   } catch {
     console.error('POST share report failed')

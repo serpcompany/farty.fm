@@ -24,8 +24,8 @@ export async function profileUser(
 export type ProfileShareRow = { shareId: string; sharedAt: Date; recording: RecordingRow }
 
 /**
- * The Recordings `userId` shares that work, newest share first. Toots aren't shared yet (#317), so
- * a share of one isn't listed.
+ * The Recordings `userId` shares that work, newest share first. Shared Toots (#317) aren't listed
+ * on the page yet, so a share of one isn't listed.
  */
 export async function profileShares(db: Database, userId: string): Promise<ProfileShareRow[]> {
   return db

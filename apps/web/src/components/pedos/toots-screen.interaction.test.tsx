@@ -47,6 +47,10 @@ vi.mock('./pedos-provider', () => ({
     renameToot: () => {}
   })
 }))
+// Each row's Shared tag (ADR 0020) reads the account: a guest's, which has no shares to read.
+vi.mock('./account-provider', () => ({
+  useAccount: () => ({ account: { status: 'signedOut' }, openStep: () => {} })
+}))
 vi.mock('next/link', () => ({
   default: ({
     href,

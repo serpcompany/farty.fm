@@ -1,0 +1,204 @@
+# The top 212 tune titles of tools/catalog/ranking.md, not yet in the catalog or tried, written by
+# tools/catalog/rank_pdmx.py --batch 212 --out tools/catalog/titles-09.txt (#312). Each title's only name is
+# the one the ranking counted scores by.
+# Review of its import (#324) pulled 8 titles, now in excluded-titles.txt: Indian Princess; Mrs Kenny's Barn Dance; The Indian River Hornpipe; Hunting Song; Lament For The Death Of The Rev. Archie Beaton; and, after the voice and title check, Let Heaven And Earth Rejoice And Sing; Little Annie Rooney. GHW.053; Smith's -- Reel.
+# The review of PR #343 pulled 8 more, now in excluded-titles.txt: Sir Archibald Grant of Monymusk's Reel; Highland Skip; The Perthshire Hunt; Scan Tester's No 1; Scan Testers No 2; French Broad; The Anvil; Duntroon.
+# It also added The Duchess of Buccleuch, which had been left out as a spelling of Duchess of Buccleugh, and fixed these titles by hand: Muss i denn, When Sick Is It Tea You Want?, A Virgin Most Pure, Peacock's Tune, Adson's Saraband, La Fougère, My Love Is Lost to Me, The Sun from the East, Come Up Stairs with Me, Johnny the Jumper.
+# id | catalog title
+christ-is-born-in-bethlehem | Christ is Born in Bethlehem
+christian-walk-carefully-danger-is-near | Christian walk carefully danger is near
+duchess-of-buccleugh | Duchess of Buccleugh
+duchess-of-buccleuch | The Duchess of Buccleuch
+hurdle-race | The Hurdle Race
+madam-frederick | Madam Frederick
+mi-go-zatvorile | Mi Go Zatvorile
+miss-johnstone | Miss Johnstone
+muss-i-denn | Muss i denn
+newfoundland | Newfoundland
+rocking-the-baby | Rocking the Baby
+rose-of-sharon | Rose of Sharon
+something-new | Something New
+talyllyn | Talyllyn
+tame-her-when-da-snaw-comes | Tame Her When Da Snaw Comes
+when-sick-is-it-tea-you-want | When Sick Is It Tea You Want?
+whitehall | Whitehall
+a-virgin-most-pure | A Virgin Most Pure
+breeches-mary | Breeches Mary
+craigellachie-lasses | The Craigellachie Lasses
+deil-take-the-warr | De'il Take the Warr
+diddanwch-gruffydd-ap-cynan | Diddanwch Gruffydd ap Cynan
+dumbarton-drums | Dumbarton Drums
+ecce-tempus | Ecce Tempus
+highland-chieftain | The Highland Chieftain
+long-time-ago | Long Time Ago
+lord-alexander-gordons-strathspey | Lord Alexander Gordon's Strathspey
+marquis-of-bowmonts-reel | The Marquis of Bowmont's Reel
+marquis-of-huntlys-strathspey | Marquis of Huntly's Strathspey
+miss-ross | Miss Ross
+over-the-mountains | Over the Mountains
+quare-tristis-es-anima-mea | Quare tristis es anima mea
+queens-welcome-to-invercauld | The Queen's Welcome to Invercauld
+sir-alexander-dons-strathspey | Sir Alexander Don's Strathspey
+talisker | Talisker
+this-new-christmas-carol | This New Christmas Carol
+alexander | Alexander
+athole-brose | Athole Brose
+brolum | Brolum
+coffee-house | The Coffee House
+elevation | Elevation
+fain-i-would | Fain I Would
+gathering | The Gathering
+graies-inne-maske | Graies Inne Maske
+grants-rant | Grant's Rant
+i-was-wrecked-on-a-rocky-and-desolate-shore | I was wrecked on a rocky and desolate shore
+knights-of-snowdon | Knights of Snowdon
+little-pickle | Little Pickle
+lloyd | Lloyd
+loch-erroch-side | Loch Erroch Side
+london | London
+lord-elcho | Lord Elcho
+lovers-luck | The Lover's Luck
+master-john-romily | Master John Romily
+miller | The Miller
+miss-andy-campbells-scotch-measure | Miss Andy Campbell's Scotch Measure
+mutual-love | Mutual Love
+pas-du-loup | Pas du Loup
+perthshire-volunteers | Perthshire Volunteers
+redesdale-hornpipe | Redesdale Hornpipe
+source-of-spey | The Source Of Spey
+sportsmans-hornpipe | The Sportsman's Hornpipe
+summer-morning | The Summer Morning
+sweet-molly-malone | Sweet Molly Malone
+teviot-bridge | Teviot Bridge
+tipperary-hills | Tipperary Hills
+wives-victory | The Wives' Victory
+young-damons-flight | Young Damon's Flight
+a-trip-to-highgate | A Trip To Highgate
+a-trip-to-tunbridge | A Trip to Tunbridge
+bartlett-house | Bartlett House
+brandlings | Brandlings
+confesse | Confesse
+cullen-house | Cullen House
+delvine-side | Delvine Side
+eliza | Eliza
+forneth-house | Forneth House
+great-high-priest | Great High Priest
+james-duff-m-p | James Duff M.P.
+lord-at-first-did-adam-make | The Lord At First Did Adam Make
+machynlleth | Machynlleth
+manage-the-miser | Manage the Miser
+o-gottes-lamm | O Gottes Lamm
+peacocks-tune | Peacock's Tune
+remember-davids-troubles-lord | Remember David's troubles Lord
+shepherd | The Shepherd
+tulchan-lodge | Tulchan Lodge
+twll-yn-ei-boch | Twll yn ei boch
+wakefield-hunt | Wakefield Hunt
+way-to-norwich | The Way to Norwich
+adsons-saraband | Adson's Saraband
+ayrshire-lasses | Ayrshire Lasses
+bless-the-lord | Bless the Lord
+bob-o-dowally | The Bob o' Dowally
+bridge-of-banff | Bridge of Banff
+cadgers-in-the-canongate | Cadgers in the Canongate
+crieff-fair | Crieff Fair
+general-macdonald | General MacDonald
+glencoe | Glencoe
+killiechassie | Killiechassie
+lady-harriet-hopes-reel | Lady Harriet Hope's Reel
+major-malleys-march | Major Malley's March
+major-shanly | Major Shanly
+mrs-power | Mrs. Power
+navvie-on-the-line | Navvie on the Line
+o-what-can-little-hands-do | O what can little hands do
+piper-of-drummond | Piper of Drummond
+shave-the-donkey | Shave The Donkey
+strathbogie-toast | Strathbogie Toast
+this-day-a-child-is-born | This Day A Child Is Born
+apley-house | Apley House
+arise-and-sing-dispel-your-fears | Arise And Sing Dispel Your Fears
+bellingham-boat | Bellingham Boat
+buff-and-blue | Buff and Blue
+captain-lanoes-quick-march | Captain Lanoe's Quick March
+captain-white | Captain White
+chelmsford-assembly | Chelmsford Assembly
+corgarff-castle | Corgarff Castle
+cottey-house | Cottey House
+cradled-all-lowly | Cradled All Lowly
+dancing-on-the-green | Dancing On The Green
+forbes-morrison | Forbes Morrison
+general-garibaldis-reel | General Garibaldi's Reel
+happy-marriage | The Happy Marriage
+hughie-rory-mackinnon | Hughie Rory MacKinnon
+la-fougere | La Fougère
+lieutenant-howard-douglas | Lieutenant Howard Douglas
+little-house-around-the-corner | Little House Around the Corner
+loves-triumph | Love's Triumph
+miss-campbells-reel | Miss Campbell's Reel
+miss-ogilvies-fancy | Miss Ogilvie's Fancy
+mountain-high | The Mountain High
+mrs-adie | Mrs. Adie
+mrs-garden-of-troups-strathspey | Mrs Garden of Troup's Strathspey
+my-love-is-lost-to-me | My Love Is Lost to Me
+nameless-lassie | The Nameless Lassie
+new-moon | The New Moon
+nuptial-knot | The Nuptial Knot
+pease-strae | Pease Strae
+rattle-the-bottles | Rattle the Bottles
+review | The Review
+shepherd-of-souls | Shepherd of Souls
+sun-assembly | Sun Assembly
+sun-from-the-east | The Sun from the East
+welsh | The Welsh
+whigs-of-fife | The Whigs of Fife
+caledonian-canal | Caledonian Canal
+captain-o-cain | Captain O Cain
+careys-minuet | Carey's Minuet
+come-dance-and-sing | Come Dance and Sing
+come-up-stairs-with-me | Come Up Stairs with Me
+counsellor-dillon | Counsellor Dillon
+cream-pot | Cream Pot
+dover-pier | Dover Pier
+durham | Durham
+fox | Fox
+glise-de-sherbrooke | Glise de Sherbrooke
+inverness-rant | The Inverness Rant
+john-of-paris | John Of Paris
+johnny-the-jumper | Johnny the Jumper
+kildrummy-castle | Kildrummy Castle
+lady-betty-cochrans-reel | Lady Betty Cochran's Reel
+lady-mary-hays-scotch-measure | Lady Mary Hay's Scotch Measure
+lord-save-me-for-thy-glorious-name | Lord save me for thy glorious Name
+lorn-strathspey | The Lorn Strathspey
+merry-lads-of-ayr | The Merry Lads of Ayr
+miss-gordon-of-liverpool | Miss Gordon Of Liverpool
+miss-gordon-of-park | Miss Gordon Of Park
+murphys-hornpipe | Murphy's Hornpipe
+my-dearie | My Dearie
+niel-gows-recovery | Niel Gow's Recovery
+old-as-the-hills | Old as the Hills
+old-batchelor | Old Batchelor
+perth | Perth
+pinagay-branle | Pinagay Branle
+there-is-a-land-of-pleasure | There is a land of pleasure
+thorn-bush | Thorn Bush
+tunbridge | Tunbridge
+we-are-marching-onward-in-the-cause-of-right | We are marching onward in the cause of right
+ye-children-which-do-serve-the-lord | Ye children which do serve the Lord
+ball | The Ball
+black-heath | Black-Heath
+blest-are-the-sons-of-peace | Blest Are The Sons Of Peace
+burns-irish-hornpipe | Burns' Irish Hornpipe
+ca-the-wethers-to-the-hill | Ca' the Wethers to the Hill
+colonel-w-marshall-of-the-79th-regiment-of-foot | Colonel W. Marshall of the 79th Regiment of Foot
+come-all-you-worthy-gentlemen | Come All You Worthy Gentlemen
+conor-oreilly | Conor O'Reilly
+corn-riggs-are-bonnie | Corn Riggs Are Bonnie
+da-auld-stoers-back-again | Da Auld Stoers Back Again
+hunter | Hunter
+kelsterne-gardens | Kelsterne Gardens
+kew-gardens | Kew Gardens
+kingston-hornpipe | Kingston Hornpipe
+light-of-other-days | The Light of Other Days
+miller-o-hirn | The Miller O' Hirn
+miss-campbell-of-saddells | Miss Campbell Of Saddell's

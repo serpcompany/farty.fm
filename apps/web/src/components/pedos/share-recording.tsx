@@ -1,7 +1,7 @@
 'use client'
 
 import { Link2, Link2Off, Share } from 'lucide-react'
-import { useEffect, useEffectEvent, useState, useSyncExternalStore } from 'react'
+import { type ReactNode, useEffect, useEffectEvent, useState, useSyncExternalStore } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,18 +36,20 @@ import {
   readHandle,
   readShares,
   type Shared,
+  type ShareKind,
   type Shares,
-  shareRecording,
+  shareItem,
+  shareLink,
   stopSharing
 } from '@/lib/sharing'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 
-// Share on a Recording's row (ADR 0020): the first time, a Handle; then the link, to the phone's
-// share sheet or the clipboard. A shared Recording's Share offers Share link or Stop sharing. A
-// guest makes a free account first.
+// Share on a Recording's row, and on a saved Toot's screen and row (ADR 0020): the first time, a
+// Handle; then the link, to the phone's share sheet or the clipboard. A shared item's Share offers
+// Share link or Stop sharing. A guest makes a free account first.
 
-/** The signed-in account's Handle and shared Recordings, as last read, for every row. */
+/** The signed-in account's Handle and shared items, as last read, for every row. */
 let known: { accountId: string; shares: Shares; readAt: number } | null = null
 let reading: string | null = null
 const listeners = new Set<() => void>()
@@ -77,15 +79,23 @@ async function refresh(accountId: string): Promise<void> {
 
 function remember(
   accountId: string,
-  change: { handle?: string; id?: string; url?: string | null }
+  change: { handle?: string; item?: { kind: ShareKind; id: string; url: string | null } }
 ) {
-  const shares = known?.accountId === accountId ? known.shares : { handle: null, links: new Map() }
+  const shares: Shares =
+    known?.accountId === accountId
+      ? known.shares
+      : { handle: null, links: new Map(), tootLinks: new Map() }
   const links = new Map(shares.links)
-  if (change.id && change.url) links.set(change.id, change.url)
-  if (change.id && change.url === null) links.delete(change.id)
+  const tootLinks = new Map(shares.tootLinks)
+  const item = change.item
+  if (item) {
+    const changed = item.kind === 'toots' ? tootLinks : links
+    if (item.url) changed.set(item.id, item.url)
+    else changed.delete(item.id)
+  }
   setKnown({
     accountId,
-    shares: { handle: change.handle ?? shares.handle, links },
+    shares: { handle: change.handle ?? shares.handle, links, tootLinks },
     readAt: known?.readAt ?? 0
   })
 }
@@ -95,7 +105,7 @@ export function rememberHandle(accountId: string, handle: string): void {
   remember(accountId, { handle })
 }
 
-/** The signed-in account's Handle and shared Recordings, or null until read or when signed out. */
+/** The signed-in account's Handle and shared items, or null until read or when signed out. */
 export function useShares(): Shares | null {
   const { account } = useAccount()
   const accountId = account.status === 'signedIn' ? account.id : null
@@ -120,23 +130,45 @@ export function SharedMark() {
   )
 }
 
-const failures: Record<Exclude<Shared, { url: string }>['error'], string> = {
-  noHandle: "Couldn't share. Try again.",
-  notUploaded: "This Recording hasn't reached your account yet. Try again in a moment.",
-  takenDown: 'This Recording was taken down after a report, so it can’t be shared.',
-  deleted: 'This Recording was deleted.',
-  failed: "Couldn't share. Check your connection and try again."
+const nouns: Record<ShareKind, string> = { recordings: 'Recording', toots: 'Toot' }
+
+function failure(kind: ShareKind, error: Exclude<Shared, { url: string }>['error']): string {
+  const what = nouns[kind]
+  return {
+    noHandle: "Couldn't share. Try again.",
+    notUploaded: `This ${what} hasn't reached your account yet. Try again in a moment.`,
+    takenDown: `This ${what} was taken down after a report, so it can’t be shared.`,
+    deleted: `This ${what} was deleted.`,
+    failed: "Couldn't share. Check your connection and try again."
+  }[error]
+}
+
+/** One item's Share, as `useShare` gives it: its link, and what each control does. */
+export type ShareFlow = {
+  /** Its link, while it's shared. */
+  link: string | null
+  /** A link is being made or stopped. */
+  busy: boolean
+  /** Share, from the top: an account, then a Handle, then the link. */
+  share: () => void
+  /** Offers the link it already has again. */
+  shareLink: () => void
+  /** Asks before it stops sharing. */
+  stop: () => void
+  /** The Handle picker, Stop sharing's question, the link the browser held back, and the note. */
+  dialogs: ReactNode
 }
 
 /**
- * The row's Share: shares `recording`, or, once it's shared, offers Share link and Stop sharing.
- * `name` is the Recording's, as its row shows it.
+ * Share for one Recording or saved Toot, whichever control it's behind: a row's button, a
+ * screen's header or a More menu. `name` is the item's, as its row shows it. Render `dialogs`
+ * outside any menu, so they stay open once it closes.
  */
-export function ShareRecordingButton({ recording, name }: { recording: Recording; name: string }) {
+export function useShare({ kind, id, name }: { kind: ShareKind; id: string; name: string }) {
   const { account, openStep } = useAccount()
   const shares = useShares()
   const accountId = account.status === 'signedIn' ? account.id : null
-  const link = shares?.links.get(recording.id) ?? null
+  const link = shareLink(shares, kind, id)
   const [busy, setBusy] = useState(false)
   const [picking, setPicking] = useState<{ suggestion: string } | null>(null)
   const [stopping, setStopping] = useState(false)
@@ -161,15 +193,15 @@ export function ShareRecordingButton({ recording, name }: { recording: Recording
   }
 
   /** Makes the link with the user's Handle, then offers it. */
-  const share = async (id: string, handle: string) => {
+  const share = async (account: string, handle: string) => {
     setBusy(true)
-    const shared = await shareRecording(recording.id, id)
+    const shared = await shareItem(kind, id, account)
     setBusy(false)
     if ('error' in shared) {
-      setNote(failures[shared.error])
+      setNote(failure(kind, shared.error))
       return
     }
-    remember(id, { handle, id: recording.id, url: shared.url })
+    remember(account, { handle, item: { kind, id, url: shared.url } })
     await offer(shared.url, handle)
   }
 
@@ -203,46 +235,8 @@ export function ShareRecordingButton({ recording, name }: { recording: Recording
     if (account.status === 'signedIn') carryOn()
   }, [resume, account.status])
 
-  const label = `Share ${name}`
-  return (
+  const dialogs = (
     <>
-      {link ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon" aria-label={label} disabled={busy} />}
-          >
-            <Share />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-auto">
-            <DropdownMenuItem
-              className="min-h-11 px-3 text-base"
-              onClick={() => void offer(link, shares?.handle ?? null)}
-            >
-              <Share />
-              Share link
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              className="min-h-11 px-3 text-base"
-              onClick={() => setStopping(true)}
-            >
-              <Link2Off />
-              Stop sharing
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={label}
-          disabled={busy}
-          onClick={() => void start()}
-        >
-          <Share />
-        </Button>
-      )}
-
       {accountId && (
         <HandleDialog
           accountId={accountId}
@@ -273,9 +267,9 @@ export function ShareRecordingButton({ recording, name }: { recording: Recording
                 setStopping(false)
                 if (!accountId) return
                 setBusy(true)
-                const stopped = await stopSharing(recording.id, accountId)
+                const stopped = await stopSharing(kind, id, accountId)
                 setBusy(false)
-                if (stopped) remember(accountId, { id: recording.id, url: null })
+                if (stopped) remember(accountId, { item: { kind, id, url: null } })
                 else setNote("Couldn't stop sharing. Check your connection and try again.")
               }}
             >
@@ -320,6 +314,112 @@ export function ShareRecordingButton({ recording, name }: { recording: Recording
       )}
     </>
   )
+
+  return {
+    link,
+    busy,
+    share: () => void start(),
+    shareLink: () => {
+      if (link) void offer(link, shares?.handle ?? null)
+    },
+    stop: () => setStopping(true),
+    dialogs
+  } satisfies ShareFlow
+}
+
+/**
+ * Share as a button of its own: shares the item, or, once it's shared, offers Share link and Stop
+ * sharing. `name` is the item's, as its row shows it.
+ */
+export function ShareButton({
+  kind,
+  id,
+  name,
+  className
+}: {
+  kind: ShareKind
+  id: string
+  name: string
+  className?: string
+}) {
+  const flow = useShare({ kind, id, name })
+  const label = `Share ${name}`
+  return (
+    <>
+      {flow.link ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={label}
+                disabled={flow.busy}
+                className={className}
+              />
+            }
+          >
+            <Share />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-auto">
+            <ShareMenuItems flow={flow} />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={label}
+          disabled={flow.busy}
+          onClick={flow.share}
+          className={className}
+        >
+          <Share />
+        </Button>
+      )}
+      {flow.dialogs}
+    </>
+  )
+}
+
+/**
+ * Share's items in a menu: Share while the item isn't shared, or Share link and Stop sharing once
+ * it is.
+ */
+export function ShareMenuItems({ flow }: { flow: ShareFlow }) {
+  if (!flow.link) {
+    return (
+      <DropdownMenuItem
+        className="min-h-11 px-3 text-base"
+        disabled={flow.busy}
+        onClick={flow.share}
+      >
+        <Share />
+        Share
+      </DropdownMenuItem>
+    )
+  }
+  return (
+    <>
+      <DropdownMenuItem className="min-h-11 px-3 text-base" onClick={flow.shareLink}>
+        <Share />
+        Share link
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        variant="destructive"
+        className="min-h-11 px-3 text-base"
+        onClick={flow.stop}
+      >
+        <Link2Off />
+        Stop sharing
+      </DropdownMenuItem>
+    </>
+  )
+}
+
+/** The row's Share on a Recording. `name` is the Recording's, as its row shows it. */
+export function ShareRecordingButton({ recording, name }: { recording: Recording; name: string }) {
+  return <ShareButton kind="recordings" id={recording.id} name={name} />
 }
 
 type Check = { handle: string; problem: HandleProblem | null } | { handle: string; checking: true }
