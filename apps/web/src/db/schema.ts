@@ -11,6 +11,7 @@ import {
 } from 'drizzle-orm/sqlite-core'
 import type { Performance } from '../lib/performance'
 import type { Analysis } from '../lib/recordings'
+import { SONG_REPORT_REASON_IDS } from '../lib/song-report'
 import type { TootArrangement } from '../lib/toot'
 
 // The D1 schema (SERP's data-and-storage standard): Drizzle owns every table, Better Auth's too, so
@@ -392,5 +393,29 @@ export const profileReports = sqliteTable(
     index('profile_reports_created_at_idx').on(table.createdAt),
     // For deleting an account's reports by `on delete cascade`.
     index('profile_reports_user_id_idx').on(table.userId)
+  ]
+)
+
+/**
+ * A report that a catalog Song is wrong, from Report a problem in Song Creator or on a locked
+ * Song's sheet (#358), for Farty to fix the catalog by. It names the Song, the notes it was sent
+ * about, the reason and the reporter's note, never who sent it: guests report too, and no account
+ * or address is kept.
+ */
+export const songReports = sqliteTable(
+  'song_reports',
+  {
+    id: text('id').primaryKey(),
+    songId: text('song_id').notNull(),
+    /** The hash the Song's notes file was named by (`songVersion`): which notes were reported. */
+    songVersion: text('song_version').notNull(),
+    reason: text('reason', { enum: SONG_REPORT_REASON_IDS }).notNull(),
+    /** What the reporter added, at most `SONG_REPORT_NOTE_MAX`, or null when they added nothing. */
+    note: text('note'),
+    createdAt: timestamp('created_at').notNull()
+  },
+  table => [
+    index('song_reports_created_at_idx').on(table.createdAt),
+    index('song_reports_song_id_idx').on(table.songId)
   ]
 )

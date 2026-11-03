@@ -23,6 +23,8 @@ The first run downloads `PDMX.csv` (225 MB) and `mid.tar.gz` (214 MB) into `~/.c
 | `test_flag_picks.py` | Unit tests for the flags |
 | `ranking.md` | The ranking: the top 1,500 titles not yet tried, and why the others are left out |
 | `excluded-titles.txt` | Titles the ranking leaves out by hand, one `Title \| why` a line: under copyright, not one tune, or the same tune under another name |
+| `song_reports.py` | Lists an export of D1's `song_reports` per Song, worst first, against the catalog's notes now ([`docs/agents/web.md`](../../docs/agents/web.md#reports-and-take-downs)) |
+| `test_song_reports.py` | Unit tests for the list |
 
 ## Ranking
 

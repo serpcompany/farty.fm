@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   return (
     <article className="flex flex-col gap-3 px-4 pt-4 pb-6 text-sm leading-relaxed [&_a]:underline [&_h2]:pt-3 [&_h2]:text-lg [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
       <h1 className="text-3xl font-bold tracking-tight">Privacy</h1>
-      <p className="text-muted-foreground">Last updated: November 3, 2026</p>
+      <p className="text-muted-foreground">Last updated: November 4, 2026</p>
       <p>
         Farty records your farts, finds the note of each one, and plays songs with them. This policy
         explains what happens to your data. The short version:{' '}
@@ -66,6 +66,15 @@ export default function PrivacyPage() {
           address for an hour, never the address itself.
         </li>
       </ul>
+
+      <h2>Reporting a Song</h2>
+      <p>
+        Anyone can report a Song that&apos;s wrong, from Song Creator or a locked Song&apos;s sheet,
+        with or without an account. Farty keeps the Song and which version of its notes it had, the
+        reason you picked, your note if you wrote one, and when, and nothing about who sent it. To
+        limit how many reports one device can send, it keeps a scrambled code made from your IP
+        address for an hour, never the address itself.
+      </p>
 
       <h2>The account step</h2>
       <p>
