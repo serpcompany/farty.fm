@@ -40,7 +40,16 @@ export type CatalogEntry = {
   file: string
   sha256: string
   source: Record<string, string>
-  render: { bpm: number }
+  render: Render
+}
+
+/** How the reference engine imports a catalog score (`melody.load_midi`'s arguments). */
+export type Render = {
+  bpm: number
+  /** The excerpt ends here: no note starts on or after it. */
+  max_beats?: number
+  beats_per_bar?: number
+  start_beat?: number
 }
 
 /** `fixtures/golden/songs/<id>.json`: the reference engine's import of a catalog score. */
@@ -49,7 +58,10 @@ export type GoldenSong = {
   title: string
   file: string
   sha256: string
+  /** The catalog entry's `render` it was imported with. */
+  import_args: Render
   bpm: number
+  beats_per_bar: number
   /** Where the score's bars start, in beats: a note on one is accented. A pickup isn't a bar. */
   bar_lines: number[]
   length_beats: number
@@ -218,8 +230,17 @@ function song(entry: CatalogEntry, golden: GoldenSong, names: readonly string[])
   if (golden.file !== entry.file || golden.sha256 !== entry.sha256)
     throw problem("the golden copy wasn't imported from the cited score")
   if (golden.bpm !== entry.render.bpm) throw problem('the golden copy has another tempo')
+  // A golden copy left over from an older entry, or edited by hand (#350).
+  const renderKeys = ['bpm', 'max_beats', 'beats_per_bar', 'start_beat'] as const
+  if (renderKeys.some(key => golden.import_args?.[key] !== entry.render[key]))
+    throw problem("the golden copy wasn't imported with the catalog's render arguments")
+  const { max_beats, beats_per_bar } = entry.render
+  if (beats_per_bar !== undefined && golden.beats_per_bar !== beats_per_bar)
+    throw problem('the golden copy has another meter')
   const { notes } = golden
   if (notes.length === 0) throw problem('no notes')
+  if (max_beats !== undefined && notes.some(n => n.start >= max_beats))
+    throw problem(`the golden copy has a note on or after beat ${max_beats}`)
   for (const [i, note] of notes.entries()) {
     if (!(note.dur > 0) || (i > 0 && note.start < notes[i - 1].start))
       throw problem(`note ${i} isn't in time order with a positive length`)

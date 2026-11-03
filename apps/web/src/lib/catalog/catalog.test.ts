@@ -6,6 +6,7 @@ import { catalogPath } from './catalog-path.generated'
 import {
   type CatalogEntry,
   catalogSongs,
+  type GoldenSong,
   outOfDate,
   readSources,
   renderCatalog,
@@ -141,6 +142,32 @@ describe('the generator', () => {
       golden: (id: string) => ({ ...sources.golden(id), sha256: '0'.repeat(64) })
     }
     expect(() => renderCatalog(changed, ['mary'])).toThrow(/cited score/)
+  })
+
+  // #350: every Song's notes come from its golden copy, so one left stale after a change to the
+  // entry's render arguments, or edited by hand, fails here and in `generate.ts --check`.
+  test.each([
+    [
+      'its render arguments',
+      (g: GoldenSong) => ({ ...g, import_args: { ...g.import_args, max_beats: 99 } }),
+      /render arguments/
+    ],
+    ['its meter', (g: GoldenSong) => ({ ...g, beats_per_bar: 3 }), /another meter/],
+    [
+      'a note past its end',
+      (g: GoldenSong) => ({ ...g, notes: [...g.notes, { start: 64, dur: 1, pitch: 72 }] }),
+      /on or after beat/
+    ]
+  ])('refuses a golden copy that differs from its catalog entry in %s', (_, edit, error) => {
+    const id = 'danny-boy'
+    const entry = sources.catalog.find(e => e.id === id)
+    expect(entry?.render).toMatchObject({ max_beats: expect.any(Number), beats_per_bar: 4 })
+    expect(() => renderCatalog(sources, [id])).not.toThrow()
+    const changed = {
+      ...sources,
+      golden: (other: string) => (other === id ? edit(sources.golden(id)) : sources.golden(other))
+    }
+    expect(() => renderCatalog(changed, [id])).toThrow(error)
   })
 
   test('keeps a title with an apostrophe', () => {
