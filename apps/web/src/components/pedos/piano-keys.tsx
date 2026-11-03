@@ -4,9 +4,9 @@ import { audioContext, setPlaybackSession } from '@/lib/audio/context'
 import { noteName, pitchClassNames } from '@/lib/pitch'
 import { cn } from '@/lib/utils'
 
-// One octave of piano keys for placing a Noise-like Recording by ear (ADR 0015), and the piano
-// note each key plays. The note sounds only here, to compare the fart with: Songs and Toots never
-// play it, and stay fart-only (AGENTS.md).
+// One octave of piano keys for giving a Recording its note by ear on its review (ADR 0015, #314),
+// and the piano note each key plays. The note sounds only there, to compare the fart with: Songs
+// and Toots never play it, and stay fart-only (AGENTS.md).
 
 /** The white keys, as steps up from C. */
 const WHITE_STEPS = [0, 2, 4, 5, 7, 9, 11]
@@ -30,26 +30,26 @@ export function octaveOf(midi: number): number {
 
 /**
  * The twelve keys from C to B of `octave`. A white key names its note on C, and on the key picked;
- * the others name only the letter. The key picked is filled; the note the fart is placed on now,
- * if it isn't the one picked, is ringed.
+ * the others name only the letter. The key picked is filled; the note analysis found, if it isn't
+ * the one picked, is ringed.
  */
 export function PianoKeys({
   octave,
   selected,
-  placed,
+  ringed,
   onKey
 }: {
   octave: number
   /** The key picked, as a MIDI note, or null. */
   selected: number | null
-  /** The note the fart is placed on now, or null. */
-  placed: number | null
+  /** The note analysis found, ringed when it isn't the one picked, or null. */
+  ringed: number | null
   onKey: (midi: number) => void
 }) {
   const c = 12 * (octave + 1)
   const state = (midi: number) => ({
     isSelected: midi === selected,
-    wasPlaced: midi === placed && midi !== selected
+    isRinged: midi === ringed && midi !== selected
   })
   return (
     // The fieldset only names the keys: Chrome lays a fieldset's children out in a box of its own,
@@ -59,7 +59,7 @@ export function PianoKeys({
       <div className="relative flex h-42 touch-manipulation">
         {WHITE_STEPS.map(step => {
           const midi = c + step
-          const { isSelected, wasPlaced } = state(midi)
+          const { isSelected, isRinged } = state(midi)
           return (
             <button
               key={midi}
@@ -70,7 +70,7 @@ export function PianoKeys({
               className={cn(
                 'flex min-w-0 flex-1 items-end justify-center rounded-b-[7px] border border-t-0 border-neutral-300 bg-white pb-2 text-[11px] text-neutral-500 outline-none not-first:-ml-px focus-visible:z-10 focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-neutral-200 dark:border-neutral-600 dark:bg-neutral-200 dark:active:bg-neutral-300',
                 step === 0 && 'font-semibold text-neutral-950',
-                wasPlaced && 'inset-ring-2 inset-ring-brand-strong',
+                isRinged && 'inset-ring-2 inset-ring-brand-strong',
                 isSelected &&
                   'border-brand-strong bg-brand-strong font-semibold text-white active:bg-brand-strong dark:border-brand-strong dark:bg-brand-strong dark:active:bg-brand-strong'
               )}
@@ -81,7 +81,7 @@ export function PianoKeys({
         })}
         {BLACK_KEYS.map(({ step, after }) => {
           const midi = c + step
-          const { isSelected, wasPlaced } = state(midi)
+          const { isSelected, isRinged } = state(midi)
           const center = (after / WHITE_STEPS.length) * 100
           return (
             <button
@@ -93,7 +93,7 @@ export function PianoKeys({
               style={{ left: `${center - BLACK_WIDTH / 2}%`, width: `${BLACK_WIDTH}%` }}
               className={cn(
                 'absolute top-0 z-20 flex h-3/5 items-end justify-center rounded-b-[5px] bg-neutral-900 pb-1.5 text-[10px] text-white shadow-[0_2px_0_rgb(0_0_0/0.25)] outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-neutral-700 dark:bg-neutral-950 dark:active:bg-neutral-700',
-                wasPlaced && 'inset-ring-2 inset-ring-brand-strong',
+                isRinged && 'inset-ring-2 inset-ring-brand-strong',
                 isSelected &&
                   'bg-brand-strong font-semibold active:bg-brand-strong dark:bg-brand-strong dark:active:bg-brand-strong'
               )}
@@ -119,7 +119,7 @@ const PARTIALS = [
 
 /**
  * Plays a piano note at `midi` on the shared AudioContext, from a tap: a few decaying partials,
- * enough to hold the fart up to. Only the place-by-ear picker plays it.
+ * enough to hold the fart up to. Only a take's review plays it.
  */
 export function playPianoNote(midi: number): void {
   const context = audioContext()

@@ -8,7 +8,15 @@ import {
 } from './account'
 import { favoritesChanged } from './favorite-store'
 import * as api from './library-api'
-import { itemKey, type Kind, type OutboxEntry, onQueued, placedFields } from './outbox'
+import {
+  itemKey,
+  type Kind,
+  type OutboxEntry,
+  onQueued,
+  type PlacedField,
+  placedFieldNames,
+  placedFields
+} from './outbox'
 import { adoptTakes, releaseTakes } from './pad-take'
 import { audioStore, clearLibrary, download, type PedosDB, withDb } from './recording-store'
 import type { Recording, Trim } from './recordings'
@@ -41,9 +49,9 @@ export type ItemChange = Exclude<LibraryChange, { reset: true }>
 
 /**
  * The Recordings a screen shows, `list`, after a sync's `change`: those deleted gone, new ones
- * added, and those changed with their new number, Placed Pitch and Trim, as a Recording not
- * uploaded yet may come back renumbered and one placed or trimmed in another browser with its
- * Placed Pitch and Trim. Each keeps this browser's analysis. Oldest first.
+ * added, and those changed with their new number, Placed Pitch, Trim and name, as a Recording not
+ * uploaded yet may come back renumbered and one placed, trimmed or named in another browser with
+ * its Placed Pitch, Trim and name. Each keeps this browser's analysis. Oldest first.
  */
 export function recordingsAfter(list: readonly Recording[], change: ItemChange): Recording[] {
   const { recordings: added, deleted } = change
@@ -52,7 +60,13 @@ export function recordingsAfter(list: readonly Recording[], change: ItemChange):
   const merged = kept.map(r => {
     const changed = fresh.get(r.id)
     return changed
-      ? { ...r, number: changed.number, placedPitch: changed.placedPitch, trim: changed.trim }
+      ? {
+          ...r,
+          number: changed.number,
+          placedPitch: changed.placedPitch,
+          trim: changed.trim,
+          name: changed.name
+        }
       : r
   })
   const ids = new Set(kept.map(r => r.id))
@@ -312,12 +326,13 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
         continue
       }
       await Promise.all([outbox.put(entry), tx.done])
-      // Only the fields this browser changed, so it never sends back an old Trim or Placed
-      // Pitch over another browser's newer one (ADR 0019).
+      // Only the fields this browser changed, so it never sends back an old Trim, Placed Pitch
+      // or name over another browser's newer one (ADR 0019).
       const placement: api.Placement = {}
       for (const field of placedFields(queued)) {
         if (field === 'placedPitch') placement.placedPitch = recording.placedPitch ?? null
-        else placement.trim = recording.trim ?? null
+        else if (field === 'trim') placement.trim = recording.trim ?? null
+        else placement.name = recording.name ?? null
       }
       return { entry, kind: 'recordings', op: 'place', placement }
     }
@@ -514,20 +529,25 @@ async function apply(database: Database, answer: api.LibraryChanges) {
     if (op === 'delete') continue
     const here = await recordings.get(recording.id)
     if (here) {
-      // Only its Placed Pitch (ADR 0015) and Trim (ADR 0019) change: the analysis stays this
-      // browser's own. A Worker from before #268 sends no Placed Pitch, and one from before #293
-      // no Trim, which changes neither. A field this browser is still placing keeps its own
-      // value, and the other takes the account's, as another browser changed it (ADR 0019).
+      // Only its Placed Pitch (ADR 0015), Trim (ADR 0019) and name (#314) change: the analysis
+      // stays this browser's own. A Worker from before #268 sends no Placed Pitch, one from
+      // before #293 no Trim, and one from before #314 no name, which changes none of them. A
+      // field this browser is still placing keeps its own value, and the others take the
+      // account's, as another browser changed them (ADR 0019).
       const entry = entries.get(key)
-      const held = entry?.op === 'place' ? placedFields(entry) : ['placedPitch', 'trim']
+      const held: readonly PlacedField[] =
+        entry?.op === 'place' ? placedFields(entry) : placedFieldNames
       const moved: Recording = { ...here }
       if (recording.placedPitch !== undefined && !(op && held.includes('placedPitch')))
         moved.placedPitch = recording.placedPitch
       if (recording.trim !== undefined && !(op && held.includes('trim')))
         moved.trim = recording.trim
+      if (recording.name !== undefined && !(op && held.includes('name')))
+        moved.name = recording.name
       const same =
         (here.placedPitch ?? null) === (moved.placedPitch ?? null) &&
-        sameTrim(here.trim ?? null, moved.trim ?? null)
+        sameTrim(here.trim ?? null, moved.trim ?? null) &&
+        (here.name ?? null) === (moved.name ?? null)
       if (same) continue
       await recordings.put(moved)
       change.recordings.push(moved)

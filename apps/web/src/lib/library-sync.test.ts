@@ -191,8 +191,10 @@ const version3 = (fill: Fill, keepOpen = false) => olderDatabase(3, fill, keepOp
 const version5 = (fill: Fill, keepOpen = false) => olderDatabase(5, fill, keepOpen)
 /** Writes a version 6 `pedos` database, as a browser on a build from before #313 left it. */
 const version6 = (fill: Fill, keepOpen = false) => olderDatabase(6, fill, keepOpen)
+/** Writes a version 7 `pedos` database, as a browser on a build from before #314 left it. */
+const version7 = (fill: Fill, keepOpen = false) => olderDatabase(7, fill, keepOpen)
 
-async function olderDatabase(version: 3 | 5 | 6, fill: Fill, keepOpen: boolean) {
+async function olderDatabase(version: 3 | 5 | 6 | 7, fill: Fill, keepOpen: boolean) {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const open = indexedDB.open('pedos', version)
     open.onupgradeneeded = () => {
@@ -203,6 +205,7 @@ async function olderDatabase(version: 3 | 5 | 6, fill: Fill, keepOpen: boolean) 
       for (const name of ['audio', 'tootAudio', 'downloads', 'meta'])
         database.createObjectStore(name)
       if (version >= 5) database.createObjectStore('pads')
+      if (version >= 7) database.createObjectStore('favorites')
       fill(name => (open.transaction as IDBTransaction).objectStore(name))
     }
     open.onsuccess = () => {
@@ -374,7 +377,7 @@ describe('version 7', () => {
     }, true)
     older.onversionchange = () => older.close()
     const database = await page.store.db()
-    expect(database.version).toBe(7)
+    expect(database.version).toBe(page.store.DB_VERSION)
     expect([...database.objectStoreNames]).toContain('favorites')
     expect(await database.get('meta', 'cursor')).toBe(0)
     expect(await database.get('pads', 0)).toBe(recording.id)
@@ -388,6 +391,83 @@ describe('version 7', () => {
       open.onerror = () => resolve(open.error?.name ?? '')
     })
     expect(reopened).toBe('VersionError')
+  })
+})
+
+// Version 8 (#314) changes no store: it shuts out code from before names, which would send a
+// `place` without the name and settle it, and drop the account's names while its cursor moved on.
+describe('version 8', () => {
+  it('keeps the Favorite Songs and their queue, reads the names once and shuts out older tabs', async () => {
+    claimedBy('user-a')
+    const recording = theirs(1)
+    account.add('recordings', { ...recording, placedPitch: 45, name: 'Big one' }, wav(1))
+    const older = await version7(tx => {
+      tx('recordings').put({ ...recording, placedPitch: 48 })
+      tx('audio').put(wav(1), recording.id)
+      tx('favorites').put(Date.now(), 'twinkle')
+      for (const [kind, id, op, fields] of [
+        ['favorites', 'twinkle', 'put', undefined],
+        ['recordings', recording.id, 'place', ['placedPitch']]
+      ] as const)
+        tx('outbox').put({
+          key: `${kind}:${id}`,
+          kind,
+          id,
+          op,
+          sent: false,
+          queuedAt: Date.now(),
+          version: crypto.randomUUID(),
+          ...(fields ? { fields } : {})
+        })
+      tx('meta').put(10 ** 13, 'cursor')
+    }, true)
+    older.onversionchange = () => older.close()
+    const database = await page.store.db()
+    expect(database.version).toBe(8)
+    expect(await database.get('meta', 'cursor')).toBe(0)
+    expect(await page.favorites.loadFavorites()).toEqual(['twinkle'])
+    expect((await outbox()).map(entry => entry.key).sort()).toEqual(
+      [`favorites:twinkle`, `recordings:${recording.id}`].sort()
+    )
+    expect(() => older.transaction('outbox')).toThrow()
+    await page.sync.syncOnce('user-a')
+    // The place version 7 code queued only ever meant the Placed Pitch: it keeps the name.
+    expect(requests('PATCH').map(s => s.json)).toEqual([{ placedPitch: 48 }])
+    expect(account.favorites()).toEqual(['twinkle'])
+    expect(account.get('recordings', recording.id)?.item).toMatchObject({
+      placedPitch: 48,
+      name: 'Big one'
+    })
+    expect(await outbox()).toEqual([])
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0]).toMatchObject({
+      placedPitch: 48,
+      name: 'Big one'
+    })
+    expect(await page.favorites.loadFavorites()).toEqual(['twinkle'])
+    const reopened = await new Promise<string>(resolve => {
+      const open = indexedDB.open('pedos', 7)
+      open.onsuccess = () => resolve('opened')
+      open.onerror = () => resolve(open.error?.name ?? '')
+    })
+    expect(reopened).toBe('VersionError')
+  })
+
+  it('sends a name and a Favorite Song queued together, each alone', async () => {
+    claimedBy('user-a')
+    const mine = await recorded(1)
+    await page.sync.syncOnce('user-a')
+    account.place(mine.id, 45)
+    await page.store.placeRecording(mine.id, { name: 'Squeaker' })
+    await page.favorites.setFavorite('twinkle', true)
+    await page.sync.syncOnce('user-a')
+    expect(requests('PATCH').map(s => s.json)).toEqual([{ name: 'Squeaker' }])
+    expect(account.favorites()).toEqual(['twinkle'])
+    expect(account.get('recordings', mine.id)?.item).toMatchObject({
+      placedPitch: 45,
+      name: 'Squeaker'
+    })
+    expect(await outbox()).toEqual([])
   })
 })
 
@@ -819,6 +899,60 @@ describe('uploading', () => {
     expect(account.get('recordings', recording.id)?.item).toMatchObject({ placedPitch: 45, trim })
     await page.sync.syncOnce('user-a')
     expect((await page.store.loadRecordings())[0]).toMatchObject({ placedPitch: 45, trim })
+  })
+
+  it('names a Recording on the account, in its upload or after it, sending the name alone (#314)', async () => {
+    const early = await recorded(1)
+    await page.store.placeRecording(early.id, { placedPitch: -1, name: 'Squeaker' })
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(account.get('recordings', early.id)?.item).toMatchObject({
+      placedPitch: -1,
+      name: 'Squeaker'
+    })
+    expect(requests('PATCH')).toEqual([])
+    // Another browser moves it; this one renames it, and sends only the name.
+    account.place(early.id, 45)
+    await page.store.placeRecording(early.id, { name: 'Big one' })
+    await page.sync.syncOnce('user-a')
+    expect(requests('PATCH').map(s => s.json)).toEqual([{ name: 'Big one' }])
+    expect(account.get('recordings', early.id)?.item).toMatchObject({
+      placedPitch: 45,
+      name: 'Big one'
+    })
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0]).toMatchObject({
+      placedPitch: 45,
+      name: 'Big one'
+    })
+  })
+
+  it("applies another browser's name, on the screen's Recordings too, but not over one it is sending", async () => {
+    const recording = theirs()
+    account.add('recordings', recording, wav(5))
+    await page.sync.syncOnce('user-a')
+    const shown = [{ ...recording, analysis: { state: 'analyzing' } as const }]
+    account.placeAndTrim(recording.id, { name: 'From the phone' })
+    const changes: LibraryChange[] = []
+    page.sync.onLibraryChanged(change => changes.push(change))
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0].name).toBe('From the phone')
+    const [change] = changes
+    if (!change || change.reset) throw new Error('no change')
+    expect(page.sync.recordingsAfter(shown, change)).toEqual([
+      { ...shown[0], name: 'From the phone' }
+    ])
+
+    refuse('PATCH', 503, 'unavailable')
+    await page.store.placeRecording(recording.id, { name: 'Mine' })
+    account.placeAndTrim(recording.id, { name: 'Theirs' })
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0].name).toBe('Mine')
+    // A Worker from before #314 lists the Recording without a name: it stays.
+    account.intercept = null
+    await page.sync.syncOnce('user-a')
+    account.add('recordings', recording, wav(5))
+    await page.sync.syncOnce('user-a')
+    expect((await page.store.loadRecordings())[0].name).toBe('Mine')
   })
 
   // Offline, A trims and B moves the same fart; each change reaches the account whole.

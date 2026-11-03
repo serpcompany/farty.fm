@@ -71,18 +71,23 @@ export interface AutoMapRecording {
 }
 
 /**
- * A Recording from its stored analysis. The gesture length is recovered in whole samples, as the
+ * A Recording from its stored analysis, at its own length, or its Trim's (ADR 0019): any Recording
+ * can be trimmed (#314), and nothing re-reads a trimmed one's pitch, shortest note or settle time,
+ * as the reference's `trimmed()` keeps them. The length is recovered in whole samples, as the
  * reference measures it.
  */
-export function autoMapRecording(id: string, analysis: Analysis): AutoMapRecording {
-  const sr = ANALYSIS_SAMPLE_RATE
-  const samples =
-    Math.round(analysis.gestureEndSeconds * sr) - Math.round(analysis.gestureStartSeconds * sr)
+export function autoMapRecording(
+  id: string,
+  analysis: Analysis,
+  trim: Trim | null = null
+): AutoMapRecording {
   return {
     id,
     recordingPitchMidi: analysis.recordingPitchMidi,
     shortestNoteSeconds: analysis.shortestNoteSeconds,
-    gestureSeconds: samples / sr,
+    gestureSeconds: trimSeconds(
+      trim ?? { startSeconds: analysis.gestureStartSeconds, endSeconds: analysis.gestureEndSeconds }
+    ),
     settleSeconds: analysis.settleSeconds ?? null
   }
 }
@@ -96,11 +101,11 @@ export function autoMapRecording(id: string, analysis: Analysis): AutoMapRecordi
 export const PLACED_SHORTEST_NOTE_SECONDS = 0.6
 
 /**
- * A Noise-like Recording the user placed on `placedMidi` by ear, as Auto-map sees it (ADR 0015): a
- * Melodic Recording at that note that holds it from `PLACED_SHORTEST_NOTE_SECONDS` and settles at
- * once, at its own length, or its Trim's (ADR 0019). The reference's `placed()` makes the same
- * `Source`, of `trimmed()` for a Trim. It still plays raw (ADR 0012), so the note only decides
- * which pitches it may play.
+ * A Recording the user placed on `placedMidi` by ear, as Auto-map sees it (ADR 0015): a Melodic
+ * Recording at that note that holds it from `PLACED_SHORTEST_NOTE_SECONDS` and settles at once,
+ * at its own length, or its Trim's (ADR 0019). Noise-like or Melodic: any Recording can be placed
+ * (#314). The reference's `placed()` makes the same `Source`, of `trimmed()` for a Trim. It still
+ * plays raw (ADR 0012), so the note only decides which pitches it may play.
  */
 export function placedAutoMapRecording(
   id: string,
@@ -108,12 +113,10 @@ export function placedAutoMapRecording(
   placedMidi: number,
   trim: Trim | null = null
 ): AutoMapRecording {
-  const recording = autoMapRecording(id, analysis)
   return {
-    ...recording,
+    ...autoMapRecording(id, analysis, trim),
     recordingPitchMidi: placedMidi,
     shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
-    gestureSeconds: trim === null ? recording.gestureSeconds : trimSeconds(trim),
     settleSeconds: 0
   }
 }
@@ -189,7 +192,9 @@ export function arrange(song: Song, recordings: readonly AutoMapRecording[]): Ar
   for (const p of pitches) {
     const notes = song.notes.filter(n => n.pitch === p)
     weight.push(pythonSum(notes.map(n => n.dur)))
-    noteSeconds.push(notes.map(n => n.dur * spb - GAP_SECONDS))
+    // A note shorter than the gap has no time left to sound, not a negative time: a negative one
+    // made `unsettledCost` about -1e8 a note, so `solve`'s penalties no longer ranked choices (#332).
+    noteSeconds.push(notes.map(n => Math.max(0, n.dur * spb - GAP_SECONDS)))
     longest.push(Math.max(...noteSeconds[noteSeconds.length - 1]))
   }
 
@@ -292,10 +297,11 @@ export function fills(recordingSeconds: number, longestNoteSeconds: number): boo
 /**
  * The shortest Recording, at its own pitch, that covers a pitch whose longest note lasts
  * `longestNoteSeconds`: `NOTE_FILL` × that, rounded up to 0.1 s ("Needs a fart near F3 (1.2 s)").
- * The 1e-9 keeps float noise from adding 0.1 s to an exact tenth, as the reference does.
+ * The 1e-9 keeps float noise from adding 0.1 s to an exact tenth, as the reference does. A note
+ * shorter than the gap needs 0 s, not the −0 that `Math.ceil` gives (Python's `math.ceil` gives 0).
  */
 export function neededSeconds(longestNoteSeconds: number): number {
-  return Math.ceil(NOTE_FILL * longestNoteSeconds * 10 - 1e-9) / 10
+  return Math.max(0, Math.ceil(NOTE_FILL * longestNoteSeconds * 10 - 1e-9) / 10)
 }
 
 /**
@@ -455,7 +461,8 @@ class Table {
   /**
    * The best choice for the pitches after `fixed` (Recording indexes or null, in pitch order), as
    * one assignment problem. Penalties larger than any cost make it minimise uncovered pitches
-   * first, then Octave Moves, then cost.
+   * first, then Octave Moves, then cost. Costs are never negative, so `bound` is at least any
+   * choice's cost.
    */
   solve(fixed: readonly (number | null)[]): { key: Key; choice: (number | null)[] } {
     const first = fixed.length
@@ -512,6 +519,9 @@ class Table {
           break
         }
       }
+      // The last solve was optimal, so one of its choices for pitch i is too. Without one, the
+      // next pitch's Recording would land on this pitch.
+      if (fixed.length === i) throw new Error(`Auto-map found no optimal choice for pitch ${i}`)
     }
     return fixed
   }
