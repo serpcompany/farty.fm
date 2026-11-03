@@ -210,7 +210,9 @@ export function SongCreatorFromAddress() {
     if (!title) return
     const wanted = `${title} · Farty`
     const set = () => {
-      if (document.title !== wanted) document.title = wanted
+      // Leaving the Song, the next page's title lands before this effect's cleanup runs (#351).
+      const here = /^\/compose\/([^/]+)/.exec(location.pathname)?.[1]
+      if (here === id && document.title !== wanted) document.title = wanted
     }
     set()
     // The page's metadata title ("Compose · Farty") can land after this effect, and would stay;
@@ -218,7 +220,7 @@ export function SongCreatorFromAddress() {
     const observer = new MutationObserver(set)
     observer.observe(document.head, { childList: true, characterData: true, subtree: true })
     return () => observer.disconnect()
-  }, [title])
+  }, [id, title])
   return <SongCreator id={id} />
 }
 

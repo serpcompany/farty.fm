@@ -342,16 +342,43 @@ test.describe('installed', () => {
     // hydration is late, as it is on a busy phone.
     const cdp = await context.newCDPSession(page)
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+    const wanted = `${song.title} · Farty`
     for (let load = 0; load < 20; load++) {
       await page.goto(`/compose/${song.id}/`)
-      await expect(page, `load ${load + 1}`).toHaveTitle(`${song.title} · Farty`, {
+      await expect(page, `load ${load + 1}`).toHaveTitle(wanted, {
         timeout: 15_000
       })
     }
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 })
-    await page.goto('/compose/')
-    await expect(page).toHaveTitle('Compose · Farty')
     await context.setOffline(false)
+
+    // Leaving the Song by a tab, a client navigation, the next page keeps its own title: the
+    // Song's title is never written back once the address is no longer the Song's.
+    await page.evaluate(() => {
+      const w = window as unknown as { __stayed: boolean; __titles: string[][] }
+      w.__stayed = true
+      w.__titles = []
+      new MutationObserver(() => w.__titles.push([location.pathname, document.title])).observe(
+        document.head,
+        { childList: true, characterData: true, subtree: true }
+      )
+    })
+    await page
+      .getByRole('navigation', { name: 'Tabs' })
+      .getByRole('link', { name: 'Recordings', exact: true })
+      .click()
+    await expect(page).toHaveURL(/\/recordings\/$/)
+    await expect(page).toHaveTitle('Recordings · Farty')
+    await page.waitForTimeout(500)
+    const after = await page.evaluate(() => {
+      const w = window as unknown as { __stayed?: boolean; __titles: string[][] }
+      return { stayed: w.__stayed === true, titles: w.__titles }
+    })
+    expect(after.stayed, 'the tab was a client navigation').toBe(true)
+    expect(
+      after.titles.filter(([path, title]) => !path.startsWith('/compose/') && title === wanted)
+    ).toEqual([])
+    await expect(page).toHaveTitle('Recordings · Farty')
   })
 })
 
