@@ -4270,7 +4270,7 @@
  },
  {
   "id": "vedro-con-mio-diletto",
-  "title": "Vedro con mio diletto",
+  "title": "Vedrò con mio diletto",
   "file": "midi/pdmx-vedro-con-mio-diletto.mid",
   "sha256": "40e9d91e5a09b8aa7b51f9a30341fd2f54dcfe7a619e076c2b04990a9768a361",
   "source": {
@@ -4455,7 +4455,7 @@
  },
  {
   "id": "csardas",
-  "title": "Csardas",
+  "title": "Csárdás",
   "file": "midi/pdmx-csardas.mid",
   "sha256": "97bbb4bfb1cb206bb255a2ae485efde1a6596730ae94d40c04fe5aad8e497d1a",
   "source": {
@@ -5042,7 +5042,7 @@
  },
  {
   "id": "standchen-serenade",
-  "title": "Standchen Serenade",
+  "title": "Ständchen Serenade",
   "file": "midi/pdmx-standchen-serenade.mid",
   "sha256": "7c6475331d49d8197c908777d3ea5dfc8e6ca30f88e0943751b359cf359c95db",
   "source": {
@@ -5194,7 +5194,7 @@
  },
  {
   "id": "a-la-claire-fontaine",
-  "title": "A la claire fontaine",
+  "title": "À la claire fontaine",
   "file": "midi/pdmx-a-la-claire-fontaine.mid",
   "sha256": "a052b54bc3e12b711dfc3fae5666193de1b5c4ec2a93c340760751cb755c6f81",
   "source": {
@@ -5517,36 +5517,6 @@
    "rating": "0.0",
    "n_ratings": "0",
    "n_views": "362"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-04.txt"
-  }
- },
- {
-  "id": "hanschen-klein",
-  "title": "Hänschen Klein",
-  "file": "midi/pdmx-hanschen-klein.mid",
-  "sha256": "40fdee97953f56de4eb972a7139dee8db644d6d3b7ca5cbe9e4c90c1912d1aef",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/8/9/QmQat7zCtKGMMANcq87cb6ogpmenfZpghtaXNjLnCdq73s.mid",
-   "musescore_score_id": "3911446",
-   "musescore_url": "https://musescore.com/score/3911446",
-   "score_title": "Hänschen Klein",
-   "composer": "Deutsches Kinderlied / German children's song",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.59",
-   "n_ratings": "14",
-   "n_views": "960"
   },
   "retrieved": "2026-10-25",
   "render": {
@@ -6207,28 +6177,26 @@
   "id": "in-the-bleak-midwinter",
   "title": "In the Bleak Midwinter",
   "file": "midi/pdmx-in-the-bleak-midwinter.mid",
-  "sha256": "ab53354636ced0a93301b372b8510c7948d7aff200c6ed59c4a993da1b87a6b0",
+  "sha256": "5632441b098a507e99621d8d5ac2123321b08ed4978ea185229beae77b2a5740",
   "source": {
    "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
    "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/3/42/QmdsxjRE2B68AEZ2hNRdWAyhj3jAee5UUVRZb6nqFVp8FN.mid",
-   "musescore_score_id": "5864163",
-   "musescore_url": "https://musescore.com/score/5864163",
-   "score_title": "In the bleak midwinter",
+   "dataset_path": "./mid/7/5/QmP6QoMA6KE3eJsGWhxGPdrnoXJ1RudrCAgK7WWPtLxHFn.mid",
+   "musescore_score_id": "5088484",
+   "musescore_url": "https://musescore.com/score/5088484",
+   "score_title": "In The Bleak Midwinter",
    "composer": "NA",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
    "pdmx_license_conflict": "False",
    "rating": "0.0",
    "n_ratings": "0",
-   "n_views": "37"
+   "n_views": "22"
   },
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "start_beat": 1,
-   "max_beats": 32,
-   "beats_per_bar": 4
+   "max_beats": 32
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -6454,7 +6422,7 @@
  },
  {
   "id": "si-bheag-si-mhor",
-  "title": "Si Bheag Si Mhor",
+  "title": "Sí Bheag Sí Mhór",
   "file": "midi/pdmx-si-bheag-si-mhor.mid",
   "sha256": "bf82a58654a99800bb90c989a974b863a03193189c9cf0ac82ad9abd9fa4c76a",
   "source": {
