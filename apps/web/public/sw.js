@@ -2,17 +2,30 @@
 //
 // Every request it handles goes to the network first, so a deploy shows at once. The cache is
 // only the fallback when there's no network, or when a deploy has taken an older build's file
-// off the server. It holds pages, scripts, styles, fonts and images, never audio: Recordings live
-// in IndexedDB, and the Fixture Library is never kept.
+// off the server. It holds pages, scripts, styles, fonts, images and the Song Catalog, never
+// audio: Recordings live in IndexedDB, and the Fixture Library is never kept.
+//
+// It keeps one Song page, `/compose/song/`, not one per Song (#322): offline, it answers every
+// Song's page, and shows the Song its address names from the kept catalog. It never keeps a Song's
+// own page, even one loaded online: nothing would refresh it, so after a deploy it would load an
+// older build's code and catalog, beside the current build's database.
 //
 // Bump `version` when the cache's contents change shape. A new worker deletes every other
 // version's cache when it activates.
 
-const version = 1
+const version = 2
 const cacheName = `pedos-shell-v${version}`
 // A few deploys' worth of the shell. The least recently fetched files go first.
 const maxEntries = 200
 const shellFile = /\.(?:js|css|woff2?|png|ico|svg|webp|jpg|webmanifest)$/i
+// The Song Catalog, named by its content (`src/lib/catalog/generate.ts`), so it never changes
+// under one name, as a build's scripts don't.
+const catalogFile = /^\/catalog\/songs-[0-9a-f]+\.json$/
+// A Song's Song Creator, `/compose/<song>/`, and the page that answers for any of them offline.
+// The pages beside it aren't Songs: the generator refuses their names as Song ids.
+const songPage = /^\/compose\/([^/]+)\/?$/
+const songShell = '/compose/song/'
+const notSongs = new Set(['song', 'pad'])
 // How often an online start page refreshes the tabs and their files, at most.
 const refreshEvery = 5 * 60 * 1000
 let lastRefresh = 0
@@ -49,29 +62,38 @@ function handles(request) {
   // Shared links (ADR 0020): once a link is stopped or taken down, no copy of its page opens.
   if (url.pathname.startsWith('/u/')) return false
   if (request.mode === 'navigate') return true
+  if (catalogFile.test(url.pathname)) return true
   return url.pathname !== '/sw.js' && shellFile.test(url.pathname)
 }
 
 async function networkFirst(event) {
   const { request } = event
+  const { pathname } = new URL(request.url)
+  const opensSong = request.mode === 'navigate' && isSongPage(pathname)
   let response
   try {
     response = await fetch(request)
   } catch (offline) {
-    const kept = await keptCopy(request)
+    // Offline, a Song's page is always the kept Song page, which the start page refreshes with
+    // the tabs, so it runs the same build as they do.
+    const kept = opensSong ? await keptSongShell() : await keptCopy(request)
     if (kept) return kept
     throw offline
   }
   // A tab opened before a deploy still loads its own build's scripts, such as a tab's code or
-  // the render worker's, and the deploy took them off the server (#222). The copy kept from
-  // before answers instead of the 404. A build's files never change under the same name.
-  if (response.status === 404 && new URL(request.url).pathname.startsWith('/_next/static/')) {
+  // the render worker's, and its own Song Catalog, and the deploy took them off the server
+  // (#222). The copy kept from before answers instead of the 404. A build's files and the
+  // catalog never change under the same name.
+  if (
+    response.status === 404 &&
+    (pathname.startsWith('/_next/static/') || catalogFile.test(pathname))
+  ) {
     const kept = await keptCopy(request)
     if (kept) return kept
   }
-  if (keepable(response)) {
+  if (keepable(response) && !opensSong) {
     event.waitUntil(keep(request.url, response.clone()))
-    if (request.mode === 'navigate' && new URL(request.url).pathname === '/') {
+    if (request.mode === 'navigate' && pathname === '/') {
       event.waitUntil(refreshShell(response.clone()))
     }
   }
@@ -90,6 +112,18 @@ async function keptCopy(request) {
     ignoreVary: true,
     ignoreSearch: request.mode === 'navigate'
   })
+}
+
+// `/compose/<song>/` for a Song, not for a page beside the Songs, such as the Sound Pad.
+function isSongPage(pathname) {
+  const match = songPage.exec(pathname)
+  return match !== null && !notSongs.has(match[1])
+}
+
+// The one Song page, which answers for every Song offline. It reads the Song from the address.
+async function keptSongShell() {
+  const cache = await caches.open(cacheName)
+  return await cache.match(new URL(songShell, self.location.origin).href, { ignoreVary: true })
 }
 
 // Only a whole, same-origin success. That leaves out the Staging password's 401 (#123),
@@ -131,10 +165,10 @@ async function refreshShell(startPage) {
   }
 }
 
-// The start page, the pages it links to (the tabs), each Song's page (`/shell.json`), and the
-// files they load, so Farty opens offline right after it's installed, before any of them is
-// fetched again. `startHtml` is the start page already fetched, if any. Resolves to false when
-// the network failed for any of them.
+// The start page, the pages it links to (the tabs), the pages in `/shell.json` (the one Song
+// page among them), and the files they load, the Song Catalog too, so Farty opens offline right
+// after it's installed, before any of them is fetched again. `startHtml` is the start page
+// already fetched, if any. Resolves to false when the network failed for any of them.
 async function precacheShell(startHtml) {
   let complete = true
   const get = path =>
@@ -173,8 +207,8 @@ async function precacheShell(startHtml) {
   return complete
 }
 
-// The pages a tab opens that the start page doesn't link to, such as each Song's Song Creator,
-// from `/shell.json`. Throws when the network fails.
+// The pages a tab opens that the start page doesn't link to, such as the Song page that answers
+// for every Song, from `/shell.json`. Throws when the network fails.
 async function laterPages() {
   const response = await fetch('/shell.json', { cache: 'no-cache' })
   if (!keepable(response)) return []

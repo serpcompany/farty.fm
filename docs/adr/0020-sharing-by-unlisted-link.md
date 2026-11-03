@@ -18,7 +18,7 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
    - `/u/<handle>/r/<share id>/`, where the share id is 12 random characters of lowercase Crockford base 32 (60 bits, `newShareId()`). It can't be guessed from another link and says nothing of the Recording's own id.
    - Stop sharing deletes the share, and sharing again makes a new id, so a link that was stopped never works again.
 4. **Unlisted: anyone with the link, and nothing else.**
-   - The page, its image and its audio need no account. Nothing lists a link: there's no profile page until #319, every shared page is `noindex, nofollow` with no canonical, and the sitemaps leave `/u/` out.
+   - The page, its image and its audio need no account. Nothing lists a link: there's no profile page until #319 (which lists a user's shares on it, ADR 0021), every shared page is `noindex, nofollow` with no canonical, and the sitemaps leave `/u/` out.
    - It shows the Handle, the Recording's name, its note (a Placed Pitch counts), its length and the waveform of the part it plays, which is what its row plays: its Trim (ADR 0019), or else the whole take. Nothing else of the account: no email, no other Recordings.
    - Nothing is public until the user shares. A Recording that was never shared, or whose share stopped, answers the same 404 as one that never existed.
 5. **Each request checks D1.**
@@ -33,6 +33,7 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
    - `opengraph-image.tsx` draws a 1200 by 630 PNG with `next/og`: Farty's pink and icon, the note, the name, "A fart by @maya" and the waveform's bars. It reads D1 like the page, so a stopped link's image is gone too, and Next's default (`public, max-age=0, must-revalidate` in Next 16.3) is replaced by `private, no-cache`. The bundled font has no ♯, and a missing glyph makes `next/og` fetch one from Google Fonts on the request, so the image spells a sharp `#`.
 8. **Share, then the share sheet.**
    - On a Recording's row, Share puts the link on the phone's share sheet (`navigator.share`), or copies it where there's none. A row that is shared says "Shared", and its button opens Share link and Stop sharing.
+   - The record flow offers the same Share at the top of Result, the step after its review's Save, once the take is saved (#320). The review before Save has none: the take isn't a Recording yet.
    - When the browser has spent the tap's activation on the requests before the sheet (a `NotAllowedError`), a "Your link is ready" dialog offers the sheet on a fresh tap.
    - Stop sharing asks first: "The link stops working for everyone who has it. Sharing it again makes a new link." Deleting a shared Recording, or the account, says its links stop working too.
 9. **Report, on every shared page, reaches Farty in D1.**

@@ -1,14 +1,30 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
 import { REPO_ROOT } from '../../test-support/golden'
-import { type CatalogEntry, outputPath, readSources, renderCatalog, shipList } from './generate'
+import { catalogPath } from './catalog-path.generated'
+import {
+  type CatalogEntry,
+  catalogSongs,
+  outOfDate,
+  readSources,
+  renderCatalog,
+  shipList
+} from './generate'
 import { songs } from './songs.generated'
 
 const sources = readSources()
 
 describe('the Song Catalog in the app', () => {
   test('is what the generator writes from catalog/ and fixtures/golden/songs/', () => {
-    expect(renderCatalog(sources)).toBe(readFileSync(outputPath, 'utf8'))
+    expect(outOfDate(renderCatalog(sources))).toEqual([])
+  })
+
+  // #322: the browser fetches the file the server and the tests import, by its content's name.
+  test('is one file the browser fetches by its content and the server imports', () => {
+    const files = renderCatalog(sources)
+    expect(`public${catalogPath}`).toBe(files.data.path)
+    expect(files.songs.text).toContain(`'../../../${files.data.path}'`)
+    expect(JSON.parse(files.data.text)).toEqual(songs)
   })
 
   test("holds the iPhone app's 12 Songs first, in its order", () => {
@@ -90,10 +106,30 @@ describe('the generator', () => {
     expect(() => renderCatalog(changed, ['mary'])).toThrow(/cited score/)
   })
 
-  test('quotes a title with an apostrophe as Biome does', () => {
-    expect(renderCatalog(sources, ['teddy-bears-picnic'])).toContain(
-      `title: "The Teddy Bears' Picnic",`
-    )
+  test('keeps a title with an apostrophe', () => {
+    const { data } = renderCatalog(sources, ['teddy-bears-picnic'])
+    expect(JSON.parse(data.text)[0].title).toBe("The Teddy Bears' Picnic")
+  })
+
+  // A new deploy's catalog has a new name, so no browser or cache reads an older one for it.
+  test('names the catalog by its content', () => {
+    const one = renderCatalog(sources, ['twinkle', 'mary'])
+    const again = renderCatalog(sources, ['twinkle', 'mary'])
+    const other = renderCatalog(sources, ['mary', 'twinkle'])
+    expect(one.data.path).toMatch(/^public\/catalog\/songs-[0-9a-f]{16}\.json$/)
+    expect(again.data.path).toBe(one.data.path)
+    expect(other.data.path).not.toBe(one.data.path)
+    expect(one.path.text).toContain(`'${one.data.path.slice('public'.length)}'`)
+  })
+
+  // `/compose/pad/` is the Sound Pad, and `/compose/song/` answers for every Song offline.
+  test.each(['pad', 'song'])("refuses a Song whose id is Compose's own page %s", id => {
+    const twinkle = sources.catalog.find(e => e.id === 'twinkle') as CatalogEntry
+    const taken = {
+      catalog: [{ ...twinkle, id }],
+      golden: () => ({ ...sources.golden('twinkle'), id })
+    }
+    expect(() => catalogSongs(taken, [id])).toThrow(/Compose's own pages/)
   })
 
   test('refuses a source it has no line for', () => {

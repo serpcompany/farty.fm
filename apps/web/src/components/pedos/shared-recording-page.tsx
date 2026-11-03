@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Flag, Link2Off, Play, Square } from 'lucide-react'
+import { Check, ChevronRight, Flag, Link2Off, Play, Square } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
@@ -132,7 +132,13 @@ export function SharedRecordingPage({
       <SharedTopBar />
       <div className="flex flex-1 flex-col px-4 pb-6">
         <p className="pt-3 text-[15px] text-muted-foreground">
-          <span className="font-medium text-foreground">@{handle}</span> shared a Recording
+          <Link
+            href={`/u/${handle}/`}
+            className="rounded-sm font-medium text-foreground outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            @{handle}
+          </Link>{' '}
+          shared a Recording
         </p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight">{name}</h1>
         {note && (
@@ -190,7 +196,15 @@ export function SharedRecordingPage({
           </div>
         )}
 
-        <div className="mt-7 flex justify-center">
+        <Link
+          href={`/u/${handle}/`}
+          className="mt-6 flex min-h-11 items-center justify-center gap-1 rounded-md text-[15px] font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          More from @{handle}
+          <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
+        </Link>
+
+        <div className="mt-3 flex justify-center">
           <Report what="Recording" action={`${base}report/`} />
         </div>
       </div>
@@ -198,8 +212,11 @@ export function SharedRecordingPage({
   )
 }
 
-/** Report, on every shared page: asks first, then sends it to Farty, who checks each one. */
-function Report({ what, action }: { what: string; action: string }) {
+/**
+ * Report, on every shared page and profile page: asks first ("Report this Recording?", or
+ * `title`), then sends it to Farty, who checks each one.
+ */
+export function Report({ what, title, action }: { what?: string; title?: string; action: string }) {
   const [asking, setAsking] = useState(false)
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'failed' | 'limited'>('idle')
 
@@ -234,7 +251,7 @@ function Report({ what, action }: { what: string; action: string }) {
       <AlertDialog open={asking} onOpenChange={open => state !== 'sending' && setAsking(open)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Report this {what}?</AlertDialogTitle>
+            <AlertDialogTitle>{title ?? `Report this ${what}?`}</AlertDialogTitle>
             <AlertDialogDescription>
               Farty checks every report and takes down anything that breaks the rules.
             </AlertDialogDescription>

@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { songs } from '@/lib/catalog/songs.generated'
 import { PAD_TOOT_TITLE, type Toot } from '@/lib/toot'
 import { cn } from '@/lib/utils'
 import { PadTootLayout } from './pad-take'
@@ -33,7 +32,7 @@ export function TootScreen() {
   const closing = useRef(false)
   const current = pedos.toot(id)
   const toot = current ?? (lastSeen?.id === id ? lastSeen : undefined)
-  const song = toot?.songId ? songs.find(s => s.id === toot.songId) : undefined
+  const song = toot?.songId ? pedos.song(toot.songId) : undefined
 
   useEffect(() => {
     if (current) setLastSeen(current)
@@ -96,7 +95,7 @@ export function TootScreen() {
         )}
       </header>
 
-      {pedos.toots === null ? (
+      {pedos.toots === null || (toot?.songId && pedos.songs === null && !pedos.songsFailed) ? (
         <div className="flex flex-1 items-center justify-center">
           <Spinner />
         </div>
@@ -117,7 +116,9 @@ export function TootScreen() {
         </div>
       ) : !song ? (
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
-          This Toot's Song isn't in Farty any more.
+          {pedos.songsFailed
+            ? "Couldn't load the Songs."
+            : "This Toot's Song isn't in Farty any more."}
         </p>
       ) : (
         <TootLayout toot={toot} song={song} isAudioMissing={toot.isAudioMissing}>

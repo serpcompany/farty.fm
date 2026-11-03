@@ -4,8 +4,10 @@ import { SongCreator } from '@/components/pedos/song-creator'
 import { songs } from '@/lib/catalog/songs.generated'
 
 // Song Creator, one page per Song in the catalog, inside the Compose tab: `/compose/<song>/`.
-// Each is prerendered, so the service worker can keep it for offline use (`/shell.json`); any
-// other id is not found.
+// Each is prerendered with its Song's title and source line, so a link or a search engine opens it
+// on its own; any other id is not found. The notes come from the Song Catalog the browser fetches
+// (#322), so the page holds only which Song it is. Offline, the service worker answers a Song's
+// page it kept no copy of with `/compose/song/`, which reads the Song from the address.
 
 export const dynamicParams = false
 
@@ -25,5 +27,6 @@ export default async function SongCreatorPage({ params }: PageProps<'/compose/[s
   const { song: id } = await params
   const song = songs.find(s => s.id === id)
   if (!song) notFound()
-  return <SongCreator song={song} />
+  const { title, source } = song
+  return <SongCreator id={id} heading={{ id, title, source }} />
 }

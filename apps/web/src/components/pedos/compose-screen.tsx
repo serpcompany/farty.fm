@@ -124,7 +124,14 @@ export function ComposeScreen() {
         />
       </div>
 
-      {pedos.recordings === null || favorites === null ? (
+      {pedos.songsFailed ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+          <p className="text-muted-foreground">Couldn't load the Songs.</p>
+          <Button variant="outline" className="h-11 px-5 text-base" onClick={pedos.reloadSongs}>
+            Try again
+          </Button>
+        </div>
+      ) : pedos.recordings === null || pedos.songs === null || favorites === null ? (
         <div className="flex flex-1 items-center justify-center">
           <Spinner />
         </div>
