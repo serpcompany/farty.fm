@@ -4,7 +4,7 @@ import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { PAD_TOOT_TITLE, type Toot } from '@/lib/toot'
 import { cn } from '@/lib/utils'
@@ -14,6 +14,7 @@ import { previousPage } from './previous-page'
 import { ShareButton, useShares } from './share-recording'
 import { TootLayout } from './song-creator'
 import { DeleteTootDialog, RenameTootDialog, TootMenu } from './toots-screen'
+import { useSongNotes } from './use-song-notes'
 
 /**
  * A Toot's screen, opened from the Toots tab: Song Creator's layout without Save, showing which
@@ -33,11 +34,14 @@ export function TootScreen() {
   const closing = useRef(false)
   const current = pedos.toot(id)
   const toot = current ?? (lastSeen?.id === id ? lastSeen : undefined)
-  const song = toot?.songId ? pedos.song(toot.songId) : undefined
+  const summary = toot?.songId ? pedos.song(toot.songId) : undefined
+  // Its Song's notes, which the Song Catalog's index leaves out (#323). Only the note view needs
+  // them: Play plays the Toot's own audio, so it shows while they load, or if they don't.
+  const notes = useSongNotes(summary)
   const isShared = useShares()?.tootLinks.has(id) ?? false
   /** Under the title: its Song, or Sound Pad, and Shared while it's shared, as the prototype's. */
   const subtitle = [
-    song ? song.title : toot?.songId === null ? PAD_TOOT_TITLE : null,
+    summary ? summary.title : toot?.songId === null ? PAD_TOOT_TITLE : null,
     isShared ? 'Shared' : null
   ]
     .filter(part => part !== null)
@@ -130,15 +134,36 @@ export function TootScreen() {
             )}
           </PadTootLayout>
         </div>
-      ) : !song ? (
+      ) : !summary ? (
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
           {pedos.songsFailed
             ? "Couldn't load the Songs."
             : "This Toot's Song isn't in Farty any more."}
         </p>
       ) : (
-        <TootLayout toot={toot} song={song} isAudioMissing={toot.isAudioMissing}>
-          <p className="pt-1 text-xs text-muted-foreground">{song.source}</p>
+        <TootLayout
+          toot={toot}
+          song={notes.song ?? summary}
+          isAudioMissing={toot.isAudioMissing}
+          notesFallback={
+            notes.failed ? (
+              <div
+                className="flex flex-col items-center gap-3 py-4 text-center"
+                data-testid="toot-notes-failed"
+              >
+                <p className="text-sm text-muted-foreground">Couldn't load this Song's notes.</p>
+                <Button variant="outline" className="h-11 px-5 text-base" onClick={notes.retry}>
+                  Try again
+                </Button>
+              </div>
+            ) : (
+              <div className="flex justify-center py-4">
+                <Spinner />
+              </div>
+            )
+          }
+        >
+          <p className="pt-1 text-xs text-muted-foreground">{summary.source}</p>
           {toot.isAudioMissing && (
             <p className="pt-1 text-xs text-muted-foreground" data-testid="toot-audio-missing">
               This Toot's audio is missing. You can delete it and make it again in Compose.

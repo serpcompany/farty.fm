@@ -3,7 +3,7 @@
 import { ArrowUpDown, ChevronRight, Heart, LayoutGrid, Lock, Music2, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type ReactNode, useEffect, useId, useMemo, useState } from 'react'
+import { memo, type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -17,8 +17,9 @@ import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
 import { startAudioInTap } from '@/lib/audio/context'
-import type { Song } from '@/lib/catalog/song'
+import type { SongSummary } from '@/lib/catalog/song'
 import {
+  type Coverage,
   coverageFraction,
   coverageSummary,
   missingNotes,
@@ -31,6 +32,7 @@ import { songOrders, useComposeChoices } from './compose-choices'
 import { FavoriteButton, useFavorites } from './favorite-button'
 import { LockedSongSheet } from './locked-song-sheet'
 import { usePedos } from './pedos-provider'
+import { useNearViewport } from './use-near-viewport'
 
 const noFavorites: ReadonlySet<string> = new Set()
 
@@ -44,7 +46,7 @@ export function ComposeScreen() {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const { order, chooseOrder, onlyFavorites, chooseOnlyFavorites } = useComposeChoices()
-  const [lockedSong, setLockedSong] = useState<Song | null>(null)
+  const [lockedSong, setLockedSong] = useState<SongSummary | null>(null)
   const favorites = useFavorites()
 
   // The page comes back on the Record tab, so the sheet doesn't stay open.
@@ -161,7 +163,12 @@ export function ComposeScreen() {
           {listing.locked.length > 0 && (
             <Section title={`Locked · ${listing.locked.length}`} testId="locked-songs">
               {listing.locked.map(row => (
-                <LockedSongRow key={row.song.id} row={row} onOpen={() => setLockedSong(row.song)} />
+                <LockedSongRow
+                  key={row.song.id}
+                  row={row}
+                  arranged={pedos.coverage}
+                  onOpen={setLockedSong}
+                />
               ))}
             </Section>
           )}
@@ -243,10 +250,16 @@ function SoundPadRow() {
   )
 }
 
+// A row off the screen skips its layout and paint, and keeps the room it last took, or about a
+// row's before it's first on screen. With 1,000 Songs, laying out every row was most of the time
+// Compose took to open, search and scroll (#323).
+const unlockedRow = 'flex items-center [content-visibility:auto] [contain-intrinsic-size:auto_49px]'
+const lockedRow = 'flex items-center [content-visibility:auto] [contain-intrinsic-size:auto_107px]'
+
 /** An Unlocked Song: its title and "Ready". It opens in Song Creator. */
-function UnlockedSongRow({ song }: { song: Song }) {
+const UnlockedSongRow = memo(function UnlockedSongRow({ song }: { song: SongSummary }) {
   return (
-    <li data-testid="song-row" data-song={song.id} className="flex items-center">
+    <li data-testid="song-row" data-song={song.id} className={unlockedRow}>
       <Link
         href={`/compose/${song.id}/`}
         // Song Creator plays the Toot once it's made: the tap starts the sound it needs.
@@ -262,32 +275,45 @@ function UnlockedSongRow({ song }: { song: Song }) {
       <FavoriteButton song={song} className="mr-1" />
     </li>
   )
-}
+})
 
 /**
  * A locked Song: its title, a Pitch Coverage bar, a lock and the lowest missing notes, with how
- * long a fart each needs. Two of them, so "Needs …" stays on one line on a phone.
+ * long a fart each needs. Two of them, so "Needs …" stays on one line on a phone. The missing
+ * notes need the Song's Arrangement, so they're worked out only while the row is near the screen
+ * (#323), and their line keeps its place otherwise.
  */
-function LockedSongRow({ row, onOpen }: { row: SongRow; onOpen: () => void }) {
+const LockedSongRow = memo(function LockedSongRow({
+  row,
+  arranged,
+  onOpen
+}: {
+  row: SongRow
+  /** `usePedos().coverage`: the Song's Arrangement, which names its missing notes. */
+  arranged: (song: SongSummary) => Coverage
+  onOpen: (song: SongSummary) => void
+}) {
   const { song, coverage } = row
   const valueId = useId()
-  const missing = missingNotes(coverage, 2)
+  const ref = useRef<HTMLLIElement>(null)
+  const near = useNearViewport(ref)
+  const missing = near ? missingNotes(arranged(song), 2) : null
   const needs = missing === null ? null : `Needs ${missing}`
   return (
-    <li data-testid="song-row" data-song={song.id} className="flex items-center">
+    <li ref={ref} data-testid="song-row" data-song={song.id} className={lockedRow}>
       <button
         type="button"
         className="flex min-w-0 flex-1 items-baseline gap-3 py-3 pr-1 pl-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset active:bg-muted"
         aria-label={song.title}
         aria-describedby={valueId}
-        onClick={onOpen}
+        onClick={() => onOpen(song)}
       >
         <span className="flex min-w-0 flex-1 flex-col gap-1.5" aria-hidden>
           <span>{song.title}</span>
           <Progress value={coverageFraction(coverage) * 100} />
           <span className="flex flex-col gap-0.5 text-sm text-muted-foreground">
             <span>{coverageSummary(coverage)}</span>
-            {needs && <span>{needs}</span>}
+            {coverage.hasMelodicRecordings && <span>{needs ?? ' '}</span>}
           </span>
         </span>
         <Lock className="size-4 shrink-0 text-muted-foreground" aria-hidden />
@@ -298,4 +324,4 @@ function LockedSongRow({ row, onOpen }: { row: SongRow; onOpen: () => void }) {
       <FavoriteButton song={song} className="mr-1" />
     </li>
   )
-}
+})

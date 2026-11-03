@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import type { Song } from '@/lib/catalog/song'
+import type { SongSummary } from '@/lib/catalog/song'
 import { pitchClass } from '@/lib/pitch'
 import {
   type Coverage,
@@ -28,7 +28,7 @@ export function LockedSongSheet({
   onRecord
 }: {
   /** The Song shown, or null when the sheet is closed. */
-  song: Song | null
+  song: SongSummary | null
   onClose: () => void
   /** Record: closes the sheet and switches to the Record tab. */
   onRecord: () => void
@@ -38,7 +38,7 @@ export function LockedSongSheet({
   const [shown, setShown] = useState(song)
   if (song !== null && song !== shown) setShown(song)
   // Read live, so a Recording analyzed while the sheet is open shows at once.
-  const coverage = pedos.songRows.find(r => r.song.id === shown?.id)?.coverage
+  const coverage = shown ? pedos.coverage(shown) : undefined
 
   return (
     <Sheet open={song !== null} onOpenChange={open => !open && onClose()}>

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
 import { REPO_ROOT } from '../../test-support/golden'
+import { songPitches } from '../engine/auto-map'
 import { catalogPath } from './catalog-path.generated'
 import {
   type CatalogEntry,
@@ -8,8 +9,11 @@ import {
   outOfDate,
   readSources,
   renderCatalog,
-  shipList
+  shipList,
+  titleNames
 } from './generate'
+import type { SongSummary } from './song'
+import { songIndex } from './song-index.generated'
 import { songs } from './songs.generated'
 
 const sources = readSources()
@@ -20,11 +24,36 @@ describe('the Song Catalog in the app', () => {
   })
 
   // #322: the browser fetches the file the server and the tests import, by its content's name.
-  test('is one file the browser fetches by its content and the server imports', () => {
+  // #323: that file is the index, every Song but its notes, and each Song's notes are a file of
+  // their own, fetched as the Song opens.
+  test('is an index the browser fetches by its content and the server imports', () => {
     const files = renderCatalog(sources)
     expect(`public${catalogPath}`).toBe(files.data.path)
+    expect(files.index.text).toContain(`'../../../${files.data.path}'`)
     expect(files.songs.text).toContain(`'../../../${files.data.path}'`)
-    expect(JSON.parse(files.data.text)).toEqual(songs)
+    const index: SongSummary[] = JSON.parse(files.data.text)
+    expect(index).toEqual(songs.map(({ bar_lines, length_beats, notes, ...summary }) => summary))
+    expect(index).toEqual(songIndex)
+  })
+
+  test('has each Song’s notes in a file of their own, named by its content', () => {
+    const files = renderCatalog(sources)
+    expect(files.notes).toHaveLength(songs.length)
+    for (const [i, song] of songs.entries()) {
+      const file = files.notes[i]
+      expect(file.path).toBe(`public${song.notesPath}`)
+      expect(file.path).toMatch(new RegExp(`^public/catalog/notes/${song.id}-[0-9a-f]{16}\\.json$`))
+      const { bar_lines, length_beats, notes } = song
+      expect(JSON.parse(file.text)).toEqual({ bar_lines, length_beats, notes })
+      expect(files.songs.text).toContain(`'../../../${file.path}'`)
+    }
+  })
+
+  // Compose reads Pitch Coverage from the index alone: Auto-map reads only these of a Song.
+  test.each(songs)('$id has the pitches and note lengths Auto-map reads', song => {
+    expect({ bpm: song.bpm, pitches: song.pitches, durations: song.durations }).toEqual(
+      songPitches(song)
+    )
   })
 
   test("holds the iPhone app's 12 Songs first, in its order", () => {
@@ -122,12 +151,43 @@ describe('the generator', () => {
     expect(one.path.text).toContain(`'${one.data.path.slice('public'.length)}'`)
   })
 
+  // A Song's notes keep their name while they stay the same, so a browser keeps them for offline
+  // use across deploys, and get a new one, and the index with it, once they change.
+  test("names each Song's notes by their content", () => {
+    const one = renderCatalog(sources, ['twinkle', 'mary'])
+    expect(renderCatalog(sources, ['mary']).notes[0].path).toBe(one.notes[1].path)
+    const changed = {
+      ...sources,
+      golden: (id: string) => {
+        const golden = sources.golden(id)
+        return id !== 'mary' ? golden : { ...golden, length_beats: golden.length_beats + 1 }
+      }
+    }
+    const other = renderCatalog(changed, ['twinkle', 'mary'])
+    expect(other.notes[0].path).toBe(one.notes[0].path)
+    expect(other.notes[1].path).not.toBe(one.notes[1].path)
+    expect(other.data.path).not.toBe(one.data.path)
+  })
+
+  test('finds a Song by the other titles in tools/catalog/, once each', () => {
+    const named = (titles: string) =>
+      catalogSongs({ ...sources, titles: [titles] }, ['danny-boy'])[0].aliases
+    expect(named('danny-boy | Danny Boy | Londonderry Air; Danny boy; londonderry')).toEqual([
+      'Londonderry Air'
+    ])
+    expect(named('# danny-boy | Danny Boy | Londonderry Air')).toBeUndefined()
+    expect(titleNames(['a | A | B; C # a comment', '', 'a | A | D'])).toEqual(
+      new Map([['a', ['A', 'B', 'C', 'A', 'D']]])
+    )
+  })
+
   // `/compose/pad/` is the Sound Pad, and `/compose/song/` answers for every Song offline.
   test.each(['pad', 'song'])("refuses a Song whose id is Compose's own page %s", id => {
     const twinkle = sources.catalog.find(e => e.id === 'twinkle') as CatalogEntry
     const taken = {
       catalog: [{ ...twinkle, id }],
-      golden: () => ({ ...sources.golden('twinkle'), id })
+      golden: () => ({ ...sources.golden('twinkle'), id }),
+      titles: []
     }
     expect(() => catalogSongs(taken, [id])).toThrow(/Compose's own pages/)
   })

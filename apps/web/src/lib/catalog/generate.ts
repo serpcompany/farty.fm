@@ -5,16 +5,22 @@
  * - each Song's melody from `fixtures/golden/songs/<id>.json`, so nothing parses MIDI here;
  * - its title and source line from `catalog/catalog.json`, checked against the golden copy, so
  *   the notes come from the cited score;
+ * - the other names its titles file lists (`tools/catalog/titles-*.txt`), which Compose's search
+ *   finds it by too;
  * - only the Songs on the ship list, in its order.
  *
  * It writes the Songs as data, not code (#322), so the JavaScript bundle stays the same size
- * however many Songs ship:
+ * however many Songs ship, and keeps each Song's notes out of the index Compose reads (#323), so
+ * Compose loads quickly with 1,000 Songs:
  *
- * - `public/catalog/songs-<hash>.json`, named by its content, which the browser fetches
- *   (`load-songs.ts`) and the service worker keeps. A new deploy's code names its own file, so it
- *   never reads an older catalog. The older file is deleted.
- * - `catalog-path.generated.ts`, that file's path, for the browser.
- * - `songs.generated.ts`, which imports the file, for the server and the tests.
+ * - `public/catalog/songs-<hash>.json`, the index (`SongSummary`), which the browser fetches
+ *   (`load-songs.ts`) and the service worker keeps. Each data file is named by its content, so a
+ *   new deploy's code never reads an older catalog. Older files are deleted.
+ * - `public/catalog/notes/<id>-<hash>.json`, each Song's notes (`SongNotes`), which the browser
+ *   fetches when the Song is opened, and the service worker keeps once fetched.
+ * - `catalog-path.generated.ts`, the index's path, for the browser.
+ * - `song-index.generated.ts`, which imports the index, for routes and the server.
+ * - `songs.generated.ts`, which imports the index and every Song's notes, for the tests.
  *
  * Node-only: the app imports the generated files, never this one. Run from `apps/web/`:
  *
@@ -24,7 +30,8 @@
 import { createHash } from 'node:crypto'
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import type { Song } from './song'
+import { searchKey } from './search-key'
+import type { Song, SongNotes, SongSummary } from './song'
 
 /** An entry of `catalog/catalog.json`: the cited score and how the reference engine imports it. */
 export type CatalogEntry = {
@@ -50,23 +57,39 @@ export type GoldenSong = {
   notes: { start: number; dur: number; pitch: number }[]
 }
 
-export type Sources = { catalog: CatalogEntry[]; golden(id: string): GoldenSong }
+export type Sources = {
+  catalog: CatalogEntry[]
+  golden(id: string): GoldenSong
+  /** The text of each titles file in `tools/catalog/`. */
+  titles: readonly string[]
+}
 
-/** What the generator writes: each file's path from `apps/web/`, and its text. */
+/** A file the generator writes: its path from `apps/web/`, and its text. */
+export type GeneratedFile = { path: string; text: string }
+
+/** What the generator writes. */
 export type CatalogFiles = {
-  /** `public/catalog/songs-<hash>.json`. */
-  data: { path: string; text: string }
+  /** `public/catalog/songs-<hash>.json`: the index. */
+  data: GeneratedFile
+  /** `public/catalog/notes/<id>-<hash>.json`: each Song's notes, in the index's order. */
+  notes: GeneratedFile[]
   /** `src/lib/catalog/catalog-path.generated.ts`. */
-  path: { path: string; text: string }
+  path: GeneratedFile
+  /** `src/lib/catalog/song-index.generated.ts`. */
+  index: GeneratedFile
   /** `src/lib/catalog/songs.generated.ts`. */
-  songs: { path: string; text: string }
+  songs: GeneratedFile
 }
 
 const repo = new URL('../../../../../', import.meta.url)
 const web = new URL('../../../', import.meta.url)
-/** Where the catalog's data file goes, served at `/catalog/`. */
+/** Where the catalog's index goes, served at `/catalog/`. */
 export const dataDirectory = 'public/catalog'
+/** Where each Song's notes go, served at `/catalog/notes/`. */
+export const notesDirectory = `${dataDirectory}/notes`
 const dataFile = /^songs-[0-9a-f]+\.json$/
+const notesFile = /^[a-z0-9-]+-[0-9a-f]{16}\.json$/
+const titlesFile = /^titles-\d+\.txt$/
 
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(fileURLToPath(new URL(path, repo)), 'utf8')) as T
@@ -90,12 +113,54 @@ export const shipList: readonly string[] = readJson<string[]>(
  */
 export const reservedIds: readonly string[] = ['pad', 'song']
 
-/** The catalog and the golden Songs, read from the repository. */
+/** The catalog, the golden Songs and the titles files, read from the repository. */
 export function readSources(): Sources {
+  const tools = fileURLToPath(new URL('tools/catalog/', repo))
   return {
     catalog: readJson<CatalogEntry[]>('catalog/catalog.json'),
-    golden: id => readJson<GoldenSong>(`fixtures/golden/songs/${id}.json`)
+    golden: id => readJson<GoldenSong>(`fixtures/golden/songs/${id}.json`),
+    titles: readdirSync(tools)
+      .filter(name => titlesFile.test(name))
+      .sort()
+      .map(name => readFileSync(`${tools}${name}`, 'utf8'))
   }
+}
+
+/**
+ * Every name each Song id has in the titles files, as `pdmx.read_titles` reads them: one Song a
+ * line, `id | Title` or `id | Title | other name; other name`, with `#` starting a comment. A Song
+ * in more than one file has the names of each.
+ */
+export function titleNames(titles: readonly string[]): Map<string, string[]> {
+  const names = new Map<string, string[]>()
+  for (const text of titles) {
+    for (const line of text.split('\n')) {
+      const parts = line
+        .split('#', 1)[0]
+        .split('|')
+        .map(part => part.trim())
+      if (parts.length < 2 || !parts[0]) continue
+      const others = (parts[2] ?? '').split(';').map(name => name.trim())
+      names.set(parts[0], [...(names.get(parts[0]) ?? []), parts[1], ...others].filter(Boolean))
+    }
+  }
+  return names
+}
+
+/**
+ * The names search finds a Song by besides its title: each once, leaving out any that the title or
+ * an earlier name already finds, since search looks for what's typed anywhere in a name.
+ */
+function aliasesOf(title: string, names: readonly string[]): string[] {
+  const keys = [searchKey(title)]
+  const aliases: string[] = []
+  for (const name of names) {
+    const key = searchKey(name)
+    if (key === '' || keys.some(k => k.includes(key))) continue
+    keys.push(key)
+    aliases.push(name)
+  }
+  return aliases
 }
 
 /**
@@ -109,7 +174,21 @@ function sourceLine(entry: CatalogEntry): string {
   throw new Error(`Song ${entry.id} has a source this script has no line for; add one here`)
 }
 
-function song(entry: CatalogEntry, golden: GoldenSong): Song {
+/** The first 16 hex digits of the SHA-256 of `text`: what names each data file by its content. */
+function hash(text: string): string {
+  return createHash('sha256').update(text).digest('hex').slice(0, 16)
+}
+
+/** A Song's notes file, named by its content: its path from `apps/web/`, and its text. */
+function notesFor(id: string, notes: SongNotes): GeneratedFile {
+  const text = `${JSON.stringify(notes)}\n`
+  return { path: `${notesDirectory}/${id}-${hash(text)}.json`, text }
+}
+
+/** Where the browser fetches a file in `public/`. */
+const served = (path: string) => path.slice('public'.length)
+
+function song(entry: CatalogEntry, golden: GoldenSong, names: readonly string[]): Song {
   const problem = (what: string) => new Error(`Song ${entry.id}: ${what}`)
   if (reservedIds.includes(entry.id)) throw problem("its id is one of Compose's own pages")
   if (golden.id !== entry.id || golden.title !== entry.title)
@@ -126,49 +205,81 @@ function song(entry: CatalogEntry, golden: GoldenSong): Song {
   const pitches = [...new Set(notes.map(n => n.pitch))].sort((a, b) => a - b)
   if (pitches.join() !== golden.pitches.join()) throw problem("its pitches don't match its notes")
 
+  const melody: SongNotes = {
+    bar_lines: golden.bar_lines,
+    length_beats: golden.length_beats,
+    notes: notes.map(({ start, dur, pitch }) => ({ start, dur, pitch }))
+  }
+  const aliases = aliasesOf(entry.title, names)
   return {
     id: entry.id,
     title: entry.title,
+    ...(aliases.length > 0 && { aliases }),
     source: sourceLine(entry),
     bpm: golden.bpm,
-    bar_lines: golden.bar_lines,
-    length_beats: golden.length_beats,
     pitches,
-    notes: notes.map(({ start, dur, pitch }) => ({ start, dur, pitch }))
+    durations: pitches.map(p => notes.filter(n => n.pitch === p).map(n => n.dur)),
+    notesPath: served(notesFor(entry.id, melody).path),
+    ...melody
   }
 }
 
-/** The Songs on `ids`, from the catalog and the golden data, checked. */
+/** What the index holds of a Song: all but its notes. */
+function summary(song: Song): SongSummary {
+  const { bar_lines, length_beats, notes, ...rest } = song
+  return rest
+}
+
+/** The Songs on `ids`, from the catalog, the golden data and the titles files, checked. */
 export function catalogSongs(sources: Sources, ids: readonly string[] = shipList): Song[] {
   if (new Set(ids).size !== ids.length) throw new Error('the ship list names a Song twice')
+  const names = titleNames(sources.titles)
   return ids.map(id => {
     const entry = sources.catalog.find(e => e.id === id)
     if (!entry) throw new Error(`the ship list names ${id}, which isn't in catalog/catalog.json`)
-    return song(entry, sources.golden(id))
+    return song(entry, sources.golden(id), names.get(id) ?? [])
   })
 }
 
 const header = [
-  '// Generated by src/lib/catalog/generate.ts from catalog/catalog.json and',
-  '// fixtures/golden/songs/. Do not edit by hand: run it again instead.'
+  '// Generated by src/lib/catalog/generate.ts from catalog/catalog.json, fixtures/golden/songs/',
+  '// and tools/catalog/titles-*.txt. Do not edit by hand: run it again instead.'
 ]
 
 /** The files the generator writes for the Songs on `ids`. */
 export function renderCatalog(sources: Sources, ids: readonly string[] = shipList): CatalogFiles {
   const songs = catalogSongs(sources, ids)
   // One Song a line, so a change shows as the Songs it changed.
-  const data = `[\n${songs.map(s => JSON.stringify(s)).join(',\n')}\n]\n`
-  const hash = createHash('sha256').update(data).digest('hex').slice(0, 16)
-  const file = `songs-${hash}.json`
+  const data = `[\n${songs.map(s => JSON.stringify(summary(s))).join(',\n')}\n]\n`
+  const file = `${dataDirectory}/songs-${hash(data)}.json`
+  const notes = songs.map(({ id, bar_lines, length_beats, notes }) =>
+    notesFor(id, { bar_lines, length_beats, notes })
+  )
   return {
-    data: { path: `${dataDirectory}/${file}`, text: data },
+    data: { path: file, text: data },
+    notes,
     path: {
       path: 'src/lib/catalog/catalog-path.generated.ts',
       text: [
         ...header,
         '',
-        `/** Where the browser fetches the Song Catalog: ${songs.length} Songs, named by their content. */`,
-        `export const catalogPath = '/catalog/${file}'`,
+        `/** Where the browser fetches the Song Catalog's index: ${songs.length} Songs, named by their content. */`,
+        `export const catalogPath = '${served(file)}'`,
+        ''
+      ].join('\n')
+    },
+    index: {
+      path: 'src/lib/catalog/song-index.generated.ts',
+      text: [
+        ...header,
+        `import index from '../../../${file}'`,
+        "import type { SongSummary } from './song'",
+        '',
+        '/**',
+        " * The Song Catalog's index, in the ship list's order, for routes and the server. The browser",
+        ' * fetches it instead (`load-songs.ts`), so it stays out of the JavaScript (#322).',
+        ' */',
+        'export const songIndex: readonly SongSummary[] = index',
         ''
       ].join('\n')
     },
@@ -176,14 +287,22 @@ export function renderCatalog(sources: Sources, ids: readonly string[] = shipLis
       path: 'src/lib/catalog/songs.generated.ts',
       text: [
         ...header,
-        `import catalog from '../../../${dataDirectory}/${file}'`,
-        "import type { Song } from './song'",
+        `import index from '../../../${file}'`,
+        ...notes.map((n, i) => `import notes${i} from '../../../${n.path}'`),
+        "import type { Song, SongSummary } from './song'",
+        '',
+        'const notes = [',
+        ...notes.map((_, i) => `  notes${i}${i < notes.length - 1 ? ',' : ''}`),
+        ']',
         '',
         '/**',
-        " * The Songs the app ships, in the ship list's order, for the server and the tests. The browser",
-        ' * fetches them instead (`load-songs.ts`), so they stay out of its JavaScript (#322).',
+        " * The Songs the app ships, with their notes, in the ship list's order, for the tests. The",
+        " * browser fetches the index and each Song's notes instead (`load-songs.ts`, #322, #323).",
         ' */',
-        'export const songs: readonly Song[] = catalog',
+        'export const songs: readonly Song[] = (index as readonly SongSummary[]).map((song, i) => ({',
+        '  ...song,',
+        '  ...notes[i]',
+        '}))',
         ''
       ].join('\n')
     }
@@ -192,19 +311,34 @@ export function renderCatalog(sources: Sources, ids: readonly string[] = shipLis
 
 const inWeb = (path: string) => fileURLToPath(new URL(path, web))
 
-/** The data files in `public/catalog/` now, by name. */
-function dataFiles(): string[] {
+/** The files in `directory` now whose names match `pattern`, by path from `apps/web/`. */
+function filesIn(directory: string, pattern: RegExp): string[] {
   try {
-    return readdirSync(inWeb(dataDirectory)).filter(name => dataFile.test(name))
+    return readdirSync(inWeb(directory))
+      .filter(name => pattern.test(name))
+      .map(name => `${directory}/${name}`)
   } catch {
     return []
   }
 }
 
+/** Every file `files` holds. */
+function written(files: CatalogFiles): GeneratedFile[] {
+  return [files.data, ...files.notes, files.path, files.index, files.songs]
+}
+
+/** The data files on disk that `files` doesn't hold: an older catalog's. */
+function staleFiles(files: CatalogFiles): string[] {
+  const paths = new Set(written(files).map(f => f.path))
+  return [...filesIn(dataDirectory, dataFile), ...filesIn(notesDirectory, notesFile)].filter(
+    path => !paths.has(path)
+  )
+}
+
 /** What differs between the files on disk and `files`: none when the catalog is current. */
 export function outOfDate(files: CatalogFiles): string[] {
   const stale: string[] = []
-  for (const { path, text } of [files.data, files.path, files.songs]) {
+  for (const { path, text } of written(files)) {
     let current: string | null = null
     try {
       current = readFileSync(inWeb(path), 'utf8')
@@ -213,9 +347,7 @@ export function outOfDate(files: CatalogFiles): string[] {
     }
     if (current !== text) stale.push(path)
   }
-  const name = files.data.path.slice(dataDirectory.length + 1)
-  for (const other of dataFiles()) if (other !== name) stale.push(`${dataDirectory}/${other}`)
-  return stale
+  return [...stale, ...staleFiles(files)]
 }
 
 function main(): void {
@@ -228,15 +360,15 @@ function main(): void {
       )
       process.exit(1)
     }
-    console.log('ok    the catalog matches catalog/ and fixtures/golden/songs/')
+    console.log('ok    the catalog matches catalog/, fixtures/golden/songs/ and the titles files')
     return
   }
-  mkdirSync(inWeb(dataDirectory), { recursive: true })
-  const name = files.data.path.slice(dataDirectory.length + 1)
-  for (const other of dataFiles()) if (other !== name) rmSync(inWeb(`${dataDirectory}/${other}`))
-  for (const { path, text } of [files.data, files.path, files.songs])
-    writeFileSync(inWeb(path), text)
-  console.log(`wrote ${files.data.path} (${shipList.length} Songs) and its two modules`)
+  mkdirSync(inWeb(notesDirectory), { recursive: true })
+  for (const path of staleFiles(files)) rmSync(inWeb(path))
+  for (const { path, text } of written(files)) writeFileSync(inWeb(path), text)
+  console.log(
+    `wrote ${files.data.path}, ${files.notes.length} Songs' notes and their three modules`
+  )
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()

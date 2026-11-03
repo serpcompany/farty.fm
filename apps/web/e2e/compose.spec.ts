@@ -77,6 +77,8 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true })
   // Which notes it needs depends on the take's settle time (two Arrangements nearly tie), so the
   // journey checks the shape; `pitch-coverage.test.ts` pins the exact notes on the golden 095.
+  // A row works out its notes once it's near the screen (#323).
+  await mary.scrollIntoViewIfNeeded()
   await expect(mary).toHaveAccessibleDescription(
     /^Locked\. 1 of 4 notes covered\. Needs [A-G]♯?\d \(\d\.\d s\), [A-G]♯?\d \(\d\.\d s\), and 1 more$/
   )
@@ -191,6 +193,26 @@ test.describe('a Song Catalog that does not load', () => {
     await expect(page.getByTestId('stat-songs')).toHaveText(`Songs unlocked0 of ${songs.length}`)
     await tab(page, 'Compose').click()
     await expect(page.getByRole('heading', { name: `Locked · ${songs.length}` })).toBeVisible()
+  })
+
+  // A Song's notes load as it opens (#323): offline, a Song never opened has none.
+  test("says so in Song Creator when a Song's notes don't load, and Try again loads them", async ({
+    page,
+    context
+  }) => {
+    await context.route('**/catalog/notes/**', route =>
+      route.fulfill({ status: 500, body: 'down' })
+    )
+    await page.goto('/compose/mary/')
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Mary Had a Little Lamb' })
+    ).toBeVisible()
+    await expect(page.getByText("Couldn't load this Song.")).toBeVisible()
+
+    await context.unroute('**/catalog/notes/**')
+    await page.getByRole('button', { name: 'Try again' }).click()
+    // No Recordings yet, so the Song it loaded is locked.
+    await expect(page.getByText('This Song is locked.')).toBeVisible()
   })
 })
 

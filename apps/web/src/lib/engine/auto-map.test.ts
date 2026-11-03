@@ -17,10 +17,12 @@ import { goldenRecordings, row } from '@/test-support/golden'
 import { minimumCost } from './assignment'
 import {
   type Arrangement,
+  type AutoMapRecording,
   arrange,
   autoMapRecording,
   choiceForSongPitch,
   compareIds,
+  coveredCount,
   fills,
   HIGHEST_TRANSPOSITION,
   LOWEST_TRANSPOSITION,
@@ -30,6 +32,7 @@ import {
   PLACED_SHORTEST_NOTE_SECONDS,
   placedAutoMapRecording,
   silentCost,
+  songPitches,
   tooShortCost,
   unsettledCost
 } from './auto-map'
@@ -232,8 +235,41 @@ describe('Pitch Coverage matches every coverage.json subset', () => {
           song,
           `subset ${s} ${golden.song}`
         )
+        expect(coveredCount(songPitches(song), library), `subset ${s} ${golden.song}`).toBe(
+          golden.pitch_coverage.covered
+        )
       }
     })
+  })
+})
+
+describe('coveredCount (#323)', () => {
+  it('counts what Auto-map covers, on each library and on random ones with placed farts', () => {
+    let seed = 323
+    const random = () => {
+      seed = (seed * 1103515245 + 12345) % 2 ** 31
+      return seed / 2 ** 31
+    }
+    const full = inputs(libraries.full)
+    const sets: AutoMapRecording[][] = [full, inputs(libraries.small), []]
+    for (let k = 0; k < 8; k++) {
+      const some = full.filter(() => random() < 0.3)
+      // A Noise-like Recording placed by ear, as Auto-map takes it (ADR 0015).
+      const placed: AutoMapRecording = {
+        ...autoMapInput('065'),
+        id: 'placed',
+        recordingPitchMidi: 36 + Math.floor(random() * 36),
+        shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
+        settleSeconds: 0
+      }
+      sets.push(k % 2 === 0 ? some : [...some, placed])
+    }
+    for (const library of sets) {
+      for (const id of songIds) {
+        const song = goldenSong(id)
+        expect(coveredCount(songPitches(song), library), id).toBe(arrange(song, library).covered)
+      }
+    }
   })
 })
 

@@ -17,7 +17,7 @@ import {
   shareOf,
   tootPlaysTakenDown
 } from '@/db/sharing'
-import { songs } from '@/lib/catalog/songs.generated'
+import { songIndex } from '@/lib/catalog/song-index.generated'
 import { handleProblem, normalizeHandle, suggestHandle } from '@/lib/handle'
 import type { Recording, Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
@@ -65,7 +65,7 @@ export function sharePath(kind: Kind, handle: string, shareId: string): string {
  * Pad" for a Toot made on the Sound Pad, or null for a Song that isn't in Farty any more.
  */
 export function tootSongTitle(songId: string | null): string | null {
-  return songId === null ? PAD_TOOT_TITLE : (songs.find(s => s.id === songId)?.title ?? null)
+  return songId === null ? PAD_TOOT_TITLE : (songIndex.find(s => s.id === songId)?.title ?? null)
 }
 
 /**

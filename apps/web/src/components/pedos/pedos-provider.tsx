@@ -23,15 +23,17 @@ import {
 } from '@/lib/audio/recorder'
 import { catalogPath } from '@/lib/catalog/catalog-path.generated'
 import { loadSongs } from '@/lib/catalog/load-songs'
-import type { Song } from '@/lib/catalog/song'
+import type { Song, SongSummary } from '@/lib/catalog/song'
 import { onLibraryChanged, recordingsAfter } from '@/lib/library-sync'
 import type { Performance } from '@/lib/performance'
 import { nearestNote } from '@/lib/pitch'
 import {
+  type Coverage,
   type CoverageChanges,
   collectedPitchClasses,
   coverageChanges,
   coverageKey,
+  coverageOf,
   type SongRow,
   songRows
 } from '@/lib/pitch-coverage'
@@ -176,15 +178,16 @@ export type ProfileStats = {
 
 type Pedos = {
   /**
-   * The Song Catalog this build ships, in the ship list's order; null until it loads. It's
-   * fetched as data (#322), and kept for offline use by the service worker.
+   * The Song Catalog this build ships, in the ship list's order, without the Songs' notes; null
+   * until it loads. It's fetched as data (#322), and kept for offline use by the service worker.
+   * A Song's notes load when it's opened (`loadSong`, #323).
    */
-  songs: readonly Song[] | null
+  songs: readonly SongSummary[] | null
   /** The Song Catalog didn't load. `reloadSongs` tries again, as does coming back online. */
   songsFailed: boolean
   reloadSongs(): void
   /** The Song of this id, once the catalog has loaded. */
-  song(id: string): Song | undefined
+  song(id: string): SongSummary | undefined
   recordings: Recording[] | null
   recording(id: string): Recording | undefined
   /**
@@ -196,8 +199,14 @@ type Pedos = {
   collectedNotes: Set<number>
   /** The pitch classes (0 = C … 11 = B) of every Melodic Recording, for the `PitchStrip`. */
   collectedPitchClasses: Set<number>
-  /** Every Song with its Pitch Coverage, in catalog order. */
+  /** Every Song with its Pitch Coverage, in catalog order: counted, not arranged (#323). */
   songRows: SongRow[]
+  /**
+   * A Song's Pitch Coverage with the notes it still needs, from Auto-map's Arrangement: worked out
+   * when first asked for, and kept until the Recordings change, so Compose arranges only the
+   * Songs it shows notes for (#323).
+   */
+  coverage(song: SongSummary): Coverage
   showsWelcome: boolean
   capture: Capture
   /** The take's live waveform while recording and finishing; empty otherwise. */
@@ -295,9 +304,10 @@ type Pedos = {
   /**
    * Plays or stops the whole Toot, or just its `note`th note as rendered: a made Toot from its
    * draft's audio, a saved one from the store. A saved Toot whose audio is gone is marked
-   * `isAudioMissing`; one whose audio couldn't be read this time is `tootPlayFailed`.
+   * `isAudioMissing`; one whose audio couldn't be read this time is `tootPlayFailed`. A saved
+   * Toot's note is found in its audio by its Song's notes (`loadSong`), which its screen gives.
    */
-  toggleTootPlayback(toot: TootDraft | Toot, note?: number): void
+  toggleTootPlayback(toot: TootDraft | Toot, note?: number, notes?: Song): void
   /** The saved Toot whose audio couldn't be read on its last play, until the next play. */
   tootPlayFailed: string | null
   /** Gives a Toot a new title, trimmed. An empty title changes nothing. */
@@ -351,7 +361,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   // Every app page's head names the catalog, so it downloads beside the scripts, and the service
   // worker keeps it with the page's other files (public/sw.js).
   if (wantsSongs) preload(catalogPath, { as: 'fetch', crossOrigin: 'anonymous' })
-  const [songs, setSongs] = useState<readonly Song[] | null>(null)
+  const [songs, setSongs] = useState<readonly SongSummary[] | null>(null)
   const songById = useMemo(() => new Map(songs?.map(song => [song.id, song])), [songs])
   const [songsFailed, setSongsFailed] = useState(false)
   /** Bumped by `reloadSongs`, to fetch the catalog again. */
@@ -956,15 +966,14 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const toggleTootPlayback = useCallback(
-    (toot: TootDraft | Toot, note?: number) => {
+    (toot: TootDraft | Toot, note?: number, notes?: Song) => {
       const key = tootPlayback(toot.id, note)
       setTootPlayFailed(null)
       if (nowPlaying === key) {
         stopPlayback()
         return
       }
-      const song =
-        'song' in toot ? toot.song : toot.songId === null ? undefined : songById.get(toot.songId)
+      const song = 'song' in toot ? toot.song : toot.songId === notes?.id ? notes : undefined
       // A note needs its Song, to find it in the audio.
       if (note !== undefined && !song) return
       const written = note === undefined || !song ? null : noteSeconds(song, song.notes[note])
@@ -997,7 +1006,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         if (thisPlay === tootPlays.current) setPlaybackStart({ key, at: performance.now() })
       })
     },
-    [nowPlaying, markAudioMissing, songById]
+    [nowPlaying, markAudioMissing]
   )
 
   // As the iPhone app's `renameToot`: the list changes at once, and a failed write is let go.
@@ -1039,6 +1048,20 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const key = coverageKey(recordings ?? [])
   // biome-ignore lint/correctness/useExhaustiveDependencies: `key` stands for `recordings`.
   const rows = useMemo(() => songRows(songs ?? [], recordings ?? []), [key, songs])
+  // Each Song's Arrangement, once asked for, while the Recordings stay as they are.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `key` stands for `recordings`.
+  const coverage = useMemo(() => {
+    const arranged = new Map<SongSummary, Coverage>()
+    const current = recordings ?? []
+    return (song: SongSummary) => {
+      let found = arranged.get(song)
+      if (!found) {
+        found = coverageOf(song, current)
+        arranged.set(song, found)
+      }
+      return found
+    }
+  }, [key])
 
   const profileStats: ProfileStats | null =
     recordings === null || toots === null || songs === null
@@ -1063,6 +1086,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     collectedNotes,
     collectedPitchClasses: collectedPitchClasses(recordings ?? []),
     songRows: rows,
+    coverage,
     showsWelcome,
     capture,
     liveTake,

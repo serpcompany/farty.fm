@@ -10,17 +10,27 @@
 // own page, even one loaded online: nothing would refresh it, so after a deploy it would load an
 // older build's code and catalog, beside the current build's database.
 //
-// Bump `version` when the cache's contents change shape. A new worker deletes every other
-// version's cache when it activates.
+// The catalog is an index, and each Song's notes are a file of their own, fetched as the Song
+// opens (#323). The worker keeps notes in a cache of their own, so they never push the shell out.
+// Once it has the index, when it installs and whenever a page or the start page's refresh fetches
+// one, it fetches every Song's notes it hasn't kept, in the background, so a Song never opened
+// plays offline too (#138). Compose itself reads only the index.
+//
+// Bump `version` when the shell cache's contents change shape, and `notesVersion` when the notes
+// cache's do. A new worker deletes every other version's caches when it activates.
 
 const version = 2
-const cacheName = `pedos-shell-v${version}`
+const notesVersion = 1
 // A few deploys' worth of the shell. The least recently fetched files go first.
-const maxEntries = 200
+const shell = { name: `pedos-shell-v${version}`, maxEntries: 200 }
+// Every Song's notes twice over, at a few KB a Song. The least recently fetched go first.
+const songNotes = { name: `pedos-notes-v${notesVersion}`, maxEntries: 2000 }
 const shellFile = /\.(?:js|css|woff2?|png|ico|svg|webp|jpg|webmanifest)$/i
-// The Song Catalog, named by its content (`src/lib/catalog/generate.ts`), so it never changes
-// under one name, as a build's scripts don't.
+// The Song Catalog's index and each Song's notes, named by their content
+// (`src/lib/catalog/generate.ts`), so they never change under one name, as a build's scripts
+// don't.
 const catalogFile = /^\/catalog\/songs-[0-9a-f]+\.json$/
+const notesFile = /^\/catalog\/notes\/[a-z0-9-]+-[0-9a-f]{16}\.json$/
 // A Song's Song Creator, `/compose/<song>/`, and the page that answers for any of them offline.
 // The pages beside it aren't Songs: the generator refuses their names as Song ids.
 const songPage = /^\/compose\/([^/]+)\/?$/
@@ -29,6 +39,11 @@ const notSongs = new Set(['song', 'pad'])
 // How often an online start page refreshes the tabs and their files, at most.
 const refreshEvery = 5 * 60 * 1000
 let lastRefresh = 0
+// Each index whose Songs' notes this worker is keeping or has kept, so a page's every fetch of the
+// index doesn't look again. Notes are named by their content, so an index's notes never change.
+const notesKeptFor = new Map()
+// How many Songs' notes it fetches at once, so they don't crowd out what a page fetches.
+const notesAtOnce = 6
 
 self.addEventListener('install', event => {
   event.waitUntil(precacheShell().finally(() => self.skipWaiting()))
@@ -38,7 +53,8 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     (async () => {
       for (const name of await caches.keys()) {
-        if (name.startsWith('pedos-shell-') && name !== cacheName) await caches.delete(name)
+        if (name.startsWith('pedos-shell-') && name !== shell.name) await caches.delete(name)
+        if (name.startsWith('pedos-notes-') && name !== songNotes.name) await caches.delete(name)
       }
       await self.clients.claim()
     })()
@@ -62,7 +78,7 @@ function handles(request) {
   // Shared links (ADR 0020): once a link is stopped or taken down, no copy of its page opens.
   if (url.pathname.startsWith('/u/')) return false
   if (request.mode === 'navigate') return true
-  if (catalogFile.test(url.pathname)) return true
+  if (catalogFile.test(url.pathname) || notesFile.test(url.pathname)) return true
   return url.pathname !== '/sw.js' && shellFile.test(url.pathname)
 }
 
@@ -81,18 +97,24 @@ async function networkFirst(event) {
     throw offline
   }
   // A tab opened before a deploy still loads its own build's scripts, such as a tab's code or
-  // the render worker's, and its own Song Catalog, and the deploy took them off the server
-  // (#222). The copy kept from before answers instead of the 404. A build's files and the
-  // catalog never change under the same name.
+  // the render worker's, and its own Song Catalog and Songs' notes, and the deploy took them off
+  // the server (#222). The copy kept from before answers instead of the 404. A build's files and
+  // the catalog never change under the same name.
   if (
     response.status === 404 &&
-    (pathname.startsWith('/_next/static/') || catalogFile.test(pathname))
+    (pathname.startsWith('/_next/static/') ||
+      catalogFile.test(pathname) ||
+      notesFile.test(pathname))
   ) {
     const kept = await keptCopy(request)
     if (kept) return kept
   }
   if (keepable(response) && !opensSong) {
     event.waitUntil(keep(request.url, response.clone()))
+    if (catalogFile.test(pathname)) {
+      const index = response.clone()
+      event.waitUntil(index.text().then(text => keepEveryNotes(pathname, text)))
+    }
     if (request.mode === 'navigate' && pathname === '/') {
       event.waitUntil(refreshShell(response.clone()))
     }
@@ -106,8 +128,13 @@ async function networkFirst(event) {
   return response
 }
 
+// The cache a file goes in: a Song's notes in their own, everything else in the shell's.
+function storeFor(url) {
+  return notesFile.test(new URL(url).pathname) ? songNotes : shell
+}
+
 async function keptCopy(request) {
-  const cache = await caches.open(cacheName)
+  const cache = await caches.open(storeFor(request.url).name)
   return await cache.match(request.url, {
     ignoreVary: true,
     ignoreSearch: request.mode === 'navigate'
@@ -122,7 +149,7 @@ function isSongPage(pathname) {
 
 // The one Song page, which answers for every Song offline. It reads the Song from the address.
 async function keptSongShell() {
-  const cache = await caches.open(cacheName)
+  const cache = await caches.open(shell.name)
   return await cache.match(new URL(songShell, self.location.origin).href, { ignoreVary: true })
 }
 
@@ -134,20 +161,82 @@ function keepable(response) {
 
 async function keep(url, response) {
   try {
-    const cache = await caches.open(cacheName)
+    const store = storeFor(url)
+    const cache = await caches.open(store.name)
     // Both workers load one script, each with its own chunks in the URL's fragment
     // (`#params=`), and a worker runs what its script's response URL says. So the copy is kept
     // with no URL of its own, and a worker started offline keeps the URL it asked for.
     const bare = new URL(url)
     bare.hash = ''
     await cache.put(bare.href, new Response(response.body, response))
-    const keys = await cache.keys()
-    for (const old of keys.slice(0, Math.max(0, keys.length - maxEntries))) {
-      await cache.delete(old)
-    }
+    await trim(cache, store.maxEntries)
   } catch {
     // A full disk only costs the offline copy.
   }
+}
+
+// The least recently fetched go first.
+async function trim(cache, maxEntries) {
+  const keys = await cache.keys()
+  for (const old of keys.slice(0, Math.max(0, keys.length - maxEntries))) {
+    await cache.delete(old)
+  }
+}
+
+// Every Song's notes that the index at `path` names and the cache doesn't hold yet, fetched ahead,
+// a few at a time. Resolves to false when the network failed for any of them, and the next fetch
+// of the index tries again.
+function keepEveryNotes(path, indexText) {
+  let keeping = notesKeptFor.get(path)
+  if (!keeping) {
+    keeping = fetchEveryNotes(indexText)
+    notesKeptFor.set(path, keeping)
+    keeping.then(complete => {
+      if (!complete) notesKeptFor.delete(path)
+    })
+  }
+  return keeping
+}
+
+async function fetchEveryNotes(indexText) {
+  let paths = []
+  try {
+    const index = JSON.parse(indexText)
+    if (Array.isArray(index)) {
+      paths = index
+        .map(song => song?.notesPath)
+        .filter(notes => typeof notes === 'string' && notesFile.test(notes))
+    }
+  } catch {
+    return true
+  }
+  let complete = true
+  try {
+    const cache = await caches.open(songNotes.name)
+    const kept = new Set(
+      (await cache.keys()).map(key => new URL(typeof key === 'string' ? key : key.url).pathname)
+    )
+    const missing = paths.filter(notes => !kept.has(notes))
+    const fetchNext = async () => {
+      for (let notes = missing.shift(); notes !== undefined; notes = missing.shift()) {
+        try {
+          const response = await fetch(notes)
+          // A 404 is notes a deploy took off the server: the next index names their successor.
+          if (keepable(response)) {
+            await cache.put(new URL(notes, self.location.origin).href, response)
+          }
+        } catch {
+          complete = false
+        }
+      }
+    }
+    await Promise.all(Array.from({ length: notesAtOnce }, fetchNext))
+    await trim(cache, songNotes.maxEntries)
+  } catch {
+    // A full disk only costs the offline copies.
+    complete = false
+  }
+  return complete
 }
 
 // Tabs open by client-side navigation, which this worker never keeps, so an online start page
@@ -166,9 +255,10 @@ async function refreshShell(startPage) {
 }
 
 // The start page, the pages it links to (the tabs), the pages in `/shell.json` (the one Song
-// page among them), and the files they load, the Song Catalog too, so Farty opens offline right
-// after it's installed, before any of them is fetched again. `startHtml` is the start page
-// already fetched, if any. Resolves to false when the network failed for any of them.
+// page among them), and the files they load, the Song Catalog and every Song's notes too, so
+// Farty opens and plays offline right after it's installed, before any of them is fetched again.
+// `startHtml` is the start page already fetched, if any. Resolves to false when the network
+// failed for any of them.
 async function precacheShell(startHtml) {
   let complete = true
   const get = path =>
@@ -198,12 +288,19 @@ async function precacheShell(startHtml) {
   // The scripts load more scripts by name, such as the render and analysis workers' own, which
   // Song Creator and Record need offline too.
   const loaded = new Set()
-  for (const text of await Promise.all([...files].map(get))) {
-    for (const [, path] of (text ?? '').matchAll(/"(static\/chunks\/[^"\s\\]+\.js)"/g)) {
+  const indexes = []
+  const texts = await Promise.all([...files].map(get))
+  for (const [i, file] of [...files].entries()) {
+    const text = texts[i] ?? ''
+    if (catalogFile.test(file)) indexes.push([file, text])
+    for (const [, path] of text.matchAll(/"(static\/chunks\/[^"\s\\]+\.js)"/g)) {
       if (!files.has(`/_next/${path}`)) loaded.add(`/_next/${path}`)
     }
   }
   await Promise.all([...loaded].map(get))
+  for (const [path, text] of indexes) {
+    if (!(await keepEveryNotes(path, text))) complete = false
+  }
   return complete
 }
 

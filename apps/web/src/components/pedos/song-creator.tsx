@@ -7,7 +7,7 @@ import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'rea
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { libraryOwner } from '@/lib/account'
-import type { Song } from '@/lib/catalog/song'
+import type { Song, SongSummary } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import { TOOT_PRICE_LABEL } from '@/lib/pricing'
@@ -40,6 +40,7 @@ import { FavoriteButton } from './favorite-button'
 import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
+import { useSongNotes } from './use-song-notes'
 import { Waveform } from './waveform'
 
 type Phase =
@@ -56,23 +57,26 @@ export type SongHeading = Pick<Song, 'id' | 'title' | 'source'>
  * an editor: nothing here changes the Arrangement (ADR 0005). As the iPhone app's
  * `SongCreatorView`.
  *
- * The Song's notes come from the Song Catalog the browser fetches (`usePedos().songs`); its page
- * gives only its `heading`, which shows until then.
+ * The Song comes from the Song Catalog the browser fetches (`usePedos().songs`), and its notes
+ * when it's opened (`useSongNotes`, #323); its page gives only its `heading`, which shows until
+ * then.
  */
 export function SongCreator({ id, heading }: { id: string; heading?: SongHeading }) {
   const pedos = usePedos()
   const router = useRouter()
-  const song = pedos.song(id)
-  const shown = song ?? heading
+  const summary = pedos.song(id)
+  const notes = useSongNotes(summary)
+  const song = notes.song
+  const shown = summary ?? heading
   const [phase, setPhase] = useState<Phase>({ kind: 'making' })
   /** Bumped by Try again, to make the Toot again. */
   const [attempt, setAttempt] = useState(0)
-  const loaded = pedos.recordings !== null && song !== undefined
-  // The catalog didn't load, or has no Song of this id.
+  const loaded = pedos.recordings !== null && song !== null
+  // The catalog or the Song's notes didn't load, or the catalog has no Song of this id.
   const view =
-    song === undefined && pedos.songsFailed
+    (summary === undefined && pedos.songsFailed) || notes.failed
       ? 'failed'
-      : song === undefined && pedos.songs !== null
+      : summary === undefined && pedos.songs !== null
         ? 'missing'
         : phase.kind
 
@@ -167,13 +171,18 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
       {view === 'failed' && (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
           <p className="text-muted-foreground">
-            {pedos.songsFailed ? "Couldn't load the Songs." : "Couldn't make this Toot."}
+            {pedos.songsFailed
+              ? "Couldn't load the Songs."
+              : notes.failed
+                ? "Couldn't load this Song."
+                : "Couldn't make this Toot."}
           </p>
           <Button
             variant="outline"
             className="h-11 px-5 text-base"
             onClick={() => {
               if (pedos.songsFailed) pedos.reloadSongs()
+              if (notes.failed) notes.retry()
               setPhase({ kind: 'making' })
               setAttempt(a => a + 1)
             }}
@@ -443,26 +452,38 @@ type Focus = { pitch: number } | { note: number } | null
  * `toot` is the made Toot (Song Creator) or a saved one (its screen, with no Save). When its audio
  * is missing, Play and the notes can't play, and the Recordings still can. `children` are more
  * lines under "N of your Recordings, one per note".
+ *
+ * Play needs only the Toot's audio, so a saved Toot's screen shows it before its Song's notes load
+ * (#323): `song` is then the Song without them, and `notesFallback` stands in for the note view.
  */
 export function TootLayout({
   toot,
   song,
+  notesFallback,
   isAudioMissing = false,
   children
 }: {
   toot: SongTootDraft | SongToot
-  song: Song
+  song: Song | SongSummary
+  notesFallback?: ReactNode
   isAudioMissing?: boolean
   children?: ReactNode
 }) {
   const pedos = usePedos()
   const { arrangement } = toot
   const [focus, setFocus] = useState<Focus>(null)
+  /** The Song with its notes, once they've loaded. */
+  const melody = 'notes' in song ? song : null
   const isPlaying = pedos.nowPlaying === tootPlayback(toot.id)
-  const playingNote = song.notes.findIndex((_, i) => pedos.nowPlaying === tootPlayback(toot.id, i))
-  const selectedNote = focus && 'note' in focus ? focus.note : null
+  const playingNote =
+    melody?.notes.findIndex((_, i) => pedos.nowPlaying === tootPlayback(toot.id, i)) ?? -1
+  const selectedNote = melody && focus && 'note' in focus ? focus.note : null
   const highlightedPitch =
-    focus === null ? null : 'pitch' in focus ? focus.pitch : song.notes[focus.note].pitch
+    focus === null
+      ? null
+      : 'pitch' in focus
+        ? focus.pitch
+        : (melody?.notes[focus.note].pitch ?? null)
   const recordingFor = (pitch: number) => {
     const id = arrangement.recordingForPitch[pitch]
     return id === undefined ? undefined : pedos.recording(id)
@@ -514,35 +535,39 @@ export function TootLayout({
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <NoteView
-          song={song}
-          arrangement={arrangement}
-          recordingName={note => {
-            const recording = recordingFor(note.pitch)
-            return recording ? recordingName(recording) : 'Recording deleted'
-          }}
-          startedAt={isPlaying ? pedos.playbackStartedAt : null}
-          highlightedPitch={highlightedPitch}
-          selectedNote={selectedNote}
-          playingNote={playingNote === -1 ? null : playingNote}
-          onTapNote={index => {
-            if (isAudioMissing) return
-            setFocus({ note: index })
-            pedos.toggleTootPlayback(toot, index)
-          }}
-        />
-        {selectedNote !== null && (
-          <p className="px-4 text-sm text-muted-foreground" data-testid="note-caption">
-            {noteCaption(
-              song,
-              arrangement,
-              song.notes[selectedNote],
-              recordingFor(song.notes[selectedNote].pitch)
-            )}
-          </p>
-        )}
-      </div>
+      {melody ? (
+        <div className="flex flex-col gap-2">
+          <NoteView
+            song={melody}
+            arrangement={arrangement}
+            recordingName={note => {
+              const recording = recordingFor(note.pitch)
+              return recording ? recordingName(recording) : 'Recording deleted'
+            }}
+            startedAt={isPlaying ? pedos.playbackStartedAt : null}
+            highlightedPitch={highlightedPitch}
+            selectedNote={selectedNote}
+            playingNote={playingNote === -1 ? null : playingNote}
+            onTapNote={index => {
+              if (isAudioMissing) return
+              setFocus({ note: index })
+              pedos.toggleTootPlayback(toot, index, melody)
+            }}
+          />
+          {selectedNote !== null && (
+            <p className="px-4 text-sm text-muted-foreground" data-testid="note-caption">
+              {noteCaption(
+                melody,
+                arrangement,
+                melody.notes[selectedNote],
+                recordingFor(melody.notes[selectedNote].pitch)
+              )}
+            </p>
+          )}
+        </div>
+      ) : (
+        notesFallback
+      )}
 
       <section aria-labelledby="recordings-used">
         <h2 id="recordings-used" className="px-4 pb-1.5 text-xs font-normal text-muted-foreground">
