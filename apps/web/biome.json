@@ -120,6 +120,26 @@
           }
         }
       }
+    },
+    {
+      "includes": ["src/app/**", "src/server/**", "!**/*.test.ts", "!**/*.test.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/lib/catalog/songs.generated", "**/songs.generated"],
+                    "message": "songs.generated carries every Song's notes, so the Worker would too (#323). Routes and the server read song-index.generated; only tests import songs.generated."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "assist": {
