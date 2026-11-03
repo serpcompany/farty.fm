@@ -1,5 +1,7 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { searchKey } from '../src/lib/catalog/search-key'
 import { songs } from '../src/lib/catalog/songs.generated'
+import { songRows, sortRows } from '../src/lib/pitch-coverage'
 import {
   fakeMicrophone,
   fartAndRecord,
@@ -177,18 +179,27 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   const search = page.getByRole('searchbox', { name: 'Search Songs' })
   await expectTappable(search)
   await expectTappable(page.getByRole('button', { name: 'Sort' }))
-  // Mary Had a Little Lamb, Twinkle Twinkle Little Star, Little Peggy's Love and Little Pickle.
+  // Every Song with "little" in its title or another name, worked out from the catalog.
+  const little = songs.filter(song =>
+    [song.title, ...(song.aliases ?? [])].some(name => searchKey(name).includes('little'))
+  )
+  expect(little.map(song => song.id)).toContain('mary')
   await search.fill('LITTLE')
-  await expect(page.getByTestId('song-row')).toHaveCount(4)
+  await expect(page.getByTestId('song-row')).toHaveCount(little.length)
   await search.fill('zzz')
   await expect(page.getByText('No Results for “zzz”')).toBeVisible()
   await search.fill('')
   await page.getByRole('button', { name: 'Sort' }).click()
   await page.getByRole('menuitemradio', { name: 'A–Z' }).click()
-  // A–Z puts a title that starts with a number first.
+  // The first locked Song by the app's A–Z order, which puts a title that starts with a number
+  // first.
+  const firstLocked = sortRows(songRows(songs, fixtureRecordings(journey)), 'alphabetical').find(
+    row => !row.coverage.unlocked
+  )
+  expect(firstLocked).toBeDefined()
   await expect(page.getByTestId('locked-songs').getByTestId('song-row').first()).toHaveAttribute(
     'data-song',
-    '12th-street-rag'
+    firstLocked?.song.id ?? ''
   )
 })
 
