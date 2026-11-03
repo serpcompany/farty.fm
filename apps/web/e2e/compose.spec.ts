@@ -174,6 +174,26 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   )
 })
 
+// The browser fetches the Song Catalog as data (#322). With no service worker to answer for it, a
+// catalog the server won't give says so on Compose and Profile, and Try again loads it.
+test.describe('a Song Catalog that does not load', () => {
+  test.use({ serviceWorkers: 'block' })
+
+  test('says so on Compose and Profile, and Try again loads it', async ({ page, context }) => {
+    await context.route('**/catalog/**', route => route.fulfill({ status: 500, body: 'down' }))
+    await page.goto('/compose/')
+    await expect(page.getByText("Couldn't load the Songs.")).toBeVisible()
+    await page.goto('/profile/')
+    await expect(page.getByText("Couldn't load the Songs.")).toBeVisible()
+
+    await context.unroute('**/catalog/**')
+    await page.getByRole('button', { name: 'Try again' }).click()
+    await expect(page.getByTestId('stat-songs')).toHaveText(`Songs unlocked0 of ${songs.length}`)
+    await tab(page, 'Compose').click()
+    await expect(page.getByRole('heading', { name: `Locked · ${songs.length}` })).toBeVisible()
+  })
+})
+
 /** A control a thumb can hit: at least 44 by 44 CSS pixels, as the iPhone's controls. */
 async function expectTappable(control: Locator) {
   const box = await control.boundingBox()

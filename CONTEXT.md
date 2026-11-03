@@ -121,8 +121,12 @@ A Recording its owner has shared by link, which anyone with the link can open an
 _Avoid_: Public Recording, post, upload, published Recording
 
 **Friend**:
-Another user, found by their Handle, who has accepted a friend request from the user, or whose request the user accepted. Either can remove the other. Friends see each other's profile page of what they've shared (#319; not built yet).
+Another user, found by their Handle, who has accepted a friend request from the user, or whose request the user accepted. Either can remove the other, and the other isn't told. Friends are listed in Profile, each opening their Profile Page (ADR 0021).
 _Avoid_: Follower, contact, connection
+
+**Profile Page**:
+A user's page, `farty.fm/u/<handle>`, which anyone can open: their Handle, Add friend, and what they share now, newest first. No counts and no feed. Not Profile, the tab that is the user's own account and settings (ADR 0021).
+_Avoid_: Profile (for this page), wall, timeline
 
 ## Testing
 

@@ -1,19 +1,30 @@
 /**
- * Generates the Songs the app ships (`songs.generated.ts`) from what the reference engine already
- * imported, as the iPhone app's `ios/scripts/generate-sample-data.py` does (ADR 0003):
+ * Generates the Song Catalog the app ships from what the reference engine already imported, as the
+ * iPhone app's `ios/scripts/generate-sample-data.py` does (ADR 0003):
  *
  * - each Song's melody from `fixtures/golden/songs/<id>.json`, so nothing parses MIDI here;
  * - its title and source line from `catalog/catalog.json`, checked against the golden copy, so
  *   the notes come from the cited score;
  * - only the Songs on the ship list, in its order.
  *
- * Node-only: the app imports `songs.generated.ts`, never this file. Run from `apps/web/`:
+ * It writes the Songs as data, not code (#322), so the JavaScript bundle stays the same size
+ * however many Songs ship:
  *
- *     pnpm exec tsx src/lib/catalog/generate.ts           # rewrite songs.generated.ts
+ * - `public/catalog/songs-<hash>.json`, named by its content, which the browser fetches
+ *   (`load-songs.ts`) and the service worker keeps. A new deploy's code names its own file, so it
+ *   never reads an older catalog. The older file is deleted.
+ * - `catalog-path.generated.ts`, that file's path, for the browser.
+ * - `songs.generated.ts`, which imports the file, for the server and the tests.
+ *
+ * Node-only: the app imports the generated files, never this one. Run from `apps/web/`:
+ *
+ *     pnpm exec tsx src/lib/catalog/generate.ts           # rewrite the catalog
  *     pnpm exec tsx src/lib/catalog/generate.ts --check   # fail if it's out of date
  */
-import { readFileSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import type { Song } from './song'
 
 /** An entry of `catalog/catalog.json`: the cited score and how the reference engine imports it. */
 export type CatalogEntry = {
@@ -41,8 +52,21 @@ export type GoldenSong = {
 
 export type Sources = { catalog: CatalogEntry[]; golden(id: string): GoldenSong }
 
+/** What the generator writes: each file's path from `apps/web/`, and its text. */
+export type CatalogFiles = {
+  /** `public/catalog/songs-<hash>.json`. */
+  data: { path: string; text: string }
+  /** `src/lib/catalog/catalog-path.generated.ts`. */
+  path: { path: string; text: string }
+  /** `src/lib/catalog/songs.generated.ts`. */
+  songs: { path: string; text: string }
+}
+
 const repo = new URL('../../../../../', import.meta.url)
-export const outputPath = fileURLToPath(new URL('songs.generated.ts', import.meta.url))
+const web = new URL('../../../', import.meta.url)
+/** Where the catalog's data file goes, served at `/catalog/`. */
+export const dataDirectory = 'public/catalog'
+const dataFile = /^songs-[0-9a-f]+\.json$/
 
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(fileURLToPath(new URL(path, repo)), 'utf8')) as T
@@ -59,6 +83,12 @@ function readJson<T>(path: string): T {
 export const shipList: readonly string[] = readJson<string[]>(
   'apps/web/src/lib/catalog/ship-list.json'
 )
+
+/**
+ * Compose's own pages beside the Songs' `/compose/<id>/`: the Sound Pad, and the Song page the
+ * service worker answers with offline (`app/compose/song/`). No Song may take their ids.
+ */
+export const reservedIds: readonly string[] = ['pad', 'song']
 
 /** The catalog and the golden Songs, read from the repository. */
 export function readSources(): Sources {
@@ -79,39 +109,9 @@ function sourceLine(entry: CatalogEntry): string {
   throw new Error(`Song ${entry.id} has a source this script has no line for; add one here`)
 }
 
-/** `text` as a string literal, quoted as Biome writes it: in double quotes if it has an apostrophe. */
-function quoted(text: string): string {
-  const quote = text.includes("'") ? '"' : "'"
-  if (/[\\\n]/.test(text) || text.includes(quote))
-    throw new Error(`can't quote ${JSON.stringify(text)}`)
-  return `${quote}${text}${quote}`
-}
-
-/**
- * `key: [values],` as Biome writes it: on one line if it fits in 100 columns, else the values fill
- * the lines between the brackets.
- */
-function numbers(indent: string, key: string, values: readonly number[]): string[] {
-  const width = 100
-  const line = `${indent}${key}: [${values.join(', ')}],`
-  if (line.length <= width) return [line]
-  const inner = `${indent}  `
-  const lines: string[] = []
-  let current = ''
-  for (const [i, value] of values.entries()) {
-    const item = i < values.length - 1 ? `${value},` : `${value}`
-    if (current !== '' && `${inner}${current} ${item}`.length > width) {
-      lines.push(`${inner}${current}`)
-      current = item
-    } else {
-      current = current === '' ? item : `${current} ${item}`
-    }
-  }
-  return [`${indent}${key}: [`, ...lines, `${inner}${current}`, `${indent}],`]
-}
-
-function song(entry: CatalogEntry, golden: GoldenSong): string[] {
+function song(entry: CatalogEntry, golden: GoldenSong): Song {
   const problem = (what: string) => new Error(`Song ${entry.id}: ${what}`)
+  if (reservedIds.includes(entry.id)) throw problem("its id is one of Compose's own pages")
   if (golden.id !== entry.id || golden.title !== entry.title)
     throw problem('the golden copy has another id or title')
   if (golden.file !== entry.file || golden.sha256 !== entry.sha256)
@@ -126,62 +126,117 @@ function song(entry: CatalogEntry, golden: GoldenSong): string[] {
   const pitches = [...new Set(notes.map(n => n.pitch))].sort((a, b) => a - b)
   if (pitches.join() !== golden.pitches.join()) throw problem("its pitches don't match its notes")
 
-  return [
-    '  {',
-    `    id: ${quoted(entry.id)},`,
-    `    title: ${quoted(entry.title)},`,
-    `    source: ${quoted(sourceLine(entry))},`,
-    `    bpm: ${golden.bpm},`,
-    ...numbers('    ', 'bar_lines', golden.bar_lines),
-    `    length_beats: ${golden.length_beats},`,
-    ...numbers('    ', 'pitches', pitches),
-    '    notes: [',
-    ...notes.map(
-      (n, i) =>
-        `      { start: ${n.start}, dur: ${n.dur}, pitch: ${n.pitch} }${i < notes.length - 1 ? ',' : ''}`
-    ),
-    '    ]',
-    '  }'
-  ]
+  return {
+    id: entry.id,
+    title: entry.title,
+    source: sourceLine(entry),
+    bpm: golden.bpm,
+    bar_lines: golden.bar_lines,
+    length_beats: golden.length_beats,
+    pitches,
+    notes: notes.map(({ start, dur, pitch }) => ({ start, dur, pitch }))
+  }
 }
 
-/** The text of `songs.generated.ts` for the Songs on `ids`. */
-export function renderCatalog(sources: Sources, ids: readonly string[] = shipList): string {
+/** The Songs on `ids`, from the catalog and the golden data, checked. */
+export function catalogSongs(sources: Sources, ids: readonly string[] = shipList): Song[] {
   if (new Set(ids).size !== ids.length) throw new Error('the ship list names a Song twice')
-  const songs = ids.map(id => {
+  return ids.map(id => {
     const entry = sources.catalog.find(e => e.id === id)
     if (!entry) throw new Error(`the ship list names ${id}, which isn't in catalog/catalog.json`)
     return song(entry, sources.golden(id))
   })
-  return [
-    '// Generated by src/lib/catalog/generate.ts from catalog/catalog.json and',
-    '// fixtures/golden/songs/. Do not edit by hand: run it again instead.',
-    "import type { Song } from './song'",
-    '',
-    "/** The Songs the app ships, in the ship list's order. */",
-    'export const songs: readonly Song[] = [',
-    ...songs.flatMap((lines, i) =>
-      i < songs.length - 1 ? [...lines.slice(0, -1), '  },'] : lines
-    ),
-    ']',
-    ''
-  ].join('\n')
+}
+
+const header = [
+  '// Generated by src/lib/catalog/generate.ts from catalog/catalog.json and',
+  '// fixtures/golden/songs/. Do not edit by hand: run it again instead.'
+]
+
+/** The files the generator writes for the Songs on `ids`. */
+export function renderCatalog(sources: Sources, ids: readonly string[] = shipList): CatalogFiles {
+  const songs = catalogSongs(sources, ids)
+  // One Song a line, so a change shows as the Songs it changed.
+  const data = `[\n${songs.map(s => JSON.stringify(s)).join(',\n')}\n]\n`
+  const hash = createHash('sha256').update(data).digest('hex').slice(0, 16)
+  const file = `songs-${hash}.json`
+  return {
+    data: { path: `${dataDirectory}/${file}`, text: data },
+    path: {
+      path: 'src/lib/catalog/catalog-path.generated.ts',
+      text: [
+        ...header,
+        '',
+        `/** Where the browser fetches the Song Catalog: ${songs.length} Songs, named by their content. */`,
+        `export const catalogPath = '/catalog/${file}'`,
+        ''
+      ].join('\n')
+    },
+    songs: {
+      path: 'src/lib/catalog/songs.generated.ts',
+      text: [
+        ...header,
+        `import catalog from '../../../${dataDirectory}/${file}'`,
+        "import type { Song } from './song'",
+        '',
+        '/**',
+        " * The Songs the app ships, in the ship list's order, for the server and the tests. The browser",
+        ' * fetches them instead (`load-songs.ts`), so they stay out of its JavaScript (#322).',
+        ' */',
+        'export const songs: readonly Song[] = catalog',
+        ''
+      ].join('\n')
+    }
+  }
+}
+
+const inWeb = (path: string) => fileURLToPath(new URL(path, web))
+
+/** The data files in `public/catalog/` now, by name. */
+function dataFiles(): string[] {
+  try {
+    return readdirSync(inWeb(dataDirectory)).filter(name => dataFile.test(name))
+  } catch {
+    return []
+  }
+}
+
+/** What differs between the files on disk and `files`: none when the catalog is current. */
+export function outOfDate(files: CatalogFiles): string[] {
+  const stale: string[] = []
+  for (const { path, text } of [files.data, files.path, files.songs]) {
+    let current: string | null = null
+    try {
+      current = readFileSync(inWeb(path), 'utf8')
+    } catch {
+      // Missing: out of date.
+    }
+    if (current !== text) stale.push(path)
+  }
+  const name = files.data.path.slice(dataDirectory.length + 1)
+  for (const other of dataFiles()) if (other !== name) stale.push(`${dataDirectory}/${other}`)
+  return stale
 }
 
 function main(): void {
-  const text = renderCatalog(readSources())
+  const files = renderCatalog(readSources())
   if (process.argv.includes('--check')) {
-    if (readFileSync(outputPath, 'utf8') !== text) {
+    const stale = outOfDate(files)
+    if (stale.length > 0) {
       console.error(
-        'error: songs.generated.ts is out of date; run pnpm exec tsx src/lib/catalog/generate.ts'
+        `error: the catalog is out of date (${stale.join(', ')}); run pnpm exec tsx src/lib/catalog/generate.ts`
       )
       process.exit(1)
     }
-    console.log('ok    songs.generated.ts matches catalog/ and fixtures/golden/songs/')
+    console.log('ok    the catalog matches catalog/ and fixtures/golden/songs/')
     return
   }
-  writeFileSync(outputPath, text)
-  console.log(`wrote songs.generated.ts (${shipList.length} Songs)`)
+  mkdirSync(inWeb(dataDirectory), { recursive: true })
+  const name = files.data.path.slice(dataDirectory.length + 1)
+  for (const other of dataFiles()) if (other !== name) rmSync(inWeb(`${dataDirectory}/${other}`))
+  for (const { path, text } of [files.data, files.path, files.songs])
+    writeFileSync(inWeb(path), text)
+  console.log(`wrote ${files.data.path} (${shipList.length} Songs) and its two modules`)
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()

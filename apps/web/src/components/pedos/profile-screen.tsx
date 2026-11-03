@@ -14,10 +14,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import { setSharing, useSharing } from '@/lib/telemetry/sharing'
 import { useAccount } from './account-provider'
+import { FriendsSection } from './friends'
 import { InstallGuideCard, useInstallGuide } from './install-button'
 import { usePedos } from './pedos-provider'
 import { useShares } from './share-recording'
@@ -37,12 +39,13 @@ const list = 'divide-y overflow-hidden rounded-xl bg-muted/60'
 
 /**
  * Profile: what you've collected and made, counted from what's in this browser, your account,
- * where the Songs come from, and the app version. As the iPhone app's `ProfileTab`, plus the
- * account (#155), Install, sharing error reports (#126) and the privacy and support
- * pages, which the web app needs.
+ * where the Songs come from, and the app version. As the iPhone app's `ProfileTab`, plus
+ * Friends (#319), the account (#155) with your page, Install, sharing error reports (#126) and
+ * the privacy and support pages, which the web app needs.
  */
 export function ProfileScreen({ version }: { version: string }) {
-  const stats = usePedos().profileStats
+  const pedos = usePedos()
+  const stats = pedos.profileStats
 
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
@@ -52,7 +55,15 @@ export function ProfileScreen({ version }: { version: string }) {
         <h2 id="profile-stats" className={header}>
           Stats
         </h2>
-        {stats === null ? (
+        {stats === null && pedos.songsFailed ? (
+          // The counts include the Songs unlocked, so they wait for the Song Catalog (#322).
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <p className="text-sm text-muted-foreground">Couldn't load the Songs.</p>
+            <Button variant="outline" onClick={pedos.reloadSongs}>
+              Try again
+            </Button>
+          </div>
+        ) : stats === null ? (
           <div className="flex justify-center py-6">
             <Spinner />
           </div>
@@ -86,6 +97,8 @@ export function ProfileScreen({ version }: { version: string }) {
           </>
         )}
       </section>
+
+      <Friends />
 
       <section aria-labelledby="profile-account" className="pt-6">
         <h2 id="profile-account" className={header}>
@@ -132,6 +145,14 @@ export function ProfileScreen({ version }: { version: string }) {
       </section>
     </div>
   )
+}
+
+/** Friend requests and Friends (#319), for a signed-in account only: a guest has no friends. */
+function Friends() {
+  const { account } = useAccount()
+  if (account.status !== 'signedIn') return null
+  // Keyed by the account, so another account's lists never show.
+  return <FriendsSection key={account.id} accountId={account.id} />
 }
 
 /**
@@ -225,7 +246,7 @@ function AccountSection() {
   /** Some farts haven't reached the account: wait, or sign out anyway. */
   const [notUploaded, setNotUploaded] = useState(false)
   const [confirmsClear, setConfirmsClear] = useState(false)
-  /** The Handle picked the first time a Recording was shared (ADR 0020). */
+  /** The Handle picked the first time a Recording was shared or a friend added (ADR 0020). */
   const handle = useShares()?.handle ?? null
 
   const [signingOut, setSigningOut] = useState(false)
@@ -342,11 +363,23 @@ function AccountSection() {
           </span>
         </li>
         {handle && (
-          <li className="flex min-h-11 items-center justify-between gap-4 px-4 py-2.5">
-            <span>Handle</span>
-            <span className="min-w-0 truncate text-muted-foreground" data-testid="account-handle">
-              @{handle}
-            </span>
+          <li>
+            {/* The user's own profile page (#319), which lists only what they've shared. */}
+            <Link
+              href={`/u/${handle}/`}
+              className="flex min-h-11 items-center justify-between gap-4 px-4 py-2.5 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
+            >
+              <span className="shrink-0">Your page</span>
+              <span className="flex min-w-0 items-center gap-1">
+                <span
+                  className="min-w-0 truncate text-muted-foreground"
+                  data-testid="account-handle"
+                >
+                  @{handle}
+                </span>
+                <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+              </span>
+            </Link>
           </li>
         )}
         <li>

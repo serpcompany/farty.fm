@@ -23,7 +23,8 @@ const flag = (name: string) => integer(name, { mode: 'boolean' })
 // Better Auth's tables, as its `drizzleAdapter(db, { provider: 'sqlite' })` finds them: each export
 // is named after its model, and each property after Better Auth's field. Better Auth writes every
 // `created_at` and `updated_at` itself, so they have no defaults. Deleting a user deletes their
-// sessions, sign-in methods, Recordings, Toots, Favorite Songs, Toot payments, Handles and shares.
+// sessions, sign-in methods, Recordings, Toots, Favorite Songs, Toot payments, Handles, shares,
+// friend requests either way, friendships and reports of their profile page.
 
 /** A person with an account. A first sign-in with an email code creates one. */
 export const user = sqliteTable('user', {
@@ -323,4 +324,73 @@ export const shareReports = sqliteTable(
     createdAt: timestamp('created_at').notNull()
   },
   table => [index('share_reports_created_at_idx').on(table.createdAt)]
+)
+
+// Friends (#319, ADR 0021): a request from one user to another, found by their Handle, and once
+// it's accepted a friendship, kept as a row each way. Deleting either account deletes both.
+
+/**
+ * A friend request: `from_user_id` asked `to_user_id`, who hasn't accepted or declined yet.
+ * Accepting makes the friendship and deletes the request; declining or cancelling deletes it.
+ */
+export const friendRequests = sqliteTable(
+  'friend_requests',
+  {
+    fromUserId: text('from_user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    toUserId: text('to_user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull()
+  },
+  table => [
+    primaryKey({ columns: [table.fromUserId, table.toUserId] }),
+    index('friend_requests_to_user_id_idx').on(table.toUserId),
+    check('friend_requests_not_self', sql`from_user_id <> to_user_id`)
+  ]
+)
+
+/**
+ * A friendship, as a row each way: `user_id` is friends with `friend_id`, and the other row says
+ * the reverse, so a user's friends are one indexed read. Removing a friend deletes both.
+ */
+export const friends = sqliteTable(
+  'friends',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    friendId: text('friend_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull()
+  },
+  table => [
+    primaryKey({ columns: [table.userId, table.friendId] }),
+    // For deleting an account's friendships the other way, by `on delete cascade`.
+    index('friends_friend_id_idx').on(table.friendId),
+    check('friends_not_self', sql`user_id <> friend_id`)
+  ]
+)
+
+/**
+ * A report of a profile page, `/u/<handle>/`, from its Report, for Farty to check, such as for a
+ * bad Handle. It names the user reported, never who reported them. Deleting that account deletes
+ * it.
+ */
+export const profileReports = sqliteTable(
+  'profile_reports',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull()
+  },
+  table => [
+    index('profile_reports_created_at_idx').on(table.createdAt),
+    // For deleting an account's reports by `on delete cascade`.
+    index('profile_reports_user_id_idx').on(table.userId)
+  ]
 )

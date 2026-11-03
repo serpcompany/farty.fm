@@ -22,6 +22,7 @@ import { useAccount } from './account-provider'
 import { type Draft, usePedos } from './pedos-provider'
 import { PitchStrip } from './pitch-strip'
 import { useTake } from './recording-replay'
+import { ShareRecordingButton } from './share-recording'
 import { TakeReview, useTakeReview } from './take-review'
 import { LiveWaveform } from './waveform'
 
@@ -82,8 +83,10 @@ export function RecordFlow() {
     case 'result': {
       const recording = pedos.recording(flow.id)
       if (!recording) return null
+      const name = recordingName(recording)
+      // Saved now, so it can be shared, as from its row (#320).
       return (
-        <Cover title={recordingName(recording)}>
+        <Cover title={name} action={<ShareRecordingButton recording={recording} name={name} />}>
           <Result recording={recording} changes={flow.changes} trimFailed={flow.trimFailed} />
         </Cover>
       )
@@ -108,10 +111,13 @@ function Cover({
   title,
   label,
   tone,
+  action,
   onClose,
   children
 }: CoverName & {
   tone?: 'record'
+  /** A control at the header's end: Share, once the take is saved (#320). */
+  action?: ReactNode
   onClose?: () => void
   children: ReactNode
 }) {
@@ -123,8 +129,14 @@ function Cover({
   )
   const content = (
     <>
-      <header className="flex h-12 shrink-0 items-center justify-center px-4">
-        {title && <h1 className="font-semibold">{title}</h1>}
+      <header
+        className={cn(
+          'relative flex h-12 shrink-0 items-center justify-center px-4',
+          action && 'px-14'
+        )}
+      >
+        {title && <h1 className="truncate font-semibold">{title}</h1>}
+        {action && <div className="absolute top-1/2 right-2 -translate-y-1/2">{action}</div>}
       </header>
       <div className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col">{children}</div>
     </>
