@@ -4,7 +4,8 @@
  *
  * - each Song's melody from `fixtures/golden/songs/<id>.json`, so nothing parses MIDI here;
  * - its title and source line from `catalog/catalog.json`, checked against the golden copy, so
- *   the notes come from the cited score;
+ *   the notes come from the cited score, and its composer, MuseScore views and rating from there
+ *   too, which Compose shows, searches and sorts by (#356);
  * - the other names its titles file lists (`tools/catalog/titles-*.txt`), which Compose's search
  *   finds it by too;
  * - every Song in the catalog but `notShipped`, the iPhone app's 12 first (`shippedIds`).
@@ -208,6 +209,29 @@ function sourceLine(entry: CatalogEntry): string {
   throw new Error(`Song ${entry.id} has a source this script has no line for; add one here`)
 }
 
+/**
+ * What a score says when it names no composer: PDMX's "NA", MuseScore's "Composer" placeholder,
+ * "anon." and "Unknown". Compared trimmed, in lower case and without a closing full stop.
+ */
+const unknownComposers: readonly string[] = [
+  '',
+  'na',
+  'n/a',
+  'composer',
+  'anon',
+  'anonymous',
+  'unknown'
+]
+
+/**
+ * The Song's composer, as its score names them, or none when the score doesn't, so Compose never
+ * shows "NA". The names stay as PDMX spells them; #357 spells each composer one way.
+ */
+export function composerOf(entry: CatalogEntry): string | undefined {
+  const name = (entry.source.composer ?? '').trim()
+  return unknownComposers.includes(name.toLowerCase().replace(/\.$/, '')) ? undefined : name
+}
+
 /** The first 16 hex digits of the SHA-256 of `text`: what names each data file by its content. */
 function hash(text: string): string {
   return createHash('sha256').update(text).digest('hex').slice(0, 16)
@@ -254,11 +278,22 @@ function song(entry: CatalogEntry, golden: GoldenSong, names: readonly string[])
     notes: notes.map(({ start, dur, pitch }) => ({ start, dur, pitch }))
   }
   const aliases = aliasesOf(entry.title, names)
+  const source = sourceLine(entry)
+  const composer = composerOf(entry)
+  // Most popular sorts by the score's MuseScore views, then its rating (#356).
+  const views = Number(entry.source.n_views)
+  if (!Number.isInteger(views) || views < 0) throw problem('its source has no PDMX n_views')
+  const rating = Number(entry.source.rating ?? 0)
+  if (!(rating >= 0 && rating <= 5)) throw problem("its source's rating isn't from 0 to 5")
   return {
     id: entry.id,
     title: entry.title,
     ...(aliases.length > 0 && { aliases }),
-    source: sourceLine(entry),
+    source,
+    ...(composer !== undefined && { composer }),
+    views,
+    ...(rating > 0 && { rating }),
+    lengthBeats: golden.length_beats,
     bpm: golden.bpm,
     pitches,
     durations: pitches.map(p => notes.filter(n => n.pitch === p).map(n => n.dur)),

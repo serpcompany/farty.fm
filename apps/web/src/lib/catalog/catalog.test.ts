@@ -230,4 +230,51 @@ describe('the generator', () => {
   test('refuses a source it has no line for', () => {
     expect(() => renderCatalog(sources, ['ode-mutopia'])).toThrow(/no line for/)
   })
+
+  // #356: Compose shows, searches and sorts by these. A score that names no composer says so in
+  // one of a few ways, and Compose shows nothing for it, never "NA".
+  const twinkle = sources.catalog.find(e => e.id === 'twinkle') as CatalogEntry
+  const withSource = (source: Record<string, string>) => ({
+    ...sources,
+    catalog: [{ ...twinkle, source }]
+  })
+
+  test.each([
+    ['NA', undefined],
+    ['anon.', undefined],
+    ['Composer', undefined],
+    ['UnKnown', undefined],
+    [' ', undefined],
+    ['W. A. Mozart', 'W. A. Mozart'],
+    [' Trad. ', 'Trad.']
+  ])('reads a score’s composer %j as %j', (composer, expected) => {
+    const [song] = catalogSongs(withSource({ ...twinkle.source, composer }), ['twinkle'])
+    expect(song.composer).toBe(expected)
+    expect('composer' in song).toBe(expected !== undefined)
+  })
+
+  test('gives no Song a composer its score doesn’t name', () => {
+    const named = songs.filter(s => s.composer !== undefined)
+    expect(named.length).toBeGreaterThan(200)
+    expect(
+      named.filter(s =>
+        /^(na|n\/a|composer|anon\.?|anonymous|unknown|)$/i.test(s.composer?.trim() ?? '')
+      )
+    ).toEqual([])
+  })
+
+  test('carries each score’s MuseScore views and rating, and the melody’s length', () => {
+    const [star, mary] = catalogSongs(sources, ['twinkle', 'mary'])
+    expect(star).toMatchObject({ views: 4171, rating: 4.59, lengthBeats: 32 })
+    // Mary's score has no ratings, so no rating.
+    expect(mary).toMatchObject({ views: 51, lengthBeats: 16 })
+    expect('rating' in mary).toBe(false)
+    expect(songs.filter(s => s.lengthBeats !== s.length_beats)).toEqual([])
+  })
+
+  test('refuses a Song whose score has no MuseScore views', () => {
+    const { n_views, ...source } = twinkle.source
+    expect(n_views).toBe('4171')
+    expect(() => catalogSongs(withSource(source), ['twinkle'])).toThrow(/n_views/)
+  })
 })

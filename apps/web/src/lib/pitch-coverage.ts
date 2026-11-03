@@ -158,14 +158,11 @@ const andList = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' }
 
 /**
  * The notes still needed, with their octave and how long a fart each needs: "D3 (0.5 s) and F3
- * (1.2 s)", or with a `limit` of 3, "D3 (0.5 s), F3 (1.2 s), A3 (0.4 s), and 2 more". Null when
- * nothing is missing.
+ * (1.2 s)". Null when nothing is missing.
  */
-export function missingNotes(coverage: Coverage, limit?: number): string | null {
+export function missingNotes(coverage: Coverage): string | null {
   const names = coverage.missing.map(m => `${noteName(m.midi)} (${m.seconds.toFixed(1)} s)`)
-  if (names.length === 0) return null
-  if (limit === undefined || names.length <= limit) return andList.format(names)
-  return andList.format([...names.slice(0, limit), `${names.length - limit} more`])
+  return names.length === 0 ? null : andList.format(names)
 }
 
 /** The pitch classes (0 = C … 11 = B) of every Melodic Recording and Placed Recording. */
@@ -217,7 +214,7 @@ export function songRows(
 }
 
 /** How Compose orders Songs within each section. */
-export type SongOrder = 'closestToUnlocking' | 'alphabetical' | 'favoritesFirst'
+export type SongOrder = 'closestToUnlocking' | 'mostPopular' | 'fewestNotes' | 'alphabetical'
 
 const titles = new Intl.Collator('en', { numeric: true })
 
@@ -228,37 +225,33 @@ const closestToUnlocking = (a: SongRow, b: SongRow) => {
   return a.coverage.total - b.coverage.total
 }
 
-const alphabetical = (a: SongRow, b: SongRow) => titles.compare(a.song.title, b.song.title)
+const orders: Record<SongOrder, (a: SongRow, b: SongRow) => number> = {
+  closestToUnlocking,
+  mostPopular: (a, b) => b.song.views - a.song.views || (b.song.rating ?? 0) - (a.song.rating ?? 0),
+  fewestNotes: (a, b) => a.song.pitches.length - b.song.pitches.length,
+  alphabetical: (a, b) => titles.compare(a.song.title, b.song.title)
+}
 
 /**
  * `rows`, given in catalog order, sorted by `order`. Closest to unlocking puts the highest Pitch
- * Coverage first and, among equals, Songs with fewer notes. Favorites first puts the Favorite Songs
- * (ids in `favorites`) first, each part closest to unlocking. Ties keep catalog order.
+ * Coverage first and, among equals, Songs with fewer notes. Most popular puts the scores viewed
+ * most on MuseScore first and, among equals, the best rated. Fewest notes puts the Songs with the
+ * fewest distinct notes first. Ties keep catalog order.
  */
-export function sortRows(
-  rows: readonly SongRow[],
-  order: SongOrder,
-  favorites: ReadonlySet<string> = new Set()
-): SongRow[] {
-  const compare =
-    order === 'alphabetical'
-      ? alphabetical
-      : order === 'favoritesFirst'
-        ? (a: SongRow, b: SongRow) =>
-            Number(favorites.has(b.song.id)) - Number(favorites.has(a.song.id)) ||
-            closestToUnlocking(a, b)
-        : closestToUnlocking
+export function sortRows(rows: readonly SongRow[], order: SongOrder): SongRow[] {
   // Array sort is stable, so ties keep catalog order.
-  return [...rows].sort(compare)
+  return [...rows].sort(orders[order])
 }
 
 const searchKeys = new WeakMap<SongSummary, readonly string[]>()
 
-/** A Song's title and other names as search compares them, worked out once a Song. */
+/** A Song's title, other names and composer as search compares them, worked out once a Song. */
 function namesOf(song: SongSummary): readonly string[] {
   let keys = searchKeys.get(song)
   if (!keys) {
-    keys = [song.title, ...(song.aliases ?? [])].map(searchKey)
+    keys = [song.title, ...(song.aliases ?? []), ...(song.composer ? [song.composer] : [])].map(
+      searchKey
+    )
     searchKeys.set(song, keys)
   }
   return keys
@@ -268,20 +261,27 @@ function namesOf(song: SongSummary): readonly string[] {
 export type SongListing = { unlocked: SongRow[]; locked: SongRow[] }
 
 /**
- * The rows, already sorted, whose title or another name contains `query` anywhere, ignoring case,
- * accents and punctuation (`searchKey`): "londonderry" finds Danny Boy. A query with no letters
- * or digits matches every Song. With `only`, Compose's Favorites filter, just the Songs whose ids
- * it holds.
+ * Compose's filters, both on at once when both are given: `ready`, only the Unlocked Songs, and
+ * `favorites`, only the Songs whose ids it holds.
+ */
+export type SongFilters = { ready?: boolean; favorites?: ReadonlySet<string> | null }
+
+/**
+ * The rows, already sorted, that pass `filters` and whose title, another name or composer contains
+ * `query` anywhere, ignoring case, accents and punctuation (`searchKey`): "londonderry" finds
+ * Danny Boy, and "mozart" every Song by Mozart. A query with no letters or digits matches every
+ * Song.
  */
 export function songListing(
   sorted: readonly SongRow[],
   query: string,
-  only: ReadonlySet<string> | null = null
+  { ready = false, favorites = null }: SongFilters = {}
 ): SongListing {
   const q = searchKey(query)
   const rows = sorted.filter(
     r =>
-      (only === null || only.has(r.song.id)) &&
+      (!ready || r.coverage.unlocked) &&
+      (favorites === null || favorites.has(r.song.id)) &&
       (q === '' || namesOf(r.song).some(name => name.includes(q)))
   )
   return {

@@ -50,6 +50,9 @@ export function LockedSongSheet({
       >
         <SheetHeader className="items-center px-12 pt-4 pb-2">
           <SheetTitle className="text-center font-semibold">{shown?.title}</SheetTitle>
+          {shown?.composer !== undefined && (
+            <p className="text-center text-sm text-muted-foreground">{shown.composer}</p>
+          )}
         </SheetHeader>
         {coverage && <Body coverage={coverage} onRecord={onRecord} />}
         {/* A locked Song can be a Favorite Song too (#313). */}

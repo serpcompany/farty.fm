@@ -1,7 +1,7 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
 import { searchKey } from '../src/lib/catalog/search-key'
 import { songs } from '../src/lib/catalog/songs.generated'
-import { songRows, sortRows } from '../src/lib/pitch-coverage'
+import { type SongOrder, songRows, sortRows } from '../src/lib/pitch-coverage'
 import {
   fakeMicrophone,
   fartAndRecord,
@@ -23,6 +23,27 @@ import { skipWelcome } from './record'
 const journey = ['095', '017', '022', '002']
 /** The Songs the journey's first `takes` takes unlock. */
 const unlockedAt = (takes: number) => songsUnlockedBy(fixtureRecordings(journey.slice(0, takes)))
+
+/** A Song's notes, tempo and length in whole seconds, from the catalog (#356). */
+function facts(id: string) {
+  const song = songs.find(s => s.id === id)
+  if (!song) throw new Error(`No Song ${id}`)
+  return {
+    notes: song.pitches.length,
+    bpm: song.bpm,
+    seconds: Math.round((song.lengthBeats * 60) / song.bpm)
+  }
+}
+
+/** The ids of the Songs whose title, other names or composer has `query`, from the catalog. */
+const searchFinds = (query: string) =>
+  songs
+    .filter(song =>
+      [song.title, ...(song.aliases ?? []), song.composer ?? ''].some(name =>
+        searchKey(name).includes(searchKey(query))
+      )
+    )
+    .map(song => song.id)
 
 test.use({ permissions: ['microphone'] })
 
@@ -56,6 +77,17 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(locked(songs.length)).toBeVisible()
   await expect(page.getByRole('heading', { name: /^Unlocked/ })).toHaveCount(0)
 
+  // Ready shows only the Unlocked Songs: none yet.
+  const ready = page.getByRole('button', { name: 'Ready', exact: true })
+  await expectTappable(ready)
+  await ready.click()
+  await expect(ready).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByText('No Ready Songs yet')).toBeVisible()
+  await expect(page.getByTestId('song-row')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Show all Songs' }).click()
+  await expect(ready).toHaveAttribute('aria-pressed', 'false')
+  await expect(locked(songs.length)).toBeVisible()
+
   // A locked Song's sheet: no Melodic Recordings yet.
   await page.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true }).click()
   const sheet = page.getByRole('dialog', { name: 'Mary Had a Little Lamb' })
@@ -80,17 +112,19 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await tab(page, 'Compose').click()
   await expect(page.getByText('No Melodic Recordings yet')).toHaveCount(0)
   await expect(locked(songs.length)).toBeVisible()
+  // A locked row: its title, no composer (Mary's score names none), and its facts, Pitch Coverage
+  // first (#356).
   const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true })
-  // Which notes it needs depends on the take's settle time (two Arrangements nearly tie), so the
-  // journey checks the shape; `pitch-coverage.test.ts` pins the exact notes on the golden 095.
-  // A row works out its notes once it's near the screen (#323).
-  await mary.scrollIntoViewIfNeeded()
+  const { notes, bpm, seconds } = facts('mary')
+  await expect(mary).toContainText(`1 of ${notes} notes · ${bpm} BPM · ${seconds} s`)
   await expect(mary).toHaveAccessibleDescription(
-    /^Locked\. 1 of 4 notes covered\. Needs [A-G]♯?\d \(\d\.\d s\), [A-G]♯?\d \(\d\.\d s\), and 1 more$/
+    `Locked. 1 of ${notes} notes covered, ${bpm} BPM, ${seconds} seconds`
   )
 
   // The locked Song's sheet names the notes it needs, and how long a fart each needs (ADR 0011).
-  // Record goes to the Record tab.
+  // Which notes depends on the take's settle time (two Arrangements nearly tie), so the journey
+  // checks the shape; `pitch-coverage.test.ts` pins the exact notes on the golden 095. Record
+  // goes to the Record tab.
   await mary.click()
   await expect(sheet.getByTestId('locked-song-needs')).toHaveText(
     /^Needs a fart near [A-G]♯?\d \(\d\.\d s\), [A-G]♯?\d \(\d\.\d s\), and [A-G]♯?\d \(\d\.\d s\)\.$/
@@ -165,7 +199,10 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
     .getByTestId('unlocked-songs')
     .locator('[data-song="mary"]')
     .getByRole('link')
-  await expect(unlocked).toHaveText('Mary Had a Little LambReady')
+  await expect(unlocked).toHaveAccessibleName('Mary Had a Little Lamb')
+  await expect(unlocked).toHaveAccessibleDescription(
+    `${notes} notes, ${bpm} BPM, ${seconds} seconds`
+  )
   await expectTappable(unlocked)
   await unlocked.click()
   await expect(page).toHaveURL(/\/compose\/mary\/$/)
@@ -175,32 +212,84 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(page.getByTestId('recording-row')).toHaveCount(4)
   await tab(page, 'Compose').click()
 
-  // Search and sort.
-  const search = page.getByRole('searchbox', { name: 'Search Songs' })
+  // Search, by title or composer, with its clear button.
+  const search = page.getByRole('searchbox', { name: 'Search Songs or composers' })
   await expectTappable(search)
-  await expectTappable(page.getByRole('button', { name: 'Sort' }))
-  // Every Song with "little" in its title or another name, worked out from the catalog.
-  const little = songs.filter(song =>
-    [song.title, ...(song.aliases ?? [])].some(name => searchKey(name).includes('little'))
-  )
-  expect(little.map(song => song.id)).toContain('mary')
+  // Every Song with "little" in its title, another name or its composer, from the catalog.
+  const little = searchFinds('little')
+  expect(little).toContain('mary')
   await search.fill('LITTLE')
   await expect(page.getByTestId('song-row')).toHaveCount(little.length)
+  // Mozart's Songs, by their composer: none has "Mozart" in its title (#356).
+  const mozart = searchFinds('mozart')
+  expect(mozart.length).toBeGreaterThan(1)
+  expect(songs.filter(s => mozart.includes(s.id) && /mozart/i.test(s.title))).toEqual([])
+  await search.fill('Mozart')
+  await expect(page.getByTestId('song-row')).toHaveCount(mozart.length)
+  // Each row shows its composer under the title.
+  for (const id of mozart) {
+    const song = songs.find(s => s.id === id)
+    await expect(page.locator(`[data-song="${id}"]`)).toContainText(
+      `${song?.title}${song?.composer}`
+    )
+  }
   await search.fill('zzz')
   await expect(page.getByText('No Results for “zzz”')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Search all Songs' })).toHaveCount(0)
+  await expectTappable(page.getByRole('button', { name: 'Clear search' }))
+  await page.getByRole('button', { name: 'Clear search' }).click()
+  await expect(search).toHaveValue('')
+  await expect(search).toBeFocused()
+  await expect(locked(songs.length - unlockedSongs)).toBeVisible()
+
+  // Ready: only the Unlocked Songs. A search the filter hides offers every Song.
+  await ready.click()
+  await expect(page.getByTestId('song-row')).toHaveCount(unlockedSongs)
+  await expect(page.getByRole('heading', { name: /^Locked/ })).toHaveCount(0)
+  await expect(page.getByText('Sound Pad')).toHaveCount(0)
+  await search.fill('zzz')
+  await expect(page.getByText('No Ready Songs match “zzz”')).toBeVisible()
+  await page.getByRole('button', { name: 'Search all Songs' }).click()
+  await expect(ready).toHaveAttribute('aria-pressed', 'false')
+  await expect(search).toHaveValue('zzz')
+  await expect(page.getByText('No Results for “zzz”')).toBeVisible()
   await search.fill('')
-  await page.getByRole('button', { name: 'Sort' }).click()
-  await page.getByRole('menuitemradio', { name: 'A–Z' }).click()
+
+  // Sort: the chip names the order. Most popular puts the most viewed score first (#356).
+  const sort = (label: string) => page.getByRole('button', { name: `Sort: ${label}` })
+  await expectTappable(sort('Closest to unlocking'))
+  await expectTappable(page.getByRole('button', { name: 'Favorites', exact: true }))
+  const rows = songRows(songs, fixtureRecordings(journey))
+  /** The first Song of each section in `order`, by the app's own sort. */
+  const firsts = (order: SongOrder) => {
+    const sorted = sortRows(rows, order)
+    return [sorted.find(r => r.coverage.unlocked), sorted.find(r => !r.coverage.unlocked)].map(
+      r => r?.song.id ?? ''
+    )
+  }
+  const firstUnlocked = page.getByTestId('unlocked-songs').getByTestId('song-row').first()
+  const firstLocked = page.getByTestId('locked-songs').getByTestId('song-row').first()
+  await sort('Closest to unlocking').click()
+  await expect(page.getByRole('menuitemradio')).toHaveText([
+    'Closest to unlocking',
+    'Most popular',
+    'Fewest notes',
+    'A–Z'
+  ])
+  await page.getByRole('menuitemradio', { name: 'Most popular' }).click()
+  await expect(sort('Most popular')).toBeVisible()
+  const [popularUnlocked, popularLocked] = firsts('mostPopular')
+  const views = (id: string) => songs.find(s => s.id === id)?.views ?? 0
+  expect(views(popularLocked)).toBe(
+    Math.max(...rows.filter(r => !r.coverage.unlocked).map(r => r.song.views))
+  )
+  await expect(firstUnlocked).toHaveAttribute('data-song', popularUnlocked)
+  await expect(firstLocked).toHaveAttribute('data-song', popularLocked)
   // The first locked Song by the app's A–Z order, which puts a title that starts with a number
   // first.
-  const firstLocked = sortRows(songRows(songs, fixtureRecordings(journey)), 'alphabetical').find(
-    row => !row.coverage.unlocked
-  )
-  expect(firstLocked).toBeDefined()
-  await expect(page.getByTestId('locked-songs').getByTestId('song-row').first()).toHaveAttribute(
-    'data-song',
-    firstLocked?.song.id ?? ''
-  )
+  await sort('Most popular').click()
+  await page.getByRole('menuitemradio', { name: 'A–Z' }).click()
+  await expect(firstLocked).toHaveAttribute('data-song', firsts('alphabetical')[1])
 })
 
 // The browser fetches the Song Catalog as data (#322). With no service worker to answer for it, a

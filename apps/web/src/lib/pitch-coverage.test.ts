@@ -8,6 +8,7 @@ import {
 } from '../test-support/engine-golden'
 import { goldenIndex } from '../test-support/golden'
 import { goldenAnalysisRecording } from '../test-support/golden-analysis'
+import { searchKey } from './catalog/search-key'
 import type { Song, SongSummary } from './catalog/song'
 import { songs } from './catalog/songs.generated'
 import { fixtureRecordingId } from './fixture-library'
@@ -21,7 +22,9 @@ import {
   fartSeconds,
   formattedFartLength,
   missingNotes,
+  type SongFilters,
   type SongOrder,
+  type SongRow,
   songListing,
   songRows,
   sortRows
@@ -75,9 +78,8 @@ const listing = (
   recordings: Recording[],
   query = '',
   order: SongOrder = 'closestToUnlocking',
-  favorites: ReadonlySet<string> = new Set(),
-  only: ReadonlySet<string> | null = null
-) => songListing(sortRows(songRows(songs, recordings), order, favorites), query, only)
+  filters: SongFilters = {}
+) => songListing(sortRows(songRows(songs, recordings), order), query, filters)
 /** Compose's listing of the iPhone app's Songs only, as the iPhone's tests read it. */
 const iPhoneListing = (recordings: Recording[], order: SongOrder = 'closestToUnlocking') =>
   songListing(sortRows(songRows(iPhone, recordings), order), '')
@@ -183,7 +185,6 @@ describe('Pitch Coverage against the reference engine', () => {
     expect(coverageSummary(mary)).toBe('1 of 4 notes covered')
     expect(mary.transposition).toBe(-36)
     expect(missingNotes(mary)).toBe('C2 (1.5 s), D2 (0.7 s), and E2 (0.7 s)')
-    expect(missingNotes(mary, 2)).toBe('C2 (1.5 s), D2 (0.7 s), and 1 more')
   })
 })
 
@@ -225,6 +226,8 @@ describe('the Pitch Coverage rule', () => {
       id: 'test',
       title: 'Test',
       source: '',
+      views: 0,
+      lengthBeats: pitches.length,
       bpm: 60,
       bar_lines: [0],
       length_beats: pitches.length,
@@ -444,46 +447,156 @@ describe('Compose’s listing', () => {
     // Two Unlocked Songs and a locked one on the first 10 takes.
     const favorites = new Set(['twinkle', 'mary', 'birthday'])
 
-    it('puts Favorite Songs first, each part closest to unlocking', () => {
-      const closest = listing(ten)
-      const { unlocked, locked } = listing(ten, '', 'favoritesFirst', favorites)
-      expect(ids(unlocked)).toEqual([
-        'mary',
-        'twinkle',
-        ...ids(closest.unlocked).filter(id => !favorites.has(id))
-      ])
-      expect(ids(locked)).toEqual([
-        'birthday',
-        ...ids(closest.locked).filter(id => !favorites.has(id))
-      ])
-    })
-
-    it('sorts closest to unlocking when there are no Favorite Songs', () => {
-      expect(listing(ten, '', 'favoritesFirst')).toEqual(listing(ten))
-    })
-
     it('filters to Favorite Songs, keeping both sections and the order', () => {
-      const { unlocked, locked } = listing(ten, '', 'closestToUnlocking', favorites, favorites)
+      const { unlocked, locked } = listing(ten, '', 'closestToUnlocking', { favorites })
       expect(ids(unlocked)).toEqual(['mary', 'twinkle'])
       expect(ids(locked)).toEqual(['birthday'])
-      const az = listing(ten, '', 'alphabetical', favorites, favorites)
+      const az = listing(ten, '', 'alphabetical', { favorites })
       expect(ids(az.unlocked)).toEqual(['mary', 'twinkle'])
     })
 
     it('searches within the filter', () => {
-      expect(
-        ids(listing(ten, 'little', 'closestToUnlocking', favorites, favorites).unlocked)
-      ).toEqual(['mary', 'twinkle'])
-      const twinkle = listing(ten, 'TWINKLE', 'closestToUnlocking', favorites, new Set(['mary']))
+      expect(ids(listing(ten, 'little', 'closestToUnlocking', { favorites }).unlocked)).toEqual([
+        'mary',
+        'twinkle'
+      ])
+      const twinkle = listing(ten, 'TWINKLE', 'closestToUnlocking', {
+        favorites: new Set(['mary'])
+      })
       expect(twinkle.unlocked.length + twinkle.locked.length).toBe(0)
     })
 
     it('shows nothing with no Favorite Songs, and ignores ids not in the catalog', () => {
-      const none = listing(ten, '', 'closestToUnlocking', new Set(), new Set())
+      const none = listing(ten, '', 'closestToUnlocking', { favorites: new Set() })
       expect(none.unlocked.length + none.locked.length).toBe(0)
-      const gone = listing(ten, '', 'closestToUnlocking', new Set(), new Set(['gone', 'mary']))
+      const gone = listing(ten, '', 'closestToUnlocking', { favorites: new Set(['gone', 'mary']) })
       expect(ids(gone.unlocked)).toEqual(['mary'])
       expect(gone.locked).toEqual([])
+    })
+  })
+
+  describe("Compose's sorts, Ready filter and composer search (#356)", () => {
+    const ids = (rows: { song: SongSummary }[]) => rows.map(r => r.song.id)
+    const every = (l: { unlocked: SongRow[]; locked: SongRow[] }) => [...l.unlocked, ...l.locked]
+
+    it('sorts Most popular by the score’s MuseScore views', () => {
+      // The whole Fixture Library unlocks all 12.
+      expect(ids(iPhoneListing(all, 'mostPopular').unlocked)).toEqual([
+        'twinkle', // 4,171 views
+        'furelise', // 3,539
+        'ode', // 2,556
+        'birthday', // 2,349
+        'row', // 1,796
+        'frere', // 1,671
+        'auld', // 1,383
+        'amazing', // 1,211
+        'saints', // 957
+        'jingle', // 829
+        'merryxmas', // 610
+        'mary' // 51
+      ])
+    })
+
+    it('breaks Most popular’s ties by rating, then catalog order', () => {
+      const base = song('mary')
+      const coverage = { covered: 0, total: 4, hasMelodicRecordings: false, unlocked: false }
+      const row = (id: string, views: number, rating?: number): SongRow => ({
+        song: { ...base, id, views, rating },
+        coverage
+      })
+      const rows = [
+        row('a', 10, 4),
+        row('b', 10, 4.5),
+        row('c', 10),
+        row('d', 20),
+        row('e', 10, 4.5)
+      ]
+      expect(ids(sortRows(rows, 'mostPopular'))).toEqual(['d', 'b', 'e', 'a', 'c'])
+    })
+
+    it('sorts Fewest notes by the Song’s distinct notes, then catalog order', () => {
+      expect(ids(iPhoneListing(all, 'fewestNotes').unlocked)).toEqual([
+        'mary', // 4 notes
+        'jingle', // 5
+        'saints',
+        'ode',
+        'twinkle', // 6
+        'row',
+        'amazing',
+        'frere', // 7
+        'merryxmas',
+        'furelise',
+        'auld',
+        'birthday' // 8
+      ])
+      const { locked } = listing([], '', 'fewestNotes')
+      const notes = locked.map(r => r.song.pitches.length)
+      expect(notes).toEqual([...notes].sort((a, b) => a - b))
+    })
+
+    it('keeps every Song in its section, whatever the order', () => {
+      const closest = listing(ten)
+      for (const order of ['mostPopular', 'fewestNotes', 'alphabetical'] as const) {
+        const sorted = listing(ten, '', order)
+        expect(new Set(ids(sorted.unlocked))).toEqual(new Set(ids(closest.unlocked)))
+        expect(new Set(ids(sorted.locked))).toEqual(new Set(ids(closest.locked)))
+      }
+    })
+
+    it('filters to the Ready Songs, in the order chosen', () => {
+      for (const order of ['closestToUnlocking', 'mostPopular', 'fewestNotes'] as const) {
+        const ready = listing(ten, '', order, { ready: true })
+        expect(ready.unlocked).toEqual(listing(ten, '', order).unlocked)
+        expect(ready.locked).toEqual([])
+      }
+      const none = listing([], '', 'closestToUnlocking', { ready: true })
+      expect(every(none)).toEqual([])
+    })
+
+    it('filters to Ready Favorite Songs with both filters on', () => {
+      const favorites = new Set(['twinkle', 'mary', 'birthday'])
+      const both = listing(ten, '', 'closestToUnlocking', { ready: true, favorites })
+      expect(ids(both.unlocked)).toEqual(['mary', 'twinkle'])
+      expect(both.locked).toEqual([])
+      const lockedOnly = listing(ten, '', 'closestToUnlocking', {
+        ready: true,
+        favorites: new Set(['birthday'])
+      })
+      expect(every(lockedOnly)).toEqual([])
+      const readyLittle = listing(ten, 'little', 'closestToUnlocking', { ready: true })
+      expect(ids(readyLittle.unlocked)).toEqual(['mary', 'twinkle', 'little-peggys-love'])
+      expect(readyLittle.locked).toEqual([])
+    })
+
+    it('finds Songs by their composer, ignoring case, accents and punctuation', () => {
+      const found = (query: string) => ids(every(listing(all, query))).sort()
+      // Every Song whose title, other names or composer has the query, from the catalog.
+      const named = (query: string) =>
+        songs
+          .filter(s =>
+            [s.title, ...(s.aliases ?? []), s.composer ?? ''].some(name =>
+              searchKey(name).includes(searchKey(query))
+            )
+          )
+          .map(s => s.id)
+          .sort()
+      expect(found('mozart')).toEqual(named('mozart'))
+      expect(found('mozart')).toEqual(
+        expect.arrayContaining(['dies-irae', 'eine-kleine', 'komm-lieber-mai'])
+      )
+      expect(song('ode').title).not.toMatch(/beethoven/i)
+      expect(found('BEETHOVEN')).toContain('ode')
+      expect(found("o'carolan")).toEqual(found('ocarolan'))
+      expect(found('carolan')).toEqual(named('carolan'))
+      expect(found('carolan').length).toBeGreaterThan(10)
+    })
+
+    it('finds no Song by a composer its score doesn’t name', () => {
+      // Twinkle's score says "NA", and the index leaves it out.
+      expect(song('twinkle').composer).toBeUndefined()
+      const na = ids(every(listing(all, 'NA')))
+      expect(na.length).toBeGreaterThan(0)
+      expect(na).not.toContain('twinkle')
     })
   })
 
@@ -556,12 +669,6 @@ describe('Compose’s listing', () => {
     const few = takes(3)
     expect(missingNotes(coverageOf(song('birthday'), few))).toBe(
       'B2 (0.5 s), C♯3 (0.5 s), E3 (1.5 s), F♯3 (0.5 s), A3 (0.4 s), and B3 (0.5 s)'
-    )
-    expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe(
-      'B2 (0.5 s), C♯3 (0.5 s), E3 (1.5 s), and 3 more'
-    )
-    expect(missingNotes(coverageOf(song('mary'), few), 3)).toBe(
-      'G♯2 (1.5 s), A♯2 (0.7 s), and C3 (0.7 s)'
     )
   })
 

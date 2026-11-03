@@ -89,11 +89,12 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
       exact: true
     })
   ).toBeVisible()
+  // Its row says its Pitch Coverage and facts (#356), and its sheet the note it needs.
   const amazing = page.getByRole('button', { name: 'Amazing Grace', exact: true })
-  // A row works out its notes once it's near the screen (#323).
-  await amazing.scrollIntoViewIfNeeded()
+  const song = songs.find(s => s.id === 'amazing')
+  const seconds = Math.round(((song?.lengthBeats ?? 0) * 60) / (song?.bpm ?? 1))
   await expect(amazing).toHaveAccessibleDescription(
-    'Locked. 5 of 6 notes covered. Needs E3 (3.0 s)'
+    `Locked. ${song?.composer}. 5 of 6 notes covered, ${song?.bpm} BPM, ${seconds} seconds`
   )
   await amazing.click()
   await expect(page.getByTestId('locked-song-needs')).toHaveText('Needs a fart near E3 (3.0 s).')
