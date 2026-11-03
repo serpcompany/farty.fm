@@ -24,6 +24,8 @@ export const ERROR_CODES = [
   /** Decoding, analyzing or saving the analysis of a Recording failed. */
   'analysis-failed',
   'toots-load-failed',
+  /** Fetching the Song Catalog failed, so Compose and Song Creator have no Songs (#322). */
+  'catalog-load-failed',
   /** Reloading the library after a sync reset failed. */
   'library-reload-failed',
   'toot-audio-missing',

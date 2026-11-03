@@ -28,7 +28,8 @@ const page = vi.hoisted(() => ({
   stored: [] as Recording[],
   saveRecording: vi.fn(),
   saveAnalysis: vi.fn(),
-  placeRecording: vi.fn()
+  placeRecording: vi.fn(),
+  openStep: vi.fn()
 }))
 
 vi.mock('@/lib/audio/recorder', async importOriginal => {
@@ -69,11 +70,22 @@ vi.mock('@/lib/recording-store', () => ({
   placeRecording: page.placeRecording
 }))
 vi.mock('@/lib/toot-store', () => ({ loadToots: async () => [] }))
+vi.mock('@/lib/catalog/load-songs', async () => {
+  const { songs } = await import('@/lib/catalog/songs.generated')
+  return { loadSongs: async () => songs }
+})
 vi.mock('@/lib/toot-renderer', () => ({ makeToot: () => new Promise(() => {}) }))
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
 vi.mock('@/lib/stale-build', () => ({ holdReload: () => () => {} }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: () => undefined }))
-vi.mock('./account-provider', () => ({ useAccount: () => ({ offerStep: () => false }) }))
+// A guest, as far as Result's Share (#320) can tell.
+vi.mock('./account-provider', () => ({
+  useAccount: () => ({
+    account: { status: 'signedOut' },
+    offerStep: () => false,
+    openStep: page.openStep
+  })
+}))
 vi.mock('next/navigation', () => ({ useRouter: () => ({}), usePathname: () => '/' }))
 vi.mock('./piano-keys', async importOriginal => ({
   ...(await importOriginal<typeof import('./piano-keys')>()),
@@ -395,11 +407,38 @@ describe('the review after Stop (#314)', () => {
     expect(document.body.textContent).toContain("Saved, but we couldn't find its note")
   })
 
+  it('still says the take was kept whole after Retry, when the Trim and the analysis both failed', async () => {
+    await recordTake()
+    await analysisFails()
+    await nudge('end', 'ArrowLeft')
+    page.findTrim.mockRejectedValueOnce(new Error('no fart'))
+    await tap('Save')
+    expect(document.body.textContent).toContain("Saved, but we couldn't find its note")
+    await tap('Retry')
+    await analysisFinds(found)
+    expect(text('result-note')).toBe('G3')
+    expect(text('result-trim-failed')).toBe(
+      "Couldn't save the trim, so it's kept whole. Trim it again from the Recordings tab."
+    )
+  })
+
   it('throws the take away with Discard, saving nothing', async () => {
     await recordTake()
     await tap('Discard')
     expect(page.saveRecording).not.toHaveBeenCalled()
     expect(byTestId('review-note')).toBeNull()
+  })
+
+  it('offers Share once the take is saved, and a guest makes an account first (#320)', async () => {
+    await recordTake()
+    await analysisFinds(found)
+    // Not a Recording yet, so nothing to share.
+    expect(document.querySelector('[aria-label^="Share"]')).toBeNull()
+    await typeName('Squeaker')
+    await tap('Save')
+    expect(text('result-note')).toBe('G3')
+    await tap('Share Squeaker')
+    expect(page.openStep).toHaveBeenCalledWith(expect.any(Function), 'share')
   })
 })
 

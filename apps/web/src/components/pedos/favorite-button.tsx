@@ -81,7 +81,13 @@ async function toggleFavorite(songId: string, on: boolean) {
 }
 
 /** A Song's heart: one tap makes it a Favorite Song, another takes it off. */
-export function FavoriteButton({ song, className }: { song: Song; className?: string }) {
+export function FavoriteButton({
+  song,
+  className
+}: {
+  song: Pick<Song, 'id' | 'title'>
+  className?: string
+}) {
   const current = useFavorites()
   const on = current?.has(song.id) ?? false
   return (

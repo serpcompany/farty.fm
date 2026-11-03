@@ -86,11 +86,18 @@ vi.mock('@/lib/recording-store', () => ({
   loadRecordings: async () => []
 }))
 vi.mock('@/lib/toot-store', () => ({ loadToots: async () => [] }))
+vi.mock('@/lib/catalog/load-songs', async () => {
+  const { songs } = await import('@/lib/catalog/songs.generated')
+  return { loadSongs: async () => songs }
+})
 vi.mock('@/lib/toot-renderer', () => ({ makeToot: () => new Promise(() => {}) }))
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
 vi.mock('@/lib/stale-build', () => ({ holdReload: () => () => {} }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: mic.reportError }))
-vi.mock('./account-provider', () => ({ useAccount: () => ({ offerStep: () => false }) }))
+// Result's Share (#320) reads the account too.
+vi.mock('./account-provider', () => ({
+  useAccount: () => ({ account: { status: 'signedOut' }, offerStep: () => false })
+}))
 vi.mock('next/navigation', () => ({ useRouter: () => ({}), usePathname: () => '/' }))
 
 const { PedosProvider, hintAfterMs } = await import('./pedos-provider')

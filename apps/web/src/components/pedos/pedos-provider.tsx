@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import {
   createContext,
   type ReactNode,
@@ -10,6 +11,7 @@ import {
   useRef,
   useState
 } from 'react'
+import { preload } from 'react-dom'
 import { analyze, findTrim } from '@/lib/analysis/client'
 import { type RescanResult, rescan, upgradeAnalyses } from '@/lib/analysis-upgrade'
 import { forgetDecoded, play, playbackPosition, stopPlayback } from '@/lib/audio/player'
@@ -19,8 +21,9 @@ import {
   startTake,
   type Take
 } from '@/lib/audio/recorder'
+import { catalogPath } from '@/lib/catalog/catalog-path.generated'
+import { loadSongs } from '@/lib/catalog/load-songs'
 import type { Song } from '@/lib/catalog/song'
-import { songs } from '@/lib/catalog/songs.generated'
 import { onLibraryChanged, recordingsAfter } from '@/lib/library-sync'
 import type { Performance } from '@/lib/performance'
 import { nearestNote } from '@/lib/pitch'
@@ -137,7 +140,7 @@ export type Flow =
   | { kind: 'review'; draft: Draft }
   | { kind: 'saveFailed'; draft: Draft; review: ReviewChange }
   | { kind: 'analyzing'; id: string }
-  | { kind: 'analysisFailed'; id: string }
+  | { kind: 'analysisFailed'; id: string; trimFailed?: boolean }
   | { kind: 'result'; id: string; changes: CoverageChanges; trimFailed?: boolean }
 
 export type RecordProblem = 'microphoneOff' | 'couldNotStart' | 'interrupted' | 'nothingHeard'
@@ -172,6 +175,16 @@ export type ProfileStats = {
 }
 
 type Pedos = {
+  /**
+   * The Song Catalog this build ships, in the ship list's order; null until it loads. It's
+   * fetched as data (#322), and kept for offline use by the service worker.
+   */
+  songs: readonly Song[] | null
+  /** The Song Catalog didn't load. `reloadSongs` tries again, as does coming back online. */
+  songsFailed: boolean
+  reloadSongs(): void
+  /** The Song of this id, once the catalog has loaded. */
+  song(id: string): Song | undefined
   recordings: Recording[] | null
   recording(id: string): Recording | undefined
   /**
@@ -297,7 +310,7 @@ type Pedos = {
   playbackStartedAt: number | null
   /** The database waits for Farty in another tab, on an older version, to close. */
   waitsForOtherTabs: boolean
-  /** Profile's counts; null until the Recordings and Toots load. */
+  /** Profile's counts; null until the Recordings, the Toots and the Song Catalog load. */
   profileStats: ProfileStats | null
 }
 
@@ -332,6 +345,17 @@ type DraftSession = {
 
 /** The app's state and actions, mirroring the iPhone app's `AppModel`. */
 export function PedosProvider({ children }: { children: ReactNode }) {
+  // A shared Recording's public page (ADR 0020) reads no Song, and mostly people without the app
+  // open it, so it neither names nor fetches the catalog.
+  const wantsSongs = !usePathname()?.startsWith('/u/')
+  // Every app page's head names the catalog, so it downloads beside the scripts, and the service
+  // worker keeps it with the page's other files (public/sw.js).
+  if (wantsSongs) preload(catalogPath, { as: 'fetch', crossOrigin: 'anonymous' })
+  const [songs, setSongs] = useState<readonly Song[] | null>(null)
+  const songById = useMemo(() => new Map(songs?.map(song => [song.id, song])), [songs])
+  const [songsFailed, setSongsFailed] = useState(false)
+  /** Bumped by `reloadSongs`, to fetch the catalog again. */
+  const [songsAttempt, setSongsAttempt] = useState(0)
   const [recordings, setRecordings] = useState<Recording[] | null>(null)
   const [showsWelcome, setShowsWelcome] = useState(false)
   const [capture, setCapture] = useState<Capture>({ kind: 'idle' })
@@ -393,16 +417,49 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     [replace]
   )
 
+  // The Song Catalog, fetched once for the app (#322).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `songsAttempt` is what Try again changes.
+  useEffect(() => {
+    if (!wantsSongs) return
+    let left = false
+    loadSongs().then(
+      loaded => {
+        if (left) return
+        setSongs(loaded)
+        setSongsFailed(false)
+      },
+      error => {
+        reportError('catalog-load-failed', error)
+        if (!left) setSongsFailed(true)
+      }
+    )
+    return () => {
+      left = true
+    }
+  }, [songsAttempt, wantsSongs])
+  const reloadSongs = useCallback(() => {
+    setSongsFailed(false)
+    setSongsAttempt(n => n + 1)
+  }, [])
+  // A catalog that failed for want of a network loads once the browser is back online.
+  useEffect(() => {
+    if (!songsFailed) return
+    window.addEventListener('online', reloadSongs)
+    return () => window.removeEventListener('online', reloadSongs)
+  }, [songsFailed, reloadSongs])
+
   /**
    * The Result screen after analysis, with what the Recording changed in the Song Catalog's Pitch
-   * Coverage: the iPhone app's `analyze()` compares the Recordings before and after it.
+   * Coverage: the iPhone app's `analyze()` compares the Recordings before and after it. It waits
+   * for the catalog, should it still be loading; without one, nothing changed.
    */
-  const resultOf = useCallback((analyzed: Recording, trimFailed = false): Flow => {
+  const resultOf = useCallback(async (analyzed: Recording, trimFailed = false): Promise<Flow> => {
+    const catalog = await loadSongs().catch(() => [])
     const others = (latest.current ?? []).filter(r => r.id !== analyzed.id)
     return {
       kind: 'result',
       id: analyzed.id,
-      changes: coverageChanges(songs, others, [...others, analyzed]),
+      changes: coverageChanges(catalog, others, [...others, analyzed]),
       ...(trimFailed ? { trimFailed } : {})
     }
   }, [])
@@ -724,8 +781,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           : null
         : await runAnalysis(saved.id)
       const next: Flow = analyzed
-        ? resultOf(analyzed, !trimmed)
-        : { kind: 'analysisFailed', id: saved.id }
+        ? await resultOf(analyzed, !trimmed)
+        : { kind: 'analysisFailed', id: saved.id, ...(trimmed ? {} : { trimFailed: true }) }
       setFlow(current =>
         current?.kind === 'analyzing' && current.id === saved.id ? next : current
       )
@@ -743,6 +800,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     async (id: string) => {
       const recording = recordings?.find(r => r.id === id)
       if (!recording || recording.analysis.state !== 'notAnalyzed') return
+      // A Trim that failed before analysis did is still said on Result after Retry.
+      const trimFailed = flow?.kind === 'analysisFailed' && flow.id === id && !!flow.trimFailed
       replace({ ...recording, analysis: { state: 'analyzing' } })
       setFlow(current =>
         current?.kind === 'analysisFailed' && current.id === id
@@ -750,10 +809,12 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           : current
       )
       const analyzed = await runAnalysis(id)
-      const next: Flow = analyzed ? resultOf(analyzed) : { kind: 'analysisFailed', id }
+      const next: Flow = analyzed
+        ? await resultOf(analyzed, trimFailed)
+        : { kind: 'analysisFailed', id, ...(trimFailed ? { trimFailed } : {}) }
       setFlow(current => (current?.kind === 'analyzing' && current.id === id ? next : current))
     },
-    [recordings, replace, runAnalysis, resultOf]
+    [flow, recordings, replace, runAnalysis, resultOf]
   )
 
   const finishFlow = useCallback(() => {
@@ -902,7 +963,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         stopPlayback()
         return
       }
-      const song = 'song' in toot ? toot.song : songs.find(s => s.id === toot.songId)
+      const song =
+        'song' in toot ? toot.song : toot.songId === null ? undefined : songById.get(toot.songId)
       // A note needs its Song, to find it in the audio.
       if (note !== undefined && !song) return
       const written = note === undefined || !song ? null : noteSeconds(song, song.notes[note])
@@ -935,7 +997,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         if (thisPlay === tootPlays.current) setPlaybackStart({ key, at: performance.now() })
       })
     },
-    [nowPlaying, markAudioMissing]
+    [nowPlaying, markAudioMissing, songById]
   )
 
   // As the iPhone app's `renameToot`: the list changes at once, and a failed write is let go.
@@ -976,10 +1038,10 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   // `CoverageCache`: `key` holds everything Pitch Coverage reads from `recordings`.
   const key = coverageKey(recordings ?? [])
   // biome-ignore lint/correctness/useExhaustiveDependencies: `key` stands for `recordings`.
-  const rows = useMemo(() => songRows(songs, recordings ?? []), [key])
+  const rows = useMemo(() => songRows(songs ?? [], recordings ?? []), [key, songs])
 
   const profileStats: ProfileStats | null =
-    recordings === null || toots === null
+    recordings === null || toots === null || songs === null
       ? null
       : {
           recordings: recordings.length,
@@ -991,6 +1053,10 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         }
 
   const value: Pedos = {
+    songs,
+    songsFailed,
+    reloadSongs,
+    song: id => songById.get(id),
     recordings,
     recording: id => recordings?.find(r => r.id === id),
     melodicRecordings,

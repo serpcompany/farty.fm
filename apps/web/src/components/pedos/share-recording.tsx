@@ -100,6 +100,11 @@ function remember(
   })
 }
 
+/** Keeps the Handle the user just picked somewhere else, such as to add a friend (#319). */
+export function rememberHandle(accountId: string, handle: string): void {
+  remember(accountId, { handle })
+}
+
 /** The signed-in account's Handle and shared items, or null until read or when signed out. */
 export function useShares(): Shares | null {
   const { account } = useAccount()
@@ -420,17 +425,20 @@ export function ShareRecordingButton({ recording, name }: { recording: Recording
 type Check = { handle: string; problem: HandleProblem | null } | { handle: string; checking: true }
 
 /**
- * Pick a handle: asked the first time someone shares, filled in from their email when that
- * Handle is free, and checked as they type. Shows while `suggestion` is set.
+ * Pick a handle: asked the first time someone shares or adds a friend, filled in from their email
+ * when that Handle is free, and checked as they type. Shows while `suggestion` is set. `action` is
+ * what the button does next: Share, or Add friend.
  */
-function HandleDialog({
+export function HandleDialog({
   accountId,
   suggestion,
+  action = 'Share',
   onClose,
   onPicked
 }: {
   accountId: string
   suggestion: string | null
+  action?: string
   onClose: () => void
   onPicked: (handle: string) => void
 }) {
@@ -539,7 +547,7 @@ function HandleDialog({
           <AlertDialogFooter>
             <AlertDialogCancel className="h-11 text-base">Cancel</AlertDialogCancel>
             <Button type="submit" className="h-11 text-base" disabled={!free || saving}>
-              Share
+              {action}
             </Button>
           </AlertDialogFooter>
         </form>
