@@ -1,7 +1,7 @@
 /**
  * A known melody in the Song Catalog, taken from a cited public-domain score (ADR 0003), as the
- * iPhone app's `Song`. The app's Songs are generated into `songs.generated.ts`; none is typed by
- * hand.
+ * iPhone app's `Song`. The app's Songs are generated into `public/catalog/` (`generate.ts`); none
+ * is typed by hand.
  *
  * `bpm`, `bar_lines`, `length_beats`, `pitches` and `notes` keep the names and values of
  * `fixtures/golden/songs/<id>.json`, the reference engine's import of the score, so a Song is
