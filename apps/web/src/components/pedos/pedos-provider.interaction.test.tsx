@@ -2,7 +2,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { RescanResult } from '@/lib/analysis-upgrade'
-import type { Song } from '@/lib/catalog/song'
+import type { SongSummary } from '@/lib/catalog/song'
 import type { Recording } from '@/lib/recordings'
 import { encodeWav } from '@/lib/wav'
 
@@ -23,7 +23,7 @@ const page = vi.hoisted(() => ({
   placeRecording: vi.fn(async () => null),
   findTrim: vi.fn(),
   reportError: vi.fn(),
-  loadSongs: vi.fn<() => Promise<readonly Song[]>>(),
+  loadSongs: vi.fn<() => Promise<readonly SongSummary[]>>(),
   pathname: '/compose/',
   rescan:
     vi.fn<
@@ -51,8 +51,10 @@ vi.mock('@/lib/recording-store', () => ({
 vi.mock('@/lib/toot-store', () => ({ loadToots: async () => [] }))
 vi.mock('next/navigation', () => ({ usePathname: () => page.pathname }))
 vi.mock('@/lib/catalog/load-songs', async () => {
-  const { songs } = await import('@/lib/catalog/songs.generated')
-  page.loadSongs.mockImplementation(async () => songs)
+  // The index, as the app fetches it: the Songs with their notes are a thousand files to import,
+  // inside the first test's time (#350).
+  const { songIndex } = await import('@/lib/catalog/song-index.generated')
+  page.loadSongs.mockImplementation(async () => songIndex)
   return { loadSongs: page.loadSongs }
 })
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))

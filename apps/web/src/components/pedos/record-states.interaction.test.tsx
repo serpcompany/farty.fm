@@ -87,8 +87,10 @@ vi.mock('@/lib/recording-store', () => ({
 }))
 vi.mock('@/lib/toot-store', () => ({ loadToots: async () => [] }))
 vi.mock('@/lib/catalog/load-songs', async () => {
-  const { songs } = await import('@/lib/catalog/songs.generated')
-  return { loadSongs: async () => songs }
+  // The index, as the app fetches it: the Songs with their notes are a thousand files to import,
+  // inside the first test's time (#350).
+  const { songIndex } = await import('@/lib/catalog/song-index.generated')
+  return { loadSongs: async () => songIndex }
 })
 vi.mock('@/lib/toot-renderer', () => ({ makeToot: () => new Promise(() => {}) }))
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
