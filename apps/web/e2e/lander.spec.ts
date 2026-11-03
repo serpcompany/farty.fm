@@ -112,7 +112,9 @@ test.describe('on a touch tablet', () => {
     await page.getByTestId('stop-button').click()
     await underTopBar('New Recording')
     await page.getByRole('button', { name: 'Save' }).click()
-    await expect(page.getByTestId('result-note').or(page.getByTestId('result-noise'))).toBeVisible({
+    await expect(
+      page.getByTestId('result-note').or(page.getByTestId('result-no-note'))
+    ).toBeVisible({
       timeout: 30_000
     })
     await underTopBar('Recording 1')

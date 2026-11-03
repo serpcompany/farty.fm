@@ -71,18 +71,23 @@ export interface AutoMapRecording {
 }
 
 /**
- * A Recording from its stored analysis. The gesture length is recovered in whole samples, as the
+ * A Recording from its stored analysis, at its own length, or its Trim's (ADR 0019): any Recording
+ * can be trimmed (#314), and nothing re-reads a trimmed one's pitch, shortest note or settle time,
+ * as the reference's `trimmed()` keeps them. The length is recovered in whole samples, as the
  * reference measures it.
  */
-export function autoMapRecording(id: string, analysis: Analysis): AutoMapRecording {
-  const sr = ANALYSIS_SAMPLE_RATE
-  const samples =
-    Math.round(analysis.gestureEndSeconds * sr) - Math.round(analysis.gestureStartSeconds * sr)
+export function autoMapRecording(
+  id: string,
+  analysis: Analysis,
+  trim: Trim | null = null
+): AutoMapRecording {
   return {
     id,
     recordingPitchMidi: analysis.recordingPitchMidi,
     shortestNoteSeconds: analysis.shortestNoteSeconds,
-    gestureSeconds: samples / sr,
+    gestureSeconds: trimSeconds(
+      trim ?? { startSeconds: analysis.gestureStartSeconds, endSeconds: analysis.gestureEndSeconds }
+    ),
     settleSeconds: analysis.settleSeconds ?? null
   }
 }
@@ -96,11 +101,11 @@ export function autoMapRecording(id: string, analysis: Analysis): AutoMapRecordi
 export const PLACED_SHORTEST_NOTE_SECONDS = 0.6
 
 /**
- * A Noise-like Recording the user placed on `placedMidi` by ear, as Auto-map sees it (ADR 0015): a
- * Melodic Recording at that note that holds it from `PLACED_SHORTEST_NOTE_SECONDS` and settles at
- * once, at its own length, or its Trim's (ADR 0019). The reference's `placed()` makes the same
- * `Source`, of `trimmed()` for a Trim. It still plays raw (ADR 0012), so the note only decides
- * which pitches it may play.
+ * A Recording the user placed on `placedMidi` by ear, as Auto-map sees it (ADR 0015): a Melodic
+ * Recording at that note that holds it from `PLACED_SHORTEST_NOTE_SECONDS` and settles at once,
+ * at its own length, or its Trim's (ADR 0019). Noise-like or Melodic: any Recording can be placed
+ * (#314). The reference's `placed()` makes the same `Source`, of `trimmed()` for a Trim. It still
+ * plays raw (ADR 0012), so the note only decides which pitches it may play.
  */
 export function placedAutoMapRecording(
   id: string,
@@ -108,12 +113,10 @@ export function placedAutoMapRecording(
   placedMidi: number,
   trim: Trim | null = null
 ): AutoMapRecording {
-  const recording = autoMapRecording(id, analysis)
   return {
-    ...recording,
+    ...autoMapRecording(id, analysis, trim),
     recordingPitchMidi: placedMidi,
     shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
-    gestureSeconds: trim === null ? recording.gestureSeconds : trimSeconds(trim),
     settleSeconds: 0
   }
 }

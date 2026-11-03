@@ -296,12 +296,13 @@ PLACED_MIN_NOTE_S = 0.6  # the shortest note a Placed Recording counts as readin
 
 def placed(src, midi):
     """A Recording placed on `midi` by ear (ADR 0015), as melody_fit() reads it: a Melodic
-    Recording whose Recording Pitch is that note. Only a Noise-like Recording is placed, but the
-    placement outlasts a later analysis that finds a Recording Pitch, and stays the one used: the
-    user chose it (ADR 0017). Nothing measured the fart on that note, so its shortest note is
-    audition()'s longest length, the slowest a Melodic Recording reads back on, and it counts as
-    settled from its start. render() plays it raw, like any fart: the note is where it goes, never
-    a pitch shift. The web's `placedAutoMapRecording()` makes the same."""
+    Recording whose Recording Pitch is that note. Any Recording can be placed: a Noise-like one on
+    a note, or a Melodic one on another note than analysis found (#314). The placement outlasts a
+    later analysis that finds a Recording Pitch, and stays the one used: the user chose it (ADR
+    0017). Nothing measured the fart on that note, so its shortest note is audition()'s longest
+    length, the slowest a Melodic Recording reads back on, and it counts as settled from its
+    start. render() plays it raw, like any fart: the note is where it goes, never a pitch shift.
+    The web's `placedAutoMapRecording()` makes the same."""
     return replace(src, ref_midi=float(midi), min_note_s=PLACED_MIN_NOTE_S, settle_s=0.0)
 
 
@@ -320,20 +321,18 @@ def trim_bounds(y, start_s, end_s):
     return (a + start) / SR, (a + end) / SR
 
 
-def trimmed(src, y, start_s, end_s, placed_by_ear=False, handles=None):
-    """A Noise-like Recording with a Trim (ADR 0019): the same Recording, playing only
-    y[round(start_s x SR):round(end_s x SR)] of its decoded take `y`. Songs cut it there, and
-    melody_fit() counts that length; nothing re-reads its pitch, so placed() puts it on the note
-    it was placed on. `start_s` and `end_s` are the fart a stored Trim keeps, already found by
-    trim_bounds() between the Trim's `handles` (start, end, in seconds).
+def trimmed(src, y, start_s, end_s, handles=None):
+    """A Recording with a Trim (ADR 0019): the same Recording, playing only
+    y[round(start_s x SR):round(end_s x SR)] of its decoded take `y`. Any Recording can be
+    trimmed (#314), Melodic or Noise-like. Songs cut it there, and melody_fit() counts that
+    length; nothing re-reads its pitch, so a Melodic Recording keeps its Recording Pitch, shortest
+    note and settle time, and placed() puts a placed one on the note it was placed on. `start_s`
+    and `end_s` are the fart a stored Trim keeps, already found by trim_bounds() between the
+    Trim's `handles` (start, end, in seconds).
     Its lead-in (#287) is found between the handles too: lead_in_start() on the part they keep,
     as trim_bounds() finds the fart there, so Songs never play what's before the start handle.
     Without `handles` there is no room before the fart, and no lead-in.
-    A Recording placed by ear keeps its Trim when a later analysis finds a Recording Pitch, as it
-    keeps its Placed Pitch (ADR 0017), so `placed_by_ear` lets a Melodic one be trimmed. The
-    web's `trimOf()` and `renderSource()` give the same."""
-    if src.pitched and not placed_by_ear:
-        raise ValueError(f"{src.id} is Melodic and not placed: only a Noise-like or placed Recording is trimmed")
+    The web's `trimOf()` and `renderSource()` give the same."""
     a = max(0, min(len(y), round(start_s * SR)))
     b = max(a, min(len(y), round(end_s * SR)))
     lead_from = a

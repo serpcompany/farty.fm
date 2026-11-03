@@ -1,0 +1,7 @@
+{
+  "id": "review-melodic",
+  "about": "#314's measurement: trim-065's library, with 065 placed and trimmed as there, and Melodic Recordings trimmed and moved in their review, as any Recording can be now. 002 is trimmed to 0.4 to 1.8 s and 022 to 0.9 to 1.9 s, so Songs start each later in the fart and keep its Recording Pitch; 069 (G#2 +43 c) is placed on A2 by ear. Compare with trim-065, the same library with those three as analysis found them. When the Saints Go Marching In plays all three; Mary Had a Little Lamb locks, since 022's Trim is too short for its long E2.",
+  "library": ["002", "016", "022", "065", "069", "090"],
+  "placed": { "065": 36, "069": 45 },
+  "trims": { "065": [0.8, 2.3], "002": [0.4, 1.8], "022": [0.9, 1.9] }
+}

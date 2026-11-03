@@ -31,10 +31,15 @@ export type NewRecording = {
   sampleRate: number
   waveform: number[]
   analysis: Analysis | null
-  /** The Placed Pitch, or null when left out (ADR 0015). */
+  /**
+   * The Placed Pitch, `NO_NOTE` when the user left it out of Songs, or null when it follows its
+   * analysis (ADR 0015).
+   */
   placedPitch: number | null
   /** The Trim, or null when untrimmed (ADR 0019). */
   trim: RecordingTrim | null
+  /** The name the user gave it, or null for "Recording {number}" (#314). */
+  name: string | null
   audioBytes: number
 }
 
@@ -115,12 +120,12 @@ export async function insertRecording(
   const added = await db.all(sql`
     insert into recordings (user_id, id, number, created_at, seconds, sample_rate, waveform,
       analysis, placed_pitch, trim_start_seconds, trim_end_seconds, trim_fart_start_seconds,
-      trim_fart_end_seconds, audio_bytes, updated_at)
+      trim_fart_end_seconds, name, audio_bytes, updated_at)
     select ${userId}, ${r.id}, ${r.number}, ${r.createdAt}, ${r.seconds}, ${r.sampleRate},
       ${JSON.stringify(r.waveform)}, ${analysis}, ${r.placedPitch},
       ${r.trim?.startSeconds ?? null}, ${r.trim?.endSeconds ?? null},
-      ${r.trim?.fart.startSeconds ?? null}, ${r.trim?.fart.endSeconds ?? null}, ${r.audioBytes},
-      ${d1Now}
+      ${r.trim?.fart.startSeconds ?? null}, ${r.trim?.fart.endSeconds ?? null}, ${r.name},
+      ${r.audioBytes}, ${d1Now}
     where (select count(*) from recordings where user_id = ${userId} and deleted_at is null)
       < ${limit}
     on conflict do nothing
@@ -313,14 +318,18 @@ export async function renameToot(
 }
 
 /**
- * What a PATCH changes on a Recording: its Placed Pitch (ADR 0015), its Trim (ADR 0019) or both,
- * each null to take it off. A field left out stays as it is.
+ * What a PATCH changes on a Recording: its Placed Pitch (ADR 0015), its Trim (ADR 0019), its name
+ * (#314) or any of them, each null to take it off. A field left out stays as it is.
  */
-export type Placement = { placedPitch?: number | null; trim?: RecordingTrim | null }
+export type Placement = {
+  placedPitch?: number | null
+  trim?: RecordingTrim | null
+  name?: string | null
+}
 
 /**
- * Places a live Recording on a note and trims it, or takes either off with null; the last to
- * arrive wins. Returns the row's status before, or `tooLong` when the Trim reaches past the end of
+ * Places a live Recording on a note, trims it and names it, or takes any of them off with null;
+ * the last to arrive wins. Returns the row's status before, or `tooLong` when the Trim reaches past the end of
  * the take, more than `tolerance` seconds (#299), and nothing changed.
  */
 export async function placeRecording(
@@ -340,9 +349,10 @@ export async function placeRecording(
           trimFartEndSeconds: change.trim?.fart.endSeconds ?? null
         }
   const placedPitch = change.placedPitch === undefined ? {} : { placedPitch: change.placedPitch }
+  const name = change.name === undefined ? {} : { name: change.name }
   const placed = await db
     .update(recordings)
-    .set({ ...placedPitch, ...trim, updatedAt: d1Now })
+    .set({ ...placedPitch, ...trim, ...name, updatedAt: d1Now })
     .where(
       and(
         whereItem('recordings', userId, id),
