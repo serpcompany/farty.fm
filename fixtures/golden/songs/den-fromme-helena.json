@@ -1,0 +1,259 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 72,
+  "file": "midi/pdmx-den-fromme-helena.mid",
+  "id": "den-fromme-helena",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 72,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "den-fromme-helena",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 42,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-den-fromme-helena.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 2.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 2.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 6.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 9.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 10.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 10.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 12.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 13.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 20.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 21.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 22.75
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 24.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 25.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 26.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 28.5
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    65,
+    67,
+    69,
+    70,
+    72,
+    74
+  ],
+  "sha256": "5ddb3c288d2ce5a93a93622e588a121bd9749dd0be2f1db185ebcb693f751c68",
+  "title": "Den Fromme Helena"
+}

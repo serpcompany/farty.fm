@@ -1,0 +1,205 @@
+{
+  "bar_lines": [
+    0.0,
+    6.0,
+    12.0,
+    18.0,
+    24.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 120,
+  "file": "midi/pdmx-mr-beveridges-maggot.mid",
+  "id": "mr-beveridges-maggot",
+  "import_args": {
+    "beats_per_bar": 6,
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "mr-beveridges-maggot",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 31,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-mr-beveridges-maggot.mid",
+    "tempo_changes_ignored": 2,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 3.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 15.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 82,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 20.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 75,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 23.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 27.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    70,
+    72,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    81,
+    82
+  ],
+  "sha256": "15202bd57db9a4f231511f3dc9bdd8f26226423aace711a0b45b24e031a5336d",
+  "title": "Mr. Beveridge's Maggot"
+}

@@ -1,0 +1,140 @@
+{
+  "bar_lines": [
+    2.0,
+    8.0,
+    14.0,
+    20.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 140,
+  "file": "midi/pdmx-god-of-mercy-and-compassion.mid",
+  "id": "god-of-mercy-and-compassion",
+  "import_args": {
+    "beats_per_bar": 6,
+    "bpm": 140,
+    "max_beats": 26,
+    "start_beat": 4
+  },
+  "import_report": {
+    "catalog_id": "god-of-mercy-and-compassion",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 19,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-god-of-mercy-and-compassion.mid",
+    "tempo_changes_ignored": 2,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 26.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 1.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 2.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 68,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 13.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 19.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 66,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 25.0
+    }
+  ],
+  "pitches": [
+    65,
+    66,
+    68,
+    69,
+    71,
+    73
+  ],
+  "sha256": "809184ce2cd69e46e0a11efc405e4d8dc830bbeafb42bc1593b2bf942d00e675",
+  "title": "God of Mercy and Compassion"
+}

@@ -1,0 +1,368 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5,
+    28.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 144,
+  "file": "midi/pdmx-dunkeld-hermitage.mid",
+  "id": "dunkeld-hermitage",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 144,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "dunkeld-hermitage",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 64,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-dunkeld-hermitage.mid",
+    "tempo_changes_ignored": 2,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.5,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 0.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 0.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 8.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 8.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 8.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 13.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 14.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 14.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 14.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 16.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 16.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 16.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 24.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 24.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 28.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 29.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 29.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 30.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 30.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 30.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 31.5
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    74
+  ],
+  "sha256": "a76e4f795d06e7523d778cfcb669dde26ada3fcf5b676bcfa9c1e16a691946b8",
+  "title": "Dunkeld Hermitage"
+}

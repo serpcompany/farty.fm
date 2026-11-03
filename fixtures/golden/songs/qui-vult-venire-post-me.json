@@ -1,0 +1,139 @@
+{
+  "bar_lines": [
+    2.0,
+    6.0,
+    10.0,
+    14.0,
+    18.0,
+    22.0,
+    26.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 108,
+  "file": "midi/pdmx-qui-vult-venire-post-me.mid",
+  "id": "qui-vult-venire-post-me",
+  "import_args": {
+    "bpm": 108,
+    "max_beats": 30,
+    "start_beat": 2
+  },
+  "import_report": {
+    "catalog_id": "qui-vult-venire-post-me",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 18,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-qui-vult-venire-post-me.mid",
+    "tempo_changes_ignored": 7,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 4.0,
+      "pitch": 60,
+      "start": 0.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 57,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 7.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 57,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 58,
+      "start": 10.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 60,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 58,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 17.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 20.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 58,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 50,
+      "start": 25.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 53,
+      "start": 26.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 52,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 53,
+      "start": 29.5
+    }
+  ],
+  "pitches": [
+    50,
+    52,
+    53,
+    55,
+    57,
+    58,
+    60,
+    62
+  ],
+  "sha256": "66ddb032268b648601b8bd275a309d9e71230ff5d882de7e3c13c29b84e79b9d",
+  "title": "Qui vult venire post me"
+}

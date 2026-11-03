@@ -1,0 +1,352 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5,
+    28.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-red-red-rose.mid",
+  "id": "red-red-rose",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "red-red-rose",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 60,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-red-red-rose.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 0.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 0.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 1.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 1.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 2.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 2.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 3.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 4.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 5.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 7.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 8.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 8.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 9.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 10.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 10.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 11.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 12.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 13.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 18.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 18.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 18.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 20.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 20.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 21.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 22.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 79,
+      "start": 23.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 24.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 26.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 27.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 28.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 28.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 29.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 30.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 30.5
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    77,
+    79
+  ],
+  "sha256": "63ca3a49c2d2ce0777b7b8fe8b7aeceb03141f8103f1a1cc7443443ef6acc347",
+  "title": "The Red Red Rose"
+}

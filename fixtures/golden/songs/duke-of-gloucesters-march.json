@@ -1,0 +1,213 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-duke-of-gloucesters-march.mid",
+  "id": "duke-of-gloucesters-march",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "duke-of-gloucesters-march",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 33,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-duke-of-gloucesters-march.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 0.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 4.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 17.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 20.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 77,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 24.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 25.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 28.5
+    }
+  ],
+  "pitches": [
+    65,
+    67,
+    69,
+    70,
+    72,
+    74,
+    75,
+    77
+  ],
+  "sha256": "495386fb264642140c3dfc2214107d9ab5e88240d0b2ef75980657ef3097ba52",
+  "title": "The Duke of Gloucester's March"
+}

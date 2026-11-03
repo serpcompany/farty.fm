@@ -1,0 +1,347 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 116,
+  "file": "midi/pdmx-london-lasses.mid",
+  "id": "london-lasses",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 116,
+    "max_beats": 28.5
+  },
+  "import_report": {
+    "catalog_id": "london-lasses",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 60,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-london-lasses.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 28.5,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 72,
+      "start": 5.5
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 71,
+      "start": 5.833333333333333
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 69,
+      "start": 6.166666666666667
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 72,
+      "start": 7.5
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 71,
+      "start": 7.833333333333333
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 69,
+      "start": 8.166666666666666
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 72,
+      "start": 21.5
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 71,
+      "start": 21.833333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 69,
+      "start": 22.166666666666668
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 72,
+      "start": 23.5
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 71,
+      "start": 23.833333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 69,
+      "start": 24.166666666666668
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    69,
+    71,
+    72,
+    74,
+    76,
+    78,
+    81
+  ],
+  "sha256": "2a96d6972714ee26956e8d8f86ddd0ab83e26a4c86bd3c7e8499c87e15ccf7e6",
+  "title": "London Lasses"
+}

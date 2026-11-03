@@ -1,0 +1,151 @@
+{
+  "bar_lines": [
+    12.0
+  ],
+  "beats_per_bar": 14,
+  "bpm": 120,
+  "file": "midi/pdmx-i-will-go-home-to-kintail.mid",
+  "id": "i-will-go-home-to-kintail",
+  "import_args": {
+    "beats_per_bar": 14,
+    "bpm": 120,
+    "max_beats": 26
+  },
+  "import_report": {
+    "catalog_id": "i-will-go-home-to-kintail",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 22,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-i-will-go-home-to-kintail.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 26.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 2.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 2.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 3.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 78,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 7.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 14.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 14.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 15.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 18.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 20.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 20.25
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 21.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 23.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 23.25
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 24.0
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    71,
+    73,
+    74,
+    76,
+    78
+  ],
+  "sha256": "2a003639610601868e52ac2cf0589e5e533f424b3e6acf213fc3cdc42f551465",
+  "title": "I Will Go Home To Kintail"
+}

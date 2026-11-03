@@ -1,0 +1,145 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-cantique-de-jean-racine-op-11.mid",
+  "id": "cantique-de-jean-racine-op-11",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 29,
+    "start_beat": 3
+  },
+  "import_report": {
+    "catalog_id": "cantique-de-jean-racine-op-11",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 19,
+    "overlaps_clipped": 2,
+    "source_file": "catalog/midi/pdmx-cantique-de-jean-racine-op-11.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 0.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 68,
+      "start": 1.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 3.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 65,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 16.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 63,
+      "start": 17.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 19.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 65,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 24.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 63,
+      "start": 25.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 27.0
+    }
+  ],
+  "pitches": [
+    63,
+    65,
+    66,
+    68,
+    70,
+    72,
+    73
+  ],
+  "sha256": "b5b8d6977f08fad9596c022ce69875301fe80afb4d452cf31f1dcc64725b10d0",
+  "title": "Cantique de Jean Racine Op. 11"
+}

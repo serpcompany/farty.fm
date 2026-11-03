@@ -1,0 +1,350 @@
+{
+  "bar_lines": [
+    0.0,
+    8.0,
+    16.0,
+    24.0
+  ],
+  "beats_per_bar": 8,
+  "bpm": 120,
+  "file": "midi/pdmx-arrival-of-the-queen-of-sheba.mid",
+  "id": "arrival-of-the-queen-of-sheba",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "arrival-of-the-queen-of-sheba",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 61,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-arrival-of-the-queen-of-sheba.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 30.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 31.5
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    71,
+    72,
+    73,
+    74,
+    76,
+    78,
+    79
+  ],
+  "sha256": "acbde951e0cdf1a0fc621a1098003420c122862c78c8f12d170faadb191ddaa1",
+  "title": "The Arrival Of The Queen Of Sheba"
+}

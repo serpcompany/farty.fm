@@ -1,0 +1,210 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-ellacombe.mid",
+  "id": "ellacombe",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "ellacombe",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 32,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-ellacombe.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 61,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 12.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 73,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 18.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 61,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 28.5
+    }
+  ],
+  "pitches": [
+    61,
+    62,
+    64,
+    66,
+    68,
+    69,
+    71,
+    73,
+    74,
+    76
+  ],
+  "sha256": "f3d4f23703b5d3e59551e8f8993c4fd5e1e089594bb287bb7a2dc5105d7896d7",
+  "title": "Ellacombe"
+}

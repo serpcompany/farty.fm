@@ -1,0 +1,255 @@
+{
+  "bar_lines": [
+    0.0,
+    2.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0,
+    12.0,
+    14.0,
+    16.0,
+    18.0,
+    20.0,
+    22.0
+  ],
+  "beats_per_bar": 2,
+  "bpm": 120,
+  "file": "midi/pdmx-a-la-claire-fontaine.mid",
+  "id": "a-la-claire-fontaine",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "a-la-claire-fontaine",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 41,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-a-la-claire-fontaine.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 1,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 24.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 3.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 18.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 18.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 18.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 21.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 21.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 21.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 23.0
+    }
+  ],
+  "pitches": [
+    65,
+    67,
+    69,
+    70,
+    72
+  ],
+  "sha256": "a052b54bc3e12b711dfc3fae5666193de1b5c4ec2a93c340760751cb755c6f81",
+  "title": "À la claire fontaine"
+}

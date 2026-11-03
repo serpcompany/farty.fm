@@ -11,7 +11,7 @@ let loading: Promise<readonly SongSummary[]> | null = null
 const songs = new Map<string, Promise<Song>>()
 
 /**
- * The Songs this build ships, without their notes, in the ship list's order: fetched once and
+ * The Songs this build ships, without their notes, in the app's order: fetched once and
  * shared. A failed fetch isn't kept, so the next call tries again.
  */
 export function loadSongs(): Promise<readonly SongSummary[]> {

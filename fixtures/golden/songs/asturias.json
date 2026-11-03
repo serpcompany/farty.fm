@@ -1,0 +1,351 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-asturias.mid",
+  "id": "asturias",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "asturias",
+    "chord_tones_dropped": 6,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 60,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-asturias.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 52,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 52,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 52,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 54,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 54,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 52,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 52,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 52,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 54,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 52,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 50,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 48,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 47,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 54,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 47,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 54,
+      "start": 29.5
+    }
+  ],
+  "pitches": [
+    47,
+    48,
+    50,
+    52,
+    54,
+    55,
+    57,
+    59,
+    60
+  ],
+  "sha256": "a84cabb4dba2d32ebece079a6a854a009695ee8af59617202077eb93bedd9b43",
+  "title": "Asturias"
+}

@@ -1,0 +1,219 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    23.5,
+    26.5
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-life-let-us-cherish.mid",
+  "id": "life-let-us-cherish",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 29.5
+  },
+  "import_report": {
+    "catalog_id": "life-let-us-cherish",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 34,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-life-let-us-cherish.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.5,
+  "notes": [
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 84,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 84,
+      "start": 5.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 10.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 10.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 84,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 84,
+      "start": 17.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 20.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 21.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 26.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 84,
+      "start": 27.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 84,
+      "start": 28.5
+    }
+  ],
+  "pitches": [
+    72,
+    74,
+    76,
+    77,
+    79,
+    84
+  ],
+  "sha256": "ece04d3c567fe421224ebba470dde6409709dfcb09b9e706ed83e96d269c18b4",
+  "title": "Life Let Us Cherish"
+}

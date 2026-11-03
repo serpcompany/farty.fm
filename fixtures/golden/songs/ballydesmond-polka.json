@@ -1,0 +1,377 @@
+{
+  "bar_lines": [
+    0.0,
+    2.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0,
+    12.0,
+    14.0,
+    16.0,
+    18.0,
+    20.0,
+    22.0,
+    24.0,
+    26.0,
+    28.0,
+    30.0
+  ],
+  "beats_per_bar": 2,
+  "bpm": 120,
+  "file": "midi/pdmx-ballydesmond-polka.mid",
+  "id": "ballydesmond-polka",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "ballydesmond-polka",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 64,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-ballydesmond-polka.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 0.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 4.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 6.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 7.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 7.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 7.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 7.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 8.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 15.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 16.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 19.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 20.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 20.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 22.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 23.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 23.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 23.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 23.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 24.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 26.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 30.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76
+  ],
+  "sha256": "af8a12b1180fc79973f75dd1b8a1e0b93ad14a45badf77b846b0df273a602ce6",
+  "title": "Ballydesmond Polka"
+}

@@ -1,0 +1,171 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 72,
+  "file": "midi/pdmx-si-hei-lwli-mabi.mid",
+  "id": "si-hei-lwli-mabi",
+  "import_args": {
+    "bpm": 72,
+    "max_beats": 32,
+    "start_beat": 16
+  },
+  "import_report": {
+    "catalog_id": "si-hei-lwli-mabi",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 25,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-si-hei-lwli-mabi.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1,
+      2
+    ]
+  },
+  "length_beats": 30.854166666666668,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 1.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 3.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 68,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 7.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 11.0
+    },
+    {
+      "dur": 2.8541666666666665,
+      "pitch": 70,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 17.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 20.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 68,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 23.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 25.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 70,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 27.5
+    },
+    {
+      "dur": 2.8541666666666665,
+      "pitch": 68,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    68,
+    70,
+    72
+  ],
+  "sha256": "6d053b4ecf78439166cc2d2d98d2b254487a30278fa796f408f64bb58b0b8124",
+  "title": "Si hei lwli mabi"
+}

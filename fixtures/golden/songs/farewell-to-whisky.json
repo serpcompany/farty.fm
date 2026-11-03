@@ -1,0 +1,171 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 140,
+  "file": "midi/pdmx-farewell-to-whisky.mid",
+  "id": "farewell-to-whisky",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 140,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "farewell-to-whisky",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 24,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-farewell-to-whisky.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 1.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 3.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 10.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 5.0,
+      "pitch": 72,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    65,
+    67,
+    69,
+    72,
+    74
+  ],
+  "sha256": "37241688b32fec780f3c222345b5bd33af0ba5c5c044268b5958124e34b8e7cd",
+  "title": "Farewell to Whisky"
+}

@@ -1,0 +1,134 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 140,
+  "file": "midi/pdmx-though-philomela-lost-her-love.mid",
+  "id": "though-philomela-lost-her-love",
+  "import_args": {
+    "bpm": 140,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "though-philomela-lost-her-love",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 17,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-though-philomela-lost-her-love.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1,
+      2
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 2.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 14.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 18.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 19.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 76,
+      "start": 24.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 74,
+      "start": 27.0
+    }
+  ],
+  "pitches": [
+    69,
+    71,
+    72,
+    74,
+    76
+  ],
+  "sha256": "c7ce47f1d5ddab63383da934959c96503cd4b61c912b380097728e23920aaa44",
+  "title": "Though Philomela lost her love"
+}

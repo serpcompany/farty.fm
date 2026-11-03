@@ -1,0 +1,361 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5,
+    28.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-crieff-fair.mid",
+  "id": "crieff-fair",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "crieff-fair",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 62,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-crieff-fair.mid",
+    "tempo_changes_ignored": 3,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 30.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 31.5
+    }
+  ],
+  "pitches": [
+    65,
+    67,
+    69,
+    70,
+    72,
+    73,
+    74,
+    76,
+    77,
+    79
+  ],
+  "sha256": "bfa6736593a5e76ddcbb84b62e9e74322b2c1c3179e911c41253623c4d68fbfd",
+  "title": "Crieff Fair"
+}

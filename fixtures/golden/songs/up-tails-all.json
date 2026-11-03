@@ -1,0 +1,157 @@
+{
+  "bar_lines": [
+    0.5,
+    2.5,
+    4.5,
+    6.5,
+    8.5,
+    10.5,
+    12.5,
+    14.5
+  ],
+  "beats_per_bar": 1,
+  "bpm": 120,
+  "file": "midi/pdmx-up-tails-all.mid",
+  "id": "up-tails-all",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "up-tails-all",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 22,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-up-tails-all.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 16.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 1.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 2.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 5.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 6.25
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 12.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 13.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 14.5
+    }
+  ],
+  "pitches": [
+    62,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76
+  ],
+  "sha256": "e3a873910159cf201a0b70fb08da17d849c4be245fc698ea31c5be06d0a3dcce",
+  "title": "Up Tails All"
+}

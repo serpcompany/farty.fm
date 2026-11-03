@@ -1,0 +1,271 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 75,
+  "file": "midi/pdmx-mrs-jamiesons-favorite.mid",
+  "id": "mrs-jamiesons-favorite",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 75,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "mrs-jamiesons-favorite",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 44,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-mrs-jamiesons-favorite.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 0.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 6.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 11.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 12.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 19.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 19.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 20.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 22.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 26.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 28.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    67,
+    69,
+    71,
+    74,
+    76
+  ],
+  "sha256": "e7308e284b464afaa7d6ff7218a3f16af125aa94ee3b63eaa6c3a590d14e80f4",
+  "title": "Mrs Jamieson's Favorite"
+}

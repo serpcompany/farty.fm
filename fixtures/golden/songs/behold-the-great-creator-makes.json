@@ -1,0 +1,159 @@
+{
+  "bar_lines": [
+    0.0,
+    6.0,
+    12.0,
+    18.0,
+    24.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 120,
+  "file": "midi/pdmx-behold-the-great-creator-makes.mid",
+  "id": "behold-the-great-creator-makes",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "behold-the-great-creator-makes",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 23,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-behold-the-great-creator-makes.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 0.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 3.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 75,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 15.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 16.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 16.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 18.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    63,
+    67,
+    68,
+    70,
+    72,
+    74,
+    75
+  ],
+  "sha256": "892b49e86efd0e4b228dc9a57b7358f353189dbef6a920c8ceb7e1f7be8bb475",
+  "title": "Behold The Great Creator Makes"
+}

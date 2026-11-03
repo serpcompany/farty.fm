@@ -1,0 +1,256 @@
+{
+  "bar_lines": [
+    2.0,
+    6.0,
+    10.0,
+    14.0,
+    18.0,
+    22.0,
+    26.0,
+    30.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-pools-hole.mid",
+  "id": "pools-hole",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "pools-hole",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 42,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-pools-hole.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 29.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    69,
+    74,
+    76,
+    77,
+    79
+  ],
+  "sha256": "15c8aaaedef0c4d4323ef3663ec20a9678398eb8ffaf8d382983d4f61b44b1f7",
+  "title": "Pool's Hole"
+}

@@ -1,0 +1,330 @@
+{
+  "bar_lines": [
+    0.0,
+    2.0,
+    4.0,
+    7.5,
+    9.5,
+    11.5,
+    13.5,
+    15.5,
+    19.0,
+    21.0,
+    23.0,
+    25.0,
+    27.0
+  ],
+  "beats_per_bar": 2,
+  "bpm": 120,
+  "file": "midi/pdmx-hob-y-deri-danno.mid",
+  "id": "hob-y-deri-danno",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30.5
+  },
+  "import_report": {
+    "catalog_id": "hob-y-deri-danno",
+    "chord_tones_dropped": 6,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 55,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-hob-y-deri-danno.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.5,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 0.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 1.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 5.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 5.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 5.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 6.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 7.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 8.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 12.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 12.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 13.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 16.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 17.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 17.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 17.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 17.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 18.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 20.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 79,
+      "start": 24.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 24.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    65,
+    67,
+    69,
+    70,
+    72,
+    74,
+    75,
+    76,
+    77,
+    79
+  ],
+  "sha256": "914caa26db3784f394b395865440c0fa24040c5bfe4878ea9f0f5eb4fe0c4b47",
+  "title": "Hob y Deri Danno"
+}

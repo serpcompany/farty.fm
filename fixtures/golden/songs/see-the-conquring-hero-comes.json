@@ -1,0 +1,226 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-see-the-conquring-hero-comes.mid",
+  "id": "see-the-conquring-hero-comes",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "see-the-conquring-hero-comes",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 35,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-see-the-conquring-hero-comes.mid",
+    "tempo_changes_ignored": 3,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 3.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 4.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 17.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 19.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 20.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 30.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 31.5
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    79
+  ],
+  "sha256": "66ce0783d5dbeec0c8f7dfb1f3b0325553e7bc1cb97d96dbd6e518f49e356bea",
+  "title": "See the Conqu'ring hero comes"
+}

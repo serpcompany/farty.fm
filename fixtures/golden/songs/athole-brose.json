@@ -1,0 +1,370 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-athole-brose.mid",
+  "id": "athole-brose",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 28.5
+  },
+  "import_report": {
+    "catalog_id": "athole-brose",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 64,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-athole-brose.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 28.5,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 66,
+      "start": 0.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 1.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 1.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 1.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 2.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 57,
+      "start": 2.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 3.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 3.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 4.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 66,
+      "start": 4.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 5.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 5.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 5.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 6.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 6.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 7.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 8.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 66,
+      "start": 8.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 9.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 9.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 9.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 10.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 57,
+      "start": 10.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 10.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 11.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 12.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 12.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 12.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 61,
+      "start": 13.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 14.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 73,
+      "start": 14.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 15.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 15.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 16.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 66,
+      "start": 16.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 17.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 17.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 17.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 57,
+      "start": 18.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 19.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 19.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 20.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 66,
+      "start": 20.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 21.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 21.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 21.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 22.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 22.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 23.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 24.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 66,
+      "start": 24.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 25.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 25.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 25.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 57,
+      "start": 26.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 26.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 27.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 28.25
+    }
+  ],
+  "pitches": [
+    57,
+    61,
+    62,
+    64,
+    65,
+    66,
+    67,
+    69,
+    71,
+    73
+  ],
+  "sha256": "d35dcc9c63f73278e0a0728acf01f4c35916de27231e0127082d32f81143f41f",
+  "title": "Athole Brose"
+}

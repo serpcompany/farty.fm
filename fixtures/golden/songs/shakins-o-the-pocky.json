@@ -1,0 +1,200 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-shakins-o-the-pocky.mid",
+  "id": "shakins-o-the-pocky",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "shakins-o-the-pocky",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 30,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-shakins-o-the-pocky.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 0.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 58,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 2.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 5.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 5.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 58,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 12.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 12.5
+    },
+    {
+      "dur": 4.0,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 75,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 18.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 20.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 26.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 70,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 28.5
+    }
+  ],
+  "pitches": [
+    58,
+    60,
+    62,
+    65,
+    67,
+    69,
+    70,
+    72,
+    74,
+    75
+  ],
+  "sha256": "eca50a06227330f47b1616b1789727d10266e90d4cbb189557542dc74eac4df9",
+  "title": "The Shakin's o' the Pocky"
+}

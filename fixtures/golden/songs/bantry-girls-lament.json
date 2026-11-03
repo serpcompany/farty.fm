@@ -1,0 +1,195 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-bantry-girls-lament.mid",
+  "id": "bantry-girls-lament",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "bantry-girls-lament",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 30,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-bantry-girls-lament.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 0.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 61,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 61,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 4.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 64,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 61,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 12.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 59,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 61,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 61,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 20.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 64,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 24.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 61,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    57,
+    59,
+    61,
+    64,
+    66
+  ],
+  "sha256": "fd3b9240dbb3dc7fce48078e990cee704e427c8f7fe1c6021ac0268ef86ea4b2",
+  "title": "The Bantry Girl's Lament"
+}

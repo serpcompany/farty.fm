@@ -1,0 +1,264 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0,
+    29.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 116,
+  "file": "midi/pdmx-aboyne-castle.mid",
+  "id": "aboyne-castle",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 116,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "aboyne-castle",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 43,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-aboyne-castle.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 0.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 0.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 0.75
+    },
+    {
+      "dur": 3.0,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 15.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 16.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 16.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 16.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 16.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 28.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    57,
+    59,
+    61,
+    62,
+    64,
+    66,
+    67,
+    69
+  ],
+  "sha256": "4fe7f471e757a5574f4b5ae788b12998582bb7cdfed51cb99666137ec2a347ee",
+  "title": "Aboyne Castle"
+}

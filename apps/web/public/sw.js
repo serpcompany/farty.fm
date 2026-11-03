@@ -12,9 +12,11 @@
 //
 // The catalog is an index, and each Song's notes are a file of their own, fetched as the Song
 // opens (#323). The worker keeps notes in a cache of their own, so they never push the shell out.
-// Once it has the index, when it installs and whenever a page or the start page's refresh fetches
-// one, it fetches every Song's notes it hasn't kept, in the background, so a Song never opened
-// plays offline too (#138). Compose itself reads only the index.
+// Once it has the index, it fetches every Song's notes it hasn't kept, in the background, so a
+// Song never opened plays offline too (#138): once it's active after installing, and whenever a
+// page or the start page's refresh fetches an index. Installing keeps only the shell, so a new
+// deploy's worker takes over without waiting on a thousand Songs' notes (#350). Compose itself
+// reads only the index.
 //
 // Bump `version` when the shell cache's contents change shape, and `notesVersion` when the notes
 // cache's do. A new worker deletes every other version's caches when it activates.
@@ -23,7 +25,9 @@ const version = 2
 const notesVersion = 1
 // A few deploys' worth of the shell. The least recently fetched files go first.
 const shell = { name: `pedos-shell-v${version}`, maxEntries: 200 }
-// Every Song's notes twice over, at a few KB a Song. The least recently fetched go first.
+// Two catalogs' notes, at a few KB a Song: at least `maxEntries`, and twice the Songs of the
+// latest index the worker read, however large the catalog grows (`notesCap`). The least recently
+// fetched go first, but never that index's own.
 const songNotes = { name: `pedos-notes-v${notesVersion}`, maxEntries: 2000 }
 const shellFile = /\.(?:js|css|woff2?|png|ico|svg|webp|jpg|webmanifest)$/i
 // The Song Catalog's index and each Song's notes, named by their content
@@ -44,21 +48,35 @@ let lastRefresh = 0
 const notesKeptFor = new Map()
 // How many Songs' notes it fetches at once, so they don't crowd out what a page fetches.
 const notesAtOnce = 6
+// The notes that the latest index the worker read names, which trimming never deletes.
+let currentNotes = new Set()
+// The indexes the shell's pages load, found as the worker installs, whose notes it fetches once
+// it's active.
+let installedIndexes = []
 
 self.addEventListener('install', event => {
-  event.waitUntil(precacheShell().finally(() => self.skipWaiting()))
+  event.waitUntil(
+    precacheShell()
+      .then(({ indexes }) => {
+        installedIndexes = indexes
+      })
+      .finally(() => self.skipWaiting())
+  )
 })
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    (async () => {
-      for (const name of await caches.keys()) {
-        if (name.startsWith('pedos-shell-') && name !== shell.name) await caches.delete(name)
-        if (name.startsWith('pedos-notes-') && name !== songNotes.name) await caches.delete(name)
-      }
-      await self.clients.claim()
-    })()
-  )
+  const activated = (async () => {
+    for (const name of await caches.keys()) {
+      if (name.startsWith('pedos-shell-') && name !== shell.name) await caches.delete(name)
+      if (name.startsWith('pedos-notes-') && name !== songNotes.name) await caches.delete(name)
+    }
+    await self.clients.claim()
+  })()
+  event.waitUntil(activated)
+  // Every Song's notes after that, without holding the activation, which would keep each page's
+  // requests waiting until they're all fetched. Should the browser stop the worker part way, the
+  // next fetch of the index fetches the rest.
+  activated.then(() => keepNotesOf(installedIndexes)).catch(() => {})
 })
 
 self.addEventListener('fetch', event => {
@@ -169,23 +187,45 @@ async function keep(url, response) {
     const bare = new URL(url)
     bare.hash = ''
     await cache.put(bare.href, new Response(response.body, response))
-    await trim(cache, store.maxEntries)
+    if (store === songNotes) await trim(cache, notesCap(), currentNotes)
+    else await trim(cache, store.maxEntries)
   } catch {
     // A full disk only costs the offline copy.
   }
 }
 
-// The least recently fetched go first.
-async function trim(cache, maxEntries) {
+// The least recently fetched go first, except the paths in `spare`.
+async function trim(cache, maxEntries, spare = new Set()) {
   const keys = await cache.keys()
-  for (const old of keys.slice(0, Math.max(0, keys.length - maxEntries))) {
+  let over = keys.length - maxEntries
+  for (const old of keys) {
+    if (over <= 0) return
+    if (spare.has(new URL(typeof old === 'string' ? old : old.url).pathname)) continue
     await cache.delete(old)
+    over -= 1
   }
 }
 
+// Twice the latest index's Songs, so its notes and the last catalog's fit, and never fewer than
+// `songNotes.maxEntries`.
+function notesCap() {
+  return Math.max(songNotes.maxEntries, 2 * currentNotes.size)
+}
+
+// Every Song's notes that each of `indexes`, `[path, text]`, names. Resolves to false when the
+// network failed for any of them.
+async function keepNotesOf(indexes) {
+  let complete = true
+  for (const [path, text] of indexes) {
+    if (!(await keepEveryNotes(path, text))) complete = false
+  }
+  return complete
+}
+
 // Every Song's notes that the index at `path` names and the cache doesn't hold yet, fetched ahead,
-// a few at a time. Resolves to false when the network failed for any of them, and the next fetch
-// of the index tries again.
+// a few at a time. Resolves to false when the network failed for any of them, or the index's text
+// isn't an index, such as the empty text of an index install couldn't fetch, and the next fetch of
+// the index tries again.
 function keepEveryNotes(path, indexText) {
   let keeping = notesKeptFor.get(path)
   if (!keeping) {
@@ -208,8 +248,9 @@ async function fetchEveryNotes(indexText) {
         .filter(notes => typeof notes === 'string' && notesFile.test(notes))
     }
   } catch {
-    return true
+    return false
   }
+  if (paths.length > 0) currentNotes = new Set(paths)
   let complete = true
   try {
     const cache = await caches.open(songNotes.name)
@@ -231,7 +272,7 @@ async function fetchEveryNotes(indexText) {
       }
     }
     await Promise.all(Array.from({ length: notesAtOnce }, fetchNext))
-    await trim(cache, songNotes.maxEntries)
+    await trim(cache, notesCap(), currentNotes)
   } catch {
     // A full disk only costs the offline copies.
     complete = false
@@ -246,7 +287,8 @@ async function refreshShell(startPage) {
   lastRefresh = Date.now()
   let complete = false
   try {
-    complete = await precacheShell(await startPage.text())
+    const kept = await precacheShell(await startPage.text())
+    complete = (await keepNotesOf(kept.indexes)) && kept.complete
   } finally {
     // A connection lost part way leaves the cache partly refreshed, so the next start page tries
     // again instead of waiting.
@@ -255,10 +297,10 @@ async function refreshShell(startPage) {
 }
 
 // The start page, the pages it links to (the tabs), the pages in `/shell.json` (the one Song
-// page among them), and the files they load, the Song Catalog and every Song's notes too, so
-// Farty opens and plays offline right after it's installed, before any of them is fetched again.
-// `startHtml` is the start page already fetched, if any. Resolves to false when the network
-// failed for any of them.
+// page among them), and the files they load, the Song Catalog's index too, so Farty opens
+// offline right after it's installed, before any of them is fetched again. `startHtml` is the
+// start page already fetched, if any. Resolves to `complete`, false when the network failed for
+// any of them, and the `indexes` kept, `[path, text]`, whose Songs' notes the caller fetches.
 async function precacheShell(startHtml) {
   let complete = true
   const get = path =>
@@ -291,17 +333,16 @@ async function precacheShell(startHtml) {
   const indexes = []
   const texts = await Promise.all([...files].map(get))
   for (const [i, file] of [...files].entries()) {
-    const text = texts[i] ?? ''
+    const text = texts[i]
+    // An index it couldn't fetch is left to the next fetch of it, which keeps its notes then.
+    if (text === null) continue
     if (catalogFile.test(file)) indexes.push([file, text])
     for (const [, path] of text.matchAll(/"(static\/chunks\/[^"\s\\]+\.js)"/g)) {
       if (!files.has(`/_next/${path}`)) loaded.add(`/_next/${path}`)
     }
   }
   await Promise.all([...loaded].map(get))
-  for (const [path, text] of indexes) {
-    if (!(await keepEveryNotes(path, text))) complete = false
-  }
-  return complete
+  return { complete, indexes }
 }
 
 // The pages a tab opens that the start page doesn't link to, such as the Song page that answers

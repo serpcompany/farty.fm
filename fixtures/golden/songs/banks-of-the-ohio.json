@@ -1,0 +1,121 @@
+{
+  "bar_lines": [
+    3.0,
+    7.0,
+    11.0,
+    15.0,
+    19.0,
+    23.0,
+    27.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 140,
+  "file": "midi/pdmx-banks-of-the-ohio.mid",
+  "id": "banks-of-the-ohio",
+  "import_args": {
+    "bpm": 140,
+    "max_beats": 31,
+    "start_beat": 1
+  },
+  "import_report": {
+    "catalog_id": "banks-of-the-ohio",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 15,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-banks-of-the-ohio.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 5.0,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 69,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 18.0
+    },
+    {
+      "dur": 5.0,
+      "pitch": 72,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 26.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 71,
+      "start": 27.0
+    }
+  ],
+  "pitches": [
+    66,
+    67,
+    69,
+    71,
+    72,
+    74
+  ],
+  "sha256": "078c7a8068a7aad5058116d433190cb4556c6b34f0ff83965d96dfded6fc6918",
+  "title": "Banks of The Ohio"
+}

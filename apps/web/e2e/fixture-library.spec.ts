@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
-import { songsTheFixtureLibraryUnlocks } from './golden'
+import { fixtureRecordingId } from '../src/lib/fixture-library'
+import { fixtureLibrary, songsTheFixtureLibraryUnlocks, songsUnlockedBy } from './golden'
 
 // The Fixture Library loader on Profile, in the Staging build only (`pnpm build:staging` copies the
-// fixtures and turns the loader on). Loading it unlocks every Song the golden data says it does
-// (`golden.ts`), since Songs play every burst of a fart (ADR 0016). Without fixture 002, Amazing
-// Grace's 2.98 s note outlasts every fixture near it (ADR 0011).
+// fixtures and turns the loader on). Loading it unlocks every Song the app's Pitch Coverage does
+// with the golden analysis (`golden.ts`), since Songs play every burst of a fart (ADR 0016).
+// Without fixture 002, Amazing Grace's 2.98 s note outlasts every fixture near it (ADR 0011).
 
 test.beforeEach(async ({ request }) => {
   // `next dev` never shows the loader, even with fixtures left in public/ by a Staging build.
@@ -67,10 +68,11 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
   ).toBeVisible()
 
   // Without Recording 1, Amazing Grace's 2.98 s note on E3 outlasts every fixture near it, and it
-  // is one of 11 Songs that lock. The golden data has no answer for the library without 002, so
-  // `pitch-coverage.test.ts` checks this count with the app's rule on the golden analysis ('locks
-  // 11 more of the catalog's Songs without 002').
-  const lockedWithout002 = 11
+  // is one of the Songs that lock (`pitch-coverage.test.ts`, 'locks ... more of the catalog's
+  // Songs without 002').
+  const lockedWithout002 =
+    unlocked -
+    songsUnlockedBy(fixtureLibrary.filter(r => r.id !== fixtureRecordingId('002'))).length
   await recordings.click()
   await page.getByRole('button', { name: 'Delete Recording 1', exact: true }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Delete Recording' }).click()

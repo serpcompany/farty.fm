@@ -1,0 +1,313 @@
+{
+  "bar_lines": [
+    9.5,
+    19.5
+  ],
+  "beats_per_bar": 10,
+  "bpm": 120,
+  "file": "midi/pdmx-aurea-luce.mid",
+  "id": "aurea-luce",
+  "import_args": {
+    "beats_per_bar": 10,
+    "bpm": 120,
+    "max_beats": 27
+  },
+  "import_report": {
+    "catalog_id": "aurea-luce",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 54,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-aurea-luce.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 27.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.5
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    65,
+    67,
+    69,
+    71,
+    72,
+    74
+  ],
+  "sha256": "15ed032f7b727fe904ee0d224c282c1bc039e879d95f95c3f494b4616d55a5f7",
+  "title": "Aurea luce"
+}

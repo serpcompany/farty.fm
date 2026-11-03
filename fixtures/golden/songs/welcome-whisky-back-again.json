@@ -1,0 +1,348 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-welcome-whisky-back-again.mid",
+  "id": "welcome-whisky-back-again",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "welcome-whisky-back-again",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 60,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-welcome-whisky-back-again.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.25,
+      "pitch": 58,
+      "start": 0.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 0.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 1.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 1.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 2.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 2.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 5.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 6.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 6.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 7.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 58,
+      "start": 8.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 8.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 9.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 9.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 10.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 11.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 11.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 12.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 12.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 13.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 14.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 14.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 58,
+      "start": 15.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 58,
+      "start": 16.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 16.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 17.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 17.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 18.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 18.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 21.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 22.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 23.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 58,
+      "start": 24.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 24.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 25.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 25.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 26.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 27.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 27.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 28.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 28.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 29.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 29.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 30.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 30.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 58,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    58,
+    60,
+    62,
+    65,
+    67,
+    70,
+    72,
+    74
+  ],
+  "sha256": "71de0137a1b6458525ffcd69c745c4bc59705dfa7b4577cb980b1f8dc8c42d5b",
+  "title": "Welcome Whisky Back Again"
+}

@@ -33,7 +33,7 @@ declare global {
 const evidence = process.env.E2E_EVIDENCE_DIR ? resolve(process.env.E2E_EVIDENCE_DIR) : null
 
 /**
- * The Songs the journey makes a Toot of: the iPhone app's 12, first on the ship list, and Hot Cross
+ * The Songs the journey makes a Toot of: the iPhone app's 12, first in the app's order, and Hot Cross
  * Buns, the first of the catalog Songs Compose lists since #229. Making a Toot of every Song would
  * take the journey past its time limit; the unit tests check every Song against the golden data.
  */

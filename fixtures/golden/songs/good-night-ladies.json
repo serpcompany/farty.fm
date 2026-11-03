@@ -1,0 +1,136 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-good-night-ladies.mid",
+  "id": "good-night-ladies",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "good-night-ladies",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 18,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-good-night-ladies.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 4.0
+    },
+    {
+      "dur": 2.5,
+      "pitch": 70,
+      "start": 4.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 2.5,
+      "pitch": 72,
+      "start": 12.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 20.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 75,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 23.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 25.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 27.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 70,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    65,
+    70,
+    72,
+    74,
+    75
+  ],
+  "sha256": "e08512e1d2ab58c1c58087e77820a0150a8a2a55202e8ac95debc3c10e9e6608",
+  "title": "Good-Night Ladies"
+}

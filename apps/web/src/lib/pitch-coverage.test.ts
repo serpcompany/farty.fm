@@ -3,9 +3,11 @@ import {
   coverageSubsets,
   goldenArrangement,
   goldenRecording,
-  libraries
+  libraries,
+  songIds
 } from '../test-support/engine-golden'
 import { goldenIndex } from '../test-support/golden'
+import { goldenAnalysisRecording } from '../test-support/golden-analysis'
 import type { Song, SongSummary } from './catalog/song'
 import { songs } from './catalog/songs.generated'
 import { fixtureRecordingId } from './fixture-library'
@@ -28,8 +30,8 @@ import { type AnalysisState, NO_NOTE, type Recording } from './recordings'
 
 // Pitch Coverage as the app reads it, checked against the reference engine's golden data and
 // ported from the iPhone app's `PitchCoverageTests` and `SongListingTests`. The ported tests read
-// the iPhone app's 12 Songs, the first on the ship list; every Song is checked against the golden
-// data.
+// the iPhone app's 12 Songs, the first in the app's order; every Song the golden data arranges is
+// checked against it (`arranged`), and Compose lists every Song in the catalog (#350).
 
 /**
  * The sample story's takes, in order: Melodic ones that unlock Songs, with 3 Noise-like takes
@@ -42,34 +44,8 @@ import { type AnalysisState, NO_NOTE, type Recording } from './recordings'
 const story = ['018', '032', '090', '052', '094', '069', '017', '086', '002', '084', '013', '055']
 const fixtureIds = goldenIndex.recordings
 
-/** A Recording of this fixture with the reference engine's analysis and its Fixture Library id. */
-function fixtureRecording(id: string, number: number): Recording {
-  const golden = goldenRecording(id)
-  const rate = goldenIndex.sample_rate
-  return {
-    id: fixtureRecordingId(id),
-    number,
-    createdAt: 0,
-    seconds: golden.file.frames / golden.file.sample_rate,
-    sampleRate: golden.file.sample_rate,
-    waveform: [],
-    analysis: {
-      state: 'analyzed',
-      analysis: {
-        gestureStartSeconds: golden.gesture.start_sample / rate,
-        gestureEndSeconds: golden.gesture.end_sample / rate,
-        cutAtReattack: golden.gesture.cut_at_reattack,
-        pitchEstimateMidi: golden.pitch_estimate_midi,
-        pitchConfidence: golden.pitch_confidence,
-        recordingPitchMidi: golden.melodic ? golden.recording_pitch_midi : null,
-        shortestNoteSeconds: golden.melodic ? golden.shortest_note_s : null,
-        settleSeconds: golden.melodic ? golden.settle_s : null
-      }
-    }
-  }
-}
-
-const fixtures = (ids: readonly string[]) => ids.map((id, i) => fixtureRecording(id, i + 1))
+const fixtures = (ids: readonly string[]) =>
+  ids.map((id, i) => goldenAnalysisRecording(goldenRecording(id), i + 1, goldenIndex.sample_rate))
 const all = fixtures(fixtureIds)
 /**
  * The Fixture Library without 002, which alone lasts 3 s: it leaves Amazing Grace locked.
@@ -87,8 +63,13 @@ const song = (id: string): Song => {
 /** The fixture id of a Fixture Library Recording id. */
 const fixtureId = (recordingId: string | undefined) => recordingId?.slice(-3)
 
-/** The iPhone app's Songs, the first on the ship list (#229). */
+/** The iPhone app's Songs, the first in the app's order (#229). */
 const iPhone = songs.slice(0, 12)
+/**
+ * The Songs the reference engine's golden data arranges: the 128 the app shipped before #350.
+ * Every later Song passed `tools/catalog/import_pdmx.py`'s render gate on the reference engine.
+ */
+const arranged = songs.filter(s => songIds.includes(s.id))
 
 const listing = (
   recordings: Recording[],
@@ -121,7 +102,8 @@ describe('Pitch Coverage against the reference engine', () => {
       'auld'
     ])
     // Each fart plays at its own length (ADR 0012), every burst of it (ADR 0016).
-    for (const s of songs) {
+    expect(arranged).toHaveLength(128)
+    for (const s of arranged) {
       expect(coverageOf(s, all).unlocked, s.id).toBe(unlockedByAll(s))
     }
     expect(iPhone.every(unlockedByAll)).toBe(true)
@@ -157,7 +139,7 @@ describe('Pitch Coverage against the reference engine', () => {
         checked++
       }
     }
-    expect(checked).toBe(50 * songs.length)
+    expect(checked).toBe(50 * arranged.length)
   })
 
   it('unlocks 6 of the iPhone’s Songs at the 9th story take, and 11 by the 11th', () => {
@@ -422,7 +404,7 @@ describe('Compose’s listing', () => {
     expect(ids(listing(ten, 'JINGLE').unlocked)).toEqual(['jingle'])
     expect(ids(listing(ten, 'fur').unlocked)).toEqual(['furelise'])
     expect(ids(listing(ten, 'frere').unlocked)).toEqual(['frere'])
-    expect(ids(listing(ten, 'little').unlocked)).toEqual(['mary', 'twinkle'])
+    expect(ids(listing(ten, 'little').unlocked)).toEqual(['mary', 'twinkle', 'little-peggys-love'])
     expect(ids(listing(ten, 'BIRTH').locked)).toEqual(['birthday'])
     expect(listing(ten, '  ')).toEqual(listing(ten))
     const none = listing(ten, 'zzz')
@@ -508,8 +490,9 @@ describe('Compose’s listing', () => {
   it('unlocks the Songs the reference does with the whole Fixture Library', () => {
     const { unlocked, locked } = listing(all)
     expect(unlocked.length + locked.length).toBe(songs.length)
-    expect(unlocked.every(r => unlockedByAll(r.song))).toBe(true)
-    expect(locked.every(r => !unlockedByAll(r.song))).toBe(true)
+    const isArranged = (r: { song: SongSummary }) => songIds.includes(r.song.id)
+    expect(unlocked.filter(isArranged).every(r => unlockedByAll(r.song))).toBe(true)
+    expect(locked.filter(isArranged).every(r => !unlockedByAll(r.song))).toBe(true)
   })
 
   it('unlocks all 12 of the iPhone’s Songs with the whole Fixture Library, and 11 without 002', () => {
@@ -521,12 +504,12 @@ describe('Compose’s listing', () => {
     expect(locked.map(r => missingNotes(coverageOf(r.song, without002)))).toEqual(['E3 (3.0 s)'])
   })
 
-  it('locks 11 more of the catalog’s Songs without 002, Amazing Grace among them', () => {
-    // `e2e/fixture-library.spec.ts` deletes 002 and expects Compose to lock these 11 more.
+  it('locks 40 more of the catalog’s Songs without 002, Amazing Grace among them', () => {
+    // `e2e/fixture-library.spec.ts` deletes 002 and expects Compose to lock these more.
     const ids = (rows: { song: SongSummary }[]) => rows.map(r => r.song.id)
     const withAll = new Set(ids(listing(all).locked))
     const lockedNow = ids(listing(without002).locked).filter(id => !withAll.has(id))
-    expect(lockedNow).toHaveLength(11)
+    expect(lockedNow).toHaveLength(40)
     expect(lockedNow).toContain('amazing')
     expect(listing(without002).unlocked.every(r => !withAll.has(r.song.id))).toBe(true)
   })

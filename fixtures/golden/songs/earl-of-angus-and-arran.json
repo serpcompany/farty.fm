@@ -1,0 +1,348 @@
+{
+  "bar_lines": [
+    0.5,
+    2.5,
+    6.5,
+    10.5,
+    13.5,
+    14.0,
+    16.0,
+    20.0,
+    24.0,
+    27.0,
+    27.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-earl-of-angus-and-arran.mid",
+  "id": "earl-of-angus-and-arran",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 31.5
+  },
+  "import_report": {
+    "catalog_id": "earl-of-angus-and-arran",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 59,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-earl-of-angus-and-arran.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.5,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 0.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 0.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 1.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 63,
+      "start": 1.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 2.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 68,
+      "start": 2.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 2.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 3.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 63,
+      "start": 4.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 4.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 58,
+      "start": 4.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 5.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 6.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 63,
+      "start": 6.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 63,
+      "start": 6.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 7.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 8.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 9.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 63,
+      "start": 9.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 10.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 68,
+      "start": 10.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 10.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 11.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 12.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 13.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 14.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 63,
+      "start": 15.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 15.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 68,
+      "start": 16.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 16.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 17.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 63,
+      "start": 17.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 58,
+      "start": 18.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 19.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 19.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 63,
+      "start": 20.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 63,
+      "start": 20.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 21.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 22.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 63,
+      "start": 23.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 23.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 68,
+      "start": 24.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 24.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 25.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 25.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 27.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 27.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 27.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 63,
+      "start": 28.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 29.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 29.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 29.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 63,
+      "start": 30.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 31.25
+    }
+  ],
+  "pitches": [
+    58,
+    60,
+    62,
+    63,
+    65,
+    67,
+    68,
+    70,
+    74
+  ],
+  "sha256": "bfc3377e6f92cb878996d2bf065c8f18775b9f046bf01d3d157fa90033ed277a",
+  "title": "Earl of Angus and Arran"
+}

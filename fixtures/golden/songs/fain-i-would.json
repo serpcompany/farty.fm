@@ -1,0 +1,180 @@
+{
+  "bar_lines": [
+    0.0,
+    12.0
+  ],
+  "beats_per_bar": 12,
+  "bpm": 120,
+  "file": "midi/pdmx-fain-i-would.mid",
+  "id": "fain-i-would",
+  "import_args": {
+    "beats_per_bar": 12,
+    "bpm": 120,
+    "max_beats": 24
+  },
+  "import_report": {
+    "catalog_id": "fain-i-would",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 27,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-fain-i-would.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 24.0,
+  "notes": [
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 0.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 75,
+      "start": 1.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 3.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 7.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 7.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 78,
+      "start": 8.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 8.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 75,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 75,
+      "start": 10.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 11.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 11.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 12.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 19.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 20.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 20.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 21.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 22.5
+    }
+  ],
+  "pitches": [
+    66,
+    67,
+    69,
+    71,
+    72,
+    74,
+    75,
+    76,
+    78,
+    79
+  ],
+  "sha256": "a3d2b10ff541e76f685a64d854c6d267e873c8c919f58e0498e5aa76b2299735",
+  "title": "Fain I Would"
+}

@@ -1,0 +1,258 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-old-folks-at-home.mid",
+  "id": "old-folks-at-home",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "old-folks-at-home",
+    "chord_tones_dropped": 8,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 42,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-old-folks-at-home.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 2.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 3.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 6.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 6.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 15.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 17.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 18.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 19.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 19.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 20.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 20.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 21.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 79,
+      "start": 21.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 25.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 25.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 26.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 27.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 27.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 29.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    78,
+    79
+  ],
+  "sha256": "30c107108711de2a012c3bad8dd5d52cf1c46724ca8f85e627bc28d6bac7f292",
+  "title": "Old Folks at Home"
+}

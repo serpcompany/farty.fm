@@ -1,0 +1,327 @@
+{
+  "bar_lines": [
+    0.25,
+    4.25,
+    8.25,
+    12.25,
+    16.25,
+    20.25,
+    24.25
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-source-of-spey.mid",
+  "id": "source-of-spey",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 28.25
+  },
+  "import_report": {
+    "catalog_id": "source-of-spey",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 56,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-source-of-spey.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 28.25,
+  "notes": [
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 0.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 0.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 1.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 2.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 2.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 3.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 3.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 4.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 4.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 5.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 6.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 7.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 7.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 8.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 8.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 9.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 10.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 10.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 11.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 11.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 11.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 12.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 12.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 13.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 14.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 15.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 16.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 16.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 16.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 17.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 18.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 18.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 19.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 19.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 20.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 20.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 21.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 22.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 22.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 23.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 23.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 24.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 24.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 25.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 26.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 26.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 27.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 27.5
+    }
+  ],
+  "pitches": [
+    64,
+    66,
+    67,
+    69,
+    71,
+    74,
+    76
+  ],
+  "sha256": "894ebab0c164e030b07f09533f37a5fba534098343dad1e1168221b527c5efdf",
+  "title": "The Source Of Spey"
+}

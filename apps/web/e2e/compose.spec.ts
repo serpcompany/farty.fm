@@ -1,5 +1,7 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { searchKey } from '../src/lib/catalog/search-key'
 import { songs } from '../src/lib/catalog/songs.generated'
+import { songRows, sortRows } from '../src/lib/pitch-coverage'
 import {
   fakeMicrophone,
   fartAndRecord,
@@ -7,16 +9,20 @@ import {
   getUserMediaMs,
   waitForOpenMicrophone
 } from './fake-microphone'
+import { fixtureRecordings, songsUnlockedBy } from './golden'
 import { skipWelcome } from './record'
 
 // Compose and the Result screen, with Recordings made through the fake microphone in
 // `fake-microphone.ts`, which plays each fart as the person presses Record, all on one page.
 //
-// Mary Had a Little Lamb unlocks with fixtures 095 (F2), 017 (D♯2), 022 (E2) and 002 (A♯2), with 4
-// more Songs, and only Hot Cross Buns unlocks before the fourth, at the third: the reference's
-// `melody_fit()` on these four. Songs play each fart raw, at its own length (ADR 0012), so Mary's
-// last note, 1.40 s long, needs 002 (4.04 s with every burst, ADR 0016), the only one of the four
-// that long (ADR 0011).
+// Mary Had a Little Lamb unlocks with fixtures 095 (F2), 017 (D♯2), 022 (E2) and 002 (A♯2), with
+// more Songs, and Hot Cross Buns unlocks before the fourth, at the third: the app's Pitch Coverage
+// on the reference's analysis of these four (`golden.ts`), so the counts follow the catalog. Songs
+// play each fart raw, at its own length (ADR 0012), so Mary's last note, 1.40 s long, needs 002
+// (4.04 s with every burst, ADR 0016), the only one of the four that long (ADR 0011).
+const journey = ['095', '017', '022', '002']
+/** The Songs the journey's first `takes` takes unlock. */
+const unlockedAt = (takes: number) => songsUnlockedBy(fixtureRecordings(journey.slice(0, takes)))
 
 test.use({ permissions: ['microphone'] })
 
@@ -96,19 +102,26 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(sheet).toBeHidden()
   await expect(page.getByTestId('record-button')).toBeVisible()
 
-  // Three more takes: the third unlocks Hot Cross Buns, and the fourth Mary and 4 more Songs.
+  // Three more takes: the third unlocks Hot Cross Buns, and the fourth Mary and more Songs.
+  expect(unlockedAt(2)).toEqual([])
+  const third = unlockedAt(3).map(s => s.title)
+  expect(third).toContain('Hot Cross Buns')
+  expect(third).not.toContain('Mary Had a Little Lamb')
+  const fourth = unlockedAt(4).length - third.length
+  expect(fourth).toBeGreaterThan(2)
   await recordAndSave(page, '017')
   await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
   await page.getByRole('button', { name: 'Record another' }).click()
   await recordAndSave(page, '022')
-  await expect(page.getByTestId('result-progress')).toContainText('You unlocked Hot Cross Buns')
+  for (const title of third)
+    await expect(page.getByTestId('result-progress')).toContainText(`You unlocked ${title}`)
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page).toHaveURL(/\/recordings\/$/)
   await tab(page, 'Record').click()
   await recordAndSave(page, '002')
 
   // More than 2 unlocks are counted, then listed in the catalog's order, where Mary comes first.
-  await expect(page.getByTestId('result-progress')).toContainText('You unlocked 5 Songs')
+  await expect(page.getByTestId('result-progress')).toContainText(`You unlocked ${fourth} Songs`)
   await expect(page.getByTestId('result-progress')).toContainText('Mary Had a Little Lamb · ')
   // After an unlock, Try it opens the Song in Song Creator, and Done goes to Recordings.
   await expect(page.getByRole('button', { name: 'Record another' })).toHaveCount(0)
@@ -143,8 +156,11 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   // A reload continues a guest's visit (`visit.ts`), so from here Compose and Recordings read the
   // four Recordings back from storage.
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Unlocked · 6', exact: true })).toBeVisible()
-  await expect(locked(songs.length - 6)).toBeVisible()
+  const unlockedSongs = unlockedAt(4).length
+  await expect(
+    page.getByRole('heading', { name: `Unlocked · ${unlockedSongs}`, exact: true })
+  ).toBeVisible()
+  await expect(locked(songs.length - unlockedSongs)).toBeVisible()
   const unlocked = page
     .getByTestId('unlocked-songs')
     .locator('[data-song="mary"]')
@@ -163,16 +179,27 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   const search = page.getByRole('searchbox', { name: 'Search Songs' })
   await expectTappable(search)
   await expectTappable(page.getByRole('button', { name: 'Sort' }))
+  // Every Song with "little" in its title or another name, worked out from the catalog.
+  const little = songs.filter(song =>
+    [song.title, ...(song.aliases ?? [])].some(name => searchKey(name).includes('little'))
+  )
+  expect(little.map(song => song.id)).toContain('mary')
   await search.fill('LITTLE')
-  await expect(page.getByTestId('song-row')).toHaveCount(2)
+  await expect(page.getByTestId('song-row')).toHaveCount(little.length)
   await search.fill('zzz')
   await expect(page.getByText('No Results for “zzz”')).toBeVisible()
   await search.fill('')
   await page.getByRole('button', { name: 'Sort' }).click()
   await page.getByRole('menuitemradio', { name: 'A–Z' }).click()
+  // The first locked Song by the app's A–Z order, which puts a title that starts with a number
+  // first.
+  const firstLocked = sortRows(songRows(songs, fixtureRecordings(journey)), 'alphabetical').find(
+    row => !row.coverage.unlocked
+  )
+  expect(firstLocked).toBeDefined()
   await expect(page.getByTestId('locked-songs').getByTestId('song-row').first()).toHaveAttribute(
     'data-song',
-    'all-through-the-night'
+    firstLocked?.song.id ?? ''
   )
 })
 
