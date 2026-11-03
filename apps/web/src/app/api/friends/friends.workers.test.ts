@@ -2,9 +2,9 @@ import { eq, like } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 
 import * as handleRoute from '@/app/api/handle/route'
-import type { FriendLists } from '@/db/friends'
+import { addFriendRequest, type FriendLists } from '@/db/friends'
 import { friendRequests, friends, rateLimit } from '@/db/schema'
-import { FRIEND_REQUEST_LIMITS } from '@/server/friends'
+import { FRIEND_REQUEST_LIMITS, requestFriend } from '@/server/friends'
 import { type As, api, ORIGIN, signUp, testDb } from '@/test-support/library-api'
 
 import * as friendRoute from './[handle]/route'
@@ -184,7 +184,7 @@ describe('Sending a friend request', () => {
     expect(await requestRows()).toEqual([])
   })
 
-  it('keeps a few a day to the same person, so a decline can’t start a stream', async () => {
+  it('keeps a few to the same person, so a decline can’t start a stream', async () => {
     const { alice, bob } = await aliceAskedBob()
     for (let i = 1; i < FRIEND_REQUEST_LIMITS.perPair.max; i++) {
       expect((await friend.act('alice', 'decline', bob)).status).toBe(200)
@@ -224,6 +224,42 @@ describe('Sending a friend request', () => {
         .where(like(rateLimit.key, 'friend-pair|%'))
     ).toHaveLength(1)
     expect(await requestRows()).toEqual([{ from: 'useralice', to: 'userbob' }])
+  })
+
+  it('keeps the same-person limit for 30 days, not one', async () => {
+    const alice = await member('alice')
+    const bob = await member('bob')
+    const start = Date.now()
+    const at = (days: number) => new Date(start + days * 24 * 60 * 60 * 1000)
+    const ask = (days: number) => requestFriend(testDb(), 'useralice', 'bob', 'test-secret', at(days))
+    for (let i = 0; i < FRIEND_REQUEST_LIMITS.perPair.max; i++) {
+      expect(await ask(0)).toEqual({ sent: 'requested' })
+      expect((await friend.act('alice', 'decline', bob)).status).toBe(200)
+    }
+    expect(await ask(1)).toEqual({ refused: 'too_many_requests' })
+    expect(await ask(29)).toEqual({ refused: 'too_many_requests' })
+    expect(await ask(30.01)).toEqual({ sent: 'requested' })
+    expect((await friend.state('bob', alice)).state).toBe('requested')
+  })
+})
+
+describe('Two users asking each other', () => {
+  it('can’t leave a request each way: the second insert sees the first', async () => {
+    const alice = await member('alice')
+    const bob = await member('bob')
+    expect((await friend.ask('alice', bob)).status).toBe(201)
+    expect(await addFriendRequest(testDb(), 'useralice', 'userbob', new Date())).toBe(false)
+    expect(await requestRows()).toEqual([{ from: 'userbob', to: 'useralice' }])
+    expect((await friend.state('bob', alice)).state).toBe('asked')
+  })
+
+  it('end as friends when they ask at once', async () => {
+    const alice = await member('alice')
+    const bob = await member('bob')
+    const [a, b] = await Promise.all([friend.ask('bob', alice), friend.ask('alice', bob)])
+    expect([a.status, b.status].sort()).toEqual([200, 201])
+    expect(await requestRows()).toEqual([])
+    expect(await friendRows()).toHaveLength(2)
   })
 })
 

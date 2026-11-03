@@ -24,13 +24,13 @@ import { apiError, type SessionUser } from './require-user'
 
 /**
  * How many friend requests a user sends, each a row in `rate_limit` (`consumeSlots`): a few an
- * hour, so no one can ask every Handle, and a few a day to the same person, so asking again after
- * a decline can't become a stream of requests. A request spends a slot of each only when both have
- * one.
+ * hour, so no one can ask every Handle, and a few in 30 days to the same person, so asking again
+ * after a decline can't become a stream of requests. A request spends a slot of each only when both
+ * have one.
  */
 export const FRIEND_REQUEST_LIMITS = {
   perSender: { window: 60 * 60, max: 20 },
-  perPair: { window: 24 * 60 * 60, max: 3 }
+  perPair: { window: 30 * 24 * 60 * 60, max: 3 }
 } satisfies Record<string, SlotRule>
 
 /** A sender's row for friend requests an hour: an HMAC of their user id, as every key is. */
@@ -38,7 +38,7 @@ export async function friendRequesterKey(secret: string, userId: string): Promis
   return `friend-requester|${await keyedHash(secret, 'friend-requester-limit', userId)}`
 }
 
-/** A sender's row for requests to one user a day. */
+/** A sender's row for requests to one user in 30 days. */
 export async function friendPairKey(secret: string, fromId: string, toId: string) {
   return `friend-pair|${await keyedHash(secret, 'friend-pair-limit', `${fromId}\0${toId}`)}`
 }
