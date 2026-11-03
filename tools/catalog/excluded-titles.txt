@@ -314,12 +314,10 @@ Teu Santo Nome | under copyright: a modern worship song by Adoradores Novo Tempo
 The Fields of Athenry | under copyright: Pete St John, 1979
 Stern über Bethlehem | unsure: Alfred Hans Zoller, 1960s
 Swanee | under copyright: George Gershwin (died 1937) with lyricist Irving Caesar (died 1996), 1919
-79th's Farewell to Gibraltar | unsure of the composer's death date (a Pipe Major MacDonald)
 Russian Sailor's Dance | under copyright: Reinhold Glière (died 1956), 1927
 Hilf o Himmel | unsure of the composer and date
 Raglan Road | under copyright: Patrick Kavanagh (died 1967), 1946
 Mistletoe Waltz | unsure of the composer and date
-Road to the Isles | unsure: lyricist Kenneth MacLeod died in 1955 and the tune's composer is unclear
 Blessed Be the Name | unsure: Matt Redman's "Blessed Be Your Name" (2002) and older hymns share the title
 Red is the Rose | under copyright: lyrics of the 1970s on the Loch Lomond air
 Michael Turner's Waltz | unsure of the composer and date; the score's artist is Mozart
@@ -369,7 +367,6 @@ Jig | not one tune: a generic title
 Caledonia | not one tune: Dougie MacLean's song (1977) and a hymn tune share the title
 Carnevale Di Venezia | the same tune as Carnival of Venice
 Oh Suzana | the same tune as Oh! Susanna
-Off to California | unsure: James Hill's tune, composer's death date unknown
 Lacrymosa | not one tune: many Requiems share the movement's title
 Beale St. Blues | under copyright: W. C. Handy (died 1958), 1917
 Chariots of Fire | under copyright: Vangelis, 1981
@@ -494,6 +491,32 @@ Brighton Camp | the same tune as The Girl I Left Behind Me in the catalog
 Christmas Is Coming | the importer picks "christmas is a-coming" by Misc Christmas, genre soundtrack, not Nesbit's rhyme
 Eri gia tutta mia | the importer picks a score credited to Claudio Monteverdi, not Spighi da Prato's piece
 Here We Come A-Caroling | the importer picks Ron Smith's arrangement (a modern arranger), not the traditional tune
+
+# Pulled from titles-05.txt and titles-06.txt after the second review of their import (#324, PR #331).
+# 79th's Farewell to Gibraltar, Off to California and Road to the Isles were excluded by mistake and
+# are now in titles-06.txt.
+# Under copyright, or unsure
+Crested Hens | under copyright: Gilles Chabenat's "Les poules huppées" (1980s, living), not a traditional tune
+Black is the Color (of my True Love's Hair) | under copyright: the pick is John Jacob Niles's tune (died 1980), as Black Is The Colour
+Black Mountain Rag | unsure: known from 1930s recordings, and Leslie Keith (died 1977) claimed it
+Ida Sweet As Apple Cider | unsure: music by Eddie Munson, whose dates are unknown
+Ershter Vals | unsure: credited to G. L. Kitler (c. 1900), whose death date is unknown
+I Like The Flowers | unsure: a 20th-century camp round of unknown author and date
+Land of the Silver Birch | unsure: a 20th-century camp song of unknown author and date
+Salt Creek | unsure: known from Bill Monroe's 1963 recording; no form dated before 1931
+Wildwood Flower arr. for Voice and Tenor Viol | unsure: arranged by David Saphra, a living arranger; PDMX doesn't say who uploaded it
+# The same tune as a Song in the catalog
+Kings Of Orient | the same tune as We Three Kings in the catalog
+Sheebeg and Sheemore | the same tune as Si Bheag Si Mhor in the catalog
+Johnny I Hardly Knew Ye | the same tune as When Johnny Comes Marching Home in the catalog
+On Christmas Night | the importer picks "Version 4", another tune; the tune known by this name is the Sussex Carol, in the catalog
+Cold and Raw | the same tune as Stingo, the better-ranked title (Playford's "Stingo, or the Oyle of Barley")
+# The importer's pick isn't the tune
+My Faith Looks Up To Thee | the importer picked the tenor part of OLIVET; the scores with the melody fail the sanity gate
+Forty Days and Forty Nights | the importer picked the tenor part of AUS DER TIEFE; the score with the melody fails the sanity gate
+Crown Him With Many Crowns | the importer picks Charles H. Gabriel's setting; PDMX has no pickable score of DIADEMATA, Elvey's tune
+# Not one tune
+Ballet Cclxviii | not a tune name: a number in a collection
 
 # Reviewed for batch 07 (#324): the top 200 of the ranking after batch 06, read against each title's Artist in ranking.md.
 # Under copyright, or unsure (batch 07)

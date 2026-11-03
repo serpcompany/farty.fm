@@ -1,7 +1,8 @@
-"""A Trim (ADR 0019): a person keeps part of a Noise-like Recording's take with two handles, and
+"""A Trim (ADR 0019): a person keeps part of any Recording's take with two handles (#314), and
 trim_bounds() finds the fart between them as note_segment() finds a Recording's fart (ADR 0016).
 trimmed() then plays only that part: Songs cut it there and melody_fit() counts its length, but
-nothing re-reads its pitch, so a placed fart (placed(), ADR 0015) stays on its note.
+nothing re-reads its pitch, so a Melodic Recording keeps its Recording Pitch and a placed fart
+(placed(), ADR 0015) stays on its note.
 Runs on synthetic bursts, on the golden Songs and Recordings in fixtures/golden/, and on one
 Fixture Library file, Recording 065.
 `apps/web/src/lib/analysis/trim.test.ts` checks the same bounds on the web.
@@ -131,10 +132,18 @@ class Trimmed(unittest.TestCase):
         self.assertEqual(t.seconds, (91820 - 39108) / SR)
         self.assertLess(t.seconds, self.noise.seconds)
 
-    def test_only_a_noise_like_recording_is_trimmed(self):
-        melodic = next(s for s in map(golden_source, INDEX["libraries"]["full"]) if s.pitched)
-        with self.assertRaises(ValueError):
-            trimmed(melodic, self.take, 0.1, 0.5)
+    def test_a_melodic_recording_keeps_its_pitch(self):
+        # Any Recording can be trimmed (#314). Nothing re-reads a Melodic one's pitch: it keeps
+        # its Recording Pitch, its shortest note and when it settles, and plays only the Trim.
+        melodic = next(s for s in map(golden_source, INDEX["libraries"]["full"]) if s.id == "002")
+        self.assertTrue(melodic.pitched)
+        y = np.arange(1000, dtype=np.float32)
+        t = trimmed(melodic, y, 100 / SR, 400 / SR)
+        np.testing.assert_array_equal(t.audio, y[100:400])
+        self.assertEqual((t.start, t.end), (100, 400))
+        self.assertEqual(
+            (t.ref_midi, t.min_note_s, t.settle_s), (melodic.ref_midi, melodic.min_note_s, melodic.settle_s)
+        )
 
     def test_a_placed_recording_keeps_its_trim_when_a_later_analysis_finds_a_pitch(self):
         # 009 was Noise-like until the second pitch window (#282, ADR 0017) found it near G1. Placed
@@ -142,7 +151,7 @@ class Trimmed(unittest.TestCase):
         found = next(s for s in map(golden_source, INDEX["libraries"]["full"]) if s.id == "009")
         self.assertTrue(found.pitched)
         y = np.arange(1000, dtype=np.float32)
-        t = placed(trimmed(found, y, 100 / SR, 400 / SR, placed_by_ear=True), C2)
+        t = placed(trimmed(found, y, 100 / SR, 400 / SR), C2)
         np.testing.assert_array_equal(t.audio, y[100:400])
         self.assertEqual((t.ref_midi, t.start, t.end), (36.0, 100, 400))
 
@@ -163,6 +172,21 @@ class Trimmed(unittest.TestCase):
                 self.assertTrue(f.unlocked, sid)
                 self.assertIn("065", f.recording_for_pitch.values(), sid)
             self.assertFalse(melody_fit(m, [*small, burst_only]).unlocked, sid)
+
+    def test_melody_fit_counts_a_melodic_trim(self):
+        # Mary plays 002 (4.04 s, B♭2) on its 1.4 s notes. Trimmed to 1.5 s it still covers
+        # them; trimmed to 0.5 s it is too short for them, and another fart, or none, must.
+        small = [golden_source(rid) for rid in ("002", "016", "022", "069", "090")]
+        noise = placed(trimmed(self.noise, self.take, 39108 / SR, 91820 / SR), C2)
+        m = melody(SONGS["mary"])
+        whole = melody_fit(m, [*small, noise])
+        self.assertIn("002", whole.recording_for_pitch.values())
+        take = np.zeros(round(4.2 * SR), dtype=np.float32)
+        for seconds, plays in ((1.5, True), (0.5, False)):
+            cut = [trimmed(s, take, 0.15, 0.15 + seconds) if s.id == "002" else s for s in small]
+            self.assertAlmostEqual(cut[0].seconds, seconds, delta=1 / SR)
+            fit = melody_fit(m, [*cut, noise])
+            self.assertEqual("002" in fit.recording_for_pitch.values(), plays, seconds)
 
 
 if __name__ == "__main__":

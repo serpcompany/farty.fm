@@ -2,7 +2,9 @@
 # tools/catalog/rank_pdmx.py --batch 200 --out tools/catalog/titles-05.txt (#312). Each title's only name is
 # the one the ranking counted scores by. Review of its import (#324) pulled 7 titles, now in
 # excluded-titles.txt: Tochter Zion, Bolero, Lo How A Rose, How Firm a Foundation, Canticum trium
-# puerorum, The Chicago, Indian Queen.
+# puerorum, The Chicago, Indian Queen. Its second review pulled 6 more: Kings Of Orient, On Christmas
+# Night, Crown Him With Many Crowns, Ida Sweet As Apple Cider, I Like The Flowers, Wildwood Flower arr.
+# for Voice and Tenor Viol; and gave 7 Songs their proper title, keeping the ranking's as an alias.
 # id | catalog title
 moments-musicaux-opus-94-no-3-in-f-minor | Moments Musicaux Opus 94 No. 3 in F minor
 ave-maria-bach-gounod | Ave Maria Bach-Gounod
@@ -46,7 +48,7 @@ ade-zur-guten-nacht | Ade zur guten Nacht
 come-back-to-sorrento | Come Back To Sorrento
 lord-enthroned-in-heavenly-splendour | Lord enthroned in heavenly splendour
 i-shall-not-be-moved | I Shall Not Be Moved
-calon-lan | Calon Lan
+calon-lan | Calon Lân
 sangerhilsen | Sangerhilsen
 trumpet-hornpipe | The Trumpet Hornpipe
 geh-aus-mein-herz-und-suche-freud | Geh aus mein Herz und suche Freud
@@ -65,19 +67,17 @@ lead-me-lord | Lead Me Lord
 einigkeit-und-recht-und-freiheit | Einigkeit und Recht und Freiheit
 sarabande-de-haendel | Sarabande de Haendel
 banks-of-green-willow | Banks of Green Willow
-o-du-frohliche | O du frohliche
+o-du-frohliche | O du fröhliche
 bethena | Bethena
 niel-gows-lament-for-the-death-of-his-second-wife | Niel Gow's Lament for the Death of his Second Wife
 personent-hodie | Personent Hodie
-i-like-the-flowers | I Like The Flowers
 flee-as-a-bird | Flee As A Bird
-on-christmas-night | On Christmas Night
 jesus-loves-the-little-children | Jesus loves the little children
 whistler-and-his-dog | The Whistler And His Dog
 flow-my-tears | Flow My Tears
 guter-mond-du-gehst-so-stille | Guter Mond du gehst so stille
-noel-nouvelet | Noel Nouvelet
-amhran-na-bhfiann | Amhr'an na bhFiann
+noel-nouvelet | Noël nouvelet
+amhran-na-bhfiann | Amhrán na bhFiann
 sorcerers-apprentice | The Sorcerer's Apprentice
 my-lagan-love | My Lagan Love
 ay-linda-amiga | Ay Linda Amiga
@@ -113,7 +113,6 @@ du-gamla-du-fria | Du Gamla Du Fria
 i-need-thee-every-hour | I Need Thee Every Hour
 cantique-de-jean-racine-op-11 | Cantique de Jean Racine Op. 11
 wer-ein-liebchen-hat-gefunden | Wer ein liebchen hat gefunden
-kings-of-orient | Kings Of Orient
 una-furtiva-lagrima | Una Furtiva Lagrima
 theres-a-wideness-in-gods-mercy | There's a Wideness in God's Mercy
 cooleys-reel | Cooley's Reel
@@ -122,7 +121,6 @@ sumer-is-icumen-in | Sumer is icumen in
 black-and-white-rag | Black and White Rag
 ah-poor-bird | Ah Poor Bird
 garoun | Garoun
-wildwood-flower-arr-for-voice-and-tenor-viol | Wildwood Flower arr. for Voice and Tenor Viol
 my-jesus-i-love-thee | My Jesus I Love Thee
 he-shall-feed-his-flock | He Shall Feed His Flock
 la-grande-porte-de-kiev | La grande porte de Kiev
@@ -147,7 +145,6 @@ jig-of-slurs | The Jig Of Slurs
 bonaparte-crossing-the-alps | Bonaparte Crossing The Alps
 jesus-paid-it-all | Jesus Paid It All
 durme-durme | Durme Durme
-ida-sweet-as-apple-cider | Ida Sweet As Apple Cider
 walenki | Walenki
 song-to-the-moon | Song to the Moon
 off-she-goes | Off She Goes
@@ -172,24 +169,23 @@ beautiful-river | Beautiful River
 cumberland-gap | Cumberland Gap
 all-for-jesus | All For Jesus
 blackbird | The Blackbird
-crown-him-with-many-crowns | Crown Him With Many Crowns
 farewell-to-erin | Farewell To Erin
 argeers | Argeers
-amhran-na-leabhar | Amhran na Leabhar
+amhran-na-leabhar | Amhrán na Leabhar
 bantry-girls-lament | The Bantry Girl's Lament
 school-of-velocity-op-299-no-3-czerny | School Of Velocity Op.299 No.3 Czerny
 sleep-holy-babe | Sleep Holy Babe
 studentsangen | Studentsången
 atholl-highlanders | The Atholl Highlanders
 harvest-home | Harvest Home
-la-gazza-ladra | La Gazza Ladra
+la-gazza-ladra | La gazza ladra: Solemn March | La Gazza Ladra
 morgan-megan | Morgan Megan
 manchester-hornpipe | Manchester Hornpipe
 maoz-tsur | Maoz tsur
 summ-summ-summ | Summ Summ Summ
 charlie-is-my-darling | Charlie is my Darling
 miss-mcleods | Miss McLeod's
-thomas-campion-never-weather-beaten-sail | THOMAS CAMPION Never Weather-Beaten Sail
+thomas-campion-never-weather-beaten-sail | Never Weather-Beaten Sail | THOMAS CAMPION Never Weather-Beaten Sail
 marche-slave | Marche Slave
 drowsy-maggie | Drowsy Maggie
 must-jesus-bear-the-cross-alone | Must Jesus bear the cross alone

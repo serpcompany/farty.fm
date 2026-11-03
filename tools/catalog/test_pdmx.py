@@ -115,6 +115,19 @@ class Picking(unittest.TestCase):
         self.assertEqual([pdmx.score_id(r) for _, r in c.eligible], ["6420004"])
         self.assertEqual(c.rejected, {"its bar lines are off the tune": 1})
 
+    def test_a_score_that_isnt_the_melody_is_never_picked(self):
+        # #324: the best-rated score that passed was the hymn's tenor part.
+        rows = [row("My Faith Looks Up To Thee: Tenor", sid="562231", rating="4.9"),
+                row("My faith looks up to Thee - Lowell Mason", sid="5789390")]
+        [c] = pdmx.find_candidates(rows, titles("faith | My Faith Looks Up To Thee"))
+        self.assertEqual([pdmx.score_id(r) for _, r in c.eligible], ["5789390"])
+        self.assertEqual(c.rejected, {"it isn't the tune's melody": 1})
+
+    def test_no_catalog_song_has_a_score_that_isnt_the_melody(self):
+        for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
+            with self.subTest(song=entry["id"]):
+                self.assertNotIn(entry["source"].get("musescore_score_id"), pdmx.NOT_THE_MELODY)
+
     def test_no_catalog_song_has_a_misbarred_score(self):
         for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
             if entry["id"] == "saints":  # keeps its hand-picked misbarred score by decision (#232, comment 6459788077)
