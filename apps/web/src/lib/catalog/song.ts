@@ -8,6 +8,12 @@
 export type SongSummary = {
   id: string
   title: string
+  /**
+   * Who wrote the tune, as a cited page names them (#357): "Frédéric Chopin", several joined by
+   * " and ", or "Traditional (Irish)" for a folk tune. Absent when it isn't known yet, or the
+   * lookup found nobody.
+   */
+  composer?: string
   /** Other names the Song goes by, which search finds it by too: "Londonderry Air". */
   aliases?: readonly string[]
   /** The source and license line, for example "Public domain score · PDMX". */

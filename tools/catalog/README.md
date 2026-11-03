@@ -23,6 +23,10 @@ The first run downloads `PDMX.csv` (225 MB) and `mid.tar.gz` (214 MB) into `~/.c
 | `test_flag_picks.py` | Unit tests for the flags |
 | `ranking.md` | The ranking: the top 1,500 titles not yet tried, and why the others are left out |
 | `excluded-titles.txt` | Titles the ranking leaves out by hand, one `Title \| why` a line: under copyright, not one tune, or the same tune under another name |
+| `composers.py` | Each Song's composer ([Composers](#composers)): PDMX's names in one spelling each, and the rules, `check`, `apply` and `plan` for the lookup batches |
+| `test_composers.py` | Unit tests for the composer rules, and every batch against the catalog |
+| `composers-NN.json` | A batch of composer lookups: one record per Song, most viewed first |
+| `composers-NN.report.md` | The batch's report, written by `apply`: every Song's composer and source, the Unknowns and the removals |
 
 ## Ranking
 
@@ -67,3 +71,53 @@ The run writes `catalog/` only after every passing Song's entry imports, through
 ## After a batch
 
 Imported Songs are in the catalog, so the melody lab renders them (`run_all.py`, `build.py`), and the app ships every Song in the catalog but `ode-mutopia` (#350). To ship a batch, run `tools/melody-lab/export_golden.py`, which writes each Song's melody to `fixtures/golden/songs/`, then the app's generator (`apps/web/src/lib/catalog/generate.ts`); `catalog.test.ts` fails until both have run. Re-running a titles file replaces that batch's entries in their place; nothing else in the catalog changes. The importer has changed since the first batches, so re-running one may pick other scores: titles-01 would replace 8 shipped Songs' scores (#344). Compare the catalog before and after.
+
+A re-imported Song keeps its composer. A new Song is in no composer batch, so `composers.test.ts` fails until it's in one: run `composers.py plan` (below) and look the new batch up, in the import's PR or its own.
+
+## Composers
+
+Every Song names its composer, with the page that says so (#357). The fields sit after `title` in `catalog/catalog.json`:
+
+- `composer`: one name ("Frédéric Chopin"), several joined by ` and `, "Traditional (Irish)" for a folk tune, or "Unknown". The app's Compose index (`SongSummary.composer`) carries it, and leaves it out for "Unknown" and for a Song not looked up yet.
+- `composer_died`: the year the last of them died, when the source gives it. Only for a named composer.
+- `composer_source`: the page that says who wrote it.
+
+`source.composer` stays as PDMX gave it. PDMX's name is the uploader's, and often wrong: "NA" for most Songs, a lyricist, an arranger or a collection. Never copy it without checking.
+
+The lookups are in batch files, `composers-01.json` and on, about 150 Songs each, most viewed on MuseScore first. Every Song in the catalog is in exactly one. `apps/web/src/lib/catalog/composers.test.ts` counts the Songs looked up, and the count can't go down: each looked-up Song must carry its batch's answer, and no Song may have a composer its batch doesn't give it. Once no batch has a record left open, every Song must have `composer` and `composer_source`.
+
+### Look up a batch
+
+One agent, one batch, one PR from `staging`. For each record of `composers-NN.json` whose `composer` isn't set yet:
+
+1. Find who wrote the melody the Song plays: not the words, the arrangement or the uploader. Start from the record's `title` and `score` (its MuseScore page, to tell which piece of that name it is), and treat `pdmx` as a hint only.
+2. Use only these sources: Wikipedia (any language), IMSLP, The Session, the Traditional Tune Archive (tunearch.org), the Mutopia Project, or the Song's own MuseScore score (its `score`). Prefer the tune's own page; the composer's page counts when it names the work. Never guess.
+3. Write `composer` the catalog's way:
+   - A person: their English Wikipedia article's title, without its bracketed disambiguation ("Antonín Dvořák", "Turlough O'Carolan", "George Frideric Handel"). With no English article, the source's spelling. No dates, "arr." or "attrib.".
+   - Several: joined by ` and ` ("Peadar Kearney and Patrick Heeney").
+   - A folk tune nobody is credited with: `Traditional (<tradition>)`, the tradition as the source gives it, one capitalized adjective or two ("Traditional (Irish)", "Traditional (African American)" for a spiritual), or `Traditional` when it doesn't say.
+   - A tune the source credits to someone with doubt: the person it credits, the doubt in `note`. When the source says nobody knows, or you find nothing: `Unknown`, with `checked`, the list of page URLs you read.
+   - `composers.py check` refuses another spelling of a name it knows (`ALIASES`). When it's a new name and PDMX spells it another way, add the spelling to `ALIASES`.
+4. Add `composer_died` (an integer) when the source, or the composer's own article, gives it; for several composers, the last of their deaths. Add `published`, the year the tune was first published, when the source gives it. Add `composer_source`, and a short `note` for anything a reader would ask (the words' author, another attribution).
+5. **Under copyright**: when `composer_died` is after 1955, or `published` is 1931 or later ([ADR 0003](../../docs/adr/0003-songs-come-from-cited-scores.md)), the Song leaves the catalog. Keep its record with `remove`, the reason in words ("first published in 1931 or later: Morris first published it in 1940"), and the years that show it. Then pull it the way [Ranking](#ranking) pulls a title: add it to `excluded-titles.txt` with the reason, delete its line from its titles file (its entry's `import.titles`), note that in the file's header, and import that file again. Compare the catalog before and after: when the import changes any other Song (titles-01 would, #344), restore the catalog, leave the record without `remove`, and list the Song in the PR for the owner. A Song added by hand (no `import`) also goes to the PR, not out of the catalog.
+6. Check, then write the batch into the catalog and its report:
+
+   ```sh
+   tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py check --batch tools/catalog/composers-NN.json
+   tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py apply --batch tools/catalog/composers-NN.json
+   tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py check
+   ```
+
+   `apply` refuses while `check --batch` lists a problem. Both print how many Songs have their composer, for the PR.
+7. When a Song was removed, run `tools/melody-lab/export_golden.py` (from `tools/melody-lab`, with its venv) and lower the shipped Songs' count in `apps/web/src/lib/catalog/catalog.test.ts`. Always run the generator, from `apps/web`: `pnpm exec tsx src/lib/catalog/generate.ts`. Then the unit tests above and `pnpm check`.
+8. Open the PR with `Part of #357`, a line `No issue: one batch of #357's composer lookups` (the issue-link check needs it), the count `check` printed, the removed Songs and the Unknowns. The PR that leaves no record open starts with `Closes #357` instead.
+
+Batches run in parallel and touch the same files. After rebasing on `staging`, take `staging`'s `catalog/catalog.json` on a conflict and run `apply --batch` again, then always run the generator again: its output's file name is a hash of every Song, so two batches never merge cleanly there.
+
+### New batches
+
+`plan` puts every Song in no batch into new batch files of about `--size` (150) Songs, most viewed first, from `PDMX.csv` in the cache. `--batches K` writes only K batches of `--size`.
+
+```sh
+tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py plan
+```
