@@ -95,6 +95,13 @@ describe('mergeOutbox', () => {
         'placedPitch'
       ])
     ).toMatchObject({ op: 'place', sent: false, fields: ['placedPitch', 'trim'] })
+    // A name (#314) joins them, in the order a PATCH sends them.
+    expect(
+      mergeOutbox(recording('place', false, ['name']), 'recordings', id, 'place', stamp('v2'), [
+        'trim',
+        'placedPitch'
+      ])
+    ).toMatchObject({ op: 'place', fields: ['placedPitch', 'trim', 'name'] })
   })
 
   // Code from before #293 queued a place without fields: it only ever changed the Placed Pitch.

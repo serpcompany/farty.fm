@@ -6,20 +6,27 @@ import {
   type Analysis,
   type AnalysisState,
   atFullLevel,
-  fartPart,
+  defaultName,
+  foundNote,
+  foundPart,
   HIGHEST_PLACED_PITCH,
   heardSomething,
+  isLeftOut,
   isNoiseLike,
   isPlaceablePitch,
   LOWEST_PLACED_PITCH,
   levelContrast,
+  MAXIMUM_NAME_LENGTH,
+  NO_NOTE,
   needsReanalysis,
   placedPitch,
   type Recording,
+  recordingName,
   recordingPitch,
   songPitch,
   songTrim,
   TakeLevels,
+  trimHandles,
   trimOf
 } from './recordings'
 
@@ -359,7 +366,7 @@ describe('a Placed Pitch (ADR 0015)', () => {
     expect(songPitch(found(null))).toBe(55.3)
   })
 
-  it('keeps its Trim in use with it, and a Trim alone stops counting once Melodic (ADR 0019)', () => {
+  it('keeps its Trim in use with it, and a Trim alone on a Melodic Recording too (#314)', () => {
     const trim = {
       startSeconds: 0.3,
       endSeconds: 0.9,
@@ -375,13 +382,16 @@ describe('a Placed Pitch (ADR 0015)', () => {
     })
     expect(trimOf({ ...noiseLike(), trim })).toEqual(trim)
     expect(trimOf(found(48))).toEqual(trim)
-    // The picker plays the handles, and Songs the fart between them.
-    expect(fartPart(found(48))).toEqual({ startSeconds: 0.3, endSeconds: 0.9 })
+    // The row and the review play the handles, and Songs the fart between them.
+    expect(trimHandles(found(48))).toEqual({ startSeconds: 0.3, endSeconds: 0.9 })
     expect(songTrim(found(48))).toEqual(trim.fart)
-    // Not placed, it plays the fart analysis found, and keeps the Trim for nothing.
-    expect(trimOf(found(null))).toBeNull()
-    expect(fartPart(found(null))).toEqual({ startSeconds: 0.01, endSeconds: 1.2 })
-    expect(found(null).trim).toEqual(trim)
+    // Not placed, a Melodic Recording plays its Trim too: any Recording can be trimmed (#314).
+    expect(trimOf(found(null))).toEqual(trim)
+    expect(trimHandles(found(null))).toEqual({ startSeconds: 0.3, endSeconds: 0.9 })
+    expect(songTrim(found(null))).toEqual(trim.fart)
+    // Untrimmed, there are no handles: the review opens on the fart analysis found.
+    expect(trimHandles({ ...found(null), trim: null })).toBeNull()
+    expect(foundPart(found(null))).toEqual({ startSeconds: 0.01, endSeconds: 1.2 })
   })
 
   it('counts for nothing while the Recording is not analyzed', () => {
@@ -390,5 +400,38 @@ describe('a Placed Pitch (ADR 0015)', () => {
       expect(isNoiseLike(r)).toBe(false)
       expect(songPitch(r)).toBeNull()
     }
+  })
+
+  it('places a Melodic Recording on another note, or leaves it out with "No note" (#314)', () => {
+    const melodic = (placed?: number | null): Recording => ({
+      ...noiseLike(placed),
+      analysis: {
+        state: 'analyzed',
+        analysis: { ...analysis, recordingPitchMidi: 55.3, shortestNoteSeconds: 0.12 }
+      }
+    })
+    // The review names the nearest note analysis found: G3.
+    expect(foundNote(melodic())).toBe(55)
+    expect(foundNote(noiseLike())).toBeNull()
+    expect(songPitch(melodic(43))).toBe(43)
+    expect(isLeftOut(melodic(NO_NOTE))).toBe(true)
+    expect(placedPitch(melodic(NO_NOTE))).toBeNull()
+    expect(songPitch(melodic(NO_NOTE))).toBeNull()
+    expect(recordingPitch(melodic(NO_NOTE))).toBe(55.3)
+    expect(isLeftOut(melodic(null))).toBe(false)
+    expect(isPlaceablePitch(NO_NOTE)).toBe(false)
+  })
+})
+
+describe('a Recording’s name (#314)', () => {
+  const named = (name?: string | null) => ({ number: 12, ...(name === undefined ? {} : { name }) })
+
+  it('is "Recording {number}" until the user names it', () => {
+    expect(recordingName(named())).toBe('Recording 12')
+    expect(recordingName(named(null))).toBe('Recording 12')
+    expect(recordingName(named('   '))).toBe('Recording 12')
+    expect(recordingName(named(' Big one '))).toBe('Big one')
+    expect(defaultName(3)).toBe('Recording 3')
+    expect(MAXIMUM_NAME_LENGTH).toBe(40)
   })
 })

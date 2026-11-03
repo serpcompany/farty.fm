@@ -296,12 +296,13 @@ PLACED_MIN_NOTE_S = 0.6  # the shortest note a Placed Recording counts as readin
 
 def placed(src, midi):
     """A Recording placed on `midi` by ear (ADR 0015), as melody_fit() reads it: a Melodic
-    Recording whose Recording Pitch is that note. Only a Noise-like Recording is placed, but the
-    placement outlasts a later analysis that finds a Recording Pitch, and stays the one used: the
-    user chose it (ADR 0017). Nothing measured the fart on that note, so its shortest note is
-    audition()'s longest length, the slowest a Melodic Recording reads back on, and it counts as
-    settled from its start. render() plays it raw, like any fart: the note is where it goes, never
-    a pitch shift. The web's `placedAutoMapRecording()` makes the same."""
+    Recording whose Recording Pitch is that note. Any Recording can be placed: a Noise-like one on
+    a note, or a Melodic one on another note than analysis found (#314). The placement outlasts a
+    later analysis that finds a Recording Pitch, and stays the one used: the user chose it (ADR
+    0017). Nothing measured the fart on that note, so its shortest note is audition()'s longest
+    length, the slowest a Melodic Recording reads back on, and it counts as settled from its
+    start. render() plays it raw, like any fart: the note is where it goes, never a pitch shift.
+    The web's `placedAutoMapRecording()` makes the same."""
     return replace(src, ref_midi=float(midi), min_note_s=PLACED_MIN_NOTE_S, settle_s=0.0)
 
 
@@ -320,20 +321,18 @@ def trim_bounds(y, start_s, end_s):
     return (a + start) / SR, (a + end) / SR
 
 
-def trimmed(src, y, start_s, end_s, placed_by_ear=False, handles=None):
-    """A Noise-like Recording with a Trim (ADR 0019): the same Recording, playing only
-    y[round(start_s x SR):round(end_s x SR)] of its decoded take `y`. Songs cut it there, and
-    melody_fit() counts that length; nothing re-reads its pitch, so placed() puts it on the note
-    it was placed on. `start_s` and `end_s` are the fart a stored Trim keeps, already found by
-    trim_bounds() between the Trim's `handles` (start, end, in seconds).
+def trimmed(src, y, start_s, end_s, handles=None):
+    """A Recording with a Trim (ADR 0019): the same Recording, playing only
+    y[round(start_s x SR):round(end_s x SR)] of its decoded take `y`. Any Recording can be
+    trimmed (#314), Melodic or Noise-like. Songs cut it there, and melody_fit() counts that
+    length; nothing re-reads its pitch, so a Melodic Recording keeps its Recording Pitch, shortest
+    note and settle time, and placed() puts a placed one on the note it was placed on. `start_s`
+    and `end_s` are the fart a stored Trim keeps, already found by trim_bounds() between the
+    Trim's `handles` (start, end, in seconds).
     Its lead-in (#287) is found between the handles too: lead_in_start() on the part they keep,
     as trim_bounds() finds the fart there, so Songs never play what's before the start handle.
     Without `handles` there is no room before the fart, and no lead-in.
-    A Recording placed by ear keeps its Trim when a later analysis finds a Recording Pitch, as it
-    keeps its Placed Pitch (ADR 0017), so `placed_by_ear` lets a Melodic one be trimmed. The
-    web's `trimOf()` and `renderSource()` give the same."""
-    if src.pitched and not placed_by_ear:
-        raise ValueError(f"{src.id} is Melodic and not placed: only a Noise-like or placed Recording is trimmed")
+    The web's `trimOf()` and `renderSource()` give the same."""
     a = max(0, min(len(y), round(start_s * SR)))
     b = max(a, min(len(y), round(end_s * SR)))
     lead_from = a
@@ -509,7 +508,10 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
     pitches = sorted({n.pitch for n in melody.notes})
     spb = 60 / melody.bpm
     weight = {p: sum(n.dur for n in melody.notes if n.pitch == p) for p in pitches}
-    note_seconds = {p: [n.dur * spb - GAP_S for n in melody.notes if n.pitch == p] for p in pitches}
+    # A note shorter than GAP_S has no slot left, not a negative one: a negative slot made
+    # unsettled_cost() about -1e8 a note (it divides by max(1e-9, slot)), so solve()'s penalties
+    # no longer ranked choices and Bolero's ornaments crashed smallest_ids() (#332).
+    note_seconds = {p: [max(0.0, n.dur * spb - GAP_S) for n in melody.notes if n.pitch == p] for p in pitches}
     longest = {p: max(note_seconds[p]) for p in pitches}
 
     def cells(t):  # cells[i][j]: (Octave Move?, cost) of pitch i on Recording j, or None
@@ -542,7 +544,8 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
     def solve(table, fixed=()):
         """Best choice for the pitches after `fixed` (Recording indexes or None, in pitch
         order), as one assignment problem: penalties larger than any cost make it minimise
-        uncovered pitches first, then Octave Moves, then cost."""
+        uncovered pitches first, then Octave Moves, then cost. Costs are never negative, so
+        `bound` is at least any choice's cost."""
         rows = table[len(fixed) :]
         cols = [j for j in range(len(pitched)) if j not in fixed]
         bound = sum(max((c[1] for c in row if c is not None), default=0.0) for row in rows)
@@ -578,6 +581,9 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
                 if optimal(solve(table, fixed + [j])[0]):
                     fixed.append(j)
                     break
+            else:  # the last solve() was optimal, so one of its choices for pitch i is too.
+                # Without one, the next pitch's Recording would land on this pitch (#332).
+                raise AssertionError(f"no optimal choice for Song pitch {pitches[i]}")
         return fixed
 
     fits = []

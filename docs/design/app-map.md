@@ -22,6 +22,7 @@ Capture-first, as approved in #2, with the owner's changes from the #47 review: 
 - **Record a fart:** Record tab → tap the big button (recording fills the screen: Stop, with a timer) → tap Stop → Review (play back, Save / Discard) → Save → Analyzing → Result (Recording Pitch or "noise-like", plus any unlock progress) → Done → Recordings
 - **Unlock moment:** Result → "You unlocked Twinkle, Twinkle" → Try it → Song Creator
 - **Replay or delete a Recording:** Recordings → tap row to play → swipe or long-press → Delete → confirm
+- **Web, since #314:** Stop opens one review: the waveform with Trim handles and Play, the note above one octave of piano keys with a "No note" button, and the name. Discard or Save → Result (the note, or "No note") → Done → Recordings. A Recording's pencil on the Recordings tab opens the same review as a modal, with Cancel and Save; Escape is Cancel.
 - **Make a Toot:** Compose → Songs → an Unlocked Song → Song Creator (plays automatically) → Save → Toots
 - **See what a locked Song needs:** Compose → Songs → a locked Song → "Needs a fart near D3 and F3" sheet → Record (goes to the Record tab). Locked Songs can't be played.
 - **Make an AI melody (post-MVP):** Compose → AI → pick a mood → Compose (plays) → Try again or Save → Toots
@@ -90,4 +91,4 @@ Use system colors, with red only for recording. This is why the minimum iOS is 2
 
 1. **Early payoff:** the first unlock comes late. Proposed: add a few 3-note starter Songs (Hot Cross Buns and similar) through the batch import (#121). Letting AI Song Creator work from 3 Melodic farts was the other idea; it's post-MVP with AI.
 2. **Choosing Recordings:** Auto-map picks the farts itself, with no manual picking in the MVP.
-3. **Naming Recordings:** default "Recording 1, 2, …", with no renaming in the MVP.
+3. **Naming Recordings:** default "Recording 1, 2, …", with no renaming in the MVP. Update 2026-11-03: on the web, a Recording is named in its review (#314).
