@@ -287,22 +287,13 @@ test.describe('installed', () => {
       return navigator.serviceWorker.controller !== null
     })
     await loadTheFixtureLibrary(page)
-    const mary = page.getByTestId('unlocked-songs').locator('[data-song="mary"]').getByRole('link')
-    const state = page.getByTestId('song-creator-state')
-    const play = page.getByTestId('song-creator-play')
 
-    // A Song's notes load as it opens, and the service worker keeps them (#323), so Mary opens once
-    // online first.
-    await mary.click()
-    await expect(state).toBeVisible({ timeout: 60_000 })
-    await page.getByRole('link', { name: 'Back to Compose' }).click()
-
-    // A reload, offline, forgets the notes the page held, so Mary's come from the service worker.
     await context.setOffline(true)
-    await page.reload()
-    await mary.click()
+    await page.getByTestId('unlocked-songs').locator('[data-song="mary"]').getByRole('link').click()
     await expect(page).toHaveURL(/\/compose\/mary\/$/)
     await expect(page.getByRole('heading', { name: 'Mary Had a Little Lamb' })).toBeVisible()
+    const state = page.getByTestId('song-creator-state')
+    const play = page.getByTestId('song-creator-play')
     await expect(state).toBeVisible({ timeout: 60_000 })
     // Opened from a tap, it plays by itself: the whole Toot, which isn't silence. Tapping Play now
     // would stop it, so wait for the sound before tapping.
@@ -320,18 +311,15 @@ test.describe('installed', () => {
 
     // A Song's page opened from a link, still offline: the service worker keeps no Song's own
     // page, so the one Song page answers, and shows the Song its address names, with its title
-    // in the tab (#322). This Song was never opened, so it has no notes offline (#323), and says
-    // so until it's online again.
+    // in the tab (#322).
     const other = songsTheFixtureLibraryUnlocks.find(song => song.id !== 'mary')
     if (!other) throw new Error('the Fixture Library unlocks another Song')
     await page.goto(`/compose/${other.id}/`)
     await expect(page.getByRole('heading', { name: other.title })).toBeVisible()
     await expect(page).toHaveTitle(`${other.title} · Farty`)
     await expect(page.getByText(other.source)).toBeVisible()
-    await expect(page.getByText("Couldn't load this Song.")).toBeVisible({ timeout: 60_000 })
-    await context.setOffline(false)
-    await page.getByRole('button', { name: 'Try again' }).click()
     await expect(state).toBeVisible({ timeout: 60_000 })
+    await context.setOffline(false)
   })
 })
 

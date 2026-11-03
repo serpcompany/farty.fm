@@ -492,8 +492,78 @@ describe("a Song's notes (#323)", () => {
 
     online = false
     expect(await (await worker.request(notes('mary')))?.text()).toBe(`notes of ${notes('mary')}`)
-    // A Song never opened has no notes offline: Song Creator says so, with Try again.
-    await expect(worker.request(notes('twinkle'))).rejects.toThrow('Failed to fetch')
+  })
+
+  /** An index of these Songs, as the generator writes it. */
+  const index = (...ids: string[]) =>
+    JSON.stringify(ids.map(id => ({ id, title: id, notesPath: notes(id) })))
+
+  it("keeps every Song's notes when it installs, so a Song never opened plays offline (#138)", async () => {
+    let online = true
+    const fetched: string[] = []
+    const worker = startWorker(url => {
+      if (!online) return 'offline'
+      const path = url.replace(origin, '')
+      fetched.push(path)
+      if (path === '/') return ok(startPage)
+      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
+      if (path === '/compose/song/') return ok(`<link rel="preload" href="${catalog}" as="fetch"/>`)
+      if (path === catalog) return ok(index('mary', 'twinkle', 'ode-to-joy'))
+      return ok(`notes of ${path}`)
+    })
+    await worker.lifecycle('install')
+    expect(worker.kept('pedos-notes-v1').sort()).toEqual(
+      [notes('mary'), notes('ode-to-joy'), notes('twinkle')].sort()
+    )
+    // The index stays in the shell's cache, and the notes never go there.
+    expect(worker.kept()).toContain(catalog)
+    expect(worker.kept().filter(path => path.startsWith('/catalog/notes/'))).toEqual([])
+
+    online = false
+    expect(await (await worker.request(notes('twinkle')))?.text()).toBe(
+      `notes of ${notes('twinkle')}`
+    )
+
+    // The start page's refresh, online again, fetches no notes it already holds.
+    online = true
+    fetched.length = 0
+    await worker.request('/', { mode: 'navigate' })
+    expect(fetched.filter(path => path.startsWith('/catalog/notes/'))).toEqual([])
+  })
+
+  it("keeps a new index's notes once a page fetches it, such as after a deploy", async () => {
+    const next = '/catalog/songs-00000000000000ff.json'
+    const fetched: string[] = []
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      fetched.push(path)
+      if (path === catalog) return ok(index('mary'))
+      if (path === next) return ok(index('mary', 'twinkle'))
+      return ok(`notes of ${path}`)
+    })
+    expect(await (await worker.request(catalog))?.text()).toBe(index('mary'))
+    expect(worker.kept('pedos-notes-v1')).toEqual([notes('mary')])
+    await worker.request(next)
+    expect(worker.kept('pedos-notes-v1')).toEqual([notes('mary'), notes('twinkle')])
+    // Mary's notes were kept already, and a page's later fetches of an index look no further.
+    await worker.request(next)
+    expect(fetched.filter(path => path === notes('mary'))).toHaveLength(1)
+    expect(fetched.filter(path => path === notes('twinkle'))).toHaveLength(1)
+  })
+
+  it('tries the notes again on the next fetch of the index when the connection drops part way', async () => {
+    let flaky = true
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      if (path === catalog) return ok(index('mary', 'twinkle'))
+      if (flaky && path === notes('twinkle')) return 'offline'
+      return ok(`notes of ${path}`)
+    })
+    await worker.request(catalog)
+    expect(worker.kept('pedos-notes-v1')).toEqual([notes('mary')])
+    flaky = false
+    await worker.request(catalog)
+    expect(worker.kept('pedos-notes-v1')).toEqual([notes('mary'), notes('twinkle')])
   })
 
   it("answers a Song's notes from before a deploy with the copy it kept", async () => {
