@@ -116,6 +116,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - **Result for a Noise-like Recording:** "No steady note this time. It's saved, but it can't play melody notes." On the web (#314): "No note. It's saved. Songs leave it out until you give it a note from the Recordings tab", for a Noise-like Recording or one left out with "No note". When analysis fails, "Saved, but we couldn't find its note", with Retry. When the review's Trim can't be saved, Result says it's kept whole.
 - Pitch Coverage changes: "Ode to Joy: 4 of 5 notes covered"
 - Unlocks: "You unlocked Twinkle, Twinkle", with a "Try it" button
+- On the web (#320): Share at the top right, as on the Recording's row (ADR 0020)
 - Done button
 **PRIMARY ACTION:** Done (or Try it when something was unlocked).
 **SECONDARY ACTIONS:** Record another.
