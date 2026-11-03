@@ -21,11 +21,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
+      docs: ${{ steps.scope.outputs.docs }}
       web: ${{ steps.paths.outputs.web }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 2
+      - id: scope
+        uses: ./.github/actions/ci-scope
       - id: paths
         run: |
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
@@ -39,10 +42,11 @@ jobs:
 
   check:
     needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.docs != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      WEB: ${{ needs.changes.outputs.web }}
+      WEB: ${{ needs.changes.outputs.web || 'true' }}
     steps:
       - if: env.WEB == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -97,11 +101,13 @@ jobs:
 
   e2e:
     needs: changes
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    if: >-
+      ${{ !cancelled() && needs.changes.outputs.docs != 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      WEB: ${{ needs.changes.outputs.web }}
+      WEB: ${{ needs.changes.outputs.web || 'true' }}
     steps:
       - if: env.WEB == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -177,8 +183,8 @@ jobs:
           path: apps/web/playwright-report
 
   deploy-staging:
-    if: github.event_name != 'pull_request' && github.ref_name == 'staging'
-    needs: [check, e2e]
+    if: github.event_name != 'pull_request' && github.ref_name == 'staging' && needs.changes.outputs.docs != 'true'
+    needs: [changes, check, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
@@ -239,8 +245,8 @@ jobs:
         run: scripts/smoke.sh https://pedos-web-staging.serpcompany.workers.dev staging
 
   deploy-production:
-    if: github.event_name != 'pull_request' && github.ref_name == 'main'
-    needs: [check, e2e]
+    if: github.event_name != 'pull_request' && github.ref_name == 'main' && needs.changes.outputs.docs != 'true'
+    needs: [changes, check, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:

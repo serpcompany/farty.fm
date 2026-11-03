@@ -7,8 +7,10 @@ The `gh` and `git` commands here run as the organization's app, through the `ser
 - **Promotion** fast-forwards `main` to `staging`'s tip, so Production gets exactly the squash commits Staging tested. The push to `main` deploys Production and smoke-tests it; a promoted tree usually has its receipt already, so `e2e` skips. `main`'s pull-request rule lets only its bypass actors, the owner and the release workflow, push it, so the owner runs:
 
   ```sh
-  git fetch origin && git push origin origin/staging:main
+  git fetch origin && node apps/web/scripts/ci-passed.mjs origin/staging && git push origin origin/staging:main
   ```
+
+  `ci-passed.mjs` is the gate: it pushes nothing unless `staging`'s tip passed CI. A docs-only push runs only the docs checks ([CI](ci.md#scope)), so its green run says nothing about the code under it: the script walks back along first parents past docs-only commits, at most 50, to the last full run, and requires that run's `verify`, `check`, `e2e`, `reference` and `scores` to have passed on a push to `staging` or `main`. It reads the runs with `gh`, as the person running it.
 
   If `main` has diverged (a hotfix landed there), open a `staging` → `main` PR instead and merge it with a merge commit, then merge back (below).
 - **Releases.** Release Please (`.github/workflows/release-please.yml`, configured for `apps/web` in `release-please-config.json`) keeps one `chore: release Farty x.y.z` PR open on `main`, built from the commits that promotion brought. Merging it bumps `apps/web/package.json`, writes `apps/web/CHANGELOG.md` and tags `vX.Y.Z`. Nobody types versions or tags. The iPhone app's history and its `v1.0.0` release are in tags (ADR 0016), so the web app's first release was `v1.1.0`.

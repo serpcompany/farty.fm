@@ -19,11 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
+      docs: ${{ steps.scope.outputs.docs }}
       tools: ${{ steps.paths.outputs.tools }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 2
+      - id: scope
+        uses: ./.github/actions/ci-scope
       - id: paths
         run: |
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
@@ -37,10 +40,11 @@ jobs:
 
   reference:
     needs: tools-changes
+    if: ${{ !cancelled() && needs.tools-changes.outputs.docs != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      TOOLS: ${{ needs.tools-changes.outputs.tools }}
+      TOOLS: ${{ needs.tools-changes.outputs.tools || 'true' }}
     steps:
       - if: env.TOOLS == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -73,10 +77,11 @@ jobs:
 
   scores:
     needs: tools-changes
+    if: ${{ !cancelled() && needs.tools-changes.outputs.docs != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      TOOLS: ${{ needs.tools-changes.outputs.tools }}
+      TOOLS: ${{ needs.tools-changes.outputs.tools || 'true' }}
     steps:
       - if: env.TOOLS == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

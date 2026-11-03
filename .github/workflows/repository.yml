@@ -15,11 +15,26 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  verify-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      docs: ${{ steps.scope.outputs.docs }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+      - id: scope
+        uses: ./.github/actions/ci-scope
+
   verify:
+    needs: verify-changes
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       HAS_AGENT_KEY: ${{ secrets.SERP_AGENT_PRIVATE_KEY != '' }}
+      DOCS: ${{ needs.verify-changes.outputs.docs }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -42,9 +57,14 @@ jobs:
           cache: pnpm
           registry-url: https://npm.pkg.github.com
           scope: "@serpcompany"
-      - name: Install the workspace, with @serpcompany/verify from GitHub Packages
+      - name: Install the workspace, with @serpcompany/verify from GitHub Packages, or only the root's for docs
         id: install
-        run: pnpm install --frozen-lockfile
+        run: |
+          if [ "$DOCS" = true ]; then
+            pnpm install --frozen-lockfile --filter farty
+          else
+            pnpm install --frozen-lockfile
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
       - name: Say what installing the private package needs
@@ -53,8 +73,13 @@ jobs:
           echo "::error title=@serpcompany/verify is a private GitHub Package::This job grants
           packages: read, and the package's settings must give this repository Read under Manage
           Actions access (docs/agents/ci.md)."
-      - name: Every check, at the version the lockfile pins
-        run: pnpm verify
+      - name: The checks the change can affect, at the version the lockfile pins
+        run: |
+          if [ "$DOCS" = true ]; then
+            pnpm verify docs,secrets
+          else
+            pnpm verify
+          fi
         env:
           SERP_VERIFY_GITHUB_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           SERP_VERIFY_BASE: HEAD^1

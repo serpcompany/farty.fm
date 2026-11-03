@@ -4,7 +4,7 @@ Every GitHub Actions workflow, what starts it, and the checks a merge waits for.
 
 | Workflow | Starts on | Jobs |
 | --- | --- | --- |
-| `repository.yml` | Every PR, and every push to `staging` and `main` | `verify` |
+| `repository.yml` | Every PR, and every push to `staging` and `main` | `verify-changes`, `verify` |
 | `code-review.yml` | A PR opened, pushed to, reopened or marked ready | `review` |
 | `claude.yml` | `@claude` in an issue, a PR comment, a review or a review comment | `claude` |
 | `pull-request.yml` | A PR opened, edited, pushed to or marked ready | `title`, `issue-link`, `fix-test`, `text` |
@@ -16,16 +16,27 @@ Every GitHub Actions workflow, what starts it, and the checks a merge waits for.
 
 ## Required checks
 
-`staging` and `main` require `verify`, `title`, `issue-link`, `fix-test`, `text`, `changes`, `check` and `e2e`, and every review thread resolved. A required workflow has no `paths` filter, since a skipped one leaves its check pending: `web.yml`'s `changes` job decides instead, and its jobs still report when they skip their steps. `tools.yml`'s `tools-changes` works the same way, so its `reference` and `scores` are ready to be required too. `review` isn't required: a merge waits on its threads instead.
+`staging` and `main` require `verify`, `title`, `issue-link`, `fix-test`, `text`, `changes`, `check` and `e2e`, and every review thread resolved. A required workflow has no `paths` filter, since a workflow that never starts leaves its checks pending: each decides in a job instead (Scope, below). `tools.yml`'s `reference` and `scores` are ready to be required too. `review` isn't required: a merge waits on its threads instead.
+
+## Scope
+
+Each run checks what its change can affect, as SERP's [CI Scope](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/ci-scope.md) sets.
+
+- **One classification per workflow.** `web.yml`'s `changes`, `tools.yml`'s `tools-changes` and `repository.yml`'s `verify-changes` each run the local action `.github/actions/ci-scope`, which compares a PR's merge commit with its first parent (the whole PR), or a push with `github.event.before`, and runs `apps/web/scripts/ci-scope.mjs`. A change is docs-only when every changed file, a renamed one under its old path too, is in the docs paths that script declares: Markdown at the root, under `docs/`, in `.claude/skills/`, in `apps/web/docs/`, `apps/web/AGENTS.md` and `CLAUDE.md`, tools' READMEs and the golden data's notes. Two of those a Python test reads, `tools/catalog/README.md` and `fixtures/golden/port-tests.md`, so they count as code. A manual run, a new branch or anything else runs everything.
+- **A docs-only PR** runs `verify`'s docs and secrets checks, the PR checks and the code review, and nothing else. **A docs-only push** runs the docs and secrets checks and deploys nothing, since the built site can't change.
+- **Jobs skip, never workflows.** `check`, `e2e`, `reference` and `scores` run on `!cancelled() && needs.<classification>.outputs.docs != 'true'`: a skipped required job counts as passing, and when the classification fails they run in full while the failed job turns the run red. The deploys need `changes`, so a failed classification deploys nothing. Within a code change, `changes` and `tools-changes` still skip a job's steps when a PR touches nothing it reads, and the job still reports.
+- **Nothing builds from the docs paths.** Tailwind reads only `src` (`source(none)` in `globals.css`), since it scans every file of its folder by default, docs included. `apps/web/scripts/ci-scope.test.ts` holds that, and that no code, test, script, workflow or config names a doc beyond the text of a rule or a reason; `apps/web/scripts/ci-workflows.test.ts` holds each workflow's conditions.
+- **A green docs-only run says nothing about the code under it.** Before promoting, `node apps/web/scripts/ci-passed.mjs origin/staging` walks back past docs-only commits to the last full run and requires its `verify`, `check`, `e2e`, `reference` and `scores` to have passed ([Promotion and releases](releases.md)).
 
 ## Repository
 
-- **`verify`** installs the workspace, with `@serpcompany/verify` from GitHub Packages, and runs `pnpm verify`: every SERP check, at the version the lockfile pins ([Verification](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification/README.md)). It checks out the commit with its parent, which it names `SERP_VERIFY_BASE`, so each exception list can only shrink against it. The docs check reads links into SERP's private repositories with the `serp-agent` app's short-lived token when `SERP_AGENT_APP_ID` and `SERP_AGENT_PRIVATE_KEY` are set, and with the job's own token otherwise.
+- **`verify`** installs the workspace, with `@serpcompany/verify` from GitHub Packages, and runs `pnpm verify`: every SERP check, at the version the lockfile pins ([Verification](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification/README.md)). On a docs-only change it installs only the root's packages and runs `pnpm verify docs,secrets`. It checks out the commit with its parent, which it names `SERP_VERIFY_BASE`, so each exception list can only shrink against it. The docs check reads links into SERP's private repositories with the `serp-agent` app's short-lived token when `SERP_AGENT_APP_ID` and `SERP_AGENT_PRIVATE_KEY` are set, and with the job's own token otherwise.
+
 ## Code review
 
 `code-review.yml` is its own workflow, as SERP's [code review](https://github.com/serpcompany/serp/blob/main/docs/engineering/standards/verification/code-review/github-actions.md) standard sets, so a PR that changes `repository.yml` or another workflow is still reviewed.
 
-- **`review`** runs on a PR that isn't a draft or a bot's, beside `verify` rather than after it. It installs the review's scripts from the same package version outside the checkout, gives Claude the rules (`AGENTS.md`, `ARCHITECTURE.md`, `CONTEXT.md`, [`docs/agents/code.md`](code.md), `apps/web/AGENTS.md`, as they are on the base branch), the change since the last reviewed commit, its issue and the earlier findings, and runs the [`pr-review`](../../.claude/skills/pr-review/SKILL.md) skill. Claude posts findings inline, marked blocking or suggestion, and the job posts one summary comment. It skips with a notice until `CLAUDE_CODE_OAUTH_TOKEN` is set. It never reviews a PR that changes `code-review.yml` itself, since Claude runs only from the default branch's copy of its workflow: a person reviews such a PR.
+- **`review`** runs on a PR that isn't a draft or a bot's, a docs-only one too, since docs carry rules. It starts beside `verify` rather than after the docs checks pass, as CI Scope has it, because a job can't wait on another workflow's. It installs the review's scripts from the same package version outside the checkout, gives Claude the rules (`AGENTS.md`, `ARCHITECTURE.md`, `CONTEXT.md`, [`docs/agents/code.md`](code.md), `apps/web/AGENTS.md`, as they are on the base branch), the change since the last reviewed commit, its issue and the earlier findings, and runs the [`pr-review`](../../.claude/skills/pr-review/SKILL.md) skill. Claude posts findings inline, marked blocking or suggestion, and the job posts one summary comment. It skips with a notice until `CLAUDE_CODE_OAUTH_TOKEN` is set. It never reviews a PR that changes `code-review.yml` itself, since Claude runs only from the default branch's copy of its workflow: a person reviews such a PR.
 
 ## @claude requests
 
@@ -51,10 +62,10 @@ Each job runs one of SERP's [pull request checks](https://github.com/serpcompany
 
 `web.yml` runs on every PR and on every push to `staging` and `main`:
 
-- `changes`: on a PR, whether anything the web app builds from changed (`apps/web`, `fixtures`, `catalog`, the root's package files or the workflow). When nothing did, `check` and `e2e` skip their steps and still report.
+- `changes`: whether the change is docs-only, which skips `check`, `e2e` and the deploys (Scope, above), and on a PR whether anything the web app builds from changed (`apps/web`, `fixtures`, `catalog`, the root's package files or the workflow). When nothing did, `check` and `e2e` skip their steps and still report.
 - `check`: ShellCheck on the smoke test, lint, types (with `wrangler types --check`), `drizzle-kit check`, a guard that fails when `pnpm db:generate` would write a migration (a `schema.ts` change without its migration), and unit tests. On a PR it also runs both Workers builds: `build:production`, which fails if the build carries any Fixture Library file, and `build:staging`, which `check` runs only on a draft, since `e2e` builds it otherwise. On a push, the deploy job's build is the build check.
 - `e2e`: the Playwright journeys on the Staging build in workerd, behind the gate. CI writes `.dev.vars` from `.dev.vars.example` and applies the migrations to the local database first. A draft PR skips it; it runs when the PR is marked ready. A passing run uploads a `passed-e2e-<tree>` receipt, and a push whose tree already passed skips the suite.
-- `deploy-staging` on a push to `staging`, and `deploy-production` on a push to `main`, each once `check` and `e2e` pass, in its GitHub environment. Each builds and, only when the commit is still the branch tip (an older run passes without deploying), applies its environment's migrations (`pnpm db:migrate:<env>`) and deploys, then runs `scripts/smoke.sh` on its workers.dev host. Each has its own group (`deploy-web-staging`, `deploy-web-production`): a running deploy is never cancelled, and a newer queued run replaces an older one. When no push started a run, `gh workflow run web.yml --ref staging` (or `--ref main`) checks and redeploys that branch's tip.
+- `deploy-staging` on a push to `staging`, and `deploy-production` on a push to `main`, each once `check` and `e2e` pass, in its GitHub environment, and never for a docs-only push. Each builds and, only when the commit is still the branch tip (an older run passes without deploying), applies its environment's migrations (`pnpm db:migrate:<env>`) and deploys, then runs `scripts/smoke.sh` on its workers.dev host. Each has its own group (`deploy-web-staging`, `deploy-web-production`): a running deploy is never cancelled, and a newer queued run replaces an older one. When no push started a run, `gh workflow run web.yml --ref staging` (or `--ref main`) checks and redeploys that branch's tip.
 
 Each step that runs one of the web app's scripts names `working-directory: apps/web` itself, rather than through the job's `defaults`, because Knip reads a step's own working directory to find the scripts and binaries it runs.
 
@@ -64,7 +75,7 @@ Each step that runs one of the web app's scripts names `working-directory: apps/
 
 `tools.yml` checks the Python reference engine and the catalog importer, the `tools/` uv project ([the reference engine](../../tools/melody-lab/README.md)):
 
-- `tools-changes`: on a PR, whether anything they read changed (`tools`, `fixtures`, `catalog`, the web app's ship list, `.python-version` or the workflow). When nothing did, `reference` and `scores` skip their steps and still report.
+- `tools-changes`: whether the change is docs-only, which skips `reference` and `scores`, and on a PR whether anything they read changed (`tools`, `fixtures`, `catalog`, the web app's ship list, `.python-version` or the workflow). When nothing did, they skip their steps and still report.
 - `reference`: installs uv 0.7.2, the version that wrote `tools/uv.lock`, and the locked environment with Python 3.12.10 (`uv sync --locked`), runs the unit tests (`uv run pytest`), then runs `export_golden.py` and fails if `fixtures/golden` isn't byte for byte what it wrote, new files included, so the reference and the golden data can't drift apart. The export gives the same bytes on Linux and Windows.
 - `scores`: re-hashes every score `catalog/catalog.json` names against its `sha256`, so a changed or missing score fails.
 
