@@ -212,10 +212,9 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     await expect(other.getByText(`@${handle} shared a Recording`)).toBeVisible()
     await expect(other.getByRole('heading', { name: 'Recording 1' })).toBeVisible()
     await expect(other.getByTestId('shared-note')).toHaveText('G3')
-    await expect(other.getByRole('link', { name: 'Get Farty' }).first()).toHaveAttribute(
-      'href',
-      '/'
-    )
+    // Signed out, Get Farty starts Get Farty here (#318), so it's a button, not a link to `/`.
+    await expect(other.getByRole('button', { name: 'Get Farty' }).first()).toBeVisible()
+    await expect(other.getByRole('link', { name: 'Get Farty' })).toHaveCount(0)
     await expect(other.getByRole('navigation', { name: 'Tabs' })).toHaveCount(0)
 
     // Unlisted, with a link preview.
