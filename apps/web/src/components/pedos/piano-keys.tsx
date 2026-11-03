@@ -5,8 +5,9 @@ import { noteName, pitchClassNames } from '@/lib/pitch'
 import { cn } from '@/lib/utils'
 
 // One octave of piano keys for giving a Recording its note by ear on its review (ADR 0015, #314),
-// and the piano note each key plays. The note sounds only there, to compare the fart with: Songs
-// and Toots never play it, and stay fart-only (AGENTS.md).
+// and the piano note each key plays. The note goes straight to the speakers, to compare the fart
+// with or to hear a Song's melody (#359): renders, Toots and shares never play it, and stay
+// fart-only (AGENTS.md, `piano-boundary.test.ts`).
 
 /** The white keys, as steps up from C. */
 const WHITE_STEPS = [0, 2, 4, 5, 7, 9, 11]
@@ -138,7 +139,7 @@ const LEVEL = 0.2
 
 /**
  * The piano note at `midi`, as samples at `sampleRate` (ADR 0015 rule 3): decaying partials of a
- * struck string, voiced for a phone's speaker. The one piano voice: `playPianoNote` plays it.
+ * struck string, voiced for a phone's speaker. The one piano voice: `strikePianoNote` plays it.
  */
 export function pianoNote(midi: number, sampleRate: number): Float32Array {
   const length = Math.round(NOTE_SECONDS * sampleRate)
@@ -183,18 +184,62 @@ export function pianoNote(midi: number, sampleRate: number): Float32Array {
 }
 
 /**
- * Plays the piano note at `midi` on the shared AudioContext, from a tap, straight to the speakers.
- * Only a take's review plays it.
+ * How many notes each context keeps built, each about 0.4 MB: no Song in the catalog has more
+ * different notes than this.
+ */
+const MOST_BUILT = 16
+/**
+ * The notes built on each context, by MIDI note, the most recently used last. Building one takes a
+ * few ms on the main thread, so the melody pays it once per note (#359). A context's sample rate
+ * never changes, and a context replaced after a hide (`audioContext()`) takes its notes with it.
+ */
+const built = new WeakMap<BaseAudioContext, Map<number, AudioBuffer>>()
+
+/** `pianoNote(midi, context.sampleRate)` as an AudioBuffer on `context`, built once. */
+export function pianoBuffer(context: BaseAudioContext, midi: number): AudioBuffer {
+  let notes = built.get(context)
+  if (!notes) {
+    notes = new Map()
+    built.set(context, notes)
+  }
+  let buffer = notes.get(midi)
+  if (buffer) {
+    notes.delete(midi)
+  } else {
+    const samples = pianoNote(midi, context.sampleRate)
+    buffer = context.createBuffer(1, samples.length, context.sampleRate)
+    buffer.getChannelData(0).set(samples)
+  }
+  notes.set(midi, buffer)
+  if (notes.size > MOST_BUILT) notes.delete(notes.keys().next().value as number)
+  return buffer
+}
+
+/**
+ * The piano note at `midi`, struck at `t` on `context`'s clock into `output`. It stops by itself
+ * once it has rung out (`buffer.duration`), or sooner with `stop`. Song Creator's and a locked
+ * Song's melody on piano (`piano-preview.ts`, #359) strikes it ahead of time.
+ */
+export function strikePianoNote(
+  context: BaseAudioContext,
+  output: AudioNode,
+  midi: number,
+  t: number
+): AudioBufferSourceNode {
+  const source = context.createBufferSource()
+  source.buffer = pianoBuffer(context, midi)
+  source.connect(output)
+  source.start(t)
+  return source
+}
+
+/**
+ * Plays the piano note at `midi` on the shared AudioContext, from a tap, straight to the speakers:
+ * a take's review.
  */
 export function playPianoNote(midi: number): void {
   const context = audioContext()
   setPlaybackSession()
   context.resume().catch(() => {})
-  const samples = pianoNote(midi, context.sampleRate)
-  const buffer = context.createBuffer(1, samples.length, context.sampleRate)
-  buffer.getChannelData(0).set(samples)
-  const source = context.createBufferSource()
-  source.buffer = buffer
-  source.connect(context.destination)
-  source.start()
+  strikePianoNote(context, context.destination, midi, context.currentTime)
 }

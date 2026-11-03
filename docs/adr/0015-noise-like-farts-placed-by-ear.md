@@ -22,6 +22,18 @@ Update 2026-11-03 (#314): the picker is gone, and any Recording's note can be ch
 
 Measured on `scenarios/review-melodic.json`, with `069` (G♯2 +43 c) placed on A2 and two Melodic farts trimmed: When the Saints Go Marching In passes the bar. ADR 0019's update has the numbers.
 
+Update 2026-11-04 (#359): the piano also plays a Song's melody. The owner asked for it:
+
+> "as I'm previewing the songs like some of them just don't sound like a song at all so I kinda feel like we need like a way to actually like hear the original song using the MIDI … with like some kind of stock piano synthesizer and then be able to hear it with the fart notes"
+
+This replaces rule 3, and the #314 update's rule 3:
+
+- **Rule 3.** The piano plays the review's note, and a Song's melody as a preview: Song Creator's Piano choice and a locked Song's "Play on piano" (`piano-preview.ts`).
+  - Each note is the review key's note, the partials of a struck string voiced for a phone's speaker since #362 (`pianoNote` in `piano-keys.tsx`), in the key the farts play the Song in, at the Song's tempo. `strikePianoNote` starts it ahead of time. It is held for its length less the renderer's 0.025 s gap, then let go over 80 ms.
+  - Each note is built once per AudioContext and kept, the 16 used last, since building one takes a few milliseconds on the main thread (`pianoBuffer`).
+  - It goes straight to the speakers. It never reaches a Toot, a render, a share or a saved file. Nothing in `src/lib/`, `src/server/`, a route or `scripts/` imports the piano's code, even through another module, and nothing makes a tone with an oscillator (`piano-boundary.test.ts`).
+  - Song Creator now imports it, but the Toot is still rendered from Recordings only, and fart rendering is unchanged (ADR 0004, ADR 0012).
+
 1. **Place it, or leave it out.**
    - On the Recordings tab, a Noise-like Recording's row has an outlined "noise-like ›" pill. It opens the picker (`place-by-ear.tsx`): a stock bottom Sheet on a phone, a centered Dialog from 48rem wide.
    - The picker has the fart's play button, waveform and length, one octave of piano keys with octave arrows, then "Place at E3" and "Leave it out".

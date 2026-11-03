@@ -20,7 +20,7 @@ export const RENDER_SAMPLE_RATE = ANALYSIS_SAMPLE_RATE
 /** Silence between consecutive notes: a note plays for its length minus this. */
 export const GAP_SECONDS = 0.025
 /** A note never plays shorter than this, even when its length minus the gap is shorter. */
-const SHORTEST_NOTE_SECONDS = 0.06
+export const SHORTEST_NOTE_SECONDS = 0.06
 const FADE_IN_SECONDS = 0.003
 /** The fade-out is this long, or a third of the note if that is shorter. Squared curve. */
 const LONGEST_FADE_OUT_SECONDS = 0.03

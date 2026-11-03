@@ -91,7 +91,7 @@ _Avoid_: Created Melody, Melody, Created Song, generated song, track, output
 ## Creation areas
 
 **Song Creator**:
-The creation area that plays a Song using only the user's Recordings as sound.
+The creation area that plays a Song using only the user's Recordings as sound. Its Piano choice plays the Song's melody on piano to compare with, which never reaches the Toot (ADR 0015, #359).
 _Avoid_: Musical Fruit, standard song creator
 
 **AI Song Creator**:

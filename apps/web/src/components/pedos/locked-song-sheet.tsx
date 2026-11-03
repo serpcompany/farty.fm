@@ -1,7 +1,7 @@
 'use client'
 
-import { Lock, XIcon } from 'lucide-react'
-import { useState } from 'react'
+import { Lock, Play, Square, XIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -15,12 +15,16 @@ import {
 } from '@/lib/pitch-coverage'
 import { FavoriteButton } from './favorite-button'
 import { usePedos } from './pedos-provider'
+import { pianoSchedule } from './piano-preview'
 import { PitchStrip } from './pitch-strip'
+import { type PianoPlaying, usePianoPreview } from './use-piano-preview'
+import { useSongNotes } from './use-song-notes'
 
 /**
  * What a locked Song still needs: its Pitch Coverage, the missing notes with their octave, and the
- * pitch strip with the needed pitch classes marked. A locked Song can't be played. Matches the
- * iPhone app's `LockedSongSheet`.
+ * pitch strip with the needed pitch classes marked. A locked Song can't be played by farts, but
+ * its melody plays on piano (#359), in the key the needed notes are named in. Matches the iPhone
+ * app's `LockedSongSheet`, with the piano added.
  */
 export function LockedSongSheet({
   song,
@@ -39,6 +43,13 @@ export function LockedSongSheet({
   if (song !== null && song !== shown) setShown(song)
   // Read live, so a Recording analyzed while the sheet is open shows at once.
   const coverage = shown ? pedos.coverage(shown) : undefined
+  const { song: melody } = useSongNotes(shown ?? undefined)
+  const piano = usePianoPreview()
+  const stopPiano = piano.stop
+  // Closing the sheet stops the piano.
+  useEffect(() => {
+    if (song === null) stopPiano()
+  }, [song, stopPiano])
 
   return (
     <Sheet open={song !== null} onOpenChange={open => !open && onClose()}>
@@ -51,7 +62,21 @@ export function LockedSongSheet({
         <SheetHeader className="items-center px-12 pt-4 pb-2">
           <SheetTitle className="text-center font-semibold">{shown?.title}</SheetTitle>
         </SheetHeader>
-        {coverage && <Body coverage={coverage} onRecord={onRecord} />}
+        {coverage && (
+          <Body
+            coverage={coverage}
+            onRecord={onRecord}
+            pianoPlaying={piano.playing}
+            onPiano={
+              melody &&
+              (() => {
+                if (piano.playing) piano.stop()
+                // In the key the farts would play it in; as written before there are any.
+                else piano.play('song', pianoSchedule(melody, pianoKey(coverage)))
+              })
+            }
+          />
+        )}
         {/* A locked Song can be a Favorite Song too (#313). */}
         {shown && <FavoriteButton song={shown} className="absolute top-1.5 left-1.5" />}
         <SheetClose
@@ -67,7 +92,18 @@ export function LockedSongSheet({
   )
 }
 
-function Body({ coverage, onRecord }: { coverage: Coverage; onRecord: () => void }) {
+function Body({
+  coverage,
+  onRecord,
+  pianoPlaying,
+  onPiano
+}: {
+  coverage: Coverage
+  onRecord: () => void
+  pianoPlaying: PianoPlaying | null
+  /** Plays or stops the melody on piano; null until the Song's notes load. */
+  onPiano: (() => void) | null
+}) {
   const pedos = usePedos()
   const needed = new Set(coverage.missing.map(m => pitchClass(m.midi)))
   return (
@@ -84,9 +120,31 @@ function Body({ coverage, onRecord }: { coverage: Coverage; onRecord: () => void
         {needs(coverage)}
       </p>
       <div className="flex-1" />
-      <Button size="lg" className="h-12 w-full text-base" onClick={onRecord}>
-        Record
-      </Button>
+      <div className="flex flex-col gap-2">
+        <Button
+          variant="outline"
+          size="lg"
+          className="h-12 w-full text-base"
+          disabled={onPiano === null}
+          onClick={() => onPiano?.()}
+          data-testid="locked-song-piano"
+        >
+          {pianoPlaying ? (
+            <>
+              <Square className="fill-current" />
+              Stop
+            </>
+          ) : (
+            <>
+              <Play className="fill-current" />
+              Play on piano
+            </>
+          )}
+        </Button>
+        <Button size="lg" className="h-12 w-full text-base" onClick={onRecord}>
+          Record
+        </Button>
+      </div>
     </div>
   )
 }
@@ -98,4 +156,13 @@ function needs(coverage: Coverage): string {
     return 'Record a fart with a clear note to start.'
   }
   return `Needs a fart near ${missing}.`
+}
+
+/**
+ * The key "Play on piano" plays a locked Song in: the one Auto-map would play it in with your
+ * farts, or as written while you have none, since every key then ties and Auto-map takes the
+ * lowest it tries, three octaves down.
+ */
+function pianoKey(coverage: Coverage): number {
+  return coverage.hasMelodicRecordings ? coverage.transposition : 0
 }
