@@ -10,17 +10,26 @@
 // own page, even one loaded online: nothing would refresh it, so after a deploy it would load an
 // older build's code and catalog, beside the current build's database.
 //
-// Bump `version` when the cache's contents change shape. A new worker deletes every other
-// version's cache when it activates.
+// The catalog is an index, and each Song's notes are a file of their own, fetched as the Song
+// opens (#323). The worker keeps the notes it has seen in a cache of their own, so opening many
+// Songs never pushes the shell out. Offline, a Song opened before plays; one never opened can't,
+// as nothing fetches every Song's notes ahead.
+//
+// Bump `version` when the shell cache's contents change shape, and `notesVersion` when the notes
+// cache's do. A new worker deletes every other version's caches when it activates.
 
 const version = 2
-const cacheName = `pedos-shell-v${version}`
+const notesVersion = 1
 // A few deploys' worth of the shell. The least recently fetched files go first.
-const maxEntries = 200
+const shell = { name: `pedos-shell-v${version}`, maxEntries: 200 }
+// Every Song's notes twice over, at a few KB a Song. The least recently fetched go first.
+const songNotes = { name: `pedos-notes-v${notesVersion}`, maxEntries: 2000 }
 const shellFile = /\.(?:js|css|woff2?|png|ico|svg|webp|jpg|webmanifest)$/i
-// The Song Catalog, named by its content (`src/lib/catalog/generate.ts`), so it never changes
-// under one name, as a build's scripts don't.
+// The Song Catalog's index and each Song's notes, named by their content
+// (`src/lib/catalog/generate.ts`), so they never change under one name, as a build's scripts
+// don't.
 const catalogFile = /^\/catalog\/songs-[0-9a-f]+\.json$/
+const notesFile = /^\/catalog\/notes\/[a-z0-9-]+-[0-9a-f]{16}\.json$/
 // A Song's Song Creator, `/compose/<song>/`, and the page that answers for any of them offline.
 // The pages beside it aren't Songs: the generator refuses their names as Song ids.
 const songPage = /^\/compose\/([^/]+)\/?$/
@@ -38,7 +47,8 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     (async () => {
       for (const name of await caches.keys()) {
-        if (name.startsWith('pedos-shell-') && name !== cacheName) await caches.delete(name)
+        if (name.startsWith('pedos-shell-') && name !== shell.name) await caches.delete(name)
+        if (name.startsWith('pedos-notes-') && name !== songNotes.name) await caches.delete(name)
       }
       await self.clients.claim()
     })()
@@ -62,7 +72,7 @@ function handles(request) {
   // Shared links (ADR 0020): once a link is stopped or taken down, no copy of its page opens.
   if (url.pathname.startsWith('/u/')) return false
   if (request.mode === 'navigate') return true
-  if (catalogFile.test(url.pathname)) return true
+  if (catalogFile.test(url.pathname) || notesFile.test(url.pathname)) return true
   return url.pathname !== '/sw.js' && shellFile.test(url.pathname)
 }
 
@@ -81,12 +91,14 @@ async function networkFirst(event) {
     throw offline
   }
   // A tab opened before a deploy still loads its own build's scripts, such as a tab's code or
-  // the render worker's, and its own Song Catalog, and the deploy took them off the server
-  // (#222). The copy kept from before answers instead of the 404. A build's files and the
-  // catalog never change under the same name.
+  // the render worker's, and its own Song Catalog and Songs' notes, and the deploy took them off
+  // the server (#222). The copy kept from before answers instead of the 404. A build's files and
+  // the catalog never change under the same name.
   if (
     response.status === 404 &&
-    (pathname.startsWith('/_next/static/') || catalogFile.test(pathname))
+    (pathname.startsWith('/_next/static/') ||
+      catalogFile.test(pathname) ||
+      notesFile.test(pathname))
   ) {
     const kept = await keptCopy(request)
     if (kept) return kept
@@ -106,8 +118,13 @@ async function networkFirst(event) {
   return response
 }
 
+// The cache a file goes in: a Song's notes in their own, everything else in the shell's.
+function storeFor(url) {
+  return notesFile.test(new URL(url).pathname) ? songNotes : shell
+}
+
 async function keptCopy(request) {
-  const cache = await caches.open(cacheName)
+  const cache = await caches.open(storeFor(request.url).name)
   return await cache.match(request.url, {
     ignoreVary: true,
     ignoreSearch: request.mode === 'navigate'
@@ -122,7 +139,7 @@ function isSongPage(pathname) {
 
 // The one Song page, which answers for every Song offline. It reads the Song from the address.
 async function keptSongShell() {
-  const cache = await caches.open(cacheName)
+  const cache = await caches.open(shell.name)
   return await cache.match(new URL(songShell, self.location.origin).href, { ignoreVary: true })
 }
 
@@ -134,7 +151,8 @@ function keepable(response) {
 
 async function keep(url, response) {
   try {
-    const cache = await caches.open(cacheName)
+    const store = storeFor(url)
+    const cache = await caches.open(store.name)
     // Both workers load one script, each with its own chunks in the URL's fragment
     // (`#params=`), and a worker runs what its script's response URL says. So the copy is kept
     // with no URL of its own, and a worker started offline keeps the URL it asked for.
@@ -142,7 +160,7 @@ async function keep(url, response) {
     bare.hash = ''
     await cache.put(bare.href, new Response(response.body, response))
     const keys = await cache.keys()
-    for (const old of keys.slice(0, Math.max(0, keys.length - maxEntries))) {
+    for (const old of keys.slice(0, Math.max(0, keys.length - store.maxEntries))) {
       await cache.delete(old)
     }
   } catch {

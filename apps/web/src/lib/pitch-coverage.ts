@@ -1,9 +1,12 @@
-import type { Song } from '@/lib/catalog/song'
+import { searchKey } from '@/lib/catalog/search-key'
+import type { Song, SongSummary } from '@/lib/catalog/song'
 import {
   type Arrangement,
   type AutoMapRecording,
   arrange,
+  arrangePitches,
   autoMapRecording,
+  coveredCount,
   type MissingNote,
   placedAutoMapRecording
 } from '@/lib/engine/auto-map'
@@ -23,14 +26,25 @@ import {
 // module reads its answer the way the screens show it.
 
 /**
- * A Song's Pitch Coverage by the user's Melodic Recordings, and the Arrangement Auto-map chose:
- * each distinct pitch gets its own Melodic Recording within 3 semitones, or an octave away with an
- * Octave Move (ADR 0004, ADR 0006), and at least as long as the pitch's longest note (ADR 0011). As
- * the iPhone app's `CoverageResult`.
+ * How much of a Song the user's Melodic Recordings cover: each distinct pitch gets its own Melodic
+ * Recording within 3 semitones, or an octave away with an Octave Move (ADR 0004, ADR 0006), and at
+ * least as long as the pitch's longest note (ADR 0011). What Compose sorts and splits every Song
+ * by, and the Result screen shows (#323).
  */
-export type Coverage = {
+export type CoverageCount = {
   covered: number
   total: number
+  /** False when there are no Melodic Recordings at all, Placed Recordings included. */
+  hasMelodicRecordings: boolean
+  /** An Unlocked Song: every distinct pitch has its own Melodic Recording. */
+  unlocked: boolean
+}
+
+/**
+ * A Song's Pitch Coverage, and the Arrangement Auto-map chose, which says what the Song still
+ * needs. As the iPhone app's `CoverageResult`.
+ */
+export type Coverage = CoverageCount & {
   /** The transposition, in semitones, Auto-map chose. */
   transposition: number
   /**
@@ -40,10 +54,6 @@ export type Coverage = {
   missing: MissingNote[]
   /** The Melodic Recording that covers each covered pitch, keyed by the Song's pitch (score key). */
   recordingForPitch: Map<number, string>
-  /** False when there are no Melodic Recordings at all, Placed Recordings included. */
-  hasMelodicRecordings: boolean
-  /** An Unlocked Song: every distinct pitch has its own Melodic Recording. */
-  unlocked: boolean
 }
 
 /**
@@ -108,10 +118,14 @@ export function arrangementOf(song: Song, recordings: readonly Recording[]): Arr
   return arrange(engineSong(song), autoMapRecordings(recordings))
 }
 
-/** Auto-map of `song` with the Melodic ones among `recordings`. Ties break on Recording ids. */
-export function coverageOf(song: Song, recordings: readonly Recording[]): Coverage {
+/**
+ * Auto-map of `song` with the Melodic ones among `recordings`, from the Song Catalog's index: the
+ * same Arrangement `arrangementOf` chooses from the Song's notes (`arrangePitches`). Ties break on
+ * Recording ids.
+ */
+export function coverageOf(song: SongSummary, recordings: readonly Recording[]): Coverage {
   const melodic = autoMapRecordings(recordings)
-  const result = arrange(engineSong(song), melodic)
+  const result = arrangePitches(song, melodic)
   const recordingForPitch = new Map<number, string>()
   for (const choice of result.pitches) {
     if (choice.recordingId !== null) recordingForPitch.set(choice.songPitch, choice.recordingId)
@@ -129,12 +143,12 @@ export function coverageOf(song: Song, recordings: readonly Recording[]): Covera
 }
 
 /** Covered pitches as a fraction, for the Pitch Coverage bar. */
-export function coverageFraction(coverage: Coverage): number {
+export function coverageFraction(coverage: CoverageCount): number {
   return coverage.total === 0 ? 0 : coverage.covered / coverage.total
 }
 
 /** "3 of 4 notes covered", or "All 4 notes covered" when unlocked. */
-export function coverageSummary(coverage: Coverage): string {
+export function coverageSummary(coverage: CoverageCount): string {
   return coverage.unlocked
     ? `All ${coverage.total} notes covered`
     : `${coverage.covered} of ${coverage.total} notes covered`
@@ -183,11 +197,23 @@ export function coverageKey(recordings: readonly Recording[]): string {
 }
 
 /** A Song with its Pitch Coverage. */
-export type SongRow = { song: Song; coverage: Coverage }
+export type SongRow = { song: SongSummary; coverage: CoverageCount }
 
-/** Every Song with its Pitch Coverage, in catalog order. */
-export function songRows(songs: readonly Song[], recordings: readonly Recording[]): SongRow[] {
-  return songs.map(song => ({ song, coverage: coverageOf(song, recordings) }))
+/**
+ * Every Song with its Pitch Coverage, in catalog order: counted, not arranged (`coveredCount`), so
+ * a 1,000-Song catalog is counted in a moment on a phone (#323). Equal to `coverageOf`'s counts.
+ */
+export function songRows(
+  songs: readonly SongSummary[],
+  recordings: readonly Recording[]
+): SongRow[] {
+  const melodic = autoMapRecordings(recordings)
+  const hasMelodicRecordings = melodic.length > 0
+  return songs.map(song => {
+    const covered = coveredCount(song, melodic)
+    const total = song.pitches.length
+    return { song, coverage: { covered, total, hasMelodicRecordings, unlocked: covered === total } }
+  })
 }
 
 /** How Compose orders Songs within each section. */
@@ -226,27 +252,37 @@ export function sortRows(
   return [...rows].sort(compare)
 }
 
-/** Lowercased, without accents: how a search compares titles. */
-function folded(text: string): string {
-  return text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('en')
+const searchKeys = new WeakMap<SongSummary, readonly string[]>()
+
+/** A Song's title and other names as search compares them, worked out once a Song. */
+function namesOf(song: SongSummary): readonly string[] {
+  let keys = searchKeys.get(song)
+  if (!keys) {
+    keys = [song.title, ...(song.aliases ?? [])].map(searchKey)
+    searchKeys.set(song, keys)
+  }
+  return keys
 }
 
 /** Compose's Songs: matching a search, split into Unlocked and locked Songs. */
 export type SongListing = { unlocked: SongRow[]; locked: SongRow[] }
 
 /**
- * The rows, already sorted, whose title contains `query` anywhere, ignoring case and accents. An
- * empty or blank query matches every Song. With `only`, Compose's Favorites filter, just the Songs
- * whose ids it holds.
+ * The rows, already sorted, whose title or another name contains `query` anywhere, ignoring case,
+ * accents and punctuation (`searchKey`): "londonderry" finds Danny Boy. A query with no letters
+ * or digits matches every Song. With `only`, Compose's Favorites filter, just the Songs whose ids
+ * it holds.
  */
 export function songListing(
   sorted: readonly SongRow[],
   query: string,
   only: ReadonlySet<string> | null = null
 ): SongListing {
-  const q = folded(query.trim())
+  const q = searchKey(query)
   const rows = sorted.filter(
-    r => (only === null || only.has(r.song.id)) && (q === '' || folded(r.song.title).includes(q))
+    r =>
+      (only === null || only.has(r.song.id)) &&
+      (q === '' || namesOf(r.song).some(name => name.includes(q)))
   )
   return {
     unlocked: rows.filter(r => r.coverage.unlocked),
@@ -260,7 +296,7 @@ export function songListing(
  */
 export type CoverageChanges = {
   /** Songs that just became Unlocked Songs, in catalog order. */
-  unlocked: Song[]
+  unlocked: SongSummary[]
   /** Songs still locked that gained a covered pitch, closest to unlocking first. */
   improved: SongRow[]
   /** The locked Song closest to unlocking, if any Song is still locked. */
@@ -269,7 +305,7 @@ export type CoverageChanges = {
 
 /** Compares every Song's Pitch Coverage before and after the Recordings changed. */
 export function coverageChanges(
-  songs: readonly Song[],
+  songs: readonly SongSummary[],
   before: readonly Recording[],
   after: readonly Recording[]
 ): CoverageChanges {

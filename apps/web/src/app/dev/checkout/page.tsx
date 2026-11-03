@@ -3,7 +3,7 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 
 import { buttonVariants } from '@/components/ui/button'
-import { songs } from '@/lib/catalog/songs.generated'
+import { songIndex } from '@/lib/catalog/song-index.generated'
 import { TOOT_PRICE_LABEL } from '@/lib/pricing'
 import { cn } from '@/lib/utils'
 import { isItemId } from '@/server/library-input'
@@ -25,7 +25,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>
 export default async function DevCheckoutPage({ searchParams }: { searchParams: SearchParams }) {
   if (!devCheckoutServes((await headers()).get('host'))) notFound()
   const { toot, song: songId } = await searchParams
-  const song = songId === undefined ? null : songs.find(s => s.id === songId)
+  const song = songId === undefined ? null : songIndex.find(s => s.id === songId)
   if (!isItemId(toot) || song === undefined) notFound()
   const back = song ? `/compose/${song.id}/` : '/compose/pad/'
   return (

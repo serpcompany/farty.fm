@@ -88,6 +88,8 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
     })
   ).toBeVisible()
   const amazing = page.getByRole('button', { name: 'Amazing Grace', exact: true })
+  // A row works out its notes once it's near the screen (#323).
+  await amazing.scrollIntoViewIfNeeded()
   await expect(amazing).toHaveAccessibleDescription(
     'Locked. 5 of 6 notes covered. Needs E3 (3.0 s)'
   )

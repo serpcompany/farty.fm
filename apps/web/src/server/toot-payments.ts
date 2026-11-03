@@ -8,7 +8,7 @@ import {
   type TootPaymentRow,
   tootPayment
 } from '@/db/payments'
-import { songs } from '@/lib/catalog/songs.generated'
+import { songIndex } from '@/lib/catalog/song-index.generated'
 import { TOOT_PRICE } from '@/lib/pricing'
 import { servedOrigin } from '@/lib/site'
 
@@ -69,7 +69,7 @@ function stripeFailed(error: unknown): Response {
 
 /** The Song of `songId`, from the catalog, or null. */
 function catalogSong(songId: unknown) {
-  return songs.find(song => song.id === songId) ?? null
+  return songIndex.find(song => song.id === songId) ?? null
 }
 
 /**

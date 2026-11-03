@@ -1,7 +1,7 @@
 import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
 import type { Analysis, Trim } from '@/lib/recordings'
 import { minimumCost } from './assignment'
-import { type Song, secondsPerBeat } from './song'
+import { type Song, type SongNote, secondsPerBeat } from './song'
 
 // Auto-map and Pitch Coverage: a port of `AutoMap.swift`, the iPhone 1.0 planner, which ports the
 // reference engine's `melody_fit()` (`tools/melody-lab/engine.py`) and the unlock rule of ADR 0004,
@@ -183,18 +183,54 @@ export interface MissingNote {
  * order of `recordings`.
  */
 export function arrange(song: Song, recordings: readonly AutoMapRecording[]): Arrangement {
-  const melodic = recordings.filter(isMelodic).sort((a, b) => compareIds(a.id, b.id))
+  return arrangePitches(songPitches(song), recordings)
+}
+
+/**
+ * All Auto-map reads of a Song: its tempo, and each distinct pitch, lowest first, with the lengths
+ * of its notes. The Song Catalog's index holds a Song this way (#323), so Compose measures Pitch
+ * Coverage without the Song's notes.
+ */
+export interface SongPitches {
+  /** The tempo it plays at, in beats per minute. */
+  bpm: number
+  /** The distinct pitches as MIDI note numbers, before transposition, lowest first. */
+  pitches: readonly number[]
+  /** The written lengths in beats of each pitch's notes, in `pitches`' order and in time order. */
+  durations: readonly (readonly number[])[]
+}
+
+/** What Auto-map reads of `song`. */
+export function songPitches(song: Pick<Song, 'bpm'> & { notes: readonly SongNote[] }): SongPitches {
   const pitches = [...new Set(song.notes.map(n => n.pitch))].sort((a, b) => a - b)
+  return {
+    bpm: song.bpm,
+    pitches,
+    durations: pitches.map(p => song.notes.filter(n => n.pitch === p).map(n => n.dur))
+  }
+}
+
+/** How long each of a pitch's notes sounds, in seconds: its written length less the gap. */
+function soundingSeconds(durations: readonly number[], spb: number): number[] {
+  // A note shorter than the gap has no time left to sound, not a negative time: a negative one
+  // made `unsettledCost` about -1e8 a note, so `solve`'s penalties no longer ranked choices (#332).
+  return durations.map(dur => Math.max(0, dur * spb - GAP_SECONDS))
+}
+
+/** `arrange` of a Song as `songPitches` reads it, to the last bit. */
+export function arrangePitches(
+  song: SongPitches,
+  recordings: readonly AutoMapRecording[]
+): Arrangement {
+  const melodic = recordings.filter(isMelodic).sort((a, b) => compareIds(a.id, b.id))
+  const { pitches } = song
   const spb = secondsPerBeat(song)
   const weight: number[] = []
   const noteSeconds: number[][] = []
   const longest: number[] = []
-  for (const p of pitches) {
-    const notes = song.notes.filter(n => n.pitch === p)
-    weight.push(pythonSum(notes.map(n => n.dur)))
-    // A note shorter than the gap has no time left to sound, not a negative time: a negative one
-    // made `unsettledCost` about -1e8 a note, so `solve`'s penalties no longer ranked choices (#332).
-    noteSeconds.push(notes.map(n => Math.max(0, n.dur * spb - GAP_SECONDS)))
+  for (const durations of song.durations) {
+    weight.push(pythonSum(durations))
+    noteSeconds.push(soundingSeconds(durations, spb))
     longest.push(Math.max(...noteSeconds[noteSeconds.length - 1]))
   }
 
@@ -262,6 +298,70 @@ export function arrange(song: Song, recordings: readonly AutoMapRecording[]): Ar
   }
 }
 
+/**
+ * How many of a Song's distinct pitches Auto-map covers: `arrangePitches(song, recordings).covered`,
+ * without choosing the Arrangement, so Compose can count every Song of a 1,000-Song catalog after
+ * each Recording (#323). Auto-map covers as many pitches as any transposition can (its first rank:
+ * `solve`'s penalties make each transposition cover the most it can), and under one transposition
+ * whether a Recording may cover a pitch depends only on its pitch and length. So this is the
+ * largest one-to-one matching of pitches to Recordings that any transposition allows.
+ */
+export function coveredCount(song: SongPitches, recordings: readonly AutoMapRecording[]): number {
+  const melodic = recordings.filter(isMelodic)
+  const rows = song.pitches.length
+  const columns = melodic.length
+  if (columns === 0) return 0
+  const spb = secondsPerBeat(song)
+  const recordingPitch = melodic.map(r => r.recordingPitchMidi as number)
+  // The Recordings long enough for each pitch, under any transposition.
+  const longEnough = song.durations.map(durations => {
+    const longest = Math.max(...soundingSeconds(durations, spb))
+    return melodic.flatMap((r, j) => (fills(r.gestureSeconds, longest) ? [j] : []))
+  })
+  const candidates = new Int32Array(rows * columns)
+  const count = new Int32Array(rows)
+  const owner = new Int32Array(columns)
+  const seen = new Int32Array(columns)
+  let visit = 0
+  // Kuhn's augmenting paths: gives pitch i a Recording, moving others along if they can.
+  const augment = (i: number): boolean => {
+    for (let k = 0; k < count[i]; k++) {
+      const j = candidates[i * columns + k]
+      if (seen[j] === visit) continue
+      seen[j] = visit
+      if (owner[j] === -1 || augment(owner[j])) {
+        owner[j] = i
+        return true
+      }
+    }
+    return false
+  }
+
+  let best = 0
+  for (let t = LOWEST_TRANSPOSITION; t <= HIGHEST_TRANSPOSITION && best < rows; t++) {
+    let reachable = 0
+    for (let i = 0; i < rows; i++) {
+      const target = song.pitches[i] + t
+      let n = 0
+      for (const j of longEnough[i]) {
+        if (inReach(target - recordingPitch[j])) candidates[i * columns + n++] = j
+      }
+      count[i] = n
+      if (n > 0) reachable++
+    }
+    // No more pitches have a Recording in reach than the best already covers.
+    if (reachable <= best) continue
+    owner.fill(-1)
+    let matched = 0
+    for (let i = 0; i < rows; i++) {
+      visit++
+      if (augment(i)) matched++
+    }
+    best = Math.max(best, matched)
+  }
+  return best
+}
+
 /** The choice for a Song pitch (before transposition). */
 export function choiceForSongPitch(arrangement: Arrangement, pitch: number): PitchChoice | null {
   return arrangement.pitches.find(c => c.songPitch === pitch) ?? null
@@ -283,6 +383,12 @@ export function moveCost(shift: number): { cost: number; octaveMove: boolean } |
     return { cost: OCTAVE_MOVE_COST + Math.abs(a - OCTAVE) ** 1.5, octaveMove: true }
   }
   return null
+}
+
+/** Whether the unlock rule lets a note `shift` semitones from a Recording Pitch use it, as `moveCost`. */
+function inReach(shift: number): boolean {
+  const a = Math.abs(shift)
+  return a <= MAXIMUM_SHIFT || Math.abs(a - OCTAVE) <= MAXIMUM_SHIFT
 }
 
 /**

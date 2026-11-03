@@ -4,7 +4,7 @@ import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { PAD_TOOT_TITLE, type Toot } from '@/lib/toot'
 import { cn } from '@/lib/utils'
@@ -13,6 +13,7 @@ import { usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
 import { TootLayout } from './song-creator'
 import { DeleteTootDialog, RenameTootDialog, TootMenu } from './toots-screen'
+import { useSongNotes } from './use-song-notes'
 
 /**
  * A Toot's screen, opened from the Toots tab: Song Creator's layout without Save, showing which
@@ -32,7 +33,10 @@ export function TootScreen() {
   const closing = useRef(false)
   const current = pedos.toot(id)
   const toot = current ?? (lastSeen?.id === id ? lastSeen : undefined)
-  const song = toot?.songId ? pedos.song(toot.songId) : undefined
+  const summary = toot?.songId ? pedos.song(toot.songId) : undefined
+  // Its Song's notes, which the Song Catalog's index leaves out (#323).
+  const notes = useSongNotes(summary)
+  const song = notes.song
 
   useEffect(() => {
     if (current) setLastSeen(current)
@@ -80,9 +84,9 @@ export function TootScreen() {
           <>
             <div className="min-w-0 text-center">
               <h1 className="truncate font-semibold">{toot.title}</h1>
-              {(song || toot.songId === null) && (
+              {(summary || toot.songId === null) && (
                 <p className="truncate text-xs text-muted-foreground">
-                  {song ? song.title : PAD_TOOT_TITLE}
+                  {summary ? summary.title : PAD_TOOT_TITLE}
                 </p>
               )}
             </div>
@@ -114,12 +118,23 @@ export function TootScreen() {
             )}
           </PadTootLayout>
         </div>
-      ) : !song ? (
+      ) : !summary ? (
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
           {pedos.songsFailed
             ? "Couldn't load the Songs."
             : "This Toot's Song isn't in Farty any more."}
         </p>
+      ) : notes.failed ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+          <p className="text-muted-foreground">Couldn't load this Song.</p>
+          <Button variant="outline" className="h-11 px-5 text-base" onClick={notes.retry}>
+            Try again
+          </Button>
+        </div>
+      ) : !song ? (
+        <div className="flex flex-1 items-center justify-center">
+          <Spinner />
+        </div>
       ) : (
         <TootLayout toot={toot} song={song} isAudioMissing={toot.isAudioMissing}>
           <p className="pt-1 text-xs text-muted-foreground">{song.source}</p>

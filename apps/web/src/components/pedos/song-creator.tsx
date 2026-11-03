@@ -40,6 +40,7 @@ import { FavoriteButton } from './favorite-button'
 import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
+import { useSongNotes } from './use-song-notes'
 import { Waveform } from './waveform'
 
 type Phase =
@@ -56,23 +57,26 @@ export type SongHeading = Pick<Song, 'id' | 'title' | 'source'>
  * an editor: nothing here changes the Arrangement (ADR 0005). As the iPhone app's
  * `SongCreatorView`.
  *
- * The Song's notes come from the Song Catalog the browser fetches (`usePedos().songs`); its page
- * gives only its `heading`, which shows until then.
+ * The Song comes from the Song Catalog the browser fetches (`usePedos().songs`), and its notes
+ * when it's opened (`useSongNotes`, #323); its page gives only its `heading`, which shows until
+ * then.
  */
 export function SongCreator({ id, heading }: { id: string; heading?: SongHeading }) {
   const pedos = usePedos()
   const router = useRouter()
-  const song = pedos.song(id)
-  const shown = song ?? heading
+  const summary = pedos.song(id)
+  const notes = useSongNotes(summary)
+  const song = notes.song
+  const shown = summary ?? heading
   const [phase, setPhase] = useState<Phase>({ kind: 'making' })
   /** Bumped by Try again, to make the Toot again. */
   const [attempt, setAttempt] = useState(0)
-  const loaded = pedos.recordings !== null && song !== undefined
-  // The catalog didn't load, or has no Song of this id.
+  const loaded = pedos.recordings !== null && song !== null
+  // The catalog or the Song's notes didn't load, or the catalog has no Song of this id.
   const view =
-    song === undefined && pedos.songsFailed
+    (summary === undefined && pedos.songsFailed) || notes.failed
       ? 'failed'
-      : song === undefined && pedos.songs !== null
+      : summary === undefined && pedos.songs !== null
         ? 'missing'
         : phase.kind
 
@@ -167,13 +171,18 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
       {view === 'failed' && (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
           <p className="text-muted-foreground">
-            {pedos.songsFailed ? "Couldn't load the Songs." : "Couldn't make this Toot."}
+            {pedos.songsFailed
+              ? "Couldn't load the Songs."
+              : notes.failed
+                ? "Couldn't load this Song."
+                : "Couldn't make this Toot."}
           </p>
           <Button
             variant="outline"
             className="h-11 px-5 text-base"
             onClick={() => {
               if (pedos.songsFailed) pedos.reloadSongs()
+              if (notes.failed) notes.retry()
               setPhase({ kind: 'making' })
               setAttempt(a => a + 1)
             }}
@@ -529,7 +538,7 @@ export function TootLayout({
           onTapNote={index => {
             if (isAudioMissing) return
             setFocus({ note: index })
-            pedos.toggleTootPlayback(toot, index)
+            pedos.toggleTootPlayback(toot, index, song)
           }}
         />
         {selectedNote !== null && (

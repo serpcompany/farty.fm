@@ -117,7 +117,7 @@ function startWorker(network: Network) {
 }
 
 /** A build's Song Catalog, named by its content (src/lib/catalog/generate.ts). */
-const catalog = '/catalog/songs-6a1cebdbfde22ed7.json'
+const catalog = '/catalog/songs-3cfb06831b9e44c0.json'
 
 const startPage = `<html><head>
 <link rel="icon" href="/icon.png?a1b2" sizes="512x512">
@@ -466,8 +466,62 @@ describe('the service worker', () => {
     const worker = startWorker(() => ok())
     await worker.caches.open('pedos-shell-v1')
     await worker.caches.open('pedos-shell-v2')
+    await worker.caches.open('pedos-notes-v0')
+    await worker.caches.open('pedos-notes-v1')
     await worker.caches.open('someone-elses-cache')
     await worker.lifecycle('activate')
-    expect(await worker.caches.keys()).toEqual(['pedos-shell-v2', 'someone-elses-cache'])
+    expect(await worker.caches.keys()).toEqual([
+      'pedos-shell-v2',
+      'pedos-notes-v1',
+      'someone-elses-cache'
+    ])
+  })
+})
+
+describe("a Song's notes (#323)", () => {
+  const notes = (id: string) => `/catalog/notes/${id}-0123456789abcdef.json`
+
+  it('keeps the notes of each Song opened, in a cache of their own, and plays them offline', async () => {
+    let online = true
+    const worker = startWorker(url =>
+      online ? ok(`notes of ${url.replace(origin, '')}`) : 'offline'
+    )
+    expect(await (await worker.request(notes('mary')))?.text()).toBe(`notes of ${notes('mary')}`)
+    expect(worker.kept('pedos-notes-v1')).toEqual([notes('mary')])
+    expect(worker.kept()).toEqual([])
+
+    online = false
+    expect(await (await worker.request(notes('mary')))?.text()).toBe(`notes of ${notes('mary')}`)
+    // A Song never opened has no notes offline: Song Creator says so, with Try again.
+    await expect(worker.request(notes('twinkle'))).rejects.toThrow('Failed to fetch')
+  })
+
+  it("answers a Song's notes from before a deploy with the copy it kept", async () => {
+    let deployed = false
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      return deployed && path.startsWith('/catalog/') ? failed(404) : ok(`first build's ${path}`)
+    })
+    await worker.request(notes('mary'))
+    deployed = true
+    expect(await (await worker.request(notes('mary')))?.text()).toBe(
+      `first build's ${notes('mary')}`
+    )
+    expect((await worker.request(notes('twinkle')))?.status).toBe(404)
+  })
+
+  it('never pushes the shell out, however many Songs open', async () => {
+    const worker = startWorker(() => ok('file'))
+    await worker.request('/_next/static/chunks/main.js')
+    for (let i = 0; i < 300; i++) await worker.request(notes(`song-${i}`))
+    expect(worker.kept()).toEqual(['/_next/static/chunks/main.js'])
+    expect(worker.kept('pedos-notes-v1')).toHaveLength(300)
+  })
+
+  it('leaves anything else under /catalog/notes/ to the network', async () => {
+    const worker = startWorker(() => ok('file'))
+    for (const path of ['/catalog/notes/mary.json', '/catalog/notes/Mary-0123456789abcdef.json']) {
+      expect(await worker.request(path), path).toBeUndefined()
+    }
   })
 })

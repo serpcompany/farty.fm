@@ -17,7 +17,8 @@
       "!e2e/report",
       "!cloudflare-env.d.ts",
       "!drizzle",
-      "!public/catalog"
+      "!public/catalog",
+      "!src/lib/catalog/*.generated.ts"
     ]
   },
   "formatter": {
@@ -76,8 +77,13 @@
                     "message": "src/lib holds the app's logic, which components, hooks and routes build on, so it never imports them. Move what both sides need into src/lib."
                   },
                   {
-                    "group": ["@/lib/catalog/songs.generated", "**/songs.generated"],
-                    "message": "The browser fetches the Song Catalog (loadSongs, or usePedos().songs), so its Songs stay out of the JavaScript (#322). Only routes, the server and tests import songs.generated."
+                    "group": [
+                      "@/lib/catalog/songs.generated",
+                      "**/songs.generated",
+                      "@/lib/catalog/song-index.generated",
+                      "**/song-index.generated"
+                    ],
+                    "message": "The browser fetches the Song Catalog (loadSongs and loadSong, or usePedos()), so its Songs stay out of the JavaScript (#322). Only routes and the server import song-index.generated, and only tests songs.generated."
                   }
                 ]
               }
@@ -100,8 +106,13 @@
                     "message": "Routes (src/app) import components and hooks, never the reverse. Pass what a component needs as a prop, or move shared code into src/lib."
                   },
                   {
-                    "group": ["@/lib/catalog/songs.generated", "**/songs.generated"],
-                    "message": "The browser fetches the Song Catalog (loadSongs, or usePedos().songs), so its Songs stay out of the JavaScript (#322). Only routes, the server and tests import songs.generated."
+                    "group": [
+                      "@/lib/catalog/songs.generated",
+                      "**/songs.generated",
+                      "@/lib/catalog/song-index.generated",
+                      "**/song-index.generated"
+                    ],
+                    "message": "The browser fetches the Song Catalog (loadSongs and loadSong, or usePedos()), so its Songs stay out of the JavaScript (#322). Only routes and the server import song-index.generated, and only tests songs.generated."
                   }
                 ]
               }
