@@ -291,3 +291,229 @@ Jana Gana Mana | the same as Indian National Anthem: India's Prevention of Insul
 
 # An offensive title
 Le petit negre | an offensive title
+
+# Reviewed for batch 05 (#324): the top 200 of the ranking after batch 04, read against each title's Artist in ranking.md.
+# Under copyright, or unsure (batch 05)
+The Free Software Song | under copyright: Richard Stallman, 1990s
+Limehouse Blues | under copyright: lyricist Douglas Furber (died 1961), 1922
+Thy Word Is a Lamp unto My Feet | under copyright: Amy Grant and Michael W. Smith, 1984, share the title; unsure which the scores carry
+Kumbaya | unsure: first published in the 1930s and arranged in 1958 (Peter, Paul and Mary)
+L'Eau vive | under copyright: Guy Béart, 1958
+Gallo Ciego | under copyright: Agustín Bardi (died 1963)
+Shortnin' Bread | unsure: the common tune is Jacques Wolfe's 1928 setting (died 1973)
+Xochipitzahuatl | unsure of the composer and date
+The Bluebell Polka | unsure of the composer and date; probably 20th century
+Funkerlied | unsure: a German song of the 1930s or 1940s
+Tom Dooley | unsure: the common tune is the Kingston Trio's 1958 arrangement
+Black Is The Colour | under copyright: John Jacob Niles (died 1980), 1930s
+Midnight On The Water | unsure: Luke Thomasson's 1920s fiddle tune, composer's death date unknown
+Will Ye Go Lassie Go | under copyright: Francis McPeake (died 1971), 1957
+Molly On The Shore | under copyright: Percy Grainger (died 1961)
+Byssan lull | unsure: Evert Taube (died 1976) is its named author
+Teu Santo Nome | under copyright: a modern worship song by Adoradores Novo Tempo
+The Fields of Athenry | under copyright: Pete St John, 1979
+Stern über Bethlehem | unsure: Alfred Hans Zoller, 1960s
+Swanee | under copyright: George Gershwin (died 1937) with lyricist Irving Caesar (died 1996), 1919
+Russian Sailor's Dance | under copyright: Reinhold Glière (died 1956), 1927
+Hilf o Himmel | unsure of the composer and date
+Raglan Road | under copyright: Patrick Kavanagh (died 1967), 1946
+Mistletoe Waltz | unsure of the composer and date
+Blessed Be the Name | unsure: Matt Redman's "Blessed Be Your Name" (2002) and older hymns share the title
+Red is the Rose | under copyright: lyrics of the 1970s on the Loch Lomond air
+Michael Turner's Waltz | unsure of the composer and date; the score's artist is Mozart
+Salzburg | unsure: the title names several hymn tunes and pieces
+
+# Not one tune (batch 05)
+Bwv 1005 | a whole multi-movement work (Violin Sonata No. 3)
+Ich habe genug BWV 82 | a whole cantata
+Musikalisches Würfelspiel K.516f | a dice game that builds many minuets
+Arabesque | many pieces share the title (Debussy has two, Schumann and Burgmuller one each)
+Easter Hymn | many pieces share the title (Mascagni, Lyra Davidica and others)
+Sehnsucht | many songs share the title (Schubert alone set several)
+Basic Blues | a generic title, no one piece
+Memes | not a piece
+Wanderers Nachtlied | many songs set the poem (Schubert, Hauptmann and others)
+New Year's Day | a generic title (a hymn text, U2 and others)
+Romance d'amour | many pieces share the title
+Revelation | a generic title, no one piece we can tell
+Benedicamus Domino | many chants and settings share the title
+Tantum ergo Sacramentum | many settings share the title
+Mazurka Op.1 No.1 | many composers have an Op. 1 No. 1 mazurka
+Warschauer Mazurka | names no one piece we can tell
+Sangen | a generic title ("The Song"), no one piece we can tell
+
+# The same tune as a Song in the catalog (batch 05)
+Tochter Zion freue dich | the same tune as See the Conqu'ring Hero comes (Handel, Judas Maccabaeus)
+Alphabet Song | the same tune as Twinkle, Twinkle, Little Star
+
+# More for batch 05, from the titles that moved up (#324)
+Moscow Nights | under copyright: Vasily Solovyov-Sedoi (died 1979), 1955
+Alabama Jubilee | under copyright: lyricist Jack Yellen (died 1991), 1915
+Mood Indigo | under copyright: Duke Ellington (died 1974), 1930
+Eu Sei Que Vou Te Amar | under copyright: Antonio Carlos Jobim (died 1994), 1959
+The Whiffenpoof Song | under copyright: lyricist Meade Minnigerode (died 1967), 1909
+The Christmas Stars Are Shining | unsure of the composer and date
+My Paddle's | unsure of the composer and date; a camp song of the 1900s
+Waltz Facile | unsure of the composer and date
+My Dream Of You | unsure: a generic title, no one piece we can tell
+Bears in the Moonlight | unsure of the composer and date; probably modern
+James' | under copyright: Pat Metheny (living), 1990s
+Apollo Myth And Legend | under copyright: Rob Romeyn, modern
+Menuett and Trio | not one tune: many pieces share the title (Mozart has dozens)
+Humoresque | not one tune: many pieces share the title (Dvorak, Tchaikovsky, Schumann and others)
+Breton tune | not one tune: names no piece
+The Rake | not one tune: a generic title many tunes share
+Jig | not one tune: a generic title
+Caledonia | not one tune: Dougie MacLean's song (1977) and a hymn tune share the title
+Carnevale Di Venezia | the same tune as Carnival of Venice
+Oh Suzana | the same tune as Oh! Susanna
+Lacrymosa | not one tune: many Requiems share the movement's title
+Beale St. Blues | under copyright: W. C. Handy (died 1958), 1917
+Chariots of Fire | under copyright: Vangelis, 1981
+The Unquiet Grave | unsure: the score is Gryphon's 1970s arrangement
+Night Walk | unsure: a modern piece by Rhythm Tengoku
+Baa Baa Black Sheep | the same tune as Twinkle, Twinkle, Little Star
+Pick a bale of cotton | unsure: known from Lead Belly's 1930s recordings and arrangements
+
+# Pulled from titles-05.txt after review of its first import (#324)
+Tochter Zion | the same tune as See the Conqu'ring Hero comes (Handel, Judas Maccabaeus)
+Bolero | the importer picks a score by Trung Hieu Ngo with no composer, not Ravel's; the title is shared
+Lo How A Rose | the importer picks Sufjan Stevens's arrangement (2010s), not the traditional tune
+How Firm a Foundation | the importer picks a score titled "Give Thanks", a modern worship song (Henry Smith, 1978)
+Canticum trium puerorum | the importer picks "11. Viva la musica (Canon a 3)", not the canticle
+The Chicago | the importer picks Fred Fisher's "Chicago" (1922), not Alfred Mortimer's march
+Indian Queen | the importer picks Purcell's Indian Queen (opera), not Playford's dance
+
+# Reviewed for batch 06 (#324): the top 200 of the ranking after batch 05, read against each title's Artist in ranking.md.
+# Under copyright, or unsure (batch 06)
+Georgia | under copyright: Hoagy Carmichael (died 1981), 1930
+Castle Nebulous | under copyright: Neople, video game music
+Tour of California | under copyright: Alan Lee Silva, a living composer
+Evening Breezes Waltz | unsure of its date and of Charles James Dorn's dates
+Slumber Song | unsure of its date and of Charles James Dorn's dates, and many pieces share the title
+That Is Love | unsure: C. V. Hayden's dates are unknown
+Experiment | under copyright: Ben.Z, a modern uploader's own piece
+Day's Yet to Come | unsure: Arling Shaeffer's dates are unknown, a modern hymn-style song
+Mountain Breezes | unsure: John C. Folwell's dates are unknown
+MacNamara's Band | unsure: Shamus O'Connor's 1917 song, and its lyricist's dates are unknown
+Bayern des samma mia | under copyright: Haindling, a modern band
+Curse of An Aching Heart | unsure: Al Piantadosi 1913 with lyrics by Henry Fink, whose dates are unknown
+Reina Galop | unsure: P. W. Newton's dates are unknown
+Rocky Top | under copyright: Boudleaux and Felice Bryant, 1967
+Gypsy Rover | under copyright: Leo Maguire, 1950s
+The Turtle Dove | under copyright: Ralph Vaughan Williams's arrangement (died 1958)
+Der Heiland ist geboren | unsure: Martin Böttger's dates are unknown
+I Wonder As I Wander | under copyright: John Jacob Niles, 1933
+Saint James Infirmary Blues | under copyright: Irving Mills's 1928 credit (died 1985)
+The Legacy | under copyright: asher77howell, a modern uploader's own piece
+The Willow Tree | under copyright: Chris Perry, a modern uploader's own piece
+Erev Ba | under copyright: an Israeli song of the 1940s or later
+Hokey Pokey | under copyright: 1940s
+Jesus Jesus Jesus in the morning | unsure: a modern worship chorus
+Give me oil in my lamp | unsure: a 20th-century Christian chorus
+The Hills Of Connemara | unsure: a 20th-century song
+East Tennessee Blues | unsure: a 1920s recording credited to Old Time
+A Babe Is Born | unsure: William Mathias's 1971 carol shares the title
+Nkosi Sikelel' iAfrika | unsure: the South African anthem's later verses (1920s onward)
+Ja chválim Teba Pane | unsure: an unknown hymn with no composer given
+The Prodigal Son | unsure: a modern praise song
+Anna | unsure: a title many pieces share, by Carlos Viola
+Flower | unsure: a title many pieces share
+May Breezes | unsure: a title many pieces share, no composer given
+
+# Not one tune (batch 06)
+Deus in adjutorium meum intende | not one tune: a chant verse many settings share
+Praeludium | not one tune: many Bach preludes
+Cinderella Waltz | not one tune: no Rossini piece of that name, an arrangement from La Cenerentola
+Choses vues à droite et à gauche | not one tune: a suite by Satie
+Psalm 3 | not one tune: Goudimel's psalm settings
+Rimsky-Korsakov Harmonic Exercises Suspensions | not one tune: a harmony exercise
+Spanish Romance | not one tune: many pieces share the title
+Largo | not one tune: many pieces share the title
+Scherzo | not one tune: many pieces share the title
+Vals | not one tune: many pieces share the title
+A toye | not one tune: many dance pieces share the title
+Magnificat and Nunc dimittis from the Short Service in the Dorian mode | not one tune: two canticle settings
+Sonata for 2 Pianos in D major K.448/375a | not one tune: a three-movement sonata
+Sonata I | not one tune: a multi-movement sonata
+A Carol For Christmas Eve | not one tune: many carols share the title
+Rigaudon | not one tune: many rigaudons
+I know that my Redeemer lives | not one tune: many hymns share the title
+Joseph | not one tune: Méhul's opera
+The Thirsty Vampires | not one tune we can tell: a glee with no piece we can check
+General Salute | not one tune: a generic pipe-band title
+Leap Year | not one tune: a generic title
+The Chase | not one tune: many pieces share the title
+Huntsman's Chorus | not one tune: many pieces share the title
+A New Beginning | not one tune: no Händel piece of that name
+The Battle of Waterloo | not one tune: many pieces share the title
+Cape Breton | not one tune: a regional title
+Stabat mater dolorosa | not one tune: Pergolesi's whole Stabat Mater
+Mary Ann | not one tune: many songs share the title
+
+# The same tune as a Song in the catalog (batch 06)
+MacPherson's Rant | the same tune as MacPherson's Lament in the catalog
+
+# More for batch 06, from the titles that moved up (#324)
+Sympathy | unsure: a title many pieces share, James P. Carrell's dates are unknown
+Jump At The Sun | unsure: no composer given, a title with no piece we can check
+Coranto | not one tune: a generic dance name
+The Hunter in his Career | under copyright: Percy Grainger (died 1961)
+Woodland Flowers | unsure: Felix Burns's dates are unknown
+Country Dance | not one tune: a generic dance name
+Fingal's Cave | not one tune: Mendelssohn's overture shares the title
+The Vagabond | under copyright: Beirut, a modern band
+Evangeline | not one tune: many pieces share the title
+The Wandering Minstrel | unsure: the name is Sullivan's, not a Beethoven piece
+2008 Y&m | under copyright: Ah Doe, a modern uploader's own piece
+Kum Ba Yah | unsure: first recorded in the 1930s, origin unknown
+More love more Power | under copyright: Vineyard Music, a modern worship song
+Fowl Play | under copyright: Kris Berg, a modern uploader's own piece
+Wild Rose Of The Mountain | unsure: John Mason's dates are unknown
+Puttin' On the Ritz | under copyright: Irving Berlin, 1929 (died 1989)
+Two Rivers | under copyright: Larry Unger, a modern uploader's own piece
+La Rotta | not one tune: a generic dance name
+Because He Was a Bonny Lad | unsure: Cole Richardson's dates are unknown
+Christmas Eve | not one tune: many pieces share the title
+The Drummer | not one tune: many pieces share the title
+Hasten Ye Faithful | the same tune as O Come, All Ye Faithful in the catalog
+Irish Dance | not one tune: a generic dance name
+Esperanza | under copyright: josemusic9, a modern uploader's own piece
+Galliard | not one tune: a generic dance name
+Scotland | not one tune: a place name
+Concertos Bwv-1055 1 C Langbein | not one tune: a multi-movement concerto
+Ophelia | not one tune: many pieces share the title
+Slow Air | not one tune: a generic title
+Emmanuel | under copyright: Wayne Goodine, a modern hymn-style song
+Brighton Camp | the same tune as The Girl I Left Behind Me in the catalog
+
+# Pulled from titles-06.txt after review of its first import (#324)
+Christmas Is Coming | the importer picks "christmas is a-coming" by Misc Christmas, genre soundtrack, not Nesbit's rhyme
+Eri gia tutta mia | the importer picks a score credited to Claudio Monteverdi, not Spighi da Prato's piece
+Here We Come A-Caroling | the importer picks Ron Smith's arrangement (a modern arranger), not the traditional tune
+
+# Pulled from titles-05.txt and titles-06.txt after the second review of their import (#324, PR #331).
+# 79th's Farewell to Gibraltar, Off to California and Road to the Isles were excluded by mistake and
+# are now in titles-06.txt.
+# Under copyright, or unsure
+Crested Hens | under copyright: Gilles Chabenat's "Les poules huppées" (1980s, living), not a traditional tune
+Black is the Color (of my True Love's Hair) | under copyright: the pick is John Jacob Niles's tune (died 1980), as Black Is The Colour
+Black Mountain Rag | unsure: known from 1930s recordings, and Leslie Keith (died 1977) claimed it
+Ida Sweet As Apple Cider | unsure: music by Eddie Munson, whose dates are unknown
+Ershter Vals | unsure: credited to G. L. Kitler (c. 1900), whose death date is unknown
+I Like The Flowers | unsure: a 20th-century camp round of unknown author and date
+Land of the Silver Birch | unsure: a 20th-century camp song of unknown author and date
+Salt Creek | unsure: known from Bill Monroe's 1963 recording; no form dated before 1931
+Wildwood Flower arr. for Voice and Tenor Viol | unsure: arranged by David Saphra, a living arranger; PDMX doesn't say who uploaded it
+# The same tune as a Song in the catalog
+Kings Of Orient | the same tune as We Three Kings in the catalog
+Sheebeg and Sheemore | the same tune as Si Bheag Si Mhor in the catalog
+Johnny I Hardly Knew Ye | the same tune as When Johnny Comes Marching Home in the catalog
+On Christmas Night | the importer picks "Version 4", another tune; the tune known by this name is the Sussex Carol, in the catalog
+Cold and Raw | the same tune as Stingo, the better-ranked title (Playford's "Stingo, or the Oyle of Barley")
+# The importer's pick isn't the tune
+My Faith Looks Up To Thee | the importer picked the tenor part of OLIVET; the scores with the melody fail the sanity gate
+Forty Days and Forty Nights | the importer picked the tenor part of AUS DER TIEFE; the score with the melody fails the sanity gate
+Crown Him With Many Crowns | the importer picks Charles H. Gabriel's setting; PDMX has no pickable score of DIADEMATA, Elvey's tune
+# Not one tune
+Ballet Cclxviii | not a tune name: a number in a collection
