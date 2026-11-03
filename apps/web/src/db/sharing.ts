@@ -1,13 +1,14 @@
-import { and, eq, isNull } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 
 import type { Database } from './database'
-import type { Kind, RecordingRow } from './library'
-import { handles, recordings, shareReports, shares, user } from './schema'
+import type { Kind, RecordingRow, TootRow } from './library'
+import { handles, recordings, shareReports, shares, toots, user } from './schema'
 
 // Sharing in D1 (ADR 0020): Handles, shares and reports. The owner's queries take the session's
 // user id and filter on it, so one user never shares or stops sharing another's item. The public
 // lookups find an item only through a share that isn't taken down, its owner's Handle, and the
-// live item itself.
+// live item itself. A Toot also stays down while any Recording it plays is taken down, so a Toot
+// never carries a taken-down Recording's audio back out.
 
 export type ShareRow = typeof shares.$inferSelect
 
@@ -102,15 +103,76 @@ export async function removeShare(
   return removed.length > 0
 }
 
-/** The user's shares that work: each item's kind, id and link id. */
+/** D1 binds at most 100 values a statement; one is the user id. */
+const IN_BATCH = 90
+
+/** The Recordings a Toot plays: its Arrangement's, or its Sound Pad Performance's. */
+export function tootRecordingIds(toot: Pick<TootRow, 'arrangement' | 'performance'>): string[] {
+  return [
+    ...new Set([
+      ...Object.values(toot.arrangement?.recordingForPitch ?? {}),
+      ...(toot.performance?.recordings ?? [])
+    ])
+  ]
+}
+
+/** The ids of the user's Recordings that Farty took down after a report. Usually none. */
+async function takenDownRecordings(db: Database, userId: string): Promise<Set<string>> {
+  const rows = await db
+    .select({ itemId: shares.itemId })
+    .from(shares)
+    .where(
+      and(eq(shares.userId, userId), eq(shares.kind, 'recordings'), isNotNull(shares.takenDownAt))
+    )
+  return new Set(rows.map(row => row.itemId))
+}
+
+const playsAny = (toot: Pick<TootRow, 'arrangement' | 'performance'>, ids: Set<string>) =>
+  ids.size > 0 && tootRecordingIds(toot).some(id => ids.has(id))
+
+/**
+ * Whether the user's Toot plays a Recording Farty took down, so it can't be shared: its link
+ * would make that Recording's audio public again.
+ */
+export async function tootPlaysTakenDown(
+  db: Database,
+  userId: string,
+  tootId: string
+): Promise<boolean> {
+  const takenDown = await takenDownRecordings(db, userId)
+  if (takenDown.size === 0) return false
+  const rows = await db
+    .select({ arrangement: toots.arrangement, performance: toots.performance })
+    .from(toots)
+    .where(and(eq(toots.userId, userId), eq(toots.id, tootId)))
+  return rows.some(toot => playsAny(toot, takenDown))
+}
+
+/**
+ * The user's shares that work: each item's kind, id and link id. A Toot that plays a taken-down
+ * Recording is left out, as a taken-down Recording is.
+ */
 export async function liveShares(
   db: Database,
   userId: string
 ): Promise<{ kind: Kind; itemId: string; id: string }[]> {
-  return db
+  const live = await db
     .select({ kind: shares.kind, itemId: shares.itemId, id: shares.id })
     .from(shares)
     .where(and(eq(shares.userId, userId), isNull(shares.takenDownAt)))
+  const tootIds = live.filter(share => share.kind === 'toots').map(share => share.itemId)
+  if (tootIds.length === 0) return live
+  const takenDown = await takenDownRecordings(db, userId)
+  if (takenDown.size === 0) return live
+  const down = new Set<string>()
+  for (let at = 0; at < tootIds.length; at += IN_BATCH) {
+    const rows = await db
+      .select({ id: toots.id, arrangement: toots.arrangement, performance: toots.performance })
+      .from(toots)
+      .where(and(eq(toots.userId, userId), inArray(toots.id, tootIds.slice(at, at + IN_BATCH))))
+    for (const toot of rows) if (playsAny(toot, takenDown)) down.add(toot.id)
+  }
+  return live.filter(share => share.kind !== 'toots' || !down.has(share.itemId))
 }
 
 /** A shared Recording, as anyone with its link finds it. */
@@ -143,6 +205,38 @@ export async function sharedRecording(
       )
     )
   return rows[0] ?? null
+}
+
+/** A shared Toot, as anyone with its link finds it. */
+export type SharedTootRow = { share: ShareRow; handle: string; toot: TootRow }
+
+/**
+ * The saved Toot shared at `/u/<handle>/t/<shareId>/`, as `sharedRecording` finds a Recording: only
+ * while it's shared under that Handle, not taken down, and not deleted, and while no Recording it
+ * plays is taken down. A Toot is in `toots` only once it's saved, so an unsaved one is never found.
+ */
+export async function sharedToot(
+  db: Database,
+  handle: string,
+  shareId: string
+): Promise<SharedTootRow | null> {
+  const rows = await db
+    .select({ share: shares, handle: handles.handle, toot: toots })
+    .from(shares)
+    .innerJoin(handles, eq(handles.userId, shares.userId))
+    .innerJoin(toots, and(eq(toots.userId, shares.userId), eq(toots.id, shares.itemId)))
+    .where(
+      and(
+        eq(shares.id, shareId),
+        eq(shares.kind, 'toots'),
+        isNull(shares.takenDownAt),
+        eq(handles.handle, handle),
+        isNull(toots.deletedAt)
+      )
+    )
+  const row = rows[0]
+  if (!row) return null
+  return playsAny(row.toot, await takenDownRecordings(db, row.share.userId)) ? null : row
 }
 
 /** Keeps a report of `share` for Farty to check. */
