@@ -33,11 +33,13 @@ MISBARRED_SCORES = {
     "5171990": 'The Star-Spangled Banner in 4/4 from "O-": the anthem is in 3/4, with "O-" as its pickup',
 }
 
-# Scores that pass the gates but aren't the tune's melody: one inner voice of a hymn's harmony, found
-# by reading the picks after an import (flag_picks.py, #324). They're never picked. MuseScore score id -> why.
+# Scores that pass the gates but aren't the tune's melody: one inner voice of a hymn's harmony, or
+# another tune under the same name, found by reading the picks after an import (flag_picks.py, #324).
+# They're never picked. MuseScore score id -> why.
 NOT_THE_MELODY = {
     "562231": "My Faith Looks Up To Thee: the tenor part of OLIVET",
     "653966": "Forty Days and Forty Nights: the tenor part of AUS DER TIEFE",
+    "4878861": "The Dark-Eyed Sailor: Version 2 of 3, not the tune most PDMX scores of the song carry",
 }
 
 # A sensible excerpt and tempo, chosen from the score itself.

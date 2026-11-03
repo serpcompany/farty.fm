@@ -38,6 +38,7 @@ import collections
 import json
 import re
 import sys
+import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -255,10 +256,39 @@ def garbled(text):
     return any(len(w) > 1 and all("À" <= c <= "ÿ" for c in w) for w in re.findall(r"[^\W\d_]+", text))
 
 
+def _clean(text):
+    """A spelling with nothing a titles file reads as a comment or a separator, and no trailing full stop."""
+    text = unicodedata.normalize("NFC", text).replace("#", "♯").replace("|", "/").replace(";", ",")
+    return text.strip(" -–—:/").rstrip(". ")
+
+
+def _base(c):
+    """A letter without its accent: "à" -> "a"."""
+    return unicodedata.normalize("NFD", c)[0]
+
+
+def _with_accents(text, accented):
+    """text with the accents of the `accented` spellings written with the same letters, keeping text's
+    case: "Mairi Bhan Og" and "MÀIRI BHÀN ÒG" -> "Màiri Bhàn Òg". A letter takes an accent only when
+    all those spellings write it the same way, so "Fúnicúlí Fúnicúla" and "Funiculì Funiculà" leave
+    "Funiculi Funicula" as it is."""
+    same = [o for o in accented if len(o) == len(text)
+            and all(_base(a).lower() == _base(b).lower() for a, b in zip(text, o))]
+
+    def letter(a, column):
+        ways = {b.lower() for b in column}
+        if _base(a) == a and len(ways) == 1 and _base(b := ways.pop()) != b:
+            return b.upper() if a.isupper() else b
+        return a
+
+    return "".join(letter(a, column) for a, column in zip(text, zip(*same))) if same else text
+
+
 def display_title(tune):
     """The title as its scores most often write it, still matching the tune's key: not garbled,
     preferring one in title or sentence case (starting with a capital), with nothing a titles file reads as a comment or a
-    separator. None when every spelling is garbled."""
+    separator and no trailing full stop. When other spellings write the same letters with accents
+    ("Màiri Bhàn Òg"), the title takes the ones they agree on. None when every spelling is garbled."""
     def upper_share(text):
         letters = [c for c in text if c.isalpha()]
         return sum(c.isupper() for c in letters) / len(letters) if letters else 0
@@ -267,13 +297,13 @@ def display_title(tune):
         text, n = item
         return (text == text.lower() or upper_share(text) > 0.5 or text[:1].islower(), -n, text)
 
-    for text, _ in sorted(tune.spellings.items(), key=order):
-        if garbled(text):
-            continue
-        text = text.replace("#", "♯").replace("|", "/").replace(";", ",").strip(" -–—:/")
+    readable = [text for text, _ in sorted(tune.spellings.items(), key=order) if not garbled(text)]
+    accented = [_clean(t) for t in readable if any(_base(c) != c for c in _clean(t) if c.isalpha())]
+    for text in readable:
+        text = _clean(text)
         if text == text.lower() or upper_share(text) > 0.5:
             text = " ".join(w[:1].upper() + w[1:] for w in text.lower().split())
-        text = text[:1].upper() + text[1:]
+        text = _with_accents(text[:1].upper() + text[1:], accented)
         if pdmx.match_key(text) == tune.key:
             return text
     return None
