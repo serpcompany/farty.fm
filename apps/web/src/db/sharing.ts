@@ -117,7 +117,7 @@ export function tootRecordingIds(toot: Pick<TootRow, 'arrangement' | 'performanc
 }
 
 /** The ids of the user's Recordings that Farty took down after a report. Usually none. */
-async function takenDownRecordings(db: Database, userId: string): Promise<Set<string>> {
+export async function takenDownRecordings(db: Database, userId: string): Promise<Set<string>> {
   const rows = await db
     .select({ itemId: shares.itemId })
     .from(shares)
@@ -149,6 +149,28 @@ export async function tootPlaysTakenDown(
 }
 
 /**
+ * The ids of the user's Toots of `tootIds` that play a Recording of `takenDown`, the user's
+ * taken-down Recordings. It loads no Toot when nothing is taken down, which is usual.
+ */
+export async function tootsPlayingTakenDown(
+  db: Database,
+  userId: string,
+  tootIds: string[],
+  takenDown: Set<string>
+): Promise<Set<string>> {
+  const down = new Set<string>()
+  if (takenDown.size === 0) return down
+  for (let at = 0; at < tootIds.length; at += IN_BATCH) {
+    const rows = await db
+      .select({ id: toots.id, arrangement: toots.arrangement, performance: toots.performance })
+      .from(toots)
+      .where(and(eq(toots.userId, userId), inArray(toots.id, tootIds.slice(at, at + IN_BATCH))))
+    for (const toot of rows) if (playsAny(toot, takenDown)) down.add(toot.id)
+  }
+  return down
+}
+
+/**
  * The user's shares that work: each item's kind, id and link id. A Toot that plays a taken-down
  * Recording is left out, as a taken-down Recording is.
  */
@@ -164,14 +186,7 @@ export async function liveShares(
   if (tootIds.length === 0) return live
   const takenDown = await takenDownRecordings(db, userId)
   if (takenDown.size === 0) return live
-  const down = new Set<string>()
-  for (let at = 0; at < tootIds.length; at += IN_BATCH) {
-    const rows = await db
-      .select({ id: toots.id, arrangement: toots.arrangement, performance: toots.performance })
-      .from(toots)
-      .where(and(eq(toots.userId, userId), inArray(toots.id, tootIds.slice(at, at + IN_BATCH))))
-    for (const toot of rows) if (playsAny(toot, takenDown)) down.add(toot.id)
-  }
+  const down = await tootsPlayingTakenDown(db, userId, tootIds, takenDown)
   return live.filter(share => share.kind !== 'toots' || !down.has(share.itemId))
 }
 
