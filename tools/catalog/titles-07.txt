@@ -4,6 +4,7 @@
 # excluded-titles.txt: Promised Land, Valse du Départ.
 # The second review (#324, PR #341) pulled 14 more, now in excluded-titles.txt: The Alphabet, Monymusk, La Morisque, The Gallowglass, Gloucestershire Wassail, The Banks Of Lough Gowna, Dixie, The Happy Clown, The Tennessee, Aunt Mary's (Canadian) Jig, Gasp\'e Reel, Dont vient cela, See see the shepherds' Queen, Steal Away.
 # It also named these by hand, with their accents or the name people know: Màiri Bhàn Òg, Helan går, Old Folks at Home.
+# PR #343 pulled Huldrevise (decided on PR #341: credited to "Urskoug" alone, undatable), now in excluded-titles.txt.
 # id | catalog title
 after-the-ball | After the Ball
 bold-fenian-men | Bold Fenian Men
@@ -162,7 +163,6 @@ mrs-major-l-stewart-of-the-island-of-java | Mrs. Major L. Stewart of the Island 
 sad-is-my-fate | Sad Is My Fate
 balquhidder-lasses | Balquhidder Lasses
 fine-companion | Fine Companion
-huldrevise | Huldrevise
 huntsmans-chorus-in-dr-freyschutz-gs-088 | Huntsman's Chorus in Dr. Freyschutz. GS.088
 maid-in-the-meadow | Maid in the Meadow
 mrs-hamilton-of-pencaitland | Mrs. Hamilton Of Pencaitland

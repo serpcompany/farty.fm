@@ -666,3 +666,128 @@ Frank Gilruth | unsure: credited to "Misc tunes" with no composer, and no dated 
 Will You Come Home With Me | unsure: credited to "Misc tunes" with no composer, and no dated source names one
 Over the Border | unsure: credited to "Misc tunes" with no composer, and no dated source names one
 Tell me where is fancy bred | unsure: credited only to "Carr", and which Carr can't be told
+Huldrevise | unsure: credited to "Urskoug" alone, with no first name, dates or dated source (decided on PR #341, pulled in PR #343)
+
+# From the review of titles-09.txt (#324)
+Hornpipes | not one tune: a collection title
+Vocals | not a tune: a part name
+Christmas Hymn | unsure: a generic title, not one tune
+[id 1-77a] | not a title: a catalogue code
+[id 8-93] | not a title: a catalogue code
+Sailors JournalComd by DibdinThe. JC.165 | not a clean title: two words run together with a catalogue code
+Good Morning to All | the same tune as the Song Happy Birthday
+Welcome Whiskey Back Again | the same tune as the Song Welcome Whisky Back Again
+O'er the Hills and far Awa | the same tune as the Song O'er the Hills and far away
+Garfield | unsure: probably the same tune as the Song President Garfield's Hornpipe
+Nitzotz Ha ahava | unsure: an Israeli song of unknown date, probably under copyright
+Ländler | not one tune: a dance type
+
+# Pulled from titles-09.txt after review of its first import (#324)
+Indian Princess | the importer picks a score by Colin Hume, a modern composer
+Mrs Kenny's Barn Dance | unsure: the importer picks a score credited to Felix Burns, a 20th-century composer
+The Indian River Hornpipe | unsure: the importer picks a score credited to Frank Livingstone, who may be a living composer
+Hunting Song | unsure: the importer picks a score credited to Henry Thomas Smart that is also tagged as a 1910 Chippewa song
+Lament For The Death Of The Rev. Archie Beaton | unsure: the importer picks a score credited to John Mason, whose dates and the tune's composer are not known
+
+# Pulled from titles-09.txt after the voice and title check (#324)
+Let Heaven And Earth Rejoice And Sing | the importer picks "Version 2" of the score, with a harmony part, not the melody score
+Little Annie Rooney. GHW.053 | not a clean title: a catalogue code is part of the name
+Smith's -- Reel | not a clean title: a stray double dash in the name
+
+# Pulled from titles-09.txt after the review of its import (#324, PR #343)
+# The same tune as a Song in the catalog
+Sir Archibald Grant of Monymusk's Reel | the same tune as Money Musk (batch 06), Daniel Dow's: note for note, a whole tone apart
+Highland Skip | the same tune as The Boyne Hunt (batch 06): the pick's subtitle is "The Boyne Hunt", and the notes are its tune, ornamented differently
+# The importer's pick isn't the tune
+French Broad | the pick's top voice is a treble harmony of William Walker's shape-note tune; the air is the tenor
+# Under copyright, or unsure
+Scan Tester's No 1 | unsure: known only from Lewis "Scan" Tester (1887-1972), written down from his playing in the late 1950s and after
+Scan Testers No 2 | unsure: known only from Lewis "Scan" Tester (1887-1972), written down from his playing in the late 1950s and after
+The Anvil | unsure: the pick's composer is credited as "No idea", and no dated source names one
+Duntroon | unsure: no composer or dated source; the name is also Australia's Royal Military College (1911), so the tune may be 20th-century
+
+# Reviewed for batch 10 (#324, PR #343): the top 152 of the ranking after batch 09, read against each title's Artist in ranking.md.
+# Under copyright, or unsure (batch 10)
+Black Mountain Reel | unsure: credited to "Misc Traditional", and probably Black Mountain Rag (excluded: 1930s recordings, Leslie Keith died 1977) under another name
+Shoemaker | unsure: credited to Charles Edward Pollock, no dates found
+Barney O'Neill | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Down With the French | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+The Fenian Stronghold | unsure: credited to "Misc Traditional" with no composer; the Fenians date it after 1858, and no dated source names one
+Ffarwel Ir Marian | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Fiddler's heaven | unsure: credited to Delaney, no dates found
+The Highland Society of London | unsure: credited to "Pipe tune" with no composer, and no dated source names one
+Ice On The Water | unsure: credited to George Reynolds, no dates found
+In The Hallowed Manger | unsure: credited to Thomas Adams, and which one can't be told
+In The Silence Of The Night | unsure: credited to A. Mary R. Dobson, no dates found
+Jolly Raftsman | unsure: credited to "unknown composer", and no dated source names one
+The Mill Burn | unsure: credited to James Fraser, no dates found
+Mississippi | unsure: credited to Bradshaw, no dates found
+Morecambe Bay | under copyright: credited to Pat Shaw (died 1977)
+Mother Kilwinning | unsure: credited to Carl Volti, no dates found (as Cuckoo Valse, batch 07)
+Vale of Leven | unsure: credited to Carl Volti, no dates found (as Cuckoo Valse, batch 07)
+Remember the Poor | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Ring Out The Bells For Christmas | unsure: credited to "Various" with no composer named
+Shropshire Lass | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+The Splendid Shilling | unsure: credited to "ca", no composer or date
+Anne Fraser MacKenzie | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Arniston Castle | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Christ was once a little baby | unsure: credited to Florence W. Williams, no dates found
+Dwelling together | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+The Grand Slam | unsure: credited to "ABB", no composer or date
+Hullichan Jig | unsure: credited to "from the playing of Mary Motley", a modern player; no dated source
+Lady Louisa Macdonald's Strathspey | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Mr. Douglas of Springwood Park | unsure: credited to Alexander Givan, no dates found
+The Old Blackbird | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Old Joe | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Sadler's Wells | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Shepherd's song | unsure: T. Tertius Noble died 1953, but the song's first publication can't be dated before 1931
+Sojourner | unsure: credited to R. DeWitt Mallary, no dates found
+Wind On The Heath | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Argyll is my name | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Blanchland Races | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+Indeed Then You Won't ! | unsure: credited to "Misc Traditional" with no composer, and no dated source names one
+The Maiden's Choice | unsure: credited to Michael Dabney, no dates found (as The Lottery, batch 07)
+The Washington | unsure: credited to Reubin Monday, no dates found
+# Not one tune, or not a clean title (batch 10)
+Oh povera me. CJF.037 | not a clean title: a catalogue code is part of the name
+GB/7d/21 Room for Cuckolds | not a clean title: a catalogue code is part of the name
+Moss Roses. CJF.012 | not a clean title: a catalogue code is part of the name
+Patrick Day in the Morning. JaW.110 | not a clean title: a catalogue code is part of the name
+[id 1-36] | not a title: a catalogue code
+A Hornpipe | not one tune: a dance name, many pieces
+Single chant in A flat major | not one tune: a form name; a chant, not a tune with a name
+O Lord how many are my foes increased | not one tune: a metrical psalm that many tunes are set to
+Now Israel may say and that truly | not one tune: a metrical psalm that many tunes are set to
+# The importer's pick may not be the tune (batch 10)
+Augusta | unsure which voice: a New England tunebook tune (Abraham Maxim), whose air is the tenor; the importer takes the top voice (as French Broad)
+Cuba | unsure which voice: a New England tunebook tune (Oliver Holden), whose air is the tenor; the importer takes the top voice
+New Jordan | unsure which voice: a New England tunebook tune (Nehemiah Shumway), whose air is the tenor; the importer takes the top voice
+Arabia | unsure which voice: a New England tunebook tune (Oliver Holden), whose air is the tenor; the importer takes the top voice
+Ye princes that in might excel | unsure which voice: a West Gallery psalm tune (Joseph Stephenson), whose air is the tenor
+All laud and praise with heart and voice | unsure which voice: a West Gallery hymn tune (Thomas Clark), whose air is the tenor
+Come let us anew our journey pursue | unsure which voice: a West Gallery hymn tune (Thomas Clark), whose air is the tenor
+Amour partes | unsure which voice: a four-part chanson (Heurteur); no one part is the tune
+Similabo eum | unsure which voice: a polyphonic motet; no one part is the tune
+# The same tune as a Song in the catalog, or the credit doesn't fit (batch 10)
+Sir Alexander Don | credited to Rossini, not the strathspey; the strathspey is the Song Sir Alexander Don's Strathspey (batch 09)
+
+# Pulled from titles-09.txt after a stricter same-tune scan (#324, PR #343)
+The Perthshire Hunt | the same tune as The Boyne Hunt (batch 06): the first strain's 15 notes have the same changes of pitch, a fourth lower
+
+# Pulled from titles-10.txt after review of its first import (#324, PR #343)
+# The same tune as a Song in the catalog
+The Marquis of Huntly | the same tune as Marquis of Huntly's Strathspey (batch 09), William Marshall's: flag_picks.py found the same opening
+Of A' the Airts the Wind Can Blaw | the same tune as Miss Admiral Gordon's Strathspey: the pick's subtitle names it, and the opening is the same
+# The importer's pick isn't the ranking's piece: a "Misc tunes" score with no composer, so unsure
+The Pride of Rathmore | the pick's subtitle names two other dance tunes (Rabbit's Burrow, The Kerryman's Daughter), not Percy French's piece; no dated source
+The Rivals | the pick is credited "anon.", not J. L. Hatton; no dated source
+Killarney | the pick is credited to "Misc tunes" with no composer, so it can't be told to be Balfe's song
+St. Lawrence | the pick is a one-line "Misc tunes" score with no composer, not Charles Steggall's hymn tune
+Chimes | the pick is a "Misc tunes" score with no composer, not Lowell Mason's tune
+The Primrose | the pick is a "Misc tunes" score with no composer, not H. D. Leslie's partsong
+The Sloe | the pick is a "Misc tunes" score with no composer, not Henry Bishop's; no dated source
+Sky Lark | the pick is "Skylark [4]", one of several tunes of the name, with no composer; not shown to be John Sheeles's
+The Prince Of Wales | the pick is a "Misc tunes" score with no composer; many tunes share the name, and it can't be told to be Niel Gow's
+The Fairy | the pick is a "Misc tunes" score with no composer; several tunes share the name, and it can't be told to be Nathaniel Gow's
+# The importer's pick may not be the tune
+Balvenie Castle | unsure which voice: the pick has two treble parts, and the importer takes the one of mostly repeated notes, which may be the second
