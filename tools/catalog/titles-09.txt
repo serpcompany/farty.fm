@@ -1,25 +1,28 @@
 # The top 212 tune titles of tools/catalog/ranking.md, not yet in the catalog or tried, written by
 # tools/catalog/rank_pdmx.py --batch 212 --out tools/catalog/titles-09.txt (#312). Each title's only name is
 # the one the ranking counted scores by.
-# Review of its import (#324) pulled 5 titles, now in excluded-titles.txt: Indian Princess; Mrs Kenny's Barn Dance; The Indian River Hornpipe; Hunting Song; Lament For The Death Of The Rev. Archie Beaton; and, after the voice and title check, Let Heaven And Earth Rejoice And Sing; Little Annie Rooney. GHW.053; Smith's -- Reel.
+# Review of its import (#324) pulled 8 titles, now in excluded-titles.txt: Indian Princess; Mrs Kenny's Barn Dance; The Indian River Hornpipe; Hunting Song; Lament For The Death Of The Rev. Archie Beaton; and, after the voice and title check, Let Heaven And Earth Rejoice And Sing; Little Annie Rooney. GHW.053; Smith's -- Reel.
+# The review of PR #343 pulled 8 more, now in excluded-titles.txt: Sir Archibald Grant of Monymusk's Reel; Highland Skip; The Perthshire Hunt; Scan Tester's No 1; Scan Testers No 2; French Broad; The Anvil; Duntroon.
+# It also added The Duchess of Buccleuch, which had been left out as a spelling of Duchess of Buccleugh, and fixed these titles by hand: Muss i denn, When Sick Is It Tea You Want?, A Virgin Most Pure, Peacock's Tune, Adson's Saraband, La Fougère, My Love Is Lost to Me, The Sun from the East, Come Up Stairs with Me, Johnny the Jumper.
 # id | catalog title
 christ-is-born-in-bethlehem | Christ is Born in Bethlehem
 christian-walk-carefully-danger-is-near | Christian walk carefully danger is near
 duchess-of-buccleugh | Duchess of Buccleugh
+duchess-of-buccleuch | The Duchess of Buccleuch
 hurdle-race | The Hurdle Race
 madam-frederick | Madam Frederick
 mi-go-zatvorile | Mi Go Zatvorile
 miss-johnstone | Miss Johnstone
-muss-i-denn | Muss i Denn
+muss-i-denn | Muss i denn
 newfoundland | Newfoundland
 rocking-the-baby | Rocking the Baby
 rose-of-sharon | Rose of Sharon
 something-new | Something New
 talyllyn | Talyllyn
 tame-her-when-da-snaw-comes | Tame Her When Da Snaw Comes
-when-sick-is-it-tea-you-want | When Sick is it Tea You Want
+when-sick-is-it-tea-you-want | When Sick Is It Tea You Want?
 whitehall | Whitehall
-a-virgin-most-pure | A Virgin most pure
+a-virgin-most-pure | A Virgin Most Pure
 breeches-mary | Breeches Mary
 craigellachie-lasses | The Craigellachie Lasses
 deil-take-the-warr | De'il Take the Warr
@@ -36,7 +39,6 @@ over-the-mountains | Over the Mountains
 quare-tristis-es-anima-mea | Quare tristis es anima mea
 queens-welcome-to-invercauld | The Queen's Welcome to Invercauld
 sir-alexander-dons-strathspey | Sir Alexander Don's Strathspey
-sir-archibald-grant-of-monymusks-reel | Sir Archibald Grant of Monymusk's Reel
 talisker | Talisker
 this-new-christmas-carol | This New Christmas Carol
 alexander | Alexander
@@ -73,30 +75,27 @@ wives-victory | The Wives' Victory
 young-damons-flight | Young Damon's Flight
 a-trip-to-highgate | A Trip To Highgate
 a-trip-to-tunbridge | A Trip to Tunbridge
-anvil | The Anvil
 bartlett-house | Bartlett House
 brandlings | Brandlings
 confesse | Confesse
 cullen-house | Cullen House
 delvine-side | Delvine Side
-duntroon | Duntroon
 eliza | Eliza
 forneth-house | Forneth House
 great-high-priest | Great High Priest
-highland-skip | Highland Skip
 james-duff-m-p | James Duff M.P.
 lord-at-first-did-adam-make | The Lord At First Did Adam Make
 machynlleth | Machynlleth
 manage-the-miser | Manage the Miser
 o-gottes-lamm | O Gottes Lamm
-peacocks-tune | Peacocks Tune
+peacocks-tune | Peacock's Tune
 remember-davids-troubles-lord | Remember David's troubles Lord
 shepherd | The Shepherd
 tulchan-lodge | Tulchan Lodge
 twll-yn-ei-boch | Twll yn ei boch
 wakefield-hunt | Wakefield Hunt
 way-to-norwich | The Way to Norwich
-adsons-saraband | Adson's Saraband.
+adsons-saraband | Adson's Saraband
 ayrshire-lasses | Ayrshire Lasses
 bless-the-lord | Bless the Lord
 bob-o-dowally | The Bob o' Dowally
@@ -113,7 +112,6 @@ mrs-power | Mrs. Power
 navvie-on-the-line | Navvie on the Line
 o-what-can-little-hands-do | O what can little hands do
 piper-of-drummond | Piper of Drummond
-scan-testers-no-2 | Scan Testers No 2
 shave-the-donkey | Shave The Donkey
 strathbogie-toast | Strathbogie Toast
 this-day-a-child-is-born | This Day A Child Is Born
@@ -132,7 +130,7 @@ forbes-morrison | Forbes Morrison
 general-garibaldis-reel | General Garibaldi's Reel
 happy-marriage | The Happy Marriage
 hughie-rory-mackinnon | Hughie Rory MacKinnon
-la-fougere | La Fougere
+la-fougere | La Fougère
 lieutenant-howard-douglas | Lieutenant Howard Douglas
 little-house-around-the-corner | Little House Around the Corner
 loves-triumph | Love's Triumph
@@ -141,34 +139,32 @@ miss-ogilvies-fancy | Miss Ogilvie's Fancy
 mountain-high | The Mountain High
 mrs-adie | Mrs. Adie
 mrs-garden-of-troups-strathspey | Mrs Garden of Troup's Strathspey
-my-love-is-lost-to-me | My love is lost to me
+my-love-is-lost-to-me | My Love Is Lost to Me
 nameless-lassie | The Nameless Lassie
 new-moon | The New Moon
 nuptial-knot | The Nuptial Knot
 pease-strae | Pease Strae
 rattle-the-bottles | Rattle the Bottles
 review | The Review
-scan-testers-no-1 | Scan Tester's No 1
 shepherd-of-souls | Shepherd of Souls
 sun-assembly | Sun Assembly
-sun-from-the-east | The Sun from the east
+sun-from-the-east | The Sun from the East
 welsh | The Welsh
 whigs-of-fife | The Whigs of Fife
 caledonian-canal | Caledonian Canal
 captain-o-cain | Captain O Cain
 careys-minuet | Carey's Minuet
 come-dance-and-sing | Come Dance and Sing
-come-up-stairs-with-me | Come up stairs with me
+come-up-stairs-with-me | Come Up Stairs with Me
 counsellor-dillon | Counsellor Dillon
 cream-pot | Cream Pot
 dover-pier | Dover Pier
 durham | Durham
 fox | Fox
-french-broad | French Broad
 glise-de-sherbrooke | Glise de Sherbrooke
 inverness-rant | The Inverness Rant
 john-of-paris | John Of Paris
-johnny-the-jumper | Johnny the jumper
+johnny-the-jumper | Johnny the Jumper
 kildrummy-castle | Kildrummy Castle
 lady-betty-cochrans-reel | Lady Betty Cochran's Reel
 lady-mary-hays-scotch-measure | Lady Mary Hay's Scotch Measure
@@ -183,7 +179,6 @@ niel-gows-recovery | Niel Gow's Recovery
 old-as-the-hills | Old as the Hills
 old-batchelor | Old Batchelor
 perth | Perth
-perthshire-hunt | The Perthshire Hunt
 pinagay-branle | Pinagay Branle
 there-is-a-land-of-pleasure | There is a land of pleasure
 thorn-bush | Thorn Bush

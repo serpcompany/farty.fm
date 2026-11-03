@@ -1,7 +1,12 @@
 # The top 200 tune titles of tools/catalog/ranking.md, not yet in the catalog or tried, written by
 # tools/catalog/rank_pdmx.py --batch 200 --out tools/catalog/titles-06.txt (#312). Each title's only name is
 # the one the ranking counted scores by. Review of its import (#324) pulled 3 titles, now in
-# excluded-titles.txt: Christmas Is Coming, Eri gia tutta mia, Here We Come A-Caroling.
+# excluded-titles.txt: Christmas Is Coming, Eri gia tutta mia, Here We Come A-Caroling. Its second
+# review pulled 12 more (Crested Hens, Black is the Color, Black Mountain Rag, Sheebeg and Sheemore,
+# Johnny I Hardly Knew Ye, Ershter Vals, Land of the Silver Birch, Salt Creek, Ballet Cclxviii, Cold
+# and Raw, and My Faith Looks Up To Thee and Forty Days and Forty Nights, whose picks were tenor parts
+# and whose other scores fail the sanity gate), added 3 titles excluded by mistake (79th's Farewell to
+# Gibraltar, Off to California, Road to the Isles), and gave 4 Songs their proper title.
 # id | catalog title
 befiehl-du-deine-wege | Befiehl du deine Wege
 infant-holy-infant-lowly | Infant Holy Infant Lowly
@@ -11,9 +16,8 @@ lord-lovats-lament | Lord Lovat's Lament
 tomorrow-shall-be-my-dancing-day | Tomorrow Shall Be My Dancing Day
 speed-the-plough | Speed the Plough
 childgrove | Childgrove
-crested-hens | Crested Hens
 american-patrol | American Patrol
-sussex-carol | Sussex carol
+sussex-carol | Sussex Carol
 battle-of-the-somme | Battle of the Somme
 fra-tutte-le-pene | Fra tutte le pene
 hole-in-the-wall | Hole in the Wall
@@ -24,11 +28,8 @@ black-nag | The Black Nag
 blackthorn-stick | The Blackthorn Stick
 hector-the-hero | Hector The Hero
 toyland | Toyland
-land-of-the-silver-birch | Land of the Silver Birch
 sailors-wife | The Sailor's Wife
 tu-scendi-dalle-stelle | Tu Scendi Dalle Stelle
-black-is-the-color-of-my-true-loves-hair | Black is the Color (of my True Love's Hair)
-my-faith-looks-up-to-thee | My Faith Looks Up To Thee
 princess-royal | Princess Royal
 ballydesmond-polka | Ballydesmond Polka
 drive-the-cold-winter-away | Drive the Cold Winter Away
@@ -38,7 +39,6 @@ tant-que-vivray | Tant que vivray
 rakes-of-kildare | The Rakes of Kildare
 smash-the-windows | Smash the Windows
 whiskey-youre-the-devil | Whiskey You're the Devil
-ershter-vals | Ershter Vals
 fairy-dance | The Fairy Dance
 goddesses | Goddesses
 praise-my-soul-the-king-of-heaven | Praise my Soul the King of Heaven
@@ -53,19 +53,16 @@ boars-head-carol | The Boar's Head Carol
 le-piccadilly | Le piccadilly
 canon-in-c | Canon in C
 ebenezer | Ebenezer
-kimer-i-klokker | Kimer I klokker
+kimer-i-klokker | Kimer, I klokker
 lily-of-the-valley | Lily Of The Valley
 eileen-aroon | Eileen Aroon
 parsons-farewell | Parson's Farewell
 bucks-of-oranmore | The Bucks Of Oranmore
 bonnie-lass-o-bon-accord | The Bonnie Lass O' Bon Accord
 dry-hands | Dry Hands
-black-mountain-rag | Black Mountain Rag
 duke-of-yorks-march | Duke of York's March
-salt-creek | Salt Creek
 chinquapin-hunting | Chinquapin Hunting
 gay-gordons | The Gay Gordons
-sheebeg-and-sheemore | Sheebeg and Sheemore
 christ-whose-glory-fills-the-skies | Christ whose glory fills the skies
 hen-wlad-fy-nhadau | Hen Wlad Fy Nhadau
 black-raven | Black Raven
@@ -113,7 +110,6 @@ let-all-mortal-flesh-keep-silence | Let all mortal flesh keep silence
 beauty-of-the-north | The Beauty of the North
 la-mourisque | La Mourisque
 billy-in-the-lowground | Billy in the Lowground
-johnny-i-hardly-knew-ye | Johnny I Hardly Knew Ye
 nathaniel-gows-lament-for-the-death-of-his-brother | Nathaniel Gow's Lament for the Death of His Brother
 durangs-hornpipe | Durang's Hornpipe
 mrs-judge | Mrs. Judge
@@ -122,9 +118,8 @@ afton-water | Afton Water
 king-williams-march | King William's March
 wounded-hussar | The Wounded Hussar
 roxburgh-castle | Roxburgh Castle
-ballet-cclxviii | Ballet Cclxviii
 boyne-hunt | The Boyne Hunt
-mr-beveridges-maggot | Mr.Beveridge's Maggot.
+mr-beveridges-maggot | Mr. Beveridge's Maggot
 alas-and-did-my-savior-bleed | Alas and Did My Savior Bleed
 lady-mary-ramsay | Lady Mary Ramsay
 hunt-the-squirrel | Hunt the Squirrel
@@ -173,8 +168,6 @@ donkey-riding | Donkey Riding
 highland-mary | Highland Mary
 lindisfarne | Lindisfarne
 christians-awake-salute-the-happy-morn | Christians Awake Salute The Happy Morn
-cold-and-raw | Cold and Raw
-forty-days-and-forty-nights | Forty Days and Forty Nights
 glenlivet | Glenlivet
 money-in-both-pockets | Money in Both Pockets
 planxty-fanny-power | Planxty Fanny Power
@@ -189,7 +182,7 @@ juice-of-barley | Juice of Barley
 all-round-my-hat | All Round My Hat
 castle-of-dromore | The Castle Of Dromore
 eternal-father-strong-to-save | Eternal Father Strong To Save
-picking-of-sticks | Picking Of Sticks.
+picking-of-sticks | Picking of Sticks
 si-hei-lwli-mabi | Si hei lwli mabi
 corellis-maggot | Corelli's Maggot
 stool-of-repentance | The Stool of Repentance
@@ -200,3 +193,6 @@ my-love-shes-but-a-lassie-yet | My Love She's But A Lassie Yet
 emperor-of-the-moon | Emperor of the Moon
 hearts-ease | Hearts Ease
 hickory-jack | Hickory Jack
+79ths-farewell-to-gibraltar | 79th's Farewell to Gibraltar
+off-to-california | Off to California
+road-to-the-isles | Road to the Isles

@@ -1,0 +1,85 @@
+# The top 93 tune titles of tools/catalog/ranking.md, not yet in the catalog or tried, written by
+# tools/catalog/rank_pdmx.py --batch 93 --out tools/catalog/titles-10.txt (#312). Each title's only name is
+# the one the ranking counted scores by.
+# Review of its import (#324, PR #343) pulled 13 titles, now in excluded-titles.txt: The Pride of Rathmore; The Rivals; Killarney; St. Lawrence; Chimes; The Primrose; The Sloe; Sky Lark; The Prince Of Wales; The Fairy; The Marquis of Huntly; Of A' the Airts the Wind Can Blaw; Balvenie Castle.
+# id | catalog title
+miss-grant-of-grant | Miss Grant of Grant
+miss-wharton-duff | Miss Wharton Duff
+mr-george-a-young | Mr. George A. Young
+mrs-campbell-of-lochnell | Mrs. Campbell of Lochnell
+mrs-colonel-bailie-of-red-castle | Mrs. Colonel Bailie of Red-Castle
+mrs-fraser-of-lovats-strathspey | Mrs. Fraser of Lovat's Strathspey
+mrs-nugent | Mrs. Nugent
+mrs-waller | Mrs. Waller
+quayside | The Quayside
+wha-can-help-it | Wha Can Help It
+buckingham-house | Buckingham House
+dance-the-polygon | Dance the Polygon
+daniel-kelly | Daniel Kelly
+dublin-bay | Dublin Bay
+grant-lodge | Grant Lodge
+hambletons-round-o | Hambleton's Round O
+house-of-achluncart | The House of Achluncart
+house-of-candacraig | The House of Candacraig
+house-of-letterfourie | The House of Letterfourie
+john-mcneills-highland-fling | John McNeill's Highland Fling
+lassies-of-dunse | Lassies of Dunse
+merry-conclusion | The Merry Conclusion
+miss-bennets-jig | Miss Bennet's Jig
+miss-graham-of-inchbrakies-strathspey | Miss Graham of Inchbrakies Strathspey
+mr-morison-of-bognie | Mr. Morison Of Bognie
+old-wife-behind-the-fire | Old Wife Behind the Fire
+polygon | The Polygon
+what-a-beau-my-granny-was | What a Beau My Granny Was
+whimbleton-house | Whimbleton-House
+witches | The Witches
+a-virgin-unspotted | A Virgin Unspotted
+amorous-goddess | The Amorous Goddess
+bog-o-gight | The Bog o' Gight
+cage | The Cage
+connachtmans-rambles | The Connachtman's Rambles
+earl-of-seafield | Earl of Seafield
+fallen-hero | The Fallen Hero
+from-thee-eliza-i-must-go | From Thee Eliza I Must Go
+general-campbell | General Campbell
+hackney-minuet | Hackney Minuet
+happy-captive | The Happy Captive
+happy-pair | The Happy Pair
+lady-heriet-georgina-hamilton | Lady Heriet Georgina Hamilton
+lady-peel | Lady Peel
+miss-elder | Miss Elder
+miss-murray-of-lintrose | Miss Murray of Lintrose
+mrs-brown-of-linkwood | Mrs. Brown of Linkwood
+mrs-captain-stewarts-strathspey | Mrs. Captain Stewart's Strathspey
+mrs-ferguson-of-raiths-strathspey | Mrs. Ferguson of Raith's Strathspey
+my-lady-winwoods-maggot | My Lady Winwood's Maggot
+on-the-other-shore | On The Other Shore
+top-and-bottom | Top and Bottom
+wearmouth-lads | Wearmouth Lads
+when-storms-around-are-sweeping | When storms around are sweeping
+banks-of-allan | The Banks Of Allan
+banks-of-garry | The Banks of Garry
+big-john-mcneil | Big John McNeil
+blaw-the-wind-southerly | Blaw the Wind Southerly
+bulocks-hornpipe | Bulock's Hornpipe
+drive-the-monsieur-from-flanders | Drive the Monsieur from Flanders
+earl-of-home | Earl of Home
+forest-of-gaick | The Forest of Gaick
+forglen-house | Forglen House
+free-trade | Free Trade
+garthland-house-strathspey | Garthland House Strathspey
+garthlands-strathspey | Garthlands Strathspey
+general-gathering-1745 | The General Gathering 1745
+hob-y-deri-danno | Hob y Deri Danno
+knives-and-forks | Knives and Forks
+lady-grace-douglass-reel | Lady Grace Douglas's Reel
+lady-mary-murray | Lady Mary Murray
+lady-spencer-chichester | Lady Spencer Chichester
+little-peggys-love | Little Peggy's Love
+miss-austin | Miss Austin
+miss-mcpherson-grant-of-ballindalloch | Miss McPherson Grant Of Ballindalloch
+nineteenth-of-december | The Nineteenth of December
+scots-recluse | The Scots Recluse
+shakins-o-the-pocky | The Shakin's o' the Pocky
+susie-brodie | Susie Brodie
+tros-y-gareg | Tros Y gareg

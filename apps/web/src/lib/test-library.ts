@@ -54,8 +54,14 @@ export function fakeAccount(userId = 'user-a') {
     place(id: string, placedPitch: number | null) {
       state.placeAndTrim(id, { placedPitch })
     },
-    /** What another browser did: places or trims a Recording, or takes either off (ADR 0019). */
-    placeAndTrim(id: string, change: { placedPitch?: number | null; trim?: RecordingTrim | null }) {
+    /**
+     * What another browser did: places, trims or names a Recording, or takes any of them off
+     * (ADR 0019).
+     */
+    placeAndTrim(
+      id: string,
+      change: { placedPitch?: number | null; trim?: RecordingTrim | null; name?: string | null }
+    ) {
       const stored = items.recordings.get(id)
       if (stored) {
         items.recordings.set(id, {
@@ -175,13 +181,15 @@ export function fakeAccount(userId = 'user-a') {
     if (method === 'PATCH') {
       if (!stored) return error(404, 'not_found')
       if (stored.deletedAt) return error(410, 'deleted')
-      // A Toot's `{ title }` or a Recording's `{ placedPitch, trim }`, either left out.
+      // A Toot's `{ title }` or a Recording's `{ placedPitch, trim, name }`, any left out.
       const body = JSON.parse(String(init.body))
       const changed =
         kind === 'toots'
           ? { title: body.title }
           : Object.fromEntries(
-              ['placedPitch', 'trim'].filter(key => key in body).map(key => [key, body[key]])
+              ['placedPitch', 'trim', 'name']
+                .filter(key => key in body)
+                .map(key => [key, body[key]])
             )
       items[kind].set(id, { ...stored, item: { ...stored.item, ...changed }, updatedAt: tick() })
       return Response.json({ id, ...changed })

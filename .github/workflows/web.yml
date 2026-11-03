@@ -8,16 +8,18 @@ name: Web
 #
 # Every push runs, with no paths filter, so a deploy never skips. On a pull request, `changes`
 # skips the checks' steps when nothing the web app builds from changed, and they still report.
-# Draft pull requests skip `e2e`, which runs once the PR is marked ready. A manual run on `staging`
-# or `main` checks and redeploys that branch's tip, for when no push started a run.
+# The journeys run in parallel shards (`e2e-shard`), and `e2e`, the required check, passes only
+# when every shard passed. Draft pull requests skip both, which run once the PR is marked ready. A
+# manual run on `staging` or `main` checks and redeploys that branch's tip, for when no push
+# started a run.
 #
 # Each deploy reads CLOUDFLARE_API_TOKEN from its own environment (staging or production) and the
 # CLOUDFLARE_ACCOUNT_ID variable. With no token the deploy fails, so a green run at the tip always
 # deployed and passed the smoke test.
 #
 # The D1 databases change only here: each deploy applies its environment's migrations
-# (`pnpm db:migrate:<env>`) first, and `e2e` applies them to its local database before the
-# journeys. src/db/deploy-config.test.ts checks that every deploy and migration names its --env.
+# (`pnpm db:migrate:<env>`) first, and each e2e shard applies them to its local database before
+# the journeys. src/db/deploy-config.test.ts checks that every deploy and migration names its --env.
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -40,6 +42,8 @@ jobs:
     timeout-minutes: 5
     outputs:
       web: ${{ steps.paths.outputs.web }}
+      e2e: ${{ steps.receipt.outputs.run }}
+      tree: ${{ steps.receipt.outputs.tree }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -56,6 +60,25 @@ jobs:
           else
             echo "web=true" >> "$GITHUB_OUTPUT"
           fi
+      # Whether the journeys run, decided once for every shard: a push skips them when a passing run
+      # already tested its tree. No receipt, or an error looking one up, runs them.
+      - id: receipt
+        if: steps.paths.outputs.web == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO_ID: ${{ github.repository_id }}
+        run: |
+          tree=$(git rev-parse 'HEAD^{tree}')
+          echo "tree=$tree" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            n=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=passed-e2e-$tree" --jq \
+              "[.artifacts[] | select(.expired | not) | select(.workflow_run.head_repository_id == $REPO_ID)] | length") || n=0
+            if [ "$n" -gt 0 ]; then
+              echo "::notice::A passing run already tested tree $tree, so the journeys skip."
+              exit 0
+            fi
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
 
   check:
     needs: changes
@@ -104,8 +127,8 @@ jobs:
           fi
       - if: env.WEB == 'true'
         run: pnpm test
-      # Both Workers builds run on every PR, once each: `e2e` builds Staging, except on a draft,
-      # which skips `e2e`. On a push, the deploy job's build is this commit's build check.
+      # Both Workers builds run on every PR: `e2e-shard` builds Staging, except on a draft, which
+      # skips it. On a push, the deploy job's build is this commit's build check.
       - name: Build for Staging, on a draft
         if: env.WEB == 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft
         run: pnpm build:staging
@@ -115,86 +138,96 @@ jobs:
         if: env.WEB == 'true' && github.event_name == 'pull_request'
         run: pnpm build:production
 
-  e2e:
+  # The journeys, split by Playwright's --shard into parallel jobs, each on its own runner with its
+  # own build, local database and preview. Locally, `pnpm test:e2e` still runs them all. A shard
+  # skips its steps, not its job, so that `e2e` and the deploys still run (#337).
+  e2e-shard:
+    name: e2e shard ${{ matrix.shard }}
     needs: changes
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false # every shard finishes, so one run reports every failing journey
+      matrix:
+        shard: [1, 2, 3, 4]
     env:
-      WEB: ${{ needs.changes.outputs.web }}
+      RUN: ${{ needs.changes.outputs.e2e }}
     defaults:
       run:
         working-directory: apps/web
     steps:
-      - if: env.WEB == 'true'
+      - if: env.RUN == 'true'
         uses: actions/checkout@v7
-      # A push skips the suite when a passing run already tested its tree. No receipt, or an error
-      # looking one up, runs it.
-      - id: receipt
-        if: env.WEB == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO_ID: ${{ github.repository_id }}
-        run: |
-          tree=$(git rev-parse 'HEAD^{tree}')
-          echo "tree=$tree" >> "$GITHUB_OUTPUT"
-          if [ "$GITHUB_EVENT_NAME" = push ]; then
-            n=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=passed-e2e-$tree" --jq \
-              "[.artifacts[] | select(.expired | not) | select(.workflow_run.head_repository_id == $REPO_ID)] | length") || n=0
-            if [ "$n" -gt 0 ]; then
-              echo "::notice::A passing run already tested tree $tree, so the journeys skip."
-              exit 0
-            fi
-          fi
-          echo "run=true" >> "$GITHUB_OUTPUT"
-      - if: steps.receipt.outputs.run == 'true'
+      - if: env.RUN == 'true'
         uses: pnpm/action-setup@v6
         with:
           package_json_file: apps/web/package.json
-      - if: steps.receipt.outputs.run == 'true'
+      - if: env.RUN == 'true'
         uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
           cache-dependency-path: apps/web/pnpm-lock.yaml
-      - if: steps.receipt.outputs.run == 'true'
+      - if: env.RUN == 'true'
         run: pnpm install --frozen-lockfile
       - name: Build for Staging, with the Fixture Library
-        if: steps.receipt.outputs.run == 'true'
+        if: env.RUN == 'true'
         run: pnpm build:staging
       # The local Workers build runs behind the Staging gate, with the password from .dev.vars.
       - name: Write .dev.vars
-        if: steps.receipt.outputs.run == 'true'
+        if: env.RUN == 'true'
         run: cp .dev.vars.example .dev.vars
       # The preview runs the top level of wrangler.jsonc, with its local D1 in .wrangler/.
       - name: Apply the migrations to the local database
-        if: steps.receipt.outputs.run == 'true'
+        if: env.RUN == 'true'
         run: pnpm db:migrate:local
-      - if: steps.receipt.outputs.run == 'true'
+      - if: env.RUN == 'true'
         run: pnpm exec playwright install --with-deps chromium
       - name: Record journeys on workerd
-        if: steps.receipt.outputs.run == 'true'
-        run: pnpm test:e2e
+        if: env.RUN == 'true'
+        run: pnpm test:e2e --shard="$SHARD"
         env:
+          SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
           E2E_SERVER: preview
           CI: 'true'
-      - name: Write the receipt
-        if: steps.receipt.outputs.run == 'true'
-        env:
-          TREE: ${{ steps.receipt.outputs.tree }}
-        run: echo "$TREE" > receipt.txt
-      - if: steps.receipt.outputs.run == 'true'
+      - if: failure() && env.RUN == 'true'
         uses: actions/upload-artifact@v7
         with:
-          name: passed-e2e-${{ steps.receipt.outputs.tree }}
-          path: apps/web/receipt.txt
+          name: playwright-report-${{ matrix.shard }}
+          path: apps/web/e2e/report
+
+  # The required check. It runs even when a shard failed or was cancelled, since GitHub counts a
+  # skipped required job as passing, and passes only when `changes` and every shard passed: shards
+  # that ran the journeys, or that skipped their steps because nothing needed them.
+  e2e:
+    needs: [changes, e2e-shard]
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check every shard passed
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          SHARDS: ${{ needs.e2e-shard.result }}
+        run: |
+          if [ "$CHANGES" != success ] || [ "$SHARDS" != success ]; then
+            echo "::error::changes: $CHANGES, e2e shards: $SHARDS. Every shard must pass."
+            exit 1
+          fi
+      # One receipt for the whole suite, once every shard passed.
+      - name: Write the receipt
+        if: needs.changes.outputs.e2e == 'true'
+        env:
+          TREE: ${{ needs.changes.outputs.tree }}
+        run: echo "$TREE" > receipt.txt
+      - if: needs.changes.outputs.e2e == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: passed-e2e-${{ needs.changes.outputs.tree }}
+          path: receipt.txt
           retention-days: 30
           overwrite: true # a re-run uploads the same name again
-      - if: failure() && steps.receipt.outputs.run == 'true'
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-report
-          path: apps/web/e2e/report
 
   deploy-staging:
     if: github.event_name != 'pull_request' && github.ref_name == 'staging'

@@ -14,7 +14,7 @@
   }
  },
  "library": "38 Recordings, 26 Melodic",
- "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES); then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 3 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
  "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
@@ -24,7 +24,7 @@
  "songs": [
   {
    "id": "lull-me-beyond-thee",
-   "title": "Lull Me Beyond Thee..",
+   "title": "Lull Me Beyond Thee",
    "matched": 11,
    "eligible": 11,
    "rejected": {},
@@ -307,25 +307,25 @@
    "picked": null
   },
   {
-   "id": "moreen",
-   "title": "Moreen",
-   "matched": 6,
-   "eligible": 5,
+   "id": "minstrel-boy",
+   "title": "The Minstrel Boy",
+   "matched": 20,
+   "eligible": 19,
    "rejected": {
     "more than 2 tracks": 1
    },
    "tried": [
     {
-     "score_id": "5101722",
-     "url": "https://musescore.com/score/5101722",
-     "score_title": "The Moreen",
+     "score_id": "4686536",
+     "url": "https://musescore.com/score/4686536",
+     "score_title": "the Minstrel Boy",
      "match": "title",
      "rating": "0.0",
      "n_ratings": "0",
-     "n_views": "17",
+     "n_views": "25",
      "license": "publicdomain",
      "n_tracks": "1",
-     "dataset_path": "./mid/10/23/QmShnnE1yjzzzbuMFbFqhiHQsZPRtJAMWXa9cPxtLeMKdM.mid",
+     "dataset_path": "./mid/1/35/QmboE2oX8Zy6opjyrWFejHYS2HqXq3XeZpQd7poNDCanzw.mid",
      "gates": {
       "license": "pass",
       "hash": "pass",
@@ -333,85 +333,11 @@
       "render": "pass"
      },
      "passed": true,
-     "sha256": "5c1c48d924100fa5a17be52f0b4e1f326d6dcec8410850c95105414a148cface",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 4,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 40
-     },
-     "track_notes": 112,
-     "range_semitones": 17,
-     "distinct_pitches": 9,
-     "pitch_coverage": "9 of 9",
-     "metrics": {
-      "notes": 40,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 22,
-      "within_50c_any_octave_pct": 22,
-      "median_abs_cents": 122.4,
-      "contour_pct": 85,
-      "distinct_recordings": 9,
-      "on_pitch_pct": 15,
-      "sounding_pct": 95,
-      "notes_mostly_silent": 0,
-      "transpose": -21,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.83
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "5101722"
-  },
-  {
-   "id": "tell-me-where-is-fancy-bred",
-   "title": "Tell me where is fancy bred",
-   "matched": 4,
-   "eligible": 2,
-   "rejected": {
-    "PDMX flags a license conflict": 1,
-    "more than 2 tracks": 2
-   },
-   "tried": [
-    {
-     "score_id": "4974367",
-     "url": "https://musescore.com/score/4974367",
-     "score_title": "Carr - Tell me where is fancy bred",
-     "match": "song name",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "20",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/17/12/QmZBgYkTFPpzzRoQfX1boT2QDWSVxxPiPuMCwpLj6CmiKC.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "0e42c83a59d78583ed072ab47eb0cf92e19e94493f7588ffd3fb973e4b671635",
+     "sha256": "79c9c79f22aa528c4088455157c55613cef4236c762a6deb62da12071ff66c80",
      "render": {
       "bpm": 120,
       "max_beats": 30,
-      "beats_per_bar": 3
+      "beats_per_bar": 4
      },
      "import_report": {
       "track_used": 0,
@@ -421,37 +347,37 @@
       "chord_tones_dropped": 0,
       "inner_voice_onsets_dropped": 0,
       "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 31
+      "tempo_changes_ignored": 1,
+      "note_count": 19
      },
-     "track_notes": 101,
-     "range_semitones": 16,
+     "track_notes": 95,
+     "range_semitones": 17,
      "distinct_pitches": 9,
      "pitch_coverage": "9 of 9",
      "metrics": {
-      "notes": 31,
+      "notes": 19,
       "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
-      "notes_with_second_burst": 5,
+      "notes_with_second_burst": 3,
       "pitch_readable_pct": 100,
-      "within_50c_pct": 3,
-      "within_50c_any_octave_pct": 3,
-      "median_abs_cents": 102.6,
-      "contour_pct": 87,
+      "within_50c_pct": 5,
+      "within_50c_any_octave_pct": 5,
+      "median_abs_cents": 177.4,
+      "contour_pct": 72,
       "distinct_recordings": 9,
-      "on_pitch_pct": 11,
-      "sounding_pct": 94,
+      "on_pitch_pct": 9,
+      "sounding_pct": 96,
       "notes_mostly_silent": 0,
-      "transpose": -17,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.57
+      "transpose": -21,
+      "octave_moves": 2,
+      "max_abs_shift_semitones": 14.67
      }
     }
    ],
    "result": "pass",
    "reason": null,
-   "picked": "4974367"
+   "picked": "4686536"
   },
   {
    "id": "anada-pa-gael",
@@ -849,7 +775,7 @@
   },
   {
    "id": "millisons-jig",
-   "title": "Millison's Jig.",
+   "title": "Millison's Jig",
    "matched": 7,
    "eligible": 7,
    "rejected": {},
@@ -917,77 +843,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4706578"
-  },
-  {
-   "id": "princess",
-   "title": "Princess",
-   "matched": 14,
-   "eligible": 14,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4951215",
-     "url": "https://musescore.com/score/4951215",
-     "score_title": "The Princess",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "7",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/15/4/QmX5L3hoNPpzN9R6rUsvsS7mJbL5suQrgY8zm8mJyjgrb3.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "e6133bf3d4ad31d54e030c6794c4bbc107f1a09a8cd8e9e6915bc230a1184160",
-     "render": {
-      "bpm": 120,
-      "max_beats": 29,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 29
-     },
-     "track_notes": 323,
-     "range_semitones": 14,
-     "distinct_pitches": 9,
-     "pitch_coverage": "9 of 9",
-     "metrics": {
-      "notes": 29,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 2,
-      "pitch_readable_pct": 90,
-      "within_50c_pct": 10,
-      "within_50c_any_octave_pct": 10,
-      "median_abs_cents": 342.5,
-      "contour_pct": 59,
-      "distinct_recordings": 9,
-      "on_pitch_pct": 4,
-      "sounding_pct": 95,
-      "notes_mostly_silent": 0,
-      "transpose": -25,
-      "octave_moves": 2,
-      "max_abs_shift_semitones": 10.27
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4951215"
   },
   {
    "id": "qui-vult-venire-post-me",
@@ -1133,77 +988,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4567007"
-  },
-  {
-   "id": "will-you-come-home-with-me",
-   "title": "Will You Come Home With Me",
-   "matched": 15,
-   "eligible": 15,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4945819",
-     "url": "https://musescore.com/score/4945819",
-     "score_title": "Will You Come Home With Me?",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "5",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/10/4/QmS5xeidPBK5wbCgak2ZrS4SdePUZPSF4Hb1oF2JwzD91U.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "cb986a8a3a69d0292d8cd506a229cc9a97ca21aa7fc57a27bbd8d473b709a679",
-     "render": {
-      "bpm": 120,
-      "max_beats": 30.5,
-      "beats_per_bar": 3
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 2,
-      "note_count": 60
-     },
-     "track_notes": 227,
-     "range_semitones": 9,
-     "distinct_pitches": 5,
-     "pitch_coverage": "5 of 5",
-     "metrics": {
-      "notes": 60,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 32,
-      "within_50c_any_octave_pct": 32,
-      "median_abs_cents": 77.4,
-      "contour_pct": 69,
-      "distinct_recordings": 5,
-      "on_pitch_pct": 29,
-      "sounding_pct": 93,
-      "notes_mostly_silent": 0,
-      "transpose": -11,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 1.93
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4945819"
   },
   {
    "id": "an-muileann-dubh",
@@ -1891,76 +1675,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4876245"
-  },
-  {
-   "id": "woodland-revels",
-   "title": "Woodland Revels",
-   "matched": 6,
-   "eligible": 6,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4913999",
-     "url": "https://musescore.com/score/4913999",
-     "score_title": "Woodland Revels",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "11",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/0/2/Qma3EEDRsVN1XsHyur33ZXDa3VRKR79feYTNsmZSBmjvyw.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "7ef44d37829b4c98e6f30da14b883f6e59af158c12a1a1cf37c03bd214e2fa1b",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 30
-     },
-     "track_notes": 185,
-     "range_semitones": 12,
-     "distinct_pitches": 9,
-     "pitch_coverage": "9 of 9",
-     "metrics": {
-      "notes": 30,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 6,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 33,
-      "within_50c_any_octave_pct": 33,
-      "median_abs_cents": 110.0,
-      "contour_pct": 62,
-      "distinct_recordings": 9,
-      "on_pitch_pct": 19,
-      "sounding_pct": 91,
-      "notes_mostly_silent": 0,
-      "transpose": -17,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.97
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4913999"
   },
   {
    "id": "althea",
@@ -3071,77 +2785,6 @@
    "picked": "4969344"
   },
   {
-   "id": "si-beag-si-mhor",
-   "title": "Si Beag Si Mhor",
-   "matched": 3,
-   "eligible": 3,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4886982",
-     "url": "https://musescore.com/score/4886982",
-     "score_title": "Si Beag Si Mhor",
-     "match": "title",
-     "rating": "4.66",
-     "n_ratings": "3",
-     "n_views": "17",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/12/8/QmU9XeULRjrxXZyRQhjDV8LDhLUtWuwdPByhShbHShE4rT.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "31d4ff365e759c9d782df46e631d87da718ff1872a5e5a6fc7037f5c873bd15f",
-     "render": {
-      "bpm": 120,
-      "max_beats": 31,
-      "beats_per_bar": 3
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 41
-     },
-     "track_notes": 111,
-     "range_semitones": 15,
-     "distinct_pitches": 9,
-     "pitch_coverage": "9 of 9",
-     "metrics": {
-      "notes": 41,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 98,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 5,
-      "pitch_readable_pct": 90,
-      "within_50c_pct": 2,
-      "within_50c_any_octave_pct": 2,
-      "median_abs_cents": 212.6,
-      "contour_pct": 49,
-      "distinct_recordings": 9,
-      "on_pitch_pct": 9,
-      "sounding_pct": 92,
-      "notes_mostly_silent": 0,
-      "transpose": -20,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.57
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4886982"
-  },
-  {
    "id": "barham-down",
    "title": "Barham Down",
    "matched": 13,
@@ -3288,79 +2931,6 @@
    "result": "pass",
    "reason": null,
    "picked": "5809842"
-  },
-  {
-   "id": "charleston",
-   "title": "Charleston",
-   "matched": 4,
-   "eligible": 1,
-   "rejected": {
-    "PDMX flags a license conflict": 2,
-    "more than 2 tracks": 1
-   },
-   "tried": [
-    {
-     "score_id": "4864499",
-     "url": "https://musescore.com/score/4864499",
-     "score_title": "The Charleston",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "18",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/13/21/QmVgjb39gYSSeXpdLS9UsvViUcd4Fr21mLj6hBcsjaZX8Y.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "a6ac45640fe8dd3470a79ed7d10f7c259cd49615e89801306c4eac5ea6dbcb3e",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 2,
-      "note_count": 61
-     },
-     "track_notes": 237,
-     "range_semitones": 19,
-     "distinct_pitches": 11,
-     "pitch_coverage": "11 of 11",
-     "metrics": {
-      "notes": 61,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 7,
-      "within_50c_any_octave_pct": 7,
-      "median_abs_cents": 172.6,
-      "contour_pct": 82,
-      "distinct_recordings": 11,
-      "on_pitch_pct": 12,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -22,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.07
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4864499"
   },
   {
    "id": "i-will-praise-him",
@@ -5473,76 +5043,6 @@
    "picked": "4657831"
   },
   {
-   "id": "dresden",
-   "title": "The Dresden",
-   "matched": 2,
-   "eligible": 2,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4814065",
-     "url": "https://musescore.com/score/4814065",
-     "score_title": "The Dresden",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "0",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/11/57/QmTZz1k8Kma4DCfG1m1TVpKEE1PWXuRzxVxzgTtHYoaWfM.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "12318ffe2eafedd5ef5ce9ae09dff780c9678e7c4528eb2ccc4466071ebea420",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 63
-     },
-     "track_notes": 248,
-     "range_semitones": 16,
-     "distinct_pitches": 10,
-     "pitch_coverage": "10 of 10",
-     "metrics": {
-      "notes": 63,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 63,
-      "within_50c_any_octave_pct": 63,
-      "median_abs_cents": 32.6,
-      "contour_pct": 92,
-      "distinct_recordings": 10,
-      "on_pitch_pct": 27,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -26,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 1.97
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4814065"
-  },
-  {
    "id": "gypsy-hornpipe",
    "title": "Gypsy Hornpipe",
    "matched": 4,
@@ -6992,78 +6492,6 @@
    "result": "pass",
    "reason": null,
    "picked": "5076550"
-  },
-  {
-   "id": "from-night-till-morn",
-   "title": "From Night 'till Morn",
-   "matched": 10,
-   "eligible": 10,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4972272",
-     "url": "https://musescore.com/score/4972272",
-     "score_title": "FROM NIGHT TILL MORN",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "6",
-     "license": "publicdomain",
-     "n_tracks": "2",
-     "dataset_path": "./mid/8/54/QmQy8TrwZeZNUG2jK89bpskXZLGmJQxUVyfWkCLTECh6BM.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "6dab580f2ed5f2e64a0a374547c4a0491cb9514f6027438d34a2021d65519a73",
-     "render": {
-      "bpm": 104,
-      "max_beats": 32,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0,
-       1
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 3,
-      "note_count": 48
-     },
-     "track_notes": 280,
-     "range_semitones": 7,
-     "distinct_pitches": 5,
-     "pitch_coverage": "5 of 5",
-     "metrics": {
-      "notes": 48,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 98,
-      "within_50c_pct": 17,
-      "within_50c_any_octave_pct": 17,
-      "median_abs_cents": 102.6,
-      "contour_pct": 69,
-      "distinct_recordings": 5,
-      "on_pitch_pct": 11,
-      "sounding_pct": 98,
-      "notes_mostly_silent": 0,
-      "transpose": -36,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 1.67
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4972272"
   },
   {
    "id": "getting-upstairs",
@@ -9479,7 +8907,7 @@
   },
   {
    "id": "old-nolls-jig",
-   "title": "Old Noll's Jig.",
+   "title": "Old Noll's Jig",
    "matched": 10,
    "eligible": 10,
    "rejected": {},
@@ -9674,117 +9102,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4723994"
-  },
-  {
-   "id": "union",
-   "title": "Union",
-   "matched": 10,
-   "eligible": 9,
-   "rejected": {
-    "more than 2 tracks": 1
-   },
-   "tried": [
-    {
-     "score_id": "5035067",
-     "url": "https://musescore.com/score/5035067",
-     "score_title": "The Union",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "2",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/9/37/QmRPgcQdcdZHCU8xYkV8kWKq3o6x6NStdwKmEw6L6jq26d.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": [
-       "86 notes (between 8 and 64)"
-      ]
-     },
-     "passed": false,
-     "sha256": "a065395d298b101c8b5c821f3361068f898e5ec614ee31de7ed2e8c8f97b8419",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 86
-     },
-     "track_notes": 172,
-     "range_semitones": 17,
-     "distinct_pitches": 10
-    },
-    {
-     "score_id": "4713329",
-     "url": "https://musescore.com/score/4713329",
-     "score_title": "The Union",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "1",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/1/47/QmbU2A21Z6RuwQ9xkiJ91Jc5theJrQrXx2oVyoXpBM5vG3.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "995f91decfeb1f8ec85a97326331b3c4037c78533aaecef5a4caa69dc10dfc75",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 61
-     },
-     "track_notes": 119,
-     "range_semitones": 12,
-     "distinct_pitches": 7,
-     "pitch_coverage": "7 of 7",
-     "metrics": {
-      "notes": 61,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 5,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 30,
-      "within_50c_any_octave_pct": 30,
-      "median_abs_cents": 72.6,
-      "contour_pct": 87,
-      "distinct_recordings": 7,
-      "on_pitch_pct": 15,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -17,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.57
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4713329"
   },
   {
    "id": "barbarinis-tambourine",
@@ -10941,77 +10258,6 @@
    "picked": "4961724"
   },
   {
-   "id": "fair-maid-of-the-inn",
-   "title": "The Fair Maid of the Inn",
-   "matched": 5,
-   "eligible": 5,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4714369",
-     "url": "https://musescore.com/score/4714369",
-     "score_title": "The Fair Maid of the Inn",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "12",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/12/6/QmU796PE917YbxnR9kpFFSo5K2XrwTeEGQedZXxH1ARMdk.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "5e6d41aa5e4ed294a908bda6861822e489796cd6e7127f70294a2285101f94e0",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 58
-     },
-     "track_notes": 218,
-     "range_semitones": 12,
-     "distinct_pitches": 8,
-     "pitch_coverage": "8 of 8",
-     "metrics": {
-      "notes": 58,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 2,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 9,
-      "within_50c_any_octave_pct": 9,
-      "median_abs_cents": 149.9,
-      "contour_pct": 62,
-      "distinct_recordings": 8,
-      "on_pitch_pct": 8,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -15,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.77
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4714369"
-  },
-  {
    "id": "fanny-dillon",
    "title": "Fanny Dillon",
    "matched": 7,
@@ -11522,147 +10768,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4595415"
-  },
-  {
-   "id": "long-odds",
-   "title": "Long Odds",
-   "matched": 4,
-   "eligible": 4,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "5123643",
-     "url": "https://musescore.com/score/5123643",
-     "score_title": "Long Odds",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "11",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/7/22/QmPGfEq9zLxtipkExXBNkEQVwiht1mvFpLsJReuWxdJyNc.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "ae17c92fa1bd246bfd34a0a809602941d3d7cea82b351716c78a29e2dc23516b",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 56
-     },
-     "track_notes": 109,
-     "range_semitones": 14,
-     "distinct_pitches": 9,
-     "pitch_coverage": "9 of 9",
-     "metrics": {
-      "notes": 56,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 2,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 0,
-      "within_50c_any_octave_pct": 0,
-      "median_abs_cents": 127.4,
-      "contour_pct": 91,
-      "distinct_recordings": 9,
-      "on_pitch_pct": 6,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -16,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.97
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "5123643"
-  },
-  {
-   "id": "mary-walker",
-   "title": "Mary Walker",
-   "matched": 2,
-   "eligible": 2,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "5037494",
-     "url": "https://musescore.com/score/5037494",
-     "score_title": "Mary Walker",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "2",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/11/46/QmTuLjVE7SFAtaWqzpTHhHYLSk39DjXghpVqoYHa3xTvp4.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "13011db5c1bafa3bd911c9fe060b41540861d1283e349788caa95d7f710531fa",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 2,
-      "note_count": 60
-     },
-     "track_notes": 306,
-     "range_semitones": 17,
-     "distinct_pitches": 11,
-     "pitch_coverage": "11 of 11",
-     "metrics": {
-      "notes": 60,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 45,
-      "within_50c_any_octave_pct": 45,
-      "median_abs_cents": 72.4,
-      "contour_pct": 97,
-      "distinct_recordings": 11,
-      "on_pitch_pct": 28,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -29,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.93
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "5037494"
   },
   {
    "id": "red-and-all-red",
@@ -12220,7 +11325,7 @@
   },
   {
    "id": "frenet-ha",
-   "title": "Frenet Ha",
+   "title": "Frenet Ha'",
    "matched": 4,
    "eligible": 4,
    "rejected": {},
@@ -13093,121 +12198,6 @@
    "picked": "4563177"
   },
   {
-   "id": "ohio",
-   "title": "Ohio",
-   "matched": 5,
-   "eligible": 4,
-   "rejected": {
-    "more than 2 tracks": 1
-   },
-   "tried": [
-    {
-     "score_id": "4920759",
-     "url": "https://musescore.com/score/4920759",
-     "score_title": "Ohio",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "22",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/8/20/QmQF8o8bMhe87yab9kG452KAMdzroVPNankJD8XYPmvbDb.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": [
-       "locked with the full Fixture Library: 4 of 5 notes covered, needs F♯2 (2.2 s)"
-      ]
-     },
-     "passed": false,
-     "sha256": "84a0bce96dadd199b3add4173d5c4d9d551eb7bf10f9cf60cc6f8a220fbcaa3a",
-     "render": {
-      "bpm": 120,
-      "start_beat": 1,
-      "max_beats": 31
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 17
-     },
-     "track_notes": 35,
-     "range_semitones": 7,
-     "distinct_pitches": 5,
-     "pitch_coverage": "4 of 5"
-    },
-    {
-     "score_id": "4886746",
-     "url": "https://musescore.com/score/4886746",
-     "score_title": "OHIO",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "0",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/11/44/QmTtS34uy4s2xsxAdSD7oZQDeuUJ7qympnPXqimW9yHcCg.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "580f3f8aac64d39ef33df6b963cc3636fe8a91aa1ff77f123a3ce58c88a56326",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 2,
-      "note_count": 51
-     },
-     "track_notes": 149,
-     "range_semitones": 14,
-     "distinct_pitches": 10,
-     "pitch_coverage": "10 of 10",
-     "metrics": {
-      "notes": 51,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 12,
-      "within_50c_any_octave_pct": 12,
-      "median_abs_cents": 137.4,
-      "contour_pct": 98,
-      "distinct_recordings": 10,
-      "on_pitch_pct": 12,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -27,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.57
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4886746"
-  },
-  {
    "id": "orange-nan",
    "title": "Orange Nan",
    "matched": 5,
@@ -13492,7 +12482,7 @@
   },
   {
    "id": "barbu-lautarul",
-   "title": "Barbu Lautarul",
+   "title": "Barbu Lăutarul",
    "matched": 2,
    "eligible": 2,
    "rejected": {},
@@ -14106,79 +13096,6 @@
    "picked": "4574899"
   },
   {
-   "id": "jack-frost",
-   "title": "Jack Frost",
-   "matched": 2,
-   "eligible": 1,
-   "rejected": {
-    "more than 2 tracks": 1
-   },
-   "tried": [
-    {
-     "score_id": "5009713",
-     "url": "https://musescore.com/score/5009713",
-     "score_title": "Jack Frost",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "16",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/17/12/QmZBWGQkGrgMEepRnTnXgpgXJ87njPNyKiNXT44Dc4f1ZQ.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "2e6edc450950cd144cccce73629fff0a156aeb112c46797dc5eb5ed7690c3409",
-     "render": {
-      "bpm": 120,
-      "start_beat": 4,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 58
-     },
-     "track_notes": 232,
-     "range_semitones": 17,
-     "distinct_pitches": 13,
-     "pitch_coverage": "13 of 13",
-     "metrics": {
-      "notes": 58,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 1,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 3,
-      "within_50c_any_octave_pct": 3,
-      "median_abs_cents": 180.1,
-      "contour_pct": 77,
-      "distinct_recordings": 13,
-      "on_pitch_pct": 8,
-      "sounding_pct": 93,
-      "notes_mostly_silent": 0,
-      "transpose": -18,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.47
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "5009713"
-  },
-  {
    "id": "lady-loudon",
    "title": "Lady Loudon",
    "matched": 8,
@@ -14432,118 +13349,6 @@
    "picked": "4701174"
   },
   {
-   "id": "over-the-border",
-   "title": "Over the Border",
-   "matched": 14,
-   "eligible": 13,
-   "rejected": {
-    "PDMX flags a license conflict": 1
-   },
-   "tried": [
-    {
-     "score_id": "4967265",
-     "url": "https://musescore.com/score/4967265",
-     "score_title": "Over the Border",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "5",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/9/55/QmRYXTQRWzDPWUCdqPr7iJyg1d6Mi5orYxsM1QmHMD3VoZ.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": [
-       "98 notes (between 8 and 64)"
-      ]
-     },
-     "passed": false,
-     "sha256": "5120cc7378bb9434d880a9b58ead4cb6341d19d1c704001df1de7ae3c6c3a377",
-     "render": {
-      "bpm": 120,
-      "max_beats": 31.5
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 6,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 98
-     },
-     "track_notes": 1012,
-     "range_semitones": 12,
-     "distinct_pitches": 7
-    },
-    {
-     "score_id": "4571138",
-     "url": "https://musescore.com/score/4571138",
-     "score_title": "Over The Border",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "3",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/8/1/QmQ2PJcLMCANu23TxivcCcTcVQ56j7ZnhEa42NP5sBGaX3.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "9852d0cd5a6c66280c4dc2c96fbd74836562a4480bf8bb4b8842fc6ba563d278",
-     "render": {
-      "bpm": 120,
-      "max_beats": 29.75,
-      "beats_per_bar": 3
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 2,
-      "note_count": 46
-     },
-     "track_notes": 208,
-     "range_semitones": 17,
-     "distinct_pitches": 9,
-     "pitch_coverage": "9 of 9",
-     "metrics": {
-      "notes": 46,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 15,
-      "within_50c_any_octave_pct": 15,
-      "median_abs_cents": 127.4,
-      "contour_pct": 78,
-      "distinct_recordings": 9,
-      "on_pitch_pct": 12,
-      "sounding_pct": 95,
-      "notes_mostly_silent": 0,
-      "transpose": -25,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.43
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4571138"
-  },
-  {
    "id": "vallafield",
    "title": "Vallafield",
    "matched": 7,
@@ -14683,157 +13488,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4839353"
-  },
-  {
-   "id": "caller-herring",
-   "title": "Caller Herring",
-   "matched": 9,
-   "eligible": 9,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4672386",
-     "url": "https://musescore.com/score/4672386",
-     "score_title": "CALLER HERRING",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "5",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/12/43/QmUSogMJQ2fw4qkscymdPY5XVfwS7fV2YvqSPK4Uhgp4vg.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": [
-       "66 notes (between 8 and 64)"
-      ]
-     },
-     "passed": false,
-     "sha256": "379c896f16d61dd2b4f9671189325071ce353bf1162a93c73e607bc595d668ef",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 66
-     },
-     "track_notes": 320,
-     "range_semitones": 10,
-     "distinct_pitches": 7
-    },
-    {
-     "score_id": "4570607",
-     "url": "https://musescore.com/score/4570607",
-     "score_title": "Caller Herring",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "3",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/3/47/QmdUc6K8PmVXeSzwBUwkaRFUtGdeYKa952RnH2mtFKVfL5.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": [
-       "the importer dropped 54 chord tones and inner-voice onsets, 16% of the track's notes (at most 10%)"
-      ]
-     },
-     "passed": false,
-     "sha256": "fe4cbab2237d7f71bd958daf08730b96b5e6cce6151f2a17eff052946ac57bd1",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 54,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 52
-     },
-     "track_notes": 274,
-     "range_semitones": 9,
-     "distinct_pitches": 6
-    },
-    {
-     "score_id": "4573582",
-     "url": "https://musescore.com/score/4573582",
-     "score_title": "Caller Herring",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "3",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/13/41/QmVRiQCrorjSsePTPQwonKSsw73WuxZVe3aXoWWea4Scp7.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "c15b82fe7581c249cf158c3cf00940667f6d290b20591cba65f0ce9f285efa1a",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 52
-     },
-     "track_notes": 274,
-     "range_semitones": 9,
-     "distinct_pitches": 6,
-     "pitch_coverage": "6 of 6",
-     "metrics": {
-      "notes": 52,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 6,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 12,
-      "within_50c_any_octave_pct": 12,
-      "median_abs_cents": 112.6,
-      "contour_pct": 77,
-      "distinct_recordings": 6,
-      "on_pitch_pct": 10,
-      "sounding_pct": 93,
-      "notes_mostly_silent": 0,
-      "transpose": -17,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 1.83
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4573582"
   },
   {
    "id": "duchess-of-gordon",
@@ -14976,117 +13630,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4837831"
-  },
-  {
-   "id": "frank-gilruth",
-   "title": "Frank Gilruth",
-   "matched": 8,
-   "eligible": 8,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4874875",
-     "url": "https://musescore.com/score/4874875",
-     "score_title": "Frank Gilruth",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "4",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/11/52/QmTx9qr7pgTEFcu2MeKsqArk7xKoPB1r1627R3G7SqGiZD.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": [
-       "129 notes (between 8 and 64)",
-       "range 22 semitones (at most 19)"
-      ]
-     },
-     "passed": false,
-     "sha256": "e03933829bf9888de5a063169ad77fcf2b997bdbe61fe4ffe7a081ddc48b9c9b",
-     "render": {
-      "bpm": 120,
-      "max_beats": 30.625,
-      "beats_per_bar": 2
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 4,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 129
-     },
-     "track_notes": 268,
-     "range_semitones": 22,
-     "distinct_pitches": 14
-    },
-    {
-     "score_id": "4679010",
-     "url": "https://musescore.com/score/4679010",
-     "score_title": "Frank Gilruth",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "3",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/0/45/QmaT4PnoUPGtTM4VoCyFQmmnMD4mtkJQbrTU19XcCFFo71.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "511b307c73171e0b2ad6d3ca280c82d66bdc7f9678fc941494f8000e60c6331c",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 61
-     },
-     "track_notes": 125,
-     "range_semitones": 17,
-     "distinct_pitches": 11,
-     "pitch_coverage": "11 of 11",
-     "metrics": {
-      "notes": 61,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 3,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 20,
-      "within_50c_any_octave_pct": 20,
-      "median_abs_cents": 112.6,
-      "contour_pct": 86,
-      "distinct_recordings": 11,
-      "on_pitch_pct": 11,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -19,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.97
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4679010"
   },
   {
    "id": "friar-and-the-nun",
@@ -16405,7 +14948,7 @@
   },
   {
    "id": "come-thou-burning-spirit-come",
-   "title": "Come Thou Burning Spirit Come.",
+   "title": "Come Thou Burning Spirit Come",
    "matched": 2,
    "eligible": 1,
    "rejected": {
@@ -16460,7 +15003,7 @@
   },
   {
    "id": "devonshire-house",
-   "title": "Devonshire House.",
+   "title": "Devonshire House",
    "matched": 9,
    "eligible": 9,
    "rejected": {},
@@ -18005,7 +16548,7 @@
   },
   {
    "id": "bishop-of-bangors-jig",
-   "title": "The Bishop of Bangor's Jig.",
+   "title": "The Bishop of Bangor's Jig",
    "matched": 8,
    "eligible": 8,
    "rejected": {},
@@ -18073,77 +16616,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4951319"
-  },
-  {
-   "id": "calver-lodge",
-   "title": "Calver Lodge",
-   "matched": 10,
-   "eligible": 10,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4570176",
-     "url": "https://musescore.com/score/4570176",
-     "score_title": "Calver Lodge",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "3",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/6/52/QmNxhxi2scyXYQpCNSpchq5bguE6uWtRYnWmgaEhSqPrTv.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "83a57cb822aad9d9c5cef8f44fec24cdbef4d11928c5f18160b5383cbdea8608",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32,
-      "beats_per_bar": 4
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 53
-     },
-     "track_notes": 222,
-     "range_semitones": 14,
-     "distinct_pitches": 10,
-     "pitch_coverage": "10 of 10",
-     "metrics": {
-      "notes": 53,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 11,
-      "within_50c_any_octave_pct": 11,
-      "median_abs_cents": 127.4,
-      "contour_pct": 82,
-      "distinct_recordings": 10,
-      "on_pitch_pct": 20,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -28,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.93
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4570176"
   }
  ]
 }

@@ -2,6 +2,9 @@
 # tools/catalog/rank_pdmx.py --batch 200 --out tools/catalog/titles-07.txt (#312). Each title's only name is
 # the one the ranking counted scores by. Review of its import (#324) pulled 2 titles, now in
 # excluded-titles.txt: Promised Land, Valse du Départ.
+# The second review (#324, PR #341) pulled 14 more, now in excluded-titles.txt: The Alphabet, Monymusk, La Morisque, The Gallowglass, Gloucestershire Wassail, The Banks Of Lough Gowna, Dixie, The Happy Clown, The Tennessee, Aunt Mary's (Canadian) Jig, Gasp\'e Reel, Dont vient cela, See see the shepherds' Queen, Steal Away.
+# It also named these by hand, with their accents or the name people know: Màiri Bhàn Òg, Helan går, Old Folks at Home.
+# PR #343 pulled Huldrevise (decided on PR #341: credited to "Urskoug" alone, undatable), now in excluded-titles.txt.
 # id | catalog title
 after-the-ball | After the Ball
 bold-fenian-men | Bold Fenian Men
@@ -9,7 +12,6 @@ o-for-a-heart-to-praise-my-god | O for a heart to praise my God
 battle-of-aughrim | The Battle of Aughrim
 mathematician | The Mathematician
 cameron-highlanders | The Cameron Highlanders
-alphabet | The Alphabet
 blue-eyed-stranger | The Blue-Eyed Stranger
 hard-times-come-again-no-more | Hard Times Come Again No More
 irish-girl | The Irish Girl
@@ -18,7 +20,6 @@ oranges-and-lemons | Oranges and Lemons
 short-and-sweet | Short and Sweet
 black-dance | The Black Dance
 en-avant-blonde | En Avant Blonde
-gloucestershire-wassail | Gloucestershire Wassail
 i-will-sing-of-my-redeemer | I will sing of my Redeemer
 bunker-hill | Bunker Hill
 down-by-the-sally-gardens | Down By The Sally Gardens
@@ -29,7 +30,6 @@ brightest-and-best | Brightest and best
 nous-nirons-plus-au-bois | Nous n'irons plus au bois
 egans-polka | Egan's Polka
 larry-ogaff | Larry O'Gaff
-dont-vient-cela | Dont vient cela
 ave-verum-corpus-ii | Ave verum corpus II
 chief-oneills-favourite | Chief O'Neill's Favourite
 contentment-is-wealth | Contentment Is Wealth
@@ -39,12 +39,11 @@ i-will-go-home-to-kintail | I Will Go Home To Kintail
 alexanders-hornpipe | Alexander's Hornpipe
 devil-among-the-tailors | Devil Among the Tailors
 moll-in-the-wad | Moll in the Wad
-monymusk | Monymusk
 nous-voici-dans-la-ville | Nous Voici Dans La Ville
 orientis-partibus | Orientis partibus
 parcel-of-rogues | Parcel of Rogues
 mrs-jamiesons-favorite | Mrs Jamieson's Favorite
-excuse-me | Excuse Me.
+excuse-me | Excuse Me
 bloomsbury-market | Bloomsbury Market
 friendly-visit | The Friendly Visit
 admiral-nelson | Admiral Nelson
@@ -57,7 +56,6 @@ navvy-on-the-line | Navvy on the Line
 president-garfields-hornpipe | President Garfield's Hornpipe
 star-of-bethlehem | Star Of Bethlehem
 friendly-beasts | The Friendly Beasts
-gallowglass | The Gallowglass
 horses-bransle | Horse's Bransle
 petite-camusette | Petite camusette
 barrack-hill | Barrack Hill
@@ -67,7 +65,7 @@ st-kilda-wedding | St. Kilda Wedding
 morgan-rattler | Morgan Rattler
 my-lord-byrons-maggot | My Lord Byron's Maggot
 ding-dong-bell | Ding Dong Bell
-mairi-bhan-og | Mairi Bhan Og
+mairi-bhan-og | Màiri Bhàn Òg
 reveillez-vous-picards | Reveillez Vous Picards
 farmers-daughter | The Farmer's Daughter
 pant-corlan-yr-wyn | Pant Corlan Yr Wyn
@@ -93,7 +91,7 @@ wells-humour | Well's Humour
 branle-de-bourgogne | Branle de Bourgogne
 champion-hornpipe | Champion Hornpipe
 da-full-rigged-ship | Da Full Rigged Ship
-helan | Helan
+helan-gar | Helan går | Helan
 lilli-burlero | Lilli Burlero
 oer-the-hills-and-far-away | O'er the Hills and far away
 our-highland-queen | Our Highland Queen
@@ -108,12 +106,10 @@ ellacombe | Ellacombe
 spring-garden | The Spring Garden
 tuonne-taakse-metsamaan | Tuonne taakse metsämaan
 up-with-aily | Up with Aily
-aunt-marys-canadian-jig | Aunt Mary's (Canadian) Jig
 flax-in-bloom | The Flax In Bloom
 gavotte-de-laven | Gavotte de l'Aven
 hulls-victory | Hull's Victory
 i-bibelen-star | I Bibelen Står
-see-see-the-shepherds-queen | See see the shepherds' Queen
 year-of-jubilo | Year of Jubilo
 christe-redemptor-omnium | Christe Redemptor Omnium
 john-anderson-my-joe | John Anderson My Joe
@@ -121,7 +117,6 @@ nyth-y-gog | Nyth Y Gog
 craigellachie-bridge | Craigellachie Bridge
 glenburnie-rant | Glenburnie Rant
 nelly-bly | Nelly Bly
-tennessee | The Tennessee
 72nd-highlanders-farewell-to-aberdeen | The 72nd Highlanders' Farewell To Aberdeen
 fyket | The Fyket
 mille-regrets | Mille regrets
@@ -140,7 +135,6 @@ white-petticoat | The White Petticoat
 boys-of-wexford | The Boys of Wexford
 early-to-bed | Early to Bed
 good-comrade | Good Comrade
-happy-clown | The Happy Clown
 pride-of-petravore | The Pride Of Petravore
 spey-in-spate | The Spey In Spate
 bile-them-cabbage-down | Bile Them Cabbage Down
@@ -148,14 +142,13 @@ gipsy-hornpipe | Gipsy Hornpipe
 lady-dillon | Lady Dillon
 leander | Leander
 mount-hills | Mount Hills
-old-folks | Old Folks
+old-folks-at-home | Old Folks at Home | Old Folks
 planxty-browne | Planxty Browne
 dark-eyed-sailor | The Dark-Eyed Sailor
 earl-of-dalhousies-happy-return-to-scotland | The Earl Of Dalhousie's Happy Return To Scotland
 up-tails-all | Up Tails All
 black-haired-lass | The Black Haired Lass
 carolans-quarrel-with-the-landlady | Carolan's Quarrel with the Landlady
-dixie | Dixie
 east-neuk-of-fife | East Neuk of Fife
 haggis | The Haggis
 household-brigade | The Household Brigade
@@ -164,23 +157,19 @@ red-red-rose | The Red Red Rose
 sixpenny-money | Sixpenny Money
 fife-hunt | The Fife Hunt
 gloucester-hornpipe | The Gloucester Hornpipe
-banks-of-lough-gowna | The Banks Of Lough Gowna
 chapel-keithack | Chapel Keithack
 down-the-brae | Down the Brae
 mrs-major-l-stewart-of-the-island-of-java | Mrs. Major L. Stewart of the Island of Java
 sad-is-my-fate | Sad Is My Fate
 balquhidder-lasses | Balquhidder Lasses
 fine-companion | Fine Companion
-gasp-e-reel | Gasp\'e Reel
-huldrevise | Huldrevise
 huntsmans-chorus-in-dr-freyschutz-gs-088 | Huntsman's Chorus in Dr. Freyschutz. GS.088
 maid-in-the-meadow | Maid in the Meadow
 mrs-hamilton-of-pencaitland | Mrs. Hamilton Of Pencaitland
 night-peece | The Night Peece
-steal-away | Steal Away
 stirling-castle | Stirling Castle
 archie-menzies | Archie Menzies
-banks-hornpipe | Bank's Hornpipe.
+banks-hornpipe | Bank's Hornpipe
 captain-byng | Captain Byng
 come-o-holy-spirit | Come O Holy Spirit
 duchess-of-atholls-slipper | The Duchess Of Atholl's Slipper
@@ -200,4 +189,3 @@ see-me-dance-the-polka | See Me Dance the Polka
 caller-herrin | Caller Herrin'
 dunkeld-hermitage | Dunkeld Hermitage
 hostis-herodes-impie | Hostis Herodes impie
-la-morisque | La Morisque
