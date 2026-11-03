@@ -1,0 +1,170 @@
+{
+  "bar_lines": [
+    1.0,
+    7.0,
+    13.0,
+    19.0,
+    25.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 120,
+  "file": "midi/pdmx-happy-marriage.mid",
+  "id": "happy-marriage",
+  "import_args": {
+    "beats_per_bar": 6,
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "happy-marriage",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 25,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-happy-marriage.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 0.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 77,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 73,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 6.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 77,
+      "start": 7.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 12.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 81,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 82,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 18.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 76,
+      "start": 19.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 77,
+      "start": 22.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 26.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 82,
+      "start": 27.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 81,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 29.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    73,
+    74,
+    76,
+    77,
+    79,
+    81,
+    82
+  ],
+  "sha256": "d26b181bddb13591a8150bf0d180605e9b0b7c9791cc5fb549703569c73e34e8",
+  "title": "The Happy Marriage"
+}

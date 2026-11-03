@@ -1,0 +1,195 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-angeline-the-baker.mid",
+  "id": "angeline-the-baker",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "angeline-the-baker",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 30,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-angeline-the-baker.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 1.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 3.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 9.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 17.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 57,
+      "start": 28.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 57,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    57,
+    59,
+    62,
+    64,
+    66
+  ],
+  "sha256": "2b65da577d7ff48b1d7e500b2f9df9105ce5f30bcc0eb9ff2c40dfccba2031d1",
+  "title": "Angeline the Baker"
+}

@@ -1,0 +1,181 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 144,
+  "file": "midi/pdmx-black-velvet-band.mid",
+  "id": "black-velvet-band",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 144,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "black-velvet-band",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 26,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-black-velvet-band.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 0.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 7.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 5.0,
+      "pitch": 60,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 24.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    65,
+    67,
+    69,
+    70,
+    72
+  ],
+  "sha256": "9904d6a3a00bb4f0088c5162b1bbc12fe1e8ae35051fa0c141bf2d7efc444b42",
+  "title": "The Black Velvet Band"
+}

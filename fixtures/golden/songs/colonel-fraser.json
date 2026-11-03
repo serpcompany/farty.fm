@@ -1,0 +1,344 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 116,
+  "file": "midi/pdmx-colonel-fraser.mid",
+  "id": "colonel-fraser",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 116,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "colonel-fraser",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 59,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-colonel-fraser.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 3.5
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 66,
+      "start": 4.333333333333333
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 67,
+      "start": 4.666666666666667
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.5
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 67,
+      "start": 20.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 66,
+      "start": 20.333333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 67,
+      "start": 20.666666666666668
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 28.5
+    }
+  ],
+  "pitches": [
+    62,
+    66,
+    67,
+    69,
+    71,
+    72,
+    74,
+    78,
+    79
+  ],
+  "sha256": "c1f42babd588e318a79b3114acdcbbac25c44fcdf759b4939fa403ebc46ea72c",
+  "title": "Colonel Fraser"
+}

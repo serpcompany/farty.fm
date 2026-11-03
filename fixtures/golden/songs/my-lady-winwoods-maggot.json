@@ -1,0 +1,222 @@
+{
+  "bar_lines": [
+    0.0,
+    1.0,
+    2.0,
+    3.0,
+    4.0,
+    5.0,
+    6.0,
+    7.0,
+    8.0,
+    9.0,
+    10.0,
+    11.0,
+    12.0,
+    13.0,
+    16.0,
+    17.0,
+    18.0,
+    19.0,
+    20.0,
+    21.0,
+    22.0,
+    23.0,
+    24.0,
+    25.0,
+    27.0,
+    29.0
+  ],
+  "beats_per_bar": 1,
+  "bpm": 120,
+  "file": "midi/pdmx-my-lady-winwoods-maggot.mid",
+  "id": "my-lady-winwoods-maggot",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "my-lady-winwoods-maggot",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 31,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-my-lady-winwoods-maggot.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 12.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 79,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 20.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 25.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    78,
+    79,
+    81
+  ],
+  "sha256": "e3780372e1fced2cf5d50605a12ae33ff6d59c549ef898ff4a78ffae1f1fba88",
+  "title": "My Lady Winwood's Maggot"
+}

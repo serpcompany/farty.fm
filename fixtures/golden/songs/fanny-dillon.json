@@ -1,0 +1,326 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-fanny-dillon.mid",
+  "id": "fanny-dillon",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "fanny-dillon",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 55,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-fanny-dillon.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 0.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 1.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 81,
+      "start": 2.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 79,
+      "start": 2.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 2.5
+    },
+    {
+      "dur": 0.125,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 0.125,
+      "pitch": 75,
+      "start": 3.125
+    },
+    {
+      "dur": 0.125,
+      "pitch": 74,
+      "start": 3.25
+    },
+    {
+      "dur": 0.125,
+      "pitch": 75,
+      "start": 3.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 3.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 5.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 5.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 7.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 12.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 15.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 77,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 19.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 70,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 26.5
+    },
+    {
+      "dur": 0.125,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 0.125,
+      "pitch": 70,
+      "start": 27.125
+    },
+    {
+      "dur": 0.125,
+      "pitch": 69,
+      "start": 27.25
+    },
+    {
+      "dur": 0.125,
+      "pitch": 70,
+      "start": 27.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 27.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 31.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 75,
+      "start": 31.75
+    }
+  ],
+  "pitches": [
+    65,
+    67,
+    69,
+    70,
+    72,
+    74,
+    75,
+    77,
+    79,
+    81
+  ],
+  "sha256": "f8d6b8e108c95d28f3dc91a52fe8f4fdbf8fcee7775c6ba79b2c452af7111147",
+  "title": "Fanny Dillon"
+}

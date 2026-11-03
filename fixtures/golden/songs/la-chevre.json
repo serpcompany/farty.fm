@@ -1,0 +1,293 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-la-chevre.mid",
+  "id": "la-chevre",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32,
+    "start_beat": 4
+  },
+  "import_report": {
+    "catalog_id": "la-chevre",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 49,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-la-chevre.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.75,
+      "pitch": 73,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 0.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 68,
+      "start": 1.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 66,
+      "start": 2.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 2.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 3.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 3.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 4.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 68,
+      "start": 5.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 5.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 8.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 8.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 8.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 73,
+      "start": 9.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 9.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 10.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 11.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 11.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 73,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 12.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 73,
+      "start": 13.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 13.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 16.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 16.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 16.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 73,
+      "start": 17.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 17.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 18.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 18.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 19.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 73,
+      "start": 20.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 20.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 73,
+      "start": 21.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 21.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 73,
+      "start": 28.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 28.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 29.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 68,
+      "start": 29.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 30.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 31.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 31.75
+    }
+  ],
+  "pitches": [
+    64,
+    66,
+    68,
+    69,
+    71,
+    73,
+    74
+  ],
+  "sha256": "2aada6ad903361c486127182283d2a93ffb4134d0ed30dc1b4f2bcb98f9c4833",
+  "title": "La Chevre"
+}

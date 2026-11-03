@@ -1,0 +1,370 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5,
+    28.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-miss-campbells-reel.mid",
+  "id": "miss-campbells-reel",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "miss-campbells-reel",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 64,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-miss-campbells-reel.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 0.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 1.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 2.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 3.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 4.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 4.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 5.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 10.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 11.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 12.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 79,
+      "start": 12.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 13.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 79,
+      "start": 13.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 14.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 16.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 17.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 18.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 19.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 20.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 20.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 21.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 21.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 26.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 27.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 30.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 31.5
+    }
+  ],
+  "pitches": [
+    64,
+    67,
+    69,
+    72,
+    74,
+    76,
+    77,
+    79,
+    81
+  ],
+  "sha256": "1bdafc7715257fad252577830c81f115cc42b85164869815fca29a5c6bb66866",
+  "title": "Miss Campbell's Reel"
+}

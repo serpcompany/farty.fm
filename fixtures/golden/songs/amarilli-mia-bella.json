@@ -1,0 +1,154 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0,
+    32.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 72,
+  "file": "midi/pdmx-amarilli-mia-bella.mid",
+  "id": "amarilli-mia-bella",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 72,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "amarilli-mia-bella",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 21,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-amarilli-mia-bella.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      2
+    ]
+  },
+  "length_beats": 33.0,
+  "notes": [
+    {
+      "dur": 3.0,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 7.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 15.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 74,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 21.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 22.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 24.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 74,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 29.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 70,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    66,
+    67,
+    69,
+    70,
+    72,
+    74
+  ],
+  "sha256": "80db301dc78710c5527e14ad6e5a5a4ef18fe23477479358e851accf99262885",
+  "title": "Amarilli mia Bella"
+}

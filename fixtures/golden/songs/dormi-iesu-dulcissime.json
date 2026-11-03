@@ -1,0 +1,113 @@
+{
+  "bar_lines": [
+    0.0,
+    6.0,
+    12.0,
+    18.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 120,
+  "file": "midi/pdmx-dormi-iesu-dulcissime.mid",
+  "id": "dormi-iesu-dulcissime",
+  "import_args": {
+    "beats_per_bar": 6,
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "dormi-iesu-dulcissime",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 14,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-dormi-iesu-dulcissime.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 24.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 14.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 16.0
+    },
+    {
+      "dur": 6.0,
+      "pitch": 74,
+      "start": 18.0
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    71,
+    72,
+    74,
+    76
+  ],
+  "sha256": "29f6b82bdeb33e4f99d27e5c74e26c718a2431f38c5b37341c2bad6dc53cfbf2",
+  "title": "Dormi Iesu dulcissime"
+}

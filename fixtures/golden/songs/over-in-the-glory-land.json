@@ -1,0 +1,131 @@
+{
+  "bar_lines": [
+    2.0,
+    6.0,
+    10.0,
+    14.0,
+    18.0,
+    22.0,
+    26.0,
+    30.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-over-in-the-glory-land.mid",
+  "id": "over-in-the-glory-land",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "over-in-the-glory-land",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 17,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-over-in-the-glory-land.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 2.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 2.5,
+      "pitch": 70,
+      "start": 5.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 10.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 65,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 22.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 6.0,
+      "pitch": 72,
+      "start": 26.0
+    }
+  ],
+  "pitches": [
+    65,
+    67,
+    70,
+    72,
+    74
+  ],
+  "sha256": "f1db3d49f1239162029c3d70ccc66ffc9fd0f1c603058f44579c13a821848297",
+  "title": "Over in the Glory Land"
+}

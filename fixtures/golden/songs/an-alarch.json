@@ -1,0 +1,273 @@
+{
+  "bar_lines": [
+    1.5,
+    3.5,
+    6.5,
+    8.5,
+    11.5,
+    13.5,
+    15.5,
+    17.5,
+    19.5,
+    21.5,
+    23.5,
+    25.5,
+    27.5
+  ],
+  "beats_per_bar": 2,
+  "bpm": 120,
+  "file": "midi/pdmx-an-alarch.mid",
+  "id": "an-alarch",
+  "import_args": {
+    "beats_per_bar": 2,
+    "bpm": 120,
+    "max_beats": 31.5
+  },
+  "import_report": {
+    "catalog_id": "an-alarch",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 44,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-an-alarch.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.5,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 1.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 9.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 14.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 18.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 19.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 20.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 20.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 20.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 24.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 25.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 25.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 26.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 27.5
+    }
+  ],
+  "pitches": [
+    62,
+    65,
+    67,
+    69,
+    70,
+    72,
+    74
+  ],
+  "sha256": "dc9e04dbfd8ea021d4d30dae7fdc321a5013b233bb9249ed531d99202b9316de",
+  "title": "An Alarc'h"
+}

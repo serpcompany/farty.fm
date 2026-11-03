@@ -1,0 +1,320 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5,
+    28.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-cabar-feidh.mid",
+  "id": "cabar-feidh",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "cabar-feidh",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 54,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-cabar-feidh.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 1,
+    "tracks_with_notes": [
+      1
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 0.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 1.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 2.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 3.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 4.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 4.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 5.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 59,
+      "start": 6.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 57,
+      "start": 6.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 55,
+      "start": 7.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 53,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 12.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 13.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 14.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 59,
+      "start": 14.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 57,
+      "start": 15.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 16.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 16.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 17.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 18.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 19.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 20.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 20.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 21.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 59,
+      "start": 22.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 57,
+      "start": 22.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 55,
+      "start": 23.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 53,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 24.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 55,
+      "start": 24.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 57,
+      "start": 25.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 25.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 26.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 27.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 28.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 29.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 30.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 59,
+      "start": 30.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 57,
+      "start": 31.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 31.5
+    }
+  ],
+  "pitches": [
+    53,
+    55,
+    57,
+    59,
+    60,
+    62,
+    64,
+    65,
+    67
+  ],
+  "sha256": "5811989f6ab6dedc506fdc5669f86eafde6de16d2c41cebd0abadab658774232",
+  "title": "Cabar Feidh"
+}

@@ -1,0 +1,145 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0
+  ],
+  "beats_per_bar": 2,
+  "bpm": 120,
+  "file": "midi/pdmx-ewe-with-the-crooked-horn.mid",
+  "id": "ewe-with-the-crooked-horn",
+  "import_args": {
+    "beats_per_bar": 2,
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "ewe-with-the-crooked-horn",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 20,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-ewe-with-the-crooked-horn.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 11.0,
+  "notes": [
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 64,
+      "start": 0.3333333333333333
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 66,
+      "start": 0.6666666666666666
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 10.5
+    }
+  ],
+  "pitches": [
+    57,
+    58,
+    59,
+    60,
+    62,
+    64,
+    65,
+    66,
+    67
+  ],
+  "sha256": "7dfb453c210240ae522a66ca43f311c469919037a59a42d467cc1f4e15efa718",
+  "title": "Ewe With the Crooked Horn"
+}

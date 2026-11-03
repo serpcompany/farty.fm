@@ -1,0 +1,220 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-die-wacht-am-rhein.mid",
+  "id": "die-wacht-am-rhein",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "die-wacht-am-rhein",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 34,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-die-wacht-am-rhein.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 0.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 62,
+      "start": 1.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 65,
+      "start": 1.3333333333333333
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 70,
+      "start": 1.6666666666666667
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 2.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 65,
+      "start": 3.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 70,
+      "start": 3.3333333333333335
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 74,
+      "start": 3.6666666666666665
+    },
+    {
+      "dur": 3.0,
+      "pitch": 77,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 7.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 58,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 11.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 13.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 75,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 19.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 70,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 21.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 23.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 25.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 26.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 27.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 27.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    58,
+    62,
+    65,
+    69,
+    70,
+    71,
+    72,
+    74,
+    75,
+    77
+  ],
+  "sha256": "8956777eae3aadbeb3d8a6d7d8b4d72c50310cdd378124ee015d98dd6c06d07f",
+  "title": "Die Wacht am Rhein"
+}

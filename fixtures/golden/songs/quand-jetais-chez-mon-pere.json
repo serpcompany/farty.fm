@@ -1,0 +1,203 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 144,
+  "file": "midi/pdmx-quand-jetais-chez-mon-pere.mid",
+  "id": "quand-jetais-chez-mon-pere",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 144,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "quand-jetais-chez-mon-pere",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 31,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-quand-jetais-chez-mon-pere.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 12.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 18.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    71,
+    72,
+    74
+  ],
+  "sha256": "16dd42f8cdde3a3888f37dc404c47554de40991f4b26bd52f5a58b9f58d6446c",
+  "title": "Quand j'étais chez mon père"
+}

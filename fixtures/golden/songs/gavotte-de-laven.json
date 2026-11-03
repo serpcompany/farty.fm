@@ -1,0 +1,366 @@
+{
+  "bar_lines": [
+    0.5,
+    2.5,
+    4.5,
+    6.5,
+    8.5,
+    10.5,
+    12.5,
+    14.5,
+    16.5,
+    18.5,
+    20.5,
+    22.5,
+    24.5,
+    26.5,
+    28.5,
+    30.5
+  ],
+  "beats_per_bar": 2,
+  "bpm": 120,
+  "file": "midi/pdmx-gavotte-de-laven.mid",
+  "id": "gavotte-de-laven",
+  "import_args": {
+    "beats_per_bar": 2,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "gavotte-de-laven",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 62,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-gavotte-de-laven.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 0.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 0.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 5.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 6.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 6.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 7.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 7.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 8.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 8.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 12.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 13.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 13.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 14.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 16.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 16.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 18.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 21.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 22.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 22.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 23.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 23.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 24.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 24.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 26.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 28.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 29.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 29.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 30.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 30.5
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    65,
+    67,
+    69,
+    71,
+    72
+  ],
+  "sha256": "80066cc21faa171c8c4541c0a21bf32e2f4de39267cc8eba3857c7710fad1a52",
+  "title": "Gavotte de l'Aven"
+}

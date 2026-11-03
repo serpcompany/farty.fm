@@ -4,12 +4,14 @@ Writes deterministic JSON to fixtures/golden/ (format and tolerances: fixtures/g
 
   index.json                         libraries, Recordings, Songs, a summary, library versions
   recordings/<id>.json               Recording Analysis of every Fixture Library Recording
-  songs/<id>.json                    the imported melody of every golden Song (golden_catalog())
+  songs/<id>.json                    the imported melody of every catalog Song, which the web app
+                                     ships from (apps/web/src/lib/catalog/generate.ts)
   arrangements/<library>/<id>.json   Pitch Coverage, transposition, Arrangement and evaluate.py
-                                     metrics per Song, for the full Fixture Library and the small
-                                     6-Recording one (no Arrangement to render when locked)
-  coverage.json                      Pitch Coverage and Arrangement of every Song on fixed random
-                                     subsets of the Fixture Library
+                                     metrics per arranged Song (arranged_catalog()), for the full
+                                     Fixture Library and the small 6-Recording one (no Arrangement
+                                     to render when locked)
+  coverage.json                      Pitch Coverage and Arrangement of every arranged Song on fixed
+                                     random subsets of the Fixture Library
 
 Everything is computed by the lab's own functions (the same calls run_all.py makes); this
 script only rounds and writes. Running it twice gives byte-identical files.
@@ -34,7 +36,10 @@ from evaluate import evaluate
 from melody import load_catalog
 
 GOLDEN = engine.ROOT / "fixtures/golden"
-SHIP_LIST = engine.ROOT / "apps/web/src/lib/catalog/ship-list.json"  # the Songs the web app ships
+# The batches whose Songs get arrangements/ and coverage.json, with the hand-entered Songs: the 129
+# Songs with golden data before #350 (the web app's 128 and ode-mutopia), which the web port's tests
+# check against this engine.
+ARRANGED_BATCHES = {f"tools/catalog/titles-0{n}.txt" for n in (1, 2, 3)}
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")  # README.md is written by hand
 FORMAT_VERSION = 8  # 8: a fart's lead-in plays before its beat (#287); 7: Songs play every burst, the pitch reads the first (ADR 0016); 6: Songs' `bar_lines` (#232); 5: Songs play farts raw (ADR 0012); 4: the length rule (#221)
 COVERAGE_SEEDS = 10  # random subsets per size in coverage.json
@@ -239,16 +244,12 @@ def coverage_json(catalog, lib):
     return {"subsets": out}
 
 
-def golden_catalog():
-    """The catalog Songs that get golden data, in catalog order: every Song the web app ships
-    (its ship list, which apps/web/src/lib/catalog/generate.ts reads too), and every hand-entered
-    Song. The other PDMX imports (catalog entries with "import") are gated by
-    tools/catalog/import_pdmx.py instead, and would make the golden data ten times larger."""
-    ship = json.loads(SHIP_LIST.read_text())
-    catalog = [(c, m) for c, m in load_catalog() if c["id"] in ship or "import" not in c]
-    missing = set(ship) - {c["id"] for c, _ in catalog}
-    assert not missing, f"the ship list names Songs that aren't in catalog/: {sorted(missing)}"
-    return catalog
+def arranged_catalog(catalog):
+    """The Songs of `catalog` that get arrangements/ and coverage.json, in catalog order: the
+    hand-entered ones and ARRANGED_BATCHES' (#350). Every later batch's Song passed
+    tools/catalog/import_pdmx.py's render gate on this engine. Arranging all 1,009 here would take
+    this script from about 3 minutes to 25, and the web tests that read them about 8 times as long."""
+    return [(c, m) for c, m in catalog if "import" not in c or c["import"].get("titles") in ARRANGED_BATCHES]
 
 
 def main():
@@ -267,10 +268,12 @@ def main():
     for src in lib:
         write(f"recordings/{src.id}.json", recording_json(manifest[src.id], src))
 
-    catalog = golden_catalog()
+    every = load_catalog()
+    for c, m in every:
+        write(f"songs/{c['id']}.json", song_json(c, m))
+    catalog = arranged_catalog(every)
     songs = []
     for c, m in catalog:
-        write(f"songs/{c['id']}.json", song_json(c, m))
         transposes, unlocked = {}, {}
         for name, sources in libraries.items():
             a = arrangement_json(c, m, name, sources)

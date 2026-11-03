@@ -7,6 +7,7 @@ import {
   getUserMediaMs,
   waitForOpenMicrophone
 } from './fake-microphone'
+import { fixtureRecordings, songsUnlockedBy } from './golden'
 import { payAtTheDevCheckout } from './pay'
 import { skipWelcome } from './record'
 
@@ -22,6 +23,9 @@ import { skipWelcome } from './record'
 // `song-creator.spec.ts` and `account.spec.ts` pay the same way.
 
 const production = process.env.E2E_SITE_ENV === 'production'
+/** The Songs the journey's first `takes` takes unlock, as many as the catalog has (`golden.ts`). */
+const unlockedAt = (takes: number) =>
+  songsUnlockedBy(fixtureRecordings(['095', '017', '022', '002'].slice(0, takes))).length
 
 test.use({ permissions: ['microphone'] })
 
@@ -52,7 +56,7 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
   await page.goto('/profile/')
   await signInByApi(page, newEmail(testInfo, 'production-save'))
 
-  // Four takes unlock Mary, and Hot Cross Buns and 4 more Songs (#229).
+  // Four takes unlock Mary, and Hot Cross Buns and more Songs (#229).
   await page.goto('/')
   for (const id of ['095', '017', '022', '002']) {
     await waitForOpenMicrophone(page)
@@ -66,7 +70,9 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
       await tab(page, 'Record').click()
     } else await page.getByRole('button', { name: 'Record another' }).click()
   }
-  await expect(page.getByTestId('result-progress')).toContainText('You unlocked 5 Songs')
+  await expect(page.getByTestId('result-progress')).toContainText(
+    `You unlocked ${unlockedAt(4) - unlockedAt(3)} Songs`
+  )
   await page.getByRole('button', { name: 'Done' }).click()
 
   await tab(page, 'Compose').click()
@@ -104,7 +110,9 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
   // Back to Compose, and Toots has the one Toot.
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
-  await expect(page.getByRole('heading', { name: 'Unlocked · 6', exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: `Unlocked · ${unlockedAt(4)}`, exact: true })
+  ).toBeVisible()
   await tab(page, 'Toots').click()
   // The row's title only: the line under it starts with the Song's title too (`tootDetails`).
   await expect(page.getByText('Mary Had a Little Lamb', { exact: true })).toHaveCount(1)

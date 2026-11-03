@@ -1,0 +1,217 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    10.0,
+    14.0,
+    18.0,
+    22.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 144,
+  "file": "midi/pdmx-pinagay-branle.mid",
+  "id": "pinagay-branle",
+  "import_args": {
+    "bpm": 144,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "pinagay-branle",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 34,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-pinagay-branle.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 7.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 17.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 21.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    66,
+    67,
+    69,
+    71,
+    72,
+    74
+  ],
+  "sha256": "4226eeb0ecf761b087bc53ac6a7946d0f8ff80c51893d9d6e485e39e40eacb69",
+  "title": "Pinagay Branle"
+}

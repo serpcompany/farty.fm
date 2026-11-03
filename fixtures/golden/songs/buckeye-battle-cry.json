@@ -1,0 +1,202 @@
+{
+  "bar_lines": [
+    0.0,
+    2.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0,
+    12.0,
+    14.0,
+    16.0,
+    18.0,
+    20.0,
+    22.0,
+    24.0,
+    26.0,
+    28.0,
+    30.0
+  ],
+  "beats_per_bar": 2,
+  "bpm": 144,
+  "file": "midi/pdmx-buckeye-battle-cry.mid",
+  "id": "buckeye-battle-cry",
+  "import_args": {
+    "bpm": 144,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "buckeye-battle-cry",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 29,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-buckeye-battle-cry.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 39,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 38,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 39,
+      "start": 1.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 42,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 41,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 39,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 43,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 42,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 43,
+      "start": 5.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 46,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 48,
+      "start": 7.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 43,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 41,
+      "start": 10.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 39,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 34,
+      "start": 15.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 43,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 42,
+      "start": 17.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 43,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 39,
+      "start": 19.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 41,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 40,
+      "start": 21.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 41,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 38,
+      "start": 23.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 39,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 41,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 43,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 39,
+      "start": 27.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 34,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 34,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    34,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    46,
+    48
+  ],
+  "sha256": "0b56081f060c00527625feb6a3b60ad0d26f4e1a65c684229e870e16896f1149",
+  "title": "Buckeye Battle Cry"
+}

@@ -1,0 +1,224 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 72,
+  "file": "midi/pdmx-bist-du-bei-mir.mid",
+  "id": "bist-du-bei-mir",
+  "import_args": {
+    "bpm": 72,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "bist-du-bei-mir",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 34,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-bist-du-bei-mir.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1,
+      2
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 0.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 75,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 2.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 75,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 68,
+      "start": 9.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 17.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 18.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 19.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 20.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 75,
+      "start": 20.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 21.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 21.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 22.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 23.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 23.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 27.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 75,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 29.5
+    }
+  ],
+  "pitches": [
+    63,
+    65,
+    67,
+    68,
+    69,
+    70,
+    72,
+    74,
+    75,
+    77
+  ],
+  "sha256": "103bf89e6c651e6f9f29ca5a79d98bacf76dbf47b9853af2f6e4f7cef8aeada2",
+  "title": "Bist Du Bei Mir"
+}

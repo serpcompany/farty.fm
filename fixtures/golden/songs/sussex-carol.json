@@ -1,0 +1,144 @@
+{
+  "bar_lines": [
+    3.0,
+    9.0,
+    15.0,
+    21.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 120,
+  "file": "midi/pdmx-sussex-carol.mid",
+  "id": "sussex-carol",
+  "import_args": {
+    "beats_per_bar": 6,
+    "bpm": 120,
+    "max_beats": 27
+  },
+  "import_report": {
+    "catalog_id": "sussex-carol",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 20,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-sussex-carol.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 27.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 2.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 72,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 0.6666666666666666,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 0.6666666666666666,
+      "pitch": 67,
+      "start": 7.666666666666667
+    },
+    {
+      "dur": 0.6666666666666666,
+      "pitch": 69,
+      "start": 8.333333333333334
+    },
+    {
+      "dur": 3.0,
+      "pitch": 64,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 14.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 20.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 72,
+      "start": 21.0
+    },
+    {
+      "dur": 0.6666666666666666,
+      "pitch": 72,
+      "start": 25.0
+    },
+    {
+      "dur": 0.6666666666666666,
+      "pitch": 72,
+      "start": 25.666666666666668
+    },
+    {
+      "dur": 0.6666666666666666,
+      "pitch": 76,
+      "start": 26.333333333333332
+    }
+  ],
+  "pitches": [
+    64,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76
+  ],
+  "sha256": "eaff6f9ab44084f16699d2d00aaa2017aa191678aff3dd245a5fa4ba101772c5",
+  "title": "Sussex Carol"
+}

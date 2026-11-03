@@ -1,13 +1,14 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { runInNewContext } from 'node:vm'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 // public/sw.js is a plain script, so it runs here against a fake network and Cache Storage.
 const source = readFileSync(fileURLToPath(new URL('../../public/sw.js', import.meta.url)), 'utf8')
 const origin = 'https://pedos.test'
 
-type Network = (url: string) => Response | 'offline'
+/** The network's answer to a URL: a response, 'offline', or a response still on its way. */
+type Network = (url: string) => Response | 'offline' | Promise<Response>
 type Listener = (event: unknown) => void
 
 /** A same-origin response, as `fetch` gives the service worker. */
@@ -498,7 +499,7 @@ describe("a Song's notes (#323)", () => {
   const index = (...ids: string[]) =>
     JSON.stringify(ids.map(id => ({ id, title: id, notesPath: notes(id) })))
 
-  it("keeps every Song's notes when it installs, so a Song never opened plays offline (#138)", async () => {
+  it("keeps every Song's notes once it's active, so a Song never opened plays offline (#138)", async () => {
     let online = true
     const fetched: string[] = []
     const worker = startWorker(url => {
@@ -512,11 +513,16 @@ describe("a Song's notes (#323)", () => {
       return ok(`notes of ${path}`)
     })
     await worker.lifecycle('install')
-    expect(worker.kept('pedos-notes-v1').sort()).toEqual(
-      [notes('mary'), notes('ode-to-joy'), notes('twinkle')].sort()
+    // Installing keeps the shell and the index, and no notes yet.
+    expect(worker.kept()).toContain(catalog)
+    expect(worker.kept('pedos-notes-v1')).toEqual([])
+    await worker.lifecycle('activate')
+    await vi.waitFor(() =>
+      expect(worker.kept('pedos-notes-v1').sort()).toEqual(
+        [notes('mary'), notes('ode-to-joy'), notes('twinkle')].sort()
+      )
     )
     // The index stays in the shell's cache, and the notes never go there.
-    expect(worker.kept()).toContain(catalog)
     expect(worker.kept().filter(path => path.startsWith('/catalog/notes/'))).toEqual([])
 
     online = false
@@ -529,6 +535,29 @@ describe("a Song's notes (#323)", () => {
     fetched.length = 0
     await worker.request('/', { mode: 'navigate' })
     expect(fetched.filter(path => path.startsWith('/catalog/notes/'))).toEqual([])
+  })
+
+  it("installs and activates without waiting on the notes, so a new build's worker takes over at once (#350)", async () => {
+    const fetched: string[] = []
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      if (path === '/') return ok(startPage)
+      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
+      if (path === '/compose/song/') return ok(`<link rel="preload" href="${catalog}" as="fetch"/>`)
+      if (path === catalog) return ok(index('mary', 'twinkle'))
+      fetched.push(path)
+      // The notes never arrive, as on a slow connection with a thousand Songs to fetch.
+      return path.startsWith('/catalog/notes/') ? new Promise<Response>(() => {}) : ok()
+    })
+    await worker.lifecycle('install')
+    expect(fetched.filter(path => path.startsWith('/catalog/notes/'))).toEqual([])
+    await worker.lifecycle('activate')
+    await vi.waitFor(() =>
+      expect(fetched.filter(path => path.startsWith('/catalog/notes/')).sort()).toEqual([
+        notes('mary'),
+        notes('twinkle')
+      ])
+    )
   })
 
   it("keeps a new index's notes once a page fetches it, such as after a deploy", async () => {

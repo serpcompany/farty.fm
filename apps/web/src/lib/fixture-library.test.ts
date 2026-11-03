@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { fixtures, fixtureWav } from '../../scripts/fixture-library'
-import { goldenArrangement, goldenRecording } from '../test-support/engine-golden'
+import { goldenArrangement, goldenRecording, songIds } from '../test-support/engine-golden'
+import { goldenIndex } from '../test-support/golden'
+import { goldenAnalysisRecording } from '../test-support/golden-analysis'
 import { analyzeToAnalysis } from './analysis/port'
 import { songs } from './catalog/songs.generated'
 import { fixtureRecordingId } from './fixture-library'
@@ -45,10 +47,11 @@ describe('the Fixture Library', () => {
         analysis: { state: 'analyzed', analysis }
       })
     }
-    for (const [i, song] of songs.entries()) {
+    // Each Song the reference engine's golden data arranges (#350).
+    for (const [i, song] of songs.filter(s => songIds.includes(s.id)).entries()) {
       const coverage = coverageOf(song, recordings)
       const golden = goldenArrangement('full', song.id)
-      // The iPhone app's 12, first on the ship list, all unlock: since every burst plays (ADR
+      // The iPhone app's 12, first in the app's order, all unlock: since every burst plays (ADR
       // 0016), a fixture near each of their pitches is as long as its longest note (ADR 0011).
       if (i < 12) expect(coverage.unlocked, song.id).toBe(true)
       expect(coverage.unlocked, song.id).toBe(golden.unlocked)
@@ -59,5 +62,13 @@ describe('the Fixture Library', () => {
         )
       }
     }
+    // Every Song the app ships, those without golden Arrangements too: the reference's analysis,
+    // which the journeys count with (`e2e/golden.ts`), unlocks the same Songs as the app's own.
+    const withGoldenAnalysis = goldenIndex.recordings.map((id, i) =>
+      goldenAnalysisRecording(goldenRecording(id), i + 1, goldenIndex.sample_rate)
+    )
+    const unlocked = (library: Recording[]) =>
+      songs.filter(s => coverageOf(s, library).unlocked).map(s => s.id)
+    expect(unlocked(recordings)).toEqual(unlocked(withGoldenAnalysis))
   })
 })

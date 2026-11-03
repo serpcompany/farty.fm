@@ -1,0 +1,175 @@
+{
+  "bar_lines": [
+    0.0,
+    2.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0,
+    12.0,
+    14.0
+  ],
+  "beats_per_bar": 2,
+  "bpm": 120,
+  "file": "midi/pdmx-bile-them-cabbage-down.mid",
+  "id": "bile-them-cabbage-down",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "bile-them-cabbage-down",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 26,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-bile-them-cabbage-down.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 1,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 16.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 13.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 14.0
+    }
+  ],
+  "pitches": [
+    66,
+    67,
+    69,
+    71
+  ],
+  "sha256": "5da06c3ef18c0a022bfde125fb38df96363fe9f76abbd96cb929edcedef1b551",
+  "title": "Bile Them Cabbage Down"
+}

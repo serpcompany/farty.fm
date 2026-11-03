@@ -1,0 +1,171 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 126,
+  "file": "midi/pdmx-i-shall-not-be-moved.mid",
+  "id": "i-shall-not-be-moved",
+  "import_args": {
+    "bpm": 126,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "i-shall-not-be-moved",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 25,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-i-shall-not-be-moved.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 11.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 20.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    64,
+    65,
+    66,
+    67,
+    69,
+    70
+  ],
+  "sha256": "b4b88d6b2219c381a753e68883dade3f65d67bb30fc7211a5d03f858187063f4",
+  "title": "I Shall Not Be Moved"
+}

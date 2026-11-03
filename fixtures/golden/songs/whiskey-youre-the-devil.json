@@ -1,0 +1,351 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-whiskey-youre-the-devil.mid",
+  "id": "whiskey-youre-the-devil",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 28.5
+  },
+  "import_report": {
+    "catalog_id": "whiskey-youre-the-devil",
+    "chord_tones_dropped": 1,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 60,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-whiskey-youre-the-devil.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 28.5,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 16.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 17.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 18.25
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 18.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 20.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 20.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 20.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 20.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 21.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 21.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 21.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 21.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 22.25
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 22.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 24.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 24.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 24.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 25.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 25.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 25.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 26.25
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    79,
+    81
+  ],
+  "sha256": "6cb680e83bff922c316cc901d74550527a848ef7fbc0c1741405ad201a143063",
+  "title": "Whiskey You're the Devil"
+}

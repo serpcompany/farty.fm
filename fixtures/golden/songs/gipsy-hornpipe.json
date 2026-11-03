@@ -1,0 +1,342 @@
+{
+  "bar_lines": [
+    0.5,
+    2.5,
+    4.5,
+    6.5,
+    8.5,
+    10.5,
+    12.5,
+    14.5,
+    15.375,
+    19.375,
+    21.375,
+    25.375,
+    27.375,
+    29.375
+  ],
+  "beats_per_bar": 2,
+  "bpm": 120,
+  "file": "midi/pdmx-gipsy-hornpipe.mid",
+  "id": "gipsy-hornpipe",
+  "import_args": {
+    "beats_per_bar": 2,
+    "bpm": 120,
+    "max_beats": 31.375
+  },
+  "import_report": {
+    "catalog_id": "gipsy-hornpipe",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 57,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-gipsy-hornpipe.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.375,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 10.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 11.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 13.5
+    },
+    {
+      "dur": 0.375,
+      "pitch": 62,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 14.875
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 15.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 16.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 16.875
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 17.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.875
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 18.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 18.875
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 19.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 19.875
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 20.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 20.875
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 21.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 21.875
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 22.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 22.875
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 23.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 23.875
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 24.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 24.875
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 25.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 25.875
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 26.875
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 27.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 28.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 28.875
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 29.375
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 30.875
+    }
+  ],
+  "pitches": [
+    62,
+    66,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    78,
+    79
+  ],
+  "sha256": "0ac0bccf1438b3f5a5bbf03febaa9956b0b332ae139fa61bb838b7ea83f4e8b2",
+  "title": "Gipsy Hornpipe"
+}

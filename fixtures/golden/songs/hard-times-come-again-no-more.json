@@ -1,0 +1,261 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0,
+    29.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-hard-times-come-again-no-more.mid",
+  "id": "hard-times-come-again-no-more",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "hard-times-come-again-no-more",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 43,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-hard-times-come-again-no-more.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 0.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 7.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 8.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 11.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 12.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 28.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    69,
+    71
+  ],
+  "sha256": "0b406d58a83e1945aff5e1caf43afd8571b9409c94b7d52f14cd3f38852d75d8",
+  "title": "Hard Times Come Again No More"
+}

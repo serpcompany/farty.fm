@@ -1,0 +1,185 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-bag-of-spuds.mid",
+  "id": "bag-of-spuds",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "bag-of-spuds",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 28,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-bag-of-spuds.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 16.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 83,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 83,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 83,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 13.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 15.0
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    71,
+    73,
+    74,
+    76,
+    79,
+    81,
+    83
+  ],
+  "sha256": "4ee0b2c31ebf82eaa6d4e28b09545bc5f5b68f5a8b5395e2a0b24c487b2f452f",
+  "title": "The Bag Of Spuds"
+}

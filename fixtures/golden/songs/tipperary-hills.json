@@ -1,0 +1,237 @@
+{
+  "bar_lines": [
+    0.0,
+    4.5,
+    9.0,
+    13.5,
+    18.0,
+    22.5,
+    27.0
+  ],
+  "beats_per_bar": 9,
+  "bpm": 120,
+  "file": "midi/pdmx-tipperary-hills.mid",
+  "id": "tipperary-hills",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 31.5
+  },
+  "import_report": {
+    "catalog_id": "tipperary-hills",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 38,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-tipperary-hills.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.5,
+  "notes": [
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 4.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 8.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 17.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 20.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 22.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 26.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 29.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    73,
+    74
+  ],
+  "sha256": "11327e3e65650eed5f98462356157034d61bd2ed911a74e706a45a9d2baa79f6",
+  "title": "Tipperary Hills"
+}

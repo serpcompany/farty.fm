@@ -1,0 +1,99 @@
+{
+  "bar_lines": [
+    0.0,
+    8.0,
+    16.0,
+    24.0
+  ],
+  "beats_per_bar": 8,
+  "bpm": 144,
+  "file": "midi/pdmx-aus-tiefer-not-schrei-ich-zu-dir.mid",
+  "id": "aus-tiefer-not-schrei-ich-zu-dir",
+  "import_args": {
+    "beats_per_bar": 8,
+    "bpm": 144,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "aus-tiefer-not-schrei-ich-zu-dir",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 11,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-aus-tiefer-not-schrei-ich-zu-dir.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 4.0,
+      "pitch": 59,
+      "start": 0.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 52,
+      "start": 4.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 59,
+      "start": 6.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 60,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 59,
+      "start": 10.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 55,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 57,
+      "start": 14.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 59,
+      "start": 16.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 59,
+      "start": 22.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 60,
+      "start": 26.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    52,
+    55,
+    57,
+    59,
+    60,
+    62
+  ],
+  "sha256": "5008163d2c7ff0f4ece3f12ee8a5b40361cc937515046aace451203eadc4d40a",
+  "title": "Aus tiefer Not schrei ich zu dir"
+}

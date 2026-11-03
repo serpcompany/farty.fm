@@ -7,8 +7,9 @@ next best score when one fails, up to --tries scores. A score is picked for one 
 so no two Songs share a score. A Song that passes is copied to catalog/midi/ and added to
 catalog/catalog.json with its provenance. Every title gets a line in the report, written next to
 the titles file (<titles>.report.md and .json). Nothing edits notes: the catalog keeps the
-score's own MIDI file and only chooses the excerpt and tempo (ADR 0003). Imported Songs don't
-ship until they're on the app's ship list (apps/web/src/lib/catalog/ship-list.json).
+score's own MIDI file and only chooses the excerpt and tempo (ADR 0003). The app ships every
+Song in the catalog (#350) once tools/melody-lab/export_golden.py and the app's catalog
+generator (apps/web/src/lib/catalog/generate.ts) have run again.
 
 The rules and thresholds are in pdmx.py. The gates, in order:
 
@@ -425,7 +426,8 @@ def write_report(path, run, songs):
         "```",
         "",
         f"**{len(passed)} of {len(songs)} titles pass** and are in `catalog/catalog.json`; "
-        f"{len(songs) - len(passed)} fail. Imported Songs don't ship until they're on the app's ship list.",
+        f"{len(songs) - len(passed)} fail. Imported Songs ship once the golden data and the app's "
+        "catalog are generated again.",
         "",
         f"- Dataset: PDMX, doi:{DOI}. `PDMX.csv` md5 `{run['dataset']['PDMX.csv']['md5']}` and `mid.tar.gz` md5 "
         f"`{run['dataset']['mid.tar.gz']['md5']}`, both equal to Zenodo's; downloaded {run['dataset']['mid.tar.gz']['downloaded']}.",

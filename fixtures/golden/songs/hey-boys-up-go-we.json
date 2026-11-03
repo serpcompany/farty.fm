@@ -1,0 +1,261 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.5,
+    15.5,
+    18.5,
+    21.5,
+    27.5
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-hey-boys-up-go-we.mid",
+  "id": "hey-boys-up-go-we",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 31,
+    "start_beat": 1
+  },
+  "import_report": {
+    "catalog_id": "hey-boys-up-go-we",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 42,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-hey-boys-up-go-we.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 5.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 7.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 8.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 8.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 19.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 20.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 20.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 21.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 21.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 27.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 30.5
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    65,
+    67,
+    69,
+    71,
+    72,
+    74
+  ],
+  "sha256": "90255e2f357ad8a9e746d01f22db2f0a3f40f38feb01a9fc4955c60a33b5d7e5",
+  "title": "Hey Boys Up Go We"
+}

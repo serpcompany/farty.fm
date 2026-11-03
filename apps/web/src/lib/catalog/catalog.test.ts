@@ -9,7 +9,7 @@ import {
   outOfDate,
   readSources,
   renderCatalog,
-  shipList,
+  shippedIds,
   titleNames
 } from './generate'
 import type { SongSummary } from './song'
@@ -73,13 +73,14 @@ describe('the Song Catalog in the app', () => {
     ])
   })
 
-  // #229: every Song in catalog/ then, but the second Ode to Joy. Songs added since ship once
-  // they're on the ship list.
-  test('then the rest of the catalog, in its order, but ode-mutopia', () => {
+  // #350: every Song in catalog/ then, but the second Ode to Joy (#229).
+  test('then every other Song in the catalog, in its order, but ode-mutopia', () => {
     const ids = songs.map(s => s.id)
-    expect(ids).toHaveLength(128)
-    expect(ids).not.toContain('ode-mutopia')
-    const catalogOrder = sources.catalog.map(e => e.id).filter(id => ids.slice(12).includes(id))
+    expect(ids).toHaveLength(1008)
+    const first = ids.slice(0, 12)
+    const catalogOrder = sources.catalog
+      .map(e => e.id)
+      .filter(id => !first.includes(id) && id !== 'ode-mutopia')
     expect(ids.slice(12)).toEqual(catalogOrder)
   })
 
@@ -98,29 +99,36 @@ describe('the Song Catalog in the app', () => {
   })
 })
 
-// export_golden.py reads the same ship list (#225), so a Song can't ship without the golden data
-// the Auto-map and renderer tests check it against.
+// export_golden.py writes every catalog Song's melody, which the generator reads, so a Song
+// can't ship without it. It arranges the Songs the app shipped before #350, the hand-entered ones
+// and the first three PDMX batches, which the Auto-map and renderer tests check against the
+// reference; every later Song passed tools/catalog/import_pdmx.py's render gate on it.
 describe('the golden data', () => {
   const golden = `${REPO_ROOT}/fixtures/golden`
   const index = JSON.parse(readFileSync(`${golden}/index.json`, 'utf8')) as {
     songs: { id: string }[]
   }
 
-  test.each(shipList)('covers %s, which the app ships', id => {
-    expect(index.songs.map(s => s.id)).toContain(id)
-    for (const file of [
-      `songs/${id}.json`,
-      `arrangements/full/${id}.json`,
-      `arrangements/small/${id}.json`
-    ])
+  test('has the melody of every Song in the catalog', () => {
+    const missing = sources.catalog.filter(e => !existsSync(`${golden}/songs/${e.id}.json`))
+    expect(missing.map(e => e.id)).toEqual([])
+  })
+
+  test.each(index.songs.map(s => s.id))('arranges %s, in both libraries', id => {
+    for (const file of [`arrangements/full/${id}.json`, `arrangements/small/${id}.json`])
       expect(existsSync(`${golden}/${file}`), file).toBe(true)
+  })
+
+  test('arranges the 129 Songs the reference engine checks the port against', () => {
+    expect(index.songs).toHaveLength(129)
   })
 })
 
 describe('the generator', () => {
-  test('ships only the Songs on the ship list', () => {
-    expect(sources.catalog.map(e => e.id)).toContain('ode-mutopia')
-    expect(songs.map(s => s.id)).not.toContain('ode-mutopia')
+  test('ships every Song in the catalog but ode-mutopia, the same tune as ode', () => {
+    expect(songs.map(s => s.id)).toEqual(shippedIds(sources.catalog))
+    const shipped = new Set(songs.map(s => s.id))
+    expect(sources.catalog.map(e => e.id).filter(id => !shipped.has(id))).toEqual(['ode-mutopia'])
   })
 
   test("refuses a Song that isn't in the catalog", () => {

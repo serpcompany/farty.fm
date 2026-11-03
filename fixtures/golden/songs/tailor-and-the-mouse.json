@@ -1,0 +1,185 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-tailor-and-the-mouse.mid",
+  "id": "tailor-and-the-mouse",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "tailor-and-the-mouse",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 28,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-tailor-and-the-mouse.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 6.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 63,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 68,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 22.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 63,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 26.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    60,
+    63,
+    65,
+    68,
+    72
+  ],
+  "sha256": "5e9ad2553cff194c816a61cfbe496868ad3765822b9fe18125e3f36e641715af",
+  "title": "The Tailor and the Mouse"
+}

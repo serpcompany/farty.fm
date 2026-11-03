@@ -1,0 +1,314 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0,
+    29.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 144,
+  "file": "midi/pdmx-la-cinquantaine.mid",
+  "id": "la-cinquantaine",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 144,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "la-cinquantaine",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 53,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-la-cinquantaine.mid",
+    "tempo_changes_ignored": 2,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 14.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 18.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 24.0
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 25.0
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 25.125
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 25.25
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 25.375
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 25.5
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 25.625
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 25.75
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 25.875
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 26.0
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 26.125
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 26.25
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 26.375
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 26.5
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 26.625
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 26.75
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 26.875
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 27.0
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 27.125
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 27.25
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 27.375
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 27.5
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 27.625
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 27.75
+    },
+    {
+      "dur": 0.125,
+      "pitch": 65,
+      "start": 27.875
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 28.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 64,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    65,
+    67,
+    69,
+    70,
+    72,
+    74
+  ],
+  "sha256": "3ef8dce21ec8794eb8ffc0af680e5c9da856f2ab32ba7270dc51027e112f5dad",
+  "title": "La Cinquantaine"
+}

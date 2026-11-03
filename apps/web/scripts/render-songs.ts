@@ -1,6 +1,7 @@
-// Renders every Song with the full Fixture Library through the web engine, the way the app does it:
-// decode each fixture, run Recording Analysis, Auto-map, then render. The renders are for the
-// reference's checks (`tools/melody-lab/evaluate_renders.py`); nothing here ships.
+// Renders every Song with a golden Arrangement (`fixtures/golden/arrangements/full/`) with the full
+// Fixture Library through the web engine, the way the app does it: decode each fixture, run
+// Recording Analysis, Auto-map, then render. The renders are for the reference's checks
+// (`tools/melody-lab/evaluate_renders.py`); nothing here ships.
 //
 //   pnpm exec tsx scripts/render-songs.ts [out-dir]
 //
@@ -13,10 +14,10 @@
 //
 //   pnpm exec tsx scripts/render-songs.ts --scenario ../../tools/melody-lab/scenarios/trim-065.json [out-dir]
 //
-// renders with a Scenario's library instead, into `tools/melody-lab/out/web-<id>/` by default: the
-// fixtures it lists, each trimmed between its handles (`trimBounds`, ADR 0019) and placed on its
-// note by ear (ADR 0015) as the app does it. `evaluate_renders.py --scenario` checks them; nothing
-// is compared with golden here.
+// renders every Song in `fixtures/golden/songs/`, the whole catalog, with a Scenario's library
+// instead, into `tools/melody-lab/out/web-<id>/` by default: the fixtures it lists, each trimmed
+// between its handles (`trimBounds`, ADR 0019) and placed on its note by ear (ADR 0015) as the app
+// does it. `evaluate_renders.py --scenario` checks them; nothing is compared with golden here.
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { toAnalysis } from '../src/lib/analysis/port'
@@ -173,7 +174,9 @@ async function main() {
     sourceMs.set(r.id, ms)
   }
 
-  const songIds = readdirSync(SONGS)
+  // A Scenario's renders are every Song's, as `evaluate_renders.py --scenario` expects them; the
+  // full library's are the Songs with a golden Arrangement to compare with (#350).
+  const songIds = readdirSync(scenario ? SONGS : GOLDEN_ARRANGEMENTS)
     .filter(name => name.endsWith('.json'))
     .map(name => name.replace(/\.json$/, ''))
     .sort()

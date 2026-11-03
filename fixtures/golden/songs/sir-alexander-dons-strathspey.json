@@ -1,0 +1,328 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5,
+    28.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-sir-alexander-dons-strathspey.mid",
+  "id": "sir-alexander-dons-strathspey",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "sir-alexander-dons-strathspey",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 56,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-sir-alexander-dons-strathspey.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 0.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 0.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 1.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 2.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 2.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 3.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 4.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 4.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 4.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 5.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 6.25
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 8.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 8.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 9.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 10.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 10.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 11.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 12.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 59,
+      "start": 12.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 59,
+      "start": 13.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 57,
+      "start": 14.25
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 16.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 16.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 16.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 17.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 18.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 18.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 19.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 20.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 20.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 20.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 21.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 22.25
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 24.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 24.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 25.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 26.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 26.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 27.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 28.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 28.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 59,
+      "start": 28.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 59,
+      "start": 29.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 57,
+      "start": 30.25
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 30.5
+    }
+  ],
+  "pitches": [
+    57,
+    59,
+    62,
+    64,
+    66,
+    69,
+    74
+  ],
+  "sha256": "70d0182c3f0de67cfaf1f514b7a781894f3c09ff62f41fa80f3fe3ada8a6d46e",
+  "title": "Sir Alexander Don's Strathspey"
+}

@@ -1,0 +1,79 @@
+{
+  "bar_lines": [
+    0.0,
+    1.5,
+    3.0,
+    4.5
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-our-highland-queen.mid",
+  "id": "our-highland-queen",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 31.5
+  },
+  "import_report": {
+    "catalog_id": "our-highland-queen",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 8,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-our-highland-queen.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 6.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    }
+  ],
+  "pitches": [
+    62,
+    66,
+    69
+  ],
+  "sha256": "96692a2e54f774b23a793546aebc834001c1a2b3c7bb6f84058d7aac48052601",
+  "title": "Our Highland Queen"
+}

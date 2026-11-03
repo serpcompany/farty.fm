@@ -178,7 +178,7 @@ export type ProfileStats = {
 
 type Pedos = {
   /**
-   * The Song Catalog this build ships, in the ship list's order, without the Songs' notes; null
+   * The Song Catalog this build ships, in the app's order, without the Songs' notes; null
    * until it loads. It's fetched as data (#322), and kept for offline use by the service worker.
    * A Song's notes load when it's opened (`loadSong`, #323).
    */

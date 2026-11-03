@@ -1,0 +1,261 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-durme-durme.mid",
+  "id": "durme-durme",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "durme-durme",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 43,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-durme-durme.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 1.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 13.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 14.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 22.5
+    },
+    {
+      "dur": 0.9583333333333334,
+      "pitch": 59,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 27.5
+    },
+    {
+      "dur": 1.8958333333333333,
+      "pitch": 59,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 31.5
+    }
+  ],
+  "pitches": [
+    59,
+    61,
+    62,
+    64,
+    66,
+    69
+  ],
+  "sha256": "73438644e5765343c0c1ed2e66c422eae282b705eb5026ada4fb3cb0bc0cf5fc",
+  "title": "Durme Durme"
+}

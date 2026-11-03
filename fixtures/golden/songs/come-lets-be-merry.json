@@ -1,0 +1,192 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-come-lets-be-merry.mid",
+  "id": "come-lets-be-merry",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "come-lets-be-merry",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 28,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-come-lets-be-merry.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 18.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 68,
+      "start": 19.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 28.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    68,
+    69,
+    71,
+    73,
+    74,
+    76,
+    78
+  ],
+  "sha256": "17a2d64265e385fdee56d81118698dba9c2f04674a08e69035d7ab348eb2c64e",
+  "title": "Come Let's Be Merry"
+}

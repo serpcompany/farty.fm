@@ -1,0 +1,131 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 72,
+  "file": "midi/pdmx-prelude-no-4.mid",
+  "id": "prelude-no-4",
+  "import_args": {
+    "bpm": 72,
+    "max_beats": 29,
+    "start_beat": 3
+  },
+  "import_report": {
+    "catalog_id": "prelude-no-4",
+    "chord_tones_dropped": 6,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 17,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-prelude-no-4.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 0.75,
+      "pitch": 59,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 0.75
+    },
+    {
+      "dur": 3.0,
+      "pitch": 71,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 4.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 71,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 71,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 71,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 16.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 20.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 28.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 28.75
+    }
+  ],
+  "pitches": [
+    59,
+    69,
+    70,
+    71,
+    72
+  ],
+  "sha256": "2265ecb1d7d4de86cc771ea1c49ae9e6228881ce17704b1ca301e55394a7af34",
+  "title": "Prélude No. 4"
+}

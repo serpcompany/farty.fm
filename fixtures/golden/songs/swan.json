@@ -1,0 +1,185 @@
+{
+  "bar_lines": [
+    0.0,
+    6.0,
+    12.0,
+    18.0,
+    24.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 75,
+  "file": "midi/pdmx-swan.mid",
+  "id": "swan",
+  "import_args": {
+    "bpm": 75,
+    "max_beats": 30,
+    "start_beat": 6
+  },
+  "import_report": {
+    "catalog_id": "swan",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 27,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-swan.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 57,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 8.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 60,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 52,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 54,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 17.5
+    },
+    {
+      "dur": 4.0,
+      "pitch": 71,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    52,
+    54,
+    55,
+    57,
+    59,
+    60,
+    62,
+    64,
+    66,
+    67,
+    71
+  ],
+  "sha256": "3f95249d45b8d3efdea4d6d9cff84a4ea27c8085444b389ac4f5451dc071cb13",
+  "title": "The Swan"
+}

@@ -1,0 +1,158 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-la-chanson-de-craonne.mid",
+  "id": "la-chanson-de-craonne",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 28,
+    "start_beat": 2
+  },
+  "import_report": {
+    "catalog_id": "la-chanson-de-craonne",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 22,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-la-chanson-de-craonne.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 28.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 15.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 66,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 27.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    67,
+    69,
+    71
+  ],
+  "sha256": "3773e6235a72e52ceafa7e9aeb8be5a0d27cd701a4f657623fa8c1d2256446f8",
+  "title": "La Chanson de Craonne"
+}

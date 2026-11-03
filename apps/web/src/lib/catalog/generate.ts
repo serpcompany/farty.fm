@@ -7,7 +7,7 @@
  *   the notes come from the cited score;
  * - the other names its titles file lists (`tools/catalog/titles-*.txt`), which Compose's search
  *   finds it by too;
- * - only the Songs on the ship list, in its order.
+ * - every Song in the catalog but `notShipped`, the iPhone app's 12 first (`shippedIds`).
  *
  * It writes the Songs as data, not code (#322), so the JavaScript bundle stays the same size
  * however many Songs ship, and keeps each Song's notes out of the index Compose reads (#323), so
@@ -95,17 +95,39 @@ function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(fileURLToPath(new URL(path, repo)), 'utf8')) as T
 }
 
+/** The iPhone app's 12 Songs, in its order: the app lists them first. */
+export const iPhoneSongs: readonly string[] = [
+  'twinkle',
+  'mary',
+  'jingle',
+  'birthday',
+  'frere',
+  'saints',
+  'row',
+  'ode',
+  'merryxmas',
+  'amazing',
+  'furelise',
+  'auld'
+]
+
 /**
- * The Songs the app ships, from `ship-list.json`: the iPhone app's 12 in its order, then the rest
- * of the catalog in its order (#229). A Song added to `catalog/` doesn't ship until it's on this
- * list. The Mutopia Ode to Joy (`ode-mutopia`) stays
- * out: it's the same tune as `ode`, kept in the catalog to exercise the reference engine's
- * importer. `tools/melody-lab/export_golden.py` reads the same file, so every Song on it has
- * golden data.
+ * The catalog Songs the app leaves out. The Mutopia Ode to Joy is the same tune as `ode`, kept in
+ * the catalog to exercise the reference engine's importer.
  */
-export const shipList: readonly string[] = readJson<string[]>(
-  'apps/web/src/lib/catalog/ship-list.json'
-)
+export const notShipped: readonly string[] = ['ode-mutopia']
+
+/**
+ * The Songs the app ships: every Song in the catalog (#350) but `notShipped`, the iPhone app's 12
+ * first, then the rest in the catalog's order. A Song added to `catalog/` ships once
+ * `tools/melody-lab/export_golden.py` has written its melody and this generator has run again.
+ */
+export function shippedIds(catalog: readonly CatalogEntry[]): string[] {
+  const rest = catalog
+    .map(e => e.id)
+    .filter(id => !iPhoneSongs.includes(id) && !notShipped.includes(id))
+  return [...iPhoneSongs, ...rest]
+}
 
 /**
  * Compose's own pages beside the Songs' `/compose/<id>/`: the Sound Pad, and the Song page the
@@ -230,13 +252,20 @@ function summary(song: Song): SongSummary {
   return rest
 }
 
-/** The Songs on `ids`, from the catalog, the golden data and the titles files, checked. */
-export function catalogSongs(sources: Sources, ids: readonly string[] = shipList): Song[] {
-  if (new Set(ids).size !== ids.length) throw new Error('the ship list names a Song twice')
+/**
+ * The Songs on `ids`, every Song the app ships unless given, from the catalog, the golden data and
+ * the titles files, checked.
+ */
+export function catalogSongs(
+  sources: Sources,
+  ids: readonly string[] = shippedIds(sources.catalog)
+): Song[] {
+  if (new Set(ids).size !== ids.length) throw new Error('the Songs to ship name a Song twice')
   const names = titleNames(sources.titles)
+  const entries = new Map(sources.catalog.map(e => [e.id, e]))
   return ids.map(id => {
-    const entry = sources.catalog.find(e => e.id === id)
-    if (!entry) throw new Error(`the ship list names ${id}, which isn't in catalog/catalog.json`)
+    const entry = entries.get(id)
+    if (!entry) throw new Error(`${id} isn't in catalog/catalog.json`)
     return song(entry, sources.golden(id), names.get(id) ?? [])
   })
 }
@@ -246,8 +275,11 @@ const header = [
   '// and tools/catalog/titles-*.txt. Do not edit by hand: run it again instead.'
 ]
 
-/** The files the generator writes for the Songs on `ids`. */
-export function renderCatalog(sources: Sources, ids: readonly string[] = shipList): CatalogFiles {
+/** The files the generator writes for the Songs on `ids`, every Song the app ships unless given. */
+export function renderCatalog(
+  sources: Sources,
+  ids: readonly string[] = shippedIds(sources.catalog)
+): CatalogFiles {
   const songs = catalogSongs(sources, ids)
   // One Song a line, so a change shows as the Songs it changed.
   const data = `[\n${songs.map(s => JSON.stringify(summary(s))).join(',\n')}\n]\n`
@@ -276,7 +308,7 @@ export function renderCatalog(sources: Sources, ids: readonly string[] = shipLis
         "import type { SongSummary } from './song'",
         '',
         '/**',
-        " * The Song Catalog's index, in the ship list's order, for routes and the server. The browser",
+        " * The Song Catalog's index, in the app's order, for routes and the server. The browser",
         ' * fetches it instead (`load-songs.ts`), so it stays out of the JavaScript (#322).',
         ' */',
         'export const songIndex: readonly SongSummary[] = index',
@@ -296,7 +328,7 @@ export function renderCatalog(sources: Sources, ids: readonly string[] = shipLis
         ']',
         '',
         '/**',
-        " * The Songs the app ships, with their notes, in the ship list's order, for the tests. The",
+        " * The Songs the app ships, with their notes, in the app's order, for the tests. The",
         " * browser fetches the index and each Song's notes instead (`load-songs.ts`, #322, #323).",
         ' */',
         'export const songs: readonly Song[] = (index as readonly SongSummary[]).map((song, i) => ({',

@@ -1,0 +1,337 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-general-macdonald.mid",
+  "id": "general-macdonald",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "general-macdonald",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 58,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-general-macdonald.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 14.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 22.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 81,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 30.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 30.5
+    }
+  ],
+  "pitches": [
+    69,
+    73,
+    74,
+    76,
+    78,
+    79,
+    81
+  ],
+  "sha256": "5bd0d8ced973660c1854c54bf189d9c48a65ed0ddd5c6eae8f89beeb06816efe",
+  "title": "General MacDonald"
+}

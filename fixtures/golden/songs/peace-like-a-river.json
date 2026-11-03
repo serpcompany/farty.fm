@@ -1,0 +1,166 @@
+{
+  "bar_lines": [
+    2.0,
+    6.0,
+    10.0,
+    14.0,
+    18.0,
+    22.0,
+    26.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-peace-like-a-river.mid",
+  "id": "peace-like-a-river",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30,
+    "start_beat": 2
+  },
+  "import_report": {
+    "catalog_id": "peace-like-a-river",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 24,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-peace-like-a-river.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 29.791666666666668,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 1.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 17.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 25.0
+    },
+    {
+      "dur": 3.7916666666666665,
+      "pitch": 69,
+      "start": 26.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    67,
+    69,
+    71
+  ],
+  "sha256": "f709ce926c79d47b9c7a588c01275eb75d3d613ee9481c61167b791f05a4c687",
+  "title": "Peace like a River"
+}

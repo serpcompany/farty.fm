@@ -1,0 +1,219 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 144,
+  "file": "midi/pdmx-adsons-saraband.mid",
+  "id": "adsons-saraband",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 144,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "adsons-saraband",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 34,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-adsons-saraband.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 1.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 5.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 11.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 74,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 17.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 77,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 21.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 82,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 82,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 24.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 25.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 27.5
+    },
+    {
+      "dur": 4.0,
+      "pitch": 74,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    69,
+    72,
+    74,
+    76,
+    77,
+    79,
+    81,
+    82
+  ],
+  "sha256": "8bf25e7437ad2ae8f602957e0dca7a29664a432f060251758e9131ed3cd6a177",
+  "title": "Adson's Saraband"
+}

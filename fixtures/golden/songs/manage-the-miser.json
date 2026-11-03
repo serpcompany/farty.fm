@@ -1,0 +1,147 @@
+{
+  "bar_lines": [
+    0.0,
+    6.0,
+    12.0,
+    18.0,
+    24.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 120,
+  "file": "midi/pdmx-manage-the-miser.mid",
+  "id": "manage-the-miser",
+  "import_args": {
+    "beats_per_bar": 6,
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "manage-the-miser",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 20,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-manage-the-miser.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 77,
+      "start": 0.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 2.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 6.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 77,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 14.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 23.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 77,
+      "start": 24.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    65,
+    67,
+    69,
+    72,
+    74,
+    76,
+    77,
+    79,
+    81
+  ],
+  "sha256": "ba42cfb53a2307c380b0f3efe1ead4f3fc4265e9ee6886eccac1e76c8837debf",
+  "title": "Manage the Miser"
+}

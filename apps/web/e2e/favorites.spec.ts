@@ -7,6 +7,7 @@ import {
   getUserMediaMs,
   waitForOpenMicrophone
 } from './fake-microphone'
+import { fixtureRecordings, songsUnlockedBy } from './golden'
 import { skipWelcome } from './record'
 import { onPhone } from './screens'
 
@@ -14,8 +15,9 @@ import { onPhone } from './screens'
 // Unlocked Song's row and on a locked Song's sheet, the Favorites filter with search inside it,
 // the "Favorites first" order, both kept over a reload, and the heart in Song Creator.
 //
-// Mary Had a Little Lamb unlocks with fixtures 095, 017, 022 and 002, with 4 more Songs, and Hot
-// Cross Buns at the third (`compose.spec.ts`).
+// Mary Had a Little Lamb unlocks with fixtures 095, 017, 022 and 002, with more Songs, and Hot
+// Cross Buns at the third (`compose.spec.ts`), so the count follows the catalog (`golden.ts`).
+const unlocked = songsUnlockedBy(fixtureRecordings(['095', '017', '022', '002'])).length
 
 test.use({ permissions: ['microphone'] })
 
@@ -54,7 +56,7 @@ test('favorites Songs, filters and sorts by them, and keeps them over a reload',
   await signInByApi(page, newEmail(testInfo, 'favorites'))
   await page.reload()
 
-  // Four takes unlock Mary and 4 more Songs; the third unlocks Hot Cross Buns, and a Result
+  // Four takes unlock Mary and more Songs; the third unlocks Hot Cross Buns, and a Result
   // that unlocks offers Done, not Record another (`compose.spec.ts`).
   await tab(page, 'Record').click()
   for (const id of ['095', '017', '022', '002']) {
@@ -73,7 +75,9 @@ test('favorites Songs, filters and sorts by them, and keeps them over a reload',
   await expect(page.getByTestId('result-progress')).toContainText(`${MARY} · `)
   await page.getByRole('button', { name: 'Done' }).click()
   await tab(page, 'Compose').click()
-  await expect(page.getByRole('heading', { name: 'Unlocked · 6', exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: `Unlocked · ${unlocked}`, exact: true })
+  ).toBeVisible()
 
   // No favorites yet: the filter says how to add one.
   const filter = page.getByRole('button', { name: 'Favorites', exact: true })

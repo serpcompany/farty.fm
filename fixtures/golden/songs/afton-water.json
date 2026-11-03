@@ -1,0 +1,204 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-afton-water.mid",
+  "id": "afton-water",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "afton-water",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 31,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-afton-water.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 27.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    64,
+    66,
+    69,
+    71,
+    73,
+    76
+  ],
+  "sha256": "00e078b2d8883d934e90377555cee1e6055975325dae7cc03b12a330654b4195",
+  "title": "Afton Water"
+}
