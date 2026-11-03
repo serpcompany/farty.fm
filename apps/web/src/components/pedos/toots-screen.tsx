@@ -212,8 +212,9 @@ function TootRow({
       </Link>
       <TootMenu
         title={toot.title}
-        // A Toot that can't play has nothing to share.
-        share={toot.isAudioMissing ? undefined : share}
+        // A Toot that can't play here has nothing to share, but once shared (from another
+        // device, say) its link plays from the account, so Share link and Stop sharing stay.
+        share={toot.isAudioMissing && !share.link ? undefined : share}
         onRename={onRename}
         onDelete={onDelete}
       />

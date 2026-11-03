@@ -97,8 +97,9 @@ export function TootScreen() {
               )}
             </div>
             <div className="flex justify-end">
-              {/* A Toot that can't play has nothing to share. */}
-              {!toot.isAudioMissing && (
+              {/* A Toot that can't play here has nothing to share, but once shared (from
+                  another device, say) its link plays from the account, so Stop sharing stays. */}
+              {(!toot.isAudioMissing || isShared) && (
                 <ShareButton kind="toots" id={toot.id} name={toot.title} className="size-11" />
               )}
               <TootMenu
