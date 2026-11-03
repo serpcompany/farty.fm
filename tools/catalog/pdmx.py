@@ -33,6 +33,15 @@ MISBARRED_SCORES = {
     "5171990": 'The Star-Spangled Banner in 4/4 from "O-": the anthem is in 3/4, with "O-" as its pickup',
 }
 
+# Scores that pass the gates but aren't the tune's melody: one inner voice of a hymn's harmony, or
+# another tune under the same name, found by reading the picks after an import (flag_picks.py, #324).
+# They're never picked. MuseScore score id -> why.
+NOT_THE_MELODY = {
+    "562231": "My Faith Looks Up To Thee: the tenor part of OLIVET",
+    "653966": "Forty Days and Forty Nights: the tenor part of AUS DER TIEFE",
+    "4878861": "The Dark-Eyed Sailor: Version 2 of 3, not the tune most PDMX scores of the song carry",
+}
+
 # A sensible excerpt and tempo, chosen from the score itself.
 EXCERPT_BEATS = 32  # the whole bars that fit in 32 quarter-note beats: 8 bars of 4/4, 10 of 3/4
 MIN_BPM, MAX_BPM = 72, 144  # the score's own tempo, kept inside this range
@@ -139,10 +148,12 @@ def license_problems(row):
 
 def pick_problems(row):
     """Why a PDMX row can't be picked at all: its license, its track count, no MIDI file, or bar
-    lines off the tune (MISBARRED_SCORES)."""
+    lines off the tune (MISBARRED_SCORES), or not the tune's melody (NOT_THE_MELODY)."""
     problems = license_problems(row)
     if score_id(row) in MISBARRED_SCORES:
         problems.append("its bar lines are off the tune")
+    if score_id(row) in NOT_THE_MELODY:
+        problems.append("it isn't the tune's melody")
     if int(float(row["n_tracks"] or 0)) > MAX_TRACKS:
         problems.append(f"more than {MAX_TRACKS} tracks")
     if not row["mid"]:

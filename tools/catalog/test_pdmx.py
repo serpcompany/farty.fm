@@ -115,6 +115,19 @@ class Picking(unittest.TestCase):
         self.assertEqual([pdmx.score_id(r) for _, r in c.eligible], ["6420004"])
         self.assertEqual(c.rejected, {"its bar lines are off the tune": 1})
 
+    def test_a_score_that_isnt_the_melody_is_never_picked(self):
+        # #324: the best-rated score that passed was the hymn's tenor part.
+        rows = [row("My Faith Looks Up To Thee: Tenor", sid="562231", rating="4.9"),
+                row("My faith looks up to Thee - Lowell Mason", sid="5789390")]
+        [c] = pdmx.find_candidates(rows, titles("faith | My Faith Looks Up To Thee"))
+        self.assertEqual([pdmx.score_id(r) for _, r in c.eligible], ["5789390"])
+        self.assertEqual(c.rejected, {"it isn't the tune's melody": 1})
+
+    def test_no_catalog_song_has_a_score_that_isnt_the_melody(self):
+        for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
+            with self.subTest(song=entry["id"]):
+                self.assertNotIn(entry["source"].get("musescore_score_id"), pdmx.NOT_THE_MELODY)
+
     def test_no_catalog_song_has_a_misbarred_score(self):
         for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
             if entry["id"] == "saints":  # keeps its hand-picked misbarred score by decision (#232, comment 6459788077)
@@ -366,6 +379,43 @@ class PaddedPickup(unittest.TestCase):
         self.assertEqual(notes[:3], [(0.0, 0.75), (0.75, 1.0), (3.0, 4.0)])
         self.assertIn((3.0, 5.0), notes)  # the accompaniment's first chord
         self.assertEqual(len(notes), 48)  # 26 melody notes and 22 accompaniment notes
+
+
+class MelodyTrack(unittest.TestCase):
+    """The importer never takes a percussion part as the melody (#324: O Sacred Head's score 461931 has a
+    "Wood Blocks" track on MIDI channel 10 above the hymn, and the Song played the wood blocks)."""
+
+    def midi(self, *tracks):
+        """A MIDI file of one track per (channel, program, pitches), each pitch a quarter note."""
+        import mido
+        mid = mido.MidiFile(ticks_per_beat=480)
+        for channel, program, pitches in tracks:
+            trk = mido.MidiTrack([mido.Message("program_change", channel=channel, program=program)])
+            for p in pitches:
+                trk += [mido.Message("note_on", channel=channel, note=p, velocity=80),
+                        mido.Message("note_off", channel=channel, note=p, time=480)]
+            mid.tracks.append(trk)
+        path = temp_dir(self) / "score.mid"
+        mid.save(path)
+        return path
+
+    def test_skips_the_drum_channel(self):
+        m = load_midi(self.midi((0, 22, [64, 69, 67, 65]), (9, 0, [76, 77, 77, 77])))
+        self.assertEqual(m.report["track_used"], 0)
+        self.assertEqual([n.pitch for n in m.notes], [64, 69, 67, 65])
+
+    def test_skips_a_percussion_program(self):
+        m = load_midi(self.midi((0, 0, [60, 62, 64]), (1, 115, [84, 84, 84])))  # GM 116, Woodblock
+        self.assertEqual(m.report["track_used"], 0)
+
+    def test_a_score_of_only_percussion_still_imports(self):
+        m = load_midi(self.midi((9, 0, [76, 77])))
+        self.assertEqual(m.report["track_used"], 0)
+
+    def test_the_hymns_score_plays_the_hymn(self):
+        m = load_midi(ROOT / "catalog/midi/pdmx-o-sacred-head-now-wounded.mid")
+        self.assertEqual(m.report["track_used"], 0)  # "Melodica", not "Wood Blocks"
+        self.assertEqual([n.pitch for n in m.notes[:5]], [64, 69, 67, 65, 64])  # E4 A4 G4 F4 E4
 
 
 class Extract(unittest.TestCase):

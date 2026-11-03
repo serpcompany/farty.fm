@@ -112,7 +112,7 @@ describe('A profile page', () => {
     expect(await names('bob')).toEqual(['Recording 1'])
   })
 
-  it('lists no shared Toot until Toots can be shared (#317)', async () => {
+  it('lists no shared Toot yet, only Recordings (#317)', async () => {
     const alice = await sharer('alice', [R1])
     await testDb().insert(shares).values({
       id: 'abcdefghjkmn',

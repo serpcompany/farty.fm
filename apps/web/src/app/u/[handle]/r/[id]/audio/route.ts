@@ -11,7 +11,7 @@ export async function GET(
 ): Promise<Response> {
   const { handle, id } = await params
   try {
-    return await sharedAudio(requestStores(), request, handle, id)
+    return await sharedAudio('recordings', requestStores(), request, handle, id)
   } catch {
     console.error('GET shared audio failed')
     return Response.json({ error: 'server_error' }, { status: 500 })

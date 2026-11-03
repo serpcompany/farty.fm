@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { PadTootLayout } from './pad-take'
 import { usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
+import { ShareButton, useShares } from './share-recording'
 import { TootLayout } from './song-creator'
 import { DeleteTootDialog, RenameTootDialog, TootMenu } from './toots-screen'
 import { useSongNotes } from './use-song-notes'
@@ -18,8 +19,8 @@ import { useSongNotes } from './use-song-notes'
 /**
  * A Toot's screen, opened from the Toots tab: Song Creator's layout without Save, showing which
  * Recording played which notes, or for a Sound Pad Toot its Play and what it played (ADR 0017).
- * Rename and Delete are in its More menu. As the iPhone app's `TootDetailView`. The Toot is
- * `?id=`, so one page serves every Toot, offline too.
+ * Share is in its header (ADR 0020), and Rename and Delete in its More menu. As the iPhone app's
+ * `TootDetailView`. The Toot is `?id=`, so one page serves every Toot, offline too.
  */
 export function TootScreen() {
   const id = useSearchParams().get('id') ?? ''
@@ -37,6 +38,14 @@ export function TootScreen() {
   // Its Song's notes, which the Song Catalog's index leaves out (#323).
   const notes = useSongNotes(summary)
   const song = notes.song
+  const isShared = useShares()?.tootLinks.has(id) ?? false
+  /** Under the title: its Song, or Sound Pad, and Shared while it's shared, as the prototype's. */
+  const subtitle = [
+    summary ? summary.title : toot?.songId === null ? PAD_TOOT_TITLE : null,
+    isShared ? 'Shared' : null
+  ]
+    .filter(part => part !== null)
+    .join(' · ')
 
   useEffect(() => {
     if (current) setLastSeen(current)
@@ -66,7 +75,7 @@ export function TootScreen() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="grid grid-cols-[2.75rem_1fr_2.75rem] items-center gap-2 px-2 pt-2 pb-3">
+      <header className="grid grid-cols-[5.5rem_1fr_5.5rem] items-center gap-1 px-2 pt-2 pb-3">
         <Link
           href="/toots/"
           replace
@@ -84,17 +93,24 @@ export function TootScreen() {
           <>
             <div className="min-w-0 text-center">
               <h1 className="truncate font-semibold">{toot.title}</h1>
-              {(summary || toot.songId === null) && (
-                <p className="truncate text-xs text-muted-foreground">
-                  {summary ? summary.title : PAD_TOOT_TITLE}
+              {subtitle && (
+                <p className="truncate text-xs text-muted-foreground" data-testid="toot-subtitle">
+                  {subtitle}
                 </p>
               )}
             </div>
-            <TootMenu
-              title={toot.title}
-              onRename={() => setIsRenaming(true)}
-              onDelete={() => setIsConfirmingDelete(true)}
-            />
+            <div className="flex justify-end">
+              {/* A Toot that can't play here has nothing to share, but once shared (from
+                  another device, say) its link plays from the account, so Stop sharing stays. */}
+              {(!toot.isAudioMissing || isShared) && (
+                <ShareButton kind="toots" id={toot.id} name={toot.title} className="size-11" />
+              )}
+              <TootMenu
+                title={toot.title}
+                onRename={() => setIsRenaming(true)}
+                onDelete={() => setIsConfirmingDelete(true)}
+              />
+            </div>
           </>
         )}
       </header>
