@@ -240,7 +240,7 @@ describe('Sending a friend request', () => {
     expect(await ask(1)).toEqual({ refused: 'too_many_requests' })
     expect(await ask(29)).toEqual({ refused: 'too_many_requests' })
     expect(await ask(30.01)).toEqual({ sent: 'requested' })
-    expect((await friend.state('bob', alice)).state).toBe('requested')
+    expect(await friend.state('bob', alice)).toEqual({ status: 200, state: 'requested' })
   })
 })
 
@@ -251,7 +251,7 @@ describe('Two users asking each other', () => {
     expect((await friend.ask('alice', bob)).status).toBe(201)
     expect(await addFriendRequest(testDb(), 'useralice', 'userbob', new Date())).toBe(false)
     expect(await requestRows()).toEqual([{ from: 'userbob', to: 'useralice' }])
-    expect((await friend.state('bob', alice)).state).toBe('asked')
+    expect(await friend.state('bob', alice)).toEqual({ status: 200, state: 'asked' })
   })
 
   it('end as friends when they ask at once', async () => {
