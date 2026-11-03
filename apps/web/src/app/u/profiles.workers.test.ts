@@ -252,6 +252,11 @@ describe('A profile page', () => {
       'Song with R2',
       'Recording 1'
     ])
+
+    // Taken down again, then deleted: its take-down stays, so its Toots stay off the page.
+    await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, R1))
+    expect((await api.delete('recordings', R1, alice)).status).toBe(204)
+    expect(await names('alice')).toEqual(['Song with R2'])
   })
 
   it('is found by its Handle in any case, and is there with nothing shared', async () => {
