@@ -157,6 +157,15 @@ UPDATE shares SET taken_down_at = unixepoch() * 1000 WHERE id = '<share_id>';
 
 A link taken down stays down: its row is kept, so the owner can't share that Recording again (403 `taken_down`), and neither Stop sharing nor deleting the Recording removes it. To put it back, set `taken_down_at` to `NULL`. Deleting the account removes it, with the reports.
 
+A profile page, `/u/<handle>/`, has Report too (#319, ADR 0021): a `profile_reports` row (the user and when) and a `profile_reported` log line with the Handle. It spends the same reporter and site slots as a link's Report, and a page gets 5 a day. A page lists only live shares, so taking down each of its shares empties it. There's no way yet to take a Handle away.
+
+```sql
+-- Newest profile reports first, and what each page lists.
+SELECT r.created_at, h.handle, r.user_id FROM profile_reports r
+  JOIN handles h ON h.user_id = r.user_id ORDER BY r.created_at DESC LIMIT 20;
+SELECT id, kind, item_id FROM shares WHERE user_id = '<user_id>' AND taken_down_at IS NULL;
+```
+
 ## Gotchas learned in slice 1
 
 - `apps/web` isn't `"type": "module"`, so Playwright compiles `e2e/` as CommonJS. Use `__dirname`, not `import.meta`.
