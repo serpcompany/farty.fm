@@ -321,6 +321,38 @@ test.describe('installed', () => {
     await expect(state).toBeVisible({ timeout: 60_000 })
     await context.setOffline(false)
   })
+
+  test('a Song opened offline always ends with its own title in the tab (#351)', async ({
+    page,
+    context
+  }) => {
+    test.setTimeout(240_000)
+    await listenToThePage(page)
+    await page.goto('/profile/')
+    await page.waitForFunction(async () => {
+      await navigator.serviceWorker.ready
+      return navigator.serviceWorker.controller !== null
+    })
+    await loadTheFixtureLibrary(page)
+    const song = songsTheFixtureLibraryUnlocks.find(s => s.id !== 'mary')
+    if (!song) throw new Error('the Fixture Library unlocks another Song')
+
+    await context.setOffline(true)
+    // The title races the page's own metadata title as the page hydrates. Slow the CPU so
+    // hydration is late, as it is on a busy phone.
+    const cdp = await context.newCDPSession(page)
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+    for (let load = 0; load < 20; load++) {
+      await page.goto(`/compose/${song.id}/`)
+      await expect(page, `load ${load + 1}`).toHaveTitle(`${song.title} · Farty`, {
+        timeout: 15_000
+      })
+    }
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+    await page.goto('/compose/')
+    await expect(page).toHaveTitle('Compose · Farty')
+    await context.setOffline(false)
+  })
 })
 
 /**
