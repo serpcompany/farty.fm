@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { play, stopPlayback } from '@/lib/audio/player'
 import { actOnFriend, type FriendAction, type FriendState, readFriendState } from '@/lib/friends'
+import { useGetFarty } from '@/lib/get-farty'
 import { formattedTootDate } from '@/lib/toot'
 import { useAccount } from './account-provider'
 import { FriendsUnreachable, RemoveFriendDialog, refusalMessage, useFriendRequest } from './friends'
@@ -188,9 +189,11 @@ function FriendControl({ handle, onOwn }: { handle: string; onOwn: (own: boolean
     if (read) setState({ accountId, state: read })
   }, [accountId, handle])
 
+  // Signed in through Get Farty, its friend request is still on its way: read once it's gone.
+  const asking = useGetFarty()?.stage === 'friend'
   useEffect(() => {
-    void reload()
-  }, [reload])
+    if (!asking) void reload()
+  }, [reload, asking])
 
   const known = accountId && state?.accountId === accountId ? state.state : null
   useEffect(() => onOwn(known === 'own'), [known, onOwn])

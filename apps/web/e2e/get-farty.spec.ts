@@ -7,15 +7,11 @@ import { onPhone } from './screens'
 // Get Farty from a shared page (#318): someone signed out opens Maya's link on a phone and taps
 // Get Farty. The first step makes a free account with "Add @maya as a friend" ticked, so the
 // request is made before they leave the browser, after they pick a Handle; the second is the Home
-// Screen steps. Unticked, no request goes. A computer gets the QR code (desktop.spec.ts).
+// Screen steps. Unticked, no request goes. Signed out, a profile page's Add friend is the same
+// flow, checked at phone and tablet size. A computer gets the QR code (desktop.spec.ts).
 
 // A service worker would answer navigations itself, without the Staging gate's credentials.
 test.use({ serviceWorkers: 'block' })
-
-test.skip(
-  ({ viewport }) => !onPhone({ viewport }),
-  "Get Farty's two steps are checked at phone size"
-)
 
 /** Claims `handle` for the signed-in account, as the first share does. */
 async function claimHandle(page: Page, handle: string) {
@@ -127,6 +123,7 @@ test('Get Farty on a shared page makes an account, asks the sharer to be friends
   isMobile,
   hasTouch
 }, testInfo) => {
+  test.skip(!onPhone({ viewport }), "Get Farty's two steps are checked at phone size")
   test.setTimeout(150_000)
   const maya = `e2e_${randomInt(1e9)}`
   const sam = `e2e_${randomInt(1e9)}`
@@ -213,6 +210,66 @@ test('Get Farty on a shared page makes an account, asks the sharer to be friends
     await expect(leePage.getByRole('alertdialog')).toHaveCount(0)
     expect(await requestsTo(page)).toEqual([sam])
     await leePage.context().close()
+  })
+
+  await samPage.context().close()
+})
+
+test("signed out, a profile page's Add friend is Get Farty, and the request reaches the server", async ({
+  page,
+  browser,
+  baseURL,
+  httpCredentials,
+  viewport,
+  userAgent,
+  deviceScaleFactor,
+  isMobile,
+  hasTouch
+}, testInfo) => {
+  test.setTimeout(120_000)
+  const maya = `e2e_${randomInt(1e9)}`
+  const sam = `e2e_${randomInt(1e9)}`
+
+  await test.step('maya has an account and a Handle', async () => {
+    await page.addInitScript(skipWelcome, {})
+    await page.goto('/profile/')
+    await signInByApi(page, newEmail(testInfo, 'maya'))
+    await claimHandle(page, maya)
+  })
+
+  const samPage = await stranger(browser, {
+    baseURL,
+    httpCredentials,
+    viewport,
+    userAgent,
+    deviceScaleFactor,
+    isMobile,
+    hasTouch
+  })
+
+  await test.step("Add friend on maya's page opens the account step, offering maya, ticked", async () => {
+    await samPage.goto(`/u/${maya}/`)
+    await samPage.getByRole('button', { name: 'Add friend' }).click()
+    const step = samPage.getByRole('dialog', { name: 'Make a free account' })
+    await expect(step).toBeVisible()
+    await expect(step.getByRole('checkbox', { name: `Add @${maya} as a friend` })).toBeChecked()
+    // A shared page has no app top bar, so the step covers the whole page, its top bar too.
+    expect((await step.boundingBox())?.y).toBe(0)
+  })
+
+  await test.step('sam signs up and picks a Handle, and the request is on the server', async () => {
+    await signUpInTheStep(samPage, newEmail(testInfo, 'sam'))
+    const dialog = samPage.getByRole('alertdialog')
+    await dialog.getByRole('textbox', { name: 'Handle' }).fill(sam)
+    await expect(dialog.getByText(`@${sam} is free`)).toBeVisible()
+    await dialog.getByRole('button', { name: 'Add friend' }).click()
+    await expect(dialog).toBeHidden()
+
+    const home = samPage.getByRole('dialog', { name: 'Get the app' })
+    await expect(home).toContainText(`You asked @${maya} to be friends.`)
+    expect(await requestsTo(page)).toEqual([sam])
+    await home.getByRole('button', { name: 'Done' }).click()
+    await expect(samPage.getByRole('button', { name: 'Requested' })).toBeVisible()
   })
 
   await samPage.context().close()

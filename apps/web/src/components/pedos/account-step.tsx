@@ -1,7 +1,9 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { type FormEvent, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import {
@@ -12,8 +14,9 @@ import {
   signIn,
   turnstileSiteKey
 } from '@/lib/account'
-import { offerFriend, useGetFarty } from '@/lib/get-farty'
+import { leaveGetFarty, offerFriend, signedInAtAccountStep, useGetFarty } from '@/lib/get-farty'
 import { unsavedBeforeSignIn } from '@/lib/library-sync'
+import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { Turnstile } from './turnstile'
 
@@ -29,7 +32,7 @@ const messages: Record<SignInProblem, string> = {
 
 /**
  * The account step (#155, the plan's §1), full screen over everything on a phone, and a card under
- * the top bar from 768px: an email, then the 6-digit code sent to it, which signs in or makes the
+ * the top bar from 768px (over everything on a shared page, which has no app top bar): an email, then the 6-digit code sent to it, which signs in or makes the
  * account. Sending the code needs Turnstile's check, under the email (#237). Not now says what a
  * guest loses. A browser whose session ended (`expired`) is asked to sign in again, and loses
  * nothing. Signing in to another account clears this device's farts not saved to the first: the
@@ -37,11 +40,15 @@ const messages: Record<SignInProblem, string> = {
  */
 export function AccountStep() {
   const { stepOpen } = useAccount()
+  const pathname = usePathname()
+  // Get Farty's offer (#318) belongs to the page that started it: anywhere else, it ends.
+  useEffect(() => leaveGetFarty(pathname), [pathname])
+  // A shared page (ADR 0020) has no app top bar to leave room for, so the step covers it all.
   // Mounted afresh each time it opens, so it starts at the email, or where a reload left it.
-  return stepOpen ? <Step /> : null
+  return stepOpen ? <Step underTopBar={!pathname.startsWith('/u/')} /> : null
 }
 
-function Step() {
+function Step({ underTopBar }: { underTopBar: boolean }) {
   const { account, skipStep, finishSignIn, stepReason } = useAccount()
   const again = account.status === 'expired'
   const toShare = stepReason === 'share' && !again
@@ -175,6 +182,8 @@ function Step() {
     const result = await signIn(email, code)
     setBusy(false)
     if (result.ok) {
+      // Signed in here: Get Farty's friend request, if it's ticked.
+      signedInAtAccountStep()
       finishSignIn(result.value)
       return
     }
@@ -188,7 +197,10 @@ function Step() {
       role="dialog"
       aria-modal
       aria-labelledby="account-step-title"
-      className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:top-[calc(4rem+1px)] md:p-6"
+      className={cn(
+        'fixed inset-0 z-50 flex flex-col overflow-y-auto bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:p-6',
+        underTopBar && 'md:top-[calc(4rem+1px)]'
+      )}
     >
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 md:my-auto md:flex-none md:rounded-3xl md:border md:py-3 md:shadow-sm">
         <div className="flex flex-1 flex-col justify-center gap-6 py-6">
@@ -252,12 +264,15 @@ function Step() {
                 onChange={event => setEmail(event.target.value)}
               />
               {friend !== null && getFarty && (
-                <label className="flex min-h-11 items-center gap-3 text-base">
-                  <input
-                    type="checkbox"
-                    className="size-5 shrink-0 accent-primary"
+                <label
+                  htmlFor="get-farty-friend"
+                  className="flex min-h-11 items-center gap-3 text-base"
+                >
+                  <Checkbox
+                    id="get-farty-friend"
+                    className="size-5"
                     checked={getFarty.add}
-                    onChange={event => offerFriend(event.target.checked)}
+                    onCheckedChange={checked => offerFriend(checked)}
                   />
                   Add @{friend} as a friend
                 </label>

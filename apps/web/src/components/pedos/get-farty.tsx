@@ -1,6 +1,7 @@
 'use client'
 
 import { Check } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import {
   createContext,
   type ReactNode,
@@ -16,8 +17,9 @@ import { desktop } from '@/lib/desktop'
 import {
   endGetFarty,
   type FriendOutcome,
-  finishAccountStep,
   finishFriendRequest,
+  retryFriendRequest,
+  skippedAccountStep,
   startGetFarty,
   useGetFarty
 } from '@/lib/get-farty'
@@ -41,8 +43,11 @@ export function useStartGetFarty(): (friend: string | null) => void {
 
 /** Runs Get Farty for the pages under it. `qrCode` is the lander's, drawn on the server. */
 export function GetFartyFlow({ qrCode, children }: { qrCode: ReactNode; children: ReactNode }) {
-  const { account, openStep, stepOpen } = useAccount()
-  const flow = useGetFarty()
+  const { account, openStep, stepOpen, skipStep } = useAccount()
+  const pathname = usePathname()
+  const stored = useGetFarty()
+  // Only this page's: another page's ends once the account step sees the path change.
+  const flow = stored?.page === pathname ? stored : null
   const [scanning, setScanning] = useState(false)
   const accountId = account.status === 'signedIn' ? account.id : null
   const request = useFriendRequest(accountId)
@@ -53,25 +58,35 @@ export function GetFartyFlow({ qrCode, children }: { qrCode: ReactNode; children
       return
     }
     openStep()
-    startGetFarty(friend)
+    startGetFarty(friend, pathname)
   }
 
-  // The account step closed, signed in or with Not now. A reload while it's open (a phone that
-  // drops the tab while the person reads Mail) reopens it once the session is read.
   const stage = flow?.stage ?? null
   const settled = account.status !== 'checking'
   useEffect(() => {
-    if (stage === 'account' && !stepOpen && settled) finishAccountStep(accountId !== null)
-  }, [stage, stepOpen, settled, accountId])
+    if (stage !== 'account' || !settled) return
+    // Tapped before the session was read, and it's signed in: there's no account to make, so the
+    // flow ends and nothing is sent. Signing in at the step moves on before this sees it.
+    if (accountId !== null) {
+      endGetFarty()
+      if (stepOpen) skipStep()
+      return
+    }
+    // Not now. A reload while it's open (a phone that drops the tab while the person reads Mail)
+    // reopens it once the session is read.
+    if (!stepOpen) skippedAccountStep()
+  }, [stage, stepOpen, settled, accountId, skipStep])
 
-  // Signed in with the friend ticked: the request, after Pick a handle for someone with none.
+  // Signed in at the step with the friend ticked: the request, after Pick a handle for someone with
+  // none. Offline, or while the session is read again, it waits.
   const sending = useRef(false)
   const ask = useEffectEvent(async (friend: string) => {
     const sent = await request.send(friend)
     finishFriendRequest('state' in sent ? sent.state : sent.refused)
   })
   const friend = stage === 'friend' && accountId !== null ? (flow?.friend ?? null) : null
-  const signedOut = stage === 'friend' && settled && accountId === null
+  const signedOut =
+    stage === 'friend' && (account.status === 'signedOut' || account.status === 'expired')
   useEffect(() => {
     // A reload that finds the session gone: nothing can be sent.
     if (signedOut) {
@@ -135,6 +150,8 @@ function HomeScreenStep({
   const result = said(friend, outcome)
   const asked = outcome === 'requested' || outcome === 'already_requested'
   const friends = outcome === 'friends' || outcome === 'already_friends'
+  // Couldn't reach Farty: the request can go again (signed out, it can't).
+  const again = outcome === 'failed' && signedIn
 
   useEffect(() => {
     const opener = document.activeElement
@@ -182,6 +199,11 @@ function HomeScreenStep({
           )}
         </div>
         <div className="grid gap-2 pb-3">
+          {again && (
+            <Button className="h-12 text-base" onClick={retryFriendRequest}>
+              Try again
+            </Button>
+          )}
           <Button variant="secondary" className="h-12 text-base" onClick={endGetFarty}>
             Done
           </Button>
