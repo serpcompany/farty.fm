@@ -11,16 +11,16 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
   license gate accepts. Ranked by their views in all, then ratings in all, then mean rating. Artist:
   the artist MuseScore gives the scores most often, preferring one that names somebody over
   "Misc tunes" or "Anonymous", to judge whether the tune is under copyright.
-- 114780 titles; 1557 may be tried next, and the top 1500 are listed. Left out:
+- 114780 titles; 1558 may be tried next, and the top 1500 are listed. Left out:
   - 63461: fewer than 2 scores
   - 25504: no score has a MuseScore genre: mostly recent game, anime and film music
   - 18557: no score the importer can pick
   - 2519: mostly a title head: a composer or collection
   - 891: mostly a modern genre: likely under copyright
   - 874: no one artist for most of its scores: several pieces share the title
-  - 732: in the catalog or tried already
-  - 444: in excluded-titles.txt
-  - 219: the same tune as a better-ranked or tried title
+  - 718: in the catalog or tried already
+  - 459: in excluded-titles.txt
+  - 217: the same tune as a better-ranked or tried title
   - 22: every spelling of the title is garbled
 
 | Rank | Title | Artist | Scores | Can be picked | Views | Ratings | Rating |
@@ -69,191 +69,191 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 42 | Nous Voici Dans La Ville | Misc Traditional | 2 | 2 | 78 | 0 | 0.00 |
 | 43 | Orientis partibus | Anonymous | 2 | 1 | 78 | 0 | 0.00 |
 | 44 | Parcel of Rogues | Robert Burns | 5 | 5 | 78 | 0 | 0.00 |
-| 45 | The Road To The Isles/Burning Sands of Egypt | Misc Traditional | 2 | 2 | 78 | 0 | 0.00 |
-| 46 | Hbd | Misc tunes | 3 | 2 | 77 | 0 | 0.00 |
-| 47 | Mrs Jamieson's Favorite | Charles Grant | 2 | 2 | 77 | 0 | 0.00 |
-| 48 | Excuse Me. | John Playford | 14 | 14 | 76 | 0 | 0.00 |
-| 49 | Promised Land | Anne Steele | 2 | 2 | 76 | 0 | 0.00 |
-| 50 | Valse du Départ | Misc Traditional | 2 | 2 | 76 | 0 | 0.00 |
-| 51 | Bloomsbury Market | John Walsh | 17 | 17 | 75 | 0 | 0.00 |
-| 52 | Chanson à boire | Halfdan Kjerulf | 3 | 2 | 75 | 0 | 0.00 |
-| 53 | The Friendly Visit | Misc Traditional | 29 | 29 | 75 | 0 | 0.00 |
-| 54 | Admiral Nelson | Niel Gow | 17 | 17 | 74 | 0 | 0.00 |
-| 55 | Hyde Park | John Playford | 12 | 12 | 73 | 0 | 0.00 |
-| 56 | Irish Molly Barn Dance | from the playing of Dan Quinn | 8 | 8 | 73 | 0 | 0.00 |
-| 57 | Scottish | Scottish | 7 | 7 | 73 | 0 | 0.00 |
-| 58 | Halling | Edvard Grieg | 11 | 10 | 72 | 0 | 0.00 |
-| 59 | Handel With Care | Georg Friedrich Händel | 5 | 5 | 72 | 0 | 0.00 |
-| 60 | Jenny Lind | Anton Wallerstein | 30 | 30 | 72 | 0 | 0.00 |
-| 61 | The Wheels of the World | McNamara | 25 | 25 | 72 | 0 | 0.00 |
-| 62 | Marchioness of Huntly | William Marshall | 39 | 39 | 71 | 0 | 0.00 |
-| 63 | Murdo's Wedding | March | 3 | 3 | 71 | 0 | 0.00 |
-| 64 | Navvy on the Line | James Hill | 19 | 19 | 71 | 0 | 0.00 |
-| 65 | President Garfield's Hornpipe | Harry Carleton | 14 | 14 | 71 | 0 | 0.00 |
-| 66 | Star Of Bethlehem | Misc Traditional | 2 | 2 | 71 | 0 | 0.00 |
-| 67 | The Friendly Beasts | Misc Traditional | 5 | 5 | 70 | 0 | 0.00 |
-| 68 | The Gallowglass | Niel Gow | 29 | 29 | 70 | 0 | 0.00 |
-| 69 | Horse's Bransle | Misc tunes | 11 | 11 | 70 | 0 | 0.00 |
-| 70 | Petite camusette | Josquin des Prez | 7 | 6 | 70 | 0 | 0.00 |
-| 71 | When Messiah Comes | Wayne Goodine | 3 | 2 | 70 | 0 | 0.00 |
-| 72 | The Wild Mountain Thyme 1 | Misc Traditional | 2 | 2 | 70 | 0 | 0.00 |
-| 73 | Barrack Hill | Playford | 18 | 18 | 69 | 0 | 0.00 |
-| 74 | La Chevre | Limousin | 5 | 5 | 69 | 0 | 0.00 |
-| 75 | Seven Stars | Misc tunes | 24 | 24 | 69 | 0 | 0.00 |
-| 76 | St. Kilda Wedding | Misc tunes | 11 | 11 | 69 | 0 | 0.00 |
-| 77 | Winter Waltz | Misc Traditional | 4 | 4 | 69 | 0 | 0.00 |
-| 78 | Morgan Rattler | Misc Traditional | 38 | 38 | 68 | 0 | 0.00 |
-| 79 | My Lord Byron's Maggot | Henry Playford | 13 | 13 | 68 | 0 | 0.00 |
-| 80 | Ding Dong Bell | Mother Goose | 5 | 5 | 67 | 0 | 0.00 |
-| 81 | Mairi Bhan Og | Misc Traditional | 5 | 4 | 67 | 0 | 0.00 |
-| 82 | Peek-A-Boo Waltz | Anna Cramer | 8 | 8 | 67 | 0 | 0.00 |
-| 83 | Reveillez Vous Picards | François-Auguste Gevaert | 2 | 1 | 67 | 0 | 0.00 |
-| 84 | The Veleta | Arthur Morris | 2 | 2 | 67 | 0 | 0.00 |
-| 85 | The Farmer's Daughter | Frederick Page | 12 | 12 | 66 | 0 | 0.00 |
-| 86 | Pant Corlan Yr Wyn | Misc Traditional | 16 | 16 | 66 | 0 | 0.00 |
-| 87 | Psalm 23 | Francis Hopkinson | 2 | 1 | 66 | 0 | 0.00 |
-| 88 | All in a Garden Green | John Playford | 13 | 13 | 65 | 0 | 0.00 |
-| 89 | Cheshire Rounds | Henry Playford | 20 | 20 | 65 | 0 | 0.00 |
-| 90 | Il était une dame tartine | Misc Traditional | 2 | 2 | 65 | 0 | 0.00 |
-| 91 | Killiecrankie | Misc tunes | 12 | 12 | 65 | 0 | 0.00 |
-| 92 | Balmoral Castle | Alexander Walker | 14 | 14 | 64 | 0 | 0.00 |
-| 93 | Bude zima bude mráz | Misc Traditional | 2 | 2 | 64 | 0 | 0.00 |
-| 94 | La Gueussinette | Stephen Jones | 6 | 6 | 64 | 0 | 0.00 |
-| 95 | Ma chère amie | James Hook | 4 | 4 | 64 | 0 | 0.00 |
-| 96 | Morna | C. H. Perrot | 3 | 3 | 63 | 0 | 0.00 |
-| 97 | The Bag Of Spuds | Misc Traditional | 18 | 18 | 62 | 0 | 0.00 |
-| 98 | Bellamira | Henry Playford | 12 | 12 | 62 | 0 | 0.00 |
-| 99 | The Flower of the Quern | James Scott Skinner | 3 | 3 | 62 | 0 | 0.00 |
-| 100 | Keep It Up | Misc tunes | 18 | 18 | 62 | 0 | 0.00 |
-| 101 | Rakish Paddy | Misc Traditional | 16 | 16 | 62 | 0 | 0.00 |
-| 102 | The Miller of Drone | Nathaniel Gow | 24 | 24 | 61 | 0 | 0.00 |
-| 103 | Aux marches du palais | Misc Traditional | 2 | 2 | 60 | 0 | 0.00 |
-| 104 | Avondstemming | Alice Nahon | 6 | 6 | 60 | 0 | 0.00 |
-| 105 | Behind the Haystack | Misc Traditional | 14 | 14 | 60 | 0 | 0.00 |
-| 106 | Bung Your Eye | Niel Gow | 21 | 21 | 60 | 0 | 0.00 |
-| 107 | The First Of October | Nigel Gatherer | 4 | 4 | 60 | 0 | 0.00 |
-| 108 | Gentle Mary Laid Her Child | Melchior Vulpius | 2 | 1 | 60 | 0 | 0.00 |
-| 109 | Well's Humour | Purcell | 9 | 9 | 60 | 0 | 0.00 |
-| 110 | Mazltov | Misc Traditional | 5 | 5 | 59 | 3 | 4.49 |
-| 111 | Branle de Bourgogne | Jacques Moderne | 8 | 8 | 59 | 0 | 0.00 |
-| 112 | Champion Hornpipe | James Hill | 14 | 14 | 59 | 0 | 0.00 |
-| 113 | Da Full Rigged Ship | Shetland Jig | 19 | 19 | 59 | 0 | 0.00 |
-| 114 | 'Et dodim kala | Yemenite | 6 | 6 | 59 | 0 | 0.00 |
-| 115 | Helan | Emil Nielsen | 3 | 2 | 59 | 0 | 0.00 |
-| 116 | Lilli Burlero | Henry Purcell | 18 | 18 | 59 | 0 | 0.00 |
-| 117 | O'er the Hills and far away | March | 8 | 8 | 59 | 0 | 0.00 |
-| 118 | Our Highland Queen | James Scott Skinner | 14 | 14 | 59 | 0 | 0.00 |
-| 119 | Shores of Lough Gowna | jig | 9 | 9 | 59 | 0 | 0.00 |
-| 120 | The Curly Headed Ploughboy | aka The Ploughboy | 12 | 12 | 58 | 0 | 0.00 |
-| 121 | Hiraeth | a tasty shade of mauve | 2 | 2 | 58 | 0 | 0.00 |
-| 122 | Iron Legs | Misc Traditional | 15 | 15 | 58 | 0 | 0.00 |
-| 123 | Maids of Arrochar | John MacDonald Dundee | 8 | 8 | 58 | 0 | 0.00 |
-| 124 | Rejoice Our Nature Christ Assumes | St. Ambrose | 2 | 2 | 58 | 0 | 0.00 |
-| 125 | Sweet Jenny Jones | John Parry | 11 | 11 | 58 | 0 | 0.00 |
-| 126 | Twin Sisters | as played by the Reed Island Rounders | 8 | 8 | 58 | 0 | 0.00 |
-| 127 | Breton | Breton | 6 | 6 | 57 | 0 | 0.00 |
-| 128 | Ellacombe | Andrew Sims | 2 | 2 | 57 | 0 | 0.00 |
-| 129 | The Spring Garden | John Playford | 16 | 16 | 57 | 0 | 0.00 |
-| 130 | Tuonne taakse metsämaan | Misc Traditional | 2 | 1 | 57 | 0 | 0.00 |
-| 131 | Up with Aily | Henry Playford | 16 | 16 | 57 | 0 | 0.00 |
-| 132 | Aunt Mary's (Canadian) Jig | not known | 11 | 11 | 56 | 0 | 0.00 |
-| 133 | The Flax In Bloom | Misc Traditional | 23 | 23 | 56 | 0 | 0.00 |
-| 134 | Gavotte de l'Aven | Misc Traditional | 2 | 2 | 56 | 0 | 0.00 |
-| 135 | Hull's Victory | Misc Traditional | 17 | 16 | 56 | 0 | 0.00 |
-| 136 | I Bibelen Står | Anonymous | 2 | 2 | 56 | 0 | 0.00 |
-| 137 | See see the shepherds' Queen | Thomas Tomkins | 2 | 1 | 56 | 0 | 0.00 |
-| 138 | Year of Jubilo | Henry Clay Work | 6 | 6 | 56 | 0 | 0.00 |
-| 139 | Christe Redemptor Omnium | Misc Traditional | 6 | 2 | 55 | 0 | 0.00 |
-| 140 | John Anderson My Joe | Misc tunes | 3 | 2 | 55 | 0 | 0.00 |
-| 141 | Nyth Y Gog | Misc Traditional | 4 | 4 | 55 | 0 | 0.00 |
-| 142 | Craigellachie Bridge | William Marshall | 12 | 12 | 54 | 0 | 0.00 |
-| 143 | Glenburnie Rant | Neil Gow | 21 | 21 | 54 | 0 | 0.00 |
-| 144 | Nelly Bly | Stephen Foster | 7 | 7 | 54 | 0 | 0.00 |
-| 145 | The Tennessee | Oliver Holden | 4 | 3 | 54 | 0 | 0.00 |
-| 146 | The 72nd Highlanders' Farewell To Aberdeen | William Mackay | 9 | 9 | 53 | 0 | 0.00 |
-| 147 | For God so loved the world | Misc Traditional | 3 | 3 | 53 | 0 | 0.00 |
-| 148 | The Fyket | Very old | 28 | 28 | 53 | 0 | 0.00 |
-| 149 | Mille regrets | Josquin des Prez | 6 | 5 | 53 | 0 | 0.00 |
-| 150 | The Shepherd Boy | Grenville D. Wilson | 4 | 4 | 53 | 0 | 0.00 |
-| 151 | Since First I Saw Your Face | Thomas Ford | 2 | 1 | 53 | 0 | 0.00 |
-| 152 | Wha Saw the 42nd | Misc Traditional | 3 | 3 | 53 | 0 | 0.00 |
-| 153 | Canaries | Thoinot Arbeau | 2 | 2 | 52 | 0 | 0.00 |
-| 154 | Christchurch Bells | John Playford | 16 | 9 | 52 | 0 | 0.00 |
-| 155 | Farewell to the Highlands | Joachim Kelecom | 2 | 1 | 52 | 0 | 0.00 |
-| 156 | Green Grow The Rushes - O | Robbie Burns | 4 | 4 | 52 | 0 | 0.00 |
-| 157 | Hey Boys Up Go We | John Playford | 15 | 15 | 52 | 0 | 0.00 |
-| 158 | The Hills | Rickeybattleyahoo.com | 2 | 1 | 52 | 0 | 0.00 |
-| 159 | The Pleasures of the Town | Thompson | 15 | 15 | 52 | 0 | 0.00 |
-| 160 | Tekeli | James Hook | 6 | 6 | 52 | 0 | 0.00 |
-| 161 | Transylvania | Misc Traditional | 2 | 1 | 52 | 0 | 0.00 |
-| 162 | The White Petticoat | Misc Traditional | 20 | 20 | 52 | 0 | 0.00 |
-| 163 | All the Rage | Larry Ungar | 14 | 14 | 51 | 0 | 0.00 |
-| 164 | The Boys of Wexford | Misc Traditional | 10 | 10 | 51 | 0 | 0.00 |
-| 165 | Dublin Streets | Ennis | 13 | 13 | 51 | 0 | 0.00 |
-| 166 | Early to Bed | Misc Traditional | 2 | 1 | 51 | 0 | 0.00 |
-| 167 | Good Comrade | Misc Traditional | 4 | 4 | 51 | 0 | 0.00 |
-| 168 | The Happy Clown | John Walsh | 7 | 7 | 51 | 0 | 0.00 |
-| 169 | Lamentations Of Jeremiah | Thomas Tallis | 2 | 1 | 51 | 0 | 0.00 |
-| 170 | The Pride Of Petravore | William Percy French | 5 | 5 | 51 | 0 | 0.00 |
-| 171 | The Spey In Spate | James Scott Skinner | 11 | 11 | 51 | 0 | 0.00 |
-| 172 | Bile Them Cabbage Down | Misc Traditional | 7 | 7 | 50 | 0 | 0.00 |
-| 173 | French-Canadian Waltz | Misc Traditional | 2 | 2 | 50 | 0 | 0.00 |
-| 174 | Gipsy Hornpipe | Niel Gow | 4 | 4 | 50 | 0 | 0.00 |
-| 175 | Lady Dillon | Carolan | 10 | 10 | 50 | 0 | 0.00 |
-| 176 | Leander | Misc Traditional | 2 | 1 | 50 | 0 | 0.00 |
-| 177 | Mount Hills | Henry Playford | 16 | 16 | 50 | 0 | 0.00 |
-| 178 | Old Folks | Stephen Foster | 4 | 4 | 50 | 0 | 0.00 |
-| 179 | Planxty Browne | Nathaniel Gow | 9 | 9 | 50 | 0 | 0.00 |
-| 180 | The Dark-Eyed Sailor | Frederick Page | 2 | 2 | 49 | 0 | 0.00 |
-| 181 | The Earl Of Dalhousie's Happy Return To Scotland | Niel Gow | 6 | 6 | 49 | 0 | 0.00 |
-| 182 | Five Shetland Reels | Misc Traditional | 2 | 2 | 49 | 0 | 0.00 |
-| 183 | Tartini Variaciones en un tema de Corelli | Giuseppe Tartini | 2 | 2 | 49 | 0 | 0.00 |
-| 184 | Up Tails All | John Playford | 10 | 10 | 49 | 0 | 0.00 |
-| 185 | The Black Haired Lass | Misc Traditional | 14 | 14 | 48 | 0 | 0.00 |
-| 186 | Carolan's Quarrel with the Landlady | Carolan | 13 | 13 | 48 | 0 | 0.00 |
-| 187 | Dixie | Dan Emmett | 4 | 4 | 48 | 0 | 0.00 |
-| 188 | East Neuk of Fife | James Oswald | 16 | 16 | 48 | 0 | 0.00 |
-| 189 | The Haggis | Captain Simon Fraser | 14 | 14 | 48 | 0 | 0.00 |
-| 190 | The Household Brigade | Felix Burns | 6 | 6 | 48 | 0 | 0.00 |
-| 191 | Maiden Lane | John Playford | 16 | 16 | 48 | 0 | 0.00 |
-| 192 | The Red Red Rose | John Liptrot Hatton | 12 | 11 | 48 | 0 | 0.00 |
-| 193 | Sixpenny Money | jig | 11 | 11 | 48 | 0 | 0.00 |
-| 194 | Vivace | Nicolas Chédeville | 2 | 2 | 48 | 0 | 0.00 |
-| 195 | The Bishop | bishop | 22 | 22 | 47 | 0 | 0.00 |
-| 196 | The Fife Hunt | William Gow | 23 | 23 | 47 | 0 | 0.00 |
-| 197 | Galopp | Misc tunes | 2 | 1 | 47 | 0 | 0.00 |
-| 198 | The Gloucester Hornpipe | Misc Traditional | 4 | 4 | 47 | 0 | 0.00 |
-| 199 | The Banks Of Lough Gowna | Misc Traditional | 21 | 21 | 46 | 0 | 0.00 |
-| 200 | Chapel Keithack | William Marshall | 5 | 5 | 46 | 0 | 0.00 |
-| 201 | Down the Brae | Misc tunes | 11 | 11 | 46 | 0 | 0.00 |
-| 202 | Mrs. Major L. Stewart of the Island of Java | William Marshall | 2 | 2 | 46 | 0 | 0.00 |
-| 203 | Sad Is My Fate | Misc Traditional | 6 | 6 | 46 | 0 | 0.00 |
-| 204 | Balquhidder Lasses | Misc Traditional | 13 | 13 | 45 | 0 | 0.00 |
-| 205 | Fine Companion | John Playford | 15 | 15 | 45 | 0 | 0.00 |
-| 206 | Gasp\'e Reel | French Canadian | 17 | 17 | 45 | 0 | 0.00 |
-| 207 | GB/7a/12 God Rest You Merry Version 2 of 2 | Mrs Cranstone VIII | 2 | 2 | 45 | 0 | 0.00 |
-| 208 | Huldrevise | Misc Traditional | 2 | 2 | 45 | 0 | 0.00 |
-| 209 | Huntsman's Chorus in Dr. Freyschutz. GS.088 | Misc Traditional | 3 | 3 | 45 | 0 | 0.00 |
-| 210 | Maid in the Meadow | jig | 18 | 18 | 45 | 0 | 0.00 |
-| 211 | Mrs. Hamilton Of Pencaitland | Nathaniel Gow | 6 | 6 | 45 | 0 | 0.00 |
-| 212 | The Night Peece | John Playford | 7 | 7 | 45 | 0 | 0.00 |
-| 213 | Steal Away | Misc Traditional | 3 | 2 | 45 | 0 | 0.00 |
-| 214 | Stirling Castle | Professor Bannatyne | 12 | 12 | 45 | 0 | 0.00 |
-| 215 | Archie Menzies | John Lowe | 18 | 18 | 44 | 0 | 0.00 |
-| 216 | Bank's Hornpipe. | Parazotti | 4 | 4 | 44 | 0 | 0.00 |
-| 217 | Captain Byng | Nathaniel Gow | 15 | 15 | 44 | 0 | 0.00 |
-| 218 | Come O Holy Spirit | John R. Sweney | 2 | 2 | 44 | 0 | 0.00 |
-| 219 | Dance | Guillaume de Marchault | 18 | 18 | 44 | 0 | 0.00 |
-| 220 | The Duchess Of Atholl's Slipper | Niel Gow | 11 | 11 | 44 | 0 | 0.00 |
-| 221 | Hunsdon House | John Playford | 15 | 15 | 44 | 0 | 0.00 |
-| 222 | Jockey to the Fair | Richard Hughes MS | 15 | 15 | 44 | 0 | 0.00 |
-| 223 | Kari Kari Baane graater | Misc Traditional | 2 | 2 | 44 | 0 | 0.00 |
-| 224 | Lady Charlotte Campbell | Nathaniel Gow | 11 | 11 | 44 | 0 | 0.00 |
-| 225 | Lady Jane Taylor | William Marshall | 4 | 4 | 44 | 0 | 0.00 |
-| 226 | Miss Admiral Gordon's Strathspey | William Marshall | 12 | 12 | 44 | 0 | 0.00 |
-| 227 | Official Branle | Orchesography | 3 | 3 | 44 | 0 | 0.00 |
-| 228 | St. Albans | Walter Janes | 11 | 9 | 44 | 0 | 0.00 |
-| 229 | Trimazo | Misc Traditional | 3 | 3 | 44 | 0 | 0.00 |
+| 45 | Hbd | Misc tunes | 3 | 2 | 77 | 0 | 0.00 |
+| 46 | Mrs Jamieson's Favorite | Charles Grant | 2 | 2 | 77 | 0 | 0.00 |
+| 47 | Excuse Me. | John Playford | 14 | 14 | 76 | 0 | 0.00 |
+| 48 | Promised Land | Anne Steele | 2 | 2 | 76 | 0 | 0.00 |
+| 49 | Valse du Départ | Misc Traditional | 2 | 2 | 76 | 0 | 0.00 |
+| 50 | Bloomsbury Market | John Walsh | 17 | 17 | 75 | 0 | 0.00 |
+| 51 | Chanson à boire | Halfdan Kjerulf | 3 | 2 | 75 | 0 | 0.00 |
+| 52 | The Friendly Visit | Misc Traditional | 29 | 29 | 75 | 0 | 0.00 |
+| 53 | Admiral Nelson | Niel Gow | 17 | 17 | 74 | 0 | 0.00 |
+| 54 | Hyde Park | John Playford | 12 | 12 | 73 | 0 | 0.00 |
+| 55 | Irish Molly Barn Dance | from the playing of Dan Quinn | 8 | 8 | 73 | 0 | 0.00 |
+| 56 | Scottish | Scottish | 7 | 7 | 73 | 0 | 0.00 |
+| 57 | Halling | Edvard Grieg | 11 | 10 | 72 | 0 | 0.00 |
+| 58 | Handel With Care | Georg Friedrich Händel | 5 | 5 | 72 | 0 | 0.00 |
+| 59 | Jenny Lind | Anton Wallerstein | 30 | 30 | 72 | 0 | 0.00 |
+| 60 | The Wheels of the World | McNamara | 25 | 25 | 72 | 0 | 0.00 |
+| 61 | Marchioness of Huntly | William Marshall | 39 | 39 | 71 | 0 | 0.00 |
+| 62 | Murdo's Wedding | March | 3 | 3 | 71 | 0 | 0.00 |
+| 63 | Navvy on the Line | James Hill | 19 | 19 | 71 | 0 | 0.00 |
+| 64 | President Garfield's Hornpipe | Harry Carleton | 14 | 14 | 71 | 0 | 0.00 |
+| 65 | Star Of Bethlehem | Misc Traditional | 2 | 2 | 71 | 0 | 0.00 |
+| 66 | The Friendly Beasts | Misc Traditional | 5 | 5 | 70 | 0 | 0.00 |
+| 67 | The Gallowglass | Niel Gow | 29 | 29 | 70 | 0 | 0.00 |
+| 68 | Horse's Bransle | Misc tunes | 11 | 11 | 70 | 0 | 0.00 |
+| 69 | Petite camusette | Josquin des Prez | 7 | 6 | 70 | 0 | 0.00 |
+| 70 | When Messiah Comes | Wayne Goodine | 3 | 2 | 70 | 0 | 0.00 |
+| 71 | The Wild Mountain Thyme 1 | Misc Traditional | 2 | 2 | 70 | 0 | 0.00 |
+| 72 | Barrack Hill | Playford | 18 | 18 | 69 | 0 | 0.00 |
+| 73 | La Chevre | Limousin | 5 | 5 | 69 | 0 | 0.00 |
+| 74 | Seven Stars | Misc tunes | 24 | 24 | 69 | 0 | 0.00 |
+| 75 | St. Kilda Wedding | Misc tunes | 11 | 11 | 69 | 0 | 0.00 |
+| 76 | Winter Waltz | Misc Traditional | 4 | 4 | 69 | 0 | 0.00 |
+| 77 | Morgan Rattler | Misc Traditional | 38 | 38 | 68 | 0 | 0.00 |
+| 78 | My Lord Byron's Maggot | Henry Playford | 13 | 13 | 68 | 0 | 0.00 |
+| 79 | Ding Dong Bell | Mother Goose | 5 | 5 | 67 | 0 | 0.00 |
+| 80 | Mairi Bhan Og | Misc Traditional | 5 | 4 | 67 | 0 | 0.00 |
+| 81 | Peek-A-Boo Waltz | Anna Cramer | 8 | 8 | 67 | 0 | 0.00 |
+| 82 | Reveillez Vous Picards | François-Auguste Gevaert | 2 | 1 | 67 | 0 | 0.00 |
+| 83 | The Veleta | Arthur Morris | 2 | 2 | 67 | 0 | 0.00 |
+| 84 | The Farmer's Daughter | Frederick Page | 12 | 12 | 66 | 0 | 0.00 |
+| 85 | Pant Corlan Yr Wyn | Misc Traditional | 16 | 16 | 66 | 0 | 0.00 |
+| 86 | Psalm 23 | Francis Hopkinson | 2 | 1 | 66 | 0 | 0.00 |
+| 87 | All in a Garden Green | John Playford | 13 | 13 | 65 | 0 | 0.00 |
+| 88 | Cheshire Rounds | Henry Playford | 20 | 20 | 65 | 0 | 0.00 |
+| 89 | Il était une dame tartine | Misc Traditional | 2 | 2 | 65 | 0 | 0.00 |
+| 90 | Killiecrankie | Misc tunes | 12 | 12 | 65 | 0 | 0.00 |
+| 91 | Balmoral Castle | Alexander Walker | 14 | 14 | 64 | 0 | 0.00 |
+| 92 | Bude zima bude mráz | Misc Traditional | 2 | 2 | 64 | 0 | 0.00 |
+| 93 | La Gueussinette | Stephen Jones | 6 | 6 | 64 | 0 | 0.00 |
+| 94 | Ma chère amie | James Hook | 4 | 4 | 64 | 0 | 0.00 |
+| 95 | Morna | C. H. Perrot | 3 | 3 | 63 | 0 | 0.00 |
+| 96 | The Bag Of Spuds | Misc Traditional | 18 | 18 | 62 | 0 | 0.00 |
+| 97 | Bellamira | Henry Playford | 12 | 12 | 62 | 0 | 0.00 |
+| 98 | The Flower of the Quern | James Scott Skinner | 3 | 3 | 62 | 0 | 0.00 |
+| 99 | Keep It Up | Misc tunes | 18 | 18 | 62 | 0 | 0.00 |
+| 100 | Rakish Paddy | Misc Traditional | 16 | 16 | 62 | 0 | 0.00 |
+| 101 | The Miller of Drone | Nathaniel Gow | 24 | 24 | 61 | 0 | 0.00 |
+| 102 | Aux marches du palais | Misc Traditional | 2 | 2 | 60 | 0 | 0.00 |
+| 103 | Avondstemming | Alice Nahon | 6 | 6 | 60 | 0 | 0.00 |
+| 104 | Behind the Haystack | Misc Traditional | 14 | 14 | 60 | 0 | 0.00 |
+| 105 | Bung Your Eye | Niel Gow | 21 | 21 | 60 | 0 | 0.00 |
+| 106 | The First Of October | Nigel Gatherer | 4 | 4 | 60 | 0 | 0.00 |
+| 107 | Gentle Mary Laid Her Child | Melchior Vulpius | 2 | 1 | 60 | 0 | 0.00 |
+| 108 | Well's Humour | Purcell | 9 | 9 | 60 | 0 | 0.00 |
+| 109 | Mazltov | Misc Traditional | 5 | 5 | 59 | 3 | 4.49 |
+| 110 | Branle de Bourgogne | Jacques Moderne | 8 | 8 | 59 | 0 | 0.00 |
+| 111 | Champion Hornpipe | James Hill | 14 | 14 | 59 | 0 | 0.00 |
+| 112 | Da Full Rigged Ship | Shetland Jig | 19 | 19 | 59 | 0 | 0.00 |
+| 113 | 'Et dodim kala | Yemenite | 6 | 6 | 59 | 0 | 0.00 |
+| 114 | Helan | Emil Nielsen | 3 | 2 | 59 | 0 | 0.00 |
+| 115 | Lilli Burlero | Henry Purcell | 18 | 18 | 59 | 0 | 0.00 |
+| 116 | O'er the Hills and far away | March | 8 | 8 | 59 | 0 | 0.00 |
+| 117 | Our Highland Queen | James Scott Skinner | 14 | 14 | 59 | 0 | 0.00 |
+| 118 | Shores of Lough Gowna | jig | 9 | 9 | 59 | 0 | 0.00 |
+| 119 | The Curly Headed Ploughboy | aka The Ploughboy | 12 | 12 | 58 | 0 | 0.00 |
+| 120 | Hiraeth | a tasty shade of mauve | 2 | 2 | 58 | 0 | 0.00 |
+| 121 | Iron Legs | Misc Traditional | 15 | 15 | 58 | 0 | 0.00 |
+| 122 | Maids of Arrochar | John MacDonald Dundee | 8 | 8 | 58 | 0 | 0.00 |
+| 123 | Rejoice Our Nature Christ Assumes | St. Ambrose | 2 | 2 | 58 | 0 | 0.00 |
+| 124 | Sweet Jenny Jones | John Parry | 11 | 11 | 58 | 0 | 0.00 |
+| 125 | Twin Sisters | as played by the Reed Island Rounders | 8 | 8 | 58 | 0 | 0.00 |
+| 126 | Breton | Breton | 6 | 6 | 57 | 0 | 0.00 |
+| 127 | Ellacombe | Andrew Sims | 2 | 2 | 57 | 0 | 0.00 |
+| 128 | The Spring Garden | John Playford | 16 | 16 | 57 | 0 | 0.00 |
+| 129 | Tuonne taakse metsämaan | Misc Traditional | 2 | 1 | 57 | 0 | 0.00 |
+| 130 | Up with Aily | Henry Playford | 16 | 16 | 57 | 0 | 0.00 |
+| 131 | Aunt Mary's (Canadian) Jig | not known | 11 | 11 | 56 | 0 | 0.00 |
+| 132 | The Flax In Bloom | Misc Traditional | 23 | 23 | 56 | 0 | 0.00 |
+| 133 | Gavotte de l'Aven | Misc Traditional | 2 | 2 | 56 | 0 | 0.00 |
+| 134 | Hull's Victory | Misc Traditional | 17 | 16 | 56 | 0 | 0.00 |
+| 135 | I Bibelen Står | Anonymous | 2 | 2 | 56 | 0 | 0.00 |
+| 136 | See see the shepherds' Queen | Thomas Tomkins | 2 | 1 | 56 | 0 | 0.00 |
+| 137 | Year of Jubilo | Henry Clay Work | 6 | 6 | 56 | 0 | 0.00 |
+| 138 | Christe Redemptor Omnium | Misc Traditional | 6 | 2 | 55 | 0 | 0.00 |
+| 139 | John Anderson My Joe | Misc tunes | 3 | 2 | 55 | 0 | 0.00 |
+| 140 | Nyth Y Gog | Misc Traditional | 4 | 4 | 55 | 0 | 0.00 |
+| 141 | Craigellachie Bridge | William Marshall | 12 | 12 | 54 | 0 | 0.00 |
+| 142 | Glenburnie Rant | Neil Gow | 21 | 21 | 54 | 0 | 0.00 |
+| 143 | Nelly Bly | Stephen Foster | 7 | 7 | 54 | 0 | 0.00 |
+| 144 | The Tennessee | Oliver Holden | 4 | 3 | 54 | 0 | 0.00 |
+| 145 | The 72nd Highlanders' Farewell To Aberdeen | William Mackay | 9 | 9 | 53 | 0 | 0.00 |
+| 146 | For God so loved the world | Misc Traditional | 3 | 3 | 53 | 0 | 0.00 |
+| 147 | The Fyket | Very old | 28 | 28 | 53 | 0 | 0.00 |
+| 148 | Mille regrets | Josquin des Prez | 6 | 5 | 53 | 0 | 0.00 |
+| 149 | The Shepherd Boy | Grenville D. Wilson | 4 | 4 | 53 | 0 | 0.00 |
+| 150 | Since First I Saw Your Face | Thomas Ford | 2 | 1 | 53 | 0 | 0.00 |
+| 151 | Wha Saw the 42nd | Misc Traditional | 3 | 3 | 53 | 0 | 0.00 |
+| 152 | Canaries | Thoinot Arbeau | 2 | 2 | 52 | 0 | 0.00 |
+| 153 | Christchurch Bells | John Playford | 16 | 9 | 52 | 0 | 0.00 |
+| 154 | Farewell to the Highlands | Joachim Kelecom | 2 | 1 | 52 | 0 | 0.00 |
+| 155 | Green Grow The Rushes - O | Robbie Burns | 4 | 4 | 52 | 0 | 0.00 |
+| 156 | Hey Boys Up Go We | John Playford | 15 | 15 | 52 | 0 | 0.00 |
+| 157 | The Hills | Rickeybattleyahoo.com | 2 | 1 | 52 | 0 | 0.00 |
+| 158 | The Pleasures of the Town | Thompson | 15 | 15 | 52 | 0 | 0.00 |
+| 159 | Tekeli | James Hook | 6 | 6 | 52 | 0 | 0.00 |
+| 160 | Transylvania | Misc Traditional | 2 | 1 | 52 | 0 | 0.00 |
+| 161 | The White Petticoat | Misc Traditional | 20 | 20 | 52 | 0 | 0.00 |
+| 162 | All the Rage | Larry Ungar | 14 | 14 | 51 | 0 | 0.00 |
+| 163 | The Boys of Wexford | Misc Traditional | 10 | 10 | 51 | 0 | 0.00 |
+| 164 | Dublin Streets | Ennis | 13 | 13 | 51 | 0 | 0.00 |
+| 165 | Early to Bed | Misc Traditional | 2 | 1 | 51 | 0 | 0.00 |
+| 166 | Good Comrade | Misc Traditional | 4 | 4 | 51 | 0 | 0.00 |
+| 167 | The Happy Clown | John Walsh | 7 | 7 | 51 | 0 | 0.00 |
+| 168 | Lamentations Of Jeremiah | Thomas Tallis | 2 | 1 | 51 | 0 | 0.00 |
+| 169 | The Pride Of Petravore | William Percy French | 5 | 5 | 51 | 0 | 0.00 |
+| 170 | The Spey In Spate | James Scott Skinner | 11 | 11 | 51 | 0 | 0.00 |
+| 171 | Bile Them Cabbage Down | Misc Traditional | 7 | 7 | 50 | 0 | 0.00 |
+| 172 | French-Canadian Waltz | Misc Traditional | 2 | 2 | 50 | 0 | 0.00 |
+| 173 | Gipsy Hornpipe | Niel Gow | 4 | 4 | 50 | 0 | 0.00 |
+| 174 | Lady Dillon | Carolan | 10 | 10 | 50 | 0 | 0.00 |
+| 175 | Leander | Misc Traditional | 2 | 1 | 50 | 0 | 0.00 |
+| 176 | Mount Hills | Henry Playford | 16 | 16 | 50 | 0 | 0.00 |
+| 177 | Old Folks | Stephen Foster | 4 | 4 | 50 | 0 | 0.00 |
+| 178 | Planxty Browne | Nathaniel Gow | 9 | 9 | 50 | 0 | 0.00 |
+| 179 | The Dark-Eyed Sailor | Frederick Page | 2 | 2 | 49 | 0 | 0.00 |
+| 180 | The Earl Of Dalhousie's Happy Return To Scotland | Niel Gow | 6 | 6 | 49 | 0 | 0.00 |
+| 181 | Five Shetland Reels | Misc Traditional | 2 | 2 | 49 | 0 | 0.00 |
+| 182 | Tartini Variaciones en un tema de Corelli | Giuseppe Tartini | 2 | 2 | 49 | 0 | 0.00 |
+| 183 | Up Tails All | John Playford | 10 | 10 | 49 | 0 | 0.00 |
+| 184 | The Black Haired Lass | Misc Traditional | 14 | 14 | 48 | 0 | 0.00 |
+| 185 | Carolan's Quarrel with the Landlady | Carolan | 13 | 13 | 48 | 0 | 0.00 |
+| 186 | Dixie | Dan Emmett | 4 | 4 | 48 | 0 | 0.00 |
+| 187 | East Neuk of Fife | James Oswald | 16 | 16 | 48 | 0 | 0.00 |
+| 188 | The Haggis | Captain Simon Fraser | 14 | 14 | 48 | 0 | 0.00 |
+| 189 | The Household Brigade | Felix Burns | 6 | 6 | 48 | 0 | 0.00 |
+| 190 | Maiden Lane | John Playford | 16 | 16 | 48 | 0 | 0.00 |
+| 191 | The Red Red Rose | John Liptrot Hatton | 12 | 11 | 48 | 0 | 0.00 |
+| 192 | Sixpenny Money | jig | 11 | 11 | 48 | 0 | 0.00 |
+| 193 | Vivace | Nicolas Chédeville | 2 | 2 | 48 | 0 | 0.00 |
+| 194 | The Bishop | bishop | 22 | 22 | 47 | 0 | 0.00 |
+| 195 | The Fife Hunt | William Gow | 23 | 23 | 47 | 0 | 0.00 |
+| 196 | Galopp | Misc tunes | 2 | 1 | 47 | 0 | 0.00 |
+| 197 | The Gloucester Hornpipe | Misc Traditional | 4 | 4 | 47 | 0 | 0.00 |
+| 198 | The Banks Of Lough Gowna | Misc Traditional | 21 | 21 | 46 | 0 | 0.00 |
+| 199 | Chapel Keithack | William Marshall | 5 | 5 | 46 | 0 | 0.00 |
+| 200 | Down the Brae | Misc tunes | 11 | 11 | 46 | 0 | 0.00 |
+| 201 | Mrs. Major L. Stewart of the Island of Java | William Marshall | 2 | 2 | 46 | 0 | 0.00 |
+| 202 | Sad Is My Fate | Misc Traditional | 6 | 6 | 46 | 0 | 0.00 |
+| 203 | Balquhidder Lasses | Misc Traditional | 13 | 13 | 45 | 0 | 0.00 |
+| 204 | Fine Companion | John Playford | 15 | 15 | 45 | 0 | 0.00 |
+| 205 | Gasp\'e Reel | French Canadian | 17 | 17 | 45 | 0 | 0.00 |
+| 206 | GB/7a/12 God Rest You Merry Version 2 of 2 | Mrs Cranstone VIII | 2 | 2 | 45 | 0 | 0.00 |
+| 207 | Huldrevise | Misc Traditional | 2 | 2 | 45 | 0 | 0.00 |
+| 208 | Huntsman's Chorus in Dr. Freyschutz. GS.088 | Misc Traditional | 3 | 3 | 45 | 0 | 0.00 |
+| 209 | Maid in the Meadow | jig | 18 | 18 | 45 | 0 | 0.00 |
+| 210 | Mrs. Hamilton Of Pencaitland | Nathaniel Gow | 6 | 6 | 45 | 0 | 0.00 |
+| 211 | The Night Peece | John Playford | 7 | 7 | 45 | 0 | 0.00 |
+| 212 | Steal Away | Misc Traditional | 3 | 2 | 45 | 0 | 0.00 |
+| 213 | Stirling Castle | Professor Bannatyne | 12 | 12 | 45 | 0 | 0.00 |
+| 214 | Archie Menzies | John Lowe | 18 | 18 | 44 | 0 | 0.00 |
+| 215 | Bank's Hornpipe. | Parazotti | 4 | 4 | 44 | 0 | 0.00 |
+| 216 | Captain Byng | Nathaniel Gow | 15 | 15 | 44 | 0 | 0.00 |
+| 217 | Come O Holy Spirit | John R. Sweney | 2 | 2 | 44 | 0 | 0.00 |
+| 218 | Dance | Guillaume de Marchault | 18 | 18 | 44 | 0 | 0.00 |
+| 219 | The Duchess Of Atholl's Slipper | Niel Gow | 11 | 11 | 44 | 0 | 0.00 |
+| 220 | Hunsdon House | John Playford | 15 | 15 | 44 | 0 | 0.00 |
+| 221 | Jockey to the Fair | Richard Hughes MS | 15 | 15 | 44 | 0 | 0.00 |
+| 222 | Kari Kari Baane graater | Misc Traditional | 2 | 2 | 44 | 0 | 0.00 |
+| 223 | Lady Charlotte Campbell | Nathaniel Gow | 11 | 11 | 44 | 0 | 0.00 |
+| 224 | Lady Jane Taylor | William Marshall | 4 | 4 | 44 | 0 | 0.00 |
+| 225 | Miss Admiral Gordon's Strathspey | William Marshall | 12 | 12 | 44 | 0 | 0.00 |
+| 226 | Official Branle | Orchesography | 3 | 3 | 44 | 0 | 0.00 |
+| 227 | St. Albans | Walter Janes | 11 | 9 | 44 | 0 | 0.00 |
+| 228 | Trimazo | Misc Traditional | 3 | 3 | 44 | 0 | 0.00 |
+| 229 | Black Mountain Reel | Misc Traditional | 5 | 5 | 43 | 0 | 0.00 |
 | 230 | Bonny Grey-Ey'd Morn | Nathaniel Kynaston | 12 | 12 | 43 | 0 | 0.00 |
 | 231 | Cuckoo Valse | Carl Volti | 3 | 3 | 43 | 0 | 0.00 |
 | 232 | The Gentle Shepherd | Joshua Campbell | 9 | 9 | 43 | 0 | 0.00 |
@@ -1054,474 +1054,474 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 1027 | Certainly I will be with thee | Samuel Morrison | 2 | 2 | 9 | 0 | 0.00 |
 | 1028 | Copenhagen | Peter C. Lutkin | 4 | 4 | 9 | 0 | 0.00 |
 | 1029 | The Cowboy's Jig | Misc Traditional | 3 | 3 | 9 | 0 | 0.00 |
-| 1030 | Duchess of Hamilton | John Bowie | 4 | 4 | 9 | 0 | 0.00 |
-| 1031 | The Duke of Buccleuch | William Marshall | 9 | 9 | 9 | 0 | 0.00 |
-| 1032 | Fhear nan casun caola' | Pipe tune | 2 | 2 | 9 | 0 | 0.00 |
-| 1033 | The Florida Crackers' Hornpipe | FRANK LIVINGSTON | 3 | 3 | 9 | 0 | 0.00 |
-| 1034 | GB/7d/19 Bonnet So Blue | Transcribed by Simon Furey and Lewis Jones | 3 | 3 | 9 | 0 | 0.00 |
-| 1035 | Geordie Jack | Carl Volti | 7 | 7 | 9 | 0 | 0.00 |
-| 1036 | Gladez | Jonathan Shorland | 4 | 4 | 9 | 0 | 0.00 |
-| 1037 | Glenfiddich | William Marshall | 6 | 6 | 9 | 0 | 0.00 |
-| 1038 | God is our refuge in distress | Richard Garbett | 2 | 1 | 9 | 0 | 0.00 |
-| 1039 | Grange | Robert Brown-Borthwick | 3 | 3 | 9 | 0 | 0.00 |
-| 1040 | The Handsome Couple | Thompson | 7 | 7 | 9 | 0 | 0.00 |
-| 1041 | Harem Scarem | As played by The Old Guard | 2 | 2 | 9 | 0 | 0.00 |
-| 1042 | I Love my Jean | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
-| 1043 | The King's Gun | Pipe tune | 3 | 3 | 9 | 0 | 0.00 |
-| 1044 | Knockando House | William Marshall | 8 | 8 | 9 | 0 | 0.00 |
-| 1045 | La Flora | Robert Mackintosh | 2 | 2 | 9 | 0 | 0.00 |
-| 1046 | ....Laddy a gud tune. JaW.058 | FRAGMENT | 3 | 3 | 9 | 0 | 0.00 |
-| 1047 | Lady Caroline Montague | Nathaniel Gow | 4 | 4 | 9 | 0 | 0.00 |
-| 1048 | Lady Charlotte Campbells Strathspey | Nathaniel Gow | 4 | 4 | 9 | 0 | 0.00 |
-| 1049 | Lady Doune | Nathaniel Gow | 7 | 7 | 9 | 0 | 0.00 |
-| 1050 | Lady Glenorchy | Duncan MacKercher | 5 | 5 | 9 | 0 | 0.00 |
-| 1051 | Leap Year -- Reel | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
-| 1052 | Leith Hall | William Marshall | 3 | 3 | 9 | 0 | 0.00 |
-| 1053 | Light of the World | Arthur Henry Mann | 2 | 2 | 9 | 0 | 0.00 |
-| 1054 | Llanthony Abbey | John H. Lester | 5 | 5 | 9 | 0 | 0.00 |
-| 1055 | Lord John Scott | William Marshall | 5 | 5 | 9 | 0 | 0.00 |
-| 1056 | Love and a Bottle | in | 5 | 5 | 9 | 0 | 0.00 |
-| 1057 | Lucis Creator | Oliver Hayes | 3 | 2 | 9 | 0 | 0.00 |
-| 1058 | Maidstone Hall | bishop | 2 | 2 | 9 | 0 | 0.00 |
-| 1059 | Major James Monroe's Strathspey | Robert Mackintosh | 2 | 2 | 9 | 0 | 0.00 |
-| 1060 | Mantell Siani | Misc Traditional | 3 | 3 | 9 | 0 | 0.00 |
-| 1061 | Marching to Praetorius | Pierre Caroubel | 2 | 2 | 9 | 0 | 0.00 |
-| 1062 | The Marchioness of Normanby | William Marshall | 7 | 7 | 9 | 0 | 0.00 |
-| 1063 | Miss Dundas of Arniston | Nathaniel Gow | 3 | 3 | 9 | 0 | 0.00 |
-| 1064 | Miss Elders Reel | Robert Petrie | 5 | 5 | 9 | 0 | 0.00 |
-| 1065 | Miss Erskine of Torry | Niel Gow | 5 | 5 | 9 | 0 | 0.00 |
-| 1066 | Miss Grace Menzies | William Marshall | 5 | 5 | 9 | 0 | 0.00 |
-| 1067 | Miss Louisa Duff | William Marshall | 5 | 5 | 9 | 0 | 0.00 |
-| 1068 | Miss Menzies of Culdare's | Niel Gow | 4 | 4 | 9 | 0 | 0.00 |
-| 1069 | Miss Ross's Strathspey | by Niel Gow | 4 | 4 | 9 | 0 | 0.00 |
-| 1070 | Môn | Misc tunes | 4 | 4 | 9 | 0 | 0.00 |
-| 1071 | Monaltrie's Strathspey | Robert Petrie | 3 | 3 | 9 | 0 | 0.00 |
-| 1072 | Mrs. Garden of Troup | Robert Petrie | 6 | 6 | 9 | 0 | 0.00 |
-| 1073 | Mrs Gordon Of Knockespoch | William Marshall | 6 | 6 | 9 | 0 | 0.00 |
-| 1074 | Mrs. H. Inglis | William Marshall | 6 | 6 | 9 | 0 | 0.00 |
-| 1075 | Mrs. Weymss of Cuttle Hill. | Nathaniel Gow | 3 | 3 | 9 | 0 | 0.00 |
-| 1076 | O God my Heart is fully bent | Thomas Clark | 2 | 1 | 9 | 0 | 0.00 |
-| 1077 | O we are volunteers in the army of the Lord | George F. Root | 2 | 2 | 9 | 0 | 0.00 |
-| 1078 | Ore Boggy | Neal | 4 | 4 | 9 | 0 | 0.00 |
-| 1079 | Pease Bridge | Abraham Macintosh | 4 | 4 | 9 | 0 | 0.00 |
-| 1080 | Preston Hornpipe. JMT.112 | Dixon | 4 | 4 | 9 | 0 | 0.00 |
-| 1081 | The Prince of Mecklenburg's Jigg | Misc Traditional | 3 | 3 | 9 | 0 | 0.00 |
-| 1082 | Red Cross Knight | John Wall Callcott | 3 | 2 | 9 | 0 | 0.00 |
-| 1083 | Reel Des Vieux | Misc Traditional | 3 | 3 | 9 | 0 | 0.00 |
-| 1084 | The Roseland | Frank N. Shepperd | 4 | 4 | 9 | 0 | 0.00 |
-| 1085 | Royal Hunters | c | 3 | 3 | 9 | 0 | 0.00 |
-| 1086 | Schottische a Dede | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
-| 1087 | Scottish March | Scottish March | 2 | 2 | 9 | 0 | 0.00 |
-| 1088 | Serch Hudol | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
-| 1089 | So long in Egypt staying | Mrs. C. H. Morris | 2 | 2 | 9 | 0 | 0.00 |
-| 1090 | Son Ar Skoff | Misc Traditional | 3 | 3 | 9 | 0 | 0.00 |
-| 1091 | They Leave The Land of Gems and Gold | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
-| 1092 | Touch the String. GHW.070 | Thomas Hudson | 3 | 3 | 9 | 0 | 0.00 |
-| 1093 | Vespers | J. W. Elliot | 2 | 2 | 9 | 0 | 0.00 |
-| 1094 | Abercairney House | Niel Gow | 6 | 6 | 8 | 0 | 0.00 |
-| 1095 | Absence | John Liptrot Hatton | 2 | 1 | 8 | 0 | 0.00 |
-| 1096 | Adam | Misc Traditional | 3 | 3 | 8 | 0 | 0.00 |
-| 1097 | Argyll's Bowling Green | Gow | 2 | 2 | 8 | 0 | 0.00 |
-| 1098 | The Black Decree | Misc Traditional | 3 | 3 | 8 | 0 | 0.00 |
-| 1099 | Bonny Cate | Ashover Book | 2 | 2 | 8 | 0 | 0.00 |
-| 1100 | Brig of Perth | Daniel Dow | 4 | 4 | 8 | 0 | 0.00 |
-| 1101 | Bristol Cross | Wright | 5 | 5 | 8 | 0 | 0.00 |
-| 1102 | Brudmarsch fr. H\alsingland | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
-| 1103 | Carol Christian Children | Alfred Moffat | 2 | 1 | 8 | 0 | 0.00 |
-| 1104 | Colonel Baird | Mrs Oswald | 4 | 4 | 8 | 0 | 0.00 |
-| 1105 | Countess of Sutherland | George Jenkins | 7 | 7 | 8 | 0 | 0.00 |
-| 1106 | Covenant | Joseph Barnby | 2 | 2 | 8 | 0 | 0.00 |
-| 1107 | Craigellachie Lassies | William Marshall | 3 | 3 | 8 | 0 | 0.00 |
-| 1108 | Dalkeith House | James MacDonald | 4 | 4 | 8 | 0 | 0.00 |
-| 1109 | Dance for ever | Thompson | 4 | 4 | 8 | 0 | 0.00 |
-| 1110 | Dance of the Lakes | Jeremiah Clarke | 3 | 3 | 8 | 0 | 0.00 |
-| 1111 | Delgaty Castle | Robert Petrie | 4 | 4 | 8 | 0 | 0.00 |
-| 1112 | Deus Deorum | William Whittingham | 2 | 1 | 8 | 0 | 0.00 |
-| 1113 | Do you hear the Savior's voice so sweetly calling | R. L. Blowers | 2 | 2 | 8 | 0 | 0.00 |
-| 1114 | Drum House | Nathaniel Gow | 2 | 2 | 8 | 0 | 0.00 |
-| 1115 | Drumins | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
-| 1116 | Dunkeld Steeple | Niel Gow | 4 | 4 | 8 | 0 | 0.00 |
-| 1117 | Earl Of Breadalbane | Niel Gow | 4 | 4 | 8 | 0 | 0.00 |
-| 1118 | The Earl of Fife's Strathspey | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
-| 1119 | Flora | George F. Le Jeune | 2 | 2 | 8 | 0 | 0.00 |
-| 1120 | Forest of Ga-ick | William Marshall | 3 | 3 | 8 | 0 | 0.00 |
-| 1121 | GB/7d/22 Old Woman | Transcribed by Simon Furey and Lewis Jones | 2 | 2 | 8 | 0 | 0.00 |
-| 1122 | GB/7d/23 Old Black Joe | Transcribed by Simon Furey and Lewis Jones | 2 | 2 | 8 | 0 | 0.00 |
-| 1123 | The Glen where my love is | Pipe tune | 4 | 4 | 8 | 0 | 0.00 |
-| 1124 | The glorious gospel of the Son of God | Roger M. Hickman | 2 | 2 | 8 | 0 | 0.00 |
-| 1125 | Hame Came Our Gudeman | Old Scotch | 5 | 5 | 8 | 0 | 0.00 |
-| 1126 | Harpers Frolick | Ashover Book | 3 | 3 | 8 | 0 | 0.00 |
-| 1127 | Hava Netze Bamachol | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
-| 1128 | HawkThe. JMT.054 | James Hill | 2 | 2 | 8 | 0 | 0.00 |
-| 1129 | The Heart Bowed Down | Michael Balfe | 3 | 3 | 8 | 0 | 0.00 |
-| 1130 | Highland Time | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
-| 1131 | The House of New | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
-| 1132 | I had heard the gospel call | Mrs. C. H. Morris | 2 | 2 | 8 | 0 | 0.00 |
-| 1133 | I'll take my gospel trumpet | Misc Traditional | 2 | 1 | 8 | 0 | 0.00 |
-| 1134 | In The Country Nigh To Bethlehem | Gertrude Hine | 2 | 2 | 8 | 0 | 0.00 |
-| 1135 | Infant So Gentle | Misc Traditional | 2 | 1 | 8 | 0 | 0.00 |
-| 1136 | It was the very noon of night | Joseph Barnby | 2 | 2 | 8 | 0 | 0.00 |
-| 1137 | Lady Duff of Delgaty | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
-| 1138 | Lady Glasgow | EARL of EGLINTON | 5 | 5 | 8 | 0 | 0.00 |
-| 1139 | Lady John Scott | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
-| 1140 | Lady Shaftsburys Strathspey | Nathiel Gow | 2 | 2 | 8 | 0 | 0.00 |
-| 1141 | Lassie Look Behind Ye | William Marshall | 2 | 2 | 8 | 0 | 0.00 |
-| 1142 | Laurel Hill | Cantelo | 2 | 2 | 8 | 0 | 0.00 |
-| 1143 | Look Before You | William Marshall | 3 | 3 | 8 | 0 | 0.00 |
-| 1144 | Lord Eglintoune | Lord Eglintoune | 4 | 4 | 8 | 0 | 0.00 |
-| 1145 | Lord Francis Russell | William Marshall | 5 | 5 | 8 | 0 | 0.00 |
-| 1146 | Madge Wildfire's Strathspey | Nathaniel Gow | 4 | 4 | 8 | 0 | 0.00 |
-| 1147 | Malden | Daniel Belknap | 2 | 1 | 8 | 0 | 0.00 |
-| 1148 | Mar Castle | Alexander Walker | 5 | 5 | 8 | 0 | 0.00 |
-| 1149 | Marquis Of Waterford's Hornpipe | Attributed to James Hill | 2 | 2 | 8 | 0 | 0.00 |
-| 1150 | The Miser's Jewel | Thompson | 6 | 6 | 8 | 0 | 0.00 |
-| 1151 | Miss Field's Strathspey | Robert Mackintosh | 2 | 2 | 8 | 0 | 0.00 |
-| 1152 | Miss Maule of Panmure | Nathaniel Gow | 5 | 5 | 8 | 0 | 0.00 |
-| 1153 | Mrs Hamilton of Wishaw's Strathspey | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
-| 1154 | Mrs. James Duff | Isaac Cooper | 2 | 2 | 8 | 0 | 0.00 |
-| 1155 | Mrs. Macpherson Of Cluny | Joseph Lowe | 4 | 4 | 8 | 0 | 0.00 |
-| 1156 | Mrs. Mony Pennys Reel | Robert Petrie | 2 | 2 | 8 | 0 | 0.00 |
-| 1157 | Munich | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
-| 1158 | Niagara -- Hornpipe | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
-| 1159 | Niel Gow's Compliments Returned To Mr Marshall | Niel Gow | 3 | 3 | 8 | 0 | 0.00 |
-| 1160 | Old Pipe Reel | Misc Traditional | 3 | 3 | 8 | 0 | 0.00 |
-| 1161 | Queensborough | Jacob French | 2 | 1 | 8 | 0 | 0.00 |
-| 1162 | Rannoch Lodge | William MacLeish | 6 | 6 | 8 | 0 | 0.00 |
-| 1163 | Ratisbon | Andrew Sims | 2 | 2 | 8 | 0 | 0.00 |
-| 1164 | Rullande Gubben | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
-| 1165 | Salem -- Hornpipe | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
-| 1166 | To Us Is Born A Little Child | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
-| 1167 | Tour | Misc tunes | 5 | 5 | 8 | 0 | 0.00 |
-| 1168 | Traver's | Frank N. Shepperd | 5 | 5 | 8 | 0 | 0.00 |
-| 1169 | Vassr\aafela | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
-| 1170 | The Virgins Frolick | John Young | 5 | 5 | 8 | 0 | 0.00 |
-| 1171 | We Are Coming | Teton Sioux band | 3 | 3 | 8 | 0 | 0.00 |
-| 1172 | We won't give up the Bible | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
-| 1173 | Welsh March | Georg Friedrich Händel | 3 | 3 | 8 | 0 | 0.00 |
-| 1174 | Ye'll aye be Welcome back again | Bremner | 2 | 2 | 8 | 0 | 0.00 |
-| 1175 | A homeless stranger amongst us came | May Whittle Moody | 2 | 2 | 7 | 0 | 0.00 |
-| 1176 | Albion Hornpipe | Carl Volti | 6 | 6 | 7 | 0 | 0.00 |
-| 1177 | The Ashford Assembly | Colin Hume | 4 | 4 | 7 | 0 | 0.00 |
-| 1178 | Avimore | Joseph Lowe | 4 | 4 | 7 | 0 | 0.00 |
-| 1179 | Ballindalloch Castle | William Marshall | 3 | 3 | 7 | 0 | 0.00 |
-| 1180 | The Barns of Clyde | Joshua Campbell | 3 | 3 | 7 | 0 | 0.00 |
-| 1181 | The Bridge of Alford | Alexander Walker | 3 | 3 | 7 | 0 | 0.00 |
-| 1182 | Burnside of Tynet | William Marshall | 5 | 5 | 7 | 0 | 0.00 |
-| 1183 | The Clare | Hubert P. Main | 4 | 4 | 7 | 0 | 0.00 |
-| 1184 | Collar Green | William Marshall | 4 | 4 | 7 | 0 | 0.00 |
-| 1185 | Colonel David Stewart of Garths Reel | Niel Gow | 2 | 2 | 7 | 0 | 0.00 |
-| 1186 | Deil Among the Mantua-Makers | William Marshall | 5 | 5 | 7 | 0 | 0.00 |
-| 1187 | The Devil's Elbow | James Scott Skinner | 2 | 2 | 7 | 0 | 0.00 |
-| 1188 | Difyrrwch Gwyr Llangallo | Misc Traditional | 3 | 3 | 7 | 0 | 0.00 |
-| 1189 | The Dismissal | George Whelpton | 2 | 2 | 7 | 0 | 0.00 |
-| 1190 | The Dunkeld Volunteers | Niel Gow | 3 | 3 | 7 | 0 | 0.00 |
-| 1191 | The Earl of Breadalbane's Hermitage | Niel Gow | 4 | 4 | 7 | 0 | 0.00 |
-| 1192 | The Earl of Fife | William Marshall | 7 | 7 | 7 | 0 | 0.00 |
-| 1193 | The Earl of Fife's Fireside | Robert Petrie | 4 | 4 | 7 | 0 | 0.00 |
-| 1194 | Easter Elchies | William Marshall | 6 | 6 | 7 | 0 | 0.00 |
-| 1195 | Elterwater Hornpipe | Wm Irwin | 3 | 3 | 7 | 0 | 0.00 |
-| 1196 | The foe behind the deep before | Joseph Barnby | 2 | 2 | 7 | 0 | 0.00 |
-| 1197 | Great Eastern Reel | CLEM TITUS | 2 | 2 | 7 | 0 | 0.00 |
-| 1198 | Hoffed ap Hywel | Misc Traditional | 2 | 2 | 7 | 0 | 0.00 |
-| 1199 | Holy Voices | G. Jarvis Geer | 2 | 2 | 7 | 0 | 0.00 |
-| 1200 | Howard | Carl F. Crusius | 4 | 4 | 7 | 0 | 0.00 |
-| 1201 | Hoxton | Misc Traditional | 2 | 2 | 7 | 0 | 0.00 |
-| 1202 | Inverary Cross | Carl Volti | 3 | 3 | 7 | 0 | 0.00 |
-| 1203 | Jesus meek and gentle | William H. Monk | 2 | 2 | 7 | 0 | 0.00 |
-| 1204 | Jesus Our Shepherd | Misc Traditional | 2 | 2 | 7 | 0 | 0.00 |
-| 1205 | Joe Cormier's | Misc Traditional | 3 | 3 | 7 | 0 | 0.00 |
-| 1206 | The Kirn | John Prentice Taylor | 3 | 3 | 7 | 0 | 0.00 |
-| 1207 | Lady Louisa Hamilton | William Marshall | 5 | 5 | 7 | 0 | 0.00 |
-| 1208 | Lassie Look Before Ye | William Marshall | 3 | 3 | 7 | 0 | 0.00 |
-| 1209 | Lo A Star Ye Sages Hoary | Walter Newport | 2 | 2 | 7 | 0 | 0.00 |
-| 1210 | Look behind you | William Marshall | 3 | 3 | 7 | 0 | 0.00 |
-| 1211 | Lord Spencer Chichester | Nathaniel Gow | 2 | 2 | 7 | 0 | 0.00 |
-| 1212 | Mabel Kelly | Turlough Carolan | 2 | 2 | 7 | 0 | 0.00 |
-| 1213 | MacIntosh of MacIntosh | James Macintosh | 2 | 2 | 7 | 0 | 0.00 |
-| 1214 | Major Logans Favorite | Nathaniel Gow | 2 | 2 | 7 | 0 | 0.00 |
-| 1215 | Master Frank Romily | William Marshall | 5 | 5 | 7 | 0 | 0.00 |
-| 1216 | Master McDonald St. Martin's Strathspey | Robert Petrie | 2 | 2 | 7 | 0 | 0.00 |
-| 1217 | Miss Forbes's Farewell To Banff | Isaac Cooper | 3 | 3 | 7 | 0 | 0.00 |
-| 1218 | Miss Georgina B. Stewart West Park Elgin | William Marshall | 3 | 3 | 7 | 0 | 0.00 |
-| 1219 | Miss H. Hunter of Blackness | Nathaniel Gow | 4 | 4 | 7 | 0 | 0.00 |
-| 1220 | Miss Jessie Dalrymple | Robert Marshall | 3 | 3 | 7 | 0 | 0.00 |
-| 1221 | Miss Sophia Campbell | Robert Mackintosh | 3 | 3 | 7 | 0 | 0.00 |
-| 1222 | Monro's Rant | Angus Cumming | 3 | 3 | 7 | 0 | 0.00 |
-| 1223 | Mopsi Dôn | Misc Traditional | 5 | 5 | 7 | 0 | 0.00 |
-| 1224 | Mount Pleasant | James Leach | 3 | 3 | 7 | 0 | 0.00 |
-| 1225 | Mountain View | Wiliiam T. Rogers | 4 | 4 | 7 | 0 | 0.00 |
-| 1226 | Mr. Compton of Compton Hall | Alexander Givan | 4 | 4 | 7 | 0 | 0.00 |
-| 1227 | Mr. Murray | William Martin | 6 | 6 | 7 | 0 | 0.00 |
-| 1228 | Mrs Dundas of Arniston | William Gow | 5 | 5 | 7 | 0 | 0.00 |
-| 1229 | Mrs. Harwood | Carolan | 3 | 3 | 7 | 0 | 0.00 |
-| 1230 | Mrs. MacDonal Grant | Niel Gow | 3 | 3 | 7 | 0 | 0.00 |
-| 1231 | Mrs. MacInroy Of Lude | Joseph Lowe | 6 | 6 | 7 | 0 | 0.00 |
-| 1232 | Mrs. Mitchell of Stow | William Marshall | 3 | 3 | 7 | 0 | 0.00 |
-| 1233 | Mrs. Norman Lockhart | William Clarke | 2 | 2 | 7 | 0 | 0.00 |
-| 1234 | Mrs. Small of Dirnanean's Jigg | Robert Petrie | 2 | 2 | 7 | 0 | 0.00 |
-| 1235 | Mrs. Trench | Carolan | 2 | 2 | 7 | 0 | 0.00 |
-| 1236 | Norman Toy | Cushing | 5 | 5 | 7 | 0 | 0.00 |
-| 1237 | O Blessed Day When First Was Poured | Sebastian Besnault | 2 | 1 | 7 | 0 | 0.00 |
-| 1238 | O spotless Lamb I come to thee | Catherine Booth-Clibborn | 2 | 2 | 7 | 0 | 0.00 |
-| 1239 | One moment the darkness of midnight | E. L. Wolslagel | 2 | 2 | 7 | 0 | 0.00 |
-| 1240 | Our Sure Defense | Misc Traditional | 2 | 1 | 7 | 0 | 0.00 |
-| 1241 | Pell Mell | Playford | 2 | 2 | 7 | 0 | 0.00 |
-| 1242 | Proudlock's Hornpipe | James Hill | 3 | 3 | 7 | 0 | 0.00 |
-| 1243 | Rejoice ye saints again rejoice | James H. Burke | 2 | 2 | 7 | 0 | 0.00 |
-| 1244 | Russell | Timothy Swan | 2 | 1 | 7 | 0 | 0.00 |
-| 1245 | Saint Albans | Henry Playford | 3 | 3 | 7 | 0 | 0.00 |
-| 1246 | Sing We Now Of Joy And Gladness | W. Gilbert | 2 | 2 | 7 | 0 | 0.00 |
-| 1247 | Sir George Clerk of Pennycuick | Nathaniel Gow | 5 | 5 | 7 | 0 | 0.00 |
-| 1248 | Snowdon | Richard S. Willis | 3 | 3 | 7 | 0 | 0.00 |
-| 1249 | Sutherland | William B. Bradbury | 3 | 3 | 7 | 0 | 0.00 |
-| 1250 | There Came Three Kings From Far Away | Misc Traditional | 2 | 2 | 7 | 0 | 0.00 |
-| 1251 | Towie Castle | Alexander Walker | 3 | 3 | 7 | 0 | 0.00 |
-| 1252 | The Weasel | aka The Mulberry Jig | 3 | 3 | 7 | 0 | 0.00 |
-| 1253 | When the twilight gathers fast | Joseph Barnby | 2 | 1 | 7 | 0 | 0.00 |
-| 1254 | Who is this that's waiting waiting | C. Austin Miles | 2 | 2 | 7 | 0 | 0.00 |
-| 1255 | Young Phillis | John Young | 3 | 3 | 7 | 0 | 0.00 |
-| 1256 | A tribute to the Christ we bring | W. H. Doane | 2 | 2 | 6 | 0 | 0.00 |
-| 1257 | Albert | A. J. Holden | 2 | 2 | 6 | 0 | 0.00 |
-| 1258 | Alpha | Caryl Florio | 2 | 2 | 6 | 0 | 0.00 |
-| 1259 | The Alston | R. Menthal | 6 | 6 | 6 | 0 | 0.00 |
-| 1260 | Amid the hours that rapid fly | Asa Hull | 2 | 2 | 6 | 0 | 0.00 |
-| 1261 | Anniseed-water Robin | Playford | 3 | 3 | 6 | 0 | 0.00 |
-| 1262 | Ayr Races | John Gow | 4 | 4 | 6 | 0 | 0.00 |
-| 1263 | The Braes Of Mellinish | Neil Gow | 2 | 2 | 6 | 0 | 0.00 |
-| 1264 | Carmarthen | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
-| 1265 | Christmas Morning | George Edgar Oliver Carol 297 | 2 | 2 | 6 | 0 | 0.00 |
-| 1266 | Convention | G. E. Moser | 2 | 2 | 6 | 0 | 0.00 |
-| 1267 | Countess of Eglinton's Delight | Niel Gow | 2 | 2 | 6 | 0 | 0.00 |
-| 1268 | David Adams | James Scott Skinner | 6 | 6 | 6 | 0 | 0.00 |
-| 1269 | Dawns y glocsen | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
-| 1270 | The Duchess D. of Richmond's Strathspey | William Marshall | 2 | 2 | 6 | 0 | 0.00 |
-| 1271 | Duke of Gordon | Niel Gow | 5 | 5 | 6 | 0 | 0.00 |
-| 1272 | Dunse Castle | Abraham Mackintosh | 2 | 2 | 6 | 0 | 0.00 |
-| 1273 | Edradynate House | James Stewart Robertson | 5 | 5 | 6 | 0 | 0.00 |
-| 1274 | Egg Hornpipe. JC.253 | by Arnold Fishar | 2 | 2 | 6 | 0 | 0.00 |
-| 1275 | Eton | Joseph Barnby | 2 | 1 | 6 | 0 | 0.00 |
-| 1276 | The First Good Joy That Mary Had | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
-| 1277 | Fonab House | Niel Gow Jr | 2 | 2 | 6 | 0 | 0.00 |
-| 1278 | The Foula Reel | aka The Shaalds of Foula | 4 | 4 | 6 | 0 | 0.00 |
-| 1279 | Freeford Gardens | Daniel Wright | 2 | 2 | 6 | 0 | 0.00 |
-| 1280 | Glengrant | J Scott Skinner | 4 | 4 | 6 | 0 | 0.00 |
-| 1281 | Go and tell Jesus weary sin-sick soul | T. F. Seward | 2 | 2 | 6 | 0 | 0.00 |
-| 1282 | The Good Physician | John Newton | 2 | 1 | 6 | 0 | 0.00 |
-| 1283 | Highland Lass | Pipe tune | 4 | 4 | 6 | 0 | 0.00 |
-| 1284 | The Honorable Miss Drummond of Perth | John Bowie | 4 | 4 | 6 | 0 | 0.00 |
-| 1285 | In Chapel Park | Collected by Jekyll | 3 | 3 | 6 | 0 | 0.00 |
-| 1286 | Jordan | William Billings | 2 | 1 | 6 | 0 | 0.00 |
-| 1287 | Lady Auckland's Reel | Misc Traditional | 3 | 3 | 6 | 0 | 0.00 |
-| 1288 | Lady Charlotte Bruces Favourite | Nathaniel Gow | 3 | 3 | 6 | 0 | 0.00 |
-| 1289 | Lady Charlotte Gordon's Reel | William Marshall | 4 | 4 | 6 | 0 | 0.00 |
-| 1290 | Lady MacKenzie of Coul | Nathaniel Gow | 4 | 4 | 6 | 0 | 0.00 |
-| 1291 | Lady Mary Menzies Reel | Bremner | 6 | 6 | 6 | 0 | 0.00 |
-| 1292 | Lady Menzies of Castle Menzies | William Marshall | 4 | 4 | 6 | 0 | 0.00 |
-| 1293 | Laudate pueri | Tiburtio Massaino | 2 | 1 | 6 | 0 | 0.00 |
-| 1294 | The Leeds Polka | from the playing of Bob Keeble | 4 | 4 | 6 | 0 | 0.00 |
-| 1295 | Lord Louth | Carolan | 3 | 3 | 6 | 0 | 0.00 |
-| 1296 | Maggie And Jock | Felix Burns | 2 | 2 | 6 | 0 | 0.00 |
-| 1297 | The Marchioness of Breadalbane | William Marshall | 6 | 6 | 6 | 0 | 0.00 |
-| 1298 | The Marchioness of Huntly's Strathspey | William Marshall | 5 | 5 | 6 | 0 | 0.00 |
-| 1299 | The Mill of Lagan | William Marshal | 3 | 3 | 6 | 0 | 0.00 |
-| 1300 | Miss Barstow's Reel | Robert MacIntosh | 2 | 2 | 6 | 0 | 0.00 |
-| 1301 | Miss Davidson | Nathaniel Gow | 4 | 4 | 6 | 0 | 0.00 |
-| 1302 | Miss Farquharson of Invercauld's Jigg | Robert Petrie | 2 | 2 | 6 | 0 | 0.00 |
-| 1303 | Miss Gordon of Abergeldie's Jigg | Robert Petrie | 3 | 3 | 6 | 0 | 0.00 |
-| 1304 | Miss Maxwell's Reel | Abraham Mackintosh | 4 | 4 | 6 | 0 | 0.00 |
-| 1305 | Miss Rutherfoord's Jigg | Robert Petrie | 3 | 3 | 6 | 0 | 0.00 |
-| 1306 | Mr. Graham Of Orchill's | Niel Gow | 3 | 3 | 6 | 0 | 0.00 |
-| 1307 | Mr William Davidson | Joseph Lowe | 3 | 3 | 6 | 0 | 0.00 |
-| 1308 | Mrs. Garden of Troups Reel | Robert Petrie | 2 | 2 | 6 | 0 | 0.00 |
-| 1309 | Mrs. Hamilton of Wishaw | William Marshall | 3 | 3 | 6 | 0 | 0.00 |
-| 1310 | Mrs. Johnston of Woodhills Reel | Robert Petrie | 3 | 3 | 6 | 0 | 0.00 |
-| 1311 | Mrs. Muir MacKenzie | Wm GOW | 6 | 6 | 6 | 0 | 0.00 |
-| 1312 | Mrs. Small of Dirnanean's Delight | Robert Petrie | 3 | 3 | 6 | 0 | 0.00 |
-| 1313 | Mrs. Stewart Nicholson's Strathspey | Nathaniel Gow | 3 | 3 | 6 | 0 | 0.00 |
-| 1314 | Mrs. Wills | George Jenkins | 2 | 2 | 6 | 0 | 0.00 |
-| 1315 | My trust is in Jesus alone | Robert Lowry | 2 | 2 | 6 | 0 | 0.00 |
-| 1316 | The Nether Bow has Vanished | Niel Gow | 3 | 3 | 6 | 0 | 0.00 |
-| 1317 | The North Side Of The Grampians | Simon Fraser | 2 | 2 | 6 | 0 | 0.00 |
-| 1318 | Nymrod Hornpipe | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
-| 1319 | On the Field of Work | Robert Lowry | 2 | 2 | 6 | 0 | 0.00 |
-| 1320 | Orchill House | Nathaniel Gow | 3 | 3 | 6 | 0 | 0.00 |
-| 1321 | Prince Alberts -- Hornpipe | James Hill | 4 | 4 | 6 | 0 | 0.00 |
-| 1322 | Proclamation | Jacob French | 2 | 1 | 6 | 0 | 0.00 |
-| 1323 | Scots Jenny | James Oswald | 3 | 3 | 6 | 0 | 0.00 |
-| 1324 | Shottish | Belgium | 4 | 4 | 6 | 0 | 0.00 |
-| 1325 | Sir George MacKenzie | Niel Gow | 5 | 5 | 6 | 0 | 0.00 |
-| 1326 | Stewart Robertson's Strathspey | Robert Petrie | 2 | 2 | 6 | 0 | 0.00 |
-| 1327 | The Sunderland Hornpipe | Ravenscroft | 3 | 3 | 6 | 0 | 0.00 |
-| 1328 | Sweeny's | Misc Traditional | 3 | 3 | 6 | 0 | 0.00 |
-| 1329 | Tullymet Hall | John Gow | 3 | 3 | 6 | 0 | 0.00 |
-| 1330 | The Violet | Henry David Leslie | 2 | 1 | 6 | 0 | 0.00 |
-| 1331 | Walk Around__ Hey Daddy. | Dan Emmett | 2 | 2 | 6 | 0 | 0.00 |
-| 1332 | Weymss Castle Strathspey | Robert Petrie | 2 | 2 | 6 | 0 | 0.00 |
-| 1333 | When Cloe | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
-| 1334 | The Wickering Wench | John Young | 2 | 2 | 6 | 0 | 0.00 |
-| 1335 | Alarm | Stephen Jenks | 2 | 1 | 5 | 0 | 0.00 |
-| 1336 | Bridge of Lodi. JaW.100 | Manchester Hornpipe | 2 | 2 | 5 | 0 | 0.00 |
-| 1337 | Caritas | Richard W. Beaty | 2 | 2 | 5 | 0 | 0.00 |
-| 1338 | The children's Friend is Jesus | Robert Harkness | 2 | 2 | 5 | 0 | 0.00 |
-| 1339 | The Collonel | David Young | 2 | 2 | 5 | 0 | 0.00 |
-| 1340 | The Countess of Haddington | Neil Gow | 5 | 5 | 5 | 0 | 0.00 |
-| 1341 | The Countess of Seafield | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
-| 1342 | Dandaleith | William Marshall | 6 | 6 | 5 | 0 | 0.00 |
-| 1343 | Duniquaich | Carl Volti | 4 | 4 | 5 | 0 | 0.00 |
-| 1344 | The Fochaber's Rant | William Marshall | 5 | 5 | 5 | 0 | 0.00 |
-| 1345 | The Hills of Kesh | Misc Traditional | 3 | 3 | 5 | 0 | 0.00 |
-| 1346 | Holloway | Jay Deavereaux | 4 | 4 | 5 | 0 | 0.00 |
-| 1347 | Hombey House | John Young | 3 | 3 | 5 | 0 | 0.00 |
-| 1348 | The House of Park | William Marshall | 6 | 6 | 5 | 0 | 0.00 |
-| 1349 | Kinloss | Misc Traditional | 3 | 3 | 5 | 0 | 0.00 |
-| 1350 | Kirkmichael Plows | Robert Petrie | 3 | 3 | 5 | 0 | 0.00 |
-| 1351 | La Gracieuse | Misc Traditional | 3 | 3 | 5 | 0 | 0.00 |
-| 1352 | Lady Anne Gordon's Reel | William Marshall | 5 | 5 | 5 | 0 | 0.00 |
-| 1353 | Lady Blaney | Carolan | 2 | 2 | 5 | 0 | 0.00 |
-| 1354 | Lady Madelina Palmer's Strathspey | William Marshall | 6 | 6 | 5 | 0 | 0.00 |
-| 1355 | Lady McNeil | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
-| 1356 | Lady Shaftsbury | Nathaniel Gow | 3 | 3 | 5 | 0 | 0.00 |
-| 1357 | The Lasses O' Ballantrae | Captain Simon Fraser | 4 | 4 | 5 | 0 | 0.00 |
-| 1358 | Lee Mills | Marshall | 4 | 4 | 5 | 0 | 0.00 |
-| 1359 | Les filles de marbre | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
-| 1360 | Lewis Ricardo M.P. | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
-| 1361 | Lowe's Reel | John Cumming | 3 | 3 | 5 | 0 | 0.00 |
-| 1362 | The Marquis of Tullybardine | John Crerar | 5 | 5 | 5 | 0 | 0.00 |
-| 1363 | Merry Hop | John Young | 2 | 2 | 5 | 0 | 0.00 |
-| 1364 | Miss Robertson of Tullybelton | Nathaniel Gow | 2 | 2 | 5 | 0 | 0.00 |
-| 1365 | Miss Young | William Marshall | 3 | 3 | 5 | 0 | 0.00 |
-| 1366 | Monaghan Switch | Misc tunes | 3 | 3 | 5 | 0 | 0.00 |
-| 1367 | Mrs. Crofton | Carolan | 2 | 2 | 5 | 0 | 0.00 |
-| 1368 | Mrs. Douglas Moncrieff | Robert MacIntosh | 3 | 3 | 5 | 0 | 0.00 |
-| 1369 | Mrs. Fergusson of Raith's Delight | Robert Petrie | 3 | 3 | 5 | 0 | 0.00 |
-| 1370 | Mrs. Gordon of Park | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
-| 1371 | Mrs. MacKinnon Corry | Sir Alexander Macdonald | 4 | 4 | 5 | 0 | 0.00 |
-| 1372 | Ned Kendall's -- Hornpipe | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
-| 1373 | No night in Heaven! O blessed thought | A. C. Neece | 2 | 2 | 5 | 0 | 0.00 |
-| 1374 | O Babe in manger lying | Joseph Barnby | 2 | 2 | 5 | 0 | 0.00 |
-| 1375 | O spread the gospel tidings | Haldor Lillenas | 2 | 1 | 5 | 0 | 0.00 |
-| 1376 | One look at the Cross on Calvarys mount | W. W. Rhoads | 2 | 2 | 5 | 0 | 0.00 |
-| 1377 | Opera Schottische | Henry Kleber | 2 | 2 | 5 | 0 | 0.00 |
-| 1378 | The Oracle | Oliver Holden | 3 | 2 | 5 | 0 | 0.00 |
-| 1379 | Ossians Hall | Daniel Dow | 3 | 3 | 5 | 0 | 0.00 |
-| 1380 | The Peace Of The Valley | Michael Balfe | 2 | 2 | 5 | 0 | 0.00 |
-| 1381 | Peterborough | John Goss | 2 | 1 | 5 | 0 | 0.00 |
-| 1382 | Polka D'Uzeste | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
-| 1383 | Request | A. M. Lloyd | 5 | 5 | 5 | 0 | 0.00 |
-| 1384 | Ring Out Ye Throbbing Stars Of Night | Mrs. J. H. Barbour | 2 | 2 | 5 | 0 | 0.00 |
-| 1385 | The Road to Berwick | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
-| 1386 | Saint Catherine | Henry Playford | 3 | 3 | 5 | 0 | 0.00 |
-| 1387 | Spotted BitchThe. JMT.026 | James Hill | 2 | 2 | 5 | 0 | 0.00 |
-| 1388 | Viscount Hamilton | William Marshall | 3 | 3 | 5 | 0 | 0.00 |
-| 1389 | Wait for the Waggon | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
-| 1390 | Waken Christian children | Rev. S. C. Hamerton | 2 | 2 | 5 | 0 | 0.00 |
-| 1391 | When shall I see the day | Asa Hull | 2 | 2 | 5 | 0 | 0.00 |
-| 1392 | William Gibson Craig M.P. | William Marshall | 3 | 3 | 5 | 0 | 0.00 |
-| 1393 | Aberlour's Squeeze | William Marshall | 3 | 3 | 4 | 0 | 0.00 |
-| 1394 | Allowa Kirk | Joseph Lowe | 2 | 2 | 4 | 0 | 0.00 |
-| 1395 | Angels Unawares | Misc Traditional | 2 | 2 | 4 | 0 | 0.00 |
-| 1396 | Auld Toon o' Ayr | Misc Traditional | 5 | 5 | 4 | 0 | 0.00 |
-| 1397 | The Beauties of Ireland | Misc Traditional | 4 | 4 | 4 | 0 | 0.00 |
-| 1398 | The Blackthorn | Misc Traditional | 2 | 2 | 4 | 0 | 0.00 |
-| 1399 | The Buttonhole | c | 4 | 4 | 4 | 0 | 0.00 |
-| 1400 | Cambridge | Oliver Brownson | 3 | 1 | 4 | 0 | 0.00 |
-| 1401 | Chiselhurst | Joseph Barnby | 2 | 2 | 4 | 0 | 0.00 |
-| 1402 | Contentment | Oliver Holden | 2 | 1 | 4 | 0 | 0.00 |
-| 1403 | Countess of Dalkeiths | William Marshall | 2 | 2 | 4 | 0 | 0.00 |
-| 1404 | Culloden's Fancy | Caledonian Country Dances c | 2 | 2 | 4 | 0 | 0.00 |
-| 1405 | Daldowny's | Pipe tune | 3 | 3 | 4 | 0 | 0.00 |
-| 1406 | Denbigh | Timothy Swan | 2 | 1 | 4 | 0 | 0.00 |
-| 1407 | Deuks Dang o'er My Daddy | Misc tunes | 2 | 2 | 4 | 0 | 0.00 |
-| 1408 | Duchess of Gordon's reel | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
-| 1409 | Dunie Mains | James Stewart Robertson | 5 | 5 | 4 | 0 | 0.00 |
-| 1410 | The Fiddich-Side Lasses | William Marshall | 2 | 2 | 4 | 0 | 0.00 |
-| 1411 | George Skene Duff of Milton | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
-| 1412 | Henry's Cottage Maid | Pleyel | 3 | 3 | 4 | 0 | 0.00 |
-| 1413 | Honourable Mr. Ramsay Maule | Neil Gow | 3 | 3 | 4 | 0 | 0.00 |
-| 1414 | Hundred Years Since A | James Porteons | 2 | 2 | 4 | 0 | 0.00 |
-| 1415 | Inverary | Carl Volti | 5 | 5 | 4 | 0 | 0.00 |
-| 1416 | Invereys Strathspey | Robert Petrie | 3 | 3 | 4 | 0 | 0.00 |
-| 1417 | Jenny Cameron | Jenny Cameron | 4 | 4 | 4 | 0 | 0.00 |
-| 1418 | Jimmy Linn's Hornpipe | Jimmy Linn | 3 | 3 | 4 | 0 | 0.00 |
-| 1419 | La Schottische | Misc Traditional | 2 | 2 | 4 | 0 | 0.00 |
-| 1420 | Lady Agnes Duff | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
-| 1421 | Lady Amelia Murray | Niel Gow | 3 | 3 | 4 | 0 | 0.00 |
-| 1422 | Lady Forbes of New and Edinglassie | William Marshall | 3 | 3 | 4 | 0 | 0.00 |
-| 1423 | Lady Gwyder | John Bowie | 3 | 3 | 4 | 0 | 0.00 |
-| 1424 | Lawers House | Niel Gow | 3 | 3 | 4 | 0 | 0.00 |
-| 1425 | Let Music Break On This Blest Morn | J. B. Calkin | 2 | 2 | 4 | 0 | 0.00 |
-| 1426 | Lord Ballenden | George Jenkins | 2 | 2 | 4 | 0 | 0.00 |
-| 1427 | MacDonald | Niel Gow | 3 | 3 | 4 | 0 | 0.00 |
-| 1428 | Marnoch's | William Marshall | 2 | 2 | 4 | 0 | 0.00 |
-| 1429 | McVicar's Strathspey | Nathaniel Gow | 2 | 2 | 4 | 0 | 0.00 |
-| 1430 | Middleton | W. Arnold | 2 | 2 | 4 | 0 | 0.00 |
-| 1431 | Mill of Tynett | Alexander Walker | 2 | 2 | 4 | 0 | 0.00 |
-| 1432 | Miss C. Elphinstone | DUNCAN MACINTYRE | 3 | 3 | 4 | 0 | 0.00 |
-| 1433 | Miss Cruickshank's Reel | William Marshall | 2 | 2 | 4 | 0 | 0.00 |
-| 1434 | Miss Forsyth Huntly | William Marshall | 3 | 3 | 4 | 0 | 0.00 |
-| 1435 | Miss Gunning's Reel | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
-| 1436 | Miss Nisbet of Dirleton's Reel | Nathaniel Gow | 3 | 3 | 4 | 0 | 0.00 |
-| 1437 | Miss Sitwell | Nathaniel Gow | 2 | 2 | 4 | 0 | 0.00 |
-| 1438 | Miss Susan Spalding's Jigg | Robert Petrie | 4 | 4 | 4 | 0 | 0.00 |
-| 1439 | Miss Taylor | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
-| 1440 | The Mortlach Reel | William Marshall | 3 | 3 | 4 | 0 | 0.00 |
-| 1441 | Mr. Joseph Bank | William Martin | 2 | 2 | 4 | 0 | 0.00 |
-| 1442 | Mr. Stewart Dowally's Reel | Robert Petrie | 3 | 3 | 4 | 0 | 0.00 |
-| 1443 | Mrs. Chisholm | Niel Gow | 5 | 5 | 4 | 0 | 0.00 |
-| 1444 | My Father knows just what I need | Chas. H. Gabriel | 2 | 2 | 4 | 0 | 0.00 |
-| 1445 | O She's Comical | Very old | 5 | 5 | 4 | 0 | 0.00 |
-| 1446 | Perth Assembly | Samson Duncan | 4 | 4 | 4 | 0 | 0.00 |
-| 1447 | Philander. | Henry Purcell | 2 | 2 | 4 | 0 | 0.00 |
-| 1448 | Ring Out O Bells! Your Peals Today | Anonymous | 2 | 2 | 4 | 0 | 0.00 |
-| 1449 | The Roman Reel | Ashover Book | 2 | 2 | 4 | 0 | 0.00 |
-| 1450 | Shepherds Keeping Watch By Night | Misc Traditional | 2 | 1 | 4 | 0 | 0.00 |
-| 1451 | Sir Robert Peel | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
-| 1452 | Turriff Hunt | Robert Petrie | 2 | 2 | 4 | 0 | 0.00 |
-| 1453 | When the tempests rage and the storms beat high | Mrs. C. H. Morris | 2 | 2 | 4 | 0 | 0.00 |
-| 1454 | Between me and my Savior | P. P. Bliss | 2 | 2 | 3 | 0 | 0.00 |
-| 1455 | The Bridge Of Ballater | Niel Gow | 2 | 2 | 3 | 0 | 0.00 |
-| 1456 | The Bridge of Gairn | Alexander Walker | 2 | 2 | 3 | 0 | 0.00 |
-| 1457 | Caerdroea | Misc Traditional | 2 | 2 | 3 | 0 | 0.00 |
-| 1458 | Capt. Higgins | Carollan | 2 | 2 | 3 | 0 | 0.00 |
-| 1459 | Charles O'Conor | Turlough Carolan | 2 | 2 | 3 | 0 | 0.00 |
-| 1460 | Colonel L. Stewart's Reel | William Marshall | 2 | 2 | 3 | 0 | 0.00 |
-| 1461 | The Cross | Oliver Holden | 2 | 1 | 3 | 0 | 0.00 |
-| 1462 | Croughly | William Marshall | 5 | 5 | 3 | 0 | 0.00 |
-| 1463 | The Dorset | W. Burney | 3 | 3 | 3 | 0 | 0.00 |
-| 1464 | The Duchess of Roxburghes' Strathspey | William Marshall | 3 | 3 | 3 | 0 | 0.00 |
-| 1465 | The Dutchess of Bedford's Strathspey | William Marshall | 4 | 4 | 3 | 0 | 0.00 |
-| 1466 | Enrico | Misc tunes | 4 | 4 | 3 | 0 | 0.00 |
-| 1467 | Evans | S. M. Bixby | 4 | 4 | 3 | 0 | 0.00 |
-| 1468 | Fife Ness | McGibbon c | 3 | 3 | 3 | 0 | 0.00 |
-| 1469 | From Calvarys mountain sounding | W. Warren Bentley | 2 | 2 | 3 | 0 | 0.00 |
-| 1470 | Fulham | W. Harrison | 2 | 1 | 3 | 0 | 0.00 |
-| 1471 | GB/7d/20 Saturday Night | Transcribed by Simon Furey and Lewis Jones | 2 | 2 | 3 | 0 | 0.00 |
-| 1472 | Gogerddan | Misc Traditional | 2 | 2 | 3 | 0 | 0.00 |
-| 1473 | Havre | Oliver Holden | 3 | 2 | 3 | 0 | 0.00 |
-| 1474 | The Hills of Glen Orchy | Misc Traditional | 4 | 4 | 3 | 0 | 0.00 |
-| 1475 | The Honorable Captain Elliot's Quickstep | John Pringle | 3 | 3 | 3 | 0 | 0.00 |
-| 1476 | Honorable John Leslie Melville | Niel Gow | 3 | 3 | 3 | 0 | 0.00 |
-| 1477 | Jolie Flamande. EHo.088 La | Misc Traditional | 2 | 2 | 3 | 0 | 0.00 |
-| 1478 | Keithmore | William Marshall | 2 | 2 | 3 | 0 | 0.00 |
-| 1479 | Lady Belhaven's Reel | Scotch | 2 | 2 | 3 | 0 | 0.00 |
-| 1480 | Lady Bromes | Robert MacIntosh | 3 | 3 | 3 | 0 | 0.00 |
-| 1481 | Little Florrie | Robert Whinham | 2 | 2 | 3 | 0 | 0.00 |
-| 1482 | Lord John Russell | William Marshall | 5 | 5 | 3 | 0 | 0.00 |
-| 1483 | Luckie Bawdin's Reel | Scotch | 2 | 2 | 3 | 0 | 0.00 |
-| 1484 | March To The Wars | March | 2 | 2 | 3 | 0 | 0.00 |
-| 1485 | Marchioness of Blandfords Reel | Misc tunes | 2 | 2 | 3 | 0 | 0.00 |
-| 1486 | Marquis of Huntlys Birthday | Robert Petrie | 2 | 2 | 3 | 0 | 0.00 |
-| 1487 | Miss Grace Stewart | EARL of EGLINTON | 2 | 2 | 3 | 0 | 0.00 |
-| 1488 | Miss Heron | Nathaniel Gow | 4 | 4 | 3 | 0 | 0.00 |
-| 1489 | Miss Syme Wilson | William Marshall | 4 | 4 | 3 | 0 | 0.00 |
-| 1490 | Mount Vernon | Jacob French | 2 | 1 | 3 | 0 | 0.00 |
-| 1491 | Mrs. Buchan of Auchmacoy | William Marshall | 3 | 3 | 3 | 0 | 0.00 |
-| 1492 | Nos Galan Fel Y Cenir Yn Bencader | Misc Traditional | 3 | 3 | 3 | 0 | 0.00 |
-| 1493 | Null thar nan eileanan | Jenny Cameron | 2 | 2 | 3 | 0 | 0.00 |
-| 1494 | O Day So Wondrous | Harold Marlow | 2 | 2 | 3 | 0 | 0.00 |
-| 1495 | Ostend | Lowell Mason | 2 | 2 | 3 | 0 | 0.00 |
-| 1496 | P\'adraic Mac Giollarn\'ath | Misc Traditional | 4 | 4 | 3 | 0 | 0.00 |
-| 1497 | Prince Charlie's Last View of Scotland | William Marshall | 2 | 2 | 3 | 0 | 0.00 |
-| 1498 | Renown | Jeremiah Ingalls | 2 | 1 | 3 | 0 | 0.00 |
-| 1499 | Sir John Henderson | Neil Gow | 2 | 2 | 3 | 0 | 0.00 |
-| 1500 | Sir Watkin's Jig | Misc Traditional | 3 | 3 | 3 | 0 | 0.00 |
+| 1030 | Dark Is The Colour Of My True Love's Hair | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
+| 1031 | Duchess of Hamilton | John Bowie | 4 | 4 | 9 | 0 | 0.00 |
+| 1032 | The Duke of Buccleuch | William Marshall | 9 | 9 | 9 | 0 | 0.00 |
+| 1033 | Fhear nan casun caola' | Pipe tune | 2 | 2 | 9 | 0 | 0.00 |
+| 1034 | The Florida Crackers' Hornpipe | FRANK LIVINGSTON | 3 | 3 | 9 | 0 | 0.00 |
+| 1035 | GB/7d/19 Bonnet So Blue | Transcribed by Simon Furey and Lewis Jones | 3 | 3 | 9 | 0 | 0.00 |
+| 1036 | Geordie Jack | Carl Volti | 7 | 7 | 9 | 0 | 0.00 |
+| 1037 | Gladez | Jonathan Shorland | 4 | 4 | 9 | 0 | 0.00 |
+| 1038 | Glenfiddich | William Marshall | 6 | 6 | 9 | 0 | 0.00 |
+| 1039 | God is our refuge in distress | Richard Garbett | 2 | 1 | 9 | 0 | 0.00 |
+| 1040 | Grange | Robert Brown-Borthwick | 3 | 3 | 9 | 0 | 0.00 |
+| 1041 | The Handsome Couple | Thompson | 7 | 7 | 9 | 0 | 0.00 |
+| 1042 | Harem Scarem | As played by The Old Guard | 2 | 2 | 9 | 0 | 0.00 |
+| 1043 | I Love my Jean | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
+| 1044 | The King's Gun | Pipe tune | 3 | 3 | 9 | 0 | 0.00 |
+| 1045 | Knockando House | William Marshall | 8 | 8 | 9 | 0 | 0.00 |
+| 1046 | La Flora | Robert Mackintosh | 2 | 2 | 9 | 0 | 0.00 |
+| 1047 | ....Laddy a gud tune. JaW.058 | FRAGMENT | 3 | 3 | 9 | 0 | 0.00 |
+| 1048 | Lady Caroline Montague | Nathaniel Gow | 4 | 4 | 9 | 0 | 0.00 |
+| 1049 | Lady Charlotte Campbells Strathspey | Nathaniel Gow | 4 | 4 | 9 | 0 | 0.00 |
+| 1050 | Lady Doune | Nathaniel Gow | 7 | 7 | 9 | 0 | 0.00 |
+| 1051 | Lady Glenorchy | Duncan MacKercher | 5 | 5 | 9 | 0 | 0.00 |
+| 1052 | Leap Year -- Reel | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
+| 1053 | Leith Hall | William Marshall | 3 | 3 | 9 | 0 | 0.00 |
+| 1054 | Light of the World | Arthur Henry Mann | 2 | 2 | 9 | 0 | 0.00 |
+| 1055 | Llanthony Abbey | John H. Lester | 5 | 5 | 9 | 0 | 0.00 |
+| 1056 | Lord John Scott | William Marshall | 5 | 5 | 9 | 0 | 0.00 |
+| 1057 | Love and a Bottle | in | 5 | 5 | 9 | 0 | 0.00 |
+| 1058 | Lucis Creator | Oliver Hayes | 3 | 2 | 9 | 0 | 0.00 |
+| 1059 | Maidstone Hall | bishop | 2 | 2 | 9 | 0 | 0.00 |
+| 1060 | Major James Monroe's Strathspey | Robert Mackintosh | 2 | 2 | 9 | 0 | 0.00 |
+| 1061 | Mantell Siani | Misc Traditional | 3 | 3 | 9 | 0 | 0.00 |
+| 1062 | Marching to Praetorius | Pierre Caroubel | 2 | 2 | 9 | 0 | 0.00 |
+| 1063 | The Marchioness of Normanby | William Marshall | 7 | 7 | 9 | 0 | 0.00 |
+| 1064 | Miss Dundas of Arniston | Nathaniel Gow | 3 | 3 | 9 | 0 | 0.00 |
+| 1065 | Miss Elders Reel | Robert Petrie | 5 | 5 | 9 | 0 | 0.00 |
+| 1066 | Miss Erskine of Torry | Niel Gow | 5 | 5 | 9 | 0 | 0.00 |
+| 1067 | Miss Grace Menzies | William Marshall | 5 | 5 | 9 | 0 | 0.00 |
+| 1068 | Miss Louisa Duff | William Marshall | 5 | 5 | 9 | 0 | 0.00 |
+| 1069 | Miss Menzies of Culdare's | Niel Gow | 4 | 4 | 9 | 0 | 0.00 |
+| 1070 | Miss Ross's Strathspey | by Niel Gow | 4 | 4 | 9 | 0 | 0.00 |
+| 1071 | Môn | Misc tunes | 4 | 4 | 9 | 0 | 0.00 |
+| 1072 | Monaltrie's Strathspey | Robert Petrie | 3 | 3 | 9 | 0 | 0.00 |
+| 1073 | Mrs. Garden of Troup | Robert Petrie | 6 | 6 | 9 | 0 | 0.00 |
+| 1074 | Mrs Gordon Of Knockespoch | William Marshall | 6 | 6 | 9 | 0 | 0.00 |
+| 1075 | Mrs. H. Inglis | William Marshall | 6 | 6 | 9 | 0 | 0.00 |
+| 1076 | Mrs. Weymss of Cuttle Hill. | Nathaniel Gow | 3 | 3 | 9 | 0 | 0.00 |
+| 1077 | O God my Heart is fully bent | Thomas Clark | 2 | 1 | 9 | 0 | 0.00 |
+| 1078 | O we are volunteers in the army of the Lord | George F. Root | 2 | 2 | 9 | 0 | 0.00 |
+| 1079 | Ore Boggy | Neal | 4 | 4 | 9 | 0 | 0.00 |
+| 1080 | Pease Bridge | Abraham Macintosh | 4 | 4 | 9 | 0 | 0.00 |
+| 1081 | Preston Hornpipe. JMT.112 | Dixon | 4 | 4 | 9 | 0 | 0.00 |
+| 1082 | The Prince of Mecklenburg's Jigg | Misc Traditional | 3 | 3 | 9 | 0 | 0.00 |
+| 1083 | Red Cross Knight | John Wall Callcott | 3 | 2 | 9 | 0 | 0.00 |
+| 1084 | Reel Des Vieux | Misc Traditional | 3 | 3 | 9 | 0 | 0.00 |
+| 1085 | The Roseland | Frank N. Shepperd | 4 | 4 | 9 | 0 | 0.00 |
+| 1086 | Royal Hunters | c | 3 | 3 | 9 | 0 | 0.00 |
+| 1087 | Schottische a Dede | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
+| 1088 | Scottish March | Scottish March | 2 | 2 | 9 | 0 | 0.00 |
+| 1089 | Serch Hudol | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
+| 1090 | So long in Egypt staying | Mrs. C. H. Morris | 2 | 2 | 9 | 0 | 0.00 |
+| 1091 | Son Ar Skoff | Misc Traditional | 3 | 3 | 9 | 0 | 0.00 |
+| 1092 | They Leave The Land of Gems and Gold | Misc Traditional | 2 | 2 | 9 | 0 | 0.00 |
+| 1093 | Touch the String. GHW.070 | Thomas Hudson | 3 | 3 | 9 | 0 | 0.00 |
+| 1094 | Vespers | J. W. Elliot | 2 | 2 | 9 | 0 | 0.00 |
+| 1095 | Abercairney House | Niel Gow | 6 | 6 | 8 | 0 | 0.00 |
+| 1096 | Absence | John Liptrot Hatton | 2 | 1 | 8 | 0 | 0.00 |
+| 1097 | Adam | Misc Traditional | 3 | 3 | 8 | 0 | 0.00 |
+| 1098 | Argyll's Bowling Green | Gow | 2 | 2 | 8 | 0 | 0.00 |
+| 1099 | The Black Decree | Misc Traditional | 3 | 3 | 8 | 0 | 0.00 |
+| 1100 | Bonny Cate | Ashover Book | 2 | 2 | 8 | 0 | 0.00 |
+| 1101 | Brig of Perth | Daniel Dow | 4 | 4 | 8 | 0 | 0.00 |
+| 1102 | Bristol Cross | Wright | 5 | 5 | 8 | 0 | 0.00 |
+| 1103 | Brudmarsch fr. H\alsingland | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
+| 1104 | Carol Christian Children | Alfred Moffat | 2 | 1 | 8 | 0 | 0.00 |
+| 1105 | Colonel Baird | Mrs Oswald | 4 | 4 | 8 | 0 | 0.00 |
+| 1106 | Countess of Sutherland | George Jenkins | 7 | 7 | 8 | 0 | 0.00 |
+| 1107 | Covenant | Joseph Barnby | 2 | 2 | 8 | 0 | 0.00 |
+| 1108 | Craigellachie Lassies | William Marshall | 3 | 3 | 8 | 0 | 0.00 |
+| 1109 | Dalkeith House | James MacDonald | 4 | 4 | 8 | 0 | 0.00 |
+| 1110 | Dance for ever | Thompson | 4 | 4 | 8 | 0 | 0.00 |
+| 1111 | Dance of the Lakes | Jeremiah Clarke | 3 | 3 | 8 | 0 | 0.00 |
+| 1112 | Delgaty Castle | Robert Petrie | 4 | 4 | 8 | 0 | 0.00 |
+| 1113 | Deus Deorum | William Whittingham | 2 | 1 | 8 | 0 | 0.00 |
+| 1114 | Do you hear the Savior's voice so sweetly calling | R. L. Blowers | 2 | 2 | 8 | 0 | 0.00 |
+| 1115 | Drum House | Nathaniel Gow | 2 | 2 | 8 | 0 | 0.00 |
+| 1116 | Drumins | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
+| 1117 | Dunkeld Steeple | Niel Gow | 4 | 4 | 8 | 0 | 0.00 |
+| 1118 | Earl Of Breadalbane | Niel Gow | 4 | 4 | 8 | 0 | 0.00 |
+| 1119 | The Earl of Fife's Strathspey | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
+| 1120 | Flora | George F. Le Jeune | 2 | 2 | 8 | 0 | 0.00 |
+| 1121 | Forest of Ga-ick | William Marshall | 3 | 3 | 8 | 0 | 0.00 |
+| 1122 | GB/7d/22 Old Woman | Transcribed by Simon Furey and Lewis Jones | 2 | 2 | 8 | 0 | 0.00 |
+| 1123 | GB/7d/23 Old Black Joe | Transcribed by Simon Furey and Lewis Jones | 2 | 2 | 8 | 0 | 0.00 |
+| 1124 | The Glen where my love is | Pipe tune | 4 | 4 | 8 | 0 | 0.00 |
+| 1125 | The glorious gospel of the Son of God | Roger M. Hickman | 2 | 2 | 8 | 0 | 0.00 |
+| 1126 | Hame Came Our Gudeman | Old Scotch | 5 | 5 | 8 | 0 | 0.00 |
+| 1127 | Harpers Frolick | Ashover Book | 3 | 3 | 8 | 0 | 0.00 |
+| 1128 | Hava Netze Bamachol | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
+| 1129 | HawkThe. JMT.054 | James Hill | 2 | 2 | 8 | 0 | 0.00 |
+| 1130 | The Heart Bowed Down | Michael Balfe | 3 | 3 | 8 | 0 | 0.00 |
+| 1131 | Highland Time | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
+| 1132 | The House of New | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
+| 1133 | I had heard the gospel call | Mrs. C. H. Morris | 2 | 2 | 8 | 0 | 0.00 |
+| 1134 | I'll take my gospel trumpet | Misc Traditional | 2 | 1 | 8 | 0 | 0.00 |
+| 1135 | In The Country Nigh To Bethlehem | Gertrude Hine | 2 | 2 | 8 | 0 | 0.00 |
+| 1136 | Infant So Gentle | Misc Traditional | 2 | 1 | 8 | 0 | 0.00 |
+| 1137 | It was the very noon of night | Joseph Barnby | 2 | 2 | 8 | 0 | 0.00 |
+| 1138 | Lady Duff of Delgaty | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
+| 1139 | Lady Glasgow | EARL of EGLINTON | 5 | 5 | 8 | 0 | 0.00 |
+| 1140 | Lady John Scott | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
+| 1141 | Lady Shaftsburys Strathspey | Nathiel Gow | 2 | 2 | 8 | 0 | 0.00 |
+| 1142 | Lassie Look Behind Ye | William Marshall | 2 | 2 | 8 | 0 | 0.00 |
+| 1143 | Laurel Hill | Cantelo | 2 | 2 | 8 | 0 | 0.00 |
+| 1144 | Look Before You | William Marshall | 3 | 3 | 8 | 0 | 0.00 |
+| 1145 | Lord Eglintoune | Lord Eglintoune | 4 | 4 | 8 | 0 | 0.00 |
+| 1146 | Lord Francis Russell | William Marshall | 5 | 5 | 8 | 0 | 0.00 |
+| 1147 | Madge Wildfire's Strathspey | Nathaniel Gow | 4 | 4 | 8 | 0 | 0.00 |
+| 1148 | Malden | Daniel Belknap | 2 | 1 | 8 | 0 | 0.00 |
+| 1149 | Mar Castle | Alexander Walker | 5 | 5 | 8 | 0 | 0.00 |
+| 1150 | Marquis Of Waterford's Hornpipe | Attributed to James Hill | 2 | 2 | 8 | 0 | 0.00 |
+| 1151 | The Miser's Jewel | Thompson | 6 | 6 | 8 | 0 | 0.00 |
+| 1152 | Miss Field's Strathspey | Robert Mackintosh | 2 | 2 | 8 | 0 | 0.00 |
+| 1153 | Miss Maule of Panmure | Nathaniel Gow | 5 | 5 | 8 | 0 | 0.00 |
+| 1154 | Mrs Hamilton of Wishaw's Strathspey | William Marshall | 4 | 4 | 8 | 0 | 0.00 |
+| 1155 | Mrs. James Duff | Isaac Cooper | 2 | 2 | 8 | 0 | 0.00 |
+| 1156 | Mrs. Macpherson Of Cluny | Joseph Lowe | 4 | 4 | 8 | 0 | 0.00 |
+| 1157 | Mrs. Mony Pennys Reel | Robert Petrie | 2 | 2 | 8 | 0 | 0.00 |
+| 1158 | Munich | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
+| 1159 | Niagara -- Hornpipe | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
+| 1160 | Niel Gow's Compliments Returned To Mr Marshall | Niel Gow | 3 | 3 | 8 | 0 | 0.00 |
+| 1161 | Old Pipe Reel | Misc Traditional | 3 | 3 | 8 | 0 | 0.00 |
+| 1162 | Queensborough | Jacob French | 2 | 1 | 8 | 0 | 0.00 |
+| 1163 | Rannoch Lodge | William MacLeish | 6 | 6 | 8 | 0 | 0.00 |
+| 1164 | Ratisbon | Andrew Sims | 2 | 2 | 8 | 0 | 0.00 |
+| 1165 | Rullande Gubben | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
+| 1166 | Salem -- Hornpipe | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
+| 1167 | To Us Is Born A Little Child | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
+| 1168 | Tour | Misc tunes | 5 | 5 | 8 | 0 | 0.00 |
+| 1169 | Traver's | Frank N. Shepperd | 5 | 5 | 8 | 0 | 0.00 |
+| 1170 | Vassr\aafela | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
+| 1171 | The Virgins Frolick | John Young | 5 | 5 | 8 | 0 | 0.00 |
+| 1172 | We Are Coming | Teton Sioux band | 3 | 3 | 8 | 0 | 0.00 |
+| 1173 | We won't give up the Bible | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
+| 1174 | Welsh March | Georg Friedrich Händel | 3 | 3 | 8 | 0 | 0.00 |
+| 1175 | Ye'll aye be Welcome back again | Bremner | 2 | 2 | 8 | 0 | 0.00 |
+| 1176 | A homeless stranger amongst us came | May Whittle Moody | 2 | 2 | 7 | 0 | 0.00 |
+| 1177 | Albion Hornpipe | Carl Volti | 6 | 6 | 7 | 0 | 0.00 |
+| 1178 | The Ashford Assembly | Colin Hume | 4 | 4 | 7 | 0 | 0.00 |
+| 1179 | Avimore | Joseph Lowe | 4 | 4 | 7 | 0 | 0.00 |
+| 1180 | Ballindalloch Castle | William Marshall | 3 | 3 | 7 | 0 | 0.00 |
+| 1181 | The Barns of Clyde | Joshua Campbell | 3 | 3 | 7 | 0 | 0.00 |
+| 1182 | The Bridge of Alford | Alexander Walker | 3 | 3 | 7 | 0 | 0.00 |
+| 1183 | Burnside of Tynet | William Marshall | 5 | 5 | 7 | 0 | 0.00 |
+| 1184 | The Clare | Hubert P. Main | 4 | 4 | 7 | 0 | 0.00 |
+| 1185 | Collar Green | William Marshall | 4 | 4 | 7 | 0 | 0.00 |
+| 1186 | Colonel David Stewart of Garths Reel | Niel Gow | 2 | 2 | 7 | 0 | 0.00 |
+| 1187 | Deil Among the Mantua-Makers | William Marshall | 5 | 5 | 7 | 0 | 0.00 |
+| 1188 | The Devil's Elbow | James Scott Skinner | 2 | 2 | 7 | 0 | 0.00 |
+| 1189 | Difyrrwch Gwyr Llangallo | Misc Traditional | 3 | 3 | 7 | 0 | 0.00 |
+| 1190 | The Dismissal | George Whelpton | 2 | 2 | 7 | 0 | 0.00 |
+| 1191 | The Dunkeld Volunteers | Niel Gow | 3 | 3 | 7 | 0 | 0.00 |
+| 1192 | The Earl of Breadalbane's Hermitage | Niel Gow | 4 | 4 | 7 | 0 | 0.00 |
+| 1193 | The Earl of Fife | William Marshall | 7 | 7 | 7 | 0 | 0.00 |
+| 1194 | The Earl of Fife's Fireside | Robert Petrie | 4 | 4 | 7 | 0 | 0.00 |
+| 1195 | Easter Elchies | William Marshall | 6 | 6 | 7 | 0 | 0.00 |
+| 1196 | Elterwater Hornpipe | Wm Irwin | 3 | 3 | 7 | 0 | 0.00 |
+| 1197 | The foe behind the deep before | Joseph Barnby | 2 | 2 | 7 | 0 | 0.00 |
+| 1198 | Great Eastern Reel | CLEM TITUS | 2 | 2 | 7 | 0 | 0.00 |
+| 1199 | Hoffed ap Hywel | Misc Traditional | 2 | 2 | 7 | 0 | 0.00 |
+| 1200 | Holy Voices | G. Jarvis Geer | 2 | 2 | 7 | 0 | 0.00 |
+| 1201 | Howard | Carl F. Crusius | 4 | 4 | 7 | 0 | 0.00 |
+| 1202 | Hoxton | Misc Traditional | 2 | 2 | 7 | 0 | 0.00 |
+| 1203 | Inverary Cross | Carl Volti | 3 | 3 | 7 | 0 | 0.00 |
+| 1204 | Jesus meek and gentle | William H. Monk | 2 | 2 | 7 | 0 | 0.00 |
+| 1205 | Jesus Our Shepherd | Misc Traditional | 2 | 2 | 7 | 0 | 0.00 |
+| 1206 | Joe Cormier's | Misc Traditional | 3 | 3 | 7 | 0 | 0.00 |
+| 1207 | The Kirn | John Prentice Taylor | 3 | 3 | 7 | 0 | 0.00 |
+| 1208 | Lady Louisa Hamilton | William Marshall | 5 | 5 | 7 | 0 | 0.00 |
+| 1209 | Lassie Look Before Ye | William Marshall | 3 | 3 | 7 | 0 | 0.00 |
+| 1210 | Lo A Star Ye Sages Hoary | Walter Newport | 2 | 2 | 7 | 0 | 0.00 |
+| 1211 | Look behind you | William Marshall | 3 | 3 | 7 | 0 | 0.00 |
+| 1212 | Lord Spencer Chichester | Nathaniel Gow | 2 | 2 | 7 | 0 | 0.00 |
+| 1213 | Mabel Kelly | Turlough Carolan | 2 | 2 | 7 | 0 | 0.00 |
+| 1214 | MacIntosh of MacIntosh | James Macintosh | 2 | 2 | 7 | 0 | 0.00 |
+| 1215 | Major Logans Favorite | Nathaniel Gow | 2 | 2 | 7 | 0 | 0.00 |
+| 1216 | Master Frank Romily | William Marshall | 5 | 5 | 7 | 0 | 0.00 |
+| 1217 | Master McDonald St. Martin's Strathspey | Robert Petrie | 2 | 2 | 7 | 0 | 0.00 |
+| 1218 | Miss Forbes's Farewell To Banff | Isaac Cooper | 3 | 3 | 7 | 0 | 0.00 |
+| 1219 | Miss Georgina B. Stewart West Park Elgin | William Marshall | 3 | 3 | 7 | 0 | 0.00 |
+| 1220 | Miss H. Hunter of Blackness | Nathaniel Gow | 4 | 4 | 7 | 0 | 0.00 |
+| 1221 | Miss Jessie Dalrymple | Robert Marshall | 3 | 3 | 7 | 0 | 0.00 |
+| 1222 | Miss Sophia Campbell | Robert Mackintosh | 3 | 3 | 7 | 0 | 0.00 |
+| 1223 | Monro's Rant | Angus Cumming | 3 | 3 | 7 | 0 | 0.00 |
+| 1224 | Mopsi Dôn | Misc Traditional | 5 | 5 | 7 | 0 | 0.00 |
+| 1225 | Mount Pleasant | James Leach | 3 | 3 | 7 | 0 | 0.00 |
+| 1226 | Mountain View | Wiliiam T. Rogers | 4 | 4 | 7 | 0 | 0.00 |
+| 1227 | Mr. Compton of Compton Hall | Alexander Givan | 4 | 4 | 7 | 0 | 0.00 |
+| 1228 | Mr. Murray | William Martin | 6 | 6 | 7 | 0 | 0.00 |
+| 1229 | Mrs Dundas of Arniston | William Gow | 5 | 5 | 7 | 0 | 0.00 |
+| 1230 | Mrs. Harwood | Carolan | 3 | 3 | 7 | 0 | 0.00 |
+| 1231 | Mrs. MacDonal Grant | Niel Gow | 3 | 3 | 7 | 0 | 0.00 |
+| 1232 | Mrs. MacInroy Of Lude | Joseph Lowe | 6 | 6 | 7 | 0 | 0.00 |
+| 1233 | Mrs. Mitchell of Stow | William Marshall | 3 | 3 | 7 | 0 | 0.00 |
+| 1234 | Mrs. Norman Lockhart | William Clarke | 2 | 2 | 7 | 0 | 0.00 |
+| 1235 | Mrs. Small of Dirnanean's Jigg | Robert Petrie | 2 | 2 | 7 | 0 | 0.00 |
+| 1236 | Mrs. Trench | Carolan | 2 | 2 | 7 | 0 | 0.00 |
+| 1237 | Norman Toy | Cushing | 5 | 5 | 7 | 0 | 0.00 |
+| 1238 | O Blessed Day When First Was Poured | Sebastian Besnault | 2 | 1 | 7 | 0 | 0.00 |
+| 1239 | O spotless Lamb I come to thee | Catherine Booth-Clibborn | 2 | 2 | 7 | 0 | 0.00 |
+| 1240 | One moment the darkness of midnight | E. L. Wolslagel | 2 | 2 | 7 | 0 | 0.00 |
+| 1241 | Our Sure Defense | Misc Traditional | 2 | 1 | 7 | 0 | 0.00 |
+| 1242 | Pell Mell | Playford | 2 | 2 | 7 | 0 | 0.00 |
+| 1243 | Proudlock's Hornpipe | James Hill | 3 | 3 | 7 | 0 | 0.00 |
+| 1244 | Rejoice ye saints again rejoice | James H. Burke | 2 | 2 | 7 | 0 | 0.00 |
+| 1245 | Russell | Timothy Swan | 2 | 1 | 7 | 0 | 0.00 |
+| 1246 | Saint Albans | Henry Playford | 3 | 3 | 7 | 0 | 0.00 |
+| 1247 | Sing We Now Of Joy And Gladness | W. Gilbert | 2 | 2 | 7 | 0 | 0.00 |
+| 1248 | Sir George Clerk of Pennycuick | Nathaniel Gow | 5 | 5 | 7 | 0 | 0.00 |
+| 1249 | Snowdon | Richard S. Willis | 3 | 3 | 7 | 0 | 0.00 |
+| 1250 | Sutherland | William B. Bradbury | 3 | 3 | 7 | 0 | 0.00 |
+| 1251 | There Came Three Kings From Far Away | Misc Traditional | 2 | 2 | 7 | 0 | 0.00 |
+| 1252 | Towie Castle | Alexander Walker | 3 | 3 | 7 | 0 | 0.00 |
+| 1253 | The Weasel | aka The Mulberry Jig | 3 | 3 | 7 | 0 | 0.00 |
+| 1254 | When the twilight gathers fast | Joseph Barnby | 2 | 1 | 7 | 0 | 0.00 |
+| 1255 | Who is this that's waiting waiting | C. Austin Miles | 2 | 2 | 7 | 0 | 0.00 |
+| 1256 | Young Phillis | John Young | 3 | 3 | 7 | 0 | 0.00 |
+| 1257 | A tribute to the Christ we bring | W. H. Doane | 2 | 2 | 6 | 0 | 0.00 |
+| 1258 | Albert | A. J. Holden | 2 | 2 | 6 | 0 | 0.00 |
+| 1259 | Alpha | Caryl Florio | 2 | 2 | 6 | 0 | 0.00 |
+| 1260 | The Alston | R. Menthal | 6 | 6 | 6 | 0 | 0.00 |
+| 1261 | Amid the hours that rapid fly | Asa Hull | 2 | 2 | 6 | 0 | 0.00 |
+| 1262 | Anniseed-water Robin | Playford | 3 | 3 | 6 | 0 | 0.00 |
+| 1263 | Ayr Races | John Gow | 4 | 4 | 6 | 0 | 0.00 |
+| 1264 | The Braes Of Mellinish | Neil Gow | 2 | 2 | 6 | 0 | 0.00 |
+| 1265 | Carmarthen | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
+| 1266 | Christmas Morning | George Edgar Oliver Carol 297 | 2 | 2 | 6 | 0 | 0.00 |
+| 1267 | Convention | G. E. Moser | 2 | 2 | 6 | 0 | 0.00 |
+| 1268 | Countess of Eglinton's Delight | Niel Gow | 2 | 2 | 6 | 0 | 0.00 |
+| 1269 | David Adams | James Scott Skinner | 6 | 6 | 6 | 0 | 0.00 |
+| 1270 | Dawns y glocsen | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
+| 1271 | The Duchess D. of Richmond's Strathspey | William Marshall | 2 | 2 | 6 | 0 | 0.00 |
+| 1272 | Duke of Gordon | Niel Gow | 5 | 5 | 6 | 0 | 0.00 |
+| 1273 | Dunse Castle | Abraham Mackintosh | 2 | 2 | 6 | 0 | 0.00 |
+| 1274 | Edradynate House | James Stewart Robertson | 5 | 5 | 6 | 0 | 0.00 |
+| 1275 | Egg Hornpipe. JC.253 | by Arnold Fishar | 2 | 2 | 6 | 0 | 0.00 |
+| 1276 | Eton | Joseph Barnby | 2 | 1 | 6 | 0 | 0.00 |
+| 1277 | The First Good Joy That Mary Had | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
+| 1278 | Fonab House | Niel Gow Jr | 2 | 2 | 6 | 0 | 0.00 |
+| 1279 | The Foula Reel | aka The Shaalds of Foula | 4 | 4 | 6 | 0 | 0.00 |
+| 1280 | Freeford Gardens | Daniel Wright | 2 | 2 | 6 | 0 | 0.00 |
+| 1281 | Glengrant | J Scott Skinner | 4 | 4 | 6 | 0 | 0.00 |
+| 1282 | Go and tell Jesus weary sin-sick soul | T. F. Seward | 2 | 2 | 6 | 0 | 0.00 |
+| 1283 | The Good Physician | John Newton | 2 | 1 | 6 | 0 | 0.00 |
+| 1284 | Highland Lass | Pipe tune | 4 | 4 | 6 | 0 | 0.00 |
+| 1285 | The Honorable Miss Drummond of Perth | John Bowie | 4 | 4 | 6 | 0 | 0.00 |
+| 1286 | In Chapel Park | Collected by Jekyll | 3 | 3 | 6 | 0 | 0.00 |
+| 1287 | Jordan | William Billings | 2 | 1 | 6 | 0 | 0.00 |
+| 1288 | Lady Auckland's Reel | Misc Traditional | 3 | 3 | 6 | 0 | 0.00 |
+| 1289 | Lady Charlotte Bruces Favourite | Nathaniel Gow | 3 | 3 | 6 | 0 | 0.00 |
+| 1290 | Lady Charlotte Gordon's Reel | William Marshall | 4 | 4 | 6 | 0 | 0.00 |
+| 1291 | Lady MacKenzie of Coul | Nathaniel Gow | 4 | 4 | 6 | 0 | 0.00 |
+| 1292 | Lady Mary Menzies Reel | Bremner | 6 | 6 | 6 | 0 | 0.00 |
+| 1293 | Lady Menzies of Castle Menzies | William Marshall | 4 | 4 | 6 | 0 | 0.00 |
+| 1294 | Laudate pueri | Tiburtio Massaino | 2 | 1 | 6 | 0 | 0.00 |
+| 1295 | The Leeds Polka | from the playing of Bob Keeble | 4 | 4 | 6 | 0 | 0.00 |
+| 1296 | Lord Louth | Carolan | 3 | 3 | 6 | 0 | 0.00 |
+| 1297 | Maggie And Jock | Felix Burns | 2 | 2 | 6 | 0 | 0.00 |
+| 1298 | The Marchioness of Breadalbane | William Marshall | 6 | 6 | 6 | 0 | 0.00 |
+| 1299 | The Marchioness of Huntly's Strathspey | William Marshall | 5 | 5 | 6 | 0 | 0.00 |
+| 1300 | The Mill of Lagan | William Marshal | 3 | 3 | 6 | 0 | 0.00 |
+| 1301 | Miss Barstow's Reel | Robert MacIntosh | 2 | 2 | 6 | 0 | 0.00 |
+| 1302 | Miss Davidson | Nathaniel Gow | 4 | 4 | 6 | 0 | 0.00 |
+| 1303 | Miss Farquharson of Invercauld's Jigg | Robert Petrie | 2 | 2 | 6 | 0 | 0.00 |
+| 1304 | Miss Gordon of Abergeldie's Jigg | Robert Petrie | 3 | 3 | 6 | 0 | 0.00 |
+| 1305 | Miss Maxwell's Reel | Abraham Mackintosh | 4 | 4 | 6 | 0 | 0.00 |
+| 1306 | Miss Rutherfoord's Jigg | Robert Petrie | 3 | 3 | 6 | 0 | 0.00 |
+| 1307 | Mr. Graham Of Orchill's | Niel Gow | 3 | 3 | 6 | 0 | 0.00 |
+| 1308 | Mr William Davidson | Joseph Lowe | 3 | 3 | 6 | 0 | 0.00 |
+| 1309 | Mrs. Garden of Troups Reel | Robert Petrie | 2 | 2 | 6 | 0 | 0.00 |
+| 1310 | Mrs. Hamilton of Wishaw | William Marshall | 3 | 3 | 6 | 0 | 0.00 |
+| 1311 | Mrs. Johnston of Woodhills Reel | Robert Petrie | 3 | 3 | 6 | 0 | 0.00 |
+| 1312 | Mrs. Muir MacKenzie | Wm GOW | 6 | 6 | 6 | 0 | 0.00 |
+| 1313 | Mrs. Small of Dirnanean's Delight | Robert Petrie | 3 | 3 | 6 | 0 | 0.00 |
+| 1314 | Mrs. Stewart Nicholson's Strathspey | Nathaniel Gow | 3 | 3 | 6 | 0 | 0.00 |
+| 1315 | Mrs. Wills | George Jenkins | 2 | 2 | 6 | 0 | 0.00 |
+| 1316 | My trust is in Jesus alone | Robert Lowry | 2 | 2 | 6 | 0 | 0.00 |
+| 1317 | The Nether Bow has Vanished | Niel Gow | 3 | 3 | 6 | 0 | 0.00 |
+| 1318 | The North Side Of The Grampians | Simon Fraser | 2 | 2 | 6 | 0 | 0.00 |
+| 1319 | Nymrod Hornpipe | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
+| 1320 | On the Field of Work | Robert Lowry | 2 | 2 | 6 | 0 | 0.00 |
+| 1321 | Orchill House | Nathaniel Gow | 3 | 3 | 6 | 0 | 0.00 |
+| 1322 | Prince Alberts -- Hornpipe | James Hill | 4 | 4 | 6 | 0 | 0.00 |
+| 1323 | Proclamation | Jacob French | 2 | 1 | 6 | 0 | 0.00 |
+| 1324 | Scots Jenny | James Oswald | 3 | 3 | 6 | 0 | 0.00 |
+| 1325 | Shottish | Belgium | 4 | 4 | 6 | 0 | 0.00 |
+| 1326 | Sir George MacKenzie | Niel Gow | 5 | 5 | 6 | 0 | 0.00 |
+| 1327 | Stewart Robertson's Strathspey | Robert Petrie | 2 | 2 | 6 | 0 | 0.00 |
+| 1328 | The Sunderland Hornpipe | Ravenscroft | 3 | 3 | 6 | 0 | 0.00 |
+| 1329 | Sweeny's | Misc Traditional | 3 | 3 | 6 | 0 | 0.00 |
+| 1330 | Tullymet Hall | John Gow | 3 | 3 | 6 | 0 | 0.00 |
+| 1331 | The Violet | Henry David Leslie | 2 | 1 | 6 | 0 | 0.00 |
+| 1332 | Walk Around__ Hey Daddy. | Dan Emmett | 2 | 2 | 6 | 0 | 0.00 |
+| 1333 | Weymss Castle Strathspey | Robert Petrie | 2 | 2 | 6 | 0 | 0.00 |
+| 1334 | When Cloe | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
+| 1335 | The Wickering Wench | John Young | 2 | 2 | 6 | 0 | 0.00 |
+| 1336 | Alarm | Stephen Jenks | 2 | 1 | 5 | 0 | 0.00 |
+| 1337 | Bridge of Lodi. JaW.100 | Manchester Hornpipe | 2 | 2 | 5 | 0 | 0.00 |
+| 1338 | Caritas | Richard W. Beaty | 2 | 2 | 5 | 0 | 0.00 |
+| 1339 | The children's Friend is Jesus | Robert Harkness | 2 | 2 | 5 | 0 | 0.00 |
+| 1340 | The Collonel | David Young | 2 | 2 | 5 | 0 | 0.00 |
+| 1341 | The Countess of Haddington | Neil Gow | 5 | 5 | 5 | 0 | 0.00 |
+| 1342 | The Countess of Seafield | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
+| 1343 | Dandaleith | William Marshall | 6 | 6 | 5 | 0 | 0.00 |
+| 1344 | Duniquaich | Carl Volti | 4 | 4 | 5 | 0 | 0.00 |
+| 1345 | The Fochaber's Rant | William Marshall | 5 | 5 | 5 | 0 | 0.00 |
+| 1346 | The Hills of Kesh | Misc Traditional | 3 | 3 | 5 | 0 | 0.00 |
+| 1347 | Holloway | Jay Deavereaux | 4 | 4 | 5 | 0 | 0.00 |
+| 1348 | Hombey House | John Young | 3 | 3 | 5 | 0 | 0.00 |
+| 1349 | The House of Park | William Marshall | 6 | 6 | 5 | 0 | 0.00 |
+| 1350 | Kinloss | Misc Traditional | 3 | 3 | 5 | 0 | 0.00 |
+| 1351 | Kirkmichael Plows | Robert Petrie | 3 | 3 | 5 | 0 | 0.00 |
+| 1352 | La Gracieuse | Misc Traditional | 3 | 3 | 5 | 0 | 0.00 |
+| 1353 | Lady Anne Gordon's Reel | William Marshall | 5 | 5 | 5 | 0 | 0.00 |
+| 1354 | Lady Blaney | Carolan | 2 | 2 | 5 | 0 | 0.00 |
+| 1355 | Lady Madelina Palmer's Strathspey | William Marshall | 6 | 6 | 5 | 0 | 0.00 |
+| 1356 | Lady McNeil | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
+| 1357 | Lady Shaftsbury | Nathaniel Gow | 3 | 3 | 5 | 0 | 0.00 |
+| 1358 | The Lasses O' Ballantrae | Captain Simon Fraser | 4 | 4 | 5 | 0 | 0.00 |
+| 1359 | Lee Mills | Marshall | 4 | 4 | 5 | 0 | 0.00 |
+| 1360 | Les filles de marbre | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
+| 1361 | Lewis Ricardo M.P. | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
+| 1362 | Lowe's Reel | John Cumming | 3 | 3 | 5 | 0 | 0.00 |
+| 1363 | The Marquis of Tullybardine | John Crerar | 5 | 5 | 5 | 0 | 0.00 |
+| 1364 | Merry Hop | John Young | 2 | 2 | 5 | 0 | 0.00 |
+| 1365 | Miss Robertson of Tullybelton | Nathaniel Gow | 2 | 2 | 5 | 0 | 0.00 |
+| 1366 | Miss Young | William Marshall | 3 | 3 | 5 | 0 | 0.00 |
+| 1367 | Monaghan Switch | Misc tunes | 3 | 3 | 5 | 0 | 0.00 |
+| 1368 | Mrs. Crofton | Carolan | 2 | 2 | 5 | 0 | 0.00 |
+| 1369 | Mrs. Douglas Moncrieff | Robert MacIntosh | 3 | 3 | 5 | 0 | 0.00 |
+| 1370 | Mrs. Fergusson of Raith's Delight | Robert Petrie | 3 | 3 | 5 | 0 | 0.00 |
+| 1371 | Mrs. Gordon of Park | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
+| 1372 | Mrs. MacKinnon Corry | Sir Alexander Macdonald | 4 | 4 | 5 | 0 | 0.00 |
+| 1373 | Ned Kendall's -- Hornpipe | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
+| 1374 | No night in Heaven! O blessed thought | A. C. Neece | 2 | 2 | 5 | 0 | 0.00 |
+| 1375 | O Babe in manger lying | Joseph Barnby | 2 | 2 | 5 | 0 | 0.00 |
+| 1376 | O spread the gospel tidings | Haldor Lillenas | 2 | 1 | 5 | 0 | 0.00 |
+| 1377 | One look at the Cross on Calvarys mount | W. W. Rhoads | 2 | 2 | 5 | 0 | 0.00 |
+| 1378 | Opera Schottische | Henry Kleber | 2 | 2 | 5 | 0 | 0.00 |
+| 1379 | The Oracle | Oliver Holden | 3 | 2 | 5 | 0 | 0.00 |
+| 1380 | Ossians Hall | Daniel Dow | 3 | 3 | 5 | 0 | 0.00 |
+| 1381 | The Peace Of The Valley | Michael Balfe | 2 | 2 | 5 | 0 | 0.00 |
+| 1382 | Peterborough | John Goss | 2 | 1 | 5 | 0 | 0.00 |
+| 1383 | Polka D'Uzeste | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
+| 1384 | Request | A. M. Lloyd | 5 | 5 | 5 | 0 | 0.00 |
+| 1385 | Ring Out Ye Throbbing Stars Of Night | Mrs. J. H. Barbour | 2 | 2 | 5 | 0 | 0.00 |
+| 1386 | The Road to Berwick | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
+| 1387 | Saint Catherine | Henry Playford | 3 | 3 | 5 | 0 | 0.00 |
+| 1388 | Spotted BitchThe. JMT.026 | James Hill | 2 | 2 | 5 | 0 | 0.00 |
+| 1389 | Viscount Hamilton | William Marshall | 3 | 3 | 5 | 0 | 0.00 |
+| 1390 | Wait for the Waggon | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
+| 1391 | Waken Christian children | Rev. S. C. Hamerton | 2 | 2 | 5 | 0 | 0.00 |
+| 1392 | When shall I see the day | Asa Hull | 2 | 2 | 5 | 0 | 0.00 |
+| 1393 | William Gibson Craig M.P. | William Marshall | 3 | 3 | 5 | 0 | 0.00 |
+| 1394 | Aberlour's Squeeze | William Marshall | 3 | 3 | 4 | 0 | 0.00 |
+| 1395 | Allowa Kirk | Joseph Lowe | 2 | 2 | 4 | 0 | 0.00 |
+| 1396 | Angels Unawares | Misc Traditional | 2 | 2 | 4 | 0 | 0.00 |
+| 1397 | Auld Toon o' Ayr | Misc Traditional | 5 | 5 | 4 | 0 | 0.00 |
+| 1398 | The Beauties of Ireland | Misc Traditional | 4 | 4 | 4 | 0 | 0.00 |
+| 1399 | The Blackthorn | Misc Traditional | 2 | 2 | 4 | 0 | 0.00 |
+| 1400 | The Buttonhole | c | 4 | 4 | 4 | 0 | 0.00 |
+| 1401 | Cambridge | Oliver Brownson | 3 | 1 | 4 | 0 | 0.00 |
+| 1402 | Chiselhurst | Joseph Barnby | 2 | 2 | 4 | 0 | 0.00 |
+| 1403 | Contentment | Oliver Holden | 2 | 1 | 4 | 0 | 0.00 |
+| 1404 | Countess of Dalkeiths | William Marshall | 2 | 2 | 4 | 0 | 0.00 |
+| 1405 | Culloden's Fancy | Caledonian Country Dances c | 2 | 2 | 4 | 0 | 0.00 |
+| 1406 | Daldowny's | Pipe tune | 3 | 3 | 4 | 0 | 0.00 |
+| 1407 | Denbigh | Timothy Swan | 2 | 1 | 4 | 0 | 0.00 |
+| 1408 | Deuks Dang o'er My Daddy | Misc tunes | 2 | 2 | 4 | 0 | 0.00 |
+| 1409 | Duchess of Gordon's reel | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
+| 1410 | Dunie Mains | James Stewart Robertson | 5 | 5 | 4 | 0 | 0.00 |
+| 1411 | The Fiddich-Side Lasses | William Marshall | 2 | 2 | 4 | 0 | 0.00 |
+| 1412 | George Skene Duff of Milton | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
+| 1413 | Henry's Cottage Maid | Pleyel | 3 | 3 | 4 | 0 | 0.00 |
+| 1414 | Honourable Mr. Ramsay Maule | Neil Gow | 3 | 3 | 4 | 0 | 0.00 |
+| 1415 | Hundred Years Since A | James Porteons | 2 | 2 | 4 | 0 | 0.00 |
+| 1416 | Inverary | Carl Volti | 5 | 5 | 4 | 0 | 0.00 |
+| 1417 | Invereys Strathspey | Robert Petrie | 3 | 3 | 4 | 0 | 0.00 |
+| 1418 | Jenny Cameron | Jenny Cameron | 4 | 4 | 4 | 0 | 0.00 |
+| 1419 | Jimmy Linn's Hornpipe | Jimmy Linn | 3 | 3 | 4 | 0 | 0.00 |
+| 1420 | La Schottische | Misc Traditional | 2 | 2 | 4 | 0 | 0.00 |
+| 1421 | Lady Agnes Duff | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
+| 1422 | Lady Amelia Murray | Niel Gow | 3 | 3 | 4 | 0 | 0.00 |
+| 1423 | Lady Forbes of New and Edinglassie | William Marshall | 3 | 3 | 4 | 0 | 0.00 |
+| 1424 | Lady Gwyder | John Bowie | 3 | 3 | 4 | 0 | 0.00 |
+| 1425 | Lawers House | Niel Gow | 3 | 3 | 4 | 0 | 0.00 |
+| 1426 | Let Music Break On This Blest Morn | J. B. Calkin | 2 | 2 | 4 | 0 | 0.00 |
+| 1427 | Lord Ballenden | George Jenkins | 2 | 2 | 4 | 0 | 0.00 |
+| 1428 | MacDonald | Niel Gow | 3 | 3 | 4 | 0 | 0.00 |
+| 1429 | Marnoch's | William Marshall | 2 | 2 | 4 | 0 | 0.00 |
+| 1430 | McVicar's Strathspey | Nathaniel Gow | 2 | 2 | 4 | 0 | 0.00 |
+| 1431 | Middleton | W. Arnold | 2 | 2 | 4 | 0 | 0.00 |
+| 1432 | Mill of Tynett | Alexander Walker | 2 | 2 | 4 | 0 | 0.00 |
+| 1433 | Miss C. Elphinstone | DUNCAN MACINTYRE | 3 | 3 | 4 | 0 | 0.00 |
+| 1434 | Miss Cruickshank's Reel | William Marshall | 2 | 2 | 4 | 0 | 0.00 |
+| 1435 | Miss Forsyth Huntly | William Marshall | 3 | 3 | 4 | 0 | 0.00 |
+| 1436 | Miss Gunning's Reel | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
+| 1437 | Miss Nisbet of Dirleton's Reel | Nathaniel Gow | 3 | 3 | 4 | 0 | 0.00 |
+| 1438 | Miss Sitwell | Nathaniel Gow | 2 | 2 | 4 | 0 | 0.00 |
+| 1439 | Miss Susan Spalding's Jigg | Robert Petrie | 4 | 4 | 4 | 0 | 0.00 |
+| 1440 | Miss Taylor | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
+| 1441 | The Mortlach Reel | William Marshall | 3 | 3 | 4 | 0 | 0.00 |
+| 1442 | Mr. Joseph Bank | William Martin | 2 | 2 | 4 | 0 | 0.00 |
+| 1443 | Mr. Stewart Dowally's Reel | Robert Petrie | 3 | 3 | 4 | 0 | 0.00 |
+| 1444 | Mrs. Chisholm | Niel Gow | 5 | 5 | 4 | 0 | 0.00 |
+| 1445 | My Father knows just what I need | Chas. H. Gabriel | 2 | 2 | 4 | 0 | 0.00 |
+| 1446 | O She's Comical | Very old | 5 | 5 | 4 | 0 | 0.00 |
+| 1447 | Perth Assembly | Samson Duncan | 4 | 4 | 4 | 0 | 0.00 |
+| 1448 | Philander. | Henry Purcell | 2 | 2 | 4 | 0 | 0.00 |
+| 1449 | Ring Out O Bells! Your Peals Today | Anonymous | 2 | 2 | 4 | 0 | 0.00 |
+| 1450 | The Roman Reel | Ashover Book | 2 | 2 | 4 | 0 | 0.00 |
+| 1451 | Shepherds Keeping Watch By Night | Misc Traditional | 2 | 1 | 4 | 0 | 0.00 |
+| 1452 | Sir Robert Peel | William Marshall | 4 | 4 | 4 | 0 | 0.00 |
+| 1453 | Turriff Hunt | Robert Petrie | 2 | 2 | 4 | 0 | 0.00 |
+| 1454 | When the tempests rage and the storms beat high | Mrs. C. H. Morris | 2 | 2 | 4 | 0 | 0.00 |
+| 1455 | Between me and my Savior | P. P. Bliss | 2 | 2 | 3 | 0 | 0.00 |
+| 1456 | The Bridge Of Ballater | Niel Gow | 2 | 2 | 3 | 0 | 0.00 |
+| 1457 | The Bridge of Gairn | Alexander Walker | 2 | 2 | 3 | 0 | 0.00 |
+| 1458 | Caerdroea | Misc Traditional | 2 | 2 | 3 | 0 | 0.00 |
+| 1459 | Capt. Higgins | Carollan | 2 | 2 | 3 | 0 | 0.00 |
+| 1460 | Charles O'Conor | Turlough Carolan | 2 | 2 | 3 | 0 | 0.00 |
+| 1461 | Colonel L. Stewart's Reel | William Marshall | 2 | 2 | 3 | 0 | 0.00 |
+| 1462 | The Cross | Oliver Holden | 2 | 1 | 3 | 0 | 0.00 |
+| 1463 | Croughly | William Marshall | 5 | 5 | 3 | 0 | 0.00 |
+| 1464 | The Dorset | W. Burney | 3 | 3 | 3 | 0 | 0.00 |
+| 1465 | The Duchess of Roxburghes' Strathspey | William Marshall | 3 | 3 | 3 | 0 | 0.00 |
+| 1466 | The Dutchess of Bedford's Strathspey | William Marshall | 4 | 4 | 3 | 0 | 0.00 |
+| 1467 | Enrico | Misc tunes | 4 | 4 | 3 | 0 | 0.00 |
+| 1468 | Evans | S. M. Bixby | 4 | 4 | 3 | 0 | 0.00 |
+| 1469 | Fife Ness | McGibbon c | 3 | 3 | 3 | 0 | 0.00 |
+| 1470 | From Calvarys mountain sounding | W. Warren Bentley | 2 | 2 | 3 | 0 | 0.00 |
+| 1471 | Fulham | W. Harrison | 2 | 1 | 3 | 0 | 0.00 |
+| 1472 | GB/7d/20 Saturday Night | Transcribed by Simon Furey and Lewis Jones | 2 | 2 | 3 | 0 | 0.00 |
+| 1473 | Gogerddan | Misc Traditional | 2 | 2 | 3 | 0 | 0.00 |
+| 1474 | Havre | Oliver Holden | 3 | 2 | 3 | 0 | 0.00 |
+| 1475 | The Hills of Glen Orchy | Misc Traditional | 4 | 4 | 3 | 0 | 0.00 |
+| 1476 | The Honorable Captain Elliot's Quickstep | John Pringle | 3 | 3 | 3 | 0 | 0.00 |
+| 1477 | Honorable John Leslie Melville | Niel Gow | 3 | 3 | 3 | 0 | 0.00 |
+| 1478 | Jolie Flamande. EHo.088 La | Misc Traditional | 2 | 2 | 3 | 0 | 0.00 |
+| 1479 | Keithmore | William Marshall | 2 | 2 | 3 | 0 | 0.00 |
+| 1480 | Lady Belhaven's Reel | Scotch | 2 | 2 | 3 | 0 | 0.00 |
+| 1481 | Lady Bromes | Robert MacIntosh | 3 | 3 | 3 | 0 | 0.00 |
+| 1482 | Little Florrie | Robert Whinham | 2 | 2 | 3 | 0 | 0.00 |
+| 1483 | Lord John Russell | William Marshall | 5 | 5 | 3 | 0 | 0.00 |
+| 1484 | Luckie Bawdin's Reel | Scotch | 2 | 2 | 3 | 0 | 0.00 |
+| 1485 | March To The Wars | March | 2 | 2 | 3 | 0 | 0.00 |
+| 1486 | Marchioness of Blandfords Reel | Misc tunes | 2 | 2 | 3 | 0 | 0.00 |
+| 1487 | Marquis of Huntlys Birthday | Robert Petrie | 2 | 2 | 3 | 0 | 0.00 |
+| 1488 | Miss Grace Stewart | EARL of EGLINTON | 2 | 2 | 3 | 0 | 0.00 |
+| 1489 | Miss Heron | Nathaniel Gow | 4 | 4 | 3 | 0 | 0.00 |
+| 1490 | Miss Syme Wilson | William Marshall | 4 | 4 | 3 | 0 | 0.00 |
+| 1491 | Mount Vernon | Jacob French | 2 | 1 | 3 | 0 | 0.00 |
+| 1492 | Mrs. Buchan of Auchmacoy | William Marshall | 3 | 3 | 3 | 0 | 0.00 |
+| 1493 | Nos Galan Fel Y Cenir Yn Bencader | Misc Traditional | 3 | 3 | 3 | 0 | 0.00 |
+| 1494 | Null thar nan eileanan | Jenny Cameron | 2 | 2 | 3 | 0 | 0.00 |
+| 1495 | O Day So Wondrous | Harold Marlow | 2 | 2 | 3 | 0 | 0.00 |
+| 1496 | Ostend | Lowell Mason | 2 | 2 | 3 | 0 | 0.00 |
+| 1497 | P\'adraic Mac Giollarn\'ath | Misc Traditional | 4 | 4 | 3 | 0 | 0.00 |
+| 1498 | Prince Charlie's Last View of Scotland | William Marshall | 2 | 2 | 3 | 0 | 0.00 |
+| 1499 | Renown | Jeremiah Ingalls | 2 | 1 | 3 | 0 | 0.00 |
+| 1500 | Sir John Henderson | Neil Gow | 2 | 2 | 3 | 0 | 0.00 |

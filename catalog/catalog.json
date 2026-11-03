@@ -7590,7 +7590,7 @@
  },
  {
   "id": "calon-lan",
-  "title": "Calon Lan",
+  "title": "Calon Lân",
   "file": "midi/pdmx-calon-lan.mid",
   "sha256": "13fb31024fd1fd08bf43179de5598158af8b99aabdf70756c455bc55590fa9c6",
   "source": {
@@ -8021,7 +8021,7 @@
  },
  {
   "id": "o-du-frohliche",
-  "title": "O du frohliche",
+  "title": "O du fröhliche",
   "file": "midi/pdmx-o-du-frohliche.mid",
   "sha256": "089a1717c6c4488e6bdb59e2092f7f5412cf04d616222ee7e4256a1797b4ce16",
   "source": {
@@ -8112,36 +8112,6 @@
   }
  },
  {
-  "id": "i-like-the-flowers",
-  "title": "I Like The Flowers",
-  "file": "midi/pdmx-i-like-the-flowers.mid",
-  "sha256": "6bce584fd18e985e061d9ac6358a5e2f6b98affffbfb5c1edfe227fc52c2cea3",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/11/53/QmTXZ2Zuf9dUikXM8e5yUZ3zV5GqXczoBwnWav57nqCko2.mid",
-   "musescore_score_id": "5652335",
-   "musescore_url": "https://musescore.com/score/5652335",
-   "score_title": "I like the flowers",
-   "composer": "NA",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.41",
-   "n_ratings": "9",
-   "n_views": "532"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-05.txt"
-  }
- },
- {
   "id": "flee-as-a-bird",
   "title": "Flee As A Bird",
   "file": "midi/pdmx-flee-as-a-bird.mid",
@@ -8166,36 +8136,6 @@
    "bpm": 72,
    "start_beat": 4,
    "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-05.txt"
-  }
- },
- {
-  "id": "on-christmas-night",
-  "title": "On Christmas Night",
-  "file": "midi/pdmx-on-christmas-night.mid",
-  "sha256": "d4dd48091047470cca37bfc5fa658eb3a1f73fe5c1849b733ed7da0d4697cbdb",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/2/25/Qmcix4KHgknPAEqRajJAgUQWfXnKRaZeBoxHgtDxM7DxXR.mid",
-   "musescore_score_id": "5730186",
-   "musescore_url": "https://musescore.com/score/5730186",
-   "score_title": "On Christmas Night - Version 4",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "4"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 30
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -8265,7 +8205,7 @@
  },
  {
   "id": "noel-nouvelet",
-  "title": "Noel Nouvelet",
+  "title": "Noël nouvelet",
   "file": "midi/pdmx-noel-nouvelet.mid",
   "sha256": "5f84f359be322bf0c535cc42f85647880fe5e7faa0c424a657b870c81c316a92",
   "source": {
@@ -8296,7 +8236,7 @@
  },
  {
   "id": "amhran-na-bhfiann",
-  "title": "Amhr'an na bhFiann",
+  "title": "Amhrán na bhFiann",
   "file": "midi/pdmx-amhran-na-bhfiann.mid",
   "sha256": "0a4844920e3ce10e7c327ae6a9036c77002fcd20ff4cb63d2430da4484070715",
   "source": {
@@ -9128,36 +9068,6 @@
   }
  },
  {
-  "id": "kings-of-orient",
-  "title": "Kings Of Orient",
-  "file": "midi/pdmx-kings-of-orient.mid",
-  "sha256": "6a6a445de3d51707d1c4a819721e1c5c81ed9247d0c5b5b08f4d84d197373055",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/1/54/QmbyYtiRxr2s3CCeouwCmw65wbWx5JG1FZo19NtnfqCWUt.mid",
-   "musescore_score_id": "4910121",
-   "musescore_url": "https://musescore.com/score/4910121",
-   "score_title": "Kings of Orient",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "4"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 90,
-   "max_beats": 31.5
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-05.txt"
-  }
- },
- {
   "id": "una-furtiva-lagrima",
   "title": "Una Furtiva Lagrima",
   "file": "midi/pdmx-una-furtiva-lagrima.mid",
@@ -9396,37 +9306,6 @@
   "render": {
    "bpm": 144,
    "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-05.txt"
-  }
- },
- {
-  "id": "wildwood-flower-arr-for-voice-and-tenor-viol",
-  "title": "Wildwood Flower arr. for Voice and Tenor Viol",
-  "file": "midi/pdmx-wildwood-flower-arr-for-voice-and-tenor-viol.mid",
-  "sha256": "f561d059a844bab2be7b6728a7be79a60facf8da1f80693889d9bb41ec98c181",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/4/35/QmeoapZPXVuce86gfAf7Wtqy895NbjRcJWVWjBSPpb5Cd6.mid",
-   "musescore_score_id": "5670616",
-   "musescore_url": "https://musescore.com/score/5670616",
-   "score_title": "Wildwood Flower arr. for Voice and Tenor Viol",
-   "composer": "arr. David Saphra",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "213"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 72,
-   "max_beats": 31,
-   "beats_per_bar": 2
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -9852,36 +9731,6 @@
    "rating": "0.0",
    "n_ratings": "0",
    "n_views": "179"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-05.txt"
-  }
- },
- {
-  "id": "ida-sweet-as-apple-cider",
-  "title": "Ida Sweet As Apple Cider",
-  "file": "midi/pdmx-ida-sweet-as-apple-cider.mid",
-  "sha256": "5771bf330f819e5f7e72c5815a289489b84fa06884139e563796ad6fd2a4ac12",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/7/49/QmPV6GphLTJ9TL2NzSDPxKNQRYb9wcrmLRr6Bwc6NC6DYe.mid",
-   "musescore_score_id": "1307006",
-   "musescore_url": "https://musescore.com/score/1307006",
-   "score_title": "Ida Sweet As Apple Cider",
-   "composer": "Eddie Munson & Eddie Leonard - 1903",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "157"
   },
   "retrieved": "2026-10-25",
   "render": {
@@ -10386,37 +10235,6 @@
   }
  },
  {
-  "id": "crown-him-with-many-crowns",
-  "title": "Crown Him With Many Crowns",
-  "file": "midi/pdmx-crown-him-with-many-crowns.mid",
-  "sha256": "8baa8ce65f677fa97a1565534fc4eba5b1975b1f07b704bc87432017c1dbb5bf",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/8/34/QmQNUniSHM9AJhnT6kWJdrW6kaJBWEWqRtAx4dGXu3QiE9.mid",
-   "musescore_score_id": "5780012",
-   "musescore_url": "https://musescore.com/score/5780012",
-   "score_title": "Crown Him with many crowns (Gabriel) - Chas. H. Gabriel",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "88"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 100,
-   "start_beat": 3,
-   "max_beats": 29
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-05.txt"
-  }
- },
- {
   "id": "farewell-to-erin",
   "title": "Farewell To Erin",
   "file": "midi/pdmx-farewell-to-erin.mid",
@@ -10480,7 +10298,7 @@
  },
  {
   "id": "amhran-na-leabhar",
-  "title": "Amhran na Leabhar",
+  "title": "Amhrán na Leabhar",
   "file": "midi/pdmx-amhran-na-leabhar.mid",
   "sha256": "ed79fe9510a80ebfe4193aa0f4618f0f8b910f379e2564f127d8f2a11a0e4b63",
   "source": {
@@ -10634,7 +10452,7 @@
  },
  {
   "id": "la-gazza-ladra",
-  "title": "La Gazza Ladra",
+  "title": "La gazza ladra: Solemn March",
   "file": "midi/pdmx-la-gazza-ladra.mid",
   "sha256": "2572c38650086e2e86e77c228f82e438bd9312a79045c645384c3ae327a23c0b",
   "source": {
@@ -10849,7 +10667,7 @@
  },
  {
   "id": "thomas-campion-never-weather-beaten-sail",
-  "title": "THOMAS CAMPION Never Weather-Beaten Sail",
+  "title": "Never Weather-Beaten Sail",
   "file": "midi/pdmx-thomas-campion-never-weather-beaten-sail.mid",
   "sha256": "86740295514c89aab7477b09bb5a0d9667a11689d9169e0eac9c843fa257e7fe",
   "source": {
@@ -11246,36 +11064,6 @@
   }
  },
  {
-  "id": "crested-hens",
-  "title": "Crested Hens",
-  "file": "midi/pdmx-crested-hens.mid",
-  "sha256": "cfb3fc43b649358d354024e20d34f57df6b6fd126c2d9e9ec93487aa0f0e4351",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/0/11/QmabG225bMWF8MWCooim7M8heRg8bLtcE5nxfrpS1p8k3A.mid",
-   "musescore_score_id": "4673033",
-   "musescore_url": "https://musescore.com/score/4673033",
-   "score_title": "Crested Hens",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.74",
-   "n_ratings": "5",
-   "n_views": "76"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 30
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
   "id": "american-patrol",
   "title": "American Patrol",
   "file": "midi/pdmx-american-patrol.mid",
@@ -11308,7 +11096,7 @@
  },
  {
   "id": "sussex-carol",
-  "title": "Sussex carol",
+  "title": "Sussex Carol",
   "file": "midi/pdmx-sussex-carol.mid",
   "sha256": "eaff6f9ab44084f16699d2d00aaa2017aa191678aff3dd245a5fa4ba101772c5",
   "source": {
@@ -11613,97 +11401,6 @@
   }
  },
  {
-  "id": "land-of-the-silver-birch",
-  "title": "Land of the Silver Birch",
-  "file": "midi/pdmx-land-of-the-silver-birch.mid",
-  "sha256": "e98cbc9d9761070c687e210beb464f4228aac5dcb15dace29729e3800f699fbf",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/4/53/QmeXxpXX5EXDHWV8JVGAyUavpa89LVZYS9Co3C87ppTnUs.mid",
-   "musescore_score_id": "5030366",
-   "musescore_url": "https://musescore.com/score/5030366",
-   "score_title": "Land of the Silver Birch",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.77",
-   "n_ratings": "6",
-   "n_views": "197"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "start_beat": 4,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
-  "id": "black-is-the-color-of-my-true-loves-hair",
-  "title": "Black is the Color (of my True Love's Hair)",
-  "file": "midi/pdmx-black-is-the-color-of-my-true-loves-hair.mid",
-  "sha256": "c42aba13e484bcba625ee44af96ff1f15abc17206f4c158096b81cb85dcd664a",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/1/30/QmbLUdk4bSRwmPW7dX2gYMwbrQcmKBbs2m2LGcSihfGyYh.mid",
-   "musescore_score_id": "4935099",
-   "musescore_url": "https://musescore.com/score/4935099",
-   "score_title": "Black is the Color of my True Love's Hair",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "19"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
-  "id": "my-faith-looks-up-to-thee",
-  "title": "My Faith Looks Up To Thee",
-  "file": "midi/pdmx-my-faith-looks-up-to-thee.mid",
-  "sha256": "e99040df08f95703231e1d82b01eee279d7debe03e9a48dcbca7b70e969e8f76",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/0/52/QmaxXGVthEtQLYVaDQ8az9bSSx3GYZVNHt5f1EEeonwdms.mid",
-   "musescore_score_id": "562231",
-   "musescore_url": "https://musescore.com/score/562231",
-   "score_title": "My Faith Looks Up To Thee: Tenor",
-   "composer": "Olivet by Lowell Mason",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "76"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
   "id": "princess-royal",
   "title": "Princess Royal",
   "file": "midi/pdmx-princess-royal.mid",
@@ -11951,37 +11648,6 @@
   }
  },
  {
-  "id": "ershter-vals",
-  "title": "Ershter Vals",
-  "file": "midi/pdmx-ershter-vals.mid",
-  "sha256": "171019028b7cb2f4e326dc0ec885bd3044c79e1496ea1ca4378d478d291445c1",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/10/18/QmSER5i2KuFGGUoTr6NgKmPXkxiC3zfSGTcsWrCfcRdb4h.mid",
-   "musescore_score_id": "4660001",
-   "musescore_url": "https://musescore.com/score/4660001",
-   "score_title": "Ershter Vals (First Waltz)",
-   "composer": "G.L.Kitler (ca.1900)",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "139"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "start_beat": 3.5,
-   "max_beats": 30.5
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
   "id": "fairy-dance",
   "title": "The Fairy Dance",
   "file": "midi/pdmx-fairy-dance.mid",
@@ -12197,7 +11863,7 @@
  },
  {
   "id": "kimer-i-klokker",
-  "title": "Kimer I klokker",
+  "title": "Kimer, I klokker",
   "file": "midi/pdmx-kimer-i-klokker.mid",
   "sha256": "3ede214312c9e53e4ede492c7c7060a831b2b8e4e0ebb3a3756e7a3502d546a3",
   "source": {
@@ -12347,36 +12013,6 @@
   }
  },
  {
-  "id": "black-mountain-rag",
-  "title": "Black Mountain Rag",
-  "file": "midi/pdmx-black-mountain-rag.mid",
-  "sha256": "8c6208a3ebb128f03e81558e34316eb2ed4b64899efb79fb6c9a1eabaa31beb2",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/14/31/QmWm8WuY2WpvtAzeRE9XV3BrkKhYbrH7MhdnGma4XEn8MC.mid",
-   "musescore_score_id": "4694763",
-   "musescore_url": "https://musescore.com/score/4694763",
-   "score_title": "Traditional music - Black Mountain Rag",
-   "composer": "Traditional",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "27"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
   "id": "duke-of-yorks-march",
   "title": "Duke of York's March",
   "file": "midi/pdmx-duke-of-yorks-march.mid",
@@ -12400,36 +12036,6 @@
   "render": {
    "bpm": 120,
    "max_beats": 31
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
-  "id": "salt-creek",
-  "title": "Salt Creek",
-  "file": "midi/pdmx-salt-creek.mid",
-  "sha256": "e27e8b4f2c568bc136b59005e8cb4d192ee72fb7c2802660069bfb01cfed1b55",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/4/55/QmeYxb52w42HKTn8NWFZKzLca7mrA8GpjXSrbKwZwxoKvH.mid",
-   "musescore_score_id": "4664437",
-   "musescore_url": "https://musescore.com/score/4664437",
-   "score_title": "Traditional music - Salt Creek",
-   "composer": "Traditional",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.66",
-   "n_ratings": "6",
-   "n_views": "66"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 144,
-   "max_beats": 32
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -12491,37 +12097,6 @@
    "bpm": 120,
    "max_beats": 32,
    "beats_per_bar": 4
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
-  "id": "sheebeg-and-sheemore",
-  "title": "Sheebeg and Sheemore",
-  "file": "midi/pdmx-sheebeg-and-sheemore.mid",
-  "sha256": "f1b30025deb9d59b397b0f602c02abcee905306d201bfe3f1c7126e1dd9a08d9",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/11/24/QmTHNT4oxnL2v15iogarhnVTSkrYC1Ju1Yq7KSJBc71GET.mid",
-   "musescore_score_id": "4882489",
-   "musescore_url": "https://musescore.com/score/4882489",
-   "score_title": "Sheebeg and Sheemore",
-   "composer": "Turlough O'Carolan (1670-1738)",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "59"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 31,
-   "beats_per_bar": 3
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -13639,37 +13214,6 @@
   }
  },
  {
-  "id": "johnny-i-hardly-knew-ye",
-  "title": "Johnny I Hardly Knew Ye",
-  "file": "midi/pdmx-johnny-i-hardly-knew-ye.mid",
-  "sha256": "eaa376f68525326c812d2b6be21bd0d2065b6d61a4725fd00e018e5b70be569f",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/9/33/QmRnqpkR8r5V9M3YW5C7cioQ5XBL9S9366nFXKTVmkSW2z.mid",
-   "musescore_score_id": "4973233",
-   "musescore_url": "https://musescore.com/score/4973233",
-   "score_title": "Johnny I Hardly Knew Ye",
-   "composer": "Lyrics by Joseph B. Geoghegan (published in 1867)",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "46"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 144,
-   "max_beats": 30.5,
-   "beats_per_bar": 3
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
   "id": "nathaniel-gows-lament-for-the-death-of-his-brother",
   "title": "Nathaniel Gow's Lament for the Death of His Brother",
   "file": "midi/pdmx-nathaniel-gows-lament-for-the-death-of-his-brother.mid",
@@ -13825,36 +13369,6 @@
   }
  },
  {
-  "id": "ballet-cclxviii",
-  "title": "Ballet Cclxviii",
-  "file": "midi/pdmx-ballet-cclxviii.mid",
-  "sha256": "7ff9d37b75733fcc1338c2a09751941bc6b09243fe9b9e3e78d34fe29c4a9f92",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/15/54/QmXy9BPnwrJz9XtcUcjaHoNAkQKm2UnsjLaWvmYrG1bRRK.mid",
-   "musescore_score_id": "5121143",
-   "musescore_url": "https://musescore.com/score/5121143",
-   "score_title": "Ballet CCLXVIII",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "3"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
   "id": "boyne-hunt",
   "title": "The Boyne Hunt",
   "file": "midi/pdmx-boyne-hunt.mid",
@@ -13887,7 +13401,7 @@
  },
  {
   "id": "mr-beveridges-maggot",
-  "title": "Mr.Beveridge's Maggot.",
+  "title": "Mr. Beveridge's Maggot",
   "file": "midi/pdmx-mr-beveridges-maggot.mid",
   "sha256": "15202bd57db9a4f231511f3dc9bdd8f26226423aace711a0b45b24e031a5336d",
   "source": {
@@ -15149,67 +14663,6 @@
   }
  },
  {
-  "id": "cold-and-raw",
-  "title": "Cold and Raw",
-  "file": "midi/pdmx-cold-and-raw.mid",
-  "sha256": "513f1bce811c70cedde46a8c2bee8f328238bc541a2b124ca31c78fad7d3a969",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/1/5/Qmb6Ziwnefq4jnS63hWfB5yBsxBi6eFeSRjNQa6NXjZgCU.mid",
-   "musescore_score_id": "4899081",
-   "musescore_url": "https://musescore.com/score/4899081",
-   "score_title": "Cold and Raw",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "13"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 72,
-   "max_beats": 30,
-   "beats_per_bar": 3
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
-  "id": "forty-days-and-forty-nights",
-  "title": "Forty Days and Forty Nights",
-  "file": "midi/pdmx-forty-days-and-forty-nights.mid",
-  "sha256": "3087544c153b55070518e6ac7cea1f398164f3eab645d5f4532c5de1c783feb5",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/12/47/QmUUw2pt5nTRYBU5CGXCBgFHuLArYTUPXVDriYrKo2XoHa.mid",
-   "musescore_score_id": "653966",
-   "musescore_url": "https://musescore.com/score/653966",
-   "score_title": "Forty Days and Forty Nights - tenor",
-   "composer": "Aus Der Tiefe (Heinlein)",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "76"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
   "id": "glenlivet",
   "title": "Glenlivet",
   "file": "midi/pdmx-glenlivet.mid",
@@ -15644,7 +15097,7 @@
  },
  {
   "id": "picking-of-sticks",
-  "title": "Picking Of Sticks.",
+  "title": "Picking of Sticks",
   "file": "midi/pdmx-picking-of-sticks.mid",
   "sha256": "afc64ecfdbff7d961a4d8a825d3aac32c88a9df97363426858588ff2eafaeab1",
   "source": {
@@ -15883,6 +15336,99 @@
   "render": {
    "bpm": 120,
    "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-06.txt"
+  }
+ },
+ {
+  "id": "79ths-farewell-to-gibraltar",
+  "title": "79th's Farewell to Gibraltar",
+  "file": "midi/pdmx-79ths-farewell-to-gibraltar.mid",
+  "sha256": "cea5790e46329f431e7ba87a151c8fcdb3f3c6b4eab31d405c75f44e70472ea6",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/15/QmddU4pdZrXwafUrbuTdf7bfNdAWSdkrEtp76eduyuXUzV.mid",
+   "musescore_score_id": "4557588",
+   "musescore_url": "https://musescore.com/score/4557588",
+   "score_title": "79th's Farewell to Gibraltar",
+   "composer": "Unknown",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "89"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-06.txt"
+  }
+ },
+ {
+  "id": "off-to-california",
+  "title": "Off to California",
+  "file": "midi/pdmx-off-to-california.mid",
+  "sha256": "ac8b9684e27aa8575581d28c33d04cb17193472b375b100031b7ed062c66f6d5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/26/QmajYKJH31DHyYBugBELdQAaK9AAF1JPHPPer5492V9T4p.mid",
+   "musescore_score_id": "4672064",
+   "musescore_url": "https://musescore.com/score/4672064",
+   "score_title": "Off to California",
+   "composer": "R-49New England",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "10"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-06.txt"
+  }
+ },
+ {
+  "id": "road-to-the-isles",
+  "title": "Road to the Isles",
+  "file": "midi/pdmx-road-to-the-isles.mid",
+  "sha256": "f03f7ab8181493d1f3dc885d788121888c6ba61212c1d91ebe75d7c358269303",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/14/QmeCDC5gBy98QiyXtBRCnKB7SrxFAUzRheMZw1Z3qdkFYe.mid",
+   "musescore_score_id": "5636003",
+   "musescore_url": "https://musescore.com/score/5636003",
+   "score_title": "Road to the Isles",
+   "composer": "Pipe Major John McLellan",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "234"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
    "beats_per_bar": 4
   },
   "import": {
