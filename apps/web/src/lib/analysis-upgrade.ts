@@ -1,6 +1,7 @@
 import { loadAudio, loadRecording, saveAnalysis } from './recording-store'
 import {
   type Analysis,
+  isLeftOut,
   needsReanalysis,
   placedPitch,
   type Recording,
@@ -50,12 +51,13 @@ export interface RescanResult {
 
 /**
  * Whether a Re-scan runs on the Recording: an analyzed one with no note, Noise-like and not placed
- * by ear, whose analysis an older Recording Analysis made (`needsReanalysis`). Analysis is
- * deterministic, so a Re-scan of any other Recording would find what it already has. Once
- * `upgradeAnalyses` has brought every Recording to the current analysis, nothing can be re-scanned.
+ * by ear nor left out with "No note" (#314), whose analysis an older Recording Analysis made
+ * (`needsReanalysis`). Analysis is deterministic, so a Re-scan of any other Recording would find
+ * what it already has. Once `upgradeAnalyses` has brought every Recording to the current analysis,
+ * nothing can be re-scanned.
  */
 export function canRescan(recording: Recording): boolean {
-  return needsReanalysis(recording) && songPitch(recording) === null
+  return needsReanalysis(recording) && songPitch(recording) === null && !isLeftOut(recording)
 }
 
 /**

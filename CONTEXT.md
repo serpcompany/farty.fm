@@ -7,8 +7,12 @@ It was called Pedos until 2026-10-22 (ADR 0009). Users only ever see Farty. Inte
 ## Recordings
 
 **Recording**:
-A single fart audio clip captured and saved by a user. One Recording must not contain multiple fart events.
+A single fart audio clip captured and saved by a user. One Recording must not contain multiple fart events. It has a name, "Recording 12" by its number until the user names it in its review (#314).
 _Avoid_: Sample, sound, track, clip
+
+**Review**:
+Where the user sets a Recording's Trim, note and name: right after Stop, before Save, and later from the Recording's pencil on the Recordings tab. Saving never waits on Recording Analysis (#314).
+_Avoid_: Picker, editor
 
 **Recording Analysis**:
 The characteristics derived once from a saved Recording and preserved with it, such as its gesture and its pitch. The gesture is the whole fart, every burst of it, from just before its attack to where it fades out. It is never cut at a second burst. Songs play it from the note's beat, and a quieter lead-in before the attack just before the beat, when the rest before the note has room (#287). The pitch is read from its first burst, so a second one can't blur it (ADR 0016). The saved file stays the whole take, and the Recordings tab plays all of it. Saving and playback never wait on it.
@@ -19,19 +23,19 @@ A Recording whose pitch is steady enough to carry melody notes. In Songs, Pitch 
 _Avoid_: Pitched fart, tonal fart, good Recording
 
 **Noise-like Recording**:
-A Recording with no steady pitch, so it can't tell the listener which note it is. Songs leave it out unless the user places it on a note by ear (a Placed Recording).
+A Recording with no steady pitch, so it can't tell the listener which note it is. Songs leave it out unless the user gives it a note by ear in its review (a Placed Recording).
 _Avoid_: Bad Recording, unpitched fart
 
 **Placed Pitch**:
-The note, C2 to B4, that the user placed a Noise-like Recording on by ear, on the Recordings tab: the piano key they hear as closest to the fart. Set once per Recording, used in every Song, kept with the Recording and its account, and through a new analysis. If a later analysis finds the fart a Recording Pitch, the Placed Pitch stays the one used, since the user chose it (ADR 0017). The fart still plays raw (ADR 0012): the note says only where Songs use it, never how it sounds (ADR 0015).
+The note, C2 to B4, that the user gave a Recording by ear in its review: the piano key they hear as closest to the fart. Any Recording can have one, a Melodic one on another note than its Recording Pitch included; picking the note analysis found clears it (#314). Set once per Recording, used in every Song, kept with the Recording and its account, and through a new analysis. If a later analysis finds the fart a Recording Pitch, the Placed Pitch stays the one used, since the user chose it (ADR 0017). The fart still plays raw (ADR 0012): the note says only where Songs use it, never how it sounds (ADR 0015).
 _Avoid_: Tuned pitch, assigned pitch, Recording Pitch (that is the analyzed one)
 
 **Placed Recording**:
-A Recording with a Placed Pitch, placed while it was Noise-like. Songs, Pitch Coverage and Auto-map treat it as a Melodic Recording at its Placed Pitch, even after a later analysis finds a Recording Pitch (ADR 0017). Leaving it out, the default, keeps a Noise-like Recording out of Songs.
+A Recording with a Placed Pitch. Songs, Pitch Coverage and Auto-map treat it as a Melodic Recording at its Placed Pitch, even after a later analysis finds a Recording Pitch (ADR 0017). "No note" leaves a Recording out of Songs: a Noise-like one by default, or a Melodic one the user leaves out (ADR 0015).
 _Avoid_: Beat, tuned fart
 
 **Trim**:
-The part of a Noise-like Recording's take the user kept with the picker's two handles. The Recordings tab and the picker then play exactly what's between the handles, and Songs play the fart found between them, whose length is the fart's length. The saved take never changes, and Remove trim brings the whole fart back. Kept with the Recording and its account, and through a new analysis, a Re-scan included; on a placed Recording it stays in use with the Placed Pitch (ADR 0017). It never changes the fart's pitch (ADR 0019).
+The part of a Recording's take the user kept with the review's two handles; any Recording can be trimmed (#314). The Recordings tab and the review then play exactly what's between the handles, and Songs play the fart found between them, whose length is the fart's length. The saved take never changes, and Reset, then Save, brings the whole fart back. Kept with the Recording and its account, and through a new analysis, a Re-scan included (ADR 0017). It never changes the fart's pitch: a trimmed Melodic Recording keeps its Recording Pitch (ADR 0019).
 _Avoid_: Crop, edit, clip
 
 **Recording Pitch**:

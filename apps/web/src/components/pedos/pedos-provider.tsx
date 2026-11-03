@@ -34,6 +34,7 @@ import {
 } from '@/lib/pitch-coverage'
 import * as store from '@/lib/recording-store'
 import {
+  type AnalysisState,
   atFullLevel,
   heardSomething,
   maximumTakeSeconds,
@@ -45,6 +46,7 @@ import {
   trimHandles
 } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
+import type { ReviewChange } from '@/lib/take-review'
 import { reportError } from '@/lib/telemetry/errors'
 import {
   noteSeconds,
@@ -126,18 +128,22 @@ function buzz(): void {
   }
 }
 
-/** The full-screen record flow after Stop: Review, then Result, with their error states. */
+/**
+ * The full-screen record flow after Stop: Review, then Result, with their error states. A save
+ * that failed keeps what the review changed, for Try again. `trimFailed`: the take was saved, but
+ * the fart between the review's handles couldn't be found, so it has no Trim.
+ */
 export type Flow =
   | { kind: 'review'; draft: Draft }
-  | { kind: 'saveFailed'; draft: Draft }
+  | { kind: 'saveFailed'; draft: Draft; review: ReviewChange }
   | { kind: 'analyzing'; id: string }
   | { kind: 'analysisFailed'; id: string }
-  | { kind: 'result'; id: string; changes: CoverageChanges }
+  | { kind: 'result'; id: string; changes: CoverageChanges; trimFailed?: boolean }
 
 export type RecordProblem = 'microphoneOff' | 'couldNotStart' | 'interrupted' | 'nothingHeard'
 
 /**
- * What's playing: the draft on Review, a saved Recording by id, or a Toot or one of its notes
+ * What's playing: the draft on its review, a saved Recording by id, or a Toot or one of its notes
  * (`tootPlayback`).
  */
 export type NowPlaying = 'draft' | string | null
@@ -189,23 +195,35 @@ type Pedos = {
   isSaving: boolean
   /** Recording, Review or Result is on screen, full screen over the tabs. */
   showsRecordFlow: boolean
+  /** A saved Recording's review, from its pencil, is open over the tabs (#314). */
+  reviewOpen: boolean
+  setReviewOpen(open: boolean): void
   finishWelcome(): void
   startRecording(): Promise<void>
   stopRecording(): Promise<void>
   dismissProblem(): void
-  saveDraft(): Promise<void>
+  /**
+   * What analysis has found in the take on review so far (#314): it starts at Stop, so the review
+   * shows the note once it's found. Null while no take is on review.
+   */
+  draftAnalysis: AnalysisState | null
+  /**
+   * Saves the take on review at once, with the note, name and Trim the review changed, then waits
+   * for its analysis to show Result. Saving never waits for analysis (ADR 0002).
+   */
+  saveDraft(review?: ReviewChange): Promise<void>
   discardDraft(): void
   retryAnalysis(id: string): Promise<void>
   finishFlow(): void
   /**
    * Plays or stops the draft, or a Recording: its Trim if it has one (ADR 0019), or else the whole
-   * take (ADR 0016). With `part`, just that part of the take, as the picker plays the fart.
+   * take (ADR 0016). With `part`, just that part of the take, as the review plays the fart.
    */
   togglePlayback(target: 'draft' | Recording, part?: Trim): void
-  /** Plays `part` of a Recording's take, from its start, as a scrub lets go: never a stop. */
-  playRecording(recording: Recording, part: Trim): void
+  /** Plays `part` of the draft's or a Recording's take, from its start, as a scrub lets go. */
+  playRecording(target: 'draft' | Recording, part: Trim): void
   stopPlayback(): void
-  /** The part of the take playing, while `nowPlaying` is a Recording. */
+  /** The part of the take playing, while `nowPlaying` is the draft or a Recording. */
   playingPart: Trim | null
   /**
    * Where what's playing is now, in seconds of its whole take, by the audio clock: what the
@@ -214,15 +232,13 @@ type Pedos = {
   playbackPosition(): number | null
   deleteRecording(id: string): Promise<void>
   /**
-   * Places a Noise-like Recording on a MIDI note by ear, or takes it off with null (ADR 0015), and
-   * trims it to `handles`, or takes its Trim off with null (ADR 0019). A field
-   * left out stays. Every Song uses it there at once; it still plays raw, at its own pitch.
-   * False when the fart between the handles couldn't be found, and then nothing changes.
+   * What a Recording's review saves (#314): places it on a MIDI note by ear, leaves it out with
+   * `NO_NOTE`, or has it follow analysis with null (ADR 0015); trims it to `handles`, or takes its
+   * Trim off with null (ADR 0019); and names it, or takes its name off with null. A field left out
+   * stays. Every Song uses it at once; it still plays raw, at its own pitch. False when the fart
+   * between the handles couldn't be found, and then nothing changes.
    */
-  placeRecording(
-    id: string,
-    change: { placedPitch?: number | null; handles?: Trim | null }
-  ): Promise<boolean>
+  placeRecording(id: string, change: ReviewChange): Promise<boolean>
   /**
    * The Re-scan running (#282): the Recording it is on, how many came before it, and how many it
    * runs on; null when none runs.
@@ -294,13 +310,24 @@ export function usePedos(): Pedos {
 }
 
 /**
- * The Trim the picker's `handles` keep in a Recording's take (ADR 0019): the handles exactly, which
- * the row and the picker play, and the fart between them, found as Recording Analysis finds a fart
+ * The Trim the review's `handles` keep in a Recording's take (ADR 0019): the handles exactly, which
+ * the row and the review play, and the fart between them, found as Recording Analysis finds a fart
  * (`trimBounds`), which Songs play.
  */
 async function trimBetween(id: string, handles: Trim): Promise<RecordingTrim> {
   const fart = await findTrim(decodeWav(await store.loadAudio(id)), handles)
   return { startSeconds: handles.startSeconds, endSeconds: handles.endSeconds, fart }
+}
+
+/**
+ * The take on review, encoded once as the WAV it saves as: its analysis, started at Stop on that
+ * WAV so it finds what a saved Recording's would, and the key its decoded audio plays under.
+ */
+type DraftSession = {
+  draft: Draft
+  wav: ArrayBuffer
+  key: string
+  analysis: Promise<AnalysisState>
 }
 
 /** The app's state and actions, mirroring the iPhone app's `AppModel`. */
@@ -313,6 +340,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const [nowPlaying, setNowPlaying] = useState<NowPlaying>(null)
   const [playingPart, setPlayingPart] = useState<Trim | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [reviewOpen, setReviewOpen] = useState(false)
   const [toots, setToots] = useState<Toot[] | null>(null)
   const [tootsFailed, setTootsFailed] = useState(false)
   const [tootPlayFailed, setTootPlayFailed] = useState<string | null>(null)
@@ -325,6 +353,10 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   /** Counts Toot plays, so only the latest one sets where the playhead starts. */
   const tootPlays = useRef(0)
   const take = useRef<TakeInProgress | null>(null)
+  const draftSession = useRef<DraftSession | null>(null)
+  const [draftAnalyzed, setDraftAnalyzed] = useState<{ draft: Draft; state: AnalysisState } | null>(
+    null
+  )
   const [liveTake] = useState(liveTakeStore)
   // The Recordings as last rendered, to compare Pitch Coverage after an analysis.
   const latest = useRef<Recording[] | null>(null)
@@ -365,12 +397,13 @@ export function PedosProvider({ children }: { children: ReactNode }) {
    * The Result screen after analysis, with what the Recording changed in the Song Catalog's Pitch
    * Coverage: the iPhone app's `analyze()` compares the Recordings before and after it.
    */
-  const resultOf = useCallback((analyzed: Recording): Flow => {
+  const resultOf = useCallback((analyzed: Recording, trimFailed = false): Flow => {
     const others = (latest.current ?? []).filter(r => r.id !== analyzed.id)
     return {
       kind: 'result',
       id: analyzed.id,
-      changes: coverageChanges(songs, others, [...others, analyzed])
+      changes: coverageChanges(songs, others, [...others, analyzed]),
+      ...(trimFailed ? { trimFailed } : {})
     }
   }, [])
 
@@ -572,38 +605,139 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   const recordFlowOpen = capture.kind !== 'idle' || flow !== null
   useEffect(() => (recordFlowOpen ? holdReload() : undefined), [recordFlowOpen])
 
-  const saveDraft = useCallback(async () => {
-    if (!flow || (flow.kind !== 'review' && flow.kind !== 'saveFailed') || isSaving) return
-    const { draft } = flow
-    setIsSaving(true)
-    stopPlayback()
-    let saved: Recording
-    try {
-      // Saved after the visit has started, so what its open clears (the last visit's farts, a
-      // library an account left, or another account's at sign-in) never takes it.
-      await openVisit().library
-      saved = await store.saveRecording(
-        { seconds: draft.seconds, sampleRate: draft.audio.sampleRate, waveform: draft.waveform },
-        encodeWav(draft.audio)
-      )
-    } catch (error) {
-      reportError('recording-save-failed', error)
+  /** The take on review's session, started the first time it's asked for. */
+  const sessionOf = useCallback((draft: Draft): DraftSession => {
+    const current = draftSession.current
+    if (current?.draft === draft) return current
+    if (current) forgetDecoded(current.key)
+    const wav = encodeWav(draft.audio)
+    const analysis = analyze(decodeWav(wav)).then(
+      (found): AnalysisState => ({ state: 'analyzed', analysis: found }),
+      (error): AnalysisState => {
+        reportError('analysis-failed', error)
+        return { state: 'notAnalyzed' }
+      }
+    )
+    const session = { draft, wav, key: `draft-${crypto.randomUUID()}`, analysis }
+    draftSession.current = session
+    void analysis.then(state => {
+      if (draftSession.current === session) setDraftAnalyzed({ draft, state })
+    })
+    return session
+  }, [])
+
+  // Analysis starts as the take comes up for review (#314), so its note shows there.
+  const reviewing = flow?.kind === 'review' || flow?.kind === 'saveFailed' ? flow.draft : null
+  useEffect(() => {
+    if (reviewing) sessionOf(reviewing)
+  }, [reviewing, sessionOf])
+  const draftAnalysis: AnalysisState | null =
+    reviewing === null
+      ? null
+      : draftAnalyzed?.draft === reviewing
+        ? draftAnalyzed.state
+        : { state: 'analyzing' }
+
+  /** Lets go of the take on review: its decoded audio, and its analysis's result. */
+  const letGoOfDraft = useCallback(() => {
+    if (draftSession.current) forgetDecoded(draftSession.current.key)
+    draftSession.current = null
+    setDraftAnalyzed(null)
+  }, [])
+
+  // As `renameToot`: the list, and so every Song's coverage, changes at once. A Trim keeps the
+  // handles as they are, and its fart is found first, in the analysis worker (`trimBounds`, ADR
+  // 0019). If that fails, nothing is saved and the review says so.
+  const placeRecording = useCallback(
+    async (id: string, { placedPitch, handles, name }: ReviewChange) => {
+      const change: store.Placement = {}
+      if (placedPitch !== undefined) change.placedPitch = placedPitch
+      if (name !== undefined) change.name = name
+      try {
+        if (handles !== undefined) change.trim = handles && (await trimBetween(id, handles))
+      } catch (error) {
+        reportError('recording-trim-failed', error)
+        return false
+      }
+      if (Object.keys(change).length === 0) return true
+      setRecordings(list => list?.map(r => (r.id === id ? { ...r, ...change } : r)) ?? null)
+      await store
+        .placeRecording(id, change)
+        .catch(error => reportError('recording-place-failed', error))
+      return true
+    },
+    []
+  )
+
+  // The take is saved at once, with the review's note and name; its Trim and analysis follow, and
+  // Result waits for them (ADR 0002).
+  const saveDraft = useCallback(
+    async (review?: ReviewChange) => {
+      if (!flow || (flow.kind !== 'review' && flow.kind !== 'saveFailed') || isSaving) return
+      const { draft } = flow
+      const changes = review ?? (flow.kind === 'saveFailed' ? flow.review : {})
+      const session = sessionOf(draft)
+      setIsSaving(true)
+      stopPlayback()
+      let saved: Recording
+      try {
+        // Saved after the visit has started, so what its open clears (the last visit's farts, a
+        // library an account left, or another account's at sign-in) never takes it.
+        await openVisit().library
+        const { placedPitch, name } = changes
+        saved = await store.saveRecording(
+          {
+            seconds: draft.seconds,
+            sampleRate: draft.audio.sampleRate,
+            waveform: draft.waveform,
+            ...(placedPitch == null ? {} : { placedPitch }),
+            ...(name == null ? {} : { name })
+          },
+          session.wav
+        )
+      } catch (error) {
+        reportError('recording-save-failed', error)
+        setIsSaving(false)
+        setFlow({ kind: 'saveFailed', draft, review: changes })
+        return
+      }
       setIsSaving(false)
-      setFlow({ kind: 'saveFailed', draft })
-      return
-    }
-    setIsSaving(false)
-    setRecordings(list => [...(list ?? []), saved])
-    setFlow({ kind: 'analyzing', id: saved.id })
-    const analyzed = await runAnalysis(saved.id)
-    const next: Flow = analyzed ? resultOf(analyzed) : { kind: 'analysisFailed', id: saved.id }
-    setFlow(current => (current?.kind === 'analyzing' && current.id === saved.id ? next : current))
-  }, [flow, isSaving, runAnalysis, resultOf])
+      setRecordings(list => [...(list ?? []), saved])
+      setFlow({ kind: 'analyzing', id: saved.id })
+      letGoOfDraft()
+      // The Trim's fart is found in the analysis worker, after the take's analysis. If it isn't
+      // found, the take stays whole, and Result says so.
+      const trimmed = changes.handles
+        ? await placeRecording(saved.id, { handles: changes.handles })
+        : true
+      const state = await session.analysis
+      const kept = await store.saveAnalysis(saved.id, state).catch(error => {
+        reportError('analysis-failed', error)
+        return null
+      })
+      if (kept) replace(kept)
+      // Analysis at Stop failed: the Recording is kept as not analyzed, and Retry runs it again. If
+      // keeping its analysis failed, analysis runs once more on the saved take.
+      const analyzed = kept
+        ? kept.analysis.state === 'analyzed'
+          ? kept
+          : null
+        : await runAnalysis(saved.id)
+      const next: Flow = analyzed
+        ? resultOf(analyzed, !trimmed)
+        : { kind: 'analysisFailed', id: saved.id }
+      setFlow(current =>
+        current?.kind === 'analyzing' && current.id === saved.id ? next : current
+      )
+    },
+    [flow, isSaving, sessionOf, letGoOfDraft, placeRecording, replace, runAnalysis, resultOf]
+  )
 
   const discardDraft = useCallback(() => {
     stopPlayback()
+    letGoOfDraft()
     setFlow(null)
-  }, [])
+  }, [letGoOfDraft])
 
   const retryAnalysis = useCallback(
     async (id: string) => {
@@ -627,15 +761,21 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     setFlow(null)
   }, [])
 
-  const playRecording = useCallback((recording: Recording, part: Trim | null) => {
-    const key = recording.id
+  const playRecording = useCallback((target: 'draft' | Recording, part: Trim | null) => {
+    const key = target === 'draft' ? 'draft' : target.id
+    // The take on review isn't saved yet: it plays from its session's WAV, decoded once under its
+    // own key. Decoding takes the buffer it's given, so it gets a copy.
+    const session = target === 'draft' ? draftSession.current : null
+    if (target === 'draft' && !session) return
     const ended = () => setNowPlaying(current => (current === key ? null : current))
     setNowPlaying(key)
-    setPlayingPart(part ?? { startSeconds: 0, endSeconds: recording.seconds })
+    const seconds = target === 'draft' ? (session?.draft.seconds ?? 0) : target.seconds
+    setPlayingPart(part ?? { startSeconds: 0, endSeconds: seconds })
     // The whole take, start to end, as recorded (ADR 0016), unless it's trimmed (ADR 0019) or the
-    // picker or a scrub plays a part of it.
+    // review or a scrub plays a part of it.
     const segment = part && { start: part.startSeconds, end: part.endSeconds }
-    void play(key, () => store.loadAudio(key), segment, ended)
+    if (session) void play(session.key, async () => session.wav.slice(0), segment, ended)
+    else void play(key, () => store.loadAudio(key), segment, ended)
   }, [])
 
   const togglePlayback = useCallback(
@@ -645,18 +785,9 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         stopPlayback()
         return
       }
-      if (target !== 'draft') {
-        playRecording(target, part ?? trimHandles(target))
-        return
-      }
-      const ended = () => setNowPlaying(current => (current === key ? null : current))
-      setNowPlaying(key)
-      if (flow?.kind !== 'review') return
-      const wav = encodeWav(flow.draft.audio)
-      // The draft isn't saved yet, so it's decoded fresh each time under a one-off key.
-      void play(`draft-${crypto.randomUUID()}`, async () => wav, null, ended)
+      playRecording(target, part ?? (target === 'draft' ? null : trimHandles(target)))
     },
-    [flow, nowPlaying, playRecording]
+    [nowPlaying, playRecording]
   )
 
   const deleteRecording = useCallback(async (id: string) => {
@@ -664,31 +795,6 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     await store.deleteRecording(id)
     setRecordings(list => list?.filter(r => r.id !== id) ?? null)
   }, [])
-
-  // As `renameToot`: the list, and so every Song's coverage, changes at once. A Trim keeps the
-  // handles as they are, and its fart is found first, in the analysis worker (`trimBounds`, ADR
-  // 0019). If that fails, nothing is saved and the picker says so.
-  const placeRecording = useCallback(
-    async (
-      id: string,
-      { placedPitch, handles }: { placedPitch?: number | null; handles?: Trim | null }
-    ) => {
-      const change: store.Placement = placedPitch === undefined ? {} : { placedPitch }
-      try {
-        if (handles !== undefined) change.trim = handles && (await trimBetween(id, handles))
-      } catch (error) {
-        reportError('recording-trim-failed', error)
-        return false
-      }
-      if (Object.keys(change).length === 0) return true
-      setRecordings(list => list?.map(r => (r.id === id ? { ...r, ...change } : r)) ?? null)
-      await store
-        .placeRecording(id, change)
-        .catch(error => reportError('recording-place-failed', error))
-      return true
-    },
-    []
-  )
 
   // One Re-scan at a time; a second request waits for the one running.
   const runRescan = useCallback(
@@ -899,10 +1005,13 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     nowPlaying,
     isSaving,
     showsRecordFlow: capture.kind !== 'idle' || flow !== null,
+    reviewOpen,
+    setReviewOpen,
     finishWelcome,
     startRecording,
     stopRecording,
     dismissProblem: () => setProblem(null),
+    draftAnalysis,
     saveDraft,
     discardDraft,
     retryAnalysis,
