@@ -41,11 +41,11 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools
 | The Merry Conclusion | pass | [4608914](https://musescore.com/score/4608914) | title | publicdomain | 0.0 | 3 | 35 | 12 | 0 of 272 | 7 of 7 | 100% | 100% | 0 |  |
 | Miss Bennet's Jig | pass | [4835770](https://musescore.com/score/4835770) | title | publicdomain | 0.0 | 6 | 44 | 17 | 0 of 134 | 10 of 10 | 100% | 100% | 0 |  |
 | Miss Graham of Inchbrakies Strathspey | fail | [4553170](https://musescore.com/score/4553170) | song name | publicdomain | 0.0 | 12 | 96 | 22 | 4 of 209 |  |  |  |  | none of the 2 best scores passed; the best: sanity: 68 notes (between 8 and 64) |
-| Mr. Morison Of Bognie | pass | [4552463](https://musescore.com/score/4552463) | title | publicdomain | 0.0 | 1 | 45 | 14 | 0 of 146 | 10 of 10 | 100% | 100% | 0 |  |
+| Mr. Morison of Bognie | pass | [4552463](https://musescore.com/score/4552463) | title | publicdomain | 0.0 | 1 | 45 | 14 | 0 of 146 | 10 of 10 | 100% | 100% | 0 |  |
 | Old Wife Behind the Fire | pass | [4605975](https://musescore.com/score/4605975) | title | publicdomain | 0.0 | 2 | 27 | 14 | 0 of 122 | 7 of 7 | 100% | 100% | 0 |  |
 | The Polygon | pass | [4656836](https://musescore.com/score/4656836) | title | publicdomain | 0.0 | 8 | 62 | 19 | 0 of 184 | 12 of 12 | 100% | 100% | 0 |  |
 | What a Beau My Granny Was | pass | [4548799](https://musescore.com/score/4548799) | title | publicdomain | 0.0 | 2 | 60 | 17 | 0 of 122 | 11 of 11 | 100% | 100% | 0 |  |
-| Whimbleton-House | pass | [4966894](https://musescore.com/score/4966894) | title | publicdomain | 0.0 | 3 | 35 | 17 | 0 of 94 | 8 of 8 | 100% | 100% | 0 |  |
+| Whimbleton House | pass | [4966894](https://musescore.com/score/4966894) | title | publicdomain | 0.0 | 3 | 35 | 17 | 0 of 94 | 8 of 8 | 100% | 100% | 0 |  |
 | The Witches | pass | [5145297](https://musescore.com/score/5145297) | title | publicdomain | 0.0 | 3 | 19 | 17 | 0 of 59 | 8 of 8 | 100% | 100% | 0 |  |
 | A Virgin Unspotted | pass | [4903602](https://musescore.com/score/4903602) | title | publicdomain | 0.0 | 4 | 27 | 9 | 0 of 27 | 6 of 6 | 100% | 100% | 0 |  |
 | The Amorous Goddess | pass | [4956010](https://musescore.com/score/4956010) | title | publicdomain | 0.0 | 3 | 58 | 12 | 0 of 168 | 7 of 7 | 100% | 100% | 0 |  |
@@ -71,7 +71,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools
 | Top and Bottom | pass | [4970858](https://musescore.com/score/4970858) | title | publicdomain | 0.0 | 2 | 38 | 16 | 0 of 205 | 11 of 11 | 100% | 100% | 0 |  |
 | Wearmouth Lads | fail | [4673717](https://musescore.com/score/4673717) | song name | publicdomain | 0.0 | 2 | 44 | 20 | 0 of 166 |  |  |  |  | none of the 5 best scores passed; the best: sanity: range 20 semitones (at most 19) |
 | When storms around are sweeping | fail | [5767867](https://musescore.com/score/5767867) | title head | publicdomain | 0.0 | 5 | 28 | 13 | 43 of 88 |  |  |  |  | none of the 2 best scores passed; the best: sanity: the importer dropped 44 chord tones and inner-voice onsets, 49% of the track's notes (at most 10%) |
-| The Banks Of Allan | pass | [4697524](https://musescore.com/score/4697524) | title | publicdomain | 0.0 | 4 | 59 | 12 | 0 of 184 | 7 of 7 | 100% | 100% | 0 |  |
+| The Banks of Allan | pass | [4697524](https://musescore.com/score/4697524) | title | publicdomain | 0.0 | 4 | 59 | 12 | 0 of 184 | 7 of 7 | 100% | 100% | 0 |  |
 | The Banks of Garry | pass | [4934919](https://musescore.com/score/4934919) | title | publicdomain | 0.0 | 0 | 64 | 16 | 0 of 284 | 8 of 8 | 100% | 100% | 0 |  |
 | Big John McNeil | pass | [4869890](https://musescore.com/score/4869890) | title | publicdomain | 0.0 | 1 | 60 | 13 | 0 of 259 | 8 of 8 | 100% | 100% | 0 |  |
 | Blaw the Wind Southerly | pass | [4546692](https://musescore.com/score/4546692) | title | publicdomain | 0.0 | 4 | 57 | 15 | 0 of 124 | 9 of 9 | 100% | 100% | 0 |  |
@@ -82,7 +82,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools
 | Forglen House | fail | [4932227](https://musescore.com/score/4932227) | song name | publicdomain | 0.0 | 2 | 72 | 19 | 0 of 318 |  |  |  |  | none of the 3 best scores passed; the best: sanity: 72 notes (between 8 and 64) |
 | Free Trade | fail | [4546531](https://musescore.com/score/4546531) | song name | publicdomain | 0.0 | 3 | 70 | 17 | 0 of 300 |  |  |  |  | none of the 3 best scores passed; the best: sanity: 68 notes (between 8 and 64) |
 | Garthland House Strathspey | fail | [4713561](https://musescore.com/score/4713561) | song name | publicdomain | 0.0 | 1 | 78 | 17 | 0 of 153 |  |  |  |  | none of the 4 best scores passed; the best: sanity: 78 notes (between 8 and 64) |
-| Garthlands Strathspey | pass | [4937495](https://musescore.com/score/4937495) | title | publicdomain | 0.0 | 1 | 62 | 17 | 0 of 151 | 8 of 8 | 100% | 100% | 0 |  |
+| Garthland's Strathspey | pass | [4937495](https://musescore.com/score/4937495) | title | publicdomain | 0.0 | 1 | 62 | 17 | 0 of 151 | 8 of 8 | 100% | 100% | 0 |  |
 | The General Gathering 1745 | pass | [4833342](https://musescore.com/score/4833342) | title | publicdomain | 0.0 | 2 | 54 | 14 | 0 of 173 | 9 of 9 | 100% | 100% | 0 |  |
 | Hob y Deri Danno | pass | [4855640](https://musescore.com/score/4855640) | title | publicdomain | 0.0 | 3 | 55 | 14 | 6 of 89 | 10 of 10 | 100% | 100% | 0 |  |
 | Knives and Forks | pass | [4668087](https://musescore.com/score/4668087) | title | publicdomain | 0.0 | 1 | 40 | 14 | 0 of 110 | 9 of 9 | 100% | 100% | 0 |  |
@@ -91,12 +91,12 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools
 | Lady Spencer Chichester | pass | [4962266](https://musescore.com/score/4962266) | title | publicdomain | 0.0 | 6 | 53 | 17 | 0 of 248 | 9 of 9 | 100% | 100% | 0 |  |
 | Little Peggy's Love | pass | [4918472](https://musescore.com/score/4918472) | title | publicdomain | 0.0 | 2 | 54 | 9 | 0 of 164 | 6 of 6 | 100% | 100% | 0 |  |
 | Miss Austin | fail | [4920609](https://musescore.com/score/4920609) | song name | publicdomain | 0.0 | 4 | 58 | 24 | 0 of 135 |  |  |  |  | none of the 3 best scores passed; the best: sanity: 76 notes (between 8 and 64); range 24 semitones (at most 19) |
-| Miss McPherson Grant Of Ballindalloch | pass | [5094409](https://musescore.com/score/5094409) | title | publicdomain | 0.0 | 3 | 50 | 14 | 0 of 151 | 9 of 9 | 100% | 100% | 0 |  |
+| Miss McPherson Grant of Ballindalloch | pass | [5094409](https://musescore.com/score/5094409) | title | publicdomain | 0.0 | 3 | 50 | 14 | 0 of 151 | 9 of 9 | 100% | 100% | 0 |  |
 | The Nineteenth of December | pass | [4567255](https://musescore.com/score/4567255) | title | publicdomain | 0.0 | 5 | 50 | 14 | 0 of 141 | 8 of 8 | 100% | 100% | 0 |  |
 | The Scots Recluse | pass | [4715925](https://musescore.com/score/4715925) | song name | publicdomain | 0.0 | 11 | 50 | 16 | 0 of 99 | 9 of 9 | 100% | 100% | 0 |  |
 | The Shakin's o' the Pocky | pass | [4964944](https://musescore.com/score/4964944) | title | publicdomain | 0.0 | 3 | 30 | 17 | 0 of 137 | 10 of 10 | 100% | 100% | 0 |  |
 | Susie Brodie | pass | [4954708](https://musescore.com/score/4954708) | title | publicdomain | 0.0 | 0 | 57 | 16 | 0 of 99 | 8 of 8 | 100% | 100% | 0 |  |
-| Tros Y gareg | pass | [4707559](https://musescore.com/score/4707559) | title head | publicdomain | 0.0 | 8 | 25 | 17 | 12 of 129 | 11 of 11 | 100% | 100% | 0 |  |
+| Tros y Garreg | pass | [4942268](https://musescore.com/score/4942268) | title | publicdomain | 0.0 | 16 | 46 | 17 | 0 of 147 | 12 of 12 | 100% | 100% | 0 |  |
 
 The row shows the score that passed, or the last one tried. Dropped: chord tones and inner-voice
 onsets the importer dropped, of the track's notes. Pitches: Pitch Coverage with the full library.
@@ -185,7 +185,7 @@ onsets the importer dropped, of the track's notes. Pitches: Pitch Coverage with 
 - **Miss Graham of Inchbrakies Strathspey** (`miss-graham-of-inchbrakies-strathspey`): 2 PDMX scores match, 2 can be picked. FAIL: none of the 2 best scores passed; the best: sanity: 68 notes (between 8 and 64)
   - [4572115](https://musescore.com/score/4572115) 'Miss Graham of Inchbrakies Strathspey': sanity: 68 notes (between 8 and 64)
   - [4553170](https://musescore.com/score/4553170) 'Nathaniel Gow - Miss Graham of Inchbrakies Strathspey': sanity: 96 notes (between 8 and 64); range 22 semitones (at most 19)
-- **Mr. Morison Of Bognie** (`mr-morison-of-bognie`): 5 PDMX scores match, 5 can be picked. PASS
+- **Mr. Morison of Bognie** (`mr-morison-of-bognie`): 5 PDMX scores match, 5 can be picked. PASS
   - [4552463](https://musescore.com/score/4552463) 'Mr. Morison of Bognie': pass
 - **Old Wife Behind the Fire** (`old-wife-behind-the-fire`): 8 PDMX scores match, 8 can be picked. PASS
   - [4605975](https://musescore.com/score/4605975) 'Old Wife Behind the Fire': pass
@@ -193,7 +193,7 @@ onsets the importer dropped, of the track's notes. Pitches: Pitch Coverage with 
   - [4656836](https://musescore.com/score/4656836) 'The Polygon': pass
 - **What a Beau My Granny Was** (`what-a-beau-my-granny-was`): 6 PDMX scores match, 6 can be picked. PASS
   - [4548799](https://musescore.com/score/4548799) 'What a Beau my Granny was': pass
-- **Whimbleton-House** (`whimbleton-house`): 4 PDMX scores match, 4 can be picked. PASS
+- **Whimbleton House** (`whimbleton-house`): 4 PDMX scores match, 4 can be picked. PASS
   - [4966894](https://musescore.com/score/4966894) 'Whimbleton House': pass
 - **The Witches** (`witches`): 8 PDMX scores match, 8 can be picked. PASS
   - [5145297](https://musescore.com/score/5145297) 'The Witches': pass
@@ -272,7 +272,7 @@ onsets the importer dropped, of the track's notes. Pitches: Pitch Coverage with 
 - **When storms around are sweeping** (`when-storms-around-are-sweeping`): 2 PDMX scores match, 2 can be picked. FAIL: none of the 2 best scores passed; the best: sanity: the importer dropped 44 chord tones and inner-voice onsets, 49% of the track's notes (at most 10%)
   - [5783559](https://musescore.com/score/5783559) 'When storms around are sweeping - Joanna Kinkel': sanity: the importer dropped 44 chord tones and inner-voice onsets, 49% of the track's notes (at most 10%)
   - [5767867](https://musescore.com/score/5767867) 'When storms around are sweeping - Joanna Kinkel': sanity: the importer dropped 43 chord tones and inner-voice onsets, 49% of the track's notes (at most 10%)
-- **The Banks Of Allan** (`banks-of-allan`): 9 PDMX scores match, 9 can be picked. PASS
+- **The Banks of Allan** (`banks-of-allan`): 9 PDMX scores match, 9 can be picked. PASS
   - [4697524](https://musescore.com/score/4697524) 'The Banks of Allan': pass
 - **The Banks of Garry** (`banks-of-garry`): 5 PDMX scores match, 5 can be picked. PASS
   - [4720504](https://musescore.com/score/4720504) 'The Banks of Garry': sanity: 72 notes (between 8 and 64)
@@ -308,7 +308,7 @@ onsets the importer dropped, of the track's notes. Pitches: Pitch Coverage with 
   - [4606620](https://musescore.com/score/4606620) 'Garthland House Strathspey': sanity: 69 notes (between 8 and 64)
   - [4555951](https://musescore.com/score/4555951) 'Robert Petrie - Garthland House Strathspey': sanity: 78 notes (between 8 and 64)
   - [4713561](https://musescore.com/score/4713561) 'Robert Petrie - Garthland House Strathspey': sanity: 78 notes (between 8 and 64)
-- **Garthlands Strathspey** (`garthlands-strathspey`): 6 PDMX scores match, 6 can be picked. PASS
+- **Garthland's Strathspey** (`garthlands-strathspey`): 6 PDMX scores match, 6 can be picked. PASS
   - [4951466](https://musescore.com/score/4951466) 'Garthlands Strathspey': sanity: 96 notes (between 8 and 64)
   - [4688645](https://musescore.com/score/4688645) 'Garthlands Strathspey': sanity: 76 notes (between 8 and 64)
   - [4711775](https://musescore.com/score/4711775) "GARTHLAND'S -- STRATHSPEY": sanity: 90 notes (between 8 and 64)
@@ -335,7 +335,7 @@ onsets the importer dropped, of the track's notes. Pitches: Pitch Coverage with 
   - [5056131](https://musescore.com/score/5056131) 'Miss Austin': sanity: 76 notes (between 8 and 64); range 24 semitones (at most 19)
   - [4561566](https://musescore.com/score/4561566) 'Miss Austin': sanity: range 24 semitones (at most 19)
   - [4920609](https://musescore.com/score/4920609) 'Archibald Allan of Forfar - Miss Austin': sanity: range 24 semitones (at most 19)
-- **Miss McPherson Grant Of Ballindalloch** (`miss-mcpherson-grant-of-ballindalloch`): 7 PDMX scores match, 7 can be picked. PASS
+- **Miss McPherson Grant of Ballindalloch** (`miss-mcpherson-grant-of-ballindalloch`): 7 PDMX scores match, 7 can be picked. PASS
   - [5094409](https://musescore.com/score/5094409) 'Miss McPherson Grant Of Ballindalloch': pass
 - **The Nineteenth of December** (`nineteenth-of-december`): 7 PDMX scores match, 7 can be picked. PASS
   - [4567255](https://musescore.com/score/4567255) 'the Nineteenth of December': pass
@@ -346,5 +346,5 @@ onsets the importer dropped, of the track's notes. Pitches: Pitch Coverage with 
   - [4964944](https://musescore.com/score/4964944) "the Shakins' o' the Pocky": pass
 - **Susie Brodie** (`susie-brodie`): 5 PDMX scores match, 5 can be picked. PASS
   - [4954708](https://musescore.com/score/4954708) 'SUSIE BRODIE': pass
-- **Tros Y gareg** (`tros-y-gareg`): 2 PDMX scores match, 2 can be picked. PASS
-  - [4707559](https://musescore.com/score/4707559) 'Tros Y gareg (Over the Stone)': pass
+- **Tros y Garreg** (`tros-y-gareg`): 5 PDMX scores match, 5 can be picked. PASS
+  - [4942268](https://musescore.com/score/4942268) 'Tros Y Garreg': pass

@@ -2905,7 +2905,7 @@
   },
   {
    "id": "mr-morison-of-bognie",
-   "title": "Mr. Morison Of Bognie",
+   "title": "Mr. Morison of Bognie",
    "matched": 5,
    "eligible": 5,
    "rejected": {},
@@ -3189,7 +3189,7 @@
   },
   {
    "id": "whimbleton-house",
-   "title": "Whimbleton-House",
+   "title": "Whimbleton House",
    "matched": 4,
    "eligible": 4,
    "rejected": {},
@@ -5972,7 +5972,7 @@
   },
   {
    "id": "banks-of-allan",
-   "title": "The Banks Of Allan",
+   "title": "The Banks of Allan",
    "matched": 9,
    "eligible": 9,
    "rejected": {},
@@ -7235,7 +7235,7 @@
   },
   {
    "id": "garthlands-strathspey",
-   "title": "Garthlands Strathspey",
+   "title": "Garthland's Strathspey",
    "matched": 6,
    "eligible": 6,
    "rejected": {},
@@ -8180,7 +8180,7 @@
   },
   {
    "id": "miss-mcpherson-grant-of-ballindalloch",
-   "title": "Miss McPherson Grant Of Ballindalloch",
+   "title": "Miss McPherson Grant of Ballindalloch",
    "matched": 7,
    "eligible": 7,
    "rejected": {},
@@ -8575,22 +8575,22 @@
   },
   {
    "id": "tros-y-gareg",
-   "title": "Tros Y gareg",
-   "matched": 2,
-   "eligible": 2,
+   "title": "Tros y Garreg",
+   "matched": 5,
+   "eligible": 5,
    "rejected": {},
    "tried": [
     {
-     "score_id": "4707559",
-     "url": "https://musescore.com/score/4707559",
-     "score_title": "Tros Y gareg (Over the Stone)",
-     "match": "title head",
+     "score_id": "4942268",
+     "url": "https://musescore.com/score/4942268",
+     "score_title": "Tros Y Garreg",
+     "match": "title",
      "rating": "0.0",
      "n_ratings": "0",
-     "n_views": "8",
+     "n_views": "16",
      "license": "publicdomain",
      "n_tracks": "1",
-     "dataset_path": "./mid/11/32/QmTMGje8m38EaFd6zpp5GzoRDDbuyLzy4q9aaMhWyefEF7.mid",
+     "dataset_path": "./mid/12/14/QmUCcXaPSyige2Gs1VsDKyDNMwLeddecy6Vp8yw4RsmMgM.mid",
      "gates": {
       "license": "pass",
       "hash": "pass",
@@ -8598,10 +8598,10 @@
       "render": "pass"
      },
      "passed": true,
-     "sha256": "0889e339aee796f77f6a73374e04acaeed009a8c5ec11f29b7e1eeed411aed26",
+     "sha256": "8b12064f7a77f041846ffbb30b11b08d4b2ac841e086208e9c73f2c80c2d8cf6",
      "render": {
       "bpm": 120,
-      "max_beats": 31,
+      "max_beats": 30,
       "beats_per_bar": 3
      },
      "import_report": {
@@ -8609,40 +8609,40 @@
       "tracks_with_notes": [
        0
       ],
-      "chord_tones_dropped": 12,
+      "chord_tones_dropped": 0,
       "inner_voice_onsets_dropped": 0,
       "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 25
+      "tempo_changes_ignored": 1,
+      "note_count": 46
      },
-     "track_notes": 117,
+     "track_notes": 147,
      "range_semitones": 17,
-     "distinct_pitches": 11,
-     "pitch_coverage": "11 of 11",
+     "distinct_pitches": 12,
+     "pitch_coverage": "12 of 12",
      "metrics": {
-      "notes": 25,
+      "notes": 46,
       "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
       "notes_with_second_burst": 1,
       "pitch_readable_pct": 100,
-      "within_50c_pct": 4,
-      "within_50c_any_octave_pct": 4,
-      "median_abs_cents": 162.6,
-      "contour_pct": 67,
-      "distinct_recordings": 11,
-      "on_pitch_pct": 7,
-      "sounding_pct": 96,
+      "within_50c_pct": 11,
+      "within_50c_any_octave_pct": 11,
+      "median_abs_cents": 109.9,
+      "contour_pct": 86,
+      "distinct_recordings": 12,
+      "on_pitch_pct": 16,
+      "sounding_pct": 94,
       "notes_mostly_silent": 0,
-      "transpose": -22,
-      "octave_moves": 2,
-      "max_abs_shift_semitones": 12.93
+      "transpose": -20,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.57
      }
     }
    ],
    "result": "pass",
    "reason": null,
-   "picked": "4707559"
+   "picked": "4942268"
   }
  ]
 }

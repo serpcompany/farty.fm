@@ -29731,7 +29731,7 @@
  },
  {
   "id": "mr-morison-of-bognie",
-  "title": "Mr. Morison Of Bognie",
+  "title": "Mr. Morison of Bognie",
   "file": "midi/pdmx-mr-morison-of-bognie.mid",
   "sha256": "42187f2ffd0382e843ff916c3c5b6a810000cda8f7f7ea9d07ceabdbd98675fd",
   "source": {
@@ -29855,7 +29855,7 @@
  },
  {
   "id": "whimbleton-house",
-  "title": "Whimbleton-House",
+  "title": "Whimbleton House",
   "file": "midi/pdmx-whimbleton-house.mid",
   "sha256": "fef97d5867cc2493cf113d8d1bc60414b20196ed951a032f1633a03158ae89cd",
   "source": {
@@ -30408,7 +30408,7 @@
  },
  {
   "id": "banks-of-allan",
-  "title": "The Banks Of Allan",
+  "title": "The Banks of Allan",
   "file": "midi/pdmx-banks-of-allan.mid",
   "sha256": "4c12ec1d7b9146adbb070a4202db499575d6052a775dceee4ab597cfe16d33f1",
   "source": {
@@ -30623,7 +30623,7 @@
  },
  {
   "id": "garthlands-strathspey",
-  "title": "Garthlands Strathspey",
+  "title": "Garthland's Strathspey",
   "file": "midi/pdmx-garthlands-strathspey.mid",
   "sha256": "8236f994101f759541e8c8a49f7c21cf6b75fb77fc98680ccacc3c39a41d6271",
   "source": {
@@ -30808,7 +30808,7 @@
  },
  {
   "id": "miss-mcpherson-grant-of-ballindalloch",
-  "title": "Miss McPherson Grant Of Ballindalloch",
+  "title": "Miss McPherson Grant of Ballindalloch",
   "file": "midi/pdmx-miss-mcpherson-grant-of-ballindalloch.mid",
   "sha256": "9120e77c6ccecab676b7ae4b857a765a975dd21e7cfad4a397cb7d62d45701a6",
   "source": {
@@ -30963,28 +30963,28 @@
  },
  {
   "id": "tros-y-gareg",
-  "title": "Tros Y gareg",
+  "title": "Tros y Garreg",
   "file": "midi/pdmx-tros-y-gareg.mid",
-  "sha256": "0889e339aee796f77f6a73374e04acaeed009a8c5ec11f29b7e1eeed411aed26",
+  "sha256": "8b12064f7a77f041846ffbb30b11b08d4b2ac841e086208e9c73f2c80c2d8cf6",
   "source": {
    "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
    "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/11/32/QmTMGje8m38EaFd6zpp5GzoRDDbuyLzy4q9aaMhWyefEF7.mid",
-   "musescore_score_id": "4707559",
-   "musescore_url": "https://musescore.com/score/4707559",
-   "score_title": "Tros Y gareg (Over the Stone)",
+   "dataset_path": "./mid/12/14/QmUCcXaPSyige2Gs1VsDKyDNMwLeddecy6Vp8yw4RsmMgM.mid",
+   "musescore_score_id": "4942268",
+   "musescore_url": "https://musescore.com/score/4942268",
+   "score_title": "Tros Y Garreg",
    "composer": "NA",
    "license": "publicdomain",
    "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
    "pdmx_license_conflict": "False",
    "rating": "0.0",
    "n_ratings": "0",
-   "n_views": "8"
+   "n_views": "16"
   },
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 31,
+   "max_beats": 30,
    "beats_per_bar": 3
   },
   "import": {

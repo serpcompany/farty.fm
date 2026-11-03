@@ -2,6 +2,7 @@
 # tools/catalog/rank_pdmx.py --batch 93 --out tools/catalog/titles-10.txt (#312). Each title's only name is
 # the one the ranking counted scores by.
 # Review of its import (#324, PR #343) pulled 13 titles, now in excluded-titles.txt: The Pride of Rathmore; The Rivals; Killarney; St. Lawrence; Chimes; The Primrose; The Sloe; Sky Lark; The Prince Of Wales; The Fairy; The Marquis of Huntly; Of A' the Airts the Wind Can Blaw; Balvenie Castle.
+# The review of PR #343 also fixed these titles by hand: Mr. Morison of Bognie, Whimbleton House, The Banks of Allan, Garthland's Strathspey, Miss McPherson Grant of Ballindalloch, Tros y Garreg.
 # id | catalog title
 miss-grant-of-grant | Miss Grant of Grant
 miss-wharton-duff | Miss Wharton Duff
@@ -27,11 +28,11 @@ lassies-of-dunse | Lassies of Dunse
 merry-conclusion | The Merry Conclusion
 miss-bennets-jig | Miss Bennet's Jig
 miss-graham-of-inchbrakies-strathspey | Miss Graham of Inchbrakies Strathspey
-mr-morison-of-bognie | Mr. Morison Of Bognie
+mr-morison-of-bognie | Mr. Morison of Bognie
 old-wife-behind-the-fire | Old Wife Behind the Fire
 polygon | The Polygon
 what-a-beau-my-granny-was | What a Beau My Granny Was
-whimbleton-house | Whimbleton-House
+whimbleton-house | Whimbleton House
 witches | The Witches
 a-virgin-unspotted | A Virgin Unspotted
 amorous-goddess | The Amorous Goddess
@@ -57,7 +58,7 @@ on-the-other-shore | On The Other Shore
 top-and-bottom | Top and Bottom
 wearmouth-lads | Wearmouth Lads
 when-storms-around-are-sweeping | When storms around are sweeping
-banks-of-allan | The Banks Of Allan
+banks-of-allan | The Banks of Allan
 banks-of-garry | The Banks of Garry
 big-john-mcneil | Big John McNeil
 blaw-the-wind-southerly | Blaw the Wind Southerly
@@ -68,7 +69,7 @@ forest-of-gaick | The Forest of Gaick
 forglen-house | Forglen House
 free-trade | Free Trade
 garthland-house-strathspey | Garthland House Strathspey
-garthlands-strathspey | Garthlands Strathspey
+garthlands-strathspey | Garthland's Strathspey
 general-gathering-1745 | The General Gathering 1745
 hob-y-deri-danno | Hob y Deri Danno
 knives-and-forks | Knives and Forks
@@ -77,9 +78,9 @@ lady-mary-murray | Lady Mary Murray
 lady-spencer-chichester | Lady Spencer Chichester
 little-peggys-love | Little Peggy's Love
 miss-austin | Miss Austin
-miss-mcpherson-grant-of-ballindalloch | Miss McPherson Grant Of Ballindalloch
+miss-mcpherson-grant-of-ballindalloch | Miss McPherson Grant of Ballindalloch
 nineteenth-of-december | The Nineteenth of December
 scots-recluse | The Scots Recluse
 shakins-o-the-pocky | The Shakin's o' the Pocky
 susie-brodie | Susie Brodie
-tros-y-gareg | Tros Y gareg
+tros-y-gareg | Tros y Garreg | Tros Y gareg
