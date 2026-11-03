@@ -3,7 +3,7 @@
 import { Clock, Play, Square, UserCheck, UserPlus, X } from 'lucide-react'
 import Link from 'next/link'
 import { type ReactNode, useCallback, useEffect, useState, useSyncExternalStore } from 'react'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +12,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { play, stopPlayback } from '@/lib/audio/player'
 import { actOnFriend, type FriendAction, type FriendState, readFriendState } from '@/lib/friends'
+import { useGetFarty } from '@/lib/get-farty'
 import { formattedTootDate } from '@/lib/toot'
-import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { FriendsUnreachable, RemoveFriendDialog, refusalMessage, useFriendRequest } from './friends'
+import { useStartGetFarty } from './get-farty'
 import { Report, SharedTopBar } from './shared-recording-page'
 
 // A profile page, `/u/<handle>/` (#319, ADR 0021): what anyone sees, signed in or not, in any
@@ -77,7 +78,7 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <SharedTopBar />
+      <SharedTopBar friend={handle} />
       <div className="flex flex-1 flex-col px-4 pb-6">
         <h1 className="pt-3 text-3xl font-bold tracking-tight break-all">@{handle}</h1>
         <div className="mt-4">
@@ -152,6 +153,17 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
 
 const block = 'h-11 w-full gap-2 text-base'
 
+/** Signed out, Add friend is Get Farty, offering `handle` as a friend (#318). */
+function AddFriendSignedOut({ handle }: { handle: string }) {
+  const start = useStartGetFarty()
+  return (
+    <Button className={block} onClick={() => start(handle)}>
+      <UserPlus aria-hidden />
+      Add friend
+    </Button>
+  )
+}
+
 /**
  * Add friend, and what it becomes: Requested (which can be cancelled), their request to the
  * viewer (Accept or Decline), Friends (which can be removed), or a note on the viewer's own page.
@@ -177,9 +189,11 @@ function FriendControl({ handle, onOwn }: { handle: string; onOwn: (own: boolean
     if (read) setState({ accountId, state: read })
   }, [accountId, handle])
 
+  // Signed in through Get Farty, its friend request is still on its way: read once it's gone.
+  const asking = useGetFarty()?.stage === 'friend'
   useEffect(() => {
-    void reload()
-  }, [reload])
+    if (!asking) void reload()
+  }, [reload, asking])
 
   const known = accountId && state?.accountId === accountId ? state.state : null
   useEffect(() => onOwn(known === 'own'), [known, onOwn])
@@ -210,12 +224,7 @@ function FriendControl({ handle, onOwn }: { handle: string; onOwn: (own: boolean
   }
 
   if (account.status === 'signedOut' || account.status === 'expired') {
-    return (
-      <Link href="/" className={cn(buttonVariants(), block)}>
-        <UserPlus aria-hidden />
-        Add friend
-      </Link>
-    )
+    return <AddFriendSignedOut handle={handle} />
   }
   if (!known && accountId && unreachable === accountId) {
     return <FriendsUnreachable onRetry={() => void reload()} />
