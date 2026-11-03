@@ -1,7 +1,7 @@
 """Deterministic MIDI -> monophonic melody plan importer.
 
 Every melody comes from a checked-in source MIDI file. The importer never invents notes:
-it selects one track, keeps the highest note at each onset ("skyline"), clips overlaps,
+it selects one track (never a percussion part), keeps the highest note at each onset ("skyline"), clips overlaps,
 and reports everything it discarded so nothing is silently dropped. It also reads where the
 score's bars start (`bar_lines`) from its time signatures, for the downbeat accent.
 """
@@ -19,6 +19,8 @@ class Note:
 
 
 EPS = 1e-6  # beats: two times this close are the same time
+DRUM_CHANNEL = 9  # MIDI channel 10, General MIDI's percussion
+PERCUSSION_PROGRAMS = range(112, 120)  # General MIDI's Percussive family (Tinkle Bell to Reverse Cymbal)
 
 
 @dataclass
@@ -74,11 +76,14 @@ def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat
     tempo_us, beats_per_bar, tempo_changes = 500000, 4, 0
     meters = {}  # tick -> (numerator, denominator): the score's time signatures, from every track
     events = {}  # track index -> list of (start_tick, end_tick, pitch)
+    percussion = set()  # tracks whose every note is on the drum channel or a percussion program
     for ti, trk in enumerate(mid.tracks):
-        tick, open_notes, done = 0, {}, []
+        tick, open_notes, done, programs, pitched = 0, {}, [], {}, False
         for msg in trk:
             tick += msg.time
-            if msg.type == "set_tempo":
+            if msg.type == "program_change":
+                programs[msg.channel] = msg.program
+            elif msg.type == "set_tempo":
                 if tick == 0:
                     tempo_us = msg.tempo
                 else:
@@ -89,6 +94,7 @@ def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat
                     beats_per_bar = msg.numerator
             elif msg.type == "note_on" and msg.velocity > 0:
                 open_notes.setdefault((msg.channel, msg.note), []).append(tick)
+                pitched |= msg.channel != DRUM_CHANNEL and programs.get(msg.channel) not in PERCUSSION_PROGRAMS
             elif msg.type in ("note_off", "note_on"):
                 starts = open_notes.get((msg.channel, msg.note))
                 if starts:
@@ -96,8 +102,11 @@ def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat
         done = [d for d in done if d[1] > d[0]]  # zero-length notes carry no sound
         if done:
             events[ti] = sorted(done)
-    if track is None:  # default: the track with the highest mean pitch (usually the tune)
-        track = max(events, key=lambda t: sum(p for _, _, p in events[t]) / len(events[t]))
+            if not pitched:
+                percussion.add(ti)
+    if track is None:  # default: the pitched track with the highest mean pitch (usually the tune)
+        candidates = [t for t in events if t not in percussion] or list(events)
+        track = max(candidates, key=lambda t: sum(p for _, _, p in events[t]) / len(events[t]))
     raw = events[track]
 
     # Sustain-aware skyline: a new melody note starts only when the highest *sounding*

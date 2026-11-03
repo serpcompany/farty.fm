@@ -381,6 +381,43 @@ class PaddedPickup(unittest.TestCase):
         self.assertEqual(len(notes), 48)  # 26 melody notes and 22 accompaniment notes
 
 
+class MelodyTrack(unittest.TestCase):
+    """The importer never takes a percussion part as the melody (#324: O Sacred Head's score 461931 has a
+    "Wood Blocks" track on MIDI channel 10 above the hymn, and the Song played the wood blocks)."""
+
+    def midi(self, *tracks):
+        """A MIDI file of one track per (channel, program, pitches), each pitch a quarter note."""
+        import mido
+        mid = mido.MidiFile(ticks_per_beat=480)
+        for channel, program, pitches in tracks:
+            trk = mido.MidiTrack([mido.Message("program_change", channel=channel, program=program)])
+            for p in pitches:
+                trk += [mido.Message("note_on", channel=channel, note=p, velocity=80),
+                        mido.Message("note_off", channel=channel, note=p, time=480)]
+            mid.tracks.append(trk)
+        path = temp_dir(self) / "score.mid"
+        mid.save(path)
+        return path
+
+    def test_skips_the_drum_channel(self):
+        m = load_midi(self.midi((0, 22, [64, 69, 67, 65]), (9, 0, [76, 77, 77, 77])))
+        self.assertEqual(m.report["track_used"], 0)
+        self.assertEqual([n.pitch for n in m.notes], [64, 69, 67, 65])
+
+    def test_skips_a_percussion_program(self):
+        m = load_midi(self.midi((0, 0, [60, 62, 64]), (1, 115, [84, 84, 84])))  # GM 116, Woodblock
+        self.assertEqual(m.report["track_used"], 0)
+
+    def test_a_score_of_only_percussion_still_imports(self):
+        m = load_midi(self.midi((9, 0, [76, 77])))
+        self.assertEqual(m.report["track_used"], 0)
+
+    def test_the_hymns_score_plays_the_hymn(self):
+        m = load_midi(ROOT / "catalog/midi/pdmx-o-sacred-head-now-wounded.mid")
+        self.assertEqual(m.report["track_used"], 0)  # "Melodica", not "Wood Blocks"
+        self.assertEqual([n.pitch for n in m.notes[:5]], [64, 69, 67, 65, 64])  # E4 A4 G4 F4 E4
+
+
 class Extract(unittest.TestCase):
     def test_a_cached_file_cut_short_is_read_again_from_the_archive(self):
         tmp, data = temp_dir(self), SCORE.read_bytes()
