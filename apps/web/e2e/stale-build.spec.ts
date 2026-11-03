@@ -82,7 +82,7 @@ test('the service worker answers a 404 for a script it kept with its copy', asyn
     return navigator.serviceWorker.controller !== null
   })
   const kept = await page.evaluate(async () => {
-    const cache = await caches.open('pedos-shell-v1')
+    const cache = await caches.open('pedos-shell-v2')
     for (const request of await cache.keys()) {
       const { pathname } = new URL(request.url)
       if (pathname.startsWith('/_next/static/chunks/') && pathname.endsWith('.js')) {
