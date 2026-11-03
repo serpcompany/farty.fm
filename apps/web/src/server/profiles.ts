@@ -88,7 +88,7 @@ export async function reportProfile(
         key: await reporterLimitKey(secret, requestClient(request)),
         rule: REPORT_LIMITS.perReporter
       },
-      { key: profileReportsKey(owner.userId), rule: REPORT_LIMITS.perRecording },
+      { key: profileReportsKey(owner.userId), rule: REPORT_LIMITS.perItem },
       { key: SITE_REPORTS_KEY, rule: REPORT_LIMITS.siteWide }
     ],
     now

@@ -4,31 +4,50 @@ import { describe, expect, it } from 'vitest'
 import * as handleRoute from '@/app/api/handle/route'
 import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
 import * as sharesRoute from '@/app/api/share/route'
+import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
+import type { Kind } from '@/db/library'
+import { markTootPaid, startTootPayment } from '@/db/payments'
 import { rateLimit, shareReports, shares } from '@/db/schema'
+import { TOOT_PRICE } from '@/lib/pricing'
 import { encodeWav } from '@/lib/wav'
-import { findSharedRecording, partFrames, sharedAudioCacheKey, sharedPart } from '@/server/sharing'
+import {
+  findSharedRecording,
+  findSharedToot,
+  partFrames,
+  SHARED_TOOT_BARS,
+  sharedAudioCacheKey,
+  sharedPart,
+  sharedTootKey,
+  sharedTootLevels
+} from '@/server/sharing'
 import { readWavHeader } from '@/server/wav-header'
 import {
   type As,
   api,
   media,
   ORIGIN,
+  padTootMetadata,
   recordingMetadata,
   signUp,
   testDb,
+  tootMetadata,
   uploadBody,
   wav
 } from '@/test-support/library-api'
 
 import * as audioRoute from './[handle]/r/[id]/audio/route'
 import * as reportRoute from './[handle]/r/[id]/report/route'
+import * as tootAudioRoute from './[handle]/t/[id]/audio/route'
+import * as tootReportRoute from './[handle]/t/[id]/report/route'
 
 // Sharing (ADR 0020) in workerd, with a real D1 and R2: Handles, sharing and stopping sharing a
-// Recording, its public audio and Report, and that a link works only while its Recording is
-// shared, by its owner, under their Handle.
+// Recording or a saved Toot, its public audio and Report, and that a link works only while its
+// item is shared, by its owner, under their Handle.
 
 const R1 = '11111111-1111-4111-8111-111111111111'
 const R2 = '22222222-2222-4222-8222-222222222222'
+const T1 = '33333333-3333-4333-8333-333333333333'
+const T2 = '44444444-4444-4444-8444-444444444444'
 
 const params = <P>(value: P) => ({ params: Promise.resolve(value) })
 
@@ -46,6 +65,13 @@ const json = (body: unknown) => ({
   body: JSON.stringify(body)
 })
 
+const shareRoutes = { recordings: shareRecordingRoute, toots: shareTootRoute }
+/** Each kind of link's public routes, by its segment: `r` for a Recording, `t` for a Toot. */
+const linkRoutes = {
+  r: { audio: audioRoute, report: reportRoute },
+  t: { audio: tootAudioRoute, report: tootReportRoute }
+}
+
 const share = {
   handle: (as: As) => handleRoute.GET(request('/api/handle/', 'GET', as), params({})),
   check: (handle: string, as: As) =>
@@ -56,28 +82,25 @@ const share = {
   pick: (handle: unknown, as: As) =>
     handleRoute.PUT(request('/api/handle/', 'PUT', as, json({ handle })), params({})),
   list: (as: As) => sharesRoute.GET(request('/api/share/', 'GET', as), params({})),
-  put: (id: string, as: As) =>
-    shareRecordingRoute.PUT(request(`/api/share/recordings/${id}/`, 'PUT', as), params({ id })),
-  stop: (id: string, as: As) =>
-    shareRecordingRoute.DELETE(
-      request(`/api/share/recordings/${id}/`, 'DELETE', as),
-      params({ id })
-    ),
-  /** The shared Recording's audio, as anyone with the link fetches it: no cookie. */
+  put: (id: string, as: As, kind: Kind = 'recordings') =>
+    shareRoutes[kind].PUT(request(`/api/share/${kind}/${id}/`, 'PUT', as), params({ id })),
+  stop: (id: string, as: As, kind: Kind = 'recordings') =>
+    shareRoutes[kind].DELETE(request(`/api/share/${kind}/${id}/`, 'DELETE', as), params({ id })),
+  /** The shared item's audio, as anyone with the link fetches it: no cookie. */
   audio: (url: string, init: RequestInit = {}) => {
-    const { handle, id } = linkParts(url)
-    return audioRoute.GET(
+    const { segment, handle, id } = linkParts(url)
+    return linkRoutes[segment].audio.GET(
       new Request(`${url}audio/`, { ...init, method: 'GET' }),
       params({ handle, id })
     )
   },
   /** A report from the page, by the reporter at `ip`, or with no `cf-connecting-ip` when null. */
   report: (url: string, origin: string | null = ORIGIN, ip: string | null = '203.0.113.1') => {
-    const { handle, id } = linkParts(url)
+    const { segment, handle, id } = linkParts(url)
     const headers = new Headers()
     if (ip !== null) headers.set('cf-connecting-ip', ip)
     if (origin !== null) headers.set('origin', origin)
-    return reportRoute.POST(
+    return linkRoutes[segment].report.POST(
       new Request(`${url}report/`, { method: 'POST', headers }),
       params({ handle, id })
     )
@@ -102,10 +125,10 @@ async function slotsLike(pattern: string): Promise<number[]> {
   return rows.map(row => row.count)
 }
 
-function linkParts(url: string): { handle: string; id: string } {
-  const match = new URL(url).pathname.match(/^\/u\/([^/]+)\/r\/([^/]+)\/$/)
+function linkParts(url: string): { segment: 'r' | 't'; handle: string; id: string } {
+  const match = new URL(url).pathname.match(/^\/u\/([^/]+)\/(r|t)\/([^/]+)\/$/)
   if (!match) throw new Error(`Not a share link: ${url}`)
-  return { handle: match[1], id: match[2] }
+  return { segment: match[2] as 'r' | 't', handle: match[1], id: match[3] }
 }
 
 async function upload(id: string, cookie: string) {
@@ -113,6 +136,53 @@ async function upload(id: string, cookie: string) {
     cookie
   })
   expect(response.status).toBe(201)
+}
+
+/** A saved Toot's WAV: 0.1 s of a tone, so the bytes served are plainly the ones stored. */
+function tootWav(): Uint8Array {
+  const samples = Float32Array.from({ length: 4800 }, (_, i) => 0.5 * Math.sin(i / 10))
+  return new Uint8Array(encodeWav({ samples, sampleRate: 48_000 }))
+}
+
+/** The Recording `tootMetadata`'s Arrangement plays. */
+const tootRecording = '00000000-0000-0000-0000-000000000090'
+
+/** A Sound Pad Performance that taps `recordingId` twice. */
+const playing = (recordingId: string) => ({
+  recordings: [recordingId],
+  taps: [
+    [0, 0],
+    [0.25, 0]
+  ]
+})
+
+/** Pays for the Toot `id`, as Checkout does (ADR 0010), without saving it. */
+async function payFor(user: { id: string }, id: string, songId: string | null = 'twinkle') {
+  await startTootPayment(testDb(), user.id, id, songId, `cs_test_${id}`, TOOT_PRICE)
+  expect(await markTootPaid(testDb(), user.id, id, `cs_test_${id}`)).toBe(true)
+}
+
+/** Pays for the Toot `id` and saves it to the account, as Song Creator's Save does. */
+async function saveToot(
+  id: string,
+  user: { id: string; cookie: string },
+  audio = tootWav(),
+  metadata: { songId: string | null } = tootMetadata(id)
+) {
+  await payFor(user, id, metadata.songId)
+  const response = await api.put('toots', id, uploadBody(metadata, audio), user)
+  expect(response.status).toBe(201)
+}
+
+/** A user with a Handle and a saved Toot `T1`, shared: its link. */
+async function tootSharer(name: string) {
+  const user = await signUp(name)
+  expect((await share.pick(name, user)).status).toBe(201)
+  await saveToot(T1, user)
+  const response = await share.put(T1, user, 'toots')
+  expect(response.status).toBe(201)
+  const { url } = (await response.json()) as { url: string }
+  return { ...user, url }
 }
 
 /** A user with a Handle and an uploaded Recording `R1`, shared: its link. */
@@ -553,6 +623,335 @@ describe('Reporting a shared Recording', () => {
     await share.report(alice.url)
     await api.deleteAccount(alice)
     expect(await testDb().select().from(shareReports)).toEqual([])
+  })
+})
+
+describe('Sharing a saved Toot', () => {
+  it('needs a Handle and a saved Toot of your own', async () => {
+    const alice = await signUp('alice')
+    await saveToot(T1, alice)
+    expect(await (await share.put(T1, alice, 'toots')).json()).toEqual({ error: 'no_handle' })
+
+    await share.pick('alice', alice)
+    // Never saved: one Song Creator only previewed, or one paid for and not saved yet.
+    expect((await share.put(T2, alice, 'toots')).status).toBe(404)
+    await payFor(alice, T2)
+    expect((await share.put(T2, alice, 'toots')).status).toBe(404)
+    // A Recording isn't a Toot.
+    await upload(R1, alice.cookie)
+    expect((await share.put(R1, alice, 'toots')).status).toBe(404)
+    expect((await share.put('not-an-id', alice, 'toots')).status).toBe(404)
+    expect((await share.put(T1, { ...alice, library: 'someone-else' }, 'toots')).status).toBe(409)
+    const elsewhere = { ...alice, origin: 'https://evil.example' }
+    expect((await share.put(T1, elsewhere, 'toots')).status).toBe(403)
+    expect((await share.put(T1, {}, 'toots')).status).toBe(401)
+    expect(await testDb().select().from(shares)).toEqual([])
+  })
+
+  it('makes a link anyone can play: the saved WAV, whole and as stored', async () => {
+    const alice = await tootSharer('alice')
+    expect(alice.url).toMatch(new RegExp(`^${ORIGIN}/u/alice/t/[0-9a-hjkmnp-tv-z]{12}/$`))
+    // The link names a share of its own, never the Toot's id.
+    expect(alice.url).not.toContain(T1)
+
+    const again = await share.put(T1, alice, 'toots')
+    expect(again.status).toBe(200)
+    expect(await again.json()).toEqual({ url: alice.url })
+
+    const audio = await share.audio(alice.url)
+    expect(audio.status).toBe(200)
+    expect(audio.headers.get('content-type')).toBe('audio/wav')
+    expect(audio.headers.get('cache-control')).toBe('private, no-cache')
+    expect(audio.headers.get('content-length')).toBe(String(tootWav().byteLength))
+    expect(new Uint8Array(await audio.arrayBuffer())).toEqual(tootWav())
+
+    expect(await (await share.list(alice)).json()).toEqual({
+      handle: 'alice',
+      shares: [{ kind: 'toots', itemId: T1, url: alice.url }]
+    })
+  })
+
+  it('serves the audio from the cache, and answers 304 to a browser that has it', async () => {
+    const alice = await tootSharer('alice')
+    const first = await share.audio(alice.url)
+    const etag = first.headers.get('etag')
+    expect(etag).toBeTruthy()
+    await first.arrayBuffer()
+
+    const unchanged = await share.audio(alice.url, { headers: { 'if-none-match': etag ?? '' } })
+    expect(unchanged.status).toBe(304)
+    expect(unchanged.headers.get('cache-control')).toBe('private, no-cache')
+
+    // The copy in the cache plays even once R2's is gone, while the share works.
+    await media().delete(`users/${alice.id}/toots/${T1}.wav`)
+    const cached = await share.audio(alice.url)
+    expect(cached.status).toBe(200)
+    expect(new Uint8Array(await cached.arrayBuffer())).toEqual(tootWav())
+  })
+
+  it('lists Recordings and Toots, each opening only under its own kind of link', async () => {
+    const alice = await tootSharer('alice')
+    await upload(R1, alice.cookie)
+    const recording = (await (await share.put(R1, alice)).json()) as { url: string }
+    expect(recording.url).toMatch(new RegExp(`^${ORIGIN}/u/alice/r/`))
+
+    const { shares: listed } = (await (await share.list(alice)).json()) as { shares: unknown[] }
+    expect(listed).toHaveLength(2)
+    expect(listed).toEqual(
+      expect.arrayContaining([
+        { kind: 'toots', itemId: T1, url: alice.url },
+        { kind: 'recordings', itemId: R1, url: recording.url }
+      ])
+    )
+
+    // A Toot's link never opens as a Recording's, nor a Recording's as a Toot's.
+    const asRecording = alice.url.replace('/t/', '/r/')
+    const asToot = recording.url.replace('/r/', '/t/')
+    expect((await share.audio(asRecording)).status).toBe(404)
+    expect((await share.audio(asToot)).status).toBe(404)
+    expect((await share.report(asRecording)).status).toBe(404)
+    expect((await share.report(asToot)).status).toBe(404)
+    expect(await findSharedRecording(testDb(), 'alice', linkParts(alice.url).id)).toBeNull()
+    expect(await findSharedToot(testDb(), 'alice', linkParts(recording.url).id)).toBeNull()
+  })
+
+  it("shows the page only the Toot's title, Song and length, under its owner's Handle", async () => {
+    const alice = await tootSharer('alice')
+    const { handle, id } = linkParts(alice.url)
+    const shared = await findSharedToot(testDb(), handle, id)
+    if (!shared) throw new Error('Not shared')
+    // `row` is for the server's own lookups (the WAV's R2 key); the page gets only the rest.
+    const { row: _, ...shown } = shared
+    expect(shown).toEqual({
+      handle: 'alice',
+      shareId: id,
+      title: 'Twinkle Twinkle Little Star',
+      songId: 'twinkle',
+      seconds: 0.1
+    })
+    const page = JSON.stringify(shown)
+    for (const secret of [T1, alice.id, 'alice@example.test', tootRecording]) {
+      expect(page).not.toContain(secret)
+    }
+    // The Handle in the link is matched as lowercase, and must be the owner's.
+    expect(await findSharedToot(testDb(), 'ALICE', id)).not.toBeNull()
+    await tootSharer('bob')
+    expect(await findSharedToot(testDb(), 'bob', id)).toBeNull()
+    expect((await share.audio(alice.url.replace('/u/alice/', '/u/bob/'))).status).toBe(404)
+  })
+
+  it('shares a Sound Pad Toot too', async () => {
+    const alice = await signUp('alice')
+    await share.pick('alice', alice)
+    await saveToot(T2, alice, tootWav(), padTootMetadata(T2))
+    const response = await share.put(T2, alice, 'toots')
+    expect(response.status).toBe(201)
+    const { url } = (await response.json()) as { url: string }
+    const { handle, id } = linkParts(url)
+    expect(await findSharedToot(testDb(), handle, id)).toMatchObject({
+      title: 'Sound Pad',
+      songId: null
+    })
+    expect((await share.audio(url)).status).toBe(200)
+  })
+
+  it("can't be shared or stopped by anyone but its owner", async () => {
+    const alice = await tootSharer('alice')
+    const bob = await signUp('bob')
+    await share.pick('bob', bob)
+
+    expect((await share.put(T1, bob, 'toots')).status).toBe(404)
+    expect((await share.stop(T1, bob, 'toots')).status).toBe(204)
+    expect((await share.audio(alice.url)).status).toBe(200)
+    expect(await (await share.list(bob)).json()).toEqual({ handle: 'bob', shares: [] })
+    expect(await testDb().select().from(shares)).toHaveLength(1)
+  })
+
+  it('stops working when its owner stops sharing it, and a new share is a new link', async () => {
+    const alice = await tootSharer('alice')
+    const elsewhere = { ...alice, origin: 'https://evil.example' }
+    expect((await share.stop(T1, elsewhere, 'toots')).status).toBe(403)
+    expect((await share.audio(alice.url)).status).toBe(200)
+
+    expect((await share.stop(T1, alice, 'toots')).status).toBe(204)
+    expect((await share.audio(alice.url)).status).toBe(404)
+    expect((await share.report(alice.url)).status).toBe(404)
+    const { handle, id } = linkParts(alice.url)
+    expect(await findSharedToot(testDb(), handle, id)).toBeNull()
+    expect(await (await share.list(alice)).json()).toEqual({ handle: 'alice', shares: [] })
+
+    const again = await share.put(T1, alice, 'toots')
+    expect(again.status).toBe(201)
+    const { url } = (await again.json()) as { url: string }
+    expect(url).not.toBe(alice.url)
+    expect((await share.audio(url)).status).toBe(200)
+    expect((await share.audio(alice.url)).status).toBe(404)
+  })
+
+  it('stops working when the Toot is deleted', async () => {
+    const alice = await tootSharer('alice')
+    expect((await api.delete('toots', T1, alice)).status).toBe(204)
+    expect((await share.audio(alice.url)).status).toBe(404)
+    expect((await share.report(alice.url)).status).toBe(404)
+    expect(await testDb().select().from(shares)).toEqual([])
+    expect((await share.put(T1, alice, 'toots')).status).toBe(410)
+  })
+
+  it('stops working when the account is deleted', async () => {
+    const alice = await tootSharer('alice')
+    expect((await api.deleteAccount(alice)).status).toBe(204)
+    expect((await share.audio(alice.url)).status).toBe(404)
+    expect(await testDb().select().from(shares)).toEqual([])
+  })
+
+  it('stays down once Farty takes it down, even if its owner shares it again', async () => {
+    const alice = await tootSharer('alice')
+    await testDb().update(shares).set({ takenDownAt: new Date() })
+    expect((await share.audio(alice.url)).status).toBe(404)
+    expect((await share.report(alice.url)).status).toBe(404)
+
+    const again = await share.put(T1, alice, 'toots')
+    expect(again.status).toBe(403)
+    expect(await again.json()).toEqual({ error: 'taken_down' })
+    expect((await share.stop(T1, alice, 'toots')).status).toBe(204)
+    expect((await share.put(T1, alice, 'toots')).status).toBe(403)
+    expect(await (await share.list(alice)).json()).toEqual({ handle: 'alice', shares: [] })
+  })
+
+  it('stays down while a Recording it plays is taken down, and never shares again', async () => {
+    const alice = await signUp('alice')
+    await share.pick('alice', alice)
+    await upload(R1, alice.cookie)
+    expect((await share.put(R1, alice)).status).toBe(201)
+    // T1 plays R1 for one of its Song's pitches; T2 tapped R1 on the Sound Pad.
+    const arrangement = { transposition: 0, recordingForPitch: { 60: R2, 64: R1 } }
+    await saveToot(T1, alice, tootWav(), tootMetadata(T1, { arrangement }))
+    await saveToot(T2, alice, tootWav(), padTootMetadata(T2, { performance: playing(R1) }))
+    const response = await share.put(T1, alice, 'toots')
+    expect(response.status).toBe(201)
+    const { url } = (await response.json()) as { url: string }
+    expect((await share.audio(url)).status).toBe(200)
+
+    // Farty takes down R1's own link after a report.
+    await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, R1))
+
+    expect((await share.audio(url)).status).toBe(404)
+    expect((await share.report(url)).status).toBe(404)
+    const { handle, id } = linkParts(url)
+    expect(await findSharedToot(testDb(), handle, id)).toBeNull()
+    expect(await (await share.list(alice)).json()).toEqual({ handle: 'alice', shares: [] })
+    for (const toot of [T1, T2]) {
+      const again = await share.put(toot, alice, 'toots')
+      expect(again.status).toBe(403)
+      expect(await again.json()).toEqual({ error: 'taken_down' })
+    }
+    // Deleting R1 keeps its take-down, so the Toots stay down.
+    expect((await api.delete('recordings', R1, alice)).status).toBe(204)
+    expect((await share.audio(url)).status).toBe(404)
+    expect((await share.put(T2, alice, 'toots')).status).toBe(403)
+  })
+
+  it('shares a Toot whose Recordings are up, though another Recording is down', async () => {
+    const alice = await signUp('alice')
+    await share.pick('alice', alice)
+    await upload(R1, alice.cookie)
+    expect((await share.put(R1, alice)).status).toBe(201)
+    await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, R1))
+    await saveToot(T2, alice, tootWav(), padTootMetadata(T2, { performance: playing(R2) }))
+    const response = await share.put(T2, alice, 'toots')
+    expect(response.status).toBe(201)
+    const { url } = (await response.json()) as { url: string }
+    expect((await share.audio(url)).status).toBe(200)
+    expect(await (await share.list(alice)).json()).toEqual({
+      handle: 'alice',
+      shares: [{ kind: 'toots', itemId: T2, url }]
+    })
+  })
+
+  it('never opens a link nobody shared', async () => {
+    const alice = await signUp('alice')
+    await share.pick('alice', alice)
+    await saveToot(T1, alice)
+    for (const id of ['000000000000', 'abc', T1]) {
+      expect((await share.audio(`${ORIGIN}/u/alice/t/${id}/`)).status).toBe(404)
+    }
+  })
+
+  it('draws its bars from the saved WAV, kept in the cache by its R2 key', async () => {
+    const dora = await signUp('dora')
+    await share.pick('dora', dora)
+    // 0.75 s at 8 kHz: loud for its first half, then silent, so 30 bars of each.
+    const samples = Float32Array.from({ length: 6000 }, (_, i) => (i < 3000 ? 0.5 : 0))
+    await saveToot(T2, dora, new Uint8Array(encodeWav({ samples, sampleRate: 8000 })))
+    const { url } = (await (await share.put(T2, dora, 'toots')).json()) as { url: string }
+    const { handle, id } = linkParts(url)
+    const shared = await findSharedToot(testDb(), handle, id)
+    if (!shared) throw new Error('Not shared')
+
+    const key = sharedTootKey(shared)
+    expect(key).toBe(`users/${dora.id}/toots/${T2}.wav`)
+    const levels = await sharedTootLevels(media(), key, ORIGIN)
+    expect(levels).toHaveLength(SHARED_TOOT_BARS)
+    expect(levels).toEqual([...Array(30).fill(1), ...Array(30).fill(0.05)])
+
+    await media().delete(key)
+    expect(await sharedTootLevels(media(), key, ORIGIN)).toEqual(levels)
+    // Flat for audio that's gone and was never drawn.
+    const gone = await sharedTootLevels(media(), `users/${dora.id}/toots/${T1}.wav`, ORIGIN)
+    expect(gone).toEqual(Array(SHARED_TOOT_BARS).fill(0.05))
+  })
+})
+
+describe('Reporting a shared Toot', () => {
+  it('keeps a row naming the share and the Toot, not the reporter', async () => {
+    const alice = await tootSharer('alice')
+    expect((await share.report(alice.url)).status).toBe(204)
+    expect(await testDb().select().from(shareReports)).toEqual([
+      expect.objectContaining({
+        shareId: linkParts(alice.url).id,
+        userId: alice.id,
+        kind: 'toots',
+        itemId: T1
+      })
+    ])
+    expect(await slots(`share_report_item|${alice.id}|toots|${T1}`)).toBe(1)
+  })
+
+  it('is refused from another site, or with no origin', async () => {
+    const alice = await tootSharer('alice')
+    expect((await share.report(alice.url, 'https://evil.example')).status).toBe(403)
+    expect((await share.report(alice.url, null)).status).toBe(403)
+    expect(await testDb().select().from(shareReports)).toEqual([])
+  })
+
+  it("keeps a few reports a day per Toot, and doesn't start over under a new link", async () => {
+    const alice = await tootSharer('alice')
+    for (let i = 0; i < 5; i++) {
+      expect((await share.report(alice.url, ORIGIN, `203.0.113.${i}`)).status).toBe(204)
+    }
+    expect((await share.report(alice.url, ORIGIN, '203.0.113.9')).status).toBe(429)
+
+    expect((await share.stop(T1, alice, 'toots')).status).toBe(204)
+    const again = (await (await share.put(T1, alice, 'toots')).json()) as { url: string }
+    expect(again.url).not.toBe(alice.url)
+    expect((await share.report(again.url, ORIGIN, '198.51.100.1')).status).toBe(429)
+    expect(await testDb().select().from(shareReports)).toHaveLength(5)
+    expect(await slots('share_report')).toBe(5)
+  })
+
+  it("spends the same reporter's and site's slots as a Recording's report", async () => {
+    const alice = await sharer('alice')
+    await saveToot(T1, alice)
+    const toot = (await (await share.put(T1, alice, 'toots')).json()) as { url: string }
+    const bob = await tootSharer('bob')
+    for (const url of [alice.url, toot.url]) {
+      for (let i = 0; i < 5; i++) expect((await share.report(url)).status).toBe(204)
+    }
+    // The same client's 11th report this hour is refused, a Toot's as a Recording's.
+    expect((await share.report(bob.url)).status).toBe(429)
+    expect(await slots('share_report')).toBe(10)
+    expect(await slotsLike('share-reporter|%')).toEqual([10])
+    expect((await share.report(bob.url, ORIGIN, '198.51.100.7')).status).toBe(204)
   })
 })
 
