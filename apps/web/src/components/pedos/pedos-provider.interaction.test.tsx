@@ -24,6 +24,7 @@ const page = vi.hoisted(() => ({
   findTrim: vi.fn(),
   reportError: vi.fn(),
   loadSongs: vi.fn<() => Promise<readonly Song[]>>(),
+  pathname: '/compose/',
   rescan:
     vi.fn<
       (
@@ -48,6 +49,7 @@ vi.mock('@/lib/recording-store', () => ({
   onWaitingForOtherTabs: () => () => {}
 }))
 vi.mock('@/lib/toot-store', () => ({ loadToots: async () => [] }))
+vi.mock('next/navigation', () => ({ usePathname: () => page.pathname }))
 vi.mock('@/lib/catalog/load-songs', async () => {
   const { songs } = await import('@/lib/catalog/songs.generated')
   page.loadSongs.mockImplementation(async () => songs)
@@ -97,6 +99,7 @@ afterEach(() => {
   root = null
   document.body.replaceChildren()
   page.stored = []
+  page.pathname = '/compose/'
   vi.clearAllMocks()
 })
 
@@ -363,4 +366,12 @@ it("reports a Song Catalog that didn't load, and loads it once the browser is ba
   expect(pedos().songsFailed).toBe(false)
   expect(pedos().song('mary')?.title).toBe('Mary Had a Little Lamb')
   expect(page.loadSongs).toHaveBeenCalledTimes(2)
+})
+
+it("doesn't fetch the Song Catalog on a shared Recording's public page", async () => {
+  page.pathname = '/u/maya/r/8k2fq3m9x1ab/'
+  const pedos = await mount()
+  expect(page.loadSongs).not.toHaveBeenCalled()
+  expect(pedos().songs).toBeNull()
+  expect(pedos().songsFailed).toBe(false)
 })

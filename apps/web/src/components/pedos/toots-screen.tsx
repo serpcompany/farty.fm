@@ -76,6 +76,15 @@ export function TootsScreen() {
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
       <h1 className="pt-4 pb-3 text-3xl font-bold tracking-tight">Toots</h1>
+      {/* A Song Toot's row names its Song from the catalog. */}
+      {pedos.songsFailed && toots.some(toot => toot.songId !== null) && (
+        <div className="flex items-center justify-between gap-3 pb-3 pl-4">
+          <p className="text-muted-foreground">Couldn't load the Songs.</p>
+          <Button variant="outline" className="h-11 px-5 text-base" onClick={pedos.reloadSongs}>
+            Try again
+          </Button>
+        </div>
+      )}
       {/* A Toot saved since a failed load still shows, under the line. */}
       {pedos.tootsFailed && (
         <p
@@ -169,7 +178,12 @@ function TootRow({
 }) {
   const pedos = usePedos()
   const isPlaying = pedos.nowPlaying === tootPlayback(toot.id)
-  const songTitle = toot.songId === null ? PAD_TOOT_TITLE : (pedos.song(toot.songId)?.title ?? '')
+  const songTitle =
+    toot.songId === null
+      ? PAD_TOOT_TITLE
+      : (pedos.song(toot.songId)?.title ??
+        // Until the catalog loads; if it doesn't, or the Song left it, a neutral name.
+        (pedos.songs === null && !pedos.songsFailed ? 'Loading…' : 'Song'))
   // Until the next play: the Toot is kept, and its play button tries again.
   const details =
     pedos.tootPlayFailed === toot.id ? `${songTitle} · Couldn't play` : tootDetails(toot, songTitle)

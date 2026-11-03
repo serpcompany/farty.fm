@@ -309,12 +309,14 @@ test.describe('installed', () => {
     await expect(state).toHaveText('Playing')
     expect((await lastStart(page)).duration).toBe(whole.duration)
 
-    // A Song's page opened from a link, still offline: the service worker kept no page of its
-    // own, so the one Song page answers, and shows the Song its address names (#322).
+    // A Song's page opened from a link, still offline: the service worker keeps no Song's own
+    // page, so the one Song page answers, and shows the Song its address names, with its title
+    // in the tab (#322).
     const other = songsTheFixtureLibraryUnlocks.find(song => song.id !== 'mary')
     if (!other) throw new Error('the Fixture Library unlocks another Song')
     await page.goto(`/compose/${other.id}/`)
     await expect(page.getByRole('heading', { name: other.title })).toBeVisible()
+    await expect(page).toHaveTitle(`${other.title} · Farty`)
     await expect(page.getByText(other.source)).toBeVisible()
     await expect(state).toBeVisible({ timeout: 60_000 })
     await context.setOffline(false)

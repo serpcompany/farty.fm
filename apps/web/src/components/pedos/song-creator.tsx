@@ -190,12 +190,16 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
 }
 
 /**
- * Song Creator for the Song the address names: the page the service worker answers a Song's page
- * with offline, when it kept no copy of that page (`/compose/song/`, public/sw.js). It knows the
- * Song only once the catalog loads.
+ * Song Creator for the Song the address names: the page the service worker answers every Song's
+ * page with offline (`/compose/song/`, public/sw.js). It knows the Song only once the catalog
+ * loads, and then gives the tab the Song's title, as the Song's own page has.
  */
 export function SongCreatorFromAddress() {
   const id = /^\/compose\/([^/]+)/.exec(usePathname())?.[1] ?? ''
+  const title = usePedos().song(id)?.title
+  useEffect(() => {
+    if (title) document.title = `${title} · Farty`
+  }, [title])
   return <SongCreator id={id} />
 }
 

@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import {
   createContext,
   type ReactNode,
@@ -317,10 +318,14 @@ async function trimBetween(id: string, handles: Trim): Promise<RecordingTrim> {
 
 /** The app's state and actions, mirroring the iPhone app's `AppModel`. */
 export function PedosProvider({ children }: { children: ReactNode }) {
-  // Every page's head names the catalog, so it downloads beside the scripts, and the service
+  // A shared Recording's public page (ADR 0020) reads no Song, and mostly people without the app
+  // open it, so it neither names nor fetches the catalog.
+  const wantsSongs = !usePathname()?.startsWith('/u/')
+  // Every app page's head names the catalog, so it downloads beside the scripts, and the service
   // worker keeps it with the page's other files (public/sw.js).
-  preload(catalogPath, { as: 'fetch', crossOrigin: 'anonymous' })
+  if (wantsSongs) preload(catalogPath, { as: 'fetch', crossOrigin: 'anonymous' })
   const [songs, setSongs] = useState<readonly Song[] | null>(null)
+  const songById = useMemo(() => new Map(songs?.map(song => [song.id, song])), [songs])
   const [songsFailed, setSongsFailed] = useState(false)
   /** Bumped by `reloadSongs`, to fetch the catalog again. */
   const [songsAttempt, setSongsAttempt] = useState(0)
@@ -383,6 +388,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   // The Song Catalog, fetched once for the app (#322).
   // biome-ignore lint/correctness/useExhaustiveDependencies: `songsAttempt` is what Try again changes.
   useEffect(() => {
+    if (!wantsSongs) return
     let left = false
     loadSongs().then(
       loaded => {
@@ -398,7 +404,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     return () => {
       left = true
     }
-  }, [songsAttempt])
+  }, [songsAttempt, wantsSongs])
   const reloadSongs = useCallback(() => {
     setSongsFailed(false)
     setSongsAttempt(n => n + 1)
@@ -849,7 +855,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         stopPlayback()
         return
       }
-      const song = 'song' in toot ? toot.song : songs?.find(s => s.id === toot.songId)
+      const song =
+        'song' in toot ? toot.song : toot.songId === null ? undefined : songById.get(toot.songId)
       // A note needs its Song, to find it in the audio.
       if (note !== undefined && !song) return
       const written = note === undefined || !song ? null : noteSeconds(song, song.notes[note])
@@ -882,7 +889,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         if (thisPlay === tootPlays.current) setPlaybackStart({ key, at: performance.now() })
       })
     },
-    [nowPlaying, markAudioMissing, songs]
+    [nowPlaying, markAudioMissing, songById]
   )
 
   // As the iPhone app's `renameToot`: the list changes at once, and a failed write is let go.
@@ -941,7 +948,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     songs,
     songsFailed,
     reloadSongs,
-    song: id => songs?.find(s => s.id === id),
+    song: id => songById.get(id),
     recordings,
     recording: id => recordings?.find(r => r.id === id),
     melodicRecordings,

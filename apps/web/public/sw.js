@@ -5,8 +5,10 @@
 // off the server. It holds pages, scripts, styles, fonts, images and the Song Catalog, never
 // audio: Recordings live in IndexedDB, and the Fixture Library is never kept.
 //
-// It keeps one Song page, `/compose/song/`, not one per Song (#322): offline, it answers a Song's
-// page it kept no copy of, and shows the Song its address names from the kept catalog.
+// It keeps one Song page, `/compose/song/`, not one per Song (#322): offline, it answers every
+// Song's page, and shows the Song its address names from the kept catalog. It never keeps a Song's
+// own page, even one loaded online: nothing would refresh it, so after a deploy it would load an
+// older build's code and catalog, beside the current build's database.
 //
 // Bump `version` when the cache's contents change shape. A new worker deletes every other
 // version's cache when it activates.
@@ -20,8 +22,10 @@ const shellFile = /\.(?:js|css|woff2?|png|ico|svg|webp|jpg|webmanifest)$/i
 // under one name, as a build's scripts don't.
 const catalogFile = /^\/catalog\/songs-[0-9a-f]+\.json$/
 // A Song's Song Creator, `/compose/<song>/`, and the page that answers for any of them offline.
-const songPage = /^\/compose\/[^/]+\/?$/
+// The pages beside it aren't Songs: the generator refuses their names as Song ids.
+const songPage = /^\/compose\/([^/]+)\/?$/
 const songShell = '/compose/song/'
+const notSongs = new Set(['song', 'pad'])
 // How often an online start page refreshes the tabs and their files, at most.
 const refreshEvery = 5 * 60 * 1000
 let lastRefresh = 0
@@ -64,11 +68,15 @@ function handles(request) {
 
 async function networkFirst(event) {
   const { request } = event
+  const { pathname } = new URL(request.url)
+  const opensSong = request.mode === 'navigate' && isSongPage(pathname)
   let response
   try {
     response = await fetch(request)
   } catch (offline) {
-    const kept = (await keptCopy(request)) ?? (await keptSongShell(request))
+    // Offline, a Song's page is always the kept Song page, which the start page refreshes with
+    // the tabs, so it runs the same build as they do.
+    const kept = opensSong ? await keptSongShell() : await keptCopy(request)
     if (kept) return kept
     throw offline
   }
@@ -76,7 +84,6 @@ async function networkFirst(event) {
   // the render worker's, and its own Song Catalog, and the deploy took them off the server
   // (#222). The copy kept from before answers instead of the 404. A build's files and the
   // catalog never change under the same name.
-  const { pathname } = new URL(request.url)
   if (
     response.status === 404 &&
     (pathname.startsWith('/_next/static/') || catalogFile.test(pathname))
@@ -84,9 +91,9 @@ async function networkFirst(event) {
     const kept = await keptCopy(request)
     if (kept) return kept
   }
-  if (keepable(response)) {
+  if (keepable(response) && !opensSong) {
     event.waitUntil(keep(request.url, response.clone()))
-    if (request.mode === 'navigate' && new URL(request.url).pathname === '/') {
+    if (request.mode === 'navigate' && pathname === '/') {
       event.waitUntil(refreshShell(response.clone()))
     }
   }
@@ -107,11 +114,14 @@ async function keptCopy(request) {
   })
 }
 
-// Offline, a Song's page that wasn't kept, because it was never loaded as a page, opens on the
-// one Song page instead. That page reads the Song from the address. Undefined for any other
-// request.
-async function keptSongShell(request) {
-  if (request.mode !== 'navigate' || !songPage.test(new URL(request.url).pathname)) return
+// `/compose/<song>/` for a Song, not for a page beside the Songs, such as the Sound Pad.
+function isSongPage(pathname) {
+  const match = songPage.exec(pathname)
+  return match !== null && !notSongs.has(match[1])
+}
+
+// The one Song page, which answers for every Song offline. It reads the Song from the address.
+async function keptSongShell() {
   const cache = await caches.open(cacheName)
   return await cache.match(new URL(songShell, self.location.origin).href, { ignoreVary: true })
 }

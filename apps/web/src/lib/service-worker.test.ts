@@ -188,25 +188,60 @@ describe('the service worker', () => {
     }
   })
 
-  it("answers offline with a Song's own page once it was loaded, over the one Song page", async () => {
+  it("never keeps a Song's own page, so offline every Song opens on the one Song page", async () => {
     let online = true
     const worker = startWorker(url => {
       if (!online) return 'offline'
       const path = url.replace(origin, '')
-      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
+      if (path === '/shell.json') {
+        return ok(JSON.stringify({ pages: ['/compose/song/', '/compose/pad/'] }))
+      }
       if (path === '/compose/song/') return ok('Song page')
+      if (path === '/compose/pad/') return ok('Sound Pad')
       if (path === '/compose/mary/') return ok('Mary')
       return ok('file')
     })
     await worker.lifecycle('install')
-    await worker.request('/compose/mary/', { mode: 'navigate' })
-
-    online = false
     expect(await (await worker.request('/compose/mary/', { mode: 'navigate' }))?.text()).toBe(
       'Mary'
     )
-    expect(await (await worker.request('/compose/twinkle/', { mode: 'navigate' }))?.text()).toBe(
-      'Song page'
+    expect(worker.kept()).not.toContain('/compose/mary/')
+
+    online = false
+    for (const path of ['/compose/mary/', '/compose/twinkle/']) {
+      expect(await (await worker.request(path, { mode: 'navigate' }))?.text(), path).toBe(
+        'Song page'
+      )
+    }
+    // The pages beside the Songs aren't Songs: the Sound Pad opens on its own kept page.
+    expect(await (await worker.request('/compose/pad/', { mode: 'navigate' }))?.text()).toBe(
+      'Sound Pad'
+    )
+  })
+
+  it("opens a Song offline on the current build's Song page after a deploy, never an older build's", async () => {
+    let online = true
+    let build = 'A'
+    const worker = startWorker(url => {
+      if (!online) return 'offline'
+      const path = url.replace(origin, '')
+      if (path === '/') return ok(`<script src="/_next/static/chunks/main-${build}.js"></script>`)
+      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
+      if (path === '/compose/song/') return ok(`build ${build}'s Song page`)
+      if (path === '/compose/mary/') return ok(`build ${build}'s Mary`)
+      return ok('file')
+    })
+    // Build A: installed, and Mary opened online.
+    await worker.lifecycle('install')
+    await worker.request('/compose/mary/', { mode: 'navigate' })
+
+    // Build B ships. Farty opens online at the start page, which refreshes the shell.
+    build = 'B'
+    await worker.request('/', { mode: 'navigate' })
+
+    online = false
+    expect(await (await worker.request('/compose/mary/', { mode: 'navigate' }))?.text()).toBe(
+      "build B's Song page"
     )
   })
 
