@@ -280,8 +280,8 @@ const UnlockedSongRow = memo(function UnlockedSongRow({ song }: { song: SongSumm
 /**
  * A locked Song: its title, a Pitch Coverage bar, a lock and the lowest missing notes, with how
  * long a fart each needs. Two of them, so "Needs …" stays on one line on a phone. The missing
- * notes need the Song's Arrangement, so they're worked out once the row comes near the screen
- * (#323), and their line keeps its place until then.
+ * notes need the Song's Arrangement, so they're worked out only while the row is near the screen
+ * (#323), and their line keeps its place otherwise.
  */
 const LockedSongRow = memo(function LockedSongRow({
   row,
