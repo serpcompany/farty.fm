@@ -233,6 +233,31 @@ class DisplayTitleTest(unittest.TestCase):
         t.key = "prelude in c minor op 3 no 2"
         self.assertEqual(rank_pdmx.display_title(t), "Prelude in C♯ minor / Op. 3, No. 2")
 
+    def test_takes_the_accents_of_a_less_common_spelling(self):
+        t = tune("x", spellings=collections.Counter({"Mairi Bhan Og": 5, "MÀIRI BHÀN ÒG": 1}))
+        t.key = "mairi bhan og"
+        self.assertEqual(rank_pdmx.display_title(t), "Màiri Bhàn Òg")
+        t.spellings = collections.Counter({"Frere Jacques": 3, "frère jacques": 1})
+        t.key = "frere jacques"
+        self.assertEqual(rank_pdmx.display_title(t), "Frère Jacques")
+        t.spellings = collections.Counter({"Funiculi Funicula": 2, "Fúnicúlí Fúnicúla": 2, "Funiculì Funiculà": 1})
+        t.key = "funiculi funicula"
+        self.assertEqual(rank_pdmx.display_title(t), "Funiculi Funicula")
+        t.spellings = collections.Counter({"Greensleeves": 3})
+        t.key = "greensleeves"
+        self.assertEqual(rank_pdmx.display_title(t), "Greensleeves")
+
+    def test_drops_a_trailing_full_stop(self):
+        t = tune("x", spellings=collections.Counter({"Excuse Me.": 2}))
+        t.key = "excuse me"
+        self.assertEqual(rank_pdmx.display_title(t), "Excuse Me")
+        t.spellings = collections.Counter({"Lull Me Beyond Thee..": 1})
+        t.key = "lull me beyond thee"
+        self.assertEqual(rank_pdmx.display_title(t), "Lull Me Beyond Thee")
+        t.spellings = collections.Counter({"Prelude Op. 3 No. 2": 1})
+        t.key = "prelude op 3 no 2"
+        self.assertEqual(rank_pdmx.display_title(t), "Prelude Op. 3 No. 2")
+
     def test_skips_garbled_spellings_and_gives_none_when_all_are(self):
         t = tune("x", spellings=collections.Counter({"O ce veste minunatÄ": 2, "O Ce Veste Minunata": 1}))
         t.key = "o ce veste minunata"
