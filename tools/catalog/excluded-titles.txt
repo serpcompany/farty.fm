@@ -536,6 +536,9 @@ Avondstemming | unsure: credited to Alice Nahon, a poet; the music's composer is
 Morna | unsure: credited to C. H. Perrot, no dates found; "morna" is also a Cape Verdean genre
 'Et dodim kala | unsure: Yemenite Hebrew song of the 20th century; no composer named
 Mazltov | unsure: no piece we can tell; the title is a greeting many tunes carry
+March of Saint Timothy | unsure: Judi Morningstar, a modern composer
+St. Albans | unsure: credited to Walter Janes, no dates found
+Cuckoo Valse | unsure: credited to Carl Volti, no dates found; likely 20th century
 
 # Not one tune (batch 07)
 Bourr\'ee | not one tune: Bach wrote many bourrees
@@ -556,16 +559,13 @@ Halling | not one tune: a dance form; Grieg wrote several hallings
 Winter Waltz | not one tune: a title many waltzes share
 Cowboy Waltz | not one tune: a title many waltzes share
 French-Canadian Waltz | not one tune: a type of waltz, no piece we can tell
-
-# The same tune as a Song in the catalog (batch 07)
-Hbd | the same tune as Happy Birthday, under an abbreviation (and under copyright in the US until 2016, Mildred and Patty Hill 1893/1935)
-March of Saint Timothy | unsure: Judi Morningstar, a modern composer
-St. Albans | unsure: credited to Walter Janes, no dates found
-Cuckoo Valse | unsure: credited to Carl Volti, no dates found; likely 20th century
-GB/7a/12 God Rest You Merry Version 2 of 2 | the same tune as God Rest You Merry, under a catalogue code
 Dance | not one tune: a title any dance shares; no piece we can tell
 Official Branle | not one tune: Arbeau's Orchésographie gives several branles
 Hold On | not one tune: the title of several spirituals and many songs
+
+# The same tune as a Song in the catalog (batch 07)
+Hbd | the same tune as Happy Birthday, under an abbreviation (and under copyright in the US until 2016, Mildred and Patty Hill 1893/1935)
+GB/7a/12 God Rest You Merry Version 2 of 2 | the same tune as God Rest You Merry, under a catalogue code
 
 # Pulled from titles-07.txt after review of its first import (#324)
 Promised Land | the importer picks a score whose composer is credited as "Paradise Lunch", a modern arranger, not Anne Steele's hymn
@@ -628,3 +628,41 @@ Horses Branle | the same tune as the Song Horse's Bransle (batch 07)
 
 # Pulled from titles-08.txt after review of its first import (#324)
 Helena | the importer picks a score whose composer is credited as "tune: Colin Hume 1988", a modern composer, not W. B. Bradbury's hymn tune
+
+# Pulled from titles-07.txt and titles-08.txt after the review of their import (#324, PR #341)
+# The same tune as a Song in the catalog
+The Alphabet | the same tune as Twinkle, Twinkle, Little Star: the same 15 opening intervals, a fourth apart
+Monymusk | the same tune as Money Musk (batch 06), Daniel Dow's, under its Scottish spelling
+La Morisque | the same tune as La Mourisque (batch 06), Susato's
+The Gallowglass | the same tune as Nathaniel Gow's Lament for the Death of his Brother (batch 06); the pick's subtitle is "Gallowglass"
+Si Beag Si Mhor | the same tune as Si Bheag Si Mhor (batch 04), O'Carolan's, under another spelling
+Gloucestershire Wassail | the same tune as Wassail Song (batch 05): the same first 10 notes, two settings of one tune
+From Night 'till Morn | the same tune as Deck the Halls (flag_picks.py: the same 10 opening changes of pitch); also no composer or date
+# The same tune twice in batches 07 and 08: the name PDMX's scores rank higher stays
+The Fair Maid of the Inn | the same tune as The Pleasures of the Town (batch 07), whose score reads "aka The Fair Maid of the Inn"
+The Banks Of Lough Gowna | the same tune as Shores of Lough Gowna (batch 07), its common name
+Caller Herring | the same tune as Caller Herrin' (batch 07), Nathaniel Gow's
+# The importer's pick isn't the tune, or left out by decision
+Dont vient cela | the pick was the Altus part; PDMX's other scores of Susato's basse danse are its Tenor, Bassus and an unnamed part below the Altus, none the top part
+See see the shepherds' Queen | the pick was the Alto part of Tomkins's madrigal ending; PDMX has no other score the importer can pick
+Steal Away | the picks are Seconds parts of a band arrangement; PDMX's scores of the tune have a license conflict or more than 2 tracks
+Charleston | the pick is a fiddle tune that can't be dated, not the 1923 Charleston (James P. Johnson and Cecil Mack, under copyright)
+Dixie | left out by decision: the Confederacy's unofficial anthem; the owner can add it back
+# Unsure: no composer or date, so the rule is to exclude
+The Happy Clown | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+The Tennessee | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Ohio | unsure: credited to "Misc tunes" with no composer, and no dated source names one; the title is also Bernstein's 1953 song
+Aunt Mary's (Canadian) Jig | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Gasp\'e Reel | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Calver Lodge | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Woodland Revels | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Jack Frost | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+The Dresden | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Princess | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Union | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Long Odds | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Mary Walker | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Frank Gilruth | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Will You Come Home With Me | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Over the Border | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Tell me where is fancy bred | unsure: credited only to "Carr", and which Carr can't be told

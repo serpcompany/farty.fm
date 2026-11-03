@@ -13,13 +13,13 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
   "Misc tunes" or "Anonymous", to judge whether the tune is under copyright.
 - 114780 titles; 1073 may be tried next, and the top 1073 are listed. Left out:
   - 63461: fewer than 2 scores
-  - 25504: no score has a MuseScore genre: mostly recent game, anime and film music
-  - 18557: no score the importer can pick
+  - 25503: no score has a MuseScore genre: mostly recent game, anime and film music
+  - 18556: no score the importer can pick
   - 2519: mostly a title head: a composer or collection
-  - 1115: in the catalog or tried already
+  - 1086: in the catalog or tried already
   - 891: mostly a modern genre: likely under copyright
-  - 874: no one artist for most of its scores: several pieces share the title
-  - 552: in excluded-titles.txt
+  - 873: no one artist for most of its scores: several pieces share the title
+  - 584: in excluded-titles.txt
   - 212: the same tune as a better-ranked or tried title
   - 22: every spelling of the title is garbled
 
@@ -116,7 +116,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 89 | Great High Priest | Misc Traditional | 3 | 3 | 20 | 0 | 0.00 |
 | 90 | Highland Skip | Daniel Dow | 7 | 7 | 20 | 0 | 0.00 |
 | 91 | [id 1-77a] | Misc tunes | 8 | 8 | 20 | 0 | 0.00 |
-| 92 | James Duff M.P. | William Marshall | 5 | 5 | 20 | 0 | 0.00 |
+| 92 | James Duff M.P | William Marshall | 5 | 5 | 20 | 0 | 0.00 |
 | 93 | Let Heaven And Earth Rejoice And Sing | Old Cornish Melody; Harmony by A. H. Brown | 2 | 2 | 20 | 0 | 0.00 |
 | 94 | The Lord At First Did Adam Make | Misc Traditional | 3 | 1 | 20 | 0 | 0.00 |
 | 95 | Machynlleth | Misc Traditional | 4 | 4 | 20 | 0 | 0.00 |
@@ -130,7 +130,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 103 | Twll yn ei boch | Misc Traditional | 3 | 3 | 20 | 0 | 0.00 |
 | 104 | Wakefield Hunt | Thompson | 8 | 8 | 20 | 0 | 0.00 |
 | 105 | The Way to Norwich | John Playford | 4 | 4 | 20 | 0 | 0.00 |
-| 106 | Adson's Saraband. | John Playford | 7 | 7 | 19 | 0 | 0.00 |
+| 106 | Adson's Saraband | John Playford | 7 | 7 | 19 | 0 | 0.00 |
 | 107 | Ayrshire Lasses | Hugh Montgomerie | 6 | 6 | 19 | 0 | 0.00 |
 | 108 | Bless the Lord | R. E. Hudson | 2 | 2 | 19 | 0 | 0.00 |
 | 109 | The Bob o' Dowally | Caledonian Country Dances | 7 | 7 | 19 | 0 | 0.00 |
@@ -435,7 +435,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 408 | The Market Lass | John Burbank | 4 | 4 | 12 | 0 | 0.00 |
 | 409 | Master Erskine's Hornpipe | By NEIL GOW | 3 | 3 | 12 | 0 | 0.00 |
 | 410 | Methven Castle | Alexander Walker | 6 | 6 | 12 | 0 | 0.00 |
-| 411 | The Milkmaids Bob. | John Playford | 3 | 3 | 12 | 0 | 0.00 |
+| 411 | The Milkmaids Bob | John Playford | 3 | 3 | 12 | 0 | 0.00 |
 | 412 | Miss Anne Gordon | William Marshall | 4 | 4 | 12 | 0 | 0.00 |
 | 413 | Miss Annie Robertson | Robert Mackintosh | 3 | 3 | 12 | 0 | 0.00 |
 | 414 | Miss Cathrine Chalmers | Nathaniel Gow | 4 | 4 | 12 | 0 | 0.00 |
@@ -612,7 +612,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 585 | Mrs. Garden of Troup | Robert Petrie | 6 | 6 | 9 | 0 | 0.00 |
 | 586 | Mrs Gordon Of Knockespoch | William Marshall | 6 | 6 | 9 | 0 | 0.00 |
 | 587 | Mrs. H. Inglis | William Marshall | 6 | 6 | 9 | 0 | 0.00 |
-| 588 | Mrs. Weymss of Cuttle Hill. | Nathaniel Gow | 3 | 3 | 9 | 0 | 0.00 |
+| 588 | Mrs. Weymss of Cuttle Hill | Nathaniel Gow | 3 | 3 | 9 | 0 | 0.00 |
 | 589 | O God my Heart is fully bent | Thomas Clark | 2 | 1 | 9 | 0 | 0.00 |
 | 590 | O we are volunteers in the army of the Lord | George F. Root | 2 | 2 | 9 | 0 | 0.00 |
 | 591 | Ore Boggy | Neal | 4 | 4 | 9 | 0 | 0.00 |
@@ -694,7 +694,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 667 | Mrs. James Duff | Isaac Cooper | 2 | 2 | 8 | 0 | 0.00 |
 | 668 | Mrs. Macpherson Of Cluny | Joseph Lowe | 4 | 4 | 8 | 0 | 0.00 |
 | 669 | Mrs. Mony Pennys Reel | Robert Petrie | 2 | 2 | 8 | 0 | 0.00 |
-| 670 | Munich | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
+| 670 | Münich | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
 | 671 | Niagara -- Hornpipe | Misc Traditional | 2 | 2 | 8 | 0 | 0.00 |
 | 672 | Niel Gow's Compliments Returned To Mr Marshall | Niel Gow | 3 | 3 | 8 | 0 | 0.00 |
 | 673 | Old Pipe Reel | Misc Traditional | 3 | 3 | 8 | 0 | 0.00 |
@@ -870,7 +870,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 843 | Sweeny's | Misc Traditional | 3 | 3 | 6 | 0 | 0.00 |
 | 844 | Tullymet Hall | John Gow | 3 | 3 | 6 | 0 | 0.00 |
 | 845 | The Violet | Henry David Leslie | 2 | 1 | 6 | 0 | 0.00 |
-| 846 | Walk Around__ Hey Daddy. | Dan Emmett | 2 | 2 | 6 | 0 | 0.00 |
+| 846 | Walk Around__ Hey Daddy | Dan Emmett | 2 | 2 | 6 | 0 | 0.00 |
 | 847 | Weymss Castle Strathspey | Robert Petrie | 2 | 2 | 6 | 0 | 0.00 |
 | 848 | When Cloe | Misc Traditional | 2 | 2 | 6 | 0 | 0.00 |
 | 849 | The Wickering Wench | John Young | 2 | 2 | 6 | 0 | 0.00 |
@@ -899,7 +899,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 872 | The Lasses O' Ballantrae | Captain Simon Fraser | 4 | 4 | 5 | 0 | 0.00 |
 | 873 | Lee Mills | Marshall | 4 | 4 | 5 | 0 | 0.00 |
 | 874 | Les filles de marbre | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
-| 875 | Lewis Ricardo M.P. | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
+| 875 | Lewis Ricardo M.P | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
 | 876 | Lowe's Reel | John Cumming | 3 | 3 | 5 | 0 | 0.00 |
 | 877 | The Marquis of Tullybardine | John Crerar | 5 | 5 | 5 | 0 | 0.00 |
 | 878 | Merry Hop | John Young | 2 | 2 | 5 | 0 | 0.00 |
@@ -922,7 +922,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 895 | The Peace Of The Valley | Michael Balfe | 2 | 2 | 5 | 0 | 0.00 |
 | 896 | Peterborough | John Goss | 2 | 1 | 5 | 0 | 0.00 |
 | 897 | Polka D'Uzeste | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
-| 898 | Quand les moutons... | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
+| 898 | Quand les moutons | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
 | 899 | Request | A. M. Lloyd | 5 | 5 | 5 | 0 | 0.00 |
 | 900 | Ring Out Ye Throbbing Stars Of Night | Mrs. J. H. Barbour | 2 | 2 | 5 | 0 | 0.00 |
 | 901 | The Road to Berwick | William Marshall | 4 | 4 | 5 | 0 | 0.00 |
@@ -932,7 +932,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 905 | Wait for the Waggon | Misc Traditional | 2 | 2 | 5 | 0 | 0.00 |
 | 906 | Waken Christian children | Rev. S. C. Hamerton | 2 | 2 | 5 | 0 | 0.00 |
 | 907 | When shall I see the day | Asa Hull | 2 | 2 | 5 | 0 | 0.00 |
-| 908 | William Gibson Craig M.P. | William Marshall | 3 | 3 | 5 | 0 | 0.00 |
+| 908 | William Gibson Craig M.P | William Marshall | 3 | 3 | 5 | 0 | 0.00 |
 | 909 | Aberlour's Squeeze | William Marshall | 3 | 3 | 4 | 0 | 0.00 |
 | 910 | Allowa Kirk | Joseph Lowe | 2 | 2 | 4 | 0 | 0.00 |
 | 911 | Angels Unawares | Misc Traditional | 2 | 2 | 4 | 0 | 0.00 |
@@ -987,7 +987,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
 | 960 | My Father knows just what I need | Chas. H. Gabriel | 2 | 2 | 4 | 0 | 0.00 |
 | 961 | O She's Comical | Very old | 5 | 5 | 4 | 0 | 0.00 |
 | 962 | Perth Assembly | Samson Duncan | 4 | 4 | 4 | 0 | 0.00 |
-| 963 | Philander. | Henry Purcell | 2 | 2 | 4 | 0 | 0.00 |
+| 963 | Philander | Henry Purcell | 2 | 2 | 4 | 0 | 0.00 |
 | 964 | Ring Out O Bells! Your Peals Today | Anonymous | 2 | 2 | 4 | 0 | 0.00 |
 | 965 | The Roman Reel | Ashover Book | 2 | 2 | 4 | 0 | 0.00 |
 | 966 | Shepherds Keeping Watch By Night | Misc Traditional | 2 | 1 | 4 | 0 | 0.00 |
