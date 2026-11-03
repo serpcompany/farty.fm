@@ -14,7 +14,7 @@
   }
  },
  "library": "38 Recordings, 26 Melodic",
- "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES); then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 4 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
  "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
@@ -3607,7 +3607,7 @@
   },
   {
    "id": "vedro-con-mio-diletto",
-   "title": "Vedro con mio diletto",
+   "title": "Vedrò con mio diletto",
    "matched": 2,
    "eligible": 2,
    "rejected": {},
@@ -4694,7 +4694,7 @@
   },
   {
    "id": "csardas",
-   "title": "Csardas",
+   "title": "Csárdás",
    "matched": 7,
    "eligible": 4,
    "rejected": {
@@ -6631,7 +6631,7 @@
   },
   {
    "id": "standchen-serenade",
-   "title": "Standchen Serenade",
+   "title": "Ständchen Serenade",
    "matched": 3,
    "eligible": 3,
    "rejected": {},
@@ -7397,7 +7397,7 @@
   },
   {
    "id": "a-la-claire-fontaine",
-   "title": "A la claire fontaine",
+   "title": "À la claire fontaine",
    "matched": 6,
    "eligible": 5,
    "rejected": {
@@ -9297,76 +9297,6 @@
    "picked": "5373338"
   },
   {
-   "id": "hanschen-klein",
-   "title": "Hänschen Klein",
-   "matched": 3,
-   "eligible": 3,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "3911446",
-     "url": "https://musescore.com/score/3911446",
-     "score_title": "Hänschen Klein",
-     "match": "title",
-     "rating": "4.59",
-     "n_ratings": "14",
-     "n_views": "960",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/8/9/QmQat7zCtKGMMANcq87cb6ogpmenfZpghtaXNjLnCdq73s.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "40fdee97953f56de4eb972a7139dee8db644d6d3b7ca5cbe9e4c90c1912d1aef",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 24
-     },
-     "track_notes": 49,
-     "range_semitones": 7,
-     "distinct_pitches": 5,
-     "pitch_coverage": "5 of 5",
-     "metrics": {
-      "notes": 24,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 1,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 42,
-      "within_50c_any_octave_pct": 42,
-      "median_abs_cents": 80.0,
-      "contour_pct": 80,
-      "distinct_recordings": 5,
-      "on_pitch_pct": 22,
-      "sounding_pct": 96,
-      "notes_mostly_silent": 0,
-      "transpose": -11,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.83
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "3911446"
-  },
-  {
    "id": "just-a-closer-walk-with-thee",
    "title": "Just A Closer Walk With Thee",
    "matched": 6,
@@ -10631,7 +10561,7 @@
   },
   {
    "id": "marche-funebre",
-   "title": "Marche funebre",
+   "title": "Marche funèbre",
    "matched": 2,
    "eligible": 2,
    "rejected": {},
@@ -11862,10 +11792,11 @@
    "id": "in-the-bleak-midwinter",
    "title": "In the Bleak Midwinter",
    "matched": 17,
-   "eligible": 9,
+   "eligible": 8,
    "rejected": {
     "PDMX flags a license conflict": 3,
-    "more than 2 tracks": 7
+    "more than 2 tracks": 7,
+    "it isn't the tune's melody": 1
    },
    "tried": [
     {
@@ -11908,16 +11839,16 @@
      "distinct_pitches": 8
     },
     {
-     "score_id": "5864163",
-     "url": "https://musescore.com/score/5864163",
-     "score_title": "In the bleak midwinter",
+     "score_id": "5088484",
+     "url": "https://musescore.com/score/5088484",
+     "score_title": "In The Bleak Midwinter",
      "match": "title",
      "rating": "0.0",
      "n_ratings": "0",
-     "n_views": "37",
-     "license": "cc-zero",
+     "n_views": "22",
+     "license": "publicdomain",
      "n_tracks": "1",
-     "dataset_path": "./mid/3/42/QmdsxjRE2B68AEZ2hNRdWAyhj3jAee5UUVRZb6nqFVp8FN.mid",
+     "dataset_path": "./mid/7/5/QmP6QoMA6KE3eJsGWhxGPdrnoXJ1RudrCAgK7WWPtLxHFn.mid",
      "gates": {
       "license": "pass",
       "hash": "pass",
@@ -11925,12 +11856,10 @@
       "render": "pass"
      },
      "passed": true,
-     "sha256": "ab53354636ced0a93301b372b8510c7948d7aff200c6ed59c4a993da1b87a6b0",
+     "sha256": "5632441b098a507e99621d8d5ac2123321b08ed4978ea185229beae77b2a5740",
      "render": {
       "bpm": 120,
-      "start_beat": 1,
-      "max_beats": 32,
-      "beats_per_bar": 4
+      "max_beats": 32
      },
      "import_report": {
       "track_used": 0,
@@ -11941,36 +11870,36 @@
       "inner_voice_onsets_dropped": 0,
       "overlaps_clipped": 0,
       "tempo_changes_ignored": 0,
-      "note_count": 23
+      "note_count": 22
      },
-     "track_notes": 45,
-     "range_semitones": 12,
-     "distinct_pitches": 8,
-     "pitch_coverage": "8 of 8",
+     "track_notes": 90,
+     "range_semitones": 10,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
      "metrics": {
-      "notes": 23,
+      "notes": 22,
       "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
-      "notes_with_second_burst": 6,
+      "notes_with_second_burst": 11,
       "pitch_readable_pct": 100,
-      "within_50c_pct": 57,
-      "within_50c_any_octave_pct": 57,
-      "median_abs_cents": 47.4,
-      "contour_pct": 69,
-      "distinct_recordings": 8,
-      "on_pitch_pct": 38,
-      "sounding_pct": 93,
+      "within_50c_pct": 9,
+      "within_50c_any_octave_pct": 9,
+      "median_abs_cents": 122.6,
+      "contour_pct": 75,
+      "distinct_recordings": 6,
+      "on_pitch_pct": 11,
+      "sounding_pct": 91,
       "notes_mostly_silent": 0,
-      "transpose": -2,
-      "octave_moves": 1,
-      "max_abs_shift_semitones": 12.27
+      "transpose": -14,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.93
      }
     }
    ],
    "result": "pass",
    "reason": null,
-   "picked": "5864163"
+   "picked": "5088484"
   },
   {
    "id": "barcarolle",
@@ -12878,7 +12807,7 @@
   },
   {
    "id": "si-bheag-si-mhor",
-   "title": "Si Bheag Si Mhor",
+   "title": "Sí Bheag Sí Mhór",
    "matched": 12,
    "eligible": 12,
    "rejected": {},

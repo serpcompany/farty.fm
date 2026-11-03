@@ -20,7 +20,10 @@ class Note:
 
 EPS = 1e-6  # beats: two times this close are the same time
 DRUM_CHANNEL = 9  # MIDI channel 10, General MIDI's percussion
-PERCUSSION_PROGRAMS = range(112, 120)  # General MIDI's Percussive family (Tinkle Bell to Reverse Cymbal)
+# The unpitched instruments of General MIDI's Percussive family, as 0-based program numbers: Agogo (GM 114),
+# Woodblock (116), Taiko Drum (117), Synth Drum (119) and Reverse Cymbal (120). Its pitched ones, Tinkle Bell (113),
+# Steel Drums (115) and Melodic Tom (118), can carry the tune.
+PERCUSSION_PROGRAMS = frozenset({113, 115, 116, 118, 119})
 
 
 @dataclass
@@ -76,7 +79,7 @@ def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat
     tempo_us, beats_per_bar, tempo_changes = 500000, 4, 0
     meters = {}  # tick -> (numerator, denominator): the score's time signatures, from every track
     events = {}  # track index -> list of (start_tick, end_tick, pitch)
-    percussion = set()  # tracks whose every note is on the drum channel or a percussion program
+    percussion = set()  # tracks whose every note is on the drum channel or an unpitched percussion program
     for ti, trk in enumerate(mid.tracks):
         tick, open_notes, done, programs, pitched = 0, {}, [], {}, False
         for msg in trk:

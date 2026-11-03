@@ -507,7 +507,7 @@ Salt Creek | unsure: known from Bill Monroe's 1963 recording; no form dated befo
 Wildwood Flower arr. for Voice and Tenor Viol | unsure: arranged by David Saphra, a living arranger; PDMX doesn't say who uploaded it
 # The same tune as a Song in the catalog
 Kings Of Orient | the same tune as We Three Kings in the catalog
-Sheebeg and Sheemore | the same tune as Si Bheag Si Mhor in the catalog
+Sheebeg and Sheemore | the same tune as Sí Bheag Sí Mhór in the catalog
 Johnny I Hardly Knew Ye | the same tune as When Johnny Comes Marching Home in the catalog
 On Christmas Night | the importer picks "Version 4", another tune; the tune known by this name is the Sussex Carol, in the catalog
 Cold and Raw | the same tune as Stingo, the better-ranked title (Playford's "Stingo, or the Oyle of Barley")
@@ -635,7 +635,7 @@ The Alphabet | the same tune as Twinkle, Twinkle, Little Star: the same 15 openi
 Monymusk | the same tune as Money Musk (batch 06), Daniel Dow's, under its Scottish spelling
 La Morisque | the same tune as La Mourisque (batch 06), Susato's
 The Gallowglass | the same tune as Nathaniel Gow's Lament for the Death of his Brother (batch 06); the pick's subtitle is "Gallowglass"
-Si Beag Si Mhor | the same tune as Si Bheag Si Mhor (batch 04), O'Carolan's, under another spelling
+Si Beag Si Mhor | the same tune as Sí Bheag Sí Mhór (batch 04), O'Carolan's, under another spelling
 Gloucestershire Wassail | the same tune as Wassail Song (batch 05): the same first 10 notes, two settings of one tune
 From Night 'till Morn | the same tune as Deck the Halls (flag_picks.py: the same 10 opening changes of pitch); also no composer or date
 # The same tune twice in batches 07 and 08: the name PDMX's scores rank higher stays
@@ -791,3 +791,5 @@ The Prince Of Wales | the pick is a "Misc tunes" score with no composer; many tu
 The Fairy | the pick is a "Misc tunes" score with no composer; several tunes share the name, and it can't be told to be Nathaniel Gow's
 # The importer's pick may not be the tune
 Balvenie Castle | unsure which voice: the pick has two treble parts, and the importer takes the one of mostly repeated notes, which may be the second
+# Pulled from titles-04.txt after the whole-catalog same-tune check (#344)
+Hänschen Klein | the same tune as Lightly Row (batch 01), its English name (flag_picks.py: the same 10 opening changes of pitch)

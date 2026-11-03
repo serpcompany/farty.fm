@@ -40,6 +40,7 @@ NOT_THE_MELODY = {
     "562231": "My Faith Looks Up To Thee: the tenor part of OLIVET",
     "653966": "Forty Days and Forty Nights: the tenor part of AUS DER TIEFE",
     "4878861": "The Dark-Eyed Sailor: Version 2 of 3, not the tune most PDMX scores of the song carry",
+    "5864163": "In the Bleak Midwinter: the tenor part of CRANHAM",
 }
 
 # A sensible excerpt and tempo, chosen from the score itself.
@@ -395,14 +396,16 @@ def batch_of(entry):
 
 
 def merge_catalog(catalog, titles_file, entries):
-    """The catalog with this titles file's earlier entries replaced by `entries`.
+    """The catalog with this titles file's earlier entries replaced by `entries`, where the first of them
+    was (at the end for a new batch), so importing a batch again doesn't reorder the app's Songs.
 
     Entries from elsewhere (other batches, or added by hand) are kept as they are, in order."""
+    first = next((i for i, e in enumerate(catalog) if batch_of(e) == titles_file), len(catalog))
     kept = [e for e in catalog if batch_of(e) != titles_file]
     clash = {e["id"] for e in kept} & {e["id"] for e in entries}
     if clash:
         raise ValueError(f"ids already in the catalog: {sorted(clash)}")
-    return kept + list(entries)
+    return kept[:first] + list(entries) + kept[first:]
 
 
 def spread(items, n):

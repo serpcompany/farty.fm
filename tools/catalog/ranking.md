@@ -16,10 +16,10 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/rank_pdmx.py
   - 25502: no score has a MuseScore genre: mostly recent game, anime and film music
   - 18556: no score the importer can pick
   - 2519: mostly a title head: a composer or collection
-  - 1363: in the catalog or tried already
+  - 1362: in the catalog or tried already
   - 891: mostly a modern genre: likely under copyright
   - 873: no one artist for most of its scores: several pieces share the title
-  - 685: in excluded-titles.txt
+  - 686: in excluded-titles.txt
   - 206: the same tune as a better-ranked or tried title
   - 22: every spelling of the title is garbled
 
