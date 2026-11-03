@@ -395,6 +395,21 @@ describe('the review after Stop (#314)', () => {
     expect(document.body.textContent).toContain("Saved, but we couldn't find its note")
   })
 
+  it('still says the take was kept whole after Retry, when the Trim and the analysis both failed', async () => {
+    await recordTake()
+    await analysisFails()
+    await nudge('end', 'ArrowLeft')
+    page.findTrim.mockRejectedValueOnce(new Error('no fart'))
+    await tap('Save')
+    expect(document.body.textContent).toContain("Saved, but we couldn't find its note")
+    await tap('Retry')
+    await analysisFinds(found)
+    expect(text('result-note')).toBe('G3')
+    expect(text('result-trim-failed')).toBe(
+      "Couldn't save the trim, so it's kept whole. Trim it again from the Recordings tab."
+    )
+  })
+
   it('throws the take away with Discard, saving nothing', async () => {
     await recordTake()
     await tap('Discard')
