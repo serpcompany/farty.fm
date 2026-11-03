@@ -33,11 +33,11 @@ pnpm db:migrate:local
 # The smoke test, on the preview with --env staging:
 pnpm exec opennextjs-cloudflare preview --env staging --port 4109
 bash scripts/smoke.sh http://localhost:4109 staging   # in another shell
-# The journeys and the tap-through, on a preview with no --env, as CI's e2e runs them:
-E2E_SERVER=preview E2E_PORT=4110 pnpm test:e2e
+# The journeys that cover the change, and the tap-through, on a preview with no --env, as CI's e2e runs them:
+E2E_SERVER=preview E2E_PORT=4110 pnpm test:e2e e2e/<spec>.spec.ts
 ```
 
-Run e2e and the tap-through on the preview with no `--env`. With `--env staging`, the preview has no `BETTER_AUTH_SECRET` and the branded origin, so sign-in answers 503 locally. Give each parallel agent its own ports. Production's paid save (`e2e/production-save.spec.ts`) runs only against a Production build, locally, by hand: CI's e2e job builds Staging, where the spec skips. Run it after any change to payments or saving: `pnpm build:production`, then `E2E_SERVER=preview E2E_SITE_ENV=production pnpm test:e2e production-save`. With no `--env` and no Stripe key, its Save goes to the dev checkout. After the merge, CI redeploys Staging from `staging`'s tip, and the same smoke test runs there.
+Run e2e and the tap-through on the preview with no `--env`, and only the specs that cover the change: CI's `e2e` runs the whole suite on the PR ([Evidence](../../apps/web/AGENTS.md#evidence)). With `--env staging`, the preview has no `BETTER_AUTH_SECRET` and the branded origin, so sign-in answers 503 locally. Give each parallel agent its own ports. Production's paid save (`e2e/production-save.spec.ts`) runs only against a Production build, locally, by hand: CI's e2e job builds Staging, where the spec skips. Run it after any change to payments or saving: `pnpm build:production`, then `E2E_SERVER=preview E2E_SITE_ENV=production pnpm test:e2e production-save`. With no `--env` and no Stripe key, its Save goes to the dev checkout. After the merge, CI redeploys Staging from `staging`'s tip, and the same smoke test runs there.
 
 **On Windows, run the Workers build and everything after it in Linux:** prefix each command above with `bash scripts/linux.sh`, or run them in one `bash scripts/linux.sh bash -c '…'`. OpenNext bundles the Worker on Windows without its Linux path rewrites, so a preview of a Windows-built Worker answers 500 on every page (`Dynamic require of "/.next/server/middleware-manifest.json"`). The script runs the command in Docker, in an image with the Node version from `.node-version` and the Chromium that the lockfile's Playwright expects. The working tree is mounted, with its own Linux `node_modules` and `.wrangler` kept in Docker volumes. `LINUX_PORT=4109` publishes a preview's port to the host, so you can open it in a Windows browser. Everything else (`pnpm check`, `pnpm dev`, the unit tests) runs on Windows itself. macOS and Linux need none of this.
 

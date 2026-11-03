@@ -33,4 +33,4 @@ Agents' skills live in `.claude/skills/`:
 
 ## When a change is done
 
-`pnpm check` passes from the root, once, on the finished tree: every check, then the web app's lint, types, migration check, unit tests and build. The evidence a change needs beyond that (a tap-through, the journeys, a deploy's smoke test) is in `apps/web/AGENTS.md`, Evidence.
+`pnpm check` passes from the root, once, on the finished tree: every check, then the web app's lint, types, migration check, unit tests and build. The evidence a change needs beyond that (a tap-through, the journeys that cover it, a deploy's smoke test) is in `apps/web/AGENTS.md`, Evidence. A heavy suite runs in full locally only when a change's reach is wide or unknown, and a fix re-runs only what it could have affected: CI's run on the final commit is the full record.
