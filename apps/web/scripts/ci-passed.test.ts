@@ -69,7 +69,7 @@ describe('whether CI passed on a commit, before it is promoted', () => {
     const { git, commit } = scratchHistory()
     const code = commit('apps/web/src/a.ts')
     commit('docs/agents/a.md')
-    const docs = commit('README.md')
+    const docs = commit('docs/agents/b.md')
     const { passed: ok, log } = passed({ [docs]: 'docs', [code]: 'passed' }, docs, git)
     expect(ok).toBe(true)
     expect(log[0]).toBe(
