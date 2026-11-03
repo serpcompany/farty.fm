@@ -2,6 +2,8 @@
 # tools/catalog/rank_pdmx.py --batch 150 --out tools/catalog/titles-04.txt (#312). Each title's only name is
 # the one the ranking counted scores by. Review of its import (#325) pulled 5 titles, now in
 # excluded-titles.txt: El Condor Pasa, Misirlou, Lavender's Blue, Dido's Lament, Indian National Anthem.
+# The whole-catalog check (#344) pulled Hänschen Klein, the same tune as Lightly Row (titles-01.txt), and
+# gave 6 titles back the accents the ranking dropped.
 # id | catalog title
 maple-leaf-rag | Maple Leaf Rag
 piano-sonata-no-16-in-c-major-k-545 | Piano Sonata No.16 in C major K.545
@@ -32,7 +34,7 @@ erlkonig | Erlkönig
 solace | Solace
 last-post | Last Post
 chopin-nocturne-in-e-minor-op-72-no-1 | Chopin Nocturne in E Minor Op. 72 No. 1
-vedro-con-mio-diletto | Vedro con mio diletto
+vedro-con-mio-diletto | Vedrò con mio diletto
 toss-the-feathers | Toss the Feathers
 lacrimosa | Lacrimosa
 prelude-in-c-major | Prelude in C Major
@@ -41,7 +43,7 @@ swan | The Swan
 waltz-in-b-minor | Waltz in B minor
 sailors-hornpipe | The Sailor's Hornpipe
 sakkijarven-polkka | Säkkijärven Polkka
-csardas | Csardas
+csardas | Csárdás
 apres-un-reve | Après un rêve
 battle-cry-of-freedom | Battle Cry of Freedom
 gnossienne-no-1 | Gnossienne No. 1
@@ -64,7 +66,7 @@ minute-waltz | Minute Waltz
 schiarazula-marazula | Schiarazula Marazula
 blarney-pilgrim | The Blarney Pilgrim
 turkey-in-the-straw | Turkey in the Straw
-standchen-serenade | Standchen Serenade
+standchen-serenade | Ständchen Serenade
 i-was-glad-when-they-said-unto-me | I Was Glad When They Said Unto Me
 el-choclo | El Choclo
 nessun-dorma | Nessun Dorma
@@ -74,7 +76,7 @@ gran-vals | Gran Vals
 jupiter | Jupiter
 a-portuguesa | A Portuguesa
 easy-winners | The Easy Winners
-a-la-claire-fontaine | A la claire fontaine
+a-la-claire-fontaine | À la claire fontaine
 toccata-and-fugue-in-d-minor | Toccata and Fugue in D Minor
 blackberry-blossom | The Blackberry Blossom
 pavane-op-50 | Pavane Op. 50
@@ -94,7 +96,6 @@ salvation-is-created | Salvation is Created
 tumbalalaika | Tumbalalaika
 kesh | The Kesh
 die-wacht-am-rhein | Die Wacht am Rhein
-hanschen-klein | Hänschen Klein
 just-a-closer-walk-with-thee | Just A Closer Walk With Thee
 salut-damour | Salut d'Amour
 it-was-a-lover-and-his-lass | It was a lover and his lass
@@ -110,7 +111,7 @@ cello-suite-no-4-in-e-flat-major-bwv-1010 | Cello Suite No.4 in E-flat major BWV
 waltz-in-a-minor-chopin | Waltz in A Minor Chopin
 gaudete-gaudete-christus-est-natus | Gaudete! Gaudete! Christus est natus
 all-creatures-of-our-god-and-king | All Creatures Of Our God and King
-marche-funebre | Marche funebre
+marche-funebre | Marche funèbre
 it-is-well-with-my-soul | It Is Well With My Soul
 lasciatemi-morire | Lasciatemi morire
 buckeye-battle-cry | Buckeye Battle Cry
@@ -133,7 +134,7 @@ march-in-d-major | March in D Major
 marching-through-georgia | Marching Through Georgia
 himno-nacional-de-bolivia | Himno Nacional de Bolivia
 now-is-the-month-of-maying | Now is the Month of Maying
-si-bheag-si-mhor | Si Bheag Si Mhor
+si-bheag-si-mhor | Sí Bheag Sí Mhór
 mairis-wedding | Mairi's Wedding
 soul-of-my-saviour | Soul of My Saviour
 bonnie-blue-flag | Bonnie Blue Flag

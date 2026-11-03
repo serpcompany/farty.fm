@@ -315,7 +315,9 @@ class Catalog(unittest.TestCase):
     def test_merge_replaces_only_its_own_batch(self):
         new = {"id": "z", "title": "Z", "import": {"titles": "tools/catalog/titles-01.txt"}}
         merged = pdmx.merge_catalog([self.hand, self.mine, self.other], "tools/catalog/titles-01.txt", [new])
-        self.assertEqual([e["id"] for e in merged], ["mary", "x", "z"])
+        self.assertEqual([e["id"] for e in merged], ["mary", "z", "x"])  # in the batch's place
+        self.assertEqual([e["id"] for e in pdmx.merge_catalog([self.hand, self.other], "tools/catalog/titles-01.txt", [new])],
+                         ["mary", "x", "z"])  # a new batch goes last
         with self.assertRaises(ValueError):
             pdmx.merge_catalog([self.hand], "tools/catalog/titles-01.txt", [{**new, "id": "mary"}])
 
@@ -407,6 +409,11 @@ class MelodyTrack(unittest.TestCase):
     def test_skips_a_percussion_program(self):
         m = load_midi(self.midi((0, 0, [60, 62, 64]), (1, 115, [84, 84, 84])))  # GM 116, Woodblock
         self.assertEqual(m.report["track_used"], 0)
+
+    def test_takes_a_pitched_percussion_program(self):
+        m = load_midi(self.midi((0, 32, [48, 50, 52, 53]), (1, 114, [76, 79, 81, 79])))  # GM 115, Steel Drums
+        self.assertEqual(m.report["track_used"], 1)
+        self.assertEqual([n.pitch for n in m.notes], [76, 79, 81, 79])
 
     def test_a_score_of_only_percussion_still_imports(self):
         m = load_midi(self.midi((9, 0, [76, 77])))
