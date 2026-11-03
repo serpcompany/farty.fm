@@ -109,6 +109,12 @@ def main():
     for subset in load("coverage.json")["subsets"]:
         for fit in subset["songs"]:
             worst, n = max(worst, check(fit, songs[fit["song"]], recordings)), n + 1
+    for case in load("choices.json")["cases"]:  # the user's changes (#360)
+        for state in case["states"]:
+            if state["choices"] is not None:
+                assert state["transpose"] == state["choices"]["transposition"], (case["case"], case["song"])
+                assert not set(state["choices"]["excluded"]) & set(state["recording_for_pitch"].values()), case
+            worst, n = max(worst, check(state, songs[case["song"]], recordings)), n + 1
     print(f"all {n} golden fits: recomputed cost within {worst:.1e} of plan_cost")
 
 

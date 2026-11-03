@@ -494,6 +494,40 @@ class Fit:
         ]
 
 
+def song_pitches(melody):
+    """The Song's distinct pitches, lowest first, and per pitch (weight, note_seconds): the
+    summed duration in beats of its notes, and how long each of them sounds."""
+    pitches = sorted({n.pitch for n in melody.notes})
+    spb = 60 / melody.bpm
+    # A note shorter than GAP_S has no slot left, not a negative one: a negative slot made
+    # unsettled_cost() about -1e8 a note (it divides by max(1e-9, slot)), so solve()'s penalties
+    # no longer ranked choices and Bolero's ornaments crashed smallest_ids() (#332).
+    return pitches, {
+        p: (
+            sum(n.dur for n in melody.notes if n.pitch == p),
+            [max(0.0, n.dur * spb - GAP_S) for n in melody.notes if n.pitch == p],
+        )
+        for p in pitches
+    }
+
+
+def pitch_cell(source, target, weight, note_seconds, octave_moves=True):
+    """(Octave Move?, cost) of a Song pitch sounding at MIDI `target` played by Melodic
+    `source`, or None when the unlock rule doesn't let it play that pitch: too far from it
+    (move_cost()) or too short for its longest note (fills()). `weight` and `note_seconds`
+    are the pitch's, from song_pitches()."""
+    m = move_cost(target - source.ref_midi, octave_moves)
+    if m is None or not fills(source.seconds, max(note_seconds)):
+        return None
+    return (
+        m[1],
+        weight * m[0]
+        + too_short_cost(note_seconds, source.seconds, source.min_note_s)
+        + unsettled_cost(note_seconds, source.seconds, source.settle_s)
+        + silent_cost(note_seconds, source.seconds),
+    )
+
+
 def melody_fit(melody, sources, transpose=None, octave_moves=True):
     """Pitch Coverage and Auto-map in one search (ADR 0004, ADR 0006).
 
@@ -505,30 +539,11 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
     `octave_moves=False` gives ADR 0004's rule without Octave Moves, for comparison.
     """
     pitched = sorted((s for s in sources if s.pitched), key=lambda s: s.id)
-    pitches = sorted({n.pitch for n in melody.notes})
-    spb = 60 / melody.bpm
-    weight = {p: sum(n.dur for n in melody.notes if n.pitch == p) for p in pitches}
-    # A note shorter than GAP_S has no slot left, not a negative one: a negative slot made
-    # unsettled_cost() about -1e8 a note (it divides by max(1e-9, slot)), so solve()'s penalties
-    # no longer ranked choices and Bolero's ornaments crashed smallest_ids() (#332).
-    note_seconds = {p: [max(0.0, n.dur * spb - GAP_S) for n in melody.notes if n.pitch == p] for p in pitches}
-    longest = {p: max(note_seconds[p]) for p in pitches}
+    pitches, slots = song_pitches(melody)
+    longest = {p: max(slots[p][1]) for p in pitches}
 
     def cells(t):  # cells[i][j]: (Octave Move?, cost) of pitch i on Recording j, or None
-        out = []
-        for p in pitches:
-            row = []
-            for s in pitched:
-                shift = p + t - s.ref_midi
-                m = move_cost(shift, octave_moves)
-                if m is None or not fills(s.seconds, longest[p]):
-                    row.append(None)
-                else:
-                    row.append((m[1], weight[p] * m[0] + too_short_cost(note_seconds[p], s.seconds, s.min_note_s)
-                                + unsettled_cost(note_seconds[p], s.seconds, s.settle_s)
-                                + silent_cost(note_seconds[p], s.seconds)))
-            out.append(row)
-        return out
+        return [[pitch_cell(s, p + t, *slots[p], octave_moves) for s in pitched] for p in pitches]
 
     def key(table, choice):  # exact (uncovered, Octave Moves, cost), summed in pitch order
         uncovered = octaves = 0
@@ -603,6 +618,130 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
     )
 
 
+# ---------------------------------------------------------------- The user's changes (#360)
+
+
+@dataclass
+class FartChoices:
+    """What the user changed in one Song's Arrangement (#360, ADR 0005): the Recording they
+    swapped in for some of its pitches, and the Recordings they left out of it. Kept with the
+    transposition the Song had when they made the first change, which holds while any change
+    stands, so changing a fart never moves the Song to another key. A Song with no change has no
+    Fart Choices and is arranged automatically (melody_fit())."""
+
+    transposition: int
+    preferred: dict = field(default_factory=dict)  # Song pitch -> the Recording id the user picked
+    excluded: tuple = ()  # Recording ids left out of this Song, sorted
+
+
+def can_play(source, pitch, choices, melody):
+    """Whether Melodic `source` may play Song `pitch` at the Fart Choices' transposition: near
+    enough to it and long enough for its longest note (pitch_cell())."""
+    _, slots = song_pitches(melody)
+    return source.pitched and pitch in slots and pitch_cell(source, pitch + choices.transposition, *slots[pitch]) is not None
+
+
+def _settled(choices):
+    """None once nothing is changed: the Song is automatic again."""
+    if not choices.preferred and not choices.excluded:
+        return None
+    return FartChoices(choices.transposition, dict(sorted(choices.preferred.items())), tuple(sorted(set(choices.excluded))))
+
+
+def swap(choices, pitch, rid):
+    """`rid` plays `pitch`: picked for it, taken from any other pitch it was picked for, and
+    no longer left out."""
+    preferred = {p: r for p, r in choices.preferred.items() if r != rid}
+    preferred[pitch] = rid
+    return _settled(FartChoices(choices.transposition, preferred, tuple(r for r in choices.excluded if r != rid)))
+
+
+def leave_out(choices, rid):
+    """`rid` plays nothing in this Song, and any pitch it was picked for is automatic again."""
+    preferred = {p: r for p, r in choices.preferred.items() if r != rid}
+    return _settled(FartChoices(choices.transposition, preferred, (*choices.excluded, rid)))
+
+
+def use_again(choices, rid):
+    """`rid`, left out, may play in this Song again."""
+    return _settled(FartChoices(choices.transposition, dict(choices.preferred), tuple(r for r in choices.excluded if r != rid)))
+
+
+def reset(choices, pitch, melody, sources):
+    """`pitch` back to Farty's pick: its own pick cleared, and every left-out Recording that
+    could play it may play again. A left-out Recording that is gone stays left out."""
+    by_id = {s.id: s for s in sources}
+    excluded = tuple(r for r in choices.excluded if not (r in by_id and can_play(by_id[r], pitch, choices, melody)))
+    preferred = {p: r for p, r in choices.preferred.items() if p != pitch}
+    return _settled(FartChoices(choices.transposition, preferred, excluded))
+
+
+def arrange(melody, sources, choices=None):
+    """The Song's Arrangement with the user's Fart Choices (#360): melody_fit() when there are none.
+
+    With Fart Choices, at their transposition T:
+    1. Farty's Arrangement at T, melody_fit(transpose=T) on every Recording, is the base.
+    2. Each picked Recording plays its pitch, lowest pitch first. A pick is dropped when its
+       pitch isn't in the Song, its Recording is gone, Noise-like, left out or picked for a
+       lower pitch already, or can't play the pitch at T (can_play()).
+    3. Every other pitch keeps its base Recording unless that one is left out or picked for
+       another pitch.
+    4. The pitches left over are arranged by melody_fit(transpose=T) on just their notes and
+       the Melodic Recordings nobody plays and nobody left out, so they rank as any
+       Arrangement does (coverage, Octave Moves, cost, then ids). One no Recording can play
+       stays uncovered, and the Song locks.
+    The cost and Octave Moves are pitch_cell()'s, summed in ascending pitch order, as
+    melody_fit() sums them.
+    """
+    if choices is None:
+        return melody_fit(melody, sources)
+    t = choices.transposition
+    pitches, slots = song_pitches(melody)
+    melodic = {s.id: s for s in sources if s.pitched}
+    excluded = set(choices.excluded)
+    base = melody_fit(melody, sources, transpose=t)
+    recording_for_pitch = {}
+    for pitch, rid in sorted(choices.preferred.items()):
+        s = melodic.get(rid)
+        if (
+            pitch in slots
+            and s is not None
+            and rid not in excluded
+            and rid not in recording_for_pitch.values()
+            and pitch_cell(s, pitch + t, *slots[pitch]) is not None
+        ):
+            recording_for_pitch[pitch] = rid
+    picked = set(recording_for_pitch.values())
+    for pitch in pitches:
+        rid = base.recording_for_pitch[pitch]
+        if pitch not in recording_for_pitch and rid is not None and rid not in excluded and rid not in picked:
+            recording_for_pitch[pitch] = rid
+    free = [pitch for pitch in pitches if pitch not in recording_for_pitch]
+    if free:
+        playing = excluded | set(recording_for_pitch.values())
+        rest = melody_fit(
+            replace(melody, notes=[n for n in melody.notes if n.pitch in free]),
+            [s for s in melodic.values() if s.id not in playing],
+            transpose=t,
+        )
+        recording_for_pitch.update(rest.recording_for_pitch)
+    octaves = 0
+    cost = 0.0
+    for pitch in pitches:
+        rid = recording_for_pitch[pitch]
+        if rid is not None:
+            octave, c = pitch_cell(melodic[rid], pitch + t, *slots[pitch])
+            octaves += octave
+            cost += c
+    return Fit(
+        transpose=t,
+        recording_for_pitch={pitch: recording_for_pitch[pitch] for pitch in pitches},
+        octave_moves=octaves,
+        cost=float(cost),
+        longest_note_s={pitch: max(slots[pitch][1]) for pitch in pitches},
+    )
+
+
 class SongLocked(ValueError):
     """The Recordings don't cover every pitch of the Song, so it can't be played."""
 
@@ -611,14 +750,16 @@ class SongLocked(ValueError):
         self.fit = fit
 
 
-def plan(melody, sources, transpose=None, with_cost=False):
+def plan(melody, sources, transpose=None, with_cost=False, choices=None):
     """Choose a key (transposition) and a Recording for each note of an Unlocked Song.
 
     Every note of a Song pitch uses that pitch's Recording, so the same note always sounds
     the same. Raises SongLocked when the Song isn't unlocked. `with_cost=True` also returns
-    the Arrangement's cost (used by the golden export).
+    the Arrangement's cost (used by the golden export). `choices` are the user's changes
+    (arrange()), which hold their own transposition, so they don't go with `transpose`.
     """
-    fit = melody_fit(melody, sources, transpose)
+    assert choices is None or transpose is None, "Fart Choices hold their own transposition"
+    fit = arrange(melody, sources, choices) if choices is not None else melody_fit(melody, sources, transpose)
     if not fit.unlocked:
         raise SongLocked(fit)
     ref = {s.id: s.ref_midi for s in sources}

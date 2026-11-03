@@ -12,6 +12,8 @@ Writes deterministic JSON to fixtures/golden/ (format and tolerances: fixtures/g
                                      to render when locked)
   coverage.json                      Pitch Coverage and Arrangement of every arranged Song on fixed
                                      random subsets of the Fixture Library
+  choices.json                       the user's changes to an Arrangement (#360) replayed step by
+                                     step on every arranged Song: swaps, farts left out, resets
 
 Everything is computed by the lab's own functions (the same calls run_all.py makes); this
 script only rounds and writes. Running it twice gives byte-identical files.
@@ -40,7 +42,7 @@ GOLDEN = engine.ROOT / "fixtures/golden"
 # Songs with golden data before #350 (the web app's 128 and ode-mutopia), which the web port's tests
 # check against this engine.
 ARRANGED_BATCHES = {f"tools/catalog/titles-0{n}.txt" for n in (1, 2, 3)}
-GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")  # README.md is written by hand
+GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json", "choices.json")  # README.md is written by hand
 FORMAT_VERSION = 8  # 8: a fart's lead-in plays before its beat (#287); 7: Songs play every burst, the pitch reads the first (ADR 0016); 6: Songs' `bar_lines` (#232); 5: Songs play farts raw (ADR 0012); 4: the length rule (#221)
 COVERAGE_SEEDS = 10  # random subsets per size in coverage.json
 
@@ -244,6 +246,122 @@ def coverage_json(catalog, lib):
     return {"subsets": out}
 
 
+def choices_json(choices):
+    if choices is None:
+        return None
+    return {"transposition": int(choices.transposition), "preferred": choices.preferred, "excluded": list(choices.excluded)}
+
+
+def choice_cases(m, sources):
+    """The changes the golden tests replay on one Song (#360), each a list of steps from no change:
+    (name, [step]), a step being an op dict as choices.json writes it. Every case picks its pitch
+    and Recording by a fixed rule, lowest first, and a Song gets only the cases it allows."""
+    auto = engine.melody_fit(m, sources)
+    start = engine.FartChoices(auto.transpose)
+    melodic = sorted((s for s in sources if s.pitched), key=lambda s: s.id)
+    pitches = sorted(auto.recording_for_pitch)
+    players = {p: [s.id for s in melodic if engine.can_play(s, p, start, m)] for p in pitches}
+    playing = {r: p for p, r in auto.recording_for_pitch.items() if r is not None}
+    cases = []
+    swap = next(((p, r) for p in pitches for r in players[p] if r not in playing), None)
+    if swap:  # a Recording nobody plays: no other pitch moves
+        cases.append(("swap", [{"op": "swap", "song_pitch": swap[0], "recording": swap[1]}]))
+    taken = next(((p, r) for p in pitches for r in players[p] if playing.get(r, p) != p), None)
+    if taken:  # a Recording another pitch plays: that pitch is arranged again
+        cases.append(("swap_taken", [{"op": "swap", "song_pitch": taken[0], "recording": taken[1]}]))
+    covered = [p for p in pitches if auto.recording_for_pitch[p] is not None]
+    if covered:
+        r = auto.recording_for_pitch[covered[0]]
+        cases.append(("leave_out", [{"op": "leave_out", "recording": r}]))
+        cases.append(("use_again", [{"op": "leave_out", "recording": r}, {"op": "use_again", "recording": r}]))
+        # The covered pitch fewest Recordings can play, lowest on a tie: leave out each of them in
+        # turn until it has no fart and the Song locks, then reset it.
+        p = min(covered, key=lambda p: (len(players[p]), p))
+        steps = [{"op": "leave_out", "recording": r} for r in players[p]]
+        cases.append(("leave_out_every", [*steps, {"op": "reset", "song_pitch": p}]))
+    if swap and len(covered) > 1:
+        q = next(q for q in covered if q != swap[0])
+        cases.append((
+            "reset",
+            [
+                {"op": "swap", "song_pitch": swap[0], "recording": swap[1]},
+                {"op": "leave_out", "recording": auto.recording_for_pitch[q]},
+                {"op": "reset", "song_pitch": swap[0]},
+                {"op": "reset", "song_pitch": q},
+            ],
+        ))
+        cases.append(("reset_all", [
+            {"op": "swap", "song_pitch": swap[0], "recording": swap[1]},
+            {"op": "leave_out", "recording": auto.recording_for_pitch[q]},
+            {"op": "reset_all"},
+        ]))
+    others = [p for p in pitches if p != swap[0]] if swap else []
+    if len(others) >= 4:
+        # A swap kept, and picks the engine drops: a Recording that is gone, one that can't play
+        # its pitch, one left out, a Noise-like one, one for a pitch the Song doesn't have, and
+        # the swapped one again for a higher pitch.
+        preferred = {swap[0]: swap[1], others[0]: "999", pitches[-1] + 1: melodic[0].id}
+        far = next((s.id for s in melodic if s.id not in players[others[1]]), None)
+        if far is not None:
+            preferred[others[1]] = far
+        left_out = auto.recording_for_pitch[others[2]] or melodic[0].id
+        preferred[others[2]] = left_out
+        noise = next((s.id for s in sorted(sources, key=lambda s: s.id) if not s.pitched), None)
+        if noise is not None:
+            preferred[others[3]] = noise
+        higher = [p for p in others[4:] if p > swap[0]]
+        if higher:
+            preferred[higher[0]] = swap[1]
+        choices = {"transposition": auto.transpose, "preferred": dict(sorted(preferred.items())), "excluded": [left_out]}
+        cases.append(("stale", [{"op": "set", "choices": choices}]))
+    return cases
+
+
+def apply_step(step, choices, auto, m, sources):
+    """One step of a choice case, on the Song's Fart Choices, or on none at the transposition of
+    Auto-map's Arrangement `auto` (what the Song shows with no change)."""
+    current = choices or engine.FartChoices(auto.transpose)
+    op = step["op"]
+    if op == "swap":
+        return engine.swap(current, step["song_pitch"], step["recording"])
+    if op == "leave_out":
+        return engine.leave_out(current, step["recording"])
+    if op == "use_again":
+        return engine.use_again(current, step["recording"])
+    if op == "reset":
+        return engine.reset(current, step["song_pitch"], m, sources)
+    if op == "reset_all":
+        return None
+    if op == "set":
+        c = step["choices"]
+        return engine.FartChoices(c["transposition"], dict(c["preferred"]), tuple(c["excluded"]))
+    raise ValueError(op)
+
+
+def choice_states(m, sources, steps):
+    """The Song's Fart Choices and Arrangement before the first step and after each."""
+    auto = engine.melody_fit(m, sources)
+    choices = None
+    states = []
+    for step in [None, *steps]:
+        if step is not None:
+            choices = apply_step(step, choices, auto, m, sources)
+        fit = auto if choices is None else engine.arrange(m, sources, choices)
+        rfp = {str(p): r for p, r in sorted(fit.recording_for_pitch.items())}
+        states.append({"step": step, "choices": choices_json(choices), **fit_json(fit), "recording_for_pitch": rfp})
+    return states
+
+
+def choices_cases_json(catalog, libraries):
+    """Every arranged Song's choice cases (choice_cases()) on each library, replayed step by step."""
+    out = []
+    for name, sources in libraries.items():
+        for c, m in catalog:
+            for case, steps in choice_cases(m, sources):
+                out.append({"case": case, "song": c["id"], "library": name, "states": choice_states(m, sources, steps)})
+    return {"cases": out}
+
+
 def arranged_catalog(catalog):
     """The Songs of `catalog` that get arrangements/ and coverage.json, in catalog order: the
     hand-entered ones and ARRANGED_BATCHES' (#350). Every later batch's Song passed
@@ -295,6 +413,7 @@ def main():
     # The owner's farts (#295) stay out of the random subsets, so adding them left every subset as
     # it was. They are Noise-like, so the Arrangements, which read only Melodic Recordings, are too.
     write("coverage.json", coverage_json(catalog, [s for s in lib if manifest[s.id]["source"] != "owner"]))
+    write("choices.json", choices_cases_json(catalog, libraries))
 
     melodic = [s.id for s in lib if s.pitched]
     by_pitch = {}
