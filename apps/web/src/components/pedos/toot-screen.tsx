@@ -35,9 +35,9 @@ export function TootScreen() {
   const current = pedos.toot(id)
   const toot = current ?? (lastSeen?.id === id ? lastSeen : undefined)
   const summary = toot?.songId ? pedos.song(toot.songId) : undefined
-  // Its Song's notes, which the Song Catalog's index leaves out (#323).
+  // Its Song's notes, which the Song Catalog's index leaves out (#323). Only the note view needs
+  // them: Play plays the Toot's own audio, so it shows while they load, or if they don't.
   const notes = useSongNotes(summary)
-  const song = notes.song
   const isShared = useShares()?.tootLinks.has(id) ?? false
   /** Under the title: its Song, or Sound Pad, and Shared while it's shared, as the prototype's. */
   const subtitle = [
@@ -140,20 +140,30 @@ export function TootScreen() {
             ? "Couldn't load the Songs."
             : "This Toot's Song isn't in Farty any more."}
         </p>
-      ) : notes.failed ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-          <p className="text-muted-foreground">Couldn't load this Song.</p>
-          <Button variant="outline" className="h-11 px-5 text-base" onClick={notes.retry}>
-            Try again
-          </Button>
-        </div>
-      ) : !song ? (
-        <div className="flex flex-1 items-center justify-center">
-          <Spinner />
-        </div>
       ) : (
-        <TootLayout toot={toot} song={song} isAudioMissing={toot.isAudioMissing}>
-          <p className="pt-1 text-xs text-muted-foreground">{song.source}</p>
+        <TootLayout
+          toot={toot}
+          song={notes.song ?? summary}
+          isAudioMissing={toot.isAudioMissing}
+          notesFallback={
+            notes.failed ? (
+              <div
+                className="flex flex-col items-center gap-3 py-4 text-center"
+                data-testid="toot-notes-failed"
+              >
+                <p className="text-sm text-muted-foreground">Couldn't load this Song's notes.</p>
+                <Button variant="outline" className="h-11 px-5 text-base" onClick={notes.retry}>
+                  Try again
+                </Button>
+              </div>
+            ) : (
+              <div className="flex justify-center py-4">
+                <Spinner />
+              </div>
+            )
+          }
+        >
+          <p className="pt-1 text-xs text-muted-foreground">{summary.source}</p>
           {toot.isAudioMissing && (
             <p className="pt-1 text-xs text-muted-foreground" data-testid="toot-audio-missing">
               This Toot's audio is missing. You can delete it and make it again in Compose.
