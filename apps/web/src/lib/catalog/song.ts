@@ -18,7 +18,8 @@ export type SongSummary = {
   pitches: readonly number[]
   /**
    * The lengths in beats of each pitch's notes, in `pitches`' order and each in time order: all
-   * that Auto-map reads of the melody, so Pitch Coverage needs no notes (`summaryEngineSong`).
+   * that Auto-map reads of the melody, so Pitch Coverage needs no notes (`SongPitches` and
+   * `arrangePitches` in `engine/auto-map.ts`).
    */
   durations: readonly (readonly number[])[]
   /** Where the browser fetches the Song's notes (`SongNotes`), named by their content. */
