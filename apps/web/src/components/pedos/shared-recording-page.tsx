@@ -19,6 +19,7 @@ import { play, playbackPosition, stopPlayback } from '@/lib/audio/player'
 import type { Trim } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
+import { useStartGetFarty } from './get-farty'
 import { ReplayWaveform } from './waveform'
 
 // A shared Recording's page, `/u/<handle>/r/<id>/` (ADR 0020): what anyone with the link sees,
@@ -28,27 +29,44 @@ import { ReplayWaveform } from './waveform'
 /** Farty's brand button, behind white text, as the lander's. */
 const brand = 'bg-brand-strong text-white hover:bg-brand-strong/90'
 
-/** Get Farty, or Open Farty for someone who already has an account. Both open Farty at `/`. */
-function GetFarty({ className, big = false }: { className?: string; big?: boolean }) {
+/**
+ * Get Farty, or Open Farty for someone who already has an account, which opens Farty at `/`. Get
+ * Farty offers `friend`, whoever's page it is, as a friend (#318).
+ */
+function GetFarty({
+  friend = null,
+  className,
+  big = false
+}: {
+  friend?: string | null
+  className?: string
+  big?: boolean
+}) {
   const { account } = useAccount()
-  const opens = account.status === 'signedIn'
+  const size = big ? 'h-12 px-7 text-base' : 'h-11 px-4 text-sm'
+  if (account.status === 'signedIn') {
+    return (
+      <Link href="/" className={cn(buttonVariants({ variant: 'outline' }), size, className)}>
+        Open Farty
+      </Link>
+    )
+  }
+  return <GetFartyButton friend={friend} className={cn(brand, size, className)} />
+}
+
+function GetFartyButton({ friend, className }: { friend: string | null; className: string }) {
+  const start = useStartGetFarty()
   return (
-    <Link
-      href="/"
-      className={cn(
-        buttonVariants({ variant: opens ? 'outline' : 'default' }),
-        !opens && brand,
-        big ? 'h-12 px-7 text-base' : 'h-11 px-4 text-sm',
-        className
-      )}
-    >
-      {opens ? 'Open Farty' : 'Get Farty'}
-    </Link>
+    <Button className={className} onClick={() => start(friend)}>
+      Get Farty
+    </Button>
   )
 }
 
-/** The page's own top bar: Farty, and Get Farty. The app's tabs aren't here. */
-export function SharedTopBar() {
+/**
+ * The page's own top bar: Farty, and Get Farty, offering `friend`. The app's tabs aren't here.
+ */
+export function SharedTopBar({ friend = null }: { friend?: string | null }) {
   return (
     <header className="flex min-h-14 items-center justify-between gap-3 px-4 py-1.5">
       <Link
@@ -66,7 +84,7 @@ export function SharedTopBar() {
         />
         Farty
       </Link>
-      <GetFarty />
+      <GetFarty friend={friend} />
     </header>
   )
 }
@@ -129,7 +147,7 @@ export function SharedRecordingPage({
   const PlayIcon = playing ? Square : Play
   return (
     <div className="flex flex-1 flex-col">
-      <SharedTopBar />
+      <SharedTopBar friend={handle} />
       <div className="flex flex-1 flex-col px-4 pb-6">
         <p className="pt-3 text-[15px] text-muted-foreground">
           <Link
@@ -189,7 +207,7 @@ export function SharedRecordingPage({
 
         {account.status !== 'signedIn' && (
           <div className="mt-5 grid gap-2 text-center">
-            <GetFarty big />
+            <GetFarty friend={handle} big />
             <p className="text-sm text-muted-foreground">
               Record your own farts and turn them into songs. Free, no app store.
             </p>

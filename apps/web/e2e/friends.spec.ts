@@ -67,7 +67,8 @@ test('a friend request sent from a profile page is accepted in Profile, then rem
     expect(cache).toContain('no-cache')
     await expect(samPage.getByRole('heading', { name: `@${maya}` })).toBeVisible()
     await expect(samPage.getByText('Nothing shared yet.')).toBeVisible()
-    await expect(samPage.getByRole('link', { name: 'Add friend' })).toHaveAttribute('href', '/')
+    // Signed out, it's Get Farty's way in (#318): get-farty.spec.ts follows it.
+    await expect(samPage.getByRole('button', { name: 'Add friend' })).toBeVisible()
     await expect(samPage.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/)
   })
 

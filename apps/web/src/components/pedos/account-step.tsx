@@ -12,6 +12,7 @@ import {
   signIn,
   turnstileSiteKey
 } from '@/lib/account'
+import { offerFriend, useGetFarty } from '@/lib/get-farty'
 import { unsavedBeforeSignIn } from '@/lib/library-sync'
 import { useAccount } from './account-provider'
 import { Turnstile } from './turnstile'
@@ -44,6 +45,10 @@ function Step() {
   const { account, skipStep, finishSignIn, stepReason } = useAccount()
   const again = account.status === 'expired'
   const toShare = stepReason === 'share' && !again
+  // Get Farty from a shared page (#318): the first of its two steps, offering a friend.
+  const getFarty = useGetFarty()
+  const toGet = getFarty?.stage === 'account' && !again
+  const friend = getFarty?.stage === 'account' ? getFarty.friend : null
   const [draft] = useState(readStepDraft)
   const [phase, setPhase] = useState(draft?.phase ?? 'email')
   const [email, setEmail] = useState(draft?.email ?? '')
@@ -194,14 +199,20 @@ function Step() {
               tabIndex={-1}
               className="text-3xl font-bold tracking-tight outline-none"
             >
-              {again ? 'Sign in again' : toShare ? 'Make a free account' : 'Keep your farts'}
+              {again
+                ? 'Sign in again'
+                : toShare || toGet
+                  ? 'Make a free account'
+                  : 'Keep your farts'}
             </h1>
             <p className="text-muted-foreground">
               {again
                 ? 'Your session ended. Your farts stay on this device until you sign in.'
-                : toShare
-                  ? 'You need one to share. It keeps your farts too.'
-                  : 'Make a free account to keep your farts.'}
+                : toGet
+                  ? 'It keeps your farts. Then add Farty to your Home Screen.'
+                  : toShare
+                    ? 'You need one to share. It keeps your farts too.'
+                    : 'Make a free account to keep your farts.'}
             </p>
           </div>
 
@@ -240,6 +251,17 @@ function Step() {
                 value={email}
                 onChange={event => setEmail(event.target.value)}
               />
+              {friend !== null && getFarty && (
+                <label className="flex min-h-11 items-center gap-3 text-base">
+                  <input
+                    type="checkbox"
+                    className="size-5 shrink-0 accent-primary"
+                    checked={getFarty.add}
+                    onChange={event => offerFriend(event.target.checked)}
+                  />
+                  Add @{friend} as a friend
+                </label>
+              )}
               {siteKey && (
                 <Turnstile
                   key={widget}
