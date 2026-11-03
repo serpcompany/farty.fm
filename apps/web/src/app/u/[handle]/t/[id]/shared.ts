@@ -1,11 +1,10 @@
 import 'server-only'
 
 import { cache } from 'react'
-import { songs } from '@/lib/catalog/songs.generated'
-import { formattedTootLength, PAD_TOOT_TITLE } from '@/lib/toot'
+import { formattedTootLength } from '@/lib/toot'
 import { requestStores } from '@/server/library'
 import { pageOrigin } from '@/server/link-preview'
-import { findSharedToot, sharedTootKey, sharedTootLevels } from '@/server/sharing'
+import { findSharedToot, sharedTootKey, sharedTootLevels, tootSongTitle } from '@/server/sharing'
 
 /** What a shared Toot's page, and its link image, show of it: nothing private. */
 export type SharedTootView = {
@@ -35,10 +34,7 @@ export const sharedTootView = cache(
     const { db, media } = requestStores()
     const shared = await findSharedToot(db, handle, id)
     if (!shared) return null
-    const song =
-      shared.songId === null
-        ? PAD_TOOT_TITLE
-        : (songs.find(s => s.id === shared.songId)?.title ?? null)
+    const song = tootSongTitle(shared.songId)
     const origin = (await pageOrigin()) ?? 'http://localhost'
     return {
       handle: shared.handle,
