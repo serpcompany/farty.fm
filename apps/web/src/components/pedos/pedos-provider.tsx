@@ -140,7 +140,7 @@ export type Flow =
   | { kind: 'review'; draft: Draft }
   | { kind: 'saveFailed'; draft: Draft; review: ReviewChange }
   | { kind: 'analyzing'; id: string }
-  | { kind: 'analysisFailed'; id: string }
+  | { kind: 'analysisFailed'; id: string; trimFailed?: boolean }
   | { kind: 'result'; id: string; changes: CoverageChanges; trimFailed?: boolean }
 
 export type RecordProblem = 'microphoneOff' | 'couldNotStart' | 'interrupted' | 'nothingHeard'
@@ -782,7 +782,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         : await runAnalysis(saved.id)
       const next: Flow = analyzed
         ? await resultOf(analyzed, !trimmed)
-        : { kind: 'analysisFailed', id: saved.id }
+        : { kind: 'analysisFailed', id: saved.id, ...(trimmed ? {} : { trimFailed: true }) }
       setFlow(current =>
         current?.kind === 'analyzing' && current.id === saved.id ? next : current
       )
@@ -800,6 +800,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     async (id: string) => {
       const recording = recordings?.find(r => r.id === id)
       if (!recording || recording.analysis.state !== 'notAnalyzed') return
+      // A Trim that failed before analysis did is still said on Result after Retry.
+      const trimFailed = flow?.kind === 'analysisFailed' && flow.id === id && !!flow.trimFailed
       replace({ ...recording, analysis: { state: 'analyzing' } })
       setFlow(current =>
         current?.kind === 'analysisFailed' && current.id === id
@@ -807,10 +809,12 @@ export function PedosProvider({ children }: { children: ReactNode }) {
           : current
       )
       const analyzed = await runAnalysis(id)
-      const next: Flow = analyzed ? await resultOf(analyzed) : { kind: 'analysisFailed', id }
+      const next: Flow = analyzed
+        ? await resultOf(analyzed, trimFailed)
+        : { kind: 'analysisFailed', id, ...(trimFailed ? { trimFailed } : {}) }
       setFlow(current => (current?.kind === 'analyzing' && current.id === id ? next : current))
     },
-    [recordings, replace, runAnalysis, resultOf]
+    [flow, recordings, replace, runAnalysis, resultOf]
   )
 
   const finishFlow = useCallback(() => {
