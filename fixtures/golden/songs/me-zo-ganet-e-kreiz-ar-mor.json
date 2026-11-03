@@ -1,0 +1,315 @@
+{
+  "bar_lines": [
+    0.0
+  ],
+  "beats_per_bar": 99,
+  "bpm": 120,
+  "file": "midi/pdmx-me-zo-ganet-e-kreiz-ar-mor.mid",
+  "id": "me-zo-ganet-e-kreiz-ar-mor",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 99
+  },
+  "import_report": {
+    "catalog_id": "me-zo-ganet-e-kreiz-ar-mor",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 55,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-me-zo-ganet-e-kreiz-ar-mor.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 99.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 0.125,
+      "pitch": 67,
+      "start": 27.0
+    },
+    {
+      "dur": 0.125,
+      "pitch": 69,
+      "start": 27.125
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 27.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 36.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 38.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 44.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 45.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 46.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 47.0
+    },
+    {
+      "dur": 0.125,
+      "pitch": 66,
+      "start": 49.0
+    },
+    {
+      "dur": 0.125,
+      "pitch": 64,
+      "start": 49.125
+    },
+    {
+      "dur": 2.75,
+      "pitch": 62,
+      "start": 49.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 52.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 53.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 54.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 71,
+      "start": 55.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 58.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 59.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 73,
+      "start": 61.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 63.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 68.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 69.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 70.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 71.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 76.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 77.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 78.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 79.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 84.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 85.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 86.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 64,
+      "start": 87.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 64,
+      "start": 91.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 64,
+      "start": 95.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    73
+  ],
+  "sha256": "41ffc929da57bcdce8aa36d7c081c1ae8c95c8457e60b5677adfef81cf95a2f1",
+  "title": "Me Zo Ganet E Kreiz Ar Mor"
+}

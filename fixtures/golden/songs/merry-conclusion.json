@@ -1,0 +1,221 @@
+{
+  "bar_lines": [
+    0.0,
+    6.0,
+    12.0,
+    18.0,
+    24.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 120,
+  "file": "midi/pdmx-merry-conclusion.mid",
+  "id": "merry-conclusion",
+  "import_args": {
+    "beats_per_bar": 6,
+    "bpm": 120,
+    "max_beats": 30,
+    "start_beat": 6
+  },
+  "import_report": {
+    "catalog_id": "merry-conclusion",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 35,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-merry-conclusion.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 7.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 29.5
+    }
+  ],
+  "pitches": [
+    64,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76
+  ],
+  "sha256": "f8ec1f8fc278fa6e8195ad221c0355e451ae6c2743e2c5e7d11133f34d7e379f",
+  "title": "The Merry Conclusion"
+}

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { fixtures, fixtureWav } from '../../scripts/fixture-library'
-import { goldenArrangement } from '../test-support/engine-golden'
+import { goldenArrangement, songIds } from '../test-support/engine-golden'
 import { bridgedWorker, WorkerScope } from '../test-support/fake-worker'
 import { songs } from '../test-support/songs.generated'
 import { analyzeToAnalysis } from './analysis/port'
@@ -69,7 +69,9 @@ afterAll(() => {
 
 describe('makeToot', () => {
   it.each(
-    songs.filter(s => goldenArrangement('full', s.id).unlocked).map(s => [s.id, s])
+    songs
+      .filter(s => songIds.includes(s.id) && goldenArrangement('full', s.id).unlocked)
+      .map(s => [s.id, s])
   )('renders %s as the engine does on the same WAVs', async (_, song) => {
     let fromWorker: RenderedSong | undefined
     const draft = await makeToot(song, recordings, loadAudio, async (...args) => {

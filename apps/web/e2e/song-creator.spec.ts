@@ -6,7 +6,7 @@ import { newEmail, signInByApi } from './account'
 import { all, bytes } from './database'
 import { payAtTheDevCheckout } from './pay'
 import { skipWelcome } from './record'
-import { expectTappable, songsHeading, tab } from './screens'
+import { expectTappable, pageSettled, songsHeading, tab } from './screens'
 import { controlledByTheServiceWorker, errorsWhileOffline } from './service-worker'
 import {
   loadTheFixtureLibrary,
@@ -40,6 +40,12 @@ test.beforeEach(async ({ context }) => {
   await context.addInitScript(hearSounds)
   await context.addInitScript(countResumesInTaps)
 })
+
+function anUnlockedSongButMary() {
+  const other = songsTheFixtureLibraryUnlocks.find(unlocked => unlocked.id !== 'mary')
+  if (!other) throw new Error('The Fixture Library unlocks no Song but Mary')
+  return other
+}
 
 async function openComposeWithTheFixtureLibrary(page: Page) {
   await loadTheFixtureLibrary(page)
@@ -307,13 +313,59 @@ test.describe('installed', () => {
     await expect(state).toHaveText('Playing')
     expect((await lastSound(page)).duration).toBe(whole.duration)
 
-    const other = songsTheFixtureLibraryUnlocks.find(unlocked => unlocked.id !== 'mary')
-    if (!other) throw new Error('The Fixture Library unlocks no Song but Mary')
+    const other = anUnlockedSongButMary()
     await page.goto(`/compose/${other.id}/`)
     await expect(page.getByRole('heading', { name: other.title })).toBeVisible()
     await expect(page).toHaveTitle(`${other.title} · Farty`)
     await expect(page.getByText(other.source)).toBeVisible()
     await expect(state).toBeVisible({ timeout: 60_000 })
     await context.setOffline(false)
+  })
+
+  test('a Song opened offline always ends with its own title in the tab (#351)', async ({
+    page,
+    context,
+    pageErrors
+  }) => {
+    test.setTimeout(240_000)
+    pageErrors.expect(...errorsWhileOffline)
+    await page.goto('/profile/')
+    await controlledByTheServiceWorker(page)
+    await loadTheFixtureLibrary(page)
+    const other = anUnlockedSongButMary()
+    const wanted = `${other.title} · Farty`
+
+    await context.setOffline(true)
+    const cdp = await context.newCDPSession(page)
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+    for (let load = 1; load <= 20; load++) {
+      await page.goto(`/compose/${other.id}/`)
+      await expect(page, `load ${load}`).toHaveTitle(wanted, { timeout: 15_000 })
+    }
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+    await context.setOffline(false)
+
+    await page.evaluate(() => {
+      const seen = window as unknown as { stayed: boolean; titles: string[][] }
+      seen.stayed = true
+      seen.titles = []
+      new MutationObserver(() => seen.titles.push([location.pathname, document.title])).observe(
+        document.head,
+        { childList: true, characterData: true, subtree: true }
+      )
+    })
+    await tab(page, 'Recordings').click()
+    await expect(page).toHaveURL(/\/recordings\/$/)
+    await expect(page).toHaveTitle('Recordings · Farty')
+    await pageSettled(page)
+    const after = await page.evaluate(() => {
+      const seen = window as unknown as { stayed?: boolean; titles: string[][] }
+      return { stayed: seen.stayed === true, titles: seen.titles }
+    })
+    expect(after.stayed, 'the tab was a client navigation').toBe(true)
+    expect(
+      after.titles.filter(([path, title]) => !path.startsWith('/compose/') && title === wanted)
+    ).toEqual([])
+    await expect(page).toHaveTitle('Recordings · Farty')
   })
 })

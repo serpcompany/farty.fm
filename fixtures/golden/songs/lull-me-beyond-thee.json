@@ -1,0 +1,262 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-lull-me-beyond-thee.mid",
+  "id": "lull-me-beyond-thee",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "lull-me-beyond-thee",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 42,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-lull-me-beyond-thee.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 77,
+      "start": 1.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 2.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 2.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 79,
+      "start": 3.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 3.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 4.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 81,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 77,
+      "start": 7.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 8.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 8.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 73,
+      "start": 9.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 77,
+      "start": 13.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 14.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 14.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 79,
+      "start": 15.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 15.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 16.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 81,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 19.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 77,
+      "start": 19.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 20.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 20.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 73,
+      "start": 21.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 25.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 79,
+      "start": 25.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 26.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 26.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 81,
+      "start": 27.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 83,
+      "start": 27.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 29.5
+    }
+  ],
+  "pitches": [
+    69,
+    72,
+    73,
+    74,
+    76,
+    77,
+    79,
+    81,
+    83
+  ],
+  "sha256": "ad0b0def125b2f981a33a5f4549899a4563f31d29f8239671f9fd81a776e3409",
+  "title": "Lull Me Beyond Thee"
+}

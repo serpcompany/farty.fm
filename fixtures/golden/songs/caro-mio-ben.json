@@ -1,0 +1,171 @@
+{
+  "bar_lines": [
+    2.75,
+    6.75,
+    10.75,
+    14.75,
+    18.75,
+    22.75
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-caro-mio-ben.mid",
+  "id": "caro-mio-ben",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 26.75,
+    "start_beat": 16.75
+  },
+  "import_report": {
+    "catalog_id": "caro-mio-ben",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 24,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-caro-mio-ben.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1,
+      2
+    ]
+  },
+  "length_beats": 26.75,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 73,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 1.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 2.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 4.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 5.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 6.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 6.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 8.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 9.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 10.25
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 10.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 12.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 13.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 14.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 14.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 15.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 20.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 21.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 22.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 22.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 24.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 25.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 26.25
+    }
+  ],
+  "pitches": [
+    61,
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    73,
+    74
+  ],
+  "sha256": "00094fff2d1b8efd17c6ec41224ceaa5b77c1080379ec8dff7bff1ac8286cf5f",
+  "title": "Caro Mio Ben"
+}

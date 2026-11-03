@@ -1,0 +1,248 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-barcarolle.mid",
+  "id": "barcarolle",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 30,
+    "start_beat": 6
+  },
+  "import_report": {
+    "catalog_id": "barcarolle",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 39,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-barcarolle.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1,
+      2
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 8.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 20.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 71,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 26.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 29.5
+    }
+  ],
+  "pitches": [
+    69,
+    71,
+    72,
+    74,
+    76,
+    78,
+    79
+  ],
+  "sha256": "09e26f2d0a7920bcd6e88a0ca6ef6fc2138f0314062b43565dc69e4fbcf53332",
+  "title": "Barcarolle"
+}

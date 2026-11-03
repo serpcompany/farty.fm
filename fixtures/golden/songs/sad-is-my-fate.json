@@ -1,0 +1,280 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-sad-is-my-fate.mid",
+  "id": "sad-is-my-fate",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "sad-is-my-fate",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 45,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-sad-is-my-fate.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 71,
+      "start": 0.3333333333333333
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 73,
+      "start": 0.6666666666666666
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 6.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 11.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 12.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 15.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 18.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 20.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 21.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 21.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 24.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 26.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 27.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 27.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 30.5
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    65,
+    67,
+    69,
+    71,
+    72,
+    73,
+    74,
+    76,
+    77
+  ],
+  "sha256": "ac1ec421e238098a5dbb90a8b4cdb83d5e415c13fcd45e2b19bc0519df753d42",
+  "title": "Sad Is My Fate"
+}

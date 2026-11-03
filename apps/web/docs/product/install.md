@@ -75,14 +75,19 @@ The service worker registers only in a build, never on `pnpm dev`.
   "keeps the scripts that the scripts load by name, such as the workers' chunks"; "answers a worker
   script offline with a copy that has no URL, so each worker keeps its own").
 - Each Song's notes are a file of their own, kept in a cache apart from the shell, so however many
-  Songs open they never push the shell out. Once it has the Song Catalog, the worker fetches every
-  Song's notes it hasn't kept in the background, so a Song never opened plays offline too (#138),
-  and does the same for a new deploy's catalog; a fetch cut off tries again on the next
+  Songs open they never push the shell out, and the current catalog's notes are never trimmed,
+  however many Songs it has. Once it's active, the worker fetches every Song's notes it hasn't kept
+  in the background, so a Song never opened plays offline too (#138), and does the same for a new
+  deploy's catalog; a fetch cut off tries again on the next. It installs and activates without
+  waiting on them, so a new deploy's worker takes over at once (#350)
   (`src/lib/service-worker-notes.test.ts`, "keeps the notes of each Song opened, in a cache of their
-  own, and plays them offline"; "keeps every Song's notes when it installs, so a Song never opened
-  plays offline (#138)"; "keeps a new index's notes once a page fetches it, such as after a deploy";
-  "tries the notes again on the next fetch of the index when the connection drops part way"; "never
-  pushes the shell out, however many Songs open").
+  own, and plays them offline"; "keeps every Song's notes once it's active, so a Song never opened
+  plays offline (#138)"; "installs and activates without waiting on the notes, so a new build's
+  worker takes over at once (#350)"; "keeps the index's notes on a page's fetch of it when install
+  couldn't fetch it"; "never trims the current index's notes, however many Songs it has"; "keeps a
+  new index's notes once a page fetches it, such as after a deploy"; "tries the notes again on the
+  next fetch of the index when the connection drops part way"; "never pushes the shell out, however
+  many Songs open").
 - Offline, an account's Recordings are there and play, a Ready Song makes its Toot, and a saved
   Toot plays (`e2e/guest-visit.spec.ts`, "an account's Recording is there when the installed app
   opens again offline"; `e2e/song-creator.spec.ts`, "the installed app opens a Ready Song offline, and

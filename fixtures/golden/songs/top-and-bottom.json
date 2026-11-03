@@ -1,0 +1,236 @@
+{
+  "bar_lines": [
+    0.0,
+    12.0
+  ],
+  "beats_per_bar": 12,
+  "bpm": 120,
+  "file": "midi/pdmx-top-and-bottom.mid",
+  "id": "top-and-bottom",
+  "import_args": {
+    "beats_per_bar": 12,
+    "bpm": 120,
+    "max_beats": 24
+  },
+  "import_report": {
+    "catalog_id": "top-and-bottom",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 38,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-top-and-bottom.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 24.0,
+  "notes": [
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 2.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 11.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 14.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 83,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 22.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 22.5
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    71,
+    72,
+    73,
+    74,
+    76,
+    78,
+    79,
+    81,
+    83
+  ],
+  "sha256": "ca4365276dff76b63e3a94ce0b2e38e40b9e0d20071b241e7c8e0f9ff648dba0",
+  "title": "Top and Bottom"
+}

@@ -23,6 +23,7 @@ test('the first visit meets WCAG 2.1 AA', async ({ page }) => {
 
 for (const path of ['/', '/recordings/', '/compose/', '/compose/mary/', '/toots/', '/profile/']) {
   test(`${path} meets WCAG 2.1 AA`, async ({ page }) => {
+    test.setTimeout(120_000)
     await page.addInitScript(skipWelcome)
     await page.goto(path)
     expect(await violations(page)).toEqual([])

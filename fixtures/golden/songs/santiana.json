@@ -1,0 +1,230 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-santiana.mid",
+  "id": "santiana",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "santiana",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 36,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-santiana.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 1.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 5.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 7.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 9.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 64,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 13.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 18.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 19.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 20.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 67,
+      "start": 21.333333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 66,
+      "start": 21.666666666666668
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 23.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 23.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 26.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 62,
+      "start": 27.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 64,
+      "start": 27.333333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 65,
+      "start": 27.666666666666668
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    57,
+    60,
+    62,
+    64,
+    65,
+    66,
+    67,
+    69,
+    71,
+    72
+  ],
+  "sha256": "0f5f1db325f26368a82044598d44110e2d21962ceb82c52e5cc0aeeef9170ba5",
+  "title": "Santiana"
+}

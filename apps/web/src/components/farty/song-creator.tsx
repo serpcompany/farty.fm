@@ -147,11 +147,21 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
   )
 }
 
+const songIdIn = (path: string) => /^\/compose\/([^/]+)/.exec(path)?.[1] ?? ''
+
 export function SongCreatorFromAddress() {
-  const id = /^\/compose\/([^/]+)/.exec(usePathname())?.[1] ?? ''
+  const id = songIdIn(usePathname())
   const title = useSongCatalog().song(id)?.title
   useEffect(() => {
-    if (title) document.title = `${title} · Farty`
-  }, [title])
+    if (!title) return
+    const wanted = `${title} · Farty`
+    const keepTheSongsTitle = () => {
+      if (songIdIn(location.pathname) === id && document.title !== wanted) document.title = wanted
+    }
+    keepTheSongsTitle()
+    const observer = new MutationObserver(keepTheSongsTitle)
+    observer.observe(document.head, { childList: true, characterData: true, subtree: true })
+    return () => observer.disconnect()
+  }, [id, title])
   return <SongCreator id={id} />
 }

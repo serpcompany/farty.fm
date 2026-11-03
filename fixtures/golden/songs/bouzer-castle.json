@@ -1,0 +1,155 @@
+{
+  "bar_lines": [
+    0.0,
+    6.0,
+    12.0,
+    18.0,
+    24.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 120,
+  "file": "midi/pdmx-bouzer-castle.mid",
+  "id": "bouzer-castle",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "bouzer-castle",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 22,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-bouzer-castle.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 17.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 57,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    57,
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    74
+  ],
+  "sha256": "d5a0b187e55f5b394be3b3c9db5c7e8066634614fa115042376c934e2f1bd52d",
+  "title": "Bouzer Castle"
+}

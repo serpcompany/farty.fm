@@ -17,7 +17,7 @@ from evaluate import evaluate
 from melody import load_catalog
 
 GOLDEN = analysis.ROOT / "fixtures/golden"
-SHIP_LIST = analysis.ROOT / "apps/web/src/lib/catalog/ship-list.json"
+ARRANGED_BATCHES = {f"tools/catalog/titles-0{n}.txt" for n in (1, 2, 3)}
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")
 FORMAT_VERSION = 8
 COVERAGE_SEEDS = 10
@@ -220,12 +220,8 @@ def coverage_json(catalog, lib):
     return {"subsets": out}
 
 
-def golden_catalog():
-    ship = json.loads(SHIP_LIST.read_text(encoding="utf-8"))
-    catalog = [(c, m) for c, m in load_catalog() if c["id"] in ship or "import" not in c]
-    missing = set(ship) - {c["id"] for c, _ in catalog}
-    assert not missing, f"the ship list names Songs that aren't in catalog/: {sorted(missing)}"
-    return catalog
+def arranged_catalog(catalog):
+    return [(c, m) for c, m in catalog if "import" not in c or c["import"].get("titles") in ARRANGED_BATCHES]
 
 
 def clear_generated():
@@ -253,7 +249,6 @@ def summary_line(c, name, a):
 def write_songs(catalog, libraries):
     songs = []
     for c, m in catalog:
-        write(f"songs/{c['id']}.json", song_json(c, m))
         transposes, unlocked = {}, {}
         for name, sources in libraries.items():
             a = arrangement_json(c, m, name, sources)
@@ -288,7 +283,10 @@ def main():
     for src in lib:
         write(f"recordings/{src.id}.json", recording_json(manifest[src.id], src))
 
-    catalog = golden_catalog()
+    every = load_catalog()
+    for c, m in every:
+        write(f"songs/{c['id']}.json", song_json(c, m))
+    catalog = arranged_catalog(every)
     songs = write_songs(catalog, libraries)
     write("coverage.json", coverage_json(catalog, [s for s in lib if manifest[s.id]["source"] != "owner"]))
 

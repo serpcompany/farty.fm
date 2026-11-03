@@ -31,7 +31,7 @@ jobs:
         run: |
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
             echo "tools=true" >> "$GITHUB_OUTPUT"
-          elif git diff --quiet HEAD^1 HEAD -- tools fixtures catalog apps/web/src/lib/catalog/ship-list.json .python-version .github/workflows/tools.yml; then
+          elif git diff --quiet HEAD^1 HEAD -- tools fixtures catalog .python-version .github/workflows/tools.yml; then
             echo "tools=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Nothing the reference engine or the catalog importer reads changed, so their checks skip their steps."
           else

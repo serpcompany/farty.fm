@@ -1,0 +1,302 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-pretty-polly.mid",
+  "id": "pretty-polly",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "pretty-polly",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 50,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-pretty-polly.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 20.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 21.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 55,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 29.5
+    }
+  ],
+  "pitches": [
+    55,
+    62,
+    64,
+    65,
+    66,
+    67,
+    69,
+    71,
+    72
+  ],
+  "sha256": "203acc287ca6e8de3b17131aaf636812e345290b213c8067156c6822adf30ac5",
+  "title": "Pretty Polly"
+}

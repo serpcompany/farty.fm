@@ -1,0 +1,254 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-apres-un-reve.mid",
+  "id": "apres-un-reve",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30,
+    "start_beat": 3
+  },
+  "import_report": {
+    "catalog_id": "apres-un-reve",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 40,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-apres-un-reve.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 2.0
+    },
+    {
+      "dur": 1.3333333333333333,
+      "pitch": 63,
+      "start": 3.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 62,
+      "start": 4.333333333333333
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 60,
+      "start": 4.666666666666667
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 63,
+      "start": 5.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 62,
+      "start": 5.333333333333334
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 60,
+      "start": 5.666666666666666
+    },
+    {
+      "dur": 2.0,
+      "pitch": 60,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 58,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 53,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 61,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 11.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 60,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 13.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 58,
+      "start": 14.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 56,
+      "start": 14.75
+    },
+    {
+      "dur": 1.3333333333333333,
+      "pitch": 55,
+      "start": 15.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 56,
+      "start": 16.333333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 58,
+      "start": 16.666666666666668
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 56,
+      "start": 17.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 58,
+      "start": 17.333333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 60,
+      "start": 17.666666666666668
+    },
+    {
+      "dur": 3.0,
+      "pitch": 55,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 21.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 51,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 53,
+      "start": 22.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 56,
+      "start": 23.5
+    },
+    {
+      "dur": 1.3333333333333333,
+      "pitch": 58,
+      "start": 24.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 53,
+      "start": 25.333333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 53,
+      "start": 25.666666666666668
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 53,
+      "start": 26.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 52,
+      "start": 26.333333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 53,
+      "start": 26.666666666666668
+    },
+    {
+      "dur": 2.0,
+      "pitch": 56,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    51,
+    52,
+    53,
+    55,
+    56,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "sha256": "415f34c8d7bbb86f4628e574467366a38290f4991a3db5d83e76614e2502e690",
+  "title": "Après un rêve"
+}

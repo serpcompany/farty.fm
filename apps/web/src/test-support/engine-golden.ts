@@ -3,6 +3,7 @@ import type { AutoMapRecording } from '../lib/engine/auto-map'
 import type { Song } from '../lib/engine/song'
 import type { Analysis } from '../lib/recordings'
 import { type GoldenRecording, goldenRecordings, REPO_ROOT } from './golden'
+import { goldenAnalysis } from './golden-analysis'
 
 const GOLDEN_DIR = `${REPO_ROOT}/fixtures/golden`
 const readJson = <T>(path: string): T => JSON.parse(readFileSync(path, 'utf8')) as T
@@ -117,16 +118,7 @@ export function autoMapInputs(ids: readonly string[]): AutoMapRecording[] {
 }
 
 export function storedAnalysis(r: GoldenRecording): Analysis {
-  return {
-    gestureStartSeconds: r.gesture.start_sample / index.sample_rate,
-    gestureEndSeconds: r.gesture.end_sample / index.sample_rate,
-    cutAtReattack: r.gesture.cut_at_reattack,
-    pitchEstimateMidi: r.pitch_estimate_midi,
-    pitchConfidence: r.pitch_confidence,
-    recordingPitchMidi: r.recording_pitch_midi,
-    shortestNoteSeconds: r.shortest_note_s,
-    settleSeconds: r.settle_s
-  }
+  return goldenAnalysis(r, index.sample_rate)
 }
 
 export function syntheticRecording(

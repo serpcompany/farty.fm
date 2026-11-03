@@ -1,0 +1,155 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-nocturne-op-9-no-2.mid",
+  "id": "nocturne-op-9-no-2",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "nocturne-op-9-no-2",
+    "chord_tones_dropped": 1,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 20,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-nocturne-op-9-no-2.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 0.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 79,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 6.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 77,
+      "start": 7.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 75,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 13.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 15.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 15.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 15.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 15.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 84,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 18.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 82,
+      "start": 19.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 80,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 24.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 77,
+      "start": 25.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    77,
+    79,
+    80,
+    82,
+    84
+  ],
+  "sha256": "30a130c22692fb6e1ec5982a18c0d87b53e0bf594bef6c9e1480dacd0642a005",
+  "title": "Nocturne Op 9 No 2"
+}

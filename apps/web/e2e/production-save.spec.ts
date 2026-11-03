@@ -3,8 +3,8 @@ import { accountLibrary, newEmail, signInByApi } from './account'
 import { uploaded } from './database'
 import { payAtTheDevCheckout } from './pay'
 import { withFartingMicrophone } from './record'
-import { tab } from './screens'
-import { openASong, recordTheFartsThatUnlockMary } from './songs'
+import { songsHeading, tab } from './screens'
+import { openASong, recordTheFartsThatUnlockMary, songsUnlockedAt } from './songs'
 import { expect, test } from './test'
 
 withFartingMicrophone()
@@ -60,7 +60,7 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
 
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
-  await expect(page.getByRole('heading', { name: 'Unlocked · 6', exact: true })).toBeVisible()
+  await expect(songsHeading(page, 'Unlocked', songsUnlockedAt(4).length)).toBeVisible()
   await tab(page, 'Toots').click()
   await expect(page).toHaveURL(/\/toots\/$/)
   const toots = page.getByTestId('toot-row')

@@ -1,0 +1,356 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.75,
+    12.75,
+    16.75,
+    20.75,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-kildrummy-castle.mid",
+  "id": "kildrummy-castle",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "kildrummy-castle",
+    "chord_tones_dropped": 9,
+    "inner_voice_onsets_dropped": 1,
+    "note_count": 61,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-kildrummy-castle.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 0.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 1.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 68,
+      "start": 2.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 5.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 5.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 5.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 6.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 6.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 7.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 7.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 8.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 8.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 9.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 68,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 10.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 11.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 11.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 12.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 12.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 13.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 13.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 63,
+      "start": 14.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 14.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 14.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 15.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 15.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 16.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 16.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 17.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 68,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 18.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 19.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 20.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 20.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 21.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 21.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 22.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 24.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 24.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 25.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 68,
+      "start": 26.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 28.5
+    }
+  ],
+  "pitches": [
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    67,
+    68,
+    70
+  ],
+  "sha256": "d0a194ad9194d82212629a6917a00591c846f0de83f6365eff0d9f370336c286",
+  "title": "Kildrummy Castle"
+}

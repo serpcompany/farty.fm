@@ -1,0 +1,299 @@
+{
+  "bar_lines": [
+    0.25,
+    2.25,
+    4.25,
+    6.25,
+    8.25,
+    10.25,
+    12.25,
+    14.25,
+    15.5,
+    21.0,
+    23.0,
+    25.0,
+    27.0,
+    29.0
+  ],
+  "beats_per_bar": 2,
+  "bpm": 124,
+  "file": "midi/pdmx-helan-gar.mid",
+  "id": "helan-gar",
+  "import_args": {
+    "beats_per_bar": 2,
+    "bpm": 124,
+    "max_beats": 31,
+    "start_beat": 0.25
+  },
+  "import_report": {
+    "catalog_id": "helan-gar",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 48,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-helan-gar.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 0.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 0.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 1.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 1.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 57,
+      "start": 2.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 57,
+      "start": 2.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 55,
+      "start": 3.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 3.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 4.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 4.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 59,
+      "start": 5.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 5.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 63,
+      "start": 6.0
+    },
+    {
+      "dur": 1.75,
+      "pitch": 64,
+      "start": 6.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 8.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 8.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 9.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 9.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 10.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 10.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 11.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 11.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 12.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 60,
+      "start": 12.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 59,
+      "start": 13.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 57,
+      "start": 13.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 59,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 14.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 58,
+      "start": 17.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 59,
+      "start": 17.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 1.75,
+      "pitch": 60,
+      "start": 23.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 24.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 25.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 25.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 25.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 26.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 27.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 60,
+      "start": 27.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    55,
+    57,
+    58,
+    59,
+    60,
+    62,
+    63,
+    64,
+    65,
+    67,
+    69
+  ],
+  "sha256": "5016e204bd184bcebb15bf6c6f41380855029b67b252f69ece0bea4669cb9027",
+  "title": "Helan går"
+}

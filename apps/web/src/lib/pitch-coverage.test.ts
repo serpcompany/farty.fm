@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { songs } from '@/test-support/songs.generated'
-import { coverageSubsets, libraries } from '../test-support/engine-golden'
+import { coverageSubsets, libraries, songIds } from '../test-support/engine-golden'
 import {
   allFixtures,
   catalogSong,
@@ -29,6 +29,7 @@ import {
 import { type AnalysisState, NO_NOTE, type Recording } from './recordings'
 
 const ten = takes(10)
+const arranged = songs.filter(s => songIds.includes(s.id))
 
 describe('Pitch Coverage against the reference engine', () => {
   it('unlocks the Songs the reference does with the 26 Melodic fixtures, the iPhone’s 12 too', () => {
@@ -47,7 +48,8 @@ describe('Pitch Coverage against the reference engine', () => {
       'furelise',
       'auld'
     ])
-    for (const s of songs) {
+    expect(arranged).toHaveLength(128)
+    for (const s of arranged) {
       expect(coverageOf(s, allFixtures).unlocked, s.id).toBe(unlockedByAll(s))
     }
     expect(iPhoneSongs.every(unlockedByAll)).toBe(true)
@@ -82,7 +84,7 @@ describe('Pitch Coverage against the reference engine', () => {
         checked++
       }
     }
-    expect(checked).toBe(50 * songs.length)
+    expect(checked).toBe(50 * arranged.length)
   })
 
   it('unlocks 6 of the iPhone’s Songs at the 9th story take, and 11 by the 11th', () => {

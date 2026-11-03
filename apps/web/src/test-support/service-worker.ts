@@ -5,7 +5,7 @@ import { runInNewContext } from 'node:vm'
 const source = readFileSync(fileURLToPath(new URL('../../public/sw.js', import.meta.url)), 'utf8')
 export const origin = 'https://farty.test'
 
-type Network = (url: string) => Response | 'offline'
+type Network = (url: string) => Response | 'offline' | Promise<Response>
 type Listener = (event: unknown) => void
 
 export function ok(body = ''): Response {

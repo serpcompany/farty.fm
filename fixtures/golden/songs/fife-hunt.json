@@ -1,0 +1,301 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5,
+    28.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-fife-hunt.mid",
+  "id": "fife-hunt",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "fife-hunt",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 50,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-fife-hunt.mid",
+    "tempo_changes_ignored": 2,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 14.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 30.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 30.5
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    67,
+    71,
+    72,
+    73,
+    74,
+    76,
+    77
+  ],
+  "sha256": "73ba0a44d6223be200023b6803bdf9e27b0702349c2f546a5a9a0f70fdcf5450",
+  "title": "The Fife Hunt"
+}

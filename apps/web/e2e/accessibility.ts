@@ -24,7 +24,12 @@ export async function violations(page: Page) {
         impact,
         targets: nodes.map(node => node.target.join(' '))
       })),
-      ...(await lowContrastMeasured(page, textOnUnknownBackgrounds(incomplete))).map(measured => ({
+      ...(
+        await lowContrastMeasured(
+          page,
+          await oneOfEachLook(page, textOnUnknownBackgrounds(incomplete))
+        )
+      ).map(measured => ({
         colorScheme,
         id: 'color-contrast-measured',
         ...measured
@@ -39,6 +44,32 @@ function textOnUnknownBackgrounds(incomplete: Results['incomplete']): Unsure[] {
   return (contrast?.nodes ?? []).filter(node =>
     node.any.some(check => unknownBackground.has(check.data?.messageKey))
   )
+}
+
+async function oneOfEachLook(page: Page, nodes: Unsure[]): Promise<Unsure[]> {
+  const looks = await page.evaluate(
+    targets =>
+      targets.map(target => {
+        const parts = []
+        for (let at = document.querySelector(target); at; at = at.parentElement) {
+          const style = getComputedStyle(at)
+          parts.push(
+            parts.length === 0
+              ? `${style.color} ${style.fontSize} ${style.fontWeight}`
+              : `${style.backgroundColor} ${style.backgroundImage} ${style.opacity}`
+          )
+        }
+        return parts.length ? parts.join('|') : target
+      }),
+    nodes.map(node => node.target.join(' '))
+  )
+  const seen = new Set<string>()
+  return nodes.filter((_, index) => {
+    const look = looks[index] ?? ''
+    if (seen.has(look)) return false
+    seen.add(look)
+    return true
+  })
 }
 
 async function lowContrastMeasured(page: Page, nodes: Unsure[]) {

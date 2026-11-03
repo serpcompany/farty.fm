@@ -1,0 +1,153 @@
+{
+  "bar_lines": [
+    2.0,
+    8.0,
+    14.0,
+    20.0,
+    26.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 120,
+  "file": "midi/pdmx-theres-a-wideness-in-gods-mercy.mid",
+  "id": "theres-a-wideness-in-gods-mercy",
+  "import_args": {
+    "beats_per_bar": 6,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "theres-a-wideness-in-gods-mercy",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 22,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-theres-a-wideness-in-gods-mercy.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 1.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 9.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 13.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 14.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 60,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 19.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 65,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 25.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 26.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    65,
+    67,
+    69
+  ],
+  "sha256": "ec5791f474446538b29c6c0fc2d607cc47d9e4917b17ae0dd17b0dbf5879b069",
+  "title": "There's a Wideness in God's Mercy"
+}

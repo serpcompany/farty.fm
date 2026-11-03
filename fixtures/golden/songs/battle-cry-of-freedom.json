@@ -1,0 +1,165 @@
+{
+  "bar_lines": [
+    2.0,
+    6.0,
+    10.0,
+    14.0,
+    18.0,
+    22.0,
+    26.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-battle-cry-of-freedom.mid",
+  "id": "battle-cry-of-freedom",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30,
+    "start_beat": 2
+  },
+  "import_report": {
+    "catalog_id": "battle-cry-of-freedom",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 23,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-battle-cry-of-freedom.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 1,
+    "tracks_with_notes": [
+      0,
+      1,
+      2
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 83,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 83,
+      "start": 3.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 83,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 5.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 11.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 13.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 14.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 21.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 83,
+      "start": 23.5
+    },
+    {
+      "dur": 4.0,
+      "pitch": 83,
+      "start": 24.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 81,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    71,
+    72,
+    74,
+    76,
+    78,
+    79,
+    81,
+    83
+  ],
+  "sha256": "f454a4a707c441d32846285155e20213cd901b8324bb25956a2c438556173e08",
+  "title": "Battle Cry of Freedom"
+}

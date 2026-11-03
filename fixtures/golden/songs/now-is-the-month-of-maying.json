@@ -1,0 +1,178 @@
+{
+  "bar_lines": [],
+  "beats_per_bar": 32,
+  "bpm": 120,
+  "file": "midi/pdmx-now-is-the-month-of-maying.mid",
+  "id": "now-is-the-month-of-maying",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 31,
+    "start_beat": 1
+  },
+  "import_report": {
+    "catalog_id": "now-is-the-month-of-maying",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 28,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-now-is-the-month-of-maying.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 4.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 8.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 20.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 57,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 24.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 26.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 28.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 59,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    55,
+    57,
+    59,
+    60,
+    62,
+    64
+  ],
+  "sha256": "58f16a7741d1131e72ec1a0dc630f53369d408ec1a201df9f7a4885efd98ed8e",
+  "title": "Now is the Month of Maying"
+}

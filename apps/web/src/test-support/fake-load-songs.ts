@@ -1,3 +1,3 @@
-import { songs } from './songs.generated'
+import { songIndex } from '../lib/catalog/song-index.generated'
 
-export const loadSongs = async () => songs
+export const loadSongs = async () => songIndex

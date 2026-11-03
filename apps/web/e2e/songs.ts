@@ -1,18 +1,40 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Page } from '@playwright/test'
+import { coverageOf } from '../src/lib/pitch-coverage'
+import type { Recording } from '../src/lib/recordings'
+import type { GoldenIndex, GoldenRecording } from '../src/test-support/golden'
+import { goldenAnalysisRecording } from '../src/test-support/golden-analysis'
 import { songs } from '../src/test-support/songs.generated'
 import { payToSave } from './pay'
 import { fartAndSave } from './record'
 import { tab } from './screens'
 import { expect, test } from './test'
 
-function unlockedByTheFixtureLibrary(id: string): boolean {
-  const golden = resolve(__dirname, '../../../fixtures/golden/arrangements/full', `${id}.json`)
-  return (JSON.parse(readFileSync(golden, 'utf8')) as { unlocked: boolean }).unlocked
-}
+const golden = resolve(__dirname, '../../../fixtures/golden')
+const readJson = <T>(path: string): T => JSON.parse(readFileSync(path, 'utf8')) as T
+const goldenIndex = readJson<GoldenIndex>(`${golden}/index.json`)
 
-export const songsTheFixtureLibraryUnlocks = songs.filter(s => unlockedByTheFixtureLibrary(s.id))
+export const fixtureRecordings = (ids: readonly string[]) =>
+  ids.map((id, i) =>
+    goldenAnalysisRecording(
+      readJson<GoldenRecording>(`${golden}/recordings/${id}.json`),
+      i + 1,
+      goldenIndex.sample_rate
+    )
+  )
+
+export const fixtureLibrary = fixtureRecordings(goldenIndex.recordings)
+
+export const songsUnlockedBy = (recordings: Recording[]) =>
+  songs.filter(song => coverageOf(song, recordings).unlocked)
+
+export const songsTheFixtureLibraryUnlocks = songsUnlockedBy(fixtureLibrary)
+
+export const marysFarts = ['095', '017', '022', '002']
+
+export const songsUnlockedAt = (takes: number) =>
+  songsUnlockedBy(fixtureRecordings(marysFarts.slice(0, takes)))
 
 export function song(id: string) {
   const found = songs.find(s => s.id === id)
@@ -68,12 +90,16 @@ export async function recordTheFartsThatUnlockMary(page: Page): Promise<void> {
 }
 
 export async function recordTheLastTwoOfMarysFarts(page: Page): Promise<void> {
+  const progress = page.getByTestId('result-progress')
+  const third = songsUnlockedAt(3)
   await fartAndSave(page, '022')
-  await expect(page.getByTestId('result-progress')).toContainText('You unlocked Hot Cross Buns')
+  for (const unlocked of third)
+    await expect(progress).toContainText(`You unlocked ${unlocked.title}`)
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page).toHaveURL(/\/recordings\/$/)
   await tab(page, 'Record').click()
   await fartAndSave(page, '002')
-  await expect(page.getByTestId('result-progress')).toContainText('You unlocked 5 Songs')
-  await expect(page.getByTestId('result-progress')).toContainText('Mary Had a Little Lamb · ')
+  const fourth = songsUnlockedAt(4).length - third.length
+  await expect(progress).toContainText(`You unlocked ${fourth} Songs`)
+  await expect(progress).toContainText('Mary Had a Little Lamb · ')
 }

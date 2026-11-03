@@ -1,0 +1,168 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 72,
+  "file": "midi/pdmx-salvation-is-created.mid",
+  "id": "salvation-is-created",
+  "import_args": {
+    "bpm": 72,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "salvation-is-created",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 24,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-salvation-is-created.mid",
+    "tempo_changes_ignored": 2,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 3.0,
+      "pitch": 60,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 60,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 11.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 62,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 15.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 60,
+      "start": 16.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 63,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 25.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 63,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 29.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    63,
+    65,
+    67,
+    68,
+    70
+  ],
+  "sha256": "2aa542284a3e1eb9a43198809a3bdfce962ef8fd76fdaa6cc9ce0497c63d07bd",
+  "title": "Salvation is Created"
+}

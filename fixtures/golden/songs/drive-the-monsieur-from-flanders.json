@@ -1,0 +1,272 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0,
+    29.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-drive-the-monsieur-from-flanders.mid",
+  "id": "drive-the-monsieur-from-flanders",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "drive-the-monsieur-from-flanders",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 44,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-drive-the-monsieur-from-flanders.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 0.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 82,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 82,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 12.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 70,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 16.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 82,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 82,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 28.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 70,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    70,
+    72,
+    74,
+    75,
+    77,
+    78,
+    79,
+    81,
+    82
+  ],
+  "sha256": "b66c8d18c519079d1fbe4f1f7f7ebec351dc07e2ee4fa016828654f9ed002ac6",
+  "title": "Drive the Monsieur from Flanders"
+}

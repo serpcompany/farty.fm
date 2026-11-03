@@ -1,11 +1,16 @@
+import { searchKey } from '../src/lib/catalog/search-key'
+import { songRows, sortRows } from '../src/lib/pitch-coverage'
 import { songs } from '../src/test-support/songs.generated'
 import { fartAndSave, withFartingMicrophone } from './record'
 import { expectTappable, lockedSong, songsHeading, tab } from './screens'
-import { recordTheLastTwoOfMarysFarts } from './songs'
+import {
+  fixtureRecordings,
+  marysFarts,
+  recordTheLastTwoOfMarysFarts,
+  songsUnlockedAt
+} from './songs'
 import { countResumesInTaps, forgetResumesInTaps, resumesInTaps } from './sounds'
 import { expect, test } from './test'
-
-const songsTheFourFartsUnlock = 6
 
 withFartingMicrophone()
 
@@ -63,6 +68,11 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(sheet).toBeHidden()
   await expect(page.getByTestId('record-button')).toBeVisible()
 
+  expect(songsUnlockedAt(2)).toEqual([])
+  const third = songsUnlockedAt(3).map(s => s.title)
+  expect(third).toContain('Hot Cross Buns')
+  expect(third).not.toContain('Mary Had a Little Lamb')
+  expect(songsUnlockedAt(4).length - third.length).toBeGreaterThan(2)
   await fartAndSave(page, '017')
   await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
   await page.getByRole('button', { name: 'Record another' }).click()
@@ -80,6 +90,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
   await page.reload()
+  const songsTheFourFartsUnlock = songsUnlockedAt(4).length
   await expect(songsHeading(page, 'Unlocked', songsTheFourFartsUnlock)).toBeVisible()
   await expect(songsHeading(page, 'Locked', songs.length - songsTheFourFartsUnlock)).toBeVisible()
   const unlocked = page
@@ -99,16 +110,24 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   const search = page.getByRole('searchbox', { name: 'Search Songs' })
   await expectTappable(search)
   await expectTappable(page.getByRole('button', { name: 'Sort' }))
+  const little = songs.filter(song =>
+    [song.title, ...(song.aliases ?? [])].some(name => searchKey(name).includes('little'))
+  )
+  expect(little.map(song => song.id)).toContain('mary')
   await search.fill('LITTLE')
-  await expect(page.getByTestId('song-row')).toHaveCount(2)
+  await expect(page.getByTestId('song-row')).toHaveCount(little.length)
   await search.fill('zzz')
   await expect(page.getByText('No Results for “zzz”')).toBeVisible()
   await search.fill('')
   await page.getByRole('button', { name: 'Sort' }).click()
   await page.getByRole('menuitemradio', { name: 'A–Z' }).click()
+  const firstLocked = sortRows(songRows(songs, fixtureRecordings(marysFarts)), 'alphabetical').find(
+    row => !row.coverage.unlocked
+  )
+  expect(firstLocked).toBeDefined()
   await expect(page.getByTestId('locked-songs').getByTestId('song-row').first()).toHaveAttribute(
     'data-song',
-    'all-through-the-night'
+    firstLocked?.song.id ?? ''
   )
 })
 

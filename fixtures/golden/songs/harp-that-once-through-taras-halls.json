@@ -1,0 +1,183 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-harp-that-once-through-taras-halls.mid",
+  "id": "harp-that-once-through-taras-halls",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "harp-that-once-through-taras-halls",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 27,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-harp-that-once-through-taras-halls.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 8.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 10.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 12.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 79,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 18.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    71,
+    74,
+    76,
+    78,
+    79,
+    81
+  ],
+  "sha256": "76ae60c7b402147ec536fc3fa98c524a8dce49c90b97aa5f0b89bbd040eeff76",
+  "title": "The Harp That Once Through Tara's Halls"
+}

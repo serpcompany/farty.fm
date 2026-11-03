@@ -1,0 +1,368 @@
+{
+  "bar_lines": [
+    0.5,
+    4.5,
+    8.5,
+    12.5,
+    16.5,
+    20.5,
+    24.5,
+    28.5
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-keep-the-country-bonnie-lassie.mid",
+  "id": "keep-the-country-bonnie-lassie",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "keep-the-country-bonnie-lassie",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 64,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-keep-the-country-bonnie-lassie.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 30.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 31.5
+    }
+  ],
+  "pitches": [
+    69,
+    71,
+    73,
+    74,
+    76,
+    78,
+    81
+  ],
+  "sha256": "63b6e077e741a15d8576ba89b7a89e727e87ba20d95af4daeaa7a7249c7af452",
+  "title": "Keep the Country Bonnie Lassie"
+}

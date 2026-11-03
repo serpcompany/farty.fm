@@ -117,9 +117,11 @@ and speed ([ADR 0005](../../../../docs/adr/0005-song-creator-is-automatic.md),
   (`e2e/song-creator.spec.ts`, "the installed app opens a Ready Song offline, and makes its Toot").
 - Offline, every Song's page opens on the one Song page the service worker keeps,
   `/compose/song/`, which reads the Song from the address and gives the tab the Song's title once
-  the Song Catalog loads. It is always the current build's, never a Song's own page from an older
-  one (`e2e/song-creator.spec.ts`, "the installed app opens a Ready Song offline, and makes its
-  Toot"; `src/lib/service-worker.test.ts`, "never keeps a Song's own page, so offline every Song
+  the Song Catalog loads. The tab keeps that title however late the page's own title lands, and a
+  tab opened from it keeps its own (#351). It is always the current build's, never a Song's own
+  page from an older one (`e2e/song-creator.spec.ts`, "the installed app opens a Ready Song
+  offline, and makes its Toot"; "a Song opened offline always ends with its own title in the tab
+  (#351)"; `src/lib/service-worker.test.ts`, "never keeps a Song's own page, so offline every Song
   opens on the one Song page"; "opens a Song offline on the current build's Song page after a
   deploy, never an older build's").
 - The notes of every Song are fetched in the background once Farty is installed, so a Song never

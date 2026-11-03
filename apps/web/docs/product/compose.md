@@ -1,7 +1,11 @@
 # Compose
 
 The Compose tab: the Sound Pad's row, then every Song in the Song Catalog, split by Pitch Coverage
-into Unlocked and Locked Songs, with search, sort and Favorite Songs. A locked Song opens a sheet
+into Unlocked and Locked Songs, with search, sort and Favorite Songs. The catalog is every Song in
+`catalog/`, over 1,000, but `ode-mutopia`, the same tune as Ode to Joy: the iPhone app's 12 first,
+in its order, then the rest in the catalog's (#350) (`src/lib/catalog/catalog.test.ts`, "holds the
+iPhone app's 12 Songs first, in its order"; "then every other Song in the catalog, in its order,
+but ode-mutopia"; "ships every Song in the catalog but ode-mutopia, the same tune as ode"). A locked Song opens a sheet
 saying what it needs, an Unlocked Song opens [Song Creator](song-creator.md), and the Sound Pad's
 row opens the [Sound Pad](sound-pad.md). Why a Song needs farts as long as its notes is
 [ADR 0011](../../../../docs/adr/0011-unlocking-needs-farts-as-long-as-notes.md).
@@ -158,16 +162,20 @@ Creator, named "Favorite" and the Song's title, pressed while it is one.
 - A trimmed Recording counts at its Trim's length (`src/lib/engine/auto-map-rules.test.ts`, "counts
   a trimmed Melodic Recording at its note and its Trim’s length (#314)";
   `src/lib/pitch-coverage.test.ts`, "is its Trim’s fart once trimmed, Melodic or not (#314)").
-- The answers match the reference engine's for every Song (`src/lib/pitch-coverage.test.ts`,
+- The answers match the reference engine's for every Song it arranges, the 128 the app listed
+  before #350; every later Song passed the catalog import's render gate on the reference engine
+  (`src/lib/pitch-coverage.test.ts`,
   "matches every Song in all 50 subsets of coverage.json"; "reads the coverage of locked Songs as
   the reference does"; `src/lib/engine/auto-map.test.ts`, "unlocks all but 5 Songs on the full
   library, and the 13 from before #229, 2 of those on the small one").
 - The whole Fixture Library unlocks every Song the reference says it does, all 12 of the iPhone
-  app's among them; without 002, its longest fart, 11 more lock, Amazing Grace among them
-  (`e2e/fixture-library.spec.ts`, "loads the Fixture Library and unlocks every Song it is long
-  enough for"; `src/lib/song-listing.test.ts`, "unlocks the Songs the reference does with the whole
+  app's among them, and the app's own analysis of the fixtures unlocks the same Songs as the
+  reference's analysis across the whole catalog; without 002, its longest fart, 40 more lock,
+  Amazing Grace among them (`e2e/fixture-library.spec.ts`, "loads the Fixture Library and unlocks
+  every Song it is long enough for"; `src/lib/fixture-library.test.ts`, "analyzes as the reference
+  does and unlocks the Songs it does, as 16-bit WAV"; `src/lib/song-listing.test.ts`, "unlocks the Songs the reference does with the whole
   Fixture Library"; "unlocks all 12 of the iPhone’s Songs with the whole Fixture Library, and 11
-  without 002"; "locks 11 more of the catalog’s Songs without 002, Amazing Grace among them";
+  without 002"; "locks 40 more of the catalog’s Songs without 002, Amazing Grace among them";
   `src/lib/pitch-coverage.test.ts`, "unlocks the Songs the reference does with the 26 Melodic
   fixtures, the iPhone’s 12 too").
 - Compose follows the Recordings as they're saved, deleted, placed by ear or synced, and matches

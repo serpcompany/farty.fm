@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 import { accountLibrary, newEmail, signInByApi } from './account'
 import { withFartingMicrophone } from './record'
 import { expectTappable, lockedSong, onPhone, songsHeading, tab } from './screens'
-import { recordTheFartsThatUnlockMary } from './songs'
+import { recordTheFartsThatUnlockMary, songsUnlockedAt } from './songs'
 import { expect, test } from './test'
 
 test.skip(({ viewport }) => !onPhone({ viewport }), 'Favorites are checked at phone size')
@@ -30,7 +30,7 @@ test('favorites Songs, filters and sorts by them, and keeps them over a reload',
   await recordTheFartsThatUnlockMary(page)
   await page.getByRole('button', { name: 'Done' }).click()
   await tab(page, 'Compose').click()
-  await expect(songsHeading(page, 'Unlocked', 6)).toBeVisible()
+  await expect(songsHeading(page, 'Unlocked', songsUnlockedAt(4).length)).toBeVisible()
 
   const filter = page.getByRole('button', { name: 'Favorites', exact: true })
   await expectTappable(filter)

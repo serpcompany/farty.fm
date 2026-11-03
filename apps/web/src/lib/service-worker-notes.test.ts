@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { catalog, failed, ok, origin, startPage, startWorker } from '@/test-support/service-worker'
 
 describe("a Song's notes (#323)", () => {
@@ -20,24 +20,35 @@ describe("a Song's notes (#323)", () => {
   const index = (...ids: string[]) =>
     JSON.stringify(ids.map(id => ({ id, title: id, notesPath: notes(id) })))
 
-  it("keeps every Song's notes when it installs, so a Song never opened plays offline (#138)", async () => {
+  const shellOrIndex = (path: string, answerTheIndex: () => Response | 'offline') => {
+    if (path === '/') return ok(startPage)
+    if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
+    if (path === '/compose/song/') return ok(`<link rel="preload" href="${catalog}" as="fetch"/>`)
+    if (path === catalog) return answerTheIndex()
+    return null
+  }
+
+  it("keeps every Song's notes once it's active, so a Song never opened plays offline (#138)", async () => {
     let online = true
     const fetched: string[] = []
     const worker = startWorker(url => {
       if (!online) return 'offline'
       const path = url.replace(origin, '')
       fetched.push(path)
-      if (path === '/') return ok(startPage)
-      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
-      if (path === '/compose/song/') return ok(`<link rel="preload" href="${catalog}" as="fetch"/>`)
-      if (path === catalog) return ok(index('mary', 'twinkle', 'ode-to-joy'))
-      return ok(`notes of ${path}`)
+      return (
+        shellOrIndex(path, () => ok(index('mary', 'twinkle', 'ode-to-joy'))) ??
+        ok(`notes of ${path}`)
+      )
     })
     await worker.lifecycle('install')
-    expect(worker.kept('pedos-notes-v1').sort()).toEqual(
-      [notes('mary'), notes('ode-to-joy'), notes('twinkle')].sort()
-    )
     expect(worker.kept()).toContain(catalog)
+    expect(worker.kept('pedos-notes-v1')).toEqual([])
+    await worker.lifecycle('activate')
+    await vi.waitFor(() =>
+      expect(worker.kept('pedos-notes-v1').sort()).toEqual(
+        [notes('mary'), notes('ode-to-joy'), notes('twinkle')].sort()
+      )
+    )
     expect(worker.kept().filter(path => path.startsWith('/catalog/notes/'))).toEqual([])
 
     online = false
@@ -49,6 +60,60 @@ describe("a Song's notes (#323)", () => {
     fetched.length = 0
     await worker.request('/', { mode: 'navigate' })
     expect(fetched.filter(path => path.startsWith('/catalog/notes/'))).toEqual([])
+  })
+
+  it("installs and activates without waiting on the notes, so a new build's worker takes over at once (#350)", async () => {
+    const fetched: string[] = []
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      const shellFile = shellOrIndex(path, () => ok(index('mary', 'twinkle')))
+      if (shellFile) return shellFile
+      fetched.push(path)
+      return path.startsWith('/catalog/notes/') ? new Promise<Response>(() => {}) : ok()
+    })
+    await worker.lifecycle('install')
+    expect(fetched.filter(path => path.startsWith('/catalog/notes/'))).toEqual([])
+    await worker.lifecycle('activate')
+    await vi.waitFor(() =>
+      expect(fetched.filter(path => path.startsWith('/catalog/notes/')).sort()).toEqual([
+        notes('mary'),
+        notes('twinkle')
+      ])
+    )
+  })
+
+  it("keeps the index's notes on a page's fetch of it when install couldn't fetch it", async () => {
+    let indexOnline = false
+    const fetched: string[] = []
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      fetched.push(path)
+      const indexAnswer = () => (indexOnline ? ok(index('mary', 'twinkle')) : 'offline')
+      return shellOrIndex(path, indexAnswer) ?? ok(`notes of ${path}`)
+    })
+    await worker.lifecycle('install')
+    await worker.lifecycle('activate')
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(fetched.filter(path => path.startsWith('/catalog/notes/'))).toEqual([])
+
+    indexOnline = true
+    await worker.request(catalog)
+    expect(worker.kept('pedos-notes-v1').sort()).toEqual([notes('mary'), notes('twinkle')])
+  })
+
+  it("never trims the current index's notes, however many Songs it has", async () => {
+    const songs = Array.from({ length: 1100 }, (_, i) => `song-${i}`)
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      if (path === catalog) return ok(index(...songs))
+      return ok(`notes of ${path}`)
+    })
+    for (const song of songs) await worker.request(notes(song))
+    for (let i = 0; i < 1500; i++) await worker.request(notes(`old-${i}`))
+    await worker.request(catalog)
+    const kept = new Set(worker.kept('pedos-notes-v1'))
+    expect(songs.filter(song => !kept.has(notes(song)))).toEqual([])
+    expect(kept.size).toBe(2 * songs.length)
   })
 
   it("keeps a new index's notes once a page fetches it, such as after a deploy", async () => {

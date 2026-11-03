@@ -1,0 +1,200 @@
+{
+  "bar_lines": [
+    0.0
+  ],
+  "beats_per_bar": 18,
+  "bpm": 120,
+  "file": "midi/pdmx-young-damons-flight.mid",
+  "id": "young-damons-flight",
+  "import_args": {
+    "beats_per_bar": 18,
+    "bpm": 120,
+    "max_beats": 18
+  },
+  "import_report": {
+    "catalog_id": "young-damons-flight",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 31,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-young-damons-flight.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 18.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 83,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 1.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 79,
+      "start": 1.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 78,
+      "start": 2.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 83,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 75,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 16.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 16.5
+    }
+  ],
+  "pitches": [
+    64,
+    66,
+    67,
+    69,
+    71,
+    72,
+    75,
+    76,
+    78,
+    79,
+    83
+  ],
+  "sha256": "c798e73e91c9cb8c01c2618b3bedf7d95935f06f486b8df3ae507bd5ccfd220c",
+  "title": "Young Damon's Flight"
+}

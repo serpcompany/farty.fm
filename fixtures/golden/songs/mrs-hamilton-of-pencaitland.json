@@ -1,0 +1,122 @@
+{
+  "bar_lines": [
+    0.0,
+    2.0,
+    6.0,
+    10.0,
+    14.0,
+    18.0,
+    22.0,
+    26.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-mrs-hamilton-of-pencaitland.mid",
+  "id": "mrs-hamilton-of-pencaitland",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30,
+    "start_beat": 4
+  },
+  "import_report": {
+    "catalog_id": "mrs-hamilton-of-pencaitland",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 15,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-mrs-hamilton-of-pencaitland.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 66,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 12.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 14.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 18.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 20.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 22.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 24.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 64,
+      "start": 26.0
+    }
+  ],
+  "pitches": [
+    64,
+    66,
+    67,
+    69,
+    71,
+    74
+  ],
+  "sha256": "a37b44ef931ce211f04433fcd566e189aae4e6b9d1d0ec316a0718e3ed38ad40",
+  "title": "Mrs. Hamilton Of Pencaitland"
+}

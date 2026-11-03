@@ -1,0 +1,314 @@
+{
+  "bar_lines": [
+    0.5,
+    3.5,
+    6.5,
+    9.5,
+    12.5,
+    15.5,
+    18.5,
+    21.5,
+    24.5,
+    27.5
+  ],
+  "beats_per_bar": 3,
+  "bpm": 110,
+  "file": "midi/pdmx-picking-of-sticks.mid",
+  "id": "picking-of-sticks",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 110,
+    "max_beats": 30.5
+  },
+  "import_report": {
+    "catalog_id": "picking-of-sticks",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 53,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-picking-of-sticks.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.5,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 0.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 1.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 1.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 2.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 2.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 6.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 7.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 7.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 8.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 12.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 12.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 13.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 13.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 14.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 14.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 15.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 18.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 19.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 19.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 20.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 24.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 25.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 66,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 26.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 27.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 27.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 28.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 28.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 29.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 29.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    66,
+    67,
+    69,
+    71,
+    72,
+    74
+  ],
+  "sha256": "afc64ecfdbff7d961a4d8a825d3aac32c88a9df97363426858588ff2eafaeab1",
+  "title": "Picking of Sticks"
+}

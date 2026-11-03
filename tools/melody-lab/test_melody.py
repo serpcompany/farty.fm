@@ -5,9 +5,10 @@ from pathlib import Path
 import mido
 
 from analysis import ROOT
-from export_golden import golden_catalog, song_json
+from export_golden import arranged_catalog, song_json
+from golden_cost import load
 from golden_inputs import SONGS
-from melody import bar_lines, load_midi
+from melody import bar_lines, load_catalog, load_midi
 
 TPB = 480
 WOODBLOCK = 115
@@ -166,13 +167,21 @@ class BarLines(unittest.TestCase):
 
 
 class Catalog(unittest.TestCase):
-    def test_imports_every_golden_song_as_the_golden_data_has_it(self):
-        catalog = golden_catalog()
-        self.assertEqual([c["id"] for c, _ in catalog], list(SONGS))
-        for c, m in catalog:
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = load_catalog()
+
+    def test_imports_every_catalog_song_as_the_golden_data_has_it(self):
+        for c, m in self.catalog:
             with self.subTest(song=c["id"]):
-                self.assertEqual(song_json(c, m), SONGS[c["id"]])
+                self.assertEqual(song_json(c, m), load(f"songs/{c['id']}.json"))
+
+    def test_arranges_the_hand_entered_songs_and_the_first_three_batches(self):
+        arranged = arranged_catalog(self.catalog)
+        self.assertEqual([c["id"] for c, _ in arranged], list(SONGS))
+        self.assertEqual(len(arranged), 129)
+        self.assertGreater(len(self.catalog), len(arranged))
 
     def test_reads_titles_as_utf8(self):
-        titles = {c["id"]: c["title"] for c, _ in golden_catalog()}
+        titles = {c["id"]: c["title"] for c, _ in self.catalog}
         self.assertEqual((titles["frere"], titles["furelise"]), ("Frère Jacques", "Für Elise"))

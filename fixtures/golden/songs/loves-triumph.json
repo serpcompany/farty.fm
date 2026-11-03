@@ -1,0 +1,213 @@
+{
+  "bar_lines": [
+    1.0,
+    3.0,
+    4.0,
+    6.0,
+    7.5,
+    8.5,
+    10.0,
+    11.0,
+    12.0,
+    14.0,
+    15.0,
+    16.0,
+    17.5,
+    18.5,
+    20.0,
+    22.0,
+    23.5,
+    24.5,
+    26.0,
+    27.0,
+    28.0
+  ],
+  "beats_per_bar": 1,
+  "bpm": 120,
+  "file": "midi/pdmx-loves-triumph.mid",
+  "id": "loves-triumph",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "loves-triumph",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 30,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-loves-triumph.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 11.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 15.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 18.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 19.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 20.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 24.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 27.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 67,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    62,
+    66,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    78,
+    79
+  ],
+  "sha256": "ced7c071c65173943f4fef50e278386eb6b188a8b21e9e8804e3b741cb732640",
+  "title": "Love's Triumph"
+}

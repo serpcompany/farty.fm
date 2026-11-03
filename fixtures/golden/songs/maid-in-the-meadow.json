@@ -1,0 +1,306 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-maid-in-the-meadow.mid",
+  "id": "maid-in-the-meadow",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "maid-in-the-meadow",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 51,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-maid-in-the-meadow.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 0.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 1.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 6.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 7.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 64,
+      "start": 7.5
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 66,
+      "start": 7.833333333333333
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 67,
+      "start": 8.166666666666666
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 12.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 13.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 18.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 19.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 64,
+      "start": 19.5
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 66,
+      "start": 19.833333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 67,
+      "start": 20.166666666666668
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 24.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 25.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 30.5
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    72,
+    74
+  ],
+  "sha256": "51427955d3776cc51019c58118b3845128a6157345a6993e597ab8b408f74a58",
+  "title": "Maid in the Meadow"
+}

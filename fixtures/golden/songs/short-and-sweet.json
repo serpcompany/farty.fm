@@ -1,0 +1,171 @@
+{
+  "bar_lines": [
+    0.0,
+    6.0,
+    12.0,
+    18.0,
+    24.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 144,
+  "file": "midi/pdmx-short-and-sweet.mid",
+  "id": "short-and-sweet",
+  "import_args": {
+    "bpm": 144,
+    "max_beats": 30,
+    "start_beat": 6
+  },
+  "import_report": {
+    "catalog_id": "short-and-sweet",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 25,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-short-and-sweet.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 7.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 12.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 83,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    67,
+    74,
+    76,
+    78,
+    79,
+    81,
+    83
+  ],
+  "sha256": "ebee9fbb72b4281ac661ddac0eb2a0b6d467c2f4589346ff37d2c6d09a270cbe",
+  "title": "Short and Sweet"
+}

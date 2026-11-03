@@ -1,0 +1,247 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0,
+    31.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 144,
+  "file": "midi/pdmx-waltz-in-b-minor.mid",
+  "id": "waltz-in-b-minor",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 144,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "waltz-in-b-minor",
+    "chord_tones_dropped": 56,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 38,
+    "overlaps_clipped": 2,
+    "source_file": "catalog/midi/pdmx-waltz-in-b-minor.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 31.5,
+  "notes": [
+    {
+      "dur": 1.5,
+      "pitch": 78,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 3.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 78,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 9.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 10.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 78,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 83,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 86,
+      "start": 15.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 86,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 17.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 86,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 20.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 85,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 83,
+      "start": 22.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 82,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 27.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 28.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 78,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    70,
+    71,
+    73,
+    74,
+    76,
+    77,
+    78,
+    79,
+    82,
+    83,
+    85,
+    86
+  ],
+  "sha256": "76478993b73ce91e4c821567cfb40c8dc2700c29cd9ad11bdcdd1f77c6be8974",
+  "title": "Waltz in B minor"
+}

@@ -157,7 +157,7 @@ async function main() {
     sourceMs.set(r.id, ms)
   }
 
-  const songIds = readdirSync(SONGS)
+  const songIds = readdirSync(scenario ? SONGS : GOLDEN_ARRANGEMENTS)
     .filter(name => name.endsWith('.json'))
     .map(name => name.replace(/\.json$/, ''))
     .sort()

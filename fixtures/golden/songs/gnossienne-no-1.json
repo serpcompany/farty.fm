@@ -1,0 +1,183 @@
+{
+  "bar_lines": [],
+  "beats_per_bar": 28,
+  "bpm": 102,
+  "file": "midi/pdmx-gnossienne-no-1.mid",
+  "id": "gnossienne-no-1",
+  "import_args": {
+    "beats_per_bar": 28,
+    "bpm": 102,
+    "max_beats": 27,
+    "start_beat": 1
+  },
+  "import_report": {
+    "catalog_id": "gnossienne-no-1",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 28,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-gnossienne-no-1.mid",
+    "tempo_changes_ignored": 2,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 27.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 0.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 2.0
+    },
+    {
+      "dur": 0.10416666666666667,
+      "pitch": 72,
+      "start": 3.0
+    },
+    {
+      "dur": 1.8958333333333333,
+      "pitch": 71,
+      "start": 3.104166666666667
+    },
+    {
+      "dur": 0.10416666666666667,
+      "pitch": 72,
+      "start": 5.0
+    },
+    {
+      "dur": 1.7916666666666667,
+      "pitch": 71,
+      "start": 5.104166666666667
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 0.10416666666666667,
+      "pitch": 76,
+      "start": 11.0
+    },
+    {
+      "dur": 1.8958333333333333,
+      "pitch": 77,
+      "start": 11.104166666666666
+    },
+    {
+      "dur": 0.10416666666666667,
+      "pitch": 76,
+      "start": 13.0
+    },
+    {
+      "dur": 1.7916666666666667,
+      "pitch": 77,
+      "start": 13.104166666666666
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 18.0
+    },
+    {
+      "dur": 0.10416666666666667,
+      "pitch": 72,
+      "start": 19.0
+    },
+    {
+      "dur": 1.8958333333333333,
+      "pitch": 71,
+      "start": 19.104166666666668
+    },
+    {
+      "dur": 0.10416666666666667,
+      "pitch": 68,
+      "start": 21.0
+    },
+    {
+      "dur": 1.8958333333333333,
+      "pitch": 67,
+      "start": 21.104166666666668
+    },
+    {
+      "dur": 0.10416666666666667,
+      "pitch": 65,
+      "start": 23.0
+    },
+    {
+      "dur": 0.8958333333333334,
+      "pitch": 67,
+      "start": 23.104166666666668
+    },
+    {
+      "dur": 0.10416666666666667,
+      "pitch": 65,
+      "start": 24.0
+    },
+    {
+      "dur": 2.8958333333333335,
+      "pitch": 67,
+      "start": 24.104166666666668
+    }
+  ],
+  "pitches": [
+    65,
+    67,
+    68,
+    71,
+    72,
+    74,
+    75,
+    76,
+    77
+  ],
+  "sha256": "0aeac60c9a75b9c7e4e382dafc2733003091ed3146096343aff9a564a0228705",
+  "title": "Gnossienne No. 1"
+}

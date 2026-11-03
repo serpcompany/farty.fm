@@ -1,0 +1,178 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 144,
+  "file": "midi/pdmx-british-grenadiers.mid",
+  "id": "british-grenadiers",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 144,
+    "max_beats": 29,
+    "start_beat": 3
+  },
+  "import_report": {
+    "catalog_id": "british-grenadiers",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 26,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-british-grenadiers.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 0.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 70,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 4.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 8.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 70,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 58,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 58,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 16.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 19.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 20.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 65,
+      "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 63,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 24.5
+    },
+    {
+      "dur": 4.0,
+      "pitch": 63,
+      "start": 25.0
+    }
+  ],
+  "pitches": [
+    58,
+    62,
+    63,
+    65,
+    67,
+    68,
+    70
+  ],
+  "sha256": "0512d439d18dde22264cfe8da6501dde77db6e922f409094be171e2a49e126d0",
+  "title": "British Grenadiers"
+}

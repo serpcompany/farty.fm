@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { songs } from '@/test-support/songs.generated'
 import { fixtures, fixtureWav } from '../../scripts/fixture-library'
-import { goldenArrangement, goldenRecording } from '../test-support/engine-golden'
+import { goldenArrangement, goldenRecording, songIds } from '../test-support/engine-golden'
+import { allFixtures } from '../test-support/fixture-recordings'
 import { analyzeToAnalysis } from './analysis/port'
 import { fixtureRecordingId, isFixtureRecordingId } from './fixture-library'
 import { coverageOf } from './pitch-coverage'
@@ -48,7 +49,7 @@ describe('the Fixture Library', () => {
         analysis: { state: 'analyzed', analysis }
       })
     }
-    for (const [i, song] of songs.entries()) {
+    for (const [i, song] of songs.filter(s => songIds.includes(s.id)).entries()) {
       const coverage = coverageOf(song, recordings)
       const golden = goldenArrangement('full', song.id)
       if (i < 12) expect(coverage.unlocked, song.id).toBe(true)
@@ -60,5 +61,8 @@ describe('the Fixture Library', () => {
         )
       }
     }
+    const unlocked = (library: Recording[]) =>
+      songs.filter(s => coverageOf(s, library).unlocked).map(s => s.id)
+    expect(unlocked(recordings)).toEqual(unlocked(allFixtures))
   })
 })

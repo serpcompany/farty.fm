@@ -16,21 +16,29 @@ const shellRefreshIntervalMs = 5 * 60 * 1000
 let lastShellRefresh = 0
 const notesKeptForIndex = new Map()
 const notesFetchedAtOnce = 6
+let notesOfTheLatestIndex = new Set()
+let indexesFoundOnInstall = []
 
 self.addEventListener('install', event => {
-  event.waitUntil(precacheShell().finally(() => self.skipWaiting()))
+  event.waitUntil(
+    precacheShell()
+      .then(({ catalogIndexes }) => {
+        indexesFoundOnInstall = catalogIndexes
+      })
+      .finally(() => self.skipWaiting())
+  )
 })
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    (async () => {
-      for (const name of await caches.keys()) {
-        if (name.startsWith('pedos-shell-') && name !== shell.name) await caches.delete(name)
-        if (name.startsWith('pedos-notes-') && name !== songNotes.name) await caches.delete(name)
-      }
-      await self.clients.claim()
-    })()
-  )
+  const activated = (async () => {
+    for (const name of await caches.keys()) {
+      if (name.startsWith('pedos-shell-') && name !== shell.name) await caches.delete(name)
+      if (name.startsWith('pedos-notes-') && name !== songNotes.name) await caches.delete(name)
+    }
+    await self.clients.claim()
+  })()
+  event.waitUntil(activated)
+  activated.then(() => keepEveryNotesOf(indexesFoundOnInstall)).catch(() => {})
 })
 
 self.addEventListener('fetch', event => {
@@ -117,17 +125,34 @@ async function keep(url, response) {
     const withoutFragment = new URL(url)
     withoutFragment.hash = ''
     await cache.put(withoutFragment.href, new Response(response.body, response))
-    await dropTheOldest(cache, store.maxKeptFiles)
+    if (store === songNotes) await dropTheOldest(cache, maxKeptNotes(), notesOfTheLatestIndex)
+    else await dropTheOldest(cache, store.maxKeptFiles)
   } catch {
     return
   }
 }
 
-async function dropTheOldest(cache, maxKeptFiles) {
+async function dropTheOldest(cache, maxKeptFiles, spare = new Set()) {
   const keys = await cache.keys()
-  for (const oldest of keys.slice(0, Math.max(0, keys.length - maxKeptFiles))) {
+  let over = keys.length - maxKeptFiles
+  for (const oldest of keys) {
+    if (over <= 0) return
+    if (spare.has(new URL(typeof oldest === 'string' ? oldest : oldest.url).pathname)) continue
     await cache.delete(oldest)
+    over -= 1
   }
+}
+
+function maxKeptNotes() {
+  return Math.max(songNotes.maxKeptFiles, 2 * notesOfTheLatestIndex.size)
+}
+
+async function keepEveryNotesOf(catalogIndexes) {
+  let keptEverything = true
+  for (const [path, text] of catalogIndexes) {
+    if (!(await keepEveryNotes(path, text))) keptEverything = false
+  }
+  return keptEverything
 }
 
 function keepEveryNotes(indexPath, indexText) {
@@ -150,12 +175,14 @@ function notesPathsIn(indexText) {
       .map(song => song?.notesPath)
       .filter(notes => typeof notes === 'string' && notesFile.test(notes))
   } catch {
-    return []
+    return null
   }
 }
 
 async function fetchEveryNotes(indexText) {
   const paths = notesPathsIn(indexText)
+  if (paths === null) return false
+  if (paths.length > 0) notesOfTheLatestIndex = new Set(paths)
   let keptEverything = true
   try {
     const cache = await caches.open(songNotes.name)
@@ -176,7 +203,7 @@ async function fetchEveryNotes(indexText) {
       }
     }
     await Promise.all(Array.from({ length: notesFetchedAtOnce }, fetchNext))
-    await dropTheOldest(cache, songNotes.maxKeptFiles)
+    await dropTheOldest(cache, maxKeptNotes(), notesOfTheLatestIndex)
   } catch {
     keptEverything = false
   }
@@ -188,7 +215,8 @@ async function refreshShell(startPage) {
   lastShellRefresh = Date.now()
   let refreshedEverything = false
   try {
-    refreshedEverything = await precacheShell(await startPage.text())
+    const kept = await precacheShell(await startPage.text())
+    refreshedEverything = (await keepEveryNotesOf(kept.catalogIndexes)) && kept.refreshedEverything
   } finally {
     if (!refreshedEverything) lastShellRefresh = 0
   }
@@ -224,17 +252,15 @@ async function precacheShell(startPageHtml) {
   const catalogIndexes = []
   const texts = await Promise.all([...files].map(get))
   for (const [i, file] of [...files].entries()) {
-    const text = texts[i] ?? ''
+    const text = texts[i]
+    if (text === null) continue
     if (catalogFile.test(file)) catalogIndexes.push([file, text])
     for (const [, path] of text.matchAll(/"(static\/chunks\/[^"\s\\]+\.js)"/g)) {
       if (!files.has(`/_next/${path}`)) scriptsTheyLoad.add(`/_next/${path}`)
     }
   }
   await Promise.all([...scriptsTheyLoad].map(get))
-  for (const [path, text] of catalogIndexes) {
-    if (!(await keepEveryNotes(path, text))) refreshedEverything = false
-  }
-  return refreshedEverything
+  return { refreshedEverything, catalogIndexes }
 }
 
 async function pagesFromShellManifest() {

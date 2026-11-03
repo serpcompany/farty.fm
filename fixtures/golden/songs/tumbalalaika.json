@@ -1,0 +1,80 @@
+{
+  "bar_lines": [
+    0.0,
+    3.0,
+    6.0,
+    9.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-tumbalalaika.mid",
+  "id": "tumbalalaika",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "tumbalalaika",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 8,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-tumbalalaika.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 12.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 8.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 64,
+      "start": 9.0
+    }
+  ],
+  "pitches": [
+    64,
+    65,
+    67,
+    69
+  ],
+  "sha256": "fa97a6a9641fc38fd39d0ecd2aac9faaa337d0737b9b0845844237c7d9d47b43",
+  "title": "Tumbalalaika"
+}

@@ -1,0 +1,337 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-bob-o-dowally.mid",
+  "id": "bob-o-dowally",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "bob-o-dowally",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 58,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-bob-o-dowally.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 0.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 1.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 2.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 2.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 3.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 3.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 4.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 5.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 6.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 6.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 7.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 7.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 8.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 9.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 10.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 10.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 11.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 11.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 12.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 12.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 13.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 14.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 15.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 16.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 16.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 17.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 18.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 18.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 19.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 19.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 20.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 20.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 21.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 22.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 23.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 23.25
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 24.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 25.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 26.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 27.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 27.25
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 28.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 64,
+      "start": 28.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 28.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 29.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 30.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 30.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 31.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 31.25
+    }
+  ],
+  "pitches": [
+    64,
+    67,
+    69,
+    71,
+    73,
+    74,
+    76
+  ],
+  "sha256": "c030273e91fbf2e9f8d875116a40dfc88d7d38352e03a9f4253bcf18067a3d9c",
+  "title": "The Bob o' Dowally"
+}

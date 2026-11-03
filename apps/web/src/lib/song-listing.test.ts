@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { songs } from '@/test-support/songs.generated'
+import { songIds } from '../test-support/engine-golden'
 import {
   allFixtures,
   catalogSong,
@@ -74,7 +75,7 @@ describe('Compose’s listing', () => {
     expect(ids(listing(ten, 'JINGLE').unlocked)).toEqual(['jingle'])
     expect(ids(listing(ten, 'fur').unlocked)).toEqual(['furelise'])
     expect(ids(listing(ten, 'frere').unlocked)).toEqual(['frere'])
-    expect(ids(listing(ten, 'little').unlocked)).toEqual(['mary', 'twinkle'])
+    expect(ids(listing(ten, 'little').unlocked)).toEqual(['mary', 'twinkle', 'little-peggys-love'])
     expect(ids(listing(ten, 'BIRTH').locked)).toEqual(['birthday'])
     expect(listing(ten, '  ')).toEqual(listing(ten))
     const none = listing(ten, 'zzz')
@@ -159,8 +160,9 @@ describe('Compose’s listing', () => {
   it('unlocks the Songs the reference does with the whole Fixture Library', () => {
     const { unlocked, locked } = listing(allFixtures)
     expect(unlocked.length + locked.length).toBe(songs.length)
-    expect(unlocked.every(r => unlockedByAll(r.song))).toBe(true)
-    expect(locked.every(r => !unlockedByAll(r.song))).toBe(true)
+    const isArranged = (r: { song: SongSummary }) => songIds.includes(r.song.id)
+    expect(unlocked.filter(isArranged).every(r => unlockedByAll(r.song))).toBe(true)
+    expect(locked.filter(isArranged).every(r => !unlockedByAll(r.song))).toBe(true)
   })
 
   it('unlocks all 12 of the iPhone’s Songs with the whole Fixture Library, and 11 without 002', () => {
@@ -172,11 +174,11 @@ describe('Compose’s listing', () => {
     expect(locked.map(r => missingNotes(coverageOf(r.song, without002)))).toEqual(['E3 (3.0 s)'])
   })
 
-  it('locks 11 more of the catalog’s Songs without 002, Amazing Grace among them', () => {
+  it('locks 40 more of the catalog’s Songs without 002, Amazing Grace among them', () => {
     const ids = (rows: { song: SongSummary }[]) => rows.map(r => r.song.id)
     const withAll = new Set(ids(listing(allFixtures).locked))
     const lockedNow = ids(listing(without002).locked).filter(id => !withAll.has(id))
-    expect(lockedNow).toHaveLength(11)
+    expect(lockedNow).toHaveLength(40)
     expect(lockedNow).toContain('amazing')
     expect(listing(without002).unlocked.every(r => !withAll.has(r.song.id))).toBe(true)
   })

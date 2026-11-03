@@ -1,0 +1,142 @@
+{
+  "bar_lines": [
+    0.0,
+    9.0,
+    18.0
+  ],
+  "beats_per_bar": 9,
+  "bpm": 120,
+  "file": "midi/pdmx-up-with-aily.mid",
+  "id": "up-with-aily",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 27
+  },
+  "import_report": {
+    "catalog_id": "up-with-aily",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 20,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-up-with-aily.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 27.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 2.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 8.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 15.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 17.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 20.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 26.0
+    }
+  ],
+  "pitches": [
+    62,
+    64,
+    66,
+    67,
+    69,
+    71,
+    74
+  ],
+  "sha256": "a5fb68eafdbc15b627bc02167e82c607987bf45e4dbfc188e5ad44d33430ac8b",
+  "title": "Up with Aily"
+}

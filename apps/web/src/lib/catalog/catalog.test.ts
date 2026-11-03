@@ -7,10 +7,11 @@ import { catalogPath } from './catalog-path.generated'
 import {
   type CatalogEntry,
   catalogSongs,
+  type GoldenSong,
   outOfDate,
   readSources,
   renderCatalog,
-  shipList,
+  shippedIds,
   titleNames
 } from './generate'
 import type { SongSummary } from './song'
@@ -69,11 +70,13 @@ describe('the Song Catalog in the app', () => {
     ])
   })
 
-  test('then the rest of the catalog, in its order, but ode-mutopia', () => {
+  test('then every other Song in the catalog, in its order, but ode-mutopia', () => {
     const ids = songs.map(s => s.id)
-    expect(ids).toHaveLength(128)
-    expect(ids).not.toContain('ode-mutopia')
-    const catalogOrder = sources.catalog.map(e => e.id).filter(id => ids.slice(12).includes(id))
+    expect(ids).toHaveLength(1008)
+    const first = ids.slice(0, 12)
+    const catalogOrder = sources.catalog
+      .map(e => e.id)
+      .filter(id => !first.includes(id) && id !== 'ode-mutopia')
     expect(ids.slice(12)).toEqual(catalogOrder)
   })
 
@@ -92,27 +95,32 @@ describe('the Song Catalog in the app', () => {
   })
 })
 
-describe('the golden data, which export_golden.py writes for the same ship list', () => {
+describe('the golden data', () => {
   const golden = `${REPO_ROOT}/fixtures/golden`
   const index = JSON.parse(readFileSync(`${golden}/index.json`, 'utf8')) as {
     songs: { id: string }[]
   }
 
-  test.each(shipList)('covers %s, which the app ships', id => {
-    expect(index.songs.map(s => s.id)).toContain(id)
-    for (const file of [
-      `songs/${id}.json`,
-      `arrangements/full/${id}.json`,
-      `arrangements/small/${id}.json`
-    ])
+  test('has the melody of every Song in the catalog', () => {
+    const missing = sources.catalog.filter(e => !existsSync(`${golden}/songs/${e.id}.json`))
+    expect(missing.map(e => e.id)).toEqual([])
+  })
+
+  test.each(index.songs.map(s => s.id))('arranges %s, in both libraries', id => {
+    for (const file of [`arrangements/full/${id}.json`, `arrangements/small/${id}.json`])
       expect(existsSync(`${golden}/${file}`), file).toBe(true)
+  })
+
+  test('arranges the 129 Songs the reference engine checks the port against', () => {
+    expect(index.songs).toHaveLength(129)
   })
 })
 
 describe('the generator', () => {
-  test('ships only the Songs on the ship list', () => {
-    expect(sources.catalog.map(e => e.id)).toContain('ode-mutopia')
-    expect(songs.map(s => s.id)).not.toContain('ode-mutopia')
+  test('ships every Song in the catalog but ode-mutopia, the same tune as ode', () => {
+    expect(songs.map(s => s.id)).toEqual(shippedIds(sources.catalog))
+    const shipped = new Set(songs.map(s => s.id))
+    expect(sources.catalog.map(e => e.id).filter(id => !shipped.has(id))).toEqual(['ode-mutopia'])
   })
 
   test("refuses a Song that isn't in the catalog", () => {
@@ -125,6 +133,30 @@ describe('the generator', () => {
       golden: (id: string) => ({ ...sources.golden(id), sha256: '0'.repeat(64) })
     }
     expect(() => renderCatalog(changed, ['mary'])).toThrow(/cited score/)
+  })
+
+  test.each([
+    [
+      'its render arguments',
+      (g: GoldenSong) => ({ ...g, import_args: { ...g.import_args, max_beats: 99 } }),
+      /render arguments/
+    ],
+    ['its meter', (g: GoldenSong) => ({ ...g, beats_per_bar: 3 }), /another meter/],
+    [
+      'a note past its end',
+      (g: GoldenSong) => ({ ...g, notes: [...g.notes, { start: 64, dur: 1, pitch: 72 }] }),
+      /on or after beat/
+    ]
+  ])('refuses a golden copy that differs from its catalog entry in %s', (_, edit, error) => {
+    const id = 'danny-boy'
+    const entry = sources.catalog.find(e => e.id === id)
+    expect(entry?.render).toMatchObject({ max_beats: expect.any(Number), beats_per_bar: 4 })
+    expect(() => renderCatalog(sources, [id])).not.toThrow()
+    const changed = {
+      ...sources,
+      golden: (other: string) => (other === id ? edit(sources.golden(id)) : sources.golden(other))
+    }
+    expect(() => renderCatalog(changed, [id])).toThrow(error)
   })
 
   test('keeps a title with an apostrophe', () => {

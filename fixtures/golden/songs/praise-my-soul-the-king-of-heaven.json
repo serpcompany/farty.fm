@@ -1,0 +1,183 @@
+{
+  "bar_lines": [
+    2.0,
+    6.0,
+    10.0,
+    14.0,
+    18.0,
+    22.0,
+    26.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-praise-my-soul-the-king-of-heaven.mid",
+  "id": "praise-my-soul-the-king-of-heaven",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 30
+  },
+  "import_report": {
+    "catalog_id": "praise-my-soul-the-king-of-heaven",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 27,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-praise-my-soul-the-king-of-heaven.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 6.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 15.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    64,
+    66,
+    67,
+    68,
+    69,
+    71,
+    73,
+    74
+  ],
+  "sha256": "3d3d67060a993e452cabb063bd822303b47a3b09745f2781623171d5d9fecb47",
+  "title": "Praise my Soul the King of Heaven"
+}

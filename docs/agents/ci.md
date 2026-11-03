@@ -76,7 +76,7 @@ Each step that runs one of the web app's scripts names `working-directory: apps/
 
 `tools.yml` checks the Python reference engine and the catalog importer, the `tools/` uv project ([the reference engine](../../tools/melody-lab/README.md)):
 
-- `tools-changes`: whether the change is docs-only, which skips `reference` and `scores`, and on a PR whether anything they read changed (`tools`, `fixtures`, `catalog`, the web app's ship list, `.python-version` or the workflow). When nothing did, they skip their steps and still report.
+- `tools-changes`: whether the change is docs-only, which skips `reference` and `scores`, and on a PR whether anything they read changed (`tools`, `fixtures`, `catalog`, `.python-version` or the workflow). When nothing did, they skip their steps and still report.
 - `reference`: installs uv 0.7.2, the version that wrote `tools/uv.lock`, and the locked environment with Python 3.12.10 (`uv sync --locked`), runs the unit tests (`uv run pytest`), then runs `export_golden.py` and fails if `fixtures/golden` isn't byte for byte what it wrote, new files included, so the reference and the golden data can't drift apart. The export gives the same bytes on Linux and Windows.
 - `scores`: re-hashes every score `catalog/catalog.json` names against its `sha256`, so a changed or missing score fails.
 

@@ -1,0 +1,146 @@
+{
+  "bar_lines": [
+    3.0,
+    7.0,
+    11.0,
+    15.0,
+    19.0,
+    23.0,
+    27.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-calvary.mid",
+  "id": "calvary",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 31,
+    "start_beat": 1
+  },
+  "import_report": {
+    "catalog_id": "calvary",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 19,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-calvary.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 2,
+    "tracks_with_notes": [
+      0,
+      1,
+      2
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 2.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 74,
+      "start": 5.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 10.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 11.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 59,
+      "start": 13.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 18.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 19.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 73,
+      "start": 21.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 26.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 59,
+      "start": 29.0
+    }
+  ],
+  "pitches": [
+    59,
+    62,
+    66,
+    69,
+    70,
+    71,
+    73,
+    74
+  ],
+  "sha256": "77a2bd67af6d3302002ede9821f2d3cb05a11f35f99bf4ab981b9f48ba27d68f",
+  "title": "Calvary"
+}

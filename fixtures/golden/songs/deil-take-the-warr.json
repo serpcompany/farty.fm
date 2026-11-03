@@ -1,0 +1,83 @@
+{
+  "bar_lines": [
+    2.0
+  ],
+  "beats_per_bar": 2,
+  "bpm": 120,
+  "file": "midi/pdmx-deil-take-the-warr.mid",
+  "id": "deil-take-the-warr",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 5.375
+  },
+  "import_report": {
+    "catalog_id": "deil-take-the-warr",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 9,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-deil-take-the-warr.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 5.375,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 0.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 72,
+      "start": 1.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 74,
+      "start": 1.3333333333333333
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 76,
+      "start": 1.6666666666666667
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 4.5
+    },
+    {
+      "dur": 0.375,
+      "pitch": 69,
+      "start": 5.0
+    }
+  ],
+  "pitches": [
+    67,
+    69,
+    72,
+    74,
+    76
+  ],
+  "sha256": "47921a5c344893abf4bb7c6db78ad9c6d5004bb0dadb087ec5a13dc735c4c255",
+  "title": "De'il Take the Warr"
+}

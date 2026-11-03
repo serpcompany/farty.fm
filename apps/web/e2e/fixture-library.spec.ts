@@ -1,17 +1,22 @@
+import { fixtureRecordingId } from '../src/lib/fixture-library'
 import { songs } from '../src/test-support/songs.generated'
 import { newEmail, signInByApi } from './account'
 import { uploaded } from './database'
 import { deleteRecording } from './record'
 import { lockedSong, onPhone, songsHeading, tab } from './screens'
 import {
+  fixtureLibrary,
   loadTheFixtureLibrary,
   needsTheFixtureLibrary,
-  songsTheFixtureLibraryUnlocks
+  songsTheFixtureLibraryUnlocks,
+  songsUnlockedBy
 } from './songs'
 import { expect, test } from './test'
 
 const fixtures = 38
-const songsThatLockWithout002 = 11
+const songsThatLockWithout002 =
+  songsTheFixtureLibraryUnlocks.length -
+  songsUnlockedBy(fixtureLibrary.filter(r => r.id !== fixtureRecordingId('002'))).length
 
 needsTheFixtureLibrary()
 

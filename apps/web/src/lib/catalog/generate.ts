@@ -10,7 +10,14 @@ export type CatalogEntry = {
   file: string
   sha256: string
   source: Record<string, string>
-  render: { bpm: number }
+  render: Render
+}
+
+type Render = {
+  bpm: number
+  max_beats?: number
+  beats_per_bar?: number
+  start_beat?: number
 }
 
 export type GoldenSong = {
@@ -18,7 +25,9 @@ export type GoldenSong = {
   title: string
   file: string
   sha256: string
+  import_args: Render
   bpm: number
+  beats_per_bar: number
   bar_lines: number[]
   length_beats: number
   pitches: number[]
@@ -53,9 +62,29 @@ function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(fileURLToPath(new URL(path, repo)), 'utf8')) as T
 }
 
-export const shipList: readonly string[] = readJson<string[]>(
-  'apps/web/src/lib/catalog/ship-list.json'
-)
+const iPhoneSongs: readonly string[] = [
+  'twinkle',
+  'mary',
+  'jingle',
+  'birthday',
+  'frere',
+  'saints',
+  'row',
+  'ode',
+  'merryxmas',
+  'amazing',
+  'furelise',
+  'auld'
+]
+
+const notShipped: readonly string[] = ['ode-mutopia']
+
+export function shippedIds(catalog: readonly CatalogEntry[]): string[] {
+  const rest = catalog
+    .map(e => e.id)
+    .filter(id => !iPhoneSongs.includes(id) && !notShipped.includes(id))
+  return [...iPhoneSongs, ...rest]
+}
 
 const reservedIds: readonly string[] = ['pad', 'song']
 
@@ -125,8 +154,16 @@ function song(entry: CatalogEntry, golden: GoldenSong, names: readonly string[])
   if (golden.file !== entry.file || golden.sha256 !== entry.sha256)
     throw problem("the golden copy wasn't imported from the cited score")
   if (golden.bpm !== entry.render.bpm) throw problem('the golden copy has another tempo')
+  const renderKeys = ['bpm', 'max_beats', 'beats_per_bar', 'start_beat'] as const
+  if (renderKeys.some(key => golden.import_args?.[key] !== entry.render[key]))
+    throw problem("the golden copy wasn't imported with the catalog's render arguments")
+  const { max_beats, beats_per_bar } = entry.render
+  if (beats_per_bar !== undefined && golden.beats_per_bar !== beats_per_bar)
+    throw problem('the golden copy has another meter')
   const { notes } = golden
   if (notes.length === 0) throw problem('no notes')
+  if (max_beats !== undefined && notes.some(n => n.start >= max_beats))
+    throw problem(`the golden copy has a note on or after beat ${max_beats}`)
   for (const [i, note] of notes.entries()) {
     if (!(note.dur > 0) || (i > 0 && note.start < notes[i - 1].start))
       throw problem(`note ${i} isn't in time order with a positive length`)
@@ -158,12 +195,16 @@ function summary(song: Song): SongSummary {
   return rest
 }
 
-export function catalogSongs(sources: Sources, ids: readonly string[] = shipList): Song[] {
-  if (new Set(ids).size !== ids.length) throw new Error('the ship list names a Song twice')
+export function catalogSongs(
+  sources: Sources,
+  ids: readonly string[] = shippedIds(sources.catalog)
+): Song[] {
+  if (new Set(ids).size !== ids.length) throw new Error('the Songs to ship name a Song twice')
   const names = titleNames(sources.titles)
+  const entries = new Map(sources.catalog.map(e => [e.id, e]))
   return ids.map(id => {
-    const entry = sources.catalog.find(e => e.id === id)
-    if (!entry) throw new Error(`the ship list names ${id}, which isn't in catalog/catalog.json`)
+    const entry = entries.get(id)
+    if (!entry) throw new Error(`${id} isn't in catalog/catalog.json`)
     return song(entry, sources.golden(id), names.get(id) ?? [])
   })
 }
@@ -173,7 +214,10 @@ const header = [
   '// and tools/catalog/titles-*.txt. Do not edit by hand: run it again instead.'
 ]
 
-export function renderCatalog(sources: Sources, ids: readonly string[] = shipList): CatalogFiles {
+export function renderCatalog(
+  sources: Sources,
+  ids: readonly string[] = shippedIds(sources.catalog)
+): CatalogFiles {
   const songs = catalogSongs(sources, ids)
   const data = `[\n${songs.map(s => JSON.stringify(summary(s))).join(',\n')}\n]\n`
   const file = `${dataDirectory}/songs-${hash(data)}.json`
@@ -201,7 +245,7 @@ export function renderCatalog(sources: Sources, ids: readonly string[] = shipLis
         "import type { SongSummary } from './song'",
         '',
         '/**',
-        " * The Song Catalog's index, in the ship list's order, for routes and the server. The browser",
+        " * The Song Catalog's index, in the app's order, for routes and the server. The browser",
         ' * fetches it instead (`load-songs.ts`), so it stays out of the JavaScript (#322).',
         ' */',
         'export const songIndex: readonly SongSummary[] = index',
@@ -221,7 +265,7 @@ export function renderCatalog(sources: Sources, ids: readonly string[] = shipLis
         ']',
         '',
         '/**',
-        " * The Songs the app ships, with their notes, in the ship list's order, for the tests. The",
+        " * The Songs the app ships, with their notes, in the app's order, for the tests. The",
         " * browser fetches the index and each Song's notes instead (`load-songs.ts`, #322, #323).",
         ' */',
         'export const songs: readonly Song[] = (index as readonly SongSummary[]).map((song, i) => ({',

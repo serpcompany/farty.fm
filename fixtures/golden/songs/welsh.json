@@ -1,0 +1,141 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 120,
+  "file": "midi/pdmx-welsh.mid",
+  "id": "welsh",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "welsh",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 19,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-welsh.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 16.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 0.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 3.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 7.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 9.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 11.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 12.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 15.0
+    }
+  ],
+  "pitches": [
+    62,
+    66,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76
+  ],
+  "sha256": "aba47d7960fc5f91418c7f3603dc084d7fd1dc507408d49b13de0fb535f52adf",
+  "title": "The Welsh"
+}

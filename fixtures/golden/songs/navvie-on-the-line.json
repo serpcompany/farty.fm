@@ -1,0 +1,356 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0,
+    29.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-navvie-on-the-line.mid",
+  "id": "navvie-on-the-line",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "navvie-on-the-line",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 61,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-navvie-on-the-line.mid",
+    "tempo_changes_ignored": 2,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 0.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 1.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 2.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 3.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 3.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 5.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 7.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 71,
+      "start": 8.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 69,
+      "start": 8.333333333333334
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 67,
+      "start": 8.666666666666666
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 10.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 11.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 67,
+      "start": 12.333333333333334
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 66,
+      "start": 12.666666666666666
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 14.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 16.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 17.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 17.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 18.5
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 74,
+      "start": 19.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 76,
+      "start": 19.333333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 74,
+      "start": 19.666666666666668
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 72,
+      "start": 20.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 71,
+      "start": 20.333333333333332
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 69,
+      "start": 20.666666666666668
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 21.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 21.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 22.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 28.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    62,
+    66,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    78,
+    79
+  ],
+  "sha256": "77de4cf8012b5bfea19c8dd27f59e0c9555b67780b6c5320e892520a21e25c56",
+  "title": "Navvie on the Line"
+}

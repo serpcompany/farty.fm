@@ -1,0 +1,369 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0,
+    29.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-high-level-hornpipe.mid",
+  "id": "high-level-hornpipe",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "high-level-hornpipe",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 63,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-high-level-hornpipe.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 0.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 1.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 1.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 2.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 2.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 3.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 3.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 4.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 4.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 77,
+      "start": 5.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 81,
+      "start": 5.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 6.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 6.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 7.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 7.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 8.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 8.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 9.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 75,
+      "start": 9.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 10.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 11.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 11.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 75,
+      "start": 12.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 79,
+      "start": 13.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 13.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 14.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 14.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 81,
+      "start": 15.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 15.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 75,
+      "start": 16.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 16.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 17.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 17.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 65,
+      "start": 18.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 18.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 62,
+      "start": 19.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 19.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 20.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 20.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 77,
+      "start": 21.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 81,
+      "start": 21.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 22.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 22.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 23.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 23.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 24.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 25.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 25.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 70,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 26.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 74,
+      "start": 27.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 75,
+      "start": 27.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 28.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 28.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 79,
+      "start": 29.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 77,
+      "start": 29.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 75,
+      "start": 30.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 72,
+      "start": 30.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 31.0
+    }
+  ],
+  "pitches": [
+    62,
+    65,
+    67,
+    69,
+    70,
+    71,
+    72,
+    74,
+    75,
+    76,
+    77,
+    79,
+    81
+  ],
+  "sha256": "7664195c0e010fdfafe9aa1653bcaa1099051135f95b6a658b5d31e51a32a778",
+  "title": "The High Level Hornpipe"
+}

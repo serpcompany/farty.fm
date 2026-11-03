@@ -1,0 +1,228 @@
+{
+  "bar_lines": [
+    1.0,
+    4.0,
+    7.0,
+    10.0,
+    13.0,
+    16.0,
+    19.0,
+    22.0,
+    25.0,
+    28.0
+  ],
+  "beats_per_bar": 3,
+  "bpm": 88,
+  "file": "midi/pdmx-young-terence-mcdonough.mid",
+  "id": "young-terence-mcdonough",
+  "import_args": {
+    "beats_per_bar": 3,
+    "bpm": 88,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "young-terence-mcdonough",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 35,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-young-terence-mcdonough.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 65,
+      "start": 0.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 3.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 3.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 6.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 8.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 9.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 15.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 17.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 18.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 18.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 22.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 24.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 69,
+      "start": 24.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 30.5
+    }
+  ],
+  "pitches": [
+    62,
+    65,
+    66,
+    67,
+    69,
+    70,
+    72,
+    74,
+    77,
+    79
+  ],
+  "sha256": "296715c1032c987cf40470fff83c20f37f4993606744882c018acf73065ab6d5",
+  "title": "Young Terence McDonough"
+}

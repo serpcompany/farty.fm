@@ -1,0 +1,141 @@
+{
+  "bar_lines": [
+    1.0,
+    7.0,
+    13.0,
+    19.0,
+    25.0
+  ],
+  "beats_per_bar": 6,
+  "bpm": 120,
+  "file": "midi/pdmx-witches.mid",
+  "id": "witches",
+  "import_args": {
+    "beats_per_bar": 6,
+    "bpm": 120,
+    "max_beats": 31
+  },
+  "import_report": {
+    "catalog_id": "witches",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 19,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-witches.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 0.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 1.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 2.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 3.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 77,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 6.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 77,
+      "start": 7.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 12.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 74,
+      "start": 13.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 5.0,
+      "pitch": 60,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 26.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    60,
+    67,
+    69,
+    70,
+    72,
+    74,
+    76,
+    77
+  ],
+  "sha256": "8fc78b0556e071d15a842638eca32d164c636e9647eb05b5abc0c477be1f0280",
+  "title": "The Witches"
+}
