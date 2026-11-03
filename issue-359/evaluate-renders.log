@@ -1,0 +1,623 @@
+/Users/devin/dev/repos/farty.fm/tools/melody-lab/.venv/lib/python3.12/site-packages/numba/np/ufunc/dufunc.py:303: RuntimeWarning: invalid value encountered in cast
+  return super().__call__(*args, **kws)
+all-through-the-night T=-16 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c=  8% med=207.4c contour=70% recs=5 octaveMoves=0 sounding=97% mostlySilent=0
+  golden     T=-16 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c=  8% med=207.4c contour=70% recs=5 octaveMoves=0 sounding=97% mostlySilent=0
+             heard cents: 24 of 24 notes equal golden
+             fart cents: 24 of 24 notes equal golden
+             PASS
+amazing      T=-28 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c=  6% med=142.6c contour=93% recs=6 octaveMoves=1 sounding=94% mostlySilent=0
+  golden     T=-28 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c=  6% med=142.6c contour=93% recs=6 octaveMoves=1 sounding=94% mostlySilent=0
+             heard cents: 16 of 16 notes equal golden
+             fart cents: 16 of 16 notes equal golden
+             PASS
+angels-we-have-heard T=-17 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 50% med= 40.0c contour=100% recs=5 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-17 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 50% med= 40.0c contour=100% recs=5 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 28 of 28 notes equal golden
+             fart cents: 28 of 28 notes equal golden
+             PASS
+arirang      T=-21 notes= 34 in50cFart=100% onTime=100% reatk=0 | in50c= 15% med=127.4c contour=81% recs=6 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-21 notes= 34 in50cFart=100% onTime=100% reatk=0 | in50c= 15% med=127.4c contour=81% recs=6 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 34 of 34 notes equal golden
+             fart cents: 34 of 34 notes equal golden
+             PASS
+au-clair     T=-11 notes= 22 in50cFart=100% onTime=100% reatk=0 | in50c= 27% med=277.4c contour=100% recs=3 octaveMoves=0 sounding=98% mostlySilent=0
+  golden     T=-11 notes= 22 in50cFart=100% onTime=100% reatk=0 | in50c= 27% med=277.4c contour=100% recs=3 octaveMoves=0 sounding=98% mostlySilent=0
+             heard cents: 22 of 22 notes equal golden
+             fart cents: 22 of 22 notes equal golden
+             PASS
+auld         T=-19 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c= 10% med=137.4c contour=64% recs=7 octaveMoves=1 sounding=96% mostlySilent=0
+  golden     T=-19 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c= 10% med=137.4c contour=64% recs=7 octaveMoves=1 sounding=96% mostlySilent=0
+             heard cents: 29 of 29 notes equal golden
+             fart cents: 29 of 29 notes equal golden
+             PASS
+aunt-rhody   T=-5 notes= 38 in50cFart=100% onTime=100% reatk=0 | in50c=  5% med= 97.4c contour=100% recs=6 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-5 notes= 38 in50cFart=100% onTime=100% reatk=0 | in50c=  5% med= 97.4c contour=100% recs=6 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 38 of 38 notes equal golden
+             fart cents: 38 of 38 notes equal golden
+             PASS
+aura-lee     T=-15 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c= 15% med=142.6c contour=58% recs=8 octaveMoves=1 sounding=97% mostlySilent=0
+  golden     T=-15 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c= 15% med=142.6c contour=58% recs=8 octaveMoves=1 sounding=97% mostlySilent=0
+             heard cents: 27 of 27 notes equal golden
+             fart cents: 27 of 27 notes equal golden
+             PASS
+battle-hymn  T=-18 notes= 49 in50cFart=100% onTime=100% reatk=0 | in50c= 14% med=202.6c contour=52% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-18 notes= 49 in50cFart=100% onTime=100% reatk=0 | in50c= 14% med=202.6c contour=52% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 49 of 49 notes equal golden
+             fart cents: 49 of 49 notes equal golden
+             PASS
+beautiful-dreamer T=-18 notes=  9 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=412.4c contour=50% recs=7 octaveMoves=3 sounding=90% mostlySilent=0
+  golden     T=-18 notes=  9 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=412.4c contour=50% recs=7 octaveMoves=3 sounding=90% mostlySilent=0
+             heard cents: 9 of 9 notes equal golden
+             fart cents: 9 of 9 notes equal golden
+             PASS
+birthday     T=-4 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 20% med=192.6c contour=80% recs=8 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-4 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 20% med=192.6c contour=80% recs=8 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 25 of 25 notes equal golden
+             fart cents: 25 of 25 notes equal golden
+             PASS
+blow-the-man-down T=-20 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c= 13% med=137.4c contour=60% recs=6 octaveMoves=1 sounding=96% mostlySilent=0
+  golden     T=-20 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c= 13% med=137.4c contour=60% recs=6 octaveMoves=1 sounding=96% mostlySilent=0
+             heard cents: 23 of 23 notes equal golden
+             fart cents: 23 of 23 notes equal golden
+             PASS
+blue-danube  T=-16 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c= 62% med= 22.6c contour=100% recs=7 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-16 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c= 62% med= 22.6c contour=100% recs=7 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 24 of 24 notes equal golden
+             fart cents: 24 of 24 notes equal golden
+             PASS
+buffalo-gals T=-21 notes= 34 in50cFart=100% onTime=100% reatk=0 | in50c= 44% med=115.0c contour=87% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-21 notes= 34 in50cFart=100% onTime=100% reatk=0 | in50c= 44% med=115.0c contour=87% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 34 of 34 notes equal golden
+             fart cents: 34 of 34 notes equal golden
+             PASS
+camptown-races T=-11 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c= 52% med= 47.4c contour=89% recs=5 octaveMoves=0 sounding=97% mostlySilent=0
+  golden     T=-11 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c= 52% med= 47.4c contour=89% recs=5 octaveMoves=0 sounding=97% mostlySilent=0
+             heard cents: 23 of 23 notes equal golden
+             fart cents: 23 of 23 notes equal golden
+             PASS
+can-can      T=-6 notes= 11 in50cFart=100% onTime=100% reatk=0 | in50c= 64% med= 22.4c contour=88% recs=6 octaveMoves=0 sounding=91% mostlySilent=0
+  golden     T=-6 notes= 11 in50cFart=100% onTime=100% reatk=0 | in50c= 64% med= 22.4c contour=88% recs=6 octaveMoves=0 sounding=91% mostlySilent=0
+             heard cents: 11 of 11 notes equal golden
+             fart cents: 11 of 11 notes equal golden
+             PASS
+chopsticks   T=-36 notes= 56 in50cFart=100% onTime=100% reatk=0 | in50c= 30% med=217.4c contour=83% recs=8 octaveMoves=0 sounding=97% mostlySilent=0
+  golden     T=-36 notes= 56 in50cFart=100% onTime=100% reatk=0 | in50c= 30% med=217.4c contour=83% recs=8 octaveMoves=0 sounding=97% mostlySilent=0
+             heard cents: 56 of 56 notes equal golden
+             fart cents: 56 of 56 notes equal golden
+             PASS
+clementine   T=-20 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=117.4c contour=70% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-20 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=117.4c contour=70% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 30 of 30 notes equal golden
+             fart cents: 30 of 30 notes equal golden
+             PASS
+coming-round-the-mountain T=-12 notes= 39 in50cFart=100% onTime=100% reatk=0 | in50c=  3% med=142.6c contour=87% recs=9 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-12 notes= 39 in50cFart=100% onTime=100% reatk=0 | in50c=  3% med=142.6c contour=87% recs=9 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 39 of 39 notes equal golden
+             fart cents: 39 of 39 notes equal golden
+             PASS
+coventry-carol T=-21 notes= 19 in50cFart=100% onTime=100% reatk=0 | in50c= 11% med=177.4c contour=71% recs=6 octaveMoves=1 sounding=95% mostlySilent=0
+  golden     T=-21 notes= 19 in50cFart=100% onTime=100% reatk=0 | in50c= 11% med=177.4c contour=71% recs=6 octaveMoves=1 sounding=95% mostlySilent=0
+             heard cents: 19 of 19 notes equal golden
+             fart cents: 19 of 19 notes equal golden
+             PASS
+danny-boy    T=-21 notes= 43 in50cFart=100% onTime=100% reatk=0 | in50c=  5% med=152.4c contour=71% recs=8 octaveMoves=1 sounding=96% mostlySilent=0
+  golden     T=-21 notes= 43 in50cFart=100% onTime=100% reatk=0 | in50c=  5% med=152.4c contour=71% recs=8 octaveMoves=1 sounding=96% mostlySilent=0
+             heard cents: 43 of 43 notes equal golden
+             fart cents: 43 of 43 notes equal golden
+             PASS
+deck-the-halls T=-13 notes= 17 in50cFart=100% onTime=100% reatk=0 | in50c= 24% med=222.4c contour=75% recs=6 octaveMoves=1 sounding=97% mostlySilent=0
+  golden     T=-13 notes= 17 in50cFart=100% onTime=100% reatk=0 | in50c= 24% med=222.4c contour=75% recs=6 octaveMoves=1 sounding=97% mostlySilent=0
+             heard cents: 17 of 17 notes equal golden
+             fart cents: 17 of 17 notes equal golden
+             PASS
+did-you-ever-see-a-lassie T=-15 notes= 34 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med= 77.6c contour=84% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-15 notes= 34 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med= 77.6c contour=84% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 34 of 34 notes equal golden
+             fart cents: 34 of 34 notes equal golden
+             PASS
+ding-dong-merrily T=-18 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 82% med= 12.5c contour=100% recs=5 octaveMoves=0 sounding=92% mostlySilent=0
+  golden     T=-18 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 82% med= 12.5c contour=100% recs=5 octaveMoves=0 sounding=92% mostlySilent=0
+             heard cents: 28 of 28 notes equal golden
+             fart cents: 28 of 28 notes equal golden
+             PASS
+down-by-the-riverside T=-11 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c=  9% med=197.4c contour=76% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-11 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c=  9% med=197.4c contour=76% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 23 of 23 notes equal golden
+             fart cents: 23 of 23 notes equal golden
+             PASS
+doxology     T=+0 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c=  6% med=147.6c contour=82% recs=7 octaveMoves=1 sounding=93% mostlySilent=0
+  golden     T=+0 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c=  6% med=147.6c contour=82% recs=7 octaveMoves=1 sounding=93% mostlySilent=0
+             heard cents: 16 of 16 notes equal golden
+             fart cents: 16 of 16 notes equal golden
+             PASS
+drunken-sailor T=-9 notes= 36 in50cFart=100% onTime=100% reatk=0 | in50c= 78% med= 27.4c contour=88% recs=9 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-9 notes= 36 in50cFart=100% onTime=100% reatk=0 | in50c= 78% med= 27.4c contour=88% recs=9 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 36 of 36 notes equal golden
+             fart cents: 36 of 36 notes equal golden
+             PASS
+eine-kleine  T=-29 notes= 41 in50cFart=100% onTime=100% reatk=0 | in50c=  7% med= 87.4c contour=100% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-29 notes= 41 in50cFart=100% onTime=100% reatk=0 | in50c=  7% med= 87.4c contour=100% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 41 of 41 notes equal golden
+             fart cents: 41 of 41 notes equal golden
+             PASS
+farmer-in-the-dell T=-23 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=172.6c contour=100% recs=6 octaveMoves=0 sounding=97% mostlySilent=0
+  golden     T=-23 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=172.6c contour=100% recs=6 octaveMoves=0 sounding=97% mostlySilent=0
+             heard cents: 24 of 24 notes equal golden
+             fart cents: 24 of 24 notes equal golden
+             PASS
+frere        T=-3 notes= 32 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=162.5c contour=74% recs=7 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-3 notes= 32 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=162.5c contour=74% recs=7 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 32 of 32 notes equal golden
+             fart cents: 32 of 32 notes equal golden
+             PASS
+funiculi     T=-25 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 16% med=122.6c contour=67% recs=7 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-25 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 16% med=122.6c contour=67% recs=7 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 25 of 25 notes equal golden
+             fart cents: 25 of 25 notes equal golden
+             PASS
+furelise     T=-17 notes= 32 in50cFart=100% onTime=100% reatk=0 | in50c= 25% med=177.4c contour=31% recs=7 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-17 notes= 32 in50cFart=100% onTime=100% reatk=0 | in50c= 25% med=177.4c contour=31% recs=7 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 32 of 32 notes equal golden
+             fart cents: 32 of 32 notes equal golden
+             PASS
+go-down-moses T=-13 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c= 31% med=172.6c contour=62% recs=6 octaveMoves=0 sounding=91% mostlySilent=0
+  golden     T=-13 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c= 31% med=172.6c contour=62% recs=6 octaveMoves=0 sounding=91% mostlySilent=0
+             heard cents: 29 of 29 notes equal golden
+             fart cents: 29 of 29 notes equal golden
+             PASS
+god-rest-ye  T=-13 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c= 44% med=102.6c contour=82% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-13 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c= 44% med=102.6c contour=82% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 27 of 27 notes equal golden
+             fart cents: 27 of 27 notes equal golden
+             PASS
+good-christian-men T=-17 notes= 20 in50cFart=100% onTime=100% reatk=0 | in50c= 20% med=107.6c contour=100% recs=5 octaveMoves=0 sounding=90% mostlySilent=0
+  golden     T=-17 notes= 20 in50cFart=100% onTime=100% reatk=0 | in50c= 20% med=107.6c contour=100% recs=5 octaveMoves=0 sounding=90% mostlySilent=0
+             heard cents: 20 of 20 notes equal golden
+             fart cents: 20 of 20 notes equal golden
+             PASS
+good-king-wenceslas T=-9 notes= 26 in50cFart=100% onTime=100% reatk=0 | in50c= 81% med= 22.6c contour=75% recs=5 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-9 notes= 26 in50cFart=100% onTime=100% reatk=0 | in50c= 81% med= 22.6c contour=75% recs=5 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 26 of 26 notes equal golden
+             fart cents: 26 of 26 notes equal golden
+             PASS
+grand-old-flag T=-6 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c= 39% med=102.6c contour=94% recs=5 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-6 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c= 39% med=102.6c contour=94% recs=5 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 23 of 23 notes equal golden
+             fart cents: 23 of 23 notes equal golden
+             PASS
+grandfathers-clock T=-12 notes= 40 in50cFart=100% onTime=100% reatk=0 | in50c=  2% med=127.6c contour=91% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-12 notes= 40 in50cFart=100% onTime=100% reatk=0 | in50c=  2% med=127.6c contour=91% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 40 of 40 notes equal golden
+             fart cents: 40 of 40 notes equal golden
+             PASS
+hark-the-herald T=-13 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 20% med=132.4c contour=73% recs=8 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-13 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 20% med=132.4c contour=73% recs=8 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 30 of 30 notes equal golden
+             fart cents: 30 of 30 notes equal golden
+             PASS
+hava-nagila  T=-12 notes= 40 in50cFart=100% onTime=100% reatk=0 | in50c= 22% med=110.1c contour=55% recs=6 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-12 notes= 40 in50cFart=100% onTime=100% reatk=0 | in50c= 22% med=110.1c contour=55% recs=6 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 40 of 40 notes equal golden
+             fart cents: 40 of 40 notes equal golden
+             PASS
+hickory-dickory-dock T=-11 notes= 17 in50cFart=100% onTime=100% reatk=0 | in50c= 65% med= 17.6c contour=55% recs=4 octaveMoves=0 sounding=92% mostlySilent=0
+  golden     T=-11 notes= 17 in50cFart=100% onTime=100% reatk=0 | in50c= 65% med= 17.6c contour=55% recs=4 octaveMoves=0 sounding=92% mostlySilent=0
+             heard cents: 17 of 17 notes equal golden
+             fart cents: 17 of 17 notes equal golden
+             PASS
+home-on-the-range T=-14 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 18% med=102.6c contour=85% recs=8 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-14 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 18% med=102.6c contour=85% recs=8 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 28 of 28 notes equal golden
+             fart cents: 28 of 28 notes equal golden
+             PASS
+hot-cross-buns T=-9 notes= 34 in50cFart=100% onTime=100% reatk=0 | in50c= 59% med= 22.6c contour=58% recs=3 octaveMoves=0 sounding=92% mostlySilent=0
+  golden     T=-9 notes= 34 in50cFart=100% onTime=100% reatk=0 | in50c= 59% med= 22.6c contour=58% recs=3 octaveMoves=0 sounding=92% mostlySilent=0
+             heard cents: 34 of 34 notes equal golden
+             fart cents: 34 of 34 notes equal golden
+             PASS
+i-saw-three-ships T=-11 notes= 41 in50cFart=100% onTime=100% reatk=0 | in50c= 54% med= 27.4c contour=94% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-11 notes= 41 in50cFart=100% onTime=100% reatk=0 | in50c= 54% med= 27.4c contour=94% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 41 of 41 notes equal golden
+             fart cents: 41 of 41 notes equal golden
+             PASS
+irish-washerwoman T=-7 notes= 59 in50cFart=100% onTime=100% reatk=0 | in50c= 61% med= 42.6c contour=90% recs=8 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-7 notes= 59 in50cFart=100% onTime=100% reatk=0 | in50c= 61% med= 42.6c contour=90% recs=8 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 59 of 59 notes equal golden
+             fart cents: 59 of 59 notes equal golden
+             PASS
+itsy-bitsy   T=-14 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c= 41% med= 97.4c contour=84% recs=6 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-14 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c= 41% med= 97.4c contour=84% recs=6 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 29 of 29 notes equal golden
+             fart cents: 29 of 29 notes equal golden
+             PASS
+jesus-loves-me T=-11 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c= 83% med= 12.6c contour=71% recs=6 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-11 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c= 83% med= 12.6c contour=71% recs=6 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 23 of 23 notes equal golden
+             fart cents: 23 of 23 notes equal golden
+             PASS
+jingle       T=-19 notes= 26 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=140.0c contour=80% recs=5 octaveMoves=0 sounding=97% mostlySilent=0
+  golden     T=-19 notes= 26 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=140.0c contour=80% recs=5 octaveMoves=0 sounding=97% mostlySilent=0
+             heard cents: 26 of 26 notes equal golden
+             fart cents: 26 of 26 notes equal golden
+             PASS
+johnny-comes-marching T=-35 notes= 38 in50cFart=100% onTime=100% reatk=0 | in50c= 37% med=237.6c contour=54% recs=7 octaveMoves=1 sounding=95% mostlySilent=0
+  golden     T=-35 notes= 38 in50cFart=100% onTime=100% reatk=0 | in50c= 37% med=237.6c contour=54% recs=7 octaveMoves=1 sounding=95% mostlySilent=0
+             heard cents: 38 of 38 notes equal golden
+             fart cents: 38 of 38 notes equal golden
+             PASS
+jolly-old-st-nicholas T=-23 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c= 62% med= 37.4c contour=100% recs=6 octaveMoves=0 sounding=98% mostlySilent=0
+  golden     T=-23 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c= 62% med= 37.4c contour=100% recs=6 octaveMoves=0 sounding=98% mostlySilent=0
+             heard cents: 24 of 24 notes equal golden
+             fart cents: 24 of 24 notes equal golden
+             PASS
+joshua       T=-15 notes= 40 in50cFart=100% onTime=100% reatk=0 | in50c=  2% med=202.6c contour=60% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-15 notes= 40 in50cFart=100% onTime=100% reatk=0 | in50c=  2% med=202.6c contour=60% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 40 of 40 notes equal golden
+             fart cents: 40 of 40 notes equal golden
+             PASS
+kalinka      T=-11 notes= 48 in50cFart=100% onTime=100% reatk=0 | in50c= 88% med= 22.6c contour=91% recs=5 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-11 notes= 48 in50cFart=100% onTime=100% reatk=0 | in50c= 88% med= 22.6c contour=91% recs=5 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 48 of 48 notes equal golden
+             fart cents: 48 of 48 notes equal golden
+             PASS
+korobeiniki  T=-20 notes= 35 in50cFart=100% onTime=100% reatk=0 | in50c= 26% med= 77.6c contour=93% recs=8 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-20 notes= 35 in50cFart=100% onTime=100% reatk=0 | in50c= 26% med= 77.6c contour=93% recs=8 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 35 of 35 notes equal golden
+             fart cents: 35 of 35 notes equal golden
+             PASS
+la-donna     T=-18 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 47% med= 57.4c contour=89% recs=8 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-18 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 47% med= 57.4c contour=89% recs=8 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 30 of 30 notes equal golden
+             fart cents: 30 of 30 notes equal golden
+             PASS
+let-me-call-you-sweetheart T=-22 notes= 15 in50cFart=100% onTime=100% reatk=0 | in50c=  7% med=327.4c contour=50% recs=9 octaveMoves=3 sounding=95% mostlySilent=0
+  golden     T=-22 notes= 15 in50cFart=100% onTime=100% reatk=0 | in50c=  7% med=327.4c contour=50% recs=9 octaveMoves=3 sounding=95% mostlySilent=0
+             heard cents: 15 of 15 notes equal golden
+             fart cents: 15 of 15 notes equal golden
+             PASS
+liberty-bell T=-22 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c= 19% med=157.4c contour=71% recs=9 octaveMoves=1 sounding=96% mostlySilent=0
+  golden     T=-22 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c= 19% med=157.4c contour=71% recs=9 octaveMoves=1 sounding=96% mostlySilent=0
+             heard cents: 27 of 27 notes equal golden
+             fart cents: 27 of 27 notes equal golden
+             PASS
+lightly-row  T=-22 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 14% med=117.4c contour=33% recs=5 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-22 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 14% med=117.4c contour=33% recs=5 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 28 of 28 notes equal golden
+             fart cents: 28 of 28 notes equal golden
+             PASS
+loch-lomond  T=-26 notes= 42 in50cFart=100% onTime=100% reatk=0 | in50c= 10% med=165.0c contour=75% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-26 notes= 42 in50cFart=100% onTime=100% reatk=0 | in50c= 10% med=165.0c contour=75% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 42 of 42 notes equal golden
+             fart cents: 42 of 42 notes equal golden
+             PASS
+london-bridge T=-13 notes= 57 in50cFart=100% onTime=100% reatk=0 | in50c= 39% med=122.6c contour=85% recs=8 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-13 notes= 57 in50cFart=100% onTime=100% reatk=0 | in50c= 39% med=122.6c contour=85% recs=8 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 57 of 57 notes equal golden
+             fart cents: 57 of 57 notes equal golden
+             PASS
+marines-hymn T=-18 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c= 62% med= 37.4c contour=90% recs=6 octaveMoves=0 sounding=86% mostlySilent=0
+  golden     T=-18 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c= 62% med= 37.4c contour=90% recs=6 octaveMoves=0 sounding=86% mostlySilent=0
+             heard cents: 16 of 16 notes equal golden
+             fart cents: 16 of 16 notes equal golden
+             PASS
+mary         T=-20 notes= 26 in50cFart=100% onTime=100% reatk=0 | in50c= 38% med= 87.4c contour=100% recs=4 octaveMoves=0 sounding=97% mostlySilent=0
+  golden     T=-20 notes= 26 in50cFart=100% onTime=100% reatk=0 | in50c= 38% med= 87.4c contour=100% recs=4 octaveMoves=0 sounding=97% mostlySilent=0
+             heard cents: 26 of 26 notes equal golden
+             fart cents: 26 of 26 notes equal golden
+             PASS
+merryxmas    T=-13 notes= 36 in50cFart=100% onTime=100% reatk=0 | in50c= 11% med=187.6c contour=72% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-13 notes= 36 in50cFart=100% onTime=100% reatk=0 | in50c= 11% med=187.6c contour=72% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 36 of 36 notes equal golden
+             fart cents: 36 of 36 notes equal golden
+             PASS
+michael-row  T=-10 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c= 17% med=152.6c contour=29% recs=6 octaveMoves=2 sounding=96% mostlySilent=0
+  golden     T=-10 notes= 23 in50cFart=100% onTime=100% reatk=0 | in50c= 17% med=152.6c contour=29% recs=6 octaveMoves=2 sounding=96% mostlySilent=0
+             heard cents: 23 of 23 notes equal golden
+             fart cents: 23 of 23 notes equal golden
+             PASS
+minuet-in-g  T=-18 notes= 43 in50cFart=100% onTime=100% reatk=0 | in50c= 30% med=142.6c contour=92% recs=9 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-18 notes= 43 in50cFart=100% onTime=100% reatk=0 | in50c= 30% med=142.6c contour=92% recs=9 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 43 of 43 notes equal golden
+             fart cents: 43 of 43 notes equal golden
+             PASS
+mountain-king T=-11 notes= 52 in50cFart=100% onTime=100% reatk=0 | in50c=  6% med=172.6c contour=96% recs=9 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-11 notes= 52 in50cFart=100% onTime=100% reatk=0 | in50c=  6% med=172.6c contour=96% recs=9 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 52 of 52 notes equal golden
+             fart cents: 52 of 52 notes equal golden
+             PASS
+mulberry-bush T=-15 notes= 36 in50cFart=100% onTime=100% reatk=0 | in50c= 11% med=202.6c contour=62% recs=7 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-15 notes= 36 in50cFart=100% onTime=100% reatk=0 | in50c= 11% med=202.6c contour=62% recs=7 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 36 of 36 notes equal golden
+             fart cents: 36 of 36 notes equal golden
+             PASS
+my-bonnie    T=-30 notes= 21 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=182.6c contour=74% recs=7 octaveMoves=1 sounding=97% mostlySilent=0
+  golden     T=-30 notes= 21 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=182.6c contour=74% recs=7 octaveMoves=1 sounding=97% mostlySilent=0
+             heard cents: 21 of 21 notes equal golden
+             fart cents: 21 of 21 notes equal golden
+             PASS
+my-country-tis T=-17 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c=  4% med=102.6c contour=95% recs=6 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-17 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c=  4% med=102.6c contour=95% recs=6 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 28 of 28 notes equal golden
+             fart cents: 28 of 28 notes equal golden
+             PASS
+my-wild-irish-rose T=-22 notes= 18 in50cFart=100% onTime=100% reatk=0 | in50c= 22% med=257.4c contour=50% recs=8 octaveMoves=2 sounding=98% mostlySilent=0
+  golden     T=-22 notes= 18 in50cFart=100% onTime=100% reatk=0 | in50c= 22% med=257.4c contour=50% recs=8 octaveMoves=2 sounding=98% mostlySilent=0
+             heard cents: 18 of 18 notes equal golden
+             fart cents: 18 of 18 notes equal golden
+             PASS
+new-world-largo T=-31 notes= 22 in50cFart=100% onTime=100% reatk=0 | in50c= 18% med=277.4c contour=61% recs=4 octaveMoves=1 sounding=97% mostlySilent=0
+  golden     T=-31 notes= 22 in50cFart=100% onTime=100% reatk=0 | in50c= 18% med=277.4c contour=61% recs=4 octaveMoves=1 sounding=97% mostlySilent=0
+             heard cents: 22 of 22 notes equal golden
+             fart cents: 22 of 22 notes equal golden
+             PASS
+nobody-knows T=-14 notes= 32 in50cFart=100% onTime=100% reatk=0 | in50c= 12% med=102.6c contour=90% recs=6 octaveMoves=1 sounding=95% mostlySilent=0
+  golden     T=-14 notes= 32 in50cFart=100% onTime=100% reatk=0 | in50c= 12% med=102.6c contour=90% recs=6 octaveMoves=1 sounding=95% mostlySilent=0
+             heard cents: 32 of 32 notes equal golden
+             fart cents: 32 of 32 notes equal golden
+             PASS
+o-christmas-tree T=-13 notes= 39 in50cFart=100% onTime=100% reatk=0 | in50c=  5% med=112.4c contour=88% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-13 notes= 39 in50cFart=100% onTime=100% reatk=0 | in50c=  5% med=112.4c contour=88% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 39 of 39 notes equal golden
+             fart cents: 39 of 39 notes equal golden
+             PASS
+o-come-all-ye-faithful T=-26 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 20% med=122.4c contour=82% recs=7 octaveMoves=1 sounding=97% mostlySilent=0
+  golden     T=-26 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 20% med=122.4c contour=82% recs=7 octaveMoves=1 sounding=97% mostlySilent=0
+             heard cents: 25 of 25 notes equal golden
+             fart cents: 25 of 25 notes equal golden
+             PASS
+o-come-emmanuel T=-13 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 48% med= 62.6c contour=90% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-13 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 48% med= 62.6c contour=90% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 25 of 25 notes equal golden
+             fart cents: 25 of 25 notes equal golden
+             PASS
+o-holy-night T=-18 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c=  8% med=440.0c contour=31% recs=7 octaveMoves=2 sounding=95% mostlySilent=0
+  golden     T=-18 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c=  8% med=440.0c contour=31% recs=7 octaveMoves=2 sounding=95% mostlySilent=0
+             heard cents: 24 of 24 notes equal golden
+             fart cents: 24 of 24 notes equal golden
+             PASS
+ode          T=-14 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 17% med=117.6c contour=75% recs=5 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-14 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 17% med=117.6c contour=75% recs=5 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 30 of 30 notes equal golden
+             fart cents: 30 of 30 notes equal golden
+             PASS
+ode-mutopia  T=-14 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 17% med=117.6c contour=75% recs=5 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-14 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 17% med=117.6c contour=75% recs=5 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 30 of 30 notes equal golden
+             fart cents: 30 of 30 notes equal golden
+             PASS
+oh-dear-what-can-the-matter-be T=-18 notes= 40 in50cFart=100% onTime=100% reatk=0 | in50c=  2% med=212.6c contour=90% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-18 notes= 40 in50cFart=100% onTime=100% reatk=0 | in50c=  2% med=212.6c contour=90% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 40 of 40 notes equal golden
+             fart cents: 40 of 40 notes equal golden
+             PASS
+oh-susanna   T=-10 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=109.9c contour=43% recs=5 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-10 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=109.9c contour=43% recs=5 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 29 of 29 notes equal golden
+             fart cents: 29 of 29 notes equal golden
+             PASS
+old-macdonald T=-4 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c= 62% med= 22.6c contour=60% recs=3 octaveMoves=0 sounding=92% mostlySilent=0
+  golden     T=-4 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c= 62% med= 22.6c contour=60% recs=3 octaveMoves=0 sounding=92% mostlySilent=0
+             heard cents: 16 of 16 notes equal golden
+             fart cents: 16 of 16 notes equal golden
+             PASS
+old-smoky    T=-23 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c= 12% med=172.6c contour=73% recs=6 octaveMoves=1 sounding=98% mostlySilent=0
+  golden     T=-23 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c= 12% med=172.6c contour=73% recs=6 octaveMoves=1 sounding=98% mostlySilent=0
+             heard cents: 16 of 16 notes equal golden
+             fart cents: 16 of 16 notes equal golden
+             PASS
+pack-up-your-troubles T=-19 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c=  7% med=192.6c contour=75% recs=8 octaveMoves=2 sounding=97% mostlySilent=0
+  golden     T=-19 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c=  7% med=192.6c contour=75% recs=8 octaveMoves=2 sounding=97% mostlySilent=0
+             heard cents: 29 of 29 notes equal golden
+             fart cents: 29 of 29 notes equal golden
+             PASS
+polly-wolly-doodle T=-27 notes= 63 in50cFart=100% onTime=100% reatk=0 | in50c= 19% med=107.4c contour=76% recs=6 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-27 notes= 63 in50cFart=100% onTime=100% reatk=0 | in50c= 19% med=107.4c contour=76% recs=6 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 63 of 63 notes equal golden
+             fart cents: 63 of 63 notes equal golden
+             PASS
+pop-goes-the-weasel T=-29 notes= 35 in50cFart=100% onTime=100% reatk=0 | in50c= 57% med= 42.6c contour=100% recs=6 octaveMoves=0 sounding=97% mostlySilent=0
+  golden     T=-29 notes= 35 in50cFart=100% onTime=100% reatk=0 | in50c= 57% med= 42.6c contour=100% recs=6 octaveMoves=0 sounding=97% mostlySilent=0
+             heard cents: 35 of 35 notes equal golden
+             fart cents: 35 of 35 notes equal golden
+             PASS
+radetzky     T=-27 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 20% med=177.4c contour=100% recs=8 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-27 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 20% med=177.4c contour=100% recs=8 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 25 of 25 notes equal golden
+             fart cents: 25 of 25 notes equal golden
+             PASS
+red-river-valley T=-21 notes= 19 in50cFart=100% onTime=100% reatk=0 | in50c= 21% med= 87.6c contour=67% recs=6 octaveMoves=1 sounding=95% mostlySilent=0
+  golden     T=-21 notes= 19 in50cFart=100% onTime=100% reatk=0 | in50c= 21% med= 87.6c contour=67% recs=6 octaveMoves=1 sounding=95% mostlySilent=0
+             heard cents: 19 of 19 notes equal golden
+             fart cents: 19 of 19 notes equal golden
+             PASS
+ring-around-the-rosie T=-10 notes= 36 in50cFart=100% onTime=100% reatk=0 | in50c= 11% med=207.4c contour=65% recs=4 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-10 notes= 36 in50cFart=100% onTime=100% reatk=0 | in50c= 11% med=207.4c contour=65% recs=4 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 36 of 36 notes equal golden
+             fart cents: 36 of 36 notes equal golden
+             PASS
+row          T=-20 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c= 15% med=217.4c contour=93% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-20 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c= 15% med=217.4c contour=93% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 27 of 27 notes equal golden
+             fart cents: 27 of 27 notes equal golden
+             PASS
+rule-britannia T=-10 notes= 22 in50cFart=100% onTime=100% reatk=0 | in50c=  5% med=272.6c contour=79% recs=6 octaveMoves=1 sounding=95% mostlySilent=0
+  golden     T=-10 notes= 22 in50cFart=100% onTime=100% reatk=0 | in50c=  5% med=272.6c contour=79% recs=6 octaveMoves=1 sounding=95% mostlySilent=0
+             heard cents: 22 of 22 notes equal golden
+             fart cents: 22 of 22 notes equal golden
+             PASS
+saints       T=-11 notes= 31 in50cFart=100% onTime=100% reatk=0 | in50c= 65% med= 27.4c contour=96% recs=5 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-11 notes= 31 in50cFart=100% onTime=100% reatk=0 | in50c= 65% med= 27.4c contour=96% recs=5 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 31 of 31 notes equal golden
+             fart cents: 31 of 31 notes equal golden
+             PASS
+santa-lucia  T=-13 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=202.6c contour=75% recs=8 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-13 notes= 29 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=202.6c contour=75% recs=8 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 29 of 29 notes equal golden
+             fart cents: 29 of 29 notes equal golden
+             PASS
+scarborough-fair T=-17 notes= 20 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=202.6c contour=57% recs=8 octaveMoves=1 sounding=95% mostlySilent=0
+  golden     T=-17 notes= 20 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=202.6c contour=57% recs=8 octaveMoves=1 sounding=95% mostlySilent=0
+             heard cents: 20 of 20 notes equal golden
+             fart cents: 20 of 20 notes equal golden
+             PASS
+scotland-the-brave T=-20 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 12% med=172.6c contour=95% recs=9 octaveMoves=0 sounding=97% mostlySilent=0
+  golden     T=-20 notes= 25 in50cFart=100% onTime=100% reatk=0 | in50c= 12% med=172.6c contour=95% recs=9 octaveMoves=0 sounding=97% mostlySilent=0
+             heard cents: 25 of 25 notes equal golden
+             fart cents: 25 of 25 notes equal golden
+             PASS
+shenandoah   T=-14 notes= 38 in50cFart=100% onTime=100% reatk=0 | in50c= 13% med=147.4c contour=68% recs=9 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-14 notes= 38 in50cFart=100% onTime=100% reatk=0 | in50c= 13% med=147.4c contour=68% recs=9 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 38 of 38 notes equal golden
+             fart cents: 38 of 38 notes equal golden
+             PASS
+silvery-moon T=-15 notes= 26 in50cFart=100% onTime=100% reatk=0 | in50c= 12% med=112.6c contour=64% recs=8 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-15 notes= 26 in50cFart=100% onTime=100% reatk=0 | in50c= 12% med=112.6c contour=64% recs=8 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 26 of 26 notes equal golden
+             fart cents: 26 of 26 notes equal golden
+             PASS
+simple-gifts T=-8 notes= 41 in50cFart=100% onTime=100% reatk=0 | in50c= 34% med= 72.6c contour=88% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-8 notes= 41 in50cFart=100% onTime=100% reatk=0 | in50c= 34% med= 72.6c contour=88% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 41 of 41 notes equal golden
+             fart cents: 41 of 41 notes equal golden
+             PASS
+skip-to-my-lou T=-5 notes= 31 in50cFart=100% onTime=100% reatk=0 | in50c= 10% med=102.6c contour=100% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-5 notes= 31 in50cFart=100% onTime=100% reatk=0 | in50c= 10% med=102.6c contour=100% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 31 of 31 notes equal golden
+             fart cents: 31 of 31 notes equal golden
+             PASS
+skye-boat-song T=-26 notes= 38 in50cFart=100% onTime=100% reatk=0 | in50c= 21% med=167.4c contour=80% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-26 notes= 38 in50cFart=100% onTime=100% reatk=0 | in50c= 21% med=167.4c contour=80% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 38 of 38 notes equal golden
+             fart cents: 38 of 38 notes equal golden
+             PASS
+sloop-john-b T=-18 notes= 22 in50cFart=100% onTime=100% reatk=0 | in50c= 32% med= 72.6c contour=100% recs=5 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-18 notes= 22 in50cFart=100% onTime=100% reatk=0 | in50c= 32% med= 72.6c contour=100% recs=5 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 22 of 22 notes equal golden
+             fart cents: 22 of 22 notes equal golden
+             PASS
+star-spangled-banner T=-14 notes= 33 in50cFart=100% onTime=100% reatk=0 | in50c= 36% med=112.6c contour=90% recs=9 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-14 notes= 33 in50cFart=100% onTime=100% reatk=0 | in50c= 36% med=112.6c contour=90% recs=9 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 33 of 33 notes equal golden
+             fart cents: 33 of 33 notes equal golden
+             PASS
+stars-and-stripes T=-24 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c= 19% med= 77.4c contour=82% recs=4 octaveMoves=1 sounding=98% mostlySilent=0
+  golden     T=-24 notes= 16 in50cFart=100% onTime=100% reatk=0 | in50c= 19% med= 77.4c contour=82% recs=4 octaveMoves=1 sounding=98% mostlySilent=0
+             heard cents: 16 of 16 notes equal golden
+             fart cents: 16 of 16 notes equal golden
+             PASS
+streets-of-laredo T=-13 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 33% med= 87.4c contour=77% recs=7 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-13 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 33% med= 87.4c contour=77% recs=7 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 30 of 30 notes equal golden
+             fart cents: 30 of 30 notes equal golden
+             PASS
+sugar-plum   T=-7 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 21% med=127.6c contour=52% recs=8 octaveMoves=1 sounding=97% mostlySilent=0
+  golden     T=-7 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 21% med=127.6c contour=52% recs=8 octaveMoves=1 sounding=97% mostlySilent=0
+             heard cents: 28 of 28 notes equal golden
+             fart cents: 28 of 28 notes equal golden
+             PASS
+sur-le-pont  T=-10 notes= 41 in50cFart=100% onTime=100% reatk=0 | in50c= 54% med= 22.6c contour=68% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-10 notes= 41 in50cFart=100% onTime=100% reatk=0 | in50c= 54% med= 22.6c contour=68% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 41 of 41 notes equal golden
+             fart cents: 41 of 41 notes equal golden
+             PASS
+swan-lake    T=-23 notes= 36 in50cFart=100% onTime=100% reatk=0 | in50c= 19% med=172.6c contour=94% recs=7 octaveMoves=0 sounding=91% mostlySilent=0
+  golden     T=-23 notes= 36 in50cFart=100% onTime=100% reatk=0 | in50c= 19% med=172.6c contour=94% recs=7 octaveMoves=0 sounding=91% mostlySilent=0
+             heard cents: 36 of 36 notes equal golden
+             fart cents: 36 of 36 notes equal golden
+             PASS
+swing-low    T=-17 notes= 32 in50cFart=100% onTime=100% reatk=0 | in50c= 31% med=115.0c contour=95% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-17 notes= 32 in50cFart=100% onTime=100% reatk=0 | in50c= 31% med=115.0c contour=95% recs=7 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 32 of 32 notes equal golden
+             fart cents: 32 of 32 notes equal golden
+             PASS
+teddy-bears-picnic T=-20 notes= 42 in50cFart=100% onTime=100% reatk=0 | in50c=  5% med=207.6c contour=68% recs=9 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-20 notes= 42 in50cFart=100% onTime=100% reatk=0 | in50c=  5% med=207.6c contour=68% recs=9 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 42 of 42 notes equal golden
+             fart cents: 42 of 42 notes equal golden
+             PASS
+this-old-man T=-11 notes= 32 in50cFart=100% onTime=100% reatk=0 | in50c= 62% med= 25.0c contour=100% recs=6 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-11 notes= 32 in50cFart=100% onTime=100% reatk=0 | in50c= 62% med= 25.0c contour=100% recs=6 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 32 of 32 notes equal golden
+             fart cents: 32 of 32 notes equal golden
+             PASS
+three-blind-mice T=-16 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c= 25% med=200.0c contour=89% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-16 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c= 25% med=200.0c contour=89% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 24 of 24 notes equal golden
+             fart cents: 24 of 24 notes equal golden
+             PASS
+tipperary    T=-12 notes= 55 in50cFart=100% onTime=100% reatk=0 | in50c= 33% med=112.6c contour=64% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-12 notes= 55 in50cFart=100% onTime=100% reatk=0 | in50c= 33% med=112.6c contour=64% recs=6 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 55 of 55 notes equal golden
+             fart cents: 55 of 55 notes equal golden
+             PASS
+trumpet-voluntary T=-28 notes= 59 in50cFart= 98% onTime=100% reatk=0 | in50c=  0% med=237.6c contour=27% recs=5 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-28 notes= 59 in50cFart= 98% onTime=100% reatk=0 | in50c=  0% med=237.6c contour=27% recs=5 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 59 of 59 notes equal golden
+             fart cents: 59 of 59 notes equal golden
+             PASS
+twelve-days  T=-17 notes= 39 in50cFart=100% onTime=100% reatk=0 | in50c= 28% med=207.4c contour=86% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-17 notes= 39 in50cFart=100% onTime=100% reatk=0 | in50c= 28% med=207.4c contour=86% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 39 of 39 notes equal golden
+             fart cents: 39 of 39 notes equal golden
+             PASS
+twinkle      T=-17 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=220.1c contour=53% recs=6 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-17 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=220.1c contour=53% recs=6 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 28 of 28 notes equal golden
+             fart cents: 28 of 28 notes equal golden
+             PASS
+up-on-the-housetop T=-11 notes= 31 in50cFart=100% onTime=100% reatk=0 | in50c= 84% med= 17.4c contour=100% recs=5 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-11 notes= 31 in50cFart=100% onTime=100% reatk=0 | in50c= 84% med= 17.4c contour=100% recs=5 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 31 of 31 notes equal golden
+             fart cents: 31 of 31 notes equal golden
+             PASS
+waltzing-matilda T=-8 notes= 47 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=212.6c contour=62% recs=8 octaveMoves=0 sounding=96% mostlySilent=0
+  golden     T=-8 notes= 47 in50cFart=100% onTime=100% reatk=0 | in50c=  0% med=212.6c contour=62% recs=8 octaveMoves=0 sounding=96% mostlySilent=0
+             heard cents: 47 of 47 notes equal golden
+             fart cents: 47 of 47 notes equal golden
+             PASS
+washington-post T=-26 notes= 34 in50cFart=100% onTime=100% reatk=0 | in50c= 26% med= 77.4c contour=71% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-26 notes= 34 in50cFart=100% onTime=100% reatk=0 | in50c= 26% med= 77.4c contour=71% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 34 of 34 notes equal golden
+             fart cents: 34 of 34 notes equal golden
+             PASS
+water-is-wide T=-14 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c= 19% med=167.4c contour=74% recs=8 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-14 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c= 19% med=167.4c contour=74% recs=8 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 27 of 27 notes equal golden
+             fart cents: 27 of 27 notes equal golden
+             PASS
+wayfaring-stranger T=-21 notes= 41 in50cFart=100% onTime=100% reatk=0 | in50c= 12% med=147.4c contour=82% recs=8 octaveMoves=0 sounding=97% mostlySilent=0
+  golden     T=-21 notes= 41 in50cFart=100% onTime=100% reatk=0 | in50c= 12% med=147.4c contour=82% recs=8 octaveMoves=0 sounding=97% mostlySilent=0
+             heard cents: 41 of 41 notes equal golden
+             fart cents: 41 of 41 notes equal golden
+             PASS
+we-three-kings T=-13 notes= 18 in50cFart=100% onTime=100% reatk=0 | in50c= 33% med=150.0c contour=88% recs=5 octaveMoves=0 sounding=93% mostlySilent=0
+  golden     T=-13 notes= 18 in50cFart=100% onTime=100% reatk=0 | in50c= 33% med=150.0c contour=88% recs=5 octaveMoves=0 sounding=93% mostlySilent=0
+             heard cents: 18 of 18 notes equal golden
+             fart cents: 18 of 18 notes equal golden
+             PASS
+what-a-friend T=-15 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 10% med=172.6c contour=80% recs=8 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-15 notes= 30 in50cFart=100% onTime=100% reatk=0 | in50c= 10% med=172.6c contour=80% recs=8 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 30 of 30 notes equal golden
+             fart cents: 30 of 30 notes equal golden
+             PASS
+wild-rover   T=-11 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c= 50% med= 42.6c contour=63% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+  golden     T=-11 notes= 24 in50cFart=100% onTime=100% reatk=0 | in50c= 50% med= 42.6c contour=63% recs=8 octaveMoves=0 sounding=95% mostlySilent=0
+             heard cents: 24 of 24 notes equal golden
+             fart cents: 24 of 24 notes equal golden
+             PASS
+william-tell T=-20 notes= 39 in50cFart=100% onTime=100% reatk=0 | in50c=  3% med=102.6c contour=86% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-20 notes= 39 in50cFart=100% onTime=100% reatk=0 | in50c=  3% med=102.6c contour=86% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 39 of 39 notes equal golden
+             fart cents: 39 of 39 notes equal golden
+             PASS
+yankee-doodle T=-11 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 54% med= 22.6c contour=70% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+  golden     T=-11 notes= 28 in50cFart=100% onTime=100% reatk=0 | in50c= 54% med= 22.6c contour=70% recs=7 octaveMoves=0 sounding=94% mostlySilent=0
+             heard cents: 28 of 28 notes equal golden
+             fart cents: 28 of 28 notes equal golden
+             PASS
+yellow-rose-of-texas T=-28 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c=  7% med= 75.0c contour=68% recs=8 octaveMoves=1 sounding=98% mostlySilent=0
+  golden     T=-28 notes= 27 in50cFart=100% onTime=100% reatk=0 | in50c=  7% med= 75.0c contour=68% recs=8 octaveMoves=1 sounding=98% mostlySilent=0
+             heard cents: 27 of 27 notes equal golden
+             fart cents: 27 of 27 notes equal golden
+             PASS
+124 of 124 renders pass
