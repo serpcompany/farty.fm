@@ -56,6 +56,7 @@ A saved Toot shares the same way, through the same Handle, `shares` rows (`kind`
 - **Link preview:** `og:title` is "Mary Had a Little Lamb by @maya", `og:description` "Mary Had a Little Lamb, played on farts. Tap to play." (a Sound Pad Toot's "A fart song on Farty. Tap to play."), and the image says "A fart song by @maya", with no note.
 - **Report limits are shared with Recordings:** the same 10 an hour per reporter and 300 an hour for the site count both, and a Toot gets 5 a day like a Recording.
 - Deleting a shared Toot says its link stops working too.
+- **A Toot that plays a taken-down Recording is down too.** Its page, image, audio and Report answer 404 while any Recording in its Arrangement or Sound Pad Performance is taken down, and sharing it answers 403 `taken_down`, so a Toot never makes that Recording's audio public again (`sharedToot`, `tootPlaysTakenDown` in `src/db/sharing.ts`).
 
 ## Tables
 

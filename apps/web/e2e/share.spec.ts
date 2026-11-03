@@ -317,10 +317,11 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
   let tootId = ''
   let title = ''
   let link = ''
+  const email = newEmail(testInfo, 'share-toot')
 
   await test.step(`signs in and saves a Toot of ${twinkle}`, async () => {
     await page.goto('/profile/')
-    await signInByApi(page, newEmail(testInfo, 'share-toot'))
+    await signInByApi(page, email)
     await page.goto('/profile/')
     await loadTheFixtureLibrary(page)
     await page.goto('/compose/twinkle/')
@@ -392,6 +393,14 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(other.getByTestId('shared-song')).toHaveText(twinkle)
     await expect(other.getByRole('navigation', { name: 'Tabs' })).toHaveCount(0)
     await shot(other, 'toot-shared-page')
+
+    // Nothing private: not the Toot's id nor its owner's email, in the HTML or its page data.
+    const html = (await response?.text()) ?? ''
+    expect(html).toContain(title)
+    for (const secret of [tootId, email]) {
+      expect(html).not.toContain(secret)
+      expect(await other.content()).not.toContain(secret)
+    }
 
     // Unlisted, with a link preview of its own.
     const meta = (property: string) =>

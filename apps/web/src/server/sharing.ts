@@ -14,7 +14,8 @@ import {
   type ShareRow,
   sharedRecording,
   sharedToot,
-  shareOf
+  shareOf,
+  tootPlaysTakenDown
 } from '@/db/sharing'
 import { handleProblem, normalizeHandle, suggestHandle } from '@/lib/handle'
 import type { Recording, Trim } from '@/lib/recordings'
@@ -128,7 +129,8 @@ export async function listShares(db: Database, user: SessionUser, request: Reque
  * `PUT /api/share/{kind}/{id}/`: shares the user's own item, or answers the link it already has.
  * 201 with `{ url }` for a new link, 200 for the same one again. 409 `no_handle` before the user
  * has a Handle, 404 when the item isn't in their account (not uploaded yet, or someone else's),
- * 410 when it's deleted and 403 `taken_down` when Farty took it down after a report.
+ * 410 when it's deleted and 403 `taken_down` when Farty took it down after a report, or, for a
+ * Toot, took down a Recording it plays.
  */
 export async function shareItem(
   kind: Kind,
@@ -147,6 +149,9 @@ export async function shareItem(
   if (status === 'deleted') return apiError(410, 'deleted')
   const existing = await shareOf(db, user.id, kind, id)
   if (existing?.takenDownAt) return apiError(403, 'taken_down')
+  if (kind === 'toots' && (await tootPlaysTakenDown(db, user.id, id))) {
+    return apiError(403, 'taken_down')
+  }
   const { share, created } = existing
     ? { share: existing, created: false }
     : await addShare(db, {
