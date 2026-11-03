@@ -3,9 +3,11 @@
 Making and playing a Toot is free. Saving one to Toots needs a free account and costs $0.99,
 through Stripe Checkout, on Production as on Staging and a local run
 ([ADR 0010](../../../../docs/adr/0010-pay-to-save-a-toot.md),
-[ADR 0013](../../../../docs/adr/0013-keeping-recordings-needs-a-free-account.md)). The routes, the
-webhook and the owner's Stripe setup are in [Payments](../../../../docs/agents/payments.md). The
-rest of [Song Creator](song-creator.md) is the same everywhere.
+[ADR 0013](../../../../docs/adr/0013-keeping-recordings-needs-a-free-account.md)). A Toot of a Song
+is saved from [Song Creator](song-creator.md), and a take from the [Sound Pad](sound-pad.md), with
+the same Save to Toots ([ADR 0017](../../../../docs/adr/0017-sound-pad-takes-save-as-toots.md)).
+The routes, the webhook and the owner's Stripe setup are in
+[Payments](../../../../docs/agents/payments.md). The rest of Song Creator is the same everywhere.
 
 ## Where saving is paid
 
@@ -78,6 +80,23 @@ adding one makes saving free there, on the browser's side and the server's.
   each Song with your farts, plays a tapped note, and saves it as a Toot";
   `src/app/api/payments-stripe.workers.test.ts`, "starts a Checkout Session for the Toot, back to its
   Song Creator").
+- A Sound Pad Toot's checkout comes back to the Sound Pad, which makes the same take again with the
+  id it was paid for and saves it. Its Stripe line reads "Save your Sound Pad Toot", and its row
+  has no Song (`e2e/sound-pad.spec.ts`, "records a take on the Pads, plays it back, and saves it as
+  a Toot for $0.99"; `src/app/api/payments-stripe.workers.test.ts`, "starts a Checkout Session for
+  a Sound Pad Toot, back to the Sound Pad (ADR 0017)"; `src/app/api/payments.workers.test.ts`,
+  "saves a Sound Pad Toot once it is paid for, back to the Sound Pad (ADR 0017)").
+- A Sound Pad take paid for whose return from the checkout never loaded is saved the next time the
+  Sound Pad opens, with no second payment. That check (`?check=stored`) answers from what the
+  account has stored and never asks Stripe, so it spends none of the return's checks; a payment
+  whose webhook hasn't landed reads unpaid, and the next open asks again. The payment counts as
+  unused only until a save uses it ([Sound Pad](sound-pad.md#a-kept-take)) (`e2e/sound-pad.spec.ts`,
+  "saves a paid take on the next open when the return from Checkout never loaded, paying once";
+  `src/app/api/payments-stripe.workers.test.ts`, "answers the Sound Pad’s check on open from D1
+  alone, never asking Stripe (ADR 0017)"; `src/app/api/payments.workers.test.ts`, "says a payment
+  is unused until a save uses it, so a kept take saves only then (ADR 0017)";
+  `src/lib/toot-payment.test.ts`, "is unused only for a payment no save has used, and null when the
+  server can’t say").
 - Cancel at the checkout comes back to Song Creator with the same Toot, still unsaved, and Save pays
   for that same Toot (`e2e/account-pay.spec.ts`, "cancelled at the checkout, the Toot is still
   unsaved, and Save pays for that same Toot").
@@ -121,6 +140,9 @@ adding one makes saving free there, on the browser's side and the server's.
   deleted"; `src/app/api/payments-stripe.workers.test.ts`, "offers a paid Toot of the Song never
   saved, without asking Stripe again"; `src/components/farty/song-creator.interaction.test.tsx`,
   "saves a paid Toot of the Song never saved, instead of paying again").
+- A paid Toot of a Song never stands in for a Sound Pad Toot, nor the other way round
+  (`src/app/api/payments.workers.test.ts`, "never offers a paid Sound Pad Toot for a Song’s, or a
+  Song’s for the Sound Pad").
 - Save goes nowhere but Stripe's page or this site's dev checkout (`src/lib/toot-payment.test.ts`,
   "goes nowhere but Stripe’s page or this site’s dev checkout").
 
@@ -132,6 +154,10 @@ adding one makes saving free there, on the browser's side and the server's.
   `src/app/api/payments.workers.test.ts`, "refuses a deleted Toot, and one past the Toot limit,
   before anything is paid"; `src/components/farty/song-creator.interaction.test.tsx`, "says why a
   checkout couldn't start (%s)").
+- A Sound Pad take this browser can't keep while the person pays starts no checkout, and Save says
+  "This take can't be saved in this browser: it can't keep the take while you pay."
+  (`src/components/farty/song-creator.interaction.test.tsx`, "starts no Checkout when the take
+  can’t be kept to make again back from it (ADR 0017)").
 - Past the checkouts one user may start, Save says "You've started a lot of payments. Try again
   later." (`src/app/api/payments.workers.test.ts`, "limits how many checkouts one user starts";
   `src/components/farty/song-creator.interaction.test.tsx`, "says to try later past the checkout

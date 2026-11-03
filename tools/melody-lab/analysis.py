@@ -1,5 +1,5 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import librosa
@@ -14,17 +14,20 @@ SR = 44100
 HOP = 256
 PYIN = {"fmin": 45, "fmax": 900, "sr": SR, "frame_length": 2048, "hop_length": HOP}
 
-LEVEL_HOP = int(0.005 * SR)
+LEVEL_HOP_S = 0.005
+LEVEL_HOP = int(LEVEL_HOP_S * SR)
 ONSET_BELOW_PEAK_DB = 12
 PRE_ROLL_S = 0.008
 SOUND_BELOW_PEAK_DB = 30
 REATTACK_DIP_DB = 6
 REATTACK_RISE_DB = 4
 REATTACK_AFTER_S = 0.06
+LEAD_IN_GAP_S = 0.05
+LEAD_IN_MAX_S = 0.25
 
 MIN_PITCH_CONF = 0.2
 FAR_FROM_CENTER = 6.0
-PITCH_HEAD_S = 0.45
+PITCH_WINDOW_S = 0.45
 AUDITION_LENGTHS_S = (0.12, 0.2, 0.35, 0.6)
 AUDITION_CENTS = 40
 SETTLE_CENTS = 50.0
@@ -46,6 +49,8 @@ class Source:
     start: int = 0
     end: int = 0
     pitch_estimate: float | None = None
+    pitch_end: int = 0
+    lead_in: np.ndarray = field(default_factory=lambda: np.zeros(0))
 
     @property
     def pitched(self):
@@ -54,6 +59,10 @@ class Source:
     @property
     def seconds(self):
         return len(self.audio) / SR
+
+    @property
+    def pitch_audio(self):
+        return self.audio[: max(0, self.pitch_end - self.start)]
 
 
 def level_db(y, frame_length):
@@ -76,8 +85,24 @@ def note_segment(y):
         if rises and (i - a0) * LEVEL_HOP > REATTACK_AFTER_S * SR:
             reattack_at = dip_i
             break
-    end = (reattack_at if reattack_at is not None else end_i) * LEVEL_HOP + LEVEL_HOP
-    return start, min(len(y), end), reattack_at is not None
+    end = min(len(y), end_i * LEVEL_HOP + LEVEL_HOP)
+    pitch_end = min(end, reattack_at * LEVEL_HOP + LEVEL_HOP) if reattack_at is not None else end
+    return start, end, pitch_end, reattack_at is not None
+
+
+def lead_in_start(y, start):
+    fine = level_db(y, 2 * LEVEL_HOP)
+    peak = fine.max()
+    attack = int(np.argmax(fine >= peak - ONSET_BELOW_PEAK_DB))
+    first, below = attack, 0
+    for i in range(attack - 1, -1, -1):
+        if fine[i] >= peak - SOUND_BELOW_PEAK_DB:
+            first, below = i, 0
+        else:
+            below += 1
+            if below > round(LEAD_IN_GAP_S / LEVEL_HOP_S):
+                break
+    return min(start, max(0, first * LEVEL_HOP - int(PRE_ROLL_S * SR), start - int(LEAD_IN_MAX_S * SR)))
 
 
 def weighted_median(mids, w):
@@ -105,22 +130,33 @@ def smoothed_contour(f0, frame_rms):
     return librosa.midi_to_hz(m)
 
 
-def recording_pitch(f0, frame_rms, n_samples):
-    head = min(len(f0), int(PITCH_HEAD_S * SR / HOP))
-    v = np.isfinite(f0[:head])
-    coverage = v.sum() / max(1, head if n_samples > PITCH_HEAD_S * SR else len(f0))
+def estimate_pitch(f0, frame_rms, n_body, a):
+    window = int(PITCH_WINDOW_S * SR / HOP)
+    end = min(len(f0), a + window)
+    v = np.isfinite(f0[a:end])
+    coverage = v.sum() / max(1, window if n_body > PITCH_WINDOW_S * SR else len(f0))
     if v.sum() < 4:
         return None, 0.0
-    mids = librosa.hz_to_midi(f0[:head][v])
-    med = weighted_median(mids, frame_rms[:head][v])
+    mids = librosa.hz_to_midi(f0[a:end][v])
+    med = weighted_median(mids, frame_rms[a:end][v])
     spread = np.median(np.abs(mids - med))
     conf = float(np.clip(coverage, 0, 1) * np.clip(1 - spread / 3, 0, 1))
     return (float(med) if conf >= MIN_PITCH_CONF else None), conf
 
 
+def recording_pitch(f0, frame_rms, n_body):
+    head = estimate_pitch(f0, frame_rms, n_body, 0)
+    kept = np.flatnonzero(np.isfinite(f0))
+    if head[0] is not None or not len(kept) or kept[0] == 0:
+        return head
+    later = estimate_pitch(f0, frame_rms, n_body, int(kept[0]))
+    return later if later[0] is not None else head
+
+
 def analyze_recording(rid, y):
-    start, end, cut_at_reattack = note_segment(y)
-    body = y[start:end].astype(np.float64)
+    start, end, pitch_end, cut_at_reattack = note_segment(y)
+    fart = y[start:end].astype(np.float64)
+    body = fart[: pitch_end - start]
     f0, voiced = voiced_f0(body)
     f0 = np.where(voiced, f0, np.nan)
     frame_rms = librosa.feature.rms(y=body, frame_length=2048, hop_length=HOP)[0][: len(f0)]
@@ -129,14 +165,16 @@ def analyze_recording(rid, y):
     src = Source(
         id=rid,
         cut_at_reattack=cut_at_reattack,
-        audio=body,
+        audio=fart,
         f0=f0,
         ref_midi=ref_midi,
         pitch_confidence=round(conf, 2),
-        rms_db=float(20 * np.log10(np.sqrt(np.mean(body**2)) + 1e-9)),
+        rms_db=float(20 * np.log10(np.sqrt(np.mean(fart**2)) + 1e-9)),
         start=start,
         end=end,
         pitch_estimate=ref_midi,
+        pitch_end=pitch_end,
+        lead_in=y[lead_in_start(y, start) : start].astype(np.float64),
     )
     if src.pitched:
         src.min_note_s = audition(src)
@@ -148,29 +186,33 @@ def analyze_recording(rid, y):
 
 
 def audition(src):
+    body = src.pitch_audio
+    seconds = len(body) / SR
     for length in AUDITION_LENGTHS_S:
-        n = int(min(length, src.seconds) * SR)
-        f0, voiced = voiced_f0(variable_resample(src.audio, src.f0, n, src.ref_midi))
+        n = int(min(length, seconds) * SR)
+        f0, voiced = voiced_f0(variable_resample(body, src.f0, n, src.ref_midi))
         f = f0[voiced & np.isfinite(f0)]
         if len(f) >= 2 and abs(np.median(librosa.hz_to_midi(f)) - src.ref_midi) * 100 <= AUDITION_CENTS:
             return length
-        if length >= src.seconds:
+        if length >= seconds:
             break
     return None
 
 
 def heard_cents(src):
-    f0, voiced = voiced_f0(variable_resample(src.audio, src.f0, len(src.audio), src.ref_midi))
+    body = src.pitch_audio
+    f0, voiced = voiced_f0(variable_resample(body, src.f0, len(body), src.ref_midi))
     ok = voiced & np.isfinite(f0)
     return np.where(ok, (librosa.hz_to_midi(np.where(ok, f0, 1.0)) - src.ref_midi) * 100, np.nan)
 
 
 def settle_time(src):
+    seconds = len(src.pitch_audio) / SR
     on = np.abs(np.nan_to_num(heard_cents(src), nan=np.inf)) <= SETTLE_CENTS
     for i in range(len(on) - SETTLE_RUN_FRAMES + 1):
         if on[i : i + SETTLE_RUN_FRAMES].all():
-            return min(src.seconds, i * HOP / SR)
-    return src.seconds
+            return min(seconds, i * HOP / SR)
+    return seconds
 
 
 def read_manifest():

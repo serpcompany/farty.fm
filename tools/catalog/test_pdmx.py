@@ -64,6 +64,18 @@ class Picking(unittest.TestCase):
         self.assertEqual([pdmx.score_id(r) for _, r in c.eligible], ["6420004"])
         self.assertEqual(c.rejected, {"its bar lines are off the tune": 1})
 
+    def test_a_score_that_isnt_the_melody_like_a_hymns_tenor_part_is_never_picked(self):
+        rows = [row("My Faith Looks Up To Thee: Tenor", sid="562231", rating="4.9"),
+                row("My faith looks up to Thee - Lowell Mason", sid="5789390")]
+        [c] = pdmx.find_candidates(rows, titles("faith | My Faith Looks Up To Thee"))
+        self.assertEqual([pdmx.score_id(r) for _, r in c.eligible], ["5789390"])
+        self.assertEqual(c.rejected, {"it isn't the tune's melody": 1})
+
+    def test_no_catalog_song_has_a_score_that_isnt_the_melody(self):
+        for entry in json.loads((ROOT / "catalog/catalog.json").read_text(encoding="utf-8")):
+            with self.subTest(song=entry["id"]):
+                self.assertNotIn(entry["source"].get("musescore_score_id"), pdmx.NOT_THE_MELODY)
+
     def test_no_catalog_song_but_saints_has_a_misbarred_score(self):
         for entry in json.loads((ROOT / "catalog/catalog.json").read_text(encoding="utf-8")):
             if entry["id"] == "saints":
@@ -227,9 +239,11 @@ class Catalog(unittest.TestCase):
                 problems = pdmx.new_title_problems(titles(line)[0], [{"id": "spider", "title": catalog_title}])
                 self.assertEqual(problems, [f"the catalog already has {catalog_title!r} (spider)"])
 
-    def test_merge_replaces_only_its_own_batch(self):
+    def test_merge_replaces_only_its_own_batch_in_its_place_and_puts_a_new_batch_last(self):
         new = {"id": "z", "title": "Z", "import": {"titles": "tools/catalog/titles-01.txt"}}
         merged = pdmx.merge_catalog([self.hand, self.mine, self.other], "tools/catalog/titles-01.txt", [new])
+        self.assertEqual([e["id"] for e in merged], ["mary", "z", "x"])
+        merged = pdmx.merge_catalog([self.hand, self.other], "tools/catalog/titles-01.txt", [new])
         self.assertEqual([e["id"] for e in merged], ["mary", "x", "z"])
         with self.assertRaises(ValueError):
             pdmx.merge_catalog([self.hand], "tools/catalog/titles-01.txt", [{**new, "id": "mary"}])

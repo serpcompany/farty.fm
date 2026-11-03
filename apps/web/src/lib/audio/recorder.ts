@@ -13,6 +13,7 @@ import {
   interrupted,
   type Microphone,
   MicrophoneReleasedError,
+  moveMicrophone,
   openMicrophone,
   releaseMicrophone
 } from './microphone'
@@ -21,30 +22,56 @@ import { stopPlayback } from './player'
 export type Take = {
   stop(): Promise<PcmAudio>
   cancel(): void
+  readonly sampleRate: number
+  listen(listener: (batch: Float32Array) => void): void
 }
 
 class NoMicrophoneAudioError extends Error {
+  readonly stoodStill: boolean
+
   constructor(context: AudioContext, clockAt: number) {
     super('No audio from the microphone')
     const state = String(context.state).replace(/[^a-z]/gi, '')
-    const clock = context.currentTime > clockAt ? 'Ran' : 'Stopped'
+    const clockRan = context.currentTime > clockAt
+    this.stoodStill = context.state === 'running' && !clockRan
+    const clock = clockRan ? 'Ran' : 'Stopped'
     this.name = `NoAudio${state.charAt(0).toUpperCase()}${state.slice(1)}Clock${clock}`
   }
 }
 
-const firstBatchTimeoutMs = 3000
+export const firstBatchTimeoutMs = 3000
 const lastBatchTimeoutMs = 500
 
-export async function startTake(onInterrupted: () => void): Promise<Take> {
+export async function startTake(
+  onInterrupted: () => void,
+  onRetry?: (error: NoMicrophoneAudioError) => void
+): Promise<Take> {
+  startContext()
+  try {
+    return await startOnce(onInterrupted)
+  } catch (error) {
+    if (!(error instanceof NoMicrophoneAudioError && error.stoodStill)) throw error
+    onRetry?.(error)
+    startContext()
+    return startOnce(onInterrupted)
+  }
+}
+
+function startContext(): void {
   audioContext()
     .resume()
     .catch(() => {})
+}
+
+async function startOnce(onInterrupted: () => void): Promise<Take> {
   const open = currentMicrophone()
   if (open && !takeInProgress() && interrupted(open)) releaseMicrophone()
   let mic = await openMicrophone()
-  if (interrupted(mic) && !takeInProgress()) {
-    releaseMicrophone()
-    mic = await openMicrophone()
+  if (!takeInProgress()) {
+    if (interrupted(mic)) {
+      releaseMicrophone()
+      mic = await openMicrophone()
+    } else if (mic.context !== audioContext()) mic = await moveMicrophone(mic)
   }
   const resumed = mic.resumed
   mic.resumed = false
@@ -92,6 +119,7 @@ async function capture(
   const take: Capturing = {
     id,
     chunks: [],
+    listener: null,
     began: () => begin(),
     finished: null,
     lost: () => {
@@ -120,6 +148,11 @@ async function capture(
 
   return {
     first: take.chunks[0],
+    sampleRate: mic.context.sampleRate,
+    listen(listener) {
+      for (const chunk of take.chunks) listener(chunk)
+      take.listener = listener
+    },
     async stop() {
       if (takeInProgress() === take) {
         await new Promise<void>(resolve => {

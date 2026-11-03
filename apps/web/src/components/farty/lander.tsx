@@ -368,16 +368,22 @@ function DownloadApp({ qrCode, className }: { qrCode: ReactNode; className: stri
       >
         Download App
       </DialogTrigger>
-      <DialogContent className="justify-items-center gap-5 p-6 text-center">
-        <DialogHeader>
-          <DialogTitle className="text-lg">Scan to open Farty on your phone</DialogTitle>
-        </DialogHeader>
-        {qrCode}
-        <DialogDescription className="text-base">
-          Then add it to your Home Screen. On iPhone, it's in the Share menu.
-        </DialogDescription>
-      </DialogContent>
+      <ScanToOpen qrCode={qrCode} />
     </Dialog>
+  )
+}
+
+export function ScanToOpen({ qrCode }: { qrCode: ReactNode }) {
+  return (
+    <DialogContent className="justify-items-center gap-5 p-6 text-center">
+      <DialogHeader>
+        <DialogTitle className="text-lg">Scan to open Farty on your phone</DialogTitle>
+      </DialogHeader>
+      {qrCode}
+      <DialogDescription className="text-base">
+        Then add it to your Home Screen. On iPhone, it's in the Share menu.
+      </DialogDescription>
+    </DialogContent>
   )
 }
 

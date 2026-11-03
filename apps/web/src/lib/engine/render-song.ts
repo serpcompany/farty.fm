@@ -1,4 +1,4 @@
-import type { Analysis } from '@/lib/recordings'
+import type { Analysis, RecordingTrim } from '@/lib/recordings'
 import type { PcmAudio } from '@/lib/wav'
 import { type Arrangement, choiceForSongPitch } from './auto-map'
 import { renderSource } from './render-source'
@@ -11,6 +11,7 @@ interface RenderedNote {
   targetMidi: number
   startSample: number
   lengthSamples: number
+  leadSamples: number
   gainDb: number
 }
 
@@ -60,6 +61,7 @@ export interface RecordingToRender {
   id: string
   audio: PcmAudio
   analysis: Analysis
+  trim?: RecordingTrim | null
 }
 
 export function renderFromRecordings(
@@ -70,7 +72,7 @@ export function renderFromRecordings(
   const used = new Set(arrangement.pitches.map(c => c.recordingId))
   const sources = new Map<string, RenderSource>()
   for (const r of recordings) {
-    if (used.has(r.id)) sources.set(r.id, renderSource(r.audio, r.analysis))
+    if (used.has(r.id)) sources.set(r.id, renderSource(r.audio, r.analysis, r.trim ?? null))
   }
   return renderSong(song, arrangement, sources)
 }

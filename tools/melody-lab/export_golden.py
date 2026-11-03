@@ -19,7 +19,7 @@ from melody import load_catalog
 GOLDEN = analysis.ROOT / "fixtures/golden"
 SHIP_LIST = analysis.ROOT / "apps/web/src/lib/catalog/ship-list.json"
 GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")
-FORMAT_VERSION = 6
+FORMAT_VERSION = 8
 COVERAGE_SEEDS = 10
 
 
@@ -83,7 +83,11 @@ def recording_json(entry, src):
             "end_sample": src.end,
             "start_s": num(src.start / analysis.SR, 6),
             "end_s": num(src.end / analysis.SR, 6),
+            "pitch_end_sample": src.pitch_end,
+            "pitch_end_s": num(src.pitch_end / analysis.SR, 6),
             "cut_at_reattack": bool(src.cut_at_reattack),
+            "lead_start_sample": src.start - len(src.lead_in),
+            "lead_start_s": num((src.start - len(src.lead_in)) / analysis.SR, 6),
         },
         "pitch_contour": {
             "sample_rate": analysis.SR,
@@ -161,11 +165,21 @@ def note_json(m, a, e, p):
         "shift_semitones": num(a.shift_semitones, 4),
         "heard_cents": p["cents"],
         "fart_cents": p["fart_cents"],
-        "render": {"start_s": e["start_s"], "len_s": e["len_s"], "gain_db": e["gain_db"]},
+        "render": {"start_s": e["start_s"], "len_s": e["len_s"], "gain_db": e["gain_db"], "lead_s": e["lead_s"]},
     }
 
 
+def require_start_order(c, m):
+    for i in range(1, len(m.notes)):
+        if not m.notes[i].start > m.notes[i - 1].start:
+            raise ValueError(
+                f"{c['id']}: note {i} starts at beat {m.notes[i].start}, not after note {i - 1} at beat "
+                f"{m.notes[i - 1].start}; golden needs a Song's notes in strictly increasing start order"
+            )
+
+
 def arrangement_json(c, m, library, sources):
+    require_start_order(c, m)
     fit = engine.melody_fit(m, sources)
     out = {"song": c["id"], "library": library, **fit_json(fit), "per_pitch": per_pitch_json(fit, sources)}
     if not fit.unlocked:
@@ -276,7 +290,7 @@ def main():
 
     catalog = golden_catalog()
     songs = write_songs(catalog, libraries)
-    write("coverage.json", coverage_json(catalog, lib))
+    write("coverage.json", coverage_json(catalog, [s for s in lib if manifest[s.id]["source"] != "owner"]))
 
     melodic = [s.id for s in lib if s.pitched]
     by_pitch = {}

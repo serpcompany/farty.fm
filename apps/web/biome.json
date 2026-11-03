@@ -11,7 +11,10 @@
       "!test-results",
       "!playwright-report",
       "!cloudflare-env.d.ts",
-      "!drizzle"
+      "!drizzle",
+      "!public/catalog",
+      "!src/lib/catalog/*.generated.ts",
+      "!src/test-support/*.generated.ts"
     ]
   },
   "css": {
@@ -61,6 +64,15 @@
                   {
                     "group": ["@/server", "@/server/**", "@/db", "@/db/**"],
                     "message": "src/lib runs in the browser too, and server code never reaches it. Move what both need into src/lib, and keep the server's part in src/server."
+                  },
+                  {
+                    "group": [
+                      "@/test-support/songs.generated",
+                      "**/songs.generated",
+                      "@/lib/catalog/song-index.generated",
+                      "**/song-index.generated"
+                    ],
+                    "message": "The browser fetches the Song Catalog (loadSongs and loadSong), so its Songs stay out of the JavaScript (#322). Only routes and the server import song-index.generated, and only tests songs.generated."
                   }
                 ]
               }
@@ -81,6 +93,35 @@
                   {
                     "group": ["@/app", "@/app/**"],
                     "message": "Routes (src/app) import components and hooks, never the reverse. Pass what a component needs as a prop, or move shared code into src/lib."
+                  },
+                  {
+                    "group": [
+                      "@/test-support/songs.generated",
+                      "**/songs.generated",
+                      "@/lib/catalog/song-index.generated",
+                      "**/song-index.generated"
+                    ],
+                    "message": "The browser fetches the Song Catalog (loadSongs and loadSong), so its Songs stay out of the JavaScript (#322). Only routes and the server import song-index.generated, and only tests songs.generated."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/app/**", "!**/*.test.ts", "!**/*.test.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@/test-support/songs.generated", "**/songs.generated"],
+                    "message": "songs.generated carries every Song's notes, so the Worker would too (#323). Routes and the server read song-index.generated; only tests import songs.generated."
                   }
                 ]
               }
@@ -108,6 +149,10 @@
                       "@/hooks/**"
                     ],
                     "message": "Server code serves routes and never imports screens or routes. Move what both need into src/lib."
+                  },
+                  {
+                    "group": ["@/test-support/songs.generated", "**/songs.generated"],
+                    "message": "songs.generated carries every Song's notes, so the Worker would too (#323). Routes and the server read song-index.generated; only tests import songs.generated."
                   }
                 ]
               }
@@ -134,6 +179,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/server/link-preview.tsx"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noImgElement": "off"
           }
         }
       }

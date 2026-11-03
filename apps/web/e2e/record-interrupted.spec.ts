@@ -34,7 +34,7 @@ test('after an interruption mutes the microphone, the next tap opens it afresh',
   page
 }) => {
   await openThenInterrupt(page, 'mute')
-  const mic = await tapRecord(page, { saysStarting: true })
+  const mic = await tapRecord(page, { getsTheMicReady: true })
   expectOpenedAfresh(mic)
   console.log(
     `getUserMedia → capture processor (ms): ${mic.processorMs.map(t => t.toFixed(1)).join(', ')}`
@@ -81,7 +81,7 @@ for (const event of ['mute', 'ended'] as const) {
     expect((await microphone(page)).nodes).toBe(0)
     await interrupt(page, event)
     await page.getByTestId('record-button').click()
-    await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
+    await expect(page.getByTestId('record-getting-ready')).toBeVisible()
     await page.evaluate(() =>
       (window as unknown as { loadCaptureProcessor: () => void }).loadCaptureProcessor()
     )

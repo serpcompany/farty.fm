@@ -23,8 +23,6 @@ PLACED_MIN_NOTE_S = 0.6
 
 
 def placed(src, midi):
-    if src.pitched:
-        raise ValueError(f"{src.id} is Melodic: only a Noise-like Recording is placed by ear")
     return replace(src, ref_midi=float(midi), min_note_s=PLACED_MIN_NOTE_S, settle_s=0.0)
 
 
@@ -115,7 +113,7 @@ def song_pitches(melody):
     pitches = sorted({n.pitch for n in melody.notes})
     spb = 60 / melody.bpm
     weight = {p: sum(n.dur for n in melody.notes if n.pitch == p) for p in pitches}
-    note_seconds = {p: [n.dur * spb - GAP_S for n in melody.notes if n.pitch == p] for p in pitches}
+    note_seconds = {p: [max(0.0, n.dur * spb - GAP_S) for n in melody.notes if n.pitch == p] for p in pitches}
     return SongPitches(pitches, weight, note_seconds, {p: max(note_seconds[p]) for p in pitches})
 
 
@@ -165,7 +163,7 @@ def solve(table, n_recordings, fixed=()):
     return arrangement_key(table, choice), choice
 
 
-def smallest_ids(table, pitched, optimal):
+def smallest_ids(table, pitched, optimal, pitches):
     fixed = []
     for i in range(len(table)):
         free = sorted(set(range(len(pitched))) - set(fixed), key=lambda j: pitched[j].id)
@@ -175,6 +173,8 @@ def smallest_ids(table, pitched, optimal):
             if optimal(solve(table, len(pitched), [*fixed, j])[0]):
                 fixed.append(j)
                 break
+        else:
+            raise AssertionError(f"no optimal choice for Song pitch {pitches[i]}")
     return fixed
 
 
@@ -193,7 +193,7 @@ def melody_fit(melody, sources, transpose=None, octave_moves=True):
     fits = []
     for t, k in best.items():
         if optimal(k):
-            choice = smallest_ids(tables[t], pitched, optimal)
+            choice = smallest_ids(tables[t], pitched, optimal, song.pitches)
             ids = tuple(pitched[j].id if j is not None else UNCOVERED_LAST for j in choice)
             fits.append((ids, t, choice))
     _, t, choice = min(fits)
@@ -226,8 +226,8 @@ def plan(melody, sources, transpose=None, with_cost=False):
     return (fit.transpose, out, fit.cost) if with_cost else (fit.transpose, out)
 
 
-def faded(seg):
-    fi, fo = int(0.003 * SR), int(min(0.03, len(seg) / SR / 3) * SR)
+def faded(seg, body_samples):
+    fi, fo = int(0.003 * SR), int(min(0.03, body_samples / SR / 3) * SR)
     env = np.ones(len(seg))
     env[:fi] = np.linspace(0, 1, fi)
     if fo > 0:
@@ -245,17 +245,28 @@ def render(melody, sources, assignments, bpm=None, gap_ms=GAP_S * 1000, accent_d
     spb = 60 / (bpm or melody.bpm)
     mix = np.zeros(int((melody.length_beats * spb + 1.0) * SR))
     events = []
-    for a in assignments:
+    played_to = 0
+    for a in sorted(assignments, key=lambda a: melody.notes[a.note_index].start):
         n = melody.notes[a.note_index]
+        s = by_id[a.source_id]
         start = int(n.start * spb * SR)
         max_len = int(max(0.06, n.dur * spb - gap_ms / 1000) * SR)
-        seg = faded(by_id[a.source_id].audio[:max_len].copy())
-        rms = np.sqrt(np.mean(seg[: int(0.25 * SR)] ** 2)) + 1e-9
+        body = s.audio[:max_len]
+        lead = min(len(s.lead_in), max(0, start - played_to))
+        seg = faded(np.concatenate([s.lead_in[len(s.lead_in) - lead :], body]), len(body))
+        rms = np.sqrt(np.mean(seg[lead : lead + int(0.25 * SR)] ** 2)) + 1e-9
         on_bar_line = any(abs(n.start - line) < 1e-6 for line in melody.bar_lines)
         gain_db = target_rms_db - 20 * np.log10(rms) + (accent_db if on_bar_line else 0)
         seg = seg * 10 ** (gain_db / 20)
-        mix[start : start + len(seg)] += seg
-        events.append({**asdict(a), "start_s": round(start / SR, 3), "len_s": round(len(seg) / SR, 3), "gain_db": round(gain_db, 1)})
+        mix[start - lead : start + len(body)] += seg
+        played_to = max(played_to, start + len(body), int((n.start * spb + n.dur * spb) * SR))
+        events.append({
+            **asdict(a),
+            "start_s": round(start / SR, 3),
+            "len_s": round(len(body) / SR, 3),
+            "gain_db": round(gain_db, 1),
+            "lead_s": round(lead / SR, 3),
+        })
     return soft_limited(mix), events
 
 

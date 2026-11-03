@@ -14,6 +14,8 @@ const fixtures: Record<string, string> = {
 
 export const getUserMediaMs = 800
 
+export const captureProcessor = 'farty-capture'
+
 export type FakeMicrophoneOptions = { farts: boolean; answersAfterMs?: number }
 
 type FakeMicrophone = {
@@ -23,7 +25,9 @@ type FakeMicrophone = {
   clicks: number[]
   batches: number[]
   fartOnPress: string | null
+  fartGain: number
   fartEnergy: number
+  fartPeak: number
   fartSeconds: number
   fartPlayedSeconds: () => number
   take: { id: number; seconds: number }
@@ -56,7 +60,9 @@ function fakeMicrophone({ wavs, delayMs }: { wavs: Record<string, string>; delay
     clicks: [],
     batches: [],
     fartOnPress: null,
+    fartGain: 1,
     fartEnergy: 0,
+    fartPeak: 0,
     fartSeconds: 0,
     fartPlayedSeconds: () => (context ? context.currentTime - fartStartedAt : 0),
     take: { id: 0, seconds: 0 },
@@ -111,11 +117,17 @@ function fakeMicrophone({ wavs, delayMs }: { wavs: Record<string, string>; delay
       const fart = mic.fartOnPress && farts[mic.fartOnPress]
       if (!fart) return
       mic.fartOnPress = null
-      mic.fartEnergy = fart.getChannelData(0).reduce((sum, v) => sum + v * v, 0)
+      const level = context.createGain()
+      level.gain.value = mic.fartGain
+      mic.fartGain = 1
+      const gain = level.gain.value
+      const samples = fart.getChannelData(0)
+      mic.fartEnergy = samples.reduce((sum, v) => sum + v * v, 0) * gain ** 2
+      mic.fartPeak = samples.reduce((max, v) => Math.max(max, Math.abs(v)), 0) * gain
       mic.fartSeconds = fart.duration
       const source = context.createBufferSource()
       source.buffer = fart
-      source.connect(output)
+      source.connect(level).connect(output)
       source.start()
       fartStartedAt = context.currentTime
     },

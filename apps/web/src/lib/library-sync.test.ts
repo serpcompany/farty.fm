@@ -10,7 +10,7 @@ import {
 import { blockedStorage } from '@/test-support/web-storage'
 
 const library = libraryHarness()
-const { recorded, outbox } = library
+const { recorded, outbox, refuse } = library
 
 describe('claimLibrary', () => {
   it("makes a guest's library the account's, keeping it", async () => {
@@ -52,6 +52,36 @@ describe('claimLibrary', () => {
     expect(await library.page.sync.claimLibrary('')).toBe(false)
     vi.stubGlobal('localStorage', blockedStorage())
     expect(await library.page.sync.claimLibrary('user-a')).toBe(false)
+  })
+})
+
+describe('libraryPulled', () => {
+  it('is the account once its changes are read, after the screens hear them, until the library is cleared', async () => {
+    await library.page.sync.claimLibrary('user-a', 'a@example.com')
+    library.account.add('recordings', anotherBrowsersRecording(), wav(5))
+    const heard: string[] = []
+    library.page.changes.onLibraryChanged(() => heard.push('change'))
+    library.page.sync.onLibraryPulled(() =>
+      heard.push(`pulled ${library.page.sync.libraryPulled()}`)
+    )
+    expect(library.page.sync.libraryPulled()).toBeNull()
+    await library.page.sync.syncOnce('user-a')
+    expect(library.page.sync.libraryPulled()).toBe('user-a')
+    expect(heard).toEqual(['change', 'pulled user-a'])
+    await library.page.sync.forgetLibrary()
+    expect(library.page.sync.libraryPulled()).toBeNull()
+  })
+
+  it('stays null when the read fails, and goes with another account’s claim', async () => {
+    await library.page.sync.claimLibrary('user-a')
+    refuse('GET', 503, 'unavailable')
+    await library.page.sync.syncOnce('user-a')
+    expect(library.page.sync.libraryPulled()).toBeNull()
+    library.account.intercept = () => undefined
+    await library.page.sync.syncOnce('user-a')
+    expect(library.page.sync.libraryPulled()).toBe('user-a')
+    await library.page.sync.claimLibrary('user-b')
+    expect(library.page.sync.libraryPulled()).toBeNull()
   })
 })
 
@@ -150,5 +180,11 @@ describe('unsavedBeforeSignIn', () => {
     claimedBy('user-a')
     await recorded(1)
     expect(await library.page.sync.unsavedBeforeSignIn('a@example.com')).toBe(1)
+  })
+
+  it('counts no Favorite Song, which is no fart', async () => {
+    await library.page.sync.claimLibrary('user-a', 'a@example.com')
+    await library.page.favorites.setFavorite('twinkle', true)
+    expect(await library.page.sync.unsavedBeforeSignIn('b@example.com')).toBe(0)
   })
 })

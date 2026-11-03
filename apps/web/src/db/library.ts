@@ -1,10 +1,11 @@
 import { and, count, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm'
 
-import type { Analysis } from '../lib/recordings'
+import type { Performance } from '../lib/performance'
+import type { Analysis, RecordingTrim } from '../lib/recordings'
 import type { TootArrangement } from '../lib/toot'
 import { d1Now } from './d1-clock'
 import type { Database } from './database'
-import { recordings, toots, user, verification } from './schema'
+import { favoriteSongs, recordings, toots, user, verification } from './schema'
 
 export type Kind = 'recordings' | 'toots'
 
@@ -19,18 +20,24 @@ export type NewRecording = {
   waveform: number[]
   analysis: Analysis | null
   placedPitch: number | null
+  trim: RecordingTrim | null
+  name: string | null
   audioBytes: number
 }
 
-export type NewToot = {
+type NewToot = TootFields & { audioBytes: number }
+
+export type TootFields = {
   id: string
   title: string
-  songId: string
   createdAt: number
   seconds: number
-  arrangement: TootArrangement
-  audioBytes: number
-}
+} & (
+  | { songId: string; arrangement: TootArrangement; performance: null }
+  | { songId: null; arrangement: null; performance: Performance }
+)
+
+const json = (value: object | null) => (value === null ? null : JSON.stringify(value))
 
 export type ItemStatus = 'live' | 'deleted' | null
 
@@ -83,9 +90,13 @@ export async function insertRecording(
   const analysis = r.analysis === null ? null : JSON.stringify(r.analysis)
   const added = await db.all(sql`
     insert into recordings (user_id, id, number, created_at, seconds, sample_rate, waveform,
-      analysis, placed_pitch, audio_bytes, updated_at)
+      analysis, placed_pitch, trim_start_seconds, trim_end_seconds, trim_fart_start_seconds,
+      trim_fart_end_seconds, name, audio_bytes, updated_at)
     select ${userId}, ${r.id}, ${r.number}, ${r.createdAt}, ${r.seconds}, ${r.sampleRate},
-      ${JSON.stringify(r.waveform)}, ${analysis}, ${r.placedPitch}, ${r.audioBytes}, ${d1Now}
+      ${JSON.stringify(r.waveform)}, ${analysis}, ${r.placedPitch},
+      ${r.trim?.startSeconds ?? null}, ${r.trim?.endSeconds ?? null},
+      ${r.trim?.fart.startSeconds ?? null}, ${r.trim?.fart.endSeconds ?? null}, ${r.name},
+      ${r.audioBytes}, ${d1Now}
     where (select count(*) from recordings where user_id = ${userId} and deleted_at is null)
       < ${limit}
     on conflict do nothing
@@ -100,9 +111,9 @@ function tootInsert(db: Database, userId: string, t: NewToot, limit: number, pai
     : sql``
   return db.all(sql`
     insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
-      audio_bytes, updated_at)
+      performance, audio_bytes, updated_at)
     select ${userId}, ${t.id}, ${t.title}, ${t.songId}, ${t.createdAt}, ${t.seconds},
-      ${JSON.stringify(t.arrangement)}, ${t.audioBytes}, ${d1Now}
+      ${json(t.arrangement)}, ${json(t.performance)}, ${t.audioBytes}, ${d1Now}
     where (select count(*) from toots where user_id = ${userId} and deleted_at is null)
       < ${limit} ${payment}
     on conflict do nothing
@@ -188,8 +199,66 @@ export async function purgeTombstones(db: Database, userId: string): Promise<voi
     )
   await db.batch([
     db.delete(recordings).where(old('recordings')),
-    db.delete(toots).where(old('toots'))
+    db.delete(toots).where(old('toots')),
+    db
+      .delete(favoriteSongs)
+      .where(
+        and(
+          eq(favoriteSongs.userId, userId),
+          isNotNull(favoriteSongs.deletedAt),
+          lt(favoriteSongs.updatedAt, horizon)
+        )
+      )
   ])
+}
+
+export async function favoriteSong(
+  db: Database,
+  userId: string,
+  songId: string,
+  limit: number
+): Promise<'added' | 'kept' | 'limit'> {
+  const [added, live] = await db.batch([
+    db
+      .insert(favoriteSongs)
+      .select(
+        sql`select ${userId}, ${songId}, ${d1Now}, ${d1Now}, null
+          where (select count(*) from ${favoriteSongs}
+            where ${favoriteSongs.userId} = ${userId} and ${favoriteSongs.deletedAt} is null)
+            < ${limit}`
+      )
+      .onConflictDoUpdate({
+        target: [favoriteSongs.userId, favoriteSongs.songId],
+        set: { deletedAt: null, updatedAt: d1Now },
+        setWhere: isNotNull(favoriteSongs.deletedAt)
+      })
+      .returning({ songId: favoriteSongs.songId }),
+    db
+      .select({ songId: favoriteSongs.songId })
+      .from(favoriteSongs)
+      .where(
+        and(
+          eq(favoriteSongs.userId, userId),
+          eq(favoriteSongs.songId, songId),
+          isNull(favoriteSongs.deletedAt)
+        )
+      )
+  ])
+  if (added.length === 1) return 'added'
+  return live.length === 1 ? 'kept' : 'limit'
+}
+
+export async function unfavoriteSong(db: Database, userId: string, songId: string): Promise<void> {
+  await db
+    .update(favoriteSongs)
+    .set({ deletedAt: d1Now, updatedAt: d1Now })
+    .where(
+      and(
+        eq(favoriteSongs.userId, userId),
+        eq(favoriteSongs.songId, songId),
+        isNull(favoriteSongs.deletedAt)
+      )
+    )
 }
 
 export async function renameToot(
@@ -206,30 +275,62 @@ export async function renameToot(
   return renamed.length === 1 ? 'live' : itemStatus(db, 'toots', userId, id)
 }
 
+type Placement = {
+  placedPitch?: number | null
+  trim?: RecordingTrim | null
+  name?: string | null
+}
+
 export async function placeRecording(
   db: Database,
   userId: string,
   id: string,
-  placedPitch: number | null
-): Promise<ItemStatus> {
+  change: Placement,
+  tolerance: number
+): Promise<ItemStatus | 'tooLong'> {
+  const trim =
+    change.trim === undefined
+      ? {}
+      : {
+          trimStartSeconds: change.trim?.startSeconds ?? null,
+          trimEndSeconds: change.trim?.endSeconds ?? null,
+          trimFartStartSeconds: change.trim?.fart.startSeconds ?? null,
+          trimFartEndSeconds: change.trim?.fart.endSeconds ?? null
+        }
+  const placedPitch = change.placedPitch === undefined ? {} : { placedPitch: change.placedPitch }
+  const name = change.name === undefined ? {} : { name: change.name }
   const placed = await db
     .update(recordings)
-    .set({ placedPitch, updatedAt: d1Now })
-    .where(and(whereItem('recordings', userId, id), isNull(recordings.deletedAt)))
+    .set({ ...placedPitch, ...trim, ...name, updatedAt: d1Now })
+    .where(
+      and(
+        whereItem('recordings', userId, id),
+        isNull(recordings.deletedAt),
+        change.trim ? gte(recordings.seconds, change.trim.endSeconds - tolerance) : undefined
+      )
+    )
     .returning({ id: recordings.id })
-  return placed.length === 1 ? 'live' : itemStatus(db, 'recordings', userId, id)
+  if (placed.length === 1) return 'live'
+  const status = await itemStatus(db, 'recordings', userId, id)
+  return status === 'live' ? 'tooLong' : status
 }
 
 export type RecordingRow = typeof recordings.$inferSelect
 export type TootRow = typeof toots.$inferSelect
+type FavoriteSongRow = { songId: string; deletedAt: Date | null }
 
 export async function libraryChanges(
   db: Database,
   userId: string,
   since: number
-): Promise<{ cursor: number; recordings: RecordingRow[]; toots: TootRow[] }> {
+): Promise<{
+  cursor: number
+  recordings: RecordingRow[]
+  toots: TootRow[]
+  favoriteSongs: FavoriteSongRow[]
+}> {
   const after = new Date(since)
-  const [clock, recordingRows, tootRows] = await db.batch([
+  const [clock, recordingRows, tootRows, favoriteRows] = await db.batch([
     db.select({ now: d1Now }).from(user).where(eq(user.id, userId)),
     db
       .select()
@@ -238,10 +339,19 @@ export async function libraryChanges(
     db
       .select()
       .from(toots)
-      .where(and(eq(toots.userId, userId), gte(toots.updatedAt, after)))
+      .where(and(eq(toots.userId, userId), gte(toots.updatedAt, after))),
+    db
+      .select({ songId: favoriteSongs.songId, deletedAt: favoriteSongs.deletedAt })
+      .from(favoriteSongs)
+      .where(and(eq(favoriteSongs.userId, userId), gte(favoriteSongs.updatedAt, after)))
   ])
   if (clock.length === 0) throw new Error('The signed-in user has no row')
-  return { cursor: Number(clock[0].now), recordings: recordingRows, toots: tootRows }
+  return {
+    cursor: Number(clock[0].now),
+    recordings: recordingRows,
+    toots: tootRows,
+    favoriteSongs: favoriteRows
+  }
 }
 
 export async function setMarketingEmail(

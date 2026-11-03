@@ -26,3 +26,8 @@ def padded(x, before_s, after_s):
 
 def burst(seconds=0.5):
     return faded(harmonic(110.0, seconds), 0.01) * 0.3
+
+
+def tone_between(start, end, seconds, level, freq=150.0):
+    t = np.arange(int(seconds * SR)) / SR
+    return np.where((t >= start) & (t < end), level * np.sin(2 * np.pi * freq * t), 0.0)

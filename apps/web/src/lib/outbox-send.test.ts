@@ -11,7 +11,7 @@ import {
 } from '@/test-support/library-page'
 
 const library = libraryHarness()
-const { recorded, outbox, requests, refuse } = library
+const { recorded, outbox, requests, refuse, placedWhileUploading } = library
 
 describe('uploading', () => {
   beforeEach(() => claimedBy('user-a'))
@@ -174,13 +174,13 @@ describe('uploading', () => {
 
   it('places a Recording on the account, in its upload or after it (ADR 0015)', async () => {
     const early = await recorded(1)
-    await library.page.store.placeRecording(early.id, 40)
+    await library.page.store.placeRecording(early.id, { placedPitch: 40 })
     expect(await outbox()).toEqual([expect.objectContaining({ id: early.id, op: 'put' })])
     expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(library.account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: 40 })
     expect(requests('PATCH')).toEqual([])
-    await library.page.store.placeRecording(early.id, 41)
-    await library.page.store.placeRecording(early.id, null)
+    await library.page.store.placeRecording(early.id, { placedPitch: 41 })
+    await library.page.store.placeRecording(early.id, { placedPitch: null })
     expect((await outbox()).map(e => e.op)).toEqual(['place'])
     expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(library.account.get('recordings', early.id)?.item).toMatchObject({ placedPitch: null })
@@ -190,21 +190,12 @@ describe('uploading', () => {
   })
 
   it('places a Recording on the account that was placed while it uploaded', async () => {
-    const recording = await recorded(1)
-    library.account.intercept = async sent => {
-      if (sent.method === 'PUT') await library.page.store.placeRecording(recording.id, 52)
-      return undefined
-    }
-    expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
-    expect(library.account.get('recordings', recording.id)?.item).toMatchObject({
-      placedPitch: 52
-    })
-    expect(await outbox()).toEqual([])
+    await placedWhileUploading({ placedPitch: 52 })
   })
 
   it('sends the Placed Pitch of a Recording the account already had, from an upload cut off before it was placed', async () => {
     const recording = await recorded(1)
-    await library.page.store.placeRecording(recording.id, 45)
+    await library.page.store.placeRecording(recording.id, { placedPitch: 45 })
     library.account.add('recordings', { ...recording, placedPitch: null }, wav(1))
     expect((await library.page.sync.uploadBeforeSignOut('user-a')).left).toBe(0)
     expect(library.account.get('recordings', recording.id)?.item).toMatchObject({
@@ -216,8 +207,8 @@ describe('uploading', () => {
     const refused = await recorded(1)
     const gone = await recorded(2)
     await library.page.sync.uploadBeforeSignOut('user-a')
-    await library.page.store.placeRecording(refused.id, 40)
-    await library.page.store.placeRecording(gone.id, 40)
+    await library.page.store.placeRecording(refused.id, { placedPitch: 40 })
+    await library.page.store.placeRecording(gone.id, { placedPitch: 40 })
     library.account.remove('recordings', gone.id)
     library.account.intercept = sent =>
       sent.method === 'PATCH' && sent.path.includes(refused.id)
@@ -231,7 +222,7 @@ describe('uploading', () => {
   it('never sends an op from a later build that it doesn’t know, and keeps it queued, as code from before #268 sent a place as a delete', async () => {
     const recording = await recorded(1)
     await library.page.sync.uploadBeforeSignOut('user-a')
-    await library.page.store.placeRecording(recording.id, 40)
+    await library.page.store.placeRecording(recording.id, { placedPitch: 40 })
     const database = await library.page.store.db()
     const [entry] = await database.getAll('outbox')
     await database.put('outbox', { ...entry, op: 'later' as OutboxOp })

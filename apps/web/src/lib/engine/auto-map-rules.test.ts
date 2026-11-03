@@ -64,7 +64,7 @@ describe('Auto-map inputs', () => {
 
   it('leaves a Song locked, at the lowest transposition, when no Recording is Melodic', () => {
     const song = goldenSong('mary')
-    const noise = autoMapInputs(['009', '018', '052'])
+    const noise = autoMapInputs(['018', '052', '055'])
     expect(noise.every(r => r.recordingPitchMidi === null)).toBe(true)
     const a = arrange(song, noise)
     expect(a.transposition).toBe(LOWEST_TRANSPOSITION)
@@ -197,6 +197,43 @@ describe('the cost terms', () => {
     expect(silentCost([0.3], 0.4)).toBe(0)
   })
 
+  const ornamentSong = (notes: Song['notes']): Song => ({
+    bpm: 120,
+    bar_lines: [0],
+    length_beats: notes.reduce((end, n) => Math.max(end, n.start + n.dur), 0),
+    notes
+  })
+  const ornamentFart = (id: string, recordingPitchMidi: number) => ({
+    id,
+    recordingPitchMidi,
+    shortestNoteSeconds: 0.1,
+    gestureSeconds: inWholeSamples(1),
+    settleSeconds: 0.05
+  })
+
+  it('leaves one of two ornaments on one Recording uncovered, honestly', () => {
+    const song = ornamentSong([
+      { start: 0, dur: 0.02, pitch: 60 },
+      { start: 0.02, dur: 0.02, pitch: 61 }
+    ])
+    const a = arrange(song, [ornamentFart('a', 60)])
+    expect(a).toMatchObject({ transposition: 0, octaveMoves: 0, covered: 1, total: 2 })
+    expect(a.pitches.map(c => c.recordingId)).toEqual(['a', null])
+    expect(a.cost).toBe(8 + 400 * 0.1)
+    expect(a.missingNotes).toEqual([{ midi: 61, seconds: 0 }])
+  })
+
+  it('gives an ornament its own Recording', () => {
+    const song = ornamentSong([
+      { start: 0, dur: 0.02, pitch: 60 },
+      { start: 0.02, dur: 1, pitch: 66 }
+    ])
+    const a = arrange(song, [ornamentFart('a', 60), ornamentFart('b', 66)])
+    expect(a).toMatchObject({ transposition: 0, octaveMoves: 0, unlocked: true })
+    expect(a.pitches.map(c => c.recordingId)).toEqual(['a', 'b'])
+    expect(a.cost).toBeCloseTo(8 + 400 * 0.1 + (20 * 0.05) / (0.5 - 0.025), 9)
+  })
+
   it('orders ids by code point', () => {
     expect(['b', 'a', '10', '9', 'Z', 'é', '😀', 'ｚ'].sort(compareIds)).toEqual([
       '10',
@@ -215,33 +252,37 @@ describe('the cost terms', () => {
 
 describe('Placed Recordings (ADR 0015)', () => {
   const C2 = 36
-  const placed080 = () => {
-    const g = goldenRecording('080')
-    expect(g.melodic).toBe(false)
-    return placedAutoMapRecording('080', storedAnalysis(g), C2)
-  }
+  const analysisOf = (id: string) => storedAnalysis(goldenRecording(id))
+  const placedInput = (id: string) => ({
+    ...autoMapInput(id),
+    recordingPitchMidi: C2,
+    shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
+    settleSeconds: 0
+  })
 
   it('counts as Melodic at its note, at its own length, holding it from 0.6 s', () => {
-    expect(placed080()).toEqual({
-      ...autoMapInput('080'),
-      recordingPitchMidi: C2,
-      shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
-      settleSeconds: 0
-    })
+    expect(goldenRecording('065').melodic).toBe(false)
+    expect(placedAutoMapRecording('065', analysisOf('065'), C2)).toEqual(placedInput('065'))
     expect(PLACED_SHORTEST_NOTE_SECONDS).toBe(0.6)
   })
 
-  it('covers a note nothing else does, as tools/melody-lab/test_placed.py: 080 on C2 unlocks 3 Songs the full library leaves locked', () => {
-    const placed = [...autoMapInputs(libraries.full.filter(id => id !== '080')), placed080()]
+  it('stays at its Placed Pitch when a later analysis finds a Recording Pitch (ADR 0017)', () => {
+    expect(analysisOf('009').recordingPitchMidi).toBeCloseTo(30.5259, 4)
+    expect(placedAutoMapRecording('009', analysisOf('009'), C2)).toEqual(placedInput('009'))
+  })
+
+  it('covers a note nothing else does, as tools/melody-lab/test_placed.py: 065 on C2 unlocks 2 Songs the small library leaves locked', () => {
+    const placed = [
+      ...autoMapInputs(libraries.small),
+      placedAutoMapRecording('065', analysisOf('065'), C2)
+    ]
     const expected = {
-      jingle: { covered: 5, total: 5, octaveMoves: 1, cost: 1072.2936, plays: 64 },
-      row: { covered: 6, total: 6, octaveMoves: 0, cost: 602.4985, plays: 67 },
-      amazing: { covered: 5, total: 6, octaveMoves: 0, cost: 71.9576, plays: 62 },
-      auld: { covered: 7, total: 7, octaveMoves: 2, cost: 753.871, plays: 65 }
+      jingle: { covered: 5, total: 5, octaveMoves: 2, cost: 260.0875, plays: 67 },
+      row: { covered: 6, total: 6, octaveMoves: 2, cost: 821.0865, plays: 67 }
     }
     for (const [id, e] of Object.entries(expected)) {
       const song = goldenSong(id)
-      expect(arrange(song, autoMapInputs(libraries.full)).unlocked, id).toBe(false)
+      expect(arrange(song, autoMapInputs([...libraries.small, '065'])).unlocked, id).toBe(false)
       const a = arrange(song, placed)
       expect({ covered: a.covered, total: a.total, octaveMoves: a.octaveMoves }, id).toEqual({
         covered: e.covered,
@@ -250,9 +291,33 @@ describe('Placed Recordings (ADR 0015)', () => {
       })
       expect(a.cost, id).toBeCloseTo(e.cost, 3)
       expect(
-        a.pitches.filter(p => p.recordingId === '080').map(p => p.songPitch),
+        a.pitches.filter(p => p.recordingId === '065').map(p => p.songPitch),
         id
       ).toEqual([e.plays])
+    }
+  })
+
+  it('counts a trimmed Melodic Recording at its note and its Trim’s length (#314)', () => {
+    const trimmed002 = (seconds: number) =>
+      autoMapRecording('002', analysisOf('002'), {
+        startSeconds: 0.15,
+        endSeconds: 0.15 + seconds
+      })
+    expect(trimmed002(1.5)).toEqual({ ...autoMapInput('002'), gestureSeconds: 1.5 })
+    const noise = placedAutoMapRecording('065', analysisOf('065'), C2, {
+      startSeconds: 39108 / SR,
+      endSeconds: 91820 / SR
+    })
+    const small = autoMapInputs(['002', '016', '022', '069', '090'])
+    const plays002 = (recordings: typeof small) =>
+      arrange(goldenSong('mary'), [...recordings, noise]).pitches.some(p => p.recordingId === '002')
+    expect(plays002(small)).toBe(true)
+    for (const [seconds, plays] of [
+      [1.5, true],
+      [0.5, false]
+    ] as const) {
+      const cut = small.map(r => (r.id === '002' ? trimmed002(seconds) : r))
+      expect(plays002(cut), String(seconds)).toBe(plays)
     }
   })
 })

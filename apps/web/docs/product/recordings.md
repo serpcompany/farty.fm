@@ -1,8 +1,9 @@
 # Recordings
 
-The Recordings tab: every Recording kept in this browser and, signed in, on the account, with its
-note, Retry for one whose note wasn't found, and placing a noise-like one on a note by ear. Recordings are made on the [Record](record.md)
-tab.
+The Recordings tab: every Recording kept in this browser and, signed in, on the account, with the
+note Songs use, playing and scrubbing, Retry and Re-scan, a Recording's review, sharing and
+deleting. Recordings are made on the [Record](record.md) tab; their Trim, note and name are set in
+the [Review](review.md).
 
 ## While the Recordings load
 
@@ -19,33 +20,75 @@ tab.
 - Newest first (`src/components/farty/recordings-screen.interaction.test.tsx`, "lists the newest
   Recording first").
 - A summary over the list counts the Melodic Recordings, the notes they cover with their octave,
-  and every Recording: "1 Melodic Recording across 1 note", "1 Recording" (`e2e/tabs.spec.ts`, "a
-  Recording shows on the Recordings tab with its note, and playback stops on a tab change";
-  `e2e/record-noise.spec.ts`, "recording a Noise-like fart says it has no steady note").
-- Each row has the Recording's name ("Recording 1"), its Recording Pitch, "noise-like", or the
-  Placed Pitch it was given by ear (see below), a
-  waveform, the fart's length and, for a take that held more than one fart, "First fart used"
-  (`e2e/tabs.spec.ts`, "a Recording shows on the Recordings tab with its note, and playback stops
-  on a tab change"; `e2e/record-noise.spec.ts`, "recording a Noise-like fart says it has no steady
-  note"; `e2e/record-two-farts.spec.ts`, "recording two farts keeps the first and says so").
-- The length is the fart's, not the whole take's (`e2e/fixture-library.spec.ts`, "loads the Fixture
-  Library and unlocks every Song it is long enough for"; `src/lib/pitch-coverage.test.ts`, "is the
-  fart, not the whole take").
-- A tap on a row plays it, and a second tap stops it. The row shows as pressed while it plays
-  (`e2e/tabs.spec.ts`, "a Recording shows on the Recordings tab with its note, and playback stops
-  on a tab change"; `src/components/farty/playback-provider.interaction.test.tsx`, "shows a sound
-  as playing until it ends"; "stops the sound that plays when it is tapped again").
-- An analyzed Recording plays only its fart, from where it starts to where it ends; one not
-  analyzed plays the whole take (`src/components/farty/playback-provider.interaction.test.tsx`,
-  "plays only the fart of an analyzed Recording, and the whole take of one not analyzed";
-  `src/lib/audio/player.test.ts`, "a segment plays only that part: from its start, for its
-  length").
+  and every Recording: "1 Melodic Recording across 1 note", "1 Recording". A Recording placed on a
+  note in its review counts as Melodic on that note (`e2e/tabs.spec.ts`, "a Recording shows on the
+  Recordings tab with its note, and playback stops on a tab change"; `e2e/record-noise.spec.ts`,
+  "recording a Noise-like fart says it has no note"; "a Noise-like fart is given a note in its
+  review, moved, and left out again (ADR 0015)").
+- Each row has the Recording's name ("Recording 1", or the one given in its review), a waveform of
+  the whole take, the fart's length, a pencil that opens its [Review](review.md), Share and Delete
+  (`e2e/tabs.spec.ts`, "a Recording shows on the Recordings tab with its note, and playback stops on
+  a tab change"; `src/components/farty/recordings-screen.interaction.test.tsx`, "names a Recording
+  by the name the user gave it, and its pencil opens its review").
+- The note pill says the note Songs use, "No note" when they leave it out (Noise-like, or left out in
+  its review), or "Finding…" while analysis runs (`src/components/farty/recordings-screen.interaction.test.tsx`,
+  "shows the note Songs use, \"No note\" when they leave it out, and \"Finding…\"";
+  `e2e/record-noise.spec.ts`, "recording a Noise-like fart says it has no note").
+- "Placed by ear" shows under the name of a Recording given a note in its review, and "Trimmed"
+  under one with a Trim (`e2e/review.spec.ts`, "a take trimmed, moved to another note and named in
+  its review keeps them"; `e2e/record-noise.spec.ts`, "a Noise-like fart can be trimmed in its
+  review, and the row then plays just that part (ADR 0019)").
+- The length is the fart's, every burst of it, not the whole take's, rounded down to a tenth; once
+  trimmed, the length of the fart between the handles. It's what a locked Song's "Needs" is
+  measured against (`e2e/fixture-library.spec.ts`, "loads the Fixture Library and unlocks every Song
+  it is long enough for"; `src/lib/pitch-coverage.test.ts`, "is the fart, not the whole take"; "is
+  its Trim’s fart once trimmed, Melodic or not (#314)"; `e2e/record-two-farts.spec.ts`, "recording
+  two farts keeps both, and replay plays the whole take").
+- A Placed Pitch stays on the row after a later analysis finds a Recording Pitch, since the person
+  chose it (`src/components/farty/recordings-screen.interaction.test.tsx`, "keeps showing the
+  Placed Pitch when a later analysis found a Recording Pitch").
 - Recordings and their notes are still there after a reload (`e2e/record-melodic.spec.ts`,
   "recording a Melodic fart shows its note, and it is still there after a reload").
 
-## Analysis
+## Playing
 
-- A Recording whose analysis is running shows a spinner. One whose note couldn't be found says
+- A tap on a row plays it, and a second tap stops it. The row shows as pressed while it plays, and
+  a tab change or hiding the page stops it (`e2e/tabs.spec.ts`, "a Recording shows on the Recordings
+  tab with its note, and playback stops on a tab change";
+  `src/components/farty/playback-provider.interaction.test.tsx`, "shows a sound as playing until it
+  ends"; "stops the sound that plays when it is tapped again").
+- A row plays the whole take, start to end, from its saved file, both farts of a take with two
+  (ADR 0016). A trimmed Recording plays exactly what's between its handles
+  (`src/components/farty/playback-provider.interaction.test.tsx`, "replays a Recording as the whole
+  take, start to end, from its saved file"; "plays a trimmed Recording's handles, and the part a
+  scrub asks for"; `e2e/record-two-farts.spec.ts`, "recording two farts keeps both, and replay plays
+  the whole take"; `e2e/record-noise.spec.ts`, "a Noise-like fart can be trimmed in its review, and
+  the row then plays just that part (ADR 0019)").
+- The waveform draws the whole take, both bursts and the silence around them, or just the Trim,
+  scaled to its own loudest (`src/components/farty/recording-replay.interaction.test.tsx`, "draws
+  the whole take, both bursts and the silence around them, whatever analysis found"; "draws just the
+  part asked for, as a Trim, scaled to its own loudest").
+- While it plays, a playhead moves with the audio, filling the bars it has passed. It follows the
+  audio clock, held back by the output's latency where the browser reports it, as on Bluetooth
+  (`src/components/farty/waveform.interaction.test.tsx`, "is a slider named for its Recording, with
+  no playhead until it plays"; "moves its playhead with the audio clock, filling the bars it has
+  passed"; `src/lib/audio/player.test.ts`, "says where the sound playing is by the audio clock, from
+  where it started to its end"; "holds the playhead back by the latency the output reports, as on
+  Bluetooth"). With reduced motion asked for, the playhead hides while it plays and the bars still
+  fill; a scrub's playhead still shows (`e2e/record-noise.spec.ts`, "a Noise-like fart can be
+  trimmed in its review, and the row then plays just that part (ADR 0019)").
+- The waveform is a slider ("Play Recording 1 from a spot"): a tap plays from that spot, a drag
+  scrubs and plays from where it lets go, and the arrow keys jump a twelfth of the view. On a phone a
+  finger scrubs across the row, and a scroll up or down stops the scrub without playing
+  (`src/components/farty/waveform.interaction.test.tsx`, "plays from the spot a tap lands on";
+  "scrubs while dragged, then plays from where it lets go"; "jumps a twelfth of the view with the
+  arrow keys"; "stops scrubbing without playing when the browser takes the touch for a scroll";
+  `e2e/record-noise.spec.ts`, "a Noise-like fart can be trimmed in its review, and the row then
+  plays just that part (ADR 0019)").
+
+## Analysis and Re-scan
+
+- A Recording whose analysis is running says "Finding…". One whose note couldn't be found says
   "not analyzed", with Retry, which finds it (`e2e/tabs.spec.ts`, "a Recording that could not be
   analyzed says so, and Retry finds its note").
 - A failed analysis is reported and leaves the Recording not analyzed; Retry analyzes only a
@@ -60,55 +103,70 @@ tab.
   an older Recording Analysis made runs again on the next open"; `src/lib/analysis-upgrade.test.ts`,
   "re-analyzes one Recording at a time"; "leaves the stored analysis as it was when re-analysis
   fails, and goes on").
+- A Recording with no note whose analysis an older Recording Analysis made has Re-scan, and the tab
+  has Re-scan all. A fart left out with "No note", or one the current analysis found no note in, has
+  none (ADR 0017; `src/components/farty/recordings-screen.interaction.test.tsx`, "offers Re-scan on
+  each Recording an older analysis found no note in, and Re-scan all"; "has no Re-scan once the
+  current analysis made every Recording’s"; `src/lib/analysis-upgrade.test.ts`, "offers Re-scan only
+  while an older analysis says there is no note"; "offers no Re-scan on a fart left out with \"No
+  note\" (#314)"; `e2e/record-noise.spec.ts`, "a fart the current analysis found no note in offers no
+  Re-scan (#282)").
+- Re-scan runs the current Recording Analysis again, one Recording at a time, and says what changed:
+  "1 fart now has a note", or "No new notes", and how many couldn't be read. Re-scan all shows how
+  far it is ("Re-scanning 2 of 3") and the Recording it's on, with Re-scan off meanwhile
+  (`e2e/record-melodic.spec.ts`, "Re-scan finds the note of a fart the open’s upgrade couldn’t read
+  (#282)"; `src/components/farty/recordings-screen.interaction.test.tsx`, "runs Re-scan all, then
+  says what changed"; "re-scans one Recording, then says when it found nothing new"; "shows how far
+  Re-scan all is and the Recording it is on, with Re-scan off meanwhile";
+  `src/lib/analysis-upgrade.test.ts`, "re-scans all with no note, one at a time, and leaves the rest
+  alone"; "counts one it can’t re-scan, keeps its analysis, and goes on").
+- A Recording deleted or placed by ear before Re-scan reaches it is skipped, and a Placed Pitch or
+  Trim saved while it runs stays: Re-scan changes only the analysis (`src/lib/analysis-upgrade.test.ts`,
+  "skips one deleted before the run reaches it, and counts it nowhere"; "skips one placed by ear
+  while its own analysis runs, and keeps the Placed Pitch"; "keeps a Trim through a Re-scan, and
+  still uses it once the fart is Melodic (#314)";
+  `src/components/farty/recordings-provider.interaction.test.tsx`, "keeps a Trim saved while a
+  Re-scan ran: the Re-scan changes only the analysis"; "runs one Re-scan at a time, on the
+  Recordings it is asked for").
+- A result that came while the tab was closed is kept, and announced when the tab opens again
+  (`src/components/farty/recordings-screen.interaction.test.tsx`, "announces a result that came
+  while the tab was closed, when it opens again (#295)";
+  `src/components/farty/recordings-provider.interaction.test.tsx`, "keeps the last Re-scan’s result
+  with no Recordings tab open, until the next one starts").
 
-## Placing a noise-like fart by ear
+## A Recording's note in Songs
 
-A Noise-like Recording plays in no Song until the person places it on the piano note it sounds
-closest to (ADR 0015). It still plays as recorded: the note says only where Songs use it.
+A Recording's note says only where Songs use it; it still plays as recorded (ADR 0012, ADR 0015).
 
-- A noise-like row's note is an outlined "noise-like ›" button, which opens the picker: the fart's
-  play button, waveform and length, one octave of piano keys with an arrow either side, then Place
-  and "Leave it out" (`e2e/record-noise.spec.ts`, "a Noise-like fart can be placed on a note by
-  ear, moved, and taken off (ADR 0015)"; `src/components/farty/recordings-screen.interaction.test.tsx`,
-  "opens the place-by-ear picker from a noise-like Recording, and closes it when the page is
-  hidden").
-- It's a bottom sheet on a phone and a dialog from 48rem wide
-  (`src/components/farty/place-by-ear.interaction.test.tsx`, "is a bottom Sheet on a phone and a
-  Dialog from 48rem").
-- It opens on octave 3, C3 to B3, with no key picked and Place disabled as "Tap a key to choose a
-  note". The arrows move one octave at a time between C2 and B4, and a key picked stays picked
-  (`src/components/farty/place-by-ear.interaction.test.tsx`, "opens on octave 3 with nothing picked,
-  and asks for a key"; "moves one octave at a time between C2 and B4, keeping the key picked").
-- A tapped key plays a short piano note to hold the fart up to, and becomes "Place at E3". Nothing
-  is kept until Place, and "Leave it out" keeps nothing
-  (`src/components/farty/place-by-ear.interaction.test.tsx`, "plays a piano note for the key tapped,
-  and places the fart there on Place"; "leaves an unplaced fart out without keeping anything").
-- Its play button plays the fart, and closing the picker stops it
-  (`src/components/farty/place-by-ear.interaction.test.tsx`, "plays the fart from its play button";
-  "stops the fart when it closes").
-- A placed fart's row shows its note in a dashed pill, with "Placed by ear". It counts as a Melodic
-  Recording on that note in the summary, and stays placed after a reload (`e2e/record-noise.spec.ts`,
-  "a Noise-like fart can be placed on a note by ear, moved, and taken off (ADR 0015)").
-- The pill opens the picker on the placed note, ringed, with "Placed at E3" disabled. Another key
-  makes it "Move to", and "Take it off" makes the fart noise-like again (`e2e/record-noise.spec.ts`,
-  "a Noise-like fart can be placed on a note by ear, moved, and taken off (ADR 0015)";
-  `src/components/farty/place-by-ear.interaction.test.tsx`, "opens a placed fart on its note, ringed
-  while another is picked, and moves it or takes it off").
-- A placement counts at once, in the summary and on Compose, and one this browser couldn't keep is
-  reported (`src/components/farty/recordings-provider.interaction.test.tsx`, "places a Noise-like
-  Recording on a note at once, and reports a placement it could not keep").
-- A new analysis keeps the placement. If it finds the fart Melodic, its Recording Pitch counts and
-  the placement is ignored (`src/lib/recording-store.test.ts`, "keeps the note through a new
-  analysis, and places nothing that is gone"; `src/lib/recordings.test.ts`, "counts for nothing
-  while the Recording is Melodic, or not analyzed").
-- Signed in, the placement reaches the account, and another browser's placement shows here, even
-  in an open picker ([Sync](sync.md)).
+- A note given in the review counts at once, in the summary and on Compose, and one this browser
+  couldn't keep is reported (`src/components/farty/recordings-provider.interaction.test.tsx`,
+  "places a Noise-like Recording on a note at once, and reports a placement it could not keep").
+- A new analysis keeps the Placed Pitch, which stays the one used even if it finds a Recording
+  Pitch, and keeps the Trim in use with it (ADR 0017; `src/lib/recording-store.test.ts`, "keeps the
+  note through a new analysis, and places nothing that is gone"; `src/lib/recordings.test.ts`,
+  "stays in use when a new analysis finds a Recording Pitch (ADR 0017)"; "keeps its Trim in use with
+  it, and a Trim alone on a Melodic Recording too (#314)"; "counts for nothing while the Recording is
+  not analyzed").
+- A Trim is kept beside the take through a new analysis and a new note, until it's taken off
+  (`src/lib/recording-store.test.ts`, "keeps a Trim beside the take, through a new analysis and a new
+  note, until it is taken off (ADR 0019)"; `src/components/farty/recordings-provider.interaction.test.tsx`,
+  "trims a Recording to its handles, with the fart found between them, and takes the Trim off").
+
+## Share
+
+- Each row's Share shares the Recording by link, and a shared row shows Shared. Sharing, Stop
+  sharing and a guest's free account are in [Sharing](sharing.md) (`e2e/share-recording.spec.ts`,
+  "a signed-in user shares a Recording, someone signed out plays it, and Stop sharing takes the link
+  down").
 
 ## Delete
 
 - Each row's Delete asks "Delete Recording 1?", "This can't be undone.", with Cancel and Delete
   Recording. The Recording is gone, after a reload too (`e2e/tabs.spec.ts`, "a Recording shows on
   the Recordings tab with its note, and playback stops on a tab change").
+- Deleting a shared Recording takes its link down too ([Sharing](sharing.md);
+  `e2e/share-recording.spec.ts`, "a signed-in user shares a Recording, someone signed out plays it,
+  and Stop sharing takes the link down").
 - Hiding the page closes the dialog (`src/components/farty/recordings-screen.interaction.test.tsx`,
   "closes the Delete dialog when the page is hidden").
 - Deleting stops whatever plays first (`src/components/farty/recordings-provider.interaction.test.tsx`,
@@ -160,3 +218,9 @@ An account keeps at most 300 Recordings. When to try again is in [Sync](sync.md)
 
 - The Fixture Library, on Staging's Profile, adds its test farts here as the person's own
   Recordings, analyzed like real ones ([Profile](profile.md#internal-build-the-fixture-library)).
+
+## Not checked
+
+- Deleting a shared Recording says "Its link stops working too." in its Delete dialog.
+- A row keeps only its waveform's bars, never its decoded take, so a library of a few hundred
+  Recordings fits in a phone's memory.

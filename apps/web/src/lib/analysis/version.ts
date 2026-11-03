@@ -1,1 +1,1 @@
-export const ANALYSIS_VERSION = 3
+export const ANALYSIS_VERSION = 5

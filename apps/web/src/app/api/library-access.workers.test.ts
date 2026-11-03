@@ -109,7 +109,7 @@ describe('every library request names its library’s account', () => {
     const kept = await library(b.cookie)
     expect(kept.recordings).toMatchObject([{ id: R1 }])
     expect(kept.toots).toMatchObject([{ id: T1, title: 'Twinkle Twinkle Little Star' }])
-    expect(kept.deleted).toEqual({ recordings: [], toots: [] })
+    expect(kept.deleted).toEqual({ recordings: [], toots: [], favorites: [] })
 
     const asB = { cookie: b.cookie, library: b.id }
     expect((await api.library(asB)).status).toBe(200)
@@ -145,7 +145,7 @@ describe('writes from another site', () => {
     const after = await library(a.cookie)
     expect(after.recordings.map(r => r.id)).toEqual([R1])
     expect(after.toots).toMatchObject([{ id: T1, title: 'Twinkle Twinkle Little Star' }])
-    expect(after.deleted).toEqual({ recordings: [], toots: [] })
+    expect(after.deleted).toEqual({ recordings: [], toots: [], favorites: [] })
     expect(await bucketKeys()).toEqual([
       `users/${a.id}/recordings/${R1}.wav`,
       `users/${a.id}/toots/${T1}.wav`

@@ -1,6 +1,10 @@
 import { errorName } from '@/lib/telemetry/report'
 
-type RouteFailure = 'user_route_failed' | 'stripe_webhook_failed'
+export type RouteFailure =
+  | 'user_route_failed'
+  | 'stripe_webhook_failed'
+  | 'shared_audio_failed'
+  | 'report_failed'
 
 const CF_RAY = /^[0-9A-Za-z-]{1,64}$/
 

@@ -14,7 +14,7 @@ const FAR_FROM_CENTER_SEMITONES = 6
 const MEDIAN_LANDED_ON_UNVOICED_MIDI = 10
 const FEWEST_SMOOTHABLE_FRAMES = 3
 const FEWEST_ESTIMATE_FRAMES = 4
-const ESTIMATE_HEAD_SECONDS = 0.45
+const PITCH_WINDOW_SECONDS = 0.45
 const SPREAD_OF_ZERO_CONFIDENCE_SEMITONES = 3
 
 export function analyzePitch(body: Float64Array): PitchAnalysis {
@@ -58,20 +58,35 @@ function contour(body: Float64Array): Float64Array {
   return f0
 }
 
-function estimate(
+export function estimate(
   body: Float64Array,
   f0: Float64Array
 ): { midi: number | null; confidence: number } {
+  const rms = frameRms(body, Pyin.frameLength, Pyin.hopLength)
+  const head = estimateAt(body.length, f0, rms, 0)
+  if (head.midi !== null) return head
+  const firstKept = f0.findIndex(Number.isFinite)
+  if (firstKept <= 0) return head
+  const later = estimateAt(body.length, f0, rms, firstKept)
+  return later.midi !== null ? later : head
+}
+
+function estimateAt(
+  bodyLength: number,
+  f0: Float64Array,
+  rms: Float64Array,
+  from: number
+): { midi: number | null; confidence: number } {
   const sr = ANALYSIS_SAMPLE_RATE
   const hop = Pyin.hopLength
-  const head = Math.min(f0.length, Math.trunc((ESTIMATE_HEAD_SECONDS * sr) / hop))
+  const window = Math.trunc((PITCH_WINDOW_SECONDS * sr) / hop)
+  const end = Math.min(f0.length, from + window)
   const voiced: number[] = []
-  for (let i = 0; i < head; i++) if (Number.isFinite(f0[i])) voiced.push(i)
-  const framesConsidered = body.length > ESTIMATE_HEAD_SECONDS * sr ? head : f0.length
+  for (let i = from; i < end; i++) if (Number.isFinite(f0[i])) voiced.push(i)
+  const framesConsidered = bodyLength > PITCH_WINDOW_SECONDS * sr ? window : f0.length
   const coverage = voiced.length / Math.max(1, framesConsidered)
   if (voiced.length < FEWEST_ESTIMATE_FRAMES) return { midi: null, confidence: 0 }
 
-  const rms = frameRms(body, Pyin.frameLength, hop)
   const mids = voiced.map(i => hzToMidi(f0[i]))
   const median = weightedMedian(
     mids,

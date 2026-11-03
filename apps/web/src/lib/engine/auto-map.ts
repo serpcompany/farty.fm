@@ -1,8 +1,8 @@
 import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
-import type { Analysis } from '@/lib/recordings'
+import type { Analysis, Trim } from '@/lib/recordings'
 import { minimumCost } from './assignment'
 import { GAP_SECONDS } from './renderer'
-import { type Song, secondsPerBeat } from './song'
+import { type Song, type SongNote, secondsPerBeat } from './song'
 
 const MAXIMUM_SHIFT = 3
 const OCTAVE = 12
@@ -25,15 +25,18 @@ export interface AutoMapRecording {
   settleSeconds: number | null
 }
 
-export function autoMapRecording(id: string, analysis: Analysis): AutoMapRecording {
-  const sr = ANALYSIS_SAMPLE_RATE
-  const samples =
-    Math.round(analysis.gestureEndSeconds * sr) - Math.round(analysis.gestureStartSeconds * sr)
+export function autoMapRecording(
+  id: string,
+  analysis: Analysis,
+  trim: Trim | null = null
+): AutoMapRecording {
   return {
     id,
     recordingPitchMidi: analysis.recordingPitchMidi,
     shortestNoteSeconds: analysis.shortestNoteSeconds,
-    gestureSeconds: samples / sr,
+    gestureSeconds: trimSeconds(
+      trim ?? { startSeconds: analysis.gestureStartSeconds, endSeconds: analysis.gestureEndSeconds }
+    ),
     settleSeconds: analysis.settleSeconds ?? null
   }
 }
@@ -43,14 +46,20 @@ export const PLACED_SHORTEST_NOTE_SECONDS = 0.6
 export function placedAutoMapRecording(
   id: string,
   analysis: Analysis,
-  placedMidi: number
+  placedMidi: number,
+  trim: Trim | null = null
 ): AutoMapRecording {
   return {
-    ...autoMapRecording(id, analysis),
+    ...autoMapRecording(id, analysis, trim),
     recordingPitchMidi: placedMidi,
     shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
     settleSeconds: 0
   }
+}
+
+export function trimSeconds(trim: Trim): number {
+  const sr = ANALYSIS_SAMPLE_RATE
+  return (Math.round(trim.endSeconds * sr) - Math.round(trim.startSeconds * sr)) / sr
 }
 
 export interface PitchChoice {
@@ -78,16 +87,41 @@ export interface MissingNote {
 }
 
 export function arrange(song: Song, recordings: readonly AutoMapRecording[]): Arrangement {
-  const melodic = recordings.filter(isMelodic).sort((a, b) => compareIds(a.id, b.id))
+  return arrangePitches(songPitches(song), recordings)
+}
+
+export interface SongPitches {
+  bpm: number
+  pitches: readonly number[]
+  durations: readonly (readonly number[])[]
+}
+
+export function songPitches(song: Pick<Song, 'bpm'> & { notes: readonly SongNote[] }): SongPitches {
   const pitches = [...new Set(song.notes.map(n => n.pitch))].sort((a, b) => a - b)
+  return {
+    bpm: song.bpm,
+    pitches,
+    durations: pitches.map(p => song.notes.filter(n => n.pitch === p).map(n => n.dur))
+  }
+}
+
+function soundingSeconds(durations: readonly number[], spb: number): number[] {
+  return durations.map(dur => Math.max(0, dur * spb - GAP_SECONDS))
+}
+
+export function arrangePitches(
+  song: SongPitches,
+  recordings: readonly AutoMapRecording[]
+): Arrangement {
+  const melodic = recordings.filter(isMelodic).sort((a, b) => compareIds(a.id, b.id))
+  const { pitches } = song
   const spb = secondsPerBeat(song)
   const weight: number[] = []
   const noteSeconds: number[][] = []
   const longest: number[] = []
-  for (const p of pitches) {
-    const notes = song.notes.filter(n => n.pitch === p)
-    weight.push(pythonSum(notes.map(n => n.dur)))
-    noteSeconds.push(notes.map(n => n.dur * spb - GAP_SECONDS))
+  for (const durations of song.durations) {
+    weight.push(pythonSum(durations))
+    noteSeconds.push(soundingSeconds(durations, spb))
     longest.push(Math.max(...noteSeconds[noteSeconds.length - 1]))
   }
 
@@ -153,6 +187,59 @@ export function arrange(song: Song, recordings: readonly AutoMapRecording[]): Ar
   }
 }
 
+export function coveredCount(song: SongPitches, recordings: readonly AutoMapRecording[]): number {
+  const melodic = recordings.filter(isMelodic)
+  const rows = song.pitches.length
+  const columns = melodic.length
+  if (columns === 0) return 0
+  const spb = secondsPerBeat(song)
+  const recordingPitch = melodic.map(r => r.recordingPitchMidi as number)
+  const longEnough = song.durations.map(durations => {
+    const longest = Math.max(...soundingSeconds(durations, spb))
+    return melodic.flatMap((r, j) => (fills(r.gestureSeconds, longest) ? [j] : []))
+  })
+  const candidates = new Int32Array(rows * columns)
+  const count = new Int32Array(rows)
+  const owner = new Int32Array(columns)
+  const seen = new Int32Array(columns)
+  let visit = 0
+  const augment = (i: number): boolean => {
+    for (let k = 0; k < count[i]; k++) {
+      const j = candidates[i * columns + k]
+      if (seen[j] === visit) continue
+      seen[j] = visit
+      if (owner[j] === -1 || augment(owner[j])) {
+        owner[j] = i
+        return true
+      }
+    }
+    return false
+  }
+
+  let best = 0
+  for (let t = LOWEST_TRANSPOSITION; t <= HIGHEST_TRANSPOSITION && best < rows; t++) {
+    let reachable = 0
+    for (let i = 0; i < rows; i++) {
+      const target = song.pitches[i] + t
+      let n = 0
+      for (const j of longEnough[i]) {
+        if (inReach(target - recordingPitch[j])) candidates[i * columns + n++] = j
+      }
+      count[i] = n
+      if (n > 0) reachable++
+    }
+    if (reachable <= best) continue
+    owner.fill(-1)
+    let matched = 0
+    for (let i = 0; i < rows; i++) {
+      visit++
+      if (augment(i)) matched++
+    }
+    best = Math.max(best, matched)
+  }
+  return best
+}
+
 export function choiceForSongPitch(arrangement: Arrangement, pitch: number): PitchChoice | null {
   return arrangement.pitches.find(c => c.songPitch === pitch) ?? null
 }
@@ -170,12 +257,17 @@ export function moveCost(shift: number): { cost: number; octaveMove: boolean } |
   return null
 }
 
+function inReach(shift: number): boolean {
+  const a = Math.abs(shift)
+  return a <= MAXIMUM_SHIFT || Math.abs(a - OCTAVE) <= MAXIMUM_SHIFT
+}
+
 export function fills(recordingSeconds: number, longestNoteSeconds: number): boolean {
   return recordingSeconds >= NOTE_FILL * longestNoteSeconds
 }
 
 export function neededSeconds(longestNoteSeconds: number): number {
-  return Math.ceil(NOTE_FILL * longestNoteSeconds * 10 - FLOAT_NOISE_IN_TENTHS) / 10
+  return Math.max(0, Math.ceil(NOTE_FILL * longestNoteSeconds * 10 - FLOAT_NOISE_IN_TENTHS) / 10)
 }
 
 export function tooShortCost(
@@ -357,6 +449,7 @@ class Table {
           break
         }
       }
+      if (fixed.length === i) throw new Error(`Auto-map found no optimal choice for pitch ${i}`)
     }
     return fixed
   }

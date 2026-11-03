@@ -19,7 +19,7 @@ import {
   SIGN_IN_CODE_MINUTES
 } from './email'
 import { keyedHash } from './hmac'
-import { clientLimitStorage, RATE_LIMITS } from './rate-limits'
+import { clientLimitStorage, IP_ADDRESS_HEADERS, RATE_LIMITS } from './rate-limits'
 
 const HOUR = 60 * 60
 export const SESSION_EXPIRES_SECONDS = 7 * 24 * HOUR
@@ -87,7 +87,7 @@ export function createAuth({ db, settings, email }: CreateAuthOptions) {
       useSecureCookies: settings.useSecureCookies,
       disableCSRFCheck: false,
       disableOriginCheck: false,
-      ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] }
+      ipAddress: IP_ADDRESS_HEADERS
     },
     logger: {
       log(level, message) {

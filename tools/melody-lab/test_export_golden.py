@@ -1,6 +1,7 @@
 import json
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -9,10 +10,11 @@ import numpy as np
 
 import export_golden
 import golden_cost
-from analysis import read_manifest
+from analysis import load_library, read_manifest
 from export_golden import Exact, noise_like_reason, plain, write
 from golden_cost import arrangement_cost, load
 from golden_inputs import INDEX, SONGS
+from melody import load_catalog
 from plot_env import plot_envelopes
 
 
@@ -68,3 +70,26 @@ class PlotEnvelopes(unittest.TestCase):
         recordings = [r for r in read_manifest() if r["id"] in ("009", "016")]
         plot_envelopes(recordings, out)
         self.assertEqual(out.read_bytes()[:8], b"\x89PNG\r\n\x1a\n")
+
+
+class StartOrder(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.c, cls.m = next((c, m) for c, m in load_catalog() if c["id"] == "twinkle")
+        cls.lib = load_library()
+
+    def test_a_song_in_start_order_is_exported(self):
+        export_golden.require_start_order(self.c, self.m)
+        self.assertIsNotNone(export_golden.arrangement_json(self.c, self.m, "full", self.lib)["notes"])
+
+    def test_notes_out_of_start_order_are_refused(self):
+        notes = list(self.m.notes)
+        notes[1], notes[2] = notes[2], notes[1]
+        with self.assertRaisesRegex(ValueError, r"twinkle: note 2 starts at beat .*strictly increasing start order"):
+            export_golden.arrangement_json(self.c, replace(self.m, notes=notes), "full", self.lib)
+
+    def test_two_notes_on_one_beat_are_refused(self):
+        notes = list(self.m.notes)
+        notes[1] = replace(notes[1], start=notes[0].start)
+        with self.assertRaisesRegex(ValueError, r"twinkle: note 1 starts at beat"):
+            export_golden.arrangement_json(self.c, replace(self.m, notes=notes), "full", self.lib)

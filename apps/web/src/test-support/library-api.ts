@@ -2,6 +2,7 @@ import { env } from 'cloudflare:test'
 import { expect } from 'vitest'
 
 import * as accountRoute from '@/app/api/account/route'
+import * as favoriteRoute from '@/app/api/favorites/[id]/route'
 import * as libraryRoute from '@/app/api/library/route'
 import * as recordingAudioRoute from '@/app/api/recordings/[id]/audio/route'
 import * as recordingRoute from '@/app/api/recordings/[id]/route'
@@ -12,6 +13,7 @@ import type { Kind } from '@/db/library'
 import { session, user } from '@/db/schema'
 import { encodeWav } from '@/lib/wav'
 
+import { analyzedTake } from './analyzed-take'
 import { TEST_SESSION_COOKIE } from './workers-session'
 
 export const ORIGIN = 'http://localhost:3116'
@@ -66,7 +68,7 @@ function headers(
   return result
 }
 
-const params = <P>(value: P) => ({ params: Promise.resolve(value) })
+export const params = <P>(value: P) => ({ params: Promise.resolve(value) })
 const noParams = params({} as Record<string, never>)
 
 export function wav(seconds = 0.1, sampleRate = 48_000): Uint8Array {
@@ -75,27 +77,7 @@ export function wav(seconds = 0.1, sampleRate = 48_000): Uint8Array {
 }
 
 export function recordingMetadata(id: string, fields: Record<string, unknown> = {}) {
-  return {
-    id,
-    number: 1,
-    createdAt: Date.UTC(2026, 9, 21),
-    seconds: 0.1,
-    sampleRate: 48_000,
-    waveform: [0, 0.5, 1],
-    analysis: {
-      state: 'analyzed',
-      analysis: {
-        gestureStartSeconds: 0.01,
-        gestureEndSeconds: 0.09,
-        cutAtReattack: false,
-        pitchEstimateMidi: 52,
-        pitchConfidence: 0.8,
-        recordingPitchMidi: 52.3,
-        shortestNoteSeconds: 0.05
-      }
-    },
-    ...fields
-  }
+  return { id, number: 1, createdAt: Date.UTC(2026, 9, 21), ...analyzedTake(), ...fields }
 }
 
 export function tootMetadata(id: string, fields: Record<string, unknown> = {}) {
@@ -116,6 +98,26 @@ export function tootMetadata(id: string, fields: Record<string, unknown> = {}) {
 export const metadataFor = (kind: Kind, id: string, fields: Record<string, unknown> = {}) =>
   kind === 'recordings' ? recordingMetadata(id, fields) : tootMetadata(id, fields)
 
+export function padTootMetadata(id: string, fields: Record<string, unknown> = {}) {
+  return {
+    id,
+    title: 'Sound Pad',
+    songId: null,
+    createdAt: Date.UTC(2026, 9, 30),
+    seconds: 0.1,
+    arrangement: null,
+    performance: {
+      recordings: ['00000000-0000-0000-0000-000000000090', '00000000-0000-0000-0000-000000000084'],
+      taps: [
+        [0, 0],
+        [0.25, 1],
+        [0.5, 0]
+      ]
+    },
+    ...fields
+  }
+}
+
 export function uploadBody(metadata: unknown, audio: Uint8Array): FormData {
   const form = new FormData()
   form.set('metadata', JSON.stringify(metadata))
@@ -126,7 +128,7 @@ export function uploadBody(metadata: unknown, audio: Uint8Array): FormData {
 const itemRoutes = { recordings: recordingRoute, toots: tootRoute }
 const audioRoutes = { recordings: recordingAudioRoute, toots: tootAudioRoute }
 
-function request(path: string, method: string, as: As, init: RequestInit = {}) {
+export function request(path: string, method: string, as: As, init: RequestInit = {}) {
   return new Request(`${ORIGIN}${path}`, {
     ...init,
     method,
@@ -165,6 +167,12 @@ export const api = {
       params({ id })
     ),
 
+  placeAndTrim: (id: string, fields: unknown, as: As) =>
+    itemRoutes.recordings.PATCH(
+      patchRequest('recordings', id, JSON.stringify(fields), as),
+      params({ id })
+    ),
+
   place: (id: string, placedPitch: unknown, as: As, body = JSON.stringify({ placedPitch })) =>
     itemRoutes.recordings.PATCH(patchRequest('recordings', id, body, as), params({ id })),
 
@@ -177,7 +185,13 @@ export const api = {
       noParams
     ),
 
-  deleteAccount: (as: As) => accountRoute.DELETE(request('/api/account/', 'DELETE', as), noParams)
+  deleteAccount: (as: As) => accountRoute.DELETE(request('/api/account/', 'DELETE', as), noParams),
+
+  favorite: (songId: string, as: As) =>
+    favoriteRoute.PUT(request(`/api/favorites/${songId}/`, 'PUT', as), params({ id: songId })),
+
+  unfavorite: (songId: string, as: As) =>
+    favoriteRoute.DELETE(request(`/api/favorites/${songId}/`, 'DELETE', as), params({ id: songId }))
 }
 
 export function upload(kind: Kind, id: string, cookie: string, audio = wav()) {

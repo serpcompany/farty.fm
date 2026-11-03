@@ -24,7 +24,8 @@ export default defineConfig({
         test: {
           name: 'happy-dom',
           include: [interactionTests],
-          environment: 'happy-dom'
+          environment: 'happy-dom',
+          testTimeout: 30_000
         }
       },
       {

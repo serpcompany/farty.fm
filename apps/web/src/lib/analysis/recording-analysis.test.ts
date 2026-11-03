@@ -43,12 +43,21 @@ describe('analyzeRecording', () => {
 
       const startError = a.gestureStartSample - golden.gesture.start_sample
       const endError = a.gestureEndSample - golden.gesture.end_sample
-      maxGestureSamples = Math.max(maxGestureSamples, Math.abs(startError), Math.abs(endError))
+      const pitchEndError = a.pitchEndSample - golden.gesture.pitch_end_sample
+      maxGestureSamples = Math.max(
+        maxGestureSamples,
+        Math.abs(startError),
+        Math.abs(endError),
+        Math.abs(pitchEndError)
+      )
       expect
         .soft(Math.abs(a.gestureStartSeconds - golden.gesture.start_s), `${id}: start`)
         .toBeLessThanOrEqual(0.01)
       expect
         .soft(Math.abs(a.gestureEndSeconds - golden.gesture.end_s), `${id}: end`)
+        .toBeLessThanOrEqual(0.01)
+      expect
+        .soft(Math.abs(a.pitchEndSeconds - golden.gesture.pitch_end_s), `${id}: pitch end`)
         .toBeLessThanOrEqual(0.01)
       expect.soft(a.cutAtReattack, `${id}: cut at re-attack`).toBe(golden.gesture.cut_at_reattack)
 
@@ -114,6 +123,18 @@ describe('analyzeRecording', () => {
     const file = await decoded(golden)
     const a = analyzeRecording(file.samples, file.sampleRate)
     expect(JSON.parse(JSON.stringify(a))).toEqual(a)
+  })
+
+  test("the owner's fart 107 has no note", async () => {
+    const golden = goldenRecordings.find(g => g.id === '107')
+    if (!golden) throw new Error('fixture 107 missing')
+    const file = await decoded(golden)
+    const a = analyzeRecording(file.samples, file.sampleRate)
+    expect(a.pitchEstimateMidi).toBeNull()
+    expect(a.recordingPitchMidi).toBeNull()
+    expect(a.melodic).toBe(false)
+    expect(a.noiseLikeReason).toBe('no_steady_pitch')
+    expect(a.pitchConfidence).toBe(0.09)
   })
 
   test.each([

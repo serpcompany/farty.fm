@@ -23,22 +23,33 @@ SOUNDING_DB = 30
 SILENT_FLOOR_DB = -80
 DRY_PAD = 8 * HOP
 ONSET_TOLERANCE_S = 0.05
+REATTACK_MATCH_S = 0.03
 
 
-def has_reattack(seg):
+def reattacks(seg):
     if len(seg) < 20 * LEVEL_HOP:
-        return False
+        return []
     db = level_db(seg, 10 * LEVEL_HOP)
     a0 = int(np.argmax(db >= db.max() - ONSET_BELOW_PEAK_DB))
-    run_max, dip = db[a0], None
+    found, run_max, dip = [], db[a0], None
     for i in range(a0 + 1, len(db) - 2):
         if db[i] > run_max and dip is None:
             run_max = db[i]
         if db[i] < run_max - REATTACK_DIP_DB and (dip is None or db[i] < db[dip]):
             dip = i
         if dip is not None and db[i] > db[dip] + REATTACK_RISE_DB and (i - a0) * LEVEL_HOP > REATTACK_AFTER_S * SR:
-            return True
-    return False
+            found.append(i * LEVEL_HOP / SR)
+            run_max, dip = db[i], None
+    return found
+
+
+def has_reattack(seg):
+    return bool(reattacks(seg))
+
+
+def added_reattacks(heard, own):
+    own_at = reattacks(own)
+    return [t for t in reattacks(heard) if not any(abs(t - o) <= REATTACK_MATCH_S for o in own_at)]
 
 
 def yin_frames(y):
@@ -85,9 +96,9 @@ def median_midi(f0, voiced, window):
     return float(np.median(librosa.hz_to_midi(f))) if len(f) >= 2 else None
 
 
-def dry_frames(gesture, offset, n_samples):
-    y = np.zeros(DRY_PAD + offset + n_samples + DRY_PAD)
-    y[DRY_PAD + offset: DRY_PAD + offset + n_samples] = gesture[:n_samples]
+def dry_frames(played, offset):
+    y = np.zeros(DRY_PAD + offset + len(played) + DRY_PAD)
+    y[DRY_PAD + offset: DRY_PAD + offset + len(played)] = played
     return yin_frames(y)[0]
 
 
@@ -114,13 +125,16 @@ class FartReader:
         self.f_yin, self.db = yin_frames(audio)
         self.dry = {}
 
+    def played(self, event):
+        g = self.gesture[event["source_id"]]
+        return g[: min(len(g), int(round(event["len_s"] * SR)))]
+
     def cents_off(self, event, start_s, heard_len, t):
         start_sample = int(start_s * SR)
-        g = self.gesture[event["source_id"]]
-        n_samples = min(len(g), int(round(event["len_s"] * SR)))
-        key = (event["source_id"], n_samples, start_sample % HOP)
+        played = self.played(event)
+        key = (event["source_id"], len(played), start_sample % HOP)
         if key not in self.dry:
-            self.dry[key] = dry_frames(g, start_sample % HOP, n_samples)
+            self.dry[key] = dry_frames(played, start_sample % HOP)
         first_render_frame = start_sample // HOP - DRY_PAD // HOP
         return fart_cents(self.f_yin, sounding_frames(t, self.db, start_s, heard_len), self.dry[key], first_render_frame)
 
@@ -139,7 +153,7 @@ def evaluate(audio, melody, events, bpm, sources):
     onsets = librosa.onset.onset_detect(onset_envelope=onset_env, sr=SR, hop_length=HOP, units="time", backtrack=False)
 
     per_note, errors, faithful, heard_midi, sounding = [], [], [], [], []
-    retrigger_notes = 0
+    retrigger_notes = second_burst_notes = 0
     for e in events:
         n = melody.notes[e["note_index"]]
         s = n.start * spb
@@ -152,7 +166,9 @@ def evaluate(audio, melody, events, bpm, sources):
             errors.append(cents)
         off_fart = reader.cents_off(e, s, heard_len, t)
         faithful.append(off_fart is not None and abs(off_fart) <= FART_CENTS)
-        retrigger_notes += has_reattack(audio[int(s * SR): int((s + heard_len) * SR)])
+        own = reader.played(e)
+        second_burst_notes += has_reattack(own)
+        retrigger_notes += bool(added_reattacks(audio[int(s * SR): int((s + heard_len) * SR)], own))
         sounding.append(slot_sounding_share(audio, s, n.dur * spb))
         per_note.append({
             "i": e["note_index"],
@@ -172,6 +188,7 @@ def evaluate(audio, melody, events, bpm, sources):
         "within_50c_of_fart_pct": round(100 * sum(faithful) / n_notes),
         "onsets_on_time_pct": round(100 * matched / n_notes),
         "notes_with_retrigger": retrigger_notes,
+        "notes_with_second_burst": second_burst_notes,
         "pitch_readable_pct": round(100 * len(errors) / n_notes),
         "within_50c_pct": round(100 * np.sum(np.abs(errors) <= 50) / n_notes),
         "within_50c_any_octave_pct": round(100 * np.sum(np.abs(pitch_class_errors) <= 50) / n_notes),

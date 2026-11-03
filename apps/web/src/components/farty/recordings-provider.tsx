@@ -12,23 +12,40 @@ import {
   useRef,
   useState
 } from 'react'
-import { analyze as analyzeAudio } from '@/lib/analysis/client'
+import { analyze as analyzeAudio, findTrim } from '@/lib/analysis/client'
+import type { RescanResult } from '@/lib/analysis-upgrade'
 import { upgradeAnalyses } from '@/lib/analysis-upgrade'
 import { stopPlayback } from '@/lib/audio/player'
-import type { Song } from '@/lib/catalog/song'
-import { songs } from '@/lib/catalog/songs.generated'
+import type { Song, SongSummary } from '@/lib/catalog/song'
 import { type LibraryChange, onLibraryChanged, recordingsAfter } from '@/lib/library-changes'
+import type { Performance } from '@/lib/performance'
 import { nearestNote } from '@/lib/pitch'
-import { collectedPitchClasses, coverageKey, type SongRow, songRows } from '@/lib/pitch-coverage'
+import {
+  type Coverage,
+  collectedPitchClasses,
+  coverageKey,
+  coverageOf,
+  type SongRow,
+  songRows
+} from '@/lib/pitch-coverage'
 import * as store from '@/lib/recording-store'
-import { type Recording, songPitch } from '@/lib/recordings'
+import {
+  type AnalysisState,
+  type Recording,
+  type RecordingTrim,
+  songPitch,
+  type Trim
+} from '@/lib/recordings'
+import type { ReviewChange } from '@/lib/take-review'
 import { reportError } from '@/lib/telemetry/errors'
-import type { TootDraft } from '@/lib/toot'
-import { makeToot as renderToot } from '@/lib/toot-renderer'
+import type { PadTootDraft, SongTootDraft } from '@/lib/toot'
+import { makePadToot as renderPadToot, makeToot as renderToot } from '@/lib/toot-renderer'
 import { openVisit } from '@/lib/visit'
 import { decodeWav } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 import { usePlayback } from './playback-provider'
+import { useSongCatalog } from './song-catalog-provider'
+import { type Rescanning, useRescan } from './use-rescan'
 
 type RecordingFields = Parameters<typeof store.saveRecording>[0]
 
@@ -42,13 +59,20 @@ type Recordings = {
   collectedNotes: Set<number>
   collectedPitchClasses: Set<number>
   songRows: SongRow[]
+  coverage(song: SongSummary): Coverage
   saveRecording(fields: RecordingFields, wav: ArrayBuffer): Promise<Recording>
   analyze(id: string): Promise<Recording | null>
+  keepAnalysis(id: string, state: AnalysisState): Promise<Recording | null>
   reanalyze(id: string): Promise<Recording | null> | null
   deleteRecording(id: string): Promise<void>
-  placeRecording(id: string, placedPitch: number | null): void
+  placeRecording(id: string, change: ReviewChange): Promise<boolean>
+  rescanning: Rescanning | null
+  rescanned: RescanResult | null
+  rescanRecording(id: string): Promise<RescanResult>
+  rescanAll(): Promise<RescanResult>
   importRecordings(files: { id: string; wav: ArrayBuffer }[]): Promise<void>
-  makeToot(song: Song, id?: string): Promise<TootDraft>
+  makeToot(song: Song, id?: string): Promise<SongTootDraft>
+  makePadToot(performance: Performance, id?: string): Promise<PadTootDraft>
 }
 
 const RecordingsContext = createContext<Recordings | null>(null)
@@ -59,13 +83,58 @@ export function useRecordings(): Recordings {
   return recordings
 }
 
-function useSongRows(recordings: readonly Recording[]): SongRow[] {
+type Coverages = {
+  key: string
+  songs: readonly SongSummary[] | null
+  rows: SongRow[]
+  coverage(song: SongSummary): Coverage
+}
+
+function coverages(
+  key: string,
+  songs: readonly SongSummary[] | null,
+  recordings: readonly Recording[]
+): Coverages {
+  const arranged = new Map<SongSummary, Coverage>()
+  return {
+    key,
+    songs,
+    rows: songRows(songs ?? [], recordings),
+    coverage(song) {
+      let found = arranged.get(song)
+      if (!found) {
+        found = coverageOf(song, recordings)
+        arranged.set(song, found)
+      }
+      return found
+    }
+  }
+}
+
+function useCoverages(recordings: readonly Recording[]): Coverages {
+  const { songs } = useSongCatalog()
   const key = coverageKey(recordings)
-  const [matched, setMatched] = useState(() => ({ key, rows: songRows(songs, recordings) }))
-  if (matched.key === key) return matched.rows
-  const rematched = { key, rows: songRows(songs, recordings) }
+  const [matched, setMatched] = useState(() => coverages(key, songs, recordings))
+  if (matched.key === key && matched.songs === songs) return matched
+  const rematched = coverages(key, songs, recordings)
   setMatched(rematched)
-  return rematched.rows
+  return rematched
+}
+
+async function trimBetween(id: string, handles: Trim): Promise<RecordingTrim> {
+  const fart = await findTrim(decodeWav(await store.loadAudio(id)), handles)
+  return { startSeconds: handles.startSeconds, endSeconds: handles.endSeconds, fart }
+}
+
+async function placement(
+  id: string,
+  { placedPitch, handles, name }: ReviewChange
+): Promise<store.Placement> {
+  const change: store.Placement = {}
+  if (placedPitch !== undefined) change.placedPitch = placedPitch
+  if (name !== undefined) change.name = name
+  if (handles !== undefined) change.trim = handles && (await trimBetween(id, handles))
+  return change
 }
 
 function useLibraryRecordings(
@@ -123,7 +192,10 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
   }, [recordings])
 
   const replace = useCallback((updated: Recording) => {
-    setRecordings(list => list?.map(r => (r.id === updated.id ? updated : r)) ?? null)
+    setRecordings(
+      list =>
+        list?.map(r => (r.id === updated.id ? { ...r, analysis: updated.analysis } : r)) ?? null
+    )
   }, [])
 
   const keep = useCallback((saved: Recording) => {
@@ -150,6 +222,19 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
   )
 
   useLibraryRecordings(setRecordings, replace, analyze, setLibraryProblem)
+  const { rescanning, rescanned, rescanRecording, rescanAll } = useRescan(latest, replace)
+
+  const keepAnalysis = useCallback(
+    async (id: string, state: AnalysisState) => {
+      const kept = await store.saveAnalysis(id, state).catch(error => {
+        reportError('analysis-failed', error)
+        return null
+      })
+      if (kept) replace(kept)
+      return kept
+    },
+    [replace]
+  )
 
   const reanalyze = useCallback(
     (id: string) => {
@@ -177,11 +262,20 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
     setRecordings(list => list?.filter(r => r.id !== id) ?? null)
   }, [])
 
-  const placeRecording = useCallback((id: string, placedPitch: number | null) => {
-    setRecordings(list => list?.map(r => (r.id === id ? { ...r, placedPitch } : r)) ?? null)
-    store
-      .placeRecording(id, placedPitch)
+  const placeRecording = useCallback(async (id: string, review: ReviewChange) => {
+    let change: store.Placement
+    try {
+      change = await placement(id, review)
+    } catch (error) {
+      reportError('recording-trim-failed', error)
+      return false
+    }
+    if (Object.keys(change).length === 0) return true
+    setRecordings(list => list?.map(r => (r.id === id ? { ...r, ...change } : r)) ?? null)
+    await store
+      .placeRecording(id, change)
       .catch(error => reportError('recording-place-failed', error))
+    return true
   }, [])
 
   const importRecordings = useCallback(
@@ -211,6 +305,12 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
     [recordings]
   )
 
+  const makePadToot = useCallback(
+    (performance: Performance, id?: string) =>
+      renderPadToot(performance, recordings ?? [], store.loadAudio, undefined, id),
+    [recordings]
+  )
+
   const melodicRecordings = useMemo(
     () => (recordings ?? []).filter(r => songPitch(r) !== null),
     [recordings]
@@ -226,7 +326,7 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
     [melodicRecordings]
   )
   const pitchClasses = useMemo(() => collectedPitchClasses(recordings ?? []), [recordings])
-  const rows = useSongRows(recordings ?? [])
+  const { rows, coverage } = useCoverages(recordings ?? [])
 
   const value = useMemo(
     (): Recordings => ({
@@ -237,13 +337,20 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
       collectedNotes,
       collectedPitchClasses: pitchClasses,
       songRows: rows,
+      coverage,
       saveRecording,
       analyze,
+      keepAnalysis,
       reanalyze,
       deleteRecording,
       placeRecording,
+      rescanning,
+      rescanned,
+      rescanRecording,
+      rescanAll,
       importRecordings,
-      makeToot
+      makeToot,
+      makePadToot
     }),
     [
       recordings,
@@ -252,13 +359,20 @@ export function RecordingsProvider({ children }: { children: ReactNode }) {
       collectedNotes,
       pitchClasses,
       rows,
+      coverage,
       saveRecording,
       analyze,
+      keepAnalysis,
       reanalyze,
       deleteRecording,
       placeRecording,
+      rescanning,
+      rescanned,
+      rescanRecording,
+      rescanAll,
       importRecordings,
-      makeToot
+      makeToot,
+      makePadToot
     ]
   )
   return <RecordingsContext value={value}>{children}</RecordingsContext>

@@ -1,10 +1,11 @@
 import { act, type ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { forgetDecoded, play, stopPlayback } from '@/lib/audio/player'
-import { songs } from '@/lib/catalog/songs.generated'
+import type { SongSummary } from '@/lib/catalog/song'
+import { songIndex } from '@/lib/catalog/song-index.generated'
 import { waitingForRoom } from '@/lib/library-sync'
 import { announceSent } from '@/lib/outbox'
-import type { Toot } from '@/lib/toot'
+import type { SongToot, Toot } from '@/lib/toot'
 import * as tootStore from '@/lib/toot-store'
 import {
   button,
@@ -18,13 +19,30 @@ import {
   type
 } from '@/test-support/screen'
 import { PlaybackProvider } from './playback-provider'
+import { SongCatalogProvider } from './song-catalog-provider'
 import { TootScreen } from './toot-screen'
 import { TootsProvider } from './toots-provider'
 import { TootsScreen } from './toots-screen'
 
+const catalog = vi.hoisted(() => ({
+  loadSongs: vi.fn<() => Promise<readonly SongSummary[]>>()
+}))
+
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ back: vi.fn(), replace: vi.fn() }),
-  useSearchParams: () => new URLSearchParams({ id: 't1' })
+  useSearchParams: () => new URLSearchParams({ id: 't1' }),
+  usePathname: () => '/toots/'
+}))
+vi.mock('@/lib/catalog/load-songs', () => ({
+  loadSongs: catalog.loadSongs,
+  loadSong: () => new Promise(() => undefined)
+}))
+vi.mock('react-dom', async importOriginal => ({
+  ...(await importOriginal<typeof import('react-dom')>()),
+  preload: () => undefined
+}))
+vi.mock('./account-provider', () => ({
+  useAccount: () => ({ account: { status: 'signedOut' }, openStep: () => undefined })
 }))
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
 vi.mock('@/lib/toot-store', () => ({
@@ -35,19 +53,15 @@ vi.mock('@/lib/toot-store', () => ({
   deleteToot: vi.fn()
 }))
 vi.mock('@/lib/library-changes', () => ({ onLibraryChanged: () => () => undefined }))
-vi.mock('@/lib/audio/player', () => ({
-  play: vi.fn(),
-  stopPlayback: vi.fn(),
-  forgetDecoded: vi.fn()
-}))
+vi.mock('@/lib/audio/player', () => import('@/test-support/fake-player'))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: vi.fn() }))
 vi.mock('./recordings-provider', () => ({ useRecordings: () => ({ recording: () => undefined }) }))
 vi.mock('@/lib/library-sync', () => ({ waitingForRoom: vi.fn() }))
 
-const saved = (id: string, title: string, more: Partial<Toot> = {}): Toot => ({
+const saved = (id: string, title: string, more: Partial<SongToot> = {}): SongToot => ({
   id,
   title,
-  songId: songs[0].id,
+  songId: songIndex[0].id,
   createdAt: 1,
   seconds: 9,
   arrangement: { transposition: 0, recordingForPitch: {} },
@@ -56,7 +70,9 @@ const saved = (id: string, title: string, more: Partial<Toot> = {}): Toot => ({
 
 const inToots = (screen: ReactNode) => (
   <PlaybackProvider>
-    <TootsProvider>{screen}</TootsProvider>
+    <SongCatalogProvider>
+      <TootsProvider>{screen}</TootsProvider>
+    </SongCatalogProvider>
   </PlaybackProvider>
 )
 
@@ -75,6 +91,9 @@ function menuItem(name: string): HTMLElement {
   return found
 }
 
+const buttonSaying = (words: string) =>
+  [...document.body.querySelectorAll('button')].find(b => b.textContent === words)
+
 async function fromMenu(title: string, item: 'Rename' | 'Delete') {
   await tap(button(`More for ${title}`))
   await tap(menuItem(item))
@@ -84,6 +103,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(play).mockResolvedValue(undefined)
   vi.mocked(waitingForRoom).mockResolvedValue(0)
+  catalog.loadSongs.mockResolvedValue(songIndex)
 })
 
 afterEach(() => {
@@ -173,5 +193,38 @@ describe('a Toot’s screen', () => {
 
     await hideAndShowPage()
     expect(dialogs()).toEqual([])
+  })
+})
+
+describe('the Toots tab, naming each Song from the Song Catalog', () => {
+  const mary = songIndex.find(song => song.id === 'mary') ?? songIndex[0]
+  const ofMary = () => saved('t1', 'My Mary', { songId: mary.id })
+  const details = () => document.body.querySelector('[data-testid="toot-details"]')?.textContent
+
+  it('names the Song once the catalog has loaded', async () => {
+    await opened([ofMary()], <TootsScreen />)
+    expect(details()).toMatch(new RegExp(`^${mary.title} · `))
+    expect(pageText()).not.toContain("Couldn't load the Songs.")
+  })
+
+  it('says the Song is loading while the catalog loads', async () => {
+    catalog.loadSongs.mockReturnValue(new Promise(() => undefined))
+    await opened([ofMary()], <TootsScreen />)
+    expect(details()).toMatch(/^Loading… · /)
+    expect(buttonSaying('Try again')).toBeUndefined()
+  })
+
+  it('says the catalog failed, with Try again, and gives the row a neutral Song title', async () => {
+    catalog.loadSongs.mockRejectedValue(new TypeError('Failed to fetch'))
+    await opened([ofMary()], <TootsScreen />)
+    expect(pageText()).toContain("Couldn't load the Songs.")
+    expect(details()).toMatch(/^Song · /)
+
+    catalog.loadSongs.mockResolvedValue(songIndex)
+    const tryAgain = buttonSaying('Try again')
+    if (!tryAgain) throw new Error('No Try again')
+    await tap(tryAgain)
+    expect(catalog.loadSongs).toHaveBeenCalledTimes(2)
+    expect(details()).toMatch(new RegExp(`^${mary.title} · `))
   })
 })

@@ -1,0 +1,84 @@
+{
+  "library": "small",
+  "max_abs_shift_semitones": null,
+  "metrics": null,
+  "missing": [
+    {
+      "seconds": 0.5,
+      "target_midi": 44
+    },
+    {
+      "seconds": 0.5,
+      "target_midi": 48
+    }
+  ],
+  "notes": null,
+  "octave_moves": 2,
+  "per_pitch": [
+    {
+      "octave_move": true,
+      "recording": "009",
+      "shift_semitones": 10.474079406339825,
+      "song_pitch": 69,
+      "target_midi": 41
+    },
+    {
+      "octave_move": false,
+      "recording": "022",
+      "shift_semitones": 2.674079406339814,
+      "song_pitch": 71,
+      "target_midi": 43
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 72,
+      "target_midi": 44
+    },
+    {
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": 1.574079406339827,
+      "song_pitch": 74,
+      "target_midi": 46
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 76,
+      "target_midi": 48
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": 2.57407940633982,
+      "song_pitch": 77,
+      "target_midi": 49
+    },
+    {
+      "octave_move": true,
+      "recording": "016",
+      "shift_semitones": 10.674079406339814,
+      "song_pitch": 79,
+      "target_midi": 51
+    },
+    {
+      "octave_move": false,
+      "recording": "090",
+      "shift_semitones": -2.2259205936601774,
+      "song_pitch": 81,
+      "target_midi": 53
+    }
+  ],
+  "pitch_coverage": {
+    "covered": 6,
+    "total": 8
+  },
+  "plan_cost": 384.3072516579839,
+  "render_settings": null,
+  "song": "korobeiniki",
+  "transpose": -28,
+  "unlocked": false
+}

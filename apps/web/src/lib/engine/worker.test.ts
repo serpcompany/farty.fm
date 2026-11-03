@@ -2,6 +2,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { storedAnalysis } from '../../test-support/engine-golden'
 import { bridgedWorker, manualWorker, WorkerScope } from '../../test-support/fake-worker'
 import { decoded, goldenRecordings } from '../../test-support/golden'
+import { padSound, soundingSpan } from '../pads'
 import { type Arrangement, arrange, autoMapRecording } from './auto-map'
 import type { RecordingToRender, RenderedSong } from './render-song'
 import { renderFromRecordings } from './render-song'
@@ -89,6 +90,53 @@ describe('the render worker', () => {
     })
     expect(message).toEqual({ id: 3, error: 'Song is locked: 0 of 1 notes covered' })
     expect(transfer).toEqual([])
+  })
+
+  it('cuts a Pad’s sound as padSound does, and transfers each channel', async () => {
+    const scope = await startWorker()
+    const { samples, sampleRate } = recording.audio
+    const { message, transfer } = await askAndAwaitReply(scope, {
+      id: 5,
+      pad: { channels: [samples, samples], sampleRate }
+    })
+    expect(message.id).toBe(5)
+    expect(message.error).toBeUndefined()
+    const channels = message.result as unknown as Float32Array[]
+    expect(channels).toHaveLength(2)
+    expect(transfer).toEqual(channels.map(channel => channel.buffer))
+    expect(channels.every(channel => channel.buffer.byteLength === 0)).toBe(true)
+  })
+})
+
+describe('padSoundInWorker', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
+  it('cuts a Pad’s sound off the page’s thread, bit for bit padSound’s, and the page keeps its audio', async () => {
+    const scope = await startWorker()
+    vi.stubGlobal('Worker', bridgedWorker(scope))
+    const { padSoundInWorker } = await import('./client')
+    const { samples, sampleRate } = recording.audio
+    const [sound] = await padSoundInWorker([samples], sampleRate)
+    expect(sound.length).toBeGreaterThan(0)
+    expect(sound).toEqual(padSound([samples], sampleRate)[0])
+    expect(samples.buffer.byteLength).toBeGreaterThan(0)
+  })
+
+  it('cuts a 48 kHz take bit for bit padSound’s, from its lead-in at the take’s own rate', async () => {
+    const golden = goldenRecordings.find(r => r.id === '106')
+    if (!golden) throw new Error('fixture 106')
+    const { samples, sampleRate } = await decoded(golden)
+    expect(sampleRate).toBe(48_000)
+    const scope = await startWorker()
+    vi.stubGlobal('Worker', bridgedWorker(scope))
+    const { padSoundInWorker } = await import('./client')
+    const [sound] = await padSoundInWorker([samples], sampleRate)
+    expect(sound).toEqual(padSound([samples], sampleRate)[0])
+    const { start, end } = soundingSpan(samples, sampleRate)
+    expect(start).toBe(Math.round((golden.gesture.lead_start_sample * sampleRate) / 44_100))
+    expect(sound).toHaveLength(end - start)
   })
 })
 

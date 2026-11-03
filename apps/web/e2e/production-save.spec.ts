@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test'
-import { newEmail, signInByApi } from './account'
+import { accountLibrary, newEmail, signInByApi } from './account'
 import { uploaded } from './database'
 import { payAtTheDevCheckout } from './pay'
-import { fartAndSave, withFartingMicrophone } from './record'
+import { withFartingMicrophone } from './record'
 import { tab } from './screens'
-import { openASong } from './songs'
+import { openASong, recordTheFartsThatUnlockMary } from './songs'
 import { expect, test } from './test'
 
 withFartingMicrophone()
@@ -13,11 +13,8 @@ test.skip(
   'For a Production build (E2E_SITE_ENV=production)'
 )
 
-function accountToots(page: Page): Promise<string[]> {
-  return page.evaluate(async () => {
-    const library = (await (await fetch('/api/library/')).json()) as { toots: { id: string }[] }
-    return library.toots.map(toot => toot.id)
-  })
+async function accountToots(page: Page): Promise<string[]> {
+  return (await accountLibrary(page)).toots.map(toot => toot.id)
 }
 
 function watchWrites(page: Page): string[] {
@@ -38,14 +35,7 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
   await signInByApi(page, newEmail(testInfo, 'production-save'))
 
   await page.goto('/')
-  for (const id of ['095', '017', '022']) {
-    await fartAndSave(page, id)
-    await page.getByRole('button', { name: 'Record another' }).click()
-  }
-  await fartAndSave(page, '002')
-  await expect(page.getByTestId('result-progress')).toContainText(
-    'You unlocked Mary Had a Little Lamb'
-  )
+  await recordTheFartsThatUnlockMary(page)
   await page.getByRole('button', { name: 'Done' }).click()
   await openASong(page, 'mary')
 
@@ -70,7 +60,7 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
 
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
-  await expect(page.getByRole('heading', { name: 'Unlocked · 1' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Unlocked · 6', exact: true })).toBeVisible()
   await tab(page, 'Toots').click()
   await expect(page).toHaveURL(/\/toots\/$/)
   const toots = page.getByTestId('toot-row')

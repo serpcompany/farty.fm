@@ -1,18 +1,18 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import type { Locator, Page } from '@playwright/test'
-import { songs } from '../src/lib/catalog/songs.generated'
+import { songs } from '../src/test-support/songs.generated'
 import { newEmail, signInByApi } from './account'
 import { all, bytes } from './database'
 import { payAtTheDevCheckout } from './pay'
 import { skipWelcome } from './record'
-import { expectTappable, tab } from './screens'
+import { expectTappable, songsHeading, tab } from './screens'
 import { controlledByTheServiceWorker, errorsWhileOffline } from './service-worker'
 import {
   loadTheFixtureLibrary,
   needsTheFixtureLibrary,
   song,
-  songsTheFixturesUnlock
+  songsTheFixtureLibraryUnlocks
 } from './songs'
 import {
   countResumesInTaps,
@@ -29,6 +29,9 @@ type Tap = { tapped: number; making: number; ready: number }
 
 const evidence = process.env.E2E_EVIDENCE_DIR ? resolve(process.env.E2E_EVIDENCE_DIR) : null
 
+const theIPhoneAppsTwelveAndHotCrossBuns = 13
+const journeySongs = songs.slice(0, theIPhoneAppsTwelveAndHotCrossBuns)
+
 needsTheFixtureLibrary()
 test.use({ serviceWorkers: 'block' })
 
@@ -41,9 +44,9 @@ test.beforeEach(async ({ context }) => {
 async function openComposeWithTheFixtureLibrary(page: Page) {
   await loadTheFixtureLibrary(page)
   await tab(page, 'Compose').click()
-  await expect(
-    page.getByRole('heading', { name: `Unlocked · ${songsTheFixturesUnlock.length}` })
-  ).toBeVisible({ timeout: 60_000 })
+  await expect(songsHeading(page, 'Unlocked', songsTheFixtureLibraryUnlocks.length)).toBeVisible({
+    timeout: 60_000
+  })
 }
 
 async function watchTap(page: Page) {
@@ -106,7 +109,9 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
   if (out) await page.screenshot({ path: join(out, 'compose.png') })
 
   const timings: { song: string; tapToReadyMs: number; makingMs: number }[] = []
-  for (const unlocked of songsTheFixturesUnlock) {
+  expect(journeySongs.map(s => s.id).at(-1)).toBe('hot-cross-buns')
+  expect(journeySongs.every(s => songsTheFixtureLibraryUnlocks.includes(s))).toBe(true)
+  for (const unlocked of journeySongs) {
     await test.step(unlocked.id, async () => {
       const link = page
         .getByTestId('unlocked-songs')
@@ -147,7 +152,7 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       const used = page.getByTestId('recording-used')
       await expect(used).toHaveCount(unlocked.pitches.length)
       if (unlocked.id === 'mary') {
-        await expect(used.getByRole('button', { name: /^Recording 1,/ })).toContainText('1.7 s')
+        await expect(used.getByRole('button', { name: /^Recording 18,/ })).toContainText('1.9 s')
       }
       for (const control of [back, play, save, noteView]) await expectTappable(control)
       for (const recording of await used.getByRole('button').all()) await expectTappable(recording)
@@ -201,7 +206,7 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
     page,
     'toots'
   )
-  expect(toots.map(t => t.songId).sort()).toEqual(songsTheFixturesUnlock.map(s => s.id).sort())
+  expect(toots.map(t => t.songId).sort()).toEqual(journeySongs.map(s => s.id).sort())
   for (const toot of toots) {
     expect(toot.title).toBe(song(toot.songId).title)
     const wav = await bytes(page, 'tootAudio', toot.id)
@@ -301,6 +306,14 @@ test.describe('installed', () => {
     await play.click()
     await expect(state).toHaveText('Playing')
     expect((await lastSound(page)).duration).toBe(whole.duration)
+
+    const other = songsTheFixtureLibraryUnlocks.find(unlocked => unlocked.id !== 'mary')
+    if (!other) throw new Error('The Fixture Library unlocks no Song but Mary')
+    await page.goto(`/compose/${other.id}/`)
+    await expect(page.getByRole('heading', { name: other.title })).toBeVisible()
+    await expect(page).toHaveTitle(`${other.title} · Farty`)
+    await expect(page.getByText(other.source)).toBeVisible()
+    await expect(state).toBeVisible({ timeout: 60_000 })
     await context.setOffline(false)
   })
 })

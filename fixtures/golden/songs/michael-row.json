@@ -1,0 +1,162 @@
+{
+  "bar_lines": [
+    2.0,
+    6.0,
+    10.0,
+    14.0,
+    18.0,
+    22.0,
+    26.0,
+    30.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-michael-row.mid",
+  "id": "michael-row",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "michael-row",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 23,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-michael-row.mid",
+    "tempo_changes_ignored": 1,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 32.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 1.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 2.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 3.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 9.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 69,
+      "start": 10.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 17.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 19.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 25.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 26.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 28.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 60,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    65,
+    67,
+    69
+  ],
+  "sha256": "05b37c22c54f953f3eb6c7fb7a1244182a3483f82233a8c2f639efeab7fb4595",
+  "title": "Michael, Row the Boat Ashore"
+}

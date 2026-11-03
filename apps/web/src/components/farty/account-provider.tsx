@@ -28,11 +28,14 @@ export type NotUploaded = { full: number; waiting: number }
 
 type SignOut = 'signedOut' | 'failed' | NotUploaded
 
+type StepReason = 'keep' | 'share'
+
 type AccountContext = {
   account: Account
   stepOpen: boolean
+  stepReason: StepReason
   offerStep(then?: () => void): void
-  openStep(): void
+  openStep(then?: () => void, reason?: StepReason): void
   retry(): void
   skipStep(): void
   finishSignIn(account: Account): void
@@ -62,6 +65,7 @@ function reopenAsSignedIn(): void {
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account>({ status: 'checking' })
   const [stepOpen, setStepOpen] = useState(false)
+  const [stepReason, setStepReason] = useState<StepReason>('keep')
   const then = useRef<(() => void) | null>(null)
 
   useEffect(() => {
@@ -94,9 +98,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('online', retry)
   }, [account.status, retry])
 
-  const show = useCallback((next: (() => void) | null) => {
+  const show = useCallback((next: (() => void) | null, reason: StepReason = 'keep') => {
     clearStepDraft()
     then.current = next
+    setStepReason(reason)
     setStepOpen(true)
   }, [])
 
@@ -168,8 +173,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const value: AccountContext = {
     account,
     stepOpen,
+    stepReason,
     offerStep,
-    openStep: () => show(null),
+    openStep: (next, reason) => show(next ?? null, reason),
     retry,
     skipStep: close,
     finishSignIn,

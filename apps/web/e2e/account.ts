@@ -54,6 +54,19 @@ export async function signInByApi(page: Page, email: string): Promise<void> {
   expect(await post('/api/auth/sign-in/email-otp', { email, otp })).toBe(200)
 }
 
+export async function signUpInTheStep(
+  page: Page,
+  email: string,
+  title: 'Keep your farts' | 'Make a free account' = 'Make a free account'
+): Promise<void> {
+  const step = page.getByRole('dialog', { name: title })
+  await step.getByLabel('Email').fill(email)
+  await step.getByRole('button', { name: 'Send code' }).click()
+  await step.getByLabel('Code').fill(await codeFor(page, email))
+  await step.getByRole('button', { name: 'Sign in' }).click()
+  await expect(step).toBeHidden()
+}
+
 export function session(
   page: Page
 ): Promise<{ user: { email: string; marketingEmail: boolean } } | null> {
@@ -83,4 +96,14 @@ export async function expiredWithARecording(
   await uploaded(page)
   await context.clearCookies()
   return reopen(context, page)
+}
+
+type AccountLibrary = {
+  recordings: { number: number; name?: string; placedPitch?: number; trim?: unknown }[]
+  toots: { id: string }[]
+  favorites: string[]
+}
+
+export function accountLibrary(page: Page): Promise<AccountLibrary> {
+  return page.evaluate(async () => (await fetch('/api/library/', { cache: 'no-store' })).json())
 }

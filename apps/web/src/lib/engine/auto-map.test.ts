@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  autoMapInput,
   autoMapInputs,
   coverageSubsets,
   type GoldenArrangement,
@@ -14,7 +15,16 @@ import {
   syntheticRecording,
   tieGroups
 } from '@/test-support/engine-golden'
-import { type Arrangement, arrange, choiceForSongPitch, NOTE_FILL } from './auto-map'
+import {
+  type Arrangement,
+  type AutoMapRecording,
+  arrange,
+  choiceForSongPitch,
+  coveredCount,
+  NOTE_FILL,
+  PLACED_SHORTEST_NOTE_SECONDS,
+  songPitches
+} from './auto-map'
 import type { Song } from './song'
 
 const TOLERANCE = 1e-9
@@ -152,14 +162,33 @@ describe('Auto-map matches the golden Arrangements, recomputing each cost from t
     }
   }
 
-  it('unlocks 9 of the 13 Songs on the full library, and none on the small one with its short farts', () => {
-    const unlocked = (library: Library) =>
-      songIds.filter(id => arrange(goldenSong(id), autoMapInputs(libraries[library])).unlocked)
-    const notesLongerThanAnyNearbyFart = ['jingle', 'row', 'amazing', 'auld']
-    expect(unlocked('full')).toEqual(
-      songIds.filter(id => !notesLongerThanAnyNearbyFart.includes(id))
-    )
-    expect(unlocked('small')).toEqual([])
+  it('unlocks all but 5 Songs on the full library, and the 13 from before #229, 2 of those on the small one', () => {
+    const locked = (library: Library, ids: readonly string[] = songIds) =>
+      ids.filter(id => !arrange(goldenSong(id), autoMapInputs(libraries[library])).unlocked)
+    const before229 = [
+      'twinkle',
+      'mary',
+      'jingle',
+      'frere',
+      'saints',
+      'row',
+      'ode',
+      'amazing',
+      'furelise',
+      'auld',
+      'ode-mutopia',
+      'birthday',
+      'merryxmas'
+    ]
+    expect(locked('full', before229)).toEqual([])
+    expect(before229.filter(id => locked('small', [id]).length === 0)).toEqual(['mary', 'saints'])
+    expect(locked('full')).toEqual([
+      'silent-night',
+      'joy-to-the-world',
+      'away-in-a-manger',
+      'daisy-bell',
+      'taps'
+    ])
   })
 })
 
@@ -179,8 +208,36 @@ describe('Pitch Coverage matches every coverage.json subset', () => {
           song,
           `subset ${s} ${golden.song}`
         )
+        expect(coveredCount(songPitches(song), library), `subset ${s} ${golden.song}`).toBe(
+          golden.pitch_coverage.covered
+        )
       }
     })
+  })
+})
+
+describe('coveredCount (#323)', () => {
+  it('counts what Auto-map covers, on each library and on random ones with placed farts', () => {
+    const random = seededRandom(323)
+    const full = autoMapInputs(libraries.full)
+    const sets: AutoMapRecording[][] = [full, autoMapInputs(libraries.small), []]
+    for (let k = 0; k < 8; k++) {
+      const some = full.filter(() => random() < 0.3)
+      const placed: AutoMapRecording = {
+        ...autoMapInput('065'),
+        id: 'placed',
+        recordingPitchMidi: 36 + Math.floor(random() * 36),
+        shortestNoteSeconds: PLACED_SHORTEST_NOTE_SECONDS,
+        settleSeconds: 0
+      }
+      sets.push(k % 2 === 0 ? some : [...some, placed])
+    }
+    for (const library of sets) {
+      for (const id of songIds) {
+        const song = goldenSong(id)
+        expect(coveredCount(songPitches(song), library), id).toBe(arrange(song, library).covered)
+      }
+    }
   })
 })
 

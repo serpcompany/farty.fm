@@ -103,7 +103,7 @@ export function DeleteAccount({
           {!asksCode ? (
             <>
               {header(
-                "This deletes your email, Recordings and Toots from Farty, on every device. It can't be undone."
+                "This deletes your email, Recordings and Toots from Farty, on every device, and your shared links stop working. It can't be undone."
               )}
               <AlertDialogFooter>
                 {cancel}

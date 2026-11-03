@@ -8,14 +8,19 @@ export const DOCS_PATHS = [
   /^\.claude\/skills\/.+\.md$/,
   /^apps\/web\/docs\/.+\.md$/,
   /^apps\/web\/(?:AGENTS|CLAUDE)\.md$/,
-  /^tools\/(?:.+\/)?README\.md$/,
+  /^tools\/.+\.md$/,
   /^fixtures\/golden\/[^/]+\.md$/
 ]
 export const READ_BY_TESTS = new Set(['tools/catalog/README.md', 'fixtures/golden/port-tests.md'])
+const GENERATED = [/\.report\.md$/, /^tools\/catalog\/ranking\.md$/]
 export const WALK_LIMIT = 50
 
 export function isDoc(path) {
-  return DOCS_PATHS.some(docs => docs.test(path)) && !READ_BY_TESTS.has(path)
+  return (
+    DOCS_PATHS.some(docs => docs.test(path)) &&
+    !READ_BY_TESTS.has(path) &&
+    !GENERATED.some(generated => generated.test(path))
+  )
 }
 
 export function isDocsOnlyChange(paths) {

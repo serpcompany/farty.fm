@@ -11,7 +11,7 @@ import {
 } from '@/test-support/library-page'
 
 const library = libraryHarness()
-const { recorded, requests, refuse } = library
+const { recorded, requests, refuse, keptWhileSending } = library
 
 describe('reading the account', () => {
   beforeEach(() => claimedBy('user-a'))
@@ -131,16 +131,7 @@ describe('reading the account', () => {
     library.account.add('recordings', { ...recording, placedPitch: 40 }, wav(5))
     await library.page.sync.syncOnce('user-a')
     expect((await library.page.store.loadRecordings())[0].placedPitch).toBe(40)
-    refuse('PATCH', 503, 'unavailable')
-    await library.page.store.placeRecording(recording.id, 41)
-    library.account.place(recording.id, 42)
-    await library.page.sync.syncOnce('user-a')
-    expect((await library.page.store.loadRecordings())[0].placedPitch).toBe(41)
-    library.account.intercept = null
-    await library.page.sync.syncOnce('user-a')
-    library.account.add('recordings', recording, wav(5))
-    await library.page.sync.syncOnce('user-a')
-    expect((await library.page.store.loadRecordings())[0].placedPitch).toBe(41)
+    await keptWhileSending(recording, { placedPitch: 41 }, { placedPitch: 42 })
   })
 
   it('leaves an id the account lists as deleted to an upload waiting here, which the account may take back', async () => {

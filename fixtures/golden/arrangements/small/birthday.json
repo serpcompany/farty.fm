@@ -4,10 +4,6 @@
   "metrics": null,
   "missing": [
     {
-      "seconds": 0.5,
-      "target_midi": 41
-    },
-    {
       "seconds": 1.5,
       "target_midi": 46
     },
@@ -21,26 +17,26 @@
     }
   ],
   "notes": null,
-  "octave_moves": 0,
+  "octave_moves": 1,
   "per_pitch": [
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "octave_move": false,
+      "recording": "022",
+      "shift_semitones": 0.6740794063398141,
       "song_pitch": 53,
       "target_midi": 41
     },
     {
       "octave_move": false,
-      "recording": "022",
-      "shift_semitones": 2.674079406339814,
+      "recording": "069",
+      "shift_semitones": -1.425920593660173,
       "song_pitch": 55,
       "target_midi": 43
     },
     {
-      "octave_move": false,
-      "recording": "069",
-      "shift_semitones": 0.5740794063398269,
+      "octave_move": true,
+      "recording": "009",
+      "shift_semitones": 14.474079406339825,
       "song_pitch": 57,
       "target_midi": 45
     },
@@ -81,10 +77,10 @@
     }
   ],
   "pitch_coverage": {
-    "covered": 4,
+    "covered": 5,
     "total": 8
   },
-  "plan_cost": 42.350753237120806,
+  "plan_cost": 183.05216525768842,
   "render_settings": null,
   "song": "birthday",
   "transpose": -12,

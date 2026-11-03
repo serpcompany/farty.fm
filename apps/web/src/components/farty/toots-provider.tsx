@@ -11,10 +11,10 @@ import {
   useState
 } from 'react'
 import { forgetDecoded, stopPlayback } from '@/lib/audio/player'
-import { songs } from '@/lib/catalog/songs.generated'
+import type { Song } from '@/lib/catalog/song'
 import { onLibraryChanged } from '@/lib/library-changes'
 import { reportError } from '@/lib/telemetry/errors'
-import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
+import { noteSeconds, PAD_TOOT_TITLE, type Toot, type TootDraft } from '@/lib/toot'
 import * as tootStore from '@/lib/toot-store'
 import { openVisit } from '@/lib/visit'
 import { usePlayback } from './playback-provider'
@@ -24,7 +24,7 @@ type Toots = {
   tootsFailed: boolean
   toot(id: string): Toot | undefined
   saveToot(draft: TootDraft): Promise<void>
-  toggleTootPlayback(toot: TootDraft | Toot, note?: number): void
+  toggleTootPlayback(toot: TootDraft | Toot, note?: number, notes?: Song): void
   tootPlayFailed: string | null
   renameToot(id: string, title: string): void
   deleteToot(id: string): void
@@ -57,6 +57,19 @@ function withChange(list: Toot[] | null, changed: Toot[], deleted: string[]): To
   return [...merged, ...changed.filter(t => !ids.has(t.id))].sort(
     (a, b) => b.createdAt - a.createdAt
   )
+}
+
+function tootOf(draft: TootDraft): Toot {
+  const saved = { id: draft.id, createdAt: Date.now(), seconds: draft.seconds }
+  return draft.song === null
+    ? {
+        ...saved,
+        title: PAD_TOOT_TITLE,
+        songId: null,
+        arrangement: null,
+        performance: draft.performance
+      }
+    : { ...saved, title: draft.song.title, songId: draft.song.id, arrangement: draft.arrangement }
 }
 
 function savedFirst(current: Toot[] | null, saved: Toot[]): Toot[] {
@@ -104,14 +117,7 @@ export function TootsProvider({ children }: { children: ReactNode }) {
     async (draft: TootDraft) => {
       if (toots?.some(t => t.id === draft.id) || savingToots.current.has(draft.id)) return
       savingToots.current.add(draft.id)
-      const toot: Toot = {
-        id: draft.id,
-        title: draft.song.title,
-        songId: draft.song.id,
-        createdAt: Date.now(),
-        seconds: draft.seconds,
-        arrangement: draft.arrangement
-      }
+      const toot = tootOf(draft)
       try {
         await tootStore.saveToot(toot, draft.wav)
         setToots(list => [toot, ...(list ?? [])])
@@ -140,9 +146,9 @@ export function TootsProvider({ children }: { children: ReactNode }) {
   )
 
   const toggleTootPlayback = useCallback(
-    (toot: TootDraft | Toot, note?: number) => {
+    (toot: TootDraft | Toot, note?: number, notes?: Song) => {
       setTootPlayFailed(null)
-      const song = 'song' in toot ? toot.song : songs.find(s => s.id === toot.songId)
+      const song = 'song' in toot ? toot.song : toot.songId === notes?.id ? notes : undefined
       if (note !== undefined && !song) return
       const written = note === undefined || !song ? null : noteSeconds(song, song.notes[note])
       togglePlayback({

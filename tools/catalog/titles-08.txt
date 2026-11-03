@@ -1,0 +1,188 @@
+# The top 200 tune titles of tools/catalog/ranking.md, not yet in the catalog or tried, written by
+# tools/catalog/rank_pdmx.py --batch 200 --out tools/catalog/titles-08.txt (#312). Each title's only name is
+# the one the ranking counted scores by. Review of its import (#324) pulled 1 title, now in
+# excluded-titles.txt: Helena.
+# The second review (#324, PR #341) pulled 18 more, now in excluded-titles.txt: Si Beag Si Mhor, The Fair Maid of the Inn, Caller Herring, Charleston, From Night 'till Morn, Ohio, Calver Lodge, Woodland Revels, Jack Frost, The Dresden, Princess, Union, Long Odds, Mary Walker, Frank Gilruth, Will You Come Home With Me, Over the Border, Tell me where is fancy bred.
+# It also named these by hand, with their accents or the name people know: The Minstrel Boy, Frenet Ha', Barbu Lăutarul.
+# id | catalog title
+lull-me-beyond-thee | Lull Me Beyond Thee
+miss-barbara-cunningham | Miss Barbara Cunningham
+minstrel-boy | The Minstrel Boy | Moreen
+anada-pa-gael | Añada Pa Gael
+farewell-to-whisky | Farewell to Whisky
+lord-moira | Lord Moira
+millisons-jig | Millison's Jig
+qui-vult-venire-post-me | Qui vult venire post me
+slip | The Slip
+an-muileann-dubh | An Muileann Dubh
+bacca-pipes-jig | Bacca Pipes Jig
+blair-athole | Blair Athole
+buffoon | The Buffoon
+death-shall-not-destroy-my-comfort | Death shall not destroy my comfort
+ewe-with-the-crooked-horn | Ewe With the Crooked Horn
+jennys-bawbee | Jenny's Bawbee
+love-divine | Love Divine
+old-mole | The Old Mole
+althea | Althea
+fill-evry-glass | Fill ev'ry glass
+goodnight-and-joy-be-with-you | Goodnight And Joy Be With You
+haymakers | The Haymakers
+health | The Health
+leslies-march | Leslie's March
+london-lasses | London Lasses
+whirligig | Whirligig
+aiken-drum | Aiken Drum
+aurea-luce | Aurea luce
+cambridge-hornpipe | The Cambridge Hornpipe
+christmas-day-ida-moarnin | Christmas Day Ida Moarnin'
+dumfries-house | Dumfries House
+jacks-health | Jack's Health
+life-let-us-cherish | Life Let Us Cherish
+barham-down | Barham Down
+calvary | Calvary
+i-will-praise-him | I Will Praise Him!
+marquis-of-huntlys-farewell | The Marquis of Huntly's Farewell
+squire-parsons | Squire Parsons
+sunshine-hornpipe | The sunshine hornpipe
+aboyne-castle | Aboyne Castle
+aitken-drum | Aitken Drum
+apple-tree | Apple Tree
+cobblers-hornpipe | The Cobbler's Hornpipe
+duke-of-gordons-birthday | The Duke of Gordon's Birthday
+enterprise-hornpipe | The Enterprise Hornpipe
+fyvie-castle | Fyvie Castle
+harp-that-once-through-taras-halls | The Harp That Once Through Tara's Halls
+how-great-our-joy | How Great Our Joy
+marquis-of-huntlys-snuff-mill | The Marquis of Huntly's Snuff-mill
+millers-reel | Miller's Reel
+neil-gows-lament-for-abercairny | Neil Gow's Lament for Abercairny
+pipers-despair | The Piper's Despair
+as-i-come-o-savior-pleading | As I come O Savior pleading
+conditor-alme-siderum | Conditor Alme Siderum
+gypsy-hornpipe | Gypsy Hornpipe
+rochester-schottische | Rochester Schottische
+sir-david-davidson-of-cantray | Sir David Davidson Of Cantray
+crusaders | The Crusaders
+cupids-garden | Cupid's Garden
+french-assembly | The French Assembly
+gordon-castle | Gordon Castle
+gorhoffedd-gwyr-harlech | Gorhoffedd Gwyr Harlech
+meillionen | Meillionen
+pennan-den | Pennan Den
+softly-good-tummas | Softly Good Tummas
+up-in-the-air | Up In The Air
+aurora-lucis | Aurora Lucis
+dribbles-of-brandy | Dribbles of Brandy
+getting-upstairs | Getting Upstairs
+lasses-of-portsmouth | The Lasses of Portsmouth
+maggie-browns-favourite | Maggie Brown's Favourite
+merry-conceit | The Merry Conceit
+mr-oconnor | Mr. O'Connor
+natus-est-nobis | Natus est nobis
+tobins-favorite | Tobin's Favorite
+arthurs-seat | Arthur's Seat
+dicks-maggot | Dick's Maggot
+in-those-twelve-days | In Those Twelve Days
+its-nice-to-get-up-in-the-morning | It's Nice To Get Up In The Morning
+keep-the-country-bonnie-lassie | Keep the Country Bonnie Lassie
+let-erin-remember | Let Erin Remember
+major-graham-of-inchbrakie | Major Graham Of Inchbrakie
+pear-tree | The Pear Tree
+royal-circus | Royal Circus
+welcome-whisky-back-again | Welcome Whisky Back Again
+within-a-mile-o-edinburgh-toon | Within A Mile O' Edinburgh Toon
+braes-of-dornoch | Braes of Dornoch
+bridge-of-perth | The Bridge of Perth
+country-farmer | Country Farmer
+easter-thursday | Easter Thursday
+enfield-common | Enfield Common
+hawk | The Hawk
+lady-louisa-gordon | Lady Louisa Gordon
+my-mothers-coming-in | My Mother's Coming In
+old-nolls-jig | Old Noll's Jig
+syria | Syria
+tipsy-parson | The Tipsy Parson
+barbarinis-tambourine | Barbarini's Tambourine
+hens-march-to-the-midden | The Hen's march to the midden
+highland-whiskey | Highland Whiskey
+lady-charlotte-murray | Lady Charlotte Murray
+major-molle | Major Molle
+royal-albert | Royal Albert
+seven-joys-of-mary | The Seven Joys Of Mary
+valentines-day | Valentine's Day
+avenging-and-bright | Avenging And Bright
+bouzer-castle | Bouzer Castle
+countess-of-sutherlands-reel | Countess of Sutherlands Reel
+delvin-house | Delvin House
+fanny-dillon | Fanny Dillon
+french-ambassador | The French Ambassador
+greigs-pipes | Greig's Pipes
+halfe-hannikin | Halfe Hannikin
+lady-day | Lady Day
+red-and-all-red | Red and all Red
+smugglers-reel | The Smuggler's Reel
+summi-triumphum-regis-i | Summi triumphum regis I
+wren | The Wren
+banks-of-forth | The Banks Of Forth
+behold-the-great-creator-makes | Behold The Great Creator Makes
+cornish-quickstep | Cornish Quickstep
+drapers-maggot | Draper's Maggot
+frenet-ha | Frenet Ha'
+gladstone | The Gladstone
+john-cheap-the-chapman | John Cheap The Chapman
+john-roy-stewart | John Roy Stewart
+johnny-in-the-nether-mains | Johnny in the Nether Mains
+lady-ann-hope | Lady Ann Hope
+my-god-i-am-thine-what-a-comfort-divine | My God I am thine what a comfort divine
+o-mistress-mine | O Mistress Mine
+orange-nan | Orange Nan
+rob-roy-macgregor | Rob Roy MacGregor
+weavers-march | The Weavers' March
+alewife-and-her-barrel | The Alewife and her Barrel
+barbu-lautarul | Barbu Lăutarul
+billy-byrne-of-ballymanus | Billy Byrne of Ballymanus
+braes-of-bushbie | Braes of Bushbie
+earl-of-angus-and-arran | Earl of Angus and Arran
+hatton-of-buchrombs-reel | Hatton of Buchromb's Reel
+lady-loudon | Lady Loudon
+millers-rant | The Miller's Rant
+mrs-oswald-of-auchincruive | Mrs. Oswald of Auchincruive
+vallafield | Vallafield
+breeches-full-of-stitches | Breeches Full of Stitches
+duchess-of-gordon | The Duchess of Gordon
+dunkeld-house | Dunkeld House
+friar-and-the-nun | The Friar and the Nun
+miss-stewart | Miss Stewart
+my-tochers-the-jewel | My Tocher's The Jewel
+robin-ddiog | Robin ddiog
+yester-house | Yester House
+an-adventure-at-margate | An Adventure at Margate
+cutty-sark | Cutty Sark
+jacob-halls-jig | Jacob Hall's Jig
+lord-gregory | Lord Gregory
+none-so-pretty | None So Pretty
+prince-william | Prince William
+young-terence-mcdonough | Young Terence McDonough
+abergenny | Abergenny
+behold-he-comes-the-savior-comes | Behold He Comes The Savior Comes
+busty-fields | Busty Fields
+christian-warfare | Christian Warfare
+come-lets-be-merry | Come Let's Be Merry
+come-thou-burning-spirit-come | Come Thou Burning Spirit Come
+devonshire-house | Devonshire House
+doed-a-ddel | Döed a ddêl
+fair-quaker-of-deal | Fair Quaker of Deal
+hop-pickers-feast | The Hop Picker's Feast
+kinrara | Kinrara
+lady-bairds-reel | Lady Baird's Reel
+lennox-love-to-blantyre | Lennox Love to Blantyre
+leominster | Leominster
+loch-earn | Loch Earn
+north-bridge-of-edinburgh | The North Bridge of Edinburgh
+open-the-door-to-three | Open the Door to Three
+patrick-kelly | Patrick Kelly
+pools-hole | Pool's Hole
+providence | Providence
+when-joseph-was-a-young-man | When Joseph Was A Young Man
+belfast | The Belfast
+bishop-of-bangors-jig | The Bishop of Bangor's Jig

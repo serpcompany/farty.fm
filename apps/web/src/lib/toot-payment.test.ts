@@ -5,6 +5,7 @@ import {
   readCheckoutReturn,
   startCheckout,
   tootPaid,
+  tootPaymentState,
   waitUntilPaid
 } from './toot-payment'
 
@@ -114,6 +115,24 @@ describe('tootPaid', () => {
     vi.restoreAllMocks()
     answering(Response.json({ error: 'signed_out' }, { status: 401 }))
     expect(await tootPaid(TOOT, 'userA')).toBeNull()
+  })
+})
+
+describe('tootPaymentState', () => {
+  it('is unused only for a payment no save has used, and null when the server can’t say', async () => {
+    const cases: [Response, Awaited<ReturnType<typeof tootPaymentState>>][] = [
+      [Response.json({ paid: true, unused: true }), 'unused'],
+      [Response.json({ paid: true, unused: false }), 'used'],
+      [Response.json({ paid: false, unused: false }), 'unpaid'],
+      [Response.json({ paid: true }), null],
+      [Response.json({ error: 'signed_out' }, { status: 401 }), null]
+    ]
+    for (const [response, state] of cases) {
+      const fetch = answering(response)
+      expect(await tootPaymentState(TOOT, 'userA')).toBe(state)
+      expect(fetch.mock.calls[0][0]).toBe(`/api/toots/${TOOT}/payment/?check=stored`)
+      vi.restoreAllMocks()
+    }
   })
 })
 

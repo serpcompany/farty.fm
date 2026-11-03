@@ -1,0 +1,86 @@
+{
+  "bar_lines": [
+    0.0,
+    11.0
+  ],
+  "beats_per_bar": 11,
+  "bpm": 120,
+  "file": "midi/pdmx-beautiful-dreamer.mid",
+  "id": "beautiful-dreamer",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 22
+  },
+  "import_report": {
+    "catalog_id": "beautiful-dreamer",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 9,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-beautiful-dreamer.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 22.0,
+  "notes": [
+    {
+      "dur": 3.0,
+      "pitch": 72,
+      "start": 0.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 71,
+      "start": 3.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 72,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 9.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 10.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 62,
+      "start": 11.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 61,
+      "start": 14.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 62,
+      "start": 17.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 20.0
+    }
+  ],
+  "pitches": [
+    61,
+    62,
+    64,
+    67,
+    69,
+    71,
+    72
+  ],
+  "sha256": "2165c7d13817b095f66cf4e065166508015590bdc907b30f008f243866635b75",
+  "title": "Beautiful Dreamer"
+}

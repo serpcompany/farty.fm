@@ -1,20 +1,33 @@
 import { describe, expect, it } from 'vitest'
 import { decoded, goldenRecordings } from '@/test-support/golden'
+import { analyzeRecording } from './analysis/recording-analysis'
 import { ANALYSIS_VERSION } from './analysis/version'
 import {
   type Analysis,
   type AnalysisState,
+  atFullLevel,
+  defaultName,
+  foundNote,
+  foundPart,
   HIGHEST_PLACED_PITCH,
   heardSomething,
+  isLeftOut,
   isNoiseLike,
   isPlaceablePitch,
   LOWEST_PLACED_PITCH,
   levelContrast,
+  MAXIMUM_NAME_LENGTH,
+  NO_NOTE,
   needsReanalysis,
   placedPitch,
   type Recording,
+  recordingName,
   recordingPitch,
-  songPitch
+  songPitch,
+  songTrim,
+  TakeLevels,
+  trimHandles,
+  trimOf
 } from './recordings'
 
 function roomNoise(seconds: number, sampleRate: number, rmsDb: number, pole = 0.97): Float32Array {
@@ -34,6 +47,12 @@ function roomNoise(seconds: number, sampleRate: number, rmsDb: number, pole = 0.
   return out.map(v => v * gain)
 }
 
+function atPeak(samples: Float32Array, peakDb: number): Float32Array {
+  const peak = samples.reduce((max, v) => Math.max(max, Math.abs(v)), 0)
+  const gain = 10 ** (peakDb / 20) / peak
+  return samples.map(v => v * gain)
+}
+
 describe('heardSomething', () => {
   it.each(['016', '019', '081', '086'])('hears the short fart %s', async id => {
     const golden = goldenRecordings.find(g => g.id === id)
@@ -43,7 +62,7 @@ describe('heardSomething', () => {
   })
 
   it('hears every fart in the Fixture Library', async () => {
-    expect(goldenRecordings).toHaveLength(32)
+    expect(goldenRecordings).toHaveLength(38)
     for (const golden of goldenRecordings) {
       const { samples, sampleRate } = await decoded(golden)
       expect(heardSomething(samples, sampleRate), golden.id).toBe(true)
@@ -54,19 +73,34 @@ describe('heardSomething', () => {
     expect(heardSomething(new Float32Array(96_000), 48_000)).toBe(false)
   })
 
-  it.each([-50, -40])('hears nothing in 2 s of room noise at %i dBFS', rmsDb => {
+  it.each([-70, -60, -50, -40])('hears nothing in 2 s of room noise at %i dBFS', rmsDb => {
     expect(heardSomething(roomNoise(2, 48_000, rmsDb), 48_000)).toBe(false)
   })
 
+  it('hears every fart in the Fixture Library with its loudest sample at -50 dBFS (#279)', async () => {
+    for (const golden of goldenRecordings) {
+      const { samples, sampleRate } = await decoded(golden)
+      expect(heardSomething(atPeak(samples, -50), sampleRate), golden.id).toBe(true)
+    }
+  })
+
+  it('hears no fart with its loudest sample below -70 dBFS', async () => {
+    for (const golden of goldenRecordings) {
+      const { samples, sampleRate } = await decoded(golden)
+      expect(heardSomething(atPeak(samples, -70.5), sampleRate), golden.id).toBe(false)
+    }
+  })
+
   it.each([
-    { noise: 'white noise', pole: 0, seconds: 2, heard: false },
-    { noise: 'white noise', pole: 0, seconds: 30, heard: false },
-    { noise: 'room noise', pole: 0.97, seconds: 2, heard: false },
-    { noise: 'room noise', pole: 0.97, seconds: 30, heard: false },
-    { noise: 'low rumble', pole: 0.995, seconds: 2, heard: true },
-    { noise: 'low rumble', pole: 0.995, seconds: 30, heard: true }
-  ])('$noise for $seconds s at -40 dBFS: heard is $heard', ({ pole, seconds, heard }) => {
-    expect(heardSomething(roomNoise(seconds, 48_000, -40, pole), 48_000)).toBe(heard)
+    { noise: 'white noise', pole: 0, seconds: 2, rmsDb: -40, heard: false },
+    { noise: 'white noise', pole: 0, seconds: 30, rmsDb: -40, heard: false },
+    { noise: 'room noise', pole: 0.97, seconds: 2, rmsDb: -40, heard: false },
+    { noise: 'room noise', pole: 0.97, seconds: 30, rmsDb: -40, heard: false },
+    { noise: 'low rumble', pole: 0.995, seconds: 2, rmsDb: -40, heard: true },
+    { noise: 'low rumble', pole: 0.995, seconds: 30, rmsDb: -40, heard: true },
+    { noise: 'low rumble', pole: 0.995, seconds: 2, rmsDb: -60, heard: true }
+  ])('$noise for $seconds s at $rmsDb dBFS: heard is $heard', ({ pole, seconds, rmsDb, heard }) => {
+    expect(heardSomething(roomNoise(seconds, 48_000, rmsDb, pole), 48_000)).toBe(heard)
   })
 
   async function fartInRoom(id: string, roomDb: number) {
@@ -105,6 +139,110 @@ describe('heardSomething', () => {
     const { samples, sampleRate } = await decoded(golden)
     expect(levelContrast(samples, sampleRate)?.contrastDb).toBeGreaterThan(4)
     expect(levelContrast(roomNoise(2, 48_000, -40), 48_000)?.contrastDb).toBeLessThan(4)
+  })
+})
+
+describe('TakeLevels, a take measured as it comes in (#281)', () => {
+  function inBatches(take: Float32Array, sampleRate: number): Float32Array[] {
+    const first = Math.round(0.3 * sampleRate) + 128
+    const batches = [take.subarray(0, first)]
+    for (let at = first; at < take.length; at += 4096) batches.push(take.subarray(at, at + 4096))
+    return batches
+  }
+
+  function wholeTake(samples: Float32Array, sampleRate: number) {
+    const hop = Math.max(1, Math.trunc(0.005 * sampleRate))
+    const frame = 10 * hop
+    if (samples.length < frame) return null
+    const energy = new Float64Array(samples.length + 1)
+    for (let i = 0; i < samples.length; i++) energy[i + 1] = energy[i] + samples[i] * samples[i]
+    const levels: number[] = []
+    for (let start = 0; start + frame <= samples.length; start += hop) {
+      const meanSquare = Math.max(0, energy[start + frame] - energy[start]) / frame
+      levels.push(20 * Math.log10(Math.sqrt(meanSquare) + 1e-9))
+    }
+    levels.sort((a, b) => a - b)
+    const peakDb = levels[levels.length - 1]
+    const floorDb = levels[Math.floor(levels.length * 0.1)]
+    return { peakDb, floorDb, contrastDb: peakDb - floorDb }
+  }
+
+  it('gives exactly the whole take’s contrast, batch by batch, on every fart and its room', async () => {
+    for (const golden of goldenRecordings) {
+      const { samples, sampleRate } = await decoded(golden)
+      const room = roomNoise(samples.length / sampleRate, sampleRate, -60)
+      for (const take of [samples, atPeak(samples, -60), atPeak(samples, -75), room]) {
+        const expected = wholeTake(take, sampleRate)
+        const levels = new TakeLevels(sampleRate)
+        for (const batch of inBatches(take, sampleRate)) levels.add(batch)
+        expect(levels.contrast(), golden.id).toEqual(expected)
+        expect(levelContrast(take, sampleRate), golden.id).toEqual(expected)
+        const whole = new TakeLevels(sampleRate)
+        whole.add(take)
+        expect(levels.bars, golden.id).toEqual(whole.bars)
+      }
+    }
+  })
+
+  it('so far, hears a fart only once it has come in, and room noise never', async () => {
+    const golden = goldenRecordings.find(g => g.id === '090')
+    if (!golden) throw new Error('No fixture 090')
+    const { samples, sampleRate } = await decoded(golden)
+    const room = roomNoise(2, sampleRate, -60)
+    const levels = new TakeLevels(sampleRate)
+    for (const batch of inBatches(room, sampleRate)) levels.add(batch)
+    expect(levels.heard()).toBe(false)
+    for (const batch of inBatches(samples, sampleRate)) levels.add(batch)
+    expect(levels.heard()).toBe(true)
+  })
+
+  it('gives a bar per 50 ms, from 0 at the -70 dBFS floor to 1 at full scale (#314)', () => {
+    const sampleRate = 48_000
+    const window = 2400
+    const levels = new TakeLevels(sampleRate)
+    expect(levels.bars).toEqual([])
+    levels.add(new Float32Array(100).fill(1))
+    expect(levels.bars).toEqual([])
+    levels.add(new Float32Array(window - 100).fill(1))
+    expect(levels.bars).toHaveLength(1)
+    expect(levels.bars[0]).toBeCloseTo(1, 6)
+    const at35 = new Float32Array(window).fill(10 ** (-35 / 20))
+    levels.add(at35.subarray(0, 1000))
+    levels.add(at35.subarray(1000))
+    expect(levels.bars).toHaveLength(2)
+    expect(levels.bars[1]).toBeCloseTo(0.5, 6)
+    levels.add(roomNoise((2 * window) / sampleRate, sampleRate, -80))
+    levels.add(new Float32Array(window))
+    expect(levels.bars.slice(2)).toEqual([0, 0, 0])
+    levels.add(new Float32Array(window - 1))
+    expect(levels.bars).toHaveLength(5)
+  })
+})
+
+describe('atFullLevel', () => {
+  it('turns a quiet take up with one gain, so its loudest sample is at about -1 dBFS', () => {
+    const take = Float32Array.from([0.001, -0.004, 0.002, 0])
+    const loud = atFullLevel(take)
+    expect(loud.map(Math.abs).reduce((max, v) => Math.max(max, v), 0)).toBeCloseTo(0.89, 6)
+    loud.forEach((v, i) => {
+      expect(v).toBeCloseTo((take[i] * 0.89) / 0.004, 6)
+    })
+  })
+
+  it('never turns a take down, and leaves silence silent', () => {
+    const loud = Float32Array.from([0.5, -0.95, 0.2])
+    expect(atFullLevel(loud)).toBe(loud)
+    const silence = new Float32Array(480)
+    expect(atFullLevel(silence)).toBe(silence)
+  })
+
+  it('gives Recording Analysis the same results on every fart in the Fixture Library', async () => {
+    for (const golden of goldenRecordings) {
+      const { samples, sampleRate } = await decoded(golden)
+      const asTaken = analyzeRecording(samples, sampleRate)
+      const turnedUp = analyzeRecording(atFullLevel(atPeak(samples, -50)), sampleRate)
+      expect({ ...turnedUp, rmsDb: 0 }, golden.id).toEqual({ ...asTaken, rmsDb: 0 })
+    }
   })
 })
 
@@ -191,21 +329,83 @@ describe('a Placed Pitch (ADR 0015)', () => {
     }
   })
 
-  it('counts for nothing while the Recording is Melodic, or not analyzed', () => {
-    const melodic: Recording = {
-      ...noiseLike(48),
+  it('stays in use when a new analysis finds a Recording Pitch (ADR 0017)', () => {
+    const found = (placed?: number | null): Recording => ({
+      ...noiseLike(placed),
       analysis: {
         state: 'analyzed',
         analysis: { ...analysis, recordingPitchMidi: 55.3, shortestNoteSeconds: 0.12 }
       }
+    })
+    expect(isNoiseLike(found(48))).toBe(false)
+    expect(recordingPitch(found(48))).toBe(55.3)
+    expect(placedPitch(found(48))).toBe(48)
+    expect(songPitch(found(48))).toBe(48)
+    expect(songPitch(found(null))).toBe(55.3)
+  })
+
+  it('keeps its Trim in use with it, and a Trim alone on a Melodic Recording too (#314)', () => {
+    const trim = {
+      startSeconds: 0.3,
+      endSeconds: 0.9,
+      fart: { startSeconds: 0.35, endSeconds: 0.8 }
     }
-    expect(isNoiseLike(melodic)).toBe(false)
-    expect(placedPitch(melodic)).toBeNull()
-    expect(songPitch(melodic)).toBe(55.3)
+    const found = (placed: number | null): Recording => ({
+      ...noiseLike(placed),
+      trim,
+      analysis: {
+        state: 'analyzed',
+        analysis: { ...analysis, recordingPitchMidi: 55.3, shortestNoteSeconds: 0.12 }
+      }
+    })
+    expect(trimOf({ ...noiseLike(), trim })).toEqual(trim)
+    expect(trimOf(found(48))).toEqual(trim)
+    expect(trimHandles(found(48))).toEqual({ startSeconds: 0.3, endSeconds: 0.9 })
+    expect(songTrim(found(48))).toEqual(trim.fart)
+    expect(trimOf(found(null))).toEqual(trim)
+    expect(trimHandles(found(null))).toEqual({ startSeconds: 0.3, endSeconds: 0.9 })
+    expect(songTrim(found(null))).toEqual(trim.fart)
+    expect(trimHandles({ ...found(null), trim: null })).toBeNull()
+    expect(foundPart(found(null))).toEqual({ startSeconds: 0.01, endSeconds: 1.2 })
+  })
+
+  it('counts for nothing while the Recording is not analyzed', () => {
     for (const state of ['analyzing', 'notAnalyzed'] as const) {
       const r: Recording = { ...noiseLike(48), analysis: { state } }
       expect(isNoiseLike(r)).toBe(false)
       expect(songPitch(r)).toBeNull()
     }
+  })
+
+  it('places a Melodic Recording on another note, or leaves it out with "No note" (#314)', () => {
+    const melodic = (placed?: number | null): Recording => ({
+      ...noiseLike(placed),
+      analysis: {
+        state: 'analyzed',
+        analysis: { ...analysis, recordingPitchMidi: 55.3, shortestNoteSeconds: 0.12 }
+      }
+    })
+    expect(foundNote(melodic())).toBe(55)
+    expect(foundNote(noiseLike())).toBeNull()
+    expect(songPitch(melodic(43))).toBe(43)
+    expect(isLeftOut(melodic(NO_NOTE))).toBe(true)
+    expect(placedPitch(melodic(NO_NOTE))).toBeNull()
+    expect(songPitch(melodic(NO_NOTE))).toBeNull()
+    expect(recordingPitch(melodic(NO_NOTE))).toBe(55.3)
+    expect(isLeftOut(melodic(null))).toBe(false)
+    expect(isPlaceablePitch(NO_NOTE)).toBe(false)
+  })
+})
+
+describe('a Recording’s name (#314)', () => {
+  const named = (name?: string | null) => ({ number: 12, ...(name === undefined ? {} : { name }) })
+
+  it('is "Recording {number}" until the user names it', () => {
+    expect(recordingName(named())).toBe('Recording 12')
+    expect(recordingName(named(null))).toBe('Recording 12')
+    expect(recordingName(named('   '))).toBe('Recording 12')
+    expect(recordingName(named(' Big one '))).toBe('Big one')
+    expect(defaultName(3)).toBe('Recording 3')
+    expect(MAXIMUM_NAME_LENGTH).toBe(40)
   })
 })

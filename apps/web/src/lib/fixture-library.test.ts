@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { songs } from '@/test-support/songs.generated'
 import { fixtures, fixtureWav } from '../../scripts/fixture-library'
 import { goldenArrangement, goldenRecording } from '../test-support/engine-golden'
 import { analyzeToAnalysis } from './analysis/port'
-import { songs } from './catalog/songs.generated'
 import { fixtureRecordingId, isFixtureRecordingId } from './fixture-library'
 import { coverageOf } from './pitch-coverage'
 import type { Recording } from './recordings'
@@ -21,8 +21,8 @@ describe('the Fixture Library', () => {
     expect(isFixtureRecordingId('00000000-0000-0000-0000-00000000009a')).toBe(false)
   })
 
-  it('has the 32 fixtures of the golden library', () => {
-    expect(fixtures().map(f => f.id)).toHaveLength(32)
+  it('has the 38 fixtures of the golden library', () => {
+    expect(fixtures().map(f => f.id)).toHaveLength(38)
   })
 
   it('analyzes as the reference does and unlocks the Songs it does, as 16-bit WAV', async () => {
@@ -48,12 +48,10 @@ describe('the Fixture Library', () => {
         analysis: { state: 'analyzed', analysis }
       })
     }
-    for (const song of songs) {
+    for (const [i, song] of songs.entries()) {
       const coverage = coverageOf(song, recordings)
       const golden = goldenArrangement('full', song.id)
-      expect(coverage.unlocked, song.id).toBe(
-        !['jingle', 'row', 'amazing', 'auld'].includes(song.id)
-      )
+      if (i < 12) expect(coverage.unlocked, song.id).toBe(true)
       expect(coverage.unlocked, song.id).toBe(golden.unlocked)
       expect(coverage.transposition, song.id).toBe(golden.transpose)
       for (const entry of golden.per_pitch) {

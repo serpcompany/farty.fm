@@ -23,12 +23,26 @@ const docs = (classify: string) => `needs.${classify}.outputs.docs != 'true'`
 const expression = (inner: string) => `\${{ ${inner} }}`
 
 const scoped = [
-  { file: 'web.yml', classify: 'changes', checks: ['check', 'e2e'], run: ['WEB', 'web'] },
+  {
+    file: 'web.yml',
+    classify: 'changes',
+    checks: ['check', 'e2e-shard', 'e2e'],
+    full: {
+      check: ['WEB', "needs.changes.outputs.web || 'true'"],
+      'e2e-shard': [
+        'RUN',
+        "needs.changes.result != 'success' || needs.changes.outputs.e2e == 'true'"
+      ]
+    }
+  },
   {
     file: 'tools.yml',
     classify: 'tools-changes',
     checks: ['reference', 'scores'],
-    run: ['TOOLS', 'tools']
+    full: {
+      reference: ['TOOLS', "needs.tools-changes.outputs.tools || 'true'"],
+      scores: ['TOOLS', "needs.tools-changes.outputs.tools || 'true'"]
+    }
   }
 ] as const
 
@@ -52,15 +66,15 @@ describe('CI checks what its change can affect (SERP CI Scope)', () => {
   })
 
   it("skips the web app's and the tools' checks on a docs-only change, and runs them in full when the change couldn't be classified", () => {
-    for (const { file, classify, checks, run } of scoped) {
+    for (const { file, classify, checks, full } of scoped) {
       const { jobs } = workflow(file)
       for (const name of checks) {
         const job = jobs[name]
         expect(needs(job), name).toContain(classify)
         expect(job.if, name).toContain(`\${{ !cancelled() && ${docs(classify)}`)
-        expect(job.env?.[run[0]], name).toBe(
-          expression(`needs.${classify}.outputs.${run[1]} || 'true'`)
-        )
+      }
+      for (const [name, [variable, value]] of Object.entries(full)) {
+        expect(jobs[name].env?.[variable], name).toBe(expression(value))
       }
     }
   })

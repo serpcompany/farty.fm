@@ -4,6 +4,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AppShell } from './app-shell'
 
 const navigation = vi.hoisted(() => ({ segments: [] as string[] }))
+const shell = vi.hoisted(() => ({
+  libraryProblem: 'unreadable' as 'unreadable' | null,
+  reviewOpen: false
+}))
 
 vi.mock('next/navigation', () => ({
   useSelectedLayoutSegments: () => navigation.segments,
@@ -12,13 +16,13 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/lib/audio/player', () => ({ stopPlayback: vi.fn() }))
 vi.mock('@/lib/recording-store', () => ({ onWaitingForOtherTabs: () => () => {} }))
 vi.mock('./recordings-provider', () => ({
-  useRecordings: () => ({ libraryProblem: 'unreadable' })
+  useRecordings: () => ({ libraryProblem: shell.libraryProblem })
 }))
 vi.mock('./welcome-provider', () => ({
   useWelcome: () => ({ showsWelcome: false, finishWelcome: vi.fn() })
 }))
 vi.mock('./record-flow-provider', () => ({
-  useRecordFlow: () => ({ showsRecordFlow: false, flow: null, capture: { kind: 'idle' } })
+  useRecordFlow: () => ({ showsRecordFlow: false, reviewOpen: shell.reviewOpen })
 }))
 vi.mock('./account-provider', () => ({ useAccount: () => ({ stepOpen: false }) }))
 vi.mock('./previous-page', () => ({ useTrackPages: () => {} }))
@@ -48,6 +52,8 @@ async function showAt(segments: string[]): Promise<HTMLElement> {
 
 afterEach(() => {
   for (const unmount of unmounts.splice(0)) act(unmount)
+  shell.libraryProblem = 'unreadable'
+  shell.reviewOpen = false
 })
 
 describe('AppShell, when the library won’t open', () => {
@@ -65,5 +71,23 @@ describe('AppShell, when the library won’t open', () => {
     const shell = await showAt(segments)
     expect(shell.textContent).toContain('The page')
     expect(shell.textContent).not.toContain('Farty can’t open your library')
+  })
+})
+
+describe('AppShell’s tabs', () => {
+  const tabs = (page: HTMLElement) => page.querySelector('nav[aria-label="Tabs"]')
+
+  it('wait while a saved Recording’s review is open', async () => {
+    shell.libraryProblem = null
+    shell.reviewOpen = true
+    const page = await showAt(['recordings'])
+    expect(tabs(page)?.hasAttribute('inert')).toBe(true)
+  })
+
+  it('are not on a shared link’s page, which has its own top bar', async () => {
+    shell.libraryProblem = null
+    const page = await showAt(['u', 'maya', 'r', '8k2fq3m9x1ab'])
+    expect(page.textContent).toContain('The page')
+    expect(tabs(page)).toBeNull()
   })
 })

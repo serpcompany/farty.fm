@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { all, bytes } from './database'
+import { peak, savedTake } from './database'
 import {
   clickToFirstBatch,
   fartAndRecord,
@@ -11,20 +11,10 @@ import {
   withFartingMicrophone
 } from './record'
 import { onPhone, pageSettled, setVisibility, tab } from './screens'
+import { recordTheLastTwoOfMarysFarts } from './songs'
 import { expect, test } from './test'
 
-async function savedTake(page: Page): Promise<{ samples: number[]; sampleRate: number }> {
-  const recordings = await all<{ id: string; number: number }>(page, 'recordings')
-  const newest = recordings.reduce((a, b) => (b.number > a.number ? b : a))
-  const wav = await bytes(page, 'audio', newest.id)
-  if (!wav) throw new Error('No audio for the newest Recording')
-  const sampleRate = wav.readUInt32LE(24)
-  let at = 12
-  while (wav.toString('ascii', at, at + 4) !== 'data') at += 8 + wav.readUInt32LE(at + 4)
-  const length = wav.readUInt32LE(at + 4) / 2
-  const samples = Array.from({ length }, (_, i) => wav.readInt16LE(at + 8 + 2 * i) / 0x8000)
-  return { samples, sampleRate }
-}
+const justAboveTheLevelATakeIsTurnedUpTo = { gainDb: 0.3 }
 
 async function expectStillOpen(page: Page) {
   await pageSettled(page)
@@ -55,7 +45,7 @@ test('a tap captures at once, keeps the fart from before it, and the mic opens o
   expect(onReview.sessions).toEqual(['play-and-record'])
   await page.getByRole('button', { name: 'Discard' }).click()
 
-  const mic = await fartAndSave(page)
+  const mic = await fartAndSave(page, '090', justAboveTheLevelATakeIsTurnedUpTo)
   await expect(page.getByTestId('result-note')).toHaveText('G3')
   expect(mic.calls).toBe(1)
   expect(mic.live).toBe(1)
@@ -69,11 +59,13 @@ test('a tap captures at once, keeps the fart from before it, and the mic opens o
 
   const take = await savedTake(page)
   const energy = take.samples.reduce((sum, v) => sum + v * v, 0)
+  const takePeak = peak(take.samples)
   const onset = take.samples.findIndex(v => Math.abs(v) > 0.01) / take.sampleRate
   console.log(
-    `saved take: ${(take.samples.length / take.sampleRate).toFixed(2)} s, fart starts at ${onset.toFixed(3)} s, ${((100 * energy) / mic.fartEnergy).toFixed(1)}% of its energy kept`
+    `saved take: ${(take.samples.length / take.sampleRate).toFixed(2)} s, fart starts at ${onset.toFixed(3)} s, ${((100 * energy) / mic.fartEnergy).toFixed(1)}% of its energy kept, peak ${takePeak.toFixed(4)} (fart ${mic.fartPeak.toFixed(4)})`
   )
   expect(onset).toBeGreaterThan(0.05)
+  expect(takePeak).toBeCloseTo(mic.fartPeak, 3)
   expect(energy / mic.fartEnergy).toBeGreaterThan(0.97)
 })
 
@@ -134,21 +126,14 @@ test('the microphone stays open from Result to every screen after it', async ({ 
   await expectStillOpen(page)
   await tab(page, 'Record').click()
 
-  await fartAndSave(page, '022')
-  await page.getByRole('button', { name: 'Record another', exact: true }).click()
-  await expect(page.getByTestId('record-button')).toBeEnabled()
-
-  await fartAndSave(page, '002')
-  await expect(page.getByTestId('result-progress')).toContainText(
-    'You unlocked Mary Had a Little Lamb'
-  )
+  await recordTheLastTwoOfMarysFarts(page)
   await page.getByRole('button', { name: 'Try it', exact: true }).click()
   await expect(page).toHaveURL(/\/compose\/mary\/$/)
   await expect(page.getByTestId('song-creator-play')).toHaveAccessibleName('Stop')
   await expectStillOpen(page)
 })
 
-test('the button says Starting… until audio comes in', async ({ page }) => {
+test('Getting the mic ready shows until audio comes in', async ({ page }) => {
   await page.goto('/')
-  expect((await tapRecord(page, { saysStarting: true })).calls).toBe(1)
+  expect((await tapRecord(page, { getsTheMicReady: true })).calls).toBe(1)
 })

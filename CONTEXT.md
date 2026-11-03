@@ -2,16 +2,20 @@
 
 Farty is a web app (installable from the browser) that turns a person's fart recordings into recordings they can replay and Toots they can make: Songs played by their farts.
 
-It was called Pedos until 2026-10-22 (ADR 0009). Users only ever see Farty. Stored data, names another build shares and Cloudflare resources keep Pedos, such as the `pedos` browser database (ADR 0018).
+It was called Pedos until 2026-10-22 (ADR 0009). Users only ever see Farty. Stored data, names another build shares and Cloudflare resources keep Pedos, such as the `pedos` browser database (ADR 0024).
 
 ## Recordings
 
 **Recording**:
-A single fart audio clip captured and saved by a user. One Recording must not contain multiple fart events.
+A single fart audio clip captured and saved by a user. One Recording must not contain multiple fart events. It has a name, "Recording 12" by its number until the user names it in its review (#314).
 _Avoid_: Sample, sound, track, clip
 
+**Review**:
+Where the user sets a Recording's Trim, note and name: right after Stop, before Save, and later from the Recording's pencil on the Recordings tab. Saving never waits on Recording Analysis (#314).
+_Avoid_: Picker, editor
+
 **Recording Analysis**:
-The characteristics derived once from a saved Recording and preserved with it, such as its single clean gesture and its pitch. Saving and playback never wait on it.
+The characteristics derived once from a saved Recording and preserved with it, such as its gesture and its pitch. The gesture is the whole fart, every burst of it, from just before its attack to where it fades out. It is never cut at a second burst. Songs play it from the note's beat, and a quieter lead-in before the attack just before the beat, when the rest before the note has room (#287). The pitch is read from its first burst, so a second one can't blur it (ADR 0016). The saved file stays the whole take, and the Recordings tab plays all of it. Saving and playback never wait on it.
 _Avoid_: Live analysis, reanalysis
 
 **Melodic Recording**:
@@ -19,20 +23,28 @@ A Recording whose pitch is steady enough to carry melody notes. In Songs, Pitch 
 _Avoid_: Pitched fart, tonal fart, good Recording
 
 **Noise-like Recording**:
-A Recording with no steady pitch, so it can't tell the listener which note it is. Songs leave it out unless the user places it on a note by ear (a Placed Recording).
+A Recording with no steady pitch, so it can't tell the listener which note it is. Songs leave it out unless the user gives it a note by ear in its review (a Placed Recording).
 _Avoid_: Bad Recording, unpitched fart
 
 **Placed Pitch**:
-The note, C2 to B4, that the user placed a Noise-like Recording on by ear, on the Recordings tab: the piano key they hear as closest to the fart. Set once per Recording, used in every Song, kept with the Recording and its account, and through a new analysis. The fart still plays raw (ADR 0012): the note says only where Songs use it, never how it sounds (ADR 0015).
+The note, C2 to B4, that the user gave a Recording by ear in its review: the piano key they hear as closest to the fart. Any Recording can have one, a Melodic one on another note than its Recording Pitch included; picking the note analysis found clears it (#314). Set once per Recording, used in every Song, kept with the Recording and its account, and through a new analysis. If a later analysis finds the fart a Recording Pitch, the Placed Pitch stays the one used, since the user chose it ([ADR 0017](docs/adr/0017-a-second-pitch-window-and-re-scan.md)). The fart still plays raw (ADR 0012): the note says only where Songs use it, never how it sounds (ADR 0015).
 _Avoid_: Tuned pitch, assigned pitch, Recording Pitch (that is the analyzed one)
 
 **Placed Recording**:
-A Noise-like Recording with a Placed Pitch. Songs, Pitch Coverage and Auto-map treat it as a Melodic Recording at its Placed Pitch. Leaving it out, the default, keeps it out of Songs.
+A Recording with a Placed Pitch. Songs, Pitch Coverage and Auto-map treat it as a Melodic Recording at its Placed Pitch, even after a later analysis finds a Recording Pitch ([ADR 0017](docs/adr/0017-a-second-pitch-window-and-re-scan.md)). "No note" leaves a Recording out of Songs: a Noise-like one by default, or a Melodic one the user leaves out (ADR 0015).
 _Avoid_: Beat, tuned fart
 
+**Trim**:
+The part of a Recording's take the user kept with the review's two handles; any Recording can be trimmed (#314). The Recordings tab and the review then play exactly what's between the handles, and Songs play the fart found between them, whose length is the fart's length. The saved take never changes, and Reset, then Save, brings the whole fart back. Kept with the Recording and its account, and through a new analysis, a Re-scan included ([ADR 0017](docs/adr/0017-a-second-pitch-window-and-re-scan.md)). It never changes the fart's pitch: a trimmed Melodic Recording keeps its Recording Pitch (ADR 0019).
+_Avoid_: Crop, edit, clip
+
 **Recording Pitch**:
-The note a Melodic Recording naturally sounds, octave included: G2 and G3 are different Recording Pitches. A Recording has a pitch; it never has a key.
+The note a Melodic Recording naturally sounds, octave included: G2 and G3 are different Recording Pitches. A Recording has a pitch; it never has a key. Recording Analysis reads it from the first 450 ms of the first burst or, when those have none, from the 450 ms where its pitch starts ([ADR 0017](docs/adr/0017-a-second-pitch-window-and-re-scan.md)).
 _Avoid_: Key, tone
+
+**Re-scan**:
+Running the current Recording Analysis again on a Recording with no note (Noise-like and not placed) whose analysis an older Recording Analysis made, from the Recordings tab: one Recording, or all of them one at a time. It says how many now have a note. It never changes a Placed Pitch, and it changes only this browser's analysis ([ADR 0017](docs/adr/0017-a-second-pitch-window-and-re-scan.md)).
+_Avoid_: Reanalysis, re-analyze, refresh
 
 ## Songs and Toots
 
@@ -56,6 +68,10 @@ _Avoid_: Progress, completion
 A Song whose Pitch Coverage is complete: every distinct pitch has its own Melodic Recording, near enough in pitch and long enough for its longest note.
 _Avoid_: Available song, playable song
 
+**Favorite Song**:
+A Song the user marked in Compose, kept with their account.
+_Avoid_: Liked song, starred song, saved song
+
 **Arrangement**:
 Which Recording plays each note of a melody. Each Recording plays raw, at its own pitch and speed (ADR 0012), so a Toot sounds near the melody, not on it.
 _Avoid_: Mapping, mix, assignment
@@ -69,7 +85,7 @@ The Arrangement the app chooses on its own, giving each distinct pitch its own M
 _Avoid_: Smart choose, AI pick, best fit
 
 **Toot**:
-A saved result: a Song played with the user's Recordings, made in Song Creator. It keeps which Recording played each pitch. It is not a conventional song or a music release.
+A saved result, of one of two kinds: a Song played with the user's Recordings, made in Song Creator, which keeps which Recording played each pitch; or a Sound Pad Performance, which keeps which Pad's Recording was tapped and when ([ADR 0017](docs/adr/0017-sound-pad-takes-save-as-toots.md)). It is not a conventional song or a music release.
 _Avoid_: Created Melody, Melody, Created Song, generated song, track, output
 
 ## Creation areas
@@ -81,6 +97,36 @@ _Avoid_: Musical Fruit, standard song creator
 **AI Song Creator**:
 The creation area where AI composes a new melody that is played using only the user's Recordings. It adds no vocals, instruments, or backing tracks.
 _Avoid_: Farty AI, AI music
+
+**Sound Pad**:
+The creation area of twelve Pads, where the user plays their Recordings by tapping them, with several at once if they like. Each fart plays raw, trimmed of the silence and room noise around it, and starts where a Song starts it, so a much quieter sound before its attack goes too.
+_Avoid_: Sampler, soundboard, drum pad, launchpad
+
+**Pad**:
+One of the Sound Pad's buttons, holding one Recording of any kind, which a tap plays at once. The Pads start filled with the user's Recordings, lowest Recording Pitch first, and the user can put any Recording on any Pad. The browser keeps which Recording each Pad holds; a guest's Pads last the visit.
+_Avoid_: Button, slot, key
+
+**Performance**:
+What the Sound Pad records between Record and Stop: which Recording each tap played, and when, from the first tap, for up to 30 s. Stop makes it into a Toot, each tap's fart playing raw from its start ([ADR 0017](docs/adr/0017-sound-pad-takes-save-as-toots.md)).
+_Avoid_: Sequence, pattern, loop, beat, track
+
+## Sharing
+
+**Handle**:
+The name a user's links carry, as in `farty.fm/u/<handle>/r/<id>`. The user picks it the first time they share: 3 to 20 lowercase letters, numbers or `_`, unique, and not on Farty's block list. It is the only thing about the user a Shared Recording shows. Only a user with an account has one (ADR 0020).
+_Avoid_: Username, display name, screen name
+
+**Shared Recording**:
+A Recording its owner has shared by link, which anyone with the link can open and play, signed in or not. Nothing lists the link but its owner's Profile Page (#346). The page shows the Handle, the Recording's name, note, length and waveform, and plays the part of the fart its row plays. Stop sharing, deleting the Recording, deleting the account, or Farty taking it down after a Report ends the link for everyone; sharing it again makes a new link (ADR 0020). A Shared Toot works the same way, for a saved Toot.
+_Avoid_: Public Recording, post, upload, published Recording
+
+**Friend**:
+Another user, found by their Handle, who has accepted a friend request from the user, or whose request the user accepted. Either can remove the other, and the other isn't told. Friends are listed in Profile, each opening their Profile Page (ADR 0021).
+_Avoid_: Follower, contact, connection
+
+**Profile Page**:
+A user's page, `farty.fm/u/<handle>`, which anyone can open: their Handle, Add friend, and what they share now, newest first. No counts and no feed. Not Profile, the tab that is the user's own account and settings (ADR 0021).
+_Avoid_: Profile (for this page), wall, timeline
 
 ## Testing
 

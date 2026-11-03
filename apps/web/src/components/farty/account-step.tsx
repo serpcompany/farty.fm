@@ -1,22 +1,32 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { readStepDraft, saveStepDraft } from '@/lib/account'
+import { leaveGetFarty, offerFriend, signedInAtAccountStep, useGetFarty } from '@/lib/get-farty'
 import { unsavedBeforeSignIn } from '@/lib/library-sync'
+import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { CodeField, useSignInCode } from './sign-in-code'
 
 export function AccountStep() {
   const { stepOpen } = useAccount()
-  return stepOpen ? <Step /> : null
+  const pathname = usePathname()
+  useEffect(() => leaveGetFarty(pathname), [pathname])
+  return stepOpen ? <Step underTopBar={!pathname.startsWith('/u/')} /> : null
 }
 
-function Step() {
-  const { account, skipStep, finishSignIn } = useAccount()
+function Step({ underTopBar }: { underTopBar: boolean }) {
+  const { account, skipStep, finishSignIn, stepReason } = useAccount()
   const again = account.status === 'expired'
+  const toShare = stepReason === 'share' && !again
+  const getFarty = useGetFarty()
+  const toGet = getFarty?.stage === 'account' && !again
+  const friend = getFarty?.stage === 'account' ? getFarty.friend : null
   const [draft] = useState(readStepDraft)
   const [email, setEmail] = useState(draft?.email ?? '')
   const steps = useSignInCode(email, true, draft?.phase)
@@ -79,7 +89,9 @@ function Step() {
   const submitCode = async (event: FormEvent) => {
     event.preventDefault()
     const signedIn = await steps.signIn()
-    if (signedIn) finishSignIn(signedIn)
+    if (!signedIn) return
+    signedInAtAccountStep()
+    finishSignIn(signedIn)
   }
 
   return (
@@ -87,7 +99,10 @@ function Step() {
       role="dialog"
       aria-modal
       aria-labelledby="account-step-title"
-      className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:top-[calc(4rem+1px)] md:p-6"
+      className={cn(
+        'fixed inset-0 z-50 flex flex-col overflow-y-auto bg-background pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:p-6',
+        underTopBar && 'md:top-[calc(4rem+1px)]'
+      )}
     >
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 md:my-auto md:flex-none md:rounded-3xl md:border md:py-3 md:shadow-sm">
         <div className="flex flex-1 flex-col justify-center gap-6 py-6">
@@ -98,12 +113,20 @@ function Step() {
               tabIndex={-1}
               className="text-3xl font-bold tracking-tight outline-none"
             >
-              {again ? 'Sign in again' : 'Keep your farts'}
+              {again
+                ? 'Sign in again'
+                : toShare || toGet
+                  ? 'Make a free account'
+                  : 'Keep your farts'}
             </h1>
             <p className="text-muted-foreground">
               {again
                 ? 'Your session ended. Your farts stay on this device until you sign in.'
-                : 'Make a free account to keep your farts.'}
+                : toGet
+                  ? 'It keeps your farts. Then add Farty to your Home Screen.'
+                  : toShare
+                    ? 'You need one to share. It keeps your farts too.'
+                    : 'Make a free account to keep your farts.'}
             </p>
           </div>
 
@@ -142,6 +165,20 @@ function Step() {
                 value={email}
                 onChange={event => setEmail(event.target.value)}
               />
+              {friend !== null && getFarty && (
+                <label
+                  htmlFor="get-farty-friend"
+                  className="flex min-h-11 items-center gap-3 text-base"
+                >
+                  <Checkbox
+                    id="get-farty-friend"
+                    className="size-5"
+                    checked={getFarty.add}
+                    onCheckedChange={checked => offerFriend(checked)}
+                  />
+                  Add @{friend} as a friend
+                </label>
+              )}
               {steps.turnstile}
               <Button
                 type="submit"

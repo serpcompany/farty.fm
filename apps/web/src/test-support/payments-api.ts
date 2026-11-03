@@ -8,7 +8,7 @@ import * as paymentRoute from '@/app/api/toots/[id]/payment/route'
 import type { CheckoutSession } from '@/server/stripe'
 
 import { extraEnv } from './extra-env'
-import { api, CF_RAY, ORIGIN, tootMetadata, uploadBody, wav } from './library-api'
+import { api, CF_RAY, ORIGIN, padTootMetadata, tootMetadata, uploadBody, wav } from './library-api'
 import { stripeV1, WEBHOOK_SECRET } from './stripe'
 
 export const T2 = '44444444-4444-4444-8444-444444444444'
@@ -41,36 +41,41 @@ export function headersFor(
 
 const params = (id: string) => ({ params: Promise.resolve({ id }) })
 
-export const checkout = (id: string, as: As, songId: unknown = 'twinkle') =>
+export const checkoutWith = (id: string, as: As, body: string) =>
   checkoutRoute.POST(
     new Request(`${ORIGIN}/api/toots/${id}/checkout/`, {
       method: 'POST',
       headers: headersFor('POST', as, { 'content-type': 'application/json' }),
-      body: JSON.stringify({ songId })
+      body
     }),
     params(id)
   )
 
-const payment = (id: string, as: As) =>
+export const checkout = (id: string, as: As, songId: unknown = 'twinkle') =>
+  checkoutWith(id, as, JSON.stringify({ songId }))
+
+export const payment = (id: string, as: As, query = '') =>
   paymentRoute.GET(
-    new Request(`${ORIGIN}/api/toots/${id}/payment/`, { headers: headersFor('GET', as) }),
+    new Request(`${ORIGIN}/api/toots/${id}/payment/${query}`, { headers: headersFor('GET', as) }),
     params(id)
   )
 
-export const payDev = (toot: string, as: As, song = 'twinkle') =>
+export const payDev = (toot: string, as: As, song: string | null = 'twinkle') =>
   devCheckoutRoute.POST(
     new Request(`${ORIGIN}/api/dev/checkout/`, {
       method: 'POST',
       headers: headersFor('POST', as, { 'content-type': 'application/x-www-form-urlencoded' }),
-      body: new URLSearchParams({ toot, song })
+      body: new URLSearchParams(song === null ? { toot } : { toot, song })
     }),
     { params: Promise.resolve({}) }
   )
 
-export const save = (id: string, as: As) =>
-  api.put('toots', id, uploadBody(tootMetadata(id), wav()), as, {
-    headers: { host: as.host ?? HOST }
-  })
+const saveWith = (id: string, metadata: unknown, as: As) =>
+  api.put('toots', id, uploadBody(metadata, wav()), as, { headers: { host: as.host ?? HOST } })
+
+export const save = (id: string, as: As) => saveWith(id, tootMetadata(id), as)
+
+export const savePad = (id: string, as: As) => saveWith(id, padTootMetadata(id), as)
 
 export async function paid(id: string, as: As): Promise<boolean> {
   const response = await payment(id, as)
@@ -80,7 +85,7 @@ export async function paid(id: string, as: As): Promise<boolean> {
 
 export async function expectSavedOnceStripeSaysPaid(id: string, as: As) {
   expect((await save(id, as)).status).toBe(402)
-  expect(await paid(id, as)).toBe(true)
+  expect(await (await payment(id, as)).json()).toEqual({ paid: true, unused: true })
   expect((await save(id, as)).status).toBe(201)
 }
 

@@ -1,5 +1,5 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import { songs } from '../src/lib/catalog/songs.generated'
+import { songs } from '../src/test-support/songs.generated'
 import { newEmail, signInByApi } from './account'
 import { all, keys } from './database'
 import { expectAtLeast44High, expectTappable, literally, tab } from './screens'
@@ -9,7 +9,7 @@ import {
   makeAToot,
   needsTheFixtureLibrary,
   song,
-  songsTheFixturesUnlock
+  songsTheFixtureLibraryUnlocks
 } from './songs'
 import { lastSound, stops } from './sounds'
 import { expect, test } from './test'
@@ -53,7 +53,7 @@ function counts(page: Page): Promise<{ fartyDecodes: number; fartyBacks: number 
 async function expectTheFixtureLibraryOnProfile(page: Page, recordings: string) {
   await expect(page.getByTestId('stat-recordings')).toHaveText(`Recordings${recordings}`)
   await expect(page.getByTestId('stat-songs')).toHaveText(
-    `Songs unlocked${songsTheFixturesUnlock.length} of ${songs.length}`
+    `Songs unlocked${songsTheFixtureLibraryUnlocks.length} of ${songs.length}`
   )
 }
 

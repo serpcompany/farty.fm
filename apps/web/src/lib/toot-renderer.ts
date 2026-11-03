@@ -1,11 +1,13 @@
 import type { Song } from '@/lib/catalog/song'
 import type { Arrangement } from '@/lib/engine/auto-map'
-import { renderInWorker } from '@/lib/engine/client'
+import { renderInWorker, renderPerformanceInWorker } from '@/lib/engine/client'
+import type { PerformanceRecording, RenderedPerformance } from '@/lib/engine/render-performance'
 import type { RecordingToRender, RenderedSong } from '@/lib/engine/render-song'
 import type { Song as EngineSong } from '@/lib/engine/song'
+import type { Performance } from '@/lib/performance'
 import { arrangementOf, engineSong } from '@/lib/pitch-coverage'
-import type { Recording } from '@/lib/recordings'
-import type { TootArrangement, TootDraft } from '@/lib/toot'
+import { type Recording, trimOf } from '@/lib/recordings'
+import type { PadTootDraft, SongTootDraft, TootArrangement } from '@/lib/toot'
 import { decodeWav, encodeWav } from '@/lib/wav'
 
 export class TootError extends Error {
@@ -38,7 +40,7 @@ export async function makeToot(
   loadAudio: (id: string) => Promise<ArrayBuffer>,
   render: Render = renderInWorker,
   id: string = crypto.randomUUID()
-): Promise<TootDraft> {
+): Promise<SongTootDraft> {
   const arrangement = arrangementOf(song, recordings)
   if (!arrangement.unlocked) throw new TootError('locked')
   let rendered: RenderedSong
@@ -48,7 +50,12 @@ export async function makeToot(
       used.map(async (id): Promise<RecordingToRender> => {
         const recording = recordings.find(r => r.id === id)
         if (recording?.analysis.state !== 'analyzed') throw new Error(`Recording ${id} is gone`)
-        return { id, audio: decodeWav(await loadAudio(id)), analysis: recording.analysis.analysis }
+        return {
+          id,
+          audio: decodeWav(await loadAudio(id)),
+          analysis: recording.analysis.analysis,
+          trim: trimOf(recording)
+        }
       })
     )
     rendered = await render(engineSong(song), arrangement, toRender)
@@ -60,6 +67,42 @@ export async function makeToot(
     id,
     song,
     arrangement: tootArrangement(arrangement),
+    seconds: samples.length / sampleRate,
+    wav: encodeWav({ samples, sampleRate })
+  }
+}
+
+export type RenderPerformance = (
+  performance: Performance,
+  recordings: readonly PerformanceRecording[]
+) => Promise<RenderedPerformance>
+
+export async function makePadToot(
+  performance: Performance,
+  recordings: readonly Recording[],
+  loadAudio: (id: string) => Promise<ArrayBuffer>,
+  render: RenderPerformance = renderPerformanceInWorker,
+  id: string = crypto.randomUUID()
+): Promise<PadTootDraft> {
+  let rendered: RenderedPerformance
+  try {
+    const toRender = await Promise.all(
+      performance.recordings.map(async (recordingId): Promise<PerformanceRecording> => {
+        if (!recordings.some(r => r.id === recordingId)) {
+          throw new Error(`Recording ${recordingId} is gone`)
+        }
+        return { id: recordingId, audio: decodeWav(await loadAudio(recordingId)) }
+      })
+    )
+    rendered = await render(performance, toRender)
+  } catch (error) {
+    throw new TootError('couldNotMake', { cause: error })
+  }
+  const { samples, sampleRate } = rendered
+  return {
+    id,
+    song: null,
+    performance,
     seconds: samples.length / sampleRate,
     wav: encodeWav({ samples, sampleRate })
   }

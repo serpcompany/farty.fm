@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { songs } from '../src/lib/catalog/songs.generated'
+import { songs } from '../src/test-support/songs.generated'
 import { violations } from './accessibility'
 import { addFakeMicrophone } from './fake-microphone'
 import { microphone, skipWelcome, waitForOpenMicrophone } from './record'
@@ -110,6 +110,27 @@ test('Download App shows a QR code for a phone; Escape closes it and gives focus
     await page.keyboard.press('Escape')
     await expect(dialog).toBeHidden()
     await expect(button).toBeFocused()
+  }
+})
+
+test("a shared page's Get Farty shows the QR code, not the account step (#318)", async ({
+  page,
+  pageErrors
+}) => {
+  pageErrors.expect('the server responded with a status of 404')
+  await page.goto('/u/nobody/r/AAAAAAAAAAAA/')
+  await expect(page.getByRole('heading', { name: "This link doesn't work any more" })).toBeVisible()
+  const getFarty = page.getByRole('button', { name: 'Get Farty' })
+  await expect(getFarty).toHaveCount(2)
+  for (const index of [0, 1]) {
+    await getFarty.nth(index).click()
+    const dialog = page.getByRole('dialog', { name: 'Scan to open Farty on your phone' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByRole('img', { name: /^QR code for / })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Make a free account' })).toHaveCount(0)
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+    await expect(getFarty.nth(index)).toBeFocused()
   }
 })
 

@@ -1,0 +1,163 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-jesus-loves-me.mid",
+  "id": "jesus-loves-me",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32,
+    "start_beat": 8
+  },
+  "import_report": {
+    "catalog_id": "jesus-loves-me",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 23,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-jesus-loves-me.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 31.0,
+  "notes": [
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 4.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 13.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 14.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 20.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 30.0
+    }
+  ],
+  "pitches": [
+    60,
+    62,
+    64,
+    67,
+    69,
+    72
+  ],
+  "sha256": "942ac64163ee4a9c4113b816fbb6d3882f3f35a033b242adf02c1aa3a30028b5",
+  "title": "Jesus Loves Me"
+}

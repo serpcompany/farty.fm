@@ -17,18 +17,19 @@ const read = (path: string) => readFileSync(new URL(path, root), 'utf8')
 afterEach(removeScratchHistories)
 
 describe('which changes are docs-only', () => {
-  it("treats Markdown under docs/, at the root, in skills, in the web app's docs and agent files, in tools' READMEs and beside the golden data as docs", () => {
+  it("treats Markdown under docs/, at the root, in skills, in the web app's docs and agent files, in the tools' docs and beside the golden data as docs", () => {
     expect(
       isDocsOnlyChange([
         'AGENTS.md',
         'README.md',
         'docs/agents/ci.md',
-        'docs/adr/0016-retire-the-iphone-app-source.md',
+        'docs/adr/0022-retire-the-iphone-app-source.md',
         '.claude/skills/verify-web/SKILL.md',
         'apps/web/docs/product/record.md',
         'apps/web/AGENTS.md',
         'apps/web/CLAUDE.md',
         'tools/melody-lab/README.md',
+        'tools/catalog/picking.md',
         'fixtures/golden/files.md'
       ])
     ).toBe(true)
@@ -45,6 +46,7 @@ describe('which changes are docs-only', () => {
       'apps/web/CHANGELOG.md',
       'apps/web/src/lib/catalog/notes.md',
       'tools/catalog/titles-01.report.md',
+      'tools/catalog/ranking.md',
       'catalog/catalog.json'
     ]) {
       expect(isDoc(path), path).toBe(false)
@@ -105,7 +107,7 @@ describe('which changes are docs-only', () => {
       '.github/workflows/repository.yml names docs/agents/ci.md': "an install error's pointer",
       'apps/web/biome.json names docs/agents/web-gotchas.md': "a lint rule's message",
       'apps/web/scripts/docs-report.test.ts names README.md': 'paths in its fixtures, never read',
-      'apps/web/scripts/docs-report.test.ts names docs/adr/0016-retire-the-iphone-app-source.md':
+      'apps/web/scripts/docs-report.test.ts names docs/adr/0022-retire-the-iphone-app-source.md':
         'paths in its fixtures, never read',
       'apps/web/scripts/docs-report.test.ts names docs/agents/ci.md':
         'paths in its fixtures, never read',

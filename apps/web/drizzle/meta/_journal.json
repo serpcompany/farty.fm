@@ -36,6 +36,48 @@
       "when": 1793199572672,
       "tag": "0004_recording_placed_pitch",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793358905781,
+      "tag": "0005_toot_performance",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793376477842,
+      "tag": "0006_recording_trim",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1793647312005,
+      "tag": "0007_favorite_songs",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793654278030,
+      "tag": "0008_sharing",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1793659665001,
+      "tag": "0009_recording_name",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1793664453439,
+      "tag": "0010_friends",
+      "breakpoints": true
     }
   ]
 }

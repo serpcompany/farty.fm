@@ -1,3 +1,4 @@
+import { env } from 'cloudflare:test'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as webhookRoute from '@/app/api/stripe/webhook/route'
@@ -12,6 +13,7 @@ import {
   deliver,
   expectSavedOnceStripeSaysPaid,
   paid,
+  payment,
   paymentsHarness,
   save,
   stubStripe,
@@ -30,6 +32,13 @@ const paidSessionFor = (userId: string, tootId: string) =>
 
 const idempotencyKeyOf = (init: RequestInit | undefined) =>
   new Headers(init?.headers).get('idempotency-key')
+
+async function checkoutThenStripeAnswers(a: { id: string; cookie: string }, answer: object) {
+  stubStripe(sessionFor(a.id, T1))
+  await checkout(T1, a)
+  vi.restoreAllMocks()
+  return vi.spyOn(globalThis, 'fetch').mockImplementation(async () => Response.json(answer))
+}
 
 describe('with Stripe Checkout in test mode', () => {
   beforeEach(() => {
@@ -56,6 +65,26 @@ describe('with Stripe Checkout in test mode', () => {
       checkoutSessionId: 'cs_test_first',
       amount: 99,
       currency: 'usd',
+      paidAt: null
+    })
+  })
+
+  it('starts a Checkout Session for a Sound Pad Toot, back to the Sound Pad (ADR 0017)', async () => {
+    const a = await signUp('A')
+    const stripe = stubStripe(sessionFor(a.id, T1))
+    expect(await (await checkout(T1, a, null)).json()).toEqual({
+      url: 'https://checkout.stripe.com/c/pay/cs_test_first'
+    })
+    const sent = stripe.mock.calls[0][1]?.body as URLSearchParams
+    expect(sent.get('line_items[0][price_data][product_data][name]')).toBe(
+      'Save your Sound Pad Toot'
+    )
+    expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('99')
+    expect(sent.get('success_url')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}&checkout=done`)
+    expect(sent.get('cancel_url')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}`)
+    expect(await tootPayment(testDb(), a.id, T1)).toMatchObject({
+      songId: null,
+      checkoutSessionId: 'cs_test_first',
       paidAt: null
     })
   })
@@ -186,14 +215,32 @@ describe('with Stripe Checkout in test mode', () => {
     expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeNull()
   })
 
+  it('answers the Sound Pad’s check on open from D1 alone, never asking Stripe (ADR 0017)', async () => {
+    const a = await signUp('A')
+    const stripe = await checkoutThenStripeAnswers(a, paidSessionFor(a.id, T1))
+    const checksSpent = () =>
+      env.DB.prepare('SELECT count FROM rate_limit WHERE key = ?')
+        .bind(`stripeChecks|${a.id}`)
+        .first<number>('count')
+    for (let i = 0; i < 3; i++) {
+      const opened = await payment(T1, a, '?check=stored')
+      expect(await opened.json()).toEqual({ paid: false, unused: false })
+    }
+    expect(stripe).not.toHaveBeenCalled()
+    expect(await checksSpent()).toBeNull()
+    expect(await (await payment(T1, a)).json()).toEqual({ paid: true, unused: true })
+    expect(stripe).toHaveBeenCalledOnce()
+    expect(await checksSpent()).toBe(1)
+    expect(await (await payment(T1, a, '?check=stored')).json()).toEqual({
+      paid: true,
+      unused: true
+    })
+    expect(stripe).toHaveBeenCalledOnce()
+  })
+
   it('asks Stripe only so often while a return waits, then answers from D1', async () => {
     const a = await signUp('A')
-    stubStripe(sessionFor(a.id, T1))
-    await checkout(T1, a)
-    vi.restoreAllMocks()
-    const stripe = vi
-      .spyOn(globalThis, 'fetch')
-      .mockImplementation(async () => Response.json(sessionFor(a.id, T1)))
+    const stripe = await checkoutThenStripeAnswers(a, sessionFor(a.id, T1))
     const { max } = PAYMENT_LIMITS.stripeChecks
     for (let i = 0; i < max; i++) expect(await paid(T1, a)).toBe(false)
     expect(stripe).toHaveBeenCalledTimes(max)

@@ -6,9 +6,10 @@
       "apps/web/CHANGELOG.md": "Release Please",
       "apps/web/cloudflare-env.d.ts": "wrangler types (pnpm cf-typegen in apps/web)",
       "apps/web/drizzle/**": "drizzle-kit (pnpm db:generate in apps/web)",
-      "apps/web/src/lib/catalog/songs.generated.ts": "src/lib/catalog/generate.ts (pnpm exec tsx src/lib/catalog/generate.ts in apps/web)",
+      "apps/web/src/{lib/catalog,test-support}/*.generated.ts": "src/lib/catalog/generate.ts (pnpm exec tsx src/lib/catalog/generate.ts in apps/web)",
       "fixtures/golden/**/*.json": "the reference engine (tools/melody-lab/export_golden.py)",
       "tools/catalog/titles-*.report.*": "the PDMX import (tools/catalog/import_pdmx.py)",
+      "tools/catalog/ranking.md": "the PDMX ranking (tools/catalog/rank_pdmx.py)",
       "tools/uv.lock": "uv lock (in tools/)"
     },
     "thirdParty": {

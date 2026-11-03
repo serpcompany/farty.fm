@@ -5,6 +5,9 @@ import { giveToken, siteKeyAnswer, widgets } from '@/test-support/fake-turnstile
 import { button, closeScreens, pageText, show, tap, type } from '@/test-support/screen'
 import { AccountStep } from './account-step'
 
+const step = vi.hoisted(() => ({ reason: 'keep' as 'keep' | 'share', pathname: '/' }))
+
+vi.mock('next/navigation', () => ({ usePathname: () => step.pathname }))
 vi.mock('@/lib/account', async importOriginal => {
   const real = await importOriginal<typeof import('@/lib/account')>()
   return { ...real, sendCode: vi.fn(real.sendCode), signIn: vi.fn(real.signIn) }
@@ -14,6 +17,7 @@ vi.mock('./account-provider', () => ({
   useAccount: () => ({
     stepOpen: true,
     account: { status: 'signedOut' },
+    stepReason: step.reason,
     skipStep: vi.fn(),
     finishSignIn: vi.fn()
   })
@@ -53,6 +57,8 @@ beforeEach(() => {
 
 afterEach(() => {
   closeScreens()
+  step.reason = 'keep'
+  step.pathname = '/'
   sessionStorage.clear()
   vi.clearAllMocks()
   vi.restoreAllMocks()
@@ -90,6 +96,28 @@ describe('the account step', () => {
     expect(field('account-code')).toBeNull()
     expect(field('account-email')?.value).toBe('farter@example.com')
     expect(document.activeElement).toBe(field('account-email'))
+  })
+})
+
+describe('why the step is open', () => {
+  it('asks a guest who shares for a free account, which keeps their farts too', async () => {
+    server(siteKeyAnswer())
+    step.reason = 'share'
+    await show(<AccountStep />)
+    expect(pageText()).toContain('Make a free account')
+    expect(pageText()).toContain('You need one to share. It keeps your farts too.')
+  })
+
+  it('covers all of a shared page, which has no app top bar to leave room for', async () => {
+    server(siteKeyAnswer())
+    const dialog = () => document.body.querySelector('[role="dialog"]')?.className ?? ''
+    await show(<AccountStep />)
+    expect(dialog()).toContain('md:top-')
+    closeScreens()
+
+    step.pathname = '/u/maya/r/8k2fq3m9x1ab/'
+    await show(<AccountStep />)
+    expect(dialog()).not.toContain('md:top-')
   })
 })
 

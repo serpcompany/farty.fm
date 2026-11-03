@@ -3,24 +3,16 @@
 import { ChevronRight } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { type ReactNode, useState } from 'react'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle
-} from '@/components/ui/alert-dialog'
+import type { ReactNode } from 'react'
+import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import { setSharing, useSharing } from '@/lib/telemetry/sharing'
-import { type NotUploaded, useAccount } from './account-provider'
-import { DeleteAccount } from './delete-account'
+import { AccountSection, row } from './account-section'
+import { ProfileFriends } from './friends-section'
 import { InstallGuideCard, useInstallGuide } from './install-button'
 import { useRecordings } from './recordings-provider'
+import { useSongCatalog } from './song-catalog-provider'
 import { useToots } from './toots-provider'
 
 const FixtureLibrary =
@@ -34,19 +26,21 @@ const list = 'divide-y overflow-hidden rounded-xl bg-muted/60'
 function useProfileStats() {
   const { recordings, melodicRecordings, collectedNotes, songRows } = useRecordings()
   const { toots } = useToots()
-  if (recordings === null || toots === null) return null
+  const { songs } = useSongCatalog()
+  if (recordings === null || toots === null || songs === null) return null
   return {
     recordings: recordings.length,
     melodicRecordings: melodicRecordings.length,
     notesCollected: collectedNotes.size,
     unlockedSongs: songRows.filter(row => row.coverage.unlocked).length,
-    songs: songRows.length,
+    songs: songs.length,
     toots: toots.length
   }
 }
 
 export function ProfileScreen({ version }: { version: string }) {
   const stats = useProfileStats()
+  const { songsFailed, reloadSongs } = useSongCatalog()
 
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
@@ -56,7 +50,14 @@ export function ProfileScreen({ version }: { version: string }) {
         <h2 id="profile-stats" className={header}>
           Stats
         </h2>
-        {stats === null ? (
+        {stats === null && songsFailed ? (
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <p className="text-sm text-muted-foreground">Couldn't load the Songs.</p>
+            <Button variant="outline" onClick={reloadSongs}>
+              Try again
+            </Button>
+          </div>
+        ) : stats === null ? (
           <div className="flex justify-center py-6">
             <Spinner />
           </div>
@@ -90,6 +91,8 @@ export function ProfileScreen({ version }: { version: string }) {
           </>
         )}
       </section>
+
+      <ProfileFriends />
 
       <section aria-labelledby="profile-account" className="pt-6">
         <h2 id="profile-account" className={header}>
@@ -174,9 +177,6 @@ function LinkRow({ href, children }: { href: string; children: ReactNode }) {
   )
 }
 
-const row =
-  'flex min-h-11 w-full items-center justify-between gap-4 px-4 py-2.5 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset disabled:opacity-50'
-
 function SharingSection() {
   const sharing = useSharing()
   return (
@@ -199,209 +199,6 @@ function SharingSection() {
           Off, because your browser asks sites not to share your data (Global Privacy Control).
         </p>
       )}
-    </>
-  )
-}
-
-function notUploadedWords({ full, waiting }: NotUploaded) {
-  if (waiting > 0) {
-    const fullToo = full === 0 ? '' : `, and ${full} more can't because it's full`
-    return {
-      title: 'Not uploaded yet',
-      text: `Some farts on this device haven't reached your account${fullToo}. Check your connection and wait, or sign out now and lose them.`,
-      keep: 'Wait'
-    }
-  }
-  const one = full === 1
-  const farts = one ? "1 fart on this device isn't" : `${full} farts on this device aren't`
-  return {
-    title: 'Your account is full',
-    text: `${farts} in your account because it's full. Delete some older ones to make room, or sign out now and lose ${one ? 'it' : 'them'}.`,
-    keep: one ? 'Keep it' : 'Keep them'
-  }
-}
-
-function AccountSection() {
-  const { account, openStep, retry, signOut, setMarketingEmail, clearDevice } = useAccount()
-  const [busy, setBusy] = useState(false)
-  const [problem, setProblem] = useState<string | null>(null)
-  const [notUploaded, setNotUploaded] = useState(false)
-  const [left, setLeft] = useState<NotUploaded>({ full: 0, waiting: 0 })
-  const [confirmsClear, setConfirmsClear] = useState(false)
-
-  const [signingOut, setSigningOut] = useState(false)
-
-  const signOutNow = async (anyway: boolean) => {
-    setBusy(true)
-    setSigningOut(true)
-    setProblem(null)
-    const result = await signOut(anyway)
-    setBusy(false)
-    setSigningOut(false)
-    const pending = typeof result === 'object'
-    if (pending) setLeft(result)
-    setNotUploaded(pending)
-    if (result === 'failed') setProblem("Couldn't sign out. Check your connection and try again.")
-  }
-
-  const changeNews = async (on: boolean) => {
-    setBusy(true)
-    setProblem(null)
-    const done = await setMarketingEmail(on)
-    setBusy(false)
-    if (!done) setProblem("Couldn't change Farty news. Try again.")
-  }
-
-  const unsent = notUploadedWords(left)
-
-  if (account.status === 'checking') {
-    return (
-      <div className="flex justify-center py-3">
-        <Spinner />
-      </div>
-    )
-  }
-  if (account.status === 'unreachable') {
-    return (
-      <ul className={list}>
-        <li className="flex min-h-11 items-center justify-between gap-4 py-0 pl-4">
-          <span className="text-muted-foreground">Can't reach your account right now.</span>
-          <button
-            type="button"
-            className="min-h-11 shrink-0 px-4 font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
-            onClick={retry}
-          >
-            Retry
-          </button>
-        </li>
-      </ul>
-    )
-  }
-  if (account.status === 'signedOut' || account.status === 'expired') {
-    return (
-      <>
-        <ul className={list}>
-          <li>
-            <button type="button" className={row} onClick={openStep}>
-              {account.status === 'expired' ? 'Sign in again' : 'Save to an account'}
-              <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
-            </button>
-          </li>
-          {account.status === 'expired' && (
-            <li>
-              <button
-                type="button"
-                className={`${row} text-destructive`}
-                onClick={() => setConfirmsClear(true)}
-              >
-                Clear this device
-              </button>
-            </li>
-          )}
-        </ul>
-        <p className="px-4 pt-1.5 text-xs text-muted-foreground">
-          {account.status === 'expired'
-            ? 'Your session ended. Your farts stay on this device until you sign in.'
-            : 'Your farts are gone when you close Farty, unless you make a free account.'}
-        </p>
-        <AlertDialog open={confirmsClear} onOpenChange={open => !busy && setConfirmsClear(open)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Clear this device?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This deletes the Recordings and Toots on this device. The ones saved to your account
-                stay there.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="h-11 text-base" disabled={busy}>
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                variant="destructive"
-                className="h-11 text-base"
-                disabled={busy}
-                onClick={async () => {
-                  setBusy(true)
-                  await clearDevice()
-                }}
-              >
-                {busy ? <Spinner /> : 'Clear'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </>
-    )
-  }
-
-  return (
-    <>
-      <ul className={list}>
-        <li className="flex min-h-11 items-center justify-between gap-4 px-4 py-2.5">
-          <span>Email</span>
-          <span className="min-w-0 truncate text-muted-foreground" data-testid="account-email">
-            {account.email}
-          </span>
-        </li>
-        <li>
-          <label htmlFor="farty-news" className={row}>
-            Farty news
-            <Switch
-              id="farty-news"
-              checked={account.marketingEmail}
-              disabled={busy}
-              onCheckedChange={on => void changeNews(on)}
-            />
-          </label>
-        </li>
-        <li>
-          <button
-            type="button"
-            className={row}
-            disabled={busy}
-            onClick={() => void signOutNow(false)}
-          >
-            Sign out
-            {signingOut && !notUploaded && <Spinner />}
-          </button>
-        </li>
-        <li>
-          <DeleteAccount
-            className={`${row} text-destructive`}
-            disabled={busy}
-            onFailed={() =>
-              setProblem("Couldn't delete your account. Check your connection and try again.")
-            }
-          />
-        </li>
-      </ul>
-      {problem && (
-        <p role="alert" className="px-4 pt-1.5 text-xs text-destructive">
-          {problem}
-        </p>
-      )}
-      <AlertDialog open={notUploaded} onOpenChange={open => !busy && setNotUploaded(open)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{unsent.title}</AlertDialogTitle>
-            <AlertDialogDescription>{unsent.text}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="h-11 text-base" disabled={busy}>
-              {unsent.keep}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              className="h-11 text-base"
-              disabled={busy}
-              onClick={() => void signOutNow(true)}
-            >
-              {busy ? <Spinner /> : 'Sign out anyway'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   )
 }

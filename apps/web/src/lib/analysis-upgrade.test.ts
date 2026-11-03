@@ -4,7 +4,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { memoryStorage } from '@/test-support/web-storage'
 import { ANALYSIS_VERSION } from './analysis/version'
 import { itemKey } from './outbox'
-import { type Analysis, needsReanalysis, type Recording } from './recordings'
+import {
+  type Analysis,
+  NO_NOTE,
+  needsReanalysis,
+  type Recording,
+  songPitch,
+  trimOf
+} from './recordings'
 import { encodeWav, type PcmAudio } from './wav'
 
 let page: Awaited<ReturnType<typeof openPage>>
@@ -68,6 +75,17 @@ async function storedNow(id: string): Promise<Recording | undefined> {
   return (await page.store.db()).get('recordings', id)
 }
 
+async function audioLeftToDownload(recording: Recording): Promise<void> {
+  localStorage.setItem('pedos.account', 'user-a')
+  const database = await page.store.db()
+  await database.delete('audio', recording.id)
+  await database.put(
+    'downloads',
+    { kind: 'recordings', id: recording.id },
+    itemKey('recordings', recording.id)
+  )
+}
+
 describe('upgradeAnalyses', () => {
   it('re-analyzes one Recording at a time', async () => {
     const noiseLike = { ...stored, recordingPitchMidi: null, shortestNoteSeconds: null }
@@ -113,14 +131,7 @@ describe('upgradeAnalyses', () => {
 
   it('leaves the stored analysis as it was when the WAV download fails', async () => {
     const recording = await storedWith(1)
-    localStorage.setItem('pedos.account', 'user-a')
-    const database = await page.store.db()
-    await database.delete('audio', recording.id)
-    await database.put(
-      'downloads',
-      { kind: 'recordings', id: recording.id },
-      itemKey('recordings', recording.id)
-    )
+    await audioLeftToDownload(recording)
     const analyze = vi.fn(async () => fresh(0.12))
     const updated = vi.fn()
 
@@ -158,5 +169,313 @@ describe('upgradeAnalyses', () => {
     expect(updated).toHaveBeenCalledTimes(1)
     expect(reportError).toHaveBeenCalledOnce()
     expect(reportError).toHaveBeenCalledWith('analysis-failed', new Error('Analysis failed'))
+  })
+})
+
+describe('rescan (#282)', () => {
+  const noNote: Analysis = {
+    ...stored,
+    pitchEstimateMidi: null,
+    pitchConfidence: 0.1,
+    recordingPitchMidi: null,
+    shortestNoteSeconds: null,
+    settleSeconds: null,
+    version: ANALYSIS_VERSION - 1
+  }
+  const stillNoNote: Analysis = { ...noNote, version: ANALYSIS_VERSION }
+
+  it('offers Re-scan only while an older analysis says there is no note', async () => {
+    const older = await storedWith(1, noNote)
+    expect(page.upgrade.canRescan(older)).toBe(true)
+    expect(page.upgrade.canRescan(await storedWith(2, stillNoNote))).toBe(false)
+    expect(page.upgrade.canRescan(await storedWith(3, fresh(0.12)))).toBe(false)
+
+    await page.upgrade.rescan([older], async () => stillNoNote, vi.fn())
+
+    expect(page.upgrade.canRescan((await storedNow(older.id)) as Recording)).toBe(false)
+  })
+
+  it('offers no Re-scan on a fart left out with "No note" (#314)', async () => {
+    const leftOut = { ...(await storedWith(1)), placedPitch: NO_NOTE }
+    expect(needsReanalysis(leftOut)).toBe(true)
+    expect(songPitch(leftOut)).toBeNull()
+    expect(page.upgrade.canRescan(leftOut)).toBe(false)
+  })
+
+  it('re-scans one Recording with no note, and counts it when it now has a note', async () => {
+    const recording = await storedWith(1, noNote)
+    expect(page.upgrade.canRescan(recording)).toBe(true)
+    const analyze = vi.fn(async () => fresh(0.12))
+    const updated = vi.fn()
+
+    const result = await page.upgrade.rescan([recording], analyze, updated)
+
+    expect(result).toEqual({ scanned: 1, found: 1, failed: 0 })
+    const now = await storedNow(recording.id)
+    expect(now?.analysis).toEqual({ state: 'analyzed', analysis: fresh(0.12) })
+    expect(updated).toHaveBeenCalledExactlyOnceWith(now)
+    expect(page.upgrade.rescanSummary(result)).toBe('1 fart now has a note')
+  })
+
+  it('re-scans all with no note, one at a time, and leaves the rest alone', async () => {
+    const melodic = await storedWith(1, fresh(0.12))
+    const found = await storedWith(2, noNote)
+    const still = await storedWith(3, noNote)
+    const placed = (await page.store.placeRecording((await storedWith(4, noNote)).id, {
+      placedPitch: 48
+    })) as Recording
+    const analyzing = await page.store.saveRecording(
+      { seconds: 0.01, sampleRate: 48_000, waveform: [0.5] },
+      encodeWav(audio(5))
+    )
+    const recordings = [melodic, found, still, placed, analyzing]
+    expect(recordings.map(page.upgrade.canRescan)).toEqual([false, true, true, false, false])
+    let running = 0
+    let most = 0
+    const analyze = vi.fn(async (pcm: PcmAudio) => {
+      running += 1
+      most = Math.max(most, running)
+      await new Promise(resolve => setTimeout(resolve, 5))
+      running -= 1
+      return Math.abs(pcm.samples[0] - 0.2) < 0.01 ? fresh(0.2) : stillNoNote
+    })
+    const updated = vi.fn()
+    const scanning = vi.fn()
+
+    const result = await page.upgrade.rescan(recordings, analyze, updated, scanning)
+
+    expect(result).toEqual({ scanned: 2, found: 1, failed: 0 })
+    expect(analyze).toHaveBeenCalledTimes(2)
+    expect(most).toBe(1)
+    expect(scanning.mock.calls).toEqual([
+      [found, 0, 2],
+      [still, 1, 2]
+    ])
+    expect(updated.mock.calls.map(([r]) => r.id)).toEqual([found.id, still.id])
+    expect((await storedNow(found.id))?.analysis).toEqual({
+      state: 'analyzed',
+      analysis: fresh(0.2)
+    })
+    expect(await storedNow(still.id)).toEqual({
+      ...still,
+      analysis: { state: 'analyzed', analysis: stillNoNote }
+    })
+    expect(await storedNow(melodic.id)).toEqual(melodic)
+    expect(page.upgrade.rescanSummary(result)).toBe('1 fart now has a note')
+  })
+
+  it('skips one deleted before the run reaches it, and counts it nowhere', async () => {
+    const first = await storedWith(1, noNote)
+    const deleted = await storedWith(2, noNote)
+    const analyze = vi.fn(async () => {
+      await page.store.deleteRecording(deleted.id)
+      return stillNoNote
+    })
+    const scanning = vi.fn()
+
+    const result = await page.upgrade.rescan([first, deleted], analyze, vi.fn(), scanning)
+
+    expect(analyze).toHaveBeenCalledOnce()
+    expect(scanning.mock.calls.map(([r]) => r.id)).toEqual([first.id])
+    expect(result).toEqual({ scanned: 1, found: 0, failed: 0 })
+    expect(page.upgrade.rescanSummary(result)).toBe('No new notes')
+    expect(reportError).not.toHaveBeenCalled()
+  })
+
+  it('skips one placed by ear before the run reaches it, and counts it nowhere', async () => {
+    const first = await storedWith(1, noNote)
+    const placedMeanwhile = await storedWith(2, noNote)
+    const analyze = vi.fn(async () => {
+      await page.store.placeRecording(placedMeanwhile.id, { placedPitch: 48 })
+      return stillNoNote
+    })
+
+    const result = await page.upgrade.rescan([first, placedMeanwhile], analyze, vi.fn())
+
+    expect(analyze).toHaveBeenCalledOnce()
+    expect(result).toEqual({ scanned: 1, found: 0, failed: 0 })
+    expect(page.upgrade.rescanSummary(result)).toBe('No new notes')
+    const now = (await storedNow(placedMeanwhile.id)) as Recording
+    expect(now.placedPitch).toBe(48)
+    expect(now.analysis).toEqual({ state: 'analyzed', analysis: noNote })
+  })
+
+  it('skips one deleted while its own analysis runs, and counts it nowhere', async () => {
+    const recording = await storedWith(1, noNote)
+    const analyze = vi.fn(async () => {
+      await page.store.deleteRecording(recording.id)
+      return fresh(0.12)
+    })
+    const updated = vi.fn()
+
+    const result = await page.upgrade.rescan([recording], analyze, updated)
+
+    expect(analyze).toHaveBeenCalledOnce()
+    expect(result).toEqual({ scanned: 0, found: 0, failed: 0 })
+    expect(updated).not.toHaveBeenCalled()
+    expect(reportError).not.toHaveBeenCalled()
+    expect(await storedNow(recording.id)).toBeUndefined()
+  })
+
+  it('skips one deleted while its audio downloads, and counts it nowhere', async () => {
+    const recording = await storedWith(1, noNote)
+    await audioLeftToDownload(recording)
+    vi.mocked(fetch).mockImplementationOnce(async () => {
+      await page.store.deleteRecording(recording.id)
+      return new Response(null, { status: 503 })
+    })
+    const analyze = vi.fn(async () => fresh(0.12))
+    const updated = vi.fn()
+
+    const result = await page.upgrade.rescan([recording], analyze, updated)
+
+    expect(fetch).toHaveBeenCalled()
+    expect(analyze).not.toHaveBeenCalled()
+    expect(result).toEqual({ scanned: 0, found: 0, failed: 0 })
+    expect(updated).not.toHaveBeenCalled()
+    expect(await storedNow(recording.id)).toBeUndefined()
+  })
+
+  it('skips one placed by ear while its own analysis runs, and keeps the Placed Pitch', async () => {
+    const recording = await storedWith(1, noNote)
+    const analyze = vi.fn(async () => {
+      await page.store.placeRecording(recording.id, { placedPitch: 48 })
+      return fresh(0.12)
+    })
+    const updated = vi.fn()
+
+    const result = await page.upgrade.rescan([recording], analyze, updated)
+
+    expect(result).toEqual({ scanned: 0, found: 0, failed: 0 })
+    expect(page.upgrade.rescanSummary(result)).toBe('No new notes')
+    const now = (await storedNow(recording.id)) as Recording
+    expect(now.placedPitch).toBe(48)
+    expect(now.analysis).toEqual({ state: 'analyzed', analysis: fresh(0.12) })
+    expect(updated).toHaveBeenCalledExactlyOnceWith(now)
+  })
+
+  it('counts one the database can’t read again as one it couldn’t read, and goes on', async () => {
+    const unreadable = await storedWith(1, noNote)
+    const failing = await storedWith(2, noNote)
+    const next = await storedWith(3, noNote)
+    let failingReads = 0
+    vi.resetModules()
+    vi.doMock('./recording-store', async importOriginal => {
+      const actual = await importOriginal<typeof import('./recording-store')>()
+      return {
+        ...actual,
+        loadRecording: async (id: string) => {
+          if (id === unreadable.id || (id === failing.id && ++failingReads > 1)) {
+            throw new Error('IndexedDB read failed')
+          }
+          return actual.loadRecording(id)
+        }
+      }
+    })
+    const { rescan, rescanSummary } = await import('./analysis-upgrade')
+    vi.doUnmock('./recording-store')
+    const analyze = vi.fn(async (pcm: PcmAudio) => {
+      if (Math.abs(pcm.samples[0] - 0.2) < 0.01) throw new Error('Analysis failed')
+      return fresh(0.2)
+    })
+    const updated = vi.fn()
+
+    const run = rescan([unreadable, failing, next], analyze, updated)
+
+    await expect(run).resolves.toEqual({ scanned: 3, found: 1, failed: 2 })
+    expect(analyze).toHaveBeenCalledTimes(2)
+    expect(updated.mock.calls.map(([r]) => r.id)).toEqual([next.id])
+    expect(await storedNow(unreadable.id)).toEqual(unreadable)
+    expect(await storedNow(failing.id)).toEqual(failing)
+    expect(rescanSummary(await run)).toBe('1 fart now has a note. 2 couldn’t be read')
+  })
+
+  it('counts one it can’t re-scan, keeps its analysis, and goes on', async () => {
+    const failing = await storedWith(1, noNote)
+    const next = await storedWith(2, noNote)
+    const analyze = vi
+      .fn<(audio: PcmAudio) => Promise<Analysis>>()
+      .mockRejectedValueOnce(new Error('Analysis failed'))
+      .mockResolvedValueOnce(fresh(0.2))
+
+    const result = await page.upgrade.rescan([failing, next], analyze, vi.fn())
+
+    expect(result).toEqual({ scanned: 2, found: 1, failed: 1 })
+    expect(await storedNow(failing.id)).toEqual(failing)
+    expect(reportError).toHaveBeenCalledExactlyOnceWith(
+      'analysis-failed',
+      new Error('Analysis failed')
+    )
+    expect(page.upgrade.rescanSummary(result)).toBe('1 fart now has a note. 1 couldn’t be read')
+  })
+
+  it('says when nothing new was found', () => {
+    const { rescanSummary } = page.upgrade
+    expect(rescanSummary({ scanned: 3, found: 0, failed: 0 })).toBe('No new notes')
+    expect(rescanSummary({ scanned: 3, found: 2, failed: 0 })).toBe('2 farts now have a note')
+  })
+
+  it('keeps a Placed Pitch when a new analysis finds a Recording Pitch (ADR 0017)', async () => {
+    const older = { ...noNote, version: ANALYSIS_VERSION - 1 }
+    const placed = (await page.store.placeRecording((await storedWith(1, older)).id, {
+      placedPitch: 48
+    })) as Recording
+    expect(songPitch(placed)).toBe(48)
+    const updated = vi.fn()
+
+    await page.upgrade.upgradeAnalyses([placed], async () => fresh(0.12), updated)
+
+    const now = (await storedNow(placed.id)) as Recording
+    expect(now.placedPitch).toBe(48)
+    expect(now.analysis).toEqual({ state: 'analyzed', analysis: fresh(0.12) })
+    expect(songPitch(now)).toBe(48)
+    expect(updated).toHaveBeenCalledExactlyOnceWith(now)
+  })
+
+  it('keeps a Trim through a Re-scan, and still uses it once the fart is Melodic (#314)', async () => {
+    const trim = {
+      startSeconds: 0.002,
+      endSeconds: 0.008,
+      fart: { startSeconds: 0.002, endSeconds: 0.008 }
+    }
+    const trimmed = (await page.store.placeRecording((await storedWith(1, noNote)).id, {
+      trim
+    })) as Recording
+    expect(page.upgrade.canRescan(trimmed)).toBe(true)
+
+    await page.upgrade.rescan([trimmed], async () => stillNoNote, vi.fn())
+    const still = (await storedNow(trimmed.id)) as Recording
+    expect(still.trim).toEqual(trim)
+    expect(trimOf(still)).toEqual(trim)
+
+    const older = (await page.store.saveAnalysis(trimmed.id, {
+      state: 'analyzed',
+      analysis: noNote
+    })) as Recording
+    const result = await page.upgrade.rescan([older], async () => fresh(0.12), vi.fn())
+    expect(result).toEqual({ scanned: 1, found: 1, failed: 0 })
+    const found = (await storedNow(trimmed.id)) as Recording
+    expect(found.trim).toEqual(trim)
+    expect(trimOf(found)).toEqual(trim)
+  })
+
+  it('keeps a placed Recording’s Trim in use when a new analysis finds a Recording Pitch', async () => {
+    const older = { ...noNote, version: ANALYSIS_VERSION - 1 }
+    const trim = {
+      startSeconds: 0.002,
+      endSeconds: 0.008,
+      fart: { startSeconds: 0.002, endSeconds: 0.008 }
+    }
+    const placed = (await page.store.placeRecording((await storedWith(1, older)).id, {
+      placedPitch: 48,
+      trim
+    })) as Recording
+
+    await page.upgrade.upgradeAnalyses([placed], async () => fresh(0.12), vi.fn())
+
+    const now = (await storedNow(placed.id)) as Recording
+    expect(now.analysis).toEqual({ state: 'analyzed', analysis: fresh(0.12) })
+    expect(songPitch(now)).toBe(48)
+    expect(trimOf(now)).toEqual(trim)
   })
 })

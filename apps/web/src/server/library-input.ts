@@ -1,13 +1,20 @@
 import { z } from 'zod'
 
-import type { NewRecording, NewToot } from '@/db/library'
+import type { NewRecording, TootFields } from '@/db/library'
+import { isPerformance, type Performance } from '@/lib/performance'
+import { MAXIMUM_NAME_LENGTH, NO_NOTE, type RecordingTrim } from '@/lib/recordings'
 
 import { apiError, readCapped } from './http'
 
 const ITEM_ID = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+const SONG_ID = z.string().regex(/^[A-Za-z0-9_.-]{1,100}$/)
 
 export function isItemId(id: unknown): id is string {
   return ITEM_ID.safeParse(id).success
+}
+
+export function isSongId(id: unknown): id is string {
+  return SONG_ID.safeParse(id).success
 }
 
 const UPLOAD_OVERHEAD_BYTES = 64 * 1024
@@ -71,7 +78,38 @@ const seconds = between(0, MAX_SECONDS)
 
 export const TITLE = z.string().trim().min(1).max(200)
 
-export const PLACED_PITCH = wholeBetween(0, 127).nullable()
+const PLACED_PITCH = z.union([z.literal(NO_NOTE), wholeBetween(0, 127)]).nullable()
+
+const NAME = z
+  .string()
+  .trim()
+  .max(MAXIMUM_NAME_LENGTH)
+  .transform(name => name || null)
+  .nullable()
+
+const PART = z
+  .object({ startSeconds: seconds, endSeconds: seconds })
+  .refine(part => part.startSeconds < part.endSeconds)
+
+export const TRIM_TOLERANCE_SECONDS = 0.01
+const SAMPLE_TOLERANCE = 0.001
+
+const TRIM = z
+  .object({ startSeconds: seconds, endSeconds: seconds, fart: PART })
+  .refine(
+    ({ startSeconds, endSeconds, fart }) =>
+      startSeconds < endSeconds &&
+      fart.startSeconds >= startSeconds - SAMPLE_TOLERANCE &&
+      fart.endSeconds <= endSeconds + SAMPLE_TOLERANCE
+  )
+  .nullable()
+
+export const PLACEMENT = z
+  .object({ placedPitch: PLACED_PITCH.optional(), trim: TRIM.optional(), name: NAME.optional() })
+  .refine(placement => Object.keys(placement).length > 0)
+
+const trimFits = (trim: RecordingTrim | null, takeSeconds: number) =>
+  trim === null || trim.endSeconds <= takeSeconds + TRIM_TOLERANCE_SECONDS
 
 const ANALYSIS = z
   .discriminatedUnion('state', [
@@ -93,16 +131,20 @@ const ANALYSIS = z
   ])
   .transform(value => (value.state === 'analyzed' ? value.analysis : null))
 
-const RECORDING = z.object({
-  id: z.string(),
-  number: wholeBetween(1, 1_000_000),
-  createdAt: epochMilliseconds,
-  seconds,
-  sampleRate: z.number(),
-  waveform: z.array(between(0, 1)).max(256),
-  analysis: ANALYSIS,
-  placedPitch: PLACED_PITCH.default(null)
-})
+const RECORDING = z
+  .object({
+    id: z.string(),
+    number: wholeBetween(1, 1_000_000),
+    createdAt: epochMilliseconds,
+    seconds,
+    sampleRate: z.number(),
+    waveform: z.array(between(0, 1)).max(256),
+    analysis: ANALYSIS,
+    placedPitch: PLACED_PITCH.default(null),
+    trim: TRIM.default(null),
+    name: NAME.default(null)
+  })
+  .refine(recording => trimFits(recording.trim, recording.seconds))
 
 export function parseRecording(
   value: unknown,
@@ -125,16 +167,23 @@ const ARRANGEMENT = z.object({
     .transform(entries => Object.fromEntries(entries.map(([pitch, id]) => [Number(pitch), id])))
 })
 
-const TOOT = z.object({
-  id: z.string(),
-  title: TITLE,
-  songId: z.string().regex(/^[A-Za-z0-9_.-]{1,100}$/),
-  createdAt: epochMilliseconds,
-  seconds,
-  arrangement: ARRANGEMENT
-})
+const PERFORMANCE = z
+  .custom<Performance>(isPerformance)
+  .transform(({ recordings, taps }) => ({ recordings, taps }))
 
-export function parseToot(value: unknown, id: string): Omit<NewToot, 'audioBytes'> | null {
+const NONE = z
+  .null()
+  .optional()
+  .transform(() => null)
+
+const TOOT_FIELDS = { id: z.string(), title: TITLE, createdAt: epochMilliseconds, seconds }
+
+const TOOT = z.union([
+  z.object({ ...TOOT_FIELDS, songId: SONG_ID, arrangement: ARRANGEMENT, performance: NONE }),
+  z.object({ ...TOOT_FIELDS, songId: z.null(), arrangement: NONE, performance: PERFORMANCE })
+])
+
+export function parseToot(value: unknown, id: string): TootFields | null {
   const parsed = TOOT.safeParse(value)
   return parsed.success && parsed.data.id === id ? parsed.data : null
 }

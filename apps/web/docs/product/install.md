@@ -65,11 +65,24 @@ The service worker registers only in a build, never on `pnpm dev`.
   (`e2e/install.spec.ts`, "the service worker opens the app shell offline";
   `src/lib/service-worker.test.ts`, "keeps the start page, the tabs it links to, and the files they
   load when it installs, but not the lander's images").
-- Each Song's page and a Toot's screen open offline, with the Web Workers that render and analyze
-  (`src/lib/service-worker.test.ts`, "keeps each Song's page from /shell.json, and the files it
-  loads, when it installs"; "keeps the scripts that the scripts load by name, such as the workers'
-  chunks"; "answers a worker script offline with a copy that has no URL, so each worker keeps its
-  own").
+- Every Song's page, the Sound Pad and a Toot's screen open offline, with the Song Catalog and the
+  Web Workers that render and analyze. The worker keeps one Song page, `/compose/song/`, and opens
+  every Song's page offline on it, never on a copy of a Song's own page, which an older build would
+  have left behind ([Song Creator](song-creator.md#offline)) (`src/lib/service-worker.test.ts`,
+  "keeps the one Song page from /shell.json, the files it loads and the Song Catalog, when it
+  installs"; "never keeps a Song's own page, so offline every Song opens on the one Song page";
+  "opens a Song offline on the current build's Song page after a deploy, never an older build's";
+  "keeps the scripts that the scripts load by name, such as the workers' chunks"; "answers a worker
+  script offline with a copy that has no URL, so each worker keeps its own").
+- Each Song's notes are a file of their own, kept in a cache apart from the shell, so however many
+  Songs open they never push the shell out. Once it has the Song Catalog, the worker fetches every
+  Song's notes it hasn't kept in the background, so a Song never opened plays offline too (#138),
+  and does the same for a new deploy's catalog; a fetch cut off tries again on the next
+  (`src/lib/service-worker-notes.test.ts`, "keeps the notes of each Song opened, in a cache of their
+  own, and plays them offline"; "keeps every Song's notes when it installs, so a Song never opened
+  plays offline (#138)"; "keeps a new index's notes once a page fetches it, such as after a deploy";
+  "tries the notes again on the next fetch of the index when the connection drops part way"; "never
+  pushes the shell out, however many Songs open").
 - Offline, an account's Recordings are there and play, a Ready Song makes its Toot, and a saved
   Toot plays (`e2e/guest-visit.spec.ts`, "an account's Recording is there when the installed app
   opens again offline"; `e2e/song-creator.spec.ts`, "the installed app opens a Ready Song offline, and
@@ -80,14 +93,18 @@ The service worker registers only in a build, never on `pnpm dev`.
   network first, and answers from the cache offline"; "keeps a later deploy's tabs, new and changed,
   after one online visit to the start page"; "tries the refresh again on the next start page when
   the connection drops part way").
-- A script an older build loads, which a deploy has taken off the server, is answered with the copy
-  kept (`e2e/stale-build.spec.ts`, "the service worker answers a 404 for a script it kept with its
-  copy"; `src/lib/service-worker.test.ts`, "answers an older build's script with the copy it kept,
-  once a deploy has taken it off the server").
-- It never keeps audio, the Fixture Library or anything behind Staging's password, and a page that
-  asks for that password lets the worker go, so the browser can ask for it
-  (`src/lib/service-worker.test.ts`, "leaves the Fixture Library, audio, data, other sites and
-  writes to the network"; "never keeps a response from the Staging password").
+- A script, a Song Catalog or a Song's notes that an older build loads, which a deploy has taken
+  off the server, is answered with the copy kept (`e2e/stale-build.spec.ts`, "the service worker
+  answers a 404 for a script it kept with its copy"; `src/lib/service-worker.test.ts`, "answers an
+  older build's script with the copy it kept, once a deploy has taken it off the server"; "answers
+  an older build's Song Catalog with the copy it kept, once a deploy has taken it off the server";
+  `src/lib/service-worker-notes.test.ts`, "answers a Song's notes from before a deploy with the copy
+  it kept").
+- It never keeps audio, the Fixture Library, a shared link's page (`/u/`, so a link that stopped
+  working never opens from a copy) or anything behind Staging's password, and a page that asks for
+  that password lets the worker go, so the browser can ask for it (`src/lib/service-worker.test.ts`,
+  "leaves the Fixture Library, audio, data, other sites and writes to the network"; "never keeps a
+  response from the Staging password").
 
 ## Keeping the browser's storage
 

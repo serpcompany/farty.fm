@@ -22,7 +22,7 @@ function isCheckoutPage(url: string): boolean {
 
 export async function startCheckout(
   tootId: string,
-  songId: string,
+  songId: string | null,
   accountId: string
 ): Promise<Checkout> {
   const response = await send(`/api/toots/${tootId}/checkout/`, accountId, {
@@ -60,6 +60,20 @@ export async function tootPaid(tootId: string, accountId: string): Promise<boole
   if (!response?.ok) return null
   const body = (await response.json().catch(() => null)) as { paid?: unknown } | null
   return typeof body?.paid === 'boolean' ? body.paid : null
+}
+
+export async function tootPaymentState(
+  tootId: string,
+  accountId: string
+): Promise<'unpaid' | 'unused' | 'used' | null> {
+  const response = await send(`/api/toots/${tootId}/payment/?check=stored`, accountId)
+  if (!response?.ok) return null
+  const body = (await response.json().catch(() => null)) as {
+    paid?: unknown
+    unused?: unknown
+  } | null
+  if (typeof body?.paid !== 'boolean' || typeof body.unused !== 'boolean') return null
+  return !body.paid ? 'unpaid' : body.unused ? 'unused' : 'used'
 }
 
 const PAYMENT_WAIT = { tries: 15, intervalMs: 2000 }

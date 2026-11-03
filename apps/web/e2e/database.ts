@@ -128,3 +128,20 @@ export function standInForPersist(): void {
 export function persistAsked(page: Page): Promise<boolean> {
   return page.evaluate(() => (window as unknown as { persistAsked: boolean }).persistAsked)
 }
+
+export async function savedTake(page: Page): Promise<{ samples: number[]; sampleRate: number }> {
+  const recordings = await all<{ id: string; number: number }>(page, 'recordings')
+  const newest = recordings.reduce((a, b) => (b.number > a.number ? b : a))
+  const wav = await bytes(page, 'audio', newest.id)
+  if (!wav) throw new Error('No audio for the newest Recording')
+  const sampleRate = wav.readUInt32LE(24)
+  let at = 12
+  while (wav.toString('ascii', at, at + 4) !== 'data') at += 8 + wav.readUInt32LE(at + 4)
+  const length = wav.readUInt32LE(at + 4) / 2
+  const samples = Array.from({ length }, (_, i) => wav.readInt16LE(at + 8 + 2 * i) / 0x8000)
+  return { samples, sampleRate }
+}
+
+export function peak(samples: number[]): number {
+  return samples.reduce((max, v) => Math.max(max, Math.abs(v)), 0)
+}

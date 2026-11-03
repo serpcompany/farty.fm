@@ -7,7 +7,9 @@ import {
   getMicrophoneStream,
   loadCaptureProcessor,
   loseTake,
+  type Microphone,
   microphoneOpening,
+  moveMicrophone,
   openMicrophone,
   releaseIfHiddenAndListening,
   releaseMicrophone,
@@ -71,6 +73,21 @@ function pageShown(): void {
     void openIfAllowed()
     return
   }
+  if (mic.context !== audioContext()) {
+    moveMicrophone(mic).then(
+      moved => {
+        if (currentMicrophone() === moved && document.visibilityState === 'visible') {
+          listenAgain(moved)
+        }
+      },
+      () => {}
+    )
+    return
+  }
+  listenAgain(mic)
+}
+
+function listenAgain(mic: Microphone): void {
   if (!silent(mic)) {
     resumeCapture(mic)
     return

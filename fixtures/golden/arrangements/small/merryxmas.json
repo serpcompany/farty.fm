@@ -4,21 +4,17 @@
   "metrics": null,
   "missing": [
     {
-      "seconds": 0.5,
-      "target_midi": 44
-    },
-    {
       "seconds": 1.0,
       "target_midi": 49
     }
   ],
   "notes": null,
-  "octave_moves": 2,
+  "octave_moves": 3,
   "per_pitch": [
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "octave_move": true,
+      "recording": "009",
+      "shift_semitones": 13.474079406339825,
       "song_pitch": 62,
       "target_midi": 44
     },
@@ -66,10 +62,10 @@
     }
   ],
   "pitch_coverage": {
-    "covered": 5,
+    "covered": 6,
     "total": 7
   },
-  "plan_cost": 135.9553626565968,
+  "plan_cost": 410.9038849153683,
   "render_settings": null,
   "song": "merryxmas",
   "transpose": -18,

@@ -2,11 +2,11 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { forgetDecoded, play, stopPlayback } from '@/lib/audio/player'
-import { songs } from '@/lib/catalog/songs.generated'
 import { type LibraryChange, onLibraryChanged } from '@/lib/library-changes'
 import { reportError } from '@/lib/telemetry/errors'
-import { noteSeconds, type Toot, type TootDraft } from '@/lib/toot'
+import { noteSeconds, PAD_TOOT_TITLE, type SongTootDraft, type Toot } from '@/lib/toot'
 import * as tootStore from '@/lib/toot-store'
+import { songs } from '@/test-support/songs.generated'
 import { PlaybackProvider, usePlayback } from './playback-provider'
 import { TootsProvider, tootPlayback, useToots } from './toots-provider'
 
@@ -20,11 +20,7 @@ vi.mock('@/lib/toot-store', () => ({
   deleteToot: vi.fn()
 }))
 vi.mock('@/lib/library-changes', () => ({ onLibraryChanged: vi.fn() }))
-vi.mock('@/lib/audio/player', () => ({
-  play: vi.fn(),
-  stopPlayback: vi.fn(),
-  forgetDecoded: vi.fn()
-}))
+vi.mock('@/lib/audio/player', () => import('@/test-support/fake-player'))
 vi.mock('@/lib/recording-store', () => ({ loadAudio: vi.fn() }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: vi.fn() }))
 
@@ -42,7 +38,7 @@ const savedToot = (id: string, createdAt: number): Toot => ({
   arrangement
 })
 
-const madeToot = (id: string): TootDraft => ({
+const madeToot = (id: string): SongTootDraft => ({
   id,
   song,
   arrangement,
@@ -136,7 +132,7 @@ describe('TootsProvider', () => {
 
   it('stops a Toot that plays before it deletes it', async () => {
     await openWith(Promise.resolve([savedToot('t1', 1), savedToot('t2', 2)]))
-    act(() => toots.toggleTootPlayback(savedToot('t1', 1), 0))
+    act(() => toots.toggleTootPlayback(savedToot('t1', 1), 0, song))
     act(() => toots.deleteToot('t1'))
 
     expect(stopPlayback).toHaveBeenCalledOnce()
@@ -158,6 +154,39 @@ describe('TootsProvider', () => {
     const audio = await playedAudio()
     expect(audio).not.toBe(draft.wav)
     expect(audio.byteLength).toBe(8)
+  })
+
+  it("plays a saved Toot's note only with its Song's notes, which its screen gives", async () => {
+    await openWith(Promise.resolve([savedToot('t1', 1)]))
+    act(() => toots.toggleTootPlayback(savedToot('t1', 1), 2))
+    expect(play).not.toHaveBeenCalled()
+
+    act(() => toots.toggleTootPlayback(savedToot('t1', 1), 2, song))
+    const written = noteSeconds(song, song.notes[2])
+    expect(vi.mocked(play).mock.calls[0][2]).toEqual({
+      start: written.start,
+      end: written.start + written.length
+    })
+    expect(playback.nowPlaying).toBe(tootPlayback('t1', 2))
+  })
+
+  it("saves a Sound Pad Toot with its Performance, under the Sound Pad's title", async () => {
+    await openWith(Promise.resolve([]))
+    const performance = { recordings: ['r1'], taps: [[0, 0]] as [number, number][] }
+    await act(() =>
+      toots.saveToot({ id: 'pad', song: null, performance, seconds: 3, wav: new ArrayBuffer(8) })
+    )
+
+    expect(toots.toot('pad')).toMatchObject({
+      title: PAD_TOOT_TITLE,
+      songId: null,
+      arrangement: null,
+      performance
+    })
+    expect(tootStore.saveToot).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'pad', performance }),
+      expect.any(ArrayBuffer)
+    )
   })
 
   it('marks a saved Toot whose audio is gone', async () => {

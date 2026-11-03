@@ -6,7 +6,7 @@ ends, signing out and deleting an account; how the farts reach every browser is 
 How sign-in works is in [Accounts and
 sign-in](../../../../docs/agents/accounts.md), how the library syncs in
 [ARCHITECTURE.md](../../../../ARCHITECTURE.md#how-data-moves-in-the-web-app), and why in
-[ADR 0017](../../../../docs/adr/0017-accounts-and-cloud-save.md) and
+[ADR 0023](../../../../docs/adr/0023-accounts-and-cloud-save.md) and
 [ADR 0013](../../../../docs/adr/0013-keeping-recordings-needs-a-free-account.md).
 
 ## Guest
@@ -61,6 +61,16 @@ sign-in](../../../../docs/agents/accounts.md), how the library syncs in
   (%s)"; `e2e/account-pay.spec.ts`, "a guest's Toot plays free, and Save asks for an account
   first"; `src/components/farty/song-creator.interaction.test.tsx`, "asks for an account before
   saving or paying, where saving is %s").
+- A guest's Share, on a Recording's row, Result or a Toot, reworded: "Make a free account", "You
+  need one to share. It keeps your farts too." Signed in there, Share carries on
+  ([Sharing](sharing.md#a-guest); `e2e/share-recording.spec.ts`, "a guest who taps Share is asked to
+  make a free account first"; "a guest records, reviews and saves, then shares from Result once
+  they've made an account, and someone signed out plays it (#320)";
+  `src/components/farty/account-step.interaction.test.tsx`, "asks a guest who shares for a free
+  account, which keeps their farts too").
+- Get Farty on a shared page or a profile page, with that person offered as a friend
+  ([Get Farty](get-farty.md); `e2e/get-farty.spec.ts`, "Get Farty on a shared page makes an
+  account, asks the sharer to be friends, then shows the Home Screen steps").
 - A session that ended asks to sign in again, once a visit ([A session that
   ends](#a-session-that-ends)).
 - It never offers itself after signing in, or where storage is blocked, since it couldn't remember
@@ -75,7 +85,9 @@ sign-in](../../../../docs/agents/accounts.md), how the library syncs in
   guest's first Result offers the account step, and Not now goes where they tapped").
 - On a phone it covers the screen; from 768px it is a card under the top bar, whose tabs wait for it
   (`e2e/lander.spec.ts`, "Sign up free opens the account step under the top bar, whose tabs wait for
-  it").
+  it"). A shared page has no app top bar, so there it covers the whole page
+  (`src/components/farty/account-step.interaction.test.tsx`, "covers all of a shared page, which
+  has no app top bar to leave room for").
 - Send code moves to the code: "We sent a 6-digit code to …", a Code field with focus, Sign in and
   Change email (`e2e/account-step.spec.ts`, "signing up from the first Result goes where they
   tapped, and Farty opens again with their Recording").
@@ -204,13 +216,20 @@ sign-in](../../../../docs/agents/accounts.md), how the library syncs in
   without a reload (`e2e/account-profile.spec.ts`, "Profile's account: the email, Farty news, and
   Sign out, which leaves nothing here"; "Sign out clears Farty's other tabs too, without a reload").
 - Delete account asks "Delete your account?": it deletes the email, Recordings and Toots on every
-  device and can't be undone. With a sign-in less than 10 minutes old, Delete deletes the account
+  device, its shared links stop working, and it can't be undone. With a sign-in less than 10 minutes old, Delete deletes the account
   straight away and leaves nothing here (`e2e/account-profile.spec.ts`, "Delete account asks first,
   then deletes the account and leaves nothing here"; `src/app/api/account/route.workers.test.ts`,
   "deletes the user’s audio, then their row with their sessions, Recordings, Toots and payments";
   "deletes for a session signed in less than 10 minutes ago";
   `src/components/farty/profile-screen.interaction.test.tsx`, "deletes straight after the confirm
   with a recent sign-in, asking for no code").
+- Deleting the account also stops every link it shared, takes down its profile page, and deletes
+  its friend requests, its friendships and the reports of its page and links
+  ([Sharing](sharing.md); [Friends](friends.md); `src/app/u/sharing.workers.test.ts`, "stops
+  working when the account is deleted"; `src/app/u/profiles.workers.test.ts`, "is not found for a
+  Handle no one has, one that could be no one's, or a deleted account"; "goes with the account";
+  `src/app/api/friends/friends.workers.test.ts`, "deletes its requests either way and its
+  friendships"; `src/app/u/share-reports.workers.test.ts`, "goes with the account").
 - A sign-in 10 minutes old or more can't delete the account, so a phone left signed in can't
   delete it: the server refuses and deletes nothing. The age is the sign-in's own, which renewing
   the session never moves (`src/app/api/account/route.workers.test.ts`, "refuses a session signed

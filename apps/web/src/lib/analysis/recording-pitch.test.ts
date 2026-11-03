@@ -2,12 +2,12 @@ import { expect, test } from 'vitest'
 import {
   CONTOUR_TOLERANCE_MIDI,
   compareContour,
-  gestureBody,
   goldenRecordings,
+  pitchBody,
   row
 } from '../../test-support/golden'
 import { hzToMidi, roundHalfEven } from './numeric'
-import { analyzePitch } from './recording-pitch'
+import { analyzePitch, estimate } from './recording-pitch'
 
 test('from the golden gesture, estimates, confidences and contours match the golden data', async () => {
   let maxErrorCents = 0
@@ -18,7 +18,7 @@ test('from the golden gesture, estimates, confidences and contours match the gol
   let maxContourMidi = 0
   const lines = [row('id', 'estimate', 'golden', 'Δ cents', 'conf', 'golden', 'voicing', 'max Δ')]
   for (const golden of goldenRecordings) {
-    const pitch = analyzePitch(await gestureBody(golden))
+    const pitch = analyzePitch(await pitchBody(golden))
     const contour = Array.from(pitch.f0, f => (Number.isFinite(f) ? hzToMidi(f) : null))
     const agreement = compareContour(contour, golden)
     framesTotal += agreement.frames
@@ -64,4 +64,19 @@ test('from the golden gesture, estimates, confidences and contours match the gol
     `Contour: voicing agrees on ${framesAgreeing}/${framesTotal} frames; max |Δ| ${(maxContourMidi * 100).toFixed(4)} cents (golden contour is rounded to 0.005 cents)`
   )
   console.log(lines.join('\n'))
+})
+
+test('a few quiet frames at the end of a short first burst are no note', () => {
+  const sr = 44100
+  const hop = 256
+  const body = new Float64Array(Math.trunc(0.257 * sr))
+  for (let i = 0; i < body.length; i++) {
+    const level = i < 41 * hop ? 0.5 : 0.5 * 10 ** (-48 / 20)
+    body[i] = level * Math.sin((2 * Math.PI * (i < 41 * hop ? 149 : 45) * i) / sr)
+  }
+  const f0 = new Float64Array(45).fill(Number.NaN)
+  for (let i = 41; i < 45; i++) f0[i] = 45
+  const found = estimate(body, f0)
+  expect(found.midi).toBeNull()
+  expect(found.confidence).toBeCloseTo(4 / 45, 6)
 })

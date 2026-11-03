@@ -4,13 +4,25 @@ import { describe, expect, it, vi } from 'vitest'
 import { tootPayment } from '@/db/payments'
 import { PAYMENT_LIMITS } from '@/server/toot-payments'
 import { extraEnv } from '@/test-support/extra-env'
-import { api, deletedAgo, ORIGIN, seed, signUp, T1, testDb } from '@/test-support/library-api'
+import {
+  api,
+  deletedAgo,
+  ORIGIN,
+  padTootMetadata,
+  seed,
+  signUp,
+  T1,
+  testDb
+} from '@/test-support/library-api'
 import {
   checkout,
+  checkoutWith,
   paid,
   payDev,
+  payment,
   paymentsHarness,
   save,
+  savePad,
   T2,
   T3,
   tootRows
@@ -96,12 +108,66 @@ describe('on a local run, with the dev checkout', () => {
     expect(await paid(T1, a)).toBe(false)
   })
 
+  it('saves a Sound Pad Toot once it is paid for, back to the Sound Pad (ADR 0017)', async () => {
+    const a = await signUp('A')
+    expect(await (await savePad(T1, a)).json()).toEqual({ error: 'payment_required' })
+    expect((await savePad(T1, a)).status).toBe(402)
+
+    const started = await checkout(T1, a, null)
+    expect(started.status).toBe(200)
+    expect(await started.json()).toEqual({ url: `${ORIGIN}/dev/checkout/?toot=${T1}` })
+    expect(await tootPayment(testDb(), a.id, T1)).toMatchObject({ songId: null, paidAt: null })
+    expect((await savePad(T1, a)).status).toBe(402)
+
+    const paying = await payDev(T1, a, null)
+    expect(paying.status).toBe(303)
+    expect(paying.headers.get('location')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}&checkout=done`)
+    expect(await paid(T1, a)).toBe(true)
+    expect((await savePad(T1, a)).status).toBe(201)
+    expect((await tootPayment(testDb(), a.id, T1))?.savedAt).toBeInstanceOf(Date)
+    expect(await (await checkout(T1, a, null)).json()).toEqual({ paid: true })
+    const library = (await (await api.library(a)).json()) as { toots: unknown[] }
+    expect(library.toots).toMatchObject([
+      { id: T1, songId: null, arrangement: null, performance: padTootMetadata(T1).performance }
+    ])
+  })
+
+  it('says a payment is unused until a save uses it, so a kept take saves only then (ADR 0017)', async () => {
+    const a = await signUp('A')
+    const answer = async (id: string) => (await payment(id, a)).json()
+    expect(await answer(T1)).toEqual({ paid: false, unused: false })
+    await checkout(T1, a, null)
+    expect(await answer(T1)).toEqual({ paid: false, unused: false })
+    await payDev(T1, a, null)
+    expect(await answer(T1)).toEqual({ paid: true, unused: true })
+    expect((await savePad(T1, a)).status).toBe(201)
+    expect(await answer(T1)).toEqual({ paid: true, unused: false })
+    expect((await api.delete('toots', T1, a)).status).toBe(204)
+    expect(await answer(T1)).toEqual({ paid: true, unused: false })
+  })
+
+  it('never offers a paid Sound Pad Toot for a Song’s, or a Song’s for the Sound Pad', async () => {
+    const a = await signUp('A')
+    await checkout(T1, a, null)
+    await payDev(T1, a, null)
+    expect(await (await checkout(T2, a)).json()).toEqual({
+      url: `${ORIGIN}/dev/checkout/?toot=${T2}&song=twinkle`
+    })
+    await payDev(T2, a)
+    expect(await (await checkout(T3, a, null)).json()).toEqual({
+      url: `${ORIGIN}/dev/checkout/?toot=${T3}`
+    })
+  })
+
   it('refuses a checkout for a bad id, an unknown Song, or another library', async () => {
     const a = await signUp('A')
     expect((await checkout('not-a-toot', a)).status).toBe(404)
     expect(await (await checkout(T1, a, 'no-such-song')).json()).toEqual({
       error: 'invalid_request'
     })
+    expect((await checkoutWith(T1, a, '{}')).status).toBe(400)
+    expect((await checkout(T1, a, '')).status).toBe(400)
+    expect((await payDev(T1, a, 'no-such-song')).status).toBe(400)
     expect((await checkout(T1, { ...a, library: 'userB' })).status).toBe(409)
     expect((await checkout(T1, {})).status).toBe(401)
   })

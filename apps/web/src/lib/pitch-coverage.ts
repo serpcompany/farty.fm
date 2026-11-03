@@ -1,42 +1,55 @@
-import type { Song } from '@/lib/catalog/song'
+import { searchKey } from '@/lib/catalog/search-key'
+import type { Song, SongSummary } from '@/lib/catalog/song'
 import {
   type Arrangement,
   type AutoMapRecording,
   arrange,
+  arrangePitches,
   autoMapRecording,
+  coveredCount,
   type MissingNote,
   placedAutoMapRecording
 } from '@/lib/engine/auto-map'
 import type { Song as EngineSong } from '@/lib/engine/song'
 import { noteName, pitchClass } from '@/lib/pitch'
-import { formattedLength, placedPitch, type Recording, songPitch } from '@/lib/recordings'
+import {
+  formattedLength,
+  isLeftOut,
+  placedPitch,
+  type Recording,
+  songPitch,
+  songTrim
+} from '@/lib/recordings'
 
-export type Coverage = {
+export type CoverageCount = {
   covered: number
   total: number
-  transposition: number
-  missing: MissingNote[]
-  recordingForPitch: Map<number, string>
   hasMelodicRecordings: boolean
   unlocked: boolean
 }
 
+export type Coverage = CoverageCount & {
+  transposition: number
+  missing: MissingNote[]
+  recordingForPitch: Map<number, string>
+}
+
 function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[] {
   return recordings.flatMap(r => {
-    if (r.analysis.state !== 'analyzed') return []
+    if (r.analysis.state !== 'analyzed' || isLeftOut(r)) return []
     const { analysis } = r.analysis
-    if (analysis.recordingPitchMidi !== null && analysis.shortestNoteSeconds !== null) {
-      return [autoMapRecording(r.id, analysis)]
-    }
     const placed = placedPitch(r)
-    return placed === null ? [] : [placedAutoMapRecording(r.id, analysis, placed)]
+    if (placed !== null) return [placedAutoMapRecording(r.id, analysis, placed, songTrim(r))]
+    return analysis.recordingPitchMidi !== null && analysis.shortestNoteSeconds !== null
+      ? [autoMapRecording(r.id, analysis, songTrim(r))]
+      : []
   })
 }
 
 export function fartSeconds(recording: Recording): number {
-  return recording.analysis.state === 'analyzed'
-    ? autoMapRecording(recording.id, recording.analysis.analysis).gestureSeconds
-    : recording.seconds
+  if (recording.analysis.state !== 'analyzed') return recording.seconds
+  return autoMapRecording(recording.id, recording.analysis.analysis, songTrim(recording))
+    .gestureSeconds
 }
 
 const floatNoise = 1e-9
@@ -62,9 +75,9 @@ export function arrangementOf(song: Song, recordings: readonly Recording[]): Arr
   return arrange(engineSong(song), autoMapRecordings(recordings))
 }
 
-export function coverageOf(song: Song, recordings: readonly Recording[]): Coverage {
+export function coverageOf(song: SongSummary, recordings: readonly Recording[]): Coverage {
   const melodic = autoMapRecordings(recordings)
-  const result = arrange(engineSong(song), melodic)
+  const result = arrangePitches(song, melodic)
   const recordingForPitch = new Map<number, string>()
   for (const choice of result.pitches) {
     if (choice.recordingId !== null) recordingForPitch.set(choice.songPitch, choice.recordingId)
@@ -80,11 +93,11 @@ export function coverageOf(song: Song, recordings: readonly Recording[]): Covera
   }
 }
 
-export function coverageFraction(coverage: Coverage): number {
+export function coverageFraction(coverage: CoverageCount): number {
   return coverage.total === 0 ? 0 : coverage.covered / coverage.total
 }
 
-export function coverageSummary(coverage: Coverage): string {
+export function coverageSummary(coverage: CoverageCount): string {
   return coverage.unlocked
     ? `All ${coverage.total} notes covered`
     : `${coverage.covered} of ${coverage.total} notes covered`
@@ -120,38 +133,74 @@ export function coverageKey(recordings: readonly Recording[]): string {
   )
 }
 
-export type SongRow = { song: Song; coverage: Coverage }
+export type SongRow = { song: SongSummary; coverage: CoverageCount }
 
-export function songRows(songs: readonly Song[], recordings: readonly Recording[]): SongRow[] {
-  return songs.map(song => ({ song, coverage: coverageOf(song, recordings) }))
+export function songRows(
+  songs: readonly SongSummary[],
+  recordings: readonly Recording[]
+): SongRow[] {
+  const melodic = autoMapRecordings(recordings)
+  const hasMelodicRecordings = melodic.length > 0
+  return songs.map(song => {
+    const covered = coveredCount(song, melodic)
+    const total = song.pitches.length
+    return { song, coverage: { covered, total, hasMelodicRecordings, unlocked: covered === total } }
+  })
 }
 
-export type SongOrder = 'closestToUnlocking' | 'alphabetical'
+export type SongOrder = 'closestToUnlocking' | 'alphabetical' | 'favoritesFirst'
 
 const titles = new Intl.Collator('en', { numeric: true })
 
-export function sortRows(rows: readonly SongRow[], order: SongOrder): SongRow[] {
+const closestToUnlocking = (a: SongRow, b: SongRow) => {
+  const x = coverageFraction(a.coverage)
+  const y = coverageFraction(b.coverage)
+  if (x !== y) return y - x
+  return a.coverage.total - b.coverage.total
+}
+
+const alphabetical = (a: SongRow, b: SongRow) => titles.compare(a.song.title, b.song.title)
+
+export function sortRows(
+  rows: readonly SongRow[],
+  order: SongOrder,
+  favorites: ReadonlySet<string> = new Set()
+): SongRow[] {
   const compare =
-    order === 'closestToUnlocking'
-      ? (a: SongRow, b: SongRow) => {
-          const x = coverageFraction(a.coverage)
-          const y = coverageFraction(b.coverage)
-          if (x !== y) return y - x
-          return a.coverage.total - b.coverage.total
-        }
-      : (a: SongRow, b: SongRow) => titles.compare(a.song.title, b.song.title)
+    order === 'alphabetical'
+      ? alphabetical
+      : order === 'favoritesFirst'
+        ? (a: SongRow, b: SongRow) =>
+            Number(favorites.has(b.song.id)) - Number(favorites.has(a.song.id)) ||
+            closestToUnlocking(a, b)
+        : closestToUnlocking
   return [...rows].sort(compare)
 }
 
-function folded(text: string): string {
-  return text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('en')
+const searchKeys = new WeakMap<SongSummary, readonly string[]>()
+
+function namesOf(song: SongSummary): readonly string[] {
+  let keys = searchKeys.get(song)
+  if (!keys) {
+    keys = [song.title, ...(song.aliases ?? [])].map(searchKey)
+    searchKeys.set(song, keys)
+  }
+  return keys
 }
 
 export type SongListing = { unlocked: SongRow[]; locked: SongRow[] }
 
-export function songListing(sorted: readonly SongRow[], query: string): SongListing {
-  const q = folded(query.trim())
-  const rows = q === '' ? sorted : sorted.filter(r => folded(r.song.title).includes(q))
+export function songListing(
+  sorted: readonly SongRow[],
+  query: string,
+  only: ReadonlySet<string> | null = null
+): SongListing {
+  const q = searchKey(query)
+  const rows = sorted.filter(
+    r =>
+      (only === null || only.has(r.song.id)) &&
+      (q === '' || namesOf(r.song).some(name => name.includes(q)))
+  )
   return {
     unlocked: rows.filter(r => r.coverage.unlocked),
     locked: rows.filter(r => !r.coverage.unlocked)
@@ -159,13 +208,13 @@ export function songListing(sorted: readonly SongRow[], query: string): SongList
 }
 
 export type CoverageChanges = {
-  unlocked: Song[]
+  unlocked: SongSummary[]
   improved: SongRow[]
   closest: SongRow | null
 }
 
 export function coverageChanges(
-  songs: readonly Song[],
+  songs: readonly SongSummary[],
   before: readonly Recording[],
   after: readonly Recording[]
 ): CoverageChanges {

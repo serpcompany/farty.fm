@@ -42,7 +42,7 @@ describe.each<Kind>(['recordings', 'toots'])('PUT /api/%s/{id}/', kind => {
     expect(await put.json()).toEqual({ id: R1 })
     expect(await bucketKeys()).toEqual([`users/${a.id}/${kind}/${R1}.wav`])
     const listed = await library(a.cookie)
-    const leftOut = kind === 'recordings' ? { placedPitch: null } : {}
+    const leftOut = kind === 'recordings' ? { placedPitch: null, trim: null, name: null } : {}
     expect(listed[kind]).toEqual([
       { ...metadataFor(kind, R1), ...leftOut, audioBytes: audio.byteLength }
     ])
@@ -324,6 +324,40 @@ describe('the rows a route keeps', () => {
     await expectRefusedRecordings(
       a,
       ['40', 40.5, 128].map(placedPitch => ({ placedPitch }))
+    )
+  })
+
+  it('keep the name (#314), and none when an older browser sends none', async () => {
+    const a = await signUp('A')
+    const kept = await keptRecordings(a, { placedPitch: -1, name: 'Squeaker' }, {})
+    expect(kept.get(R1)).toMatchObject({ placedPitch: -1, name: 'Squeaker' })
+    expect(kept.get(R2)).toMatchObject({ name: null })
+    await expectRefusedRecordings(
+      a,
+      [7, 'x'.repeat(41)].map(name => ({ name }))
+    )
+  })
+
+  it('keep the Trim (ADR 0019), and none when an older browser sends none', async () => {
+    const a = await signUp('A')
+    const trim = {
+      startSeconds: 0.02,
+      endSeconds: 0.09,
+      fart: { startSeconds: 0.03, endSeconds: 0.08 }
+    }
+    const kept = await keptRecordings(a, { placedPitch: 40, trim }, {})
+    expect(kept.get(R1)).toMatchObject({ placedPitch: 40, trim })
+    expect(kept.get(R2)).toMatchObject({ trim: null })
+    const pastTheTake = { ...trim, endSeconds: 0.2 }
+    await expectRefusedRecordings(
+      a,
+      [
+        { ...trim, startSeconds: 0.05, endSeconds: 0.05 },
+        pastTheTake,
+        { startSeconds: 0.02, endSeconds: 0.09 },
+        { startSeconds: 0.02 },
+        'all'
+      ].map(refused => ({ trim: refused }))
     )
   })
 

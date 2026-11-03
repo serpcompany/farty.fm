@@ -1,38 +1,41 @@
 'use client'
 
-import { CircleAlert, Play, Square, Trash2 } from 'lucide-react'
+import { Play, Square, Trash2 } from 'lucide-react'
 import { type ReactNode, useEffect, useState } from 'react'
-import type { Song } from '@/lib/catalog/song'
+import type { Song, SongSummary } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import { loadAudio } from '@/lib/recording-store'
-import { type Recording, recordingName, songPitch } from '@/lib/recordings'
-import { noteCaption, soundingPitch, type Toot, type TootDraft } from '@/lib/toot'
+import { playedPart, type Recording, recordingName, songPitch } from '@/lib/recordings'
+import { noteCaption, type SongToot, type SongTootDraft, soundingPitch } from '@/lib/toot'
 import { cn } from '@/lib/utils'
 import { decodeWav } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 import { NoteView, pitchColor } from './note-view'
 import { recordingSound, usePlayback } from './playback-provider'
 import { useRecordings } from './recordings-provider'
+import { TootPlayButton, tootPlayState } from './toot-play-button'
 import { tootPlayback, useToots } from './toots-provider'
 import { Waveform } from './waveform'
 
 type Focus = { pitch: number } | { note: number } | null
 
-function playState(isAudioMissing: boolean, isPlaying: boolean, playFailed: boolean): string {
-  if (isAudioMissing) return 'Audio missing'
-  if (isPlaying) return 'Playing'
-  return playFailed ? "Couldn't play" : 'Ready'
+function focusedPitch(focus: Focus, melody: Song | null): number | null {
+  if (focus === null) return null
+  if ('pitch' in focus) return focus.pitch
+  return melody?.notes[focus.note].pitch ?? null
 }
 
 export function TootLayout({
   toot,
   song,
+  notesFallback,
   isAudioMissing = false,
   children
 }: {
-  toot: TootDraft | Toot
-  song: Song
+  toot: SongTootDraft | SongToot
+  song: Song | SongSummary
+  notesFallback?: ReactNode
   isAudioMissing?: boolean
   children?: ReactNode
 }) {
@@ -41,11 +44,12 @@ export function TootLayout({
   const { recording } = useRecordings()
   const { arrangement } = toot
   const [focus, setFocus] = useState<Focus>(null)
+  const melody = 'notes' in song ? song : null
   const isPlaying = nowPlaying === tootPlayback(toot.id)
-  const playingNote = song.notes.findIndex((_, i) => nowPlaying === tootPlayback(toot.id, i))
-  const selectedNote = focus && 'note' in focus ? focus.note : null
-  const highlightedPitch =
-    focus === null ? null : 'pitch' in focus ? focus.pitch : song.notes[focus.note].pitch
+  const playingNote =
+    melody?.notes.findIndex((_, i) => nowPlaying === tootPlayback(toot.id, i)) ?? -1
+  const selectedNote = melody && focus && 'note' in focus ? focus.note : null
+  const highlightedPitch = focusedPitch(focus, melody)
   const recordingFor = (pitch: number) => {
     const id = arrangement.recordingForPitch[pitch]
     return id === undefined ? undefined : recording(id)
@@ -54,35 +58,18 @@ export function TootLayout({
   return (
     <div className="flex flex-col gap-6 px-4">
       <div className="flex items-center gap-4">
-        <button
-          type="button"
-          aria-label={isAudioMissing ? 'Audio missing' : isPlaying ? 'Stop' : 'Play'}
-          data-testid="song-creator-play"
-          disabled={isAudioMissing}
-          className={cn(
-            'flex size-14 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-            isAudioMissing
-              ? 'bg-muted text-muted-foreground'
-              : isPlaying
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-primary/10 text-primary'
-          )}
+        <TootPlayButton
+          isAudioMissing={isAudioMissing}
+          isPlaying={isPlaying}
+          testId="song-creator-play"
           onClick={() => {
             setFocus(null)
             toggleTootPlayback(toot)
           }}
-        >
-          {isAudioMissing ? (
-            <CircleAlert className="size-6" />
-          ) : isPlaying ? (
-            <Square className="size-5 fill-current" />
-          ) : (
-            <Play className="size-6 fill-current" />
-          )}
-        </button>
+        />
         <div className="min-w-0">
           <p className="font-semibold" data-testid="song-creator-state">
-            {playState(isAudioMissing, isPlaying, tootPlayFailed === toot.id)}
+            {tootPlayState(isAudioMissing, isPlaying, tootPlayFailed === toot.id)}
           </p>
           <p className="text-sm text-muted-foreground">
             {song.pitches.length} of your Recordings, one per note
@@ -91,35 +78,39 @@ export function TootLayout({
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <NoteView
-          song={song}
-          arrangement={arrangement}
-          recordingName={note => {
-            const used = recordingFor(note.pitch)
-            return used ? recordingName(used) : 'Recording deleted'
-          }}
-          startedAt={isPlaying ? playbackStartedAt : null}
-          highlightedPitch={highlightedPitch}
-          selectedNote={selectedNote}
-          playingNote={playingNote === -1 ? null : playingNote}
-          onTapNote={index => {
-            if (isAudioMissing) return
-            setFocus({ note: index })
-            toggleTootPlayback(toot, index)
-          }}
-        />
-        {selectedNote !== null && (
-          <p className="px-4 text-sm text-muted-foreground" data-testid="note-caption">
-            {noteCaption(
-              song,
-              arrangement,
-              song.notes[selectedNote],
-              recordingFor(song.notes[selectedNote].pitch)
-            )}
-          </p>
-        )}
-      </div>
+      {melody ? (
+        <div className="flex flex-col gap-2">
+          <NoteView
+            song={melody}
+            arrangement={arrangement}
+            recordingName={note => {
+              const used = recordingFor(note.pitch)
+              return used ? recordingName(used) : 'Recording deleted'
+            }}
+            startedAt={isPlaying ? playbackStartedAt : null}
+            highlightedPitch={highlightedPitch}
+            selectedNote={selectedNote}
+            playingNote={playingNote === -1 ? null : playingNote}
+            onTapNote={index => {
+              if (isAudioMissing) return
+              setFocus({ note: index })
+              toggleTootPlayback(toot, index, melody)
+            }}
+          />
+          {selectedNote !== null && (
+            <p className="px-4 text-sm text-muted-foreground" data-testid="note-caption">
+              {noteCaption(
+                melody,
+                arrangement,
+                melody.notes[selectedNote],
+                recordingFor(melody.notes[selectedNote].pitch)
+              )}
+            </p>
+          )}
+        </div>
+      ) : (
+        notesFallback
+      )}
 
       <section aria-labelledby="recordings-used">
         <h2 id="recordings-used" className="px-4 pb-1.5 text-xs font-normal text-muted-foreground">
@@ -173,7 +164,7 @@ function RecordingUsedRow({
 }) {
   const { nowPlaying } = usePlayback()
   const isPlaying = nowPlaying === recording.id
-  const levels = useWholeLevels(recording.id)
+  const levels = usePlayedLevels(recording)
   const name = recordingName(recording)
   const pitch = songPitch(recording)
   const length = formattedFartLength(recording)
@@ -280,18 +271,23 @@ function PlaysBadge({ plays }: { plays: string }) {
   )
 }
 
-function useWholeLevels(id: string): number[] {
+function usePlayedLevels(recording: Recording): number[] {
   const [levels, setLevels] = useState<number[]>([])
+  const { id } = recording
+  const { startSeconds, endSeconds } = playedPart(recording)
   useEffect(() => {
     let left = false
     loadAudio(id)
       .then(wav => {
-        if (!left) setLevels(waveformLevels(decodeWav(wav).samples, 16))
+        const { samples, sampleRate } = decodeWav(wav)
+        const from = Math.round(startSeconds * sampleRate)
+        const to = Math.max(from, Math.round(endSeconds * sampleRate))
+        if (!left) setLevels(waveformLevels(samples.subarray(from, to), 16))
       })
       .catch(() => undefined)
     return () => {
       left = true
     }
-  }, [id])
+  }, [id, startSeconds, endSeconds])
   return levels
 }

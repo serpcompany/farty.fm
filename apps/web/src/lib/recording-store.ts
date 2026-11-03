@@ -14,10 +14,13 @@ import {
   type Kind,
   mergeOutbox,
   type OutboxEntry,
+  type OutboxKind,
   type OutboxOp,
+  type PlacedField,
+  placedFieldNames,
   queueStamp
 } from './outbox'
-import type { AnalysisState, Recording } from './recordings'
+import type { AnalysisState, Recording, RecordingTrim } from './recordings'
 import { reportError } from './telemetry/errors'
 import type { Toot } from './toot'
 
@@ -29,6 +32,8 @@ export interface FartyDB extends DBSchema {
   outbox: { key: string; value: OutboxEntry }
   downloads: { key: string; value: { kind: Kind; id: string } }
   meta: { key: string; value: number }
+  pads: { key: number; value: string }
+  favorites: { key: string; value: number }
 }
 
 const allStores = [
@@ -38,14 +43,16 @@ const allStores = [
   'tootAudio',
   'outbox',
   'downloads',
-  'meta'
+  'meta',
+  'pads',
+  'favorites'
 ] as const
 
 export type LibraryDatabase = IDBPDatabase<FartyDB>
 
 export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
 
-const DB_VERSION = 4
+export const DB_VERSION = 8
 
 let opening: Promise<LibraryDatabase> | null = null
 
@@ -83,7 +90,9 @@ export function db(): Promise<LibraryDatabase> {
         database.createObjectStore('meta')
         if (oldVersion >= 1) queueEverything(transaction).catch(() => {})
       }
-      if (oldVersion === 3) readEverythingAgain(transaction).catch(() => {})
+      if (oldVersion >= 3) readEverythingAgain(transaction).catch(() => {})
+      if (oldVersion < 5) database.createObjectStore('pads')
+      if (oldVersion < 7) database.createObjectStore('favorites')
     },
     blocked() {
       setWaiting(true)
@@ -179,13 +188,14 @@ type OutboxStore = IDBPObjectStore<FartyDB, StoreNames<FartyDB>[], 'outbox', 're
 
 export async function queue(
   outbox: OutboxStore,
-  kind: Kind,
+  kind: OutboxKind,
   id: string,
-  op: OutboxOp
+  op: OutboxOp,
+  fields: PlacedField[] = []
 ): Promise<void> {
   const key = itemKey(kind, id)
   const queued = await outbox.get(key)
-  const next = mergeOutbox(queued, kind, id, op, queueStamp())
+  const next = mergeOutbox(queued, kind, id, op, queueStamp(), fields)
   if (next) await outbox.put(next)
   else if (queued) await outbox.delete(key)
 }
@@ -201,6 +211,10 @@ export function onRecordingSaved(listener: (recording: Recording) => void): () =
 export async function loadRecordings(): Promise<Recording[]> {
   const all = await withDb(database => database.getAll('recordings'))
   return all.sort((a, b) => a.number - b.number)
+}
+
+export async function loadRecording(id: string): Promise<Recording | null> {
+  return (await withDb(database => database.get('recordings', id))) ?? null
 }
 
 export async function saveRecording(
@@ -251,10 +265,13 @@ export async function saveAnalysis(id: string, analysis: AnalysisState): Promise
   return updated
 }
 
-export async function placeRecording(
-  id: string,
-  placedPitch: number | null
-): Promise<Recording | null> {
+export type Placement = {
+  placedPitch?: number | null
+  trim?: RecordingTrim | null
+  name?: string | null
+}
+
+export async function placeRecording(id: string, change: Placement): Promise<Recording | null> {
   const placed = await withDb(async database => {
     const tx = database.transaction(['recordings', 'outbox'], 'readwrite')
     const recordings = tx.objectStore('recordings')
@@ -264,12 +281,24 @@ export async function placeRecording(
       await tx.done
       return null
     }
-    const updated: Recording = { ...recording, placedPitch }
-    await Promise.all([recordings.put(updated), queue(outbox, 'recordings', id, 'place'), tx.done])
+    const updated: Recording = { ...recording, ...change }
+    const fields = placedFieldNames.filter(field => change[field] !== undefined)
+    await Promise.all([
+      recordings.put(updated),
+      queue(outbox, 'recordings', id, 'place', fields),
+      tx.done
+    ])
     return updated
   })
   if (placed) announceQueued()
   return placed
+}
+
+export class AudioNotDownloaded extends Error {
+  constructor(id: string) {
+    super(`Recording ${id}'s audio couldn't be downloaded now`)
+    this.name = 'AudioNotDownloaded'
+  }
 }
 
 export async function loadAudio(id: string): Promise<ArrayBuffer> {
@@ -277,6 +306,7 @@ export async function loadAudio(id: string): Promise<ArrayBuffer> {
   if (audio) return audio
   const downloaded = await download('recordings', id)
   if (downloaded instanceof ArrayBuffer) return downloaded
+  if (downloaded === 'failed') throw new AudioNotDownloaded(id)
   throw new Error(`No audio for Recording ${id}`)
 }
 
@@ -314,7 +344,7 @@ export async function clearVisit(kept: ReadonlySet<string> | null): Promise<void
   const forToots = IDBKeyRange.bound(itemKey('toots', ''), itemKey('toots', '\uffff'))
   await withDb(async database => {
     const tx = database.transaction(
-      ['toots', 'tootAudio', 'recordings', 'audio', 'outbox', 'downloads'],
+      ['toots', 'tootAudio', 'recordings', 'audio', 'outbox', 'downloads', 'pads'],
       'readwrite'
     )
     const recordings = tx.objectStore('recordings')
@@ -326,6 +356,7 @@ export async function clearVisit(kept: ReadonlySet<string> | null): Promise<void
     await Promise.all([
       tx.objectStore('toots').clear(),
       tx.objectStore('tootAudio').clear(),
+      tx.objectStore('pads').clear(),
       outbox.delete(forToots),
       downloads.delete(forToots),
       ...[...gone].flatMap(id => [

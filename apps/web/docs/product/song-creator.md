@@ -1,16 +1,23 @@
 # Song Creator
 
 `/compose/<song>/`: an Unlocked Song played with the person's own Recordings, as a Toot they can
-play, take apart note by note, and save. Auto-map chooses the Arrangement and each Recording plays
-raw, at its own pitch and speed ([ADR 0005](../../../../docs/adr/0005-song-creator-is-automatic.md),
+play, take apart note by note, and save. Every Song in the Song Catalog has its own page, inside
+the Compose tab. Auto-map chooses the Arrangement and each Recording plays raw, at its own pitch
+and speed ([ADR 0005](../../../../docs/adr/0005-song-creator-is-automatic.md),
 [ADR 0012](../../../../docs/adr/0012-songs-play-farts-raw.md)). A saved Toot is on the
 [Toots](toots.md) tab; paying to save one is in [Paying to save a Toot](payments.md).
 
 ## Opening it
 
-- The header has Back to Compose, the Song's title and its source. "Making your Toot…" shows while
-  the Toot renders (`e2e/song-creator.spec.ts`, "plays each Song with your farts, plays a tapped
-  note, and saves it as a Toot").
+- The header has Back to Compose, the Song's title and its source, and the Song's heart
+  ([Favorite Songs](compose.md#favorite-songs)). Each Song's page comes with its title and source,
+  so a link or a search engine opens it on its own (`e2e/song-creator.spec.ts`, "plays each Song
+  with your farts, plays a tapped note, and saves it as a Toot"; `e2e/favorites.spec.ts`,
+  "favorites Songs, filters and sorts by them, and keeps them over a reload").
+- The Song's notes load as it opens: the Song Catalog's index has only what Compose needs. Then
+  "Making your Toot…" shows while the Toot renders (`src/components/farty/song-notes.interaction.test.tsx`,
+  "makes the Toot from the Song's notes, once they've loaded"; `src/lib/catalog/load-songs.test.ts`,
+  "fetches a Song's notes once, as it opens, for every caller").
 - Opened by a tap, on Compose or the Result's Try it, the Toot plays by itself once made
   (`e2e/song-creator.spec.ts`, "plays each Song with your farts, plays a tapped note, and saves it
   as a Toot"; `e2e/record-warm.spec.ts`, "the microphone stays open from Result to every screen
@@ -29,7 +36,16 @@ raw, at its own pitch and speed ([ADR 0005](../../../../docs/adr/0005-song-creat
   unlock the Song").
 - An address that names no Song answers 404, "Page not found", with no tab current
   (`e2e/song-creator.spec.ts`, "a locked Song says how to unlock it, and an unknown Song is not
-  found, on no tab").
+  found, on no tab"). No Song may take the ids of Compose's own pages, `pad` and `song`
+  (`src/lib/catalog/catalog.test.ts`, "refuses a Song whose id is Compose's own page %s";
+  `src/lib/pads.test.ts`, "is no Song’s: `/compose/pad/` comes before the Songs’
+  `/compose/[song]/`").
+- Notes that don't load, offline for a Song never opened among them, say "Couldn't load this
+  Song.", with Try again, and are reported; the title still shows (`e2e/compose.spec.ts`, "says so
+  in Song Creator when a Song's notes don't load, and Try again loads them";
+  `src/components/farty/song-notes.interaction.test.tsx`, "says it couldn't load the Song, and
+  tries again on Try again"; `src/lib/catalog/load-songs.test.ts`, "tries again after a failed
+  fetch, and refuses notes that are not a melody").
 - A render that fails, or a Recording whose audio is gone, says "Couldn't make this Toot.", with Try
   again, and is reported (`e2e/song-creator.spec.ts`, "plays each Song with your farts, plays a
   tapped note, and saves it as a Toot", its step "a failed render says it couldn't, and Try again
@@ -67,7 +83,8 @@ raw, at its own pitch and speed ([ADR 0005](../../../../docs/adr/0005-song-creat
 
 ## Saving
 
-- Save to Toots saves the Toot to an account. It says "Save to Toots · $0.99" and goes through
+- Save to Toots, pinned above the tabs, is the [Sound Pad](sound-pad.md#saving-a-take)'s too. It
+  saves the Toot to an account. It says "Save to Toots · $0.99" and goes through
   checkout first, on Production, Staging and a local run ([Paying to save a Toot](payments.md)). A
   guest's Save opens the account step first, and carries on once they sign in
   ([Accounts](account.md#when-the-step-opens)) (`e2e/song-creator.spec.ts`, "plays each Song with
@@ -98,3 +115,18 @@ raw, at its own pitch and speed ([ADR 0005](../../../../docs/adr/0005-song-creat
 
 - The installed app opens a Ready Song offline, makes its Toot and plays it
   (`e2e/song-creator.spec.ts`, "the installed app opens a Ready Song offline, and makes its Toot").
+- Offline, every Song's page opens on the one Song page the service worker keeps,
+  `/compose/song/`, which reads the Song from the address and gives the tab the Song's title once
+  the Song Catalog loads. It is always the current build's, never a Song's own page from an older
+  one (`e2e/song-creator.spec.ts`, "the installed app opens a Ready Song offline, and makes its
+  Toot"; `src/lib/service-worker.test.ts`, "never keeps a Song's own page, so offline every Song
+  opens on the one Song page"; "opens a Song offline on the current build's Song page after a
+  deploy, never an older build's").
+- The notes of every Song are fetched in the background once Farty is installed, so a Song never
+  opened plays offline too ([Installing and offline](install.md#offline)).
+
+## Not checked
+
+- "Couldn't find this Song." when the loaded Song Catalog has no Song of the address's id, which
+  only the offline Song page can reach, and "Couldn't load the Songs.", with Try again, when the
+  Song Catalog didn't load: no test opens Song Creator either way.

@@ -1,9 +1,9 @@
 import { expect, test } from 'vitest'
 import {
-  gestureBody,
   goldenContourHz,
   goldenIndex,
   goldenRecordings,
+  pitchBody,
   row
 } from '../../test-support/golden'
 import { NOTE_LENGTHS, readBackCents, settleTime, shortestNote } from './audition'
@@ -11,6 +11,7 @@ import { midiToHz } from './numeric'
 
 const EXPECTED_MELODIC = [
   '002',
+  '009',
   '013',
   '016',
   '017',
@@ -19,6 +20,7 @@ const EXPECTED_MELODIC = [
   '032',
   '059',
   '069',
+  '080',
   '084',
   '086',
   '090',
@@ -48,7 +50,7 @@ test('from the golden gesture, contour and estimate, shortest notes and the Melo
       matches++
       continue
     }
-    const body = await gestureBody(golden)
+    const body = await pitchBody(golden)
     const f0 = goldenContourHz(golden)
     const shortest = shortestNote(body, f0, estimate)
     if (shortest === golden.shortest_note_s) matches++
@@ -80,7 +82,7 @@ test('the golden contour as written, rounded to 4 decimals and not snapped back 
     const f0 = Float64Array.from(golden.pitch_contour.midi, m =>
       m === null ? Number.NaN : midiToHz(m)
     )
-    const shortest = shortestNote(await gestureBody(golden), f0, estimate)
+    const shortest = shortestNote(await pitchBody(golden), f0, estimate)
     expect.soft(shortest, `${golden.id} with the 4-decimal contour`).toBe(golden.shortest_note_s)
   }
 })
@@ -98,7 +100,7 @@ test('from the golden gesture, contour and Recording Pitch, settle times match t
     }
     melodic++
     const settle = settleTime(
-      await gestureBody(golden),
+      await pitchBody(golden),
       goldenContourHz(golden),
       golden.recording_pitch_midi as number
     )

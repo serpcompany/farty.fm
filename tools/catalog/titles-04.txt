@@ -1,0 +1,151 @@
+# The top 150 tune titles of tools/catalog/ranking.md, not yet in the catalog or tried, written by
+# tools/catalog/rank_pdmx.py --batch 150 --out tools/catalog/titles-04.txt (#312). Each title's only name is
+# the one the ranking counted scores by. Review of its import (#325) pulled 5 titles, now in
+# excluded-titles.txt: El Condor Pasa, Misirlou, Lavender's Blue, Dido's Lament, Indian National Anthem.
+# The whole-catalog check (#344) pulled Hänschen Klein, the same tune as Lightly Row (titles-01.txt), and
+# gave 6 titles back the accents the ranking dropped.
+# id | catalog title
+maple-leaf-rag | Maple Leaf Rag
+piano-sonata-no-16-in-c-major-k-545 | Piano Sonata No.16 in C major K.545
+goldberg-variations | Goldberg Variations
+symphony-no-7-op-92 | Symphony No. 7 Op. 92
+tico-tico-no-fuba | Tico Tico no Fuba
+danse-macabre | Danse Macabre
+cello-suite-no-1 | Cello Suite No 1
+la-cumparsita | La cumparsita
+las-mananitas | Las Mañanitas
+passacaglia-handel-halvorsen | Passacaglia (Handel-Halvorsen)
+swallowtail-jig | Swallowtail Jig
+clair-de-lune | Clair de Lune
+chopins-ballade-no-1-in-g-minor | Chopin's Ballade No. 1 in G minor
+la-ci-darem-la-mano | Là ci darem la mano
+o-canada | O Canada
+nocturne-op-9-no-2 | Nocturne Op 9 No 2
+gaudeamus-igitur | Gaudeamus Igitur
+reverie | Rêverie
+brahms-intermezzo-op-118-no-2 | Brahms Intermezzo Op. 118 No. 2
+uti-var-hage | Uti vår hage
+clarinet-concerto-in-a-major-k-622 | Clarinet Concerto in A major K.622
+piano-sonatina-in-c-major-op-20-no-1 | Piano Sonatina in C major Op.20 No.1
+pas-de-deux | Pas de deux
+lagrima | Lágrima
+la-fille-aux-cheveux-de-lin | La Fille Aux Cheveux De Lin
+erlkonig | Erlkönig
+solace | Solace
+last-post | Last Post
+chopin-nocturne-in-e-minor-op-72-no-1 | Chopin Nocturne in E Minor Op. 72 No. 1
+vedro-con-mio-diletto | Vedrò con mio diletto
+toss-the-feathers | Toss the Feathers
+lacrimosa | Lacrimosa
+prelude-in-c-major | Prelude in C Major
+cavalleria-rusticana-intermezzo | Cavalleria Rusticana Intermezzo
+swan | The Swan
+waltz-in-b-minor | Waltz in B minor
+sailors-hornpipe | The Sailor's Hornpipe
+sakkijarven-polkka | Säkkijärven Polkka
+csardas | Csárdás
+apres-un-reve | Après un rêve
+battle-cry-of-freedom | Battle Cry of Freedom
+gnossienne-no-1 | Gnossienne No. 1
+wilhelmus | Wilhelmus
+mo-ghile-mear | Mo Ghile Mear
+blue-bells-of-scotland | Blue Bells of Scotland
+tourdion | Tourdion
+pini-di-roma | Pini Di Roma
+ich-steh-an-deiner-krippen-hier | Ich steh an Deiner Krippen hier
+12th-street-rag | 12th Street Rag
+hatikva | Hatikva
+toccata-in-e-minor-bwv-914 | Toccata in e minor BWV 914
+bwv-1004-violin-partita-no-2-in-d-minor | BWV 1004 Violin Partita No.2 in D minor
+internationale | The Internationale
+a-la-nanita-nana | A La Nanita Nana
+flight-of-the-bumblebee | Flight of the Bumblebee
+god-of-mercy-and-compassion | God of Mercy and Compassion
+drink-to-me-only-with-thine-eyes | Drink to Me Only with Thine Eyes
+minute-waltz | Minute Waltz
+schiarazula-marazula | Schiarazula Marazula
+blarney-pilgrim | The Blarney Pilgrim
+turkey-in-the-straw | Turkey in the Straw
+standchen-serenade | Ständchen Serenade
+i-was-glad-when-they-said-unto-me | I Was Glad When They Said Unto Me
+el-choclo | El Choclo
+nessun-dorma | Nessun Dorma
+bist-du-bei-mir | Bist Du Bei Mir
+dies-irae | Dies Irae
+gran-vals | Gran Vals
+jupiter | Jupiter
+a-portuguesa | A Portuguesa
+easy-winners | The Easy Winners
+a-la-claire-fontaine | À la claire fontaine
+toccata-and-fugue-in-d-minor | Toccata and Fugue in D Minor
+blackberry-blossom | The Blackberry Blossom
+pavane-op-50 | Pavane Op. 50
+suo-gan | Suo Gan
+ombra-mai-fu | Ombra Mai Fù
+jesus-christ-is-risen-today | Jesus Christ Is Risen Today
+waltz-in-e-minor | Waltz in E Minor
+adagio-cantabile | Adagio cantabile
+odeon | Odeon
+chapeloise | Chapeloise
+abide-with-me | Abide with me
+down-in-the-river-to-pray | Down in the River to Pray
+deilig-er-jorden | Deilig er jorden
+british-grenadiers | British Grenadiers
+come-thou-fount | Come Thou Fount
+salvation-is-created | Salvation is Created
+tumbalalaika | Tumbalalaika
+kesh | The Kesh
+die-wacht-am-rhein | Die Wacht am Rhein
+just-a-closer-walk-with-thee | Just A Closer Walk With Thee
+salut-damour | Salut d'Amour
+it-was-a-lover-and-his-lass | It was a lover and his lass
+rocky-road-to-dublin | Rocky Road to Dublin
+sometimes-i-feel-like-a-motherless-child | Sometimes I feel like a motherless child
+spanish-ladies | Spanish Ladies
+amarilli-mia-bella | Amarilli mia Bella
+komm-lieber-mai | Komm lieber Mai
+ja-vi-elsker-dette-landet | Ja vi elsker dette landet
+prelude-no-4 | Prélude No. 4
+gute-nacht | Gute Nacht
+cello-suite-no-4-in-e-flat-major-bwv-1010 | Cello Suite No.4 in E-flat major BWV 1010
+waltz-in-a-minor-chopin | Waltz in A Minor Chopin
+gaudete-gaudete-christus-est-natus | Gaudete! Gaudete! Christus est natus
+all-creatures-of-our-god-and-king | All Creatures Of Our God and King
+marche-funebre | Marche funèbre
+it-is-well-with-my-soul | It Is Well With My Soul
+lasciatemi-morire | Lasciatemi morire
+buckeye-battle-cry | Buckeye Battle Cry
+o-ce-veste-minunata | O Ce Veste Minunata
+asturias | Asturias
+trumpet-tune | Trumpet Tune
+belle-qui-tiens-ma-vie | Belle qui tiens ma vie
+der-mond-ist-aufgegangen | Der Mond ist aufgegangen
+adagio-from-bwv-974 | Adagio from BWV 974
+praise-to-the-lord-the-almighty | Praise to the Lord the Almighty
+vem-kan-segla-forutan-vind | Vem kan segla förutan vind?
+see-the-conquring-hero-comes | See the Conqu'ring hero comes
+in-the-bleak-midwinter | In the Bleak Midwinter
+barcarolle | Barcarolle
+weep-o-mine-eyes | Weep o mine eyes
+last-rose-of-summer | The Last Rose Of Summer
+polovtsian-dances | Polovtsian Dances
+bardenklange | Bardenklänge
+march-in-d-major | March in D Major
+marching-through-georgia | Marching Through Georgia
+himno-nacional-de-bolivia | Himno Nacional de Bolivia
+now-is-the-month-of-maying | Now is the Month of Maying
+si-bheag-si-mhor | Sí Bheag Sí Mhór
+mairis-wedding | Mairi's Wedding
+soul-of-my-saviour | Soul of My Saviour
+bonnie-blue-flag | Bonnie Blue Flag
+es-wird-scho-glei-dumpa | Es wird scho glei dumpa
+lascia-chio-pianga | Lascia ch'io pianga
+denn-er-hat-seinen-engeln-befohlen | Denn Er hat seinen Engeln befohlen
+la-cinquantaine | La Cinquantaine
+invention-no-3-in-d-major | Invention No. 3 in D Major
+be-thou-my-vision | Be Thou My Vision
+o-splendor-of-gods-glory-bright | O Splendor of God's glory bright
+aloha-oe | Aloha Oe
+rockingham | Rockingham
+i-sing-the-mighty-power-of-god | I Sing the Mighty Power of God
+mille-regretz | Mille regretz

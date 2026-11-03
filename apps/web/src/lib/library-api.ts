@@ -1,5 +1,5 @@
 import type { Kind } from './outbox'
-import type { Recording } from './recordings'
+import type { Recording, Trim } from './recordings'
 import { withinTimeout } from './timeout'
 import type { Toot } from './toot'
 
@@ -63,16 +63,27 @@ export function renameToot(id: string, title: string, accountId: string): Promis
   return patch(`/api/toots/${id}/`, accountId, { title })
 }
 
+export type Placement = {
+  placedPitch?: number | null
+  trim?: Trim | null
+  name?: string | null
+}
+
 export function placeRecording(
   id: string,
-  placedPitch: number | null,
+  placement: Placement,
   accountId: string
 ): Promise<Answer> {
-  return patch(`/api/recordings/${id}/`, accountId, { placedPitch })
+  return patch(`/api/recordings/${id}/`, accountId, placement)
 }
 
 export async function deleteItem(kind: Kind, id: string, accountId: string): Promise<Answer> {
   return answer(await send(`/api/${kind}/${id}/`, accountId, { method: 'DELETE' }))
+}
+
+export async function setFavorite(songId: string, on: boolean, accountId: string): Promise<Answer> {
+  const path = `/api/favorites/${encodeURIComponent(songId)}/`
+  return answer(await send(path, accountId, { method: on ? 'PUT' : 'DELETE' }))
 }
 
 export type LibraryChanges = {
@@ -80,7 +91,8 @@ export type LibraryChanges = {
   full: boolean
   recordings: (Recording & { audioBytes?: number })[]
   toots: (Toot & { audioBytes?: number })[]
-  deleted: { recordings: string[]; toots: string[] }
+  favorites?: string[]
+  deleted: { recordings: string[]; toots: string[]; favorites?: string[] }
 }
 
 export async function getLibrary(

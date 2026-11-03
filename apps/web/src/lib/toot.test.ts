@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { songs } from './catalog/songs.generated'
+import { songs } from '@/test-support/songs.generated'
 import type { Recording } from './recordings'
 import {
   formattedTootDate,

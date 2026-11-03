@@ -35,6 +35,7 @@ export const microphone = (page: Page) =>
       clicks: mic.clicks,
       batches: mic.batches,
       fartEnergy: mic.fartEnergy,
+      fartPeak: mic.fartPeak,
       nodes: mic.nodes,
       closed: mic.closed,
       flushed: mic.flushed,
@@ -53,11 +54,21 @@ export async function waitForOpenMicrophone(page: Page): Promise<void> {
     .toBe(1)
 }
 
-export async function startRecordingAFart(page: Page, id = '090'): Promise<void> {
-  await page.evaluate(fart => {
-    window.fartyMic.fartOnPress = fart
-    window.fartyMic.take = { id: -1, seconds: 0 }
-  }, id)
+type FartOptions = { gainDb?: number }
+
+export async function startRecordingAFart(
+  page: Page,
+  id = '090',
+  { gainDb = 0 }: FartOptions = {}
+): Promise<void> {
+  await page.evaluate(
+    ({ fart, gain }) => {
+      window.fartyMic.fartOnPress = fart
+      window.fartyMic.fartGain = gain
+      window.fartyMic.take = { id: -1, seconds: 0 }
+    },
+    { fart: id, gain: 10 ** (gainDb / 20) }
+  )
   const box = await page.getByTestId('record-button').boundingBox()
   if (!box) throw new Error('No Record button')
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
@@ -84,14 +95,18 @@ export async function stopPastTheFart(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { name: 'New Recording' })).toBeVisible()
 }
 
-export async function fartAndRecord(page: Page, id = '090'): Promise<void> {
-  await startRecordingAFart(page, id)
+export async function fartAndRecord(
+  page: Page,
+  id = '090',
+  options: FartOptions = {}
+): Promise<void> {
+  await startRecordingAFart(page, id, options)
   await stopPastTheFart(page)
 }
 
-export async function fartAndSave(page: Page, id = '090') {
+export async function fartAndSave(page: Page, id = '090', options: FartOptions = {}) {
   await waitForOpenMicrophone(page)
-  await fartAndRecord(page, id)
+  await fartAndRecord(page, id, options)
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByTestId('result-note')).toBeVisible()
   return microphone(page)
@@ -128,9 +143,9 @@ export async function deleteRecording(page: Page, number: number): Promise<void>
     .click()
 }
 
-export async function tapRecord(page: Page, { saysStarting = false } = {}) {
+export async function tapRecord(page: Page, { getsTheMicReady = false } = {}) {
   await page.getByTestId('record-button').click()
-  if (saysStarting) await expect(page.getByRole('button', { name: 'Starting…' })).toBeVisible()
+  if (getsTheMicReady) await expect(page.getByTestId('record-getting-ready')).toBeVisible()
   await expect(page.getByTestId('stop-button')).toBeVisible()
   return microphone(page)
 }

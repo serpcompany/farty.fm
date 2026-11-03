@@ -1,123 +1,13 @@
-import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { runInNewContext } from 'node:vm'
 import { describe, expect, it } from 'vitest'
-
-const source = readFileSync(fileURLToPath(new URL('../../public/sw.js', import.meta.url)), 'utf8')
-const origin = 'https://farty.test'
-
-type Network = (url: string) => Response | 'offline'
-type Listener = (event: unknown) => void
-
-function ok(body = ''): Response {
-  const response = new Response(body, { status: 200 })
-  Object.defineProperty(response, 'type', { value: 'basic' })
-  return response
-}
-
-function failed(status: number): Response {
-  const response = new Response('Something went wrong', { status })
-  Object.defineProperty(response, 'type', { value: 'basic' })
-  return response
-}
-
-function locked(): Response {
-  const response = new Response('Password required', {
-    status: 401,
-    headers: { 'WWW-Authenticate': 'Basic realm="Staging"' }
-  })
-  Object.defineProperty(response, 'type', { value: 'basic' })
-  return response
-}
-
-function startWorker(network: Network) {
-  const listeners: Record<string, Listener> = {}
-  const stores = new Map<string, Map<string, Response>>()
-  const cacheFor = (entries: Map<string, Response>) => ({
-    async put(url: string, response: Response) {
-      entries.delete(url)
-      entries.set(url, response)
-    },
-    async match(url: string, options?: { ignoreSearch?: boolean }) {
-      const bare = (key: string) => (options?.ignoreSearch ? key.split('?')[0] : key.split('#')[0])
-      const key = [...entries.keys()].find(k => bare(k) === bare(url))
-      return key ? entries.get(key)?.clone() : undefined
-    },
-    async keys() {
-      return [...entries.keys()]
-    },
-    async delete(url: string) {
-      return entries.delete(url)
-    }
-  })
-  const caches = {
-    async open(name: string) {
-      if (!stores.has(name)) stores.set(name, new Map())
-      return cacheFor(stores.get(name) as Map<string, Response>)
-    },
-    async keys() {
-      return [...stores.keys()]
-    },
-    async delete(name: string) {
-      return stores.delete(name)
-    }
-  }
-  async function fetch(input: string | { url: string }) {
-    const result = network(new URL(typeof input === 'string' ? input : input.url, origin).href)
-    if (result === 'offline') throw new TypeError('Failed to fetch')
-    return result
-  }
-  const registration = { unregistered: false }
-  const self = {
-    location: new URL(`${origin}/sw.js`),
-    addEventListener: (type: string, listener: Listener) => {
-      listeners[type] = listener
-    },
-    skipWaiting: async () => {},
-    clients: { claim: async () => {} },
-    registration: {
-      unregister: async () => {
-        registration.unregistered = true
-        return true
-      }
-    }
-  }
-  runInNewContext(source, { self, caches, fetch, URL, Response, console })
-
-  async function lifecycle(type: 'install' | 'activate') {
-    let done: unknown
-    listeners[type]({ waitUntil: (promise: unknown) => (done = promise) })
-    await done
-  }
-
-  async function request(path: string, init: { mode?: string; method?: string } = {}) {
-    let answer: Promise<Response> | undefined
-    const kept: Promise<unknown>[] = []
-    listeners.fetch({
-      request: { url: new URL(path, origin).href, method: init.method ?? 'GET', mode: init.mode },
-      respondWith: (promise: Promise<Response>) => (answer = promise),
-      waitUntil: (promise: Promise<unknown>) => kept.push(promise)
-    })
-    if (!answer) return undefined
-    const response = await answer
-    await Promise.all(kept)
-    return response
-  }
-
-  const kept = (name = 'pedos-shell-v1') =>
-    [...(stores.get(name)?.keys() ?? [])].map(url => url.replace(origin, ''))
-
-  return { lifecycle, request, kept, caches, registration }
-}
-
-const startPage = `<html><head>
-<link rel="icon" href="/icon.png?a1b2" sizes="512x512">
-<script src="/_next/static/chunks/main.js" async></script>
-<link rel="stylesheet" href="/_next/static/css/app.css">
-</head><body><nav><a href="/recordings/">Recordings</a><a href="/">Record</a></nav>
-<picture><source media="(min-width: 48rem)" srcSet="/lander/song.webp"/><img src="data:image/gif;base64,R0lGOD"></picture>
-<script>self.__next_f.push([1,"0:[\\"/_next/static/chunks/page.js\\"]"])</script>
-</body></html>`
+import {
+  catalog,
+  failed,
+  locked,
+  ok,
+  origin,
+  startPage,
+  startWorker
+} from '@/test-support/service-worker'
 
 describe('the service worker', () => {
   it("keeps the start page, the tabs it links to, and the files they load when it installs, but not the lander's images", async () => {
@@ -139,29 +29,109 @@ describe('the service worker', () => {
     ])
   })
 
-  it("keeps each Song's page from /shell.json, and the files it loads, when it installs", async () => {
+  it('keeps the one Song page from /shell.json, the files it loads and the Song Catalog, when it installs', async () => {
     let online = true
     const worker = startWorker(url => {
       if (!online) return 'offline'
       const path = url.replace(origin, '')
       if (path === '/') return ok(startPage)
-      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/mary/'] }))
-      if (path === '/compose/mary/') {
-        return ok('<script src="/_next/static/chunks/song.js"></script>Mary')
+      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
+      if (path === '/compose/song/') {
+        return ok(
+          `<link rel="preload" href="${catalog}" as="fetch" crossorigin="anonymous"/><script src="/_next/static/chunks/song.js"></script>Song page`
+        )
       }
+      if (path === catalog) return ok('[{"id":"mary"}]')
       return ok('file')
     })
     await worker.lifecycle('install')
     expect(worker.kept()).toEqual(
-      expect.arrayContaining(['/compose/mary/', '/_next/static/chunks/song.js'])
+      expect.arrayContaining(['/compose/song/', '/_next/static/chunks/song.js', catalog])
     )
     expect(worker.kept()).not.toContain('/shell.json')
+    expect(worker.kept()).not.toContain('/compose/mary/')
 
     online = false
-    expect(await (await worker.request('/compose/mary/', { mode: 'navigate' }))?.text()).toContain(
+    for (const path of ['/compose/mary/', '/compose/twinkle', '/compose/not-a-song/?from=link']) {
+      const answer = await worker.request(path, { mode: 'navigate' })
+      expect(await answer?.text(), path).toContain('Song page')
+    }
+    expect(await (await worker.request('/_next/static/chunks/song.js'))?.text()).toBe('file')
+    expect(await (await worker.request(catalog))?.text()).toBe('[{"id":"mary"}]')
+    for (const path of ['/compose/mary/notes/', '/toots/mary/']) {
+      await expect(worker.request(path, { mode: 'navigate' }), path).rejects.toThrow(
+        'Failed to fetch'
+      )
+    }
+  })
+
+  it("never keeps a Song's own page, so offline every Song opens on the one Song page", async () => {
+    let online = true
+    const worker = startWorker(url => {
+      if (!online) return 'offline'
+      const path = url.replace(origin, '')
+      if (path === '/shell.json') {
+        return ok(JSON.stringify({ pages: ['/compose/song/', '/compose/pad/'] }))
+      }
+      if (path === '/compose/song/') return ok('Song page')
+      if (path === '/compose/pad/') return ok('Sound Pad')
+      if (path === '/compose/mary/') return ok('Mary')
+      return ok('file')
+    })
+    await worker.lifecycle('install')
+    expect(await (await worker.request('/compose/mary/', { mode: 'navigate' }))?.text()).toBe(
       'Mary'
     )
-    expect(await (await worker.request('/_next/static/chunks/song.js'))?.text()).toBe('file')
+    expect(worker.kept()).not.toContain('/compose/mary/')
+
+    online = false
+    for (const path of ['/compose/mary/', '/compose/twinkle/']) {
+      expect(await (await worker.request(path, { mode: 'navigate' }))?.text(), path).toBe(
+        'Song page'
+      )
+    }
+    expect(await (await worker.request('/compose/pad/', { mode: 'navigate' }))?.text()).toBe(
+      'Sound Pad'
+    )
+  })
+
+  it("opens a Song offline on the current build's Song page after a deploy, never an older build's", async () => {
+    let online = true
+    let build = 'A'
+    const worker = startWorker(url => {
+      if (!online) return 'offline'
+      const path = url.replace(origin, '')
+      if (path === '/') return ok(`<script src="/_next/static/chunks/main-${build}.js"></script>`)
+      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
+      if (path === '/compose/song/') return ok(`build ${build}'s Song page`)
+      if (path === '/compose/mary/') return ok(`build ${build}'s Mary`)
+      return ok('file')
+    })
+    await worker.lifecycle('install')
+    await worker.request('/compose/mary/', { mode: 'navigate' })
+
+    build = 'B'
+    await worker.request('/', { mode: 'navigate' })
+
+    online = false
+    expect(await (await worker.request('/compose/mary/', { mode: 'navigate' }))?.text()).toBe(
+      "build B's Song page"
+    )
+  })
+
+  it("answers an older build's Song Catalog with the copy it kept, once a deploy has taken it off the server", async () => {
+    let deployed = false
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      if (deployed && path.startsWith('/catalog/')) return failed(404)
+      return ok(`first build's ${path}`)
+    })
+    await worker.request(catalog)
+    deployed = true
+    const answer = await worker.request(catalog)
+    expect(answer?.status).toBe(200)
+    expect(await answer?.text()).toBe(`first build's ${catalog}`)
+    expect((await worker.request('/catalog/songs-0000000000000000.json'))?.status).toBe(404)
   })
 
   it("keeps the scripts that the scripts load by name, such as the workers' chunks", async () => {
@@ -206,15 +176,15 @@ describe('the service worker', () => {
       const path = url.replace(origin, '')
       if (path === '/') return ok(startPage)
       if (path === '/shell.json') {
-        return dropped ? 'offline' : ok(JSON.stringify({ pages: ['/compose/mary/'] }))
+        return dropped ? 'offline' : ok(JSON.stringify({ pages: ['/compose/song/'] }))
       }
       return ok('file')
     })
     await worker.request('/', { mode: 'navigate' })
-    expect(worker.kept()).not.toContain('/compose/mary/')
+    expect(worker.kept()).not.toContain('/compose/song/')
     dropped = false
     await worker.request('/', { mode: 'navigate' })
-    expect(worker.kept()).toContain('/compose/mary/')
+    expect(worker.kept()).toContain('/compose/song/')
   })
 
   it('fetches pages from the network first, and answers from the cache offline', async () => {
@@ -354,15 +324,22 @@ describe('the service worker', () => {
       expect(await worker.request(path), path).toBeUndefined()
     }
     expect(await worker.request('/', { mode: 'navigate', method: 'POST' })).toBeUndefined()
+    expect(await worker.request('/u/maya/r/8k2fq3m9x1ab/', { mode: 'navigate' })).toBeUndefined()
     expect(worker.kept()).toEqual([])
   })
 
   it("deletes the other versions' caches when a new worker activates", async () => {
     const worker = startWorker(() => ok())
-    await worker.caches.open('pedos-shell-v0')
     await worker.caches.open('pedos-shell-v1')
+    await worker.caches.open('pedos-shell-v2')
+    await worker.caches.open('pedos-notes-v0')
+    await worker.caches.open('pedos-notes-v1')
     await worker.caches.open('someone-elses-cache')
     await worker.lifecycle('activate')
-    expect(await worker.caches.keys()).toEqual(['pedos-shell-v1', 'someone-elses-cache'])
+    expect(await worker.caches.keys()).toEqual([
+      'pedos-shell-v2',
+      'pedos-notes-v1',
+      'someone-elses-cache'
+    ])
   })
 })

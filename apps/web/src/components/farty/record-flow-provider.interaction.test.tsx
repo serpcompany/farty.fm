@@ -3,7 +3,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { analyze } from '@/lib/analysis/client'
 import { MicrophoneDeniedError, MicrophoneReleasedError } from '@/lib/audio/microphone'
-import { stopPlayback } from '@/lib/audio/player'
+import { forgetDecoded, stopPlayback } from '@/lib/audio/player'
 import { startTake, type Take } from '@/lib/audio/recorder'
 import {
   deleteRecording,
@@ -19,6 +19,7 @@ import { encodeWav, type PcmAudio } from '@/lib/wav'
 import { PlaybackProvider } from './playback-provider'
 import { RecordFlowProvider, useRecordFlow } from './record-flow-provider'
 import { RecordingsProvider, useRecordings } from './recordings-provider'
+import { SongCatalogProvider } from './song-catalog-provider'
 
 vi.mock('@/lib/audio/recorder', () => ({ startTake: vi.fn() }))
 vi.mock('@/lib/recording-store', () => ({
@@ -35,7 +36,9 @@ vi.mock('@/lib/library-changes', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/library-changes')>()),
   onLibraryChanged: () => () => undefined
 }))
-vi.mock('@/lib/audio/player', () => ({ play: vi.fn(), stopPlayback: vi.fn() }))
+vi.mock('@/lib/audio/player', () => import('@/test-support/fake-player'))
+vi.mock('@/lib/catalog/load-songs', () => import('@/test-support/fake-load-songs'))
+vi.mock('next/navigation', () => ({ usePathname: () => '/' }))
 vi.mock('@/lib/stale-build', () => ({ holdReload: vi.fn() }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: vi.fn() }))
 
@@ -88,7 +91,12 @@ function Probe() {
 function takeReturning(audio: PcmAudio) {
   vi.mocked(startTake).mockImplementation(async onInterrupted => {
     interrupt = onInterrupted
-    return { stop: async () => audio, cancel: vi.fn() } satisfies Take
+    return {
+      sampleRate: audio.sampleRate,
+      listen: next => next(audio.samples),
+      stop: async () => audio,
+      cancel: vi.fn()
+    } satisfies Take
   })
 }
 
@@ -116,11 +124,13 @@ beforeEach(async () => {
   await act(async () =>
     root.render(
       <PlaybackProvider>
-        <RecordingsProvider>
-          <RecordFlowProvider>
-            <Probe />
-          </RecordFlowProvider>
-        </RecordingsProvider>
+        <SongCatalogProvider>
+          <RecordingsProvider>
+            <RecordFlowProvider>
+              <Probe />
+            </RecordFlowProvider>
+          </RecordingsProvider>
+        </SongCatalogProvider>
       </PlaybackProvider>
     )
   )
@@ -243,6 +253,33 @@ describe('RecordFlowProvider', () => {
     expect(flow.showsRecordFlow).toBe(false)
     await act(() => flow.startRecording())
     expect(startTake).toHaveBeenCalledTimes(2)
+  })
+
+  it('plays the take on review from one decode, and lets it go once the review closes', async () => {
+    await recordAndStop()
+    const whole = flow.draftSound(null)
+    const part = flow.draftSound({ startSeconds: 0.25, endSeconds: 0.5 })
+    expect(whole?.key).toBe('draft')
+    expect(part?.decodeKey).toBe(whole?.decodeKey)
+    expect(whole?.segment).toBeNull()
+    expect(part?.segment).toEqual({ start: 0.25, end: 0.5 })
+    expect(forgetDecoded).not.toHaveBeenCalled()
+
+    act(() => flow.closeFlow())
+    expect(forgetDecoded).toHaveBeenCalledWith(whole?.decodeKey)
+    expect(flow.draftSound(null)).toBeNull()
+  })
+
+  it('finds the note of the take on review from Stop, before it is saved', async () => {
+    await recordAndStop()
+    expect(analyze).toHaveBeenCalledOnce()
+    expect(flow.draftAnalysis).toEqual({ state: 'analyzed', analysis: melodicAnalysis })
+    await finishSaving()
+    expect(analyze).toHaveBeenCalledOnce()
+    expect(saveAnalysis).toHaveBeenCalledWith('r1', {
+      state: 'analyzed',
+      analysis: melodicAnalysis
+    })
   })
 
   it('starts no take while Review shows', async () => {

@@ -58,15 +58,15 @@ function useStopPlaybackOnTabChange(tab: Tab | null): void {
 
 export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: ReactNode }) {
   const { showsWelcome, finishWelcome } = useWelcome()
-  const { showsRecordFlow, flow, capture } = useRecordFlow()
+  const { showsRecordFlow, reviewOpen } = useRecordFlow()
   const { stepOpen } = useAccount()
   const { libraryProblem } = useRecordings()
   const waitsForOtherTabs = useWaitsForOtherTabs()
   const segments = useSelectedLayoutSegments()
   const tab = tabOf(segments)
-  const tabsCovered =
-    stepOpen || flow !== null || capture.kind === 'recording' || capture.kind === 'finishing'
+  const tabsCovered = stepOpen || showsRecordFlow || reviewOpen
   const atHome = segments.length === 0
+  const sharedPage = segments[0] === 'u'
   useTrackPages()
   useStopPlaybackOnTabChange(tab)
   useBackOnRecord(tab, showsRecordFlow || stepOpen)
@@ -81,7 +81,8 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
       {tab !== null && <Lander atHome={atHome} qrCode={qrCode} />}
       <div
         className={cn(
-          'flex min-h-dvh flex-col overflow-x-clip md:pt-16',
+          'flex min-h-dvh flex-col overflow-x-clip',
+          !sharedPage && 'md:pt-16',
           atHome && 'md:unwelcomed:hidden',
           tab !== null && 'desktop:hidden'
         )}
@@ -89,7 +90,10 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
         <main
           id={appMain}
           tabIndex={-1}
-          className="mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] pb-20 outline-none md:max-w-2xl md:pt-6 md:pb-12"
+          className={cn(
+            'mx-auto flex w-full max-w-md flex-1 flex-col pt-[env(safe-area-inset-top)] outline-none md:max-w-2xl',
+            sharedPage ? 'pb-[env(safe-area-inset-bottom)]' : 'pb-20 md:pt-6 md:pb-12'
+          )}
         >
           {waitsForOtherTabs && (
             <output className="block px-4 pt-4 text-center text-muted-foreground">
@@ -102,54 +106,56 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
             children
           )}
         </main>
-        <nav
-          aria-label="Tabs"
-          inert={tabsCovered}
-          className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:top-0 md:bottom-auto md:border-t-0 md:border-b"
-        >
-          <div className="contents md:mx-auto md:flex md:h-16 md:max-w-5xl md:items-center md:justify-between md:px-6">
-            <Link
-              href="/"
-              className="hidden rounded-md text-lg font-bold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:flex md:h-11 md:items-center md:gap-2.5"
-            >
-              <Image
-                src="/icons/icon-192.png"
-                alt=""
-                width={32}
-                height={32}
-                unoptimized
-                className="rounded-lg"
-              />
-              Farty
-            </Link>
-            <ul
-              className={cn(
-                'mx-auto flex max-w-md md:mx-0 md:max-w-none md:gap-1 desktop:hidden',
-                tabsCovered && 'md:opacity-50'
-              )}
-            >
-              {tabs.map(({ id, href, label }) => {
-                const current = id === tab
-                const Icon = icons[id]
-                return (
-                  <li key={id} className="flex-1 md:flex-none">
-                    <Link
-                      href={href}
-                      aria-current={current ? 'page' : undefined}
-                      className={cn(
-                        'flex h-14 flex-col items-center justify-center gap-0.5 text-xs font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:h-11 md:flex-row md:gap-2 md:rounded-md md:px-3 md:text-sm',
-                        current ? 'text-foreground md:bg-muted' : 'text-muted-foreground'
-                      )}
-                    >
-                      <Icon className="size-6 md:size-5" aria-hidden />
-                      {label}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        </nav>
+        {!sharedPage && (
+          <nav
+            aria-label="Tabs"
+            inert={tabsCovered}
+            className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:top-0 md:bottom-auto md:border-t-0 md:border-b"
+          >
+            <div className="contents md:mx-auto md:flex md:h-16 md:max-w-5xl md:items-center md:justify-between md:px-6">
+              <Link
+                href="/"
+                className="hidden rounded-md text-lg font-bold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:flex md:h-11 md:items-center md:gap-2.5"
+              >
+                <Image
+                  src="/icons/icon-192.png"
+                  alt=""
+                  width={32}
+                  height={32}
+                  unoptimized
+                  className="rounded-lg"
+                />
+                Farty
+              </Link>
+              <ul
+                className={cn(
+                  'mx-auto flex max-w-md md:mx-0 md:max-w-none md:gap-1 desktop:hidden',
+                  tabsCovered && 'md:opacity-50'
+                )}
+              >
+                {tabs.map(({ id, href, label }) => {
+                  const current = id === tab
+                  const Icon = icons[id]
+                  return (
+                    <li key={id} className="flex-1 md:flex-none">
+                      <Link
+                        href={href}
+                        aria-current={current ? 'page' : undefined}
+                        className={cn(
+                          'flex h-14 flex-col items-center justify-center gap-0.5 text-xs font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 md:h-11 md:flex-row md:gap-2 md:rounded-md md:px-3 md:text-sm',
+                          current ? 'text-foreground md:bg-muted' : 'text-muted-foreground'
+                        )}
+                      >
+                        <Icon className="size-6 md:size-5" aria-hidden />
+                        {label}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          </nav>
+        )}
         <RecordFlow />
         <AccountStep />
         {showsWelcome && tab !== null && <Welcome />}

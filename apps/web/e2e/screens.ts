@@ -79,3 +79,13 @@ export async function pageSettled(page: Page): Promise<void> {
     })
   )
 }
+
+export function lockedSong(page: Page, title: string): Locator {
+  return page.getByRole('button', {
+    name: new RegExp(`^${literally(title)}\\s+\\d+ of \\d+ notes covered`)
+  })
+}
+
+export function songsHeading(page: Page, state: 'Locked' | 'Unlocked', count: number): Locator {
+  return page.getByRole('heading', { name: `${state} · ${count}`, exact: true })
+}

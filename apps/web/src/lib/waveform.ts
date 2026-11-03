@@ -1,10 +1,11 @@
-export function waveformLevels(samples: Float32Array, count: number): number[] {
+export function waveformLevels(samples: ArrayLike<number>, count: number, step = 1): number[] {
   const flat = Array<number>(count).fill(0.05)
   if (count <= 0 || samples.length < count) return flat
   const slice = Math.floor(samples.length / count)
+  const stride = Math.max(1, Math.floor(step))
   const peaks = Array.from({ length: count }, (_, bar) => {
     let peak = 0
-    for (let i = bar * slice; i < (bar + 1) * slice; i++)
+    for (let i = bar * slice; i < (bar + 1) * slice; i += stride)
       peak = Math.max(peak, Math.abs(samples[i]))
     return peak
   })

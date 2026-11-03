@@ -5,10 +5,6 @@
   "missing": [
     {
       "seconds": 0.6,
-      "target_midi": 33
-    },
-    {
-      "seconds": 0.6,
       "target_midi": 35
     },
     {
@@ -24,9 +20,9 @@
   "octave_moves": 0,
   "per_pitch": [
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "octave_move": false,
+      "recording": "009",
+      "shift_semitones": 2.4740794063398255,
       "song_pitch": 60,
       "target_midi": 33
     },
@@ -74,10 +70,10 @@
     }
   ],
   "pitch_coverage": {
-    "covered": 3,
+    "covered": 4,
     "total": 7
   },
-  "plan_cost": 27.076375945030733,
+  "plan_cost": 48.13048173563882,
   "render_settings": null,
   "song": "auld",
   "transpose": -27,

@@ -2,19 +2,24 @@
 
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { stopPlayback } from '@/lib/audio/player'
-import { songs } from '@/lib/catalog/songs.generated'
-import type { Toot } from '@/lib/toot'
+import { PAD_TOOT_TITLE, type Toot } from '@/lib/toot'
 import { BackLink, useGoBack } from './back-link'
+import { PadTootLayout } from './pad-toot-layout'
 import { usePageHidden } from './page-hidden'
+import { ShareButton, useShares } from './share-recording'
+import { useSongCatalog } from './song-catalog-provider'
 import { TootLayout } from './toot-layout'
 import { useToots } from './toots-provider'
 import { DeleteTootDialog, RenameTootDialog, TootMenu } from './toots-screen'
+import { useSongNotes } from './use-song-notes'
 
 export function TootScreen() {
   const id = useSearchParams().get('id') ?? ''
   const { toots, tootsFailed, toot: savedToot, forgetToot, deleteToot } = useToots()
+  const { songs, songsFailed, song } = useSongCatalog()
   const backToToots = useGoBack('/toots/')
   const [isRenaming, setIsRenaming] = useState(false)
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
@@ -22,7 +27,15 @@ export function TootScreen() {
   const closing = useRef(false)
   const current = savedToot(id)
   const toot = current ?? (lastSeen?.id === id ? lastSeen : undefined)
-  const song = toot && songs.find(s => s.id === toot.songId)
+  const summary = toot?.songId ? song(toot.songId) : undefined
+  const notes = useSongNotes(summary)
+  const isShared = useShares()?.tootLinks.has(id) ?? false
+  const subtitle = [
+    summary ? summary.title : toot?.songId === null ? PAD_TOOT_TITLE : null,
+    isShared ? 'Shared' : null
+  ]
+    .filter(part => part !== null)
+    .join(' · ')
 
   useEffect(() => {
     if (current) setLastSeen(current)
@@ -38,24 +51,33 @@ export function TootScreen() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="grid grid-cols-[2.75rem_1fr_2.75rem] items-center gap-2 px-2 pt-2 pb-3">
+      <header className="grid grid-cols-[5.5rem_1fr_5.5rem] items-center gap-1 px-2 pt-2 pb-3">
         <BackLink href="/toots/" label="Back to Toots" />
         {toot && (
           <>
             <div className="min-w-0 text-center">
               <h1 className="truncate font-semibold">{toot.title}</h1>
-              {song && <p className="truncate text-xs text-muted-foreground">{song.title}</p>}
+              {subtitle && (
+                <p className="truncate text-xs text-muted-foreground" data-testid="toot-subtitle">
+                  {subtitle}
+                </p>
+              )}
             </div>
-            <TootMenu
-              title={toot.title}
-              onRename={() => setIsRenaming(true)}
-              onDelete={() => setIsConfirmingDelete(true)}
-            />
+            <div className="flex justify-end">
+              {(!toot.isAudioMissing || isShared) && (
+                <ShareButton kind="toots" id={toot.id} name={toot.title} className="size-11" />
+              )}
+              <TootMenu
+                title={toot.title}
+                onRename={() => setIsRenaming(true)}
+                onDelete={() => setIsConfirmingDelete(true)}
+              />
+            </div>
           </>
         )}
       </header>
 
-      {toots === null ? (
+      {toots === null || (toot?.songId && songs === null && !songsFailed) ? (
         <div className="flex flex-1 items-center justify-center">
           <Spinner />
         </div>
@@ -63,13 +85,45 @@ export function TootScreen() {
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
           {tootsFailed ? "Couldn't load your Toots." : "Couldn't find this Toot."}
         </p>
-      ) : !song ? (
+      ) : toot.songId === null ? (
+        <div className="px-4">
+          <PadTootLayout toot={toot} isAudioMissing={toot.isAudioMissing}>
+            {toot.isAudioMissing && (
+              <p className="pt-1 text-xs text-muted-foreground" data-testid="toot-audio-missing">
+                This Toot's audio is missing. You can delete it and record it again on the Sound
+                Pad.
+              </p>
+            )}
+          </PadTootLayout>
+        </div>
+      ) : !summary ? (
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
-          This Toot's Song isn't in Farty any more.
+          {songsFailed ? "Couldn't load the Songs." : "This Toot's Song isn't in Farty any more."}
         </p>
       ) : (
-        <TootLayout toot={toot} song={song} isAudioMissing={toot.isAudioMissing}>
-          <p className="pt-1 text-xs text-muted-foreground">{song.source}</p>
+        <TootLayout
+          toot={toot}
+          song={notes.song ?? summary}
+          isAudioMissing={toot.isAudioMissing}
+          notesFallback={
+            notes.failed ? (
+              <div
+                className="flex flex-col items-center gap-3 py-4 text-center"
+                data-testid="toot-notes-failed"
+              >
+                <p className="text-sm text-muted-foreground">Couldn't load this Song's notes.</p>
+                <Button variant="outline" className="h-11 px-5 text-base" onClick={notes.retry}>
+                  Try again
+                </Button>
+              </div>
+            ) : (
+              <div className="flex justify-center py-4">
+                <Spinner />
+              </div>
+            )
+          }
+        >
+          <p className="pt-1 text-xs text-muted-foreground">{summary.source}</p>
           {toot.isAudioMissing && (
             <p className="pt-1 text-xs text-muted-foreground" data-testid="toot-audio-missing">
               This Toot's audio is missing. You can delete it and make it again in Compose.

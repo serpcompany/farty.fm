@@ -43,11 +43,10 @@ device with a mouse or trackpad is a computer and one without is a touch tablet
 
 ## The product page, on a computer
 
-- Every tab shows the product page instead of the app, however often the browser has opened Farty
-  before: the same sections, with Download App in place of Open Farty and Sign up free
-  (`e2e/desktop.spec.ts`, "Record shows the product page"; "Compose shows the product page"; "a
-  Song's link shows the product page"; "Profile shows the product page"; "a browser that opened
-  Farty before still gets the product page, and the microphone stays shut").
+- Every tab (Record, Compose, a Song's link and Profile) shows the product page instead of the app,
+  however often the browser has opened Farty before: the same sections, with Download App in place
+  of Open Farty and Sign up free (`e2e/desktop.spec.ts`, "${where} shows the product page"; "a
+  browser that opened Farty before still gets the product page, and the microphone stays shut").
 - The microphone stays shut, and widening a narrow window into the product page shuts it
   (`e2e/desktop.spec.ts`, "a browser that opened Farty before still gets the product page, and the
   microphone stays shut"; "widening a narrow window into the product page shuts the microphone").
@@ -56,6 +55,10 @@ device with a mouse or trackpad is a computer and one without is a touch tablet
   (`e2e/desktop.spec.ts`, "Download App shows a QR code for a phone; Escape closes it and gives
   focus back"; `src/lib/download-qr.test.ts`, "opens the build's own origin (SITE_ENV=%s)"; "draws
   exactly the encoded dark modules, inside an empty quiet zone").
+- A shared link's page stays itself, not the product page, and its Get Farty shows the same QR code
+  in place of the account step, even on a link that no longer works ([Get Farty](get-farty.md);
+  `e2e/desktop.spec.ts`, "a shared page's Get Farty shows the QR code, not the account step
+  (#318)").
 - Coming back to the page leaves it where it was (`e2e/desktop.spec.ts`, "coming back to the page
   leaves the product page where it was").
 - The privacy, support and 404 pages stay plain pages (`e2e/desktop.spec.ts`, "the privacy, support

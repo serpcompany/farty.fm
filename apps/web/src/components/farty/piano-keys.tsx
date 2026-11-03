@@ -23,18 +23,18 @@ export function octaveOf(midi: number): number {
 export function PianoKeys({
   octave,
   selected,
-  placed,
+  ringed,
   onKey
 }: {
   octave: number
   selected: number | null
-  placed: number | null
+  ringed: number | null
   onKey: (midi: number) => void
 }) {
   const c = 12 * (octave + 1)
   const state = (midi: number) => ({
     isSelected: midi === selected,
-    wasPlaced: midi === placed && midi !== selected
+    isRinged: midi === ringed && midi !== selected
   })
   return (
     <fieldset className="min-w-0">
@@ -42,7 +42,7 @@ export function PianoKeys({
       <div className="relative flex h-42 touch-manipulation">
         {WHITE_STEPS.map(step => {
           const midi = c + step
-          const { isSelected, wasPlaced } = state(midi)
+          const { isSelected, isRinged } = state(midi)
           return (
             <button
               key={midi}
@@ -53,7 +53,7 @@ export function PianoKeys({
               className={cn(
                 'flex min-w-0 flex-1 items-end justify-center rounded-b-[7px] border border-t-0 border-neutral-300 bg-white pb-2 text-[11px] text-neutral-500 outline-none not-first:-ml-px focus-visible:z-10 focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-neutral-200 dark:border-neutral-600 dark:bg-neutral-200 dark:active:bg-neutral-300',
                 step === 0 && 'font-semibold text-neutral-950',
-                wasPlaced && 'inset-ring-2 inset-ring-brand-strong',
+                isRinged && 'inset-ring-2 inset-ring-brand-strong',
                 isSelected &&
                   'border-brand-strong bg-brand-strong font-semibold text-white active:bg-brand-strong dark:border-brand-strong dark:bg-brand-strong dark:active:bg-brand-strong'
               )}
@@ -64,7 +64,7 @@ export function PianoKeys({
         })}
         {BLACK_KEYS.map(({ step, afterWhiteKey }) => {
           const midi = c + step
-          const { isSelected, wasPlaced } = state(midi)
+          const { isSelected, isRinged } = state(midi)
           const center = (afterWhiteKey / WHITE_STEPS.length) * 100
           return (
             <button
@@ -79,7 +79,7 @@ export function PianoKeys({
               }}
               className={cn(
                 'absolute top-0 z-20 flex h-3/5 items-end justify-center rounded-b-[5px] bg-neutral-900 pb-1.5 text-[10px] text-white shadow-[0_2px_0_rgb(0_0_0/0.25)] outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-neutral-700 dark:bg-neutral-950 dark:active:bg-neutral-700',
-                wasPlaced && 'inset-ring-2 inset-ring-brand-strong',
+                isRinged && 'inset-ring-2 inset-ring-brand-strong',
                 isSelected &&
                   'bg-brand-strong font-semibold active:bg-brand-strong dark:bg-brand-strong dark:active:bg-brand-strong'
               )}

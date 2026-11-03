@@ -5,7 +5,7 @@ export interface Song {
   notes: SongNote[]
 }
 
-interface SongNote {
+export interface SongNote {
   start: number
   dur: number
   pitch: number

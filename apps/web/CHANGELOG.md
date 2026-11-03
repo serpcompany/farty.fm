@@ -1,5 +1,50 @@
 # Changelog
 
+## [1.12.1](https://github.com/serpcompany/farty.fm/compare/v1.12.0...v1.12.1) (2026-10-30)
+
+
+### Fixes
+
+* **web:** start a Pad where a Song starts its fart, not at room noise ([#298](https://github.com/serpcompany/farty.fm/issues/298)) ([#301](https://github.com/serpcompany/farty.fm/issues/301)) ([713f556](https://github.com/serpcompany/farty.fm/commit/713f556005d708be0a8ffe41eb4cdab847beada3))
+
+## [1.12.0](https://github.com/serpcompany/farty.fm/compare/v1.11.0...v1.12.0) (2026-10-30)
+
+
+### Features
+
+* **web:** playhead, scrub and Trim for Recordings ([#299](https://github.com/serpcompany/farty.fm/issues/299)) ([45b456c](https://github.com/serpcompany/farty.fm/commit/45b456ca15b71b8b2a3312470c6951a44e8b15e1))
+
+## [1.11.0](https://github.com/serpcompany/farty.fm/compare/v1.10.0...v1.11.0) (2026-10-30)
+
+
+### Features
+
+* **web/engine:** play a fart's quiet lead-in before the beat ([#287](https://github.com/serpcompany/farty.fm/issues/287)) ([#297](https://github.com/serpcompany/farty.fm/issues/297)) ([e8e2cbb](https://github.com/serpcompany/farty.fm/commit/e8e2cbb591f96dd76490a9f6de70d9a8bbaa93f9))
+* **web:** find notes that start late, and re-scan Recordings with no note ([#282](https://github.com/serpcompany/farty.fm/issues/282)) ([#295](https://github.com/serpcompany/farty.fm/issues/295)) ([0e2075b](https://github.com/serpcompany/farty.fm/commit/0e2075b7fc3ecb919ffd8d542d66c90b6582e98f))
+* **web:** record a Sound Pad take and save it as a Toot ([#291](https://github.com/serpcompany/farty.fm/issues/291)) ([c22cd45](https://github.com/serpcompany/farty.fm/commit/c22cd45ee7f38b776a38d27525e75b6cb284fcb1))
+* **web:** Record shows the moment it starts listening, with a live level ([#289](https://github.com/serpcompany/farty.fm/issues/289)) ([d9bcead](https://github.com/serpcompany/farty.fm/commit/d9bcead25a0cc894bb3460c8e67b08ce9c87c8da))
+
+## [1.10.0](https://github.com/serpcompany/farty.fm/compare/v1.9.0...v1.10.0) (2026-10-30)
+
+
+### Features
+
+* **web:** play your farts on a Sound Pad ([#285](https://github.com/serpcompany/farty.fm/issues/285)) ([6d2bb50](https://github.com/serpcompany/farty.fm/commit/6d2bb50fd2432544f4afac83c4387a161fe56757))
+
+
+### Fixes
+
+* play the whole take on the Recordings tab, and every burst of a fart in Songs ([#286](https://github.com/serpcompany/farty.fm/issues/286)) ([4b92aa0](https://github.com/serpcompany/farty.fm/commit/4b92aa074cea7bc05759add869c0220311d6ecc9))
+* **web:** hear quiet takes and save them at full level ([#284](https://github.com/serpcompany/farty.fm/issues/284)) ([e120fc1](https://github.com/serpcompany/farty.fm/commit/e120fc1db038a3450cacf0ee257a50f8271dd55a))
+* **web:** the first Record tap after coming back to the app records ([#283](https://github.com/serpcompany/farty.fm/issues/283)) ([448b8d8](https://github.com/serpcompany/farty.fm/commit/448b8d874c0d692f2f4ec752cce48c0c7f6fc64d))
+
+## [1.9.0](https://github.com/serpcompany/farty.fm/compare/v1.8.0...v1.9.0) (2026-10-30)
+
+
+### Features
+
+* **web:** place a noise-like fart on a note by ear, or leave it out ([#269](https://github.com/serpcompany/farty.fm/issues/269)) ([8b8945d](https://github.com/serpcompany/farty.fm/commit/8b8945dbb19fea174ef1652ce5c4436a84f40ff7))
+
 ## [1.8.0](https://github.com/serpcompany/farty.fm/compare/v1.7.0...v1.8.0) (2026-10-28)
 
 

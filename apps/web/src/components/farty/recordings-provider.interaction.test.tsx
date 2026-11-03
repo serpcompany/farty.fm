@@ -1,16 +1,17 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { analyze } from '@/lib/analysis/client'
-import { upgradeAnalyses } from '@/lib/analysis-upgrade'
+import { analyze, findTrim } from '@/lib/analysis/client'
+import { type RescanResult, rescan, upgradeAnalyses } from '@/lib/analysis-upgrade'
 import { play, stopPlayback } from '@/lib/audio/player'
-import { songs } from '@/lib/catalog/songs.generated'
 import { type LibraryChange, onLibraryChanged } from '@/lib/library-changes'
 import * as store from '@/lib/recording-store'
 import type { Analysis, AnalysisState, Recording } from '@/lib/recordings'
 import { reportError } from '@/lib/telemetry/errors'
+import { songs } from '@/test-support/songs.generated'
 import { PlaybackProvider, recordingSound, usePlayback } from './playback-provider'
 import { RecordingsProvider, useRecordings } from './recordings-provider'
+import { SongCatalogProvider } from './song-catalog-provider'
 
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
 vi.mock('@/lib/recording-store', async importOriginal => ({
@@ -22,8 +23,10 @@ vi.mock('@/lib/recording-store', async importOriginal => ({
   deleteRecording: vi.fn(),
   placeRecording: vi.fn()
 }))
-vi.mock('@/lib/analysis/client', () => ({ analyze: vi.fn() }))
-vi.mock('@/lib/analysis-upgrade', () => ({ upgradeAnalyses: vi.fn() }))
+vi.mock('@/lib/analysis/client', () => ({ analyze: vi.fn(), findTrim: vi.fn() }))
+vi.mock('@/lib/analysis-upgrade', () => ({ upgradeAnalyses: vi.fn(), rescan: vi.fn() }))
+vi.mock('@/lib/catalog/load-songs', () => import('@/test-support/fake-load-songs'))
+vi.mock('next/navigation', () => ({ usePathname: () => '/compose/' }))
 vi.mock('@/lib/library-changes', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/library-changes')>()),
   onLibraryChanged: vi.fn()
@@ -87,9 +90,11 @@ async function open(loaded: Recording[] | DOMException) {
   await act(async () =>
     root.render(
       <PlaybackProvider>
-        <RecordingsProvider>
-          <Probe />
-        </RecordingsProvider>
+        <SongCatalogProvider>
+          <RecordingsProvider>
+            <Probe />
+          </RecordingsProvider>
+        </SongCatalogProvider>
       </PlaybackProvider>
     )
   )
@@ -156,14 +161,147 @@ describe('RecordingsProvider', () => {
     const failed = new Error('QuotaExceededError')
     vi.mocked(store.placeRecording).mockRejectedValue(failed)
 
-    act(() => library.placeRecording('r2', 48))
+    await act(() => library.placeRecording('r2', { placedPitch: 48 }))
 
-    expect(store.placeRecording).toHaveBeenCalledWith('r2', 48)
+    expect(store.placeRecording).toHaveBeenCalledWith('r2', { placedPitch: 48 })
     expect(library.recording('r2')?.placedPitch).toBe(48)
     expect(library.melodicRecordings.map(r => r.id)).toEqual(['r1', 'r2'])
     expect([...library.collectedNotes].sort()).toEqual([48, 55])
-    await settle()
+    expect(findTrim).not.toHaveBeenCalled()
     expect(reportError).toHaveBeenCalledWith('recording-place-failed', failed)
+  })
+
+  it('trims a Recording to its handles, with the fart found between them, and takes the Trim off', async () => {
+    await open([saved(18, analyzedAt(null))])
+    const handles = { startSeconds: 0.3, endSeconds: 1.5 }
+    const fart = { startSeconds: 0.45, endSeconds: 1.4 }
+    vi.mocked(findTrim).mockResolvedValueOnce(fart)
+    await act(() => library.placeRecording('r18', { handles }))
+
+    const [pcm, sent] = vi.mocked(findTrim).mock.calls[0]
+    expect(pcm.sampleRate).toBe(48_000)
+    expect(sent).toEqual(handles)
+    expect(store.placeRecording).toHaveBeenCalledWith('r18', { trim: { ...handles, fart } })
+    expect(library.recording('r18')?.trim).toEqual({ ...handles, fart })
+
+    const aroundTheFartAnalysisFound = { startSeconds: 0.001, endSeconds: 0.999 }
+    vi.mocked(findTrim).mockResolvedValueOnce(aroundTheFartAnalysisFound)
+    await act(() => library.placeRecording('r18', { placedPitch: 40, handles }))
+    expect(store.placeRecording).toHaveBeenLastCalledWith('r18', {
+      placedPitch: 40,
+      trim: { ...handles, fart: aroundTheFartAnalysisFound }
+    })
+
+    await act(() => library.placeRecording('r18', { handles: null }))
+    expect(store.placeRecording).toHaveBeenLastCalledWith('r18', { trim: null })
+    expect(findTrim).toHaveBeenCalledTimes(2)
+  })
+
+  it("saves nothing, and says it didn't, when the fart between the handles can't be found", async () => {
+    await open([saved(18, analyzedAt(null))])
+    vi.mocked(findTrim).mockRejectedValueOnce(new Error('the analysis worker failed'))
+    let placed: boolean | undefined
+    await act(async () => {
+      placed = await library.placeRecording('r18', {
+        placedPitch: 40,
+        handles: { startSeconds: 0.3, endSeconds: 1.5 }
+      })
+    })
+    expect(placed).toBe(false)
+    expect(reportError).toHaveBeenCalledWith('recording-trim-failed', expect.any(Error))
+    expect(store.placeRecording).not.toHaveBeenCalled()
+    expect(library.recording('r18')?.trim).toBeFalsy()
+    expect(library.recording('r18')?.placedPitch).toBeFalsy()
+  })
+
+  it('keeps a Trim saved while a Re-scan ran: the Re-scan changes only the analysis', async () => {
+    await open([saved(18, analyzedAt(null))])
+    const fart = { startSeconds: 0.45, endSeconds: 1.4 }
+    vi.mocked(findTrim).mockResolvedValueOnce(fart)
+    await act(() =>
+      library.placeRecording('r18', { handles: { startSeconds: 0.3, endSeconds: 1.5 } })
+    )
+    const fresh: AnalysisState = {
+      state: 'analyzed',
+      analysis: { ...analysisAt(null), version: 100 }
+    }
+    vi.mocked(rescan).mockImplementationOnce(async (_recordings, _analyze, updated) => {
+      updated({ ...saved(18), analysis: fresh })
+      return { scanned: 1, found: 0, failed: 0 }
+    })
+    await act(async () => void (await library.rescanRecording('r18')))
+    expect(library.recording('r18')?.analysis).toEqual(fresh)
+    expect(library.recording('r18')?.trim).toEqual({ startSeconds: 0.3, endSeconds: 1.5, fart })
+  })
+
+  it('runs one Re-scan at a time, on the Recordings it is asked for', async () => {
+    await open([saved(18, analyzedAt(null)), saved(19, analyzedAt(null))])
+    let finish: (result: RescanResult) => void = () => {}
+    vi.mocked(rescan).mockImplementationOnce((recordings, _analyze, _updated, scanning) => {
+      scanning?.(recordings[0], 0, recordings.length)
+      return new Promise(resolve => {
+        finish = resolve
+      })
+    })
+
+    let one: Promise<RescanResult> | undefined
+    let all: Promise<RescanResult> | undefined
+    await act(async () => {
+      one = library.rescanRecording('r18')
+      all = library.rescanAll()
+    })
+    expect(rescan).toHaveBeenCalledOnce()
+    expect(vi.mocked(rescan).mock.calls[0][0].map(r => r.id)).toEqual(['r18'])
+    expect(library.rescanning).toEqual({ recordingId: 'r18', done: 0, total: 1 })
+    expect(library.rescanned).toBeNull()
+
+    const found = { scanned: 1, found: 1, failed: 0 }
+    await act(async () => finish(found))
+    await expect(one).resolves.toEqual(found)
+    await expect(all).resolves.toEqual(found)
+    expect(library.rescanning).toBeNull()
+    expect(library.rescanned).toEqual(found)
+
+    vi.mocked(rescan).mockResolvedValueOnce({ scanned: 0, found: 0, failed: 0 })
+    await act(async () => void (await library.rescanAll()))
+    expect(vi.mocked(rescan).mock.calls[1][0].map(r => r.id)).toEqual(['r18', 'r19'])
+    expect(library.rescanned).toEqual({ scanned: 0, found: 0, failed: 0 })
+  })
+
+  it('keeps the last Re-scan’s result with no Recordings tab open, until the next one starts', async () => {
+    await open([saved(18, analyzedAt(null))])
+    let finish: (result: RescanResult) => void = () => {}
+    vi.mocked(rescan).mockImplementation(
+      () =>
+        new Promise(resolve => {
+          finish = resolve
+        })
+    )
+
+    await act(async () => void library.rescanAll())
+    await act(async () => finish({ scanned: 1, found: 1, failed: 0 }))
+    expect(library.rescanned).toEqual({ scanned: 1, found: 1, failed: 0 })
+
+    await act(async () => void library.rescanAll())
+    expect(library.rescanned).toBeNull()
+    await act(async () => finish({ scanned: 1, found: 0, failed: 0 }))
+    expect(library.rescanned).toEqual({ scanned: 1, found: 0, failed: 0 })
+  })
+
+  it("works out a Song's Arrangement once, until the Recordings change", async () => {
+    await open([saved(1, analyzedAt(55))])
+    const [first] = songs
+    const coverage = library.coverage(first)
+    expect(library.coverage(first)).toBe(coverage)
+
+    act(() =>
+      syncChanged({
+        recordings: [saved(2, analyzedAt(60))],
+        toots: [],
+        deleted: { recordings: [], toots: [] }
+      })
+    )
+    expect(library.coverage(first)).not.toBe(coverage)
   })
 
   it('matches the Song Catalog again only when Pitch Coverage can change', async () => {

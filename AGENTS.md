@@ -32,8 +32,8 @@ A PR merges by an agent only when every file it changes is on that list. The own
 - [`ARCHITECTURE.md`](ARCHITECTURE.md): the parts, how the web app stays matched to the reference, how data moves, the layout and the layers.
 - [`apps/web/AGENTS.md`](apps/web/AGENTS.md): the web app's commands and the evidence each change needs.
 - [`docs/agents/web.md`](docs/agents/web.md): environments, data, hosts, deploys, the smoke test, tapping through, and where the web app differs from SERP's standards.
-- [`docs/agents/accounts.md`](docs/agents/accounts.md), [`payments.md`](docs/agents/payments.md), [`staging-access.md`](docs/agents/staging-access.md) and [`releases.md`](docs/agents/releases.md): sign-in, paying to save a Toot, the Staging gate, and promotion, releases and who merges.
-- [`docs/agents/web-gotchas.md`](docs/agents/web-gotchas.md): what building the web app taught.
+- [`docs/agents/accounts.md`](docs/agents/accounts.md), [`payments.md`](docs/agents/payments.md), [`sharing.md`](docs/agents/sharing.md), [`staging-access.md`](docs/agents/staging-access.md) and [`releases.md`](docs/agents/releases.md): sign-in, paying to save a Toot, sharing, friends and taking down a reported link, the Staging gate, and promotion, releases and who merges.
+- [`docs/agents/web-gotchas.md`](docs/agents/web-gotchas.md) and [`browser-gotchas.md`](docs/agents/browser-gotchas.md): what building the web app taught, and what the browser taught its audio, storage and tabs.
 - [`docs/agents/ci.md`](docs/agents/ci.md): every workflow, the checks a merge waits for, and the pinned actions.
 - [`docs/agents/google-play.md`](docs/agents/google-play.md): the Play app, a Trusted Web Activity.
 - [`tools/melody-lab/README.md`](tools/melody-lab/README.md): the reference engine the web app is matched to. Its answers are the [golden data](fixtures/golden/README.md).
@@ -53,7 +53,7 @@ These rules come from a long first attempt that produced a lot of process and li
 
 1. **Show working results, not process.** Finish a slice until the product owner can hear or tap it. Don't ask them to judge anything a test or measurement can check.
 2. **Verify the audio before claiming anything.** For rendering work, run the checks in `tools/melody-lab/evaluate.py` on the real output (`apps/web/scripts/render-songs.ts` renders the web app's Songs for `evaluate_renders.py`) and report the numbers. Never describe audio you haven't measured.
-3. **Fart-only sound.** Rendering may only trim, cut, fade, adjust gain, and mix Recordings, and plays each fart at its own pitch and speed (ADR 0004, ADR 0012). The only resampling is sample-rate conversion. No oscillators, resonators, loops, or granular re-triggering.
+3. **Fart-only sound.** Rendering may only trim, cut, fade, adjust gain, and mix Recordings, and plays each fart at its own pitch and speed (ADR 0004, ADR 0012). The only resampling is sample-rate conversion. No oscillators, resonators, loops, or granular re-triggering. The one sound that isn't a fart is the review's piano reference note (ADR 0015 rule 3): it goes straight to the speakers and never into a render.
 4. **Songs need sources.** Never type melody notes by hand. Add Songs through `catalog/` with a cited score and license (ADR 0003).
 5. **Match the reference.** `tools/melody-lab/` is the reference engine. When the web app's engine differs from it, either fix the web app or change the reference deliberately and re-verify it.
 6. **Keep the UI simple.** Remove anything that isn't needed.
@@ -70,4 +70,4 @@ SERP's [engineering standards](https://github.com/serpcompany/serp/tree/main/doc
 
 ## Retired material
 
-The iPhone app, its Swift Recording Analysis and its App Store submission are in the tag `archive-2026-10-27` (ADR 0016). Read a file with `git show archive-2026-10-27:<path>`.
+The iPhone app, its Swift Recording Analysis and its App Store submission are in the tag `archive-2026-10-27` (ADR 0022). Read a file with `git show archive-2026-10-27:<path>`.

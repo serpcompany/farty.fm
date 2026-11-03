@@ -2,13 +2,14 @@ import { act } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Account } from '@/lib/account'
 import { stopPlayback } from '@/lib/audio/player'
-import { songs } from '@/lib/catalog/songs.generated'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
-import type { TootDraft } from '@/lib/toot'
+import type { SongTootDraft, TootDraft } from '@/lib/toot'
 import { readCheckoutReturn, startCheckout, waitUntilPaid } from '@/lib/toot-payment'
 import { button, closeScreens, pageText, show, tap } from '@/test-support/screen'
+import { songs } from '@/test-support/songs.generated'
 import { useAccount } from './account-provider'
+import { SaveToToots } from './save-to-toots'
 import { SongCreator } from './song-creator'
 import { useToots } from './toots-provider'
 
@@ -30,6 +31,18 @@ vi.mock('@/lib/toot-payment', async importOriginal => {
   }
 })
 vi.mock('./toot-layout', () => ({ TootLayout: () => null }))
+vi.mock('./favorite-button', () => ({ FavoriteButton: () => null }))
+vi.mock('./song-catalog-provider', () => ({
+  useSongCatalog: () => ({
+    songs: [song],
+    songsFailed: false,
+    reloadSongs: vi.fn(),
+    song: (id: string) => (id === song.id ? song : undefined)
+  })
+}))
+vi.mock('./use-song-notes', () => ({
+  useSongNotes: () => ({ song, failed: false, retry: vi.fn() })
+}))
 vi.mock('./account-provider', () => ({ useAccount: vi.fn() }))
 vi.mock('./toots-provider', () => ({ useToots: vi.fn() }))
 vi.mock('./recordings-provider', () => ({
@@ -38,7 +51,7 @@ vi.mock('./recordings-provider', () => ({
 
 const PAID_TOOT = '44444444-4444-4444-8444-444444444444'
 const song = songs.find(s => s.id === 'twinkle') ?? songs[0]
-const draft: TootDraft = {
+const draft: SongTootDraft = {
   id: '0f8fad5b-d9cb-469f-a165-70867728950e',
   song,
   arrangement: { transposition: 0, recordingForPitch: {} },
@@ -67,7 +80,7 @@ function asAccount(account: Account) {
 function openSongCreator(savingIs: 'free' | 'paid', account: Account = signedIn) {
   saving.paid = savingIs === 'paid'
   asAccount(account)
-  return show(<SongCreator song={song} />)
+  return show(<SongCreator id={song.id} />)
 }
 
 function returnFromCheckout() {
@@ -188,7 +201,7 @@ describe('Song Creator', () => {
     expect(buttonSaying('Save to Toots')?.disabled).toBe(true)
 
     asAccount(signedIn)
-    await render(<SongCreator song={song} />)
+    await render(<SongCreator id={song.id} />)
     expect(buttonSaying('Save to Toots')?.disabled).toBe(false)
   })
 })
@@ -214,6 +227,21 @@ describe('Song Creator where saving is paid', () => {
     await tap(button(PAID_LABEL))
     expect(fetch).toHaveBeenCalledOnce()
     expect(pageText()).toContain("Payments aren't available right now.")
+    expect(button(PAID_LABEL).disabled).toBe(false)
+  })
+
+  it('starts no Checkout when the take can’t be kept to make again back from it (ADR 0017)', async () => {
+    const fetch = checkoutAnswers({ url: 'https://checkout.stripe.com/c/pay/cs_test_a' })
+    const keep = vi.fn(() => false)
+    saving.paid = true
+    asAccount(signedIn)
+    await show(<SaveToToots draft={draft} back={null} keep={keep} />)
+    await tap(button(PAID_LABEL))
+    expect(keep).toHaveBeenCalledExactlyOnceWith('u1')
+    expect(fetch).not.toHaveBeenCalled()
+    expect(pageText()).toContain(
+      "This take can't be saved in this browser: it can't keep the take while you pay."
+    )
     expect(button(PAID_LABEL).disabled).toBe(false)
   })
 
@@ -269,7 +297,7 @@ describe('Song Creator where saving is paid', () => {
     expect(waitUntilPaid).not.toHaveBeenCalled()
 
     asAccount(signedIn)
-    await render(<SongCreator song={song} />)
+    await render(<SongCreator id={song.id} />)
     expect(waitUntilPaid).toHaveBeenCalledWith(draft.id, 'u1')
     expect(button('Saved to Toots').disabled).toBe(true)
   })
@@ -297,7 +325,7 @@ describe('Song Creator where saving is paid', () => {
     expect(fetch).not.toHaveBeenCalled()
 
     asAccount(signedIn)
-    await render(<SongCreator song={song} />)
+    await render(<SongCreator id={song.id} />)
     expect(waitUntilPaid).toHaveBeenCalledWith(draft.id, 'u1')
   })
 
@@ -309,7 +337,7 @@ describe('Song Creator where saving is paid', () => {
     expect(pageText()).toContain("Couldn't reach your account. Tap Save to try again.")
 
     asAccount(signedIn)
-    await render(<SongCreator song={song} />)
+    await render(<SongCreator id={song.id} />)
     expect(pageText()).not.toContain("Couldn't reach your account.")
   })
 
@@ -348,7 +376,7 @@ describe('Save to Toots, as a guest', () => {
 
     asAccount(signedIn)
     session.stepOpen = false
-    await render(<SongCreator song={song} />)
+    await render(<SongCreator id={song.id} />)
     if (savingIs === 'paid') {
       expect(fetch).toHaveBeenCalledWith(`/api/toots/${draft.id}/checkout/`, expect.anything())
     } else expect(fetch).not.toHaveBeenCalled()
@@ -359,9 +387,9 @@ describe('Save to Toots, as a guest', () => {
     const render = await openSongCreator('free', { status: 'signedOut' })
     await tap(button('Save to Toots'))
     session.stepOpen = false
-    await render(<SongCreator song={song} />)
+    await render(<SongCreator id={song.id} />)
     asAccount(signedIn)
-    await render(<SongCreator song={song} />)
+    await render(<SongCreator id={song.id} />)
     expect(saveToot).not.toHaveBeenCalled()
   })
 })

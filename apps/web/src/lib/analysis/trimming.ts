@@ -1,17 +1,19 @@
+import type { Trim } from '@/lib/recordings'
 import { frameRms } from './frame-rms'
 import { ANALYSIS_SAMPLE_RATE } from './resample'
 
 interface Gesture {
   start: number
-  endExclusive: number
+  end: number
+  pitchEnd: number
   cutAtReattack: boolean
 }
 
-const LEVEL_HOP_SECONDS = 0.005
-const FINE_FRAME_HOPS = 2
+export const LEVEL_HOP_SECONDS = 0.005
+export const FINE_FRAME_HOPS = 2
 const SMOOTH_FRAME_HOPS = 10
-const ONSET_BELOW_PEAK_DB = 12
-const ONSET_LEAD_SECONDS = 0.008
+export const ONSET_BELOW_PEAK_DB = 12
+export const ONSET_LEAD_SECONDS = 0.008
 const FADED_BELOW_PEAK_DB = 30
 const REATTACK_DIP_DB = 6
 const REATTACK_RISE_DB = 4
@@ -44,15 +46,21 @@ export function noteSegment(y: Float32Array): Gesture {
       break
     }
   }
-  const end = (reattackAt ?? fadedAt) * hop + hop
-  return {
-    start,
-    endExclusive: Math.min(y.length, end),
-    cutAtReattack: reattackAt !== undefined
-  }
+  const end = Math.min(y.length, fadedAt * hop + hop)
+  const pitchEnd = reattackAt === undefined ? end : Math.min(end, reattackAt * hop + hop)
+  return { start, end, pitchEnd, cutAtReattack: reattackAt !== undefined }
 }
 
-function levelDb(y: Float32Array, frameLength: number, hop: number): Float64Array {
+export function trimBounds(y: Float32Array, startSeconds: number, endSeconds: number): Trim {
+  const sr = ANALYSIS_SAMPLE_RATE
+  const a = Math.max(0, Math.min(y.length, Math.round(startSeconds * sr)))
+  const b = Math.max(a, Math.min(y.length, Math.round(endSeconds * sr)))
+  if (b - a < 2) throw new Error('A Trim keeps at least two samples')
+  const { start, end } = noteSegment(y.subarray(a, b))
+  return { startSeconds: (a + start) / sr, endSeconds: (a + end) / sr }
+}
+
+export function levelDb(y: Float32Array, frameLength: number, hop: number): Float64Array {
   return frameRms(y, frameLength, hop).map(rms => 20 * Math.log10(rms + 1e-9))
 }
 

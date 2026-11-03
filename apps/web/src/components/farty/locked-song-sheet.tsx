@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import type { Song } from '@/lib/catalog/song'
+import type { SongSummary } from '@/lib/catalog/song'
 import { pitchClass } from '@/lib/pitch'
 import {
   type Coverage,
@@ -13,6 +13,7 @@ import {
   coverageSummary,
   missingNotes
 } from '@/lib/pitch-coverage'
+import { FavoriteButton } from './favorite-button'
 import { PitchStrip } from './pitch-strip'
 import { useRecordings } from './recordings-provider'
 
@@ -21,14 +22,14 @@ export function LockedSongSheet({
   onClose,
   onRecord
 }: {
-  song: Song | null
+  song: SongSummary | null
   onClose: () => void
   onRecord: () => void
 }) {
-  const { songRows } = useRecordings()
+  const { coverage: coverageOf } = useRecordings()
   const [shown, setShown] = useState(song)
   if (song !== null && song !== shown) setShown(song)
-  const coverage = songRows.find(r => r.song.id === shown?.id)?.coverage
+  const coverage = shown ? coverageOf(shown) : undefined
 
   return (
     <Sheet open={song !== null} onOpenChange={open => !open && onClose()}>
@@ -42,6 +43,7 @@ export function LockedSongSheet({
           <SheetTitle className="text-center font-semibold">{shown?.title}</SheetTitle>
         </SheetHeader>
         {coverage && <Body coverage={coverage} onRecord={onRecord} />}
+        {shown && <FavoriteButton song={shown} className="absolute top-1.5 left-1.5" />}
         <SheetClose
           render={
             <Button variant="ghost" size="icon" className="absolute top-1.5 right-1.5 size-11" />

@@ -3,6 +3,7 @@ import type { CaptureBatch } from './capture-processor'
 export type Capturing = {
   id: number
   chunks: Float32Array[]
+  listener: ((batch: Float32Array) => void) | null
   began(): void
   finished: (() => void) | null
   lost(): void
@@ -36,4 +37,5 @@ export function receiveBatch(batch: CaptureBatch): void {
   take.chunks.push(batch.samples)
   take.began()
   if (batch.done) take.finished?.()
+  take.listener?.(batch.samples)
 }

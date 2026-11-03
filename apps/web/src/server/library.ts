@@ -4,6 +4,7 @@ import { getDb } from '@/db'
 import type { Database } from '@/db/database'
 import {
   deleteUser,
+  favoriteSong,
   forgetDeleted,
   type ItemStatus,
   insertPaidToot,
@@ -20,23 +21,28 @@ import {
   TOMBSTONE_RETENTION_MS,
   type TootRow,
   tombstone,
+  unfavoriteSong,
   uploadState
 } from '@/db/library'
 import { tootPayment } from '@/db/payments'
-import type { Recording } from '@/lib/recordings'
-import type { Toot } from '@/lib/toot'
+import { removeShare } from '@/db/sharing'
+import type { Performance } from '@/lib/performance'
+import type { Recording, RecordingTrim } from '@/lib/recordings'
+import type { Toot, TootArrangement } from '@/lib/toot'
 
 import { type SessionUser, signedInRecently } from './auth-session'
 import { uploadsAgainOnceDeleted } from './fixture-recordings'
 import { apiError, gone, notFound } from './http'
 import {
   isItemId,
-  PLACED_PITCH,
+  isSongId,
+  PLACEMENT,
   parseRecording,
   parseToot,
   readJson,
   readUpload,
-  TITLE
+  TITLE,
+  TRIM_TOLERANCE_SECONDS
 } from './library-input'
 import { audioKey, deleteUserMedia, getMedia, putAudioOnce } from './media'
 import { readWavHeader } from './wav-header'
@@ -52,7 +58,9 @@ export const LIMITS: Record<Kind, { maxAudioBytes: number; maxItems: number }> =
   toots: { maxAudioBytes: 16 * 1024 * 1024, maxItems: 300 }
 }
 
-function toRecording(row: RecordingRow): Recording & { audioBytes: number } {
+export const FAVORITE_SONGS_LIMIT = 5000
+
+export function toRecording(row: RecordingRow): Recording & { audioBytes: number } {
   return {
     id: row.id,
     number: row.number,
@@ -64,25 +72,50 @@ function toRecording(row: RecordingRow): Recording & { audioBytes: number } {
       ? { state: 'analyzed', analysis: row.analysis }
       : { state: 'notAnalyzed' },
     placedPitch: row.placedPitch,
+    trim: trimOfRow(row),
+    name: row.name,
     audioBytes: row.audioBytes
+  }
+}
+
+function trimOfRow(row: RecordingRow): RecordingTrim | null {
+  const { trimStartSeconds, trimEndSeconds, trimFartStartSeconds, trimFartEndSeconds } = row
+  if (
+    trimStartSeconds === null ||
+    trimEndSeconds === null ||
+    trimFartStartSeconds === null ||
+    trimFartEndSeconds === null
+  )
+    return null
+  return {
+    startSeconds: trimStartSeconds,
+    endSeconds: trimEndSeconds,
+    fart: { startSeconds: trimFartStartSeconds, endSeconds: trimFartEndSeconds }
   }
 }
 
 function toToot(row: TootRow): Toot & { audioBytes: number } {
-  return {
+  const saved = {
     id: row.id,
     title: row.title,
-    songId: row.songId,
     createdAt: row.createdAt.getTime(),
     seconds: row.seconds,
-    arrangement: row.arrangement,
     audioBytes: row.audioBytes
   }
+  if (row.songId === null) {
+    return {
+      ...saved,
+      songId: null,
+      arrangement: null,
+      performance: row.performance as Performance
+    }
+  }
+  return { ...saved, songId: row.songId, arrangement: row.arrangement as TootArrangement }
 }
 
 const LIBRARY_HEADER = 'x-pedos-library'
 
-function wrongLibrary(user: SessionUser, request: Request): Response | null {
+export function wrongLibrary(user: SessionUser, request: Request): Response | null {
   const library = request.headers.get(LIBRARY_HEADER)
   return library !== null && library !== user.id ? apiError(409, 'wrong_account') : null
 }
@@ -100,17 +133,59 @@ export async function getLibrary({ db }: Stores, user: SessionUser, request: Req
   if (wrong) return wrong
   const since = new URL(request.url).searchParams.get('since') ?? '0'
   if (!/^\d{1,15}$/.test(since)) return apiError(400, 'invalid_request')
-  const changes = await libraryChanges(db, user.id, Number(since))
+  let changes = await libraryChanges(db, user.id, Number(since))
+  const full = Number(since) < changes.cursor - TOMBSTONE_RETENTION_MS
+  if (full && Number(since) > 0) changes = await libraryChanges(db, user.id, 0)
   const live = <T extends { deletedAt: Date | null }>(rows: T[]) => rows.filter(r => !r.deletedAt)
   const deleted = (rows: { id: string; deletedAt: Date | null }[]) =>
     rows.filter(r => r.deletedAt).map(r => r.id)
   return Response.json({
     cursor: changes.cursor,
-    full: Number(since) < changes.cursor - TOMBSTONE_RETENTION_MS,
+    full,
     recordings: live(changes.recordings).map(toRecording),
     toots: live(changes.toots).map(toToot),
-    deleted: { recordings: deleted(changes.recordings), toots: deleted(changes.toots) }
+    favorites: live(changes.favoriteSongs).map(f => f.songId),
+    deleted: {
+      recordings: deleted(changes.recordings),
+      toots: deleted(changes.toots),
+      favorites: changes.favoriteSongs.filter(f => f.deletedAt).map(f => f.songId)
+    }
   })
+}
+
+function refusedFavoriteRequest(
+  user: SessionUser,
+  songId: string,
+  request: Request
+): Response | null {
+  return isSongId(songId) ? wrongLibrary(user, request) : notFound()
+}
+
+export async function putFavorite(
+  { db }: Stores,
+  user: SessionUser,
+  songId: string,
+  request: Request
+): Promise<Response> {
+  const refused = refusedFavoriteRequest(user, songId, request)
+  if (refused) return refused
+  const marked = await favoriteSong(db, user.id, songId, FAVORITE_SONGS_LIMIT)
+  if (marked === 'added') return Response.json({ songId }, { status: 201 })
+  if (marked === 'kept') return Response.json({ songId }, { status: 200 })
+  return apiError(409, 'limit_reached')
+}
+
+export async function deleteFavorite(
+  { db }: Stores,
+  user: SessionUser,
+  songId: string,
+  request: Request
+): Promise<Response> {
+  const refused = refusedFavoriteRequest(user, songId, request)
+  if (refused) return refused
+  await unfavoriteSong(db, user.id, songId)
+  await purgeTombstones(db, user.id)
+  return new Response(null, { status: 204 })
 }
 
 type AddRow = (audioBytes: number) => Promise<boolean>
@@ -213,6 +288,7 @@ export async function deleteItem(
   if (refused) return refused
   const before = await tombstone(db, kind, user.id, id)
   if (before === null) return notFound()
+  await removeShare(db, user.id, kind, id)
   await media.delete(audioKey(user.id, kind, id))
   await purgeTombstones(db, user.id)
   return new Response(null, { status: 204 })
@@ -243,7 +319,7 @@ async function patchItem<T extends object>(
   id: string,
   request: Request,
   schema: z.ZodType<T>,
-  update: (fields: T) => Promise<ItemStatus>
+  update: (fields: T) => Promise<ItemStatus | 'tooLong'>
 ): Promise<Response> {
   const refused = refusedItemRequest(user, id, request)
   if (refused) return refused
@@ -252,6 +328,7 @@ async function patchItem<T extends object>(
   const before = await update(body.json)
   if (before === null) return notFound()
   if (before === 'deleted') return gone()
+  if (before === 'tooLong') return apiError(400, 'invalid_request')
   return Response.json({ id, ...body.json })
 }
 
@@ -266,16 +343,14 @@ export function patchToot(
   return patchItem(user, id, request, RENAME, ({ title }) => renameToot(db, user.id, id, title))
 }
 
-const PLACE = z.object({ placedPitch: PLACED_PITCH })
-
 export function patchRecording(
   { db }: Stores,
   user: SessionUser,
   id: string,
   request: Request
 ): Promise<Response> {
-  return patchItem(user, id, request, PLACE, ({ placedPitch }) =>
-    placeRecording(db, user.id, id, placedPitch)
+  return patchItem(user, id, request, PLACEMENT, placement =>
+    placeRecording(db, user.id, id, placement, TRIM_TOLERANCE_SECONDS)
   )
 }
 

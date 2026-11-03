@@ -5,5 +5,6 @@ Each rule turned off in a tool's config file, with its reason, as SERP's [Verifi
 | Where | Off | Why |
 | --- | --- | --- |
 | `apps/web/biome.json`, the override for `src/components/ui/**` | `a11y/useSemanticElements`, `a11y/useKeyWithClickEvents`, `a11y/useFocusableInteractive` | These are shadcn's own components, kept as shadcn writes them so they can be updated from it. The screens that use them are checked in full. |
+| `apps/web/biome.json`, the override for `src/server/link-preview.tsx` | `performance/noImgElement` | A shared link's image is drawn by Satori, through `next/og`'s `ImageResponse`, which takes only a plain `<img>`, not `next/image` ([Sharing, friends and reports](sharing.md)). |
 | `knip.json`, `apps/web`'s `ignoreDependencies` | `cloudflare` | The Workers tests import `cloudflare:test`, a module `@cloudflare/vitest-plugin` provides at runtime. No package by that name exists to list. |
 | `verify.json`, `docs.github.exempt` | `.claude/skills/pr-review/SKILL.md` | The Code review workflow's `review` job runs it, and its `gh` commands read the pull request with that job's own token, not an agent's. |

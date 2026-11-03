@@ -10,45 +10,46 @@ import {
   useRef,
   useState
 } from 'react'
-import { MicrophoneDeniedError, MicrophoneReleasedError } from '@/lib/audio/microphone'
 import { stopPlayback } from '@/lib/audio/player'
-import { startTake, type Take } from '@/lib/audio/recorder'
-import { songs } from '@/lib/catalog/songs.generated'
+import { loadSongs } from '@/lib/catalog/load-songs'
 import { type CoverageChanges, coverageChanges } from '@/lib/pitch-coverage'
-import { heardSomething, maximumTakeSeconds, type Recording } from '@/lib/recordings'
+import type { AnalysisState, Recording, Trim } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
+import type { ReviewChange } from '@/lib/take-review'
 import { reportError } from '@/lib/telemetry/errors'
-import { encodeWav, type PcmAudio } from '@/lib/wav'
-import { waveformLevels } from '@/lib/waveform'
+import { useDraftSession } from './draft-session'
+import type { Sound } from './playback-provider'
 import { useRecordings } from './recordings-provider'
-
-export type Draft = { audio: PcmAudio; seconds: number; waveform: number[] }
-
-type Capture =
-  | { kind: 'idle' }
-  | { kind: 'starting' }
-  | { kind: 'recording'; startedAt: number }
-  | { kind: 'finishing' }
+import {
+  type Capture,
+  type Draft,
+  type LiveTake,
+  type RecordProblem,
+  useTakeCapture
+} from './take-capture'
 
 type Flow =
   | { kind: 'review'; draft: Draft }
-  | { kind: 'saveFailed'; draft: Draft }
+  | { kind: 'saveFailed'; draft: Draft; review: ReviewChange }
   | { kind: 'analyzing'; id: string }
-  | { kind: 'analysisFailed'; id: string }
-  | { kind: 'result'; id: string; changes: CoverageChanges }
-
-export type RecordProblem = 'microphoneOff' | 'couldNotStart' | 'interrupted' | 'nothingHeard'
+  | { kind: 'analysisFailed'; id: string; trimFailed?: boolean }
+  | { kind: 'result'; id: string; changes: CoverageChanges; trimFailed?: boolean }
 
 type RecordFlow = {
   capture: Capture
+  liveTake: LiveTake
   flow: Flow | null
   problem: RecordProblem | null
   isSaving: boolean
   showsRecordFlow: boolean
+  reviewOpen: boolean
+  setReviewOpen(open: boolean): void
   startRecording(): Promise<void>
   stopRecording(): Promise<void>
   dismissProblem(): void
-  saveDraft(): Promise<void>
+  draftAnalysis: AnalysisState | null
+  draftSound(part: Trim | null): Sound | null
+  saveDraft(review?: ReviewChange): Promise<void>
   retryAnalysis(id: string): Promise<void>
   closeFlow(): void
 }
@@ -61,128 +62,122 @@ export function useRecordFlow(): RecordFlow {
   return recordFlow
 }
 
-function draftOf(audio: PcmAudio): Draft {
-  return {
-    audio,
-    seconds: audio.samples.length / audio.sampleRate,
-    waveform: waveformLevels(audio.samples, 40)
-  }
-}
-
 function whenAnalyzing(id: string, next: Flow) {
   return (current: Flow | null) =>
     current?.kind === 'analyzing' && current.id === id ? next : current
 }
 
+function savedFields(draft: Draft, { placedPitch, name }: ReviewChange) {
+  return {
+    seconds: draft.seconds,
+    sampleRate: draft.audio.sampleRate,
+    waveform: draft.waveform,
+    ...(placedPitch == null ? {} : { placedPitch }),
+    ...(name == null ? {} : { name })
+  }
+}
+
 export function RecordFlowProvider({ children }: { children: ReactNode }) {
-  const { recordings, saveRecording, analyze, reanalyze } = useRecordings()
-  const [capture, setCapture] = useState<Capture>({ kind: 'idle' })
+  const { recordings, saveRecording, analyze, keepAnalysis, reanalyze, placeRecording } =
+    useRecordings()
   const [flow, setFlow] = useState<Flow | null>(null)
-  const [problem, setProblem] = useState<RecordProblem | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const take = useRef<{ take: Take; limit: number } | null>(null)
+  const [reviewOpen, setReviewOpen] = useState(false)
   const latest = useRef<Recording[] | null>(null)
   useEffect(() => {
     latest.current = recordings
   }, [recordings])
 
-  const afterAnalysis = useCallback((id: string, analyzed: Recording | null): Flow => {
-    if (!analyzed) return { kind: 'analysisFailed', id }
-    const others = (latest.current ?? []).filter(r => r.id !== analyzed.id)
-    return {
-      kind: 'result',
-      id: analyzed.id,
-      changes: coverageChanges(songs, others, [...others, analyzed])
-    }
-  }, [])
+  const review = useCallback((draft: Draft) => setFlow({ kind: 'review', draft }), [])
+  const { capture, problem, liveTake, startRecording, stopRecording, dismissProblem } =
+    useTakeCapture(flow !== null, review)
+  const reviewing = flow?.kind === 'review' || flow?.kind === 'saveFailed' ? flow.draft : null
+  const { sessionOf, draftAnalysis, letGoOfDraft, draftSound } = useDraftSession(reviewing)
 
-  const stopRecording = useCallback(async () => {
-    const current = take.current
-    if (!current) return
-    take.current = null
-    clearTimeout(current.limit)
-    setCapture({ kind: 'finishing' })
-    const audio = await current.take.stop()
-    setCapture({ kind: 'idle' })
-    if (audio.samples.length === 0 || !heardSomething(audio.samples, audio.sampleRate)) {
-      setProblem('nothingHeard')
-      return
-    }
-    setFlow({ kind: 'review', draft: draftOf(audio) })
-  }, [])
-
-  const loseTake = useCallback(() => {
-    if (!take.current) return
-    clearTimeout(take.current.limit)
-    take.current = null
-    setCapture({ kind: 'idle' })
-    setProblem('interrupted')
-  }, [])
-
-  const startRecording = useCallback(async () => {
-    if (capture.kind !== 'idle' || flow) return
-    stopPlayback()
-    setProblem(null)
-    setCapture({ kind: 'starting' })
-    try {
-      const started = await startTake(loseTake)
-      const limit = window.setTimeout(() => void stopRecording(), maximumTakeSeconds * 1000)
-      take.current = { take: started, limit }
-      setCapture({ kind: 'recording', startedAt: Date.now() })
-    } catch (error) {
-      setCapture({ kind: 'idle' })
-      if (error instanceof MicrophoneReleasedError) return
-      const denied = error instanceof MicrophoneDeniedError
-      reportError(denied ? 'mic-denied' : 'mic-start-failed', error)
-      setProblem(denied ? 'microphoneOff' : 'couldNotStart')
-    }
-  }, [capture.kind, flow, loseTake, stopRecording])
+  const afterAnalysis = useCallback(
+    async (id: string, analyzed: Recording | null, trimFailed: boolean): Promise<Flow> => {
+      const failedTrim = trimFailed ? { trimFailed } : {}
+      if (!analyzed) return { kind: 'analysisFailed', id, ...failedTrim }
+      const catalog = await loadSongs().catch(() => [])
+      const others = (latest.current ?? []).filter(r => r.id !== analyzed.id)
+      return {
+        kind: 'result',
+        id: analyzed.id,
+        changes: coverageChanges(catalog, others, [...others, analyzed]),
+        ...failedTrim
+      }
+    },
+    []
+  )
 
   const showsRecordFlow = capture.kind !== 'idle' || flow !== null
   useEffect(() => (showsRecordFlow ? holdReload() : undefined), [showsRecordFlow])
 
-  const saveDraft = useCallback(async () => {
-    if (!flow || (flow.kind !== 'review' && flow.kind !== 'saveFailed') || isSaving) return
-    const { draft } = flow
-    setIsSaving(true)
-    stopPlayback()
-    let saved: Recording
-    try {
-      saved = await saveRecording(
-        { seconds: draft.seconds, sampleRate: draft.audio.sampleRate, waveform: draft.waveform },
-        encodeWav(draft.audio)
-      )
-    } catch (error) {
-      reportError('recording-save-failed', error)
+  const saveDraft = useCallback(
+    async (change?: ReviewChange) => {
+      if (!flow || (flow.kind !== 'review' && flow.kind !== 'saveFailed') || isSaving) return
+      const { draft } = flow
+      const changes = change ?? (flow.kind === 'saveFailed' ? flow.review : {})
+      const session = sessionOf(draft)
+      setIsSaving(true)
+      stopPlayback()
+      let saved: Recording
+      try {
+        saved = await saveRecording(savedFields(draft, changes), session.wav)
+      } catch (error) {
+        reportError('recording-save-failed', error)
+        setIsSaving(false)
+        setFlow({ kind: 'saveFailed', draft, review: changes })
+        return
+      }
       setIsSaving(false)
-      setFlow({ kind: 'saveFailed', draft })
-      return
-    }
-    setIsSaving(false)
-    setFlow({ kind: 'analyzing', id: saved.id })
-    const analyzed = await analyze(saved.id)
-    setFlow(whenAnalyzing(saved.id, afterAnalysis(saved.id, analyzed)))
-  }, [flow, isSaving, saveRecording, analyze, afterAnalysis])
+      setFlow({ kind: 'analyzing', id: saved.id })
+      letGoOfDraft()
+      const trimmed = changes.handles
+        ? await placeRecording(saved.id, { handles: changes.handles })
+        : true
+      const kept = await keepAnalysis(saved.id, await session.analysis)
+      const analyzed = kept
+        ? kept.analysis.state === 'analyzed'
+          ? kept
+          : null
+        : await analyze(saved.id)
+      setFlow(whenAnalyzing(saved.id, await afterAnalysis(saved.id, analyzed, !trimmed)))
+    },
+    [
+      flow,
+      isSaving,
+      sessionOf,
+      letGoOfDraft,
+      saveRecording,
+      placeRecording,
+      keepAnalysis,
+      analyze,
+      afterAnalysis
+    ]
+  )
 
   const retryAnalysis = useCallback(
     async (id: string) => {
       const analysis = reanalyze(id)
       if (!analysis) return
+      const trimFailed = flow?.kind === 'analysisFailed' && flow.id === id && !!flow.trimFailed
       setFlow(current =>
         current?.kind === 'analysisFailed' && current.id === id
           ? { kind: 'analyzing', id }
           : current
       )
       const analyzed = await analysis
-      setFlow(whenAnalyzing(id, afterAnalysis(id, analyzed)))
+      setFlow(whenAnalyzing(id, await afterAnalysis(id, analyzed, trimFailed)))
     },
-    [reanalyze, afterAnalysis]
+    [flow, reanalyze, afterAnalysis]
   )
 
   const closeFlow = useCallback(() => {
     stopPlayback()
+    letGoOfDraft()
     setFlow(null)
-  }, [])
+  }, [letGoOfDraft])
 
   const flowRecordingId = flow && 'id' in flow ? flow.id : null
   useEffect(() => {
@@ -190,31 +185,38 @@ export function RecordFlowProvider({ children }: { children: ReactNode }) {
     if (!recordings.some(recording => recording.id === flowRecordingId)) closeFlow()
   }, [flowRecordingId, recordings, closeFlow])
 
-  const dismissProblem = useCallback(() => setProblem(null), [])
-
   const value = useMemo(
     (): RecordFlow => ({
       capture,
+      liveTake,
       flow,
       problem,
       isSaving,
       showsRecordFlow,
+      reviewOpen,
+      setReviewOpen,
       startRecording,
       stopRecording,
       dismissProblem,
+      draftAnalysis,
+      draftSound,
       saveDraft,
       retryAnalysis,
       closeFlow
     }),
     [
       capture,
+      liveTake,
       flow,
       problem,
       isSaving,
       showsRecordFlow,
+      reviewOpen,
       startRecording,
       stopRecording,
       dismissProblem,
+      draftAnalysis,
+      draftSound,
       saveDraft,
       retryAnalysis,
       closeFlow

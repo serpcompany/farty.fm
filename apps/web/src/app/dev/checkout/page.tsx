@@ -3,7 +3,7 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 
 import { buttonVariants } from '@/components/ui/button'
-import { songs } from '@/lib/catalog/songs.generated'
+import { songIndex } from '@/lib/catalog/song-index.generated'
 import { TOOT_PRICE_LABEL } from '@/lib/pricing'
 import { cn } from '@/lib/utils'
 import { isItemId } from '@/server/library-input'
@@ -20,8 +20,9 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>
 export default async function DevCheckoutPage({ searchParams }: { searchParams: SearchParams }) {
   if (!devCheckoutServes((await headers()).get('host'))) notFound()
   const { toot, song: songId } = await searchParams
-  const song = songs.find(s => s.id === songId)
-  if (!isItemId(toot) || !song) notFound()
+  const song = songId === undefined ? null : songIndex.find(s => s.id === songId)
+  if (!isItemId(toot) || song === undefined) notFound()
+  const back = song ? `/compose/${song.id}/` : '/compose/pad/'
   return (
     <article className="flex flex-col gap-4 px-4 pt-4 pb-6">
       <h1 className="text-3xl font-bold tracking-tight">Dev checkout</h1>
@@ -29,16 +30,17 @@ export default async function DevCheckoutPage({ searchParams }: { searchParams: 
         Stripe Checkout's stand-in on a local run. Nothing is charged.
       </p>
       <p>
-        Save your Toot of {song.title}: <span className="font-semibold">{TOOT_PRICE_LABEL}</span>
+        {song ? `Save your Toot of ${song.title}` : 'Save your Sound Pad Toot'}:{' '}
+        <span className="font-semibold">{TOOT_PRICE_LABEL}</span>
       </p>
       <form method="post" action="/api/dev/checkout/" className="flex flex-col gap-3">
         <input type="hidden" name="toot" value={toot} />
-        <input type="hidden" name="song" value={song.id} />
+        {song && <input type="hidden" name="song" value={song.id} />}
         <button type="submit" className={cn(buttonVariants(), 'h-12 w-full text-base')}>
           Pay {TOOT_PRICE_LABEL}
         </button>
         <a
-          href={`/compose/${song.id}/?toot=${toot}`}
+          href={`${back}?toot=${toot}`}
           className={cn(buttonVariants({ variant: 'outline' }), 'h-12 w-full text-base')}
         >
           Cancel

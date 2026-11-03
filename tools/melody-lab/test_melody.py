@@ -4,11 +4,15 @@ from pathlib import Path
 
 import mido
 
+from analysis import ROOT
 from export_golden import golden_catalog, song_json
 from golden_inputs import SONGS
 from melody import bar_lines, load_midi
 
 TPB = 480
+WOODBLOCK = 115
+STEEL_DRUMS = 114
+DRUM_CHANNEL = 9
 
 
 def track(*events):
@@ -40,6 +44,14 @@ def midi_file(test, *tracks):
 
 def notes_of(melody):
     return [(n.start, n.dur, n.pitch) for n in melody.notes]
+
+
+def instrument(channel, program, pitches):
+    events = [(0, mido.Message("program_change", channel=channel, program=program))]
+    for i, p in enumerate(pitches):
+        events += [(i * TPB, mido.Message("note_on", channel=channel, note=p, velocity=80)),
+                   ((i + 1) * TPB, mido.Message("note_off", channel=channel, note=p))]
+    return track(*events)
 
 
 class LoadMidi(unittest.TestCase):
@@ -78,6 +90,31 @@ class LoadMidi(unittest.TestCase):
         self.assertEqual(m.report["overlaps_clipped"], 1)
         self.assertEqual(notes_of(m), [(0.0, 1.0, 72), (1.0, 1.0, 74), (2.0, 1.0, 76)])
         self.assertEqual((m.bpm, m.beats_per_bar), (120.0, 4))
+
+
+class MelodyTrack(unittest.TestCase):
+    def test_skips_the_drum_channel(self):
+        m = load_midi(midi_file(self, instrument(0, 22, [64, 69, 67, 65]), instrument(DRUM_CHANNEL, 0, [76, 77, 77, 77])))
+        self.assertEqual(m.report["track_used"], 0)
+        self.assertEqual([n.pitch for n in m.notes], [64, 69, 67, 65])
+
+    def test_skips_an_unpitched_percussion_program(self):
+        m = load_midi(midi_file(self, instrument(0, 0, [60, 62, 64]), instrument(1, WOODBLOCK, [84, 84, 84])))
+        self.assertEqual(m.report["track_used"], 0)
+
+    def test_takes_a_pitched_percussion_program(self):
+        m = load_midi(midi_file(self, instrument(0, 32, [48, 50, 52, 53]), instrument(1, STEEL_DRUMS, [76, 79, 81, 79])))
+        self.assertEqual(m.report["track_used"], 1)
+        self.assertEqual([n.pitch for n in m.notes], [76, 79, 81, 79])
+
+    def test_a_score_of_only_percussion_still_imports(self):
+        m = load_midi(midi_file(self, instrument(DRUM_CHANNEL, 0, [76, 77])))
+        self.assertEqual(m.report["track_used"], 0)
+
+    def test_o_sacred_head_plays_the_hymn_not_its_wood_blocks(self):
+        m = load_midi(ROOT / "catalog/midi/pdmx-o-sacred-head-now-wounded.mid")
+        self.assertEqual(m.report["track_used"], 0)
+        self.assertEqual([n.pitch for n in m.notes[:5]], [64, 69, 67, 65, 64])
 
 
 class BarLines(unittest.TestCase):

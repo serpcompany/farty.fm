@@ -24,7 +24,11 @@ export interface GoldenRecording {
     end_sample: number
     start_s: number
     end_s: number
+    pitch_end_sample: number
+    pitch_end_s: number
     cut_at_reattack: boolean
+    lead_start_sample: number
+    lead_start_s: number
   }
   pitch_contour: { frames: number; hop: number; midi: (number | null)[] }
   pitch_estimate_midi: number | null
@@ -62,6 +66,18 @@ export async function analysisAudio(golden: GoldenRecording): Promise<Float32Arr
 export async function gestureBody(golden: GoldenRecording): Promise<Float64Array> {
   const y = await analysisAudio(golden)
   return Float64Array.from(y.subarray(golden.gesture.start_sample, golden.gesture.end_sample))
+}
+
+export async function leadInBody(golden: GoldenRecording): Promise<Float64Array> {
+  const y = await analysisAudio(golden)
+  return Float64Array.from(
+    y.subarray(golden.gesture.lead_start_sample, golden.gesture.start_sample)
+  )
+}
+
+export async function pitchBody(golden: GoldenRecording): Promise<Float64Array> {
+  const y = await analysisAudio(golden)
+  return Float64Array.from(y.subarray(golden.gesture.start_sample, golden.gesture.pitch_end_sample))
 }
 
 export function goldenContourHz(golden: GoldenRecording): Float64Array {

@@ -5,7 +5,12 @@ import { pathToFileURL } from 'node:url'
 
 export type StaleDoc = { doc: string; changed: string[] }
 
-const SKIPPED_DOCS = [/^docs\/adr\//, /(^|\/)CHANGELOG\.md$/, /\.report\.md$/]
+const SKIPPED_DOCS = [
+  /^docs\/adr\//,
+  /(^|\/)CHANGELOG\.md$/,
+  /\.report\.md$/,
+  /^tools\/catalog\/ranking\.md$/
+]
 const LINK = /\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g
 const CODE = /`([^`\s]+)`/g
 const LINE_NUMBERS = /:\d+(-\d+)?$/

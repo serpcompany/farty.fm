@@ -13,6 +13,8 @@ export interface RecordingAnalysis {
   gestureEndSample: number
   gestureStartSeconds: number
   gestureEndSeconds: number
+  pitchEndSample: number
+  pitchEndSeconds: number
   cutAtReattack: boolean
   contourMidi: (number | null)[]
   pitchEstimateMidi: number | null
@@ -28,7 +30,7 @@ export interface RecordingAnalysis {
 export function analyzeRecording(samples: Float32Array, sampleRate: number): RecordingAnalysis {
   const y = resampleToAnalysisRate(samples, sampleRate)
   const gesture = noteSegment(y)
-  const body = Float64Array.from(y.subarray(gesture.start, gesture.endExclusive))
+  const body = Float64Array.from(y.subarray(gesture.start, gesture.pitchEnd))
   const pitch = analyzePitch(body)
   const shortest =
     pitch.estimateMidi === null ? null : shortestNote(body, pitch.f0, pitch.estimateMidi)
@@ -39,9 +41,11 @@ export function analyzeRecording(samples: Float32Array, sampleRate: number): Rec
   return {
     version: ANALYSIS_VERSION,
     gestureStartSample: gesture.start,
-    gestureEndSample: gesture.endExclusive,
+    gestureEndSample: gesture.end,
     gestureStartSeconds: gesture.start / sr,
-    gestureEndSeconds: gesture.endExclusive / sr,
+    gestureEndSeconds: gesture.end / sr,
+    pitchEndSample: gesture.pitchEnd,
+    pitchEndSeconds: gesture.pitchEnd / sr,
     cutAtReattack: gesture.cutAtReattack,
     contourMidi: Array.from(pitch.f0, f => (Number.isFinite(f) ? hzToMidi(f) : null)),
     pitchEstimateMidi: pitch.estimateMidi,
@@ -55,12 +59,12 @@ export function analyzeRecording(samples: Float32Array, sampleRate: number): Rec
         : 'failed_audition',
     shortestNoteSeconds: shortest,
     settleSeconds: settle,
-    rmsDb: rmsDb(body)
+    rmsDb: rmsDb(y.subarray(gesture.start, gesture.end))
   }
 }
 
-function rmsDb(body: Float64Array): number {
+function rmsDb(fart: Float32Array): number {
   let sum = 0
-  for (const s of body) sum += s * s
-  return 20 * Math.log10(Math.sqrt(body.length > 0 ? sum / body.length : 0) + 1e-9)
+  for (const s of fart) sum += s * s
+  return 20 * Math.log10(Math.sqrt(fart.length > 0 ? sum / fart.length : 0) + 1e-9)
 }

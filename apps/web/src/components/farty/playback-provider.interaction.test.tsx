@@ -2,11 +2,12 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { play, stopPlayback } from '@/lib/audio/player'
+import { loadAudio } from '@/lib/recording-store'
 import type { AnalysisState, Recording } from '@/lib/recordings'
 import { PlaybackProvider, recordingSound, type Sound, usePlayback } from './playback-provider'
 
 vi.mock('@/lib/audio/player', () => ({ play: vi.fn(), stopPlayback: vi.fn() }))
-vi.mock('@/lib/recording-store', () => ({ loadAudio: vi.fn() }))
+vi.mock('@/lib/recording-store', () => ({ loadAudio: vi.fn(async () => new ArrayBuffer(8)) }))
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
 
@@ -31,20 +32,20 @@ function take(id: string, analysis: AnalysisState): Recording {
   return { id, number: 1, createdAt: 1, seconds: 3, sampleRate: 48_000, waveform: [], analysis }
 }
 
-const fartFrom = (start: number, end: number): AnalysisState => ({
+const withASecondBurst: AnalysisState = {
   state: 'analyzed',
   analysis: {
-    gestureStartSeconds: start,
-    gestureEndSeconds: end,
-    cutAtReattack: false,
-    pitchEstimateMidi: 57,
-    pitchConfidence: 1,
-    recordingPitchMidi: 57,
-    shortestNoteSeconds: end - start,
-    settleSeconds: 0,
-    version: 99
+    gestureStartSeconds: 0.4,
+    gestureEndSeconds: 2.1,
+    cutAtReattack: true,
+    pitchEstimateMidi: null,
+    pitchConfidence: 0,
+    recordingPitchMidi: null,
+    shortestNoteSeconds: 0.3
   }
-})
+}
+
+const lastSegment = () => vi.mocked(play).mock.lastCall?.[2]
 
 function deferredPlays() {
   const starts: (() => void)[] = []
@@ -78,17 +79,47 @@ describe('PlaybackProvider', () => {
     expect(playback.nowPlaying).toBeNull()
   })
 
-  it('plays only the fart of an analyzed Recording, and the whole take of one not analyzed', async () => {
-    const segmentPlayed = async (recording: Recording) => {
-      await act(async () => playback.togglePlayback(recordingSound(recording)))
-      return vi.mocked(play).mock.lastCall?.[2]
-    }
+  it('replays a Recording as the whole take, start to end, from its saved file', async () => {
+    await act(async () => playback.togglePlayback(recordingSound(take('r18', withASecondBurst))))
+    const [key, load, segment] = vi.mocked(play).mock.calls[0]
+    expect(key).toBe('r18')
+    expect(segment).toBeNull()
+    expect(playback.playingPart).toEqual({ startSeconds: 0, endSeconds: 3 })
+    await load()
+    expect(loadAudio).toHaveBeenCalledWith('r18')
+  })
 
-    expect(await segmentPlayed(take('fart', fartFrom(0.5, 1.25)))).toEqual({
-      start: 0.5,
-      end: 1.25
-    })
-    expect(await segmentPlayed(take('take', { state: 'notAnalyzed' }))).toBeNull()
+  it("plays a trimmed Recording's handles, and the part a scrub asks for", async () => {
+    const fart = { startSeconds: 0.6, endSeconds: 1.1 }
+    const trimmed = {
+      ...take('r18', withASecondBurst),
+      trim: { startSeconds: 0.5, endSeconds: 1.2, fart }
+    }
+    await act(async () => playback.togglePlayback(recordingSound(trimmed)))
+    expect(lastSegment()).toEqual({ start: 0.5, end: 1.2 })
+    expect(playback.playingPart).toEqual({ startSeconds: 0.5, endSeconds: 1.2 })
+
+    await act(async () =>
+      playback.playRecording(recordingSound(trimmed, { startSeconds: 0.9, endSeconds: 1.2 }))
+    )
+    expect(lastSegment()).toEqual({ start: 0.9, end: 1.2 })
+    expect(playback.nowPlaying).toBe('r18')
+    expect(stopPlayback).not.toHaveBeenCalled()
+
+    const melodic = take('r19', { state: 'notAnalyzed' })
+    await act(async () =>
+      playback.togglePlayback(recordingSound({ ...melodic, trim: trimmed.trim }))
+    )
+    expect(lastSegment()).toEqual({ start: 0.5, end: 1.2 })
+    await act(async () => playback.togglePlayback(recordingSound({ ...melodic, id: 'r20' })))
+    expect(lastSegment()).toBeNull()
+  })
+
+  it('says no part plays once what played has ended', async () => {
+    await act(async () => playback.togglePlayback(recordingSound(take('r18', withASecondBurst))))
+    const ended = vi.mocked(play).mock.calls[0][3]
+    await act(async () => ended())
+    expect(playback.playingPart).toBeNull()
   })
 
   it('stops the sound that plays when it is tapped again', async () => {

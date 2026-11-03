@@ -2,7 +2,15 @@ import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { join, resolve } from 'node:path'
 import { toAnalysis } from '../src/lib/analysis/port'
 import { analyzeRecording } from '../src/lib/analysis/recording-analysis'
-import { type Arrangement, arrange, autoMapRecording } from '../src/lib/engine/auto-map'
+import { ANALYSIS_SAMPLE_RATE, resampleToAnalysisRate } from '../src/lib/analysis/resample'
+import { trimBounds } from '../src/lib/analysis/trimming'
+import {
+  type Arrangement,
+  type AutoMapRecording,
+  arrange,
+  autoMapRecording,
+  placedAutoMapRecording
+} from '../src/lib/engine/auto-map'
 import {
   type RecordingToRender,
   renderFromRecordings,
@@ -20,7 +28,22 @@ const SONGS = join(ROOT, 'fixtures/golden/songs')
 const GOLDEN_ARRANGEMENTS = join(ROOT, 'fixtures/golden/arrangements/full')
 const RUNS = 5
 
-const outDir = resolve(process.argv[2] ?? join(ROOT, 'tools/melody-lab/out/web'))
+type Scenario = {
+  id: string
+  library: string[]
+  placed?: Record<string, number>
+  trims?: Record<string, [number, number]>
+}
+
+const args = process.argv.slice(2)
+const scenarioAt = args.indexOf('--scenario')
+const scenario: Scenario | null =
+  scenarioAt === -1 ? null : JSON.parse(readFileSync(resolve(args[scenarioAt + 1]), 'utf8'))
+const outArg = args.filter((_, i) => i !== scenarioAt && i !== scenarioAt + 1)[0]
+const outDir = resolve(
+  outArg ??
+    join(ROOT, scenario ? `tools/melody-lab/out/web-${scenario.id}` : 'tools/melody-lab/out/web')
+)
 
 function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b)
@@ -72,6 +95,15 @@ function goldenUnlocks(id: string): boolean {
   return golden.unlocked
 }
 
+function trimmedAsTheReviewSaves(
+  samples: Float32Array,
+  sampleRate: number,
+  [startSeconds, endSeconds]: [number, number]
+) {
+  const y = resampleToAnalysisRate(samples, sampleRate)
+  return { startSeconds, endSeconds, fart: trimBounds(y, startSeconds, endSeconds) }
+}
+
 async function main() {
   mkdirSync(outDir, { recursive: true })
   for (const name of readdirSync(outDir)) {
@@ -81,24 +113,46 @@ async function main() {
   const recordings: RecordingToRender[] = []
   let analysisMs = 0
   for (const { id, filename } of fixtures()) {
+    if (scenario && !scenario.library.includes(id)) continue
     const file = await decodeFile(join(FIXTURES, filename))
     const audio = { samples: file.samples, sampleRate: file.sampleRate }
     const { result, ms } = time(() => toAnalysis(analyzeRecording(audio.samples, audio.sampleRate)))
     analysisMs += ms
-    recordings.push({ id, audio, analysis: result })
+    const handles = scenario?.trims?.[id]
+    if (!handles) {
+      recordings.push({ id, audio, analysis: result })
+      continue
+    }
+    const trim = trimmedAsTheReviewSaves(audio.samples, audio.sampleRate, handles)
+    const sr = ANALYSIS_SAMPLE_RATE
+    console.log(
+      `${id} trimmed between ${handles[0]} and ${handles[1]} s: samples ` +
+        `${Math.round(trim.fart.startSeconds * sr)} to ${Math.round(trim.fart.endSeconds * sr)} ` +
+        `(${trim.fart.startSeconds.toFixed(4)} to ${trim.fart.endSeconds.toFixed(4)} s); analysis found ` +
+        `${Math.round(result.gestureStartSeconds * sr)} to ${Math.round(result.gestureEndSeconds * sr)}`
+    )
+    recordings.push({ id, audio, analysis: result, trim })
   }
-  const library = recordings.map(r => autoMapRecording(r.id, r.analysis))
-  const melodic = library.filter(r => r.recordingPitchMidi !== null).map(r => r.id)
+  const library: AutoMapRecording[] = recordings.flatMap(r => {
+    const placed = scenario?.placed?.[r.id]
+    if (placed !== undefined)
+      return [placedAutoMapRecording(r.id, r.analysis, placed, r.trim?.fart)]
+    return r.analysis.recordingPitchMidi === null
+      ? []
+      : [autoMapRecording(r.id, r.analysis, r.trim?.fart)]
+  })
   console.log(
     `${recordings.length} Recordings analysed in ${analysisMs.toFixed(0)} ms; ` +
-      `Melodic: ${melodic.join(' ')}`
+      `Melodic or placed: ${library.map(r => r.id).join(' ')}`
   )
 
   const sources = new Map<string, RenderSource>()
   const sourceMs = new Map<string, number>()
   for (const r of recordings) {
-    if (r.analysis.recordingPitchMidi === null) continue
-    const { result, ms } = medianMsAfterWarmUp(() => renderSource(r.audio, r.analysis))
+    if (!library.some(l => l.id === r.id)) continue
+    const { result, ms } = medianMsAfterWarmUp(() =>
+      renderSource(r.audio, r.analysis, r.trim ?? null)
+    )
     sources.set(r.id, result)
     sourceMs.set(r.id, ms)
   }
@@ -122,7 +176,7 @@ async function main() {
         `${id.padEnd(13)}locked: ${arrangement.covered} of ${arrangement.total} notes covered, ` +
           `needs ${arrangement.missingNotes.map(m => `${m.midi} (${m.seconds.toFixed(1)} s)`).join(' ')}`
       )
-      if (goldenUnlocks(id)) wronglyLocked.push(id)
+      if (!scenario && goldenUnlocks(id)) wronglyLocked.push(id)
       continue
     }
     const renderedFromCutRecordings = medianMsAfterWarmUp(() =>
@@ -151,7 +205,8 @@ async function main() {
         target_midi: n.targetMidi,
         start_s: round(n.startSample / sampleRate, 3),
         len_s: round(n.lengthSamples / sampleRate, 3),
-        gain_db: round(n.gainDb, 1)
+        gain_db: round(n.gainDb, 1),
+        lead_s: round(n.leadSamples / sampleRate, 3)
       }))
     }
     writeFileSync(join(outDir, `${id}.json`), `${JSON.stringify(events, null, 2)}\n`)
@@ -170,7 +225,7 @@ async function main() {
     )
   }
   const perSource = [...sourceMs].map(([id, ms]) => `${id} ${ms.toFixed(0)}`).join(', ')
-  console.log(`cut each Melodic Recording (ms, median of ${RUNS}): ${perSource}`)
+  console.log(`cut each Melodic or placed Recording (ms, median of ${RUNS}): ${perSource}`)
   console.log(`wrote ${outDir}`)
   if (wronglyLocked.length > 0) {
     console.error(`locked here, but the golden Arrangement unlocks it: ${wronglyLocked.join(' ')}`)

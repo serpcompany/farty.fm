@@ -9,7 +9,7 @@ import {
   type TootPaymentRow,
   tootPayment
 } from '@/db/payments'
-import { songs } from '@/lib/catalog/songs.generated'
+import { songIndex } from '@/lib/catalog/song-index.generated'
 import { TOOT_PRICE } from '@/lib/pricing'
 import { servedOrigin } from '@/lib/site'
 
@@ -62,11 +62,14 @@ function stripeFailed(error: unknown): Response {
 }
 
 function catalogSong(songId: unknown) {
-  return songs.find(song => song.id === songId) ?? null
+  return songIndex.find(song => song.id === songId) ?? null
 }
 
-function songCreatorUrl(request: Request, songId: string, tootId: string, done: boolean): string {
-  const url = new URL(`/compose/${songId}/`, servedOrigin(request))
+function returnUrl(request: Request, songId: string | null, tootId: string, done: boolean): string {
+  const url = new URL(
+    songId === null ? '/compose/pad/' : `/compose/${songId}/`,
+    servedOrigin(request)
+  )
   url.searchParams.set('toot', tootId)
   if (done) url.searchParams.set('checkout', 'done')
   return url.toString()
@@ -94,20 +97,20 @@ function paidAtAnotherPrice(session: CheckoutSession): Response {
   return apiError(409, 'payment_mismatch')
 }
 
-function devCheckout(request: Request, tootId: string, songId: string): Response {
+function devCheckout(request: Request, tootId: string, song: Song | null): Response {
   const url = new URL('/dev/checkout/', servedOrigin(request))
   url.searchParams.set('toot', tootId)
-  url.searchParams.set('song', songId)
+  if (song) url.searchParams.set('song', song.id)
   return Response.json({ url: url.toString() })
 }
 
-type Song = (typeof songs)[number]
+type Song = (typeof songIndex)[number]
 
 type StripeCheckout = WithDb & {
   secretKey: string
   user: SessionUser
   tootId: string
-  song: Song
+  song: Song | null
   payment: TootPaymentRow | null
   request: Request
 }
@@ -133,17 +136,17 @@ async function stripeCheckout({
   const session = await createCheckoutSession(secretKey, {
     userId: user.id,
     tootId,
-    songTitle: song.title,
-    successUrl: songCreatorUrl(request, song.id, tootId, true),
-    cancelUrl: songCreatorUrl(request, song.id, tootId, false),
+    songTitle: song?.title ?? null,
+    successUrl: returnUrl(request, song?.id ?? null, tootId, true),
+    cancelUrl: returnUrl(request, song?.id ?? null, tootId, false),
     replaces: earlier?.checkoutSessionId ?? null
   })
   if (!session.url) throw new StripeError(502)
-  await startTootPayment(db, user.id, tootId, song.id, session.id, TOOT_PRICE)
+  await startTootPayment(db, user.id, tootId, song?.id ?? null, session.id, TOOT_PRICE)
   return Response.json({ url: session.url })
 }
 
-const CHECKOUT_REQUEST = z.object({ songId: z.string() })
+const CHECKOUT_REQUEST = z.object({ songId: z.string().nullable() })
 
 type TootPaymentRoute = (
   stores: WithDb,
@@ -160,8 +163,9 @@ export const startCheckout: TootPaymentRoute = async ({ db }, payments, user, id
   if (payments.kind === 'off') return unavailable()
   const body = await readJson(request, CHECKOUT_REQUEST)
   if (body instanceof Response) return body
-  const song = catalogSong(body.json.songId)
-  if (!song) return apiError(400, 'invalid_request')
+  const { songId } = body.json
+  const song = songId === null ? null : catalogSong(songId)
+  if (songId !== null && !song) return apiError(400, 'invalid_request')
 
   const saved = await uploadState(db, 'toots', user.id, id)
   if (saved.status === 'live') return paid()
@@ -170,7 +174,7 @@ export const startCheckout: TootPaymentRoute = async ({ db }, payments, user, id
   if (payment?.savedAt) return gone()
   if (payment?.paidAt) return paid()
   if (saved.live >= LIMITS.toots.maxItems) return apiError(409, 'limit_reached')
-  const unsaved = await paidUnsavedToot(db, user.id, song.id, id)
+  const unsaved = song && (await paidUnsavedToot(db, user.id, song.id, id))
   if (unsaved) return Response.json({ paidToot: unsaved })
   const slot = await spend({ db }, user, 'checkouts')
   if (!slot.allowed) return rateLimited(slot.retryAfter)
@@ -179,8 +183,8 @@ export const startCheckout: TootPaymentRoute = async ({ db }, payments, user, id
     const sessionId = payment?.checkoutSessionId.startsWith('dev_')
       ? payment.checkoutSessionId
       : `dev_${crypto.randomUUID()}`
-    await startTootPayment(db, user.id, id, song.id, sessionId, TOOT_PRICE)
-    return devCheckout(request, id, song.id)
+    await startTootPayment(db, user.id, id, song?.id ?? null, sessionId, TOOT_PRICE)
+    return devCheckout(request, id, song)
   }
   try {
     const { secretKey } = payments
@@ -193,19 +197,26 @@ export const startCheckout: TootPaymentRoute = async ({ db }, payments, user, id
 export const getTootPayment: TootPaymentRoute = async ({ db }, payments, user, id, request) => {
   const refused = refusedItemRequest(user, id, request)
   if (refused) return refused
-  if (payments.kind === 'free') return paid()
+  const answer = (paid: boolean, unused = false) => Response.json({ paid, unused })
+  if (payments.kind === 'free') return answer(true)
   const payment = await tootPayment(db, user.id, id)
-  if (payment?.paidAt) return paid()
-  if (payment && payments.kind === 'stripe' && isCheckoutSessionId(payment.checkoutSessionId)) {
-    if (!(await spend({ db }, user, 'stripeChecks')).allowed) return Response.json({ paid: false })
+  if (payment?.paidAt) return answer(true, payment.savedAt === null)
+  const storedOnly = new URL(request.url).searchParams.get('check') === 'stored'
+  if (
+    payment &&
+    !storedOnly &&
+    payments.kind === 'stripe' &&
+    isCheckoutSessionId(payment.checkoutSessionId)
+  ) {
+    if (!(await spend({ db }, user, 'stripeChecks')).allowed) return answer(false)
     try {
       const now = await paidAtStripe({ db }, payments.secretKey, user, payment)
-      return Response.json({ paid: now?.paid ?? false })
+      return now?.paid ? answer(true, payment.savedAt === null) : answer(false)
     } catch (error) {
       return stripeFailed(error)
     }
   }
-  return Response.json({ paid: false })
+  return answer(false)
 }
 
 const WEBHOOK_MAX_BYTES = 256 * 1024
@@ -266,14 +277,15 @@ export async function payDevCheckout(
   if (body === null) return apiError(413, 'too_large')
   const form = new URLSearchParams(new TextDecoder().decode(body))
   const tootId = form.get('toot')
-  const song = catalogSong(form.get('song'))
-  if (!isItemId(tootId) || !song) return apiError(400, 'invalid_request')
+  const songId = form.get('song')
+  const song = songId === null ? null : catalogSong(songId)
+  if (!isItemId(tootId) || (songId !== null && !song)) return apiError(400, 'invalid_request')
   const payment = await tootPayment(db, user.id, tootId)
   if (!payment?.checkoutSessionId.startsWith('dev_')) return notFound()
   await markTootPaid(db, user.id, tootId, payment.checkoutSessionId)
   return new Response(null, {
     status: 303,
-    headers: { Location: songCreatorUrl(request, song.id, tootId, true) }
+    headers: { Location: returnUrl(request, song?.id ?? null, tootId, true) }
   })
 }
 

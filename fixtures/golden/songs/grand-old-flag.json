@@ -1,0 +1,161 @@
+{
+  "bar_lines": [
+    1.0,
+    5.0,
+    9.0,
+    13.0,
+    17.0,
+    21.0,
+    25.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-grand-old-flag.mid",
+  "id": "grand-old-flag",
+  "import_args": {
+    "beats_per_bar": 4,
+    "bpm": 120,
+    "max_beats": 29
+  },
+  "import_report": {
+    "catalog_id": "grand-old-flag",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 23,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-grand-old-flag.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0,
+      1
+    ]
+  },
+  "length_beats": 29.0,
+  "notes": [
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 0.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 1.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 2.0
+    },
+    {
+      "dur": 0.9583333333333334,
+      "pitch": 60,
+      "start": 3.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 6.5
+    },
+    {
+      "dur": 0.9583333333333334,
+      "pitch": 60,
+      "start": 7.0
+    },
+    {
+      "dur": 0.9583333333333334,
+      "pitch": 60,
+      "start": 9.0
+    },
+    {
+      "dur": 0.9583333333333334,
+      "pitch": 60,
+      "start": 11.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 18.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 22.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 64,
+      "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 24.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 26.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 28.5
+    }
+  ],
+  "pitches": [
+    59,
+    60,
+    62,
+    64,
+    67
+  ],
+  "sha256": "faa016ca689f00c710b180d371771ffe0c95e8e5aeef3b1876d59f0bc4c797dd",
+  "title": "You're a Grand Old Flag"
+}

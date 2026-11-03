@@ -1,5 +1,6 @@
 import { type Account, codeSentLately, libraryOwner, offerStepAgain, readSession } from './account'
 import { claimLibrary, leftByAnAccount } from './library-sync'
+import { releaseTakes } from './pad-take'
 import { clearLibrary, clearVisit, recordingIds } from './recording-store'
 
 const visitKey = 'pedos.visit'
@@ -53,6 +54,7 @@ async function startVisit(account: Promise<Account>): Promise<void> {
     if (facts.account.status === 'signedOut') setFlag(() => localStorage, openedKey)
     if (clearsOnOpen(facts)) {
       await ((await leftByAnAccount()) ? clearLibrary() : clearVisit(keptRecordings()))
+      releaseTakes(null)
     }
   } catch {
   } finally {

@@ -1,4 +1,5 @@
 import type { Song, SongNote } from '@/lib/catalog/song'
+import type { Performance } from '@/lib/performance'
 import { noteName } from '@/lib/pitch'
 import { formattedLength, type Recording, recordingName, songPitch } from '@/lib/recordings'
 
@@ -7,7 +8,9 @@ export type TootArrangement = {
   recordingForPitch: Record<number, string>
 }
 
-export type TootDraft = {
+export type TootDraft = SongTootDraft | PadTootDraft
+
+export type SongTootDraft = {
   id: string
   song: Song
   arrangement: TootArrangement
@@ -15,15 +18,29 @@ export type TootDraft = {
   wav: ArrayBuffer
 }
 
-export type Toot = {
+export type PadTootDraft = {
+  id: string
+  song: null
+  performance: Performance
+  seconds: number
+  wav: ArrayBuffer
+}
+
+export const PAD_TOOT_TITLE = 'Sound Pad'
+
+export type Toot = SongToot | PadToot
+
+type SavedToot = {
   id: string
   title: string
-  songId: string
   createdAt: number
   seconds: number
-  arrangement: TootArrangement
   isAudioMissing?: boolean
 }
+
+export type SongToot = SavedToot & { songId: string; arrangement: TootArrangement }
+
+export type PadToot = SavedToot & { songId: null; arrangement: null; performance: Performance }
 
 export function formattedTootLength(seconds: number): string {
   const whole = Math.round(seconds)

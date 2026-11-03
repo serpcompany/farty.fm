@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { accountOf, codeFor, newEmail, ownClient, signInByApi } from './account'
+import { accountOf, newEmail, ownClient, signInByApi, signUpInTheStep } from './account'
 import { stored, uploaded } from './database'
 import { payAtTheDevCheckout } from './pay'
 import { skipWelcome } from './record'
@@ -62,12 +62,7 @@ test('a guest who signs in at Save pays $0.99, and the Toot is saved to the acco
   await playMaryFree(page)
 
   await page.getByRole('button', { name: 'Save to Toots · $0.99' }).click()
-  const step = page.getByRole('dialog', { name: 'Keep your farts' })
-  await step.getByLabel('Email').fill(email)
-  await step.getByRole('button', { name: 'Send code' }).click()
-  await step.getByLabel('Code').fill(await codeFor(page, email))
-  await step.getByRole('button', { name: 'Sign in' }).click()
-  await expect(step).toBeHidden()
+  await signUpInTheStep(page, email, 'Keep your farts')
 
   const checkout = await checkoutToot(page)
   await expectTappable(page.getByRole('button', { name: 'Pay $0.99' }))

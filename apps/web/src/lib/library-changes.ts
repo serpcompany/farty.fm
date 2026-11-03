@@ -18,7 +18,15 @@ export function recordingsAfter(list: readonly Recording[], change: ItemChange):
   const fresh = new Map(added.map(r => [r.id, r]))
   const merged = kept.map(r => {
     const changed = fresh.get(r.id)
-    return changed ? { ...r, number: changed.number, placedPitch: changed.placedPitch } : r
+    return changed
+      ? {
+          ...r,
+          number: changed.number,
+          placedPitch: changed.placedPitch,
+          trim: changed.trim,
+          name: changed.name
+        }
+      : r
   })
   const ids = new Set(kept.map(r => r.id))
   return [...merged, ...added.filter(r => !ids.has(r.id))].sort((a, b) => a.number - b.number)

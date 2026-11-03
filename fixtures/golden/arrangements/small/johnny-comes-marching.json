@@ -1,0 +1,77 @@
+{
+  "library": "small",
+  "max_abs_shift_semitones": null,
+  "metrics": null,
+  "missing": [
+    {
+      "seconds": 0.5,
+      "target_midi": 62
+    },
+    {
+      "seconds": 1.0,
+      "target_midi": 64
+    }
+  ],
+  "notes": null,
+  "octave_moves": 4,
+  "per_pitch": [
+    {
+      "octave_move": true,
+      "recording": "016",
+      "shift_semitones": 11.674079406339814,
+      "song_pitch": 88,
+      "target_midi": 52
+    },
+    {
+      "octave_move": true,
+      "recording": "022",
+      "shift_semitones": 14.674079406339814,
+      "song_pitch": 91,
+      "target_midi": 55
+    },
+    {
+      "octave_move": false,
+      "recording": "090",
+      "shift_semitones": 1.7740794063398226,
+      "song_pitch": 93,
+      "target_midi": 57
+    },
+    {
+      "octave_move": true,
+      "recording": "069",
+      "shift_semitones": 14.574079406339827,
+      "song_pitch": 95,
+      "target_midi": 59
+    },
+    {
+      "octave_move": true,
+      "recording": "002",
+      "shift_semitones": 13.57407940633982,
+      "song_pitch": 96,
+      "target_midi": 60
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 98,
+      "target_midi": 62
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 100,
+      "target_midi": 64
+    }
+  ],
+  "pitch_coverage": {
+    "covered": 5,
+    "total": 7
+  },
+  "plan_cost": 568.7103161575709,
+  "render_settings": null,
+  "song": "johnny-comes-marching",
+  "transpose": -36,
+  "unlocked": false
+}

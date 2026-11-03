@@ -3,24 +3,41 @@ import { analysisAudio, goldenRecordings, row } from '../../test-support/golden'
 import { ANALYSIS_SAMPLE_RATE } from './resample'
 import { noteSegment } from './trimming'
 
-test('from each fixture file, gesture bounds and cuts at a re-attack match the golden data', async () => {
+test('from each fixture file, gesture bounds, pitch ends and cuts at a re-attack match the golden data', async () => {
   let maxErrorMs = 0
-  const lines = [row('id', 'start', 'golden', 'end', 'golden', 'Δ samples', 'cut', 'golden')]
+  const lines = [
+    row(
+      'id',
+      'start',
+      'golden',
+      'end',
+      'golden',
+      'pitch end',
+      'golden',
+      'Δ samples',
+      'cut',
+      'golden'
+    )
+  ]
   for (const golden of goldenRecordings) {
     const gesture = noteSegment(await analysisAudio(golden))
     const sr = ANALYSIS_SAMPLE_RATE
     const startError = gesture.start - golden.gesture.start_sample
-    const endError = gesture.endExclusive - golden.gesture.end_sample
-    const errorMs = (Math.max(Math.abs(startError), Math.abs(endError)) / sr) * 1000
+    const endError = gesture.end - golden.gesture.end_sample
+    const pitchEndError = gesture.pitchEnd - golden.gesture.pitch_end_sample
+    const errorMs =
+      (Math.max(Math.abs(startError), Math.abs(endError), Math.abs(pitchEndError)) / sr) * 1000
     maxErrorMs = Math.max(maxErrorMs, errorMs)
     lines.push(
       row(
         golden.id,
         gesture.start,
         golden.gesture.start_sample,
-        gesture.endExclusive,
+        gesture.end,
         golden.gesture.end_sample,
-        `${startError}/${endError}`,
+        gesture.pitchEnd,
+        golden.gesture.pitch_end_sample,
+        `${startError}/${endError}/${pitchEndError}`,
         gesture.cutAtReattack,
         golden.gesture.cut_at_reattack
       )
@@ -29,7 +46,10 @@ test('from each fixture file, gesture bounds and cuts at a re-attack match the g
       .soft(Math.abs(gesture.start / sr - golden.gesture.start_s), `${golden.id}: start`)
       .toBeLessThanOrEqual(0.01)
     expect
-      .soft(Math.abs(gesture.endExclusive / sr - golden.gesture.end_s), `${golden.id}: end`)
+      .soft(Math.abs(gesture.end / sr - golden.gesture.end_s), `${golden.id}: end`)
+      .toBeLessThanOrEqual(0.01)
+    expect
+      .soft(Math.abs(gesture.pitchEnd / sr - golden.gesture.pitch_end_s), `${golden.id}: pitch end`)
       .toBeLessThanOrEqual(0.01)
     expect
       .soft(gesture.cutAtReattack, `${golden.id}: cut at re-attack`)

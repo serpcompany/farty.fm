@@ -56,7 +56,7 @@ export interface GoldenArrangement {
         shift_semitones: number
         heard_cents: number | null
         fart_cents: number | null
-        render: { start_s: number; len_s: number; gain_db: number }
+        render: { start_s: number; len_s: number; gain_db: number; lead_s: number }
       }[]
     | null
   metrics: {

@@ -17,8 +17,9 @@ describe('tabs', () => {
     [['recordings'], 'recordings'],
     [['compose'], 'compose'],
     [['compose', 'twinkle'], 'compose'],
+    [['compose', 'pad'], 'compose'],
     [['toots'], 'toots'],
-    [['toots', 'toot'], 'toots'],
+    [['toots', '3f2a'], 'toots'],
     [['profile'], 'profile']
   ])('%j is on %s', (segments, tab) => {
     expect(tabOf(segments)).toBe(tab)

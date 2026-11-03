@@ -1,3 +1,4 @@
+import { env } from 'cloudflare:test'
 import { and, eq } from 'drizzle-orm'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -34,7 +35,7 @@ describe('deletes and GET /api/library/?since=', () => {
     await nextD1Millisecond()
     const first = await library(a.cookie)
     expect(first.recordings.map(r => r.id).sort()).toEqual([R1, R2])
-    expect(first.deleted).toEqual({ recordings: [], toots: [] })
+    expect(first.deleted).toEqual({ recordings: [], toots: [], favorites: [] })
     await nextD1Millisecond()
 
     expect((await api.delete('recordings', R1, a)).status).toBe(204)
@@ -43,11 +44,11 @@ describe('deletes and GET /api/library/?since=', () => {
     const changes = await library(a.cookie, first.cursor)
     expect(changes.recordings).toEqual([])
     expect(changes.toots).toEqual([])
-    expect(changes.deleted).toEqual({ recordings: [R1], toots: [T1] })
+    expect(changes.deleted).toEqual({ recordings: [R1], toots: [T1], favorites: [] })
     expect(changes.cursor).toBeGreaterThanOrEqual(first.cursor)
     const everything = await library(a.cookie)
     expect(everything.recordings.map(r => r.id)).toEqual([R2])
-    expect(everything.deleted).toEqual({ recordings: [R1], toots: [T1] })
+    expect(everything.deleted).toEqual({ recordings: [R1], toots: [T1], favorites: [] })
     expect(await bucketKeys()).toEqual([`users/${a.id}/recordings/${R2}.wav`])
     expect((await api.audio('recordings', R1, a)).status).toBe(404)
     const [tombstone] = await testDb()
@@ -111,6 +112,22 @@ describe('deletes and GET /api/library/?since=', () => {
     expect((await library(a.cookie, cursor - 30 * DAY - 1000)).full).toBe(true)
     expect((await library(a.cookie, cursor - 30 * DAY + 60_000)).full).toBe(false)
     expect((await library(a.cookie, cursor)).full).toBe(false)
+  })
+
+  it('lists the whole library in a full read, also what last changed before its since', async () => {
+    const a = await signUp('A')
+    expect((await upload('recordings', R1, a.cookie)).status).toBe(201)
+    await env.DB.prepare(
+      `update recordings set updated_at = updated_at - ?1 where user_id = ?2 and id = ?3`
+    )
+      .bind(40 * DAY, a.id, R1)
+      .run()
+    const { cursor } = await library(a.cookie)
+
+    const away = await library(a.cookie, cursor - 31 * DAY)
+    expect(away.full).toBe(true)
+    expect(away.recordings.map(r => r.id)).toEqual([R1])
+    expect((await library(a.cookie, cursor - 29 * DAY)).recordings).toEqual([])
   })
 
   it('refuses a since that is not epoch milliseconds (400)', async () => {

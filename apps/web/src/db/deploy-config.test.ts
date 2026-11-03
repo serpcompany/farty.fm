@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process'
 import { readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
@@ -30,8 +31,13 @@ const scripts: Record<string, string> = JSON.parse(
   readFileSync(path('../../package.json'), 'utf8')
 ).scripts
 
-type Step = { name?: string; run?: string }
-type Job = { environment?: string | { name: string }; steps?: Step[] }
+type Step = { name?: string; run?: string; env?: Record<string, string> }
+type Job = {
+  environment?: string | { name: string }
+  needs?: string | string[]
+  if?: string
+  steps?: Step[]
+}
 const workflows: Record<string, { jobs: Record<string, Job> }> = Object.fromEntries(
   readdirSync(WORKFLOWS)
     .filter(file => /^web.*\.ya?ml$/.test(file))
@@ -204,11 +210,35 @@ describe('every deploy and remote migration', () => {
 
 describe('E2E', () => {
   it('applies the migrations to the local database before the journeys', () => {
-    const steps = workflows['web.yml'].jobs.e2e.steps ?? []
+    const steps = workflows['web.yml'].jobs['e2e-shard'].steps ?? []
     const migrate = steps.findIndex(step => step.run === 'pnpm db:migrate:local')
-    const journeys = steps.findIndex(step => step.run === 'pnpm test:e2e')
+    const journeys = steps.findIndex(step => /^pnpm test:e2e\b/.test(step.run ?? ''))
     expect(migrate).toBeGreaterThanOrEqual(0)
     expect(journeys).toBeGreaterThan(migrate)
     expect(scripts['db:migrate:local']).toMatch(/--local\b/)
+  })
+
+  it('fails the required check unless changes and every shard passed', () => {
+    const e2e = workflows['web.yml'].jobs.e2e
+    expect([e2e.needs].flat()).toEqual(expect.arrayContaining(['changes', 'e2e-shard']))
+    expect(e2e.if).toMatch(/^\$\{\{ !cancelled\(\) && /)
+    const gate = (e2e.steps ?? [])[0]
+    const passes = (results: Record<string, string>) => {
+      const env = Object.fromEntries(
+        Object.entries(gate.env ?? {}).map(([name, value]) => {
+          const job = value.match(/^\$\{\{ needs\.([\w-]+)\.result \}\}$/)?.[1]
+          return [name, job ? results[job] : value]
+        })
+      )
+      const shell = spawnSync('bash', ['-c', gate.run ?? ''], { env: { ...process.env, ...env } })
+      return shell.status === 0
+    }
+    const outcomes = ['success', 'failure', 'cancelled', 'skipped']
+    for (const changes of outcomes) {
+      for (const shards of outcomes) {
+        const expected = changes === 'success' && shards === 'success'
+        expect(passes({ changes, 'e2e-shard': shards }), `${changes}, ${shards}`).toBe(expected)
+      }
+    }
   })
 })

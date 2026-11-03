@@ -1,10 +1,10 @@
-import { APIError, createAuthMiddleware, getIP } from 'better-auth/api'
-import type { BetterAuthOptions } from 'better-auth/minimal'
+import { APIError, createAuthMiddleware } from 'better-auth/api'
 
 import { SEND_CODE_ENDPOINT, SIGN_IN_ENDPOINT } from './auth-endpoints'
 import { type AuthSettings, isEmail } from './auth-settings'
 import type { EmailSender } from './email'
 import {
+  clientOf,
   consumeSlot,
   emailClientLimitKey,
   emailLimitKey,
@@ -23,10 +23,6 @@ type Guarded = {
 }
 
 type Body = Record<string, unknown>
-
-function clientOf(request: Request | undefined, options: BetterAuthOptions): string {
-  return (request && getIP(request, options)) || 'no-trusted-ip'
-}
 
 function refuseOtherFields(body: Body, allowed: readonly string[]): void {
   if (Object.keys(body).some(field => !allowed.includes(field))) {

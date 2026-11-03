@@ -23,6 +23,8 @@ jobs:
     outputs:
       docs: ${{ steps.scope.outputs.docs }}
       web: ${{ steps.paths.outputs.web }}
+      e2e: ${{ steps.receipt.outputs.run }}
+      tree: ${{ steps.receipt.outputs.tree }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -33,12 +35,28 @@ jobs:
         run: |
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
             echo "web=true" >> "$GITHUB_OUTPUT"
-          elif git diff --quiet HEAD^1 HEAD -- apps/web fixtures catalog package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc .node-version .github/workflows/web.yml; then
+          elif git diff --quiet HEAD^1 HEAD -- apps/web fixtures catalog 'tools/catalog/titles-*.txt' package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc .node-version .github/workflows/web.yml; then
             echo "web=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Nothing the web app builds from changed, so its checks skip their steps."
           else
             echo "web=true" >> "$GITHUB_OUTPUT"
           fi
+      - id: receipt
+        if: steps.scope.outputs.docs != 'true' && steps.paths.outputs.web == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO_ID: ${{ github.repository_id }}
+        run: |
+          tree=$(git rev-parse 'HEAD^{tree}')
+          echo "tree=$tree" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            n=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=passed-e2e-$tree" --jq               "[.artifacts[] | select(.expired | not) | select(.workflow_run.head_repository_id == $REPO_ID)] | length") || n=0
+            if [ "$n" -gt 0 ]; then
+              echo "::notice::A passing run already tested tree $tree, so the journeys skip."
+              exit 0
+            fi
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
 
   check:
     needs: changes
@@ -99,88 +117,94 @@ jobs:
         working-directory: apps/web
         run: pnpm build:production
 
-  e2e:
+  e2e-shard:
+    name: e2e shard ${{ matrix.shard }}
     needs: changes
     if: >-
       ${{ !cancelled() && needs.changes.outputs.docs != 'true' &&
       (github.event_name != 'pull_request' || github.event.pull_request.draft == false) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     env:
-      WEB: ${{ needs.changes.outputs.web || 'true' }}
+      RUN: ${{ needs.changes.result != 'success' || needs.changes.outputs.e2e == 'true' }}
     steps:
-      - if: env.WEB == 'true'
+      - if: env.RUN == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - id: receipt
-        if: env.WEB == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO_ID: ${{ github.repository_id }}
-        run: |
-          tree=$(git rev-parse 'HEAD^{tree}')
-          echo "tree=$tree" >> "$GITHUB_OUTPUT"
-          if [ "$GITHUB_EVENT_NAME" = push ]; then
-            n=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=passed-e2e-$tree" --jq \
-              "[.artifacts[] | select(.expired | not) | select(.workflow_run.head_repository_id == $REPO_ID)] | length") || n=0
-            if [ "$n" -gt 0 ]; then
-              echo "::notice::A passing run already tested tree $tree, so the journeys skip."
-              exit 0
-            fi
-          fi
-          echo "run=true" >> "$GITHUB_OUTPUT"
-      - if: steps.receipt.outputs.run == 'true'
+      - if: env.RUN == 'true'
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
-      - if: steps.receipt.outputs.run == 'true'
+      - if: env.RUN == 'true'
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version-file: .node-version
           cache: pnpm
           registry-url: https://npm.pkg.github.com
           scope: "@serpcompany"
-      - if: steps.receipt.outputs.run == 'true'
+      - if: env.RUN == 'true'
         run: pnpm install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
       - name: Build for Staging, with the Fixture Library
-        if: steps.receipt.outputs.run == 'true'
+        if: env.RUN == 'true'
         working-directory: apps/web
         run: pnpm build:staging
       - name: Write .dev.vars
-        if: steps.receipt.outputs.run == 'true'
+        if: env.RUN == 'true'
         working-directory: apps/web
         run: cp .dev.vars.example .dev.vars
       - name: Apply the migrations to the local database
-        if: steps.receipt.outputs.run == 'true'
+        if: env.RUN == 'true'
         working-directory: apps/web
         run: pnpm db:migrate:local
-      - if: steps.receipt.outputs.run == 'true'
+      - if: env.RUN == 'true'
         working-directory: apps/web
         run: pnpm exec playwright install --with-deps chromium
       - name: Record journeys on workerd
-        if: steps.receipt.outputs.run == 'true'
+        if: env.RUN == 'true'
         working-directory: apps/web
-        run: pnpm test:e2e
+        run: pnpm test:e2e --shard="$SHARD"
         env:
+          SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
           E2E_SERVER: preview
           CI: 'true'
-      - name: Write the receipt
-        if: steps.receipt.outputs.run == 'true'
-        working-directory: apps/web
-        env:
-          TREE: ${{ steps.receipt.outputs.tree }}
-        run: echo "$TREE" > receipt.txt
-      - if: steps.receipt.outputs.run == 'true'
+      - if: failure() && env.RUN == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: passed-e2e-${{ steps.receipt.outputs.tree }}
-          path: apps/web/receipt.txt
+          name: playwright-report-${{ matrix.shard }}
+          path: apps/web/playwright-report
+
+  e2e:
+    needs: [changes, e2e-shard]
+    if: >-
+      ${{ !cancelled() && needs.changes.outputs.docs != 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check every shard passed
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          SHARDS: ${{ needs.e2e-shard.result }}
+        run: |
+          if [ "$CHANGES" != success ] || [ "$SHARDS" != success ]; then
+            echo "::error::changes: $CHANGES, e2e shards: $SHARDS. Every shard must pass."
+            exit 1
+          fi
+      - name: Write the receipt
+        if: needs.changes.outputs.e2e == 'true'
+        env:
+          TREE: ${{ needs.changes.outputs.tree }}
+        run: echo "$TREE" > receipt.txt
+      - if: needs.changes.outputs.e2e == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: passed-e2e-${{ needs.changes.outputs.tree }}
+          path: receipt.txt
           retention-days: 30
           overwrite: true
-      - if: failure() && steps.receipt.outputs.run == 'true'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: playwright-report
-          path: apps/web/playwright-report
 
   deploy-staging:
     if: github.event_name != 'pull_request' && github.ref_name == 'staging' && needs.changes.outputs.docs != 'true'

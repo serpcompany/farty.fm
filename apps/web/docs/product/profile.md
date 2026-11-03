@@ -1,17 +1,24 @@
 # Profile
 
-The Profile tab: the person's stats, their account, the Fixture Library on Staging, how to install
-Farty, the error-report switch, and where the Songs come from. Its rows are each at least 44 CSS
+The Profile tab: the person's stats, their account and friends, the Fixture Library on Staging, how
+to install Farty, the error-report switch, and where the Songs come from. Its rows are each at least 44 CSS
 pixels high (`e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch, renamed, and
 deleted").
 
 ## Stats
 
-- While they load, a spinner (`src/components/farty/profile-screen.interaction.test.tsx`, "shows a
-  spinner while the stats load").
-- Recordings, Melodic Recordings, Notes collected, Songs unlocked ("8 of 12") and Toots, from what
-  this browser holds (`e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch,
-  renamed, and deleted").
+- While the Recordings, the Toots or the Song Catalog load, a spinner
+  (`src/components/farty/profile-screen.interaction.test.tsx`, "shows a spinner while the stats
+  load").
+- Recordings, Melodic Recordings, Notes collected, Songs unlocked out of every Song in the Song
+  Catalog, and Toots, from what this browser holds (`e2e/toots-kept.spec.ts`, "Toots
+  are kept: made, found after a relaunch, renamed, and deleted";
+  `src/components/farty/profile-screen.interaction.test.tsx`, "counts the Song Catalog’s Songs, and
+  offers Try again when it didn’t load").
+- A Song Catalog that doesn't load says "Couldn't load the Songs.", with Try again, which loads it
+  and fills the stats (`e2e/compose.spec.ts`, "says so on Compose and Profile, and Try again loads
+  it"; `src/components/farty/profile-screen.interaction.test.tsx`, "counts the Song Catalog’s
+  Songs, and offers Try again when it didn’t load").
 - With no Recordings, every stat is 0 and a line says "Record your first fart on the Record tab.
   Collect notes to unlock Songs." (`e2e/tabs.spec.ts`, "the app opens on Record, and every tab works
   before the first Recording"; `e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a
@@ -34,20 +41,29 @@ What the Account section shows depends on the account's state. Each action is in
 - Signed in: the email, the Farty news switch, Sign out and Delete account
   (`e2e/account-profile.spec.ts`, "Profile's account: the email, Farty news, and Sign out, which
   leaves nothing here").
+- Signed in with a Handle, Account links to the person's own profile page, which lists only what
+  they share ([Friends and profile pages](friends.md))
+  (`src/components/farty/profile-screen.interaction.test.tsx`, "links to the account’s own page
+  once it has a handle").
 - Delete account with a sign-in 10 minutes old or more asks for a new email code first
   ([Accounts](account.md#signed-in-on-profile); `e2e/account-profile.spec.ts`, "Delete account
   after an old sign-in asks for a new code, then deletes the account").
+
+## Friends
+
+- Signed in, Friend requests (while someone has asked) and Friends, with Add friend, are on Profile:
+  [Friends and profile pages](friends.md).
 
 ## Internal build: the Fixture Library
 
 On Staging's build only, for Internal Testers.
 
-- An "Internal build" section has Load the Fixture Library and a count, "0 of 32". Loading adds the
-  32 test farts as the person's own Recordings, analyzed like real ones, and loading again adds only
+- An "Internal build" section has Load the Fixture Library and a count, "0 of 38". Loading adds the
+  38 test farts as the person's own Recordings, analyzed like real ones, and loading again adds only
   the missing ones. Once all are in, it says "Fixture Library loaded" and is disabled
   (`e2e/fixture-library.spec.ts`, "loads the Fixture Library and unlocks every Song it is long
   enough for"; `src/components/farty/recordings-provider.interaction.test.tsx`, "adds files as
-  Recordings with their ids, then analyzes each"; `src/lib/fixture-library.test.ts`, "has the 32
+  Recordings with their ids, then analyzes each"; `src/lib/fixture-library.test.ts`, "has the 38
   fixtures of the golden library").
 - A fixture deleted while signed in loads again and stays: everywhere but Production, the account
   takes a fixture's Recording again after it was deleted (`e2e/fixture-library.spec.ts`, "a fixture

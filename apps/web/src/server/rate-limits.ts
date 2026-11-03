@@ -1,8 +1,21 @@
+import { getIP } from 'better-auth/api'
+import type { BetterAuthOptions } from 'better-auth/minimal'
+
 import { GET_SESSION_ENDPOINT, SEND_CODE_ENDPOINT, SIGN_IN_ENDPOINT } from './auth-endpoints'
 import { keyedHash } from './hmac'
 
 export type SlotRule = { window: number; max: number }
 type SlotResult = { allowed: boolean; retryAfter: number | null }
+type Slot = { key: string; rule: SlotRule }
+
+export const IP_ADDRESS_HEADERS = { ipAddressHeaders: ['cf-connecting-ip'] }
+
+export function clientOf(request: Request | undefined, options: BetterAuthOptions): string {
+  return (request && getIP(request, options)) || 'no-trusted-ip'
+}
+
+export const requestClient = (request: Request) =>
+  clientOf(request, { advanced: { ipAddress: IP_ADDRESS_HEADERS } })
 
 export const RATE_LIMITS = {
   [SEND_CODE_ENDPOINT]: { window: 10 * 60, max: 10 },
@@ -52,6 +65,10 @@ export async function clientLimitKey(secret: string, betterAuthKey: string): Pro
   return `client|${await keyedHash(secret, 'client-limit', betterAuthKey)}`
 }
 
+export async function reporterLimitKey(secret: string, client: string): Promise<string> {
+  return `share-reporter|${await keyedHash(secret, 'share-reporter-limit', client)}`
+}
+
 export async function consumeSlot(
   database: D1Database,
   key: string,
@@ -74,6 +91,37 @@ export async function consumeSlot(
   if (spent.results.length > 0) return { allowed: true, retryAfter: null }
   const ends = row.results[0]?.last_request ?? windowEnd
   return { allowed: false, retryAfter: Math.max(1, Math.ceil((ends - now) / 1000)) }
+}
+
+export async function consumeSlots(
+  database: D1Database,
+  slots: Slot[],
+  now: number
+): Promise<boolean> {
+  const values = slots.map((_, i) => `(?${i * 4 + 1}, ?${i * 4 + 2}, ?${i * 4 + 3}, ?${i * 4 + 4})`)
+  const bindings = slots.flatMap(({ key, rule }) => [
+    crypto.randomUUID(),
+    key,
+    now + rule.window * 1000,
+    rule.max
+  ])
+  const [, spent] = await database.batch<{ count: number }>([
+    database.prepare('DELETE FROM rate_limit WHERE last_request <= ?1').bind(now),
+    database
+      .prepare(
+        `WITH slot (id, key, ends, max) AS (VALUES ${values.join(', ')})
+         INSERT INTO rate_limit (id, key, count, last_request)
+         SELECT id, key, 1, ends FROM slot
+         WHERE NOT EXISTS (
+           SELECT 1 FROM slot AS full JOIN rate_limit ON rate_limit.key = full.key
+           WHERE rate_limit.count >= full.max
+         )
+         ON CONFLICT (key) DO UPDATE SET count = rate_limit.count + 1
+         RETURNING count`
+      )
+      .bind(...bindings)
+  ])
+  return spent.results.length === slots.length
 }
 
 export function logSiteCodeLimit(retryAfter: number | null): void {

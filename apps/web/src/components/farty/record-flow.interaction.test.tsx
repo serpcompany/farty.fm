@@ -1,21 +1,24 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { forgetDecoded } from '@/lib/audio/player'
-import { songs } from '@/lib/catalog/songs.generated'
-import type { Recording } from '@/lib/recordings'
+import type { Recording, Trim } from '@/lib/recordings'
 import { button, closeScreens, dialogs, show, tap } from '@/test-support/screen'
+import { songs } from '@/test-support/songs.generated'
+import type { Sound } from './playback-provider'
 import { RecordFlow } from './record-flow'
 import { useRecordFlow } from './record-flow-provider'
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => '/' }))
-vi.mock('./account-provider', () => ({ useAccount: () => ({ offerStep: vi.fn() }) }))
+vi.mock('./account-provider', () => ({
+  useAccount: () => ({ account: { status: 'signedOut' }, offerStep: vi.fn() })
+}))
 const togglePlayback = vi.hoisted(() => vi.fn())
 vi.mock('./playback-provider', () => ({
-  usePlayback: () => ({ nowPlaying: null, togglePlayback })
+  usePlayback: () => ({ nowPlaying: null, playingPart: null, togglePlayback })
 }))
-vi.mock('@/lib/audio/player', () => ({ forgetDecoded: vi.fn() }))
+vi.mock('@/lib/audio/player', () => ({ stopPlayback: vi.fn(), playbackPosition: () => null }))
 vi.mock('./record-flow-provider', () => ({ useRecordFlow: vi.fn() }))
 vi.mock('./recordings-provider', () => ({
   useRecordings: () => ({
+    recordings: [recording],
     recording: () => recording,
     collectedPitchClasses: new Set([9]),
     melodicRecordings: [recording]
@@ -47,11 +50,21 @@ const recording: Recording = {
 
 const saveDraft = vi.fn()
 const closeFlow = vi.fn()
+const draftSound = vi.fn(
+  (part: Trim | null): Sound => ({
+    key: 'draft',
+    decodeKey: 'draft-take',
+    wav: async () => new ArrayBuffer(0),
+    segment: part && { start: part.startSeconds, end: part.endSeconds }
+  })
+)
 
 function showFlow(flow: ReturnType<typeof useRecordFlow>['flow']) {
   vi.mocked(useRecordFlow).mockReturnValue({
     flow,
     capture: { kind: 'idle' },
+    draftAnalysis: { state: 'analyzing' },
+    draftSound,
     saveDraft,
     closeFlow
   } as unknown as ReturnType<typeof useRecordFlow>)
@@ -73,16 +86,15 @@ afterEach(() => {
 })
 
 describe('the record flow', () => {
-  it('decodes a take once however often Review plays it, and forgets it when Review closes', async () => {
-    const audio = { samples: new Float32Array(1), sampleRate: 48_000 }
+  it('plays the take on review between its handles, numbered after the last Recording', async () => {
+    const audio = { samples: new Float32Array(48_000), sampleRate: 48_000 }
     await showFlow({ kind: 'review', draft: { audio, seconds: 1, waveform: [] } })
-    await tap(button('Play'))
-    await tap(button('Play'))
-    const [[first], [second]] = togglePlayback.mock.calls
-    expect(second.decodeKey).toBe(first.decodeKey)
-    expect(forgetDecoded).not.toHaveBeenCalled()
-    closeScreens()
-    expect(forgetDecoded).toHaveBeenCalledWith(first.decodeKey)
+    await tap(button('Play the fart in Recording 2, 1.00 s'))
+    expect(draftSound).toHaveBeenCalledWith({ startSeconds: 0, endSeconds: 1 })
+    expect(togglePlayback).toHaveBeenCalledWith(draftSound.mock.results[0].value)
+
+    await tap(button('Discard'))
+    expect(closeFlow).toHaveBeenCalledOnce()
   })
 
   it('says Finding your note… while Recording Analysis runs', async () => {
@@ -92,7 +104,7 @@ describe('the record flow', () => {
 
   it("says it couldn't save the Recording, with Discard and Try again", async () => {
     const draft = { audio: { samples: new Float32Array(1), sampleRate: 48_000 }, seconds: 1 }
-    await showFlow({ kind: 'saveFailed', draft: { ...draft, waveform: [] } })
+    await showFlow({ kind: 'saveFailed', draft: { ...draft, waveform: [] }, review: {} })
     expect(flowText()).toBe("New RecordingCouldn't save this RecordingDiscardTry again")
 
     await tap(button('Try again'))

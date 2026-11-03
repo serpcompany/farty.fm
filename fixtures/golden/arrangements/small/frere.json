@@ -5,77 +5,73 @@
   "missing": [
     {
       "seconds": 1.1,
-      "target_midi": 44
+      "target_midi": 37
     },
     {
       "seconds": 0.6,
-      "target_midi": 49
-    },
-    {
-      "seconds": 1.1,
-      "target_midi": 51
+      "target_midi": 41
     }
   ],
   "notes": null,
-  "octave_moves": 0,
+  "octave_moves": 1,
   "per_pitch": [
     {
       "octave_move": false,
-      "recording": "022",
-      "shift_semitones": -1.3259205936601859,
+      "recording": "009",
+      "shift_semitones": 1.4740794063398255,
       "song_pitch": 50,
-      "target_midi": 39
+      "target_midi": 32
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
       "song_pitch": 55,
-      "target_midi": 44
+      "target_midi": 37
+    },
+    {
+      "octave_move": false,
+      "recording": "022",
+      "shift_semitones": -1.3259205936601859,
+      "song_pitch": 57,
+      "target_midi": 39
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 59,
+      "target_midi": 41
     },
     {
       "octave_move": false,
       "recording": "069",
-      "shift_semitones": 1.574079406339827,
-      "song_pitch": 57,
-      "target_midi": 46
+      "shift_semitones": -2.425920593660173,
+      "song_pitch": 60,
+      "target_midi": 42
     },
     {
       "octave_move": false,
       "recording": "002",
-      "shift_semitones": 1.5740794063398198,
-      "song_pitch": 59,
-      "target_midi": 48
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 60,
-      "target_midi": 49
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "shift_semitones": -2.42592059366018,
       "song_pitch": 62,
-      "target_midi": 51
+      "target_midi": 44
     },
     {
-      "octave_move": false,
+      "octave_move": true,
       "recording": "090",
-      "shift_semitones": -2.2259205936601774,
+      "shift_semitones": -9.225920593660177,
       "song_pitch": 64,
-      "target_midi": 53
+      "target_midi": 46
     }
   ],
   "pitch_coverage": {
-    "covered": 4,
+    "covered": 5,
     "total": 7
   },
-  "plan_cost": 48.496246136240615,
+  "plan_cost": 252.71125389317518,
   "render_settings": null,
   "song": "frere",
-  "transpose": -11,
+  "transpose": -18,
   "unlocked": false
 }

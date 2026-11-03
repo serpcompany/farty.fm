@@ -1,9 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { coverageSubsets, goldenRecording } from '../test-support/engine-golden'
-import { goldenIndex } from '../test-support/golden'
+import { songs } from '@/test-support/songs.generated'
+import { coverageSubsets, libraries } from '../test-support/engine-golden'
+import {
+  allFixtures,
+  catalogSong,
+  fixtureId,
+  fixtures,
+  iPhoneListing,
+  iPhoneSongs,
+  story,
+  takes,
+  unlockedByAll,
+  without002
+} from '../test-support/fixture-recordings'
 import type { Song } from './catalog/song'
-import { songs } from './catalog/songs.generated'
-import { fixtureRecordingId } from './fixture-library'
 import {
   collectedPitchClasses,
   coverageChanges,
@@ -14,66 +24,33 @@ import {
   fartSeconds,
   formattedFartLength,
   missingNotes,
-  type SongOrder,
-  songListing,
-  songRows,
-  sortRows
+  songRows
 } from './pitch-coverage'
-import type { AnalysisState, Recording } from './recordings'
+import { type AnalysisState, NO_NOTE, type Recording } from './recordings'
 
-const story = ['018', '032', '090', '052', '094', '069', '017', '086', '002', '084', '013', '055']
-const lockedByAll = ['jingle', 'row', 'amazing', 'auld']
-const fixtureIds = goldenIndex.recordings
-
-function fixtureRecording(id: string, number: number): Recording {
-  const golden = goldenRecording(id)
-  const rate = goldenIndex.sample_rate
-  return {
-    id: fixtureRecordingId(id),
-    number,
-    createdAt: 0,
-    seconds: golden.file.frames / golden.file.sample_rate,
-    sampleRate: golden.file.sample_rate,
-    waveform: [],
-    analysis: {
-      state: 'analyzed',
-      analysis: {
-        gestureStartSeconds: golden.gesture.start_sample / rate,
-        gestureEndSeconds: golden.gesture.end_sample / rate,
-        cutAtReattack: golden.gesture.cut_at_reattack,
-        pitchEstimateMidi: golden.pitch_estimate_midi,
-        pitchConfidence: golden.pitch_confidence,
-        recordingPitchMidi: golden.melodic ? golden.recording_pitch_midi : null,
-        shortestNoteSeconds: golden.melodic ? golden.shortest_note_s : null,
-        settleSeconds: golden.melodic ? golden.settle_s : null
-      }
-    }
-  }
-}
-
-const fixtures = (ids: readonly string[]) => ids.map((id, i) => fixtureRecording(id, i + 1))
-const all = fixtures(fixtureIds)
-const takes = (count: number) => fixtures(story.slice(0, count))
 const ten = takes(10)
 
-const song = (id: string): Song => {
-  const found = songs.find(s => s.id === id)
-  if (!found) throw new Error(`No Song ${id}`)
-  return found
-}
-
-const fixtureId = (recordingId: string | undefined) => recordingId?.slice(-3)
-
-const listing = (recordings: Recording[], query = '', order: SongOrder = 'closestToUnlocking') =>
-  songListing(sortRows(songRows(songs, recordings), order), query)
-
 describe('Pitch Coverage against the reference engine', () => {
-  it('unlocks 8 of the 12 Songs with the 24 Melodic fixtures', () => {
-    expect(all.filter(r => coverageKey([r]) !== '[]')).toHaveLength(24)
-    expect(songs).toHaveLength(12)
+  it('unlocks the Songs the reference does with the 26 Melodic fixtures, the iPhone’s 12 too', () => {
+    expect(allFixtures.filter(r => coverageKey([r]) !== '[]')).toHaveLength(26)
+    expect(iPhoneSongs.map(s => s.id)).toEqual([
+      'twinkle',
+      'mary',
+      'jingle',
+      'birthday',
+      'frere',
+      'saints',
+      'row',
+      'ode',
+      'merryxmas',
+      'amazing',
+      'furelise',
+      'auld'
+    ])
     for (const s of songs) {
-      expect(coverageOf(s, all).unlocked, s.id).toBe(!lockedByAll.includes(s.id))
+      expect(coverageOf(s, allFixtures).unlocked, s.id).toBe(unlockedByAll(s))
     }
+    expect(iPhoneSongs.every(unlockedByAll)).toBe(true)
   })
 
   it('matches every Song in all 50 subsets of coverage.json', () => {
@@ -82,10 +59,10 @@ describe('Pitch Coverage against the reference engine', () => {
     for (const subset of coverageSubsets) {
       const recordings = fixtures(subset.recordings)
       for (const want of subset.songs) {
-        const catalogSong = songs.find(s => s.id === want.song)
-        if (!catalogSong) continue
+        const inCatalog = songs.find(s => s.id === want.song)
+        if (!inCatalog) continue
         const label = `${subset.recordings.join(' ')} / ${want.song}`
-        const coverage = coverageOf(catalogSong, recordings)
+        const coverage = coverageOf(inCatalog, recordings)
         expect(coverage.unlocked, label).toBe(want.unlocked)
         expect([coverage.covered, coverage.total], label).toEqual([
           want.pitch_coverage.covered,
@@ -93,7 +70,7 @@ describe('Pitch Coverage against the reference engine', () => {
         ])
         expect(coverage.transposition, label).toBe(want.transpose)
         const forPitch = Object.fromEntries(
-          catalogSong.pitches.map(p => [
+          inCatalog.pitches.map(p => [
             String(p),
             fixtureId(coverage.recordingForPitch.get(p)) ?? null
           ])
@@ -105,37 +82,45 @@ describe('Pitch Coverage against the reference engine', () => {
         checked++
       }
     }
-    expect(checked).toBe(50 * 12)
+    expect(checked).toBe(50 * songs.length)
   })
 
-  it('unlocks Mary, Ode to Joy and Merry Christmas at the 9th story take, and 7 Songs by the 11th', () => {
+  it('unlocks 6 of the iPhone’s Songs at the 9th story take, and 11 by the 11th', () => {
     const unlocks: Record<number, string[]> = {}
     const before = new Set<string>()
     for (let take = 1; take <= story.length; take++) {
-      const unlocked = songs.filter(s => coverageOf(s, takes(take)).unlocked).map(s => s.id)
+      const unlocked = iPhoneSongs.filter(s => coverageOf(s, takes(take)).unlocked).map(s => s.id)
       const fresh = unlocked.filter(id => !before.has(id))
       if (fresh.length > 0) unlocks[take] = fresh
       for (const id of unlocked) before.add(id)
     }
     expect(unlocks).toEqual({
-      9: ['mary', 'ode', 'merryxmas'],
-      10: ['frere'],
-      11: ['twinkle', 'birthday', 'saints']
+      9: ['mary', 'jingle', 'saints', 'row', 'ode', 'merryxmas'],
+      10: ['twinkle', 'frere', 'furelise'],
+      11: ['birthday', 'auld']
     })
   })
 
   it('reads the coverage of locked Songs as the reference does', () => {
-    const mary = coverageOf(song('mary'), takes(3))
+    const mary = coverageOf(catalogSong('mary'), takes(3))
     expect(coverageSummary(mary)).toBe('1 of 4 notes covered')
     expect(mary.transposition).toBe(-28)
     expect(missingNotes(mary)).toBe('G♯2 (1.5 s), A♯2 (0.7 s), and C3 (0.7 s)')
     expect(fixtureId(mary.recordingForPitch.get(74))).toBeUndefined()
     expect(fixtureId(mary.recordingForPitch.get(79))).toBe('032')
 
-    const furelise = coverageOf(song('furelise'), ten)
-    expect(coverageSummary(furelise)).toBe('6 of 7 notes covered')
-    expect(furelise.transposition).toBe(-16)
-    expect(missingNotes(furelise)).toBe('F3 (1.4 s)')
+    const auld = coverageOf(catalogSong('auld'), ten)
+    expect(coverageSummary(auld)).toBe('6 of 7 notes covered')
+    expect(auld.transposition).toBe(-20)
+    expect(missingNotes(auld)).toBe('A2 (1.8 s)')
+  })
+
+  it('reads Mary on 095 alone as the compose journey expects (#288)', () => {
+    const mary = coverageOf(catalogSong('mary'), fixtures(['095']))
+    expect(coverageSummary(mary)).toBe('1 of 4 notes covered')
+    expect(mary.transposition).toBe(-36)
+    expect(missingNotes(mary)).toBe('C2 (1.5 s), D2 (0.7 s), and E2 (0.7 s)')
+    expect(missingNotes(mary, 2)).toBe('C2 (1.5 s), D2 (0.7 s), and 1 more')
   })
 })
 
@@ -169,16 +154,21 @@ describe('the Pitch Coverage rule', () => {
           }
         : { state }
   })
-  const test = (pitches: number[]): Song => ({
-    id: 'test',
-    title: 'Test',
-    source: '',
-    bpm: 60,
-    bar_lines: [0],
-    length_beats: pitches.length,
-    pitches: [...new Set(pitches)].sort((a, b) => a - b),
-    notes: pitches.map((pitch, start) => ({ start, dur: 1, pitch }))
-  })
+  const test = (pitches: number[]): Song => {
+    const distinct = [...new Set(pitches)].sort((a, b) => a - b)
+    return {
+      id: 'test',
+      title: 'Test',
+      source: '',
+      bpm: 60,
+      bar_lines: [0],
+      length_beats: pitches.length,
+      pitches: distinct,
+      durations: distinct.map(p => pitches.filter(q => q === p).map(() => 1)),
+      notesPath: '/catalog/notes/test.json',
+      notes: pitches.map((pitch, start) => ({ start, dur: 1, pitch }))
+    }
+  }
 
   it('gives each pitch its own Recording', () => {
     const one = coverageOf(test([60, 62]), [melodic(61)])
@@ -233,50 +223,70 @@ describe('Placed Recordings (ADR 0015)', () => {
   const C2 = 36
   const place = (recordings: Recording[], fixture: string, placed: number | null) =>
     recordings.map(r => (fixtureId(r.id) === fixture ? { ...r, placedPitch: placed } : r))
+  const small = fixtures(libraries.small)
+  const with065 = fixtures([...libraries.small, '065'])
 
-  it('covers its note like a Melodic Recording: 080 on C2 unlocks 3 Songs the library leaves locked', () => {
-    const placed = place(all, '080', C2)
-    const { unlocked, locked } = listing(placed)
-    expect(unlocked).toHaveLength(11)
-    expect(locked.map(r => r.song.id)).toEqual(['amazing'])
-    expect(missingNotes(locked[0].coverage)).toBe('C3 (3.0 s)')
-    for (const id of ['jingle', 'row', 'auld']) {
-      const coverage = coverageOf(song(id), placed)
+  it('covers its note like a Melodic Recording: 065 on C2 unlocks 5 Songs the small library leaves locked', () => {
+    expect(iPhoneListing(with065).unlocked.map(r => r.song.id)).toEqual(['mary', 'saints'])
+    const placed = place(with065, '065', C2)
+    const { unlocked, locked } = iPhoneListing(placed)
+    expect(unlocked).toHaveLength(7)
+    expect(locked.map(r => r.song.id)).toContain('amazing')
+    for (const id of ['jingle', 'row']) {
+      const coverage = coverageOf(catalogSong(id), placed)
       expect(coverage.unlocked, id).toBe(true)
-      expect([...coverage.recordingForPitch.values()].map(fixtureId), id).toContain('080')
+      expect([...coverage.recordingForPitch.values()].map(fixtureId), id).toContain('065')
     }
   })
 
-  it('counts for nothing left out, the default, or while the Recording is Melodic', () => {
-    expect(coverageKey(place(all, '080', null))).toBe(coverageKey(all))
-    expect(coverageKey(place(all, '002', C2))).toBe(coverageKey(all))
-    expect(collectedPitchClasses(place(all, '002', 37))).toEqual(collectedPitchClasses(all))
+  it('counts for nothing left out, the default', () => {
+    expect(coverageKey(place(allFixtures, '065', null))).toBe(coverageKey(allFixtures))
   })
 
-  it('counts only a whole note from C2 to B4, as the picker offers', () => {
+  it('stays in use when a new analysis finds the Recording Melodic (ADR 0017)', () => {
+    expect(collectedPitchClasses(fixtures(['009']))).toEqual(new Set([7]))
+    expect(collectedPitchClasses(place(fixtures(['009']), '009', 37))).toEqual(new Set([1]))
+    expect(coverageKey(place(allFixtures, '009', C2))).not.toBe(coverageKey(allFixtures))
+    expect(coverageKey(place(allFixtures, '009', null))).toBe(coverageKey(allFixtures))
+  })
+
+  it('counts only a whole note from C2 to B4, as the review offers', () => {
     for (const outside of [35, 72, 48.5, Number.NaN]) {
-      expect(coverageKey(place(all, '080', outside)), String(outside)).toBe(coverageKey(all))
+      expect(coverageKey(place(allFixtures, '065', outside)), String(outside)).toBe(
+        coverageKey(allFixtures)
+      )
     }
-    expect(coverageKey(place(all, '080', 71))).not.toBe(coverageKey(all))
+    expect(coverageKey(place(allFixtures, '065', 71))).not.toBe(coverageKey(allFixtures))
   })
 
   it('matches the catalog again when the fart is placed, moved or taken off', () => {
-    const keys = [null, C2, C2 + 1, null].map(p => coverageKey(place(all, '080', p)))
+    const keys = [null, C2, C2 + 1, null].map(p => coverageKey(place(allFixtures, '065', p)))
     expect(new Set(keys).size).toBe(3)
     expect(keys[3]).toBe(keys[0])
   })
 
   it('collects the pitch class it is placed on', () => {
-    expect(collectedPitchClasses(place(fixtures(['080']), '080', 37))).toEqual(new Set([1]))
-    expect(collectedPitchClasses(fixtures(['080']))).toEqual(new Set())
+    expect(collectedPitchClasses(place(fixtures(['065']), '065', 37))).toEqual(new Set([1]))
+    expect(collectedPitchClasses(fixtures(['065']))).toEqual(new Set())
+  })
+
+  it('leaves a Melodic Recording out with "No note": 002 out locks Amazing Grace (#314)', () => {
+    const left = place(allFixtures, '002', NO_NOTE)
+    expect(coverageKey(left)).toBe(coverageKey(without002))
+    expect(iPhoneListing(left).locked.map(r => r.song.id)).toEqual(['amazing'])
+    expect(coverageKey(place(allFixtures, '002', null))).toBe(coverageKey(allFixtures))
   })
 
   it('shows no unlock for a Noise-like save until it is placed', () => {
-    const before = all.filter(r => fixtureId(r.id) !== '080')
-    const left = coverageChanges(songs, before, all)
-    expect(left.unlocked).toEqual([])
-    const placed = coverageChanges(songs, before, place(all, '080', C2))
-    expect(placed.unlocked.map(s => s.id)).toEqual(['jingle', 'row', 'auld'])
+    expect(coverageChanges(songs, small, with065).unlocked).toEqual([])
+    const placed = coverageChanges(iPhoneSongs, small, place(with065, '065', C2))
+    expect(placed.unlocked.map(s => s.id)).toEqual([
+      'jingle',
+      'row',
+      'ode',
+      'merryxmas',
+      'furelise'
+    ])
   })
 })
 
@@ -285,127 +295,17 @@ function pitchClassOf(r: Recording): number[] {
   return [Math.floor(r.analysis.analysis.recordingPitchMidi + 0.5) % 12]
 }
 
-describe('Compose’s listing', () => {
-  it('puts the highest coverage first, then fewer notes', () => {
-    const { unlocked, locked } = listing(ten)
-    expect(unlocked.map(r => r.song.id)).toEqual(['mary', 'ode', 'frere', 'merryxmas'])
-    expect(locked.map(r => r.song.id)).toEqual([
-      'birthday',
-      'furelise',
-      'auld',
-      'twinkle',
-      'row',
-      'jingle',
-      'saints',
-      'amazing'
-    ])
-  })
-
-  it('sorts A–Z within each section', () => {
-    const { unlocked, locked } = listing(ten, '', 'alphabetical')
-    expect(unlocked.map(r => r.song.title)).toEqual([
-      'Frère Jacques',
-      'Mary Had a Little Lamb',
-      'Ode to Joy',
-      'We Wish You a Merry Christmas'
-    ])
-    expect(locked.map(r => r.song.title)).toEqual([
-      'Amazing Grace',
-      'Auld Lang Syne',
-      'Für Elise',
-      'Happy Birthday',
-      'Jingle Bells',
-      'Row, Row, Row Your Boat',
-      'Twinkle, Twinkle, Little Star',
-      'When the Saints Go Marching In'
-    ])
-  })
-
-  it('searches anywhere in the title, ignoring case and accents', () => {
-    const ids = (rows: { song: Song }[]) => rows.map(r => r.song.id)
-    expect(ids(listing(ten, 'JINGLE').locked)).toEqual(['jingle'])
-    expect(ids(listing(ten, 'fur').locked)).toEqual(['furelise'])
-    expect(ids(listing(ten, 'frere').unlocked)).toEqual(['frere'])
-    expect(ids(listing(ten, 'little').unlocked)).toEqual(['mary'])
-    expect(ids(listing(ten, 'little').locked)).toEqual(['twinkle'])
-    expect(listing(ten, '  ').unlocked).toHaveLength(4)
-    const none = listing(ten, 'zzz')
-    expect(none.unlocked.length + none.locked.length).toBe(0)
-  })
-
-  it('unlocks 8 Songs with the whole Fixture Library', () => {
-    const { unlocked, locked } = listing(all)
-    expect(unlocked).toHaveLength(8)
-    expect(locked.map(r => r.song.id)).toEqual(['auld', 'row', 'jingle', 'amazing'])
-    expect(missingNotes(locked[0].coverage)).toBe('G3 (1.8 s)')
-    expect(missingNotes(locked[3].coverage)).toBe('D3 (1.2 s) and F3 (3.0 s)')
-  })
-
-  it('locks every Song, fewest notes first, without Melodic Recordings', () => {
-    const { unlocked, locked } = listing(fixtures(['018']))
-    expect(unlocked).toHaveLength(0)
-    expect(locked).toHaveLength(12)
-    expect(locked[0].song.id).toBe('mary')
-    for (const r of locked) {
-      expect(r.coverage.hasMelodicRecordings).toBe(false)
-      expect(missingNotes(r.coverage)).toBeNull()
-    }
-  })
-
-  it('scales to hundreds of Songs', () => {
-    const catalog = Array.from({ length: 500 }, (_, i) => {
-      const s = songs[i % songs.length]
-      return { ...s, id: `${s.id}-${i}`, title: `${s.title} ${i}` }
-    })
-    const started = performance.now()
-    const { unlocked, locked } = songListing(
-      sortRows(songRows(catalog, ten), 'closestToUnlocking'),
-      ''
-    )
-    const ms = performance.now() - started
-    expect(unlocked.length + locked.length).toBe(500)
-    expect(unlocked).toHaveLength(167)
-    expect(ms).toBeLessThan(10_000)
-  })
-
-  it('names the missing notes with their octave and length', () => {
-    expect(missingNotes(coverageOf(song('furelise'), ten))).toBe('F3 (1.4 s)')
-    expect(missingNotes(coverageOf(song('jingle'), ten))).toBe('A2 (2.0 s)')
-    expect(missingNotes(coverageOf(song('mary'), ten))).toBeNull()
-    const few = takes(3)
-    expect(missingNotes(coverageOf(song('birthday'), few))).toBe(
-      'G♯2 (0.5 s), A♯2 (0.5 s), C3 (1.0 s), C♯3 (1.5 s), F3 (0.5 s), and F♯3 (0.4 s)'
-    )
-    expect(missingNotes(coverageOf(song('birthday'), few), 3)).toBe(
-      'G♯2 (0.5 s), A♯2 (0.5 s), C3 (1.0 s), and 3 more'
-    )
-    expect(missingNotes(coverageOf(song('mary'), few), 3)).toBe(
-      'G♯2 (1.5 s), A♯2 (0.7 s), and C3 (0.7 s)'
-    )
-  })
-
-  it('matches the catalog again only when the Melodic Recordings change', () => {
-    const eight = takes(8)
-    const noise = fixtures(['055'])
-    expect(coverageKey([...eight, ...noise])).toBe(coverageKey(eight))
-    expect(coverageKey(takes(9))).not.toBe(coverageKey(eight))
-    const analyzing: Recording = { ...takes(9)[8], analysis: { state: 'analyzing' } }
-    expect(coverageKey([...eight, analyzing])).toBe(coverageKey(eight))
-    expect(listing(eight).unlocked).toEqual([])
-    expect(listing(takes(9)).unlocked.map(r => r.song.id)).toEqual(['mary', 'ode', 'merryxmas'])
-    const [first, second, ...rest] = eight
-    if (second.analysis.state !== 'analyzed') throw new Error('The 2nd take is analyzed')
-    const { settleSeconds, ...stored } = second.analysis.analysis
-    expect(settleSeconds).toBeGreaterThan(0)
-    const unknown: Recording = { ...second, analysis: { state: 'analyzed', analysis: stored } }
-    expect(coverageKey([first, unknown, ...rest])).not.toBe(coverageKey(eight))
-  })
-})
-
 describe('what a save changed', () => {
   it('lists the unlocks, then the improvements closest first', () => {
-    const changes = coverageChanges(songs, takes(8), takes(9))
-    expect(changes.unlocked.map(s => s.id)).toEqual(['mary', 'ode', 'merryxmas'])
+    const changes = coverageChanges(iPhoneSongs, takes(8), takes(9))
+    expect(changes.unlocked.map(s => s.id)).toEqual([
+      'mary',
+      'jingle',
+      'saints',
+      'row',
+      'ode',
+      'merryxmas'
+    ])
     expect(changes.improved.every(r => !r.coverage.unlocked)).toBe(true)
     const fractions = changes.improved.map(r => coverageFraction(r.coverage))
     expect(fractions).toEqual([...fractions].sort((a, b) => b - a))
@@ -423,9 +323,8 @@ describe('what a save changed', () => {
   })
 
   it('has no Song closest to unlocking once every Song is unlocked', () => {
-    expect(coverageChanges(songs, all, all).closest?.song.id).toBe('auld')
-    const others = songs.filter(s => !lockedByAll.includes(s.id))
-    expect(coverageChanges(others, all, all).closest).toBeNull()
+    expect(coverageChanges(iPhoneSongs, without002, without002).closest?.song.id).toBe('amazing')
+    expect(coverageChanges(iPhoneSongs, allFixtures, allFixtures).closest).toBeNull()
   })
 })
 
@@ -459,16 +358,23 @@ describe('the fart length a Recording shows (#227)', () => {
     expect(formattedFartLength({ ...recording, analysis: { state: 'analyzing' } })).toBe('3.4 s')
   })
 
+  it('is its Trim’s fart once trimmed, Melodic or not (#314)', () => {
+    const fart = { startSeconds: 0.6, endSeconds: 1.8 }
+    const trimmed = { ...take(1, 60, 2.4), trim: { startSeconds: 0.55, endSeconds: 1.9, fart } }
+    expect(formattedFartLength(trimmed)).toBe('1.2 s')
+    expect(coverageKey([trimmed])).not.toBe(coverageKey([take(1, 60, 2.4)]))
+  })
+
   it('unlocks a locked Song once a fart near each missing note shows the length it needs', () => {
-    const amazing = song('amazing')
-    const { missing } = coverageOf(amazing, all)
-    expect(missingNotes(coverageOf(amazing, all))).toBe('D3 (1.2 s) and F3 (3.0 s)')
+    const amazing = catalogSong('amazing')
+    const { missing } = coverageOf(amazing, without002)
+    expect(missingNotes(coverageOf(amazing, without002))).toBe('E3 (3.0 s)')
     const near = (lengths: number[]) => missing.map((m, i) => take(100 + i, m.midi - 3, lengths[i]))
     const asNeeded = near(missing.map(m => m.seconds))
-    expect(asNeeded.map(formattedFartLength)).toEqual(['1.2 s', '3.0 s'])
-    expect(coverageOf(amazing, [...all, ...asNeeded]).unlocked).toBe(true)
-    const tooShort = near([1.2, 2.96])
-    expect(tooShort.map(formattedFartLength)).toEqual(['1.2 s', '2.9 s'])
-    expect(coverageOf(amazing, [...all, ...tooShort]).unlocked).toBe(false)
+    expect(asNeeded.map(formattedFartLength)).toEqual(['3.0 s'])
+    expect(coverageOf(amazing, [...without002, ...asNeeded]).unlocked).toBe(true)
+    const tooShort = near([2.96])
+    expect(tooShort.map(formattedFartLength)).toEqual(['2.9 s'])
+    expect(coverageOf(amazing, [...without002, ...tooShort]).unlocked).toBe(false)
   })
 })

@@ -9,6 +9,8 @@ DEFAULT_TEMPO_US = 500000
 DEFAULT_BEATS_PER_BAR = 4
 GRID_PER_BEAT = 48
 EPS = 1e-6
+DRUM_CHANNEL = 9
+PERCUSSION_PROGRAMS = frozenset({113, 115, 116, 118, 119})
 
 
 @dataclass
@@ -39,6 +41,7 @@ class ScoreEvents:
     beats_per_bar: int = DEFAULT_BEATS_PER_BAR
     tempo_changes: int = 0
     meters: dict = field(default_factory=dict)
+    percussion: set = field(default_factory=set)
 
 
 @dataclass(frozen=True)
@@ -83,10 +86,12 @@ def bar_lines(meters, until):
 
 
 def track_notes(track, score):
-    tick, open_notes, done = 0, {}, []
+    tick, open_notes, done, programs, pitched = 0, {}, [], {}, False
     for msg in track:
         tick += msg.time
-        if msg.type == "set_tempo":
+        if msg.type == "program_change":
+            programs[msg.channel] = msg.program
+        elif msg.type == "set_tempo":
             if tick == 0:
                 score.tempo_us = msg.tempo
             else:
@@ -97,24 +102,29 @@ def track_notes(track, score):
                 score.beats_per_bar = msg.numerator
         elif msg.type == "note_on" and msg.velocity > 0:
             open_notes.setdefault((msg.channel, msg.note), []).append(tick)
+            pitched |= msg.channel != DRUM_CHANNEL and programs.get(msg.channel) not in PERCUSSION_PROGRAMS
         elif msg.type in ("note_off", "note_on"):
             starts = open_notes.get((msg.channel, msg.note))
             if starts:
                 done.append((starts.pop(0), tick, msg.note))
-    return [d for d in done if d[1] > d[0]]
+    return [d for d in done if d[1] > d[0]], pitched
 
 
 def read_score(mid):
     score = ScoreEvents({})
     for ti, trk in enumerate(mid.tracks):
-        done = track_notes(trk, score)
+        done, pitched = track_notes(trk, score)
         if done:
             score.notes_by_track[ti] = sorted(done)
+            if not pitched:
+                score.percussion.add(ti)
     return score
 
 
-def highest_track(notes_by_track):
-    return max(notes_by_track, key=lambda t: sum(p for _, _, p in notes_by_track[t]) / len(notes_by_track[t]))
+def highest_track(score):
+    by_track = score.notes_by_track
+    candidates = [t for t in by_track if t not in score.percussion] or list(by_track)
+    return max(candidates, key=lambda t: sum(p for _, _, p in by_track[t]) / len(by_track[t]))
 
 
 def skyline(raw):
@@ -163,7 +173,7 @@ def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat
     mid = mido.MidiFile(path)
     score = read_score(mid)
     if track is None:
-        track = highest_track(score.notes_by_track)
+        track = highest_track(score)
     top, dropped_chord_tones, dropped_inner_onsets = skyline(score.notes_by_track[track])
     notes, clipped = slot_notes(top, mid.ticks_per_beat)
     notes = [Note(n.start - start_beat, n.dur, n.pitch) for n in notes if n.start >= start_beat]

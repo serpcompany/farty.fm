@@ -1,0 +1,165 @@
+{
+  "bar_lines": [
+    0.0,
+    4.0,
+    8.0,
+    12.0,
+    16.0,
+    20.0,
+    24.0,
+    28.0
+  ],
+  "beats_per_bar": 4,
+  "bpm": 120,
+  "file": "midi/pdmx-all-through-the-night.mid",
+  "id": "all-through-the-night",
+  "import_args": {
+    "bpm": 120,
+    "max_beats": 32
+  },
+  "import_report": {
+    "catalog_id": "all-through-the-night",
+    "chord_tones_dropped": 0,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 24,
+    "overlaps_clipped": 0,
+    "source_file": "catalog/midi/pdmx-all-through-the-night.mid",
+    "tempo_changes_ignored": 0,
+    "track_used": 0,
+    "tracks_with_notes": [
+      0
+    ]
+  },
+  "length_beats": 30.854166666666668,
+  "notes": [
+    {
+      "dur": 1.5,
+      "pitch": 60,
+      "start": 0.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 1.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 2.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 3.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 4.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 5.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 6.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 7.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 57,
+      "start": 8.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 59,
+      "start": 10.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 11.5
+    },
+    {
+      "dur": 2.8541666666666665,
+      "pitch": 60,
+      "start": 12.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 60,
+      "start": 16.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 17.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 19.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 20.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 21.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 23.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 57,
+      "start": 24.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 59,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 27.5
+    },
+    {
+      "dur": 2.8541666666666665,
+      "pitch": 60,
+      "start": 28.0
+    }
+  ],
+  "pitches": [
+    55,
+    57,
+    59,
+    60,
+    62
+  ],
+  "sha256": "6e32435ceb29cbfe649693a6708f81d27a82929abdc8fdf4f947151db92c2bd0",
+  "title": "All Through the Night"
+}

@@ -15,6 +15,7 @@ const LIMITER_PEAK = 0.89
 
 export interface RenderSource {
   gesture: Float64Array
+  leadIn: Float64Array
 }
 
 interface RenderNote {
@@ -47,6 +48,7 @@ export function songSeconds(lengthBeats: number, bpm: number): number {
 interface PlacedNote {
   startSample: number
   lengthSamples: number
+  leadSamples: number
   gainDb: number
 }
 
@@ -58,38 +60,55 @@ interface RenderOutput {
 export function render(notes: readonly RenderNote[], songLengthSeconds: number): RenderOutput {
   const sr = RENDER_SAMPLE_RATE
   const mix = new Float64Array(Math.trunc((songLengthSeconds + TAIL_SECONDS) * sr))
-  const placed: PlacedNote[] = []
+  const placed = new Array<PlacedNote>(notes.length)
+  const order = notes.map((_, i) => i).sort((a, b) => notes[a].startSeconds - notes[b].startSeconds)
+  let playedTo = 0
 
-  for (const note of notes) {
+  for (const index of order) {
+    const note = notes[index]
     const start = Math.trunc(note.startSeconds * sr)
     const maxLength = Math.trunc(
       Math.max(SHORTEST_NOTE_SECONDS, note.lengthSeconds - GAP_SECONDS) * sr
     )
-    const segment = note.source.gesture.slice(0, maxLength)
-    applyFades(segment)
+    const body = note.source.gesture.subarray(0, maxLength)
+    const leadIn = note.source.leadIn
+    const lead = Math.min(leadIn.length, Math.max(0, start - playedTo))
+    const segment = new Float64Array(lead + body.length)
+    segment.set(leadIn.subarray(leadIn.length - lead), 0)
+    segment.set(body, lead)
+    applyFades(segment, body.length)
 
-    const measured = Math.min(segment.length, Math.trunc(LEVEL_WINDOW_SECONDS * sr))
+    const measured = Math.min(body.length, Math.trunc(LEVEL_WINDOW_SECONDS * sr))
     const squares = new Float64Array(measured)
-    for (let i = 0; i < measured; i++) squares[i] = segment[i] * segment[i]
+    for (let i = 0; i < measured; i++) squares[i] = segment[lead + i] * segment[lead + i]
     const rms = Math.sqrt(pairwiseSum(squares, 0, measured) / Math.max(1, measured)) + 1e-9
     const gainDb = NOTE_LEVEL_DB - 20 * Math.log10(rms) + (note.downbeat ? DOWNBEAT_ACCENT_DB : 0)
     const gain = 10 ** (gainDb / 20)
 
-    const end = Math.min(mix.length, start + segment.length)
-    for (let i = start; i < end; i++) mix[i] += segment[i - start] * gain
-    placed.push({ startSample: start, lengthSamples: segment.length, gainDb })
+    const from = start - lead
+    const end = Math.min(mix.length, start + body.length)
+    for (let i = from; i < end; i++) mix[i] += segment[i - from] * gain
+    playedTo = Math.max(
+      playedTo,
+      start + body.length,
+      Math.trunc((note.startSeconds + note.lengthSeconds) * sr)
+    )
+    placed[index] = { startSample: start, lengthSamples: body.length, leadSamples: lead, gainDb }
   }
 
   return { samples: limit(mix), notes: placed }
 }
 
-export function applyFades(segment: Float64Array): void {
+export function applyFades(segment: Float64Array, noteLength = segment.length): void {
   const sr = RENDER_SAMPLE_RATE
   const n = segment.length
   const envelope = new Float64Array(n).fill(1)
   const fadeIn = Math.min(n, Math.trunc(FADE_IN_SECONDS * sr))
   for (let i = 0; i < fadeIn; i++) envelope[i] = linspace(0, 1, fadeIn, i)
-  const fadeOut = Math.min(n, Math.trunc(Math.min(LONGEST_FADE_OUT_SECONDS, n / sr / 3) * sr))
+  const fadeOut = Math.min(
+    n,
+    Math.trunc(Math.min(LONGEST_FADE_OUT_SECONDS, noteLength / sr / 3) * sr)
+  )
   for (let i = 0; i < fadeOut; i++) {
     const ramp = linspace(1, 0, fadeOut, i)
     envelope[n - fadeOut + i] *= ramp * ramp

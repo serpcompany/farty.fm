@@ -1,5 +1,7 @@
 type Numbered = { id: number }
 
+type Unnumbered<Request> = Request extends Numbered ? Omit<Request, 'id'> : never
+
 interface Settle<Result> {
   resolve(result: Result): void
   reject(error: Error): void
@@ -18,7 +20,7 @@ interface RequestScope<Request> {
 export function workerRequests<Request extends Numbered, Result>(
   start: () => Worker,
   failure: string
-): (request: Omit<Request, 'id'>) => Promise<Result> {
+): (request: Unnumbered<Request>) => Promise<Result> {
   let worker: Worker | null = null
   let nextId = 0
   const pending = new Map<number, Settle<Result>>()

@@ -12,6 +12,17 @@ export function encodeWav({ samples, sampleRate }: PcmAudio): ArrayBuffer {
   const dataBytes = samples.length * 2
   const buffer = new ArrayBuffer(headerBytes + dataBytes)
   const view = new DataView(buffer)
+  new Uint8Array(buffer).set(wavHeader(sampleRate, dataBytes))
+  for (let i = 0; i < samples.length; i++) {
+    const value = Math.round(samples[i] * int16Scale)
+    view.setInt16(headerBytes + i * 2, Math.max(-int16Scale, Math.min(int16Scale - 1, value)), true)
+  }
+  return buffer
+}
+
+export function wavHeader(sampleRate: number, dataBytes: number): Uint8Array<ArrayBuffer> {
+  const header = new Uint8Array(headerBytes)
+  const view = new DataView(header.buffer)
   const ascii = (offset: number, text: string) => {
     for (let i = 0; i < text.length; i++) view.setUint8(offset + i, text.charCodeAt(i))
   }
@@ -30,11 +41,7 @@ export function encodeWav({ samples, sampleRate }: PcmAudio): ArrayBuffer {
   view.setUint16(34, 16, true)
   ascii(36, 'data')
   view.setUint32(40, dataBytes, true)
-  for (let i = 0; i < samples.length; i++) {
-    const value = Math.round(samples[i] * int16Scale)
-    view.setInt16(headerBytes + i * 2, Math.max(-int16Scale, Math.min(int16Scale - 1, value)), true)
-  }
-  return buffer
+  return header
 }
 
 function readFormat(view: DataView, at: number): WavFormat {

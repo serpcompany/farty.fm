@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { button, closeScreens, dialogs, show, tap } from '@/test-support/screen'
-import { type RecordProblem, useRecordFlow } from './record-flow-provider'
+import { useRecordFlow } from './record-flow-provider'
 import { RecordScreen } from './record-screen'
+import type { RecordProblem } from './take-capture'
 
 vi.mock('@/lib/audio/keep-microphone-open', () => ({ keepMicrophoneOpen: vi.fn() }))
 vi.mock('./record-flow-provider', () => ({ useRecordFlow: vi.fn() }))

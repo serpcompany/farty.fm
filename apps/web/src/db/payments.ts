@@ -30,7 +30,7 @@ export async function startTootPayment(
   db: Database,
   userId: string,
   tootId: string,
-  songId: string,
+  songId: string | null,
   checkoutSessionId: string,
   price: { amount: number; currency: string }
 ): Promise<void> {

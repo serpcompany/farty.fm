@@ -14,7 +14,8 @@ import {
 import { keepMicrophoneOpen } from '@/lib/audio/keep-microphone-open'
 import { desktop } from '@/lib/desktop'
 import { RecordButton } from './record-button'
-import { type RecordProblem, useRecordFlow } from './record-flow-provider'
+import { useRecordFlow } from './record-flow-provider'
+import type { RecordProblem } from './take-capture'
 
 const problems: Record<
   Exclude<RecordProblem, 'nothingHeard'>,
@@ -44,12 +45,7 @@ export function RecordScreen() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-7">
       <div className="h-10" />
-      <RecordButton
-        isRecording={false}
-        starting={capture.kind === 'starting'}
-        disabled={capture.kind !== 'idle'}
-        onClick={() => void startRecording()}
-      />
+      <RecordButton disabled={capture.kind !== 'idle'} onClick={() => void startRecording()} />
       <p className="h-10 text-muted-foreground" data-testid="record-status">
         {problem === 'nothingHeard' && "Didn't catch that. Try again."}
       </p>

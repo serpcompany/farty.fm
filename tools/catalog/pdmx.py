@@ -19,6 +19,13 @@ MISBARRED_SCORES = {
     "5171990": 'The Star-Spangled Banner in 4/4 from "O-": the anthem is in 3/4, with "O-" as its pickup',
 }
 
+NOT_THE_MELODY = {
+    "562231": "My Faith Looks Up To Thee: the tenor part of OLIVET",
+    "653966": "Forty Days and Forty Nights: the tenor part of AUS DER TIEFE",
+    "4878861": "The Dark-Eyed Sailor: Version 2 of 3, not the tune most PDMX scores of the song carry",
+    "5864163": "In the Bleak Midwinter: the tenor part of CRANHAM",
+}
+
 EXCERPT_BEATS = 32
 MIN_BPM, MAX_BPM = 72, 144
 
@@ -107,6 +114,8 @@ def pick_problems(row):
     problems = license_problems(row)
     if score_id(row) in MISBARRED_SCORES:
         problems.append("its bar lines are off the tune")
+    if score_id(row) in NOT_THE_MELODY:
+        problems.append("it isn't the tune's melody")
     if int(float(row["n_tracks"] or 0)) > MAX_TRACKS:
         problems.append(f"more than {MAX_TRACKS} tracks")
     if not row["mid"]:
@@ -284,11 +293,12 @@ def batch_of(entry):
 
 
 def merge_catalog(catalog, titles_file, entries):
+    first = next((i for i, e in enumerate(catalog) if batch_of(e) == titles_file), len(catalog))
     kept = [e for e in catalog if batch_of(e) != titles_file]
     clash = {e["id"] for e in kept} & {e["id"] for e in entries}
     if clash:
         raise ValueError(f"ids already in the catalog: {sorted(clash)}")
-    return kept + list(entries)
+    return kept[:first] + list(entries) + kept[first:]
 
 
 def spread(items, n):

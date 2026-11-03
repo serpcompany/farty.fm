@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { NO_NOTE } from '@/lib/recordings'
+
 import { parseRecording, parseToot } from './library-input'
 
 const ID = '11111111-1111-4111-8111-111111111111'
@@ -49,8 +51,13 @@ describe('parseRecording', () => {
       analysis: { state: 'analyzed', analysis: shuffled }
     })
     const kept = parseRecording(sent, ID, 48_000)
-    expect(kept).toEqual({ ...recording(), analysis, placedPitch: 40 })
-    expect(Object.keys(kept ?? {})).toEqual([...Object.keys(recording()), 'placedPitch'])
+    expect(kept).toEqual({ ...recording(), analysis, placedPitch: 40, trim: null, name: null })
+    expect(Object.keys(kept ?? {})).toEqual([
+      ...Object.keys(recording()),
+      'placedPitch',
+      'trim',
+      'name'
+    ])
     expect(Object.keys(kept?.analysis ?? {})).toEqual(Object.keys(analysis))
   })
 
@@ -59,11 +66,11 @@ describe('parseRecording', () => {
     expect(parseRecording(recording({ placedPitch: null }), ID, 48_000)?.placedPitch).toBeNull()
   })
 
-  it('refuses a Placed Pitch that is not a MIDI note, and takes any MIDI note, wider than the picker', () => {
-    for (const placedPitch of ['40', 40.5, -1, 128, Number.NaN]) {
+  it('refuses a Placed Pitch that is not a MIDI note, and takes any MIDI note, wider than the picker, or left out of Songs', () => {
+    for (const placedPitch of ['40', 40.5, -2, 128, Number.NaN]) {
       expect(parseRecording(recording({ placedPitch }), ID, 48_000), String(placedPitch)).toBeNull()
     }
-    for (const placedPitch of [0, 127]) {
+    for (const placedPitch of [0, 127, NO_NOTE]) {
       expect(parseRecording(recording({ placedPitch }), ID, 48_000)?.placedPitch).toBe(placedPitch)
     }
   })
@@ -85,7 +92,7 @@ describe('parseToot', () => {
   it('trims the title, and keys each pitch by its number', () => {
     const parsed = parseToot(toot({ '060': PLAYER }, { title: '  Bean Song  ' }), ID)
     expect(parsed?.title).toBe('Bean Song')
-    expect(parsed?.arrangement.recordingForPitch).toEqual({ 60: PLAYER })
+    expect(parsed?.arrangement?.recordingForPitch).toEqual({ 60: PLAYER })
   })
 
   it('takes up to 128 pitches, each a number of up to 3 digits played by a Recording id', () => {

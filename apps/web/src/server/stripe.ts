@@ -117,7 +117,7 @@ async function checkoutSessionRequest(
 type NewCheckout = {
   userId: string
   tootId: string
-  songTitle: string
+  songTitle: string | null
   successUrl: string
   cancelUrl: string
   replaces: string | null
@@ -133,7 +133,10 @@ export function createCheckoutSession(
     'line_items[0][quantity]': '1',
     'line_items[0][price_data][currency]': TOOT_PRICE.currency,
     'line_items[0][price_data][unit_amount]': String(TOOT_PRICE.amount),
-    'line_items[0][price_data][product_data][name]': `Save your Toot of ${checkout.songTitle}`,
+    'line_items[0][price_data][product_data][name]':
+      checkout.songTitle === null
+        ? 'Save your Sound Pad Toot'
+        : `Save your Toot of ${checkout.songTitle}`,
     client_reference_id: checkout.tootId,
     'metadata[user_id]': checkout.userId,
     'metadata[toot_id]': checkout.tootId,

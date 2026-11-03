@@ -19,16 +19,18 @@ from signals import burst, faded, harmonic, padded, samples
 
 class NoteSegment(unittest.TestCase):
     def test_finds_the_sound_from_just_before_its_onset_to_where_it_fades(self):
-        start, end, cut = note_segment(padded(burst(), 0.2, 0.3))
+        start, end, pitch_end, cut = note_segment(padded(burst(), 0.2, 0.3))
         self.assertTrue(0.19 <= start / SR <= 0.2, start / SR)
         self.assertTrue(0.7 <= end / SR <= 0.75, end / SR)
+        self.assertEqual(pitch_end, end)
         self.assertFalse(cut)
 
-    def test_cuts_at_a_second_attack(self):
+    def test_keeps_every_burst_and_ends_the_pitch_at_the_second_attack(self):
         two = np.concatenate([burst(), np.zeros(samples(0.15)), burst()])
-        start, end, cut = note_segment(padded(two, 0.2, 0.3))
+        start, end, pitch_end, cut = note_segment(padded(two, 0.2, 0.3))
         self.assertTrue(cut)
-        self.assertTrue(0.7 <= end / SR < 0.85, end / SR)
+        self.assertTrue(0.7 <= pitch_end / SR < 0.85, pitch_end / SR)
+        self.assertTrue(1.35 <= end / SR <= 1.4, end / SR)
 
 
 class PitchArithmetic(unittest.TestCase):
@@ -73,7 +75,10 @@ class AnalyzeRecording(unittest.TestCase):
         for src in load_library({"009", "016"}):
             golden = load(f"recordings/{src.id}.json")
             with self.subTest(recording=src.id):
-                self.assertEqual((src.start, src.end), (golden["gesture"]["start_sample"], golden["gesture"]["end_sample"]))
+                gesture = golden["gesture"]
+                self.assertEqual((src.start, src.end), (gesture["start_sample"], gesture["end_sample"]))
+                self.assertEqual(src.pitch_end, gesture["pitch_end_sample"])
+                self.assertEqual(src.start - len(src.lead_in), gesture["lead_start_sample"])
                 self.assertEqual(src.ref_midi, golden["recording_pitch_midi"])
                 self.assertEqual(src.pitch_estimate, golden["pitch_estimate_midi"])
                 self.assertEqual(src.pitch_confidence, golden["pitch_confidence"])

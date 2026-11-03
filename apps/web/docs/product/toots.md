@@ -1,8 +1,9 @@
 # Toots
 
-The Toots tab and a Toot's own screen: the Toots saved in [Song Creator](song-creator.md), to play,
-open, rename and delete. Saving a Toot needs a free account, which keeps them
-([Accounts](account.md)).
+The Toots tab and a Toot's own screen: the Toots saved in [Song Creator](song-creator.md) and the
+[Sound Pad](sound-pad.md), to play, open, share, rename and delete. Saving a Toot needs a free
+account, which keeps them ([Accounts](account.md)). Sharing one by link is in
+[Sharing](sharing.md).
 
 ## While the Toots load
 
@@ -23,6 +24,14 @@ open, rename and delete. Saving a Toot needs a free account, which keeps them
   `src/lib/toot.test.ts`, "says Today and Yesterday by the calendar day, and a date before that";
   "gives the length in minutes and seconds, rounded to the second"; "shows the Song, the date and
   the length, or that the audio is missing").
+- A Toot's Song is named from the Song Catalog: "Loading…" while it loads. If it doesn't load, a
+  line above the list says "Couldn't load the Songs." with Try again, and each row says "Song" in
+  place of its title, never nothing (`src/components/farty/toots-screen.interaction.test.tsx`,
+  "names the Song once the catalog has loaded"; "says the Song is loading while the catalog loads";
+  "says the catalog failed, with Try again, and gives the row a neutral Song title").
+- A Sound Pad Toot's row says "Sound Pad" in place of a Song: "Sound Pad · Today · 0:04"
+  (`e2e/sound-pad.spec.ts`, "records a take on the Pads, plays it back, and saves it as a Toot for
+  $0.99").
 - The play button plays the Toot and turns into Stop (`e2e/toots-kept.spec.ts`, "Toots are kept:
   made, found after a relaunch, renamed, and deleted"; `e2e/sync.spec.ts`, "two browsers signed in
   to one account play each other's farts, and see each other's deletes").
@@ -40,10 +49,15 @@ open, rename and delete. Saving a Toot needs a free account, which keeps them
   `src/components/farty/toots-provider.interaction.test.tsx`, "reports Toots that fail to load, and
   still lists those saved since").
 
-## Rename and delete
+## Share, rename and delete
 
-- Each row's More menu has Rename and Delete (`e2e/toots-kept.spec.ts`, "Toots are kept: made,
-  found after a relaunch, renamed, and deleted").
+- Each row's More menu has Share, Rename and Delete (`e2e/toots-kept.spec.ts`, "Toots are kept:
+  made, found after a relaunch, renamed, and deleted"; `e2e/share-toot.spec.ts`, "a signed-in user
+  shares a saved Toot, someone signed out plays it, and Stop sharing takes the link down").
+- Once shared, the menu has Share link and Stop sharing in place of Share, even for a Toot whose
+  audio this browser can't play, since its link plays from the account; before, such a Toot has no
+  Share ([Sharing](sharing.md)) (`src/components/farty/toot-share.interaction.test.tsx`, "keeps
+  Share link and Stop sharing in its row's menu once shared, and no Share before").
 - Rename opens a dialog with the title filled in. The new title is trimmed, and a blank one changes
   nothing (`e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch, renamed, and
   deleted"; `src/components/farty/toots-provider.interaction.test.tsx`, "renames a Toot with its
@@ -58,12 +72,29 @@ open, rename and delete. Saving a Toot needs a free account, which keeps them
   (`e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch, renamed, and deleted";
   `src/components/farty/toots-provider.interaction.test.tsx`, "stops a Toot that plays before it
   deletes it").
+- Deleting a shared Toot says "Its link stops working too." first, and the link stops
+  (`e2e/share-toot.spec.ts`, "a signed-in user shares a saved Toot, someone signed out plays it,
+  and Stop sharing takes the link down", its step "shared again, the new link is gone once the Toot
+  is deleted").
 
 ## A Toot's screen
 
 - A row's title opens `/toots/toot/?id=…`: Song Creator's layout without Save, with the Toot's
-  title, its Song and source, and the More menu. It opens on Ready, and Play plays it
-  (`e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch, renamed, and deleted").
+  title, its Song and source, Share in its header, and the More menu. It opens on Ready, and Play
+  plays it (`e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch, renamed, and
+  deleted").
+- Under the title, its Song, then "Shared" while it's shared. Share in the header offers Share link
+  and Stop sharing once shared, and is there for a Toot this browser can't play only then
+  (`e2e/share-toot.spec.ts`, "a signed-in user shares a saved Toot, someone signed out plays it,
+  and Stop sharing takes the link down", its step "the Toot's screen says it's shared, and its
+  header's Share offers the same link"; `src/components/farty/toot-share.interaction.test.tsx`,
+  "keeps Share in its header once shared, and none before").
+- Play needs only the Toot's own audio, so it plays while the Song's notes still load, and when
+  they fail, which says "Couldn't load this Song's notes." with Try again. A tapped note plays only
+  once the notes are there (`src/components/farty/song-notes.interaction.test.tsx`, "plays the Toot
+  while its Song's notes are still loading"; "plays the Toot when its Song's notes fail to load,
+  and offers Try again for them"; `src/components/farty/toots-provider.interaction.test.tsx`, "plays
+  a saved Toot's note only with its Song's notes, which its screen gives").
 - A Toot that plays keeps playing into its screen, and leaving the list lets go of the audio its
   rows decoded (`src/components/farty/toots-screen.interaction.test.tsx`, "keeps a Toot that plays
   playing into its screen, and lets go of the audio its rows decoded").
@@ -85,6 +116,13 @@ open, rename and delete. Saving a Toot needs a free account, which keeps them
   failed to load. Back to Toots goes back in history when Toots opened the screen, and otherwise
   replaces it (`e2e/toots.spec.ts`, "Toots that fail to load, and a Toot that isn't there, say so";
   `e2e/toots-kept.spec.ts`, "Toots are kept: made, found after a relaunch, renamed, and deleted").
+
+## A Sound Pad Toot
+
+- Its screen has the Toot's title, "Sound Pad" under it, Play with Ready or Playing, its length and
+  how many taps of how many Recordings it played; Play plays the whole Toot
+  (`e2e/sound-pad.spec.ts`, "records a take on the Pads, plays it back, and saves it as a Toot for
+  $0.99").
 
 ## Guest and signed in
 

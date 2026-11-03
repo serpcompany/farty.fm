@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Account, AccountChange } from '@/lib/account'
+import type { SongSummary } from '@/lib/catalog/song'
 import type { Recording } from '@/lib/recordings'
 import type { Toot } from '@/lib/toot'
 import { giveToken, siteKeyAnswer, widgets } from '@/test-support/fake-turnstile'
@@ -16,11 +17,16 @@ import {
 import { type NotUploaded, useAccount } from './account-provider'
 import { ProfileScreen } from './profile-screen'
 import { useRecordings } from './recordings-provider'
+import { useShares } from './share-recording'
+import { useSongCatalog } from './song-catalog-provider'
 import { useToots } from './toots-provider'
 
 vi.mock('./account-provider', () => ({ useAccount: vi.fn() }))
 vi.mock('./fixture-library', () => ({ FixtureLibrary: () => <h2>Internal build</h2> }))
+vi.mock('./friends-section', () => ({ ProfileFriends: () => <h2>Friends</h2> }))
 vi.mock('./recordings-provider', () => ({ useRecordings: vi.fn() }))
+vi.mock('./share-recording', () => ({ useShares: vi.fn() }))
+vi.mock('./song-catalog-provider', () => ({ useSongCatalog: vi.fn() }))
 vi.mock('./toots-provider', () => ({ useToots: vi.fn() }))
 vi.mock('./turnstile', () => import('@/test-support/fake-turnstile'))
 
@@ -35,19 +41,35 @@ const failing = {
   setMarketingEmail: vi.fn(async () => false)
 }
 
+const reloadSongs = vi.fn()
+
 function holding({
   recordings = [],
   toots = [],
+  songs = [],
+  songsFailed = false,
+  handle = null,
   account = signedIn,
   deleteAccount = async () => 'failed',
   signOut = failing.signOut
 }: {
   recordings?: Recording[] | null
   toots?: Toot[] | null
+  songs?: SongSummary[] | null
+  songsFailed?: boolean
+  handle?: string | null
   account?: Account
   deleteAccount?: DeleteAccount
   signOut?: SignOut
 }) {
+  vi.mocked(useSongCatalog).mockReturnValue({
+    songs,
+    songsFailed,
+    reloadSongs
+  } as unknown as ReturnType<typeof useSongCatalog>)
+  vi.mocked(useShares).mockReturnValue(
+    handle === null ? null : { handle, links: new Map(), tootLinks: new Map() }
+  )
   vi.mocked(useRecordings).mockReturnValue({
     recordings,
     melodicRecordings: [],
@@ -82,9 +104,35 @@ describe('Profile', () => {
     await render(holding({ toots: null }))
     expect(inStats('[role="status"]')).not.toBeNull()
 
+    await render(holding({ songs: null }))
+    expect(inStats('[role="status"]')).not.toBeNull()
+
     await render(holding({}))
     expect(inStats('[role="status"]')).toBeNull()
     expect(inStats('[data-testid="stat-recordings"]')?.textContent).toBe('Recordings0')
+  })
+
+  it('counts the Song Catalog’s Songs, and offers Try again when it didn’t load', async () => {
+    const render = await show(holding({ songs: null, songsFailed: true }))
+    expect(inStats('[role="status"]')).toBeNull()
+    expect(pageText()).toContain("Couldn't load the Songs.")
+    await tap(button('Try again'))
+    expect(reloadSongs).toHaveBeenCalledTimes(1)
+
+    const song = { id: 'a', title: 'A' } as SongSummary
+    await render(holding({ songs: [song, { ...song, id: 'b' }] }))
+    expect(inStats('[data-testid="stat-songs"]')?.textContent).toBe('Songs unlocked0 of 2')
+  })
+
+  it('links to the account’s own page once it has a handle', async () => {
+    const render = await show(holding({}))
+    expect(document.body.querySelector('[data-testid="account-handle"]')).toBeNull()
+
+    await render(holding({ handle: 'sam' }))
+    const page = document.body.querySelector('[data-testid="account-handle"]')?.closest('a')
+    expect(page?.textContent).toBe('Your page@sam')
+    expect(page?.getAttribute('href')).toBe('/u/sam')
+    expect(pageText()).toContain('Friends')
   })
 
   it('has no Fixture Library in a build without it, as Production’s is', async () => {

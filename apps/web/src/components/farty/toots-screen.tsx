@@ -23,20 +23,33 @@ import {
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { songs } from '@/lib/catalog/songs.generated'
-import { type Toot, tootDetails } from '@/lib/toot'
+import type { SongSummary } from '@/lib/catalog/song'
+import { PAD_TOOT_TITLE, type Toot, tootDetails } from '@/lib/toot'
 import { cn } from '@/lib/utils'
 import { AccountFullNotice } from './account-full-notice'
 import { usePageHidden } from './page-hidden'
 import { usePlayback } from './playback-provider'
+import { type ShareFlow, ShareMenuItems, useShare, useShares } from './share-recording'
+import { useSongCatalog } from './song-catalog-provider'
+import { SongsFailed } from './songs-failed'
 import { tootPlayback, useToots } from './toots-provider'
 
 function tootPage(id: string): string {
   return `/toots/toot/?id=${encodeURIComponent(id)}`
 }
 
+function tootSongTitle(
+  toot: Toot,
+  song: (id: string) => SongSummary | undefined,
+  catalogLoading: boolean
+): string {
+  if (toot.songId === null) return PAD_TOOT_TITLE
+  return song(toot.songId)?.title ?? (catalogLoading ? 'Loading…' : 'Song')
+}
+
 export function TootsScreen() {
   const { toots, tootsFailed, forgetToot, toggleTootPlayback, deleteToot } = useToots()
+  const { songsFailed } = useSongCatalog()
   const [renaming, setRenaming] = useState<Toot | null>(null)
   const [deleting, setDeleting] = useState<Toot | null>(null)
   const [missingAudio, setMissingAudio] = useState<Toot | null>(null)
@@ -64,6 +77,9 @@ export function TootsScreen() {
     <div className="flex flex-1 flex-col px-4 pb-6">
       <h1 className="pt-4 pb-3 text-3xl font-bold tracking-tight">Toots</h1>
       <AccountFullNotice kind="toots" />
+      {songsFailed && toots.some(toot => toot.songId !== null) && (
+        <SongsFailed className="flex items-center justify-between gap-3 pb-3 pl-4" />
+      )}
       {tootsFailed && (
         <p
           className={cn(
@@ -152,11 +168,13 @@ function TootRow({
 }) {
   const { nowPlaying } = usePlayback()
   const { tootPlayFailed } = useToots()
+  const { songs, songsFailed, song } = useSongCatalog()
   const isPlaying = nowPlaying === tootPlayback(toot.id)
-  const songTitle = songs.find(song => song.id === toot.songId)?.title ?? ''
+  const songTitle = tootSongTitle(toot, song, songs === null && !songsFailed)
   const details =
     tootPlayFailed === toot.id ? `${songTitle} · Couldn't play` : tootDetails(toot, songTitle)
   const Icon = toot.isAudioMissing ? TriangleAlert : isPlaying ? Square : Play
+  const share = useShare({ kind: 'toots', id: toot.id, name: toot.title })
 
   return (
     <li
@@ -187,17 +205,25 @@ function TootRow({
           {details}
         </span>
       </Link>
-      <TootMenu title={toot.title} onRename={onRename} onDelete={onDelete} />
+      <TootMenu
+        title={toot.title}
+        share={toot.isAudioMissing && !share.link ? undefined : share}
+        onRename={onRename}
+        onDelete={onDelete}
+      />
+      {share.dialogs}
     </li>
   )
 }
 
 export function TootMenu({
   title,
+  share,
   onRename,
   onDelete
 }: {
   title: string
+  share?: ShareFlow
   onRename: () => void
   onDelete: () => void
 }) {
@@ -216,6 +242,7 @@ export function TootMenu({
         <Ellipsis className="size-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto">
+        {share && <ShareMenuItems flow={share} />}
         <DropdownMenuItem className="min-h-11 px-3 text-base" onClick={onRename}>
           <Pencil />
           Rename
@@ -284,12 +311,15 @@ export function DeleteTootDialog({
   onClose: () => void
   onDelete: (toot: Toot) => void
 }) {
+  const shared = useShares()?.tootLinks.has(toot?.id ?? '') ?? false
   return (
     <AlertDialog open={toot !== null} onOpenChange={open => !open && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete {toot?.title}?</AlertDialogTitle>
-          <AlertDialogDescription>This can't be undone.</AlertDialogDescription>
+          <AlertDialogDescription>
+            {shared && 'Its link stops working too. '}This can't be undone.
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel className="h-11 text-base">Cancel</AlertDialogCancel>

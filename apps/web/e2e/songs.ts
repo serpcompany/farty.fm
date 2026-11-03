@@ -1,12 +1,18 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import type { Page } from '@playwright/test'
-import { songs } from '../src/lib/catalog/songs.generated'
+import { songs } from '../src/test-support/songs.generated'
 import { payToSave } from './pay'
+import { fartAndSave } from './record'
 import { tab } from './screens'
 import { expect, test } from './test'
 
-const songsTooLongForTheFixtures = ['jingle', 'row', 'amazing', 'auld']
+function unlockedByTheFixtureLibrary(id: string): boolean {
+  const golden = resolve(__dirname, '../../../fixtures/golden/arrangements/full', `${id}.json`)
+  return (JSON.parse(readFileSync(golden, 'utf8')) as { unlocked: boolean }).unlocked
+}
 
-export const songsTheFixturesUnlock = songs.filter(s => !songsTooLongForTheFixtures.includes(s.id))
+export const songsTheFixtureLibraryUnlocks = songs.filter(s => unlockedByTheFixtureLibrary(s.id))
 
 export function song(id: string) {
   const found = songs.find(s => s.id === id)
@@ -50,4 +56,24 @@ export async function makeAToot(page: Page, songId: string): Promise<void> {
   await payToSave(page)
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
+}
+
+export async function recordTheFartsThatUnlockMary(page: Page): Promise<void> {
+  for (const id of ['095', '017']) {
+    await fartAndSave(page, id)
+    await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
+    await page.getByRole('button', { name: 'Record another' }).click()
+  }
+  await recordTheLastTwoOfMarysFarts(page)
+}
+
+export async function recordTheLastTwoOfMarysFarts(page: Page): Promise<void> {
+  await fartAndSave(page, '022')
+  await expect(page.getByTestId('result-progress')).toContainText('You unlocked Hot Cross Buns')
+  await page.getByRole('button', { name: 'Done' }).click()
+  await expect(page).toHaveURL(/\/recordings\/$/)
+  await tab(page, 'Record').click()
+  await fartAndSave(page, '002')
+  await expect(page.getByTestId('result-progress')).toContainText('You unlocked 5 Songs')
+  await expect(page.getByTestId('result-progress')).toContainText('Mary Had a Little Lamb · ')
 }

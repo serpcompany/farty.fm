@@ -94,7 +94,7 @@ describe('with saving free', () => {
     )
     expect(await started.json()).toEqual({ paid: true })
     const payment = await getTootPayment({ db: testDb() }, free, user, T1, request('payment'))
-    expect(await payment.json()).toEqual({ paid: true })
+    expect(await payment.json()).toEqual({ paid: true, unused: false })
     expect(await tootPayment(testDb(), a.id, T1)).toBeNull()
     expect(stripe).not.toHaveBeenCalled()
   })

@@ -34,7 +34,7 @@ describe('lastChangeTimes', () => {
 describe('isGardenedDoc', () => {
   it('leaves out ADRs and changelogs, which record history, and generated reports', () => {
     expect(isGardenedDoc('docs/agents/web.md')).toBe(true)
-    expect(isGardenedDoc('docs/adr/0016-retire-the-iphone-app-source.md')).toBe(false)
+    expect(isGardenedDoc('docs/adr/0022-retire-the-iphone-app-source.md')).toBe(false)
     expect(isGardenedDoc('apps/web/CHANGELOG.md')).toBe(false)
     expect(isGardenedDoc('tools/catalog/titles-01.report.md')).toBe(false)
     expect(isGardenedDoc('apps/web/src/server/library.ts')).toBe(false)

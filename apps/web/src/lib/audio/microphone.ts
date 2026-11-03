@@ -76,26 +76,52 @@ export async function getMicrophoneStream(): Promise<MediaStream> {
 
 export function openMicrophone(): Promise<Microphone> {
   if (microphone) return Promise.resolve(microphone)
-  if (!opening) {
-    const thisOpening = connect(releases)
-    opening = thisOpening
-    thisOpening.then(
-      opened => {
-        if (opening === thisOpening) {
-          opening = null
-          microphone = opened
-        }
-      },
-      () => {
-        if (opening === thisOpening) opening = null
-      }
-    )
-  }
-  return opening
+  return opening ?? open(connect(releases))
 }
 
-async function connect(openedIn: number): Promise<Microphone> {
+function open(connecting: Promise<Microphone>): Promise<Microphone> {
+  opening = connecting
+  connecting.then(
+    opened => {
+      if (opening === connecting) {
+        opening = null
+        microphone = opened
+      }
+    },
+    () => {
+      if (opening === connecting) opening = null
+    }
+  )
+  return connecting
+}
+
+export function moveMicrophone(mic: Microphone): Promise<Microphone> {
+  if (microphone === mic) microphone = null
+  takeApart(mic)
+  return open(connect(releases, mic))
+}
+
+async function connect(openedIn: number, kept?: Microphone): Promise<Microphone> {
   const context = audioContext()
+  const stream = kept ? kept.stream : await newStream(openedIn)
+  const heardWhileOpening = watchTracksWhileOpening(stream, kept)
+  await prepareCapture(context, stream, openedIn)
+  const graph = captureGraph(context, stream)
+  const opened: Microphone = {
+    context,
+    stream,
+    ...graph,
+    ended: heardWhileOpening.ended,
+    silenced: heardWhileOpening.muted,
+    resumed: kept !== undefined,
+    unwatch: flushWhenContextStops(context, graph.node)
+  }
+  graph.node.port.onmessage = (event: MessageEvent<CaptureBatch>) => receiveBatch(event.data)
+  watchTracks(opened)
+  return opened
+}
+
+async function newStream(openedIn: number): Promise<MediaStream> {
   setMicrophoneSession(true)
   let stream: MediaStream
   try {
@@ -107,25 +133,14 @@ async function connect(openedIn: number): Promise<Microphone> {
   }
   microphoneGranted()
   captureStarted()
-  const heardWhileOpening = watchTracksWhileOpening(stream)
-  await prepareCapture(context, stream, openedIn)
-  const graph = captureGraph(context, stream)
-  const opened: Microphone = {
-    context,
-    stream,
-    ...graph,
-    ended: heardWhileOpening.ended,
-    silenced: heardWhileOpening.muted,
-    resumed: false,
-    unwatch: flushWhenContextStops(context, graph.node)
-  }
-  graph.node.port.onmessage = (event: MessageEvent<CaptureBatch>) => receiveBatch(event.data)
-  watchTracks(opened)
-  return opened
+  return stream
 }
 
-function watchTracksWhileOpening(stream: MediaStream): { muted: boolean; ended: boolean } {
-  const heard = { muted: false, ended: false }
+function watchTracksWhileOpening(
+  stream: MediaStream,
+  kept?: Microphone
+): { muted: boolean; ended: boolean } {
+  const heard = { muted: kept?.silenced ?? false, ended: kept?.ended ?? false }
   for (const track of stream.getAudioTracks()) {
     track.onmute = () => {
       heard.muted = true
@@ -236,21 +251,23 @@ export function releaseMicrophone(): void {
   loseTake()
   const closing = microphone
   microphone = null
-  if (closing) close(closing)
+  if (closing) {
+    takeApart(closing)
+    for (const track of closing.stream.getTracks()) track.stop()
+  }
   if (wasOpen) captureStopped()
   setMicrophoneSession(false)
 }
 
-function close(closing: Microphone): void {
-  closing.unwatch()
-  sendCommand(closing.node, { type: 'close' })
-  closing.source.disconnect()
-  closing.node.disconnect()
-  closing.mute.disconnect()
-  closing.node.port.onmessage = null
-  for (const track of closing.stream.getTracks()) {
+function takeApart(mic: Microphone): void {
+  mic.unwatch()
+  sendCommand(mic.node, { type: 'close' })
+  mic.source.disconnect()
+  mic.node.disconnect()
+  mic.mute.disconnect()
+  mic.node.port.onmessage = null
+  for (const track of mic.stream.getTracks()) {
     track.onmute = track.onunmute = track.onended = null
-    track.stop()
   }
 }
 

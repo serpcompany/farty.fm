@@ -9,16 +9,12 @@ const questions = [
     a: "Allow the microphone for this site in your browser's site settings, then reload. Farty only listens while you are recording."
   },
   {
-    q: 'It says "No steady note this time".',
-    a: 'Some farts are just noise, with no clear pitch. The Recording is still saved. On the Recordings tab, tap “noise-like” to place it by ear on the piano key it sounds closest to, and Songs can use it there. It still plays as recorded: the note only says where Songs use it. Or try again: longer, steadier farts are more likely to hold a note.'
+    q: 'It says "No note".',
+    a: 'Some farts are just noise, with no clear pitch. The Recording is still saved, and Songs leave it out. To give it a note, tap its pencil on the Recordings tab, then the piano key it sounds closest to, and Songs can use it there. It still plays as recorded: the note only says where Songs use it. Or try again: longer, steadier farts are more likely to hold a note.'
   },
   {
     q: 'It says "Didn’t catch that".',
     a: 'Farty heard nothing louder than the room. Hold the phone closer, tap Record, and tap Stop after the fart.'
-  },
-  {
-    q: 'It says "We kept the first fart".',
-    a: 'Farty keeps the first fart in a Recording. Record one fart at a time.'
   },
   {
     q: 'Where are my Recordings? Can you recover them?',
@@ -46,12 +42,13 @@ export default function SupportPage() {
           One fart per Recording.
         </li>
         <li>
-          <strong>Save.</strong> Farty finds the fart&apos;s note, like G3, or tells you it is
-          noise-like.
+          <strong>Review and save.</strong> Farty finds the fart&apos;s note, like G3, or shows No
+          note. Before you save, you can trim the fart, pick another note on the piano keys, and
+          name it.
         </li>
         <li>
           <strong>Find it again.</strong> Every saved Recording is on the Recordings tab with its
-          note. Play or delete it there, or place a noise-like one on a note by ear.
+          note. Play or delete it there, or tap its pencil to trim it, change its note or rename it.
         </li>
       </ol>
 

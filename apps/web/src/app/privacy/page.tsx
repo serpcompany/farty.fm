@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   return (
     <article className="flex flex-col gap-3 px-4 pt-4 pb-6 text-sm leading-relaxed [&_a]:underline [&_h2]:pt-3 [&_h2]:text-lg [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
       <h1 className="text-3xl font-bold tracking-tight">Privacy</h1>
-      <p className="text-muted-foreground">Last updated: October 28, 2026</p>
+      <p className="text-muted-foreground">Last updated: November 3, 2026</p>
       <p>
         Farty records your farts, finds the note of each one, and plays songs with them. This policy
         explains what happens to your data. The short version:{' '}
@@ -28,6 +28,42 @@ export default function PrivacyPage() {
         <li>
           Your email is used for sign-in codes and for Farty news, which is on by default. You can
           unsubscribe from any email or on Profile. It&apos;s never sold.
+        </li>
+      </ul>
+
+      <h2>Sharing</h2>
+      <ul>
+        <li>
+          Nothing you record is public unless you share it. When you share a Recording or a saved
+          Toot, anyone with its link can open it, signed in or not, and play it. The page shows your
+          handle, the Recording&apos;s name, note, length and waveform, or the Toot&apos;s name,
+          Song, length and waveform, and nothing else about you: never your email or your other
+          Recordings and Toots.
+        </li>
+        <li>
+          What you share is listed on your page, farty.fm/u/your handle, which anyone can open.
+          Search engines are asked not to index links or pages, but anyone you send one to can pass
+          it on.
+        </li>
+        <li>
+          You pick your handle the first time you share or add a friend. It shows on every link you
+          share and on your page.
+        </li>
+        <li>
+          Friends: anyone with an account can send you a friend request by your handle. Farty keeps
+          who asked whom and who your friends are, and shows them only to the two of you. Removing a
+          friend doesn&apos;t tell them.
+        </li>
+        <li>
+          Stop sharing, deleting the Recording or Toot, or deleting your account makes the link stop
+          working for everyone. Apps that already showed a preview of the link may keep their copy
+          of it.
+        </li>
+        <li>
+          Anyone can report a shared Recording or Toot, or a page. Farty keeps which link or page
+          was reported and when, and nothing about who reported it, and may take the link down. To
+          limit how many reports one device can send, it keeps a scrambled code made from your IP
+          address for an hour, never the address itself.
         </li>
       </ul>
 
@@ -95,11 +131,11 @@ export default function PrivacyPage() {
 
       <h2>Deleting your data</h2>
       <p>
-        Delete account on Profile removes your email, Recordings, Toots and Farty&apos;s record of
-        your payments. If you signed in more than 10 minutes before, it first sends a code to your
-        email, so only you can delete your account. Stripe keeps its own record of each payment.
-        Without an account, delete a Recording on the Recordings tab, or clear this site&apos;s data
-        in your browser to remove everything.
+        Delete account on Profile removes your email, Recordings, Toots, handle, shared links,
+        friends and friend requests, and Farty&apos;s record of your payments. If you signed in more
+        than 10 minutes before, it first sends a code to your email, so only you can delete your
+        account. Stripe keeps its own record of each payment. Without an account, delete a Recording
+        on the Recordings tab, or clear this site&apos;s data in your browser to remove everything.
       </p>
 
       <h2>Children</h2>
