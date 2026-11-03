@@ -494,3 +494,56 @@ Brighton Camp | the same tune as The Girl I Left Behind Me in the catalog
 Christmas Is Coming | the importer picks "christmas is a-coming" by Misc Christmas, genre soundtrack, not Nesbit's rhyme
 Eri gia tutta mia | the importer picks a score credited to Claudio Monteverdi, not Spighi da Prato's piece
 Here We Come A-Caroling | the importer picks Ron Smith's arrangement (a modern arranger), not the traditional tune
+
+# Reviewed for batch 07 (#324): the top 200 of the ranking after batch 06, read against each title's Artist in ranking.md.
+# Under copyright, or unsure (batch 07)
+Hiraeth | unsure: credited to "a tasty shade of mauve", a modern hobby composer; no dated source
+The Hills | unsure: credited to a website name (Rickeybattleyahoo.com), a modern piece
+All the Rage | unsure: Larry Ungar, a modern composer; no dated source
+When Messiah Comes | unsure: Wayne Goodine, a modern composer
+The First Of October | under copyright: Nigel Gatherer, a living composer
+Wild Mountain Thyme 1 | under copyright: the common words and version are Francis McPeake's, 1957 (died 1971)
+The Road To The Isles/Burning Sands of Egypt | under copyright: Kenneth MacLeod's words (1917) and a combined title; also two tunes
+Murdo's Wedding | unsure: a pipe march with a named modern composer; no dated source
+Dublin Streets | unsure: credited to Ennis, a 20th-century piper; no dated source
+The Lottery | unsure: credited to Michael Dabney, no dates found
+Peek-A-Boo Waltz | unsure: Anna Cramer, no dates found; likely 20th century
+The Veleta | unsure: an Edwardian dance (1900s) credited to Arthur Morris, no dates found
+Avondstemming | unsure: credited to Alice Nahon, a poet; the music's composer is not named
+Morna | unsure: credited to C. H. Perrot, no dates found; "morna" is also a Cape Verdean genre
+'Et dodim kala | unsure: Yemenite Hebrew song of the 20th century; no composer named
+Mazltov | unsure: no piece we can tell; the title is a greeting many tunes carry
+
+# Not one tune (batch 07)
+Bourr\'ee | not one tune: Bach wrote many bourrees
+Fughetta | not one tune: a form name, many composers and pieces
+Tartini Variaciones en un tema de Corelli | not one tune: a set of variations
+Five Shetland Reels | not one tune: a set of five reels
+Lamentations Of Jeremiah | not one tune: Tallis wrote several settings, in many parts
+Psalm 23 | not one tune: a psalm that many tunes are set to
+For God so loved the world | not one tune: a verse many pieces set
+Scottish | not one tune: a genre name, no piece we can tell
+Breton | not one tune: a genre name, no piece we can tell
+Galopp | not one tune: a dance name, many pieces
+Vivace | not one tune: a tempo mark, many pieces
+The Bishop | not one tune: no piece we can tell
+Handel With Care | not one tune: a pun title for scores of Handel's music, no piece we can tell
+Chanson à boire | not one tune: "drinking song", many pieces share the title
+Halling | not one tune: a dance form; Grieg wrote several hallings
+Winter Waltz | not one tune: a title many waltzes share
+Cowboy Waltz | not one tune: a title many waltzes share
+French-Canadian Waltz | not one tune: a type of waltz, no piece we can tell
+
+# The same tune as a Song in the catalog (batch 07)
+Hbd | the same tune as Happy Birthday, under an abbreviation (and under copyright in the US until 2016, Mildred and Patty Hill 1893/1935)
+March of Saint Timothy | unsure: Judi Morningstar, a modern composer
+St. Albans | unsure: credited to Walter Janes, no dates found
+Cuckoo Valse | unsure: credited to Carl Volti, no dates found; likely 20th century
+GB/7a/12 God Rest You Merry Version 2 of 2 | the same tune as God Rest You Merry, under a catalogue code
+Dance | not one tune: a title any dance shares; no piece we can tell
+Official Branle | not one tune: Arbeau's Orchésographie gives several branles
+Hold On | not one tune: the title of several spirituals and many songs
+
+# Pulled from titles-07.txt after review of its first import (#324)
+Promised Land | the importer picks a score whose composer is credited as "Paradise Lunch", a modern arranger, not Anne Steele's hymn
+Valse du Départ | the importer picks a score credited to Thierry Laplaud, a modern composer, not a traditional waltz
