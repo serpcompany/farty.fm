@@ -2,7 +2,7 @@
 
 import { Clock, Play, Square, UserCheck, UserPlus, X } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useEffect, useState, useSyncExternalStore } from 'react'
+import { type ReactNode, useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -15,7 +15,7 @@ import { actOnFriend, type FriendAction, type FriendState, readFriendState } fro
 import { formattedTootDate } from '@/lib/toot'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
-import { RemoveFriendDialog, refusalMessage, useFriendRequest } from './friends'
+import { FriendsUnreachable, RemoveFriendDialog, refusalMessage, useFriendRequest } from './friends'
 import { Report, SharedTopBar } from './shared-recording-page'
 
 // A profile page, `/u/<handle>/` (#319, ADR 0021): what anyone sees, signed in or not, in any
@@ -161,21 +161,25 @@ function FriendControl({ handle, onOwn }: { handle: string; onOwn: (own: boolean
   const { account } = useAccount()
   const accountId = account.status === 'signedIn' ? account.id : null
   const [state, setState] = useState<{ accountId: string; state: FriendState } | null>(null)
+  // The account whose read of the friend state failed, so the control says so and offers Retry.
+  const [unreachable, setUnreachable] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   const [removing, setRemoving] = useState(false)
   const request = useFriendRequest(accountId)
 
-  useEffect(() => {
+  // Each result is kept with the account it was read for, so a read for an account that has since
+  // signed out never shows for the next.
+  const reload = useCallback(async () => {
     if (!accountId) return
-    let current = true
-    void readFriendState(handle, accountId).then(read => {
-      if (current && read) setState({ accountId, state: read })
-    })
-    return () => {
-      current = false
-    }
+    const read = await readFriendState(handle, accountId)
+    setUnreachable(failed => (read === null ? accountId : failed === accountId ? null : failed))
+    if (read) setState({ accountId, state: read })
   }, [accountId, handle])
+
+  useEffect(() => {
+    void reload()
+  }, [reload])
 
   const known = accountId && state?.accountId === accountId ? state.state : null
   useEffect(() => onOwn(known === 'own'), [known, onOwn])
@@ -212,6 +216,9 @@ function FriendControl({ handle, onOwn }: { handle: string; onOwn: (own: boolean
         Add friend
       </Link>
     )
+  }
+  if (!known && accountId && unreachable === accountId) {
+    return <FriendsUnreachable onRetry={() => void reload()} />
   }
   // Held at its size while it's read, so the list doesn't jump.
   if (!known) return <div className="h-11" aria-hidden />

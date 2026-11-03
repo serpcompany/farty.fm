@@ -231,7 +231,8 @@ describe('Sending a friend request', () => {
     const bob = await member('bob')
     const start = Date.now()
     const at = (days: number) => new Date(start + days * 24 * 60 * 60 * 1000)
-    const ask = (days: number) => requestFriend(testDb(), 'useralice', 'bob', 'test-secret', at(days))
+    const ask = (days: number) =>
+      requestFriend(testDb(), 'useralice', 'bob', 'test-secret', at(days))
     for (let i = 0; i < FRIEND_REQUEST_LIMITS.perPair.max; i++) {
       expect(await ask(0)).toEqual({ sent: 'requested' })
       expect((await friend.act('alice', 'decline', bob)).status).toBe(200)

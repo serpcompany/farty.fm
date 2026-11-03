@@ -184,6 +184,27 @@ const rowLink =
   'flex min-h-11 min-w-0 flex-1 items-center justify-between gap-4 py-2.5 pl-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset'
 
 /**
+ * Friends couldn't be read (offline, a timeout, or a session the server ended): says so, with
+ * Retry. Profile's Friends and a profile page's friend control both show it.
+ */
+export function FriendsUnreachable({ onRetry }: { onRetry: () => void }) {
+  return (
+    <ul className={list}>
+      <li className="flex min-h-11 items-center justify-between gap-4 py-0 pl-4">
+        <span className="text-muted-foreground">Can't reach your friends right now.</span>
+        <button
+          type="button"
+          className="min-h-11 shrink-0 px-4 font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
+          onClick={onRetry}
+        >
+          Retry
+        </button>
+      </li>
+    </ul>
+  )
+}
+
+/**
  * Profile's friends, under Stats (#319): "Friend requests", only while someone has asked, with
  * Accept and Decline; "Friends", each friend opening their page and the requests the user sent,
  * each with ⋯ to remove or cancel; and Add friend, by Handle.
@@ -222,18 +243,7 @@ export function FriendsSection({ accountId }: { accountId: string }) {
           Friends
         </h2>
         {unreachable ? (
-          <ul className={list}>
-            <li className="flex min-h-11 items-center justify-between gap-4 py-0 pl-4">
-              <span className="text-muted-foreground">Can't reach your friends right now.</span>
-              <button
-                type="button"
-                className="min-h-11 shrink-0 px-4 font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
-                onClick={() => void reload()}
-              >
-                Retry
-              </button>
-            </li>
-          </ul>
+          <FriendsUnreachable onRetry={() => void reload()} />
         ) : (
           <div className="flex justify-center py-3">
             <Spinner />
