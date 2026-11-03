@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
-import { blockedStorage, memoryStorage } from '../test-storage'
-
-// reportError() in Node, with the browser's globals stubbed: what it sends, what it keeps back,
-// and that it never throws. Each test loads the module afresh, as a new page load.
+import { blockedStorage, memoryStorage } from '@/test-support/web-storage'
+import { PAGE_LIMIT } from './errors'
+import { QUEUE_LIMIT } from './queue'
 
 const SECRET = 'test@example.com'
 
@@ -11,18 +10,16 @@ let browser: { onLine: boolean; globalPrivacyControl?: boolean }
 
 async function load() {
   vi.resetModules()
-  const errors = await import('./errors')
-  const queue = await import('./queue')
-  const sharing = await import('./sharing')
-  return { ...errors, ...queue, ...sharing }
+  const { flush, installErrorReporting, reportError } = await import('./errors')
+  const { readQueue } = await import('./queue')
+  const { setSharing, sharing } = await import('./sharing')
+  return { flush, installErrorReporting, readQueue, reportError, setSharing, sharing }
 }
 
-/** The reports sent so far, as the route would read them. */
 function sentBodies(): Record<string, unknown>[] {
   return fetchMock.mock.calls.map(([, init]) => JSON.parse(String(init?.body)))
 }
 
-/** Lets reportError's send, which it never waits for, finish. */
 async function settle() {
   for (let i = 0; i < 5; i++) await new Promise(resolve => setTimeout(resolve, 0))
 }
@@ -38,8 +35,8 @@ beforeEach(() => {
   vi.stubGlobal('location', { pathname: '/compose/2f1c-my-secret-song/' })
   fetchMock = vi.fn(async () => new Response(null, { status: 204 }))
   vi.stubGlobal('fetch', fetchMock)
-  vi.stubEnv('PEDOS_RELEASE', '1.2.0+1bb4403')
-  vi.stubEnv('PEDOS_ENVIRONMENT', 'staging')
+  vi.stubEnv('FARTY_RELEASE', '1.2.0+1bb4403')
+  vi.stubEnv('FARTY_ENVIRONMENT', 'staging')
 })
 
 afterEach(() => {
@@ -60,7 +57,6 @@ describe('reportError', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
     const [path, init] = fetchMock.mock.calls[0] ?? []
     expect(path).toBe('/api/telemetry/')
-    // Behind the Staging gate, with its password.
     expect(init).toMatchObject({ method: 'POST', credentials: 'same-origin', keepalive: true })
     expect(sentBodies()).toEqual([
       {
@@ -75,7 +71,7 @@ describe('reportError', () => {
   })
 
   it('sends no cookie in Production, where no gate needs a password', async () => {
-    vi.stubEnv('PEDOS_ENVIRONMENT', 'production')
+    vi.stubEnv('FARTY_ENVIRONMENT', 'production')
     const { reportError } = await load()
     reportError('toot-make-failed', new TypeError('x'))
     await settle()
@@ -147,7 +143,7 @@ describe('reportError', () => {
   })
 
   it('sends at most 25 reports from one page load', async () => {
-    const { reportError, PAGE_LIMIT } = await load()
+    const { reportError } = await load()
     for (let i = 0; i < PAGE_LIMIT + 10; i++) reportError('analysis-failed')
     await settle()
     expect(fetchMock).toHaveBeenCalledTimes(PAGE_LIMIT)
@@ -195,7 +191,7 @@ describe('offline and retry', () => {
 
   it('keeps only the newest 20 reports', async () => {
     browser.onLine = false
-    const { reportError, readQueue, QUEUE_LIMIT } = await load()
+    const { reportError, readQueue } = await load()
     for (let i = 0; i < 24; i++) reportError(i < 4 ? 'mic-denied' : 'analysis-failed')
     expect(readQueue()).toHaveLength(QUEUE_LIMIT)
     expect(readQueue().every(item => item.report.code === 'analysis-failed')).toBe(true)

@@ -10,13 +10,6 @@ import { type Recording, trimOf } from '@/lib/recordings'
 import type { PadTootDraft, SongTootDraft, TootArrangement } from '@/lib/toot'
 import { decodeWav, encodeWav } from '@/lib/wav'
 
-// Song Creator's render: an Unlocked Song played by the user's Recordings, as a Toot's audio. A
-// port of the iPhone app's `TootRenderer` and `makeToot`. And the Sound Pad's: a Performance
-// played by them (`makePadToot`, #278). The render itself is the engine's
-// (`engine/render-song.ts`, `engine/render-performance.ts`), in its Web Worker; this module only
-// feeds it what the app stores.
-
-/** Why a Toot wasn't made. As the iPhone app's `TootError`. */
 export class TootError extends Error {
   constructor(
     readonly reason: 'locked' | 'couldNotMake',
@@ -27,15 +20,13 @@ export class TootError extends Error {
   }
 }
 
-/** How a Song is rendered: the render worker in the app (`renderInWorker`). */
-export type Render = (
+type Render = (
   song: EngineSong,
   arrangement: Arrangement,
   recordings: readonly RecordingToRender[]
 ) => Promise<RenderedSong>
 
-/** What a Toot keeps of Auto-map's Arrangement. */
-export function tootArrangement(arrangement: Arrangement): TootArrangement {
+function tootArrangement(arrangement: Arrangement): TootArrangement {
   const recordingForPitch: Record<number, string> = {}
   for (const choice of arrangement.pitches) {
     if (choice.recordingId !== null) recordingForPitch[choice.songPitch] = choice.recordingId
@@ -43,16 +34,6 @@ export function tootArrangement(arrangement: Arrangement): TootArrangement {
   return { transposition: arrangement.transposition, recordingForPitch }
 }
 
-/**
- * Makes the Toot of `song`: the Arrangement Auto-map chooses on `recordings` (the one Compose
- * shows), rendered from each Recording it uses as the app stores it, a 16-bit WAV
- * (`loadAudio`), with the Recording's stored analysis and its Trim (`trimOf`, ADR 0019): the
- * fart between the handles, and its lead-in between them too. The Toot's audio is the render as a mono 16-bit WAV.
- *
- * Throws a `TootError`: `locked` when the Song isn't unlocked, `couldNotMake` when a Recording's
- * audio or analysis is missing or the render fails. `id` is a new one unless given: the return
- * from Checkout makes the Toot it paid for again (ADR 0010).
- */
 export async function makeToot(
   song: Song,
   recordings: readonly Recording[],
@@ -91,19 +72,11 @@ export async function makeToot(
   }
 }
 
-/** How a Performance is rendered: the render worker in the app (`renderPerformanceInWorker`). */
 export type RenderPerformance = (
   performance: Performance,
   recordings: readonly PerformanceRecording[]
 ) => Promise<RenderedPerformance>
 
-/**
- * Makes the Toot of a Sound Pad `performance` (ADR 0017): each Recording it plays, as the app
- * stores it (`loadAudio`), rendered in the render worker (`renderPerformance`). The Toot's audio
- * is the render as a mono 16-bit WAV. Throws a `couldNotMake` `TootError` when a Recording it
- * plays is gone or its audio can't be read, or the render fails. `id` is a new one unless given:
- * back from Checkout, the take it paid for is made again (ADR 0010).
- */
 export async function makePadToot(
   performance: Performance,
   recordings: readonly Recording[],

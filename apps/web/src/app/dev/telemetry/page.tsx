@@ -9,9 +9,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false }
 }
 
-// The telemetry standard's pre-launch tests (#126): a synthetic crash and a handled error, each
-// sent as an error report. Staging and local runs only. The Production build has no such page: it
-// answers 404, as SITE_ENV is baked in at build.
 export default function TelemetryTestPage() {
   if (siteEnv() === 'production') notFound()
   return (

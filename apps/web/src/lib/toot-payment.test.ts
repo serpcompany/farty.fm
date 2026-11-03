@@ -124,14 +124,12 @@ describe('tootPaymentState', () => {
       [Response.json({ paid: true, unused: true }), 'unused'],
       [Response.json({ paid: true, unused: false }), 'used'],
       [Response.json({ paid: false, unused: false }), 'unpaid'],
-      // A Worker from before `unused`: it can't tell a used payment from an unused one.
       [Response.json({ paid: true }), null],
       [Response.json({ error: 'signed_out' }, { status: 401 }), null]
     ]
     for (const [response, state] of cases) {
       const fetch = answering(response)
       expect(await tootPaymentState(TOOT, 'userA')).toBe(state)
-      // What D1 has: the Sound Pad's open never spends the Stripe checks a return waits on.
       expect(fetch.mock.calls[0][0]).toBe(`/api/toots/${TOOT}/payment/?check=stored`)
       vi.restoreAllMocks()
     }

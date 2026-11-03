@@ -21,47 +21,19 @@ import {
   songTrim
 } from '@/lib/recordings'
 
-// Pitch Coverage of the Song Catalog by the user's Recordings: a port of the iPhone app's
-// `PitchCoverage.swift` and `SongListing.swift`. Auto-map (`engine/auto-map.ts`) decides it; this
-// module reads its answer the way the screens show it.
-
-/**
- * How much of a Song the user's Melodic Recordings cover: each distinct pitch gets its own Melodic
- * Recording within 3 semitones, or an octave away with an Octave Move (ADR 0004, ADR 0006), and at
- * least as long as the pitch's longest note (ADR 0011). What Compose sorts and splits every Song
- * by, and the Result screen shows (#323).
- */
 export type CoverageCount = {
   covered: number
   total: number
-  /** False when there are no Melodic Recordings at all, Placed Recordings included. */
   hasMelodicRecordings: boolean
-  /** An Unlocked Song: every distinct pitch has its own Melodic Recording. */
   unlocked: boolean
 }
 
-/**
- * A Song's Pitch Coverage, and the Arrangement Auto-map chose, which says what the Song still
- * needs. As the iPhone app's `CoverageResult`.
- */
 export type Coverage = CoverageCount & {
-  /** The transposition, in semitones, Auto-map chose. */
   transposition: number
-  /**
-   * The transposed pitches still needed, lowest first: each as a MIDI note number, with the
-   * shortest fart near it that would cover it. A fart too short for a pitch leaves it missing.
-   */
   missing: MissingNote[]
-  /** The Melodic Recording that covers each covered pitch, keyed by the Song's pitch (score key). */
   recordingForPitch: Map<number, string>
 }
 
-/**
- * Recordings as Auto-map reads them: the ones the user placed on a note, as Melodic Recordings at
- * their Placed Pitch (ADR 0015), even when a later analysis found a Recording Pitch (ADR 0017), and
- * the other analyzed ones with a Recording Pitch, each at its Trim's length (ADR 0019). None the
- * user left out with "No note" (`isLeftOut`, #314).
- */
 function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[] {
   return recordings.flatMap(r => {
     if (r.analysis.state !== 'analyzed' || isLeftOut(r)) return []
@@ -74,33 +46,22 @@ function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[]
   })
 }
 
-/**
- * How long a Recording's fart lasts, in seconds: its single clean gesture, without the silence
- * around it, or the fart found between its Trim's handles (ADR 0019), which is the length the
- * unlock rule measures (ADR 0011, ADR 0012). Before analysis has found the fart, the whole take.
- */
 export function fartSeconds(recording: Recording): number {
   if (recording.analysis.state !== 'analyzed') return recording.seconds
   return autoMapRecording(recording.id, recording.analysis.analysis, songTrim(recording))
     .gestureSeconds
 }
 
-/**
- * A Recording's fart length as its rows show it: "2.9 s". Rounded down to 0.1 s, as a missing
- * note's length is rounded up, so a fart shown as long as a locked Song needs ("Needs a fart near
- * F3 (3.0 s)") is long enough. Rounded to the nearest, a 2.96 s fart would show 3.0 s and still be
- * too short for a 2.975 s note. The 1e-9 keeps float noise from taking 0.1 s off an exact tenth.
- */
+const floatNoise = 1e-9
+
+function roundedDownToTenth(seconds: number): number {
+  return Math.floor(seconds * 10 + floatNoise) / 10
+}
+
 export function formattedFartLength(recording: Recording): string {
-  return formattedFartSeconds(fartSeconds(recording))
+  return formattedLength(roundedDownToTenth(fartSeconds(recording)))
 }
 
-/** A fart `seconds` long as rows show it, rounded down. */
-function formattedFartSeconds(seconds: number): string {
-  return formattedLength(Math.floor(seconds * 10 + 1e-9) / 10)
-}
-
-/** A catalog Song as the engine takes it. */
 export function engineSong(song: Song): EngineSong {
   return {
     bpm: song.bpm,
@@ -110,19 +71,10 @@ export function engineSong(song: Song): EngineSong {
   }
 }
 
-/**
- * The Arrangement Auto-map chooses for `song` with the Melodic ones among `recordings`: the one
- * `coverageOf` reads, and the one Song Creator renders.
- */
 export function arrangementOf(song: Song, recordings: readonly Recording[]): Arrangement {
   return arrange(engineSong(song), autoMapRecordings(recordings))
 }
 
-/**
- * Auto-map of `song` with the Melodic ones among `recordings`, from the Song Catalog's index: the
- * same Arrangement `arrangementOf` chooses from the Song's notes (`arrangePitches`). Ties break on
- * Recording ids.
- */
 export function coverageOf(song: SongSummary, recordings: readonly Recording[]): Coverage {
   const melodic = autoMapRecordings(recordings)
   const result = arrangePitches(song, melodic)
@@ -134,7 +86,6 @@ export function coverageOf(song: SongSummary, recordings: readonly Recording[]):
     covered: result.covered,
     total: result.total,
     transposition: result.transposition,
-    // Without a Melodic Recording, no transposition is better than another.
     missing: melodic.length === 0 ? [] : result.missingNotes,
     recordingForPitch,
     hasMelodicRecordings: melodic.length > 0,
@@ -142,12 +93,10 @@ export function coverageOf(song: SongSummary, recordings: readonly Recording[]):
   }
 }
 
-/** Covered pitches as a fraction, for the Pitch Coverage bar. */
 export function coverageFraction(coverage: CoverageCount): number {
   return coverage.total === 0 ? 0 : coverage.covered / coverage.total
 }
 
-/** "3 of 4 notes covered", or "All 4 notes covered" when unlocked. */
 export function coverageSummary(coverage: CoverageCount): string {
   return coverage.unlocked
     ? `All ${coverage.total} notes covered`
@@ -156,11 +105,6 @@ export function coverageSummary(coverage: CoverageCount): string {
 
 const andList = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' })
 
-/**
- * The notes still needed, with their octave and how long a fart each needs: "D3 (0.5 s) and F3
- * (1.2 s)", or with a `limit` of 3, "D3 (0.5 s), F3 (1.2 s), A3 (0.4 s), and 2 more". Null when
- * nothing is missing.
- */
 export function missingNotes(coverage: Coverage, limit?: number): string | null {
   const names = coverage.missing.map(m => `${noteName(m.midi)} (${m.seconds.toFixed(1)} s)`)
   if (names.length === 0) return null
@@ -168,7 +112,6 @@ export function missingNotes(coverage: Coverage, limit?: number): string | null 
   return andList.format([...names.slice(0, limit), `${names.length - limit} more`])
 }
 
-/** The pitch classes (0 = C … 11 = B) of every Melodic Recording and Placed Recording. */
 export function collectedPitchClasses(recordings: readonly Recording[]): Set<number> {
   return new Set(
     recordings.flatMap(r => {
@@ -178,12 +121,6 @@ export function collectedPitchClasses(recordings: readonly Recording[]): Set<num
   )
 }
 
-/**
- * What Pitch Coverage reads from `recordings`, as a string: equal strings give equal coverage of
- * every Song, so the catalog is matched once per change to the Melodic and Placed Recordings (the
- * iPhone app's `CoverageCache`). Searching, sorting and unplaced Noise-like Recordings never
- * change it.
- */
 export function coverageKey(recordings: readonly Recording[]): string {
   return JSON.stringify(
     autoMapRecordings(recordings).map(r => [
@@ -196,13 +133,8 @@ export function coverageKey(recordings: readonly Recording[]): string {
   )
 }
 
-/** A Song with its Pitch Coverage. */
 export type SongRow = { song: SongSummary; coverage: CoverageCount }
 
-/**
- * Every Song with its Pitch Coverage, in catalog order: counted, not arranged (`coveredCount`), so
- * a 1,000-Song catalog is counted in a moment on a phone (#323). Equal to `coverageOf`'s counts.
- */
 export function songRows(
   songs: readonly SongSummary[],
   recordings: readonly Recording[]
@@ -216,7 +148,6 @@ export function songRows(
   })
 }
 
-/** How Compose orders Songs within each section. */
 export type SongOrder = 'closestToUnlocking' | 'alphabetical' | 'favoritesFirst'
 
 const titles = new Intl.Collator('en', { numeric: true })
@@ -230,11 +161,6 @@ const closestToUnlocking = (a: SongRow, b: SongRow) => {
 
 const alphabetical = (a: SongRow, b: SongRow) => titles.compare(a.song.title, b.song.title)
 
-/**
- * `rows`, given in catalog order, sorted by `order`. Closest to unlocking puts the highest Pitch
- * Coverage first and, among equals, Songs with fewer notes. Favorites first puts the Favorite Songs
- * (ids in `favorites`) first, each part closest to unlocking. Ties keep catalog order.
- */
 export function sortRows(
   rows: readonly SongRow[],
   order: SongOrder,
@@ -248,13 +174,11 @@ export function sortRows(
             Number(favorites.has(b.song.id)) - Number(favorites.has(a.song.id)) ||
             closestToUnlocking(a, b)
         : closestToUnlocking
-  // Array sort is stable, so ties keep catalog order.
   return [...rows].sort(compare)
 }
 
 const searchKeys = new WeakMap<SongSummary, readonly string[]>()
 
-/** A Song's title and other names as search compares them, worked out once a Song. */
 function namesOf(song: SongSummary): readonly string[] {
   let keys = searchKeys.get(song)
   if (!keys) {
@@ -264,15 +188,8 @@ function namesOf(song: SongSummary): readonly string[] {
   return keys
 }
 
-/** Compose's Songs: matching a search, split into Unlocked and locked Songs. */
 export type SongListing = { unlocked: SongRow[]; locked: SongRow[] }
 
-/**
- * The rows, already sorted, whose title or another name contains `query` anywhere, ignoring case,
- * accents and punctuation (`searchKey`): "londonderry" finds Danny Boy. A query with no letters
- * or digits matches every Song. With `only`, Compose's Favorites filter, just the Songs whose ids
- * it holds.
- */
 export function songListing(
   sorted: readonly SongRow[],
   query: string,
@@ -290,20 +207,12 @@ export function songListing(
   }
 }
 
-/**
- * How the Song Catalog's Pitch Coverage changed when a Recording was added: what the Result screen
- * shows. As the iPhone app's `CoverageChanges`.
- */
 export type CoverageChanges = {
-  /** Songs that just became Unlocked Songs, in catalog order. */
   unlocked: SongSummary[]
-  /** Songs still locked that gained a covered pitch, closest to unlocking first. */
   improved: SongRow[]
-  /** The locked Song closest to unlocking, if any Song is still locked. */
   closest: SongRow | null
 }
 
-/** Compares every Song's Pitch Coverage before and after the Recordings changed. */
 export function coverageChanges(
   songs: readonly SongSummary[],
   before: readonly Recording[],

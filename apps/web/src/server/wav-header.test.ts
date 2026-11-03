@@ -7,7 +7,6 @@ import { readWavHeader } from './wav-header'
 const wav = (frames: number, sampleRate = 48_000) =>
   new Uint8Array(encodeWav({ samples: new Float32Array(frames), sampleRate }))
 
-/** A copy of `bytes` with one header field changed. */
 function patched(bytes: Uint8Array, offset: number, value: number, size: 2 | 4) {
   const copy = bytes.slice()
   const view = new DataView(copy.buffer)

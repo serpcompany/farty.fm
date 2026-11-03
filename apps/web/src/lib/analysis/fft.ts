@@ -1,18 +1,9 @@
-/**
- * Autocorrelation of real frames by FFT: `librosa.autocorrelate(frame)`, which zero-pads to
- * `n` samples, takes the inverse FFT of the power spectrum, and keeps the first lags. pYIN calls
- * it once per frame with `n = 4096` (`scipy.fft.next_fast_len(2 * 2048 - 1)`).
- *
- * Both real transforms of size `n` run as complex transforms of size `n / 2` (even samples in
- * the real part, odd in the imaginary part), all in double precision.
- */
 export class Autocorrelation {
   private readonly half: number
   private readonly fft: ComplexFFT
   private readonly re: Float64Array
   private readonly im: Float64Array
   private readonly power: Float64Array
-  /** e^(−2πik/n) for k < n/2: the split between the even and odd halves. */
   private readonly splitCos: Float64Array
   private readonly splitSin: Float64Array
 
@@ -30,62 +21,69 @@ export class Autocorrelation {
     }
   }
 
-  /** Writes lags `0 ..< out.length` of the autocorrelation of `x[start ..< start + length]`. */
   compute(x: Float64Array, start: number, length: number, out: Float64Array): void {
-    const half = this.half
+    this.packEvenOddSamples(x, start, length)
+    this.fft.transform(this.re, this.im, false)
+    this.powerSpectrumFromPacked()
+    this.packPowerSpectrumForInverse()
+    this.fft.transform(this.re, this.im, true)
+    this.unpackLags(out)
+  }
+
+  private packEvenOddSamples(x: Float64Array, start: number, length: number): void {
     const re = this.re
     const im = this.im
-    const power = this.power
-    const splitCos = this.splitCos
-    const splitSin = this.splitSin
-    // Forward real FFT: z[m] = x[2m] + i x[2m+1], zero-padded.
     re.fill(0)
     im.fill(0)
     for (let i = 0; i < length; i++) {
       if (i % 2 === 0) re[i >> 1] = x[start + i]
       else im[i >> 1] = x[start + i]
     }
-    this.fft.transform(re, im, false)
-    // X[k] = E[k] + e^(−2πik/n) O[k], with E and O recovered from Z[k] and conj(Z[half − k]).
+  }
+
+  private powerSpectrumFromPacked(): void {
+    const half = this.half
+    const re = this.re
+    const im = this.im
     for (let k = 0; k <= half; k++) {
       const a = k % half
       const b = (half - k) % half
       const zr = re[a]
       const zi = im[a]
-      const cr = re[b]
-      const ci = -im[b]
-      const er = (zr + cr) / 2
-      const ei = (zi + ci) / 2
-      // O = (Z − conj(Z')) / 2i
-      const or = (zi - ci) / 2
-      const oi = -(zr - cr) / 2
-      const wr = k < half ? splitCos[k] : -1
-      const wi = k < half ? splitSin[k] : 0
-      const xr = er + wr * or - wi * oi
-      const xi = ei + wr * oi + wi * or
-      power[k] = xr * xr + xi * xi
+      const conjugateRe = re[b]
+      const conjugateIm = -im[b]
+      const evenRe = (zr + conjugateRe) / 2
+      const evenIm = (zi + conjugateIm) / 2
+      const oddRe = (zi - conjugateIm) / 2
+      const oddIm = -(zr - conjugateRe) / 2
+      const twiddleRe = k < half ? this.splitCos[k] : -1
+      const twiddleIm = k < half ? this.splitSin[k] : 0
+      const xr = evenRe + twiddleRe * oddRe - twiddleIm * oddIm
+      const xi = evenIm + twiddleRe * oddIm + twiddleIm * oddRe
+      this.power[k] = xr * xr + xi * xi
     }
-    // Inverse real FFT of the (real, even) power spectrum P: with Y[k] = P[k] and
-    // Y[k + half] = P[half − k], E[k] = (Y[k] + Y[k + half]) / 2 and
-    // O[k] = (Y[k] − Y[k + half]) / 2 · e^(+2πik/n); z = IFFT(E + iO) holds the even lags in
-    // its real part and the odd lags in its imaginary part.
+  }
+
+  private packPowerSpectrumForInverse(): void {
+    const half = this.half
+    const power = this.power
     for (let k = 0; k < half; k++) {
       const p = power[k]
       const q = power[half - k]
-      const e = (p + q) / 2
-      const d = (p - q) / 2
-      // i · O = i · d · (cos + i sin) = −d sin + i d cos, with sin = −splitSin.
-      re[k] = e + d * splitSin[k]
-      im[k] = d * splitCos[k]
+      const even = (p + q) / 2
+      const odd = (p - q) / 2
+      this.re[k] = even + odd * this.splitSin[k]
+      this.im[k] = odd * this.splitCos[k]
     }
-    this.fft.transform(re, im, true)
+  }
+
+  private unpackLags(out: Float64Array): void {
     for (let lag = 0; lag < out.length; lag++) {
-      out[lag] = lag % 2 === 0 ? re[lag >> 1] : im[lag >> 1]
+      out[lag] = lag % 2 === 0 ? this.re[lag >> 1] : this.im[lag >> 1]
     }
   }
 }
 
-/** In-place iterative radix-2 complex FFT. The inverse includes the 1/n scaling. */
 class ComplexFFT {
   private readonly reverse: Uint32Array
   private readonly cos: Float64Array

@@ -1,39 +1,18 @@
 import { ANALYSIS_VERSION } from './analysis/version'
 import { nearestNote } from './pitch'
 
-/** A Recording: one saved fart clip (see `CONTEXT.md`), as the web app keeps it. */
-
-/** What Recording Analysis found in a Recording, as the iPhone app's `SavedAnalysis`. */
 export type Analysis = {
-  /**
-   * Where the fart starts and ends in the file, in seconds: from just before its attack to where
-   * it fades out, never cut at a second burst. Songs play this much from the note's beat (ADR
-   * 0016), and a quieter lead-in before it in the rest before the note (`renderSource`, #287).
-   */
   gestureStartSeconds: number
   gestureEndSeconds: number
-  /**
-   * The take holds a second burst, so the pitch was read from the first burst only. Before
-   * version 4 (ADR 0016), Songs also played only the first.
-   */
   cutAtReattack: boolean
-  /** The pitch estimate before audition, as a MIDI note number, and its confidence (0…1). */
   pitchEstimateMidi: number | null
   pitchConfidence: number
-  /** The Recording Pitch as a fractional MIDI note number; null for a Noise-like Recording. */
   recordingPitchMidi: number | null
-  /** The shortest note the Recording holds on pitch, in seconds; null when Noise-like. */
   shortestNoteSeconds: number | null
-  /**
-   * When the Recording settles on its pitch, in seconds from the gesture start; null when
-   * Noise-like. Absent from an analysis stored before #116.
-   */
   settleSeconds?: number | null
-  /** The Recording Analysis version that made it (`ANALYSIS_VERSION`); absent before #208. */
   version?: number
 }
 
-/** Saving never waits for analysis (ADR 0002), so a Recording can be saved but not analyzed. */
 export type AnalysisState =
   | { state: 'analyzing' }
   | { state: 'notAnalyzed' }
@@ -41,78 +20,44 @@ export type AnalysisState =
 
 export type Recording = {
   id: string
-  /** Recordings are named "Recording 1, 2, …" until the user names one (`recordingName`). */
   number: number
   createdAt: number
-  /** Length of the whole file, in seconds. */
   seconds: number
   sampleRate: number
-  /** Loudness bars for the waveform, each 0…1. */
   waveform: number[]
   analysis: AnalysisState
-  /**
-   * The Placed Pitch: the note the user gave this Recording by ear on its review, as a whole MIDI
-   * note number (ADR 0015), or `NO_NOTE` when they left it out of Songs though analysis found a
-   * note (#314). Null or absent when it follows analysis, the default. Kept apart from `analysis`,
-   * so a new analysis never loses it, and still used when one finds another note: the user chose
-   * it (ADR 0017). Where Songs use the fart, never how it sounds: it plays raw.
-   */
   placedPitch?: number | null
-  /**
-   * The Trim: the part of the take the user kept with the review's handles, and the fart found
-   * between them (ADR 0019). Null or absent when untrimmed, the default. The saved take never
-   * changes. Kept apart from `analysis`, so re-analysis never loses it.
-   */
   trim?: RecordingTrim | null
-  /** The name the user gave it on its review (#314); null or absent for "Recording {number}". */
   name?: string | null
 }
 
-/**
- * Part of a take, in seconds of the whole file, at the 44.1 kHz samples analysis reads: the start
- * and the end (exclusive).
- */
 export type Trim = { startSeconds: number; endSeconds: number }
 
-/**
- * A Recording's Trim (ADR 0019): exactly where the user left the handles, which the row and the
- * review play, and `fart`, the fart `trimBounds` found between them, which Songs play so its onset
- * lands on the beat. `fart` always lies within the handles.
- */
 export type RecordingTrim = Trim & { fart: Trim }
 
-/**
- * The Trim, on any Recording (#314); null when untrimmed. The row and the review play its handles,
- * and Songs its fart (`songTrim`, ADR 0019).
- */
 export function trimOf(recording: Recording): RecordingTrim | null {
   return recording.trim ?? null
 }
 
-/** The part of the take Songs cut a trimmed Recording at: the fart between its handles. */
 export function songTrim(recording: Recording): Trim | null {
   return trimOf(recording)?.fart ?? null
 }
 
-/** The handles of a Recording's Trim, as a plain part of its take, or null when untrimmed. */
 export function trimHandles(recording: Recording): Trim | null {
   const trim = trimOf(recording)
   return trim && { startSeconds: trim.startSeconds, endSeconds: trim.endSeconds }
 }
 
-/** The part of the take the Recordings tab plays and draws: the Trim, or else the whole take. */
 export function playedPart(recording: Recording): Trim {
   return trimHandles(recording) ?? { startSeconds: 0, endSeconds: recording.seconds }
 }
 
-/** The fart Recording Analysis found in the take, or null before it's analyzed. */
 export function foundPart(recording: Recording): Trim | null {
   if (recording.analysis.state !== 'analyzed') return null
   const { gestureStartSeconds, gestureEndSeconds } = recording.analysis.analysis
   return { startSeconds: gestureStartSeconds, endSeconds: gestureEndSeconds }
 }
 
-/** Whether two parts of a take are the same, to 5 ms: what the review's Reset and Save compare. */
 export function samePart(a: Trim, b: Trim): boolean {
   return (
     Math.abs(a.startSeconds - b.startSeconds) < 0.005 &&
@@ -120,11 +65,9 @@ export function samePart(a: Trim, b: Trim): boolean {
   )
 }
 
-/** The notes a Recording can be placed on: C2 to B4 (ADR 0015). */
 export const LOWEST_PLACED_PITCH = 36
 export const HIGHEST_PLACED_PITCH = 71
 
-/** Whether `value` is a note a Recording can be placed on. */
 export function isPlaceablePitch(value: unknown): value is number {
   return (
     Number.isInteger(value) &&
@@ -133,38 +76,28 @@ export function isPlaceablePitch(value: unknown): value is number {
   )
 }
 
-/**
- * The Placed Pitch that leaves a Recording out of Songs though analysis found a note: its review's
- * "No note" (#314). A Noise-like Recording is left out without it.
- */
 export const NO_NOTE = -1
 
-/** Whether the user left the Recording out of Songs with "No note" (`NO_NOTE`). */
 export function isLeftOut(recording: Pick<Recording, 'placedPitch'>): boolean {
   return recording.placedPitch === NO_NOTE
 }
 
-/** The longest name a Recording takes (#314). */
 export const MAXIMUM_NAME_LENGTH = 40
 
-/** What a Recording is called until the user names it: "Recording 12". */
 export function defaultName(number: number): string {
   return `Recording ${number}`
 }
 
-/** The Recording's name: the one the user gave it, or else "Recording {number}". */
 export function recordingName(recording: Pick<Recording, 'number' | 'name'>): string {
   return recording.name?.trim() || defaultName(recording.number)
 }
 
-/** The Recording Pitch, when the Recording has been analyzed as Melodic. */
 export function recordingPitch(recording: Recording): number | null {
   return recording.analysis.state === 'analyzed'
     ? recording.analysis.analysis.recordingPitchMidi
     : null
 }
 
-/** Whether the Recording has been analyzed as Noise-like. */
 export function isNoiseLike(recording: Recording): boolean {
   return (
     recording.analysis.state === 'analyzed' &&
@@ -172,36 +105,22 @@ export function isNoiseLike(recording: Recording): boolean {
   )
 }
 
-/**
- * The Placed Pitch, when the Recording is analyzed and the user placed it on a note; otherwise
- * null, `NO_NOTE` among them. Any Recording can be placed (#314), and a placement outlasts a later
- * analysis, a Re-scan among them (ADR 0017).
- */
 export function placedPitch(recording: Recording): number | null {
   return recording.analysis.state === 'analyzed' && isPlaceablePitch(recording.placedPitch)
     ? recording.placedPitch
     : null
 }
 
-/**
- * The note Songs use the Recording for: its Placed Pitch when placed, otherwise its Recording Pitch
- * when Melodic; null when it plays no notes, or the user left it out (`NO_NOTE`).
- */
 export function songPitch(recording: Recording): number | null {
   if (isLeftOut(recording)) return null
   return placedPitch(recording) ?? recordingPitch(recording)
 }
 
-/** The note analysis found, as the review names it: the Recording Pitch's nearest; or null. */
 export function foundNote(recording: Recording): number | null {
   const pitch = recordingPitch(recording)
   return pitch === null ? null : nearestNote(pitch)
 }
 
-/**
- * Whether a Recording's stored analysis came from an older Recording Analysis, Melodic or not, so
- * `upgradeAnalyses` should run the current one on its audio.
- */
 export function needsReanalysis(recording: Recording): boolean {
   return (
     recording.analysis.state === 'analyzed' &&
@@ -209,43 +128,21 @@ export function needsReanalysis(recording: Recording): boolean {
   )
 }
 
-/** A length the way rows and Review show it: "1.1 s". */
 export function formattedLength(seconds: number): string {
   return `${seconds.toFixed(1)} s`
 }
 
-/** Recording stops by itself after this long, as on the iPhone. */
 export const maximumTakeSeconds = 30
 
-/**
- * A take's loudest 50 ms must reach this level… With the browser's voice processing off, a take
- * is the microphone's raw level, so this is low: every fart in the Fixture Library whose loudest
- * sample reaches -50 dBFS passes (#279). Below it is near-silence, which `atFullLevel` would only
- * turn into loud hiss.
- */
 const quietestFartDb = -70
-/** …and stand this far above the take's own room (its 10th-percentile 50 ms level). */
 const minimumContrastDb = 4
 
-/**
- * Whether a take holds a sound worth reviewing, judged from the raw audio, before `atFullLevel`:
- * its loudest 50 ms level against an absolute floor and against the take's own room. Silence,
- * white noise and room noise fail at any level. A low rumble passes down to the -70 dBFS floor: a
- * known false accept, which analysis finds no steady note in. The iPhone app and `tools/melody-lab/` have no such gate:
- * the iPhone app rejects takes shorter than 0.5 s, and the reference never rejects. A take shorter
- * than one 50 ms window fails.
- */
 export function heardSomething(samples: Float32Array, sampleRate: number): boolean {
   const levels = new TakeLevels(sampleRate)
   levels.add(samples)
   return levels.heard()
 }
 
-/**
- * The peak and floor (10th percentile) of a take's 50 ms RMS level every 5 ms, in dBFS, and the
- * contrast between them. Only whole windows count, so the take's edges don't read as quiet room.
- * Null when the take is shorter than one window.
- */
 export function levelContrast(samples: Float32Array, sampleRate: number): LevelContrast | null {
   const levels = new TakeLevels(sampleRate)
   levels.add(samples)
@@ -254,15 +151,9 @@ export function levelContrast(samples: Float32Array, sampleRate: number): LevelC
 
 export type LevelContrast = { peakDb: number; floorDb: number; contrastDb: number }
 
-/**
- * A take's 50 ms RMS levels every 5 ms, measured as its batches come in: what `heardSomething`
- * judges, so Record's "Can't hear anything" over the take so far and its "Didn't catch that" at
- * Stop never disagree (#281). Batch by batch it gives exactly what the whole take gives at once.
- */
 export class TakeLevels {
   private readonly hop: number
   private readonly frame: number
-  /** The take's running sum of squares, and its value at each `hop` boundary so far. */
   private sum = 0
   private readonly sums: number[] = [0]
   private untilBoundary: number
@@ -275,7 +166,6 @@ export class TakeLevels {
     this.untilBoundary = this.hop
   }
 
-  /** Adds the take's next batch of samples. */
   add(batch: Float32Array): void {
     for (let i = 0; i < batch.length; i++) {
       this.sum += batch[i] * batch[i]
@@ -284,18 +174,15 @@ export class TakeLevels {
       this.untilBoundary = this.hop
       this.sums.push(this.sum)
       const end = this.sums.length - 1
-      // Each window ends on a boundary 10 hops after its start, so it costs two lookups.
       if (end < 10) continue
       const meanSquare = Math.max(0, this.sums[end] - this.sums[end - 10]) / this.frame
       const db = 20 * Math.log10(Math.sqrt(meanSquare) + 1e-9)
       this.levels.push(db)
-      // Every 10th window starts where the last one ended: one bar per 50 ms of the take.
       if (end % 10 === 0)
         this.barLevels.push(Math.min(1, Math.max(0, (db - quietestFartDb) / -quietestFartDb)))
     }
   }
 
-  /** `levelContrast` of the take so far. */
   contrast(): LevelContrast | null {
     if (this.levels.length === 0) return null
     const sorted = Float64Array.from(this.levels).sort()
@@ -304,33 +191,18 @@ export class TakeLevels {
     return { peakDb, floorDb, contrastDb: peakDb - floorDb }
   }
 
-  /** `heardSomething` of the take so far. */
   heard(): boolean {
     const level = this.contrast()
     return level !== null && level.peakDb >= quietestFartDb && level.contrastDb >= minimumContrastDb
   }
 
-  /**
-   * Record's live waveform (#314): the level of each 50 ms of the take so far, in order, from 0 at
-   * the floor `heardSomething` ignores (-70 dBFS) to 1 at full scale. Only a room under -70 dBFS
-   * draws nothing: a real room at -60 to -50 dBFS draws a low band, about 0.14 to 0.29 high.
-   */
   get bars(): readonly number[] {
     return this.barLevels
   }
 }
 
-/** The loudest sample of a take at full level: about -1 dBFS, as a rendered Song peaks. */
 const fullLevelPeak = 0.89
 
-/**
- * A heard take turned up with one gain, so its loudest sample reaches `fullLevelPeak`. Review and
- * the Recordings tab play the file as it is, so a raw take peaking at -40 dBFS would replay 39 dB
- * quieter than a Song (#279). Only gain (ADR 0004), in float before the 16-bit save (ADR 0007):
- * never turned down, and silence stays silence.
- * Recording Analysis gives the same results on the Fixture Library either way, and a Song sets
- * each note's level itself.
- */
 export function atFullLevel(samples: Float32Array): Float32Array {
   let peak = 0
   for (const sample of samples) peak = Math.max(peak, Math.abs(sample))

@@ -7,7 +7,7 @@ Until #282 Recording Analysis read a fart's pitch from the first 450 ms of its f
 Analysis is deterministic, so running the same analysis again finds the same thing. The owner chose to improve note finding first, then add Re-scan. The investigation on #282 measured six candidate changes on the 32 Fixture Library Recordings. The orchestrator chose its rank 1 and these rules.
 
 1. **A second pitch window.**
-   - When the first 450 ms find no pitch, the same estimate runs once more over the 450 ms that start at the pitch contour's first kept frame. It uses the same voiced frames, energy-weighted median, confidence and 0.2 bar (`estimate_pitch()` in `engine.py`, `estimateAt()` in `recording-pitch.ts`).
+   - When the first 450 ms find no pitch, the same estimate runs once more over the 450 ms that start at the pitch contour's first kept frame. It uses the same voiced frames, energy-weighted median, confidence and 0.2 bar (`estimate_pitch()` in `analysis.py`, `estimateAt()` in `recording-pitch.ts`).
    - Its coverage is counted as the head's is: voiced frames over the 450 ms window, or over the whole first burst when that is shorter than 450 ms. It is never counted over the frames left after the first kept frame. Counted that way, a few quiet frames at the end of a short first burst would be full coverage: the owner's `owner-3` got a false note at 45 Hz, pYIN's floor, at confidence 1.0 (#295).
    - It never runs for a fart the first 450 ms find a pitch in, so no Melodic Recording changes.
    - The audition and `settle_time()` don't change. A Recording the window finds a pitch in is Melodic only if its read-back is on pitch, as before.

@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test'
-import { onPhone } from './screens'
+import { onPhone, pagesOutsideTheTabs } from './screens'
+import { expect, test } from './test'
 
 test('the privacy page covers accounts, news email, Turnstile, guests, error reports, page views and deleting', async ({
   page
@@ -20,6 +20,8 @@ test('the privacy page covers accounts, news email, Turnstile, guests, error rep
     page.getByText('When the account step opens, such as after your first Result, Cloudflare')
   ).toBeVisible()
   await expect(page.getByText('Delete account on Profile removes your email')).toBeVisible()
+  await expect(page.getByText('it first sends a code to your email')).toBeVisible()
+  await expect(page.getByText('when Delete account asks you for a new code')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Error reports', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Page views' })).toBeVisible()
   await expect(page.getByText('counts page views on every page of Farty')).toBeVisible()
@@ -44,8 +46,10 @@ test('the support page has a way to get in touch', async ({ page }) => {
 
 test('a made-up URL answers 404 with one noindex tag and a link home', async ({
   page,
-  request
+  request,
+  pageErrors
 }) => {
+  pageErrors.expect('the server responded with a status of 404')
   const response = await request.get('/no-such-page/', { maxRedirects: 0 })
   expect(response.status()).toBe(404)
 
@@ -58,19 +62,17 @@ test('a made-up URL answers 404 with one noindex tag and a link home', async ({
 
 test('Welcome, or from 768px the lander, shows on a first visit but never covers the privacy, support or 404 page', async ({
   page,
-  viewport
+  viewport,
+  pageErrors
 }) => {
+  pageErrors.expect('the server responded with a status of 404')
   const welcome = page.getByRole('button', {
     name: onPhone({ viewport }) ? 'Not now' : 'Sign up free'
   })
   await page.goto('/')
   await expect(welcome).toBeVisible()
 
-  for (const [path, content] of [
-    ['/privacy/', page.getByRole('heading', { name: 'Privacy', level: 1 })],
-    ['/support/', page.getByRole('heading', { name: 'Support', level: 1 })],
-    ['/nope/', page.getByText('Page not found')]
-  ] as const) {
+  for (const [path, content] of pagesOutsideTheTabs(page)) {
     await page.goto(path)
     await page.waitForLoadState('networkidle')
     await expect(content).toBeVisible()

@@ -1,39 +1,9 @@
-/**
- * Generates the Song Catalog the app ships from what the reference engine already imported, as the
- * iPhone app's `ios/scripts/generate-sample-data.py` does (ADR 0003):
- *
- * - each Song's melody from `fixtures/golden/songs/<id>.json`, so nothing parses MIDI here;
- * - its title and source line from `catalog/catalog.json`, checked against the golden copy, so
- *   the notes come from the cited score;
- * - the other names its titles file lists (`tools/catalog/titles-*.txt`), which Compose's search
- *   finds it by too;
- * - every Song in the catalog but `notShipped`, the iPhone app's 12 first (`shippedIds`).
- *
- * It writes the Songs as data, not code (#322), so the JavaScript bundle stays the same size
- * however many Songs ship, and keeps each Song's notes out of the index Compose reads (#323), so
- * Compose loads quickly with 1,000 Songs:
- *
- * - `public/catalog/songs-<hash>.json`, the index (`SongSummary`), which the browser fetches
- *   (`load-songs.ts`) and the service worker keeps. Each data file is named by its content, so a
- *   new deploy's code never reads an older catalog. Older files are deleted.
- * - `public/catalog/notes/<id>-<hash>.json`, each Song's notes (`SongNotes`), which the browser
- *   fetches when the Song is opened, and the service worker keeps once fetched.
- * - `catalog-path.generated.ts`, the index's path, for the browser.
- * - `song-index.generated.ts`, which imports the index, for routes and the server.
- * - `songs.generated.ts`, which imports the index and every Song's notes, for the tests.
- *
- * Node-only: the app imports the generated files, never this one. Run from `apps/web/`:
- *
- *     pnpm exec tsx src/lib/catalog/generate.ts           # rewrite the catalog
- *     pnpm exec tsx src/lib/catalog/generate.ts --check   # fail if it's out of date
- */
 import { createHash } from 'node:crypto'
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { searchKey } from './search-key'
 import type { Song, SongNotes, SongSummary } from './song'
 
-/** An entry of `catalog/catalog.json`: the cited score and how the reference engine imports it. */
 export type CatalogEntry = {
   id: string
   title: string
@@ -43,26 +13,21 @@ export type CatalogEntry = {
   render: Render
 }
 
-/** How the reference engine imports a catalog score (`melody.load_midi`'s arguments). */
-export type Render = {
+type Render = {
   bpm: number
-  /** The excerpt ends here: no note starts on or after it. */
   max_beats?: number
   beats_per_bar?: number
   start_beat?: number
 }
 
-/** `fixtures/golden/songs/<id>.json`: the reference engine's import of a catalog score. */
 export type GoldenSong = {
   id: string
   title: string
   file: string
   sha256: string
-  /** The catalog entry's `render` it was imported with. */
   import_args: Render
   bpm: number
   beats_per_bar: number
-  /** Where the score's bars start, in beats: a note on one is accented. A pickup isn't a bar. */
   bar_lines: number[]
   length_beats: number
   pitches: number[]
@@ -72,33 +37,23 @@ export type GoldenSong = {
 export type Sources = {
   catalog: CatalogEntry[]
   golden(id: string): GoldenSong
-  /** The text of each titles file in `tools/catalog/`. */
   titles: readonly string[]
 }
 
-/** A file the generator writes: its path from `apps/web/`, and its text. */
 export type GeneratedFile = { path: string; text: string }
 
-/** What the generator writes. */
 export type CatalogFiles = {
-  /** `public/catalog/songs-<hash>.json`: the index. */
   data: GeneratedFile
-  /** `public/catalog/notes/<id>-<hash>.json`: each Song's notes, in the index's order. */
   notes: GeneratedFile[]
-  /** `src/lib/catalog/catalog-path.generated.ts`. */
   path: GeneratedFile
-  /** `src/lib/catalog/song-index.generated.ts`. */
   index: GeneratedFile
-  /** `src/lib/catalog/songs.generated.ts`. */
   songs: GeneratedFile
 }
 
 const repo = new URL('../../../../../', import.meta.url)
 const web = new URL('../../../', import.meta.url)
-/** Where the catalog's index goes, served at `/catalog/`. */
-export const dataDirectory = 'public/catalog'
-/** Where each Song's notes go, served at `/catalog/notes/`. */
-export const notesDirectory = `${dataDirectory}/notes`
+const dataDirectory = 'public/catalog'
+const notesDirectory = `${dataDirectory}/notes`
 const dataFile = /^songs-[0-9a-f]+\.json$/
 const notesFile = /^[a-z0-9-]+-[0-9a-f]{16}\.json$/
 const titlesFile = /^titles-\d+\.txt$/
@@ -107,8 +62,7 @@ function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(fileURLToPath(new URL(path, repo)), 'utf8')) as T
 }
 
-/** The iPhone app's 12 Songs, in its order: the app lists them first. */
-export const iPhoneSongs: readonly string[] = [
+const iPhoneSongs: readonly string[] = [
   'twinkle',
   'mary',
   'jingle',
@@ -123,17 +77,8 @@ export const iPhoneSongs: readonly string[] = [
   'auld'
 ]
 
-/**
- * The catalog Songs the app leaves out. The Mutopia Ode to Joy is the same tune as `ode`, kept in
- * the catalog to exercise the reference engine's importer.
- */
-export const notShipped: readonly string[] = ['ode-mutopia']
+const notShipped: readonly string[] = ['ode-mutopia']
 
-/**
- * The Songs the app ships: every Song in the catalog (#350) but `notShipped`, the iPhone app's 12
- * first, then the rest in the catalog's order. A Song added to `catalog/` ships once
- * `tools/melody-lab/export_golden.py` has written its melody and this generator has run again.
- */
 export function shippedIds(catalog: readonly CatalogEntry[]): string[] {
   const rest = catalog
     .map(e => e.id)
@@ -141,13 +86,8 @@ export function shippedIds(catalog: readonly CatalogEntry[]): string[] {
   return [...iPhoneSongs, ...rest]
 }
 
-/**
- * Compose's own pages beside the Songs' `/compose/<id>/`: the Sound Pad, and the Song page the
- * service worker answers with offline (`app/compose/song/`). No Song may take their ids.
- */
-export const reservedIds: readonly string[] = ['pad', 'song']
+const reservedIds: readonly string[] = ['pad', 'song']
 
-/** The catalog, the golden Songs and the titles files, read from the repository. */
 export function readSources(): Sources {
   const tools = fileURLToPath(new URL('tools/catalog/', repo))
   return {
@@ -160,11 +100,6 @@ export function readSources(): Sources {
   }
 }
 
-/**
- * Every name each Song id has in the titles files, as `pdmx.read_titles` reads them: one Song a
- * line, `id | Title` or `id | Title | other name; other name`, with `#` starting a comment. A Song
- * in more than one file has the names of each.
- */
 export function titleNames(titles: readonly string[]): Map<string, string[]> {
   const names = new Map<string, string[]>()
   for (const text of titles) {
@@ -181,10 +116,6 @@ export function titleNames(titles: readonly string[]): Map<string, string[]> {
   return names
 }
 
-/**
- * The names search finds a Song by besides its title: each once, leaving out any that the title or
- * an earlier name already finds, since search looks for what's typed anywhere in a name.
- */
 function aliasesOf(title: string, names: readonly string[]): string[] {
   const keys = [searchKey(title)]
   const aliases: string[] = []
@@ -197,10 +128,6 @@ function aliasesOf(title: string, names: readonly string[]): string[] {
   return aliases
 }
 
-/**
- * The line each Song shows under its title, from its source and license. CC0 is a public domain
- * dedication, so a CC0 score's line is a public domain score's.
- */
 function sourceLine(entry: CatalogEntry): string {
   const { dataset = '', license } = entry.source
   if (dataset.startsWith('PDMX') && (license === 'publicdomain' || license === 'cc-zero'))
@@ -208,18 +135,15 @@ function sourceLine(entry: CatalogEntry): string {
   throw new Error(`Song ${entry.id} has a source this script has no line for; add one here`)
 }
 
-/** The first 16 hex digits of the SHA-256 of `text`: what names each data file by its content. */
 function hash(text: string): string {
   return createHash('sha256').update(text).digest('hex').slice(0, 16)
 }
 
-/** A Song's notes file, named by its content: its path from `apps/web/`, and its text. */
 function notesFor(id: string, notes: SongNotes): GeneratedFile {
   const text = `${JSON.stringify(notes)}\n`
   return { path: `${notesDirectory}/${id}-${hash(text)}.json`, text }
 }
 
-/** Where the browser fetches a file in `public/`. */
 const served = (path: string) => path.slice('public'.length)
 
 function song(entry: CatalogEntry, golden: GoldenSong, names: readonly string[]): Song {
@@ -230,7 +154,6 @@ function song(entry: CatalogEntry, golden: GoldenSong, names: readonly string[])
   if (golden.file !== entry.file || golden.sha256 !== entry.sha256)
     throw problem("the golden copy wasn't imported from the cited score")
   if (golden.bpm !== entry.render.bpm) throw problem('the golden copy has another tempo')
-  // A golden copy left over from an older entry, or edited by hand (#350).
   const renderKeys = ['bpm', 'max_beats', 'beats_per_bar', 'start_beat'] as const
   if (renderKeys.some(key => golden.import_args?.[key] !== entry.render[key]))
     throw problem("the golden copy wasn't imported with the catalog's render arguments")
@@ -267,16 +190,11 @@ function song(entry: CatalogEntry, golden: GoldenSong, names: readonly string[])
   }
 }
 
-/** What the index holds of a Song: all but its notes. */
 function summary(song: Song): SongSummary {
   const { bar_lines, length_beats, notes, ...rest } = song
   return rest
 }
 
-/**
- * The Songs on `ids`, every Song the app ships unless given, from the catalog, the golden data and
- * the titles files, checked.
- */
 export function catalogSongs(
   sources: Sources,
   ids: readonly string[] = shippedIds(sources.catalog)
@@ -296,13 +214,11 @@ const header = [
   '// and tools/catalog/titles-*.txt. Do not edit by hand: run it again instead.'
 ]
 
-/** The files the generator writes for the Songs on `ids`, every Song the app ships unless given. */
 export function renderCatalog(
   sources: Sources,
   ids: readonly string[] = shippedIds(sources.catalog)
 ): CatalogFiles {
   const songs = catalogSongs(sources, ids)
-  // One Song a line, so a change shows as the Songs it changed.
   const data = `[\n${songs.map(s => JSON.stringify(summary(s))).join(',\n')}\n]\n`
   const file = `${dataDirectory}/songs-${hash(data)}.json`
   const notes = songs.map(({ id, bar_lines, length_beats, notes }) =>
@@ -337,12 +253,12 @@ export function renderCatalog(
       ].join('\n')
     },
     songs: {
-      path: 'src/lib/catalog/songs.generated.ts',
+      path: 'src/test-support/songs.generated.ts',
       text: [
         ...header,
-        `import index from '../../../${file}'`,
-        ...notes.map((n, i) => `import notes${i} from '../../../${n.path}'`),
-        "import type { Song, SongSummary } from './song'",
+        `import index from '../../${file}'`,
+        ...notes.map((n, i) => `import notes${i} from '../../${n.path}'`),
+        "import type { Song, SongSummary } from '../lib/catalog/song'",
         '',
         'const notes = [',
         ...notes.map((_, i) => `  notes${i}${i < notes.length - 1 ? ',' : ''}`),
@@ -364,7 +280,6 @@ export function renderCatalog(
 
 const inWeb = (path: string) => fileURLToPath(new URL(path, web))
 
-/** The files in `directory` now whose names match `pattern`, by path from `apps/web/`. */
 function filesIn(directory: string, pattern: RegExp): string[] {
   try {
     return readdirSync(inWeb(directory))
@@ -375,12 +290,10 @@ function filesIn(directory: string, pattern: RegExp): string[] {
   }
 }
 
-/** Every file `files` holds. */
 function written(files: CatalogFiles): GeneratedFile[] {
   return [files.data, ...files.notes, files.path, files.index, files.songs]
 }
 
-/** The data files on disk that `files` doesn't hold: an older catalog's. */
 function staleFiles(files: CatalogFiles): string[] {
   const paths = new Set(written(files).map(f => f.path))
   return [...filesIn(dataDirectory, dataFile), ...filesIn(notesDirectory, notesFile)].filter(
@@ -388,16 +301,13 @@ function staleFiles(files: CatalogFiles): string[] {
   )
 }
 
-/** What differs between the files on disk and `files`: none when the catalog is current. */
 export function outOfDate(files: CatalogFiles): string[] {
   const stale: string[] = []
   for (const { path, text } of written(files)) {
     let current: string | null = null
     try {
       current = readFileSync(inWeb(path), 'utf8')
-    } catch {
-      // Missing: out of date.
-    }
+    } catch {}
     if (current !== text) stale.push(path)
   }
   return [...stale, ...staleFiles(files)]

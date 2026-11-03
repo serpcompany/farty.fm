@@ -13,8 +13,6 @@ import {
   trimChange
 } from './take-review'
 
-// The take's review (#314): what its note says, and what its Save changes.
-
 const analysis: Analysis = {
   gestureStartSeconds: 0.2,
   gestureEndSeconds: 1.1,
@@ -26,7 +24,6 @@ const analysis: Analysis = {
   settleSeconds: 0.04
 }
 
-/** A 1.5 s take analyzed as Melodic, G3 (55.3), its fart 0.2 to 1.1 s. */
 const melodic = (fields: Partial<Recording> = {}): Recording => ({
   id: 'r',
   number: 12,
@@ -53,11 +50,9 @@ describe('the review’s note', () => {
     expect(reviewNote(finding(), null)).toEqual({ kind: 'finding' })
     expect(reviewNote(melodic(), null)).toEqual({ kind: 'note', midi: 55 })
     expect(reviewNote(noiseLike(), null)).toEqual({ kind: 'none' })
-    // Analysis failed: it couldn't find the note, which isn't "No note".
     expect(reviewNote(melodic({ analysis: { state: 'notAnalyzed' } }), null)).toEqual({
       kind: 'notFound'
     })
-    // What the user picked shows at once, finding or not.
     expect(reviewNote(finding(), 43)).toEqual({ kind: 'note', midi: 43 })
     expect(reviewNote(melodic(), 'none')).toEqual({ kind: 'none' })
   })
@@ -65,7 +60,6 @@ describe('the review’s note', () => {
   it('makes a key the note, or follows analysis again on the note it found', () => {
     expect(choiceForKey(melodic(), 43)).toBe(43)
     expect(choiceForKey(melodic(), 55)).toBeNull()
-    // Still finding, any key is the user's.
     expect(choiceForKey(finding(), 55)).toBe(55)
     expect(choiceForKey(noiseLike(), 48)).toBe(48)
   })
@@ -75,7 +69,6 @@ describe('the review’s note', () => {
     expect(choiceForNoNote(melodic(), 43)).toBe('none')
     expect(choiceForNoNote(melodic(), 'none')).toBeNull()
     expect(choiceForNoNote(finding(), 'none')).toBeNull()
-    // Noise-like is "No note" already: a key gives it a note.
     expect(choiceForNoNote(noiseLike(), null)).toBeNull()
     expect(choiceForNoNote(noiseLike(), 48)).toBe('none')
   })
@@ -92,10 +85,8 @@ describe('the review’s note', () => {
     expect(placedPitchFor(melodic(), 43)).toBe(43)
     expect(placedPitchFor(melodic(), 55)).toBeNull()
     expect(placedPitchFor(melodic(), 'none')).toBe(NO_NOTE)
-    // Saved while finding, it keeps what the user picked.
     expect(placedPitchFor(finding(), 55)).toBe(55)
     expect(placedPitchFor(finding(), 'none')).toBe(NO_NOTE)
-    // Noise-like is out of Songs without it.
     expect(placedPitchFor(noiseLike(), 'none')).toBeNull()
     expect(placedPitchFor(noiseLike(), 48)).toBe(48)
   })
@@ -121,7 +112,6 @@ describe('the review’s handles', () => {
     expect(trimChange(melodic(), { startSeconds: 0.2, endSeconds: 1.1 })).toBeUndefined()
     expect(trimChange(melodic({ trim }), { startSeconds: 0.4, endSeconds: 0.9 })).toBeUndefined()
     expect(trimChange(melodic({ trim }), { startSeconds: 0.2, endSeconds: 1.1 })).toBeNull()
-    // A new take's handles moved before analysis lands are kept.
     expect(trimChange(finding(), moved)).toEqual(moved)
     expect(trimChange(finding(), { startSeconds: 0, endSeconds: 1.5 })).toBeUndefined()
   })
@@ -153,16 +143,13 @@ describe('the review’s Save', () => {
       handles: { startSeconds: 0.3, endSeconds: 0.8 },
       name: 'Squeaker'
     })
-    // Back to analysis, "Recording 12" again, untrimmed.
     const placed = melodic({
       placedPitch: 43,
       name: 'Squeaker',
       trim: { startSeconds: 0.3, endSeconds: 0.8, fart: { startSeconds: 0.3, endSeconds: 0.8 } }
     })
     expect(reviewChange(placed, left)).toEqual({ placedPitch: null, handles: null, name: null })
-    // "No note" on a Melodic Recording keeps it out of Songs.
     expect(reviewChange(melodic(), { ...left, choice: 'none' })).toEqual({ placedPitch: NO_NOTE })
-    // Opened on a Placed Pitch that is the note analysis later found, it stays unless changed.
     expect(reviewChange(melodic({ placedPitch: 55 }), { ...left, choice: 55 })).toEqual({})
   })
 })

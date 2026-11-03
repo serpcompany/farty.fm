@@ -1,13 +1,6 @@
-import { expect, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect } from './test'
 
-// Paying to save a Toot (ADR 0010) in the journeys. A local run has no Stripe key, so Save goes to
-// the dev checkout (`/dev/checkout/`), whose Pay stands in for Stripe Checkout's. A Song's id can
-// have hyphens, such as `hot-cross-buns` (#229).
-
-/**
- * The dev checkout is open: its Pay, and back to Song Creator, or with `from: 'pad'` to the Sound
- * Pad (ADR 0017), which saves the Toot.
- */
 export async function payAtTheDevCheckout(
   page: Page,
   from: 'song' | 'pad' = 'song'
@@ -24,7 +17,6 @@ export async function payAtTheDevCheckout(
   await expect(page).toHaveURL(from === 'pad' ? /\/compose\/pad\/$/ : /\/compose\/[\w-]+\/$/)
 }
 
-/** Saves the Toot on Song Creator, signed in: Save, then the dev checkout's Pay. */
 export async function payToSave(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Save to Toots · $0.99' }).click()
   await payAtTheDevCheckout(page)

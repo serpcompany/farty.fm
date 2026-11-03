@@ -17,8 +17,6 @@ describe('mergeOutbox', () => {
     })
   })
 
-  // The upload reads the Toot when it's sent, so the new title goes with it. A new version tells an
-  // upload already on its way that it carried the old one (`settle`).
   it('lets a rename ride in an upload, with a new version', () => {
     expect(mergeOutbox(queued('put'), 'toots', id, 'rename', stamp('v2'))).toEqual({
       ...queued('put'),
@@ -48,7 +46,6 @@ describe('mergeOutbox', () => {
     }
   })
 
-  // A Recording's Placed Pitch (ADR 0015) queues like a Toot's title.
   it('lets a place ride in an upload, and sends a second place as one', () => {
     const recording = (op: OutboxOp, sent = false): OutboxEntry => ({
       ...queued(op, sent),
@@ -66,7 +63,6 @@ describe('mergeOutbox', () => {
     })
   })
 
-  // Each place records the fields it changed, so the PATCH sends only those (ADR 0019).
   it('keeps the fields every place changed, in an upload or a place, sent or not', () => {
     const recording = (
       op: OutboxOp,
@@ -95,7 +91,6 @@ describe('mergeOutbox', () => {
         'placedPitch'
       ])
     ).toMatchObject({ op: 'place', sent: false, fields: ['placedPitch', 'trim'] })
-    // A name (#314) joins them, in the order a PATCH sends them.
     expect(
       mergeOutbox(recording('place', false, ['name']), 'recordings', id, 'place', stamp('v2'), [
         'trim',
@@ -104,7 +99,6 @@ describe('mergeOutbox', () => {
     ).toMatchObject({ op: 'place', fields: ['placedPitch', 'trim', 'name'] })
   })
 
-  // Code from before #293 queued a place without fields: it only ever changed the Placed Pitch.
   it('reads a place without fields as the Placed Pitch alone', () => {
     const old: OutboxEntry = { ...queued('place'), key: `recordings:${id}`, kind: 'recordings' }
     expect(placedFields(old)).toEqual(['placedPitch'])
@@ -122,7 +116,6 @@ describe('mergeOutbox', () => {
     })
   })
 
-  // A Favorite Song (#313): the browser's last tap is what the account gets.
   describe('a Favorite Song', () => {
     const song = 'twinkle'
     const favorite = (op: OutboxOp, sent = false): OutboxEntry => ({
@@ -146,9 +139,6 @@ describe('mergeOutbox', () => {
       })
     })
 
-    // Unlike a Recording's, a delete after a put that went out is still sent, and a put after a
-    // delete too: the earlier request may be on its way and fail, so only the last op is sure to
-    // arrive.
     it('lets the last op win once an earlier one went out, keeping its place in the queue', () => {
       expect(mergeOutbox(favorite('put', true), 'favorites', song, 'delete', stamp('v2'))).toEqual({
         ...favorite('delete'),
@@ -162,8 +152,6 @@ describe('mergeOutbox', () => {
       })
     })
 
-    // A guest's heart on, then off: the put never went out, so a delete would only take the Song
-    // off an account that marked it on another device.
     it('leaves nothing to send when a tap undoes one no request carried', () => {
       expect(mergeOutbox(favorite('put'), 'favorites', song, 'delete', stamp('v2'))).toBeNull()
       expect(mergeOutbox(favorite('delete'), 'favorites', song, 'put', stamp('v2'))).toBeNull()

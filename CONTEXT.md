@@ -2,7 +2,7 @@
 
 Farty is a web app (installable from the browser) that turns a person's fart recordings into recordings they can replay and Toots they can make: Songs played by their farts.
 
-It was called Pedos until 2026-10-22 (ADR 0009). Users only ever see Farty. Internal names keep Pedos: the repository, folders, code identifiers and the `pedos` browser database.
+It was called Pedos until 2026-10-22 (ADR 0009). Users only ever see Farty. Stored data, names another build shares and Cloudflare resources keep Pedos, such as the `pedos` browser database (ADR 0024).
 
 ## Recordings
 
@@ -27,23 +27,23 @@ A Recording with no steady pitch, so it can't tell the listener which note it is
 _Avoid_: Bad Recording, unpitched fart
 
 **Placed Pitch**:
-The note, C2 to B4, that the user gave a Recording by ear in its review: the piano key they hear as closest to the fart. Any Recording can have one, a Melodic one on another note than its Recording Pitch included; picking the note analysis found clears it (#314). Set once per Recording, used in every Song, kept with the Recording and its account, and through a new analysis. If a later analysis finds the fart a Recording Pitch, the Placed Pitch stays the one used, since the user chose it (ADR 0017). The fart still plays raw (ADR 0012): the note says only where Songs use it, never how it sounds (ADR 0015).
+The note, C2 to B4, that the user gave a Recording by ear in its review: the piano key they hear as closest to the fart. Any Recording can have one, a Melodic one on another note than its Recording Pitch included; picking the note analysis found clears it (#314). Set once per Recording, used in every Song, kept with the Recording and its account, and through a new analysis. If a later analysis finds the fart a Recording Pitch, the Placed Pitch stays the one used, since the user chose it ([ADR 0017](docs/adr/0017-a-second-pitch-window-and-re-scan.md)). The fart still plays raw (ADR 0012): the note says only where Songs use it, never how it sounds (ADR 0015).
 _Avoid_: Tuned pitch, assigned pitch, Recording Pitch (that is the analyzed one)
 
 **Placed Recording**:
-A Recording with a Placed Pitch. Songs, Pitch Coverage and Auto-map treat it as a Melodic Recording at its Placed Pitch, even after a later analysis finds a Recording Pitch (ADR 0017). "No note" leaves a Recording out of Songs: a Noise-like one by default, or a Melodic one the user leaves out (ADR 0015).
+A Recording with a Placed Pitch. Songs, Pitch Coverage and Auto-map treat it as a Melodic Recording at its Placed Pitch, even after a later analysis finds a Recording Pitch ([ADR 0017](docs/adr/0017-a-second-pitch-window-and-re-scan.md)). "No note" leaves a Recording out of Songs: a Noise-like one by default, or a Melodic one the user leaves out (ADR 0015).
 _Avoid_: Beat, tuned fart
 
 **Trim**:
-The part of a Recording's take the user kept with the review's two handles; any Recording can be trimmed (#314). The Recordings tab and the review then play exactly what's between the handles, and Songs play the fart found between them, whose length is the fart's length. The saved take never changes, and Reset, then Save, brings the whole fart back. Kept with the Recording and its account, and through a new analysis, a Re-scan included (ADR 0017). It never changes the fart's pitch: a trimmed Melodic Recording keeps its Recording Pitch (ADR 0019).
+The part of a Recording's take the user kept with the review's two handles; any Recording can be trimmed (#314). The Recordings tab and the review then play exactly what's between the handles, and Songs play the fart found between them, whose length is the fart's length. The saved take never changes, and Reset, then Save, brings the whole fart back. Kept with the Recording and its account, and through a new analysis, a Re-scan included ([ADR 0017](docs/adr/0017-a-second-pitch-window-and-re-scan.md)). It never changes the fart's pitch: a trimmed Melodic Recording keeps its Recording Pitch (ADR 0019).
 _Avoid_: Crop, edit, clip
 
 **Recording Pitch**:
-The note a Melodic Recording naturally sounds, octave included: G2 and G3 are different Recording Pitches. A Recording has a pitch; it never has a key. Recording Analysis reads it from the first 450 ms of the first burst or, when those have none, from the 450 ms where its pitch starts (ADR 0017).
+The note a Melodic Recording naturally sounds, octave included: G2 and G3 are different Recording Pitches. A Recording has a pitch; it never has a key. Recording Analysis reads it from the first 450 ms of the first burst or, when those have none, from the 450 ms where its pitch starts ([ADR 0017](docs/adr/0017-a-second-pitch-window-and-re-scan.md)).
 _Avoid_: Key, tone
 
 **Re-scan**:
-Running the current Recording Analysis again on a Recording with no note (Noise-like and not placed) whose analysis an older Recording Analysis made, from the Recordings tab: one Recording, or all of them one at a time. It says how many now have a note. It never changes a Placed Pitch, and it changes only this browser's analysis (ADR 0017).
+Running the current Recording Analysis again on a Recording with no note (Noise-like and not placed) whose analysis an older Recording Analysis made, from the Recordings tab: one Recording, or all of them one at a time. It says how many now have a note. It never changes a Placed Pitch, and it changes only this browser's analysis ([ADR 0017](docs/adr/0017-a-second-pitch-window-and-re-scan.md)).
 _Avoid_: Reanalysis, re-analyze, refresh
 
 ## Songs and Toots
@@ -85,7 +85,7 @@ The Arrangement the app chooses on its own, giving each distinct pitch its own M
 _Avoid_: Smart choose, AI pick, best fit
 
 **Toot**:
-A saved result, of one of two kinds: a Song played with the user's Recordings, made in Song Creator, which keeps which Recording played each pitch; or a Sound Pad Performance, which keeps which Pad's Recording was tapped and when (ADR 0017). It is not a conventional song or a music release.
+A saved result, of one of two kinds: a Song played with the user's Recordings, made in Song Creator, which keeps which Recording played each pitch; or a Sound Pad Performance, which keeps which Pad's Recording was tapped and when ([ADR 0017](docs/adr/0017-sound-pad-takes-save-as-toots.md)). It is not a conventional song or a music release.
 _Avoid_: Created Melody, Melody, Created Song, generated song, track, output
 
 ## Creation areas
@@ -107,7 +107,7 @@ One of the Sound Pad's buttons, holding one Recording of any kind, which a tap p
 _Avoid_: Button, slot, key
 
 **Performance**:
-What the Sound Pad records between Record and Stop: which Recording each tap played, and when, from the first tap, for up to 30 s. Stop makes it into a Toot, each tap's fart playing raw from its start (ADR 0017).
+What the Sound Pad records between Record and Stop: which Recording each tap played, and when, from the first tap, for up to 30 s. Stop makes it into a Toot, each tap's fart playing raw from its start ([ADR 0017](docs/adr/0017-sound-pad-takes-save-as-toots.md)).
 _Avoid_: Sequence, pattern, loop, beat, track
 
 ## Sharing
@@ -117,7 +117,7 @@ The name a user's links carry, as in `farty.fm/u/<handle>/r/<id>`. The user pick
 _Avoid_: Username, display name, screen name
 
 **Shared Recording**:
-A Recording its owner has shared by link, which anyone with the link can open and play, signed in or not, without the link being listed anywhere. The page shows the Handle, the Recording's name, note, length and waveform, and plays the part of the fart its row plays. Stop sharing, deleting the Recording, deleting the account, or Farty taking it down after a Report ends the link for everyone; sharing it again makes a new link (ADR 0020). A Shared Toot works the same way, for a saved Toot.
+A Recording its owner has shared by link, which anyone with the link can open and play, signed in or not. Nothing lists the link but its owner's Profile Page (#346). The page shows the Handle, the Recording's name, note, length and waveform, and plays the part of the fart its row plays. Stop sharing, deleting the Recording, deleting the account, or Farty taking it down after a Report ends the link for everyone; sharing it again makes a new link (ADR 0020). A Shared Toot works the same way, for a saved Toot.
 _Avoid_: Public Recording, post, upload, published Recording
 
 **Friend**:

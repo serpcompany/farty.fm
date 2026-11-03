@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest'
 import { POST } from './route'
 
-// The error report route, in Node: what it logs, and everything it refuses. It reads no session,
-// cookie, D1 or R2, so it needs no workerd (every-route.workers.test.ts skips it). Its one binding,
-// the rate limit, is a fake here: `null` is no Cloudflare context at all, as in `next dev`.
-
 type Limiter = { limit(options: { key: string }): Promise<{ success: boolean }> }
 const cloudflare = vi.hoisted(() => ({
   env: {} as { TELEMETRY_RATE_LIMIT?: Limiter } | null
@@ -16,7 +12,6 @@ vi.mock('@opennextjs/cloudflare', () => ({
   }
 }))
 
-/** Cloudflare's `simple` limit, counted per key: `limit` a window, which never ends here. */
 function fakeLimit(limit: number): Limiter & { keys: string[] } {
   const counts = new Map<string, number>()
   const keys: string[] = []
@@ -49,7 +44,6 @@ function post(body: BodyInit | null, headers: Record<string, string> = {}): Prom
       method: 'POST',
       headers: { origin: ORIGIN, 'content-type': 'application/json', ...headers },
       body,
-      // A stream body needs it in Node.
       duplex: 'half'
     } as RequestInit)
   )
@@ -168,7 +162,6 @@ describe('POST /api/telemetry/', () => {
     expect(over.headers.get('cache-control')).toBe('no-store')
     expect(logged).toHaveBeenCalledTimes(30)
 
-    // Another client has its own count.
     expect((await from('198.51.100.2')).status).toBe(204)
     expect(limiter.keys.at(-1)).toBe('198.51.100.2')
   })

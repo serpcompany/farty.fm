@@ -6,7 +6,7 @@ import {
   openDB,
   type StoreNames
 } from 'idb'
-import { libraryOwner } from './account'
+import { readableLibraryOwner } from './account'
 import { getAudio } from './library-api'
 import {
   announceQueued,
@@ -24,47 +24,18 @@ import type { AnalysisState, Recording, RecordingTrim } from './recordings'
 import { reportError } from './telemetry/errors'
 import type { Toot } from './toot'
 
-/**
- * Recordings and Toots live in this browser, in IndexedDB (ADR 0001's local-first rule, on the
- * web). Metadata and audio are separate stores, so listing them never loads their audio. Without
- * an account they last only the visit, but for the Recordings kept from before #237 (`visit.ts`).
- * Signed in, they are the account's working copy, kept in step with it by `library-sync.ts`.
- */
-export interface PedosDB extends DBSchema {
+export interface FartyDB extends DBSchema {
   recordings: { key: string; value: Recording }
-  /** Each Recording's WAV, by Recording id. */
   audio: { key: string; value: ArrayBuffer }
-  /** Since version 2. */
   toots: { key: string; value: Toot }
-  /** Each Toot's own WAV, by Toot id. Since version 2. */
   tootAudio: { key: string; value: ArrayBuffer }
-  /** What the account still needs from this browser (`outbox.ts`). Since version 3. */
   outbox: { key: string; value: OutboxEntry }
-  /**
-   * Recordings and Toots from the account whose WAV hasn't downloaded yet, by `itemKey`. Since
-   * version 3.
-   */
   downloads: { key: string; value: { kind: Kind; id: string } }
-  /**
-   * `cursor`: the account's `cursor` as of this browser's last read. Since version 3; versions 4,
-   * 5, 6, 7 and 8 set it back to 0 (`readEverythingAgain`).
-   */
   meta: { key: string; value: number }
-  /**
-   * The Sound Pad's Recordings, by Pad (0 is the top left), as the user last assigned them
-   * (`pad-store.ts`). A Pad with none here fills from the Recordings on no Pad (`padMapping`).
-   * This browser's only: it never syncs, and a guest's lasts the visit. Since version 5.
-   */
   pads: { key: number; value: string }
-  /**
-   * The Favorite Songs (#313), by Song id, each with when it was marked here. A guest's stay
-   * across visits, unlike their farts, and go to the account they sign in with; an account's are
-   * its working copy, cleared with its library at sign-out. Since version 7.
-   */
   favorites: { key: string; value: number }
 }
 
-/** Every store: clearing this browser's library clears them all. */
 const allStores = [
   'recordings',
   'audio',
@@ -77,18 +48,14 @@ const allStores = [
   'favorites'
 ] as const
 
-/** Where each kind's WAVs are kept. */
+export type LibraryDatabase = IDBPDatabase<FartyDB>
+
 export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
 
-/**
- * The `pedos` database's version. Web releases roll forward, not back, past a bump
- * (`docs/agents/web.md`).
- */
 export const DB_VERSION = 8
 
-let opening: Promise<IDBPDatabase<PedosDB>> | null = null
+let opening: Promise<LibraryDatabase> | null = null
 
-/** Whether this tab's upgrade waits for Farty in another tab, which holds an older version open. */
 let waiting = false
 const waits = new EventTarget()
 
@@ -98,10 +65,6 @@ function setWaiting(value: boolean) {
   waits.dispatchEvent(new Event('change'))
 }
 
-/**
- * Calls `listener` now and on each change with whether the database waits for Farty in another
- * tab to close. Returns a function that stops it.
- */
 export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () => void {
   const handle = () => listener(waiting)
   waits.addEventListener('change', handle)
@@ -109,41 +72,9 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
   return () => waits.removeEventListener('change', handle)
 }
 
-/**
- * The app's database, upgraded to version 8 on first open. Version 1 held Recordings only, version
- * 2 added Toots, version 3 the outbox, version 5 the Sound Pad's Pads (#277) and version 7 the
- * Favorite Songs (#313). An upgrade keeps them, and one from before version 3 queues each to
- * upload, since none has been (`queueEverything`).
- *
- * Version 4 (#268) changes no store. It shuts out code from before #268, in a tab opened before
- * the deploy or after a rollback: that code reads an outbox op it doesn't know, such as `place`,
- * as a delete, and would delete the Recording from the account. Version 4 closes its connection
- * (`blocking`), and it can't open version 3 again (`VersionError`). The upgrade also makes the
- * next sync read the whole library (`readEverythingAgain`).
- *
- * Version 6 (#293, ADR 0019) changes no store either: a Recording gains its Trim. It shuts out
- * code from before Trims the same way, since that code would upload a `place` op without the Trim
- * and settle it, and would read the account's Trims without keeping them while its cursor moves
- * past them. Its upgrade reads the whole library again too, so this browser gets the Trims another
- * one saved.
- *
- * Version 7 (#313) shuts out code from before Favorite Songs the same way: that code would read the
- * account's Favorite Songs without keeping them while its cursor moves past them, and would send
- * an outbox entry for one as a Recording's. Its upgrade reads the whole library again, which
- * brings the Favorite Songs another browser marked.
- *
- * Version 8 (#314) changes no store either: a Recording gains its name, and "No note" (`NO_NOTE`).
- * It shuts out code from before names the same way, since that code would queue and settle a
- * `place` without the name, read the account's names without keeping them, and play a Recording
- * left out with "No note" in Songs. Its upgrade reads the whole library again too.
- *
- * One connection serves the page until the browser closes it, as WebKit can while the tab sleeps
- * (#222), or it fails to open: the next call then opens a fresh one. Reads and writes go through
- * `withDb`, which also gets past a connection lost before the browser says so.
- */
-export function db(): Promise<IDBPDatabase<PedosDB>> {
+export function db(): Promise<LibraryDatabase> {
   if (opening) return opening
-  const thisOpening: Promise<IDBPDatabase<PedosDB>> = openDB<PedosDB>('pedos', DB_VERSION, {
+  const thisOpening: Promise<LibraryDatabase> = openDB<FartyDB>('pedos', DB_VERSION, {
     upgrade(database, oldVersion, _newVersion, transaction) {
       if (oldVersion < 1) {
         database.createObjectStore('recordings', { keyPath: 'id' })
@@ -157,25 +88,19 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
         database.createObjectStore('outbox', { keyPath: 'key' })
         database.createObjectStore('downloads')
         database.createObjectStore('meta')
-        // A failed write aborts the upgrade, and the open fails with it.
         if (oldVersion >= 1) queueEverything(transaction).catch(() => {})
       }
       if (oldVersion >= 3) readEverythingAgain(transaction).catch(() => {})
       if (oldVersion < 5) database.createObjectStore('pads')
       if (oldVersion < 7) database.createObjectStore('favorites')
     },
-    // An older version is open in another tab, and its code may never close it: the upgrade
-    // waits until that tab closes.
     blocked() {
       setWaiting(true)
     },
-    // A later version opening in another tab waits for this connection: close it, and open
-    // again on the next call.
     blocking(_version, _blocked, event) {
       ;(event.target as IDBDatabase).close()
       forget(thisOpening)
     },
-    // The browser closed the connection: storage cleared, or the IndexedDB server lost.
     terminated() {
       forget(thisOpening)
     }
@@ -185,16 +110,10 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
   return thisOpening
 }
 
-/** Drops `connection`, if it's still the page's, so the next `db()` opens a fresh one. */
-function forget(connection: Promise<IDBPDatabase<PedosDB>>): void {
+function forget(connection: Promise<LibraryDatabase>): void {
   if (opening === connection) opening = null
 }
 
-/**
- * Whether `error` came from a connection the browser closed or lost: an `InvalidStateError` from
- * a closed connection, or WebKit's `UnknownError`, "Connection to Indexed Database server lost.
- * Refresh the page to try again".
- */
 export function connectionLost(error: unknown): boolean {
   if (typeof error !== 'object' || error === null) return false
   const { name, message } = error as { name?: unknown; message?: unknown }
@@ -206,18 +125,8 @@ export function connectionLost(error: unknown): boolean {
   )
 }
 
-/**
- * Runs `work`, a read or a write, on the database. When it fails because the connection was
- * closed or lost, it runs once more on a fresh connection, so a tab left asleep still saves and
- * plays (#222). Should that lose its connection too, the failure is reported
- * (`library-connection-lost`) and thrown; any other failure is thrown as it is.
- *
- * `work` may run twice, so it does nothing outside the database. The first run may have committed
- * though the page never heard (WebKit can lose the connection between the two), so the second,
- * told it's a `retry`, finds its own write already there rather than failing on it.
- */
 export async function withDb<T>(
-  work: (database: IDBPDatabase<PedosDB>, retry: boolean) => Promise<T>
+  work: (database: LibraryDatabase, retry: boolean) => Promise<T>
 ): Promise<T> {
   const connection = db()
   try {
@@ -234,7 +143,6 @@ export async function withDb<T>(
   }
 }
 
-/** Whether `stored` holds every field of `fields`, as a write of them would have left it. */
 export function holds(stored: object, fields: object): boolean {
   const kept = stored as Record<string, unknown>
   return Object.entries(fields).every(
@@ -242,12 +150,8 @@ export function holds(stored: object, fields: object): boolean {
   )
 }
 
-/**
- * Queues an upload of every Recording and Toot an upgrade keeps, oldest first: before version 3
- * nothing uploaded, so none is on the account yet.
- */
 async function queueEverything(
-  transaction: IDBPTransaction<PedosDB, StoreNames<PedosDB>[], 'versionchange'>
+  transaction: IDBPTransaction<FartyDB, StoreNames<FartyDB>[], 'versionchange'>
 ): Promise<void> {
   const outbox = transaction.objectStore('outbox')
   const [recordings, toots] = await Promise.all([
@@ -273,28 +177,15 @@ async function queueEverything(
   )
 }
 
-/**
- * Sets the last read's `cursor` back to 0, where there is one, so the next sync reads the whole
- * library. A tab still on code from before #268 skipped another browser's Placed Pitch on a
- * Recording it had, one from before #293 its Trim, and one from before #314 its name, and still
- * moved the cursor past it: only a full read brings it. A library with
- * no cursor never read the account, and gets none, so `leftByAnAccount` still tells it apart.
- */
 async function readEverythingAgain(
-  transaction: IDBPTransaction<PedosDB, StoreNames<PedosDB>[], 'versionchange'>
+  transaction: IDBPTransaction<FartyDB, StoreNames<FartyDB>[], 'versionchange'>
 ): Promise<void> {
   const meta = transaction.objectStore('meta')
   if ((await meta.get('cursor')) !== undefined) await meta.put(0, 'cursor')
 }
 
-type OutboxStore = IDBPObjectStore<PedosDB, StoreNames<PedosDB>[], 'outbox', 'readwrite'>
+type OutboxStore = IDBPObjectStore<FartyDB, StoreNames<FartyDB>[], 'outbox', 'readwrite'>
 
-/**
- * Adds `op` on a Recording, Toot or Favorite Song to the outbox, in the transaction that makes the
- * change, so the change and its entry are written together or not at all. A write names `outbox`
- * before its first request: a store asked for once a request has aborted the transaction throws
- * there and then, leaving the requests already made, and `tx.done`, unhandled.
- */
 export async function queue(
   outbox: OutboxStore,
   kind: OutboxKind,
@@ -311,29 +202,21 @@ export async function queue(
 
 const saved = new EventTarget()
 
-/** Calls `listener` after each new Recording is saved. Returns a function that stops it. */
 export function onRecordingSaved(listener: (recording: Recording) => void): () => void {
   const handle = (event: Event) => listener((event as CustomEvent<Recording>).detail)
   saved.addEventListener('recording-saved', handle)
   return () => saved.removeEventListener('recording-saved', handle)
 }
 
-/** Every Recording, oldest first. */
 export async function loadRecordings(): Promise<Recording[]> {
   const all = await withDb(database => database.getAll('recordings'))
   return all.sort((a, b) => a.number - b.number)
 }
 
-/** One Recording as stored now, or null when it's gone. */
 export async function loadRecording(id: string): Promise<Recording | null> {
   return (await withDb(database => database.get('recordings', id))) ?? null
 }
 
-/**
- * Saves a new Recording and its WAV audio together, numbered after the highest so far, and queues
- * its upload. A new Recording gets a random id; the Fixture Library gives its own
- * (`fixtureRecordingId`).
- */
 export async function saveRecording(
   fields: Omit<Recording, 'id' | 'number' | 'createdAt' | 'analysis'>,
   wav: ArrayBuffer,
@@ -343,7 +226,6 @@ export async function saveRecording(
     const tx = database.transaction(['recordings', 'audio', 'outbox'], 'readwrite')
     const outbox = tx.objectStore('outbox')
     if (retry) {
-      // The first try's Recording, with its audio and its upload queued in the same transaction.
       const stored = await tx.objectStore('recordings').get(id)
       if (stored && holds(stored, fields)) {
         await tx.done
@@ -379,39 +261,27 @@ export async function saveAnalysis(id: string, analysis: AnalysisState): Promise
     await Promise.all([tx.store.put(updated), tx.done])
     return updated
   })
-  // A Recording uploads once its analysis is done.
   if (updated) announceQueued()
   return updated
 }
 
-/**
- * What a Recording's review changes on it: its Placed Pitch (ADR 0015), its Trim (ADR 0019) and
- * its name (#314), each null to take it off. A field left out stays as it is.
- */
 export type Placement = {
   placedPitch?: number | null
   trim?: RecordingTrim | null
   name?: string | null
 }
 
-/**
- * Places a Recording on a note by ear, or takes it off with null (ADR 0015), trims it or takes its
- * Trim off (ADR 0019), names it or takes its name off (#314), and queues the change for the
- * account. The updated Recording, or null when it's gone.
- */
 export async function placeRecording(id: string, change: Placement): Promise<Recording | null> {
   const placed = await withDb(async database => {
     const tx = database.transaction(['recordings', 'outbox'], 'readwrite')
     const recordings = tx.objectStore('recordings')
     const outbox = tx.objectStore('outbox')
     const recording = await recordings.get(id)
-    // Awaited together, so a failed write's aborted transaction is never left unhandled.
     if (!recording) {
       await tx.done
       return null
     }
     const updated: Recording = { ...recording, ...change }
-    // Only the fields this change names go to the account (`placedFields`).
     const fields = placedFieldNames.filter(field => change[field] !== undefined)
     await Promise.all([
       recordings.put(updated),
@@ -424,10 +294,6 @@ export async function placeRecording(id: string, change: Placement): Promise<Rec
   return placed
 }
 
-/**
- * A Recording's audio that waits for its download, which couldn't be fetched now, such as offline:
- * expected, and tried again on the next read.
- */
 export class AudioNotDownloaded extends Error {
   constructor(id: string) {
     super(`Recording ${id}'s audio couldn't be downloaded now`)
@@ -435,11 +301,6 @@ export class AudioNotDownloaded extends Error {
   }
 }
 
-/**
- * A Recording's WAV: this browser's, or the account's, downloaded now if it hasn't been yet. Fails
- * with `AudioNotDownloaded` when the download can't be fetched now, and with an error of its own
- * when there's no audio for it, here or in the account.
- */
 export async function loadAudio(id: string): Promise<ArrayBuffer> {
   const audio = await withDb(database => database.get('audio', id))
   if (audio) return audio
@@ -453,7 +314,6 @@ export async function deleteRecording(id: string): Promise<void> {
   await deleteItem('recordings', id)
 }
 
-/** Deletes a Recording or Toot and its audio, and queues the delete for the account, together. */
 export async function deleteItem(kind: Kind, id: string): Promise<void> {
   await withDb(async database => {
     const tx = database.transaction([kind, audioStore[kind], 'downloads', 'outbox'], 'readwrite')
@@ -469,10 +329,6 @@ export async function deleteItem(kind: Kind, id: string): Promise<void> {
   announceQueued()
 }
 
-/**
- * Deletes every Recording and Toot in this browser, with their audio and outbox, and the Sound
- * Pad's Pads, together.
- */
 export async function clearLibrary(): Promise<void> {
   await withDb(async database => {
     const tx = database.transaction(allStores, 'readwrite')
@@ -480,19 +336,11 @@ export async function clearLibrary(): Promise<void> {
   })
 }
 
-/** Every Recording's id in this browser. */
 export async function recordingIds(): Promise<string[]> {
   return withDb(database => database.getAllKeys('recordings'))
 }
 
-/**
- * Clears a guest's last visit (#237): every Toot, the Sound Pad's Pads, and every Recording but
- * those `kept`, with their audio and whatever waits to send or download for them, together. With
- * `kept` null, every Recording stays. Those that stay keep their outbox, so a sign-in still uploads
- * them.
- */
 export async function clearVisit(kept: ReadonlySet<string> | null): Promise<void> {
-  // Every key that starts `toots:` (`itemKey`).
   const forToots = IDBKeyRange.bound(itemKey('toots', ''), itemKey('toots', '\uffff'))
   await withDb(async database => {
     const tx = database.transaction(
@@ -522,18 +370,10 @@ export async function clearVisit(kept: ReadonlySet<string> | null): Promise<void
   })
 }
 
-/**
- * What a download found: the WAV, `missing` when the account has none (or the item is gone
- * here), or `failed` when it couldn't be fetched now.
- */
 export type Download = ArrayBuffer | 'missing' | 'failed'
 
 const downloading = new Map<string, Promise<Download>>()
 
-/**
- * Downloads a Recording's or Toot's WAV from the account, as it is kept there, if this browser
- * still waits for it. One download per item at a time.
- */
 export function download(kind: Kind, id: string): Promise<Download> {
   const key = itemKey(kind, id)
   let running = downloading.get(key)
@@ -548,24 +388,15 @@ async function fetchDownload(kind: Kind, id: string): Promise<Download> {
   const key = itemKey(kind, id)
   const waiting = await withDb(async database => {
     if (await database.getKey('downloads', key)) return true
-    // Another tab may have stored it meanwhile.
     return (await database.get(audioStore[kind], id)) ?? ('missing' as const)
   })
   if (waiting !== true) return waiting
-  // Only from the account this library is.
-  let accountId: string | null = null
-  try {
-    accountId = libraryOwner()
-  } catch {
-    // Storage is blocked: a library that never syncs has nothing to download.
-  }
+  const accountId = readableLibraryOwner()
   if (!accountId) return 'failed'
   const wav = await getAudio(kind, id, accountId)
   if (!(wav instanceof ArrayBuffer) && wav.status !== 404) return 'failed'
   return withDb(async database => {
     const tx = database.transaction([kind, audioStore[kind], 'downloads'], 'readwrite')
-    // Only for an item still waiting for it: a delete or a sign-out meanwhile wins, and another
-    // tab's download may have stored it.
     const [item, waits, stored] = await Promise.all([
       tx.objectStore(kind).getKey(id),
       tx.objectStore('downloads').getKey(key),
@@ -576,7 +407,6 @@ async function fetchDownload(kind: Kind, id: string): Promise<Download> {
       return (item && stored) || 'missing'
     }
     if (!(wav instanceof ArrayBuffer)) {
-      // The account has no audio for it: it's missing here too, from now on.
       await Promise.all([tx.objectStore('downloads').delete(key), tx.done])
       return 'missing'
     }
@@ -587,4 +417,12 @@ async function fetchDownload(kind: Kind, id: string): Promise<Download> {
     ])
     return wav
   })
+}
+
+export function savedByANewerFarty(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as { name?: unknown }).name === 'VersionError'
+  )
 }

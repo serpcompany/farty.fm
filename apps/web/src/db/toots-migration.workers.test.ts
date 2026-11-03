@@ -1,11 +1,6 @@
 import { applyD1Migrations, type D1Migration, env, reset } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
 
-// Migration 0005 (#278, ADR 0017) rebuilds `toots` so a Toot can have no Song: `song_id` and
-// `arrangement` may be null, beside a new `performance`. Its INSERT is edited by hand (the old
-// table has no `performance`), so here it runs on a D1 that already holds Toots, as Staging's and
-// Production's do, and every row comes through as it was.
-
 const { DB, TEST_MIGRATIONS } = env as unknown as {
   DB: D1Database
   TEST_MIGRATIONS: D1Migration[]
@@ -17,7 +12,6 @@ const T2 = '44444444-4444-4444-8444-444444444444'
 const T3 = '55555555-5555-4555-8555-555555555555'
 const ARRANGEMENT = '{"transposition":-12,"recordingForPitch":{"60":"r"}}'
 
-/** The D1 as it was before 0005, with a user, a live Toot and a tombstone. */
 async function before0005() {
   await reset()
   const upTo = TEST_MIGRATIONS.findIndex(m => m.name.startsWith('0005_'))

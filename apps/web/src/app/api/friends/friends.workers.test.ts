@@ -1,34 +1,14 @@
 import { eq, like } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 
-import * as handleRoute from '@/app/api/handle/route'
 import { addFriendRequest, type FriendLists } from '@/db/friends'
 import { friendRequests, friends, rateLimit } from '@/db/schema'
 import { FRIEND_REQUEST_LIMITS, requestFriend } from '@/server/friends'
-import { type As, api, ORIGIN, signUp, testDb } from '@/test-support/library-api'
+import { type As, api, params, request, signUp, testDb } from '@/test-support/library-api'
+import { jsonBody, share, withHandle } from '@/test-support/sharing-api'
 
 import * as friendRoute from './[handle]/route'
 import * as friendsRoute from './route'
-
-// Friends (#319, ADR 0021) in workerd, with a real D1: requests by Handle, accepting, declining,
-// cancelling and removing, and that each acts only between the signed-in user and the Handle in
-// it, so no one reaches a request or friendship that isn't theirs.
-
-const params = <P>(value: P) => ({ params: Promise.resolve(value) })
-
-function request(path: string, method: string, as: As, body?: unknown) {
-  const headers = new Headers()
-  if (as.cookie) headers.set('cookie', as.cookie)
-  if (as.library) headers.set('x-pedos-library', as.library)
-  const origin = as.origin === undefined ? (method === 'GET' ? null : ORIGIN) : as.origin
-  if (origin !== null) headers.set('origin', origin)
-  if (body !== undefined) headers.set('content-type', 'application/json')
-  return new Request(`${ORIGIN}${path}`, {
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body)
-  })
-}
 
 const friend = {
   list: async (as: As) =>
@@ -36,7 +16,7 @@ const friend = {
       await friendsRoute.GET(request('/api/friends/', 'GET', as), params({}))
     ).json()) as FriendLists & { handle: string | null },
   ask: (handle: unknown, as: As) =>
-    friendsRoute.POST(request('/api/friends/', 'POST', as, { handle }), params({})),
+    friendsRoute.POST(request('/api/friends/', 'POST', as, jsonBody({ handle })), params({})),
   state: async (handle: string, as: As) => {
     const response = await friendRoute.GET(
       request(`/api/friends/${handle}/`, 'GET', as),
@@ -45,18 +25,10 @@ const friend = {
     return { status: response.status, ...((await response.json()) as object) }
   },
   act: (handle: string, action: unknown, as: As) =>
-    friendRoute.POST(request(`/api/friends/${handle}/`, 'POST', as, { action }), params({ handle }))
-}
-
-/** A user with an account and the Handle `name`. */
-async function member(name: string) {
-  const user = await signUp(name)
-  const picked = await handleRoute.PUT(
-    request('/api/handle/', 'PUT', user, { handle: name }),
-    params({})
-  )
-  expect(picked.status).toBe(201)
-  return user
+    friendRoute.POST(
+      request(`/api/friends/${handle}/`, 'POST', as, jsonBody({ action })),
+      params({ handle })
+    )
 }
 
 const body = async (response: Response) => ({
@@ -64,15 +36,13 @@ const body = async (response: Response) => ({
   ...((await response.json()) as object)
 })
 
-/** Alice has asked Bob. */
 async function aliceAskedBob() {
-  const alice = await member('alice')
-  const bob = await member('bob')
+  const alice = await withHandle('alice')
+  const bob = await withHandle('bob')
   expect(await body(await friend.ask('bob', alice))).toEqual({ status: 201, state: 'requested' })
   return { alice, bob }
 }
 
-/** Alice and Bob are friends. */
 async function aliceAndBob() {
   const { alice, bob } = await aliceAskedBob()
   expect(await body(await friend.act('alice', 'accept', bob))).toEqual({
@@ -110,13 +80,13 @@ describe('Sending a friend request', () => {
   })
 
   it('takes the Handle as typed: an @, capitals and spaces', async () => {
-    const alice = await member('alice')
-    await member('bob')
+    const alice = await withHandle('alice')
+    await withHandle('bob')
     expect((await friend.ask(' @Bob ', alice)).status).toBe(201)
   })
 
   it('refuses a Handle no one has, and one that could be no one’s', async () => {
-    const alice = await member('alice')
+    const alice = await withHandle('alice')
     for (const handle of ['carol', 'ab', 'a-b', 'x'.repeat(21), '']) {
       expect(await body(await friend.ask(handle, alice))).toEqual({
         status: 404,
@@ -131,7 +101,7 @@ describe('Sending a friend request', () => {
   })
 
   it('refuses your own Handle', async () => {
-    const alice = await member('alice')
+    const alice = await withHandle('alice')
     expect(await body(await friend.ask('alice', alice))).toEqual({
       status: 400,
       error: 'own_handle'
@@ -158,7 +128,7 @@ describe('Sending a friend request', () => {
 
   it('needs a Handle of your own first, since whoever you ask sees you by it', async () => {
     const alice = await signUp('alice')
-    await member('bob')
+    await withHandle('bob')
     expect(await body(await friend.ask('bob', alice))).toEqual({
       status: 409,
       error: 'no_handle'
@@ -174,8 +144,8 @@ describe('Sending a friend request', () => {
   })
 
   it('is refused from another site, or as another account’s library', async () => {
-    const alice = await member('alice')
-    await member('bob')
+    const alice = await withHandle('alice')
+    await withHandle('bob')
     expect((await friend.ask('bob', { ...alice, origin: 'https://evil.example' })).status).toBe(403)
     expect(await body(await friend.ask('bob', { ...alice, library: 'userbob' }))).toEqual({
       status: 409,
@@ -195,8 +165,7 @@ describe('Sending a friend request', () => {
       status: 429,
       error: 'too_many_requests'
     })
-    // Someone else is a pair of its own.
-    await member('carol')
+    await withHandle('carol')
     expect((await friend.ask('carol', alice)).status).toBe(201)
   })
 
@@ -212,7 +181,7 @@ describe('Sending a friend request', () => {
     expect(sender[0].key).not.toContain('useralice')
     await testDb().update(rateLimit).set({ count: FRIEND_REQUEST_LIMITS.perSender.max })
 
-    await member('carol')
+    await withHandle('carol')
     expect(await body(await friend.ask('carol', alice))).toEqual({
       status: 429,
       error: 'too_many_requests'
@@ -227,8 +196,8 @@ describe('Sending a friend request', () => {
   })
 
   it('keeps the same-person limit for 30 days, not one', async () => {
-    const alice = await member('alice')
-    const bob = await member('bob')
+    const alice = await withHandle('alice')
+    const bob = await withHandle('bob')
     const start = Date.now()
     const at = (days: number) => new Date(start + days * 24 * 60 * 60 * 1000)
     const ask = (days: number) =>
@@ -245,30 +214,28 @@ describe('Sending a friend request', () => {
 })
 
 describe('Get Farty’s friend request, just after signing up (#318)', () => {
-  // Someone who opens Maya's shared page signs up with "Add @maya as a friend" ticked: the browser
-  // asks, picks a Handle when told it has none, and asks again, all as the new account.
-
   it('asks once the new account has picked a Handle', async () => {
-    const maya = await member('maya')
+    const maya = await withHandle('maya')
     const sam = await signUp('sam')
     expect(await body(await friend.ask('maya', sam))).toEqual({ status: 409, error: 'no_handle' })
     expect(await requestRows()).toEqual([])
-    const picked = await handleRoute.PUT(
-      request('/api/handle/', 'PUT', sam, { handle: 'sam' }),
-      params({})
-    )
-    expect(picked.status).toBe(201)
+    expect((await share.pick('sam', sam)).status).toBe(201)
     expect(await body(await friend.ask('maya', sam))).toEqual({ status: 201, state: 'requested' })
     expect(await requestRows()).toEqual([{ from: 'usersam', to: 'usermaya' }])
     expect((await friend.list(maya)).requests).toEqual(['sam'])
   })
 
   it('is sent only as the signed-in user: a sender in the body is ignored', async () => {
-    await member('maya')
-    await member('bob')
-    const sam = await member('sam')
+    await withHandle('maya')
+    await withHandle('bob')
+    const sam = await withHandle('sam')
     const forged = await friendsRoute.POST(
-      request('/api/friends/', 'POST', sam, { handle: 'maya', from: 'userbob', userId: 'userbob' }),
+      request(
+        '/api/friends/',
+        'POST',
+        sam,
+        jsonBody({ handle: 'maya', from: 'userbob', userId: 'userbob' })
+      ),
       params({})
     )
     expect(forged.status).toBe(201)
@@ -276,14 +243,14 @@ describe('Get Farty’s friend request, just after signing up (#318)', () => {
   })
 
   it('sends nothing signed out', async () => {
-    await member('maya')
+    await withHandle('maya')
     expect(await body(await friend.ask('maya', {}))).toEqual({ status: 401, error: 'signed_out' })
     expect(await requestRows()).toEqual([])
   })
 
   it('is refused for a sharer who has since gone, and for the new account’s own Handle', async () => {
-    const maya = await member('maya')
-    const sam = await member('sam')
+    const maya = await withHandle('maya')
+    const sam = await withHandle('sam')
     await api.deleteAccount(maya)
     expect(await body(await friend.ask('maya', sam))).toEqual({
       status: 404,
@@ -294,8 +261,8 @@ describe('Get Farty’s friend request, just after signing up (#318)', () => {
   })
 
   it('is harmless sent twice, as after a reload: still one request', async () => {
-    await member('maya')
-    const sam = await member('sam')
+    await withHandle('maya')
+    const sam = await withHandle('sam')
     expect((await friend.ask('maya', sam)).status).toBe(201)
     expect(await body(await friend.ask('maya', sam))).toEqual({
       status: 409,
@@ -307,8 +274,8 @@ describe('Get Farty’s friend request, just after signing up (#318)', () => {
 
 describe('Two users asking each other', () => {
   it('can’t leave a request each way: the second insert sees the first', async () => {
-    const alice = await member('alice')
-    const bob = await member('bob')
+    const alice = await withHandle('alice')
+    const bob = await withHandle('bob')
     expect((await friend.ask('alice', bob)).status).toBe(201)
     expect(await addFriendRequest(testDb(), 'useralice', 'userbob', new Date())).toBe(false)
     expect(await requestRows()).toEqual([{ from: 'userbob', to: 'useralice' }])
@@ -316,8 +283,8 @@ describe('Two users asking each other', () => {
   })
 
   it('end as friends when they ask at once', async () => {
-    const alice = await member('alice')
-    const bob = await member('bob')
+    const alice = await withHandle('alice')
+    const bob = await withHandle('bob')
     const [a, b] = await Promise.all([friend.ask('bob', alice), friend.ask('alice', bob)])
     expect([a.status, b.status].sort()).toEqual([200, 201])
     expect(await requestRows()).toEqual([])
@@ -361,8 +328,8 @@ describe('Answering a friend request', () => {
   })
 
   it('answers 404 when there’s nothing to act on, and 400 to an action it doesn’t know', async () => {
-    const alice = await member('alice')
-    await member('bob')
+    const alice = await withHandle('alice')
+    await withHandle('bob')
     for (const action of ['accept', 'decline', 'cancel', 'remove']) {
       expect(await body(await friend.act('bob', action, alice))).toEqual({
         status: 404,
@@ -394,25 +361,24 @@ describe('Removing a friend', () => {
   })
 })
 
+async function expectNothingToActOn(outsider: As) {
+  for (const action of ['accept', 'decline', 'cancel', 'remove']) {
+    expect((await friend.act('alice', action, outsider)).status).toBe(404)
+    expect((await friend.act('bob', action, outsider)).status).toBe(404)
+  }
+}
+
 describe('Someone else’s request or friendship', () => {
   it('can’t be accepted, declined, cancelled or removed by anyone else', async () => {
     const { alice, bob } = await aliceAskedBob()
-    const carol = await member('carol')
-    // Carol names Alice: only a request or friendship between Carol and Alice is reached.
-    for (const action of ['accept', 'decline', 'cancel', 'remove']) {
-      expect((await friend.act('alice', action, carol)).status).toBe(404)
-      expect((await friend.act('bob', action, carol)).status).toBe(404)
-    }
-    // Nor can Alice accept her own request, or Bob cancel it as if it were his.
+    const carol = await withHandle('carol')
+    await expectNothingToActOn(carol)
     expect((await friend.act('bob', 'accept', alice)).status).toBe(404)
     expect((await friend.act('alice', 'cancel', bob)).status).toBe(404)
     expect(await requestRows()).toEqual([{ from: 'useralice', to: 'userbob' }])
 
     await friend.act('alice', 'accept', bob)
-    for (const action of ['accept', 'decline', 'cancel', 'remove']) {
-      expect((await friend.act('alice', action, carol)).status).toBe(404)
-      expect((await friend.act('bob', action, carol)).status).toBe(404)
-    }
+    await expectNothingToActOn(carol)
     expect(await friendRows()).toHaveLength(2)
     expect(await friend.list(carol)).toEqual({
       handle: 'carol',
@@ -432,8 +398,8 @@ describe('Someone else’s request or friendship', () => {
 describe('Deleting an account', () => {
   it('deletes its requests either way and its friendships', async () => {
     const { alice, bob } = await aliceAndBob()
-    const carol = await member('carol')
-    await member('dave')
+    const carol = await withHandle('carol')
+    await withHandle('dave')
     expect((await friend.ask('alice', carol)).status).toBe(201)
     expect((await friend.ask('dave', alice)).status).toBe(201)
     expect((await api.deleteAccount(alice)).status).toBe(204)
@@ -446,12 +412,11 @@ describe('Deleting an account', () => {
 
 describe('The lists', () => {
   it('put the newest first', async () => {
-    const alice = await member('alice')
+    const alice = await withHandle('alice')
     const others = new Map<string, As>()
     for (const [i, name] of ['bob', 'carol', 'dave'].entries()) {
-      others.set(name, await member(name))
+      others.set(name, await withHandle(name))
       expect((await friend.ask(name, alice)).status).toBe(201)
-      // Minutes apart, as the order is by when each was sent.
       await testDb()
         .update(friendRequests)
         .set({ createdAt: new Date(Date.UTC(2026, 10, 1, 9, i)) })

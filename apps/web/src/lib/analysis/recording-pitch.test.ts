@@ -9,10 +9,7 @@ import {
 import { hzToMidi, roundHalfEven } from './numeric'
 import { analyzePitch, estimate } from './recording-pitch'
 
-// #35: from the golden first burst, the Recording Pitch estimate within ±30 cents and non-null for
-// exactly the same Recordings, the same rounded confidence, and the same contour
-// (`RecordingPitchTests.swift`; the contour check is this port's addition).
-test('estimates and contours match the golden data', async () => {
+test('from the golden gesture, estimates, confidences and contours match the golden data', async () => {
   let maxErrorCents = 0
   let bitExact = 0
   let estimates = 0
@@ -69,9 +66,6 @@ test('estimates and contours match the golden data', async () => {
   console.log(lines.join('\n'))
 })
 
-// #295, owner-3: a 0.257 s first burst (45 frames) voiced only in its last 4, at pYIN's 45 Hz floor
-// and 48 dB below the rest. The second window counts its coverage as the head does (4 of 45), so
-// it is no note. Counted against the 4 frames left, it was a note at confidence 1.
 test('a few quiet frames at the end of a short first burst are no note', () => {
   const sr = 44100
   const hop = 256

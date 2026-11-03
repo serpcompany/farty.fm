@@ -1,0 +1,24 @@
+name: CI scope
+description: Classify what the event changed, as SERP's CI Scope standard asks. Outputs docs=true when every changed file is a doc that nothing builds or tests (apps/web/scripts/ci-scope.mjs).
+outputs:
+  docs:
+    description: true when every file the event changed is in the docs paths, false otherwise.
+    value: ${{ steps.classify.outputs.docs }}
+runs:
+  using: composite
+  steps:
+    - name: Classify the change against its base
+      id: classify
+      shell: bash
+      env:
+        EVENT: ${{ github.event_name }}
+        BEFORE: ${{ github.event.before }}
+      run: |
+        base=
+        if [ "$EVENT" = pull_request ]; then
+          base=HEAD^1
+        elif [ "$EVENT" = push ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]]; then
+          git fetch --quiet --no-tags --depth=1 origin "$BEFORE"
+          base=$BEFORE
+        fi
+        node apps/web/scripts/ci-scope.mjs "$base" HEAD

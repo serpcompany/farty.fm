@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, test } from 'vitest'
 import { REPO_ROOT } from '../../test-support/golden'
+import { songs } from '../../test-support/songs.generated'
 import { songPitches } from '../engine/auto-map'
 import { catalogPath } from './catalog-path.generated'
 import {
@@ -15,7 +16,6 @@ import {
 } from './generate'
 import type { SongSummary } from './song'
 import { songIndex } from './song-index.generated'
-import { songs } from './songs.generated'
 
 const sources = readSources()
 
@@ -24,14 +24,11 @@ describe('the Song Catalog in the app', () => {
     expect(outOfDate(renderCatalog(sources))).toEqual([])
   })
 
-  // #322: the browser fetches the file the server and the tests import, by its content's name.
-  // #323: that file is the index, every Song but its notes, and each Song's notes are a file of
-  // their own, fetched as the Song opens.
   test('is an index the browser fetches by its content and the server imports', () => {
     const files = renderCatalog(sources)
     expect(`public${catalogPath}`).toBe(files.data.path)
     expect(files.index.text).toContain(`'../../../${files.data.path}'`)
-    expect(files.songs.text).toContain(`'../../../${files.data.path}'`)
+    expect(files.songs.text).toContain(`'../../${files.data.path}'`)
     const index: SongSummary[] = JSON.parse(files.data.text)
     expect(index).toEqual(songs.map(({ bar_lines, length_beats, notes, ...summary }) => summary))
     expect(index).toEqual(songIndex)
@@ -46,11 +43,10 @@ describe('the Song Catalog in the app', () => {
       expect(file.path).toMatch(new RegExp(`^public/catalog/notes/${song.id}-[0-9a-f]{16}\\.json$`))
       const { bar_lines, length_beats, notes } = song
       expect(JSON.parse(file.text)).toEqual({ bar_lines, length_beats, notes })
-      expect(files.songs.text).toContain(`'../../../${file.path}'`)
+      expect(files.songs.text).toContain(`'../../${file.path}'`)
     }
   })
 
-  // Compose reads Pitch Coverage from the index alone: Auto-map reads only these of a Song.
   test.each(songs)('$id has the pitches and note lengths Auto-map reads', song => {
     expect({ bpm: song.bpm, pitches: song.pitches, durations: song.durations }).toEqual(
       songPitches(song)
@@ -74,7 +70,6 @@ describe('the Song Catalog in the app', () => {
     ])
   })
 
-  // #350: every Song in catalog/ then, but the second Ode to Joy (#229).
   test('then every other Song in the catalog, in its order, but ode-mutopia', () => {
     const ids = songs.map(s => s.id)
     expect(ids).toHaveLength(1008)
@@ -100,10 +95,6 @@ describe('the Song Catalog in the app', () => {
   })
 })
 
-// export_golden.py writes every catalog Song's melody, which the generator reads, so a Song
-// can't ship without it. It arranges the Songs the app shipped before #350, the hand-entered ones
-// and the first three PDMX batches, which the Auto-map and renderer tests check against the
-// reference; every later Song passed tools/catalog/import_pdmx.py's render gate on it.
 describe('the golden data', () => {
   const golden = `${REPO_ROOT}/fixtures/golden`
   const index = JSON.parse(readFileSync(`${golden}/index.json`, 'utf8')) as {
@@ -144,8 +135,6 @@ describe('the generator', () => {
     expect(() => renderCatalog(changed, ['mary'])).toThrow(/cited score/)
   })
 
-  // #350: every Song's notes come from its golden copy, so one left stale after a change to the
-  // entry's render arguments, or edited by hand, fails here and in `generate.ts --check`.
   test.each([
     [
       'its render arguments',
@@ -175,7 +164,6 @@ describe('the generator', () => {
     expect(JSON.parse(data.text)[0].title).toBe("The Teddy Bears' Picnic")
   })
 
-  // A new deploy's catalog has a new name, so no browser or cache reads an older one for it.
   test('names the catalog by its content', () => {
     const one = renderCatalog(sources, ['twinkle', 'mary'])
     const again = renderCatalog(sources, ['twinkle', 'mary'])
@@ -186,8 +174,6 @@ describe('the generator', () => {
     expect(one.path.text).toContain(`'${one.data.path.slice('public'.length)}'`)
   })
 
-  // A Song's notes keep their name while they stay the same, so a browser keeps them for offline
-  // use across deploys, and get a new one, and the index with it, once they change.
   test("names each Song's notes by their content", () => {
     const one = renderCatalog(sources, ['twinkle', 'mary'])
     expect(renderCatalog(sources, ['mary']).notes[0].path).toBe(one.notes[1].path)
@@ -216,7 +202,6 @@ describe('the generator', () => {
     )
   })
 
-  // `/compose/pad/` is the Sound Pad, and `/compose/song/` answers for every Song offline.
   test.each(['pad', 'song'])("refuses a Song whose id is Compose's own page %s", id => {
     const twinkle = sources.catalog.find(e => e.id === 'twinkle') as CatalogEntry
     const taken = {

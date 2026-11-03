@@ -4,7 +4,7 @@
 
 1. **A profile page, `/u/<handle>/`, lists what its user shares.**
    - Anyone can open it, signed in or not: the Handle, the friend control, and each Recording and saved Toot shared now, together, newest first by when it was shared (#346). Each row plays in place, as the shared page does, and opens that shared page. A row says which it is: "Recording" and its note, or "Toot" and its Song.
-   - It lists only a live share of a live Recording or Toot of a live account, read from D1 on every request (`findProfile()` in `src/server/profiles.ts`): a share stopped or taken down, a deleted Recording or Toot and a deleted account drop off at once, and so does a Toot that plays a taken-down Recording, as its link does (ADR 0020, `withoutTakenDownRecordings` in `src/db/sharing.ts`).
+   - It lists only a live share of a live Recording or Toot of a live account, read from D1 on every request (`findProfile()` in `src/server/profiles.ts`): a share stopped or taken down, a deleted Recording or Toot and a deleted account drop off at once, and so does a Toot that plays a taken-down Recording, as its link does (ADR 0020, `tootsPlayingTakenDown` in `src/db/sharing.ts`).
    - So ADR 0020's links are no longer listed nowhere: a user's page lists them. Search engines are still asked not to index the page (`noindex, nofollow`, no canonical, not in the sitemaps), it's `private, no-cache`, and the service worker leaves `/u/` alone.
    - No counts, no feed, no likes, comments or messages (#315).
    - A Handle no one has answers the shared page's 404, "This link doesn't work any more."
@@ -34,4 +34,4 @@ Migration `0010_friends`:
 ## Consequences
 
 - Sharing a Recording or a Toot puts it on your page. The privacy page says so.
-- A page can be emptied, not taken down: the owner takes down each of its shares (`docs/agents/web.md`, Reports and take-downs), and the page then lists nothing. Taking away a Handle waits for a moderation screen, with changing one (ADR 0020).
+- A page can be emptied, not taken down: the owner takes down each of its shares (`docs/agents/sharing.md`, Reports and take-downs), and the page then lists nothing. Taking away a Handle waits for a moderation screen, with changing one (ADR 0020).

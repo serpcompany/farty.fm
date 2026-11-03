@@ -6,33 +6,20 @@ import { headers } from 'next/headers'
 import { ImageResponse } from 'next/og'
 import { siteOrigin } from '@/lib/site'
 
-// A shared link's preview (ADR 0020), for a Recording's page and a Toot's alike: the page's
-// metadata, with its Open Graph tags, and its 1200×630 image in Farty's pink, which Messages,
-// WhatsApp and the like show. Both are drawn from D1 on each request, so a link that stops working
-// takes its preview with it.
-
-/**
- * The origin this page is served on: the environment's own, or on a local run, which has no host
- * of its own, the request's. Null when there's no telling.
- */
 export async function pageOrigin(): Promise<string | null> {
   const host = (await headers()).get('host')
   return siteOrigin() ?? (host ? `http://${host}` : null)
 }
 
-/** What a shared page's metadata says of its item, or null when its link doesn't work. */
-export type LinkPreview = { title: string; description: string; path: string }
+type LinkPreview = { title: string; description: string; path: string }
 
-/** A shared page's metadata: unlisted, and with its Open Graph and Twitter tags while it works. */
 export async function linkPreviewMetadata(preview: LinkPreview | null): Promise<Metadata> {
-  // Unlisted: never indexed, and no canonical, which the layout's would give it.
   const unlisted: Metadata = {
     robots: { index: false, follow: false },
     alternates: { canonical: null }
   }
   if (!preview) return { ...unlisted, title: 'Link not found · Farty' }
   const { title, description, path } = preview
-  // Link previews need the image's absolute URL.
   const origin = await pageOrigin()
   return {
     ...unlisted,
@@ -44,19 +31,12 @@ export async function linkPreviewMetadata(preview: LinkPreview | null): Promise<
   }
 }
 
-/** The link image's size. */
 export const LINK_IMAGE_SIZE = { width: 1200, height: 630 }
 
-/** Not kept anywhere: a stopped link's image goes with it. */
 const noStore = { 'Cache-Control': 'private, no-cache' }
 
-/** The image of a link that doesn't work: none. */
 export const linkImageNotFound = () => new Response('Not found', { status: 404, headers: noStore })
 
-/**
- * A shared item's link image: Farty, with a pill at the top right when there is one (a
- * Recording's note), then its name, who shared it, and its loudness bars.
- */
 export async function linkImage({
   name,
   byline,
@@ -68,7 +48,6 @@ export async function linkImage({
   byline: string
   pill: string | null
   levels: number[]
-  /** How many flat bars to draw when there are no `levels`. */
   bars: number
 }) {
   const logo = await logoDataUrl()
@@ -88,7 +67,6 @@ export async function linkImage({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 24, fontSize: 52 }}>
           {logo && (
-            // biome-ignore lint/performance/noImgElement: Satori draws a plain img.
             <img
               src={logo}
               alt=""
@@ -121,7 +99,6 @@ export async function linkImage({
           fontSize: nameSize(name),
           letterSpacing: -nameSize(name) * 0.035,
           lineHeight: 1,
-          // One line, so a long name never pushes the bars off the image.
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis'
@@ -139,9 +116,8 @@ export async function linkImage({
           marginTop: 40
         }}
       >
-        {drawn.map((level, bar) => (
+        {Array.from(drawn.entries(), ([bar, level]) => (
           <div
-            // biome-ignore lint/suspicious/noArrayIndexKey: bars never move.
             key={bar}
             style={{
               flex: 1,
@@ -157,17 +133,12 @@ export async function linkImage({
   )
 }
 
-/**
- * The name's font size: big for a short name, such as "Recording 3", and smaller for a long one,
- * such as a Song's title, so most fit on the image's one line.
- */
 function nameSize(name: string): number {
   if (name.length <= 14) return 116
   if (name.length <= 22) return 88
   return 68
 }
 
-/** Farty's icon from the Worker's own files, or null where there are none (`next dev`). */
 async function logoDataUrl(): Promise<string | null> {
   try {
     const response = await getCloudflareContext().env.ASSETS?.fetch(

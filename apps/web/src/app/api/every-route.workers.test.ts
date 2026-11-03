@@ -2,13 +2,6 @@ import { describe, expect, it } from 'vitest'
 
 import { ORIGIN } from '@/test-support/library-api'
 
-// Every route under `src/app/api/`, found from the files, except sign-in's own (`api/auth/`),
-// the error reports' (`api/telemetry/`, which has no session by design and reads none; its own
-// tests are in `telemetry/route.test.ts`) and Stripe's webhook (`api/stripe/webhook/`, checked
-// by Stripe's signature instead; its tests are in `payments.workers.test.ts`): each method a route
-// exports must answer 401 to a request with no session, before reading its body or params. A new
-// route that skips `requireUser()` (`userRoute`) fails here.
-
 const routeModules = import.meta.glob([
   './**/route.ts',
   '!./auth/**',
@@ -18,7 +11,6 @@ const routeModules = import.meta.glob([
 const METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 const ID = '00000000-0000-4000-8000-000000000001'
 
-/** `./recordings/[id]/audio/route.ts` → `/api/recordings/{id}/audio/`, and its params. */
 function routeFor(file: string) {
   const segments = file
     .replace(/^\.\//, '')

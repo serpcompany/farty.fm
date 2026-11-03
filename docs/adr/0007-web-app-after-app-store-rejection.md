@@ -27,3 +27,5 @@ The routes the owner weighed (#106):
   Update 2026-10-30 (#279): the saved and synced WAV of a heard take is now the take times one gain, so its loudest sample reaches -1 dBFS, where a rendered Song peaks. The gain is applied in float before the 16-bit conversion, so nothing is lost, and ADR 0002's "original file stays authoritative" still holds. Recording Analysis and Songs give the same results either way.
 - Safari mutes Web Audio when the iPhone's silent switch is on, unless the page sets Safari's Audio Session to playback. The app does.
 - A browser may clear a site's storage. Asking for persistent storage and Add to Home Screen come in #109 and #112.
+
+Update 2026-10-27: accounts, a cloud library and sync replace "no accounts, no cloud libraries, no sync" (ADR 0023). Google Play is planned as a Trusted Web Activity of this web app ([Google Play](../agents/google-play.md)), not the Kotlin rewrite the table above assumed.

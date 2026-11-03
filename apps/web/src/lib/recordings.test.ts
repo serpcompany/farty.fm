@@ -30,11 +30,6 @@ import {
   trimOf
 } from './recordings'
 
-/**
- * Steady noise at `rmsDb` dBFS, the same every run: white noise through a one-pole low-pass. The
- * default pole (0.97) is the test's room; 0 is white noise, and 0.995 a low rumble such as HVAC
- * or traffic.
- */
 function roomNoise(seconds: number, sampleRate: number, rmsDb: number, pole = 0.97): Float32Array {
   let seed = 7
   const random = () => {
@@ -52,7 +47,6 @@ function roomNoise(seconds: number, sampleRate: number, rmsDb: number, pole = 0.
   return out.map(v => v * gain)
 }
 
-/** `samples` turned so its loudest sample is at `peakDb` dBFS, as a quiet microphone takes it. */
 function atPeak(samples: Float32Array, peakDb: number): Float32Array {
   const peak = samples.reduce((max, v) => Math.max(max, Math.abs(v)), 0)
   const gain = 10 ** (peakDb / 20) / peak
@@ -60,7 +54,6 @@ function atPeak(samples: Float32Array, peakDb: number): Float32Array {
 }
 
 describe('heardSomething', () => {
-  // 016, 019, 081 and 086 are shorter than the 0.5 s the old rule asked for.
   it.each(['016', '019', '081', '086'])('hears the short fart %s', async id => {
     const golden = goldenRecordings.find(g => g.id === id)
     if (!golden) throw new Error(`No fixture ${id}`)
@@ -98,9 +91,6 @@ describe('heardSomething', () => {
     }
   })
 
-  // Steady noise reads as contrast by its bandwidth and the take's length (#159 review). A low
-  // rumble passes: a known false accept, which reaches Review, where analysis finds no steady note.
-  // Since #279 lowered the floor, it passes down to -70 dBFS.
   it.each([
     { noise: 'white noise', pole: 0, seconds: 2, rmsDb: -40, heard: false },
     { noise: 'white noise', pole: 0, seconds: 30, rmsDb: -40, heard: false },
@@ -113,7 +103,6 @@ describe('heardSomething', () => {
     expect(heardSomething(roomNoise(seconds, 48_000, rmsDb, pole), 48_000)).toBe(heard)
   })
 
-  /** Fixture `id` 20 dB quieter, in room noise at `roomDb` dBFS, after 300 ms of that room. */
   async function fartInRoom(id: string, roomDb: number) {
     const golden = goldenRecordings.find(g => g.id === id)
     if (!golden) throw new Error(`No fixture ${id}`)
@@ -148,14 +137,12 @@ describe('heardSomething', () => {
     const golden = goldenRecordings.find(g => g.id === '017')
     if (!golden) throw new Error('No fixture 017')
     const { samples, sampleRate } = await decoded(golden)
-    // 017 is the quietest fixture over its own floor.
     expect(levelContrast(samples, sampleRate)?.contrastDb).toBeGreaterThan(4)
     expect(levelContrast(roomNoise(2, 48_000, -40), 48_000)?.contrastDb).toBeLessThan(4)
   })
 })
 
 describe('TakeLevels, a take measured as it comes in (#281)', () => {
-  /** `take` in the batches the capture processor sends: pre-roll and a quantum, then 4096s. */
   function inBatches(take: Float32Array, sampleRate: number): Float32Array[] {
     const first = Math.round(0.3 * sampleRate) + 128
     const batches = [take.subarray(0, first)]
@@ -163,7 +150,6 @@ describe('TakeLevels, a take measured as it comes in (#281)', () => {
     return batches
   }
 
-  /** `levelContrast` as #279 shipped it, on the whole take at once: what the batches must match. */
   function wholeTake(samples: Float32Array, sampleRate: number) {
     const hop = Math.max(1, Math.trunc(0.005 * sampleRate))
     const frame = 10 * hop
@@ -191,7 +177,6 @@ describe('TakeLevels, a take measured as it comes in (#281)', () => {
         for (const batch of inBatches(take, sampleRate)) levels.add(batch)
         expect(levels.contrast(), golden.id).toEqual(expected)
         expect(levelContrast(take, sampleRate), golden.id).toEqual(expected)
-        // The live waveform's bars too.
         const whole = new TakeLevels(sampleRate)
         whole.add(take)
         expect(levels.bars, golden.id).toEqual(whole.bars)
@@ -216,23 +201,19 @@ describe('TakeLevels, a take measured as it comes in (#281)', () => {
     const window = 2400
     const levels = new TakeLevels(sampleRate)
     expect(levels.bars).toEqual([])
-    // Less than one 50 ms window: no bar yet.
     levels.add(new Float32Array(100).fill(1))
     expect(levels.bars).toEqual([])
     levels.add(new Float32Array(window - 100).fill(1))
     expect(levels.bars).toHaveLength(1)
     expect(levels.bars[0]).toBeCloseTo(1, 6)
-    // A bar covers its own 50 ms only, whatever the batches were.
     const at35 = new Float32Array(window).fill(10 ** (-35 / 20))
     levels.add(at35.subarray(0, 1000))
     levels.add(at35.subarray(1000))
     expect(levels.bars).toHaveLength(2)
     expect(levels.bars[1]).toBeCloseTo(0.5, 6)
-    // Room under the floor, and silence, draw nothing.
     levels.add(roomNoise((2 * window) / sampleRate, sampleRate, -80))
     levels.add(new Float32Array(window))
     expect(levels.bars.slice(2)).toEqual([0, 0, 0])
-    // A take's length in bars: whole 50 ms only.
     levels.add(new Float32Array(window - 1))
     expect(levels.bars).toHaveLength(5)
   })
@@ -255,8 +236,6 @@ describe('atFullLevel', () => {
     expect(atFullLevel(silence)).toBe(silence)
   })
 
-  // A fart taken 50 dB down and turned up again is analyzed as the fart itself, so the golden
-  // answers (`fixtures/golden/`) still hold. Only the gesture's level, `rmsDb`, follows the gain.
   it('gives Recording Analysis the same results on every fart in the Fixture Library', async () => {
     for (const golden of goldenRecordings) {
       const { samples, sampleRate } = await decoded(golden)
@@ -362,7 +341,6 @@ describe('a Placed Pitch (ADR 0015)', () => {
     expect(recordingPitch(found(48))).toBe(55.3)
     expect(placedPitch(found(48))).toBe(48)
     expect(songPitch(found(48))).toBe(48)
-    // Taken off, the Recording Pitch plays.
     expect(songPitch(found(null))).toBe(55.3)
   })
 
@@ -382,14 +360,11 @@ describe('a Placed Pitch (ADR 0015)', () => {
     })
     expect(trimOf({ ...noiseLike(), trim })).toEqual(trim)
     expect(trimOf(found(48))).toEqual(trim)
-    // The row and the review play the handles, and Songs the fart between them.
     expect(trimHandles(found(48))).toEqual({ startSeconds: 0.3, endSeconds: 0.9 })
     expect(songTrim(found(48))).toEqual(trim.fart)
-    // Not placed, a Melodic Recording plays its Trim too: any Recording can be trimmed (#314).
     expect(trimOf(found(null))).toEqual(trim)
     expect(trimHandles(found(null))).toEqual({ startSeconds: 0.3, endSeconds: 0.9 })
     expect(songTrim(found(null))).toEqual(trim.fart)
-    // Untrimmed, there are no handles: the review opens on the fart analysis found.
     expect(trimHandles({ ...found(null), trim: null })).toBeNull()
     expect(foundPart(found(null))).toEqual({ startSeconds: 0.01, endSeconds: 1.2 })
   })
@@ -410,7 +385,6 @@ describe('a Placed Pitch (ADR 0015)', () => {
         analysis: { ...analysis, recordingPitchMidi: 55.3, shortestNoteSeconds: 0.12 }
       }
     })
-    // The review names the nearest note analysis found: G3.
     expect(foundNote(melodic())).toBe(55)
     expect(foundNote(noiseLike())).toBeNull()
     expect(songPitch(melodic(43))).toBe(43)

@@ -1,13 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { SongCreator } from '@/components/pedos/song-creator'
+import { SongCreator } from '@/components/farty/song-creator'
 import { songIndex } from '@/lib/catalog/song-index.generated'
-
-// Song Creator, one page per Song in the catalog, inside the Compose tab: `/compose/<song>/`.
-// Each is prerendered with its Song's title and source line, so a link or a search engine opens it
-// on its own; any other id is not found. The notes come from the Song Catalog the browser fetches
-// (#322), so the page holds only which Song it is. Offline, the service worker answers a Song's
-// page it kept no copy of with `/compose/song/`, which reads the Song from the address.
 
 export const dynamicParams = false
 

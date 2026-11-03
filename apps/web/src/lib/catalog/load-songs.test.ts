@@ -1,9 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { songs } from '../../test-support/songs.generated'
 import { catalogPath } from './catalog-path.generated'
 import { songIndex } from './song-index.generated'
-import { songs } from './songs.generated'
 
-// Each test imports the loader afresh, so none shares another's fetch.
 async function loader() {
   vi.resetModules()
   return await import('./load-songs')

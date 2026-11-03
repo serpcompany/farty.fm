@@ -10,9 +10,6 @@ export const metadata: Metadata = {
 }
 export const dynamic = 'force-dynamic'
 
-// The dev mailbox (#152): what a local run's email would have been, such as sign-in codes. It
-// answers 404 anywhere but a local run (no SITE_ENV) on a local host, so never on Staging or
-// Production (scripts/smoke.sh checks both).
 export default async function DevMailPage() {
   const emails = await readDevMailbox((await headers()).get('host'))
   if (!emails) notFound()

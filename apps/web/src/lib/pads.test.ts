@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { songs } from '@/test-support/songs.generated'
 import { decoded, goldenRecordings } from '../test-support/golden'
-import { songs } from './catalog/songs.generated'
 import {
   assignPad,
   fillOrder,
@@ -13,9 +13,6 @@ import {
 } from './pads'
 import type { Recording } from './recordings'
 
-// The Sound Pad (#277): which Recording each Pad plays, and how much of it.
-
-/** Recording `number`: Melodic at `pitch`, Noise-like with `pitch` null (placed at `placed`). */
 function recording(number: number, pitch: number | null, placed?: number): Recording {
   return {
     id: `r${number}`,
@@ -81,7 +78,6 @@ describe('padMapping', () => {
 
   it('keeps an assigned Pad, and fills the others with the Recordings on no Pad', () => {
     const library = [recording(1, 41), recording(2, 43), recording(3, 45)]
-    // Recording 3 on Pad 1: Pads 2 and 3 fill with 1 and 2.
     expect(padMapping(library, new Map([[0, 'r3']])).slice(0, 4)).toEqual(['r3', 'r1', 'r2', null])
   })
 
@@ -103,9 +99,7 @@ describe('assignPad', () => {
     const library = [recording(1, 41), recording(2, 43), recording(3, 45)]
     const shown = padMapping(library, none)
     const kept = assignPad(shown, 2, 'r1')
-    // Recording 3, now on no Pad, goes to the first empty one.
     expect(padMapping(library, kept).slice(0, 5)).toEqual(['r1', 'r2', 'r1', 'r3', null])
-    // A lower note recorded later doesn't push the Pads the user saw along.
     const later = [...library, recording(4, 30)]
     expect(padMapping(later, kept).slice(0, 3)).toEqual(['r1', 'r2', 'r1'])
   })
@@ -126,7 +120,6 @@ describe('the Pad route', () => {
 
 describe('soundingSpan', () => {
   const rate = 48_000
-  /** `lead` seconds of silence, `body` seconds of a 200 Hz burst at `level`, `tail` of silence. */
   function take(lead: number, body: number, tail: number, level = 0.5) {
     const samples = new Float32Array(Math.round((lead + body + tail) * rate))
     const from = Math.round(lead * rate)
@@ -138,7 +131,6 @@ describe('soundingSpan', () => {
   it('cuts the silence before and after, from 8 ms before the first 5 ms frame that sounds, to 50 ms after', () => {
     const { samples, from, to } = take(0.4, 0.3, 0.6)
     const span = soundingSpan(samples, rate)
-    // The first 10 ms frame (5 ms apart) to reach the burst starts up to 10 ms before it.
     expect(from - span.start).toBeGreaterThanOrEqual(0.008 * rate)
     expect(from - span.start).toBeLessThanOrEqual(0.018 * rate)
     expect(span.end).toBe(to + 2_400)
@@ -149,15 +141,12 @@ describe('soundingSpan', () => {
     if (!golden) throw new Error('fixture 106')
     const { samples, sampleRate } = await decoded(golden)
     const { start, end } = soundingSpan(samples, sampleRate)
-    // The owner's phone take: its fart runs from 2.262 s to 2.454 s, after 2 s of room noise with
-    // bumps within 30 dB of its loudest. Until #298 its Pad started at 0.28 s, 1.98 s early.
     const early = golden.gesture.start_s - start / sampleRate
     expect(early).toBeGreaterThanOrEqual(0)
     expect(early).toBeLessThan(0.05)
     expect(end / sampleRate).toBeGreaterThanOrEqual(golden.gesture.end_s)
   })
 
-  /** A burst at `level` from 0.2 s to 0.4 s, silence, then a 0.5 burst from 0.7 s to 1.0 s. */
   function twoBursts(level: number) {
     const samples = new Float32Array(Math.round(1.3 * rate))
     const loud = take(0.7, 0.3, 0.3)
@@ -167,7 +156,6 @@ describe('soundingSpan', () => {
   }
 
   it('cuts a first fart more than 12 dB under the loudest, past a 50 ms gap, as a Song does (#298)', () => {
-    // −18 dB, 0.3 s before the loud burst: not the attack, and not joined to it.
     const { samples, loud } = twoBursts(0.5 * 10 ** (-18 / 20))
     const span = soundingSpan(samples, rate)
     expect(span.start).toBe(soundingSpan(loud.samples, rate).start)
@@ -203,11 +191,8 @@ describe('soundingSpan', () => {
       const { samples, sampleRate } = await decoded(golden)
       const { start, end } = soundingSpan(samples, sampleRate)
       const at = `fixture ${golden.id}`
-      // The reference's lead_in_start() (#287), at the take's own rate: the gesture's start, or its
-      // quiet lead-in before that.
       const leadIn = Math.round((golden.gesture.lead_start_sample * sampleRate) / 44_100)
       expect(start, at).toBe(leadIn)
-      // Recording Analysis' gesture's end, to the 10 ms window.
       expect(end / sampleRate, at).toBeGreaterThanOrEqual(golden.gesture.end_s - 0.01)
       let all = 0
       let kept = 0
@@ -217,12 +202,6 @@ describe('soundingSpan', () => {
       })
       if (kept / all < 0.999) lessThanAll.push(golden.id)
     }
-    // Every fixture keeps 99.9% of its energy or more, but where its Pad leaves out what a Song
-    // leaves out before the fart (#298). `013` (99.69%) and `022` (98.16%) start 0.25 s before
-    // their attack, the longest lead-in, so 0.06 s and 0.38 s of their quiet sound go: it sits at
-    // their own noise floor (ADR 0016, Room noise). The owner's phone takes `106` (98.74%), `107`
-    // (99.76%), `108` (99.67%) and `109` (99.81%) leave out the room noise before their fart, past
-    // 0.5 to 1.5 s of quiet: 1.98 s, 1.14 s, 0.55 s and 0.60 s more than before.
     expect(lessThanAll).toEqual(['013', '022', '106', '107', '108', '109'])
   })
 })
@@ -252,7 +231,6 @@ describe('padSound', () => {
     const fadeOut = Math.round(0.03 * sampleRate)
     expect(sound[0]).toBe(0)
     expect(sound.at(-1)).toBe(0)
-    // Between the fades, every sample is the take's own times one gain: no pitch or speed change.
     const gain = padGain([padSoundUngained(samples, start, end, fadeIn, fadeOut)])
     expect(gain).not.toBe(1)
     let worst = 0
@@ -306,7 +284,6 @@ function peakOf(samples: Float32Array): number {
   return peak
 }
 
-/** The span with the fades and no gain: what `padGain` levels. */
 function padSoundUngained(
   samples: Float32Array,
   start: number,

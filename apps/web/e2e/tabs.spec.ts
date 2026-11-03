@@ -1,10 +1,11 @@
-import { expect, type Page, test } from '@playwright/test'
-import { recordAndSave, withFakeMicrophone } from './record'
+import type { Page } from '@playwright/test'
+import { recordAndSave, recordG3, withFartingMicrophone } from './record'
+import { setVisibility, tab } from './screens'
+import { countStops, stops } from './sounds'
+import { expect, test } from './test'
 
-// Fixture 090 is Melodic: its golden Recording Pitch is G3 (+13 cents).
-withFakeMicrophone('090__carlosramon__17-pet__186119.wav')
+withFartingMicrophone()
 
-// `next dev` puts its Dev Tools button over the Recordings tab at phone size.
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     document.addEventListener('DOMContentLoaded', () => {
@@ -15,30 +16,6 @@ test.beforeEach(async ({ page }) => {
   })
 })
 
-/** Counts every sound stopped before its end, which a sound that plays out never is. */
-async function countStops(page: Page): Promise<void> {
-  await page.addInitScript(() => {
-    const counter = window as unknown as { pedosStops: number }
-    counter.pedosStops = 0
-    const stop = AudioBufferSourceNode.prototype.stop
-    AudioBufferSourceNode.prototype.stop = function (when?: number) {
-      counter.pedosStops += 1
-      stop.call(this, when)
-    }
-  })
-}
-
-function tab(page: Page, label: string) {
-  return page
-    .getByRole('navigation', { name: 'Tabs' })
-    .getByRole('link', { name: label, exact: true })
-}
-
-function stops(page: Page): Promise<number> {
-  return page.evaluate(() => (window as unknown as { pedosStops: number }).pedosStops)
-}
-
-/** Answers the first Recording Analysis request with an error, as a worker that failed would. */
 async function failFirstAnalysis(page: Page): Promise<void> {
   await page.addInitScript(() => {
     let failures = 1
@@ -48,7 +25,7 @@ async function failFirstAnalysis(page: Page): Promise<void> {
       if (failures > 0 && typeof id === 'number') {
         failures -= 1
         const reply = new MessageEvent('message', { data: { id, error: 'Analysis failed' } })
-        setTimeout(() => this.onmessage?.(reply), 0)
+        queueMicrotask(() => this.onmessage?.(reply))
         return
       }
       post.call(this, message)
@@ -56,20 +33,10 @@ async function failFirstAnalysis(page: Page): Promise<void> {
   })
 }
 
-/** Fakes the page going to the background (`hidden`) and coming back (`visible`). */
-async function setVisibility(page: Page, state: 'hidden' | 'visible'): Promise<void> {
-  await page.evaluate(state => {
-    Object.defineProperty(document, 'visibilityState', { value: state, configurable: true })
-    document.dispatchEvent(new Event('visibilitychange'))
-  }, state)
-}
-
 test('the app opens on Record, and every tab works before the first Recording', async ({
   page
 }) => {
-  await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))
   await page.goto('/')
-  // From 768px the top bar also links Farty's name home, before the tabs' list.
   const tabs = page.getByRole('navigation', { name: 'Tabs' }).getByRole('list').getByRole('link')
   await expect(tabs).toHaveText(['Recordings', 'Compose', 'Record', 'Toots', 'Profile'])
   await expect(tabs.nth(2)).toHaveAttribute('aria-current', 'page')
@@ -98,9 +65,8 @@ test('the app opens on Record, and every tab works before the first Recording', 
 test('a Recording shows on the Recordings tab with its note, and playback stops on a tab change', async ({
   page
 }) => {
-  await countStops(page)
-  await recordAndSave(page, 1.5)
-  await expect(page.getByTestId('result-note')).toHaveText('G3')
+  await page.addInitScript(countStops)
+  await recordG3(page)
   await page.getByRole('button', { name: 'Done' }).click()
 
   await expect(page).toHaveURL(/\/recordings\/$/)
@@ -119,7 +85,6 @@ test('a Recording shows on the Recordings tab with its note, and playback stops 
   await tab(page, 'Recordings').click()
   await expect(row).toHaveAttribute('aria-pressed', 'false')
 
-  // The page goes to the background: playback stops, and the page comes back on Record.
   await row.click()
   await expect(row).toHaveAttribute('aria-pressed', 'true')
   await setVisibility(page, 'hidden')
@@ -145,7 +110,7 @@ test('a Recording that could not be analyzed says so, and Retry finds its note',
   page
 }) => {
   await failFirstAnalysis(page)
-  await recordAndSave(page, 1.5)
+  await recordAndSave(page)
   await expect(page.getByText("Saved, but we couldn't find its note")).toBeVisible()
   await page.getByRole('button', { name: 'Done' }).click()
 

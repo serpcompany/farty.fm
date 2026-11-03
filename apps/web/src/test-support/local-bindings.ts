@@ -1,6 +1,3 @@
-// A real local D1 and dev mailbox KV for Node tests: wrangler.jsonc's top level through Wrangler's
-// platform proxy, in memory, with every migration in drizzle/ applied. Test input only: nothing here
-// ships.
 import { readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { getPlatformProxy } from 'wrangler'
@@ -11,7 +8,6 @@ const MIGRATIONS = fileURLToPath(new URL('../../drizzle/', import.meta.url))
 export type LocalBindings = {
   DB: D1Database
   DEV_MAILBOX: KVNamespace
-  /** Empties every table and the mailbox, keeping the schema. */
   reset(): Promise<void>
   dispose(): Promise<void>
 }

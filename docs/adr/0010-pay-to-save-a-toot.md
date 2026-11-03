@@ -46,6 +46,6 @@ Production takes only live keys (`sk_live_`, `rk_live_`) and live events; Stagin
 
 ## Consequences
 
-- Saving needs an account and Stripe. On Staging and Production, Save fails until `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` of the environment's mode are set on its Worker. The steps are in `docs/agents/web.md`.
+- Saving needs an account and Stripe. On Staging and Production, Save fails until `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` of the environment's mode are set on its Worker. The steps are in [Payments](../agents/payments.md#stripe).
 - Deleting an account deletes its payment rows with it. Stripe keeps its own record of every payment.
 - Refunds are made in Stripe's dashboard, by hand. A refund doesn't remove the Toot.

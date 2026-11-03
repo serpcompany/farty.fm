@@ -1,81 +1,30 @@
 import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
 import type { Analysis, Trim } from '@/lib/recordings'
 import { minimumCost } from './assignment'
+import { GAP_SECONDS } from './renderer'
 import { type Song, type SongNote, secondsPerBeat } from './song'
 
-// Auto-map and Pitch Coverage: a port of `AutoMap.swift`, the iPhone 1.0 planner, which ports the
-// reference engine's `melody_fit()` (`tools/melody-lab/engine.py`) and the unlock rule of ADR 0004,
-// ADR 0006 and ADR 0011. Since #116 it also has the reference's settle cost, since #205 its silence
-// cost, since #221 its length rule, and since ADR 0012 every length is the Recording's own, which
-// the Swift port, frozen at golden format 2, doesn't have.
-//
-// Each distinct Song pitch gets its own Melodic Recording (one to one, never reused), at most 3
-// semitones from the note, or with an Octave Move (12 semitones up or down, plus at most 3) where
-// the Song needs it, and at least as long as the pitch's longest note (`fills`). Songs play every
-// fart raw, at its own pitch and length (ADR 0012), so the shift only decides which Recording may
-// play a pitch and what it costs, and an Octave Move plays its fart an octave from the note. Every
-// transposition from −36 to +24 is tried. Arrangements rank by:
-// 1. the most pitches covered (Pitch Coverage);
-// 2. the fewest Octave Moves;
-// 3. the lowest cost, where costs within `TIE` are equal;
-// 4. the Recording ids read in ascending Song pitch order, lexicographically smallest, with an
-//    uncovered pitch after every id; then the lower transposition.
-//
-// A Song is unlocked when every distinct pitch is covered.
-
-/** The furthest a note may be from its Recording Pitch, or from the same note an octave away, in semitones. */
-export const MAXIMUM_SHIFT = 3
+const MAXIMUM_SHIFT = 3
 const OCTAVE = 12
-/** Cost per beat of an Octave Move, on top of the remaining shift: more than any real-pitch move (3^1.5 = 5.2). */
 const OCTAVE_MOVE_COST = 6
-/** Cost of a note that sounds too briefly for its Recording to settle on its pitch ... */
 const TOO_SHORT_COST = 8
-/** ... plus this per second it falls short. */
 const TOO_SHORT_COST_PER_SECOND = 400
-/** Cost of a note played entirely before its Recording settles on pitch; less for part of it. */
 const UNSETTLED_COST = 20
-/** Cost per second of a note its Recording is too short to fill. */
 const SILENT_COST_PER_SECOND = 30
-/** Silence before the next note: a note sounds for its length minus this. */
-const GAP_SECONDS = 0.025
-/**
- * A Recording covers a pitch only if it lasts this share of the pitch's longest note (#221). ADR
- * 0011 has the measurement, made when farts were still resampled: 0.9 and 0.75 left Für Elise
- * under ADR 0004's bar.
- */
 export const NOTE_FILL = 1.0
-/** Arrangement costs this close are equal. */
 const TIE = 1e-9
-/** The transpositions tried, in semitones: −36 to +24. */
+const FLOAT_NOISE_IN_TENTHS = 1e-9
 export const LOWEST_TRANSPOSITION = -36
 export const HIGHEST_TRANSPOSITION = 24
 
-/**
- * A Recording as Auto-map sees it. Only Melodic Recordings can play a pitch, and Placed Recordings,
- * which come in as Melodic ones (`placedAutoMapRecording`).
- */
 export interface AutoMapRecording {
-  /** Ties between equally good Arrangements break on these ids, in code point order. */
   id: string
-  /** The Recording Pitch in MIDI; null for a Noise-like Recording. */
   recordingPitchMidi: number | null
-  /** The shortest note the Recording plays on pitch, in seconds; null when Noise-like. */
   shortestNoteSeconds: number | null
-  /** The length of the fart Songs play, every burst of it (ADR 0016), in seconds. */
   gestureSeconds: number
-  /**
-   * When the Recording settles on its pitch, in seconds from the gesture start. Null when not
-   * known (an analysis stored before #116), which costs nothing.
-   */
   settleSeconds: number | null
 }
 
-/**
- * A Recording from its stored analysis, at its own length, or its Trim's (ADR 0019): any Recording
- * can be trimmed (#314), and nothing re-reads a trimmed one's pitch, shortest note or settle time,
- * as the reference's `trimmed()` keeps them. The length is recovered in whole samples, as the
- * reference measures it.
- */
 export function autoMapRecording(
   id: string,
   analysis: Analysis,
@@ -92,21 +41,8 @@ export function autoMapRecording(
   }
 }
 
-/**
- * The shortest note a Placed Recording counts as holding on pitch, in seconds: the longest note
- * the reference's `audition()` tries, so a fart placed by ear counts as the slowest Melodic
- * Recording analysis accepts (ADR 0015). Shorter notes cost it `tooShortCost`, so Auto-map gives
- * them to an analyzed fart at the same distance, but it still covers a pitch nothing else can.
- */
 export const PLACED_SHORTEST_NOTE_SECONDS = 0.6
 
-/**
- * A Recording the user placed on `placedMidi` by ear, as Auto-map sees it (ADR 0015): a Melodic
- * Recording at that note that holds it from `PLACED_SHORTEST_NOTE_SECONDS` and settles at once,
- * at its own length, or its Trim's (ADR 0019). Noise-like or Melodic: any Recording can be placed
- * (#314). The reference's `placed()` makes the same `Source`, of `trimmed()` for a Trim. It still
- * plays raw (ADR 0012), so the note only decides which pitches it may play.
- */
 export function placedAutoMapRecording(
   id: string,
   analysis: Analysis,
@@ -121,86 +57,45 @@ export function placedAutoMapRecording(
   }
 }
 
-/** A Trim's length in whole samples, as Songs cut it (`renderSource`), in seconds. */
 export function trimSeconds(trim: Trim): number {
   const sr = ANALYSIS_SAMPLE_RATE
   return (Math.round(trim.endSeconds * sr) - Math.round(trim.startSeconds * sr)) / sr
 }
 
-/** Which Recording plays one distinct Song pitch. */
 export interface PitchChoice {
-  /** The Song's pitch, before transposition. */
   songPitch: number
-  /** The note to play: `songPitch` plus the transposition. */
   targetMidi: number
-  /** The Recording that plays every note at this pitch; null when none covers it. */
   recordingId: string | null
-  /**
-   * Target minus Recording Pitch, in semitones: how far the note is from its fart, which plays
-   * unshifted (ADR 0012); null when uncovered.
-   */
   shiftSemitones: number | null
-  /** The note is 12 ± 3 semitones from the Recording Pitch, so the fart plays an octave from it (ADR 0012). */
   octaveMove: boolean
 }
 
-/**
- * Auto-map's answer for one Song: Pitch Coverage, and the Arrangement of the pitches it covers. A
- * locked Song keeps its partial Arrangement, so `missingNotes` can say which notes would unlock it.
- * Plain data, so it crosses to and from a Web Worker as it is.
- */
 export interface Arrangement {
-  /** The transposition in semitones. */
   transposition: number
-  /** One entry per distinct Song pitch, lowest first. */
   pitches: PitchChoice[]
-  /** How many pitches use an Octave Move. */
   octaveMoves: number
-  /** The Arrangement's cost, summed over covered pitches in ascending pitch order. */
   cost: number
-  /** Pitch Coverage: how many distinct pitches have their own Recording ("3 of 4 notes covered"). */
   covered: number
   total: number
-  /** Every distinct pitch has its own Recording, so the Song can be played. */
   unlocked: boolean
-  /** The notes that no Recording covers, lowest first, with how long a fart each needs. */
   missingNotes: MissingNote[]
 }
 
-/** A note no Recording covers yet, and the shortest Recording near it that would cover it. */
 export interface MissingNote {
-  /** The note, after transposition, as a MIDI note number. */
   midi: number
-  /** The shortest Recording at that pitch that covers it, in seconds, rounded up to 0.1 s. */
   seconds: number
 }
 
-/**
- * Chooses the transposition and a Recording for each distinct pitch of `song`: Auto-map, and so
- * Pitch Coverage.
- *
- * Synchronous and CPU-bound. Noise-like Recordings are ignored. The answer doesn't depend on the
- * order of `recordings`.
- */
 export function arrange(song: Song, recordings: readonly AutoMapRecording[]): Arrangement {
   return arrangePitches(songPitches(song), recordings)
 }
 
-/**
- * All Auto-map reads of a Song: its tempo, and each distinct pitch, lowest first, with the lengths
- * of its notes. The Song Catalog's index holds a Song this way (#323), so Compose measures Pitch
- * Coverage without the Song's notes.
- */
 export interface SongPitches {
-  /** The tempo it plays at, in beats per minute. */
   bpm: number
-  /** The distinct pitches as MIDI note numbers, before transposition, lowest first. */
   pitches: readonly number[]
-  /** The written lengths in beats of each pitch's notes, in `pitches`' order and in time order. */
   durations: readonly (readonly number[])[]
 }
 
-/** What Auto-map reads of `song`. */
 export function songPitches(song: Pick<Song, 'bpm'> & { notes: readonly SongNote[] }): SongPitches {
   const pitches = [...new Set(song.notes.map(n => n.pitch))].sort((a, b) => a - b)
   return {
@@ -210,14 +105,10 @@ export function songPitches(song: Pick<Song, 'bpm'> & { notes: readonly SongNote
   }
 }
 
-/** How long each of a pitch's notes sounds, in seconds: its written length less the gap. */
 function soundingSeconds(durations: readonly number[], spb: number): number[] {
-  // A note shorter than the gap has no time left to sound, not a negative time: a negative one
-  // made `unsettledCost` about -1e8 a note, so `solve`'s penalties no longer ranked choices (#332).
   return durations.map(dur => Math.max(0, dur * spb - GAP_SECONDS))
 }
 
-/** `arrange` of a Song as `songPitches` reads it, to the last bit. */
 export function arrangePitches(
   song: SongPitches,
   recordings: readonly AutoMapRecording[]
@@ -255,10 +146,8 @@ export function arrangePitches(
     if (!isOptimal(best[index])) continue
     const choice = tables[index].smallestIds(isOptimal)
     const ids = choice.map(j => (j === null ? null : melodic[j].id))
-    // Transpositions are visited in ascending order, so on equal ids the lower one stays.
     if (winner === null || idsPrecede(ids, winner.ids)) winner = { ids, index, choice }
   }
-  // The best key came from some transposition, so one is always optimal.
   if (winner === null) throw new Error('Auto-map found no optimal transposition')
   const { index, choice } = winner
   const table = tables[index]
@@ -298,14 +187,6 @@ export function arrangePitches(
   }
 }
 
-/**
- * How many of a Song's distinct pitches Auto-map covers: `arrangePitches(song, recordings).covered`,
- * without choosing the Arrangement, so Compose can count every Song of a 1,000-Song catalog after
- * each Recording (#323). Auto-map covers as many pitches as any transposition can (its first rank:
- * `solve`'s penalties make each transposition cover the most it can), and under one transposition
- * whether a Recording may cover a pitch depends only on its pitch and length. So this is the
- * largest one-to-one matching of pitches to Recordings that any transposition allows.
- */
 export function coveredCount(song: SongPitches, recordings: readonly AutoMapRecording[]): number {
   const melodic = recordings.filter(isMelodic)
   const rows = song.pitches.length
@@ -313,7 +194,6 @@ export function coveredCount(song: SongPitches, recordings: readonly AutoMapReco
   if (columns === 0) return 0
   const spb = secondsPerBeat(song)
   const recordingPitch = melodic.map(r => r.recordingPitchMidi as number)
-  // The Recordings long enough for each pitch, under any transposition.
   const longEnough = song.durations.map(durations => {
     const longest = Math.max(...soundingSeconds(durations, spb))
     return melodic.flatMap((r, j) => (fills(r.gestureSeconds, longest) ? [j] : []))
@@ -323,7 +203,6 @@ export function coveredCount(song: SongPitches, recordings: readonly AutoMapReco
   const owner = new Int32Array(columns)
   const seen = new Int32Array(columns)
   let visit = 0
-  // Kuhn's augmenting paths: gives pitch i a Recording, moving others along if they can.
   const augment = (i: number): boolean => {
     for (let k = 0; k < count[i]; k++) {
       const j = candidates[i * columns + k]
@@ -349,7 +228,6 @@ export function coveredCount(song: SongPitches, recordings: readonly AutoMapReco
       count[i] = n
       if (n > 0) reachable++
     }
-    // No more pitches have a Recording in reach than the best already covers.
     if (reachable <= best) continue
     owner.fill(-1)
     let matched = 0
@@ -362,7 +240,6 @@ export function coveredCount(song: SongPitches, recordings: readonly AutoMapReco
   return best
 }
 
-/** The choice for a Song pitch (before transposition). */
 export function choiceForSongPitch(arrangement: Arrangement, pitch: number): PitchChoice | null {
   return arrangement.pitches.find(c => c.songPitch === pitch) ?? null
 }
@@ -371,11 +248,6 @@ function isMelodic(r: AutoMapRecording): boolean {
   return r.recordingPitchMidi !== null && r.shortestNoteSeconds !== null
 }
 
-/**
- * Cost per beat of playing a note `shift` semitones from the Recording Pitch, and whether that is
- * an Octave Move; null when the unlock rule doesn't allow it. Octave Moves go up or down on equal
- * terms (ADR 0006).
- */
 export function moveCost(shift: number): { cost: number; octaveMove: boolean } | null {
   const a = Math.abs(shift)
   if (a <= MAXIMUM_SHIFT) return { cost: a ** 1.5, octaveMove: false }
@@ -385,37 +257,19 @@ export function moveCost(shift: number): { cost: number; octaveMove: boolean } |
   return null
 }
 
-/** Whether the unlock rule lets a note `shift` semitones from a Recording Pitch use it, as `moveCost`. */
 function inReach(shift: number): boolean {
   const a = Math.abs(shift)
   return a <= MAXIMUM_SHIFT || Math.abs(a - OCTAVE) <= MAXIMUM_SHIFT
 }
 
-/**
- * Whether a Recording is long enough to cover a pitch (#221, ADR 0011): at its own length (ADR
- * 0012), it lasts at least `NOTE_FILL` × the longest of the pitch's notes, each its written length
- * less the gap. Recordings are never stretched (ADR 0004).
- */
 export function fills(recordingSeconds: number, longestNoteSeconds: number): boolean {
   return recordingSeconds >= NOTE_FILL * longestNoteSeconds
 }
 
-/**
- * The shortest Recording, at its own pitch, that covers a pitch whose longest note lasts
- * `longestNoteSeconds`: `NOTE_FILL` × that, rounded up to 0.1 s ("Needs a fart near F3 (1.2 s)").
- * The 1e-9 keeps float noise from adding 0.1 s to an exact tenth, as the reference does. A note
- * shorter than the gap needs 0 s, not the −0 that `Math.ceil` gives (Python's `math.ceil` gives 0).
- */
 export function neededSeconds(longestNoteSeconds: number): number {
-  return Math.max(0, Math.ceil(NOTE_FILL * longestNoteSeconds * 10 - 1e-9) / 10)
+  return Math.max(0, Math.ceil(NOTE_FILL * longestNoteSeconds * 10 - FLOAT_NOISE_IN_TENTHS) / 10)
 }
 
-/**
- * Cost of the notes a Recording plays too briefly to settle on its pitch. A note sounds for its own
- * length (minus the gap) or for the Recording's own length, whichever is shorter (ADR 0012). Below
- * the Recording's shortest note, each note costs `TOO_SHORT_COST` plus `TOO_SHORT_COST_PER_SECOND`
- * per second it falls short.
- */
 export function tooShortCost(
   noteSeconds: readonly number[],
   recordingSeconds: number,
@@ -431,12 +285,6 @@ export function tooShortCost(
   return cost
 }
 
-/**
- * Cost of the share of each note a Recording plays before it settles on its pitch (#116). A note
- * sounds as in `tooShortCost`; the Recording settles `settleSeconds` after it starts. Each note
- * costs `UNSETTLED_COST` × the share of its sounding time before that, so a short note on a
- * slow-settling fart costs up to 20 and the same fart on a long note costs little.
- */
 export function unsettledCost(
   noteSeconds: readonly number[],
   recordingSeconds: number,
@@ -450,17 +298,10 @@ export function unsettledCost(
   return cost
 }
 
-/**
- * Cost of the part of each note a Recording is too short to fill (#205). A note sounds as in
- * `tooShortCost`; the rest of it is silence, which costs `SILENT_COST_PER_SECOND` per second, so a
- * long note prefers a long Recording. The seconds are summed first, with Python's `sum()`, as the
- * reference does.
- */
 export function silentCost(noteSeconds: readonly number[], recordingSeconds: number): number {
   return SILENT_COST_PER_SECOND * pythonSum(noteSeconds.map(a => Math.max(0, a - recordingSeconds)))
 }
 
-/** Ids compare by code point, as the reference's Python strings do (and UTF-8 bytes). */
 export function compareIds(a: string, b: string): number {
   let i = 0
   let j = 0
@@ -474,7 +315,6 @@ export function compareIds(a: string, b: string): number {
   return a.length - i - (b.length - j)
 }
 
-/** Lexicographic order of per-pitch Recording ids, an uncovered pitch after every id. */
 function idsPrecede(a: readonly (string | null)[], b: readonly (string | null)[]): boolean {
   for (let k = 0; k < Math.min(a.length, b.length); k++) {
     const x = a[k]
@@ -487,10 +327,6 @@ function idsPrecede(a: readonly (string | null)[], b: readonly (string | null)[]
   return a.length < b.length
 }
 
-/**
- * Python's `sum()` of floats (3.12 and later, which the reference runs): Neumaier's compensated
- * summation, so a Song pitch's weight in beats is the reference's to the last bit.
- */
 function pythonSum(values: readonly number[]): number {
   let sum = 0
   let c = 0
@@ -502,14 +338,12 @@ function pythonSum(values: readonly number[]): number {
   return c !== 0 && Number.isFinite(c) ? sum + c : sum
 }
 
-/** (uncovered pitches, Octave Moves, cost), compared in that order. */
 interface Key {
   uncovered: number
   octaves: number
   cost: number
 }
 
-/** The allowed moves and their costs under one transposition: cell (pitch i, Recording j). */
 class Table {
   readonly rows: number
   readonly columns: number
@@ -550,7 +384,6 @@ class Table {
     })
   }
 
-  /** The exact key of a choice, cost summed in pitch order. */
   key(choice: readonly (number | null)[]): Key {
     const key: Key = { uncovered: 0, octaves: 0, cost: 0 }
     choice.forEach((j, i) => {
@@ -564,12 +397,6 @@ class Table {
     return key
   }
 
-  /**
-   * The best choice for the pitches after `fixed` (Recording indexes or null, in pitch order), as
-   * one assignment problem. Penalties larger than any cost make it minimise uncovered pitches
-   * first, then Octave Moves, then cost. Costs are never negative, so `bound` is at least any
-   * choice's cost.
-   */
   solve(fixed: readonly (number | null)[]): { key: Key; choice: (number | null)[] } {
     const first = fixed.length
     const free: number[] = []
@@ -599,7 +426,8 @@ class Table {
           matrix[r * m + k] = this.cost[cell] + (this.isOctaveMove[cell] ? octavePenalty : 0)
         }
       })
-      matrix[r * m + free.length + r] = uncoveredPenalty // this pitch stays uncovered
+      const stayUncovered = free.length + r
+      matrix[r * m + stayUncovered] = uncoveredPenalty
     }
     const choice = [...fixed]
     if (n > 0) {
@@ -608,10 +436,6 @@ class Table {
     return { key: this.key(choice), choice }
   }
 
-  /**
-   * The lexicographically smallest optimal choice by Recording id (Recordings are sorted by id),
-   * an uncovered pitch last.
-   */
   smallestIds(isOptimal: (k: Key) => boolean): (number | null)[] {
     const fixed: (number | null)[] = []
     for (let i = 0; i < this.rows; i++) {
@@ -625,8 +449,6 @@ class Table {
           break
         }
       }
-      // The last solve was optimal, so one of its choices for pitch i is too. Without one, the
-      // next pitch's Recording would land on this pitch.
       if (fixed.length === i) throw new Error(`Auto-map found no optimal choice for pitch ${i}`)
     }
     return fixed

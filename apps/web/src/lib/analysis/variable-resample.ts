@@ -1,24 +1,12 @@
 import { exp2, hzToMidi, pairwiseSum } from './numeric'
 
-// Recording Analysis's read-back (audition.ts): reading a Recording's own waveform at a rate that
-// holds its pitch steady, to hear whether it can hold a note. Songs never play this: since ADR 0012
-// they play every fart raw (`src/lib/engine/renderer.ts`). Every output sample is interpolated
-// from the input Recording, with a low-pass filter before reading faster than 1x (anti-aliasing)
-// and cubic interpolation.
-
-/** Samples per pitch-contour frame. */
 const HOP_LENGTH = 256
+const MAX_DEVIATION_SEMITONES = 5
+const ANTI_ALIAS_ABOVE_RATE = 1.02
+const ANTI_ALIAS_ORDER = 8
+const ANTI_ALIAS_CUTOFF_SHARE = 0.9
+const ANTI_ALIAS_HIGHEST_CUTOFF = 0.95
 
-/**
- * Reads `x` at a rate that can change every 256 input samples and follows its own pitch contour,
- * so the note holds steady on `referenceMidi`; a rate above 1 raises the pitch. Port of the
- * reference engine's `variable_resample()`.
- *
- * - `f0`: the pitch contour in Hz, one value per hop of `x`, NaN when unvoiced. Deviations from
- *   `referenceMidi` are clipped to ±5 semitones and interpolated across unvoiced frames.
- * - `outputLength`: how many samples to produce. Fewer come back if `x` runs out first.
- * - `referenceMidi`: the pitch the contour is pulled toward; null reads `x` at 1x.
- */
 export function variableResample(
   x: Float64Array,
   f0: Float64Array,
@@ -31,19 +19,22 @@ export function variableResample(
     const known: number[] = []
     for (let i = 0; i < nHops; i++) if (Number.isFinite(f0[i])) known.push(i)
     if (known.length >= 2) {
-      // Semitones toward the reference.
-      const deviation = known.map(i => referenceMidi - hzToMidi(f0[i]))
-      const interpolated = interp(nHops, known, deviation)
-      hopRate = interpolated.map(d => exp2(Math.min(Math.max(d, -5), 5) / 12))
+      const semitonesToReference = known.map(i => referenceMidi - hzToMidi(f0[i]))
+      const interpolated = interp(nHops, known, semitonesToReference)
+      hopRate = interpolated.map(d =>
+        exp2(Math.min(Math.max(d, -MAX_DEVIATION_SEMITONES), MAX_DEVIATION_SEMITONES) / 12)
+      )
     }
   }
 
-  // Anti-alias when reading faster than 1x.
   let source = x
   let fastest = Number.NEGATIVE_INFINITY
   for (const r of hopRate) if (r > fastest) fastest = r
-  if (fastest > 1.02 && x.length > 3 * 9) {
-    const { b, a } = butterworthLowpass(8, Math.min(0.95, 0.9 / fastest))
+  if (fastest > ANTI_ALIAS_ABOVE_RATE && x.length > 3 * (ANTI_ALIAS_ORDER + 1)) {
+    const { b, a } = butterworthLowpass(
+      ANTI_ALIAS_ORDER,
+      Math.min(ANTI_ALIAS_HIGHEST_CUTOFF, ANTI_ALIAS_CUTOFF_SHARE / fastest)
+    )
     source = filtfilt(b, a, x)
   }
 
@@ -58,11 +49,7 @@ export function variableResample(
   return cubicRead(source, positions)
 }
 
-/**
- * Catmull-Rom cubic interpolation of `x` at fractional sample positions (indices outside `x` are
- * clamped to its ends). Port of the reference engine's `_cubic_read()`.
- */
-export function cubicRead(x: Float64Array, positions: number[]): Float64Array {
+function cubicRead(x: Float64Array, positions: number[]): Float64Array {
   const out = new Float64Array(positions.length)
   if (x.length === 0) return out
   const last = x.length - 1
@@ -83,10 +70,6 @@ export function cubicRead(x: Float64Array, positions: number[]): Float64Array {
   return out
 }
 
-/**
- * `np.interp(arange(n), xp, fp)` for increasing integer `xp`: linear in between, the end values
- * outside.
- */
 function interp(n: number, xp: number[], fp: number[]): Float64Array {
   const out = new Float64Array(n)
   let j = 0
@@ -107,11 +90,7 @@ function interp(n: number, xp: number[], fp: number[]): Float64Array {
 
 type Complex = [re: number, im: number]
 
-/**
- * `scipy.signal.butter(order, cutoff, btype="low")`: analog prototype poles (buttap), pre-warped
- * cutoff, lp2lp, then the bilinear transform and zpk2tf.
- */
-export function butterworthLowpass(order: number, cutoff: number): { b: number[]; a: number[] } {
+function butterworthLowpass(order: number, cutoff: number): { b: number[]; a: number[] } {
   const fs = 2
   const warped = 2 * fs * Math.tan((Math.PI * cutoff) / fs)
   const poles: Complex[] = []
@@ -126,7 +105,6 @@ export function butterworthLowpass(order: number, cutoff: number): { b: number[]
   for (const p of poles) denominator = mul(denominator, sub(fs2, p))
   const k = gain * div([1, 0], denominator)[0]
 
-  // zpk2tf: b = k * poly(zeros at −1), a = poly(poles).
   let b: Complex[] = [[1, 0]]
   for (let i = 0; i < order; i++) b = convolveWithRoot(b, [-1, 0])
   let a: Complex[] = [[1, 0]]
@@ -134,11 +112,7 @@ export function butterworthLowpass(order: number, cutoff: number): { b: number[]
   return { b: b.map(c => k * c[0]), a: a.map(c => c[0]) }
 }
 
-/**
- * `scipy.signal.filtfilt(b, a, x)`: forward and backward, with odd extension of
- * 3 × max(len(a), len(b)) samples and steady-state initial conditions.
- */
-export function filtfilt(b: number[], a: number[], x: Float64Array): Float64Array {
+function filtfilt(b: number[], a: number[], x: Float64Array): Float64Array {
   const edge = 3 * Math.max(a.length, b.length)
   const n = x.length
   if (n <= edge) throw new RangeError(`filtfilt needs more than ${edge} samples`)
@@ -164,7 +138,6 @@ export function filtfilt(b: number[], a: number[], x: Float64Array): Float64Arra
   return backward.slice(edge, edge + n)
 }
 
-/** `scipy.signal.lfilter_zi(b, a)` (scipy 1.18): the state for a unit step's steady state. */
 function steadyState(b: number[], a: number[]): number[] {
   const yInf = pairwiseSum(b, 0, b.length) / pairwiseSum(a, 0, a.length)
   const v = b.map((bi, i) => bi - yInf * a[i])
@@ -177,7 +150,6 @@ function steadyState(b: number[], a: number[]): number[] {
   return zi
 }
 
-/** `scipy.signal.lfilter(b, a, x, zi=zi)` with `a[0] == 1`: direct form II transposed. */
 function lfilter(b: number[], a: number[], x: Float64Array, zi: number[]): Float64Array {
   const z = Float64Array.from(zi)
   const order = b.length
@@ -210,7 +182,6 @@ const mul = (l: Complex, r: Complex): Complex => [
   l[0] * r[1] + l[1] * r[0]
 ]
 
-/** Smith's algorithm, like numpy's complex division. */
 function div(l: Complex, r: Complex): Complex {
   if (Math.abs(r[0]) >= Math.abs(r[1])) {
     const rat = r[1] / r[0]

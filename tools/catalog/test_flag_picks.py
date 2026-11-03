@@ -1,21 +1,11 @@
-"""Tests for flagging a batch's modern-looking picks (flag_picks.py), on made-up rows, with no dataset.
-
-    tools/melody-lab/.venv/bin/python -I -m unittest discover -s tools/catalog -t tools/catalog
-"""
-import sys
 import unittest
-from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
-sys.path[:0] = [str(HERE)]
-
-import flag_picks  # noqa: E402
+import flag_picks
 
 BATCH = "tools/catalog/titles-09.txt"
 
 
 def row(sid, genres="classical", tags="NA", artist="Misc tunes", title="A Tune"):
-    """A PDMX.csv row with the fields flag_picks reads."""
     return {"metadata": f"./metadata/1/{sid}.json", "genres": genres, "tags": tags, "artist_name": artist,
             "title": title}
 
@@ -25,7 +15,7 @@ def entry(sid, song_id, titles=BATCH):
             "musescore_url": f"https://musescore.com/score/{sid}"}, "import": {"titles": titles}}
 
 
-class ModernSignsTest(unittest.TestCase):
+class ModernSigns(unittest.TestCase):
     def test_a_modern_genre_tag_or_artist_is_a_sign(self):
         self.assertEqual(flag_picks.modern_signs(row("1", genres="rock")), ["genre rock"])
         self.assertEqual(flag_picks.modern_signs(row("1", genres="classical-soundtrack")), ["genre soundtrack"])
@@ -46,7 +36,7 @@ class ModernSignsTest(unittest.TestCase):
         self.assertEqual(flag_picks.modern_signs({"metadata": "./metadata/1/1.json"}), [])
 
 
-class FlagTest(unittest.TestCase):
+class Flag(unittest.TestCase):
     def test_flags_only_the_batchs_picks_that_look_modern_in_catalog_order(self):
         catalog = [entry("30", "lavenders-blue"), entry("10", "misirlou"), entry("20", "greensleeves"),
                    entry("40", "rock-elsewhere", titles="tools/catalog/titles-01.txt")]
@@ -73,7 +63,7 @@ class FlagTest(unittest.TestCase):
                           ("hymn", ["part alto"])])
 
 
-class PartSignsTest(unittest.TestCase):
+class PartSigns(unittest.TestCase):
     def test_a_voice_or_version_in_the_title_subtitle_or_part_names_is_a_sign(self):
         self.assertEqual(flag_picks.part_signs({"title": "Forty Days and Forty Nights - tenor"}), ["title tenor"])
         self.assertEqual(flag_picks.part_signs({"title": "My Faith", "subtitle": "Tenor Line"}), ["subtitle tenor"])
@@ -90,27 +80,21 @@ class PartSignsTest(unittest.TestCase):
         self.assertEqual(flag_picks.part_signs({}), [])
 
 
-class SameTuneTest(unittest.TestCase):
-    # We Three Kings and Kings Of Orient: B A G E F# G F# E, twice; and When Johnny Comes Marching Home in A
-    # minor against Johnny I Hardly Knew Ye a fourth lower, with a repeated note more.
-    KINGS = [71, 69, 67, 64, 66, 67, 66, 64, 71, 69, 67, 64, 66, 67, 66, 64]
-    JOHNNY = [64, 64, 69, 69, 69, 71, 72, 71, 72, 69, 67, 64, 67, 69]
-    HARDLY = [59, 59, 64, 64, 66, 67, 66, 67, 64, 62, 59, 62, 64]
+class SameTune(unittest.TestCase):
+    WE_THREE_KINGS = [71, 69, 67, 64, 66, 67, 66, 64, 71, 69, 67, 64, 66, 67, 66, 64]
+    JOHNNY_COMES_MARCHING = [64, 64, 69, 69, 69, 71, 72, 71, 72, 69, 67, 64, 67, 69]
+    JOHNNY_I_HARDLY_KNEW_YE = [59, 59, 64, 64, 66, 67, 66, 67, 64, 62, 59, 62, 64]
 
     def test_the_same_tune_in_another_key_or_with_repeated_notes_opens_alike(self):
-        self.assertEqual(flag_picks.opening(self.JOHNNY), flag_picks.opening(self.HARDLY))
-        self.assertEqual(flag_picks.opening([p - 5 for p in self.KINGS]), flag_picks.opening(self.KINGS))
+        self.assertEqual(flag_picks.opening(self.JOHNNY_COMES_MARCHING), flag_picks.opening(self.JOHNNY_I_HARDLY_KNEW_YE))
+        self.assertEqual(flag_picks.opening([p - 5 for p in self.WE_THREE_KINGS]), flag_picks.opening(self.WE_THREE_KINGS))
 
     def test_a_melody_with_too_few_changes_of_pitch_has_no_opening(self):
         self.assertIsNone(flag_picks.opening([60, 60, 62, 62, 64]))
 
     def test_pairs_have_one_song_in_the_batch(self):
-        melodies = {"we-three-kings": self.KINGS, "johnny-comes-marching": self.JOHNNY, "other": [60, 62] * 8,
-                    "kings-of-orient": [p + 2 for p in self.KINGS], "johnny-i-hardly-knew-ye": self.HARDLY}
+        melodies = {"we-three-kings": self.WE_THREE_KINGS, "johnny-comes-marching": self.JOHNNY_COMES_MARCHING, "other": [60, 62] * 8,
+                    "kings-of-orient": [p + 2 for p in self.WE_THREE_KINGS], "johnny-i-hardly-knew-ye": self.JOHNNY_I_HARDLY_KNEW_YE}
         self.assertEqual(flag_picks.same_tunes(melodies, {"kings-of-orient", "johnny-i-hardly-knew-ye"}),
                          [("we-three-kings", "kings-of-orient"), ("johnny-comes-marching", "johnny-i-hardly-knew-ye")])
         self.assertEqual(flag_picks.same_tunes(melodies, {"other"}), [])
-
-
-if __name__ == "__main__":
-    unittest.main()

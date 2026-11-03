@@ -1,13 +1,9 @@
 import 'fake-indexeddb/auto'
 import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { memoryStorage } from '@/test-support/web-storage'
 import type { Recording } from './recordings'
-import { memoryStorage } from './test-storage'
 
-// The Sound Pad's Pads in the `pedos` database (#277), over a real IndexedDB (fake-indexeddb),
-// each page with fresh modules.
-
-/** A page of Farty: fresh modules, over this browser's database. */
 async function openPage() {
   vi.resetModules()
   return {
@@ -85,7 +81,6 @@ describe('the Pads', () => {
   })
 })
 
-/** Writes a version 4 `pedos` database, as a browser on a build from before #277 left it. */
 async function version4(fill: (store: (name: string) => IDBObjectStore) => void) {
   await new Promise<void>((resolve, reject) => {
     const open = indexedDB.open('pedos', 4)
@@ -143,7 +138,6 @@ describe('version 5', () => {
     expect([...database.objectStoreNames].sort()).toEqual([
       'audio',
       'downloads',
-      // Since version 7 (#313).
       'favorites',
       'meta',
       'outbox',
@@ -158,7 +152,6 @@ describe('version 5', () => {
     expect(bytes(await database.get('tootAudio', toot.id))).toEqual(bytes(wav(2)))
     expect(await database.getAll('outbox')).toEqual([queued])
     expect(await database.get('downloads', 'toots:gone')).toEqual({ kind: 'toots', id: 'gone' })
-    // Version 6 (#293) reads the whole library again.
     expect(await database.get('meta', 'cursor')).toBe(0)
     expect(await pads.loadPads()).toEqual(new Map())
   })

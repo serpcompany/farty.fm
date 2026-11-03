@@ -1,129 +1,24 @@
-import type { IDBPDatabase, IDBPObjectStore, StoreNames } from 'idb'
 import {
   forgetAccount,
   legacyOwner,
-  libraryOwner,
-  libraryOwnerEmail,
+  readableLibraryOwner,
+  readableLibraryOwnerEmail,
   setLibraryOwner
 } from './account'
-import { favoritesChanged } from './favorite-store'
-import * as api from './library-api'
-import {
-  itemKey,
-  type Kind,
-  type OutboxEntry,
-  onQueued,
-  type PlacedField,
-  placedFieldNames,
-  placedFields
-} from './outbox'
+import { announceLibraryChange } from './library-changes'
+import { pullAccountChanges } from './library-pull'
+import { type Kind, type OutboxEntry, onQueued, waitsForRoom } from './outbox'
+import { roomMayExist, sendOutbox } from './outbox-send'
 import { adoptTakes, releaseTakes } from './pad-take'
-import { audioStore, clearLibrary, download, type PedosDB, withDb } from './recording-store'
-import type { Recording, Trim } from './recordings'
-import type { Toot } from './toot'
+import { clearLibrary, download, withDb } from './recording-store'
 
-type Database = IDBPDatabase<PedosDB>
+const syncLock = 'pedos-sync'
 
-// A signed-in browser's library, kept in step with the account's (#156, the plan's §2). The
-// outbox (`outbox.ts`) sends what this browser changed, and a read of the account's changes since
-// the last one (`GET /api/library/?since=`) brings what other browsers did, deletes included. A
-// Recording's or Toot's WAV moves as it is, in both directions: nothing re-renders it (ADR 0004).
-// Everything that sends or applies runs under one Web Lock, so the tabs of a browser take turns.
-// Favorite Songs (#313) sync the same way, by Song id, with no audio.
-
-/** What a sync changed in this browser's library, for the screens showing it. */
-export type LibraryChange =
-  /** Everything changed: load it again. */
-  | { reset: true }
-  | {
-      reset?: false
-      /** Recordings now here that weren't, or with a new number or Placed Pitch. */
-      recordings: Recording[]
-      /** Toots now here, or with a new title. */
-      toots: Toot[]
-      deleted: { recordings: string[]; toots: string[] }
-    }
-
-/** A sync's change that isn't a reset. */
-export type ItemChange = Exclude<LibraryChange, { reset: true }>
-
-/**
- * The Recordings a screen shows, `list`, after a sync's `change`: those deleted gone, new ones
- * added, and those changed with their new number, Placed Pitch, Trim and name, as a Recording not
- * uploaded yet may come back renumbered and one placed, trimmed or named in another browser with
- * its Placed Pitch, Trim and name. Each keeps this browser's analysis. Oldest first.
- */
-export function recordingsAfter(list: readonly Recording[], change: ItemChange): Recording[] {
-  const { recordings: added, deleted } = change
-  const kept = list.filter(r => !deleted.recordings.includes(r.id))
-  const fresh = new Map(added.map(r => [r.id, r]))
-  const merged = kept.map(r => {
-    const changed = fresh.get(r.id)
-    return changed
-      ? {
-          ...r,
-          number: changed.number,
-          placedPitch: changed.placedPitch,
-          trim: changed.trim,
-          name: changed.name
-        }
-      : r
-  })
-  const ids = new Set(kept.map(r => r.id))
-  return [...merged, ...added.filter(r => !ids.has(r.id))].sort((a, b) => a.number - b.number)
+async function withSyncLock<T>(job: () => Promise<T>): Promise<T> {
+  if (typeof navigator === 'undefined' || !navigator.locks) return job()
+  return navigator.locks.request(syncLock, job)
 }
 
-/** Whether two Trims, or two takes with none, are the same. */
-function sameTrim(a: Trim | null, b: Trim | null): boolean {
-  if (a === null || b === null) return a === b
-  return a.startSeconds === b.startSeconds && a.endSeconds === b.endSeconds
-}
-
-const changes = new EventTarget()
-const channelName = 'pedos-library'
-/** This page, so it skips its own changes when they come back from the other tabs' channel. */
-const thisPage = typeof crypto === 'undefined' ? '' : crypto.randomUUID()
-type Message = { from: string; change: LibraryChange }
-
-function emit(change: LibraryChange): void {
-  changes.dispatchEvent(new CustomEvent('change', { detail: change }))
-  // The other tabs show the same library. A message posted is delivered after the close.
-  try {
-    const channel = new BroadcastChannel(channelName)
-    channel.postMessage({ from: thisPage, change } satisfies Message)
-    channel.close()
-  } catch {
-    // No other tab hears it; each loads the library again when it opens.
-  }
-}
-
-/**
- * Calls `listener` with each change a sync makes, in this tab or another. Returns a function that
- * stops it.
- */
-export function onLibraryChanged(listener: (change: LibraryChange) => void): () => void {
-  const handle = (event: Event) => listener((event as CustomEvent<LibraryChange>).detail)
-  changes.addEventListener('change', handle)
-  let others: BroadcastChannel | null = null
-  try {
-    others = new BroadcastChannel(channelName)
-    others.onmessage = ({ data }: MessageEvent<Message>) => {
-      if (data.from !== thisPage) listener(data.change)
-    }
-  } catch {
-    // Only this tab's changes, then.
-  }
-  return () => {
-    changes.removeEventListener('change', handle)
-    others?.close()
-  }
-}
-
-/**
- * The account whose changes this page has read into this browser's library (a `pull` that worked),
- * since the page opened or the library was last cleared: null until then. Before it, a Recording
- * the account has may not be here yet, such as right after signing in again (#278).
- */
 let pulledFor: string | null = null
 const pulls = new EventTarget()
 
@@ -133,56 +28,30 @@ function setPulled(accountId: string | null): void {
   pulls.dispatchEvent(new Event('change'))
 }
 
-/** The account this page's library has read the changes of, or null (`pulledFor`). */
 export function libraryPulled(): string | null {
   return pulledFor
 }
 
-/** Calls `listener` when `libraryPulled` changes, in this tab. Returns a function that stops it. */
 export function onLibraryPulled(listener: () => void): () => void {
   pulls.addEventListener('change', listener)
   return () => pulls.removeEventListener('change', listener)
 }
 
-const syncLock = 'pedos-sync'
+const isFart = (entry: OutboxEntry) => entry.kind !== 'favorites'
 
-/** Runs `job` while no other tab of this browser syncs, or at once without Web Locks. */
-async function withSyncLock<T>(job: () => Promise<T>): Promise<T> {
-  if (typeof navigator === 'undefined' || !navigator.locks) return job()
-  return navigator.locks.request(syncLock, job)
-}
-
-/** The account this browser's library is, or undefined when storage is blocked. */
-function owner(): string | null | undefined {
-  try {
-    return libraryOwner()
-  } catch {
-    return undefined
-  }
-}
-
-/**
- * Makes this browser's library `accountId`'s (with its `email`), so it can sync: true once it is.
- * A guest's library becomes the account's, and uploads, with the Recordings a guest kept from
- * visits before #237 (#203). Another account's is cleared first: it never uploads to this one,
- * and its farts not uploaded yet are lost, which the account step says before it signs in
- * (`unsavedBeforeSignIn`). With localStorage blocked Farty can't tell whose it is, so it never
- * syncs.
- */
 export async function claimLibrary(accountId: string, email = ''): Promise<boolean> {
   if (!accountId) return false
-  const current = owner()
+  roomMayExist('recordings', 'toots')
+  const current = readableLibraryOwner()
   if (current === undefined) return false
   if (current !== accountId && current !== null && current !== legacyOwner) {
     await withSyncLock(clearLibrary)
     setPulled(null)
-    // The other account's Sound Pad takes that never started a Checkout go with its library.
     releaseTakes(current)
-    emit({ reset: true })
+    announceLibraryChange({ reset: true })
   }
   try {
     setLibraryOwner(accountId, email)
-    // A guest's takes become the account's, as its Recordings do.
     if (current === null || current === legacyOwner) adoptTakes(current, accountId)
     return true
   } catch {
@@ -190,43 +59,19 @@ export async function claimLibrary(accountId: string, email = ''): Promise<boole
   }
 }
 
-/**
- * Whether this browser's library has read an account's changes (its `cursor`), so it's an
- * account's, also with no `pedos.account`. A guest's never has: `claimLibrary` makes it an
- * account's first. Before #203, a Sign out whose clear failed forgot the account and left its
- * library, which the next guest visit cleared; a guest's open still clears such a library whole
- * (`visit.ts`).
- */
 export async function leftByAnAccount(): Promise<boolean> {
   return (await withDb(database => database.get('meta', 'cursor'))) !== undefined
 }
 
-/**
- * How many farts (Recordings and Toots) on this device haven't uploaded to the account its library
- * is, which signing in as `email` would clear (`claimLibrary`): none for a guest's library, or for
- * `email`'s own. A library whose account's email isn't known counts as another's.
- */
 export async function unsavedBeforeSignIn(email: string): Promise<number> {
-  const current = owner()
+  const current = readableLibraryOwner()
   if (!current || current === legacyOwner) return 0
-  let ownerEmail: string | null = null
-  try {
-    ownerEmail = libraryOwnerEmail()
-  } catch {
-    // Unknown, then.
-  }
+  const ownerEmail = readableLibraryOwnerEmail()
   if (ownerEmail !== null && ownerEmail === email.trim().toLowerCase()) return 0
   const queued = await withDb(database => database.getAll('outbox'))
-  return queued.filter(entry => entry.op === 'put' && entry.kind !== 'favorites').length
+  return queued.filter(entry => entry.op === 'put' && isFart(entry)).length
 }
 
-/**
- * Signs this browser out of its library: clears it, then forgets whose it was, while no sync is
- * applying anything. Farty's other tabs show it cleared too. A guest's library uploads when they
- * sign in (#203, #237), so an account's library is never left here as a guest's, which a sign-in
- * would upload to another account: when the clear fails, the library stays the account's, and
- * the next open reads `expired` and offers Clear this device.
- */
 export async function forgetLibrary(): Promise<void> {
   await withSyncLock(async () => {
     try {
@@ -235,445 +80,26 @@ export async function forgetLibrary(): Promise<void> {
       return
     }
     setPulled(null)
-    // Its Sound Pad takes that never started a Checkout go too; those that did stay for it.
-    const left = owner()
+    const left = readableLibraryOwner()
     if (left) releaseTakes(left)
     forgetAccount()
   })
-  emit({ reset: true })
+  announceLibraryChange({ reset: true })
 }
 
-/** How a request went: on to the next, the entry refused (kept, and skipped this round), or stop. */
-type Sent = 'next' | 'refused' | 'stop'
-
-/**
- * Whether to stop sending: Farty is unreachable or busy, the session ended, or the account isn't
- * this library's.
- */
-const stops = ({ status, error }: api.Answer) =>
-  status === 0 ||
-  status === 401 ||
-  status === 403 ||
-  status === 429 ||
-  status >= 500 ||
-  (status === 409 && error === 'wrong_account')
-
-type Taken =
-  | { entry: OutboxEntry; kind: Kind; op: 'put'; item: Recording | Toot; wav: ArrayBuffer }
-  | { entry: OutboxEntry; kind: 'toots'; op: 'rename'; title: string }
-  | { entry: OutboxEntry; kind: 'recordings'; op: 'place'; placement: api.Placement }
-  | { entry: OutboxEntry; kind: Kind; op: 'delete' }
-  /** A Favorite Song marked (`on`), or taken off. */
-  | { entry: OutboxEntry; op: 'favorite'; on: boolean }
-
-/**
- * The oldest entry to send, marked sent in the same transaction that reads what it sends. A
- * Recording waits for its analysis, and an op this code doesn't know is never sent. Null when
- * nothing is left but those and `skip`.
- */
-function takeNext(skip: Set<string>): Promise<Taken | null> {
-  return withDb(database => takeNextIn(database, skip))
-}
-
-async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken | null> {
-  const tx = database.transaction(
-    ['outbox', 'recordings', 'audio', 'toots', 'tootAudio'],
-    'readwrite'
-  )
-  const outbox = tx.objectStore('outbox')
-  const entries = (await outbox.getAll())
-    .filter(entry => !skip.has(entry.key))
-    .sort((a, b) => a.queuedAt - b.queuedAt)
-  for (const queued of entries) {
-    const entry = { ...queued, sent: true }
-    const kind = queued.kind
-    if (kind === 'favorites') {
-      // A Favorite Song is sent as it is here now: its last op (`mergeOutbox`).
-      if (queued.op !== 'put' && queued.op !== 'delete') continue
-      await Promise.all([outbox.put(entry), tx.done])
-      return { entry, op: 'favorite', on: queued.op === 'put' }
-    }
-    if (queued.op === 'put') {
-      const [item, wav] = await Promise.all([
-        tx.objectStore(kind).get(queued.id),
-        tx.objectStore(audioStore[kind]).get(queued.id)
-      ])
-      if (!item || !wav) {
-        // Nothing left to upload.
-        await outbox.delete(queued.key)
-        continue
-      }
-      if ('analysis' in item && item.analysis.state === 'analyzing') {
-        skip.add(queued.key)
-        continue
-      }
-      await Promise.all([outbox.put(entry), tx.done])
-      return { entry, kind, op: 'put', item, wav }
-    }
-    if (queued.op === 'rename') {
-      const toot = await tx.objectStore('toots').get(queued.id)
-      if (!toot) {
-        await outbox.delete(queued.key)
-        continue
-      }
-      await Promise.all([outbox.put(entry), tx.done])
-      return { entry, kind: 'toots', op: 'rename', title: toot.title }
-    }
-    if (queued.op === 'place') {
-      const recording = await tx.objectStore('recordings').get(queued.id)
-      if (!recording) {
-        await outbox.delete(queued.key)
-        continue
-      }
-      await Promise.all([outbox.put(entry), tx.done])
-      // Only the fields this browser changed, so it never sends back an old Trim, Placed Pitch
-      // or name over another browser's newer one (ADR 0019).
-      const placement: api.Placement = {}
-      for (const field of placedFields(queued)) {
-        if (field === 'placedPitch') placement.placedPitch = recording.placedPitch ?? null
-        else if (field === 'trim') placement.trim = recording.trim ?? null
-        else placement.name = recording.name ?? null
-      }
-      return { entry, kind: 'recordings', op: 'place', placement }
-    }
-    if (queued.op === 'delete') {
-      await Promise.all([outbox.put(entry), tx.done])
-      return { entry, kind, op: 'delete' }
-    }
-    // An op this code doesn't know, from a later build: it stays queued for that build, and
-    // nothing is sent for it. Before #268 every other op went out as a delete.
-  }
-  await tx.done
-  return null
-}
-
-/**
- * After a request for `sent` succeeded: done, unless the entry changed while it was on its way. A
- * Toot renamed, or a Recording placed, during its upload, or one the account already had
- * (`then: 'update'`), is then renamed or placed on the account, and a later delete is sent next.
- */
-function settle(sent: OutboxEntry, then: 'done' | 'update' = 'done'): Promise<void> {
-  return withDb(database => settleIn(database, sent, then))
-}
-
-async function settleIn(
-  database: Database,
-  sent: OutboxEntry,
-  then: 'done' | 'update'
-): Promise<void> {
-  const tx = database.transaction('outbox', 'readwrite')
-  const now = await tx.store.get(sent.key)
-  const unchanged = now?.version === sent.version
-  if (!now) {
-    // A sign-out or the account's delete cleared it meanwhile.
-  } else if (sent.kind === 'favorites') {
-    // A tap during the request is sent next.
-    if (unchanged) await tx.store.delete(sent.key)
-  } else if (now.op === 'delete') {
-    // A delete queued during an upload or rename is sent next.
-    if (sent.op === 'delete' && unchanged) await tx.store.delete(sent.key)
-  } else if (sent.op === 'put') {
-    // A rename or place during the upload joined the queued upload (`mergeOutbox`), so it's
-    // sent now, with the fields the place changed (`placedFields`).
-    if (then === 'update' || !unchanged) {
-      const op = sent.kind === 'toots' ? 'rename' : 'place'
-      await tx.store.put({ ...now, op, sent: false, version: crypto.randomUUID() })
-    } else await tx.store.delete(sent.key)
-  } else if (unchanged) await tx.store.delete(sent.key)
-  await tx.done
-}
-
-/** Deletes a Recording or Toot the account has deleted, and whatever this browser queued for it. */
-async function deleteHere(kind: Kind, id: string): Promise<void> {
-  const key = itemKey(kind, id)
-  await withDb(async database => {
-    const tx = database.transaction([kind, audioStore[kind], 'downloads', 'outbox'], 'readwrite')
-    await Promise.all([
-      tx.objectStore(kind).delete(id),
-      tx.objectStore(audioStore[kind]).delete(id),
-      tx.objectStore('downloads').delete(key),
-      tx.objectStore('outbox').delete(key),
-      tx.done
-    ])
-  })
-  const deleted = { recordings: [] as string[], toots: [] as string[] }
-  deleted[kind].push(id)
-  emit({ recordings: [], toots: [], deleted })
-}
-
-async function send(taken: Taken, accountId: string): Promise<Sent> {
-  const { entry } = taken
-  if (taken.op === 'favorite') {
-    const answer = await api.setFavorite(entry.id, taken.on, accountId)
-    if (stops(answer)) return 'stop'
-    // Kept; or refused, at the limit or for a Song id the account doesn't take, which no retry
-    // changes. The heart stays here until a full read drops what the account doesn't list.
-    await settle(entry)
-    return 'next'
-  }
-  if (taken.op === 'put') {
-    const answer = await api.putItem(taken.kind, taken.item, taken.wav, accountId)
-    if (stops(answer)) return 'stop'
-    // 200: the account had it already, maybe with an older title or Placed Pitch.
-    if (answer.status === 201 || answer.status === 200) {
-      await settle(entry, answer.status === 200 ? 'update' : 'done')
-      return 'next'
-    }
-    if (answer.status === 410) {
-      await deleteHere(taken.kind, entry.id)
-      return 'next'
-    }
-    // At the limit, or refused: it stays here, and in the outbox.
-    return 'refused'
-  }
-  if (taken.op === 'rename') {
-    const answer = await api.renameToot(entry.id, taken.title, accountId)
-    if (stops(answer)) return 'stop'
-    if (answer.status === 410) await deleteHere(taken.kind, entry.id)
-    // Renamed; or not on the account, or a title it refuses, which no retry changes.
-    else await settle(entry)
-    return 'next'
-  }
-  if (taken.op === 'place') {
-    const answer = await api.placeRecording(entry.id, taken.placement, accountId)
-    if (stops(answer)) return 'stop'
-    if (answer.status === 410) await deleteHere(taken.kind, entry.id)
-    // Placed; or not on the account, or a note it refuses, which no retry changes.
-    else await settle(entry)
-    return 'next'
-  }
-  const answer = await api.deleteItem(taken.kind, entry.id, accountId)
-  if (stops(answer)) return 'stop'
-  // Deleted, or never on the account.
-  await settle(entry)
-  return 'next'
-}
-
-/**
- * Sends the outbox, oldest first, while this browser's library is `accountId`'s. True when
- * nothing it could send is left; false when it stopped (unreachable, signed out, or another
- * account's library now).
- */
-async function drain(accountId: string): Promise<boolean> {
-  const skip = new Set<string>()
-  for (;;) {
-    if (owner() !== accountId) return false
-    const taken = await takeNext(skip)
-    if (!taken) return true
-    const sent = await send(taken, accountId)
-    if (sent === 'stop') return false
-    if (sent === 'refused') skip.add(taken.entry.key)
-  }
-}
-
-/**
- * Reads the account's changes since this browser's last read and applies them, in one
- * transaction. What this browser still has to send wins: a Recording or Toot it's deleting stays
- * deleted, a Toot it's uploading or renaming keeps its title, a Recording it's uploading keeps its
- * Placed Pitch and Trim, and one it's placing keeps the fields it changed. A `full` answer lists
- * everything the account has, so what's here from the account and isn't listed was deleted there.
- * Recordings not uploaded yet are numbered after the rest (`renumberWaiting`). False when nothing
- * was read.
- */
-async function pull(accountId: string): Promise<boolean> {
-  const since = (await withDb(database => database.get('meta', 'cursor'))) ?? 0
-  const answer = await api.getLibrary(since, accountId)
-  if (!('cursor' in answer) || owner() !== accountId) return false
-  const { favoritesMoved, ...change } = await withDb(database => apply(database, answer))
-  if (favoritesMoved) favoritesChanged()
-  const changed =
-    change.recordings.length +
-    change.toots.length +
-    change.deleted.recordings.length +
-    change.deleted.toots.length
-  // The screens hear what changed before they hear it's read.
-  if (changed > 0) emit(change)
+async function pullThenSend(accountId: string): Promise<boolean> {
+  if (!(await pullAccountChanges(accountId))) return false
   setPulled(accountId)
-  return true
+  return sendOutbox(accountId)
 }
 
-/**
- * Applies what the account read (`pull`), in one transaction. What it changed here, and whether the
- * Favorite Songs changed.
- */
-async function apply(database: Database, answer: api.LibraryChanges) {
-  const tx = database.transaction(
-    ['recordings', 'audio', 'toots', 'tootAudio', 'downloads', 'outbox', 'meta', 'favorites'],
-    'readwrite'
-  )
-  const recordings = tx.objectStore('recordings')
-  const toots = tx.objectStore('toots')
-  const downloads = tx.objectStore('downloads')
-  const outbox = tx.objectStore('outbox')
-  const entries = new Map((await outbox.getAll()).map(entry => [entry.key, entry]))
-  const pending = new Map([...entries].map(([key, entry]) => [key, entry.op]))
-  const change = {
-    recordings: [] as Recording[],
-    toots: [] as Toot[],
-    deleted: { recordings: [] as string[], toots: [] as string[] }
-  }
-  const remove = async (kind: Kind, id: string) => {
-    const key = itemKey(kind, id)
-    await Promise.all([
-      tx.objectStore(kind).delete(id),
-      tx.objectStore(audioStore[kind]).delete(id),
-      downloads.delete(key),
-      outbox.delete(key)
-    ])
-    change.deleted[kind].push(id)
-  }
-
-  for (const { audioBytes: _, ...recording } of answer.recordings) {
-    const key = itemKey('recordings', recording.id)
-    const op = pending.get(key)
-    if (op === 'delete') continue
-    const here = await recordings.get(recording.id)
-    if (here) {
-      // Only its Placed Pitch (ADR 0015), Trim (ADR 0019) and name (#314) change: the analysis
-      // stays this browser's own. A Worker from before #268 sends no Placed Pitch, one from
-      // before #293 no Trim, and one from before #314 no name, which changes none of them. A
-      // field this browser is still placing keeps its own value, and the others take the
-      // account's, as another browser changed them (ADR 0019).
-      const entry = entries.get(key)
-      const held: readonly PlacedField[] =
-        entry?.op === 'place' ? placedFields(entry) : placedFieldNames
-      const moved: Recording = { ...here }
-      if (recording.placedPitch !== undefined && !(op && held.includes('placedPitch')))
-        moved.placedPitch = recording.placedPitch
-      if (recording.trim !== undefined && !(op && held.includes('trim')))
-        moved.trim = recording.trim
-      if (recording.name !== undefined && !(op && held.includes('name')))
-        moved.name = recording.name
-      const same =
-        (here.placedPitch ?? null) === (moved.placedPitch ?? null) &&
-        sameTrim(here.trim ?? null, moved.trim ?? null) &&
-        (here.name ?? null) === (moved.name ?? null)
-      if (same) continue
-      await recordings.put(moved)
-      change.recordings.push(moved)
-      continue
-    }
-    await Promise.all([
-      recordings.put(recording),
-      downloads.put({ kind: 'recordings', id: recording.id }, key)
-    ])
-    change.recordings.push(recording)
-  }
-  for (const { audioBytes: _, ...toot } of answer.toots) {
-    const key = itemKey('toots', toot.id)
-    const op = pending.get(key)
-    if (op === 'delete') continue
-    const here = await toots.get(toot.id)
-    if (here) {
-      if (op || here.title === toot.title) continue
-      const renamed = { ...here, title: toot.title }
-      await toots.put(renamed)
-      change.toots.push(renamed)
-    } else {
-      await Promise.all([toots.put(toot), downloads.put({ kind: 'toots', id: toot.id }, key)])
-      change.toots.push(toot)
-    }
-  }
-  for (const kind of ['recordings', 'toots'] as const) {
-    for (const id of answer.deleted[kind]) {
-      if (await tx.objectStore(kind).getKey(id)) await remove(kind, id)
-      else await outbox.delete(itemKey(kind, id))
-    }
-  }
-  if (answer.full) {
-    const listed = {
-      recordings: new Set(answer.recordings.map(r => r.id)),
-      toots: new Set(answer.toots.map(t => t.id))
-    }
-    for (const kind of ['recordings', 'toots'] as const) {
-      for (const id of await tx.objectStore(kind).getAllKeys()) {
-        if (!listed[kind].has(id) && pending.get(itemKey(kind, id)) !== 'put')
-          await remove(kind, id)
-      }
-    }
-  }
-  const favoritesMoved = await applyFavorites(tx.objectStore('favorites'), answer, pending)
-  const listed = new Set(answer.recordings.map(r => r.id))
-  const waits = (r: Recording) =>
-    pending.get(itemKey('recordings', r.id)) === 'put' && !listed.has(r.id)
-  for (const renumbered of renumberWaiting(await recordings.getAll(), waits)) {
-    await recordings.put(renumbered)
-    change.recordings.push(renumbered)
-  }
-  await Promise.all([tx.objectStore('meta').put(answer.cursor, 'cursor'), tx.done])
-  return { ...change, favoritesMoved }
-}
-
-/**
- * Applies the account's Favorite Songs (#313) in `apply`'s transaction: those marked or taken off
- * in another browser, and, in a `full` read, those it no longer has. A Song this browser is still
- * sending keeps its own. A Worker from before #313 sends none, and changes none. True if any
- * changed here.
- */
-async function applyFavorites(
-  favorites: IDBPObjectStore<PedosDB, StoreNames<PedosDB>[], 'favorites', 'readwrite'>,
-  answer: api.LibraryChanges,
-  pending: Map<string, string>
-): Promise<boolean> {
-  const sending = (songId: string) => pending.has(itemKey('favorites', songId))
-  let moved = false
-  for (const songId of answer.favorites ?? []) {
-    if (sending(songId) || (await favorites.getKey(songId)) !== undefined) continue
-    await favorites.put(Date.now(), songId)
-    moved = true
-  }
-  for (const songId of answer.deleted.favorites ?? []) {
-    if (sending(songId) || (await favorites.getKey(songId)) === undefined) continue
-    await favorites.delete(songId)
-    moved = true
-  }
-  if (answer.full && answer.favorites) {
-    const listed = new Set(answer.favorites)
-    for (const songId of await favorites.getAllKeys()) {
-      if (listed.has(songId) || sending(songId)) continue
-      await favorites.delete(songId)
-      moved = true
-    }
-  }
-  return moved
-}
-
-/**
- * The Recordings `waits` says haven't uploaded, numbered after every other one, in their order:
- * none when they already come after. A Recording's number is its name on every browser, and a
- * Recording made here before the account's reached it, such as a guest's first one before signing
- * in, would share a number with one of the account's.
- */
-export function renumberWaiting(
-  all: Recording[],
-  waits: (recording: Recording) => boolean
-): Recording[] {
-  const waiting = all.filter(waits).sort((a, b) => a.number - b.number)
-  const highest = Math.max(0, ...all.filter(r => !waits(r)).map(r => r.number))
-  if (waiting.length === 0 || waiting[0].number > highest) return []
-  return waiting.map((recording, i) => ({ ...recording, number: highest + 1 + i }))
-}
-
-/**
- * Reads the account's changes, then sends the outbox, under the lock: only once the read worked,
- * so a Recording uploads numbered after the account's.
- */
-async function pullThenDrain(accountId: string): Promise<void> {
-  if (await pull(accountId)) await drain(accountId)
-}
-
-/**
- * One sync, while no other tab syncs: reads the account's changes, then sends the outbox. Nothing
- * while this browser's library isn't `accountId`'s.
- */
 export async function syncOnce(accountId: string): Promise<void> {
   await withSyncLock(async () => {
-    if (owner() !== accountId) return
-    await pullThenDrain(accountId)
+    if (readableLibraryOwner() !== accountId) return
+    await pullThenSend(accountId)
   })
 }
 
-/** Downloads every WAV this browser still waits for, one at a time, until one fails. */
 export async function downloadAll(stopped: () => boolean): Promise<void> {
   const waiting = await withDb(database => database.getAll('downloads'))
   for (const { kind, id } of waiting) {
@@ -682,11 +108,6 @@ export async function downloadAll(stopped: () => boolean): Promise<void> {
   }
 }
 
-/**
- * Keeps this browser's library in step with `accountId`'s while the page is open: once `ready`
- * (the visit's library) and claimed, then whenever something joins the outbox, the browser comes
- * back online, or Farty comes back into view. Returns a function that stops it.
- */
 export function startSync(accountId: string, email: string, ready: Promise<void>): () => void {
   let stopped = false
   let running = false
@@ -694,14 +115,12 @@ export function startSync(accountId: string, email: string, ready: Promise<void>
   let fetching = false
   const isStopped = () => stopped
 
-  // WAVs download outside the lock, so an upload never waits for them.
   const fetchAll = async () => {
     if (fetching || stopped) return
     fetching = true
     try {
       await downloadAll(isStopped)
     } catch {
-      // On demand, then (`loadAudio`, `loadTootAudio`), or at the next sync.
     } finally {
       fetching = false
     }
@@ -720,7 +139,6 @@ export function startSync(accountId: string, email: string, ready: Promise<void>
         if (!stopped) await syncOnce(accountId)
       } while (again && !stopped)
     } catch {
-      // The next trigger tries again.
     } finally {
       running = false
     }
@@ -751,16 +169,17 @@ export function startSync(accountId: string, email: string, ready: Promise<void>
   }
 }
 
-/**
- * Before signing out: reads the account's changes and sends what's left in the outbox, after any
- * sync already running. The number of farts' entries still waiting: none means every Recording
- * and Toot this browser made is on the account. A Favorite Song still waiting isn't a fart, and
- * isn't counted.
- */
-export async function uploadBeforeSignOut(accountId: string): Promise<number> {
+export type LeftBeforeSignOut = { left: number; full: number }
+
+export async function uploadBeforeSignOut(accountId: string): Promise<LeftBeforeSignOut> {
   return withSyncLock(async () => {
-    if (owner() === accountId) await pullThenDrain(accountId)
-    const waiting = await withDb(database => database.getAll('outbox'))
-    return waiting.filter(entry => entry.kind !== 'favorites').length
+    const reached = readableLibraryOwner() === accountId && (await pullThenSend(accountId))
+    const queued = await withDb(database => database.getAll('outbox'))
+    return { left: queued.filter(isFart).length, full: reached ? await waitingForRoom() : 0 }
   })
+}
+
+export async function waitingForRoom(kind?: Kind): Promise<number> {
+  const queued = await withDb(database => database.getAll('outbox'))
+  return queued.filter(entry => waitsForRoom(entry) && (!kind || entry.kind === kind)).length
 }

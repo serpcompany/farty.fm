@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { AudioNotDownloaded } from '../recording-store'
 
-// Why a Pad's sound fails to load: a download this browser can't fetch now (expected, not
-// reported), or anything else, such as no audio anywhere, a database error or audio that won't
-// decode, or the render worker's trim (reported, `sound-pad.tsx`).
-
 const decodeAudioData = vi.hoisted(() => vi.fn())
 vi.mock('./context', () => ({
   audioContext: () => ({ decodeAudioData }),

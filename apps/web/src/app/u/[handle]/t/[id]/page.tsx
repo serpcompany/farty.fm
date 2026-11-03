@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { SharedTootPage } from '@/components/pedos/shared-recording-page'
+import { SharedTootPage } from '@/components/farty/shared-recording-page'
 import { linkPreviewMetadata } from '@/server/link-preview'
 import { sharedTootView, tootDescription } from './shared'
 
-// A shared Toot's page (ADR 0020), as a shared Recording's: public, unlisted, and read from D1 on
-// every request, so a stopped, taken-down or deleted link is gone at once. No `loading.tsx`: a
-// streamed page would answer 200 before `notFound()` could make it a 404.
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({

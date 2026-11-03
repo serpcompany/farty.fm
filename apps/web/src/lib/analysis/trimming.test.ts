@@ -3,10 +3,7 @@ import { analysisAudio, goldenRecordings, row } from '../../test-support/golden'
 import { ANALYSIS_SAMPLE_RATE } from './resample'
 import { noteSegment } from './trimming'
 
-// #34: from each fixture file, the gesture bounds within ±10 ms and the same "cut at re-attack"
-// (`TrimmingTests.swift`). Since ADR 0016 the gesture is the whole fart, every burst, and the
-// first burst's end (the pitch end) is checked the same way.
-test('gestures match the golden data', async () => {
+test('from each fixture file, gesture bounds, pitch ends and cuts at a re-attack match the golden data', async () => {
   let maxErrorMs = 0
   const lines = [
     row(

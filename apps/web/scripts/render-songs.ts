@@ -1,23 +1,3 @@
-// Renders every Song with a golden Arrangement (`fixtures/golden/arrangements/full/`) with the full
-// Fixture Library through the web engine, the way the app does it: decode each fixture, run
-// Recording Analysis, Auto-map, then render. The renders are for the reference's checks
-// (`tools/melody-lab/evaluate_renders.py`); nothing here ships.
-//
-//   pnpm exec tsx scripts/render-songs.ts [out-dir]
-//
-// Writes `<song>.wav` (mono 32-bit float, 44.1 kHz: the renderer's exact output, which Web Audio
-// plays as it is) and `<song>.json` (the Song's bpm and transposition, and one event per note) to
-// `tools/melody-lab/out/web/` by default, then prints the render time per Song in Node.
-//
-// It first deletes the `.wav` and `.json` files already in the out dir, so no stale render is
-// measured again. It exits 1 if a Song that the golden Arrangement unlocks comes out locked.
-//
-//   pnpm exec tsx scripts/render-songs.ts --scenario ../../tools/melody-lab/scenarios/trim-065.json [out-dir]
-//
-// renders every Song in `fixtures/golden/songs/`, the whole catalog, with a Scenario's library
-// instead, into `tools/melody-lab/out/web-<id>/` by default: the fixtures it lists, each trimmed
-// between its handles (`trimBounds`, ADR 0019) and placed on its note by ear (ADR 0015) as the app
-// does it. `evaluate_renders.py --scenario` checks them; nothing is compared with golden here.
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { toAnalysis } from '../src/lib/analysis/port'
@@ -39,7 +19,7 @@ import {
 import { renderSource } from '../src/lib/engine/render-source'
 import type { RenderSource } from '../src/lib/engine/renderer'
 import type { Song } from '../src/lib/engine/song'
-import { decodeFile } from '../src/test-support/decode'
+import { decodeFile } from './decode-audio-file'
 import { fixtures } from './fixture-library'
 
 const ROOT = resolve(__dirname, '../../..')
@@ -48,7 +28,6 @@ const SONGS = join(ROOT, 'fixtures/golden/songs')
 const GOLDEN_ARRANGEMENTS = join(ROOT, 'fixtures/golden/arrangements/full')
 const RUNS = 5
 
-/** A Scenario (`tools/melody-lab/scenarios/`): fixtures, where each is placed, and its handles. */
 type Scenario = {
   id: string
   library: string[]
@@ -77,16 +56,17 @@ function time<T>(run: () => T): { result: T; ms: number } {
   return { result, ms: performance.now() - started }
 }
 
-/** The median of `RUNS` timed runs, after one untimed warm-up run. */
-function medianMs<T>(run: () => T): { result: T; ms: number } {
+function medianMsAfterWarmUp<T>(run: () => T): { result: T; ms: number } {
   const result = run()
   const runs: number[] = []
   for (let k = 0; k < RUNS; k++) runs.push(time(run).ms)
   return { result, ms: median(runs) }
 }
 
-/** A mono WAV of 32-bit IEEE floats, so the reference reads exactly the samples the app plays. */
-function floatWav(samples: Float32Array, sampleRate: number): Buffer {
+const WAVE_FORMAT_IEEE_FLOAT = 3
+const MONO = 1
+
+function float32Wav(samples: Float32Array, sampleRate: number): Buffer {
   const data = samples.length * 4
   const out = Buffer.alloc(44 + data)
   out.write('RIFF', 0, 'ascii')
@@ -94,8 +74,8 @@ function floatWav(samples: Float32Array, sampleRate: number): Buffer {
   out.write('WAVE', 8, 'ascii')
   out.write('fmt ', 12, 'ascii')
   out.writeUInt32LE(16, 16)
-  out.writeUInt16LE(3, 20) // WAVE_FORMAT_IEEE_FLOAT
-  out.writeUInt16LE(1, 22)
+  out.writeUInt16LE(WAVE_FORMAT_IEEE_FLOAT, 20)
+  out.writeUInt16LE(MONO, 22)
   out.writeUInt32LE(sampleRate, 24)
   out.writeUInt32LE(sampleRate * 4, 28)
   out.writeUInt16LE(4, 32)
@@ -108,7 +88,6 @@ function floatWav(samples: Float32Array, sampleRate: number): Buffer {
 
 const round = (x: number, digits: number) => Number(x.toFixed(digits))
 
-/** Whether the golden Arrangement on the full library unlocks the Song. */
 function goldenUnlocks(id: string): boolean {
   const golden = JSON.parse(readFileSync(join(GOLDEN_ARRANGEMENTS, `${id}.json`), 'utf8')) as {
     unlocked: boolean
@@ -116,15 +95,21 @@ function goldenUnlocks(id: string): boolean {
   return golden.unlocked
 }
 
+function trimmedAsTheReviewSaves(
+  samples: Float32Array,
+  sampleRate: number,
+  [startSeconds, endSeconds]: [number, number]
+) {
+  const y = resampleToAnalysisRate(samples, sampleRate)
+  return { startSeconds, endSeconds, fart: trimBounds(y, startSeconds, endSeconds) }
+}
+
 async function main() {
   mkdirSync(outDir, { recursive: true })
-  // Only the files this script writes: the out dir may be one the caller chose.
   for (const name of readdirSync(outDir)) {
     if (/\.(wav|json)$/.test(name)) rmSync(join(outDir, name))
   }
 
-  // The full Fixture Library, as the manifest lists it (a removed fixture's file can stay in the
-  // folder), through Recording Analysis as the app runs it on a new Recording.
   const recordings: RecordingToRender[] = []
   let analysisMs = 0
   for (const { id, filename } of fixtures()) {
@@ -138,20 +123,16 @@ async function main() {
       recordings.push({ id, audio, analysis: result })
       continue
     }
-    // As the review's Save finds it, in the analysis worker.
-    const y = resampleToAnalysisRate(audio.samples, audio.sampleRate)
-    const fart = trimBounds(y, handles[0], handles[1])
-    const trim = { startSeconds: handles[0], endSeconds: handles[1], fart }
+    const trim = trimmedAsTheReviewSaves(audio.samples, audio.sampleRate, handles)
     const sr = ANALYSIS_SAMPLE_RATE
     console.log(
       `${id} trimmed between ${handles[0]} and ${handles[1]} s: samples ` +
-        `${Math.round(fart.startSeconds * sr)} to ${Math.round(fart.endSeconds * sr)} ` +
-        `(${fart.startSeconds.toFixed(4)} to ${fart.endSeconds.toFixed(4)} s); analysis found ` +
+        `${Math.round(trim.fart.startSeconds * sr)} to ${Math.round(trim.fart.endSeconds * sr)} ` +
+        `(${trim.fart.startSeconds.toFixed(4)} to ${trim.fart.endSeconds.toFixed(4)} s); analysis found ` +
         `${Math.round(result.gestureStartSeconds * sr)} to ${Math.round(result.gestureEndSeconds * sr)}`
     )
     recordings.push({ id, audio, analysis: result, trim })
   }
-  // As `autoMapRecordings` in `pitch-coverage.ts` reads them: Melodic ones, and placed ones.
   const library: AutoMapRecording[] = recordings.flatMap(r => {
     const placed = scenario?.placed?.[r.id]
     if (placed !== undefined)
@@ -169,13 +150,13 @@ async function main() {
   const sourceMs = new Map<string, number>()
   for (const r of recordings) {
     if (!library.some(l => l.id === r.id)) continue
-    const { result, ms } = medianMs(() => renderSource(r.audio, r.analysis, r.trim ?? null))
+    const { result, ms } = medianMsAfterWarmUp(() =>
+      renderSource(r.audio, r.analysis, r.trim ?? null)
+    )
     sources.set(r.id, result)
     sourceMs.set(r.id, ms)
   }
 
-  // A Scenario's renders are every Song's, as `evaluate_renders.py --scenario` expects them; the
-  // full library's are the Songs with a golden Arrangement to compare with (#350).
   const songIds = readdirSync(scenario ? SONGS : GOLDEN_ARRANGEMENTS)
     .filter(name => name.endsWith('.json'))
     .map(name => name.replace(/\.json$/, ''))
@@ -188,7 +169,7 @@ async function main() {
   )
   for (const id of songIds) {
     const song = JSON.parse(readFileSync(join(SONGS, `${id}.json`), 'utf8')) as Song
-    const planned = medianMs(() => arrange(song, library))
+    const planned = medianMsAfterWarmUp(() => arrange(song, library))
     const arrangement: Arrangement = planned.result
     if (!arrangement.unlocked) {
       console.log(
@@ -198,12 +179,14 @@ async function main() {
       if (!scenario && goldenUnlocks(id)) wronglyLocked.push(id)
       continue
     }
-    // `render ms` renders from Recordings already cut; `worker ms` is what the render
-    // worker runs for one request: cut every Recording the Arrangement uses, then render.
-    const rendered = medianMs(() => renderSong(song, arrangement, sources))
-    const worker = medianMs(() => renderFromRecordings(song, arrangement, recordings))
-    const { samples, sampleRate, notes } = rendered.result
-    writeFileSync(join(outDir, `${id}.wav`), floatWav(samples, sampleRate))
+    const renderedFromCutRecordings = medianMsAfterWarmUp(() =>
+      renderSong(song, arrangement, sources)
+    )
+    const renderedAsTheWorkerDoes = medianMsAfterWarmUp(() =>
+      renderFromRecordings(song, arrangement, recordings)
+    )
+    const { samples, sampleRate, notes } = renderedFromCutRecordings.result
+    writeFileSync(join(outDir, `${id}.wav`), float32Wav(samples, sampleRate))
     const events = {
       song: id,
       bpm: song.bpm,
@@ -212,8 +195,8 @@ async function main() {
       plan_cost: arrangement.cost,
       timing_ms: {
         arrange: round(planned.ms, 2),
-        render: round(rendered.ms, 2),
-        worker: round(worker.ms, 2),
+        render: round(renderedFromCutRecordings.ms, 2),
+        worker: round(renderedAsTheWorkerDoes.ms, 2),
         runs: RUNS
       },
       notes: notes.map(n => ({
@@ -233,8 +216,8 @@ async function main() {
         song.notes.length,
         arrangement.transposition,
         planned.ms.toFixed(1),
-        rendered.ms.toFixed(0),
-        worker.ms.toFixed(0),
+        renderedFromCutRecordings.ms.toFixed(0),
+        renderedAsTheWorkerDoes.ms.toFixed(0),
         (samples.length / sampleRate).toFixed(1)
       ]
         .map(c => String(c).padEnd(13))

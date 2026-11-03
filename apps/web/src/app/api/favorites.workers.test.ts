@@ -2,11 +2,7 @@ import { env } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
 
 import { FAVORITE_SONGS_LIMIT } from '@/server/library'
-import { api, signUp } from '@/test-support/library-api'
-
-// Favorite Songs (#313) in workerd, with a real D1: `PUT` and `DELETE /api/favorites/{songId}/`,
-// their tombstones, the library read that brings them to other browsers, and one user never
-// reaching another's.
+import { api, nextD1Millisecond, signUp } from '@/test-support/library-api'
 
 type Library = {
   cursor: number
@@ -21,12 +17,8 @@ async function library(as: { cookie: string }, since?: number): Promise<Library>
   return response.json()
 }
 
-/** Lets D1's clock move on, so the next change is after the last cursor. */
-const tick = () => new Promise(resolve => setTimeout(resolve, 5))
-
 const DAY = 24 * 60 * 60 * 1000
 
-/** Every Favorite Song row, tombstones included, as "{user id} {song id} {live|deleted}", sorted. */
 async function rows(): Promise<string[]> {
   const { results } = await env.DB.prepare(
     'select user_id, song_id, deleted_at from favorite_songs'
@@ -75,7 +67,6 @@ describe('PUT /api/favorites/{songId}/', () => {
     expect(await over.json()).toEqual({ error: 'limit_reached' })
     expect((await api.favorite('song-1', a)).status).toBe(200)
 
-    // One taken off makes room again.
     expect((await api.unfavorite('song-1', a)).status).toBe(204)
     expect((await api.favorite('twinkle', a)).status).toBe(201)
   })
@@ -87,7 +78,7 @@ describe('DELETE /api/favorites/{songId}/', () => {
     await api.favorite('twinkle', a)
     await api.favorite('mary', a)
     const { cursor } = await library(a)
-    await tick()
+    await nextD1Millisecond()
 
     expect((await api.unfavorite('twinkle', a)).status).toBe(204)
 
@@ -98,7 +89,7 @@ describe('DELETE /api/favorites/{songId}/', () => {
     const all = await library(a)
     expect(all.favorites).toEqual(['mary'])
 
-    await tick()
+    await nextD1Millisecond()
     expect((await api.favorite('twinkle', a)).status).toBe(201)
     const again = await library(a, since.cursor)
     expect(again.favorites).toEqual(['twinkle'])
@@ -188,7 +179,7 @@ describe('the library read', () => {
     const { cursor, full, favorites } = await library(a)
     expect(full).toBe(true)
     expect(favorites).toEqual(['twinkle'])
-    await tick()
+    await nextD1Millisecond()
 
     await api.favorite('mary', a)
 

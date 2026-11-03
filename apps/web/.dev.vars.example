@@ -1,4 +1,1 @@
-# Copy to .dev.vars (git-ignored) for local Workers runs: `opennextjs-cloudflare preview` and
-# `E2E_SERVER=preview pnpm test:e2e`. Outside Production the Worker entry (worker.ts) refuses every
-# request unless it has this password, and Playwright sends it. It is Staging's public password.
 STAGING_BASIC_AUTH_PASSWORD=stagingpassword

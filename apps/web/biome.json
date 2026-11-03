@@ -1,32 +1,21 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.2/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
+  "extends": ["@serpcompany/verify/biome"],
   "files": {
-    "ignoreUnknown": true,
     "includes": [
       "**",
       "!node_modules",
       "!.next",
       "!.open-next",
       "!.wrangler",
-      "!e2e/results",
-      "!e2e/report",
+      "!test-results",
+      "!playwright-report",
       "!cloudflare-env.d.ts",
       "!drizzle",
       "!public/catalog",
-      "!src/lib/catalog/*.generated.ts"
+      "!src/lib/catalog/*.generated.ts",
+      "!src/test-support/*.generated.ts"
     ]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2,
-    "lineEnding": "lf",
-    "lineWidth": 100
   },
   "css": {
     "parser": {
@@ -34,10 +23,6 @@
     }
   },
   "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
-    },
     "domains": {
       "next": "recommended",
       "react": "recommended"
@@ -77,13 +62,17 @@
                     "message": "src/lib holds the app's logic, which components, hooks and routes build on, so it never imports them. Move what both sides need into src/lib."
                   },
                   {
+                    "group": ["@/server", "@/server/**", "@/db", "@/db/**"],
+                    "message": "src/lib runs in the browser too, and server code never reaches it. Move what both need into src/lib, and keep the server's part in src/server."
+                  },
+                  {
                     "group": [
-                      "@/lib/catalog/songs.generated",
+                      "@/test-support/songs.generated",
                       "**/songs.generated",
                       "@/lib/catalog/song-index.generated",
                       "**/song-index.generated"
                     ],
-                    "message": "The browser fetches the Song Catalog (loadSongs and loadSong, or usePedos()), so its Songs stay out of the JavaScript (#322). Only routes and the server import song-index.generated, and only tests songs.generated."
+                    "message": "The browser fetches the Song Catalog (loadSongs and loadSong), so its Songs stay out of the JavaScript (#322). Only routes and the server import song-index.generated, and only tests songs.generated."
                   }
                 ]
               }
@@ -107,12 +96,12 @@
                   },
                   {
                     "group": [
-                      "@/lib/catalog/songs.generated",
+                      "@/test-support/songs.generated",
                       "**/songs.generated",
                       "@/lib/catalog/song-index.generated",
                       "**/song-index.generated"
                     ],
-                    "message": "The browser fetches the Song Catalog (loadSongs and loadSong, or usePedos()), so its Songs stay out of the JavaScript (#322). Only routes and the server import song-index.generated, and only tests songs.generated."
+                    "message": "The browser fetches the Song Catalog (loadSongs and loadSong), so its Songs stay out of the JavaScript (#322). Only routes and the server import song-index.generated, and only tests songs.generated."
                   }
                 ]
               }
@@ -122,7 +111,7 @@
       }
     },
     {
-      "includes": ["src/app/**", "src/server/**", "!**/*.test.ts", "!**/*.test.tsx"],
+      "includes": ["src/app/**", "!**/*.test.ts", "!**/*.test.tsx"],
       "linter": {
         "rules": {
           "style": {
@@ -131,7 +120,7 @@
               "options": {
                 "patterns": [
                   {
-                    "group": ["@/lib/catalog/songs.generated", "**/songs.generated"],
+                    "group": ["@/test-support/songs.generated", "**/songs.generated"],
                     "message": "songs.generated carries every Song's notes, so the Worker would too (#323). Routes and the server read song-index.generated; only tests import songs.generated."
                   }
                 ]
@@ -140,21 +129,89 @@
           }
         }
       }
-    }
-  ],
-  "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "on"
+    },
+    {
+      "includes": ["src/server/**", "src/db/**", "!**/*.test.ts", "!**/*.test.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@/components",
+                      "@/components/**",
+                      "@/app",
+                      "@/app/**",
+                      "@/hooks",
+                      "@/hooks/**"
+                    ],
+                    "message": "Server code serves routes and never imports screens or routes. Move what both need into src/lib."
+                  },
+                  {
+                    "group": ["@/test-support/songs.generated", "**/songs.generated"],
+                    "message": "songs.generated carries every Song's notes, so the Worker would too (#323). Routes and the server read song-index.generated; only tests import songs.generated."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/lib/analysis/**", "src/lib/engine/**", "!**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "window": "Recording Analysis and the engine run in a Web Worker and in Vitest, where there's no window. Take what you need as an argument.",
+                  "document": "Recording Analysis and the engine run in a Web Worker and in Vitest, where there's no document.",
+                  "navigator": "Recording Analysis and the engine run in a Web Worker and in Vitest. Take what you need as an argument.",
+                  "localStorage": "Recording Analysis and the engine run in a Web Worker, which has no localStorage.",
+                  "AudioContext": "Recording Analysis and the engine work on samples, not Web Audio, so they run in a Web Worker and in Vitest.",
+                  "OfflineAudioContext": "Recording Analysis and the engine work on samples, not Web Audio, so they run in a Web Worker and in Vitest."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/server/link-preview.tsx"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noImgElement": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["e2e/**/*.spec.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "@playwright/test": {
+                    "importNames": ["test", "expect"],
+                    "message": "Import test and expect from ./test, which fails a journey on any console error or page error the journey does not expect (docs/agents/web-gotchas.md, The journeys)."
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single",
-      "semicolons": "asNeeded",
-      "trailingCommas": "none",
-      "arrowParentheses": "asNeeded"
-    }
-  }
+  ]
 }

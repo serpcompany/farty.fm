@@ -1,19 +1,9 @@
 import { catalogPath } from './catalog-path.generated'
 import type { Song, SongNotes, SongSummary } from './song'
 
-// The Song Catalog in the browser (#322): fetched as data, not compiled into the JavaScript, so
-// the app stays the same size however many Songs ship. The index Compose reads comes first, and a
-// Song's notes only when it's opened (#323), so Compose stays quick with 1,000 Songs. Each file is
-// named by its content, so this build only ever reads its own catalog, and the service worker keeps
-// what was fetched for offline use (public/sw.js).
-
 let loading: Promise<readonly SongSummary[]> | null = null
 const songs = new Map<string, Promise<Song>>()
 
-/**
- * The Songs this build ships, without their notes, in the app's order: fetched once and
- * shared. A failed fetch isn't kept, so the next call tries again.
- */
 export function loadSongs(): Promise<readonly SongSummary[]> {
   loading ??= fetchSongs().catch(error => {
     loading = null
@@ -22,10 +12,6 @@ export function loadSongs(): Promise<readonly SongSummary[]> {
   return loading
 }
 
-/**
- * `song` with its notes, which Song Creator and a Toot's screen play: fetched once a Song and
- * shared. A failed fetch isn't kept, so the next call tries again.
- */
 export function loadSong(song: SongSummary): Promise<Song> {
   let loaded = songs.get(song.notesPath)
   if (!loaded) {

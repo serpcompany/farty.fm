@@ -1,16 +1,9 @@
-import { expect, type Page, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import { ownClient, TURNSTILE_TEST_TOKEN } from './account'
-
-// Sign-in end to end (#152), as the account step calls the auth API, reading the code from the dev
-// mailbox, as a person reads their email. A code is sent only with a Turnstile token (#237): a
-// local run checks Cloudflare's test token with Cloudflare's test secret.
+import { expect, test } from './test'
 
 type Answer = { status: number; body: unknown }
 
-/**
- * A request from the page itself, so the browser sends its own Origin and cookies, with
- * Turnstile's test token unless `token` is null.
- */
 function call(
   page: Page,
   method: 'GET' | 'POST',
@@ -35,8 +28,10 @@ function call(
 }
 
 test('a code from the dev mailbox signs in to the library, and signing out ends the session', async ({
-  page
+  page,
+  pageErrors
 }, testInfo) => {
+  pageErrors.expect('the server responded with a status of 401')
   const email = `fan-${testInfo.project.name}-${Date.now()}@example.com`
   await page.goto('/privacy/')
 
@@ -70,7 +65,6 @@ test('a code from the dev mailbox signs in to the library, and signing out ends 
     httpOnly: true,
     sameSite: 'Lax'
   })
-  // The library routes take the same session (src/server/session-user.ts).
   expect(await call(page, 'GET', '/api/library/')).toMatchObject({
     status: 200,
     body: { recordings: [], toots: [] }
@@ -82,8 +76,10 @@ test('a code from the dev mailbox signs in to the library, and signing out ends 
 })
 
 test('a code is sent only with a Turnstile token, and the page reads the site key', async ({
-  page
+  page,
+  pageErrors
 }, testInfo) => {
+  pageErrors.expect('the server responded with a status of 400')
   const email = `turnstile-${testInfo.project.name}-${Date.now()}@example.com`
   await ownClient(page.context())
   await page.goto('/privacy/')
@@ -100,14 +96,14 @@ test('a code is sent only with a Turnstile token, and the page reads the site ke
       token
     )
   expect(await sendCode(null)).toMatchObject({ status: 400 })
-  // Cloudflare's test secret passes any token (measured: 'not-a-token' got a 200), so a rejected
-  // token's 403 is checked against a siteverify that refuses it (`turnstile.workers.test.ts`).
   expect(await sendCode(TURNSTILE_TEST_TOKEN)).toEqual({ status: 200, body: { success: true } })
 })
 
 test('a wrong code is refused, and only the four endpoints and the site key answer', async ({
-  page
+  page,
+  pageErrors
 }) => {
+  pageErrors.expect(/the server responded with a status of 40[04]/)
   await page.goto('/privacy/')
   const wrong = await call(page, 'POST', '/api/auth/sign-in/email-otp', {
     email: 'nobody@example.com',

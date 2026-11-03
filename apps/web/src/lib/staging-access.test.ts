@@ -40,7 +40,7 @@ function ask(path: string, asking: Asking = {}) {
 
 describe('basicAuthPassword', () => {
   test.each([
-    [basic('pedos:stagingpassword'), 'stagingpassword'],
+    [basic('farty:stagingpassword'), 'stagingpassword'],
     [basic(':stagingpassword'), 'stagingpassword'],
     [basic('anyone:pass:with:colons'), 'pass:with:colons'],
     [`basic ${btoa('x:stagingpassword')}`, 'stagingpassword'],
@@ -100,7 +100,7 @@ describe('behindStagingAccess', () => {
   })
 
   test('refuses a wrong password, whatever the username', async () => {
-    for (const credentials of ['pedos:wrong', 'pedos:', 'stagingpassword:x']) {
+    for (const credentials of ['farty:wrong', 'farty:', 'stagingpassword:x']) {
       const { response, serve } = ask('/', { headers: { Authorization: basic(credentials) } })
       expect((await response).status).toBe(401)
       expect(serve).not.toHaveBeenCalled()
@@ -108,7 +108,7 @@ describe('behindStagingAccess', () => {
   })
 
   test('serves the password with any username, without its Authorization and with no noindex', async () => {
-    for (const credentials of ['pedos:stagingpassword', ':stagingpassword']) {
+    for (const credentials of ['farty:stagingpassword', ':stagingpassword']) {
       const { response, serve } = ask('/recordings/', {
         headers: { Authorization: basic(credentials) }
       })
@@ -126,7 +126,7 @@ describe('behindStagingAccess', () => {
     const request = new Request(url, {
       method: 'POST',
       body: 'a body',
-      headers: { Authorization: basic('pedos:stagingpassword'), 'Content-Type': 'text/plain' }
+      headers: { Authorization: basic('farty:stagingpassword'), 'Content-Type': 'text/plain' }
     })
     const passed = await behindStagingAccess(request, url, password, async forwarded => {
       expect(forwarded.headers.has('Authorization')).toBe(false)
@@ -148,7 +148,7 @@ describe('behindStagingAccess', () => {
   test('fails closed without its password variable', async () => {
     for (const expected of [undefined, '']) {
       const { response, serve } = ask('/', {
-        headers: { Authorization: basic('pedos:stagingpassword') },
+        headers: { Authorization: basic('farty:stagingpassword') },
         expected
       })
       expect((await response).status).toBe(401)
@@ -159,7 +159,7 @@ describe('behindStagingAccess', () => {
   test('serves robots.txt without the password, with noindex', async () => {
     const withAndWithoutAWrongPassword: Record<string, string>[] = [
       {},
-      { Authorization: basic('pedos:wrong') }
+      { Authorization: basic('farty:wrong') }
     ]
     for (const headers of withAndWithoutAWrongPassword) {
       for (const method of ['GET', 'HEAD']) {
@@ -194,7 +194,7 @@ describe('behindStagingAccess', () => {
   })
 
   test("serves the smoke test's header without the password, with noindex", async () => {
-    expect(smokeTestHeader).toBe('x-pedos-smoke-test')
+    expect(smokeTestHeader).toBe('x-farty-smoke-test')
     const { response, serve } = ask('/', { headers: { [smokeTestHeader]: '1' } })
     const exempt = await response
     expect(exempt.status).toBe(200)
@@ -203,7 +203,7 @@ describe('behindStagingAccess', () => {
   })
 
   test("checks a password sent with the smoke test's header", async () => {
-    for (const authorization of [basic('pedos:wrong'), 'Bearer abc', '']) {
+    for (const authorization of [basic('farty:wrong'), 'Bearer abc', '']) {
       const wrong = ask('/', {
         headers: { [smokeTestHeader]: '1', Authorization: authorization }
       })
@@ -213,7 +213,7 @@ describe('behindStagingAccess', () => {
       expect(wrong.serve).not.toHaveBeenCalled()
     }
     const right = await ask('/', {
-      headers: { [smokeTestHeader]: '1', Authorization: basic('pedos:stagingpassword') }
+      headers: { [smokeTestHeader]: '1', Authorization: basic('farty:stagingpassword') }
     }).response
     expect(right.status).toBe(200)
     expect(right.headers.get('X-Robots-Tag')).toBeNull()
@@ -246,7 +246,7 @@ describe('behindStagingAccess', () => {
   test("serves the Fixture Library with the password, with or without the smoke test's header", async () => {
     for (const headers of [{}, { [smokeTestHeader]: '1' }] as Record<string, string>[]) {
       const { response, serve } = ask(`${fixtureLibraryPath}index.json`, {
-        headers: { ...headers, Authorization: basic('pedos:stagingpassword') }
+        headers: { ...headers, Authorization: basic('farty:stagingpassword') }
       })
       expect((await response).status).toBe(200)
       expect(serve).toHaveBeenCalledOnce()
@@ -296,7 +296,7 @@ describe('servedByTheEntry', () => {
   }
 
   const stagingEnv: EntryEnv = { SITE_ENV: 'staging', STAGING_BASIC_AUTH_PASSWORD: password }
-  const withPassword = { headers: { Authorization: basic('pedos:stagingpassword') } }
+  const withPassword = { headers: { Authorization: basic('farty:stagingpassword') } }
 
   test('asks for the password for a static file, and never reads it from assets', async () => {
     const { response, assets, page } = entry(stagingEnv, staticFile)
@@ -345,7 +345,7 @@ describe('servedByTheEntry', () => {
       expect((await response).status, path).toBe(401)
       expect(assets).not.toHaveBeenCalled()
       const withBoth = entry(stagingEnv, path, {
-        headers: { [smokeTestHeader]: '1', Authorization: basic('pedos:stagingpassword') }
+        headers: { [smokeTestHeader]: '1', Authorization: basic('farty:stagingpassword') }
       })
       expect((await withBoth.response).status, path).toBe(200)
       expect(withBoth.assets).toHaveBeenCalledOnce()
@@ -369,7 +369,7 @@ describe('servedByTheEntry', () => {
   test('serves Production with no gate and no noindex, even given a wrong password', async () => {
     const withAndWithoutAWrongPassword: Record<string, string>[] = [
       {},
-      { Authorization: basic('pedos:wrong') }
+      { Authorization: basic('farty:wrong') }
     ]
     for (const headers of withAndWithoutAWrongPassword) {
       const { response, assets, page } = entry({ SITE_ENV: 'production' }, '/', { headers })

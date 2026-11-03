@@ -1,33 +1,17 @@
-"""Tests for the ranking of PDMX tune titles (rank_pdmx.py), on made-up rows and Tunes, with no dataset.
-
-    tools/melody-lab/.venv/bin/python -I -m unittest discover -s tools/catalog -t tools/catalog
-"""
 import collections
-import sys
 import unittest
-from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
-sys.path[:0] = [str(HERE)]
-
-import pdmx  # noqa: E402
-import rank_pdmx  # noqa: E402
-from rank_pdmx import Tune  # noqa: E402
+import pdmx
+import rank_pdmx
+from pdmx_testing import row
+from rank_pdmx import Tune
 
 
-def scored(title, sid="1", rating="0.0", views="0", ratings="0", song_name="NA", tracks="1", conflict="False",
-           genres="classical", artist="NA"):
-    """A PDMX.csv row with the fields the importer and the ranking read."""
-    return {
-        "title": title, "song_name": song_name, "metadata": f"./metadata/1/{sid}.json", "rating": rating,
-        "n_views": views, "n_ratings": ratings, "n_tracks": tracks, "license_conflict": conflict,
-        "license": "publicdomain", "license_url": pdmx.LICENSES["publicdomain"], "mid": f"./mid/1/1/Qm{sid}.mid",
-        "genres": genres, "artist_name": artist,
-    }
+def scored(title, genres="classical", artist="NA", **fields):
+    return {**row(title, **fields), "genres": genres, "artist_name": artist}
 
 
 def tune(title, scores=3, views=100, ratings=0, rating=0.0, **kw):
-    """A Tune called `title` whose every score names it, can be picked and has a classical genre."""
     fields = dict(scores=scores, pickable=scores, views=views, ratings=ratings, rated=rating * ratings,
                   offered=scores, named=scores, tagged=scores, modern=0, spellings=collections.Counter({title: scores}))
     fields.update(kw)
@@ -38,7 +22,7 @@ def by_key(*tunes):
     return {t.key: t for t in tunes}
 
 
-class TallyTest(unittest.TestCase):
+class Tally(unittest.TestCase):
     ROWS = [
         scored("Greensleeves", sid="1", views="10", ratings="2", rating="4.0"),
         scored("Greensleeves - Ukulele", sid="2", views="5", ratings="2", rating="5.0", tracks="3"),
@@ -63,14 +47,14 @@ class TallyTest(unittest.TestCase):
         self.assertEqual(t.ratings, 4)
         self.assertAlmostEqual(t.rating, 4.5)
 
-    def test_counts_the_scores_the_importer_can_pick(self):
+    def test_counts_the_scores_the_importer_can_pick_leaving_out_a_three_track_one(self):
         t = rank_pdmx.tally(self.ROWS)["greensleeves"]
-        self.assertEqual(t.pickable, 2)  # the ukulele score has 3 tracks
+        self.assertEqual(t.pickable, 2)
 
-    def test_counts_how_scores_carry_the_title(self):
+    def test_counts_scores_called_by_the_title_or_its_head_and_scores_named_by_it_whole_or_by_song_name(self):
         t = rank_pdmx.tally(self.ROWS)["greensleeves"]
-        self.assertEqual(t.offered, 2)  # its title, or its title's head
-        self.assertEqual(t.named, 2)  # its whole title, or its song name
+        self.assertEqual(t.offered, 2)
+        self.assertEqual(t.named, 2)
         self.assertEqual(t.spellings, collections.Counter({"Greensleeves": 2}))
 
     def test_keeps_only_names_some_score_is_called_by(self):
@@ -86,7 +70,7 @@ class TallyTest(unittest.TestCase):
         self.assertEqual(t.artists, collections.Counter({"Someone": 1, "Misc tunes": 1}))
 
 
-class LeftOutTest(unittest.TestCase):
+class LeftOut(unittest.TestCase):
     def why(self, t, known=(), excluded=None):
         return rank_pdmx.left_out(t, set(known), excluded or {})
 
@@ -129,7 +113,7 @@ class LeftOutTest(unittest.TestCase):
         self.assertEqual(self.why(t), "every spelling of the title is garbled")
 
 
-class RankTest(unittest.TestCase):
+class Rank(unittest.TestCase):
     def rank(self, *tunes, known=()):
         ranked, why = rank_pdmx.rank(by_key(*tunes), set(known), {})
         return [t.key for t in ranked], why
@@ -166,7 +150,7 @@ class RankTest(unittest.TestCase):
         self.assertEqual(keys, ["cranham"])
 
 
-class KnownNamesTest(unittest.TestCase):
+class KnownNames(unittest.TestCase):
     def test_takes_catalog_titles_and_every_name_of_tried_titles(self):
         tried = [pdmx.read_titles("ring | Ring Around the Rosie | Ring a Ring o' Roses\n")]
         known = rank_pdmx.known_names([{"id": "mice", "title": "The Three Blind Mice"}], tried)
@@ -180,7 +164,7 @@ class KnownNamesTest(unittest.TestCase):
         self.assertEqual([e["id"] for e in kept], ["mice", "ode"])
 
 
-class ReadExcludedTest(unittest.TestCase):
+class ReadExcluded(unittest.TestCase):
     def test_reads_titles_by_match_key_and_skips_comments(self):
         text = "# why\n\nThe Girl from Ipanema | under copyright: Jobim, 1962  # bossa nova\nFrère Jacques! | test\n"
         self.assertEqual(rank_pdmx.read_excluded(text),
@@ -191,11 +175,11 @@ class ReadExcludedTest(unittest.TestCase):
             rank_pdmx.read_excluded("A | why\nTake Five\n")
 
     def test_the_committed_file_reads(self):
-        excluded = rank_pdmx.read_excluded(rank_pdmx.EXCLUDED.read_text())
+        excluded = rank_pdmx.read_excluded(rank_pdmx.EXCLUDED.read_text(encoding="utf-8"))
         self.assertIn("take five", excluded)
 
 
-class GarbledTest(unittest.TestCase):
+class Garbled(unittest.TestCase):
     def test_finds_utf8_read_as_latin1(self):
         for text in ["SÃ¤kkijÃ¤rven Polkka", "Marko skaÄ\x8de", "Marko skaÄe", "SarÄ Gelin", "WÅród nocnej ciszy",
                      "JÄzus", "Nie zna Åmierci Pan Å¼ywota", "Åç", "Ððµññð²ðð¼ñðºðñ", "ΑπÏ κÎμπους"]:
@@ -209,7 +193,7 @@ class GarbledTest(unittest.TestCase):
                 self.assertFalse(rank_pdmx.garbled(text))
 
 
-class DisplayTitleTest(unittest.TestCase):
+class DisplayTitle(unittest.TestCase):
     def display(self, key, **spellings):
         t = tune("x", spellings=collections.Counter(spellings))
         t.key = key
@@ -267,7 +251,7 @@ class DisplayTitleTest(unittest.TestCase):
         self.assertIsNone(rank_pdmx.display_title(t))
 
 
-class TitlesLinesTest(unittest.TestCase):
+class TitlesLines(unittest.TestCase):
     def test_writes_a_titles_file_the_importer_reads_with_the_ranked_name_only(self):
         tunes = [tune("Maple Leaf Rag"), tune("The Swan"), tune("Prelude in C# minor")]
         lines = rank_pdmx.titles_lines(tunes, taken={"maple-leaf-rag"})
@@ -277,7 +261,7 @@ class TitlesLinesTest(unittest.TestCase):
         self.assertEqual([t.names for t in read], [(t.key,) for t in tunes])
 
 
-class RankingTextTest(unittest.TestCase):
+class RankingText(unittest.TestCase):
     def test_lists_the_top_titles_and_why_the_others_were_left_out(self):
         ranked = [tune("Maple Leaf Rag", views=350, ratings=2, rating=4.5,
                        artists=collections.Counter({"Misc tunes": 5, "Scott Joplin": 1}))]
@@ -286,7 +270,3 @@ class RankingTextTest(unittest.TestCase):
         self.assertIn("- 4 titles; 1 may be tried next, and the top 1 are listed. Left out:\n  - 3: fewer than 2 scores",
                       text)
         self.assertIn("| 1 | Maple Leaf Rag | Scott Joplin | 3 | 3 | 350 | 2 | 4.50 |", text)
-
-
-if __name__ == "__main__":
-    unittest.main()

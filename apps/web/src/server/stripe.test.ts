@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { savingIsPaid, TOOT_PRICE } from '@/lib/pricing'
+import {
+  checkoutSession,
+  LIVE_KEY,
+  stripeV1,
+  TEST_KEY,
+  WEBHOOK_SECRET
+} from '@/test-support/stripe'
 
 import {
   type CheckoutSession,
@@ -20,10 +27,6 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-// Made-up values in Stripe's formats, never real keys.
-const TEST_KEY = 'sk_test_madeUpForTheTests'
-const LIVE_KEY = 'sk_live_madeUpForTheTests'
-const WEBHOOK_SECRET = 'whsec_madeUpForTheTests'
 const TOOT = '33333333-3333-4333-8333-333333333333'
 
 describe('paymentsConfig', () => {
@@ -77,7 +80,7 @@ describe('paymentsConfig', () => {
   })
 
   it('pays on a local run of a Production build, as its Save does, never with a live key', () => {
-    vi.stubEnv('PEDOS_ENVIRONMENT', 'production')
+    vi.stubEnv('FARTY_ENVIRONMENT', 'production')
     expect(paymentsConfig({}, 'localhost:4158')).toEqual({ kind: 'dev' })
     expect(paymentsConfig({ STRIPE_SECRET_KEY: TEST_KEY }, 'localhost:4158')).toEqual({
       kind: 'stripe',
@@ -88,7 +91,7 @@ describe('paymentsConfig', () => {
     expect(paymentsConfig({ STRIPE_SECRET_KEY: LIVE_KEY }, 'localhost:4158')).toEqual({
       kind: 'off'
     })
-    vi.stubEnv('PEDOS_ENVIRONMENT', 'staging')
+    vi.stubEnv('FARTY_ENVIRONMENT', 'staging')
     expect(paymentsConfig({}, 'localhost:3071')).toEqual({ kind: 'dev' })
   })
 
@@ -100,8 +103,7 @@ describe('paymentsConfig', () => {
       ).toEqual({ kind: 'free' })
     }
     expect(free).toHaveBeenLastCalledWith('production')
-    // A local run asks about the environment its build is for, as its Save does.
-    vi.stubEnv('PEDOS_ENVIRONMENT', 'production')
+    vi.stubEnv('FARTY_ENVIRONMENT', 'production')
     expect(paymentsConfig({}, 'localhost:3071', free)).toEqual({ kind: 'free' })
     expect(free).toHaveBeenLastCalledWith('production')
   })
@@ -167,19 +169,8 @@ describe('isCheckoutSessionId', () => {
   })
 })
 
-const session = (fields: Partial<CheckoutSession> = {}): CheckoutSession => ({
-  id: 'cs_test_a1',
-  url: 'https://checkout.stripe.com/c/pay/cs_test_a1',
-  mode: 'payment',
-  status: 'complete',
-  payment_status: 'paid',
-  client_reference_id: TOOT,
-  metadata: { user_id: 'userA', toot_id: TOOT },
-  livemode: false,
-  amount_total: 99,
-  currency: 'usd',
-  ...fields
-})
+const session = (fields: Partial<CheckoutSession> = {}) =>
+  checkoutSession('userA', TOOT, { status: 'complete', payment_status: 'paid', ...fields })
 
 describe('paidFor', () => {
   it('is true for a paid session for this user and Toot', () => {
@@ -208,9 +199,10 @@ describe('paidFor', () => {
   })
 
   it('is true with Adaptive Pricing: the session keeps 99 usd, the buyer paid in their currency', () => {
-    const local = session({
+    const local = {
+      ...session(),
       presentment_details: { presentment_currency: 'jpy', presentment_amount: 163 }
-    })
+    }
     expect(paidFor(local, 'userA', TOOT, TOOT_PRICE)).toBe(true)
   })
 
@@ -236,7 +228,7 @@ describe('createCheckoutSession', () => {
       cancelUrl: `https://staging.farty.fm/compose/twinkle/?toot=${TOOT}`,
       replaces: null
     })
-    expect(created.id).toBe('cs_test_a1')
+    expect(created.id).toBe('cs_test_first')
     const [url, init] = fetch.mock.calls[0]
     expect(url).toBe('https://api.stripe.com/v1/checkout/sessions')
     expect(init?.method).toBe('POST')
@@ -321,6 +313,33 @@ describe('createCheckoutSession', () => {
     })
   })
 
+  it('gives up on Stripe after 10 seconds, as if it couldn’t be reached', async () => {
+    const timeout = vi
+      .spyOn(AbortSignal, 'timeout')
+      .mockReturnValue(AbortSignal.abort(new DOMException('Timed out', 'TimeoutError')))
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_, init) => {
+      init?.signal?.throwIfAborted()
+      return Response.json(session())
+    })
+    await expect(retrieveCheckoutSession(TEST_KEY, 'cs_test_a1')).rejects.toMatchObject({
+      status: 0
+    })
+    expect(timeout).toHaveBeenCalledWith(10_000)
+  })
+
+  it('fails with 502 when Stripe answers something that isn’t a Checkout Session', async () => {
+    for (const answer of [
+      Response.json({ ...session(), payment_status: 'refunded' }),
+      Response.json({ id: 'cs_test_a1' }),
+      new Response('not json', { status: 200 })
+    ]) {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(answer)
+      await expect(retrieveCheckoutSession(TEST_KEY, 'cs_test_a1')).rejects.toMatchObject({
+        status: 502
+      })
+    }
+  })
+
   it('never puts anything but a session id in the path', async () => {
     const fetch = vi.spyOn(globalThis, 'fetch')
     await expect(retrieveCheckoutSession(TEST_KEY, '../customers')).rejects.toBeInstanceOf(
@@ -331,19 +350,7 @@ describe('createCheckoutSession', () => {
 })
 
 const encoder = new TextEncoder()
-
-/** `Stripe-Signature`'s v1, as Stripe makes it. */
-async function sign(payload: string, timestamp: number, secret = WEBHOOK_SECRET) {
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  )
-  const mac = await crypto.subtle.sign('HMAC', key, encoder.encode(`${timestamp}.${payload}`))
-  return Buffer.from(mac).toString('hex')
-}
+const sign = stripeV1
 
 describe('verifyStripeSignature', () => {
   const payload = JSON.stringify({ type: 'checkout.session.completed' })

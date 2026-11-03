@@ -2,12 +2,6 @@ import type { MetadataRoute } from 'next'
 
 export const dynamic = 'force-static'
 
-/**
- * The web app manifest. It's a route handler, not `manifest.ts`, so that `layout.tsx` can link it
- * with `crossorigin="use-credentials"`: Chrome fetches a manifest without credentials otherwise,
- * so behind the Staging password (#123) it would get a 401. Next adds that attribute to its own
- * manifest link only on Vercel previews.
- */
 const manifest: MetadataRoute.Manifest = {
   id: '/',
   name: 'Farty',
@@ -16,9 +10,7 @@ const manifest: MetadataRoute.Manifest = {
   start_url: '/',
   scope: '/',
   display: 'standalone',
-  // The iPhone app is portrait only.
   orientation: 'portrait',
-  // The iPhone app's launch screen: the system background.
   background_color: '#ffffff',
   theme_color: '#ffffff',
   icons: [

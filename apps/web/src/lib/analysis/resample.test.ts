@@ -3,8 +3,6 @@ import { decoded, goldenRecordings } from '../../test-support/golden'
 import { ANALYSIS_SAMPLE_RATE, resampleToAnalysisRate } from './resample'
 
 describe('decoding and resampling', () => {
-  // libsndfile decodes MP3 with mpg123 in gapless mode; the test decoder does the same, so frame
-  // counts match exactly (no encoder-delay offset).
   test('fixture files decode to the frame counts libsndfile reports', async () => {
     for (const golden of goldenRecordings) {
       const file = await decoded(golden)
@@ -27,12 +25,14 @@ describe('decoding and resampling', () => {
     }
   })
 
-  // Band-limited and time-aligned: an in-band tone comes out as the same tone at the same
-  // phase, and a tone above the new Nyquist frequency is rejected. 47,999 Hz and 48,000.5 Hz
-  // take the uncached path (too many phases, or no rational step).
+  const uncachedPhaseRates = [47_999, 48_000.5]
   test.each([
-    48_000, 16_000, 96_000, 22_050, 47_999, 48_000.5
-  ])('a %s Hz tone survives intact', rate => {
+    48_000,
+    16_000,
+    96_000,
+    22_050,
+    ...uncachedPhaseRates
+  ])('a 1 kHz tone at %s Hz keeps its phase, and a tone above the new Nyquist frequency is rejected', rate => {
     const seconds = 0.5
     const tone = (f: number, sr: number, n: number) =>
       Float32Array.from({ length: n }, (_, i) => 0.5 * Math.sin((2 * Math.PI * f * i) / sr))
@@ -40,10 +40,10 @@ describe('decoding and resampling', () => {
     const y = resampleToAnalysisRate(tone(1000, rate, n), rate)
     expect(y.length).toBe(Math.ceil((n * ANALYSIS_SAMPLE_RATE) / rate))
     const ideal = tone(1000, ANALYSIS_SAMPLE_RATE, y.length)
-    // Skip the edges, where the input starts and stops abruptly.
+    const abruptEdge = 4410
     let error = 0
     let power = 0
-    for (let i = 4410; i < y.length - 4410; i++) {
+    for (let i = abruptEdge; i < y.length - abruptEdge; i++) {
       error += (y[i] - ideal[i]) ** 2
       power += ideal[i] ** 2
     }
@@ -52,7 +52,7 @@ describe('decoding and resampling', () => {
     if (rate > ANALYSIS_SAMPLE_RATE) {
       const alias = resampleToAnalysisRate(tone(23_000, rate, n), rate)
       let leaked = 0
-      for (let i = 4410; i < alias.length - 4410; i++) leaked += alias[i] ** 2
+      for (let i = abruptEdge; i < alias.length - abruptEdge; i++) leaked += alias[i] ** 2
       expect(10 * Math.log10(leaked / power)).toBeLessThan(-90)
     }
   })

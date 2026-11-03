@@ -2,118 +2,69 @@ import { env } from 'cloudflare:test'
 import { and, eq, like } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 
-import * as handleRoute from '@/app/api/handle/route'
-import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
-import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
 import { createDatabase } from '@/db/database'
-import { markTootPaid, startTootPayment } from '@/db/payments'
 import { profileReports, rateLimit, shares } from '@/db/schema'
-import { songs } from '@/lib/catalog/songs.generated'
-import { TOOT_PRICE } from '@/lib/pricing'
 import { findProfile } from '@/server/profiles'
 import {
-  type As,
   api,
   ORIGIN,
   padTootMetadata,
+  params,
+  R1,
+  R2,
   recordingMetadata,
-  signUp,
   testDb,
   tootMetadata,
   uploadBody,
   wav
 } from '@/test-support/library-api'
+import { payFor, share, shareUrl, withHandle } from '@/test-support/sharing-api'
+import { songs } from '@/test-support/songs.generated'
 
 import * as reportRoute from './[handle]/report/route'
 
-// Profile pages (#319, ADR 0021) in workerd, with a real D1 and R2: `/u/<handle>/` lists only the
-// Recordings and Toots (#346) its user shares right now, newest first, and its Report keeps a row
-// for Farty.
-
-const R1 = '11111111-1111-4111-8111-111111111111'
-const R2 = '22222222-2222-4222-8222-222222222222'
 const R3 = '33333333-3333-4333-8333-333333333333'
 const T1 = '44444444-4444-4444-8444-444444444444'
 const T2 = '55555555-5555-4555-8555-555555555555'
 const T3 = '66666666-6666-4666-8666-666666666666'
-/** The Recordings `tootMetadata`'s and `padTootMetadata`'s Toots play, which aren't shared. */
 const PLAYED = ['00000000-0000-0000-0000-000000000090', '00000000-0000-0000-0000-000000000084']
+const ITEM_KEYS = ['detail', 'kind', 'name', 'path', 'shareId', 'sharedAt']
 
 const twinkle = songs.find(song => song.id === 'twinkle')?.title
 
-const params = <P>(value: P) => ({ params: Promise.resolve(value) })
-
-function request(path: string, method: string, as: As, body?: unknown) {
-  const headers = new Headers()
-  if (as.cookie) headers.set('cookie', as.cookie)
-  if (method !== 'GET') headers.set('origin', ORIGIN)
-  if (body !== undefined) headers.set('content-type', 'application/json')
-  return new Request(`${ORIGIN}${path}`, {
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body)
-  })
-}
-
-/** A user with the Handle `name`, and Recordings `ids` uploaded and shared in that order. */
-async function sharer(name: string, ids: string[]) {
-  const user = await signUp(name)
-  const picked = await handleRoute.PUT(
-    request('/api/handle/', 'PUT', user, { handle: name }),
-    params({})
-  )
-  expect(picked.status).toBe(201)
-  for (const [i, id] of ids.entries()) {
-    const metadata = recordingMetadata(id, { number: i + 1 })
-    const uploaded = await api.put('recordings', id, uploadBody(metadata, wav()), user)
-    expect(uploaded.status).toBe(201)
-    const shared = await shareRecordingRoute.PUT(
-      request(`/api/share/recordings/${id}/`, 'PUT', user),
-      params({ id })
-    )
-    expect(shared.status).toBe(201)
-    // Minutes apart, as the page lists them by when each was shared.
-    await testDb()
-      .update(shares)
-      .set({ createdAt: new Date(Date.UTC(2026, 10, 1, 9, i)) })
-      .where(eq(shares.itemId, id))
-  }
-  return user
-}
-
-/** When the item `id` was shared: 9:`minute` on 1 November 2026. */
 const sharedAt = (id: string, minute: number) =>
   testDb()
     .update(shares)
     .set({ createdAt: new Date(Date.UTC(2026, 10, 1, 9, minute)) })
     .where(eq(shares.itemId, id))
 
-/**
- * Pays for the Toot `metadata.id` and saves it to `user`'s account, as Song Creator's Save does
- * (ADR 0010), then shares it unless `share` is false, at 9:`minute`.
- */
+async function sharer(name: string, ids: string[]) {
+  const user = await withHandle(name)
+  for (const [i, id] of ids.entries()) {
+    const metadata = recordingMetadata(id, { number: i + 1 })
+    expect((await api.put('recordings', id, uploadBody(metadata, wav()), user)).status).toBe(201)
+    await shareUrl(id, user)
+    await sharedAt(id, i)
+  }
+  return user
+}
+
 async function savedToot(
   user: { id: string; cookie: string },
   metadata: { id: string; songId: string | null },
-  { minute = 0, share = true } = {}
+  { minute = 0, share: shared = true } = {}
 ) {
   const { id, songId } = metadata
-  await startTootPayment(testDb(), user.id, id, songId, `cs_test_${id}`, TOOT_PRICE)
-  expect(await markTootPaid(testDb(), user.id, id, `cs_test_${id}`)).toBe(true)
+  await payFor(user, id, songId)
   expect((await api.put('toots', id, uploadBody(metadata, wav()), user)).status).toBe(201)
-  if (!share) return
-  const shared = await shareTootRoute.PUT(
-    request(`/api/share/toots/${id}/`, 'PUT', user),
-    params({ id })
-  )
-  expect(shared.status).toBe(201)
+  if (!shared) return
+  await shareUrl(id, user, 'toots')
   await sharedAt(id, minute)
 }
 
 const names = async (handle: string) =>
   (await findProfile(testDb(), handle))?.items.map(item => item.name) ?? null
 
-/** A report from the profile page, by the reporter at `ip`. */
 const report = (handle: string, origin: string | null = ORIGIN, ip = '203.0.113.1') => {
   const headers = new Headers({ 'cf-connecting-ip': ip })
   if (origin !== null) headers.set('origin', origin)
@@ -142,20 +93,10 @@ describe('A profile page', () => {
     expect(newest.sharedAt).toBe(Date.UTC(2026, 10, 1, 9, 2))
   })
 
-  /** Each item's fields, which are all the page gets. */
-  const ITEM_KEYS = ['detail', 'kind', 'name', 'path', 'shareId', 'sharedAt']
-
   it('leaves out what was stopped, taken down or deleted, and what others share', async () => {
     const alice = await sharer('alice', [R1, R2, R3])
     await sharer('bob', [R1])
-    expect(
-      (
-        await shareRecordingRoute.DELETE(
-          request(`/api/share/recordings/${R1}/`, 'DELETE', alice),
-          params({ id: R1 })
-        )
-      ).status
-    ).toBe(204)
+    expect((await share.stop(R1, alice)).status).toBe(204)
     await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, R2))
     expect((await api.delete('recordings', R3, alice)).status).toBe(204)
     expect(await names('alice')).toEqual([])
@@ -163,11 +104,9 @@ describe('A profile page', () => {
   })
 
   it('lists the Toots its user shares with the Recordings, newest first, with nothing private (#346)', async () => {
-    // R1 at 9:00, R2 at 9:01, R3 at 9:02.
     const alice = await sharer('alice', [R1, R2, R3])
     await savedToot(alice, tootMetadata(T1, { title: 'Twinkle for Mum' }), { minute: 3 })
     await savedToot(alice, padTootMetadata(T2), { minute: 1 })
-    // T3's Song isn't in Farty any more.
     await savedToot(alice, tootMetadata(T3, { songId: 'gone', title: 'Old' }), { minute: 5 })
     await sharedAt(R1, 4)
 
@@ -181,7 +120,6 @@ describe('A profile page', () => {
       ['toots', 'Twinkle for Mum', twinkle],
       ['recordings', 'Recording 3', 'E3']
     ])
-    // R2 and the Sound Pad Toot, shared in the same minute, come by link id, as D1 orders them.
     expect(rows.slice(4)).toEqual(
       expect.arrayContaining([
         ['recordings', 'Recording 2', 'E3'],
@@ -192,12 +130,9 @@ describe('A profile page', () => {
     for (const item of items) {
       const segment = item.kind === 'toots' ? 't' : 'r'
       expect(item.path).toBe(`/u/alice/${segment}/${item.shareId}/`)
-      // A Toot's row has a Recording's fields and no more: never its Arrangement or Performance.
       expect(Object.keys(item).sort()).toEqual(ITEM_KEYS)
     }
 
-    // Nothing private: no Toot's or Recording's own id, no Recording a Toot plays, and not the
-    // owner's id or email.
     const page = JSON.stringify(profile)
     for (const secret of [T1, T2, T3, R1, R2, R3, ...PLAYED, alice.id, 'alice@example.test']) {
       expect(page).not.toContain(secret)
@@ -221,13 +156,11 @@ describe('A profile page', () => {
     await savedToot(alice, padTootMetadata(T2, { title: 'Pad with R1', performance }), {
       minute: 1
     })
-    // Another user's take-down is not Alice's.
     const bob = await sharer('bob', [R1])
     await testDb()
       .update(shares)
       .set({ takenDownAt: new Date() })
       .where(and(eq(shares.userId, bob.id), eq(shares.itemId, R1)))
-    // The SQL each lookup sends to D1.
     let statements: string[] = []
     const watched = new Proxy(env.DB, {
       get(target, key) {
@@ -248,7 +181,6 @@ describe('A profile page', () => {
     expect(await page()).toEqual(['Song with R1', 'Pad with R1', 'Recording 1'])
     expect(loadsTaps()).toBe(false)
 
-    // With Alice's own R1 taken down, the check loads what her Toots play, and drops them.
     statements = []
     await testDb()
       .update(shares)
@@ -267,11 +199,7 @@ describe('A profile page', () => {
     await savedToot(alice, tootMetadata(T4, { title: 'Taken down' }), { minute: 1 })
     expect(await names('alice')).toEqual(['Stopped', 'Deleted', 'Taken down'])
 
-    const stopped = await shareTootRoute.DELETE(
-      request(`/api/share/toots/${T2}/`, 'DELETE', alice),
-      params({ id: T2 })
-    )
-    expect(stopped.status).toBe(204)
+    expect((await share.stop(T2, alice, 'toots')).status).toBe(204)
     expect((await api.delete('toots', T3, alice)).status).toBe(204)
     await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, T4))
     expect(await names('alice')).toEqual([])
@@ -279,7 +207,6 @@ describe('A profile page', () => {
 
   it('leaves out a Toot that plays a taken-down Recording, until it is back (#346)', async () => {
     const alice = await sharer('alice', [R1])
-    // T1 plays R1 for one of its Song's pitches, T2 tapped R1 on the Sound Pad, and T3 plays R2.
     const arrangement = { transposition: 0, recordingForPitch: { 60: R2, 64: R1 } }
     await savedToot(alice, tootMetadata(T1, { title: 'Song with R1', arrangement }), { minute: 3 })
     const performance = { recordings: [R1], taps: [[0, 0]] }
@@ -290,27 +217,15 @@ describe('A profile page', () => {
     await savedToot(alice, tootMetadata(T3, { title: 'Song with R2', arrangement: others }), {
       minute: 1
     })
-    expect(await names('alice')).toEqual([
-      'Song with R1',
-      'Pad with R1',
-      'Song with R2',
-      'Recording 1'
-    ])
+    const everything = ['Song with R1', 'Pad with R1', 'Song with R2', 'Recording 1']
+    expect(await names('alice')).toEqual(everything)
 
-    // Farty takes down R1's own link after a report.
     await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, R1))
     expect(await names('alice')).toEqual(['Song with R2'])
 
-    // Put back, R1 brings its Toots back with it.
     await testDb().update(shares).set({ takenDownAt: null }).where(eq(shares.itemId, R1))
-    expect(await names('alice')).toEqual([
-      'Song with R1',
-      'Pad with R1',
-      'Song with R2',
-      'Recording 1'
-    ])
+    expect(await names('alice')).toEqual(everything)
 
-    // Taken down again, then deleted: its take-down stays, so its Toots stay off the page.
     await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, R1))
     expect((await api.delete('recordings', R1, alice)).status).toBe(204)
     expect(await names('alice')).toEqual(['Song with R2'])

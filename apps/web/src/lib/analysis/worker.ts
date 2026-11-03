@@ -1,30 +1,26 @@
-/// <reference lib="webworker" />
+import type { Analysis, Trim } from '@/lib/recordings'
 import { analyzeToAnalysis } from './port'
 import { resampleToAnalysisRate } from './resample'
 import { trimBounds } from './trimming'
+import { answerRequests } from './worker-requests'
 
-/** One request: Recording Analysis of a take, or the Trim its handles keep (`trim`). */
-type AnalysisRequest = {
+export interface AnalysisRequest {
   id: number
   samples: Float32Array
   sampleRate: number
-  trim?: { startSeconds: number; endSeconds: number }
+  trim?: Trim
 }
 
-/**
- * Runs Recording Analysis off the page's thread, and finds a Trim (ADR 0019), which resamples the
- * whole take to 44.1 kHz first. One request at a time, answered by id.
- */
-self.onmessage = (event: MessageEvent<AnalysisRequest>) => {
-  const { id, samples, sampleRate, trim } = event.data
-  try {
-    if (trim) {
-      const y = resampleToAnalysisRate(samples, sampleRate)
-      self.postMessage({ id, trim: trimBounds(y, trim.startSeconds, trim.endSeconds) })
-    } else {
-      self.postMessage({ id, analysis: analyzeToAnalysis(samples, sampleRate) })
-    }
-  } catch (error) {
-    self.postMessage({ id, error: error instanceof Error ? error.message : String(error) })
-  }
-}
+export type AnalysisReply = { analysis: Analysis } | { trim: Trim }
+
+answerRequests<AnalysisRequest, AnalysisReply>(({ samples, sampleRate, trim }) =>
+  trim
+    ? {
+        trim: trimBounds(
+          resampleToAnalysisRate(samples, sampleRate),
+          trim.startSeconds,
+          trim.endSeconds
+        )
+      }
+    : { analysis: analyzeToAnalysis(samples, sampleRate) }
+)

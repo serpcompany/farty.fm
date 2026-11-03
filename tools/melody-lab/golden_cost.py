@@ -1,36 +1,12 @@
-"""Recompute plan()'s cost for a given Arrangement, from the golden data alone.
-
-An Auto-map or Pitch Coverage test compares the golden `uncovered`, `octave_moves` and
-`plan_cost` with what this function (or a port of it) computes for the Arrangement under
-test. It never uses the solver's own total: the solver's total only sums the matrix cells it
-picked, so a port that picks the right cells but then maps a tied cell to the wrong Recording
-(say, every tied pitch to 013) would still report the golden cost. Recomputing from the
-returned Recording ids charges that mistake and rejects it.
-
-    .venv/bin/python golden_cost.py    # recomputes every golden Arrangement and compares
-"""
 import json
 
-from engine import GAP_S, ROOT, SR, fills, move_cost, needed_seconds, silent_cost, too_short_cost, unsettled_cost
+from analysis import ROOT, SR
+from engine import GAP_S, fills, move_cost, needed_seconds, silent_cost, too_short_cost, unsettled_cost
 
 GOLDEN = ROOT / "fixtures/golden"
 
 
 def arrangement_cost(song, recordings, transpose, recording_for_pitch):
-    """(uncovered pitches, Octave Moves, cost) of this Arrangement, as plan() ranks it.
-
-    song:                a songs/<id>.json object
-    recordings:          {id: recordings/<id>.json object}
-    transpose:           the Arrangement's transposition
-    recording_for_pitch: {Song pitch: Recording id, or None when uncovered}, one entry per
-                         distinct Song pitch
-
-    Per covered pitch, in ascending pitch order: the pitch's total note length in beats x
-    move_cost(shift), plus too_short_cost(), unsettled_cost() and silent_cost() over its
-    notes, on the Recording's own length (Songs play farts raw, ADR 0012). A Recording plays
-    at most one pitch, and only moves the unlock rule allows count: within move_cost()'s
-    reach, and long enough for the pitch's longest note (fills()).
-    """
     pitches = sorted({n["pitch"] for n in song["notes"]})
     assert sorted(recording_for_pitch) == pitches, "one entry per distinct Song pitch"
     used = [r for r in recording_for_pitch.values() if r is not None]
@@ -64,8 +40,6 @@ def arrangement_cost(song, recordings, transpose, recording_for_pitch):
 
 
 def missing(song, transpose, recording_for_pitch):
-    """The notes no Recording covers, as {target_midi, seconds}: each uncovered pitch after
-    transposition, and needed_seconds() of its longest slot, lowest first (Fit.missing)."""
     spb = 60 / song["bpm"]
     out = []
     for p in sorted(recording_for_pitch):
@@ -76,11 +50,10 @@ def missing(song, transpose, recording_for_pitch):
 
 
 def load(rel):
-    return json.loads((GOLDEN / rel).read_text())
+    return json.loads((GOLDEN / rel).read_text(encoding="utf-8"))
 
 
 def check(fit, song, recordings):
-    """Recompute one golden fit (an arrangement file or a coverage.json entry); return the error."""
     if "per_pitch" in fit:
         per_pitch = {x["song_pitch"]: x["recording"] for x in fit["per_pitch"]}
     else:
@@ -110,6 +83,7 @@ def main():
         for fit in subset["songs"]:
             worst, n = max(worst, check(fit, songs[fit["song"]], recordings)), n + 1
     print(f"all {n} golden fits: recomputed cost within {worst:.1e} of plan_cost")
+    return n
 
 
 if __name__ == "__main__":

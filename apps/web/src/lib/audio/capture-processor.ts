@@ -1,34 +1,19 @@
-/** How much audio from before the tap a take starts with, while the microphone is open. */
 export const preRollSeconds = 0.3
 
-/** Takes after the first arrive in batches of this many frames. */
 export const batchFrames = 4096
 
-/**
- * What the page tells the capture processor. `take` numbers each take. `flush` empties the
- * pre-roll ring, after an interruption. `close` ends the processor for good, when the microphone
- * is let go, so the audio thread stops running it.
- */
 export type CaptureCommand =
   | { type: 'start' | 'stop' | 'cancel'; take: number }
   | { type: 'flush' | 'close' }
 
-/** What the capture processor sends back: a batch of a take's samples, the last one `done`. */
 export type CaptureBatch = { take: number; samples: Float32Array; done: boolean }
 
-/**
- * The AudioWorklet that captures the microphone, as source text, because a worklet module loads
- * from a URL. It runs on the audio thread, so a busy page can't drop samples the way a
- * ScriptProcessorNode can.
- *
- * While the microphone is open it keeps the last `preRollSeconds` of audio in a ring, in memory
- * only. A take starts with that ring, so a fart that starts as the person taps is kept whole.
- * The first batch goes out in the first render quantum after `start`, so the page knows capture
- * has begun; later batches are `batchFrames` long. `stop` sends the rest, marked `done`. After
- * `close`, `process` returns false, so the browser can free the processor.
- */
+export function sendCommand(node: AudioWorkletNode, command: CaptureCommand): void {
+  node.port.postMessage(command)
+}
+
 export const captureProcessorSource = `
-class PedosCapture extends AudioWorkletProcessor {
+class FartyCapture extends AudioWorkletProcessor {
   constructor() {
     super()
     this.ring = new Float32Array(Math.max(1, Math.round(${preRollSeconds} * sampleRate)))
@@ -108,5 +93,5 @@ class PedosCapture extends AudioWorkletProcessor {
     return true
   }
 }
-registerProcessor('pedos-capture', PedosCapture)
+registerProcessor('farty-capture', FartyCapture)
 `

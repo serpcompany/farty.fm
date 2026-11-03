@@ -1,23 +1,3 @@
-"""Export the reference engine's results as golden test data for the ports (web, Swift).
-
-Writes deterministic JSON to fixtures/golden/ (format and tolerances: fixtures/golden/README.md):
-
-  index.json                         libraries, Recordings, Songs, a summary, library versions
-  recordings/<id>.json               Recording Analysis of every Fixture Library Recording
-  songs/<id>.json                    the imported melody of every catalog Song, which the web app
-                                     ships from (apps/web/src/lib/catalog/generate.ts)
-  arrangements/<library>/<id>.json   Pitch Coverage, transposition, Arrangement and evaluate.py
-                                     metrics per arranged Song (arranged_catalog()), for the full
-                                     Fixture Library and the small 6-Recording one (no Arrangement
-                                     to render when locked)
-  coverage.json                      Pitch Coverage and Arrangement of every arranged Song on fixed
-                                     random subsets of the Fixture Library
-
-Everything is computed by the lab's own functions (the same calls run_all.py makes); this
-script only rounds and writes. Running it twice gives byte-identical files.
-
-    .venv/bin/python export_golden.py
-"""
 import hashlib
 import json
 import platform
@@ -29,24 +9,22 @@ import librosa
 import numpy as np
 import soundfile as sf
 
+import analysis
 import engine
 import golden_cost
 from build import SMALL_LIBRARY
 from evaluate import evaluate
 from melody import load_catalog
 
-GOLDEN = engine.ROOT / "fixtures/golden"
-# The batches whose Songs get arrangements/ and coverage.json, with the hand-entered Songs: the 129
-# Songs with golden data before #350 (the web app's 128 and ode-mutopia), which the web port's tests
-# check against this engine.
+GOLDEN = analysis.ROOT / "fixtures/golden"
 ARRANGED_BATCHES = {f"tools/catalog/titles-0{n}.txt" for n in (1, 2, 3)}
-GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")  # README.md is written by hand
-FORMAT_VERSION = 8  # 8: a fart's lead-in plays before its beat (#287); 7: Songs play every burst, the pitch reads the first (ADR 0016); 6: Songs' `bar_lines` (#232); 5: Songs play farts raw (ADR 0012); 4: the length rule (#221)
-COVERAGE_SEEDS = 10  # random subsets per size in coverage.json
+GENERATED = ("index.json", "recordings", "songs", "arrangements", "coverage.json")
+FORMAT_VERSION = 8
+COVERAGE_SEEDS = 10
 
 
 class Exact(float):
-    """A float written at full precision: Python's repr round-trips to the same double."""
+    pass
 
 
 def exact(x):
@@ -54,14 +32,12 @@ def exact(x):
 
 
 def num(x, digits):
-    """Round a float for stable output. NaN and None become None, -0.0 becomes 0.0."""
     if x is None or not np.isfinite(x):
         return None
     return round(float(x), digits) + 0.0
 
 
 def plain(x):
-    """Turn numpy scalars into JSON types; round any float not marked Exact to 6 decimals."""
     if isinstance(x, dict):
         return {str(k): plain(v) for k, v in x.items()}
     if isinstance(x, (list, tuple)):
@@ -79,20 +55,20 @@ def write(rel, obj):
     path = GOLDEN / rel
     path.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps(plain(obj), indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False)
-    path.write_text(text + "\n", encoding="utf-8")
+    path.write_text(text + "\n", encoding="utf-8", newline="\n")
+
+
+def noise_like_reason(src):
+    if src.pitched:
+        return None
+    return "no_steady_pitch" if src.pitch_estimate is None else "failed_audition"
 
 
 def recording_json(entry, src):
-    audio_path = engine.AUDIO_DIR / entry["filename"]
+    audio_path = analysis.AUDIO_DIR / entry["filename"]
     info = sf.info(audio_path)
     voiced = np.isfinite(src.f0)
     contour = librosa.hz_to_midi(np.where(voiced, src.f0, 1.0))
-    if src.pitched:
-        reason = None
-    elif src.pitch_estimate is None:
-        reason = "no_steady_pitch"  # too few voiced frames, or confidence below MIN_PITCH_CONF
-    else:
-        reason = "failed_audition"  # had a pitch estimate, but audition() never read it back
     return {
         "id": src.id,
         "file": {
@@ -105,19 +81,19 @@ def recording_json(entry, src):
         "gesture": {
             "start_sample": src.start,
             "end_sample": src.end,
-            "start_s": num(src.start / engine.SR, 6),
-            "end_s": num(src.end / engine.SR, 6),
+            "start_s": num(src.start / analysis.SR, 6),
+            "end_s": num(src.end / analysis.SR, 6),
             "pitch_end_sample": src.pitch_end,
-            "pitch_end_s": num(src.pitch_end / engine.SR, 6),
+            "pitch_end_s": num(src.pitch_end / analysis.SR, 6),
             "cut_at_reattack": bool(src.cut_at_reattack),
             "lead_start_sample": src.start - len(src.lead_in),
-            "lead_start_s": num((src.start - len(src.lead_in)) / engine.SR, 6),
+            "lead_start_s": num((src.start - len(src.lead_in)) / analysis.SR, 6),
         },
         "pitch_contour": {
-            "sample_rate": engine.SR,
-            "hop": engine.HOP,
+            "sample_rate": analysis.SR,
+            "hop": analysis.HOP,
             "frames": len(src.f0),
-            "midi": [num(m, 4) if v else None for m, v in zip(contour, voiced)],
+            "midi": [num(m, 4) if v else None for m, v in zip(contour, voiced, strict=True)],
         },
         "pitch_estimate_midi": exact(src.pitch_estimate),
         "pitch_confidence": src.pitch_confidence,
@@ -126,14 +102,15 @@ def recording_json(entry, src):
         "shortest_note_s": src.min_note_s if src.pitched else None,
         "settle_s": exact(src.settle_s) if src.pitched else None,
         "melodic": src.pitched,
-        "noise_like_reason": reason,
+        "noise_like_reason": noise_like_reason(src),
         "rms_db": num(src.rms_db, 4),
     }
 
 
 def song_json(c, m):
     report = dict(m.report)
-    report["source_file"] = engine.ROOT.joinpath(report["source_file"]).resolve().relative_to(engine.ROOT).as_posix()
+    root = analysis.ROOT
+    report["source_file"] = root.joinpath(report["source_file"]).resolve().relative_to(root).as_posix()
     return {
         "id": c["id"],
         "title": c["title"],
@@ -151,7 +128,6 @@ def song_json(c, m):
 
 
 def fit_json(fit):
-    """The Melody Fit's ranking and Pitch Coverage, shared by arrangements/ and coverage.json."""
     return {
         "unlocked": fit.unlocked,
         "pitch_coverage": {"covered": fit.covered, "total": fit.total},
@@ -162,21 +138,7 @@ def fit_json(fit):
     }
 
 
-def require_start_order(c, m):
-    """Raise unless the Song's notes start in strictly increasing order. engine.render() returns
-    its events in start order and the ports return theirs in the order given, so the golden rows
-    are paired with the notes by position only while the two orders are the same."""
-    for i in range(1, len(m.notes)):
-        if not m.notes[i].start > m.notes[i - 1].start:
-            raise ValueError(
-                f"{c['id']}: note {i} starts at beat {m.notes[i].start}, not after note {i - 1} at beat "
-                f"{m.notes[i - 1].start}; golden needs a Song's notes in strictly increasing start order"
-            )
-
-
-def arrangement_json(c, m, library, sources):
-    require_start_order(c, m)
-    fit = engine.melody_fit(m, sources)
+def per_pitch_json(fit, sources):
     pitch_of = {s.id: s.ref_midi for s in sources}
     per_pitch = []
     for p, rid in sorted(fit.recording_for_pitch.items()):
@@ -190,8 +152,37 @@ def arrangement_json(c, m, library, sources):
                 "octave_move": None if rid is None else engine.move_cost(shift)[1],
             }
         )
-    out = {"song": c["id"], "library": library, **fit_json(fit), "per_pitch": per_pitch}
-    if not fit.unlocked:  # a locked Song can't be played, so there is nothing to render
+    return per_pitch
+
+
+def note_json(m, a, e, p):
+    assert a.note_index == e["note_index"] == p["i"]
+    return {
+        "index": a.note_index,
+        "song_pitch": int(m.notes[a.note_index].pitch),
+        "target_midi": int(a.target_midi),
+        "recording": a.source_id,
+        "shift_semitones": num(a.shift_semitones, 4),
+        "heard_cents": p["cents"],
+        "fart_cents": p["fart_cents"],
+        "render": {"start_s": e["start_s"], "len_s": e["len_s"], "gain_db": e["gain_db"], "lead_s": e["lead_s"]},
+    }
+
+
+def require_start_order(c, m):
+    for i in range(1, len(m.notes)):
+        if not m.notes[i].start > m.notes[i - 1].start:
+            raise ValueError(
+                f"{c['id']}: note {i} starts at beat {m.notes[i].start}, not after note {i - 1} at beat "
+                f"{m.notes[i - 1].start}; golden needs a Song's notes in strictly increasing start order"
+            )
+
+
+def arrangement_json(c, m, library, sources):
+    require_start_order(c, m)
+    fit = engine.melody_fit(m, sources)
+    out = {"song": c["id"], "library": library, **fit_json(fit), "per_pitch": per_pitch_json(fit, sources)}
+    if not fit.unlocked:
         return {**out, "render_settings": None, "max_abs_shift_semitones": None, "notes": None, "metrics": None}
 
     transpose, assignments, cost = engine.plan(m, sources, with_cost=True)
@@ -199,21 +190,7 @@ def arrangement_json(c, m, library, sources):
     audio, events = engine.render(m, sources, assignments, bpm=m.bpm)
     metrics = evaluate(audio, m, events, m.bpm, sources)
     per_note = metrics.pop("per_note")
-    notes = []
-    for a, e, p in zip(assignments, events, per_note, strict=True):
-        assert a.note_index == e["note_index"] == p["i"]
-        notes.append(
-            {
-                "index": a.note_index,
-                "song_pitch": int(m.notes[a.note_index].pitch),
-                "target_midi": int(a.target_midi),
-                "recording": a.source_id,
-                "shift_semitones": num(a.shift_semitones, 4),
-                "heard_cents": p["cents"],
-                "fart_cents": p["fart_cents"],
-                "render": {"start_s": e["start_s"], "len_s": e["len_s"], "gain_db": e["gain_db"], "lead_s": e["lead_s"]},
-            }
-        )
+    notes = [note_json(m, a, e, p) for a, e, p in zip(assignments, events, per_note, strict=True)]
     return {
         **out,
         "render_settings": {"bpm": m.bpm},
@@ -224,7 +201,6 @@ def arrangement_json(c, m, library, sources):
 
 
 def coverage_json(catalog, lib):
-    """Pitch Coverage of every Song on fixed random subsets of the Fixture Library."""
     ids = [s.id for s in lib]
     melodic = [s.id for s in lib if s.pitched]
     subsets = []
@@ -245,14 +221,10 @@ def coverage_json(catalog, lib):
 
 
 def arranged_catalog(catalog):
-    """The Songs of `catalog` that get arrangements/ and coverage.json, in catalog order: the
-    hand-entered ones and ARRANGED_BATCHES' (#350). Every later batch's Song passed
-    tools/catalog/import_pdmx.py's render gate on this engine. Arranging all 1,009 here would take
-    this script from about 3 minutes to 25, and the web tests that read them about 8 times as long."""
     return [(c, m) for c, m in catalog if "import" not in c or c["import"].get("titles") in ARRANGED_BATCHES]
 
 
-def main():
+def clear_generated():
     for name in GENERATED:
         path = GOLDEN / name
         if path.is_dir():
@@ -260,8 +232,51 @@ def main():
         elif path.exists():
             path.unlink()
 
-    manifest = {r["id"]: r for r in json.loads(engine.MANIFEST.read_text())["recordings"]}
-    lib = engine.load_library()
+
+def summary_line(c, name, a):
+    cov = f"{a['pitch_coverage']['covered']}/{a['pitch_coverage']['total']}"
+    if not a["unlocked"]:
+        return f"{c['id']:12s} {name:5s} T={a['transpose']:+d} locked, {cov} notes covered"
+    r = a["metrics"]
+    return (
+        f"{c['id']:12s} {name:5s} T={a['transpose']:+d} notes={r['notes']:3d} in50cFart={r['within_50c_of_fart_pct']:3d}% "
+        f"onTime={r['onsets_on_time_pct']}% reatk={r['notes_with_retrigger']} | in50c={r['within_50c_pct']:3d}% "
+        f"med={r['median_abs_cents']:5.1f}c contour={r['contour_pct']}% recs={r['distinct_recordings']} "
+        f"octaveMoves={a['octave_moves']}"
+    )
+
+
+def write_songs(catalog, libraries):
+    songs = []
+    for c, m in catalog:
+        transposes, unlocked = {}, {}
+        for name, sources in libraries.items():
+            a = arrangement_json(c, m, name, sources)
+            write(f"arrangements/{name}/{c['id']}.json", a)
+            transposes[name] = a["transpose"]
+            unlocked[name] = a["unlocked"]
+            print(summary_line(c, name, a))
+        songs.append({"id": c["id"], "title": c["title"], "notes": len(m.notes), "transpose": transposes, "unlocked": unlocked})
+    return songs
+
+
+def environment():
+    return {
+        "python": platform.python_version(),
+        "numpy": version("numpy"),
+        "scipy": version("scipy"),
+        "librosa": version("librosa"),
+        "soundfile": version("soundfile"),
+        "libsndfile": sf.__libsndfile_version__,
+        "mido": version("mido"),
+        "soxr": version("soxr"),
+    }
+
+
+def main():
+    clear_generated()
+    manifest = {r["id"]: r for r in analysis.read_manifest()}
+    lib = analysis.load_library()
     small = [s for s in lib if s.id in SMALL_LIBRARY]
     assert [s.id for s in small] == sorted(SMALL_LIBRARY)
     libraries = {"full": lib, "small": small}
@@ -272,28 +287,7 @@ def main():
     for c, m in every:
         write(f"songs/{c['id']}.json", song_json(c, m))
     catalog = arranged_catalog(every)
-    songs = []
-    for c, m in catalog:
-        transposes, unlocked = {}, {}
-        for name, sources in libraries.items():
-            a = arrangement_json(c, m, name, sources)
-            write(f"arrangements/{name}/{c['id']}.json", a)
-            transposes[name] = a["transpose"]
-            unlocked[name] = a["unlocked"]
-            cov = f"{a['pitch_coverage']['covered']}/{a['pitch_coverage']['total']}"
-            if not a["unlocked"]:
-                print(f"{c['id']:12s} {name:5s} T={a['transpose']:+d} locked, {cov} notes covered")
-                continue
-            r = a["metrics"]
-            print(
-                f"{c['id']:12s} {name:5s} T={a['transpose']:+d} notes={r['notes']:3d} in50cFart={r['within_50c_of_fart_pct']:3d}% "
-                f"onTime={r['onsets_on_time_pct']}% reatk={r['notes_with_retrigger']} | in50c={r['within_50c_pct']:3d}% "
-                f"med={r['median_abs_cents']:5.1f}c contour={r['contour_pct']}% recs={r['distinct_recordings']} "
-                f"octaveMoves={a['octave_moves']}"
-            )
-        songs.append({"id": c["id"], "title": c["title"], "notes": len(m.notes), "transpose": transposes, "unlocked": unlocked})
-    # The owner's farts (#295) stay out of the random subsets, so adding them left every subset as
-    # it was. They are Noise-like, so the Arrangements, which read only Melodic Recordings, are too.
+    songs = write_songs(catalog, libraries)
     write("coverage.json", coverage_json(catalog, [s for s in lib if manifest[s.id]["source"] != "owner"]))
 
     melodic = [s.id for s in lib if s.pitched]
@@ -301,33 +295,23 @@ def main():
     for s in lib:
         if s.pitched:
             by_pitch.setdefault(s.ref_midi, []).append(s.id)
-    tie_groups = sorted(ids for ids in by_pitch.values() if len(ids) > 1)
     write(
         "index.json",
         {
             "format_version": FORMAT_VERSION,
             "generator": "tools/melody-lab/export_golden.py",
-            "sample_rate": engine.SR,
-            "hop": engine.HOP,
+            "sample_rate": analysis.SR,
+            "hop": analysis.HOP,
             "libraries": {name: [s.id for s in sources] for name, sources in libraries.items()},
             "recordings": [s.id for s in lib],
             "melodic_recordings": melodic,
-            "tie_groups": tie_groups,
+            "tie_groups": sorted(ids for ids in by_pitch.values() if len(ids) > 1),
             "songs": songs,
-            "environment": {
-                "python": platform.python_version(),
-                "numpy": version("numpy"),
-                "scipy": version("scipy"),
-                "librosa": version("librosa"),
-                "soundfile": version("soundfile"),
-                "libsndfile": sf.__libsndfile_version__,
-                "mido": version("mido"),
-                "soxr": version("soxr"),
-            },
+            "environment": environment(),
         },
     )
     print(f"{len(melodic)} of {len(lib)} Recordings are Melodic: {' '.join(melodic)}")
-    golden_cost.main()  # fails if golden_cost.py no longer matches plan()'s cost terms
+    golden_cost.main()
 
 
 if __name__ == "__main__":

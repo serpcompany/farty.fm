@@ -1,12 +1,13 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import type { Analysis } from '@/lib/recordings'
 import {
   autoMapInput,
+  autoMapInputs,
   goldenArrangement,
   goldenRecording,
   goldenSong,
   libraries,
-  songIds
+  songIds,
+  storedAnalysis
 } from '@/test-support/engine-golden'
 import {
   decoded,
@@ -29,36 +30,16 @@ import {
   songSeconds
 } from './renderer'
 
-// The renderer on the golden inputs (each gesture from fixtures/golden), checked against the
-// reference's own placement of every note of the 9 unlocked Arrangements.
-// The audio itself is measured with the reference's evaluate() by
-// tools/melody-lab/evaluate_renders.py on the renders of scripts/render-songs.ts.
-
 const SR = RENDER_SAMPLE_RATE
-const library = libraries.full.map(autoMapInput)
+const library = autoMapInputs(libraries.full)
 const sources = new Map<string, RenderSource>()
 
 async function goldenSource(g: GoldenRecording): Promise<RenderSource> {
   return { gesture: await gestureBody(g), leadIn: await leadInBody(g) }
 }
 
-/** The analysis the app would store for a fixture, from the golden bounds. */
-function storedAnalysis(g: GoldenRecording): Analysis {
-  return {
-    gestureStartSeconds: g.gesture.start_sample / SR,
-    gestureEndSeconds: g.gesture.end_sample / SR,
-    cutAtReattack: g.gesture.cut_at_reattack,
-    pitchEstimateMidi: g.pitch_estimate_midi,
-    pitchConfidence: g.pitch_confidence,
-    recordingPitchMidi: g.recording_pitch_midi,
-    shortestNoteSeconds: g.shortest_note_s,
-    settleSeconds: g.settle_s
-  }
-}
-
 const round = (x: number, digits: number) => Number(x.toFixed(digits))
 
-/** A placed note's segment as the reference builds it: lead-in, then the gesture, faded. */
 function withLeadIn(
   source: RenderSource,
   placed: { leadSamples: number; lengthSamples: number }
@@ -86,7 +67,6 @@ describe('the renderer places every note as the reference does', () => {
       const golden = goldenArrangement('full', id)
       const arrangement = arrange(song, library)
       if (!golden.unlocked) {
-        // A note longer than every fixture near its pitch (ADR 0011), played raw (ADR 0012).
         expect(arrangement.unlocked, id).toBe(false)
         expect(() => renderSong(song, arrangement, sources)).toThrow(/locked/)
         return
@@ -112,11 +92,10 @@ describe('the renderer places every note as the reference does', () => {
         expect(round(mine.leadSamples / SR, 3), label).toBe(g.render.lead_s)
         songGain = Math.max(songGain, Math.abs(mine.gainDb - g.render.gain_db))
       }
-      // gain_db is written to 0.1 dB, so it can't agree closer than 0.05.
-      expect(songGain, id).toBeLessThanOrEqual(0.05 + 1e-9)
+      const goldenGainRounding = 0.05
+      expect(songGain, id).toBeLessThanOrEqual(goldenGainRounding + 1e-9)
       worstGain = Math.max(worstGain, songGain)
 
-      // One check over every sample: an expect per sample is millions of calls across the catalog.
       let peak = 0
       let notFinite = 0
       for (const s of rendered.samples) {
@@ -135,8 +114,15 @@ describe('the renderer places every note as the reference does', () => {
 })
 
 describe('the render path from what the app stores', () => {
-  it('cuts the golden gesture', async () => {
-    for (const id of goldenIndex.melodic_recordings) {
+  it('cuts the golden gesture and its lead-in, a Noise-like one too, for a fart placed by ear (ADR 0015)', async () => {
+    const noiseLike = goldenIndex.recordings.filter(
+      id => !goldenIndex.melodic_recordings.includes(id)
+    )
+    expect(noiseLike).toEqual(
+      expect.arrayContaining(['065', '081', '105', '106', '107', '108', '109', '110'])
+    )
+    for (const id of noiseLike) expect(goldenRecording(id).recording_pitch_midi, id).toBeNull()
+    for (const id of [...goldenIndex.melodic_recordings, ...noiseLike]) {
       const g = goldenRecording(id)
       const file = await decoded(g)
       const source = renderSource(
@@ -174,32 +160,10 @@ describe('the render path from what the app stores', () => {
 
   it('refuses a locked Song, and a Recording it was not given', () => {
     const song = goldenSong('twinkle')
-    const locked = arrange(song, libraries.small.map(autoMapInput))
+    const locked = arrange(song, autoMapInputs(libraries.small))
     expect(() => renderSong(song, locked, sources)).toThrow(/locked: 4 of 6 notes covered/)
     const unlocked = arrange(song, library)
     expect(() => renderSong(song, unlocked, new Map())).toThrow(/No Recording plays pitch/)
-  })
-
-  it('cuts a Noise-like gesture too, for a fart placed by ear (ADR 0015)', async () => {
-    // Every Noise-like fixture, so with the Melodic ones above every golden lead_start_sample is
-    // checked, the owner's room-noisy phone takes 105 to 110 among them (#295).
-    const noiseLike = goldenIndex.recordings.filter(
-      id => !goldenIndex.melodic_recordings.includes(id)
-    )
-    expect(noiseLike).toEqual(
-      expect.arrayContaining(['065', '081', '105', '106', '107', '108', '109', '110'])
-    )
-    for (const id of noiseLike) {
-      const g = goldenRecording(id)
-      expect(g.recording_pitch_midi, id).toBeNull()
-      const file = await decoded(g)
-      const source = renderSource(
-        { samples: file.samples, sampleRate: file.sampleRate },
-        storedAnalysis(g)
-      )
-      expect(source.gesture, id).toEqual(await gestureBody(g))
-      expect(source.leadIn, id).toEqual(await leadInBody(g))
-    }
   })
 })
 
@@ -224,8 +188,6 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
     const placed = out.notes[0]
     expect(placed.startSample).toBe(22050)
     expect(placed.lengthSamples).toBe(Math.trunc(0.475 * SR))
-    // Its lead-in, whole: half a second before the beat has room for it (#287). The quiet sound
-    // before 013's attack lasts 0.306 s, so it is cut to the longest lead-in, 0.25 s.
     expect(placed.leadSamples).toBe(source.leadIn.length)
     expect(source.leadIn.length).toBe(11025)
 
@@ -236,13 +198,11 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
       expected[22050 - placed.leadSamples + i] += segment[i] * gain
     }
     expect(out.samples).toEqual(limit(expected))
-    // Three semitones up, or an Octave Move down: the same fart, at its own pitch and speed.
     expect(at((g.recording_pitch_midi as number) + 3)).toEqual(out)
     expect(at((g.recording_pitch_midi as number) - 12)).toEqual(out)
   })
 
-  it('plays a fart shorter than its note whole, then leaves the rest silent', () => {
-    // 016 lasts 0.31 s, less than a 0.975 s half note at 120 bpm: it is never stretched.
+  it('plays a fart shorter than its note whole, unstretched, then leaves the rest silent', () => {
     const source = sources.get('016') as RenderSource
     const out = render([noteInBeats(source, 40, { start: 0, dur: 2, bpm: 120, barLines: [0] })], 1)
     const placed = out.notes[0]
@@ -252,9 +212,13 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
 
   it("accents notes on the score's bar lines by 1.5 dB, not a pickup", () => {
     const source = sources.get('002') as RenderSource
-    // Happy Birthday: "Hap-py" is a pickup, and 3/4 bars start on "birth" (beat 1) and "you" (4).
-    const barLines = [1, 4, 7]
-    const beats = (start: number) => ({ start, dur: 1, bpm: 90, barLines })
+    const happyBirthdayAfterItsPickup = [1, 4, 7]
+    const beats = (start: number) => ({
+      start,
+      dur: 1,
+      bpm: 90,
+      barLines: happyBirthdayAfterItsPickup
+    })
     const notes = [0, 0.75, 1, 2, 4, 5.5, 7 + 1e-9].map(start =>
       noteInBeats(source, 48, beats(start))
     )
@@ -270,23 +234,20 @@ describe('fart-only rendering (ADR 0004), raw (ADR 0012)', () => {
       1
     )
     expect(out.notes[0].lengthSamples).toBe(Math.trunc(0.06 * SR))
-    expect(out.samples[0]).toBe(0) // the fade-in starts at silence
-    expect(out.samples[out.notes[0].lengthSamples - 1]).toBe(0) // and the fade-out ends there
+    const fadeInStart = out.samples[0]
+    const fadeOutEnd = out.samples[out.notes[0].lengthSamples - 1]
+    expect(fadeInStart).toBe(0)
+    expect(fadeOutEnd).toBe(0)
   })
 })
 
-// A fart's quiet lead-in plays before its note's beat (#287), as the reference's
-// tools/melody-lab/test_lead_in.py checks there.
 describe("a fart's lead-in", () => {
-  /** A fart that opens on a quiet `leadSeconds` lead-in, then holds 0.5 for `bodySeconds`. */
   const fart = (leadSeconds: number, bodySeconds: number): RenderSource => ({
     gesture: new Float64Array(Math.trunc(bodySeconds * SR)).fill(0.5),
     leadIn: new Float64Array(Math.trunc(leadSeconds * SR)).fill(0.02)
   })
   const at = (seconds: number) => Math.trunc(seconds * SR)
 
-  // a: 0.5 s; b: 2 s, so it fills its note and leaves only the gap. Both open on 0.3 s of lead-in.
-  // Note 0 starts 0.1 s in; a half-beat rest comes after it, none after note 1, 0.2 s after note 2.
   const a = fart(0.3, 0.5)
   const b = fart(0.3, 2)
   const notes = (
@@ -300,11 +261,7 @@ describe("a fart's lead-in", () => {
   const out = render(notes, 5)
 
   it('plays in the rest before the beat, never in the gap after a note nor before the start', () => {
-    // Cut at the Song's start; all of it in a half-beat rest; none after a legato note; the 0.2 s
-    // of a rest shorter than it.
     expect(out.notes.map(n => round(n.leadSamples / SR, 3))).toEqual([0.1, 0.3, 0, 0.2])
-    // Nothing between note 0's end (0.575 s) and note 1's lead-in (0.8 s), and the gap after
-    // note 1 (2.075 to 2.1 s) stays silent.
     expect(out.samples.subarray(at(0.58), at(0.79)).every(s => s === 0)).toBe(true)
     expect(out.samples.subarray(at(2.076), at(2.1)).every(s => s === 0)).toBe(true)
     for (const n of out.notes) {
@@ -325,8 +282,6 @@ describe("a fart's lead-in", () => {
   })
 
   it('places notes given out of start order the same, and returns them in the order given', () => {
-    // The same notes, written last first, as the reference's test_lead_in.py gives them: each
-    // lead-in is still limited by the note that starts just before it.
     const order = [3, 1, 0, 2]
     const shuffled = render(
       order.map(i => notes[i]),
@@ -337,8 +292,6 @@ describe("a fart's lead-in", () => {
   })
 
   it('holds the next lead-in back until a fart played past its written end stops', () => {
-    // A 0.05-beat note still plays 60 ms of its fart, past its written end (1.05 s), so the next
-    // note's lead-in starts where that fart stops (1.06 s): 0.24 s of its 0.3 s, not 0.25 s.
     const short = render(
       (
         [
@@ -353,13 +306,11 @@ describe("a fart's lead-in", () => {
     expect(short.notes[0].lengthSamples).toBe(at(0.06))
     expect(short.notes[1].leadSamples).toBe(at(1.3) - playedEnd)
     expect(round(short.notes[1].leadSamples / SR, 3)).toBe(0.24)
-    expect(short.samples[playedEnd + 200]).not.toBe(0) // the lead-in sounds from there
-    expect(short.samples[playedEnd - 1]).toBe(0) // where the short note's fade-out ends
+    expect(short.samples[playedEnd + 200]).not.toBe(0)
+    expect(short.samples[playedEnd - 1]).toBe(0)
   })
 
   it('sets the level from the attack, not the quiet lead-in', () => {
-    // Read from the lead-in's start, its quiet 0.3 s would set the note 28 dB louder. Only the
-    // 3 ms fade-in, now on the lead-in instead of the attack, moves it.
     const alone = render(
       [noteInBeats(fart(0, 0.5), 60, { start: 1, dur: 1, bpm: 60, barLines: [] })],
       2
@@ -368,9 +319,6 @@ describe("a fart's lead-in", () => {
   })
 
   it("plays 009's G3 opening before its beat when placed by ear on G3", async () => {
-    // When the Saints: with 002, 032 and 022 gone, 009 placed on G3 plays the first note, which
-    // starts on the half beat (0.2 s), so 0.2 s of its 0.215 s G3 opening plays before the beat.
-    // The reference finds the same (tools/melody-lab/test_lead_in.py reads the G3 there).
     const song = goldenSong('saints')
     const g009 = goldenRecording('009')
     const placed = libraries.full
@@ -392,24 +340,20 @@ describe("a fart's lead-in", () => {
     const first = rendered.notes[0]
     expect(first.recordingId).toBe('009')
     expect(first.startSample).toBe(at(0.2))
-    expect(first.leadSamples).toBe(first.startSample) // all the room there is, back to the start
+    expect(first.leadSamples).toBe(first.startSample)
 
     const leadIn = await leadInBody(g009)
-    expect(leadIn.length).toBe(9460) // 0.215 s
+    expect(leadIn.length).toBe(9460)
     const heard = rendered.samples.subarray(0, first.startSample)
     const played = leadIn.subarray(leadIn.length - first.leadSamples)
-    // The take's own samples, past the 3 ms fade-in, under the gentle limiter.
     expect(correlation(heard.subarray(200), played.subarray(200))).toBeGreaterThan(0.999)
-    // And its attack on the beat: the gesture from there.
     const body = (await gestureBody(g009)).subarray(0, 4410)
     const attack = rendered.samples.subarray(first.startSample, first.startSample + 4410)
     expect(correlation(attack, body)).toBeGreaterThan(0.99)
   })
 })
 
-// The same takes as `LeadInStart` in tools/melody-lab/test_lead_in.py.
 describe('where a lead-in starts', () => {
-  /** A take of [seconds, level] stretches. */
   const take = (...parts: [number, number][]) => {
     const y = new Float32Array(parts.reduce((n, [s]) => n + Math.trunc(s * SR), 0))
     let i = 0
@@ -420,7 +364,7 @@ describe('where a lead-in starts', () => {
     return y
   }
   const frame = Math.trunc(0.005 * SR)
-  const before = Math.trunc(0.008 * SR) // the gesture starts this long before the attack
+  const before = Math.trunc(0.008 * SR)
 
   it('takes a quiet sound before the attack, from 8 ms before it', () => {
     const y = take([0.1, 0], [0.2, 0.05], [0.5, 0.5])
@@ -440,15 +384,12 @@ describe('where a lead-in starts', () => {
   })
 
   it('leaves out room noise before a longer gap', () => {
-    // As on the owner's phone takes (#295): a bump of room noise 20 dB down, then 0.3 s of
-    // quieter noise 40 dB down, then the fart.
     const y = take([1, 0.005], [0.1, 0.05], [0.3, 0.005], [0.5, 0.5])
     const attack = Math.trunc(1.4 * SR) - before
     expect(attack - leadInStart(y, attack)).toBeLessThanOrEqual(frame)
   })
 
   it('is at most a quarter second', () => {
-    // Room noise loud enough (20 dB down) to join the attack, for 1 s before it.
     const attack = SR - before
     expect(attack - leadInStart(take([1, 0.05], [0.5, 0.5]), attack)).toBe(Math.trunc(0.25 * SR))
   })
@@ -473,11 +414,8 @@ function correlation(x: ArrayLike<number>, y: ArrayLike<number>): number {
   return sxy / Math.sqrt(sxx * syy)
 }
 
-// Two Swift behaviors kept where the reference would fail. No golden Song reaches them, so these
-// use synthetic note placements.
-describe('where the reference would fail', () => {
+describe('where the reference would fail, as the Swift port did, on synthetic placements no golden Song reaches', () => {
   it('clips a note that runs past the end of the mix', () => {
-    // The note is the Recording trimmed, faded and scaled.
     const source = sources.get('013') as RenderSource
     const note = {
       source,
@@ -497,12 +435,12 @@ describe('where the reference would fail', () => {
     const expected = new Float64Array(length)
     const from = placed.startSample - placed.leadSamples
     for (let i = from; i < length; i++) expected[i] += segment[i - from] * gain
-    expect(expected[length - 1]).not.toBe(0) // the note still plays in the last sample
+    const lastSample = expected[length - 1]
+    expect(lastSample).not.toBe(0)
     expect(out.samples).toEqual(limit(expected))
   })
 
-  it('clamps the fades on a segment shorter than the 3 ms fade-in', () => {
-    // 50 samples: the fade-in covers all 50 (not 132), and the fade-out a third of them, 16.
+  it('clamps the fades on a segment shorter than the 3 ms fade-in: all 50 samples fade in, and a third fade out', () => {
     const n = 50
     const segment = new Float64Array(n).fill(1)
     applyFades(segment)

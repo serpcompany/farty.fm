@@ -70,7 +70,6 @@ describe('Handles', () => {
       'staffan'
     ]
     for (const handle of ordinary) expect(handleProblem(handle), handle).toBeNull()
-    // `.` isn't allowed in a Handle at all, so this one is refused before the block list.
     expect(handleProblem('pedos.admin')).toBe('chars')
   })
 

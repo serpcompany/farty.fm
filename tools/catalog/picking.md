@@ -1,0 +1,19 @@
+# Picking
+
+How the import matches a title to PDMX's scores, picks one, cuts its excerpt and writes `catalog/`. The commands, and the gates each pick must pass, are in the [README](README.md).
+
+A score matches a title when its title, its title before ` - `, `(`, `[` or `:`, or its MuseScore song name is one of the Song's names (ignoring case, accents, punctuation and a leading "the"). A plain title ranks before an arrangement's title ("Greensleeves - Ukulele"), and both before a song-name match. It must be public domain or CC0, with no PDMX license conflict, have at most 2 tracks, and not be one of the scores whose bar lines are off the tune (`pdmx.MISBARRED_SCORES`: most are written without the Song's pickup, one in the wrong meter, so the accent on each bar line falls on the wrong notes, found by reading the catalog's scores against the words, #232), nor one that isn't the tune's melody (`pdmx.NOT_THE_MELODY`: a hymn's tenor part, or another tune under the same name, found by reading the picks after an import, #324). Then the highest rating wins, then the most views. If a score fails a gate, the next best is tried, up to `--tries` (5). Of the score's tracks, the importer (`melody.py`) takes the one with the highest mean pitch, leaving out percussion parts (MIDI channel 10, or an unpitched General MIDI percussive program: Agogo, Woodblock, Taiko Drum, Synth Drum or Reverse Cymbal; Tinkle Bell, Steel Drums and Melodic Tom can carry a tune): O Sacred Head Now Wounded's score has wood blocks above the hymn (#324). The Saints keeps its misbarred score (2030696) by decision: the one correctly barred score that passes the gates (6133057) plays "saints" short, then rests 4 beats (#232). The importer never picks 2030696, so importing the Saints again would replace it.
+
+A title already in the catalog from another batch, or added by hand, fails, compared the same way ("The Itsy Bitsy Spider" and "Itsy Bitsy Spider" are one title). No two Songs share a score: one already in the catalog isn't picked, and one that passed for an earlier title in the batch fails the license gate for the later ones.
+
+## The excerpt and tempo
+
+The excerpt runs from the melody's first note, at its beat exactly as `melody.py` reads it and never rounded (2/3, say, so that note stays), to the end of the whole bars that fit in 32 quarter-note beats from that note's bar, so a pickup written after a rest in a full bar doesn't open the Song with silence (#232). Bar lines follow the score's time signatures, so a pickup written as its own short bar (1/4, then 3/4) keeps them, and `beats_per_bar` is the meter that covers most of the excerpt. The renderers accent the notes on the score's own bar lines (`melody.bar_lines`), wherever the excerpt starts. The tempo is the score's own at the first note, kept within 72 to 144 bpm.
+
+## PDMX's padded pickups
+
+PDMX's MIDI pads a pickup out to a full bar when a MuseScore 1.x score sets the pickup's length only in its time-signature map, not on the measure itself: PDMX's reader (`read_musescore.py`) takes a measure's length from its `len` attribute or its time signature, and MuseScore takes it from the map. The Song then plays its pickup, then silence for the rest of the bar. Happy Birthday and We Wish You a Merry Christmas came from two such scores, so they were imported again in `titles-03.txt`.
+
+## Writing the catalog
+
+The run writes `catalog/` only after every passing Song's entry imports, through the catalog's own loader, to exactly the melody its gates judged. If one doesn't, it stops with `ReimportMismatch` and leaves `catalog/` and the report as they were. The merged `catalog.json` is staged too, and renamed over the real one only after the copies have moved in; the batch's stale copies go last, so a failure before the rename leaves the old `catalog.json` with every file it names.

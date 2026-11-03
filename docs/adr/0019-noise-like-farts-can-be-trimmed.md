@@ -41,7 +41,7 @@ The web renders of `trim-065` are byte for byte the same before and after #314. 
    - Songs play the fart found between the handles (rule 5). The fart's length on the row and the length rule (ADR 0011) measure that fart, the part Songs play.
    - This is the one exception to ADR 0016's "the Recordings tab plays the whole take". An untrimmed Recording behaves as before.
 5. **Songs find the fart between the handles.**
-   - `trimBounds()` in `analysis/trimming.ts`, like `trim_bounds()` in the reference's `engine.py`, cuts the take at the handles, at whole samples of the 44.1 kHz audio. It then finds the fart in that part as `noteSegment()` finds a Recording's fart (ADR 0016). The start moves to just before the attack, the first 5 ms frame within 12 dB of the part's peak, less 8 ms. The end moves to where the fart fades out.
+   - `trimBounds()` in `analysis/trimming.ts`, like `trim_bounds()` in the reference's `trim.py`, cuts the take at the handles, at whole samples of the 44.1 kHz audio. It then finds the fart in that part as `noteSegment()` finds a Recording's fart (ADR 0016). The start moves to just before the attack, the first 5 ms frame within 12 dB of the part's peak, less 8 ms. The end moves to where the fart fades out.
    - So the fart Songs play always lies within the handles, and its onset lands on the beat as an untrimmed fart's does.
    - Save stores both: the handles exactly as the user left them, and the fart found between them (`RecordingTrim`, with `fart`), found once in the analysis worker when the Trim is saved. The handles open where the user left them next time. A Trim is stored even when its fart is the one analysis found: the handles still change what the row plays.
    - Reset puts the handles back on the fart analysis found, and with them there, "Remove trim" takes the Trim off. That is the only way a Trim is dropped.
@@ -96,7 +96,7 @@ The outbox keeps one entry per item, and a newer op replaces an older one (`merg
 
 ## Consequences
 
-- **Web releases roll forward only past #293.** A build from before it can't open IndexedDB version 6. A Cloudflare rollback past it leaves the library unopenable in every browser that opened #293's build, until a release rolls forward (`docs/agents/web.md`).
+- **Web releases roll forward only past #293.** A build from before it can't open IndexedDB version 6. A Cloudflare rollback past it leaves the library unopenable in every browser that opened #293's build, until a release rolls forward (`docs/agents/releases.md`).
 - **The migration must apply before the Worker that reads it.** CI applies D1 migrations before each deploy (`web.yml`).
   - A Worker from before #293 accepts the PATCH and ignores `trim`, so the browser settles the op and the Trim stays only in that browser. The Trim reaches the account only when the user saves it again. A later full read from a current Worker can then take it off this browser.
   - Such a Worker also ignores `trim` in an upload, and its library read leaves it out, which a browser reads as no change.

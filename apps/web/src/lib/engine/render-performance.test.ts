@@ -6,19 +6,11 @@ import { decoded, goldenRecordings, row } from '@/test-support/golden'
 import { type PerformanceRecording, renderPerformance, tapSound } from './render-performance'
 import { RENDER_SAMPLE_RATE } from './renderer'
 
-// A Sound Pad Performance's render (#278, ADR 0017) on real fixtures: each tap's fart starts at
-// the tap's time, to the sample at 44.1 kHz, and the output is nothing but the Recordings' own
-// samples, trimmed, faded, at one gain and mixed (ADR 0004, ADR 0012). Measured, as
-// `tools/melody-lab/evaluate.py` measures Songs: the onsets by cross-correlation with each fart,
-// and the samples against the Recording itself.
-
 const SR = RENDER_SAMPLE_RATE
-/** 090 and 084 are 44.1 kHz WAVs; 009 is a 48 kHz MP3, so it's resampled once. */
 const FIXTURES = ['090', '084', '009']
 const id = (fixture: string) => `00000000-0000-0000-0000-000000000${fixture}`
 
 let recordings: PerformanceRecording[]
-/** Each fixture's audio at 44.1 kHz, as the render reads it. */
 const atRenderRate = new Map<string, Float32Array>()
 
 beforeAll(async () => {
@@ -34,7 +26,6 @@ beforeAll(async () => {
   expect(recordings.map(r => r.audio.sampleRate)).toEqual([44100, 44100, 48000])
 })
 
-/** Where `sound` sits in `samples`, near `near`: the lag of their highest cross-correlation. */
 function measuredOnset(samples: Float32Array, sound: Float32Array, near: number, reach = 400) {
   let best = -Infinity
   let at = -1
@@ -51,7 +42,6 @@ function measuredOnset(samples: Float32Array, sound: Float32Array, near: number,
   return at
 }
 
-/** The farts each tap plays, apart: every tap starts after the last one's fart ends. */
 function apart(order: string[], start = 0.0371): Performance {
   const recordingIds = [...new Set(order)]
   let at = start
@@ -96,8 +86,6 @@ describe('renderPerformance', () => {
       const own = atRenderRate.get(recordingId) ?? fail()
       const span = soundingSpan(own, SR)
       const onset = Math.round(at * SR)
-      // Away from the 3 ms fade in and the 30 ms fade out, each output sample is the Recording's
-      // own sample at the same place, times one gain: read at the fart's loudest sample there.
       const from = Math.round(0.003 * SR)
       const to = span.end - span.start - Math.round(0.03 * SR)
       let loudest = from
@@ -113,13 +101,11 @@ describe('renderPerformance', () => {
         worst = Math.max(worst, Math.abs(samples[onset + k] - own[span.start + k] * gain))
       }
       expect(worst).toBeLessThan(1e-6)
-      // The one gain is the Pads': the fart peaks at PAD_PEAK.
       expect(peak).toBeCloseTo(PAD_PEAK, 6)
       covered += span.end - span.start
       for (let k = 0; k < span.end - span.start; k++) samples[onset + k] = 0
       return row(recordingId.slice(-3), gain.toFixed(4), worst.toExponential(2))
     })
-    // Between the farts, nothing: no tone, no noise, no tail.
     for (const sample of samples) outsideFarts = Math.max(outsideFarts, Math.abs(sample))
     expect(outsideFarts).toBe(0)
     expect(covered).toBeGreaterThan(SR)
@@ -164,7 +150,6 @@ describe('renderPerformance', () => {
     }
     const rendered = renderPerformance(performance, recordings)
     const one = tapSound(recordings[0].audio)
-    // Three of the same fart at once peak at 1.5: the gain puts the peak at full scale.
     expect(rendered.gain).toBeCloseTo(0x7fff / 0x8000 / 1.5, 6)
     let worst = 0
     let peak = 0

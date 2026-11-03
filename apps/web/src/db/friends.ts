@@ -3,14 +3,8 @@ import { and, desc, eq, or } from 'drizzle-orm'
 import type { Database } from './database'
 import { friendRequests, friends, handles } from './schema'
 
-// Friends in D1 (#319, ADR 0021). Every query takes the session's user id and the other user's,
-// and reads or changes only the rows between those two, so one user never accepts, declines,
-// cancels or removes a request or friendship between two others.
-
-/** How the user stands with another: neither asked, they asked them, the other asked, friends. */
 export type FriendState = 'none' | 'requested' | 'asked' | 'friends'
 
-/** The user whose Handle is `handle`, or null when no one has it. */
 export async function userWithHandle(db: Database, handle: string): Promise<string | null> {
   const rows = await db
     .select({ userId: handles.userId })
@@ -22,7 +16,6 @@ export async function userWithHandle(db: Database, handle: string): Promise<stri
 const requestFrom = (fromId: string, toId: string) =>
   and(eq(friendRequests.fromUserId, fromId), eq(friendRequests.toUserId, toId))
 
-/** How `userId` stands with `otherId`. */
 export async function friendState(
   db: Database,
   userId: string,
@@ -47,10 +40,6 @@ export async function friendState(
   return sent.length > 0 ? 'requested' : 'none'
 }
 
-/**
- * `fromId` asks `toId` to be friends, unless they're friends already or `toId` asked first. One
- * statement, so two requests at once, each way, can't both be made. True if this made it.
- */
 export async function addFriendRequest(
   db: Database,
   fromId: string,
@@ -73,10 +62,6 @@ export async function addFriendRequest(
   return added.results.length === 1
 }
 
-/**
- * `userId` accepts `fromId`'s request: they become friends, a row each way, and every request
- * between them goes. One transaction (D1's batch). False when `fromId` hasn't asked `userId`.
- */
 export async function acceptFriendRequest(
   db: Database,
   userId: string,
@@ -95,7 +80,6 @@ export async function acceptFriendRequest(
          RETURNING user_id AS from_user_id`
       )
       .bind(userId, fromId, now.getTime()),
-    // Only once they're friends: a request left between friends means nothing.
     db.$client
       .prepare(
         `DELETE FROM friend_requests
@@ -108,7 +92,6 @@ export async function acceptFriendRequest(
   return made.results.length > 0 || cleared.results.some(row => row.from_user_id === fromId)
 }
 
-/** Deletes `fromId`'s request to `toId`: declined by `toId`, or cancelled by `fromId`. */
 export async function deleteFriendRequest(
   db: Database,
   fromId: string,
@@ -121,7 +104,6 @@ export async function deleteFriendRequest(
   return deleted.length > 0
 }
 
-/** Ends the friendship between `userId` and `otherId`, both rows. True if they were friends. */
 export async function removeFriend(
   db: Database,
   userId: string,
@@ -139,12 +121,9 @@ export async function removeFriend(
   return removed.length > 0
 }
 
-/** A user's friends and requests, by Handle, each newest first. */
 export type FriendLists = {
-  /** Who asked the user. */
   requests: string[]
   friends: string[]
-  /** Whom the user asked. */
   sent: string[]
 }
 

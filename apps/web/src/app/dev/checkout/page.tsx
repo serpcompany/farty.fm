@@ -17,11 +17,6 @@ export const dynamic = 'force-dynamic'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
-// The dev checkout (ADR 0010): what Stripe Checkout's page is on a local run with no Stripe key,
-// for the e2e journeys and tap-throughs. Pay marks the Toot paid (`POST /api/dev/checkout/`) and
-// goes back to Song Creator, or the Sound Pad for a Toot with no `song` (ADR 0017), as Stripe
-// would. It answers 404 anywhere but a local run on a local
-// host, so never on Staging or Production.
 export default async function DevCheckoutPage({ searchParams }: { searchParams: SearchParams }) {
   if (!devCheckoutServes((await headers()).get('host'))) notFound()
   const { toot, song: songId } = await searchParams
@@ -44,7 +39,6 @@ export default async function DevCheckoutPage({ searchParams }: { searchParams: 
         <button type="submit" className={cn(buttonVariants(), 'h-12 w-full text-base')}>
           Pay {TOOT_PRICE_LABEL}
         </button>
-        {/* A whole page load, as Stripe's cancel URL is. */}
         <a
           href={`${back}?toot=${toot}`}
           className={cn(buttonVariants({ variant: 'outline' }), 'h-12 w-full text-base')}

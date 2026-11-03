@@ -1,35 +1,18 @@
 import { maximumTakeSeconds } from './recordings'
 
-// A Performance (#278): what the user played on the Sound Pad while it recorded, kept by a Toot
-// made from it (ADR 0017). It plays only the Recordings it names, each tap raw from its start.
-
-/** The longest Performance, from its first tap: as long as a take (`maximumTakeSeconds`). */
 export const MAX_PERFORMANCE_SECONDS = maximumTakeSeconds
 
-/** The most taps one Performance keeps: more than 30 taps a second for 30 s. */
 export const MAX_TAPS = 1000
 
-/** The most Recordings one Performance plays: a later release may have more Pads. */
 const MAX_PERFORMANCE_RECORDINGS = 100
 
-/**
- * Which Recording each tap played, and when. Kept small, since it uploads with its Toot: each
- * Recording's id once, and each tap as `[seconds from the first tap, index in recordings]`, in
- * the order played.
- */
 export type Performance = {
   recordings: string[]
   taps: [at: number, recording: number][]
 }
 
-/** One tap as the Sound Pad records it: `at` in seconds, on any clock. */
 export type Tap = { at: number; recordingId: string }
 
-/**
- * The Performance of `taps`, timed from the first tap and to the millisecond, so it plays from
- * its first fart. Null for no taps. Taps past `MAX_PERFORMANCE_SECONDS` or `MAX_TAPS` are left
- * out.
- */
 export function performanceOf(taps: readonly Tap[]): Performance | null {
   const sorted = [...taps].sort((a, b) => a.at - b.at)
   if (sorted.length === 0) return null
@@ -46,18 +29,12 @@ export function performanceOf(taps: readonly Tap[]): Performance | null {
   return { recordings, taps: kept }
 }
 
-/** Each tap of `performance`, with its Recording's id. */
 export function tapsOf(performance: Performance): Tap[] {
   return performance.taps.map(([at, index]) => ({ at, recordingId: performance.recordings[index] }))
 }
 
 const ITEM_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
-/**
- * Whether `value` is a Performance this app can play: one to `MAX_TAPS` taps in time order, from
- * 0 to `MAX_PERFORMANCE_SECONDS`, each of a Recording it names by a Recording's id, and every
- * Recording it names played. What the account keeps, and what a take kept across Checkout is.
- */
 export function isPerformance(value: unknown): value is Performance {
   if (typeof value !== 'object' || value === null) return false
   const { recordings, taps } = value as Record<string, unknown>

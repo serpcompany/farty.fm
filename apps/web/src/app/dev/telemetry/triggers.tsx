@@ -3,14 +3,18 @@
 import { Button } from '@/components/ui/button'
 import { reportError } from '@/lib/telemetry/errors'
 
-/** Thrown where nothing catches it: an `uncaught-error` report named `SyntheticCrash`. */
 class SyntheticCrash extends Error {
   name = 'SyntheticCrash'
 }
 
-/** Caught and reported: a `synthetic-handled` report named `SyntheticError`. */
 class SyntheticError extends Error {
   name = 'SyntheticError'
+}
+
+function throwOutsideReact(error: Error): void {
+  setTimeout(() => {
+    throw error
+  })
 }
 
 export function TelemetryTriggers() {
@@ -19,12 +23,11 @@ export function TelemetryTriggers() {
       <Button
         variant="outline"
         className="h-11 text-base"
-        onClick={() => {
-          // Outside React's handler, so nothing catches it: as a real crash.
-          setTimeout(() => {
-            throw new SyntheticCrash('A synthetic crash, with a seeded secret: test@example.com')
-          })
-        }}
+        onClick={() =>
+          throwOutsideReact(
+            new SyntheticCrash('A synthetic crash, with a seeded secret: test@example.com')
+          )
+        }
       >
         Crash
       </Button>

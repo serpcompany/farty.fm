@@ -10,7 +10,6 @@ import {
   parseSender
 } from './email'
 
-/** A KV namespace in memory, as much of one as the dev mailbox uses. */
 function memoryStore(): MailboxStore & { keys: () => string[] } {
   const values = new Map<string, string>()
   const store = {
@@ -103,7 +102,6 @@ describe('where email goes', () => {
       emailConfig({ ...deployed, EMAIL_FROM: undefined }, 'farty.fm'),
       emailConfig({ ...deployed, EMAIL_FROM: 'Farty <someone@farty.fm>' }, 'farty.fm'),
       emailConfig({ DEV_MAILBOX: memoryStore() }, 'farty.fm'),
-      // A deployment never captures, even with the binding.
       emailConfig({ SITE_ENV: 'staging', DEV_MAILBOX: memoryStore() }, 'localhost:3115')
     ].map(config => (config.kind === 'off' ? config.reason : config.kind))
     expect(reasons).toEqual([

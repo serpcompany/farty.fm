@@ -14,7 +14,7 @@ They chose this outcome the same day:
 4. **The attack still starts the fart.** The start stays the first 5 ms frame within 12 dB of the peak, less 8 ms. The start is not moved back to the first sound above the silence (see Why).
 5. **The bar counts only re-attacks the renderer adds.** ADR 0012's "no second attack inside a note" now means a second attack that the note's own fart doesn't have. `evaluate.py` finds every re-attack in a note's render and every re-attack in the dry stretch of the note's own fart, and counts the note (`notes_with_retrigger`) when any re-attack in the render has none in the dry stretch within 30 ms of it (`REATTACK_MATCH_S`, `added_reattacks()`). So a fart re-triggered after its own second burst still counts. A new count, `notes_with_second_burst`, reports the notes whose fart plays a second burst of its own.
 
-`note_segment()` in `tools/melody-lab/engine.py` defines both extents, and `apps/web/src/lib/analysis/trimming.ts` matches it (`Gesture.end` and `Gesture.pitchEnd`).
+`note_segment()` in `tools/melody-lab/analysis.py` defines both extents, and `apps/web/src/lib/analysis/trimming.ts` matches it (`Gesture.end` and `Gesture.pitchEnd`).
 
 ## Why
 
@@ -64,9 +64,9 @@ Ten fixtures hold a second burst, and each now plays longer:
 | `091` | 0.38 s | 0.89 s |
 | `052` | 0.30 s | 0.56 s |
 
-`009`, `052`, `065`, `067` and `080` are Noise-like, so their lengths matter only once one is placed by ear.
+`009`, `052`, `065`, `067` and `080` are Noise-like: their lengths matter only once placed by ear.
 
-`run_all.py` on the reference, every catalog Song with the full Fixture Library, under each change's own bar:
+`run_all.py` on the reference, every catalog Song, the full Fixture Library, each change's own bar:
 
 | | Songs pass | Songs locked | Songs below the bar |
 | --- | --- | --- | --- |
@@ -120,7 +120,7 @@ The rules tried for decision 2. The catalog is the 118 unlocked catalog Songs on
 | Where the lead-in may start | Catalog Songs below the bar | Onsets on time, worst Song | Notes playing a lead-in | Lead-in played | Libraries with `009` placed below the bar |
 | --- | --- | --- | --- | --- | --- |
 | No lead-in (before) | 0 | 100% | 0 | 0 s | 0 of 7 |
-| Wherever it reaches, mixed over the note before | 22: 21 add a re-attack, 1 below fidelity | | | | |
+| Wherever it reaches, mixed over the note before | 22: 21 add a re-attack, 1 below fidelity |
 | Where the note before stops playing, filling the gap | 0 | 98% (`minuet-in-g`) | 2,893 | 40.66 s | 5 of 7, at 88 to 94% on time |
 | Where the note before ends as written (kept) | 0 | 100% | 89 of 3,697, in 38 Songs | 4.07 s | 0 of 7, at 97 to 100% on time |
 
@@ -134,11 +134,11 @@ Three rules were measured on the Fixture Library and the 6 takes. The table give
 
 | Lead-in | `009` | `013` | `022` | `106` | `107` | `108` | `109` | Others |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| First frame within 30 dB (the first version) | 0.215 | 0.306 | 0.631 | 1.976 | 1.142 | 0.539 | 0.594 | |
+| First frame within 30 dB (first version) | 0.215 | 0.306 | 0.631 | 1.976 | 1.142 | 0.539 | 0.594 |
 | Also 10 dB above the take's noise floor (its 10th-percentile frame) | 0.025 | 0 | 0 | 1.976 | 1.142 | 0.539 | 0.594 | |
-| Capped at 0.25 s | 0.215 | 0.25 | 0.25 | 0.25 | 0.25 | 0.25 | 0.25 | the same |
-| Joined to the attack, gaps up to 50 ms | 0.215 | 0.306 | 0.631 | 0.005 | 0.010 | 0 | 0 | the same |
-| Joined to the attack, and capped at 0.25 s (kept) | 0.215 | 0.25 | 0.25 | 0.005 | 0.010 | 0 | 0 | the same |
+| Capped at 0.25 s | 0.215 | 0.25 | 0.25 | 0.25 | 0.25 | 0.25 | 0.25 | same |
+| Joined to the attack, gaps up to 50 ms | 0.215 | 0.306 | 0.631 | 0.005 | 0.010 | 0 | 0 | same |
+| Joined to the attack, and capped at 0.25 s (kept) | 0.215 | 0.25 | 0.25 | 0.005 | 0.010 | 0 | 0 | same |
 
 - **Measuring against the noise floor fails both ways.** `009`'s G3 opening is its own quietest stretch: its 10th-percentile frame is 23 dB under its peak, and the opening runs 13 to 29 dB under. A margin of 6 to 15 dB above that floor cuts the opening to 0.08 s or less. `106`'s floor is 40 dB under its peak, so its noise bumps clear every margin up to 15 dB, and it still plays 1.6 s or more.
 - **A cap alone still plays noise.** On `106` to `109` it plays the last 0.25 s before the attack, and that stretch is all room noise, below the 30 dB line.

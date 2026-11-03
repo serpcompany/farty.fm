@@ -1,23 +1,13 @@
 import { vi } from 'vitest'
 
-import { TURNSTILE_TEST_SECRET_KEY } from '@/server/auth-config'
+import { TURNSTILE_TEST_SECRET_KEY } from '@/server/auth-settings'
 
-// Turnstile in the node and workers tests: a stand-in for siteverify, so nothing reaches Cloudflare.
-// The journeys (`e2e/`) use the real one.
+const SITEVERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 
-export const SITEVERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
-
-/** The token Cloudflare's test site keys give. */
 export const TEST_TOKEN = 'XXXX.DUMMY.TOKEN.XXXX'
 
 const urlOf = (input: RequestInfo | URL) => (input instanceof Request ? input.url : String(input))
 
-/**
- * Answers siteverify with success for the test secret and the test token only, and refuses any
- * other, as Cloudflare refuses a token for a real secret. Cloudflare's own always-pass test secret
- * passes any token (measured on #250), so the journeys can't check a refusal. Every other request
- * goes out as usual. Undone by `vi.restoreAllMocks()`.
- */
 export function fakeSiteverify() {
   const real = globalThis.fetch
   return vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
@@ -28,7 +18,6 @@ export function fakeSiteverify() {
   })
 }
 
-/** What each siteverify call sent, while `fakeSiteverify` answers. */
 export function siteverifyCalls(): Record<string, unknown>[] {
   return vi
     .mocked(globalThis.fetch)
