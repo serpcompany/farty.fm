@@ -3,7 +3,7 @@ import { and, eq, isNull } from 'drizzle-orm'
 import type { Database } from './database'
 import type { RecordingRow, TootRow } from './library'
 import { handles, profileReports, recordings, shares, toots } from './schema'
-import { withoutTakenDownRecordings } from './sharing'
+import { takenDownRecordings, tootsPlayingTakenDown } from './sharing'
 
 // Profile pages in D1 (#319, ADR 0021): `/u/<handle>/` lists what its user shares, and nothing
 // else. A share that was stopped, taken down, or whose Recording, Toot or account was deleted
@@ -37,7 +37,9 @@ const newestFirst = (a: ProfileShareRow, b: ProfileShareRow) =>
 export async function profileShares(db: Database, userId: string): Promise<ProfileShareRow[]> {
   const live = (kind: 'recordings' | 'toots') =>
     and(eq(shares.userId, userId), eq(shares.kind, kind), isNull(shares.takenDownAt))
-  const [recordingRows, tootRows] = await Promise.all([
+  // The take-downs come first, beside the shares, as `liveShares` checks them: a Toot's Recordings
+  // are loaded only when one of the user's Recordings was taken down.
+  const [recordingRows, tootRows, takenDown] = await Promise.all([
     db
       .select({ shareId: shares.id, sharedAt: shares.createdAt, recording: recordings })
       .from(shares)
@@ -50,24 +52,31 @@ export async function profileShares(db: Database, userId: string): Promise<Profi
       .select({
         shareId: shares.id,
         sharedAt: shares.createdAt,
+        tootId: toots.id,
         title: toots.title,
-        songId: toots.songId,
-        arrangement: toots.arrangement,
-        performance: toots.performance
+        songId: toots.songId
       })
       .from(shares)
       .innerJoin(toots, and(eq(toots.userId, shares.userId), eq(toots.id, shares.itemId)))
-      .where(and(live('toots'), isNull(toots.deletedAt)))
+      .where(and(live('toots'), isNull(toots.deletedAt))),
+    takenDownRecordings(db, userId)
   ])
-  const liveToots = await withoutTakenDownRecordings(db, userId, tootRows)
+  const down = await tootsPlayingTakenDown(
+    db,
+    userId,
+    tootRows.map(row => row.tootId),
+    takenDown
+  )
   return [
     ...recordingRows.map(row => ({ kind: 'recordings' as const, ...row })),
-    ...liveToots.map(({ shareId, sharedAt, title, songId }) => ({
-      kind: 'toots' as const,
-      shareId,
-      sharedAt,
-      toot: { title, songId }
-    }))
+    ...tootRows
+      .filter(row => !down.has(row.tootId))
+      .map(({ shareId, sharedAt, title, songId }) => ({
+        kind: 'toots' as const,
+        shareId,
+        sharedAt,
+        toot: { title, songId }
+      }))
   ].sort(newestFirst)
 }
 

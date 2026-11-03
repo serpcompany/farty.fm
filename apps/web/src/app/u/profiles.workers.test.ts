@@ -1,9 +1,11 @@
-import { eq, like } from 'drizzle-orm'
+import { env } from 'cloudflare:test'
+import { and, eq, like } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 
 import * as handleRoute from '@/app/api/handle/route'
 import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
 import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
+import { createDatabase } from '@/db/database'
 import { markTootPaid, startTootPayment } from '@/db/payments'
 import { profileReports, rateLimit, shares } from '@/db/schema'
 import { songs } from '@/lib/catalog/songs.generated'
@@ -34,6 +36,8 @@ const R3 = '33333333-3333-4333-8333-333333333333'
 const T1 = '44444444-4444-4444-8444-444444444444'
 const T2 = '55555555-5555-4555-8555-555555555555'
 const T3 = '66666666-6666-4666-8666-666666666666'
+/** The Recordings `tootMetadata`'s and `padTootMetadata`'s Toots play, which aren't shared. */
+const PLAYED = ['00000000-0000-0000-0000-000000000090', '00000000-0000-0000-0000-000000000084']
 
 const twinkle = songs.find(song => song.id === 'twinkle')?.title
 
@@ -130,20 +134,16 @@ describe('A profile page', () => {
       'Recording 1'
     ])
     const [newest] = profile?.items ?? []
-    expect(Object.keys(newest).sort()).toEqual([
-      'detail',
-      'kind',
-      'name',
-      'path',
-      'shareId',
-      'sharedAt'
-    ])
+    expect(Object.keys(newest).sort()).toEqual(ITEM_KEYS)
     expect(newest.kind).toBe('recordings')
     expect(newest.detail).toBe('E3')
     expect(newest.shareId).not.toBe(R3)
     expect(newest.path).toBe(`/u/alice/r/${newest.shareId}/`)
     expect(newest.sharedAt).toBe(Date.UTC(2026, 10, 1, 9, 2))
   })
+
+  /** Each item's fields, which are all the page gets. */
+  const ITEM_KEYS = ['detail', 'kind', 'name', 'path', 'shareId', 'sharedAt']
 
   it('leaves out what was stopped, taken down or deleted, and what others share', async () => {
     const alice = await sharer('alice', [R1, R2, R3])
@@ -192,13 +192,70 @@ describe('A profile page', () => {
     for (const item of items) {
       const segment = item.kind === 'toots' ? 't' : 'r'
       expect(item.path).toBe(`/u/alice/${segment}/${item.shareId}/`)
+      // A Toot's row has a Recording's fields and no more: never its Arrangement or Performance.
+      expect(Object.keys(item).sort()).toEqual(ITEM_KEYS)
     }
 
-    // Nothing private: no Toot's or Recording's own id, and not the owner's id or email.
+    // Nothing private: no Toot's or Recording's own id, no Recording a Toot plays, and not the
+    // owner's id or email.
     const page = JSON.stringify(profile)
-    for (const secret of [T1, T2, T3, R1, R2, R3, alice.id, 'alice@example.test']) {
+    for (const secret of [T1, T2, T3, R1, R2, R3, ...PLAYED, alice.id, 'alice@example.test']) {
       expect(page).not.toContain(secret)
     }
+  })
+
+  it('leaves out the Toots others share (#346)', async () => {
+    const alice = await sharer('alice', [])
+    await savedToot(alice, tootMetadata(T1, { title: 'Alice’s' }), { minute: 1 })
+    const bob = await sharer('bob', [])
+    await savedToot(bob, tootMetadata(T2, { title: 'Bob’s' }), { minute: 2 })
+    expect(await names('alice')).toEqual(['Alice’s'])
+    expect(await names('bob')).toEqual(['Bob’s'])
+  })
+
+  it('lists Toots with no taken-down Recording, without loading what they play (#346)', async () => {
+    const alice = await sharer('alice', [R1])
+    const arrangement = { transposition: 0, recordingForPitch: { 64: R1 } }
+    await savedToot(alice, tootMetadata(T1, { title: 'Song with R1', arrangement }), { minute: 2 })
+    const performance = { recordings: [R1], taps: [[0, 0]] }
+    await savedToot(alice, padTootMetadata(T2, { title: 'Pad with R1', performance }), {
+      minute: 1
+    })
+    // Another user's take-down is not Alice's.
+    const bob = await sharer('bob', [R1])
+    await testDb()
+      .update(shares)
+      .set({ takenDownAt: new Date() })
+      .where(and(eq(shares.userId, bob.id), eq(shares.itemId, R1)))
+    // The SQL each lookup sends to D1.
+    let statements: string[] = []
+    const watched = new Proxy(env.DB, {
+      get(target, key) {
+        if (key === 'prepare') {
+          return (sql: string) => {
+            statements.push(sql)
+            return target.prepare(sql)
+          }
+        }
+        const value = Reflect.get(target, key)
+        return typeof value === 'function' ? value.bind(target) : value
+      }
+    })
+    const page = async () =>
+      (await findProfile(createDatabase(watched), 'alice'))?.items.map(item => item.name)
+    const loadsTaps = () => /"arrangement"|"performance"/.test(statements.join('\n'))
+
+    expect(await page()).toEqual(['Song with R1', 'Pad with R1', 'Recording 1'])
+    expect(loadsTaps()).toBe(false)
+
+    // With Alice's own R1 taken down, the check loads what her Toots play, and drops them.
+    statements = []
+    await testDb()
+      .update(shares)
+      .set({ takenDownAt: new Date() })
+      .where(and(eq(shares.userId, alice.id), eq(shares.itemId, R1)))
+    expect(await page()).toEqual([])
+    expect(loadsTaps()).toBe(true)
   })
 
   it('leaves out a Toot that was never shared, stopped, deleted or taken down (#346)', async () => {

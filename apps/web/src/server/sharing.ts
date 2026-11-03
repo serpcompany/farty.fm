@@ -17,9 +17,11 @@ import {
   shareOf,
   tootPlaysTakenDown
 } from '@/db/sharing'
+import { songs } from '@/lib/catalog/songs.generated'
 import { handleProblem, normalizeHandle, suggestHandle } from '@/lib/handle'
 import type { Recording, Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
+import { PAD_TOOT_TITLE } from '@/lib/toot'
 import { wavHeader } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 
@@ -56,6 +58,14 @@ const LINK_SEGMENT: Record<Kind, string> = { recordings: 'r', toots: 't' }
 /** A shared item's page: `/u/<handle>/r/<id>/` for a Recording, or `/u/<handle>/t/<id>/`. */
 export function sharePath(kind: Kind, handle: string, shareId: string): string {
   return `/u/${handle}/${LINK_SEGMENT[kind]}/${shareId}/`
+}
+
+/**
+ * A shared Toot's Song line, on its page and its owner's profile page: the Song's title, "Sound
+ * Pad" for a Toot made on the Sound Pad, or null for a Song that isn't in Farty any more.
+ */
+export function tootSongTitle(songId: string | null): string | null {
+  return songId === null ? PAD_TOOT_TITLE : (songs.find(s => s.id === songId)?.title ?? null)
 }
 
 /**

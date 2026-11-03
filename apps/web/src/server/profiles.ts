@@ -1,16 +1,14 @@
 import type { Database } from '@/db/database'
 import type { Kind } from '@/db/library'
 import { addProfileReport, type ProfileShareRow, profileShares, profileUser } from '@/db/profiles'
-import { songs } from '@/lib/catalog/songs.generated'
 import { noteName } from '@/lib/pitch'
 import { recordingName, songPitch } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
-import { PAD_TOOT_TITLE } from '@/lib/toot'
 
 import { consumeSlots, reporterLimitKey, requestClient } from './auth-config'
 import { type Stores, toRecording } from './library'
 import { apiError } from './require-user'
-import { REPORT_LIMITS, SITE_REPORTS_KEY, sharePath } from './sharing'
+import { REPORT_LIMITS, SITE_REPORTS_KEY, sharePath, tootSongTitle } from './sharing'
 
 // Profile pages (#319, ADR 0021): `/u/<handle>/`, public, which lists only what its user shares,
 // Recordings and Toots (#346) together, newest first, each linking to its own shared page, with
@@ -51,10 +49,7 @@ async function profileOwner(db: Database, handle: string) {
 /** A share's name and detail on its row: a Recording's name and note, or a Toot's title and Song. */
 function itemText(row: ProfileShareRow): { name: string; detail: string | null } {
   if (row.kind === 'toots') {
-    const { title, songId } = row.toot
-    const song =
-      songId === null ? PAD_TOOT_TITLE : (songs.find(s => s.id === songId)?.title ?? null)
-    return { name: title, detail: song }
+    return { name: row.toot.title, detail: tootSongTitle(row.toot.songId) }
   }
   const recording = toRecording(row.recording)
   const pitch = songPitch(recording)
