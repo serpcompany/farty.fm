@@ -244,6 +244,67 @@ describe('Sending a friend request', () => {
   })
 })
 
+describe('Get Farty’s friend request, just after signing up (#318)', () => {
+  // Someone who opens Maya's shared page signs up with "Add @maya as a friend" ticked: the browser
+  // asks, picks a Handle when told it has none, and asks again, all as the new account.
+
+  it('asks once the new account has picked a Handle', async () => {
+    const maya = await member('maya')
+    const sam = await signUp('sam')
+    expect(await body(await friend.ask('maya', sam))).toEqual({ status: 409, error: 'no_handle' })
+    expect(await requestRows()).toEqual([])
+    const picked = await handleRoute.PUT(
+      request('/api/handle/', 'PUT', sam, { handle: 'sam' }),
+      params({})
+    )
+    expect(picked.status).toBe(201)
+    expect(await body(await friend.ask('maya', sam))).toEqual({ status: 201, state: 'requested' })
+    expect(await requestRows()).toEqual([{ from: 'usersam', to: 'usermaya' }])
+    expect((await friend.list(maya)).requests).toEqual(['sam'])
+  })
+
+  it('is sent only as the signed-in user: a sender in the body is ignored', async () => {
+    await member('maya')
+    await member('bob')
+    const sam = await member('sam')
+    const forged = await friendsRoute.POST(
+      request('/api/friends/', 'POST', sam, { handle: 'maya', from: 'userbob', userId: 'userbob' }),
+      params({})
+    )
+    expect(forged.status).toBe(201)
+    expect(await requestRows()).toEqual([{ from: 'usersam', to: 'usermaya' }])
+  })
+
+  it('sends nothing signed out', async () => {
+    await member('maya')
+    expect(await body(await friend.ask('maya', {}))).toEqual({ status: 401, error: 'signed_out' })
+    expect(await requestRows()).toEqual([])
+  })
+
+  it('is refused for a sharer who has since gone, and for the new account’s own Handle', async () => {
+    const maya = await member('maya')
+    const sam = await member('sam')
+    await api.deleteAccount(maya)
+    expect(await body(await friend.ask('maya', sam))).toEqual({
+      status: 404,
+      error: 'no_such_handle'
+    })
+    expect(await body(await friend.ask('sam', sam))).toEqual({ status: 400, error: 'own_handle' })
+    expect(await requestRows()).toEqual([])
+  })
+
+  it('is harmless sent twice, as after a reload: still one request', async () => {
+    await member('maya')
+    const sam = await member('sam')
+    expect((await friend.ask('maya', sam)).status).toBe(201)
+    expect(await body(await friend.ask('maya', sam))).toEqual({
+      status: 409,
+      error: 'already_requested'
+    })
+    expect(await requestRows()).toEqual([{ from: 'usersam', to: 'usermaya' }])
+  })
+})
+
 describe('Two users asking each other', () => {
   it('can’t leave a request each way: the second insert sees the first', async () => {
     const alice = await member('alice')
