@@ -517,3 +517,152 @@ Forty Days and Forty Nights | the importer picked the tenor part of AUS DER TIEF
 Crown Him With Many Crowns | the importer picks Charles H. Gabriel's setting; PDMX has no pickable score of DIADEMATA, Elvey's tune
 # Not one tune
 Ballet Cclxviii | not a tune name: a number in a collection
+
+# Reviewed for batch 07 (#324): the top 200 of the ranking after batch 06, read against each title's Artist in ranking.md.
+# Under copyright, or unsure (batch 07)
+Hiraeth | unsure: credited to "a tasty shade of mauve", a modern hobby composer; no dated source
+The Hills | unsure: credited to a website name (Rickeybattleyahoo.com), a modern piece
+All the Rage | unsure: Larry Ungar, a modern composer; no dated source
+When Messiah Comes | unsure: Wayne Goodine, a modern composer
+The First Of October | under copyright: Nigel Gatherer, a living composer
+Wild Mountain Thyme 1 | under copyright: the common words and version are Francis McPeake's, 1957 (died 1971)
+The Road To The Isles/Burning Sands of Egypt | under copyright: Kenneth MacLeod's words (1917) and a combined title; also two tunes
+Murdo's Wedding | unsure: a pipe march with a named modern composer; no dated source
+Dublin Streets | unsure: credited to Ennis, a 20th-century piper; no dated source
+The Lottery | unsure: credited to Michael Dabney, no dates found
+Peek-A-Boo Waltz | unsure: Anna Cramer, no dates found; likely 20th century
+The Veleta | unsure: an Edwardian dance (1900s) credited to Arthur Morris, no dates found
+Avondstemming | unsure: credited to Alice Nahon, a poet; the music's composer is not named
+Morna | unsure: credited to C. H. Perrot, no dates found; "morna" is also a Cape Verdean genre
+'Et dodim kala | unsure: Yemenite Hebrew song of the 20th century; no composer named
+Mazltov | unsure: no piece we can tell; the title is a greeting many tunes carry
+March of Saint Timothy | unsure: Judi Morningstar, a modern composer
+St. Albans | unsure: credited to Walter Janes, no dates found
+Cuckoo Valse | unsure: credited to Carl Volti, no dates found; likely 20th century
+
+# Not one tune (batch 07)
+Bourr\'ee | not one tune: Bach wrote many bourrees
+Fughetta | not one tune: a form name, many composers and pieces
+Tartini Variaciones en un tema de Corelli | not one tune: a set of variations
+Five Shetland Reels | not one tune: a set of five reels
+Lamentations Of Jeremiah | not one tune: Tallis wrote several settings, in many parts
+Psalm 23 | not one tune: a psalm that many tunes are set to
+For God so loved the world | not one tune: a verse many pieces set
+Scottish | not one tune: a genre name, no piece we can tell
+Breton | not one tune: a genre name, no piece we can tell
+Galopp | not one tune: a dance name, many pieces
+Vivace | not one tune: a tempo mark, many pieces
+The Bishop | not one tune: no piece we can tell
+Handel With Care | not one tune: a pun title for scores of Handel's music, no piece we can tell
+Chanson à boire | not one tune: "drinking song", many pieces share the title
+Halling | not one tune: a dance form; Grieg wrote several hallings
+Winter Waltz | not one tune: a title many waltzes share
+Cowboy Waltz | not one tune: a title many waltzes share
+French-Canadian Waltz | not one tune: a type of waltz, no piece we can tell
+Dance | not one tune: a title any dance shares; no piece we can tell
+Official Branle | not one tune: Arbeau's Orchésographie gives several branles
+Hold On | not one tune: the title of several spirituals and many songs
+
+# The same tune as a Song in the catalog (batch 07)
+Hbd | the same tune as Happy Birthday, under an abbreviation (and under copyright in the US until 2016, Mildred and Patty Hill 1893/1935)
+GB/7a/12 God Rest You Merry Version 2 of 2 | the same tune as God Rest You Merry, under a catalogue code
+
+# Pulled from titles-07.txt after review of its first import (#324)
+Promised Land | the importer picks a score whose composer is credited as "Paradise Lunch", a modern arranger, not Anne Steele's hymn
+Valse du Départ | the importer picks a score credited to Thierry Laplaud, a modern composer, not a traditional waltz
+
+# Reviewed for batch 08 (#324): the top 200 of the ranking after batch 07, read against each title's Artist in ranking.md.
+# Under copyright, or unsure (batch 08)
+Big Ben | unsure: credited to Louise Shephard, a modern composer; no dated source
+March of St. Timothy | unsure: Judi Morningstar, a modern composer (the same score as the excluded March of Saint Timothy)
+Bavarian Waltz | unsure: Chris Perry, a modern composer
+The Morning After | unsure: Paul Gitlitz, a modern composer
+City Of Savannah | unsure: credited to Frank Livingston, no dates found
+The King's Birthday | unsure: credited to Richard R. Terry (died 1938) for a piece with no dated source
+Mountain Dew | under copyright: the song most scores carry is Scotty Wiseman and Grady Stokes, 1928-1930s, and the title is shared with an older Irish song
+Andy De Jarlis' | under copyright: Andy De Jarlis, fiddler and composer (died 1975)
+Montana Cowboy | unsure: no composer or date; may be a 20th-century cowboy song
+Balkan Hornpipe | unsure: credited to Hayes, a 20th-century dance composer; no dated source
+The MacRae Meadow | unsure: a pipe march credited only as "March"; no dated source
+The Whim | unsure: credited to Michael Dabney, no dates found
+When the Battle's O'er | unsure: credited to "On Repeat", a modern arranger
+Donandi Her Yer | unsure: no composer or source named
+Sapri Tama | unsure: 20th-century Yemenite Hebrew song; no composer named
+Hail Thee Festival Day | under copyright: the tune most scores carry is Salve festa dies by Ralph Vaughan Williams (died 1958)
+Laus sit Deo | unsure: credited to André Vierendeels, a modern composer
+Villager's WaltzThe. CJF.199 | unsure: a garbled title with a catalogue code; no tune we can name
+Petition | unsure: credited to R. Menthal, no dates found
+
+# Not one tune (batch 08)
+Felix | not one tune: a name; Mendelssohn wrote many pieces
+Fortune | not one tune: a title many pieces share
+Mignon | not one tune: a title many pieces share
+Schottische | not one tune: a dance name, many pieces
+Alma mater | not one tune: a title every school's song shares
+Gaillarde | not one tune: a dance name, many pieces
+The Branle | not one tune: a dance name, many pieces
+La Volta | not one tune: a dance name, many pieces
+The Banks | not one tune: a title many pieces share
+Take a Dance | not one tune: no piece we can tell
+The Installation | not one tune: no piece we can tell
+Wonders | not one tune: a title many pieces share
+Morning song | not one tune: a title many pieces share
+Les Moutons | not one tune: a title many pieces share
+Bezemdans | not one tune: a dance name, many pieces
+
+# More for batch 08, from the titles that moved up (#324)
+Golden Grove | unsure: credited to Ernest Littlewood, no dates found; likely 20th century
+The Handy Man | unsure: Bruce Shawyer, a modern composer
+The Hermitage | unsure: credited to R. O. Morris, a 20th-century composer; no dated source
+The Physical Snob | unsure: "Unidentified source"; no composer or date
+Polska fr\aan M\oklinta | unsure: a garbled title; no tune we can name
+Penelope | not one tune: a title many pieces share
+The Traveller | not one tune: a title many pieces share
+Evening Shade | not one tune: a title many pieces share
+New York | not one tune: a title many pieces share
+One Before We Go | not one tune: no piece we can tell
+Alterations | not one tune: no piece we can tell
+Duetto | not one tune: a form name, many composers and pieces
+Horses Branle | the same tune as the Song Horse's Bransle (batch 07)
+4r. Oculus non vidit | unsure: a title with a folio mark; Lassus wrote more than one motet of the name
+
+# Pulled from titles-08.txt after review of its first import (#324)
+Helena | the importer picks a score whose composer is credited as "tune: Colin Hume 1988", a modern composer, not W. B. Bradbury's hymn tune
+
+# Pulled from titles-07.txt and titles-08.txt after the review of their import (#324, PR #341)
+# The same tune as a Song in the catalog
+The Alphabet | the same tune as Twinkle, Twinkle, Little Star: the same 15 opening intervals, a fourth apart
+Monymusk | the same tune as Money Musk (batch 06), Daniel Dow's, under its Scottish spelling
+La Morisque | the same tune as La Mourisque (batch 06), Susato's
+The Gallowglass | the same tune as Nathaniel Gow's Lament for the Death of his Brother (batch 06); the pick's subtitle is "Gallowglass"
+Si Beag Si Mhor | the same tune as Si Bheag Si Mhor (batch 04), O'Carolan's, under another spelling
+Gloucestershire Wassail | the same tune as Wassail Song (batch 05): the same first 10 notes, two settings of one tune
+From Night 'till Morn | the same tune as Deck the Halls (flag_picks.py: the same 10 opening changes of pitch); also no composer or date
+# The same tune twice in batches 07 and 08: the name PDMX's scores rank higher stays
+The Fair Maid of the Inn | the same tune as The Pleasures of the Town (batch 07), whose score reads "aka The Fair Maid of the Inn"
+The Banks Of Lough Gowna | the same tune as Shores of Lough Gowna (batch 07), its common name
+Caller Herring | the same tune as Caller Herrin' (batch 07), Nathaniel Gow's
+# The importer's pick isn't the tune, or left out by decision
+Dont vient cela | the pick was the Altus part; PDMX's other scores of Susato's basse danse are its Tenor, Bassus and an unnamed part below the Altus, none the top part
+See see the shepherds' Queen | the pick was the Alto part of Tomkins's madrigal ending; PDMX has no other score the importer can pick
+Steal Away | the picks are Seconds parts of a band arrangement; PDMX's scores of the tune have a license conflict or more than 2 tracks
+Charleston | the pick is a fiddle tune that can't be dated, not the 1923 Charleston (James P. Johnson and Cecil Mack, under copyright)
+Dixie | left out by decision: the Confederacy's unofficial anthem; the owner can add it back
+# Unsure: no composer or date, so the rule is to exclude
+The Happy Clown | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+The Tennessee | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Ohio | unsure: credited to "Misc tunes" with no composer, and no dated source names one; the title is also Bernstein's 1953 song
+Aunt Mary's (Canadian) Jig | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Gasp\'e Reel | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Calver Lodge | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Woodland Revels | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Jack Frost | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+The Dresden | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Princess | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Union | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Long Odds | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Mary Walker | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Frank Gilruth | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Will You Come Home With Me | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Over the Border | unsure: credited to "Misc tunes" with no composer, and no dated source names one
+Tell me where is fancy bred | unsure: credited only to "Carr", and which Carr can't be told
