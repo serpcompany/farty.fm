@@ -107,44 +107,94 @@ export function PianoKeys({
   )
 }
 
-/** Each partial of the piano note: its harmonic and level. */
-const PARTIALS = [
-  [1, 1],
-  [2, 0.5],
-  [3, 0.28],
-  [4, 0.14],
-  [5, 0.08],
-  [6, 0.04]
-] as const
+/** How long the piano note lasts, in seconds. */
+const NOTE_SECONDS = 2.3
+/** Its attack and its fade at the end, in seconds, so it starts and stops without a click. */
+const ATTACK_SECONDS = 0.004
+const FADE_SECONDS = 0.15
+/** Its partials, up to this many and below this frequency. */
+const MOST_PARTIALS = 40
+const TOP_HZ = 6000
+/** How sharp a string's overtones run: partial h sounds at h·f·√(1 + STRETCH·h²). */
+const STRETCH = 0.00005
+/**
+ * A phone's speaker plays hardly anything below about 300 Hz, so a partial below this is turned
+ * down, 12 dB an octave, as a piano's soundboard turns down its low strings' fundamentals. A low
+ * key then keeps its pitch and level in the partials above it (#362).
+ */
+const SOUNDBOARD_HZ = 250
+/** Above this, the hammer's partials fall off. */
+const HAMMER_HZ = 3000
+/**
+ * How long a partial up to 400 Hz takes to fall to 1/e. One above it falls faster, in
+ * DECAY_SECONDS × (400 Hz / its frequency)^0.7, so the note darkens as it rings.
+ */
+const DECAY_SECONDS = 0.9
+/**
+ * The note's RMS as it starts, −14 dBFS. Through a phone's speaker, every key is then about as
+ * loud as the fixture farts of its octave (`piano-keys.test.ts`).
+ */
+const LEVEL = 0.2
 
 /**
- * Plays a piano note at `midi` on the shared AudioContext, from a tap: a few decaying partials,
- * enough to hold the fart up to. Only a take's review plays it.
+ * The piano note at `midi`, as samples at `sampleRate` (ADR 0015 rule 3): decaying partials of a
+ * struck string, voiced for a phone's speaker. The one piano voice: `playPianoNote` plays it.
+ */
+export function pianoNote(midi: number, sampleRate: number): Float32Array {
+  const length = Math.round(NOTE_SECONDS * sampleRate)
+  const samples = new Float32Array(length)
+  const fundamental = 440 * 2 ** ((midi - 69) / 12)
+  const top = Math.min(TOP_HZ, 0.45 * sampleRate)
+  const partials: { frequency: number; level: number }[] = []
+  for (let h = 1; h <= MOST_PARTIALS; h++) {
+    const frequency = fundamental * h * Math.sqrt(1 + STRETCH * h * h)
+    if (frequency > top) break
+    const soundboard = frequency ** 2 / (frequency ** 2 + SOUNDBOARD_HZ ** 2)
+    const hammer = 1 / (1 + (frequency / HAMMER_HZ) ** 2)
+    partials.push({ frequency, level: (soundboard * hammer) / h })
+  }
+  const power = partials.reduce((sum, { level }) => sum + level ** 2 / 2, 0)
+  const scale = LEVEL / Math.sqrt(power)
+  partials.forEach(({ frequency, level }, i) => {
+    // Each partial turns as a phasor that shrinks a little every sample: no Math.sin per sample.
+    const step = (2 * Math.PI * frequency) / sampleRate
+    const shrink = Math.exp(
+      -1 / (DECAY_SECONDS * (400 / Math.max(frequency, 400)) ** 0.7 * sampleRate)
+    )
+    const c = Math.cos(step) * shrink
+    const s = Math.sin(step) * shrink
+    // Spread phases (Schroeder's), so the partials don't all peak together.
+    const phase = (Math.PI * i * i) / partials.length
+    let re = Math.cos(phase) * level * scale
+    let im = Math.sin(phase) * level * scale
+    for (let n = 0; n < length; n++) {
+      samples[n] += im
+      const next = re * c - im * s
+      im = re * s + im * c
+      re = next
+    }
+  })
+  const attack = ATTACK_SECONDS * sampleRate
+  const fade = FADE_SECONDS * sampleRate
+  for (let n = 0; n < length; n++) {
+    samples[n] *= Math.min(1, n / attack, (length - n) / fade)
+  }
+  return samples
+}
+
+/**
+ * Plays the piano note at `midi` on the shared AudioContext, from a tap, straight to the speakers.
+ * Only a take's review plays it.
  */
 export function playPianoNote(midi: number): void {
   const context = audioContext()
   setPlaybackSession()
   context.resume().catch(() => {})
-  const t = context.currentTime
-  const frequency = 440 * 2 ** ((midi - 69) / 12)
-
-  const out = context.createGain()
-  out.gain.setValueAtTime(0.0001, t)
-  out.gain.exponentialRampToValueAtTime(0.6, t + 0.008)
-  out.gain.exponentialRampToValueAtTime(0.0001, t + 2.2)
-  const lowpass = context.createBiquadFilter()
-  lowpass.type = 'lowpass'
-  lowpass.frequency.setValueAtTime(Math.min(frequency * 9, 9000), t)
-  lowpass.frequency.exponentialRampToValueAtTime(Math.max(frequency * 2.5, 400), t + 1.4)
-  for (const [harmonic, level] of PARTIALS) {
-    const partial = context.createOscillator()
-    // A real string's overtones run a little sharp.
-    partial.frequency.value = frequency * harmonic * (1 + 0.0004 * harmonic * harmonic)
-    const gain = context.createGain()
-    gain.gain.value = level * 0.3
-    partial.connect(gain).connect(lowpass)
-    partial.start(t)
-    partial.stop(t + 2.3)
-  }
-  lowpass.connect(out).connect(context.destination)
+  const samples = pianoNote(midi, context.sampleRate)
+  const buffer = context.createBuffer(1, samples.length, context.sampleRate)
+  buffer.getChannelData(0).set(samples)
+  const source = context.createBufferSource()
+  source.buffer = buffer
+  source.connect(context.destination)
+  source.start()
 }
