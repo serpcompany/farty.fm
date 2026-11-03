@@ -3,7 +3,9 @@ import {
   type AutoMapRecording,
   arrangePitches,
   compareIds,
+  HIGHEST_TRANSPOSITION,
   isMelodic,
+  LOWEST_TRANSPOSITION,
   neededSeconds,
   type PitchChoice,
   pitchCell,
@@ -34,6 +36,56 @@ export interface FartChoices {
 /** No change yet, at `transposition`: where the first change starts. */
 export function noChoices(transposition: number): FartChoices {
   return { transposition, preferred: {}, excluded: [] }
+}
+
+/** Whether `a` and `b` are the same change, or both none. */
+export function sameFartChoices(a: FartChoices | null, b: FartChoices | null): boolean {
+  if (a === null || b === null) return a === b
+  const [pa, pb] = [picks(a), picks(b)]
+  return (
+    a.transposition === b.transposition &&
+    pa.length === pb.length &&
+    pa.every(([p, id], i) => pb[i][0] === p && pb[i][1] === id) &&
+    a.excluded.length === b.excluded.length &&
+    a.excluded.every((id, i) => b.excluded[i] === id)
+  )
+}
+
+/** The most picks a Song's Fart Choices hold: one for each MIDI pitch. */
+const MOST_PICKS = 128
+/** The most Recordings left out of one Song: as many as an account keeps (`LIMITS`). */
+const MOST_LEFT_OUT = 300
+
+/**
+ * `value` as Fart Choices, as the account keeps and sends them, or null when it isn't any: a
+ * transposition Auto-map can choose, picks by MIDI pitch, and left-out Recording ids, sorted.
+ * Nothing changed is null too: the Song is automatic.
+ */
+export function parseFartChoices(value: unknown): FartChoices | null {
+  if (typeof value !== 'object' || value === null) return null
+  const { transposition, preferred, excluded } = value as Record<string, unknown>
+  const isId = (id: unknown): id is string =>
+    typeof id === 'string' && /^[A-Za-z0-9_.-]{1,100}$/.test(id)
+  if (
+    !Number.isInteger(transposition) ||
+    (transposition as number) < LOWEST_TRANSPOSITION ||
+    (transposition as number) > HIGHEST_TRANSPOSITION ||
+    typeof preferred !== 'object' ||
+    preferred === null ||
+    Array.isArray(preferred) ||
+    !Array.isArray(excluded) ||
+    excluded.length > MOST_LEFT_OUT ||
+    !excluded.every(isId)
+  )
+    return null
+  const entries = Object.entries(preferred)
+  if (entries.length > MOST_PICKS) return null
+  const pitches: [number, string][] = []
+  for (const [pitch, id] of entries) {
+    if (!/^\d{1,3}$/.test(pitch) || Number(pitch) > 127 || !isId(id)) return null
+    pitches.push([Number(pitch), id])
+  }
+  return settled(transposition as number, pitches, excluded)
 }
 
 /** The Song pitches the user picked a fart for, lowest first, with that fart. */

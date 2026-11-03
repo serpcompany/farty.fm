@@ -7,6 +7,7 @@ import {
   type StoreNames
 } from 'idb'
 import { libraryOwner } from './account'
+import type { FartChoices } from './engine/fart-choices'
 import { getAudio } from './library-api'
 import {
   announceQueued,
@@ -47,7 +48,7 @@ export interface PedosDB extends DBSchema {
   downloads: { key: string; value: { kind: Kind; id: string } }
   /**
    * `cursor`: the account's `cursor` as of this browser's last read. Since version 3; versions 4,
-   * 5, 6, 7 and 8 set it back to 0 (`readEverythingAgain`).
+   * 5, 6, 7, 8 and 9 set it back to 0 (`readEverythingAgain`).
    */
   meta: { key: string; value: number }
   /**
@@ -62,6 +63,12 @@ export interface PedosDB extends DBSchema {
    * its working copy, cleared with its library at sign-out. Since version 7.
    */
   favorites: { key: string; value: number }
+  /**
+   * Each changed Song's Fart Choices (#360), by Song id: the farts the user swapped in or left
+   * out (`fart-choice-store.ts`). A Song with none here is automatic. Synced with the account; a
+   * guest's last the visit, as their Toots do. Since version 9.
+   */
+  fartChoices: { key: string; value: FartChoices }
 }
 
 /** Every store: clearing this browser's library clears them all. */
@@ -74,7 +81,8 @@ const allStores = [
   'downloads',
   'meta',
   'pads',
-  'favorites'
+  'favorites',
+  'fartChoices'
 ] as const
 
 /** Where each kind's WAVs are kept. */
@@ -84,7 +92,7 @@ export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
  * The `pedos` database's version. Web releases roll forward, not back, past a bump
  * (`docs/agents/web.md`).
  */
-export const DB_VERSION = 8
+export const DB_VERSION = 9
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
 
@@ -110,9 +118,9 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
 }
 
 /**
- * The app's database, upgraded to version 8 on first open. Version 1 held Recordings only, version
- * 2 added Toots, version 3 the outbox, version 5 the Sound Pad's Pads (#277) and version 7 the
- * Favorite Songs (#313). An upgrade keeps them, and one from before version 3 queues each to
+ * The app's database, upgraded to version 9 on first open. Version 1 held Recordings only, version
+ * 2 added Toots, version 3 the outbox, version 5 the Sound Pad's Pads (#277), version 7 the
+ * Favorite Songs (#313) and version 9 the Songs' Fart Choices (#360). An upgrade keeps them, and one from before version 3 queues each to
  * upload, since none has been (`queueEverything`).
  *
  * Version 4 (#268) changes no store. It shuts out code from before #268, in a tab opened before
@@ -136,6 +144,11 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
  * It shuts out code from before names the same way, since that code would queue and settle a
  * `place` without the name, read the account's names without keeping them, and play a Recording
  * left out with "No note" in Songs. Its upgrade reads the whole library again too.
+ *
+ * Version 9 (#360) shuts out code from before Fart Choices the same way: that code would read the
+ * account's Fart Choices without keeping them while its cursor moves past them, and would send an
+ * outbox entry for them as a Recording's. Its upgrade reads the whole library again, which brings
+ * the Fart Choices another browser made.
  *
  * One connection serves the page until the browser closes it, as WebKit can while the tab sleeps
  * (#222), or it fails to open: the next call then opens a fresh one. Reads and writes go through
@@ -163,6 +176,7 @@ export function db(): Promise<IDBPDatabase<PedosDB>> {
       if (oldVersion >= 3) readEverythingAgain(transaction).catch(() => {})
       if (oldVersion < 5) database.createObjectStore('pads')
       if (oldVersion < 7) database.createObjectStore('favorites')
+      if (oldVersion < 9) database.createObjectStore('fartChoices')
     },
     // An older version is open in another tab, and its code may never close it: the upgrade
     // waits until that tab closes.
@@ -486,17 +500,18 @@ export async function recordingIds(): Promise<string[]> {
 }
 
 /**
- * Clears a guest's last visit (#237): every Toot, the Sound Pad's Pads, and every Recording but
- * those `kept`, with their audio and whatever waits to send or download for them, together. With
- * `kept` null, every Recording stays. Those that stay keep their outbox, so a sign-in still uploads
- * them.
+ * Clears a guest's last visit (#237): every Toot, every Song's Fart Choices (#360), the Sound
+ * Pad's Pads, and every Recording but those `kept`, with their audio and whatever waits to send or
+ * download for them, together. With `kept` null, every Recording stays. Those that stay keep their
+ * outbox, so a sign-in still uploads them.
  */
 export async function clearVisit(kept: ReadonlySet<string> | null): Promise<void> {
-  // Every key that starts `toots:` (`itemKey`).
-  const forToots = IDBKeyRange.bound(itemKey('toots', ''), itemKey('toots', '\uffff'))
+  // Every key that starts `toots:` or `fartChoices:` (`itemKey`).
+  const every = (kind: OutboxKind) => IDBKeyRange.bound(itemKey(kind, ''), itemKey(kind, '\uffff'))
+  const forToots = every('toots')
   await withDb(async database => {
     const tx = database.transaction(
-      ['toots', 'tootAudio', 'recordings', 'audio', 'outbox', 'downloads', 'pads'],
+      ['toots', 'tootAudio', 'recordings', 'audio', 'outbox', 'downloads', 'pads', 'fartChoices'],
       'readwrite'
     )
     const recordings = tx.objectStore('recordings')
@@ -509,7 +524,9 @@ export async function clearVisit(kept: ReadonlySet<string> | null): Promise<void
       tx.objectStore('toots').clear(),
       tx.objectStore('tootAudio').clear(),
       tx.objectStore('pads').clear(),
+      tx.objectStore('fartChoices').clear(),
       outbox.delete(forToots),
+      outbox.delete(every('fartChoices')),
       downloads.delete(forToots),
       ...[...gone].flatMap(id => [
         recordings.delete(id),

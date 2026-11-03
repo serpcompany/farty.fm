@@ -191,4 +191,49 @@ describe('mergeOutbox', () => {
       })
     })
   })
+
+  // A Song's Fart Choices (#360): read when sent, so the last op is all the account needs.
+  describe("a Song's Fart Choices", () => {
+    const song = 'twinkle'
+    const choices = (op: OutboxOp, sent = false): OutboxEntry => ({
+      key: `fartChoices:${song}`,
+      kind: 'fartChoices',
+      id: song,
+      op,
+      sent,
+      queuedAt: 1,
+      version: 'v1'
+    })
+
+    it('keeps a change queued as it is: the Choices go as they are when sent', () => {
+      expect(mergeOutbox(undefined, 'fartChoices', song, 'put', stamp('v2'))).toEqual({
+        ...choices('put'),
+        queuedAt: 2,
+        version: 'v2'
+      })
+      expect(mergeOutbox(choices('put'), 'fartChoices', song, 'put', stamp('v2'))).toEqual(
+        choices('put')
+      )
+    })
+
+    // Unlike a Favorite Song's, a reset after a change no request carried is still sent: the
+    // account may have the Song's Choices from another browser.
+    it('sends the last op, also when it undoes one no request carried', () => {
+      expect(mergeOutbox(choices('put'), 'fartChoices', song, 'delete', stamp('v2'))).toEqual({
+        ...choices('delete'),
+        version: 'v2'
+      })
+      expect(mergeOutbox(choices('delete'), 'fartChoices', song, 'put', stamp('v2'))).toEqual({
+        ...choices('put'),
+        version: 'v2'
+      })
+    })
+
+    it('sends a change again once the last went out, keeping its place in the queue', () => {
+      expect(mergeOutbox(choices('put', true), 'fartChoices', song, 'put', stamp('v2'))).toEqual({
+        ...choices('put'),
+        version: 'v2'
+      })
+    })
+  })
 })

@@ -15,7 +15,9 @@ import {
   type FartChoices,
   leaveOutFart,
   noChoices,
+  parseFartChoices,
   resetPitch,
+  sameFartChoices,
   swapFart
 } from './fart-choices'
 
@@ -109,5 +111,44 @@ describe('Fart Choices', () => {
     const noise = recordings.find(r => r.recordingPitchMidi === null) as AutoMapRecording
     expect(canPlay(noise, pitches.pitches[0], pitches, t)).toBe(false)
     expect(canPlay(recordings[0], (pitches.pitches.at(-1) as number) + 1, pitches, t)).toBe(false)
+  })
+})
+
+describe('Fart Choices as kept and sent', () => {
+  const choices: FartChoices = {
+    transposition: -12,
+    preferred: { 55: 'b', 60: 'a' },
+    excluded: ['c']
+  }
+
+  it('are the same whatever order their picks were made in', () => {
+    const reordered = { transposition: -12, preferred: { 60: 'a', 55: 'b' }, excluded: ['c'] }
+    expect(sameFartChoices(choices, reordered)).toBe(true)
+    expect(sameFartChoices(null, null)).toBe(true)
+    expect(sameFartChoices(choices, null)).toBe(false)
+    expect(sameFartChoices(choices, { ...choices, transposition: 0 })).toBe(false)
+    expect(sameFartChoices(choices, { ...choices, preferred: { 55: 'b', 60: 'c' } })).toBe(false)
+    expect(sameFartChoices(choices, { ...choices, excluded: [] })).toBe(false)
+  })
+
+  it('read back as they were written, in order, and refuse anything else', () => {
+    expect(parseFartChoices(JSON.parse(JSON.stringify(choices)))).toEqual(choices)
+    expect(
+      parseFartChoices({ transposition: 0, preferred: { 60: 'a' }, excluded: ['z', 'c', 'z'] })
+    ).toEqual({ transposition: 0, preferred: { 60: 'a' }, excluded: ['c', 'z'] })
+    for (const value of [
+      undefined,
+      'choices',
+      { transposition: 0, preferred: {}, excluded: [] },
+      { ...choices, transposition: 24.5 },
+      { ...choices, transposition: 25 },
+      { ...choices, preferred: { 128: 'a' } },
+      { ...choices, preferred: { 60: '' } },
+      { ...choices, preferred: null },
+      { ...choices, excluded: 'c' },
+      { ...choices, excluded: ['../c'] }
+    ]) {
+      expect(parseFartChoices(value)).toBeNull()
+    }
   })
 })

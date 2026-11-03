@@ -42,6 +42,7 @@ describe('every API route outside api/auth/', () => {
     expect(Object.keys(routeModules).sort()).toEqual(
       expect.arrayContaining([
         './account/route.ts',
+        './fart-choices/[id]/route.ts',
         './favorites/[id]/route.ts',
         './library/route.ts',
         './recordings/[id]/audio/route.ts',

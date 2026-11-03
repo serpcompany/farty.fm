@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto'
 import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { FartChoices } from './engine/fart-choices'
 import type { LibraryChanges } from './library-api'
 import type { LibraryChange } from './library-sync'
 import type { OutboxOp } from './outbox'
@@ -22,7 +23,8 @@ async function openPage() {
     sync: await import('./library-sync'),
     store: await import('./recording-store'),
     toots: await import('./toot-store'),
-    favorites: await import('./favorite-store')
+    favorites: await import('./favorite-store'),
+    choices: await import('./fart-choice-store')
   }
 }
 
@@ -423,7 +425,7 @@ describe('version 8', () => {
     }, true)
     older.onversionchange = () => older.close()
     const database = await page.store.db()
-    expect(database.version).toBe(8)
+    expect(database.version).toBe(page.store.DB_VERSION)
     expect(await database.get('meta', 'cursor')).toBe(0)
     expect(await page.favorites.loadFavorites()).toEqual(['twinkle'])
     expect((await outbox()).map(entry => entry.key).sort()).toEqual(
@@ -629,6 +631,194 @@ describe('Favorite Songs (#313)', () => {
     await page.favorites.setFavorite('mary', true)
     await page.sync.claimLibrary('user-b', 'b@example.com')
     expect(await favorites()).toEqual([])
+    expect(await outbox()).toEqual([])
+  })
+})
+
+describe('Fart Choices (#360)', () => {
+  const R1 = '00000000-0000-4000-8000-000000000001'
+  const R2 = '00000000-0000-4000-8000-000000000002'
+  const swapped: FartChoices = { transposition: -12, preferred: { 60: R1 }, excluded: [] }
+  const leftOut: FartChoices = { transposition: -12, preferred: {}, excluded: [R2] }
+  const choices = async () => Object.fromEntries(await page.choices.loadFartChoices())
+
+  it('keeps each change here and queues it, a change to the same leaving one entry', async () => {
+    await page.choices.setFartChoices('twinkle', swapped)
+    await page.choices.setFartChoices('twinkle', leftOut)
+    await page.choices.setFartChoices('mary', swapped)
+    // Already as asked: nothing changes.
+    await page.choices.setFartChoices('mary', { ...swapped })
+    expect(await choices()).toEqual({ mary: swapped, twinkle: leftOut })
+    expect((await outbox()).map(e => [e.key, e.op]).sort()).toEqual([
+      ['fartChoices:mary', 'put'],
+      ['fartChoices:twinkle', 'put']
+    ])
+  })
+
+  it('tells this tab when they change, and nothing when a change changes nothing', async () => {
+    const heard: string[] = []
+    const stop = page.choices.onFartChoicesChanged(() => heard.push('change'))
+    await page.choices.setFartChoices('twinkle', swapped)
+    await page.choices.setFartChoices('twinkle', swapped)
+    await page.choices.setFartChoices('mary', null)
+    stop()
+    await page.choices.setFartChoices('twinkle', null)
+    expect(heard).toEqual(['change'])
+  })
+
+  it("sends each as it is when sent, naming the library's account, and isn't counted as a fart", async () => {
+    claimedBy('user-a')
+    await page.choices.setFartChoices('twinkle', swapped)
+    await page.choices.setFartChoices('twinkle', leftOut)
+    await page.choices.setFartChoices('mary', swapped)
+    await page.choices.setFartChoices('ode', swapped)
+    await page.choices.setFartChoices('ode', null)
+    expect(await page.sync.uploadBeforeSignOut('user-a')).toBe(0)
+    expect(account.fartChoices()).toEqual({ mary: swapped, twinkle: leftOut })
+    expect(await outbox()).toEqual([])
+    // Ode's reset is sent too: the account may have Ode's Choices from another browser.
+    expect(
+      account.sent
+        .filter(s => s.path.startsWith('/api/fart-choices/'))
+        .map(s => [`${s.method} ${s.path} ${s.library}`, s.json])
+        .sort()
+    ).toEqual([
+      ['DELETE /api/fart-choices/ode/ user-a', undefined],
+      ['PUT /api/fart-choices/mary/ user-a', swapped],
+      ['PUT /api/fart-choices/twinkle/ user-a', leftOut]
+    ])
+  })
+
+  it('sends a change made while the last one was on its way', async () => {
+    claimedBy('user-a')
+    await page.choices.setFartChoices('twinkle', swapped)
+    account.intercept = async sent => {
+      if (sent.method !== 'PUT') return undefined
+      account.intercept = null
+      await page.choices.setFartChoices('twinkle', leftOut)
+      return undefined
+    }
+    await page.sync.syncOnce('user-a')
+    expect(account.fartChoices()).toEqual({ twinkle: leftOut })
+    expect(await outbox()).toEqual([])
+  })
+
+  it('keeps a change queued while the account is unreachable, and drops one refused at the limit', async () => {
+    claimedBy('user-a')
+    await page.choices.setFartChoices('twinkle', swapped)
+    account.offline = true
+    await page.sync.syncOnce('user-a')
+    expect(await outbox()).toHaveLength(1)
+    account.offline = false
+    await page.sync.syncOnce('user-a')
+    expect(account.fartChoices()).toEqual({ twinkle: swapped })
+    expect(await outbox()).toEqual([])
+
+    // At the limit, a retry changes nothing, so it isn't sent again on every sync.
+    await page.choices.setFartChoices('mary', swapped)
+    refuse('PUT', 409, 'limit_reached')
+    await page.sync.syncOnce('user-a')
+    expect(await outbox()).toEqual([])
+    account.intercept = null
+    const before = account.sent.length
+    await page.sync.syncOnce('user-a')
+    expect(account.sent.slice(before).filter(s => s.method === 'PUT')).toEqual([])
+  })
+
+  it("brings another browser's, and drops those it made automatic, telling the screens", async () => {
+    claimedBy('user-a')
+    account.setFartChoices('twinkle', swapped)
+    account.setFartChoices('mary', leftOut)
+    const heard: string[] = []
+    page.choices.onFartChoicesChanged(() => heard.push('change'))
+    await page.sync.syncOnce('user-a')
+    expect(await choices()).toEqual({ mary: leftOut, twinkle: swapped })
+    expect(heard).toEqual(['change'])
+
+    account.setFartChoices('mary', null)
+    account.setFartChoices('twinkle', leftOut)
+    await page.sync.syncOnce('user-a')
+    expect(await choices()).toEqual({ twinkle: leftOut })
+    // Nothing changed: the screens hear nothing.
+    await page.sync.syncOnce('user-a')
+    expect(heard).toEqual(['change', 'change'])
+    expect(await outbox()).toEqual([])
+  })
+
+  it("keeps a change this browser is still sending over what the account read, and skips what it can't read", async () => {
+    claimedBy('user-a')
+    account.setFartChoices('twinkle', swapped)
+    await page.sync.syncOnce('user-a')
+    account.offline = true
+    await page.choices.setFartChoices('twinkle', null)
+    await page.choices.setFartChoices('mary', leftOut)
+    account.offline = false
+    account.setFartChoices('mary', swapped)
+    account.setFartChoices('ode', { transposition: 99 } as FartChoices)
+    // The read comes before the send: it mustn't undo either change.
+    account.intercept = sent => (sent.method === 'GET' ? undefined : Response.error())
+    await page.sync.syncOnce('user-a')
+    expect(await choices()).toEqual({ mary: leftOut })
+  })
+
+  it("drops what the account no longer has after a full read, but not what's waiting to send", async () => {
+    claimedBy('user-a')
+    account.setFartChoices('twinkle', swapped)
+    account.setFartChoices('mary', swapped)
+    await page.sync.syncOnce('user-a')
+    account.offline = true
+    await page.choices.setFartChoices('ode', leftOut)
+    account.offline = false
+    account.setFartChoices('mary', null)
+    account.expireTombstones()
+    account.advance(31 * 24 * 60 * 60 * 1000)
+    account.intercept = sent => (sent.method === 'GET' ? undefined : Response.error())
+    await page.sync.syncOnce('user-a')
+    expect(await choices()).toEqual({ ode: leftOut, twinkle: swapped })
+  })
+
+  it('changes none after a read from a Worker from before #360, which sends none', async () => {
+    claimedBy('user-a')
+    await page.choices.setFartChoices('twinkle', swapped)
+    await page.sync.syncOnce('user-a')
+    const older = async (sent: { method: string; path: string }) => {
+      if (sent.method !== 'GET') return undefined
+      account.intercept = null
+      const answer: LibraryChanges = await (await account.fetch(sent.path)).json()
+      const { fartChoices: _, deleted, ...read } = answer
+      account.intercept = older
+      const { fartChoices: __, ...deletedBefore } = deleted
+      return Response.json({ ...read, full: true, deleted: deletedBefore })
+    }
+    account.intercept = older
+    await page.sync.syncOnce('user-a')
+    expect(await choices()).toEqual({ twinkle: swapped })
+  })
+
+  it('go with the library at sign-out, and with another account’s claim', async () => {
+    await page.sync.claimLibrary('user-a', 'a@example.com')
+    await page.choices.setFartChoices('twinkle', swapped)
+    await page.sync.forgetLibrary()
+    expect(await choices()).toEqual({})
+
+    await page.sync.claimLibrary('user-a', 'a@example.com')
+    await page.choices.setFartChoices('mary', swapped)
+    await page.sync.claimLibrary('user-b', 'b@example.com')
+    expect(await choices()).toEqual({})
+    expect(await outbox()).toEqual([])
+  })
+
+  it("last a guest's visit, as the Recordings they name do, and go to the account they sign in with", async () => {
+    await page.choices.setFartChoices('twinkle', swapped)
+    expect(account.sent).toEqual([])
+    await page.store.clearVisit(new Set())
+    expect(await choices()).toEqual({})
+    expect(await outbox()).toEqual([])
+
+    await page.choices.setFartChoices('mary', leftOut)
+    expect(await page.sync.claimLibrary('user-a', 'a@example.com')).toBe(true)
+    await page.sync.syncOnce('user-a')
+    expect(account.fartChoices()).toEqual({ mary: leftOut })
     expect(await outbox()).toEqual([])
   })
 })

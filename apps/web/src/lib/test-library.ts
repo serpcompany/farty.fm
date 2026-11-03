@@ -2,6 +2,7 @@
 // `library-api.ts` calls as `src/server/library.ts` does, for one signed-in user. The real routes
 // are tested in workerd (`library.workers.test.ts`).
 
+import type { FartChoices } from './engine/fart-choices'
 import type { Kind } from './outbox'
 import type { RecordingTrim } from './recordings'
 
@@ -19,6 +20,8 @@ export function fakeAccount(userId = 'user-a') {
   }
   /** Favorite Songs (#313), by Song id: when each last changed, and whether it was taken off. */
   const favorites = new Map<string, { deletedAt: number | null; updatedAt: number }>()
+  /** Fart Choices (#360), by Song id: the last kept, or null once the Song is automatic again. */
+  const choices = new Map<string, { choices: FartChoices | null; updatedAt: number }>()
   // As D1's clock: past the 30 days tombstones are kept, so a read since 0 is `full`.
   let now = 40 * DAY
   const tick = () => {
@@ -88,6 +91,15 @@ export function fakeAccount(userId = 'user-a') {
         .filter(([, f]) => !f.deletedAt)
         .map(([songId]) => songId)
         .sort(),
+    /** What another browser did: keeps a Song's Fart Choices, or with null makes it automatic. */
+    setFartChoices(songId: string, kept: FartChoices | null) {
+      choices.set(songId, { choices: kept, updatedAt: tick() })
+    },
+    /** The account's Fart Choices, by Song id. */
+    fartChoices: () =>
+      Object.fromEntries(
+        [...choices].flatMap(([songId, c]) => (c.choices ? [[songId, c.choices]] : []))
+      ),
     /** Moves the account's clock on. */
     advance(ms: number) {
       now += ms
@@ -98,6 +110,7 @@ export function fakeAccount(userId = 'user-a') {
         for (const [id, stored] of items[kind]) if (stored.deletedAt) items[kind].delete(id)
       }
       for (const [songId, f] of favorites) if (f.deletedAt) favorites.delete(songId)
+      for (const [songId, c] of choices) if (!c.choices) choices.delete(songId)
     },
     fetch: async (input: string, init: RequestInit = {}): Promise<Response> => {
       const url = new URL(input, 'https://pedos.test')
@@ -131,16 +144,21 @@ export function fakeAccount(userId = 'user-a') {
           .filter(s => s.deletedAt)
           .map(s => s.item.id)
       const favoritesSince = [...favorites].filter(([, f]) => f.updatedAt >= since)
+      const choicesSince = [...choices].filter(([, c]) => c.updatedAt >= since)
       return Response.json({
         cursor: now,
         full,
         recordings: live('recordings'),
         toots: live('toots'),
         favorites: favoritesSince.filter(([, f]) => !f.deletedAt).map(([songId]) => songId),
+        fartChoices: choicesSince.flatMap(([songId, c]) =>
+          c.choices ? [{ songId, choices: c.choices }] : []
+        ),
         deleted: {
           recordings: deleted('recordings'),
           toots: deleted('toots'),
-          favorites: favoritesSince.filter(([, f]) => f.deletedAt).map(([songId]) => songId)
+          favorites: favoritesSince.filter(([, f]) => f.deletedAt).map(([songId]) => songId),
+          fartChoices: choicesSince.filter(([, c]) => !c.choices).map(([songId]) => songId)
         }
       })
     }
@@ -155,6 +173,20 @@ export function fakeAccount(userId = 'user-a') {
       }
       if (method === 'DELETE') {
         if (was && !was.deletedAt) favorites.set(songId, { deletedAt: tick(), updatedAt: now })
+        return new Response(null, { status: 204 })
+      }
+      return error(405, 'method_not_allowed')
+    }
+    const chosen = url.pathname.match(/^\/api\/fart-choices\/([^/]+)\/$/)
+    if (chosen) {
+      const songId = decodeURIComponent(chosen[1])
+      if (method === 'PUT') {
+        const kept = JSON.parse(String(init.body)) as FartChoices
+        choices.set(songId, { choices: kept, updatedAt: tick() })
+        return Response.json({ songId, choices: kept })
+      }
+      if (method === 'DELETE') {
+        if (choices.get(songId)?.choices) choices.set(songId, { choices: null, updatedAt: tick() })
         return new Response(null, { status: 204 })
       }
       return error(405, 'method_not_allowed')

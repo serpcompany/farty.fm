@@ -1,3 +1,4 @@
+import { changeSignal } from './change-signal'
 import { announceQueued } from './outbox'
 import { queue, withDb } from './recording-store'
 
@@ -39,43 +40,16 @@ export async function setFavorite(songId: string, on: boolean): Promise<void> {
   favoritesChanged()
 }
 
-const changes = new EventTarget()
-const channelName = 'pedos-favorites'
-/** This page, so it skips its own changes when they come back from the other tabs' channel. */
-const thisPage = typeof crypto === 'undefined' ? '' : crypto.randomUUID()
+const signal = changeSignal('pedos-favorites')
 
 /**
  * Says the Favorite Songs changed here: a tap, or a sync that brought another browser's. This tab
  * and Farty's other tabs read them again.
  */
-export function favoritesChanged(): void {
-  changes.dispatchEvent(new Event('change'))
-  try {
-    const channel = new BroadcastChannel(channelName)
-    channel.postMessage(thisPage)
-    channel.close()
-  } catch {
-    // The other tabs read them again when they next open.
-  }
-}
+export const favoritesChanged: () => void = signal.changed
 
 /**
  * Calls `listener` whenever the Favorite Songs change, in this tab or another. Returns a function
  * that stops it.
  */
-export function onFavoritesChanged(listener: () => void): () => void {
-  changes.addEventListener('change', listener)
-  let others: BroadcastChannel | null = null
-  try {
-    others = new BroadcastChannel(channelName)
-    others.onmessage = ({ data }: MessageEvent<string>) => {
-      if (data !== thisPage) listener()
-    }
-  } catch {
-    // Only this tab's changes, then.
-  }
-  return () => {
-    changes.removeEventListener('change', listener)
-    others?.close()
-  }
-}
+export const onFavoritesChanged: (listener: () => void) => () => void = signal.onChanged
