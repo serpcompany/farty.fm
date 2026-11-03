@@ -71,3 +71,59 @@ describe('The friend control when the friend state can’t be read', () => {
     expect(retry()).toBeDefined()
   })
 })
+
+describe('A shared Toot’s row (#346)', () => {
+  it('says it’s a Toot and its Song, opens its own page and plays its own audio', async () => {
+    const fetched: string[] = []
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async input => {
+      fetched.push(String(input))
+      return String(input) === '/api/friends/alice/'
+        ? Response.json({ state: 'none' })
+        : new Response(new ArrayBuffer(8))
+    })
+    const { play } = await import('@/lib/audio/player')
+    const { ProfilePage } = await import('./profile-page')
+    const now = Date.now()
+    await act(async () =>
+      root?.render(
+        <ProfilePage
+          handle="alice"
+          items={[
+            {
+              kind: 'toots',
+              shareId: 'tttttttttttt',
+              path: '/u/alice/t/tttttttttttt/',
+              name: 'Twinkle for Mum',
+              detail: 'Sound Pad',
+              sharedAt: now
+            },
+            {
+              kind: 'recordings',
+              shareId: 'rrrrrrrrrrrr',
+              path: '/u/alice/r/rrrrrrrrrrrr/',
+              name: 'Recording 1',
+              detail: 'E3',
+              sharedAt: now
+            }
+          ]}
+        />
+      )
+    )
+    const rows = [...container.querySelectorAll('[data-testid="profile-shared-item"]')]
+    expect(rows.map(row => row.querySelector('a')?.textContent)).toEqual([
+      'Twinkle for MumToot · Sound Pad · Today',
+      'Recording 1Recording · E3 · Today'
+    ])
+    // Next's Link drops the trailing slash here, outside a build with `trailingSlash`.
+    expect(rows.map(row => row.querySelector('a')?.getAttribute('href'))).toEqual([
+      '/u/alice/t/tttttttttttt',
+      '/u/alice/r/rrrrrrrrrrrr'
+    ])
+
+    await act(async () => rows[0].querySelector('button')?.click())
+    const [key, load] = vi.mocked(play).mock.calls.at(-1) ?? []
+    expect(key).toBe('shared:tttttttttttt')
+    await load?.()
+    expect(fetched).toContain('/u/alice/t/tttttttttttt/audio/')
+  })
+})

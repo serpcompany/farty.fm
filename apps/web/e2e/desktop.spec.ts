@@ -123,6 +123,26 @@ test('Download App shows a QR code for a phone; Escape closes it and gives focus
   }
 })
 
+test("a shared page's Get Farty shows the QR code, not the account step (#318)", async ({
+  page
+}) => {
+  // A link that no longer works has Get Farty too, with no account needed to show it.
+  await page.goto('/u/nobody/r/AAAAAAAAAAAA/')
+  await expect(page.getByRole('heading', { name: "This link doesn't work any more" })).toBeVisible()
+  const getFarty = page.getByRole('button', { name: 'Get Farty' })
+  await expect(getFarty).toHaveCount(2)
+  for (const index of [0, 1]) {
+    await getFarty.nth(index).click()
+    const dialog = page.getByRole('dialog', { name: 'Scan to open Farty on your phone' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByRole('img', { name: /^QR code for / })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Make a free account' })).toHaveCount(0)
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+    await expect(getFarty.nth(index)).toBeFocused()
+  }
+})
+
 test('the privacy, support and 404 pages stay pages, with no tabs', async ({ page }) => {
   for (const [path, content] of [
     ['/privacy/', page.getByRole('heading', { name: 'Privacy', level: 1 })],

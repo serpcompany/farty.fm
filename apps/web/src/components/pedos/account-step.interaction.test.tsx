@@ -24,6 +24,7 @@ vi.mock('./account-provider', () => ({
     finishSignIn: vi.fn()
   })
 }))
+vi.mock('next/navigation', () => ({ usePathname: () => '/' }))
 vi.mock('@/lib/library-sync', () => ({ unsavedBeforeSignIn: async () => 0 }))
 // Each mount is a new widget (a new React key).
 vi.mock('./turnstile', async () => {
