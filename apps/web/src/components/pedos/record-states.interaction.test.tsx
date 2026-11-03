@@ -86,6 +86,10 @@ vi.mock('@/lib/recording-store', () => ({
   loadRecordings: async () => []
 }))
 vi.mock('@/lib/toot-store', () => ({ loadToots: async () => [] }))
+vi.mock('@/lib/catalog/load-songs', async () => {
+  const { songs } = await import('@/lib/catalog/songs.generated')
+  return { loadSongs: async () => songs }
+})
 vi.mock('@/lib/toot-renderer', () => ({ makeToot: () => new Promise(() => {}) }))
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
 vi.mock('@/lib/stale-build', () => ({ holdReload: () => () => {} }))

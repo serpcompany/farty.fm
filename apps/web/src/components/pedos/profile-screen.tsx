@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import { setSharing, useSharing } from '@/lib/telemetry/sharing'
@@ -43,7 +44,8 @@ const list = 'divide-y overflow-hidden rounded-xl bg-muted/60'
  * the privacy and support pages, which the web app needs.
  */
 export function ProfileScreen({ version }: { version: string }) {
-  const stats = usePedos().profileStats
+  const pedos = usePedos()
+  const stats = pedos.profileStats
 
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
@@ -53,7 +55,15 @@ export function ProfileScreen({ version }: { version: string }) {
         <h2 id="profile-stats" className={header}>
           Stats
         </h2>
-        {stats === null ? (
+        {stats === null && pedos.songsFailed ? (
+          // The counts include the Songs unlocked, so they wait for the Song Catalog (#322).
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <p className="text-sm text-muted-foreground">Couldn't load the Songs.</p>
+            <Button variant="outline" onClick={pedos.reloadSongs}>
+              Try again
+            </Button>
+          </div>
+        ) : stats === null ? (
           <div className="flex justify-center py-6">
             <Spinner />
           </div>
