@@ -28,7 +28,8 @@ const page = vi.hoisted(() => ({
   stored: [] as Recording[],
   saveRecording: vi.fn(),
   saveAnalysis: vi.fn(),
-  placeRecording: vi.fn()
+  placeRecording: vi.fn(),
+  openStep: vi.fn()
 }))
 
 vi.mock('@/lib/audio/recorder', async importOriginal => {
@@ -73,7 +74,14 @@ vi.mock('@/lib/toot-renderer', () => ({ makeToot: () => new Promise(() => {}) })
 vi.mock('@/lib/visit', () => ({ openVisit: () => ({ library: Promise.resolve() }) }))
 vi.mock('@/lib/stale-build', () => ({ holdReload: () => () => {} }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: () => undefined }))
-vi.mock('./account-provider', () => ({ useAccount: () => ({ offerStep: () => false }) }))
+// A guest, as far as Result's Share (#320) can tell.
+vi.mock('./account-provider', () => ({
+  useAccount: () => ({
+    account: { status: 'signedOut' },
+    offerStep: () => false,
+    openStep: page.openStep
+  })
+}))
 vi.mock('next/navigation', () => ({ useRouter: () => ({}), usePathname: () => '/' }))
 vi.mock('./piano-keys', async importOriginal => ({
   ...(await importOriginal<typeof import('./piano-keys')>()),
@@ -400,6 +408,18 @@ describe('the review after Stop (#314)', () => {
     await tap('Discard')
     expect(page.saveRecording).not.toHaveBeenCalled()
     expect(byTestId('review-note')).toBeNull()
+  })
+
+  it('offers Share once the take is saved, and a guest makes an account first (#320)', async () => {
+    await recordTake()
+    await analysisFinds(found)
+    // Not a Recording yet, so nothing to share.
+    expect(document.querySelector('[aria-label^="Share"]')).toBeNull()
+    await typeName('Squeaker')
+    await tap('Save')
+    expect(text('result-note')).toBe('G3')
+    await tap('Share Squeaker')
+    expect(page.openStep).toHaveBeenCalledWith(expect.any(Function), 'share')
   })
 })
 

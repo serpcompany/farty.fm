@@ -1,11 +1,13 @@
 import { randomInt } from 'node:crypto'
 import { type BrowserContext, expect, type Page, test } from '@playwright/test'
-import { newEmail, signInByApi } from './account'
-import { recordAndSave, withFakeMicrophone } from './record'
+import { codeFor, newEmail, ownClient, signInByApi } from './account'
+import { recordAndSave, skipWelcome, withFakeMicrophone } from './record'
+import { onPhone } from './screens'
 
 // Sharing a Recording by link (#316, ADR 0020): the owner picks a Handle and shares, someone
 // signed out opens the link in another browser and plays it, and once the owner stops sharing,
-// the link is gone. A guest is asked to make a free account first.
+// the link is gone. A guest is asked to make a free account first. The record flow's Result
+// shares the take just saved (#320).
 
 const g3 = '090__carlosramon__17-pet__186119.wav'
 withFakeMicrophone(g3)
@@ -233,6 +235,92 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
   })
 
   await viewer.close()
+})
+
+test("a guest records, reviews and saves, then shares from Result once they've made an account, and someone signed out plays it (#320)", async ({
+  context,
+  browser,
+  baseURL,
+  httpCredentials,
+  viewport,
+  userAgent,
+  deviceScaleFactor,
+  isMobile,
+  hasTouch
+}, testInfo) => {
+  test.skip(!onPhone({ viewport }), 'Share from Result is checked at phone size')
+  test.setTimeout(180_000)
+  const handle = `e2e_${randomInt(1e9)}`
+  const email = newEmail(testInfo, 'share-result')
+  await ownClient(context)
+  await fakeShareSheet(context)
+  const page = await context.newPage()
+
+  await test.step('records a G3, names it on its review, and saves it', async () => {
+    await page.addInitScript(skipWelcome)
+    await page.goto('/')
+    await page.getByTestId('record-button').click()
+    await expect(page.getByTestId('recording-timer')).toBeVisible()
+    await page.waitForTimeout(1500)
+    await page.getByTestId('stop-button').click()
+    await expect(page.getByRole('heading', { name: 'New Recording' })).toBeVisible()
+    // Not a Recording until it's saved, so there's nothing to share yet.
+    await expect(page.getByRole('button', { name: /^Share/ })).toHaveCount(0)
+    await page.getByRole('textbox', { name: 'Name' }).fill('Morning toot')
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByTestId('result-note')).toHaveText('G3')
+  })
+
+  await test.step("Result's Share asks for a free account, then a Handle, then shares", async () => {
+    await page.getByRole('button', { name: 'Share Morning toot' }).click()
+    const step = page.getByRole('dialog', { name: 'Make a free account' })
+    await expect(step.getByText('You need one to share. It keeps your farts too.')).toBeVisible()
+    await step.getByLabel('Email').fill(email)
+    await step.getByRole('button', { name: 'Send code' }).click()
+    await step.getByLabel('Code').fill(await codeFor(page, email))
+    await step.getByRole('button', { name: 'Sign in' }).click()
+    await expect(step).toBeHidden()
+
+    // Back on Result, Share carries on.
+    const dialog = page.getByRole('alertdialog')
+    await expect(dialog.getByRole('heading', { name: 'Pick a handle' })).toBeVisible()
+    await dialog.getByRole('textbox', { name: 'Handle' }).fill(handle)
+    await expect(dialog.getByText(`@${handle} is free`)).toBeVisible()
+    await dialog.getByRole('button', { name: 'Share' }).click()
+    await expect(dialog).toBeHidden()
+    // The guest's take reaches the new account first, then the link goes to the share sheet.
+    await expect.poll(() => page.evaluate(() => window.__shared.length)).toBe(1)
+    const shared = await page.evaluate(() => window.__shared[0])
+    expect(shared.title).toBe(`Morning toot by @${handle}`)
+    expect(new URL(shared.url ?? '').pathname).toMatch(new RegExp(`^/u/${handle}/r/[0-9a-z]{12}/$`))
+    await expect(page.getByTestId('result-note')).toHaveText('G3')
+  })
+
+  await test.step('someone signed out opens the link and plays it', async () => {
+    const viewer = await browser.newContext({
+      baseURL,
+      httpCredentials,
+      viewport,
+      userAgent,
+      deviceScaleFactor,
+      isMobile,
+      hasTouch,
+      serviceWorkers: 'block'
+    })
+    await listenToSounds(viewer)
+    const other = await viewer.newPage()
+    const link = new URL((await page.evaluate(() => window.__shared[0].url)) ?? '').pathname
+    expect((await other.goto(link))?.status()).toBe(200)
+    await expect(other.getByText(`@${handle} shared a Recording`)).toBeVisible()
+    await expect(other.getByRole('heading', { name: 'Morning toot' })).toBeVisible()
+    await expect(other.getByTestId('shared-note')).toHaveText('G3')
+    await other.getByRole('button', { name: 'Play Morning toot' }).click()
+    await expect.poll(() => other.evaluate(() => window.__sounds.length)).toBe(1)
+    const sound = await other.evaluate(() => window.__sounds[0])
+    expect(sound.duration).toBeGreaterThan(0.2)
+    expect(sound.peak).toBeGreaterThan(0.05)
+    await viewer.close()
+  })
 })
 
 test('a guest who taps Share is asked to make a free account first', async ({ context }) => {

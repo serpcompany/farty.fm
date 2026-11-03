@@ -33,6 +33,7 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
    - `opengraph-image.tsx` draws a 1200 by 630 PNG with `next/og`: Farty's pink and icon, the note, the name, "A fart by @maya" and the waveform's bars. It reads D1 like the page, so a stopped link's image is gone too, and Next's default (`public, max-age=0, must-revalidate` in Next 16.3) is replaced by `private, no-cache`. The bundled font has no ♯, and a missing glyph makes `next/og` fetch one from Google Fonts on the request, so the image spells a sharp `#`.
 8. **Share, then the share sheet.**
    - On a Recording's row, Share puts the link on the phone's share sheet (`navigator.share`), or copies it where there's none. A row that is shared says "Shared", and its button opens Share link and Stop sharing.
+   - The record flow offers the same Share at the top of Result, the step after its review's Save, once the take is saved (#320). The review before Save has none: the take isn't a Recording yet.
    - When the browser has spent the tap's activation on the requests before the sheet (a `NotAllowedError`), a "Your link is ready" dialog offers the sheet on a fresh tap.
    - Stop sharing asks first: "The link stops working for everyone who has it. Sharing it again makes a new link." Deleting a shared Recording, or the account, says its links stop working too.
 9. **Report, on every shared page, reaches Farty in D1.**
