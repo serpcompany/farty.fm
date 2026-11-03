@@ -560,6 +560,47 @@ describe("a Song's notes (#323)", () => {
     )
   })
 
+  it("keeps the index's notes on a page's fetch of it when install couldn't fetch it", async () => {
+    let indexOnline = false
+    const fetched: string[] = []
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      fetched.push(path)
+      if (path === '/') return ok(startPage)
+      if (path === '/shell.json') return ok(JSON.stringify({ pages: ['/compose/song/'] }))
+      if (path === '/compose/song/') return ok(`<link rel="preload" href="${catalog}" as="fetch"/>`)
+      if (path === catalog) return indexOnline ? ok(index('mary', 'twinkle')) : 'offline'
+      return ok(`notes of ${path}`)
+    })
+    await worker.lifecycle('install')
+    await worker.lifecycle('activate')
+    // Activating had no index to read, so it fetched no notes.
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(fetched.filter(path => path.startsWith('/catalog/notes/'))).toEqual([])
+
+    indexOnline = true
+    await worker.request(catalog)
+    expect(worker.kept('pedos-notes-v1').sort()).toEqual([notes('mary'), notes('twinkle')])
+  })
+
+  it("never trims the current index's notes, however many Songs it has", async () => {
+    // More Songs than the cache's floor of 2,000 entries, each opened once before the index loads.
+    const songs = Array.from({ length: 1100 }, (_, i) => `song-${i}`)
+    const worker = startWorker(url => {
+      const path = url.replace(origin, '')
+      if (path === catalog) return ok(index(...songs))
+      return ok(`notes of ${path}`)
+    })
+    for (const song of songs) await worker.request(notes(song))
+    // Then other Songs' notes, such as an older catalog's, so the cache passes its floor.
+    for (let i = 0; i < 1500; i++) await worker.request(notes(`old-${i}`))
+    await worker.request(catalog)
+    const kept = new Set(worker.kept('pedos-notes-v1'))
+    expect(songs.filter(song => !kept.has(notes(song)))).toEqual([])
+    // Room for two catalogs this size, and no more.
+    expect(kept.size).toBe(2 * songs.length)
+  })
+
   it("keeps a new index's notes once a page fetches it, such as after a deploy", async () => {
     const next = '/catalog/songs-00000000000000ff.json'
     const fetched: string[] = []

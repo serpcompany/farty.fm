@@ -25,7 +25,9 @@ const version = 2
 const notesVersion = 1
 // A few deploys' worth of the shell. The least recently fetched files go first.
 const shell = { name: `pedos-shell-v${version}`, maxEntries: 200 }
-// Every Song's notes twice over, at a few KB a Song. The least recently fetched go first.
+// Two catalogs' notes, at a few KB a Song: at least `maxEntries`, and twice the Songs of the
+// latest index the worker read, however large the catalog grows (`notesCap`). The least recently
+// fetched go first, but never that index's own.
 const songNotes = { name: `pedos-notes-v${notesVersion}`, maxEntries: 2000 }
 const shellFile = /\.(?:js|css|woff2?|png|ico|svg|webp|jpg|webmanifest)$/i
 // The Song Catalog's index and each Song's notes, named by their content
@@ -46,6 +48,8 @@ let lastRefresh = 0
 const notesKeptFor = new Map()
 // How many Songs' notes it fetches at once, so they don't crowd out what a page fetches.
 const notesAtOnce = 6
+// The notes that the latest index the worker read names, which trimming never deletes.
+let currentNotes = new Set()
 // The indexes the shell's pages load, found as the worker installs, whose notes it fetches once
 // it's active.
 let installedIndexes = []
@@ -183,18 +187,29 @@ async function keep(url, response) {
     const bare = new URL(url)
     bare.hash = ''
     await cache.put(bare.href, new Response(response.body, response))
-    await trim(cache, store.maxEntries)
+    if (store === songNotes) await trim(cache, notesCap(), currentNotes)
+    else await trim(cache, store.maxEntries)
   } catch {
     // A full disk only costs the offline copy.
   }
 }
 
-// The least recently fetched go first.
-async function trim(cache, maxEntries) {
+// The least recently fetched go first, except the paths in `spare`.
+async function trim(cache, maxEntries, spare = new Set()) {
   const keys = await cache.keys()
-  for (const old of keys.slice(0, Math.max(0, keys.length - maxEntries))) {
+  let over = keys.length - maxEntries
+  for (const old of keys) {
+    if (over <= 0) return
+    if (spare.has(new URL(typeof old === 'string' ? old : old.url).pathname)) continue
     await cache.delete(old)
+    over -= 1
   }
+}
+
+// Twice the latest index's Songs, so its notes and the last catalog's fit, and never fewer than
+// `songNotes.maxEntries`.
+function notesCap() {
+  return Math.max(songNotes.maxEntries, 2 * currentNotes.size)
 }
 
 // Every Song's notes that each of `indexes`, `[path, text]`, names. Resolves to false when the
@@ -208,8 +223,9 @@ async function keepNotesOf(indexes) {
 }
 
 // Every Song's notes that the index at `path` names and the cache doesn't hold yet, fetched ahead,
-// a few at a time. Resolves to false when the network failed for any of them, and the next fetch
-// of the index tries again.
+// a few at a time. Resolves to false when the network failed for any of them, or the index's text
+// isn't an index, such as the empty text of an index install couldn't fetch, and the next fetch of
+// the index tries again.
 function keepEveryNotes(path, indexText) {
   let keeping = notesKeptFor.get(path)
   if (!keeping) {
@@ -232,8 +248,9 @@ async function fetchEveryNotes(indexText) {
         .filter(notes => typeof notes === 'string' && notesFile.test(notes))
     }
   } catch {
-    return true
+    return false
   }
+  if (paths.length > 0) currentNotes = new Set(paths)
   let complete = true
   try {
     const cache = await caches.open(songNotes.name)
@@ -255,7 +272,7 @@ async function fetchEveryNotes(indexText) {
       }
     }
     await Promise.all(Array.from({ length: notesAtOnce }, fetchNext))
-    await trim(cache, songNotes.maxEntries)
+    await trim(cache, notesCap(), currentNotes)
   } catch {
     // A full disk only costs the offline copies.
     complete = false
@@ -316,7 +333,9 @@ async function precacheShell(startHtml) {
   const indexes = []
   const texts = await Promise.all([...files].map(get))
   for (const [i, file] of [...files].entries()) {
-    const text = texts[i] ?? ''
+    const text = texts[i]
+    // An index it couldn't fetch is left to the next fetch of it, which keeps its notes then.
+    if (text === null) continue
     if (catalogFile.test(file)) indexes.push([file, text])
     for (const [, path] of text.matchAll(/"(static\/chunks\/[^"\s\\]+\.js)"/g)) {
       if (!files.has(`/_next/${path}`)) loaded.add(`/_next/${path}`)
