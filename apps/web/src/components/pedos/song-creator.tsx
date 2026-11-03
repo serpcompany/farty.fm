@@ -207,8 +207,20 @@ export function SongCreatorFromAddress() {
   const id = /^\/compose\/([^/]+)/.exec(usePathname())?.[1] ?? ''
   const title = usePedos().song(id)?.title
   useEffect(() => {
-    if (title) document.title = `${title} · Farty`
-  }, [title])
+    if (!title) return
+    const wanted = `${title} · Farty`
+    const set = () => {
+      // Leaving the Song, the next page's title lands before this effect's cleanup runs (#351).
+      const here = /^\/compose\/([^/]+)/.exec(location.pathname)?.[1]
+      if (here === id && document.title !== wanted) document.title = wanted
+    }
+    set()
+    // The page's metadata title ("Compose · Farty") can land after this effect, and would stay;
+    // so set the Song's title again whenever the `<title>` changes (#351).
+    const observer = new MutationObserver(set)
+    observer.observe(document.head, { childList: true, characterData: true, subtree: true })
+    return () => observer.disconnect()
+  }, [id, title])
   return <SongCreator id={id} />
 }
 
