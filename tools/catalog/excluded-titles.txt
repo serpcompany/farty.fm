@@ -605,3 +605,30 @@ Horses Branle | the same tune as the Song Horse's Bransle (batch 07)
 
 # Pulled from titles-08.txt after review of its first import (#324)
 Helena | the importer picks a score whose composer is credited as "tune: Colin Hume 1988", a modern composer, not W. B. Bradbury's hymn tune
+
+# From the review of titles-09.txt (#324)
+Hornpipes | not one tune: a collection title
+Vocals | not a tune: a part name
+Christmas Hymn | unsure: a generic title, not one tune
+[id 1-77a] | not a title: a catalogue code
+[id 8-93] | not a title: a catalogue code
+Sailors JournalComd by DibdinThe. JC.165 | not a clean title: two words run together with a catalogue code
+Good Morning to All | the same tune as the Song Happy Birthday
+Welcome Whiskey Back Again | the same tune as the Song Welcome Whisky Back Again
+O'er the Hills and far Awa | the same tune as the Song O'er the Hills and far away
+Garfield | unsure: probably the same tune as the Song President Garfield's Hornpipe
+The Duchess of Buccleuch | the same tune as Duchess of Buccleugh, spelled another way
+Nitzotz Ha ahava | unsure: an Israeli song of unknown date, probably under copyright
+Ländler | not one tune: a dance type
+
+# Pulled from titles-09.txt after review of its first import (#324)
+Indian Princess | the importer picks a score by Colin Hume, a modern composer
+Mrs Kenny's Barn Dance | unsure: the importer picks a score credited to Felix Burns, a 20th-century composer
+The Indian River Hornpipe | unsure: the importer picks a score credited to Frank Livingstone, who may be a living composer
+Hunting Song | unsure: the importer picks a score credited to Henry Thomas Smart that is also tagged as a 1910 Chippewa song
+Lament For The Death Of The Rev. Archie Beaton | unsure: the importer picks a score credited to John Mason, whose dates and the tune's composer are not known
+
+# Pulled from titles-09.txt after the voice and title check (#324)
+Let Heaven And Earth Rejoice And Sing | the importer picks "Version 2" of the score, with a harmony part, not the melody score
+Little Annie Rooney. GHW.053 | not a clean title: a catalogue code is part of the name
+Smith's -- Reel | not a clean title: a stray double dash in the name

@@ -26360,5 +26360,4620 @@
    "tool": "tools/catalog/import_pdmx.py",
    "titles": "tools/catalog/titles-08.txt"
   }
+ },
+ {
+  "id": "miss-johnstone",
+  "title": "Miss Johnstone",
+  "file": "midi/pdmx-miss-johnstone.mid",
+  "sha256": "fdf7aa625ae993a4432568c78170d625c36f9552b9e179bb71562c684c4f2bbf",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/18/QmTEgtKARC9qnrhWaYtLGKrcjhijntTLeNFz22G7cnvGYR.mid",
+   "musescore_score_id": "4564092",
+   "musescore_url": "https://musescore.com/score/4564092",
+   "score_title": "Miss Johnstone",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 116,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "muss-i-denn",
+  "title": "Muss i Denn",
+  "file": "midi/pdmx-muss-i-denn.mid",
+  "sha256": "f79bd4f5fac237eee71fc1db22c7c9187a4e7d86f1f4b97867b93b444c4a3d26",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/40/QmcrzRfeD54qzUgDFhL9JxbZHGkZAUEwYCLhMmrcekXag4.mid",
+   "musescore_score_id": "4597010",
+   "musescore_url": "https://musescore.com/score/4597010",
+   "score_title": "Muss i Denn",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "15"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "newfoundland",
+  "title": "Newfoundland",
+  "file": "midi/pdmx-newfoundland.mid",
+  "sha256": "b3d9da69a90249ccf86aea7eb8cc53aa9ef1e137d2694408701aaef53494d40c",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/56/QmdzRCFcf2MizRLyMLmdJ1WKMhTyfq7ow2CCFwz4MyihNU.mid",
+   "musescore_score_id": "5145161",
+   "musescore_url": "https://musescore.com/score/5145161",
+   "score_title": "The Newfoundland",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "rocking-the-baby",
+  "title": "Rocking the Baby",
+  "file": "midi/pdmx-rocking-the-baby.mid",
+  "sha256": "928e15bc95c884e3a9beda483585c5eb3923845b3b5aeed628367e915a83c083",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/3/QmV4t7EpVxDYT7jemyrYCWCkPY3eC46Pbn9VuhZxA4Q13q.mid",
+   "musescore_score_id": "4690138",
+   "musescore_url": "https://musescore.com/score/4690138",
+   "score_title": "Rocking the Baby",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "rose-of-sharon",
+  "title": "Rose of Sharon",
+  "file": "midi/pdmx-rose-of-sharon.mid",
+  "sha256": "676b9c5ef80d876b52bff5afd4cd8fdac965f0c4a6462bc5600ff806b9eca1ff",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/11/QmTbBkji5w7QDnHYjXDpZcubuQnDaKwrszePY9Bnnx3AFj.mid",
+   "musescore_score_id": "4585592",
+   "musescore_url": "https://musescore.com/score/4585592",
+   "score_title": "Rose of Sharon",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "8"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 2
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "something-new",
+  "title": "Something New",
+  "file": "midi/pdmx-something-new.mid",
+  "sha256": "4ba6902ef42701611cda16c2e6b25e71999c9715e2ce2417afb726196e804fea",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/19/QmXfKmECVCu9wgbUoMM1c9BjrqGueBTLWLCfzTqf6TYpz3.mid",
+   "musescore_score_id": "4853684",
+   "musescore_url": "https://musescore.com/score/4853684",
+   "score_title": "Something New",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31.5
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "talyllyn",
+  "title": "Talyllyn",
+  "file": "midi/pdmx-talyllyn.mid",
+  "sha256": "594c49709eaff0b86410f4fcb7795c632bf7c5852fabdf308c1427b8d77d30a9",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/24/QmQHsjS5p1UfbGnoBj58REQh74LCrngk7ob41CGYrdQ43d.mid",
+   "musescore_score_id": "4955390",
+   "musescore_url": "https://musescore.com/score/4955390",
+   "score_title": "Traditional music - Talyllyn",
+   "composer": "Trad.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 100,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "tame-her-when-da-snaw-comes",
+  "title": "Tame Her When Da Snaw Comes",
+  "file": "midi/pdmx-tame-her-when-da-snaw-comes.mid",
+  "sha256": "59a57c3662b2c8e13a883ebda2c03008c89f165071cd5e35b4d31cadf4c7f6ef",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/18/QmeE4N4Yknx7DN3qB98BzTxFho6fYLybbk6EXvmdXSiNWR.mid",
+   "musescore_score_id": "4924372",
+   "musescore_url": "https://musescore.com/score/4924372",
+   "score_title": "Tame Her When Da Snaw Comes",
+   "composer": "R-102Shetland",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "when-sick-is-it-tea-you-want",
+  "title": "When Sick is it Tea You Want",
+  "file": "midi/pdmx-when-sick-is-it-tea-you-want.mid",
+  "sha256": "f56bc1a7656bbbfff3265b98c265d26fa020f911dd6c0c6548996cd151180be1",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/23/Qmahg8FNr8BZyCvKgLmscVbpE2afQ9zYuTxUwqjXT5JaKd.mid",
+   "musescore_score_id": "4664362",
+   "musescore_url": "https://musescore.com/score/4664362",
+   "score_title": "When Sick Is It Tea You Want?",
+   "composer": "Joe Buchanan's Scottish Tome - Page 257.2",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "a-virgin-most-pure",
+  "title": "A Virgin most pure",
+  "file": "midi/pdmx-a-virgin-most-pure.mid",
+  "sha256": "b4a5859e9cf110b37ab1016760a9c345d1b01f7e58fdfc983897c6e7af09539f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/15/QmbdeenEtbicrq3hL5daLRbxWDxtu1WSVMG3er9VmzNAnz.mid",
+   "musescore_score_id": "4953028",
+   "musescore_url": "https://musescore.com/score/4953028",
+   "score_title": "A Virgin most pure",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "19"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "breeches-mary",
+  "title": "Breeches Mary",
+  "file": "midi/pdmx-breeches-mary.mid",
+  "sha256": "e563a2096ab548cb8992e0ed6e60191d0758eb206971838333d75bfbe9e110c1",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/9/QmYa2PGkU3ssAe1dfiQNCmJzRJTivkmqNt1WxXozQ84pbL.mid",
+   "musescore_score_id": "4672133",
+   "musescore_url": "https://musescore.com/score/4672133",
+   "score_title": "Breeches Mary",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "deil-take-the-warr",
+  "title": "De'il Take the Warr",
+  "file": "midi/pdmx-deil-take-the-warr.mid",
+  "sha256": "47921a5c344893abf4bb7c6db78ad9c6d5004bb0dadb087ec5a13dc735c4c255",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/6/33/QmNn9QZHhcTy1uvJYdHQTbwu8ugoovfJwdcVCQ61NHkYqv.mid",
+   "musescore_score_id": "4600666",
+   "musescore_url": "https://musescore.com/score/4600666",
+   "score_title": "De'il Take the Warr",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "8"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 5.375
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "diddanwch-gruffydd-ap-cynan",
+  "title": "Diddanwch Gruffydd ap Cynan",
+  "file": "midi/pdmx-diddanwch-gruffydd-ap-cynan.mid",
+  "sha256": "c1b1e4b0c15984c7d99507c2383bc3175eb290d7c8e445975443f64fe0a3d823",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/16/QmSDcCLFBsjWqyfYKKPebZ852q27QtB9WpmNPFBKEQPf3y.mid",
+   "musescore_score_id": "4697956",
+   "musescore_url": "https://musescore.com/score/4697956",
+   "score_title": "Diddanwch Gruffydd ap Cynan",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "dumbarton-drums",
+  "title": "Dumbarton Drums",
+  "file": "midi/pdmx-dumbarton-drums.mid",
+  "sha256": "ad3e66b5f78809cbd411265719cfffeac7d8b1f1b242ad7222e12699e402997c",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/12/QmPBS2TWRKEordGm582NWDRLBN5PpkEr1ycYydhsGL6bXv.mid",
+   "musescore_score_id": "4663725",
+   "musescore_url": "https://musescore.com/score/4663725",
+   "score_title": "DUMBARTON DRUMS",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "ecce-tempus",
+  "title": "Ecce Tempus",
+  "file": "midi/pdmx-ecce-tempus.mid",
+  "sha256": "91e76819c89d219805b104ef69b35e75f4aa76988b15f94f48e2af2ea7370fd0",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/35/QmYo5CTj5AGcqfsRBEfJ37eNStK3Dt1rprEh6e5gcJxTmL.mid",
+   "musescore_score_id": "5795654",
+   "musescore_url": "https://musescore.com/score/5795654",
+   "score_title": "Ecce Tempus",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 24,
+   "beats_per_bar": 24
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "highland-chieftain",
+  "title": "The Highland Chieftain",
+  "file": "midi/pdmx-highland-chieftain.mid",
+  "sha256": "cde9ae3c38e70c5e969b918c7263af52390476306197d8d8d267138b9c5c1880",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/34/QmPNsB7444dU2uiWMotxj8UN6S6KxnRQgiXSYihm5gXuKA.mid",
+   "musescore_score_id": "4878202",
+   "musescore_url": "https://musescore.com/score/4878202",
+   "score_title": "Nathaniel Gow - The Highland Chieftain",
+   "composer": "Nathaniel Gow",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "long-time-ago",
+  "title": "Long Time Ago",
+  "file": "midi/pdmx-long-time-ago.mid",
+  "sha256": "1970edcfdd01f411a8166885ca7f10f9a839c1a3cd865c4050245c8c3f236e32",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/31/QmSmDZVg7XHvWJJVc63hPHMgZ4Gyt16BB1XJkuTtjz1Gio.mid",
+   "musescore_score_id": "5113429",
+   "musescore_url": "https://musescore.com/score/5113429",
+   "score_title": "A long time ago",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "10"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "marquis-of-huntlys-strathspey",
+  "title": "Marquis of Huntly's Strathspey",
+  "file": "midi/pdmx-marquis-of-huntlys-strathspey.mid",
+  "sha256": "0188ff1d5bbf5f56de614a42f285628b490b8faf4aae1b2a55bc92cdc60c8b58",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/41/QmdR2Fyn56UzBDNt45XvfG9G8inp2cGuEwkznBEKuJZsw7.mid",
+   "musescore_score_id": "4954963",
+   "musescore_url": "https://musescore.com/score/4954963",
+   "score_title": "William Marshall - The Marquis of Huntly's Strathspey",
+   "composer": "William Marshall",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "6"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "miss-ross",
+  "title": "Miss Ross",
+  "file": "midi/pdmx-miss-ross.mid",
+  "sha256": "15e6b2462d800070d7eecd07d5729a1d1bcfc1a9d5b95188e20df4be05aa543c",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/36/QmSp4DKgVvG6KfQcgjkQBCn1eyYFN6KCb2Yv7PVqWdfeGA.mid",
+   "musescore_score_id": "4585447",
+   "musescore_url": "https://musescore.com/score/4585447",
+   "score_title": "Miss Ross",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "queens-welcome-to-invercauld",
+  "title": "The Queen's Welcome to Invercauld",
+  "file": "midi/pdmx-queens-welcome-to-invercauld.mid",
+  "sha256": "79780bd3450df63831a777f6f5a35ed87668540eb0a5966fc70fbf1a6a30f34f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/15/QmPd9swZtXjUx2YTtdAmZkfkKVtuKUp2YG1yddPuD1T4fD.mid",
+   "musescore_score_id": "4944002",
+   "musescore_url": "https://musescore.com/score/4944002",
+   "score_title": "the Queen's Welcome to Invercauld",
+   "composer": "J.S.Skinner",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "sir-alexander-dons-strathspey",
+  "title": "Sir Alexander Don's Strathspey",
+  "file": "midi/pdmx-sir-alexander-dons-strathspey.mid",
+  "sha256": "70d0182c3f0de67cfaf1f514b7a781894f3c09ff62f41fa80f3fe3ada8a6d46e",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/40/QmZrNvEHr7pzBYeAXzhLb2yFES9mf3SCq6kkAEuUWHAQpH.mid",
+   "musescore_score_id": "5114918",
+   "musescore_url": "https://musescore.com/score/5114918",
+   "score_title": "Sir Alexander Don's Strathspey",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "13"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "sir-archibald-grant-of-monymusks-reel",
+  "title": "Sir Archibald Grant of Monymusk's Reel",
+  "file": "midi/pdmx-sir-archibald-grant-of-monymusks-reel.mid",
+  "sha256": "471b4eaa57e1964a1c95ad4b3656bc5faae154d8bb3038b0f63741cdc7d837e1",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/25/QmciG1ycjEk5eCdDCPgx84FW9XgHzZcb7AHPjh7ez7q9bi.mid",
+   "musescore_score_id": "4600289",
+   "musescore_url": "https://musescore.com/score/4600289",
+   "score_title": "Sir Archibald Grant of Monymusk's Reel",
+   "composer": "Daniel Dow? (Scotland 1775)",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "talisker",
+  "title": "Talisker",
+  "file": "midi/pdmx-talisker.mid",
+  "sha256": "47c6b29dfcc5f37581900a66e78c10120e50204044e97117c2f23a4d2a4305f8",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/8/Qma9URyMiFkG4EZ6MkwnEu1UGruPfEcY1NfCg1QimyJYc3.mid",
+   "musescore_score_id": "4929979",
+   "musescore_url": "https://musescore.com/score/4929979",
+   "score_title": "Talisker",
+   "composer": "J. Scott Skinner",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31.5
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "this-new-christmas-carol",
+  "title": "This New Christmas Carol",
+  "file": "midi/pdmx-this-new-christmas-carol.mid",
+  "sha256": "10d79e2a6c29cbd346d1fa8d51a036977f8e0ac8dc8a52f24a9b2b3bf37c04d4",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/51/QmRWumHK6WDs9DaaE8K4A93x9LXVkKTmMSLwFubQs3ptWn.mid",
+   "musescore_score_id": "4697710",
+   "musescore_url": "https://musescore.com/score/4697710",
+   "score_title": "This New Christmas Carol",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "13"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "alexander",
+  "title": "Alexander",
+  "file": "midi/pdmx-alexander.mid",
+  "sha256": "0dcda9489c2e2ed731c7175cc2991d1e9e0215e6ba0829a6a125373caadd2819",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/55/QmRYeBK5MH7g2ucyHZnfQVNwbJQo1wcAHRMKMQdxbfmhJm.mid",
+   "musescore_score_id": "4559415",
+   "musescore_url": "https://musescore.com/score/4559415",
+   "score_title": "Alexander",
+   "composer": "John Roberts 1806-1879",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 32,
+   "beats_per_bar": 8
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "athole-brose",
+  "title": "Athole Brose",
+  "file": "midi/pdmx-athole-brose.mid",
+  "sha256": "d35dcc9c63f73278e0a0728acf01f4c35916de27231e0127082d32f81143f41f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/14/40/QmWrmLZKqeWhFqkKYGCA52yw3nSKG77uFBwnDKS1AKMziF.mid",
+   "musescore_score_id": "4869084",
+   "musescore_url": "https://musescore.com/score/4869084",
+   "score_title": "Athole Brose",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "0"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "brolum",
+  "title": "Brolum",
+  "file": "midi/pdmx-brolum.mid",
+  "sha256": "8cf69a709fcbfadf3ae7133d6111f8398aa07ebf959f1bfd13b1115b21ac9158",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/36/QmPpwdkwQF57qzo9vHMVL2QLRyMaTz6vRzGzd49M4GYPY4.mid",
+   "musescore_score_id": "4661769",
+   "musescore_url": "https://musescore.com/score/4661769",
+   "score_title": "The Brolum",
+   "composer": "Joe Buchanan's Scottish Tome - Page 156.1",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "19"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "coffee-house",
+  "title": "The Coffee House",
+  "file": "midi/pdmx-coffee-house.mid",
+  "sha256": "fa836a1578b77d81d5494e807d21f5327468db2ede263767cc2f1d88a88c624b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/23/QmehvFtotYTV794jct4BCJTfNSZHCoW4owJ71vrNtkUCST.mid",
+   "musescore_score_id": "4862147",
+   "musescore_url": "https://musescore.com/score/4862147",
+   "score_title": "The Coffee House",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "8"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "fain-i-would",
+  "title": "Fain I Would",
+  "file": "midi/pdmx-fain-i-would.mid",
+  "sha256": "a3d2b10ff541e76f685a64d854c6d267e873c8c919f58e0498e5aa76b2299735",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/29/QmVKJExZjC5xEY3AD2mws7xZY6Fd5BKVttTZoiKTocwWop.mid",
+   "musescore_score_id": "4561948",
+   "musescore_url": "https://musescore.com/score/4561948",
+   "score_title": "Fain I Would",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 24,
+   "beats_per_bar": 12
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "gathering",
+  "title": "The Gathering",
+  "file": "midi/pdmx-gathering.mid",
+  "sha256": "4fd9f45f5c5cb327d49d5bfb5b57fe1980a5ed6f77bd15916a006d1c226d1236",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/20/QmaFdHVwRpPBZfuc9m9RKy9x6Dbdn4ANCTu7G5dBdBeLwm.mid",
+   "musescore_score_id": "4677123",
+   "musescore_url": "https://musescore.com/score/4677123",
+   "score_title": "The Gathering",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "graies-inne-maske",
+  "title": "Graies Inne Maske",
+  "file": "midi/pdmx-graies-inne-maske.mid",
+  "sha256": "b7fa3a92d752d9cd8ffbe45878fd6393b63d4b8627b10e91ec7fcdb7523ada05",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/49/QmVVC6wN1f1ZCvtQr95gp5qLpHHKKvZoUcPFvmpBj9h3JW.mid",
+   "musescore_score_id": "4651658",
+   "musescore_url": "https://musescore.com/score/4651658",
+   "score_title": "Graies Inne Maske",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 32,
+   "beats_per_bar": 2
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "grants-rant",
+  "title": "Grant's Rant",
+  "file": "midi/pdmx-grants-rant.mid",
+  "sha256": "e5632a534bd49b298f956635d8f0acc8a33a8444499bba86cc9649b08a0d6a40",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/32/QmdMs16BviZoKTFiCmSYKh8bLGWthNnzxqtJ4cA7EWdWcc.mid",
+   "musescore_score_id": "4703428",
+   "musescore_url": "https://musescore.com/score/4703428",
+   "score_title": "Grant's Rant",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "knights-of-snowdon",
+  "title": "Knights of Snowdon",
+  "file": "midi/pdmx-knights-of-snowdon.mid",
+  "sha256": "cb17b42f3a84a9820bd722e0380c3718dac2740ebad25ed83f83069df9122610",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/10/QmPAXJgRcBjSYMgCxoQxG7mWX2daLxA7M7oxNp3X5aDDS3.mid",
+   "musescore_score_id": "4863900",
+   "musescore_url": "https://musescore.com/score/4863900",
+   "score_title": "Knights of Snowdon",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "little-pickle",
+  "title": "Little Pickle",
+  "file": "midi/pdmx-little-pickle.mid",
+  "sha256": "73057c3442f9ecb3e2b80b7dbe6509d8cbc7a6537f2866a26d39b8d380b5aa73",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/49/QmXV5uynUfJNtTCAygtybzyoRuAL9M8jg4HTHJ9JcDUSfg.mid",
+   "musescore_score_id": "4687637",
+   "musescore_url": "https://musescore.com/score/4687637",
+   "score_title": "Little Pickle",
+   "composer": "J. Lowe",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "11"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "london",
+  "title": "London",
+  "file": "midi/pdmx-london.mid",
+  "sha256": "a251375029bdec35a0e6a32b0a75d6896fdbefcc231336e8cbdc98dcae075234",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/3/QmU4pkeoZuvHcyxstdQ3FH5u6sESW24h94W77XBYnWwASF.mid",
+   "musescore_score_id": "4662868",
+   "musescore_url": "https://musescore.com/score/4662868",
+   "score_title": "The London",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 6
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "lord-elcho",
+  "title": "Lord Elcho",
+  "file": "midi/pdmx-lord-elcho.mid",
+  "sha256": "d9aaed05e55a9119232ea3ca0106f5a8467bf77e7e1a5e44458a8a98c01f6302",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/37/QmdPvWiD7PVxfKWFfaMD6uErkaouMXdSd56ubedsinpaXM.mid",
+   "musescore_score_id": "5019391",
+   "musescore_url": "https://musescore.com/score/5019391",
+   "score_title": "Lord Elcho",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "6"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "lovers-luck",
+  "title": "The Lover's Luck",
+  "file": "midi/pdmx-lovers-luck.mid",
+  "sha256": "f355605f4c5e850462326706a0a0a6db9255aeb3e9a52ac482c999726270eb39",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/55/QmdY5xLQUgK78S1c2cZ1WcdFJg8AtUw1NoAYPeVaqCKm7t.mid",
+   "musescore_score_id": "4807971",
+   "musescore_url": "https://musescore.com/score/4807971",
+   "score_title": "The Lover's Luck",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 2
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "master-john-romily",
+  "title": "Master John Romily",
+  "file": "midi/pdmx-master-john-romily.mid",
+  "sha256": "aadd519bf282da0b52b58a10ed98f22a28e755813033f2174143c7a2211b940f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/36/QmUpFUSAaUK4RZ4FpJg1NzsrPcV7rgwiNtFwmS4SB1SHf9.mid",
+   "musescore_score_id": "4549154",
+   "musescore_url": "https://musescore.com/score/4549154",
+   "score_title": "William Marshall - Master John Romily",
+   "composer": "William Marshall",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "6"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 116,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "miller",
+  "title": "The Miller",
+  "file": "midi/pdmx-miller.mid",
+  "sha256": "36c9037ba3997d5dc8e031e009bf0f16e5609e959248beb3ed40b354f288ae07",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/4/Qma5dYYo6d8o2gNet6wkVuycjfr2NHKkMskU45YuHviUg9.mid",
+   "musescore_score_id": "4799726",
+   "musescore_url": "https://musescore.com/score/4799726",
+   "score_title": "The Miller",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "miss-andy-campbells-scotch-measure",
+  "title": "Miss Andy Campbell's Scotch Measure",
+  "file": "midi/pdmx-miss-andy-campbells-scotch-measure.mid",
+  "sha256": "c391b48f3777bdee3927bc49f4d5e6f10c849e8922c27e3c925df83f5e3a792a",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/23/QmYh9MMUiYuqGKGv2oBLkwsmnKyhCyDsQaxqm2VPZBuDvn.mid",
+   "musescore_score_id": "4687838",
+   "musescore_url": "https://musescore.com/score/4687838",
+   "score_title": "Miss Andy Campbell's Scotch Measure",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 116,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "mutual-love",
+  "title": "Mutual Love",
+  "file": "midi/pdmx-mutual-love.mid",
+  "sha256": "1068217771c3c8559cd90d6188dcaf79e073613aa82a1ba3d27a27921308b880",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/13/QmRc1CELc2Eco84F8XdyAgbMVJt8SoAfyuDrJHhKkhQKZb.mid",
+   "musescore_score_id": "4586623",
+   "musescore_url": "https://musescore.com/score/4586623",
+   "score_title": "Mutual Love",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "pas-du-loup",
+  "title": "Pas du Loup",
+  "file": "midi/pdmx-pas-du-loup.mid",
+  "sha256": "e1c193ea54dab916b2e48e21fb3db21640bbc227525ab8eb76a43658d94011aa",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/17/QmYeWj7jTd7ufiSztACNV2pGNtF8cPuWCNCysBWaZRjcL2.mid",
+   "musescore_score_id": "4715335",
+   "musescore_url": "https://musescore.com/score/4715335",
+   "score_title": "Pas du Loup",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "redesdale-hornpipe",
+  "title": "Redesdale Hornpipe",
+  "file": "midi/pdmx-redesdale-hornpipe.mid",
+  "sha256": "4a5ab2c0b9d56fd2925c86941ed86a3b944bd5f8d25d70180c27674c2527df44",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/6/QmR7YbQAPeCz2ixvQt4TKM9aQw2rMihiqv6YcS2A5EbAzL.mid",
+   "musescore_score_id": "5085383",
+   "musescore_url": "https://musescore.com/score/5085383",
+   "score_title": "Redesdale Hornpipe",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "source-of-spey",
+  "title": "The Source Of Spey",
+  "file": "midi/pdmx-source-of-spey.mid",
+  "sha256": "894ebab0c164e030b07f09533f37a5fba534098343dad1e1168221b527c5efdf",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/6/31/QmNmdAUmMUpM4AhsWDvHsYoSxd8PKnsiJTDDNEvuvG9j9W.mid",
+   "musescore_score_id": "4672429",
+   "musescore_url": "https://musescore.com/score/4672429",
+   "score_title": "The Source Of Spey",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "6"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 28.25,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "sportsmans-hornpipe",
+  "title": "The Sportsman's Hornpipe",
+  "file": "midi/pdmx-sportsmans-hornpipe.mid",
+  "sha256": "de986749fdefecf94d24cb0e4d75f0dbafd449965022f12c7fab498f8ad351a7",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/14/QmaCG77Kv51mUf7a8YW2ZDhFbi6dx7YmR8PqVHBntKsJoG.mid",
+   "musescore_score_id": "4689525",
+   "musescore_url": "https://musescore.com/score/4689525",
+   "score_title": "the Sportsmans hornpipe",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "summer-morning",
+  "title": "The Summer Morning",
+  "file": "midi/pdmx-summer-morning.mid",
+  "sha256": "cd75ee7e92b9d812a18201dddee942ba47d0fd899e7d279f476e9c81a3db8ffd",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/17/QmceUYEnS2P3EzwAreUMie31sS91Ls6JSzseNTuuzNFTdA.mid",
+   "musescore_score_id": "4694797",
+   "musescore_url": "https://musescore.com/score/4694797",
+   "score_title": "The Summer Morning",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "16"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "sweet-molly-malone",
+  "title": "Sweet Molly Malone",
+  "file": "midi/pdmx-sweet-molly-malone.mid",
+  "sha256": "d5be15352bb0ca8ab87ddbcc64511ae1723d82457d205581d9772e03b25dd2c0",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/33/QmbnUMhJBS2tQzZPoBMnm34pvGBB5juXoZCVzzvQ3TF2Ch.mid",
+   "musescore_score_id": "4804300",
+   "musescore_url": "https://musescore.com/score/4804300",
+   "score_title": "Sweet Molly Malone",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "9"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "teviot-bridge",
+  "title": "Teviot Bridge",
+  "file": "midi/pdmx-teviot-bridge.mid",
+  "sha256": "f824d4c160caa4fc54e238364a4c8c94478d697bec8d9af726a67e758c82906a",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/3/Qma47SYGJLB2bH2c2K75vQ45u9AkZVK8q6TzSPYVEGuCDp.mid",
+   "musescore_score_id": "4577268",
+   "musescore_url": "https://musescore.com/score/4577268",
+   "score_title": "Teviot Bridge",
+   "composer": "Gow's Repository 1817",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "tipperary-hills",
+  "title": "Tipperary Hills",
+  "file": "midi/pdmx-tipperary-hills.mid",
+  "sha256": "11327e3e65650eed5f98462356157034d61bd2ed911a74e706a45a9d2baa79f6",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/12/QmQBvQc3hBfiERHTXpiUpDLMHvon6r82x9cv6Q558qKxD7.mid",
+   "musescore_score_id": "4966653",
+   "musescore_url": "https://musescore.com/score/4966653",
+   "score_title": "Tipperary Hills",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "10"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31.5
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "wives-victory",
+  "title": "The Wives' Victory",
+  "file": "midi/pdmx-wives-victory.mid",
+  "sha256": "58efb28a184fab1ec0357e7d10df00362b424423481d7326f6925d446db0eade",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/18/QmPEP1fQPXwvaexU2MusQVEeVoMxMsShVP5JLb8mEoqNQx.mid",
+   "musescore_score_id": "4573942",
+   "musescore_url": "https://musescore.com/score/4573942",
+   "score_title": "THE WIVES' VICTORY",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 138,
+   "start_beat": 4,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "young-damons-flight",
+  "title": "Young Damon's Flight",
+  "file": "midi/pdmx-young-damons-flight.mid",
+  "sha256": "c798e73e91c9cb8c01c2618b3bedf7d95935f06f486b8df3ae507bd5ccfd220c",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/35/Qmeo3YXSh5z4rLxGTtGY3Wn5uMAhQpG8fwUWDMEBvqLEnm.mid",
+   "musescore_score_id": "4969933",
+   "musescore_url": "https://musescore.com/score/4969933",
+   "score_title": "Young Damon's Flight",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "8"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 18,
+   "beats_per_bar": 18
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "a-trip-to-highgate",
+  "title": "A Trip To Highgate",
+  "file": "midi/pdmx-a-trip-to-highgate.mid",
+  "sha256": "4d3bfbc8ee396e10cd5b4b0aca3817074e858f2579c9da8d7d970170d8e42356",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/46/QmUuRvJChSdDSEuBCBHNkkdaG45ed9F4arqZCcTJSpzQCB.mid",
+   "musescore_score_id": "5078705",
+   "musescore_url": "https://musescore.com/score/5078705",
+   "score_title": "A Trip To Highgate",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "a-trip-to-tunbridge",
+  "title": "A Trip to Tunbridge",
+  "file": "midi/pdmx-a-trip-to-tunbridge.mid",
+  "sha256": "61cd9400d9a84be1c383ca43b713fcda0d65c4b3e61b57ed1226a797f92ec4f0",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/5/QmV6ymKMGr9t7d8B59hS7dbdnpNsAfcx9h83zyVHswrevJ.mid",
+   "musescore_score_id": "5076380",
+   "musescore_url": "https://musescore.com/score/5076380",
+   "score_title": "A Trip to Tunbridge",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 2
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "anvil",
+  "title": "The Anvil",
+  "file": "midi/pdmx-anvil.mid",
+  "sha256": "c320599c0220f7ea4ea095fbd4fbcf7476cbb6c1002b9c0a6984bcd927aae279",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/39/QmdQtzSZJLduSE7b8KHrMfBJfXRJZdRESDgK3d4GdSWmAo.mid",
+   "musescore_score_id": "5038209",
+   "musescore_url": "https://musescore.com/score/5038209",
+   "score_title": "The Anvil",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "bartlett-house",
+  "title": "Bartlett House",
+  "file": "midi/pdmx-bartlett-house.mid",
+  "sha256": "6562c42b069f5a73f6508c30c0c7cf60de35d62a8e92fb876b95087e2ae8c3ad",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/12/QmaByqw4PqHY9KVP1GmCLePdntJVhbvyZWH21DkfmEXXbN.mid",
+   "musescore_score_id": "4706599",
+   "musescore_url": "https://musescore.com/score/4706599",
+   "score_title": "Bartlett House",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "brandlings",
+  "title": "Brandlings",
+  "file": "midi/pdmx-brandlings.mid",
+  "sha256": "4d4a14e62887293b6e2cd0a970cc9586ce3f57bbefb890e41b3eaba1d0d7c5cc",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/14/26/QmWj7zugiMFtZiuiH9AK5Dei4StXeFpTMwEN69w8KQR1ua.mid",
+   "musescore_score_id": "4829001",
+   "musescore_url": "https://musescore.com/score/4829001",
+   "score_title": "BRANDLINGS",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "9"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "confesse",
+  "title": "Confesse",
+  "file": "midi/pdmx-confesse.mid",
+  "sha256": "d8083a0110e9168aa87ce87e77d13f0381b4093c201e95148ab5fb96a8c8a796",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/35/QmRoQQVBJWm5hufn4uehuSG6sxjqYGdVNFtxLqx3SfMTA1.mid",
+   "musescore_score_id": "4973050",
+   "musescore_url": "https://musescore.com/score/4973050",
+   "score_title": "CONFESSE",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "cullen-house",
+  "title": "Cullen House",
+  "file": "midi/pdmx-cullen-house.mid",
+  "sha256": "91a7c79a7d12f6d51aeabd167c1c256448c7c8087b3dfc6c7b7c8716e37d0f32",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/34/QmTNfamMx5LR3hJhANnw4jYroo8AG8my1Y9EQceUEaPx2V.mid",
+   "musescore_score_id": "4697423",
+   "musescore_url": "https://musescore.com/score/4697423",
+   "score_title": "Cullen House",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "6"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "duntroon",
+  "title": "Duntroon",
+  "file": "midi/pdmx-duntroon.mid",
+  "sha256": "313c0a26a7854e36d87daae9ea1ede31c817a8e450f4e078c35a033cc618b8a1",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/42/QmTsNqNcRo1QKbD747MdiDXeF5rUSLYfGW7yYy7i6YxE82.mid",
+   "musescore_score_id": "4980670",
+   "musescore_url": "https://musescore.com/score/4980670",
+   "score_title": "Duntroon",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "eliza",
+  "title": "Eliza",
+  "file": "midi/pdmx-eliza.mid",
+  "sha256": "4b14851148ea57d67b88461d288c53b033cc830780e58caa3a07f50fa72ee592",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/52/QmSx3pDyqAvgqgwYDiwvZLFRdQwo7yyztU6Nj5zxYv41CD.mid",
+   "musescore_score_id": "4952701",
+   "musescore_url": "https://musescore.com/score/4952701",
+   "score_title": "Eliza",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "highland-skip",
+  "title": "Highland Skip",
+  "file": "midi/pdmx-highland-skip.mid",
+  "sha256": "7e3affab0304abf899674b06cfa5839498b9985912ba07b4394280a87080608f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/3/QmT4dUsT1mn4WjgcHPUQx2A7pJgm7L4XtQyjtVNZc1JtbY.mid",
+   "musescore_score_id": "4948983",
+   "musescore_url": "https://musescore.com/score/4948983",
+   "score_title": "Highland Skip",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "james-duff-m-p",
+  "title": "James Duff M.P.",
+  "file": "midi/pdmx-james-duff-m-p.mid",
+  "sha256": "d728a755a5f9b4105713c73d490172b7b231eee942efd91c092b0126c3eef9a7",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/35/QmVoeeCDhuTpNhKPAYhsYpkDecAqNPvHkAFcuVLSptTcMK.mid",
+   "musescore_score_id": "4976718",
+   "musescore_url": "https://musescore.com/score/4976718",
+   "score_title": "James Duff M.P.",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "9"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "lord-at-first-did-adam-make",
+  "title": "The Lord At First Did Adam Make",
+  "file": "midi/pdmx-lord-at-first-did-adam-make.mid",
+  "sha256": "857c7a2f81c0172759b98eac28abb14e6171159c85e03fda9019d476066eacf6",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/51/QmUWxNyH9JGfNCPX1ruLpkyY5pRJRDQ9FFnGBfVu3A1UrV.mid",
+   "musescore_score_id": "4550112",
+   "musescore_url": "https://musescore.com/score/4550112",
+   "score_title": "The Lord at first had Adam made",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "manage-the-miser",
+  "title": "Manage the Miser",
+  "file": "midi/pdmx-manage-the-miser.mid",
+  "sha256": "ba42cfb53a2307c380b0f3efe1ead4f3fc4265e9ee6886eccac1e76c8837debf",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/28/QmZkAmt7YsKerZvxnLgo5oKvQmHgW33bqBwYXFFBEMJdre.mid",
+   "musescore_score_id": "4951944",
+   "musescore_url": "https://musescore.com/score/4951944",
+   "score_title": "Manage the Miser",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 6
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "peacocks-tune",
+  "title": "Peacocks Tune",
+  "file": "midi/pdmx-peacocks-tune.mid",
+  "sha256": "b711478e6a052ef25546b561ee50736d2e24f68e16d28ac1ffbd2a22d80cd9e0",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/25/QmRi6dy9SFnEatcsqB6RUzaGkFiZqYy38gKjAPc2wbmqVe.mid",
+   "musescore_score_id": "4613164",
+   "musescore_url": "https://musescore.com/score/4613164",
+   "score_title": "John Peacock - Peacocks Tune",
+   "composer": "John Peacock",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "12"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "shepherd",
+  "title": "The Shepherd",
+  "file": "midi/pdmx-shepherd.mid",
+  "sha256": "a1bee6e3e3aa489d0ef98103eb41cf33f2556ebc110cc1c51fe9da7e35e35e8b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/16/QmXDrAEUuEREGZmeoyXDZn9sjRikkjWzR3bKebtMBEkkeE.mid",
+   "musescore_score_id": "4928054",
+   "musescore_url": "https://musescore.com/score/4928054",
+   "score_title": "The Shepherd",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "twll-yn-ei-boch",
+  "title": "Twll yn ei boch",
+  "file": "midi/pdmx-twll-yn-ei-boch.mid",
+  "sha256": "142c76bbc5c8fd3001abffb1eb94a8acf3c694c4b6d9472e678f8ac6faa5d96b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/34/QmcNLsVZmQ6Ee5q3omWNxWNAcohQiLfdiVnuMTQehZyDNJ.mid",
+   "musescore_score_id": "4590425",
+   "musescore_url": "https://musescore.com/score/4590425",
+   "score_title": "Twll yn ei boch",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "wakefield-hunt",
+  "title": "Wakefield Hunt",
+  "file": "midi/pdmx-wakefield-hunt.mid",
+  "sha256": "08e02014f3531bc30956a15d5234b19dea6f0ac142cd651be10af1f6a21a74f0",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/8/QmS9iksuBbUYCBJXzWw5WAhU4H9BZpu7jVWWvaaBETHew9.mid",
+   "musescore_score_id": "4659792",
+   "musescore_url": "https://musescore.com/score/4659792",
+   "score_title": "Wakefield Hunt",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "way-to-norwich",
+  "title": "The Way to Norwich",
+  "file": "midi/pdmx-way-to-norwich.mid",
+  "sha256": "c8cf5088dbaad57e66c6166e7a272743015edf0e915c45f0beb1af1532e51277",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/24/QmZHAGSzw97SCA1ExwB4gXc2vWjgVd2q9GQGLqqDegsfoP.mid",
+   "musescore_score_id": "4558895",
+   "musescore_url": "https://musescore.com/score/4558895",
+   "score_title": "The Way to Norwich",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 24,
+   "beats_per_bar": 12
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "adsons-saraband",
+  "title": "Adson's Saraband.",
+  "file": "midi/pdmx-adsons-saraband.mid",
+  "sha256": "8bf25e7437ad2ae8f602957e0dca7a29664a432f060251758e9131ed3cd6a177",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/20/QmTFbYAyv7pJD3AXebpraaZi9cDUQCjkrsufLqAr95Dptq.mid",
+   "musescore_score_id": "4945003",
+   "musescore_url": "https://musescore.com/score/4945003",
+   "score_title": "Adson's Saraband",
+   "composer": "John Playford 1657",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "ayrshire-lasses",
+  "title": "Ayrshire Lasses",
+  "file": "midi/pdmx-ayrshire-lasses.mid",
+  "sha256": "23183d8310b8e644aada2e1940a2aba73a0b730ddf1e7ef063106bdc6dbf1e9f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/35/Qmcod9a7qeLbbdxGC1HFMSvzsHeCuLDdZR3t92iLwrnnAr.mid",
+   "musescore_score_id": "4926162",
+   "musescore_url": "https://musescore.com/score/4926162",
+   "score_title": "Ayrshire Lasses",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "10"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "bob-o-dowally",
+  "title": "The Bob o' Dowally",
+  "file": "midi/pdmx-bob-o-dowally.mid",
+  "sha256": "c030273e91fbf2e9f8d875116a40dfc88d7d38352e03a9f4253bcf18067a3d9c",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/46/QmUuQWbhvg76GQAvRDsumsevgkKHUi7Ua4Vi4rBJwCNJu1.mid",
+   "musescore_score_id": "5040449",
+   "musescore_url": "https://musescore.com/score/5040449",
+   "score_title": "the Bob o' Dowally",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "bridge-of-banff",
+  "title": "Bridge of Banff",
+  "file": "midi/pdmx-bridge-of-banff.mid",
+  "sha256": "cf47f54b2eb5e50833e2cc23d8f064396e82e1815593495ceef11822443e152c",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/19/QmYfrmdyzjM4Zbxmw7poxBq3Spdo1LCCF13hBXC285a9ox.mid",
+   "musescore_score_id": "4874208",
+   "musescore_url": "https://musescore.com/score/4874208",
+   "score_title": "Bridge of Banff",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "cadgers-in-the-canongate",
+  "title": "Cadgers in the Canongate",
+  "file": "midi/pdmx-cadgers-in-the-canongate.mid",
+  "sha256": "38b478da6bee8bc4fd4c3ae8d984531218634e9b3e6dbf58e7809bfac86b42de",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/48/QmRvpr73ZK5SjqNpn5EWKhcsyaB4DBv7UHpDx774LQ4K1m.mid",
+   "musescore_score_id": "4599435",
+   "musescore_url": "https://musescore.com/score/4599435",
+   "score_title": "Cadgers in the Canongate",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 116,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "crieff-fair",
+  "title": "Crieff Fair",
+  "file": "midi/pdmx-crieff-fair.mid",
+  "sha256": "bfa6736593a5e76ddcbb84b62e9e74322b2c1c3179e911c41253623c4d68fbfd",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/19/Qmbfqi5sb6U8mwnoarsuByraG6xS2jCzoVAoobaSzx7dYu.mid",
+   "musescore_score_id": "4696090",
+   "musescore_url": "https://musescore.com/score/4696090",
+   "score_title": "Crieff Fair",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "general-macdonald",
+  "title": "General MacDonald",
+  "file": "midi/pdmx-general-macdonald.mid",
+  "sha256": "5bd0d8ced973660c1854c54bf189d9c48a65ed0ddd5c6eae8f89beeb06816efe",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/36/QmXpCNcXjXRN5ZMMeFyei3ShkmqtDsFushzR6M3hBbM2P1.mid",
+   "musescore_score_id": "4841890",
+   "musescore_url": "https://musescore.com/score/4841890",
+   "score_title": "General Macdonald",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "glencoe",
+  "title": "Glencoe",
+  "file": "midi/pdmx-glencoe.mid",
+  "sha256": "fc372cf0e1390cd2d71c029c21e403433b20c21a032bb2d6485cbc804b5b0e45",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/23/QmRhGQSHZUgtxirJwx7Rgz1LQiJWci42KrXeoLCQvkLobD.mid",
+   "musescore_score_id": "4967055",
+   "musescore_url": "https://musescore.com/score/4967055",
+   "score_title": "Glencoe",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "10"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "killiechassie",
+  "title": "Killiechassie",
+  "file": "midi/pdmx-killiechassie.mid",
+  "sha256": "524f460c875c051e8e60ea11d91047c95af5d35dc70fa97c1f632a4da1cf4a30",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/15/QmRdpDHNAWpX2hZs56Z2p2RxHEhEB1sJ4KadRidVz9Kk8n.mid",
+   "musescore_score_id": "4991320",
+   "musescore_url": "https://musescore.com/score/4991320",
+   "score_title": "Killiechassie",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "lady-harriet-hopes-reel",
+  "title": "Lady Harriet Hope's Reel",
+  "file": "midi/pdmx-lady-harriet-hopes-reel.mid",
+  "sha256": "3c499460fdec1499689e0dff1d7d524d7c17007ae8bbf89d6ebca48f3a65e10f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/57/QmeZWGyuuGRhq8WVTn5sSMbp7N6PzsbgzmMJn5cYiriFb9.mid",
+   "musescore_score_id": "4838762",
+   "musescore_url": "https://musescore.com/score/4838762",
+   "score_title": "Lady Harriet Hope's Reel",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "8"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "major-malleys-march",
+  "title": "Major Malley's March",
+  "file": "midi/pdmx-major-malleys-march.mid",
+  "sha256": "c722b0609af8b0755b93f3a37527c9a8722bba3e4d7d2facffbf426f05feb7e5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/0/QmX1DkfkYyuE3kPFP5iWy6zWSrW3fVpDqzjpuUXkAYbZVN.mid",
+   "musescore_score_id": "4961499",
+   "musescore_url": "https://musescore.com/score/4961499",
+   "score_title": "Major Malley's March",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "8"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "major-shanly",
+  "title": "Major Shanly",
+  "file": "midi/pdmx-major-shanly.mid",
+  "sha256": "98742301617d2749fcb5d75eafc9b655e41d376558c43a039bdaf25a162824df",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/5/16/QmfDcv7vMX3oWhmjve53K78cKf4HWk1UmMgRsUwraswwWN.mid",
+   "musescore_score_id": "4950351",
+   "musescore_url": "https://musescore.com/score/4950351",
+   "score_title": "Major Shanly",
+   "composer": "Carolan",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "navvie-on-the-line",
+  "title": "Navvie on the Line",
+  "file": "midi/pdmx-navvie-on-the-line.mid",
+  "sha256": "77de4cf8012b5bfea19c8dd27f59e0c9555b67780b6c5320e892520a21e25c56",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/37/QmaPyYZe1fmYcUsUvUqRxjQefeYGbijg1izyxNwa8js3Xr.mid",
+   "musescore_score_id": "4930390",
+   "musescore_url": "https://musescore.com/score/4930390",
+   "score_title": "The Navvie On The Line",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "11"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "piper-of-drummond",
+  "title": "Piper of Drummond",
+  "file": "midi/pdmx-piper-of-drummond.mid",
+  "sha256": "927a447c72b35f43ab668d04953b34b5d5da737094ab69d57b38e32cff846c06",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/38/Qmcq7bNYbwHLM24VBgPoasNZe5eLxbBBbQULAYa9So48Ri.mid",
+   "musescore_score_id": "4579600",
+   "musescore_url": "https://musescore.com/score/4579600",
+   "score_title": "The Piper of Drummond",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "8"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "scan-testers-no-2",
+  "title": "Scan Testers No 2",
+  "file": "midi/pdmx-scan-testers-no-2.mid",
+  "sha256": "33fcaa808adbb6593298b0490712b0f4821120227ef7d6139f2294472644d4e0",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/52/QmSxFoS8ykDDkvhxWcJxLUrv23TcdDsAU5hirXnmNyJ7Jd.mid",
+   "musescore_score_id": "4936655",
+   "musescore_url": "https://musescore.com/score/4936655",
+   "score_title": "Scan Testers No 2",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "shave-the-donkey",
+  "title": "Shave The Donkey",
+  "file": "midi/pdmx-shave-the-donkey.mid",
+  "sha256": "2ffedf6cb4c5a74625318f66835715673a0c54400663b407eb7005ce6224c4e3",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/18/QmcE5iAZ3Nn6qPrycqD43jwqMFYCfJC9CMpe3r7ZHiX2Ke.mid",
+   "musescore_score_id": "4930426",
+   "musescore_url": "https://musescore.com/score/4930426",
+   "score_title": "SHAVE THE DONKEY",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "strathbogie-toast",
+  "title": "Strathbogie Toast",
+  "file": "midi/pdmx-strathbogie-toast.mid",
+  "sha256": "9de7aa08938ec89c1b628c69a471cc9aca4676c860bd660b0469ece62c7d148d",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/5/QmV6gHGYYkMLKuaH4CwoTWPfvJ4N4kzz9BggZCRQR15ict.mid",
+   "musescore_score_id": "4704635",
+   "musescore_url": "https://musescore.com/score/4704635",
+   "score_title": "Strathbogie Toast",
+   "composer": "Wm. Marshall",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "this-day-a-child-is-born",
+  "title": "This Day A Child Is Born",
+  "file": "midi/pdmx-this-day-a-child-is-born.mid",
+  "sha256": "86b3fa82b4be861497c112a8cd3975d86753b9adff9191ba6119995542527b4e",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/4/QmQ528kJEykWHnof1TLZHnmnxM47M66d8Xv1cNF79v7Nzu.mid",
+   "musescore_score_id": "5730314",
+   "musescore_url": "https://musescore.com/score/5730314",
+   "score_title": "This Day A Child Is Born - Traditional",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 110,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "apley-house",
+  "title": "Apley House",
+  "file": "midi/pdmx-apley-house.mid",
+  "sha256": "d2cec69f8ca709410cc7d98fcd09cac402dc95d543a1581415030a72cffe3cc9",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/46/QmYu7gSW9VcByofq3WSMGoLCpTaLA1LkF4RChZvvKeKNAt.mid",
+   "musescore_score_id": "4661153",
+   "musescore_url": "https://musescore.com/score/4661153",
+   "score_title": "Apley House",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "bellingham-boat",
+  "title": "Bellingham Boat",
+  "file": "midi/pdmx-bellingham-boat.mid",
+  "sha256": "d2dbe680319b1b0e54bf5f173a0521e4bf40e9abbfd698c18b00da8337d3ffce",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/21/QmVgW63igMqst7h8fjxaz81ne7p44Gc1nVhcv3iP65J1PM.mid",
+   "musescore_score_id": "4675527",
+   "musescore_url": "https://musescore.com/score/4675527",
+   "score_title": "Bellingham Boat",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "buff-and-blue",
+  "title": "Buff and Blue",
+  "file": "midi/pdmx-buff-and-blue.mid",
+  "sha256": "373d45ae482abaae2ea327e6c833daffe43f8854040062701857326d07972c9f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/38/QmbqASn2bbMZtPQhrak8GSmZh5aBZvNoFrY3jzKTPtChN7.mid",
+   "musescore_score_id": "4879182",
+   "musescore_url": "https://musescore.com/score/4879182",
+   "score_title": "Buff and Blue",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "captain-lanoes-quick-march",
+  "title": "Captain Lanoe's Quick March",
+  "file": "midi/pdmx-captain-lanoes-quick-march.mid",
+  "sha256": "df9cc14250e83c0437df62cdf4ce4003061f85213a37b3600b36aae2ffd67b1b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/53/QmVXCAyKsxcpb8RZ17QbX9JYyW6xQpZuKHx7T1XmALudaJ.mid",
+   "musescore_score_id": "4575155",
+   "musescore_url": "https://musescore.com/score/4575155",
+   "score_title": "Captain Lanoe's Quick March",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "captain-white",
+  "title": "Captain White",
+  "file": "midi/pdmx-captain-white.mid",
+  "sha256": "166d1c203facb689291b13add579762d55666b56858e96bd2a3055c62a9e0a65",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/37/QmeP1cKoL22S6wVMco8L9xZrFJ5Hc5asMNw4ck3643Ly6m.mid",
+   "musescore_score_id": "4796738",
+   "musescore_url": "https://musescore.com/score/4796738",
+   "score_title": "Captain White",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "corgarff-castle",
+  "title": "Corgarff Castle",
+  "file": "midi/pdmx-corgarff-castle.mid",
+  "sha256": "61d434154e052c788de879d8fac4e9b97b23fd28902129843cc9422bf79bf7ce",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/5/30/QmfLaWb6NqQLzGvZWmwKZ9qkW8WJAGHtGTwuN4UFr6HBRQ.mid",
+   "musescore_score_id": "4947101",
+   "musescore_url": "https://musescore.com/score/4947101",
+   "score_title": "Alexander Walker - Corgarff Castle",
+   "composer": "Alexander Walker",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "cottey-house",
+  "title": "Cottey House",
+  "file": "midi/pdmx-cottey-house.mid",
+  "sha256": "e20372341100f8f9598c29205d5ae52417c8827ae02cdbd3752f926f4f0fe086",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/5/14/QmfCUfuzX6rKNBqgmfjmWQoQj6y5uhCHWBsTEpPWNi23Xx.mid",
+   "musescore_score_id": "5165522",
+   "musescore_url": "https://musescore.com/score/5165522",
+   "score_title": "Cottey House",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "dancing-on-the-green",
+  "title": "Dancing On The Green",
+  "file": "midi/pdmx-dancing-on-the-green.mid",
+  "sha256": "f9688a4b58a073f16f809a3c9f565f3b873e20b1154781b7b58ad40ad190d6d0",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/5/3/Qmf49mJJGndkScwQYMtX7jYVG5yFN4XEeXQNNZAC3bH4tu.mid",
+   "musescore_score_id": "5007087",
+   "musescore_url": "https://musescore.com/score/5007087",
+   "score_title": "DANCING ON THE GREEN",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "happy-marriage",
+  "title": "The Happy Marriage",
+  "file": "midi/pdmx-happy-marriage.mid",
+  "sha256": "d26b181bddb13591a8150bf0d180605e9b0b7c9791cc5fb549703569c73e34e8",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/52/QmcxuvCVzUEQwL4QyaZS16kJZUH6gMghaGB65XKhyoNEKy.mid",
+   "musescore_score_id": "4647907",
+   "musescore_url": "https://musescore.com/score/4647907",
+   "score_title": "the Happy Marriage",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 6
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "la-fougere",
+  "title": "La Fougere",
+  "file": "midi/pdmx-la-fougere.mid",
+  "sha256": "033a5e72205c0d0f8b45bf01dbe5e5e798e5a057c421d77c0e1be0d8ab6b021e",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/16/QmVDGpFfcP6jCXeT3VCnibhEbikRZV18JwQznUprC9fuT7.mid",
+   "musescore_score_id": "4699767",
+   "musescore_url": "https://musescore.com/score/4699767",
+   "score_title": "LA FOUGERE",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "loves-triumph",
+  "title": "Love's Triumph",
+  "file": "midi/pdmx-loves-triumph.mid",
+  "sha256": "ced7c071c65173943f4fef50e278386eb6b188a8b21e9e8804e3b741cb732640",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/1/45/QmbT9MVCDiiJZ8CsaEqVKhGWZJhKWft5xpg1sGAXECB1vr.mid",
+   "musescore_score_id": "4586508",
+   "musescore_url": "https://musescore.com/score/4586508",
+   "score_title": "Love's Triumph",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "miss-campbells-reel",
+  "title": "Miss Campbell's Reel",
+  "file": "midi/pdmx-miss-campbells-reel.mid",
+  "sha256": "1bdafc7715257fad252577830c81f115cc42b85164869815fca29a5c6bb66866",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/2/51/QmcWXa1J9mG77tZAGB5nnnjYVjqxESoUQjVqaqLrSvYK7i.mid",
+   "musescore_score_id": "4690486",
+   "musescore_url": "https://musescore.com/score/4690486",
+   "score_title": "Miss Campbell's -- Reel",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "mountain-high",
+  "title": "The Mountain High",
+  "file": "midi/pdmx-mountain-high.mid",
+  "sha256": "c8fa4f330884e3523a11f26b3e255b555acd414b132e7d3a9b80deab34ed0140",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/29/QmaKB4ky1BBGs2efzWRWLDHKGYJ4sB7GxV1TwSSVuDUAK7.mid",
+   "musescore_score_id": "4810258",
+   "musescore_url": "https://musescore.com/score/4810258",
+   "score_title": "The Mountain High",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "6"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 2
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "mrs-adie",
+  "title": "Mrs. Adie",
+  "file": "midi/pdmx-mrs-adie.mid",
+  "sha256": "c9cdb93c3148345deba869502b04cb283795f189a35d4f63b18f84df8b72b92f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/35/QmQoCyuTfcEFFvRGXG974xK1amiYP4BBjd9eAdaDjjmMHG.mid",
+   "musescore_score_id": "4566018",
+   "musescore_url": "https://musescore.com/score/4566018",
+   "score_title": "Mrs. Adie",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "0"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "my-love-is-lost-to-me",
+  "title": "My love is lost to me",
+  "file": "midi/pdmx-my-love-is-lost-to-me.mid",
+  "sha256": "5a40b5d892cee00709fa3bf63d12ec0723eee8d7c46a3c4a17b56bba03af80bb",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/51/QmRWf65GSjfqkKm7pyVtK9UezFxTELZr3VLYK2kYumYh1X.mid",
+   "musescore_score_id": "4878906",
+   "musescore_url": "https://musescore.com/score/4878906",
+   "score_title": "My love is lost to me",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "nameless-lassie",
+  "title": "The Nameless Lassie",
+  "file": "midi/pdmx-nameless-lassie.mid",
+  "sha256": "551c4bd6745eccc6d9c2749b2d6a4e731fae816fb93ffa9637bccbfa3a88ab33",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/11/QmSbQwqBe9jnsQyBQxD5UP7YwhTyiMNMZwKJ1gWc5qaYUe.mid",
+   "musescore_score_id": "4714648",
+   "musescore_url": "https://musescore.com/score/4714648",
+   "score_title": "The Nameless Lassie",
+   "composer": "Joe Buchanan's Scottish Tome - Page 562.1",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "new-moon",
+  "title": "The New Moon",
+  "file": "midi/pdmx-new-moon.mid",
+  "sha256": "d369720a6127b16585848984b2bdcdd2372051aead3adb74c584128e19e60b06",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/6/41/QmNRKZXyVNoEra9zTPHr1HuQnpfj3bykk7P5H2rCqEgGTG.mid",
+   "musescore_score_id": "4972209",
+   "musescore_url": "https://musescore.com/score/4972209",
+   "score_title": "The New Moon",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 75,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "nuptial-knot",
+  "title": "The Nuptial Knot",
+  "file": "midi/pdmx-nuptial-knot.mid",
+  "sha256": "6cf94b8e5567d0362ab05629db1c53b500c640ea52f1a88ecc6fa26ed072aeb8",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/54/QmUybN6bK9XhwrsLXgHZrgvMgmhPWHqeuUSizfWHAyrZgH.mid",
+   "musescore_score_id": "4860466",
+   "musescore_url": "https://musescore.com/score/4860466",
+   "score_title": "The Nuptial Knot",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "10"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "pease-strae",
+  "title": "Pease Strae",
+  "file": "midi/pdmx-pease-strae.mid",
+  "sha256": "d761826af50f5e29a5fd5664cd20e5ae5144ec038a3f2b81965aad743fdbe058",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/30/QmYL7eKZkWnL6APeqrjx8QXyNjMq2wg7T9zWdZuMyczPHn.mid",
+   "musescore_score_id": "4658194",
+   "musescore_url": "https://musescore.com/score/4658194",
+   "score_title": "Pease Strae",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "review",
+  "title": "The Review",
+  "file": "midi/pdmx-review.mid",
+  "sha256": "9b0fce2b8f1d649a89d6abbf3cc3d8257b3ada0505d3b01db40a1e025431850b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/24/QmRHkByQPbxAvbN1M2FLudaEDzbDHRW3G4tPXayWuMUXGa.mid",
+   "musescore_score_id": "4699031",
+   "musescore_url": "https://musescore.com/score/4699031",
+   "score_title": "The Review",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 104,
+   "max_beats": 29.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "scan-testers-no-1",
+  "title": "Scan Tester's No 1",
+  "file": "midi/pdmx-scan-testers-no-1.mid",
+  "sha256": "d6656eda94863e6d8571c2971ea44d13d9af64e018ab3e8410f05d0c8b4f229f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/20/QmPFHPiDCjbv9ebxje1fX3PZ39DPEyUCSfQzFyNLKiD8JE.mid",
+   "musescore_score_id": "4722164",
+   "musescore_url": "https://musescore.com/score/4722164",
+   "score_title": "Scan Tester's No 1",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "shepherd-of-souls",
+  "title": "Shepherd of Souls",
+  "file": "midi/pdmx-shepherd-of-souls.mid",
+  "sha256": "90aa4fff875ae04fbf0a1138450de1428c77c872da2cac6e877d045fff983e24",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/23/QmRhHkunmsKYyj3o3e2SmovegKveJkEU3BixypnFJ5DS1w.mid",
+   "musescore_score_id": "4669440",
+   "musescore_url": "https://musescore.com/score/4669440",
+   "score_title": "Shepherd of Souls",
+   "composer": "verses 1-3 unknownverses 4-5 James Montgomery (1771-1854)Tune: John Bacchus Dykes (1866)",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "14"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "sun-assembly",
+  "title": "Sun Assembly",
+  "file": "midi/pdmx-sun-assembly.mid",
+  "sha256": "65781ea2f793da080ac282a722ce36ac73ed94d5815bf8d1924739132ccf9811",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/51/QmeWxYfFQ2QBM8t43RT7AyzQX2Bq3dTJgEygLTPQP3sgWA.mid",
+   "musescore_score_id": "5050426",
+   "musescore_url": "https://musescore.com/score/5050426",
+   "score_title": "Sun Assembly",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "sun-from-the-east",
+  "title": "The Sun from the east",
+  "file": "midi/pdmx-sun-from-the-east.mid",
+  "sha256": "50c7b3e0696e40bba1c19863b90872c84aff6fb33b205294be6c36b5844ce860",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/29/QmZKhYgzkfosUttkxU2NtkLLicpvRYW2nhMHRg6ss3UpoT.mid",
+   "musescore_score_id": "4657161",
+   "musescore_url": "https://musescore.com/score/4657161",
+   "score_title": "The Sun from the east",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "welsh",
+  "title": "The Welsh",
+  "file": "midi/pdmx-welsh.mid",
+  "sha256": "aba47d7960fc5f91418c7f3603dc084d7fd1dc507408d49b13de0fb535f52adf",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/29/QmVK5t9upa4fkrEK3ruDLzRZjvVX1CFzsuP1ypoFVRAsgt.mid",
+   "musescore_score_id": "5088105",
+   "musescore_url": "https://musescore.com/score/5088105",
+   "score_title": "The Welsh",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 31,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "careys-minuet",
+  "title": "Carey's Minuet",
+  "file": "midi/pdmx-careys-minuet.mid",
+  "sha256": "806d921355455429c0d209f48b57b65aa246070b56cb08e456eff7fb38dfde33",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/32/QmQMHLXotTMHGeqFXEPwhLGgB8hcegd98WYxqD7fi6DJVG.mid",
+   "musescore_score_id": "4605535",
+   "musescore_url": "https://musescore.com/score/4605535",
+   "score_title": "Carey's Minuet",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "come-dance-and-sing",
+  "title": "Come Dance and Sing",
+  "file": "midi/pdmx-come-dance-and-sing.mid",
+  "sha256": "13b159827557ba1e6e1b24ca52e7ca20fa0c51eb05cbdf90ce876dd962d5167a",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/35/QmPo86V6Dg3yT7DiW4DpTWC3rpGjPKemzvgo1nBZiMUWQY.mid",
+   "musescore_score_id": "5002339",
+   "musescore_url": "https://musescore.com/score/5002339",
+   "score_title": "Come Dance and Sing",
+   "composer": "R-14New England",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "come-up-stairs-with-me",
+  "title": "Come up stairs with me",
+  "file": "midi/pdmx-come-up-stairs-with-me.mid",
+  "sha256": "eac161dcf3e2a78ba81fc2b3ffd16d8c8172adcd1df761e87b45acfcd2fc66ba",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/8/Qme9DpYa17dq158d9E8PoNnmc89CY4yJvFPuuAxHkWBqvj.mid",
+   "musescore_score_id": "4853006",
+   "musescore_url": "https://musescore.com/score/4853006",
+   "score_title": "Come up stairs with me",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "counsellor-dillon",
+  "title": "Counsellor Dillon",
+  "file": "midi/pdmx-counsellor-dillon.mid",
+  "sha256": "11a0b3a674efc9fb45ad11b184bf19368960da345660fc3b63d83571bf58a279",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/51/QmeW8uPT5DZ3jmqtEhHSrvpwsWu6UzaQTU4zq4AfE7aFFo.mid",
+   "musescore_score_id": "4949662",
+   "musescore_url": "https://musescore.com/score/4949662",
+   "score_title": "Counsellor Dillon",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "cream-pot",
+  "title": "Cream Pot",
+  "file": "midi/pdmx-cream-pot.mid",
+  "sha256": "42d8b858a1a7b8360fe9d11f50c5247265c7bba7db4acc853b499c8089f0d60b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/4/34/QmeNNqMczRN6sgtpRBXxMjEhDjavTqypdDzc5RvX19gJRU.mid",
+   "musescore_score_id": "4980758",
+   "musescore_url": "https://musescore.com/score/4980758",
+   "score_title": "The Cream Pot",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "dover-pier",
+  "title": "Dover Pier",
+  "file": "midi/pdmx-dover-pier.mid",
+  "sha256": "ec05e967814c6d3ca256c847af0856a39cc84edc56dc3a512cf58e8f856bb400",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/25/QmZigFQVjUuz9bnYm27ZUTtMa8tTmBqZfVGPx1ruChm2M9.mid",
+   "musescore_score_id": "4801546",
+   "musescore_url": "https://musescore.com/score/4801546",
+   "score_title": "Dover Pier",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 2
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "durham",
+  "title": "Durham",
+  "file": "midi/pdmx-durham.mid",
+  "sha256": "5a83de643fb1594f50ca3ee48dfe0b95000722b3e5e2a2bc4c68055fdf7979d4",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/14/42/QmWspBoTw8Bb37169b9sRbCJhhkQ2gXuhBbJoXYkoFqjjP.mid",
+   "musescore_score_id": "4710736",
+   "musescore_url": "https://musescore.com/score/4710736",
+   "score_title": "DURHAM",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "11"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "fox",
+  "title": "Fox",
+  "file": "midi/pdmx-fox.mid",
+  "sha256": "d551c0fe6375a8c88fca1f28b237bf8e13be937f6c846c722e96d902b032e7df",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/9/QmXaEcKcqm9pKXUYC1PuN5swo8QKKAZMcPMztSCYGBQXdg.mid",
+   "musescore_score_id": "5006829",
+   "musescore_url": "https://musescore.com/score/5006829",
+   "score_title": "The Fox",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "french-broad",
+  "title": "French Broad",
+  "file": "midi/pdmx-french-broad.mid",
+  "sha256": "d0ba3b11bce0181d50959c16a3fee4067d039a5b0f9f727e37b0da5da515f99e",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/55/QmaYV7Q46RXmxHketXepDzPPscDhEoSvmEg6mcojpKum1u.mid",
+   "musescore_score_id": "5806529",
+   "musescore_url": "https://musescore.com/score/5806529",
+   "score_title": "French Broad - William Walker",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "glise-de-sherbrooke",
+  "title": "Glise de Sherbrooke",
+  "file": "midi/pdmx-glise-de-sherbrooke.mid",
+  "sha256": "795922fe9e33a8da583ebd87959b6e2dcb5d418ca25fed40d85f2385f4541d14",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/55/QmTYHA3NyWYLRDfzqqT7Rmf3VQgRQCTj8mymrrRs2tnz99.mid",
+   "musescore_score_id": "4553937",
+   "musescore_url": "https://musescore.com/score/4553937",
+   "score_title": "Glise de Sherbrooke",
+   "composer": "R-23French Canadian",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "inverness-rant",
+  "title": "The Inverness Rant",
+  "file": "midi/pdmx-inverness-rant.mid",
+  "sha256": "185f11647d784dbbc1001d8618991b84e870163f4023820b3b27db28ba2a8944",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/8/QmT9AyKTzHo5Q5RHBoDyhVyqmt3Vz6sWT8BhrLecFg24Jd.mid",
+   "musescore_score_id": "4674200",
+   "musescore_url": "https://musescore.com/score/4674200",
+   "score_title": "The Inverness Rant",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "8"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "john-of-paris",
+  "title": "John Of Paris",
+  "file": "midi/pdmx-john-of-paris.mid",
+  "sha256": "41cdf9513c1015d95e230fd4ffd99c2d6da3a3ccaf48974b119b96179268cd95",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/30/QmVLMqfY1gi14npHF6JeGM9jdZ91FeVrnaQTDGaoG6PKsn.mid",
+   "musescore_score_id": "4692071",
+   "musescore_url": "https://musescore.com/score/4692071",
+   "score_title": "John Of Paris",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "johnny-the-jumper",
+  "title": "Johnny the jumper",
+  "file": "midi/pdmx-johnny-the-jumper.mid",
+  "sha256": "261c3de5fb4c3e2cfaad05fe4d8ca4f3cf8bdbdf70341e9573ea9e36a090718f",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/14/43/QmWSq2yE3MM6W53DrtoyBWppwT4vfzP5QZWMVYbg8w1GYu.mid",
+   "musescore_score_id": "4679729",
+   "musescore_url": "https://musescore.com/score/4679729",
+   "score_title": "Johnny the jumper",
+   "composer": "anon.",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "kildrummy-castle",
+  "title": "Kildrummy Castle",
+  "file": "midi/pdmx-kildrummy-castle.mid",
+  "sha256": "d0a194ad9194d82212629a6917a00591c846f0de83f6365eff0d9f370336c286",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/8/32/QmQMSuLPHHqJaezsWDHGNTJWYxkARRdt8TBTWKm1FyL54j.mid",
+   "musescore_score_id": "4602522",
+   "musescore_url": "https://musescore.com/score/4602522",
+   "score_title": "Kildrummy Castle",
+   "composer": "J. Scott Skinner",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "lady-betty-cochrans-reel",
+  "title": "Lady Betty Cochran's Reel",
+  "file": "midi/pdmx-lady-betty-cochrans-reel.mid",
+  "sha256": "4402a1abfa265ad63942d8f6996c9aa5b9338873ee4e0877fd0ce4308a063748",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/25/QmTi9oZVCBMQa1EjChfB6U8xvvkgU5o3Hky1eC5a5HV1c3.mid",
+   "musescore_score_id": "4670641",
+   "musescore_url": "https://musescore.com/score/4670641",
+   "score_title": "Robert Mackintosh - Lady Betty Cochran's Reel",
+   "composer": "Robert Mackintosh",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "11"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 116,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "lord-save-me-for-thy-glorious-name",
+  "title": "Lord save me for thy glorious Name",
+  "file": "midi/pdmx-lord-save-me-for-thy-glorious-name.mid",
+  "sha256": "160f0b4476c78e067ccd9ecb3d5224addcd0c65fefe2254d3d2f503a9dfc7ffc",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/11/24/QmTHFwUP1XNNysrsnpzLGi8K6bBffCb9aiRv7tQY9PKHXi.mid",
+   "musescore_score_id": "5761480",
+   "musescore_url": "https://musescore.com/score/5761480",
+   "score_title": "Lord save me for thy glorious Name",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "6"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 22
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "merry-lads-of-ayr",
+  "title": "The Merry Lads of Ayr",
+  "file": "midi/pdmx-merry-lads-of-ayr.mid",
+  "sha256": "51804aeebffe4775b61048f7235e15464fa2e6a85724ce4554a40895bc15aa37",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/38/QmPq8ckU1WUmsikTswXgEJypyQWrTLcu8ixJawWxrbq8pQ.mid",
+   "musescore_score_id": "4559966",
+   "musescore_url": "https://musescore.com/score/4559966",
+   "score_title": "Merry Lads of Ayr",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "miss-gordon-of-liverpool",
+  "title": "Miss Gordon Of Liverpool",
+  "file": "midi/pdmx-miss-gordon-of-liverpool.mid",
+  "sha256": "eb53b8f44ff2ae01a116e812f948cf40eae635a3705b1603a6e8f7d47f5ad0c0",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/41/QmYRjm1wAjDksLg3NLdtohTJoV3zpdG4zY7BeJg13kyGZj.mid",
+   "musescore_score_id": "4716202",
+   "musescore_url": "https://musescore.com/score/4716202",
+   "score_title": "Miss Gordon Of Liverpool",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "murphys-hornpipe",
+  "title": "Murphy's Hornpipe",
+  "file": "midi/pdmx-murphys-hornpipe.mid",
+  "sha256": "af646582d13d03001a6db524c5ae108b9656c098b903902eac06de76e744aecf",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/9/Qmaa1eGCg6jzcevuqEsjb358hQ2Q8LiMc9UYJvay3rTTZT.mid",
+   "musescore_score_id": "5086023",
+   "musescore_url": "https://musescore.com/score/5086023",
+   "score_title": "Murphy's Hornpipe",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "my-dearie",
+  "title": "My Dearie",
+  "file": "midi/pdmx-my-dearie.mid",
+  "sha256": "49e0438591bbeefbf3d807ce086b4c2545e8b387f16de3562d69c7923c00f952",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/6/32/QmNMKY3Ht36aQMoz5D24HdKaN71qHbgK55ktD3LAXX2ydf.mid",
+   "musescore_score_id": "4606150",
+   "musescore_url": "https://musescore.com/score/4606150",
+   "score_title": "My Dearie",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "old-as-the-hills",
+  "title": "Old as the Hills",
+  "file": "midi/pdmx-old-as-the-hills.mid",
+  "sha256": "3f6331977a966a8e48e2bf9efc912d00cca245ad960b829523f95101c9da68c5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/42/QmVstzkYVwexYjJhb6SxSA6Ks62PhDTYSPwhKR78bch4je.mid",
+   "musescore_score_id": "4562454",
+   "musescore_url": "https://musescore.com/score/4562454",
+   "score_title": "Old as the Hills",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "old-batchelor",
+  "title": "Old Batchelor",
+  "file": "midi/pdmx-old-batchelor.mid",
+  "sha256": "fe3d2f57d2e762e8db8a4c2c8bee2e1b9a29b9a8d175c41d7df4eefdf6514956",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/9/45/QmRT9K2JEACrpEN3Z6DjAJi7hJaGBXUyg9oTawKZUYnhCX.mid",
+   "musescore_score_id": "4703244",
+   "musescore_url": "https://musescore.com/score/4703244",
+   "score_title": "The Old Batchelor",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 24.5,
+   "beats_per_bar": 12
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "perth",
+  "title": "Perth",
+  "file": "midi/pdmx-perth.mid",
+  "sha256": "aa38929e1ecbf66fafc42a9ca895eb6b86c7aeaad6453ce66c47ca81154aca61",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/5/43/QmfStZAB2bQvqSqDKE7gJ1somz7twzLDGA9BXZHKqpzc4S.mid",
+   "musescore_score_id": "4953164",
+   "musescore_url": "https://musescore.com/score/4953164",
+   "score_title": "Perth",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "start_beat": 4,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "perthshire-hunt",
+  "title": "The Perthshire Hunt",
+  "file": "midi/pdmx-perthshire-hunt.mid",
+  "sha256": "ab0b23b3ff466af3e8b6a63b4441181de54f92b2527efc91c6d27564941a982d",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/50/QmVwWdf8XtNCFvNsbeHJUQ2ZF8GBAMJcBwtmqWYAba49GS.mid",
+   "musescore_score_id": "4966652",
+   "musescore_url": "https://musescore.com/score/4966652",
+   "score_title": "PERTHSHIRE HUNT",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "7"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "pinagay-branle",
+  "title": "Pinagay Branle",
+  "file": "midi/pdmx-pinagay-branle.mid",
+  "sha256": "4226eeb0ecf761b087bc53ac6a7946d0f8ff80c51893d9d6e485e39e40eacb69",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/0/48/Qmav8Z9SrAdLmneg5LaigjZ4Q21dfLbvi5RSZQduftMUsm.mid",
+   "musescore_score_id": "5088044",
+   "musescore_url": "https://musescore.com/score/5088044",
+   "score_title": "Pinagay Branle",
+   "composer": "Thoinot Arbeau : Orchesographie 1589",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 144,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "thorn-bush",
+  "title": "Thorn Bush",
+  "file": "midi/pdmx-thorn-bush.mid",
+  "sha256": "059a72befe65bf620924ac1ee3ee012bef356d2213ed42ba5c94ab6492f18da7",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/24/QmVH5eiXcw2gdTqbtSiqkCuU1TvwPWbicahhm7XyBrB4w1.mid",
+   "musescore_score_id": "4671806",
+   "musescore_url": "https://musescore.com/score/4671806",
+   "score_title": "James Fraser - The Thorn Bush",
+   "composer": "James Fraser",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 72,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "ball",
+  "title": "The Ball",
+  "file": "midi/pdmx-ball.mid",
+  "sha256": "724733ae9c33c0b3af2cd5ca218fc12c3b2dc1716f49538a6e4d82ba51000e1b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/14/39/QmWQW4FtZQxroZjvQrE3Vnc5V1a2ZgqHAUtTvyiUHspfz9.mid",
+   "musescore_score_id": "4928858",
+   "musescore_url": "https://musescore.com/score/4928858",
+   "score_title": "The Ball",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30.5,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "black-heath",
+  "title": "Black-Heath",
+  "file": "midi/pdmx-black-heath.mid",
+  "sha256": "0ffc2e19243970fd17757c3ba08aeb1aa8f92c26dd2f7dd461cac576f6b289d1",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/37/QmVPDB7LP5awt3iDEX7vzVTJdsopDoQQc8RMuzxJ2sjkTf.mid",
+   "musescore_score_id": "4667504",
+   "musescore_url": "https://musescore.com/score/4667504",
+   "score_title": "Black-Heath",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "1"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "burns-irish-hornpipe",
+  "title": "Burns' Irish Hornpipe",
+  "file": "midi/pdmx-burns-irish-hornpipe.mid",
+  "sha256": "ac5605b11c0893bb367c31483b8cefc72b314d1a53f5be0a0e6c6016c7bbd5ec",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/3/37/QmdPJKqBJZYiJn38ZgAGW86kTSkAcrrmA25qBwmkyreUFq.mid",
+   "musescore_score_id": "4673733",
+   "musescore_url": "https://musescore.com/score/4673733",
+   "score_title": "Burns' Irish Hornpipe",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 116,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "ca-the-wethers-to-the-hill",
+  "title": "Ca' the Wethers to the Hill",
+  "file": "midi/pdmx-ca-the-wethers-to-the-hill.mid",
+  "sha256": "866e09e02fe7d975f5d61d8b3ae316128428402ec52e732976d0d7535ae697c3",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/15/19/QmXfhRNpq4ob3NCk8tuCdJRWrbQmDqt1z4wojuEfxsPSTE.mid",
+   "musescore_score_id": "4859496",
+   "musescore_url": "https://musescore.com/score/4859496",
+   "score_title": "CA' THE WETHERS TO THE HILL",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "come-all-you-worthy-gentlemen",
+  "title": "Come All You Worthy Gentlemen",
+  "file": "midi/pdmx-come-all-you-worthy-gentlemen.mid",
+  "sha256": "0620c4fb543ae39e120886da8b8e314e0432db1a5f2bfb3b86a0c5a06e0e7de8",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/14/2/QmW3qgMoSnM8y2KHKnXybAbcsMRrhgBHCxG5Z7v6VyR6Cn.mid",
+   "musescore_score_id": "5715862",
+   "musescore_url": "https://musescore.com/score/5715862",
+   "score_title": "Come All You Worthy Gentlemen",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "11"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "conor-oreilly",
+  "title": "Conor O'Reilly",
+  "file": "midi/pdmx-conor-oreilly.mid",
+  "sha256": "39cca7de809796c35f4e39391719b78a6364cb17616d51727f7e6c305978aa63",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/6/28/QmNkPquFmPPKZZBKXRWLfBhUCz6sBZJgp6XPit3qGcmGry.mid",
+   "musescore_score_id": "4984515",
+   "musescore_url": "https://musescore.com/score/4984515",
+   "score_title": "Conor O'Reilly",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "2"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "corn-riggs-are-bonnie",
+  "title": "Corn Riggs Are Bonnie",
+  "file": "midi/pdmx-corn-riggs-are-bonnie.mid",
+  "sha256": "357d5ddeb58f59859c9cdc630e83281fc0a872412f17a8cd95b6cacf95ca1373",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/37/QmPPnCwehcjm6whqxo39jz4dcMMLMB1jQywEvi6FLU9BdJ.mid",
+   "musescore_score_id": "4856798",
+   "musescore_url": "https://musescore.com/score/4856798",
+   "score_title": "CORN RIGGS ARE BONNIE",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "da-auld-stoers-back-again",
+  "title": "Da Auld Stoers Back Again",
+  "file": "midi/pdmx-da-auld-stoers-back-again.mid",
+  "sha256": "d38ffec976544941750744eaff48d18bce39339440522f89e2cf0d388bf7793b",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/10/7/QmS8ejVaxhaPtuWRmdL7dsUDkWK4jGYYNCVb1MzZV13nLp.mid",
+   "musescore_score_id": "4826063",
+   "musescore_url": "https://musescore.com/score/4826063",
+   "score_title": "Da Auld Stoers Back Again",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "6"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "kelsterne-gardens",
+  "title": "Kelsterne Gardens",
+  "file": "midi/pdmx-kelsterne-gardens.mid",
+  "sha256": "a689f0232dda26e3cc14fedb136e97ce6354f187cf191f1ae9f5a7f7fe314285",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/13/24/QmVHuPCs5jHssqJ6L5PQKwChCJUNDjNp7hSNq9FbSi5qto.mid",
+   "musescore_score_id": "4891188",
+   "musescore_url": "https://musescore.com/score/4891188",
+   "score_title": "Kelsterne Gardens",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "5"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "light-of-other-days",
+  "title": "The Light of Other Days",
+  "file": "midi/pdmx-light-of-other-days.mid",
+  "sha256": "3721f0a10f54da3b6d3efec921a9f6999e08358bcbc9feb0980a5056c641229e",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/17/19/QmZfeiHkB2vvv3ARbNUqcYTPcZLKbEcCDbtX8QbXoBbD88.mid",
+   "musescore_score_id": "4548749",
+   "musescore_url": "https://musescore.com/score/4548749",
+   "score_title": "The Light of Other Days",
+   "composer": "No 214 Page 105 William Clarke of Feltwell",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "4"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 29,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "miller-o-hirn",
+  "title": "The Miller O' Hirn",
+  "file": "midi/pdmx-miller-o-hirn.mid",
+  "sha256": "239383da2d4a8072fbc8d3d69e7cc65b7836709fd790af4ec92e3255d0534774",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/7/48/QmPvYUkyP7R2XniRfr9JwHFH9hhrV1MyvK1M1gEJXeGsMH.mid",
+   "musescore_score_id": "4548632",
+   "musescore_url": "https://musescore.com/score/4548632",
+   "score_title": "The Miller o' Hirn",
+   "composer": "J. Scott Skinner",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "6"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 32
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
+ },
+ {
+  "id": "miss-campbell-of-saddells",
+  "title": "Miss Campbell Of Saddell's",
+  "file": "midi/pdmx-miss-campbell-of-saddells.mid",
+  "sha256": "b0c58bd5f1b37bc78d68c345596bf6067fe6f89abdd805e1d93b854eddee64ad",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/12/7/QmU8FA5vpvKwoSechfRWmD6DFCK3GhuSErkEMr4iDqaHA7.mid",
+   "musescore_score_id": "4931290",
+   "musescore_url": "https://musescore.com/score/4931290",
+   "score_title": "Miss Campbell Of Saddell's",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "3"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 28.5,
+   "beats_per_bar": 4
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-09.txt"
+  }
  }
 ]
