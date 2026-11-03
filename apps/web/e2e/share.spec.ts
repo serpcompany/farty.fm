@@ -11,7 +11,8 @@ import { onPhone } from './screens'
 // Sharing a Recording (#316) or a saved Toot (#317) by link (ADR 0020): the owner picks a Handle
 // and shares, someone signed out opens the link in another browser and plays it, and once the
 // owner stops sharing, the link is gone. A guest is asked to make a free account first. The record
-// flow's Result shares the take just saved (#320).
+// flow's Result shares the take just saved (#320). The owner's page lists a shared Toot beside a
+// shared Recording, and plays it (#346).
 //
 // With E2E_EVIDENCE_DIR set, the Toot's journey also writes its screenshots and link image there,
 // for the PR.
@@ -449,6 +450,56 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(other.getByText('Reported. Thanks.')).toBeVisible()
   })
 
+  await test.step('the owner shares a Recording too, and their page lists both, newest first, and plays the Toot (#346)', async () => {
+    // In a second tab, so the first stays on the Toot's screen for the steps after.
+    const tab = await context.newPage()
+    await tab.goto('/recordings/')
+    await tab
+      .getByTestId('recording-row')
+      .first()
+      .getByRole('button', { name: /^Share / })
+      .click()
+    const tabSheet = () => tab.evaluate(() => window.__shared.map(shared => shared.url ?? ''))
+    await expect.poll(tabSheet).toHaveLength(1)
+    const recordingLink = new URL((await tabSheet())[0]).pathname
+    expect(recordingLink).toMatch(new RegExp(`^/u/${handle}/r/[0-9a-z]{12}/$`))
+    await tab.close()
+
+    const response = await other.goto(`/u/${handle}/`)
+    expect(response?.status()).toBe(200)
+    const rows = other.getByTestId('profile-shared-item')
+    await expect(rows).toHaveCount(2)
+    await expect(rows.nth(0).getByRole('link')).toHaveAttribute('href', recordingLink)
+    await expect(rows.nth(0).getByRole('link')).toContainText('Recording ·')
+    const toot = rows.nth(1).getByRole('link')
+    await expect(toot).toHaveAttribute('href', link)
+    await expect(toot).toContainText(title)
+    await expect(toot).toContainText(`Toot · ${twinkle} · Today`)
+    await shot(other, 'toot-profile')
+
+    // Nothing private: not the Toot's id nor its owner's email, in the HTML or its page data.
+    const html = (await response?.text()) ?? ''
+    expect(html).toContain(title)
+    for (const secret of [tootId, email]) {
+      expect(html).not.toContain(secret)
+      expect(await other.content()).not.toContain(secret)
+    }
+
+    // It plays in place, from its own link's audio: the Toot as it was saved.
+    const audio = other.waitForResponse(r => new URL(r.url()).pathname === `${link}audio/`)
+    await rows
+      .nth(1)
+      .getByRole('button', { name: `Play ${title}` })
+      .click()
+    expect((await audio).status()).toBe(200)
+    await expect.poll(() => other.evaluate(() => window.__sounds.length)).toBe(1)
+    const sound = await other.evaluate(() => window.__sounds[0])
+    expect(sound.duration).toBeGreaterThan(1)
+    expect(sound.peak).toBeGreaterThan(0.05)
+    await expect(rows.nth(1).getByRole('button', { name: `Stop ${title}` })).toBeVisible()
+    await shot(other, 'toot-profile-playing')
+  })
+
   await test.step("the owner stops sharing from the Toot's screen, and the link is gone", async () => {
     await page.getByRole('button', { name: `Share ${title}` }).click()
     await page.getByRole('menuitem', { name: 'Stop sharing' }).click()
@@ -459,6 +510,10 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(page.getByTestId('toot-subtitle')).toHaveText(title)
     await expectGone(other, link, imageOf(link))
     await shot(other, 'toot-link-gone')
+    // Its page lists only the Recording now.
+    await other.goto(`/u/${handle}/`)
+    await expect(other.getByTestId('profile-shared-item')).toHaveCount(1)
+    await expect(other.locator(`a[href="${link}"]`)).toHaveCount(0)
   })
 
   await test.step('shared again, the new link is gone once the Toot is deleted', async () => {

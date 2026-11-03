@@ -19,8 +19,8 @@ import { FriendsUnreachable, RemoveFriendDialog, refusalMessage, useFriendReques
 import { Report, SharedTopBar } from './shared-recording-page'
 
 // A profile page, `/u/<handle>/` (#319, ADR 0021): what anyone sees, signed in or not, in any
-// browser. The Handle, the friend control, and what they've shared, newest first, each playing in
-// place and opening its own page. No counts and no feed.
+// browser. The Handle, the friend control, and the Recordings and Toots they've shared (#346),
+// newest first, each playing in place and opening its own page. No counts and no feed.
 
 const noSubscribe = () => () => {}
 
@@ -35,13 +35,19 @@ const useInBrowser = () =>
 export type ProfilePageProps = {
   handle: string
   items: {
+    kind: 'recordings' | 'toots'
     shareId: string
+    /** Its shared page, which its audio is under. */
+    path: string
     name: string
-    note: string | null
+    /** A Recording's note, or a Toot's Song. */
+    detail: string | null
     /** When it was shared, in ms. */
     sharedAt: number
   }[]
 }
+
+const KIND_LABEL = { recordings: 'Recording', toots: 'Toot' } as const
 
 export function ProfilePage({ handle, items }: ProfilePageProps) {
   const [playing, setPlaying] = useState<string | null>(null)
@@ -52,7 +58,7 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
   // Leaving the page stops it, as a tab change does in the app.
   useEffect(() => stopPlayback, [])
 
-  const toggle = (shareId: string) => {
+  const toggle = ({ shareId, path }: ProfilePageProps['items'][number]) => {
     if (playing === shareId) {
       stopPlayback()
       setPlaying(null)
@@ -63,7 +69,7 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
     void play(
       `shared:${shareId}`,
       async () => {
-        const response = await fetch(`/u/${handle}/r/${shareId}/audio/`)
+        const response = await fetch(`${path}audio/`)
         if (!response.ok) {
           setUnplayable(true)
           throw new Error(`audio ${response.status}`)
@@ -96,8 +102,8 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
                 const isPlaying = playing === item.shareId
                 const PlayIcon = isPlaying ? Square : Play
                 const detail = [
-                  'Recording',
-                  item.note,
+                  KIND_LABEL[item.kind],
+                  item.detail,
                   inBrowser ? formattedTootDate(item.sharedAt) : null
                 ]
                   .filter(Boolean)
@@ -112,7 +118,7 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
                       type="button"
                       aria-label={isPlaying ? `Stop ${item.name}` : `Play ${item.name}`}
                       aria-pressed={isPlaying}
-                      onClick={() => toggle(item.shareId)}
+                      onClick={() => toggle(item)}
                       className="flex size-11 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                     >
                       <span className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -120,7 +126,7 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
                       </span>
                     </button>
                     <Link
-                      href={`/u/${handle}/r/${item.shareId}/`}
+                      href={item.path}
                       className="grid min-h-14 min-w-0 flex-1 content-center py-2 pr-4 pl-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
                     >
                       <span className="truncate font-medium">{item.name}</span>

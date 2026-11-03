@@ -1,25 +1,34 @@
 import type { Database } from '@/db/database'
-import { addProfileReport, profileShares, profileUser } from '@/db/profiles'
+import type { Kind } from '@/db/library'
+import { addProfileReport, type ProfileShareRow, profileShares, profileUser } from '@/db/profiles'
+import { songs } from '@/lib/catalog/songs.generated'
 import { noteName } from '@/lib/pitch'
 import { recordingName, songPitch } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
+import { PAD_TOOT_TITLE } from '@/lib/toot'
 
 import { consumeSlots, reporterLimitKey, requestClient } from './auth-config'
 import { type Stores, toRecording } from './library'
 import { apiError } from './require-user'
-import { REPORT_LIMITS, SITE_REPORTS_KEY } from './sharing'
+import { REPORT_LIMITS, SITE_REPORTS_KEY, sharePath } from './sharing'
 
 // Profile pages (#319, ADR 0021): `/u/<handle>/`, public, which lists only what its user shares,
-// newest first, each linking to its own shared page, with Add friend and Report. No counts and no
-// feed.
+// Recordings and Toots (#346) together, newest first, each linking to its own shared page, with
+// Add friend and Report. No counts and no feed.
 
-/** A shared Recording, as its owner's page lists it: nothing private, and its link's id. */
+/** A shared Recording or Toot, as its owner's page lists it: nothing private, and its link. */
 export type ProfileItem = {
+  kind: Kind
   shareId: string
-  /** "Recording 8". */
+  /** Its shared page, `/u/<handle>/r/<id>/` or `/u/<handle>/t/<id>/`, which its audio is under. */
+  path: string
+  /** "Recording 8", or a Toot's title. */
   name: string
-  /** "E3", or null for a Noise-like one. */
-  note: string | null
+  /**
+   * A Recording's note, "E3", or null for a Noise-like one. A Toot's Song, "Twinkle, Twinkle,
+   * Little Star", or "Sound Pad", or null for a Song that isn't in Farty any more.
+   */
+  detail: string | null
   /** When it was shared, in ms, for the page to say "Today" in the viewer's own time zone. */
   sharedAt: number
 }
@@ -39,23 +48,33 @@ async function profileOwner(db: Database, handle: string) {
   return lower === null ? null : profileUser(db, lower)
 }
 
-/** The page at `/u/<handle>/`: the Handle and the Recordings shared under it that work. */
+/** A share's name and detail on its row: a Recording's name and note, or a Toot's title and Song. */
+function itemText(row: ProfileShareRow): { name: string; detail: string | null } {
+  if (row.kind === 'toots') {
+    const { title, songId } = row.toot
+    const song =
+      songId === null ? PAD_TOOT_TITLE : (songs.find(s => s.id === songId)?.title ?? null)
+    return { name: title, detail: song }
+  }
+  const recording = toRecording(row.recording)
+  const pitch = songPitch(recording)
+  return { name: recordingName(recording), detail: pitch === null ? null : noteName(pitch) }
+}
+
+/** The page at `/u/<handle>/`: the Handle and the Recordings and Toots shared under it that work. */
 export async function findProfile(db: Database, handle: string): Promise<Profile | null> {
   const owner = await profileOwner(db, handle)
   if (!owner) return null
   const rows = await profileShares(db, owner.userId)
   return {
     handle: owner.handle,
-    items: rows.map(({ shareId, sharedAt, recording: row }) => {
-      const recording = toRecording(row)
-      const pitch = songPitch(recording)
-      return {
-        shareId,
-        name: recordingName(recording),
-        note: pitch === null ? null : noteName(pitch),
-        sharedAt: sharedAt.getTime()
-      }
-    })
+    items: rows.map(row => ({
+      kind: row.kind,
+      shareId: row.shareId,
+      path: sharePath(row.kind, owner.handle, row.shareId),
+      ...itemText(row),
+      sharedAt: row.sharedAt.getTime()
+    }))
   }
 }
 

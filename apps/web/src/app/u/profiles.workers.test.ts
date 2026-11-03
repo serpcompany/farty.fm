@@ -3,15 +3,21 @@ import { describe, expect, it } from 'vitest'
 
 import * as handleRoute from '@/app/api/handle/route'
 import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
+import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
+import { markTootPaid, startTootPayment } from '@/db/payments'
 import { profileReports, rateLimit, shares } from '@/db/schema'
+import { songs } from '@/lib/catalog/songs.generated'
+import { TOOT_PRICE } from '@/lib/pricing'
 import { findProfile } from '@/server/profiles'
 import {
   type As,
   api,
   ORIGIN,
+  padTootMetadata,
   recordingMetadata,
   signUp,
   testDb,
+  tootMetadata,
   uploadBody,
   wav
 } from '@/test-support/library-api'
@@ -19,11 +25,17 @@ import {
 import * as reportRoute from './[handle]/report/route'
 
 // Profile pages (#319, ADR 0021) in workerd, with a real D1 and R2: `/u/<handle>/` lists only the
-// Recordings its user shares right now, newest first, and its Report keeps a row for Farty.
+// Recordings and Toots (#346) its user shares right now, newest first, and its Report keeps a row
+// for Farty.
 
 const R1 = '11111111-1111-4111-8111-111111111111'
 const R2 = '22222222-2222-4222-8222-222222222222'
 const R3 = '33333333-3333-4333-8333-333333333333'
+const T1 = '44444444-4444-4444-8444-444444444444'
+const T2 = '55555555-5555-4555-8555-555555555555'
+const T3 = '66666666-6666-4666-8666-666666666666'
+
+const twinkle = songs.find(song => song.id === 'twinkle')?.title
 
 const params = <P>(value: P) => ({ params: Promise.resolve(value) })
 
@@ -65,6 +77,35 @@ async function sharer(name: string, ids: string[]) {
   return user
 }
 
+/** When the item `id` was shared: 9:`minute` on 1 November 2026. */
+const sharedAt = (id: string, minute: number) =>
+  testDb()
+    .update(shares)
+    .set({ createdAt: new Date(Date.UTC(2026, 10, 1, 9, minute)) })
+    .where(eq(shares.itemId, id))
+
+/**
+ * Pays for the Toot `metadata.id` and saves it to `user`'s account, as Song Creator's Save does
+ * (ADR 0010), then shares it unless `share` is false, at 9:`minute`.
+ */
+async function savedToot(
+  user: { id: string; cookie: string },
+  metadata: { id: string; songId: string | null },
+  { minute = 0, share = true } = {}
+) {
+  const { id, songId } = metadata
+  await startTootPayment(testDb(), user.id, id, songId, `cs_test_${id}`, TOOT_PRICE)
+  expect(await markTootPaid(testDb(), user.id, id, `cs_test_${id}`)).toBe(true)
+  expect((await api.put('toots', id, uploadBody(metadata, wav()), user)).status).toBe(201)
+  if (!share) return
+  const shared = await shareTootRoute.PUT(
+    request(`/api/share/toots/${id}/`, 'PUT', user),
+    params({ id })
+  )
+  expect(shared.status).toBe(201)
+  await sharedAt(id, minute)
+}
+
 const names = async (handle: string) =>
   (await findProfile(testDb(), handle))?.items.map(item => item.name) ?? null
 
@@ -89,9 +130,18 @@ describe('A profile page', () => {
       'Recording 1'
     ])
     const [newest] = profile?.items ?? []
-    expect(Object.keys(newest).sort()).toEqual(['name', 'note', 'shareId', 'sharedAt'])
-    expect(newest.note).toBe('E3')
+    expect(Object.keys(newest).sort()).toEqual([
+      'detail',
+      'kind',
+      'name',
+      'path',
+      'shareId',
+      'sharedAt'
+    ])
+    expect(newest.kind).toBe('recordings')
+    expect(newest.detail).toBe('E3')
     expect(newest.shareId).not.toBe(R3)
+    expect(newest.path).toBe(`/u/alice/r/${newest.shareId}/`)
     expect(newest.sharedAt).toBe(Date.UTC(2026, 10, 1, 9, 2))
   })
 
@@ -112,16 +162,96 @@ describe('A profile page', () => {
     expect(await names('bob')).toEqual(['Recording 1'])
   })
 
-  it('lists no shared Toot yet, only Recordings (#317)', async () => {
+  it('lists the Toots its user shares with the Recordings, newest first, with nothing private (#346)', async () => {
+    // R1 at 9:00, R2 at 9:01, R3 at 9:02.
+    const alice = await sharer('alice', [R1, R2, R3])
+    await savedToot(alice, tootMetadata(T1, { title: 'Twinkle for Mum' }), { minute: 3 })
+    await savedToot(alice, padTootMetadata(T2), { minute: 1 })
+    // T3's Song isn't in Farty any more.
+    await savedToot(alice, tootMetadata(T3, { songId: 'gone', title: 'Old' }), { minute: 5 })
+    await sharedAt(R1, 4)
+
+    const profile = await findProfile(testDb(), 'alice')
+    const items = profile?.items ?? []
+    expect(items).toHaveLength(6)
+    const rows = items.map(item => [item.kind, item.name, item.detail])
+    expect(rows.slice(0, 4)).toEqual([
+      ['toots', 'Old', null],
+      ['recordings', 'Recording 1', 'E3'],
+      ['toots', 'Twinkle for Mum', twinkle],
+      ['recordings', 'Recording 3', 'E3']
+    ])
+    // R2 and the Sound Pad Toot, shared in the same minute, come by link id, as D1 orders them.
+    expect(rows.slice(4)).toEqual(
+      expect.arrayContaining([
+        ['recordings', 'Recording 2', 'E3'],
+        ['toots', 'Sound Pad', 'Sound Pad']
+      ])
+    )
+    expect(items[4].shareId > items[5].shareId).toBe(true)
+    for (const item of items) {
+      const segment = item.kind === 'toots' ? 't' : 'r'
+      expect(item.path).toBe(`/u/alice/${segment}/${item.shareId}/`)
+    }
+
+    // Nothing private: no Toot's or Recording's own id, and not the owner's id or email.
+    const page = JSON.stringify(profile)
+    for (const secret of [T1, T2, T3, R1, R2, R3, alice.id, 'alice@example.test']) {
+      expect(page).not.toContain(secret)
+    }
+  })
+
+  it('leaves out a Toot that was never shared, stopped, deleted or taken down (#346)', async () => {
+    const alice = await sharer('alice', [])
+    await savedToot(alice, tootMetadata(T1), { share: false })
+    await savedToot(alice, tootMetadata(T2, { title: 'Stopped' }), { minute: 3 })
+    await savedToot(alice, tootMetadata(T3, { title: 'Deleted' }), { minute: 2 })
+    const T4 = '77777777-7777-4777-8777-777777777777'
+    await savedToot(alice, tootMetadata(T4, { title: 'Taken down' }), { minute: 1 })
+    expect(await names('alice')).toEqual(['Stopped', 'Deleted', 'Taken down'])
+
+    const stopped = await shareTootRoute.DELETE(
+      request(`/api/share/toots/${T2}/`, 'DELETE', alice),
+      params({ id: T2 })
+    )
+    expect(stopped.status).toBe(204)
+    expect((await api.delete('toots', T3, alice)).status).toBe(204)
+    await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, T4))
+    expect(await names('alice')).toEqual([])
+  })
+
+  it('leaves out a Toot that plays a taken-down Recording, until it is back (#346)', async () => {
     const alice = await sharer('alice', [R1])
-    await testDb().insert(shares).values({
-      id: 'abcdefghjkmn',
-      userId: alice.id,
-      kind: 'toots',
-      itemId: R2,
-      createdAt: new Date()
+    // T1 plays R1 for one of its Song's pitches, T2 tapped R1 on the Sound Pad, and T3 plays R2.
+    const arrangement = { transposition: 0, recordingForPitch: { 60: R2, 64: R1 } }
+    await savedToot(alice, tootMetadata(T1, { title: 'Song with R1', arrangement }), { minute: 3 })
+    const performance = { recordings: [R1], taps: [[0, 0]] }
+    await savedToot(alice, padTootMetadata(T2, { title: 'Pad with R1', performance }), {
+      minute: 2
     })
-    expect(await names('alice')).toEqual(['Recording 1'])
+    const others = { transposition: 0, recordingForPitch: { 60: R2 } }
+    await savedToot(alice, tootMetadata(T3, { title: 'Song with R2', arrangement: others }), {
+      minute: 1
+    })
+    expect(await names('alice')).toEqual([
+      'Song with R1',
+      'Pad with R1',
+      'Song with R2',
+      'Recording 1'
+    ])
+
+    // Farty takes down R1's own link after a report.
+    await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, R1))
+    expect(await names('alice')).toEqual(['Song with R2'])
+
+    // Put back, R1 brings its Toots back with it.
+    await testDb().update(shares).set({ takenDownAt: null }).where(eq(shares.itemId, R1))
+    expect(await names('alice')).toEqual([
+      'Song with R1',
+      'Pad with R1',
+      'Song with R2',
+      'Recording 1'
+    ])
   })
 
   it('is found by its Handle in any case, and is there with nothing shared', async () => {

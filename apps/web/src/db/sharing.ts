@@ -149,6 +149,18 @@ export async function tootPlaysTakenDown(
 }
 
 /**
+ * The user's Toots of `rows` that play no Recording Farty took down: the ones their page may list,
+ * as `sharedToot` finds only those.
+ */
+export async function withoutTakenDownRecordings<
+  T extends Pick<TootRow, 'arrangement' | 'performance'>
+>(db: Database, userId: string, rows: T[]): Promise<T[]> {
+  if (rows.length === 0) return rows
+  const takenDown = await takenDownRecordings(db, userId)
+  return rows.filter(toot => !playsAny(toot, takenDown))
+}
+
+/**
  * The user's shares that work: each item's kind, id and link id. A Toot that plays a taken-down
  * Recording is left out, as a taken-down Recording is.
  */
