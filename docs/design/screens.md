@@ -71,13 +71,13 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - A list of Recordings, newest first. Each row has:
   - a big play button
   - the name ("Recording 7")
-  - the note in a pill, with its octave ("G♯3"), or a quiet "noise-like" when the Recording has no steady pitch
+  - the note in a pill, with its octave ("G♯3"), or a quiet "noise-like" when the Recording has no steady pitch. On the web (#314): the pill says the note Songs use, "No note" when they leave it out (Noise-like, or left out in its review), or "Finding…" with a spinner; there's no "noise-like". A pencil opens the Recording's review (below), and "Trimmed" and "Placed by ear" show under the name.
   - a full-width waveform of the whole take, which replay plays start to end, as recorded (ADR 0016). The iPhone app showed just the first fart (`replaySegment`) and "First fart used" when a second one was cut off; the web app has neither, since Songs play every burst too.
 **PRIMARY ACTION:** Play a Recording.
 **SECONDARY ACTIONS:** Swipe to delete (with confirmation).
 **STATES:**
 - Empty ("No Recordings yet. Go to the Record tab and tap the red button.")
-- Analyzing (a spinner under the name)
+- Analyzing (a spinner under the name). On the web (#314), "Finding…" in the note pill instead.
 - Not analyzed (analysis failed; "not analyzed" with Retry under the name)
 - Playing (the row is highlighted)
 - Populated
@@ -98,6 +98,12 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **SECONDARY ACTIONS:** Discard, Play.
 **STATES:** Default, Playing.
 **NAVIGATION TYPE:** Full-screen cover, step 2.
+**ON THE WEB (#314):** one screen to keep the take as you want it, open as soon as Stop finishes while analysis finds the note:
+- The whole take's waveform with pink Trim handles on the fart analysis found (the whole take while it's still finding it), Play between the handles, the length between them, and Reset back to the fart found (ADR 0019)
+- The note: "Finding note…", the note found, a note picked, "No note", or "Not found" when analysis failed. Under it, one octave of piano keys (C2 to B4 with the octave arrows) and a "No note" button. A key plays a piano reference note and makes that the note; the note found stays ringed (ADR 0015). A line under the keys says what the note means for Songs
+- The name, "Recording 7" until you type one
+- Save keeps it at once, with what you changed, and never waits for analysis (ADR 0002); Discard throws it away
+- A saved Recording's pencil, on the Recordings tab, opens the same screen as a modal with Cancel and Save. Escape is Cancel, and focus goes back to the pencil. It says "Couldn't save the trim. Try again." when the fart between the handles can't be found, and offers Retry when the Recording isn't analyzed
 
 ---
 
@@ -107,7 +113,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **WHAT'S ON THE SCREEN:**
 - **Analyzing:** a short "Finding your note…" state
 - **Result for a Melodic Recording:** the big note ("G♯3") and its place on the pitch strip
-- **Result for a Noise-like Recording:** "No steady note this time. It's saved, but it can't play melody notes."
+- **Result for a Noise-like Recording:** "No steady note this time. It's saved, but it can't play melody notes." On the web (#314): "No note. It's saved. Songs leave it out until you give it a note from the Recordings tab", for a Noise-like Recording or one left out with "No note". When analysis fails, "Saved, but we couldn't find its note", with Retry. When the review's Trim can't be saved, Result says it's kept whole.
 - Pitch Coverage changes: "Ode to Joy: 4 of 5 notes covered"
 - Unlocks: "You unlocked Twinkle, Twinkle", with a "Try it" button
 - Done button

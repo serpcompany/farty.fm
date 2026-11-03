@@ -6,7 +6,7 @@ import { analysisAudio, decoded, goldenRecordings } from '../../test-support/gol
 import { ANALYSIS_SAMPLE_RATE } from './resample'
 import { noteSegment, trimBounds } from './trimming'
 
-// A Trim (ADR 0019): the fart `noteSegment` finds between the picker's handles, as the reference's
+// A Trim (ADR 0019): the fart `noteSegment` finds between the review's handles, as the reference's
 // `trim_bounds()` finds it (`tools/melody-lab/test_trim.py` checks the same numbers), and what
 // Songs then cut and Auto-map counts.
 

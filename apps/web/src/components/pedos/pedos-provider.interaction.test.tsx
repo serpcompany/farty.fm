@@ -119,7 +119,7 @@ async function mount(): Promise<() => Pedos> {
 /** The segment the player was last asked for. */
 const lastSegment = () => page.play.mock.calls.at(-1)?.[2] as unknown
 
-/** Recording 18 once Noise-like, so its Trim counts. */
+/** Recording 18 as Noise-like. */
 const noiseLike: Recording = {
   ...twoBursts,
   analysis: {
@@ -265,8 +265,11 @@ it("plays a trimmed Recording's Trim, and the part a scrub asks for", async () =
   expect(lastSegment()).toEqual({ start: 0.9, end: 1.2 })
   expect(pedos().nowPlaying).toBe('r18')
 
-  // A Melodic one plays the whole take, whatever Trim it kept from when it was Noise-like.
+  // A Melodic one plays its Trim too: any Recording can be trimmed (#314).
   await act(async () => pedos().togglePlayback({ ...twoBursts, id: 'r19', trim: trimmed.trim }))
+  expect(lastSegment()).toEqual({ start: 0.5, end: 1.2 })
+  // Untrimmed, the whole take.
+  await act(async () => pedos().togglePlayback({ ...twoBursts, id: 'r20' }))
   expect(lastSegment()).toBeNull()
 })
 
@@ -311,7 +314,7 @@ it("saves nothing, and says it didn't, when the fart between the handles can't b
   })
   expect(saved).toBe(false)
   expect(page.reportError).toHaveBeenCalledWith('recording-trim-failed', expect.any(Error))
-  // Not the Placed Pitch alone either: the picker stays open to try both again.
+  // Not the Placed Pitch alone either: the review stays open to try both again.
   expect(page.placeRecording).not.toHaveBeenCalled()
   expect(pedos().recording('r18')?.trim).toBeFalsy()
   expect(pedos().recording('r18')?.placedPitch).toBeFalsy()

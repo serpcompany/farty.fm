@@ -7,6 +7,7 @@ import type { Rescanning } from './pedos-provider'
 
 // The Recordings tab's Re-scan (#282) in a DOM: which rows offer it, Re-scan all, its progress
 // and what it says it changed, and a Placed Pitch that outlasts a found Recording Pitch (ADR 0017).
+// Each row's note pill and the pencil to its review (#314).
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean
@@ -18,7 +19,8 @@ const page = vi.hoisted(() => ({
   rescanning: null as Rescanning | null,
   rescanned: null as RescanResult | null,
   rescanAll: vi.fn<() => Promise<RescanResult>>(),
-  rescanRecording: vi.fn<(id: string) => Promise<RescanResult>>()
+  rescanRecording: vi.fn<(id: string) => Promise<RescanResult>>(),
+  setReviewOpen: vi.fn<(open: boolean) => void>()
 }))
 
 vi.mock('./pedos-provider', () => ({
@@ -31,7 +33,8 @@ vi.mock('./pedos-provider', () => ({
     rescanning: page.rescanning,
     rescanned: page.rescanned,
     rescanAll: page.rescanAll,
-    rescanRecording: page.rescanRecording
+    rescanRecording: page.rescanRecording,
+    setReviewOpen: page.setReviewOpen
   })
 }))
 vi.mock('@/lib/recording-store', () => ({ loadAudio: () => new Promise(() => {}) }))
@@ -97,9 +100,9 @@ async function show(
   await act(async () => root?.render(<RecordingsScreen />))
 }
 
-/** The button whose accessible name or text is `name`, or undefined. */
+/** The button whose accessible name or text is `name`, or undefined. The review is a portal. */
 function findButton(name: string): HTMLButtonElement | undefined {
-  return [...container.querySelectorAll('button')].find(
+  return [...document.querySelectorAll('button')].find(
     b => b.getAttribute('aria-label') === name || b.textContent === name
   )
 }
@@ -189,8 +192,67 @@ describe('Re-scan on the Recordings tab', () => {
     await show([placedThenFound])
     const note = container.querySelector('[data-testid="recording-note"]')
     expect(note?.textContent).toBe('C3')
-    expect(note?.getAttribute('aria-label')).toBe('C3, placed by ear. Move it or take it off')
+    expect(button('Recording 3, 0.9 s, C3, placed by ear').getAttribute('aria-pressed')).toBe(
+      'false'
+    )
     expect(container.textContent).toContain('Placed by ear')
     expect(container.textContent).not.toContain('G3')
+  })
+})
+
+describe('a Recording’s note and review on the Recordings tab (#314)', () => {
+  const notes = () =>
+    [...container.querySelectorAll('[data-testid="recording-note"]')].map(n => n.textContent)
+
+  it('shows the note Songs use, "No note" when they leave it out, and "Finding…"', async () => {
+    const leftOut = analyzed(8, 55, -1)
+    const finding: Recording = { ...analyzed(9, null), analysis: { state: 'analyzing' } }
+    await show([melodic, currentNoNote, leftOut, finding, notAnalyzed])
+    // Newest first; nothing while not analyzed, which says so with Retry.
+    expect(notes()).toEqual(['Finding…', 'No note', 'No note', 'G3'])
+    expect(findButton('Recording 8, 0.9 s, No note')).toBeDefined()
+    expect(findButton('Recording 7, 0.9 s, No note')).toBeDefined()
+    expect(findButton('Recording 1, 0.9 s, G3')).toBeDefined()
+    expect(container.textContent).not.toContain('noise-like')
+  })
+
+  it('names a Recording by the name the user gave it, and its pencil opens its review', async () => {
+    await show([{ ...melodic, name: 'Squeaker' }])
+    expect(container.textContent).toContain('Squeaker')
+    expect(findButton('Squeaker, 0.9 s, G3')).toBeDefined()
+    const pencil = button('Edit Squeaker')
+    expect(pencil.getAttribute('aria-haspopup')).toBe('dialog')
+    await act(async () => pencil.click())
+    const review = document.querySelector('[role="dialog"]')
+    expect(review?.getAttribute('aria-label')).toBe('Squeaker')
+    expect(review?.querySelector('[data-testid="review-note"]')?.textContent).toBe('G3')
+
+    await act(async () => button('Cancel').click())
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+  })
+
+  it('opens its review as a modal: focus moves in, Escape is Cancel, focus goes back', async () => {
+    await show([{ ...melodic, name: 'Squeaker' }])
+    const pencil = button('Edit Squeaker')
+    pencil.focus()
+    await act(async () => pencil.click())
+    const review = document.querySelector<HTMLElement>('[role="dialog"]')
+    expect(review?.getAttribute('aria-modal')).toBe('true')
+    // The tabs wait while it's open (`app-shell.tsx`).
+    expect(page.setReviewOpen).toHaveBeenLastCalledWith(true)
+    await act(async () => new Promise(resolve => setTimeout(resolve, 50)))
+    expect(review?.contains(document.activeElement)).toBe(true)
+    // The rows under it are out of reach while it's open.
+    expect(pencil.closest('[inert], [aria-hidden="true"]')).not.toBeNull()
+
+    await act(async () =>
+      document.activeElement?.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+      )
+    )
+    await act(async () => new Promise(resolve => setTimeout(resolve, 50)))
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    expect(page.setReviewOpen).toHaveBeenLastCalledWith(false)
+    expect(document.activeElement).toBe(pencil)
   })
 })

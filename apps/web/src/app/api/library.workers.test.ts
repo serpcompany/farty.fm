@@ -118,8 +118,9 @@ describe.each<Kind>(['recordings', 'toots'])('PUT /api/%s/{id}/', kind => {
     expect(await put.json()).toEqual({ id: R1 })
     expect(await bucketKeys()).toEqual([`users/${a.id}/${kind}/${R1}.wav`])
     const listed = await library(a.cookie)
-    // A Recording sent without a Placed Pitch is listed as left out (ADR 0015), and untrimmed.
-    const left = kind === 'recordings' ? { placedPitch: null, trim: null } : {}
+    // A Recording sent without a Placed Pitch is listed as following its analysis (ADR 0015),
+    // untrimmed and unnamed.
+    const left = kind === 'recordings' ? { placedPitch: null, trim: null, name: null } : {}
     expect(listed[kind]).toEqual([{ ...metadata(kind, R1), ...left, audioBytes: audio.byteLength }])
     const played = await api.audio(kind, R1, a)
     expect(played.status).toBe(200)
@@ -592,7 +593,7 @@ describe('PATCH /api/recordings/{id}/ (ADR 0015)', () => {
     const b = await signUp('B')
     await upload('recordings', R1, a.cookie)
 
-    for (const placedPitch of ['C2', 48.5, -1, 128, undefined]) {
+    for (const placedPitch of ['C2', 48.5, -2, 128, undefined]) {
       const refused = await api.place(R1, placedPitch, a)
       expect(refused.status, String(placedPitch)).toBe(400)
       expect(await refused.json()).toEqual({ error: 'invalid_request' })
@@ -606,6 +607,63 @@ describe('PATCH /api/recordings/{id}/ (ADR 0015)', () => {
     await api.delete('recordings', R1, a)
     expect((await api.place(R1, 48, a)).status).toBe(410)
     expect((await api.place(R2, 48, a)).status).toBe(404)
+  })
+
+  it('leaves a Recording out of Songs with "No note" (-1, #314)', async () => {
+    const a = await signUp('A')
+    await upload('recordings', R1, a.cookie)
+
+    const left = await api.place(R1, -1, a)
+    expect(left.status).toBe(200)
+    expect(await left.json()).toEqual({ id: R1, placedPitch: -1 })
+    expect((await library(a.cookie)).recordings).toMatchObject([{ id: R1, placedPitch: -1 }])
+  })
+})
+
+describe('PATCH /api/recordings/{id}/ with a name (#314)', () => {
+  it('names a Recording beside its note and Trim, trims the name, and takes it off', async () => {
+    const a = await signUp('A')
+    await upload('recordings', R1, a.cookie)
+    const before = await library(a.cookie)
+    await tick()
+
+    const named = await api.placeAndTrim(R1, { placedPitch: 40, name: '  Big one  ' }, a)
+    expect(named.status).toBe(200)
+    expect(await named.json()).toEqual({ id: R1, placedPitch: 40, name: 'Big one' })
+    expect((await library(a.cookie, before.cursor)).recordings).toEqual([
+      { ...before.recordings[0], placedPitch: 40, name: 'Big one', audioBytes: expect.any(Number) }
+    ])
+
+    // A browser that changes only the note leaves the name.
+    expect((await api.place(R1, 41, a)).status).toBe(200)
+    expect((await library(a.cookie)).recordings).toMatchObject([
+      { placedPitch: 41, name: 'Big one' }
+    ])
+    // An empty name is none, and so is null.
+    expect(await (await api.placeAndTrim(R1, { name: '   ' }, a)).json()).toEqual({
+      id: R1,
+      name: null
+    })
+    expect((await api.placeAndTrim(R1, { name: 'Again' }, a)).status).toBe(200)
+    expect((await api.placeAndTrim(R1, { name: null }, a)).status).toBe(200)
+    const [row] = await testDb().select().from(recordings).where(eq(recordings.userId, a.id))
+    expect([row.name, row.placedPitch]).toEqual([null, 41])
+  })
+
+  it('refuses a name that is not text or longer than 40 (400), and changes nothing', async () => {
+    const a = await signUp('A')
+    await upload('recordings', R1, a.cookie)
+    await api.placeAndTrim(R1, { name: 'Kept' }, a)
+
+    for (const name of [12, ['a'], 'x'.repeat(41), { name: 'a' }]) {
+      const refused = await api.placeAndTrim(R1, { placedPitch: 40, name }, a)
+      expect(refused.status, JSON.stringify(name)).toBe(400)
+      expect(await refused.json()).toEqual({ error: 'invalid_request' })
+    }
+    expect((await library(a.cookie)).recordings).toMatchObject([
+      { id: R1, placedPitch: null, name: 'Kept' }
+    ])
+    expect((await api.placeAndTrim(R1, { name: 'x'.repeat(40) }, a)).status).toBe(200)
   })
 })
 
@@ -844,6 +902,38 @@ describe('the rows a route keeps', () => {
         'recordings',
         R3,
         uploadBody(recordingMetadata(R3, { placedPitch }), wav()),
+        a
+      )
+      expect(refused.status).toBe(400)
+      expect(await refused.json()).toEqual({ error: 'invalid_request' })
+    }
+    expect(await rowsOf('recordings')).toEqual([`${a.id} ${R1}`, `${a.id} ${R2}`])
+  })
+
+  it('keep the name (#314), and none when an older browser sends none', async () => {
+    const a = await signUp('A')
+    const R3 = '66666666-6666-4666-8666-666666666666'
+    for (const [id, fields] of [
+      [R1, { placedPitch: -1, name: 'Squeaker' }],
+      [R2, {}]
+    ] as const) {
+      const response = await api.put(
+        'recordings',
+        id,
+        uploadBody(recordingMetadata(id, fields), wav()),
+        a
+      )
+      expect(response.status).toBe(201)
+    }
+    const kept = new Map((await library(a.cookie)).recordings.map(r => [r.id, r]))
+    expect(kept.get(R1)).toMatchObject({ placedPitch: -1, name: 'Squeaker' })
+    expect(kept.get(R2)).toMatchObject({ name: null })
+
+    for (const name of [7, 'x'.repeat(41)]) {
+      const refused = await api.put(
+        'recordings',
+        R3,
+        uploadBody(recordingMetadata(R3, { name }), wav()),
         a
       )
       expect(refused.status).toBe(400)

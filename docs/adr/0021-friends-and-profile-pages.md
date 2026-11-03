@@ -18,11 +18,11 @@
 
 ## Tables
 
-Migration `0009_friends`:
+Migration `0010_friends`:
 
 - `friend_requests`: `from_user_id`, `to_user_id` (the primary key, each on delete cascade), `created_at`. One per pair and direction, never to yourself.
 - `friends`: `user_id`, `friend_id` (the primary key, each on delete cascade), `created_at`. Two rows per friendship, one each way, written and removed together in one batch.
-- `profile_reports`: `id`, `user_id` (on delete cascade), `created_at`.
+- `profile_reports`: `id`, `user_id` (on delete cascade, indexed for it), `created_at`.
 
 ## Considered
 

@@ -1,0 +1,378 @@
+'use client'
+
+import { Check, ChevronLeft, ChevronRight, Play, RotateCcw, Square } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
+import { noteName } from '@/lib/pitch'
+import {
+  foundNote,
+  HIGHEST_PLACED_PITCH,
+  LOWEST_PLACED_PITCH,
+  MAXIMUM_NAME_LENGTH,
+  type Recording,
+  recordingName,
+  samePart,
+  type Trim
+} from '@/lib/recordings'
+import {
+  choiceForKey,
+  choiceForNoNote,
+  foundHandles,
+  type NoteChoice,
+  openingHandles,
+  type ReviewChange,
+  type ReviewNote,
+  reviewChange,
+  reviewNote,
+  savedChoice
+} from '@/lib/take-review'
+import { cn } from '@/lib/utils'
+import type { PcmAudio } from '@/lib/wav'
+import { usePedos } from './pedos-provider'
+import { octaveOf, PianoKeys, playPianoNote } from './piano-keys'
+import { partLevels } from './recording-replay'
+import { formattedTime, ReplayWaveform } from './waveform'
+
+/** The octave the keys open on when there's no note yet: C3 to B3. */
+const FIRST_OCTAVE = 3
+const LOWEST_OCTAVE = octaveOf(LOWEST_PLACED_PITCH)
+const HIGHEST_OCTAVE = octaveOf(HIGHEST_PLACED_PITCH)
+
+const keysOctave = (midi: number) =>
+  Math.min(HIGHEST_OCTAVE, Math.max(LOWEST_OCTAVE, octaveOf(midi)))
+
+/** Where the user has left a take's review: its note, octave, handles and name. */
+export type TakeReviewState = {
+  /** The take as a Recording: the draft's analysis so far, or the saved Recording, live. */
+  recording: Recording
+  choice: NoteChoice
+  setChoice(choice: NoteChoice): void
+  note: ReviewNote
+  octave: number
+  setOctave(octave: number): void
+  handles: Trim
+  setHandles(handles: Trim): void
+  /** The name as typed, or the Recording's own until the user types. */
+  name: string
+  setName(name: string): void
+  /** What Save changes on the Recording. */
+  change(): ReviewChange
+}
+
+/**
+ * A take's review (#314), opened on what the Recording has: its Placed Pitch or the note analysis
+ * finds, its Trim or the fart analysis finds, and its name. When analysis lands while it's open,
+ * the note and handles follow it, unless the user has changed them.
+ */
+export function useTakeReview(recording: Recording): TakeReviewState {
+  const [choice, setChoice] = useState(() => savedChoice(recording))
+  const note = reviewNote(recording, choice)
+  const [octave, setOctave] = useState(() =>
+    note.kind === 'note' ? keysOctave(note.midi) : FIRST_OCTAVE
+  )
+  // Found while open: the keys move to its octave, unless the user has picked a note.
+  const found = foundNote(recording)
+  const [seenFound, setSeenFound] = useState(found)
+  if (seenFound !== found) {
+    setSeenFound(found)
+    if (choice === null && found !== null) setOctave(keysOctave(found))
+  }
+  // The handles follow the fart analysis finds, or a Trim from another browser, until moved here.
+  const opening = openingHandles(recording)
+  const [handles, setHandles] = useState(opening)
+  const [seen, setSeen] = useState(opening)
+  if (!samePart(seen, opening)) {
+    setSeen(opening)
+    if (samePart(handles, seen)) setHandles(opening)
+  }
+  const [typed, setTyped] = useState<string | null>(null)
+  const name = typed ?? recordingName(recording)
+  return {
+    recording,
+    choice,
+    setChoice,
+    note,
+    octave,
+    setOctave,
+    handles,
+    setHandles,
+    name,
+    setName: setTyped,
+    change: () => reviewChange(recording, { choice, handles, name })
+  }
+}
+
+/**
+ * The review's screen, from top to bottom (#314): the whole take with Trim handles on the fart and
+ * Play, which plays between them (ADR 0019); its note above one octave of piano keys from C2 to
+ * B4, with "No note" (ADR 0015); and its name. A key plays a piano note to hold the fart up to:
+ * Songs and Toots never play it. The fart still plays raw, at its own pitch (ADR 0012).
+ */
+export function TakeReview({
+  review,
+  target,
+  audio
+}: {
+  review: TakeReviewState
+  /** What Play plays: the take on review, or the saved Recording. */
+  target: 'draft' | Recording
+  /** The whole take, decoded, for its waveform; null while it loads. */
+  audio: PcmAudio | null
+}) {
+  const pedos = usePedos()
+  const { recording, handles, note } = review
+  const isPlaying = pedos.nowPlaying === (target === 'draft' ? 'draft' : target.id)
+  const { seconds } = recording
+  const take = { startSeconds: 0, endSeconds: seconds }
+  const levels = useMemo(
+    () =>
+      audio ? partLevels(audio, { startSeconds: 0, endSeconds: Number.POSITIVE_INFINITY }) : [],
+    [audio]
+  )
+  const name = recordingName({ number: recording.number, name: review.name })
+  const found = foundHandles(recording)
+  const length = formattedTime(handles.endSeconds - handles.startSeconds)
+
+  const stopHere = () => {
+    if (isPlaying) pedos.stopPlayback()
+  }
+  const lit = note.kind === 'note' ? note.midi : null
+  const heard = foundNote(recording)
+  const ringed = heard !== null && heard !== lit ? heard : null
+  const backToFound = () => {
+    review.setChoice(null)
+    if (heard !== null) review.setOctave(keysOctave(heard))
+  }
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 pt-1 pb-4">
+      <section aria-label="Trim" className="flex flex-col gap-3.5 pt-2">
+        <ReplayWaveform
+          levels={levels}
+          view={take}
+          playing={isPlaying ? pedos.playingPart : null}
+          position={pedos.playbackPosition}
+          dim={handles}
+          label={`Play ${name} from a spot`}
+          onScrubStart={pedos.stopPlayback}
+          onPlayFrom={from => {
+            // From inside the fart to its end; from after it, to the end of the take.
+            const to = from < handles.endSeconds - 0.01 ? handles.endSeconds : seconds
+            if (to - from >= 0.02)
+              pedos.playRecording(target, { startSeconds: from, endSeconds: to })
+          }}
+          trim={{
+            part: handles,
+            onChange: part => {
+              stopHere()
+              review.setHandles(part)
+            }
+          }}
+          className="mx-2.5 h-22"
+        />
+        <div className="flex min-h-10 items-center gap-3">
+          <Button
+            className="h-10 rounded-full pr-4 pl-3 text-[15px]"
+            aria-label={isPlaying ? 'Stop' : `Play the fart in ${name}, ${length}`}
+            aria-pressed={isPlaying}
+            data-testid="review-play"
+            onClick={() => pedos.togglePlayback(target, handles)}
+          >
+            {isPlaying ? <Square className="fill-current" /> : <Play className="fill-current" />}
+            {isPlaying ? 'Stop' : 'Play'}
+          </Button>
+          <span className="text-[15px] font-semibold tabular-nums" data-testid="review-length">
+            {length}
+          </span>
+          {samePart(handles, found) ? (
+            <span className="ml-auto text-[13px] text-muted-foreground">
+              Drag the pink ends to trim
+            </span>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto text-brand-strong dark:text-brand"
+              aria-label="Reset to the fart Farty found"
+              onClick={() => {
+                stopHere()
+                review.setHandles(found)
+              }}
+            >
+              <RotateCcw />
+              Reset
+            </Button>
+          )}
+        </div>
+      </section>
+
+      <section aria-labelledby="review-note-label" className="flex flex-col gap-2">
+        <div className="flex items-end justify-between gap-3 pb-1">
+          <div className="min-w-0">
+            <p id="review-note-label" className="text-sm font-semibold text-muted-foreground">
+              Note
+            </p>
+            <p
+              className={cn(
+                'flex h-[50px] items-center gap-2.5 font-bold tracking-tight tabular-nums',
+                note.kind === 'note' && 'text-[46px]',
+                note.kind === 'none' && 'text-[34px] text-muted-foreground',
+                (note.kind === 'finding' || note.kind === 'notFound') &&
+                  'text-2xl font-semibold text-muted-foreground'
+              )}
+              data-testid="review-note"
+            >
+              {note.kind === 'finding' && <Spinner aria-hidden className="size-5" />}
+              {note.kind === 'note'
+                ? noteName(note.midi)
+                : note.kind === 'none'
+                  ? 'No note'
+                  : note.kind === 'notFound'
+                    ? 'Not found'
+                    : 'Finding note…'}
+            </p>
+          </div>
+          <Button
+            variant={note.kind === 'none' ? 'default' : 'outline'}
+            className="h-[38px] shrink-0 rounded-full px-4 text-[15px]"
+            aria-pressed={note.kind === 'none'}
+            onClick={() => review.setChoice(choiceForNoNote(recording, review.choice))}
+          >
+            {note.kind === 'none' && <Check />}
+            No note
+          </Button>
+        </div>
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Octave down"
+            disabled={review.octave <= LOWEST_OCTAVE}
+            onClick={() => review.setOctave(review.octave - 1)}
+          >
+            <ChevronLeft />
+          </Button>
+          <p className="text-[15px] font-semibold" aria-live="polite" data-testid="review-octave">
+            Octave {review.octave}
+            <span className="ml-1.5 text-[13px] font-normal text-muted-foreground tabular-nums">
+              C{review.octave} – B{review.octave}
+            </span>
+          </p>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Octave up"
+            disabled={review.octave >= HIGHEST_OCTAVE}
+            onClick={() => review.setOctave(review.octave + 1)}
+          >
+            <ChevronRight />
+          </Button>
+        </div>
+        <PianoKeys
+          octave={review.octave}
+          selected={lit}
+          ringed={ringed}
+          onKey={midi => {
+            playPianoNote(midi)
+            review.setChoice(choiceForKey(recording, midi))
+          }}
+        />
+        <p
+          className="min-h-10 pt-1 text-sm text-muted-foreground"
+          aria-live="polite"
+          data-testid="review-caption"
+        >
+          <Caption
+            note={note}
+            heard={heard}
+            recording={recording}
+            onBack={backToFound}
+            // As Result does, once the take is saved.
+            onRetry={target === 'draft' ? undefined : () => void pedos.retryAnalysis(target.id)}
+          />
+        </p>
+      </section>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="review-name" className="text-sm font-semibold text-muted-foreground">
+          Name
+        </label>
+        <Input
+          id="review-name"
+          value={review.name}
+          maxLength={MAXIMUM_NAME_LENGTH}
+          autoComplete="off"
+          enterKeyHint="done"
+          className="h-11 rounded-[10px] px-3 text-base md:text-base"
+          onFocus={event => event.currentTarget.select()}
+          onKeyDown={event => {
+            if (event.key === 'Enter') event.currentTarget.blur()
+          }}
+          onChange={event => review.setName(event.currentTarget.value)}
+        />
+      </div>
+    </div>
+  )
+}
+
+/**
+ * What the note means for Songs, the way back to the note analysis found, and Retry when analysis
+ * failed on a saved Recording.
+ */
+function Caption({
+  note,
+  heard,
+  recording,
+  onBack,
+  onRetry
+}: {
+  note: ReviewNote
+  heard: number | null
+  recording: Recording
+  onBack: () => void
+  onRetry?: () => void
+}) {
+  const link = (label: string, onClick: () => void) => (
+    <button
+      type="button"
+      className="rounded-sm font-semibold text-brand-strong outline-none focus-visible:ring-3 focus-visible:ring-ring/50 dark:text-brand"
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  )
+  const back = (label: string) => link(label, onBack)
+  if (note.kind === 'finding') return "You can save now. The note shows here once it's found."
+  if (note.kind === 'notFound') {
+    return onRetry ? (
+      <>We couldn't find its note. Tap a key if you hear one, or {link('Retry', onRetry)}</>
+    ) : (
+      "We couldn't find its note. Tap a key if you hear one."
+    )
+  }
+  if (note.kind === 'none') {
+    if (heard !== null) {
+      return (
+        <>
+          Songs leave it out. Tap a key to give it a note, or{' '}
+          {back(`go back to ${noteName(heard)}`)}
+        </>
+      )
+    }
+    // Only analysis that ran can say it found no steady note.
+    return recording.analysis.state === 'analyzed'
+      ? 'No steady note found, so Songs leave it out. Tap a key if you hear one.'
+      : 'Songs leave it out. Tap a key to give it a note.'
+  }
+  if (heard === null) return 'Set by you. Tap another key to change it.'
+  if (note.midi === heard) {
+    return `We heard ${noteName(heard)}. Tap a key to hear it and make it the note.`
+  }
+  return (
+    <>
+      Changed from {noteName(heard)}. {back(`Back to ${noteName(heard)}`)}
+    </>
+  )
+}

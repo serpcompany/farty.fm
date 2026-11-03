@@ -17,6 +17,7 @@ import {
   type OutboxKind,
   type OutboxOp,
   type PlacedField,
+  placedFieldNames,
   queueStamp
 } from './outbox'
 import type { AnalysisState, Recording, RecordingTrim } from './recordings'
@@ -46,7 +47,7 @@ export interface PedosDB extends DBSchema {
   downloads: { key: string; value: { kind: Kind; id: string } }
   /**
    * `cursor`: the account's `cursor` as of this browser's last read. Since version 3; versions 4,
-   * 5, 6 and 7 set it back to 0 (`readEverythingAgain`).
+   * 5, 6, 7 and 8 set it back to 0 (`readEverythingAgain`).
    */
   meta: { key: string; value: number }
   /**
@@ -83,7 +84,7 @@ export const audioStore = { recordings: 'audio', toots: 'tootAudio' } as const
  * The `pedos` database's version. Web releases roll forward, not back, past a bump
  * (`docs/agents/web.md`).
  */
-export const DB_VERSION = 7
+export const DB_VERSION = 8
 
 let opening: Promise<IDBPDatabase<PedosDB>> | null = null
 
@@ -109,7 +110,7 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
 }
 
 /**
- * The app's database, upgraded to version 7 on first open. Version 1 held Recordings only, version
+ * The app's database, upgraded to version 8 on first open. Version 1 held Recordings only, version
  * 2 added Toots, version 3 the outbox, version 5 the Sound Pad's Pads (#277) and version 7 the
  * Favorite Songs (#313). An upgrade keeps them, and one from before version 3 queues each to
  * upload, since none has been (`queueEverything`).
@@ -130,6 +131,11 @@ export function onWaitingForOtherTabs(listener: (waiting: boolean) => void): () 
  * account's Favorite Songs without keeping them while its cursor moves past them, and would send
  * an outbox entry for one as a Recording's. Its upgrade reads the whole library again, which
  * brings the Favorite Songs another browser marked.
+ *
+ * Version 8 (#314) changes no store either: a Recording gains its name, and "No note" (`NO_NOTE`).
+ * It shuts out code from before names the same way, since that code would queue and settle a
+ * `place` without the name, read the account's names without keeping them, and play a Recording
+ * left out with "No note" in Songs. Its upgrade reads the whole library again too.
  *
  * One connection serves the page until the browser closes it, as WebKit can while the tab sleeps
  * (#222), or it fails to open: the next call then opens a fresh one. Reads and writes go through
@@ -270,8 +276,8 @@ async function queueEverything(
 /**
  * Sets the last read's `cursor` back to 0, where there is one, so the next sync reads the whole
  * library. A tab still on code from before #268 skipped another browser's Placed Pitch on a
- * Recording it had, and one from before #293 its Trim, and still moved the cursor past it: only a
- * full read brings it. A library with
+ * Recording it had, one from before #293 its Trim, and one from before #314 its name, and still
+ * moved the cursor past it: only a full read brings it. A library with
  * no cursor never read the account, and gets none, so `leftByAnAccount` still tells it apart.
  */
 async function readEverythingAgain(
@@ -379,15 +385,19 @@ export async function saveAnalysis(id: string, analysis: AnalysisState): Promise
 }
 
 /**
- * What the picker changes on a Recording: its Placed Pitch (ADR 0015) and its Trim (ADR 0019),
- * either of them null to take it off. A field left out stays as it is.
+ * What a Recording's review changes on it: its Placed Pitch (ADR 0015), its Trim (ADR 0019) and
+ * its name (#314), each null to take it off. A field left out stays as it is.
  */
-export type Placement = { placedPitch?: number | null; trim?: RecordingTrim | null }
+export type Placement = {
+  placedPitch?: number | null
+  trim?: RecordingTrim | null
+  name?: string | null
+}
 
 /**
- * Places a Noise-like Recording on a note by ear, or takes it off with null (ADR 0015), trims it
- * or takes its Trim off (ADR 0019), and queues the change for the account. The updated Recording,
- * or null when it's gone.
+ * Places a Recording on a note by ear, or takes it off with null (ADR 0015), trims it or takes its
+ * Trim off (ADR 0019), names it or takes its name off (#314), and queues the change for the
+ * account. The updated Recording, or null when it's gone.
  */
 export async function placeRecording(id: string, change: Placement): Promise<Recording | null> {
   const placed = await withDb(async database => {
@@ -402,7 +412,7 @@ export async function placeRecording(id: string, change: Placement): Promise<Rec
     }
     const updated: Recording = { ...recording, ...change }
     // Only the fields this change names go to the account (`placedFields`).
-    const fields = (['placedPitch', 'trim'] as const).filter(field => change[field] !== undefined)
+    const fields = placedFieldNames.filter(field => change[field] !== undefined)
     await Promise.all([
       recordings.put(updated),
       queue(outbox, 'recordings', id, 'place', fields),

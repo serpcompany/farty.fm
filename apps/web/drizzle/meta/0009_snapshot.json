@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "20afe929-ccb0-48f9-b7a2-4dcca15b5fd7",
+  "id": "3251a0c6-913e-4642-b953-12d87c957b64",
   "prevId": "614bc8b6-8de0-40af-96b6-c517b9222711",
   "tables": {
     "account": {
@@ -203,164 +203,6 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "friend_requests": {
-      "name": "friend_requests",
-      "columns": {
-        "from_user_id": {
-          "name": "from_user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "to_user_id": {
-          "name": "to_user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "friend_requests_to_user_id_idx": {
-          "name": "friend_requests_to_user_id_idx",
-          "columns": [
-            "to_user_id"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "friend_requests_from_user_id_user_id_fk": {
-          "name": "friend_requests_from_user_id_user_id_fk",
-          "tableFrom": "friend_requests",
-          "tableTo": "user",
-          "columnsFrom": [
-            "from_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "friend_requests_to_user_id_user_id_fk": {
-          "name": "friend_requests_to_user_id_user_id_fk",
-          "tableFrom": "friend_requests",
-          "tableTo": "user",
-          "columnsFrom": [
-            "to_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "friend_requests_from_user_id_to_user_id_pk": {
-          "columns": [
-            "from_user_id",
-            "to_user_id"
-          ],
-          "name": "friend_requests_from_user_id_to_user_id_pk"
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {
-        "friend_requests_not_self": {
-          "name": "friend_requests_not_self",
-          "value": "from_user_id <> to_user_id"
-        }
-      }
-    },
-    "friends": {
-      "name": "friends",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "friend_id": {
-          "name": "friend_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "friends_friend_id_idx": {
-          "name": "friends_friend_id_idx",
-          "columns": [
-            "friend_id"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "friends_user_id_user_id_fk": {
-          "name": "friends_user_id_user_id_fk",
-          "tableFrom": "friends",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "friends_friend_id_user_id_fk": {
-          "name": "friends_friend_id_user_id_fk",
-          "tableFrom": "friends",
-          "tableTo": "user",
-          "columnsFrom": [
-            "friend_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "friends_user_id_friend_id_pk": {
-          "columns": [
-            "user_id",
-            "friend_id"
-          ],
-          "name": "friends_user_id_friend_id_pk"
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {
-        "friends_not_self": {
-          "name": "friends_not_self",
-          "value": "user_id <> friend_id"
-        }
-      }
-    },
     "handles": {
       "name": "handles",
       "columns": {
@@ -399,59 +241,6 @@
         "handles_user_id_user_id_fk": {
           "name": "handles_user_id_user_id_fk",
           "tableFrom": "handles",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "profile_reports": {
-      "name": "profile_reports",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "profile_reports_created_at_idx": {
-          "name": "profile_reports_created_at_idx",
-          "columns": [
-            "created_at"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "profile_reports_user_id_user_id_fk": {
-          "name": "profile_reports_user_id_user_id_fk",
-          "tableFrom": "profile_reports",
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
@@ -610,6 +399,13 @@
         "trim_fart_end_seconds": {
           "name": "trim_fart_end_seconds",
           "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

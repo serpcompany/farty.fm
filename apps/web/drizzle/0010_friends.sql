@@ -27,4 +27,5 @@ CREATE TABLE `profile_reports` (
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE INDEX `profile_reports_created_at_idx` ON `profile_reports` (`created_at`);
+CREATE INDEX `profile_reports_created_at_idx` ON `profile_reports` (`created_at`);--> statement-breakpoint
+CREATE INDEX `profile_reports_user_id_idx` ON `profile_reports` (`user_id`);
