@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,7 +16,7 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 29,
+    "max_beats": 32,
     "track": [
       0,
       1
@@ -25,7 +26,7 @@
     "catalog_id": "grand-old-flag",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 36,
+    "note_count": 37,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-grand-old-flag.mid",
     "tempo_changes_ignored": 0,
@@ -38,7 +39,7 @@
       1
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.5,
@@ -219,6 +220,11 @@
       "dur": 0.5,
       "pitch": 60,
       "start": 28.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 62,
+      "start": 29.0
     }
   ],
   "pitches": [

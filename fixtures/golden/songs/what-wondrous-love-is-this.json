@@ -3,7 +3,8 @@
     2.0,
     8.0,
     14.0,
-    20.0
+    20.0,
+    26.0
   ],
   "beats_per_bar": 6,
   "bpm": 144,
@@ -11,14 +12,14 @@
   "id": "what-wondrous-love-is-this",
   "import_args": {
     "bpm": 144,
-    "max_beats": 26,
+    "max_beats": 30,
     "start_beat": 4
   },
   "import_report": {
     "catalog_id": "what-wondrous-love-is-this",
     "chord_tones_dropped": 9,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 24,
+    "note_count": 25,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-what-wondrous-love-is-this.mid",
     "tempo_changes_ignored": 3,
@@ -28,7 +29,7 @@
       1
     ]
   },
-  "length_beats": 26.0,
+  "length_beats": 30.0,
   "notes": [
     {
       "dur": 0.5,
@@ -149,6 +150,11 @@
       "dur": 0.5,
       "pitch": 74,
       "start": 25.5
+    },
+    {
+      "dur": 4.0,
+      "pitch": 71,
+      "start": 26.0
     }
   ],
   "pitches": [

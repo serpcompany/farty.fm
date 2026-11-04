@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 144,
@@ -14,14 +15,14 @@
   "id": "erlkonig",
   "import_args": {
     "bpm": 144,
-    "max_beats": 29,
+    "max_beats": 32,
     "start_beat": 59
   },
   "import_report": {
     "catalog_id": "erlkonig",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 15,
+    "note_count": 16,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-erlkonig.mid",
     "tempo_changes_ignored": 4,
@@ -32,7 +33,7 @@
       2
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 1.0,
@@ -108,6 +109,11 @@
       "dur": 1.0,
       "pitch": 72,
       "start": 28.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 77,
+      "start": 29.0
     }
   ],
   "pitches": [
@@ -117,6 +123,7 @@
     72,
     74,
     75,
+    77,
     79
   ],
   "sha256": "8c03d9c1a10c51659b18928623fe8ed7717161e310540f1a948936aff38118cd",

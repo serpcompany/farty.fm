@@ -7,7 +7,8 @@
     14.0,
     18.0,
     22.0,
-    26.0
+    26.0,
+    30.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,14 +16,14 @@
   "id": "mrs-hamilton-of-pencaitland",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30,
+    "max_beats": 32,
     "start_beat": 4
   },
   "import_report": {
     "catalog_id": "mrs-hamilton-of-pencaitland",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 15,
+    "note_count": 16,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-mrs-hamilton-of-pencaitland.mid",
     "tempo_changes_ignored": 0,
@@ -31,7 +32,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 1.0,
@@ -107,6 +108,11 @@
       "dur": 4.0,
       "pitch": 64,
       "start": 26.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 30.0
     }
   ],
   "pitches": [

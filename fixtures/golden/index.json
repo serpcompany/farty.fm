@@ -537,7 +537,7 @@
     },
     {
       "id": "scarborough-fair",
-      "notes": 20,
+      "notes": 21,
       "title": "Scarborough Fair",
       "transpose": {
         "full": -17,
@@ -888,7 +888,7 @@
     },
     {
       "id": "yellow-rose-of-texas",
-      "notes": 27,
+      "notes": 28,
       "title": "The Yellow Rose of Texas",
       "transpose": {
         "full": -28,
@@ -927,7 +927,7 @@
     },
     {
       "id": "grandfathers-clock",
-      "notes": 40,
+      "notes": 41,
       "title": "My Grandfather's Clock",
       "transpose": {
         "full": -12,
@@ -1317,7 +1317,7 @@
     },
     {
       "id": "grand-old-flag",
-      "notes": 36,
+      "notes": 37,
       "title": "You're a Grand Old Flag",
       "transpose": {
         "full": -6,
@@ -1369,7 +1369,7 @@
     },
     {
       "id": "o-come-emmanuel",
-      "notes": 25,
+      "notes": 26,
       "title": "O Come, O Come, Emmanuel",
       "transpose": {
         "full": -13,
@@ -1395,7 +1395,7 @@
     },
     {
       "id": "coventry-carol",
-      "notes": 19,
+      "notes": 20,
       "title": "Coventry Carol",
       "transpose": {
         "full": -21,
@@ -1499,7 +1499,7 @@
     },
     {
       "id": "doxology",
-      "notes": 16,
+      "notes": 17,
       "title": "Old Hundredth",
       "transpose": {
         "full": 0,
@@ -1629,15 +1629,15 @@
     },
     {
       "id": "stars-and-stripes",
-      "notes": 16,
+      "notes": 17,
       "title": "The Stars and Stripes Forever",
       "transpose": {
-        "full": -24,
-        "small": -27
+        "full": -26,
+        "small": -28
       },
       "unlocked": {
         "full": true,
-        "small": true
+        "small": false
       }
     },
     {
@@ -1694,10 +1694,10 @@
     },
     {
       "id": "battle-hymn",
-      "notes": 49,
+      "notes": 50,
       "title": "Battle Hymn of the Republic",
       "transpose": {
-        "full": -18,
+        "full": -26,
         "small": -23
       },
       "unlocked": {
@@ -1785,7 +1785,7 @@
     },
     {
       "id": "god-rest-ye",
-      "notes": 27,
+      "notes": 28,
       "title": "God Rest You Merry, Gentlemen",
       "transpose": {
         "full": -13,

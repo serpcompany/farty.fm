@@ -48,6 +48,7 @@ NOT_THE_MELODY = {
 
 # A sensible excerpt and tempo, chosen from the score itself.
 EXCERPT_BEATS = 32  # the whole bars that fit in 32 quarter-note beats: 8 bars of 4/4, 10 of 3/4
+HELD_NOTE_BEATS = 2  # a note this long on the excerpt's closing bar line ends its phrase: the excerpt keeps it (#389)
 MIN_BPM, MAX_BPM = 72, 144  # the score's own tempo, kept inside this range
 
 # Melody sanity: a clean single-line melody with nothing important dropped.
@@ -234,15 +235,17 @@ def find_candidates(rows, titles, used=frozenset()):
 EPS = 1e-6
 
 
-def render_options(tempos, meters, first_onset):
+def render_options(tempos, meters, first_onset, notes=()):
     """The catalog's `render` options for a score: the tempo in effect at the melody's first note,
     kept within MIN_BPM..MAX_BPM, and an excerpt from the melody's first note to the end of the
     whole bars that fit in EXCERPT_BEATS from that note's bar, so a pickup written after a rest in a
     full bar doesn't open the Song with silence. The accents still fall on the score's own bar
-    lines, which melody.py reads from its time signatures (`bar_lines`, #232).
+    lines, which melody.py reads from its time signatures (`bar_lines`, #232). When the melody's
+    held note starts on that closing bar line, the excerpt runs on to its end (held_note_end, #389).
 
     `tempos` is [(beat, bpm)] and `meters` [(beat, numerator, denominator)], from the score's
-    set_tempo and time_signature events. Beats are quarter notes, as in melody.py. Each time
+    set_tempo and time_signature events, and `notes` the melody's [(start, dur)] as melody.py reads
+    them. Beats are quarter notes, as in melody.py. Each time
     signature starts a bar, so a pickup written as its own short bar (1/4, then 3/4) and meter
     changes keep their bar lines. `beats_per_bar` is the excerpt's main meter (the one covering the
     most of it), given only when it differs from the first time signature's numerator, which
@@ -270,13 +273,39 @@ def render_options(tempos, meters, first_onset):
         start = first_line
         if start > EPS:
             opts["start_beat"] = _number(start)
-    opts["max_beats"] = _number(end - start)
+    opts["max_beats"] = excerpt_beats(start, held_note_end(notes, start, end))
 
     num, den = max(covered, key=covered.get) if covered else bars[start_index][2]
     bar = num * 4 / den
     if bar == int(bar) and bar != meters[0][1]:
         opts["beats_per_bar"] = int(bar)
     return opts
+
+
+def held_note_end(notes, start, end):
+    """Where an excerpt from `start` to the bar line `end` ends: at the end of the melody's held note
+    (HELD_NOTE_BEATS or more) that starts on that bar line, so the Song doesn't stop one note before
+    its phrase does (#389), or at `end`. Grand Old Flag's excerpt stopped on "the home of the free and
+    the", and "brave" starts on its closing bar line. The excerpt still lasts at most EXCERPT_BEATS
+    from `start`, and takes in only that note: none other starts before its end.
+
+    `notes` is the melody's [(start, dur)] in beats, as melody.py reads them: a note's slot runs to
+    the next onset unless a rest follows, and load_midi keeps each note that starts in the excerpt
+    whole, so the held note's end is where the Song stops."""
+    held = next(((s, d) for s, d in notes if abs(s - end) < EPS), None)
+    if held is None or held[1] < HELD_NOTE_BEATS - EPS:
+        return end
+    held_end = held[0] + held[1]
+    if held_end > start + EXCERPT_BEATS + EPS or any(end + EPS < s < held_end - EPS for s, _ in notes):
+        return end
+    return held_end
+
+
+def excerpt_beats(start, end):
+    """The `max_beats` of an excerpt from `start` to `end`. Rounded down, so load_midi, which keeps
+    the notes that start before it, leaves out a note that starts on `end` (a third of a beat
+    doesn't round to 6 decimals)."""
+    return _number(math.floor((end - start) * 1e6 + 1e-3) / 1e6)
 
 
 def _meters(meters):

@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -14,14 +15,14 @@
   "id": "cantique-de-jean-racine-op-11",
   "import_args": {
     "bpm": 120,
-    "max_beats": 29,
+    "max_beats": 31,
     "start_beat": 3
   },
   "import_report": {
     "catalog_id": "cantique-de-jean-racine-op-11",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 19,
+    "note_count": 20,
     "overlaps_clipped": 2,
     "source_file": "catalog/midi/pdmx-cantique-de-jean-racine-op-11.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +34,7 @@
       3
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 1.0,
@@ -129,6 +130,11 @@
       "dur": 2.0,
       "pitch": 70,
       "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 29.0
     }
   ],
   "pitches": [
@@ -136,6 +142,7 @@
     65,
     66,
     68,
+    69,
     70,
     72,
     73

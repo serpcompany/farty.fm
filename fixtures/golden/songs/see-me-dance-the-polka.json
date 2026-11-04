@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 144,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 144,
-    "max_beats": 29
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "see-me-dance-the-polka",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 28,
+    "note_count": 29,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-see-me-dance-the-polka.mid",
     "tempo_changes_ignored": 1,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.5,
@@ -171,6 +172,11 @@
       "dur": 1.0,
       "pitch": 69,
       "start": 28.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 74,
+      "start": 29.0
     }
   ],
   "pitches": [

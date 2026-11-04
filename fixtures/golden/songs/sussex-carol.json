@@ -3,7 +3,8 @@
     3.0,
     9.0,
     15.0,
-    21.0
+    21.0,
+    27.0
   ],
   "beats_per_bar": 6,
   "bpm": 120,
@@ -12,13 +13,13 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 120,
-    "max_beats": 27
+    "max_beats": 30
   },
   "import_report": {
     "catalog_id": "sussex-carol",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 20,
+    "note_count": 21,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-sussex-carol.mid",
     "tempo_changes_ignored": 0,
@@ -27,7 +28,7 @@
       0
     ]
   },
-  "length_beats": 27.0,
+  "length_beats": 30.0,
   "notes": [
     {
       "dur": 1.0,
@@ -128,6 +129,11 @@
       "dur": 0.6666666666666666,
       "pitch": 76,
       "start": 26.333333333333332
+    },
+    {
+      "dur": 3.0,
+      "pitch": 72,
+      "start": 27.0
     }
   ],
   "pitches": [
