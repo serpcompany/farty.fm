@@ -321,6 +321,18 @@ class Catalog(unittest.TestCase):
         with self.assertRaises(ValueError):
             pdmx.merge_catalog([self.hand], "tools/catalog/titles-01.txt", [{**new, "id": "mary"}])
 
+    def test_a_song_imported_again_keeps_its_composer(self):
+        looked_up = {"id": "y", "title": "Y", "composer": "Frédéric Chopin", "composer_died": 1849,
+                     "composer_source": "https://en.wikipedia.org/wiki/Fr%C3%A9d%C3%A9ric_Chopin",
+                     "import": {"titles": "tools/catalog/titles-01.txt"}}
+        again = {"id": "y", "title": "Y", "source": {}, "import": {"titles": "tools/catalog/titles-01.txt"}}
+        merged = pdmx.merge_catalog([self.hand, looked_up, self.other], "tools/catalog/titles-01.txt", [again])
+        self.assertEqual(list(merged[1]), ["id", "title", "composer", "composer_died", "composer_source", "source",
+                                           "import"])
+        self.assertEqual(merged[1]["composer"], "Frédéric Chopin")
+        new = {"id": "z", "title": "Z", "import": {"titles": "tools/catalog/titles-01.txt"}}
+        self.assertNotIn("composer", pdmx.merge_catalog([self.hand, looked_up], "tools/catalog/titles-01.txt", [new])[1])
+
     def test_spread(self):
         self.assertEqual(pdmx.spread(list(range(10)), 3), [0, 4, 9])  # round(4.5) is 4
         self.assertEqual(pdmx.spread([1, 2], 3), [1, 2])

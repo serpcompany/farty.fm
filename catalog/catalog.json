@@ -2,6 +2,8 @@
  {
   "id": "twinkle",
   "title": "Twinkle, Twinkle, Little Star",
+  "composer": "Traditional (French)",
+  "composer_source": "https://en.wikipedia.org/wiki/Twinkle,_Twinkle,_Little_Star",
   "file": "midi/pdmx-twinkle.mid",
   "sha256": "0a07d37f8e1d1666fddd1765c9ed05970cee9d43d208611e35f416ff4e52e6cb",
   "source": {
@@ -51,6 +53,9 @@
  {
   "id": "jingle",
   "title": "Jingle Bells",
+  "composer": "James Lord Pierpont",
+  "composer_died": 1893,
+  "composer_source": "https://en.wikipedia.org/wiki/Jingle_Bells",
   "file": "midi/pdmx-jingle.mid",
   "sha256": "43530d0c4d9e61594e36079015e40ec35cf522d1079cc1ce29bb1a457fdd12a6",
   "source": {
@@ -77,6 +82,8 @@
  {
   "id": "frere",
   "title": "Frère Jacques",
+  "composer": "Traditional (French)",
+  "composer_source": "https://en.wikipedia.org/wiki/Fr%C3%A8re_Jacques",
   "file": "midi/pdmx-frere.mid",
   "sha256": "39c9a325c909df6068b8e182bccd201c182f4408f0f1989fe04733de3723e4d9",
   "source": {
@@ -102,6 +109,8 @@
  {
   "id": "saints",
   "title": "When the Saints Go Marching In",
+  "composer": "Traditional (African American)",
+  "composer_source": "https://en.wikipedia.org/wiki/When_the_Saints_Go_Marching_In",
   "file": "midi/pdmx-saints.mid",
   "sha256": "71ca3fce104bf7c82d998184342174a6bef5de4344395385c8ea2c4eaee320b5",
   "source": {
@@ -127,6 +136,8 @@
  {
   "id": "row",
   "title": "Row, Row, Row Your Boat",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Row,_Row,_Row_Your_Boat",
   "file": "midi/pdmx-row.mid",
   "sha256": "f385c528ba593105f4cb20b5270e0b2e9aace1a1ca646b48bde8eca65d6a22a5",
   "source": {
@@ -151,6 +162,9 @@
  {
   "id": "ode",
   "title": "Ode to Joy",
+  "composer": "Ludwig van Beethoven",
+  "composer_died": 1827,
+  "composer_source": "https://en.wikipedia.org/wiki/Ode_to_Joy",
   "file": "midi/pdmx-ode.mid",
   "sha256": "b2c0ff8a15e023c7c7eb22c88275834a70ecc75ee111b7a316a2e6c4520174c6",
   "source": {
@@ -176,6 +190,8 @@
  {
   "id": "amazing",
   "title": "Amazing Grace",
+  "composer": "Traditional (American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Amazing_Grace",
   "file": "midi/pdmx-amazing.mid",
   "sha256": "022d9e2f42831c7d0a929112ea481369ba1278b62dd865f3dd6f5da3d8ffc7de",
   "source": {
@@ -202,6 +218,9 @@
  {
   "id": "furelise",
   "title": "Für Elise",
+  "composer": "Ludwig van Beethoven",
+  "composer_died": 1827,
+  "composer_source": "https://en.wikipedia.org/wiki/F%C3%BCr_Elise",
   "file": "midi/pdmx-furelise.mid",
   "sha256": "074cf409f8f6abf1bfe4130134033cc516e27545123efe3795bac1efabf3d137",
   "source": {
@@ -227,6 +246,8 @@
  {
   "id": "auld",
   "title": "Auld Lang Syne",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Auld_Lang_Syne",
   "file": "midi/pdmx-auld.mid",
   "sha256": "e37fc4db53a40454fe94cdfb5f849d6c31401fb2127142ae52ae1a544da7a719",
   "source": {
@@ -546,6 +567,9 @@
  {
   "id": "aunt-rhody",
   "title": "Go Tell Aunt Rhody",
+  "composer": "Jean-Jacques Rousseau",
+  "composer_died": 1778,
+  "composer_source": "https://en.wikipedia.org/wiki/Go_Tell_Aunt_Rhody",
   "file": "midi/pdmx-aunt-rhody.mid",
   "sha256": "a3b89b22caec0d83349b39a67fb0f153c227b4ab8a3eac8dbedd580ff43f2527",
   "source": {
@@ -576,6 +600,8 @@
  {
   "id": "skip-to-my-lou",
   "title": "Skip to My Lou",
+  "composer": "Traditional (American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Skip_to_My_Lou",
   "file": "midi/pdmx-skip-to-my-lou.mid",
   "sha256": "020818825d3d1c8ce516852b21c0588a6edce83f69eafbdc0d274faa94575fa7",
   "source": {
@@ -606,6 +632,8 @@
  {
   "id": "yankee-doodle",
   "title": "Yankee Doodle",
+  "composer": "Traditional (American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Yankee_Doodle",
   "file": "midi/pdmx-yankee-doodle.mid",
   "sha256": "8200905c61976b9d18fe632dc189aec0d62f2b9228c705d08e99540eaed69a1e",
   "source": {
@@ -636,6 +664,9 @@
  {
   "id": "oh-susanna",
   "title": "Oh! Susanna",
+  "composer": "Stephen Foster",
+  "composer_died": 1864,
+  "composer_source": "https://en.wikipedia.org/wiki/Oh!_Susanna",
   "file": "midi/pdmx-oh-susanna.mid",
   "sha256": "7ff15e45ce5860d51dfc48444c00d3668183e91973b71bacf3063d95232aa5ec",
   "source": {
@@ -696,6 +727,8 @@
  {
   "id": "clementine",
   "title": "Oh My Darling, Clementine",
+  "composer": "Traditional (American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Oh_My_Darling,_Clementine",
   "file": "midi/pdmx-clementine.mid",
   "sha256": "2841df4f260695dc52cc9fba2c6ceb83cd3332d01b04023d2d88568d96fb82f1",
   "source": {
@@ -911,6 +944,8 @@
  {
   "id": "danny-boy",
   "title": "Danny Boy",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Danny_Boy",
   "file": "midi/pdmx-danny-boy.mid",
   "sha256": "a50ca4b045d26a123405795f23fdad5fbb713a85b6caa7a9d63fefd01251c6c0",
   "source": {
@@ -1034,6 +1069,9 @@
  {
   "id": "joy-to-the-world",
   "title": "Joy to the World",
+  "composer": "Lowell Mason",
+  "composer_died": 1872,
+  "composer_source": "https://en.wikipedia.org/wiki/Joy_to_the_World",
   "file": "midi/pdmx-joy-to-the-world.mid",
   "sha256": "e96a0f50a07c0cf2deb59ca5e0564571ca815ac8b6adb30c45fb762d9d4adb58",
   "source": {
@@ -1095,6 +1133,8 @@
  {
   "id": "o-christmas-tree",
   "title": "O Christmas Tree",
+  "composer": "Traditional (German)",
+  "composer_source": "https://en.wikipedia.org/wiki/O_Tannenbaum",
   "file": "midi/pdmx-o-christmas-tree.mid",
   "sha256": "0692c0b3e93b2ba4ed2a89df483e24144b411687f4b18df08d67c92c35372b49",
   "source": {
@@ -1217,6 +1257,9 @@
  {
   "id": "o-come-all-ye-faithful",
   "title": "O Come, All Ye Faithful",
+  "composer": "John Francis Wade",
+  "composer_died": 1786,
+  "composer_source": "https://en.wikipedia.org/wiki/John_Francis_Wade",
   "file": "midi/pdmx-o-come-all-ye-faithful.mid",
   "sha256": "050bed1664bdbc294ef9c25b92326c470deccdf3348c5f8cbec8eafde74c6bee",
   "source": {
@@ -1248,6 +1291,9 @@
  {
   "id": "minuet-in-g",
   "title": "Minuet in G",
+  "composer": "Christian Petzold",
+  "composer_died": 1733,
+  "composer_source": "https://en.wikipedia.org/wiki/Minuets_in_G_major_and_G_minor",
   "file": "midi/pdmx-minuet-in-g.mid",
   "sha256": "d5c71150ee923895a6bfc271ae454366a360e7d70a9d7f021d3a77969b02caf9",
   "source": {
@@ -1278,6 +1324,9 @@
  {
   "id": "mountain-king",
   "title": "In the Hall of the Mountain King",
+  "composer": "Edvard Grieg",
+  "composer_died": 1907,
+  "composer_source": "https://en.wikipedia.org/wiki/In_the_Hall_of_the_Mountain_King",
   "file": "midi/pdmx-mountain-king.mid",
   "sha256": "cb88b06a4ce1e510a087b7a2627e16b33e25a3dd1ad3faf205872f1e6e92de69",
   "source": {
@@ -1552,6 +1601,9 @@
  {
   "id": "chopsticks",
   "title": "Chopsticks",
+  "composer": "Euphemia Allan",
+  "composer_died": 1949,
+  "composer_source": "https://en.wikipedia.org/wiki/Chopsticks_(waltz)",
   "file": "midi/pdmx-chopsticks.mid",
   "sha256": "594048351a031d05e086d79aa7cdee14bb0020fe4477a75af241e2210c425834",
   "source": {
@@ -1953,6 +2005,8 @@
  {
   "id": "wayfaring-stranger",
   "title": "Wayfaring Stranger",
+  "composer": "Traditional (American)",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Wayfaring_Stranger_(song)",
   "file": "midi/pdmx-wayfaring-stranger.mid",
   "sha256": "84753d5e011a5e2506e4c787e244aff8272ca9bf724bf6ec83a17c286ecc351a",
   "source": {
@@ -2074,6 +2128,8 @@
  {
   "id": "down-by-the-riverside",
   "title": "Down by the Riverside",
+  "composer": "Traditional (African American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Down_by_the_Riverside",
   "file": "midi/pdmx-down-by-the-riverside.mid",
   "sha256": "90c84f8bdf6dc46d7998e3ba96e103495f103a5cec321ea90efae9450e4056a7",
   "source": {
@@ -2105,6 +2161,8 @@
  {
   "id": "joshua",
   "title": "Joshua Fit the Battle of Jericho",
+  "composer": "Traditional (African American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Joshua_Fit_the_Battle_of_Jericho",
   "file": "midi/pdmx-joshua.mid",
   "sha256": "38ed443bca6a34f97e350f5ecdf75c263eb662b6475abe768423e97b4fef41e4",
   "source": {
@@ -2256,6 +2314,8 @@
  {
   "id": "irish-washerwoman",
   "title": "The Irish Washerwoman",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Irish_Washerwoman",
   "file": "midi/pdmx-irish-washerwoman.mid",
   "sha256": "ba9e035c6814499245834a91b585c3a84b3fb9b1e0ea35992523a025fd0e8390",
   "source": {
@@ -2318,6 +2378,9 @@
  {
   "id": "waltzing-matilda",
   "title": "Waltzing Matilda",
+  "composer": "Christina Macpherson",
+  "composer_died": 1936,
+  "composer_source": "https://en.wikipedia.org/wiki/Waltzing_Matilda",
   "file": "midi/pdmx-waltzing-matilda.mid",
   "sha256": "72b0240037fcf94eecc851988f940e03d455d3b943ac43379a840780035fd834",
   "source": {
@@ -2439,6 +2502,8 @@
  {
   "id": "korobeiniki",
   "title": "Korobeiniki",
+  "composer": "Traditional (Russian)",
+  "composer_source": "https://en.wikipedia.org/wiki/Korobeiniki",
   "file": "midi/pdmx-korobeiniki.mid",
   "sha256": "89e63db277e70e4f19f0ea9d94207e0859edffce7aceab2d7c0288b659169455",
   "source": {
@@ -2621,6 +2686,9 @@
  {
   "id": "my-wild-irish-rose",
   "title": "My Wild Irish Rose",
+  "composer": "Chauncey Olcott",
+  "composer_died": 1932,
+  "composer_source": "https://en.wikipedia.org/wiki/Chauncey_Olcott",
   "file": "midi/pdmx-my-wild-irish-rose.mid",
   "sha256": "9831211f30e55fa51a86fab87c9d049fef239a266a5e80791963f5333bb4ddc8",
   "source": {
@@ -2683,6 +2751,9 @@
  {
   "id": "pack-up-your-troubles",
   "title": "Pack Up Your Troubles in Your Old Kit-Bag",
+  "composer": "Felix Powell",
+  "composer_died": 1942,
+  "composer_source": "https://en.wikipedia.org/wiki/Pack_Up_Your_Troubles_in_Your_Old_Kit-Bag",
   "file": "midi/pdmx-pack-up-your-troubles.mid",
   "sha256": "17733f75cacabd317e32e0b38b7b924129af74b655174026db064fd2f704387e",
   "source": {
@@ -2745,6 +2816,9 @@
  {
   "id": "hark-the-herald",
   "title": "Hark! The Herald Angels Sing",
+  "composer": "Felix Mendelssohn",
+  "composer_died": 1847,
+  "composer_source": "https://en.wikipedia.org/wiki/Hark!_The_Herald_Angels_Sing",
   "file": "midi/pdmx-hark-the-herald.mid",
   "sha256": "e9f1d404b996ce98544c0cff64a173a8a589c4483f5d55510de7ccbfff090fe8",
   "source": {
@@ -2866,6 +2940,9 @@
  {
   "id": "up-on-the-housetop",
   "title": "Up on the Housetop",
+  "composer": "Benjamin Hanby",
+  "composer_died": 1867,
+  "composer_source": "https://en.wikipedia.org/wiki/Up_on_the_Housetop",
   "file": "midi/pdmx-up-on-the-housetop.mid",
   "sha256": "76f0d682ebb43851c88d24c1b89c039b3de4fd1b2e373c7ab896ed05d9ee46b2",
   "source": {
@@ -2926,6 +3003,9 @@
  {
   "id": "o-holy-night",
   "title": "O Holy Night",
+  "composer": "Adolphe Adam",
+  "composer_died": 1856,
+  "composer_source": "https://en.wikipedia.org/wiki/O_Holy_Night",
   "file": "midi/pdmx-o-holy-night.mid",
   "sha256": "cd491834b45066ccbb9f0cee62102bc2cb8f6fe0d97b44b157bf5aba2b4bc33f",
   "source": {
@@ -3048,6 +3128,8 @@
  {
   "id": "good-christian-men",
   "title": "Good Christian Men, Rejoice",
+  "composer": "Traditional (German)",
+  "composer_source": "https://en.wikipedia.org/wiki/In_dulci_jubilo",
   "file": "midi/pdmx-good-christian-men.mid",
   "sha256": "3a07fb674dceecee4af18532aad48bd56e4b57aae36e841f5d5a62bfaf3d0086",
   "source": {
@@ -3109,6 +3191,9 @@
  {
   "id": "jesus-loves-me",
   "title": "Jesus Loves Me",
+  "composer": "William Batchelder Bradbury",
+  "composer_died": 1868,
+  "composer_source": "https://en.wikipedia.org/wiki/Jesus_Loves_Me",
   "file": "midi/pdmx-jesus-loves-me.mid",
   "sha256": "942ac64163ee4a9c4113b816fbb6d3882f3f35a033b242adf02c1aa3a30028b5",
   "source": {
@@ -3170,6 +3255,9 @@
  {
   "id": "eine-kleine",
   "title": "Eine kleine Nachtmusik",
+  "composer": "Wolfgang Amadeus Mozart",
+  "composer_died": 1791,
+  "composer_source": "https://en.wikipedia.org/wiki/Eine_kleine_Nachtmusik",
   "file": "midi/pdmx-eine-kleine.mid",
   "sha256": "3f2c9258c1036a36863e4b6c5adf909411eb2ead0d5534c1189e76eacada0c51",
   "source": {
@@ -3262,6 +3350,9 @@
  {
   "id": "new-world-largo",
   "title": "Largo from the New World Symphony",
+  "composer": "Antonín Dvořák",
+  "composer_died": 1904,
+  "composer_source": "https://en.wikipedia.org/wiki/Symphony_No._9_(Dvo%C5%99%C3%A1k)",
   "file": "midi/pdmx-new-world-largo.mid",
   "sha256": "0f0bbd931a5687a55c60c8caa2d3eb141b174e3e860a8701f1d59fdeaa30ce44",
   "source": {
@@ -3292,6 +3383,9 @@
  {
   "id": "swan-lake",
   "title": "Swan Lake",
+  "composer": "Pyotr Ilyich Tchaikovsky",
+  "composer_died": 1893,
+  "composer_source": "https://en.wikipedia.org/wiki/Swan_Lake",
   "file": "midi/pdmx-swan-lake.mid",
   "sha256": "d4694c0b1749f9c26073095559e0b2c4495b16d0e5da67e177980dbe28dcc11a",
   "source": {
@@ -3322,6 +3416,9 @@
  {
   "id": "sugar-plum",
   "title": "Dance of the Sugar Plum Fairy",
+  "composer": "Pyotr Ilyich Tchaikovsky",
+  "composer_died": 1893,
+  "composer_source": "https://en.wikipedia.org/wiki/The_Nutcracker",
   "file": "midi/pdmx-sugar-plum.mid",
   "sha256": "3d299ab90082d8845114b5d02a07471484c5fbc862998c8a0014935fd31a9d7a",
   "source": {
@@ -3659,6 +3756,9 @@
  {
   "id": "taps",
   "title": "Taps",
+  "composer": "Daniel Butterfield",
+  "composer_died": 1901,
+  "composer_source": "https://en.wikipedia.org/wiki/Taps_(bugle_call)",
   "file": "midi/pdmx-taps.mid",
   "sha256": "b1f1b70280662cb5c6105666282584c969cbcbbc3ad7f76da9f87cad87631b82",
   "source": {
@@ -3689,6 +3789,9 @@
  {
   "id": "rule-britannia",
   "title": "Rule, Britannia!",
+  "composer": "Thomas Arne",
+  "composer_died": 1778,
+  "composer_source": "https://en.wikipedia.org/wiki/Rule,_Britannia!",
   "file": "midi/pdmx-rule-britannia.mid",
   "sha256": "4346b44007ffc93eb8822fab35c83ea9489f931755fe7719f3418a410509615c",
   "source": {
@@ -3750,6 +3853,9 @@
  {
   "id": "birthday",
   "title": "Happy Birthday",
+  "composer": "Mildred J. Hill and Patty Hill",
+  "composer_died": 1946,
+  "composer_source": "https://en.wikipedia.org/wiki/Happy_Birthday_to_You",
   "file": "midi/pdmx-birthday.mid",
   "sha256": "d5a94aa3791e12ebf6fdf5ce1519dc2e8e91485eccc726c272f2d6376e8818ba",
   "source": {
@@ -3781,6 +3887,8 @@
  {
   "id": "merryxmas",
   "title": "We Wish You a Merry Christmas",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/We_Wish_You_a_Merry_Christmas",
   "file": "midi/pdmx-merryxmas.mid",
   "sha256": "493124c8ff48ec79af46ca0b709fdc2bbe1eba35353461f13b925b12ba124086",
   "source": {
@@ -3812,6 +3920,8 @@
  {
   "id": "god-rest-ye",
   "title": "God Rest You Merry, Gentlemen",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/God_Rest_Ye_Merry,_Gentlemen",
   "file": "midi/pdmx-god-rest-ye.mid",
   "sha256": "17d36249b4f030749b7cf11dd9c5cc74bd048ff016044d37d15de9fa9758ad89",
   "source": {
@@ -3904,6 +4014,9 @@
  {
   "id": "la-cumparsita",
   "title": "La cumparsita",
+  "composer": "Gerardo Matos Rodríguez",
+  "composer_died": 1948,
+  "composer_source": "https://en.wikipedia.org/wiki/La_cumparsita",
   "file": "midi/pdmx-la-cumparsita.mid",
   "sha256": "c0e2305123bc0bda4bf69cef2f03cdc598d9fffea47e3b3331a2c5a766f2266c",
   "source": {
@@ -3965,6 +4078,9 @@
  {
   "id": "passacaglia-handel-halvorsen",
   "title": "Passacaglia (Handel-Halvorsen)",
+  "composer": "Johan Halvorsen",
+  "composer_died": 1935,
+  "composer_source": "https://en.wikipedia.org/wiki/Johan_Halvorsen",
   "file": "midi/pdmx-passacaglia-handel-halvorsen.mid",
   "sha256": "c310c1e2c50f7aaf6a7cc9ea7f788d69203796c4074027341d2cea5f86f38d91",
   "source": {
@@ -4027,6 +4143,9 @@
  {
   "id": "o-canada",
   "title": "O Canada",
+  "composer": "Calixa Lavallée",
+  "composer_died": 1891,
+  "composer_source": "https://en.wikipedia.org/wiki/O_Canada",
   "file": "midi/pdmx-o-canada.mid",
   "sha256": "62fd9cb863f42cb12e348215ba48877de0a32ee941e90b1caf0e693b05711604",
   "source": {
@@ -4058,6 +4177,9 @@
  {
   "id": "nocturne-op-9-no-2",
   "title": "Nocturne Op 9 No 2",
+  "composer": "Frédéric Chopin",
+  "composer_died": 1849,
+  "composer_source": "https://en.wikipedia.org/wiki/Nocturnes,_Op._9_(Chopin)",
   "file": "midi/pdmx-nocturne-op-9-no-2.mid",
   "sha256": "30a130c22692fb6e1ec5982a18c0d87b53e0bf594bef6c9e1480dacd0642a005",
   "source": {
@@ -4089,6 +4211,8 @@
  {
   "id": "gaudeamus-igitur",
   "title": "Gaudeamus Igitur",
+  "composer": "Traditional (German)",
+  "composer_source": "https://en.wikipedia.org/wiki/Gaudeamus_igitur",
   "file": "midi/pdmx-gaudeamus-igitur.mid",
   "sha256": "883d4b8c2c4ea130e29b7d71d0639273763cfdbab1946ece432928272c5b8a2b",
   "source": {
@@ -4119,6 +4243,8 @@
  {
   "id": "uti-var-hage",
   "title": "Uti vår hage",
+  "composer": "Traditional (Swedish)",
+  "composer_source": "https://sv.wikipedia.org/wiki/Uti_v%C3%A5r_hage",
   "file": "midi/pdmx-uti-var-hage.mid",
   "sha256": "bccb1d100025c580448716b9a2f0bd7ddd1d1dc9002f48cc2663849c61def8f5",
   "source": {
@@ -4149,6 +4275,9 @@
  {
   "id": "clarinet-concerto-in-a-major-k-622",
   "title": "Clarinet Concerto in A major K.622",
+  "composer": "Wolfgang Amadeus Mozart",
+  "composer_died": 1791,
+  "composer_source": "https://en.wikipedia.org/wiki/Clarinet_Concerto_(Mozart)",
   "file": "midi/pdmx-clarinet-concerto-in-a-major-k-622.mid",
   "sha256": "b66334519e64ad5a2c18a494cd8a35c5fd9e494a644bcdaedb95c541b253a290",
   "source": {
@@ -4179,6 +4308,9 @@
  {
   "id": "la-fille-aux-cheveux-de-lin",
   "title": "La Fille Aux Cheveux De Lin",
+  "composer": "Claude Debussy",
+  "composer_died": 1918,
+  "composer_source": "https://en.wikipedia.org/wiki/La_fille_aux_cheveux_de_lin",
   "file": "midi/pdmx-la-fille-aux-cheveux-de-lin.mid",
   "sha256": "27439a6c5e4e82c7cbe4304ae8b9f0a4e3c8f4087e26c2f3a1713c064c7ea9dc",
   "source": {
@@ -4209,6 +4341,9 @@
  {
   "id": "erlkonig",
   "title": "Erlkönig",
+  "composer": "Franz Schubert",
+  "composer_died": 1828,
+  "composer_source": "https://en.wikipedia.org/wiki/Erlk%C3%B6nig_(Schubert)",
   "file": "midi/pdmx-erlkonig.mid",
   "sha256": "8c03d9c1a10c51659b18928623fe8ed7717161e310540f1a948936aff38118cd",
   "source": {
@@ -4271,6 +4406,9 @@
  {
   "id": "vedro-con-mio-diletto",
   "title": "Vedrò con mio diletto",
+  "composer": "Antonio Vivaldi",
+  "composer_died": 1741,
+  "composer_source": "https://en.wikipedia.org/wiki/Giustino_(Vivaldi)",
   "file": "midi/pdmx-vedro-con-mio-diletto.mid",
   "sha256": "40e9d91e5a09b8aa7b51f9a30341fd2f54dcfe7a619e076c2b04990a9768a361",
   "source": {
@@ -4363,6 +4501,9 @@
  {
   "id": "waltz-in-b-minor",
   "title": "Waltz in B minor",
+  "composer": "Frédéric Chopin",
+  "composer_died": 1849,
+  "composer_source": "https://en.wikipedia.org/wiki/Waltzes,_Op._69_(Chopin)",
   "file": "midi/pdmx-waltz-in-b-minor.mid",
   "sha256": "76478993b73ce91e4c821567cfb40c8dc2700c29cd9ad11bdcdd1f77c6be8974",
   "source": {
@@ -4456,6 +4597,9 @@
  {
   "id": "csardas",
   "title": "Csárdás",
+  "composer": "Vittorio Monti",
+  "composer_died": 1922,
+  "composer_source": "https://en.wikipedia.org/wiki/Cs%C3%A1rd%C3%A1s_(Monti)",
   "file": "midi/pdmx-csardas.mid",
   "sha256": "97bbb4bfb1cb206bb255a2ae485efde1a6596730ae94d40c04fe5aad8e497d1a",
   "source": {
@@ -4518,6 +4662,9 @@
  {
   "id": "battle-cry-of-freedom",
   "title": "Battle Cry of Freedom",
+  "composer": "George Frederick Root",
+  "composer_died": 1895,
+  "composer_source": "https://en.wikipedia.org/wiki/Battle_Cry_of_Freedom",
   "file": "midi/pdmx-battle-cry-of-freedom.mid",
   "sha256": "f454a4a707c441d32846285155e20213cd901b8324bb25956a2c438556173e08",
   "source": {
@@ -4581,6 +4728,8 @@
  {
   "id": "wilhelmus",
   "title": "Wilhelmus",
+  "composer": "Traditional (French)",
+  "composer_source": "https://en.wikipedia.org/wiki/Wilhelmus",
   "file": "midi/pdmx-wilhelmus.mid",
   "sha256": "17affd4a893d274c026cb7d848331c2a11b954659e1cc5da9fdfff372f4d386b",
   "source": {
@@ -4674,6 +4823,8 @@
  {
   "id": "tourdion",
   "title": "Tourdion",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Tourdion",
   "file": "midi/pdmx-tourdion.mid",
   "sha256": "5401b03edd156781e305b7b1aa0f39db1ea62ca92afcc6ad1680ad236c1cbb7c",
   "source": {
@@ -4704,6 +4855,9 @@
  {
   "id": "ich-steh-an-deiner-krippen-hier",
   "title": "Ich steh an Deiner Krippen hier",
+  "composer": "Johann Sebastian Bach",
+  "composer_died": 1750,
+  "composer_source": "https://en.wikipedia.org/wiki/Ich_steh_an_deiner_Krippen_hier",
   "file": "midi/pdmx-ich-steh-an-deiner-krippen-hier.mid",
   "sha256": "4b6c937d4e4c503d9a05c37993a631d07e898470d9e6cd1db67bb42cddb9cafd",
   "source": {
@@ -4765,6 +4919,9 @@
  {
   "id": "internationale",
   "title": "The Internationale",
+  "composer": "Pierre De Geyter",
+  "composer_died": 1932,
+  "composer_source": "https://en.wikipedia.org/wiki/The_Internationale",
   "file": "midi/pdmx-internationale.mid",
   "sha256": "5546a7f8e44994938410237688317a052f05f3be27199bdcc58f6b6f028f5336",
   "source": {
@@ -4796,6 +4953,9 @@
  {
   "id": "a-la-nanita-nana",
   "title": "A La Nanita Nana",
+  "composer": "José Ramón Gomis",
+  "composer_died": 1939,
+  "composer_source": "https://es.wikipedia.org/wiki/A_la_nanita_nana",
   "file": "midi/pdmx-a-la-nanita-nana.mid",
   "sha256": "9165add6d3229ffcf2db7257c0b5b0302b9784704503eb4995262564ad5295e2",
   "source": {
@@ -4857,6 +5017,9 @@
  {
   "id": "god-of-mercy-and-compassion",
   "title": "God of Mercy and Compassion",
+  "composer": "Giovanni Battista Pergolesi",
+  "composer_died": 1736,
+  "composer_source": "https://en.wikipedia.org/wiki/Giovanni_Battista_Pergolesi",
   "file": "midi/pdmx-god-of-mercy-and-compassion.mid",
   "sha256": "809184ce2cd69e46e0a11efc405e4d8dc830bbeafb42bc1593b2bf942d00e675",
   "source": {
@@ -4920,6 +5083,9 @@
  {
   "id": "minute-waltz",
   "title": "Minute Waltz",
+  "composer": "Frédéric Chopin",
+  "composer_died": 1849,
+  "composer_source": "https://en.wikipedia.org/wiki/Minute_Waltz",
   "file": "midi/pdmx-minute-waltz.mid",
   "sha256": "b18b7f4d4422ab327a8a28ac42c43bfe77fb42e8ee7a749fc2b2a0de3cc15461",
   "source": {
@@ -5073,6 +5239,9 @@
  {
   "id": "el-choclo",
   "title": "El Choclo",
+  "composer": "Ángel Villoldo",
+  "composer_died": 1919,
+  "composer_source": "https://en.wikipedia.org/wiki/El_Choclo",
   "file": "midi/pdmx-el-choclo.mid",
   "sha256": "46305a4f6f9cb7ae4f8d3fd0bc3a824c2f6273aecc7d44d8dfb3e899447f1e6a",
   "source": {
@@ -5104,6 +5273,9 @@
  {
   "id": "bist-du-bei-mir",
   "title": "Bist Du Bei Mir",
+  "composer": "Gottfried Heinrich Stölzel",
+  "composer_died": 1749,
+  "composer_source": "https://en.wikipedia.org/wiki/Bist_du_bei_mir",
   "file": "midi/pdmx-bist-du-bei-mir.mid",
   "sha256": "103bf89e6c651e6f9f29ca5a79d98bacf76dbf47b9853af2f6e4f7cef8aeada2",
   "source": {
@@ -5347,6 +5519,8 @@
  {
   "id": "british-grenadiers",
   "title": "British Grenadiers",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/The_British_Grenadiers",
   "file": "midi/pdmx-british-grenadiers.mid",
   "sha256": "0512d439d18dde22264cfe8da6501dde77db6e922f409094be171e2a49e126d0",
   "source": {
@@ -5529,39 +5703,11 @@
   }
  },
  {
-  "id": "just-a-closer-walk-with-thee",
-  "title": "Just A Closer Walk With Thee",
-  "file": "midi/pdmx-just-a-closer-walk-with-thee.mid",
-  "sha256": "48be4c98ebf36fb535bad75a106eb472688df8a21d1726f9a6ff9459b8208b3e",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/9/5/QmR6wUnWzyqyx4qpqNdWDuxuos4XUkSbN141aFcu34wtA8.mid",
-   "musescore_score_id": "1309001",
-   "musescore_url": "https://musescore.com/score/1309001",
-   "score_title": "Just A Closer Walk With Thee",
-   "composer": "NA",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "820"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "start_beat": 1,
-   "max_beats": 31
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-04.txt"
-  }
- },
- {
   "id": "salut-damour",
   "title": "Salut d'Amour",
+  "composer": "Edward Elgar",
+  "composer_died": 1934,
+  "composer_source": "https://en.wikipedia.org/wiki/Salut_d%27Amour",
   "file": "midi/pdmx-salut-damour.mid",
   "sha256": "3dd6626479c4029af07335f0ce2915e35c58f5908e0b9fe5eec0fb94ac40dd73",
   "source": {
@@ -5593,6 +5739,9 @@
  {
   "id": "it-was-a-lover-and-his-lass",
   "title": "It was a lover and his lass",
+  "composer": "Thomas Morley",
+  "composer_died": 1602,
+  "composer_source": "https://en.wikipedia.org/wiki/Thomas_Morley",
   "file": "midi/pdmx-it-was-a-lover-and-his-lass.mid",
   "sha256": "6a42168f47a4f74a01ddafacc33218aa53b7af0979957622b255c027ecfecd95",
   "source": {
@@ -5746,6 +5895,9 @@
  {
   "id": "komm-lieber-mai",
   "title": "Komm lieber Mai",
+  "composer": "Wolfgang Amadeus Mozart",
+  "composer_died": 1791,
+  "composer_source": "https://de.wikipedia.org/wiki/Komm,_lieber_Mai,_und_mache",
   "file": "midi/pdmx-komm-lieber-mai.mid",
   "sha256": "eb9bf330e31e6edb8930073f4c4a4777fb69ed09489f88e14f8aa14de9771d49",
   "source": {
@@ -5777,6 +5929,9 @@
  {
   "id": "prelude-no-4",
   "title": "Prélude No. 4",
+  "composer": "Frédéric Chopin",
+  "composer_died": 1849,
+  "composer_source": "https://en.wikipedia.org/wiki/Prelude,_Op._28,_No._4_(Chopin)",
   "file": "midi/pdmx-prelude-no-4.mid",
   "sha256": "2265ecb1d7d4de86cc771ea1c49ae9e6228881ce17704b1ca301e55394a7af34",
   "source": {
@@ -5808,6 +5963,9 @@
  {
   "id": "gute-nacht",
   "title": "Gute Nacht",
+  "composer": "Franz Schubert",
+  "composer_died": 1828,
+  "composer_source": "https://en.wikipedia.org/wiki/Winterreise",
   "file": "midi/pdmx-gute-nacht.mid",
   "sha256": "1b79aee5602b786125338dc04e240e67ea1897d0df9cafee8ad0166d53377bbd",
   "source": {
@@ -5839,6 +5997,9 @@
  {
   "id": "waltz-in-a-minor-chopin",
   "title": "Waltz in A Minor Chopin",
+  "composer": "Frédéric Chopin",
+  "composer_died": 1849,
+  "composer_source": "https://en.wikipedia.org/wiki/Waltz_in_A_minor,_Op._posth._(Chopin)",
   "file": "midi/pdmx-waltz-in-a-minor-chopin.mid",
   "sha256": "96963ce82299d7ebd2c7f2495b2d2e69651d7ab70682e689d4b6ee64bb1b2964",
   "source": {
@@ -5963,6 +6124,9 @@
  {
   "id": "buckeye-battle-cry",
   "title": "Buckeye Battle Cry",
+  "composer": "Frank Crumit",
+  "composer_died": 1943,
+  "composer_source": "https://en.wikipedia.org/wiki/Buckeye_Battle_Cry",
   "file": "midi/pdmx-buckeye-battle-cry.mid",
   "sha256": "0b56081f060c00527625feb6a3b60ad0d26f4e1a65c684229e870e16896f1149",
   "source": {
@@ -6024,6 +6188,9 @@
  {
   "id": "asturias",
   "title": "Asturias",
+  "composer": "Isaac Albéniz",
+  "composer_died": 1909,
+  "composer_source": "https://en.wikipedia.org/wiki/Asturias_(Leyenda)",
   "file": "midi/pdmx-asturias.mid",
   "sha256": "a84cabb4dba2d32ebece079a6a854a009695ee8af59617202077eb93bedd9b43",
   "source": {
@@ -6206,6 +6373,9 @@
  {
   "id": "barcarolle",
   "title": "Barcarolle",
+  "composer": "Jacques Offenbach",
+  "composer_died": 1880,
+  "composer_source": "https://en.wikipedia.org/wiki/Belle_nuit,_%C3%B4_nuit_d%27amour",
   "file": "midi/pdmx-barcarolle.mid",
   "sha256": "09e26f2d0a7920bcd6e88a0ca6ef6fc2138f0314062b43565dc69e4fbcf53332",
   "source": {
@@ -6238,6 +6408,8 @@
  {
   "id": "last-rose-of-summer",
   "title": "The Last Rose Of Summer",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Last_Rose_of_Summer",
   "file": "midi/pdmx-last-rose-of-summer.mid",
   "sha256": "4d31aa81f50e94ba858139c9305f92e9f70c0d7b1cc10c4e1b690325f6a750c3",
   "source": {
@@ -6299,6 +6471,9 @@
  {
   "id": "march-in-d-major",
   "title": "March in D Major",
+  "composer": "Carl Philipp Emanuel Bach",
+  "composer_died": 1788,
+  "composer_source": "https://en.wikipedia.org/wiki/Notebook_for_Anna_Magdalena_Bach",
   "file": "midi/pdmx-march-in-d-major.mid",
   "sha256": "c3f96cd496b55e2a52a8d038ca2564abe0a2655e4b9b2f7a027b6394c242195e",
   "source": {
@@ -6452,36 +6627,6 @@
   }
  },
  {
-  "id": "mairis-wedding",
-  "title": "Mairi's Wedding",
-  "file": "midi/pdmx-mairis-wedding.mid",
-  "sha256": "9fcbdaaeb374db65b854130b882e0827cbf2a22bf48675c9f47f89fdb943ce53",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/2/7/Qmc8NvEPvM4BLauBo6F3QmV64Kk4TTEwvo7Doyv2Cf7uRo.mid",
-   "musescore_score_id": "5234673",
-   "musescore_url": "https://musescore.com/score/5234673",
-   "score_title": "Mairi's Wedding",
-   "composer": "Composer",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.76",
-   "n_ratings": "14",
-   "n_views": "1770"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-04.txt"
-  }
- },
- {
   "id": "bonnie-blue-flag",
   "title": "Bonnie Blue Flag",
   "file": "midi/pdmx-bonnie-blue-flag.mid",
@@ -6515,6 +6660,9 @@
  {
   "id": "es-wird-scho-glei-dumpa",
   "title": "Es wird scho glei dumpa",
+  "composer": "Anton Reidinger",
+  "composer_died": 1912,
+  "composer_source": "https://de.wikipedia.org/wiki/Es_wird_scho_glei_dumpa",
   "file": "midi/pdmx-es-wird-scho-glei-dumpa.mid",
   "sha256": "b490d87ee7c43a3bf64ac78721c0b069e8a09660a05da625823c19116ce240ff",
   "source": {
@@ -26812,6 +26960,9 @@
  {
   "id": "moments-musicaux-opus-94-no-3-in-f-minor",
   "title": "Moments Musicaux Opus 94 No. 3 in F minor",
+  "composer": "Franz Schubert",
+  "composer_died": 1828,
+  "composer_source": "https://en.wikipedia.org/wiki/Six_moments_musicaux_(Schubert)",
   "file": "midi/pdmx-moments-musicaux-opus-94-no-3-in-f-minor.mid",
   "sha256": "0a6b742f93322582dd0486883d1837487ef06d0b3b9279bb49be9e1244902627",
   "source": {
@@ -26843,6 +26994,9 @@
  {
   "id": "ave-maria-bach-gounod",
   "title": "Ave Maria Bach-Gounod",
+  "composer": "Charles Gounod",
+  "composer_died": 1893,
+  "composer_source": "https://en.wikipedia.org/wiki/Ave_Maria_(Bach/Gounod)",
   "file": "midi/pdmx-ave-maria-bach-gounod.mid",
   "sha256": "11fcdc894fe62173d8ac47cc3405fcde87739cbca0cab9c2aeae33027a6f5ebc",
   "source": {
@@ -26937,6 +27091,8 @@
  {
   "id": "schneeflockchen-wei-rockchen",
   "title": "Schneeflöckchen Weißröckchen",
+  "composer": "Traditional (German)",
+  "composer_source": "https://de.wikipedia.org/wiki/Schneefl%C3%B6ckchen,_Wei%C3%9Fr%C3%B6ckchen",
   "file": "midi/pdmx-schneeflockchen-wei-rockchen.mid",
   "sha256": "549d64787cb23be2ec405ef41084d69db7e80774e9c7e5109a5fed90148c2136",
   "source": {
@@ -26998,6 +27154,8 @@
  {
   "id": "men-of-harlech",
   "title": "Men of Harlech",
+  "composer": "Traditional (Welsh)",
+  "composer_source": "https://en.wikipedia.org/wiki/Men_of_Harlech",
   "file": "midi/pdmx-men-of-harlech.mid",
   "sha256": "1ea6a860605b5c4a0659e8f46a2fa0326da9cfc9af036d409089596e9a8c6e09",
   "source": {
@@ -27059,6 +27217,8 @@
  {
   "id": "moreton-bay",
   "title": "Moreton Bay",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Moreton_Bay_(song)",
   "file": "midi/pdmx-moreton-bay.mid",
   "sha256": "4b8a4dbf365db1511380970539fdd9df0acaf28ebd4d6e13dc3d14243be3c592",
   "source": {
@@ -27090,6 +27250,8 @@
  {
   "id": "narodil-se-kristus-pan",
   "title": "Narodil se Kristus Pán",
+  "composer": "Traditional (Czech)",
+  "composer_source": "https://cs.wikipedia.org/wiki/Narodil_se_Kristus_P%C3%A1n",
   "file": "midi/pdmx-narodil-se-kristus-pan.mid",
   "sha256": "fa0bee752ad9d45bf5b83d18e4eaa0f9256b52fb17bdf8b252e35f1139b04fcb",
   "source": {
@@ -27151,6 +27313,8 @@
  {
   "id": "rising-of-the-moon",
   "title": "The Rising of the Moon",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Rising_of_the_Moon",
   "file": "midi/pdmx-rising-of-the-moon.mid",
   "sha256": "6be1149b5224ce91f97bee30fc749c7cf7edcd5a22f89f86bd271d5cc9eef3c7",
   "source": {
@@ -27182,6 +27346,8 @@
  {
   "id": "sweet-nightingale",
   "title": "Sweet Nightingale",
+  "composer": "Traditional (Cornish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Sweet_Nightingale",
   "file": "midi/pdmx-sweet-nightingale.mid",
   "sha256": "3231155d564068052f7f1e8fa50d79dce5cffb3be1d6fd3cec795b6d6c00ecda",
   "source": {
@@ -27245,6 +27411,9 @@
  {
   "id": "macphersons-lament",
   "title": "MacPherson's Lament",
+  "composer": "James Macpherson",
+  "composer_died": 1700,
+  "composer_source": "https://en.wikipedia.org/wiki/James_Macpherson_(outlaw)",
   "file": "midi/pdmx-macphersons-lament.mid",
   "sha256": "cc0e3807d95939061c7b0a1ccfcf30440fff20b52adb9c4ed21a02b6ca10e842",
   "source": {
@@ -27276,6 +27445,9 @@
  {
   "id": "bourree-in-e-minor",
   "title": "Bourrée in E Minor",
+  "composer": "Johann Sebastian Bach",
+  "composer_died": 1750,
+  "composer_source": "https://en.wikipedia.org/wiki/Lute_Suite_in_E_minor,_BWV_996",
   "file": "midi/pdmx-bourree-in-e-minor.mid",
   "sha256": "fb9b0d91911c9372c76cff8e4ca8ae1a18166993b26fb2604971608dbc269d09",
   "source": {
@@ -27307,6 +27479,8 @@
  {
   "id": "ut-queant-laxis",
   "title": "Ut queant laxis",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Ut_queant_laxis",
   "file": "midi/pdmx-ut-queant-laxis.mid",
   "sha256": "7ff6aae0e36e36b6b40a16bbefd52ef048d1900c1c0ca7fd466cb4a002fa7627",
   "source": {
@@ -27582,6 +27756,8 @@
  {
   "id": "ade-zur-guten-nacht",
   "title": "Ade zur guten Nacht",
+  "composer": "Traditional (German)",
+  "composer_source": "https://de.wikipedia.org/wiki/Ade_zur_guten_Nacht",
   "file": "midi/pdmx-ade-zur-guten-nacht.mid",
   "sha256": "92d29dbefa85ee249ec08b14e03fed48688f373b5a17b0568c3501cb6fe2ca29",
   "source": {
@@ -27643,6 +27819,8 @@
  {
   "id": "i-shall-not-be-moved",
   "title": "I Shall Not Be Moved",
+  "composer": "Traditional (African American)",
+  "composer_source": "https://en.wikipedia.org/wiki/I_Shall_Not_Be_Moved",
   "file": "midi/pdmx-i-shall-not-be-moved.mid",
   "sha256": "b4b88d6b2219c381a753e68883dade3f65d67bb30fc7211a5d03f858187063f4",
   "source": {
@@ -27734,6 +27912,9 @@
  {
   "id": "la-chanson-de-craonne",
   "title": "La Chanson de Craonne",
+  "composer": "Charles Sablon",
+  "composer_died": 1929,
+  "composer_source": "https://en.wikipedia.org/wiki/La_Chanson_de_Craonne",
   "file": "midi/pdmx-la-chanson-de-craonne.mid",
   "sha256": "3773e6235a72e52ceafa7e9aeb8be5a0d27cd701a4f657623fa8c1d2256446f8",
   "source": {
@@ -27826,6 +28007,8 @@
  {
   "id": "brian-borus-march",
   "title": "Brian Boru's March",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Brian_Boru%27s_March",
   "file": "midi/pdmx-brian-borus-march.mid",
   "sha256": "275b8e29504623fd585f1dbf688d70fca269f6e28b627aa109290cdc3c7f8fdc",
   "source": {
@@ -28104,6 +28287,8 @@
  {
   "id": "o-du-frohliche",
   "title": "O du fröhliche",
+  "composer": "Traditional (Sicilian)",
+  "composer_source": "https://en.wikipedia.org/wiki/O_du_fr%C3%B6hliche",
   "file": "midi/pdmx-o-du-frohliche.mid",
   "sha256": "089a1717c6c4488e6bdb59e2092f7f5412cf04d616222ee7e4256a1797b4ce16",
   "source": {
@@ -28135,6 +28320,9 @@
  {
   "id": "niel-gows-lament-for-the-death-of-his-second-wife",
   "title": "Niel Gow's Lament for the Death of his Second Wife",
+  "composer": "Niel Gow",
+  "composer_died": 1807,
+  "composer_source": "https://en.wikipedia.org/wiki/Niel_Gow",
   "file": "midi/pdmx-niel-gows-lament-for-the-death-of-his-second-wife.mid",
   "sha256": "ef11aaca1164c932e349e1854eb7cfa1ce25af3a089218d2ee57c05d7c0a569a",
   "source": {
@@ -28319,6 +28507,9 @@
  {
   "id": "amhran-na-bhfiann",
   "title": "Amhrán na bhFiann",
+  "composer": "Peadar Kearney and Patrick Heeney",
+  "composer_died": 1942,
+  "composer_source": "https://en.wikipedia.org/wiki/Amhr%C3%A1n_na_bhFiann",
   "file": "midi/pdmx-amhran-na-bhfiann.mid",
   "sha256": "0a4844920e3ce10e7c327ae6a9036c77002fcd20ff4cb63d2430da4484070715",
   "source": {
@@ -28534,6 +28725,8 @@
  {
   "id": "high-germany",
   "title": "High Germany",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/High_Germany_(folk_song)",
   "file": "midi/pdmx-high-germany.mid",
   "sha256": "399467f812379f229ebaf917fc890a0b1aa6a95996b4f2cd3d040a26a838aa9c",
   "source": {
@@ -28780,6 +28973,9 @@
  {
   "id": "caro-mio-ben",
   "title": "Caro Mio Ben",
+  "composer": "Tommaso Giordani",
+  "composer_died": 1806,
+  "composer_source": "https://en.wikipedia.org/wiki/Caro_mio_ben",
   "file": "midi/pdmx-caro-mio-ben.mid",
   "sha256": "00094fff2d1b8efd17c6ec41224ceaa5b77c1080379ec8dff7bff1ac8286cf5f",
   "source": {
