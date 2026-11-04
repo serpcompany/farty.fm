@@ -273,4 +273,49 @@ describe('the generator', () => {
     expect(n_views).toBe('4171')
     expect(() => catalogSongs(withSource(source), ['twinkle'])).toThrow(/n_views/)
   })
+
+  // #383 tagged every Song, and Compose's chips, search and Most popular read the tags (#384): only
+  // the values, so the index stays small.
+  test('carries each Song’s kind, origin, fame and Well known, and nothing of their sources', () => {
+    const entries = new Map(sources.catalog.map(e => [e.id, e]))
+    for (const s of songs) {
+      const entry = entries.get(s.id) as CatalogEntry
+      expect(
+        { kind: s.kind, origin: s.origin ?? null, fame: s.fame, wellKnown: s.wellKnown ?? false },
+        s.id
+      ).toEqual({
+        kind: entry.kind,
+        origin: entry.origin,
+        fame: entry.fame,
+        wellKnown: entry.well_known
+      })
+    }
+    const [star] = catalogSongs(sources, ['twinkle'])
+    expect(star).toMatchObject({ kind: 'Kids', origin: 'French', fame: 10.339, wellKnown: true })
+    // No origin and not Well known: neither field.
+    const plain = songs.filter(s => !s.wellKnown && s.origin === undefined)
+    expect(plain.length).toBeGreaterThan(100)
+    expect(plain.filter(s => 'origin' in s || 'wellKnown' in s)).toEqual([])
+    const index = renderCatalog(sources).data.text
+    expect(index).not.toMatch(/"well_known"|"wellKnown":false|"origin":null|tag_source/)
+  })
+
+  test('refuses a Song whose tags tools/catalog/tag.py didn’t write', () => {
+    const tagged = (tags: Partial<CatalogEntry>) => ({
+      ...sources,
+      catalog: [{ ...twinkle, ...tags }]
+    })
+    const refused = (tags: Partial<CatalogEntry>) =>
+      expect(() => catalogSongs(tagged(tags), ['twinkle'])).toThrow(/tag\.py/)
+    refused({ kind: 'Lullabies' })
+    refused({ kind: undefined })
+    refused({ origin: '' })
+    refused({ origin: undefined })
+    refused({ fame: undefined })
+    refused({ fame: -1 })
+    refused({ well_known: undefined })
+    expect(
+      catalogSongs(tagged({ origin: null, well_known: false }), ['twinkle'])[0]
+    ).not.toHaveProperty('origin')
+  })
 })

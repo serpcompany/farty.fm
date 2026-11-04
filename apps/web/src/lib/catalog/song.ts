@@ -1,4 +1,26 @@
 /**
+ * What kind of Song it is (#383, `tools/catalog/tag.py`'s `KINDS`): each Song has one, and Compose
+ * has a chip for each, in this order, after Well known (#384).
+ */
+export const songKinds = [
+  'Christmas',
+  'Kids',
+  'Hymns',
+  'Anthems',
+  'Classical',
+  'Songs',
+  'Fiddle tunes'
+] as const
+
+export type SongKind = (typeof songKinds)[number]
+
+/** What one of Compose's Kind chips shows (#384): the Well known Songs of every kind, or a kind. */
+export type KindChoice = 'Well known' | SongKind
+
+/** Compose's Kind chips, in their order (#384). */
+export const kindChoices: readonly KindChoice[] = ['Well known', ...songKinds]
+
+/**
  * A Song in the Song Catalog's index: what Compose lists, searches, sorts and measures Pitch
  * Coverage by, without its notes (#323). The browser fetches the index once (`loadSongs`) and a
  * Song's notes only when the Song is opened (`loadSong`), so Compose stays quick with 1,000 Songs.
@@ -18,9 +40,20 @@ export type SongSummary = {
   aliases?: readonly string[]
   /** The source and license line, for example "Public domain score · PDMX". */
   source: string
-  /** How many times the score was viewed on MuseScore (PDMX's `n_views`): Most popular's order. */
+  /** What kind of Song it is (#383): Compose's chips filter by it, and search finds it by it. */
+  kind: SongKind
+  /** Where the tune is from, "Irish" or "African American", when a source says (#383). */
+  origin?: string
+  /**
+   * How well known the Song is (#383): its Wikipedia page's pageviews and its PDMX views, each on a
+   * log scale, added. Most popular's order (#384).
+   */
+  fame: number
+  /** Set on the Well known Songs (#383), which Compose's first chip shows. */
+  wellKnown?: true
+  /** How many times the score was viewed on MuseScore (PDMX's `n_views`): Most popular's ties. */
   views: number
-  /** The score's MuseScore rating out of 5, when it has one: it breaks Most popular's ties. */
+  /** The score's MuseScore rating out of 5, when it has one: Most popular's ties after views. */
   rating?: number
   /** How long the melody is, in beats: `SongNotes.length_beats`, for the Song's length. */
   lengthBeats: number

@@ -9,7 +9,7 @@ import {
 import { goldenIndex } from '../test-support/golden'
 import { goldenAnalysisRecording } from '../test-support/golden-analysis'
 import { searchKey } from './catalog/search-key'
-import type { Song, SongSummary } from './catalog/song'
+import { type KindChoice, type Song, type SongSummary, songKinds } from './catalog/song'
 import { songs } from './catalog/songs.generated'
 import { fixtureRecordingId } from './fixture-library'
 import {
@@ -227,6 +227,8 @@ describe('the Pitch Coverage rule', () => {
       id: 'test',
       title: 'Test',
       source: '',
+      kind: 'Songs',
+      fame: 0,
       views: 0,
       lengthBeats: pitches.length,
       bpm: 60,
@@ -480,39 +482,44 @@ describe('Compose’s listing', () => {
     const ids = (rows: { song: SongSummary }[]) => rows.map(r => r.song.id)
     const every = (l: { unlocked: SongRow[]; locked: SongRow[] }) => [...l.unlocked, ...l.locked]
 
-    it('sorts Most popular by the score’s MuseScore views', () => {
+    // #384: by fame, Wikipedia pageviews and PDMX views together, not the one score's views.
+    it('sorts Most popular by fame', () => {
       // The whole Fixture Library unlocks all 12.
       expect(ids(iPhoneListing(all, 'mostPopular').unlocked)).toEqual([
-        'twinkle', // 4,171 views
-        'furelise', // 3,539
-        'ode', // 2,556
-        'birthday', // 2,349
-        'row', // 1,796
-        'frere', // 1,671
-        'auld', // 1,383
-        'amazing', // 1,211
-        'saints', // 957
-        'jingle', // 829
-        'merryxmas', // 610
-        'mary' // 51
+        'birthday', // 11.201
+        'amazing', // 10.954
+        'auld', // 10.603
+        'twinkle', // 10.339
+        'jingle', // 10.054
+        'merryxmas', // 9.768
+        'furelise', // 9.705
+        'ode', // 9.672
+        'saints', // 9.551
+        'frere', // 9.487
+        'mary', // 9.294
+        'row' // 8.292
       ])
+      const { locked } = listing([], '', 'mostPopular')
+      const fame = locked.map(r => r.song.fame)
+      expect(fame).toEqual([...fame].sort((a, b) => b - a))
     })
 
-    it('breaks Most popular’s ties by rating, then catalog order', () => {
+    it('breaks Most popular’s ties by views, then rating, then catalog order', () => {
       const base = song('mary')
       const coverage = { covered: 0, total: 4, hasMelodicRecordings: false, unlocked: false }
-      const row = (id: string, views: number, rating?: number): SongRow => ({
-        song: { ...base, id, views, rating },
+      const row = (id: string, fame: number, views: number, rating?: number): SongRow => ({
+        song: { ...base, id, fame, views, rating },
         coverage
       })
       const rows = [
-        row('a', 10, 4),
-        row('b', 10, 4.5),
-        row('c', 10),
-        row('d', 20),
-        row('e', 10, 4.5)
+        row('a', 5, 10, 4),
+        row('b', 5, 10, 4.5),
+        row('c', 5, 10),
+        row('d', 5, 20),
+        row('e', 5, 10, 4.5),
+        row('f', 6, 1)
       ]
-      expect(ids(sortRows(rows, 'mostPopular'))).toEqual(['d', 'b', 'e', 'a', 'c'])
+      expect(ids(sortRows(rows, 'mostPopular'))).toEqual(['f', 'd', 'b', 'e', 'a', 'c'])
     })
 
     it('sorts Fewest notes by the Song’s distinct notes, then catalog order', () => {
@@ -597,10 +604,116 @@ describe('Compose’s listing', () => {
       expect(found("o'carolan")).toEqual(found('ocarolan'))
     })
 
+    it('finds Songs by their origin and kind words (#384)', () => {
+      const found = (query: string) => ids(every(listing(all, query))).sort()
+      const where = (test: (s: SongSummary) => boolean) => songs.filter(test).map(s => s.id)
+      // "Irish" finds every Irish Song, not only those with the word in a title or composer.
+      const irish = where(s => s.origin === 'Irish')
+      expect(irish.length).toBeGreaterThan(50)
+      expect(found('Irish')).toEqual(expect.arrayContaining(irish))
+      expect(found('irish').length).toBeGreaterThan(
+        where(s => /irish/i.test(`${s.title} ${s.composer}`)).length
+      )
+      expect(found('irish')).toEqual(
+        where(s => s.origin === 'Irish' || /irish/i.test(`${s.title} ${s.composer}`)).sort()
+      )
+      // "Christmas" and "hymn" find their kinds.
+      const christmas = where(s => s.kind === 'Christmas')
+      expect(found('christmas')).toEqual(expect.arrayContaining(christmas))
+      expect(found('hymn')).toEqual(expect.arrayContaining(where(s => s.kind === 'Hymns')))
+      expect(found('Fiddle tunes')).toEqual(where(s => s.kind === 'Fiddle tunes').sort())
+      // Every Song is a Song: "song" finds the titles with the word, not the kind Songs.
+      expect(found('song')).toEqual(
+        where(s =>
+          [s.title, ...(s.aliases ?? []), s.composer ?? ''].some(n => /song/i.test(n))
+        ).sort()
+      )
+      expect(where(s => s.kind === 'Songs').length).toBeGreaterThan(found('song').length)
+      // An origin of two words is found by either.
+      expect(found('african')).toEqual(
+        expect.arrayContaining(where(s => s.origin === 'African American'))
+      )
+    })
+
     it('finds no Song by the name its score gives but #357 doesn’t', () => {
       // Red River Valley's score names "Joe Buchanan's Scottish Tome"; #357 calls it a folk song.
       expect(song('red-river-valley').composer).toBe('Traditional')
       expect(ids(every(listing(all, 'buchanan')))).toEqual([])
+    })
+  })
+
+  describe('the Kind chips (#384)', () => {
+    const ids = (rows: { song: SongSummary }[]) => rows.map(r => r.song.id)
+    const every = (l: { unlocked: SongRow[]; locked: SongRow[] }) => [...l.unlocked, ...l.locked]
+    const kinded = (kind: KindChoice, recordings: Recording[] = ten, filters: SongFilters = {}) =>
+      listing(recordings, '', 'closestToUnlocking', { ...filters, kind })
+
+    it('shows only the Songs of the kind chosen, every kind having some', () => {
+      for (const kind of songKinds) {
+        const shown = every(kinded(kind))
+        expect(shown.length, kind).toBeGreaterThan(30)
+        expect(
+          shown.filter(r => r.song.kind !== kind),
+          kind
+        ).toEqual([])
+        expect(shown.length, kind).toBe(songs.filter(s => s.kind === kind).length)
+      }
+      // Each Song is of exactly one kind.
+      const counts = songKinds.map(kind => every(kinded(kind)).length)
+      expect(counts.reduce((a, b) => a + b)).toBe(songs.length)
+    })
+
+    it('shows the Well known Songs of every kind', () => {
+      const known = every(kinded('Well known'))
+      expect(ids(known).sort()).toEqual(
+        songs
+          .filter(s => s.wellKnown)
+          .map(s => s.id)
+          .sort()
+      )
+      expect(known.length).toBeGreaterThan(200)
+      expect(new Set(known.map(r => r.song.kind)).size).toBe(songKinds.length)
+      // The iPhone app's 12 are all Well known.
+      expect(ids(known)).toEqual(expect.arrayContaining(iPhone.map(s => s.id)))
+      // A null kind shows every Song.
+      expect(listing(ten, '', 'closestToUnlocking', { kind: null })).toEqual(listing(ten))
+    })
+
+    it('keeps both sections and the order chosen', () => {
+      const christmas = kinded('Christmas')
+      expect(ids(christmas.unlocked)).toEqual(expect.arrayContaining(['jingle', 'merryxmas']))
+      expect(christmas.locked.length).toBeGreaterThan(0)
+      for (const order of ['closestToUnlocking', 'mostPopular', 'fewestNotes'] as const) {
+        const sorted = listing(ten, '', order, { kind: 'Christmas' })
+        const whole = listing(ten, '', order)
+        const isChristmas = (r: SongRow) => r.song.kind === 'Christmas'
+        expect(ids(sorted.unlocked)).toEqual(ids(whole.unlocked.filter(isChristmas)))
+        expect(ids(sorted.locked)).toEqual(ids(whole.locked.filter(isChristmas)))
+      }
+    })
+
+    it('combines with Ready, Favorites and search', () => {
+      const readyKids = kinded('Kids', ten, { ready: true })
+      expect(ids(readyKids.unlocked)).toEqual(
+        ids(listing(ten).unlocked.filter(r => r.song.kind === 'Kids'))
+      )
+      expect(ids(readyKids.unlocked)).toEqual(
+        expect.arrayContaining(['mary', 'twinkle', 'row', 'frere'])
+      )
+      expect(readyKids.locked).toEqual([])
+      const favorites = new Set(['twinkle', 'jingle', 'birthday'])
+      const kids = kinded('Kids', ten, { favorites })
+      expect(ids(every(kids))).toEqual(['twinkle'])
+      expect(every(kinded('Songs', ten, { favorites })).map(r => r.song.id)).toEqual(['birthday'])
+      // Happy Birthday is a Favorite Song, but not unlocked yet.
+      expect(every(kinded('Songs', ten, { favorites, ready: true }))).toEqual([])
+      const littleKids = listing(ten, 'little', 'closestToUnlocking', { kind: 'Kids' })
+      expect(ids(littleKids.unlocked)).toEqual(['mary', 'twinkle'])
+      // Little Peggy's Love has "little" in its title, but it's a fiddle tune.
+      expect(song('little-peggys-love').kind).toBe('Fiddle tunes')
+      expect(
+        ids(every(listing(ten, 'little', 'closestToUnlocking', { kind: 'Well known' })))
+      ).toEqual(expect.arrayContaining(['mary', 'twinkle']))
     })
   })
 

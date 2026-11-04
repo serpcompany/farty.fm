@@ -35,7 +35,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { startAudioInTap } from '@/lib/audio/context'
-import type { SongSummary } from '@/lib/catalog/song'
+import { type KindChoice, kindChoices, type SongSummary } from '@/lib/catalog/song'
 import { songListing, sortRows } from '@/lib/pitch-coverage'
 import { cn } from '@/lib/utils'
 import { songOrders, useComposeChoices } from './compose-choices'
@@ -48,9 +48,10 @@ import { LockedSongRow, songList, UnlockedSongRow } from './song-row'
 const noFavorites: ReadonlySet<string> = new Set()
 
 /**
- * Compose: the Song Catalog with each Song's Pitch Coverage. Search it by title or composer, sort
- * it, and show only the Ready or Favorite Songs (#356). Open an Unlocked Song in Song Creator, or a
- * locked Song to see which notes it still needs. It began as a port of the iPhone app's
+ * Compose: the Song Catalog with each Song's Pitch Coverage. Search it by title, composer, kind or
+ * origin, sort it, show only the Ready or Favorite Songs (#356), and show one kind of Song, or the
+ * Well known ones, with a Kind chip (#384). Open an Unlocked Song in Song Creator, or a locked Song
+ * to see which notes it still needs. It began as a port of the iPhone app's
  * `ComposeTab`, which still lists Favorites first and has no composer, Ready filter, Most popular or
  * Fewest notes: the web screen is the newer one, so port from here to the iPhone, not back.
  */
@@ -59,8 +60,17 @@ export function ComposeScreen() {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const searchBox = useRef<HTMLInputElement>(null)
-  const { order, chooseOrder, onlyFavorites, chooseOnlyFavorites, onlyReady, chooseOnlyReady } =
-    useComposeChoices()
+  const {
+    order,
+    chooseOrder,
+    onlyFavorites,
+    chooseOnlyFavorites,
+    onlyReady,
+    chooseOnlyReady,
+    kind,
+    chooseKind
+  } = useComposeChoices()
+  const kindRow = useRef<HTMLDivElement>(null)
   const [lockedSong, setLockedSong] = useState<SongSummary | null>(null)
   /** The Song a locked sheet's Report a problem opened the report sheet for (#358). */
   const [reportedSong, setReportedSong] = useState<SongSummary | null>(null)
@@ -75,19 +85,29 @@ export function ComposeScreen() {
     return () => document.removeEventListener('visibilitychange', visibilityChanged)
   }, [])
 
+  // The chosen Kind chip scrolls into sight, as when a remembered one is past the screen's edge.
+  useEffect(() => {
+    if (kind === null) return
+    kindRow.current
+      ?.querySelector('[aria-pressed="true"]')
+      ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [kind])
+
   const sorted = useMemo(() => sortRows(pedos.songRows, order), [pedos.songRows, order])
   // A heart tap filters again only while the Favorites filter is on.
   const only = onlyFavorites ? (favorites ?? noFavorites) : null
   const listing = useMemo(
-    () => songListing(sorted, query, { ready: onlyReady, favorites: only }),
-    [sorted, query, onlyReady, only]
+    () => songListing(sorted, query, { ready: onlyReady, favorites: only, kind }),
+    [sorted, query, onlyReady, only, kind]
   )
+  const listed = listing.unlocked.length + listing.locked.length
   // The whole catalog, or the search within it: the Sound Pad and the first steps show with it.
-  const showsAll = query === '' && !onlyFavorites && !onlyReady
+  const showsAll = query === '' && !onlyFavorites && !onlyReady && kind === null
   const orderLabel = (songOrders.find(o => o.value === order) ?? songOrders[0]).label
   const showAll = () => {
     chooseOnlyReady(false)
     chooseOnlyFavorites(false)
+    chooseKind(null)
   }
 
   return (
@@ -183,6 +203,27 @@ export function ComposeScreen() {
             </span>
           </button>
         </div>
+        {/* One kind at a time, or none: tapping the chosen chip again shows every Song (#384). The
+            fieldset only names the chips; the row inside scrolls sideways, to the screen's edges. */}
+        <fieldset className="-mx-4 min-w-0" data-testid="kind-chips">
+          <legend className="sr-only">Kinds</legend>
+          <div
+            ref={kindRow}
+            className="flex scroll-px-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {kindChoices.map(choice => (
+              <button
+                key={choice}
+                type="button"
+                className={chip}
+                aria-pressed={kind === choice}
+                onClick={() => chooseKind(kind === choice ? null : choice)}
+              >
+                <span className={chipFace}>{choice}</span>
+              </button>
+            ))}
+          </div>
+        </fieldset>
       </div>
 
       {pedos.songsFailed ? (
@@ -198,6 +239,11 @@ export function ComposeScreen() {
         </div>
       ) : (
         <div className="flex flex-col gap-6 pt-1.5">
+          {kind !== null && listed > 0 && (
+            <p className="-mb-3 px-4 text-sm text-muted-foreground" data-testid="kind-count">
+              {kind} · {listed}
+            </p>
+          )}
           {showsAll && <SoundPadRow />}
           {pedos.melodicRecordings.length === 0 && showsAll && (
             <Empty className="rounded-xl bg-muted/60 p-6">
@@ -226,11 +272,12 @@ export function ComposeScreen() {
               ))}
             </Section>
           )}
-          {listing.unlocked.length === 0 && listing.locked.length === 0 && (
+          {listed === 0 && (
             <NoSongs
               query={query.trim()}
               onlyReady={onlyReady}
               onlyFavorites={onlyFavorites}
+              kind={kind}
               hasFavorites={(favorites?.size ?? 0) > 0}
               onShowAll={showAll}
             />
@@ -263,25 +310,29 @@ const chipFace =
 
 /**
  * What Compose says when it lists no Song: why, and a way to show the Songs a filter hides, when
- * there are any.
+ * there are any. Every kind has Songs, so a Kind chip empties the list only with another filter or
+ * a search (#384).
  */
 function NoSongs({
   query,
   onlyReady,
   onlyFavorites,
+  kind,
   hasFavorites,
   onShowAll
 }: {
   query: string
   onlyReady: boolean
   onlyFavorites: boolean
+  kind: KindChoice | null
   hasFavorites: boolean
   onShowAll: () => void
 }) {
   const filters = [onlyReady && 'Ready', onlyFavorites && 'Favorite'].filter(Boolean)
+  const inKind = kind === null ? '' : ` in ${kind}`
   const [icon, title, description, action]: [ReactNode, string, string, string?] =
     query !== ''
-      ? filters.length === 0
+      ? filters.length === 0 && kind === null
         ? [
             <Search key="icon" />,
             `No Results for “${query}”`,
@@ -289,30 +340,44 @@ function NoSongs({
           ]
         : [
             <Search key="icon" />,
-            `No ${filters.join(' ')} Songs match “${query}”`,
+            `No ${[...filters, 'Songs'].join(' ')}${inKind} match “${query}”`,
             'The filters are on. Search every Song instead.',
             'Search all Songs'
           ]
-      : onlyFavorites && (!hasFavorites || !onlyReady)
+      : onlyFavorites && (!hasFavorites || (!onlyReady && kind === null))
         ? [
             <Heart key="icon" />,
             'No Favorites yet',
             'Tap the heart on a Song to add it to your Favorites.',
-            onlyReady ? 'Show all Songs' : undefined
+            onlyReady || kind !== null ? 'Show all Songs' : undefined
           ]
-        : onlyFavorites
+        : onlyFavorites && onlyReady
           ? [
               <CircleCheck key="icon" />,
-              'No Ready Favorites',
-              'None of your Favorites is unlocked yet.',
+              `No Ready Favorites${inKind}`,
+              `None of your Favorites${inKind} is unlocked yet.`,
               'Show all Songs'
             ]
-          : [
-              <CircleCheck key="icon" />,
-              'No Ready Songs yet',
-              'Record a few farts with a clear note to unlock a Song.',
-              'Show all Songs'
-            ]
+          : onlyFavorites
+            ? [
+                <Heart key="icon" />,
+                `No Favorites${inKind}`,
+                'Tap the heart on a Song to add it to your Favorites.',
+                'Show all Songs'
+              ]
+            : onlyReady
+              ? [
+                  <CircleCheck key="icon" />,
+                  `No Ready Songs${inKind} yet`,
+                  'Record a few farts with a clear note to unlock a Song.',
+                  'Show all Songs'
+                ]
+              : [
+                  <Music2 key="icon" />,
+                  `No Songs${inKind}`,
+                  'Try another kind, or show every Song.',
+                  'Show all Songs'
+                ]
   return (
     <Empty className="pt-16" data-testid="no-songs">
       <EmptyHeader>
