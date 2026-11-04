@@ -127,7 +127,7 @@ describe('the renderer places every note as the reference does', () => {
       expect(notFinite, id).toBe(0)
       // Peaks at -1 dBFS, the ceiling phone media plays to, so plain gain can't make it louder.
       expect(peak).toBeCloseTo(0.89, 6)
-      // And plays about as loud as phone media, -14 LUFS (#369): -12.3 to -17.5 on these Songs.
+      // And plays about as loud as phone media, -14 LUFS (#369): -12.2 to -17.4 on these Songs.
       const lufs = loudness(rendered.samples, SR)
       expect(lufs, id).toBeGreaterThan(-18)
       expect(lufs, id).toBeLessThan(-11)
