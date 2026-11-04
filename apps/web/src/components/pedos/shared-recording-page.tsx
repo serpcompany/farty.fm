@@ -16,13 +16,14 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { play, playbackPosition, stopPlayback } from '@/lib/audio/player'
+import { profilePath } from '@/lib/handle'
 import type { Trim } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { useStartGetFarty } from './get-farty'
 import { ReplayWaveform } from './waveform'
 
-// A shared Recording's page, `/u/<handle>/r/<id>/`, and a shared Toot's, `/u/<handle>/t/<id>/`
+// A shared Recording's page, `/@<handle>/r/<id>/`, and a shared Toot's, `/@<handle>/t/<id>/`
 // (ADR 0020): what anyone with the link sees, signed in or not, in any browser. The fart comes
 // first: who shared it, its name and its note or Song, a big waveform and Play. Get Farty sits
 // under the player and in the top bar. The prototype's option A.
@@ -113,7 +114,7 @@ export function SharedRecordingPage({
       what="Recording"
       handle={handle}
       shareId={shareId}
-      base={`/u/${handle}/r/${shareId}/`}
+      base={`${profilePath(handle)}r/${shareId}/`}
       name={name}
       {...player}
     >
@@ -158,7 +159,7 @@ export function SharedTootPage({
       what="Toot"
       handle={handle}
       shareId={shareId}
-      base={`/u/${handle}/t/${shareId}/`}
+      base={`${profilePath(handle)}t/${shareId}/`}
       name={title}
       length={length}
       part={{ startSeconds: 0, endSeconds: seconds }}
@@ -240,7 +241,7 @@ function SharedItemPage({
       <div className="flex flex-1 flex-col px-4 pb-6">
         <p className="pt-3 text-[15px] text-muted-foreground">
           <Link
-            href={`/u/${handle}/`}
+            href={profilePath(handle)}
             className="rounded-sm font-medium text-foreground outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             @{handle}
@@ -295,7 +296,7 @@ function SharedItemPage({
         )}
 
         <Link
-          href={`/u/${handle}/`}
+          href={profilePath(handle)}
           className="mt-6 flex min-h-11 items-center justify-center gap-1 rounded-md text-[15px] font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           More from @{handle}

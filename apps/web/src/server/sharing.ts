@@ -18,7 +18,7 @@ import {
   tootPlaysTakenDown
 } from '@/db/sharing'
 import { songIndex } from '@/lib/catalog/song-index.generated'
-import { handleProblem, normalizeHandle, suggestHandle } from '@/lib/handle'
+import { handleProblem, normalizeHandle, profilePath, suggestHandle } from '@/lib/handle'
 import type { Recording, Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
 import { PAD_TOOT_TITLE } from '@/lib/toot'
@@ -34,9 +34,9 @@ import { HEADER_BYTES, readWavHeader, wavHeaderOf } from './wav-header'
 
 // Sharing (ADR 0020). The owner's routes, under `src/app/api/` with `userRoute`: their Handle, and
 // sharing or stopping sharing one of their own Recordings or saved Toots. The public routes, under
-// `src/app/u/[handle]/r/[id]/` for a Recording and `src/app/u/[handle]/t/[id]/` for a Toot: the
-// shared page, its audio and its Report, which anyone with the link reaches, and which find the
-// item only through a live share.
+// `src/app/[atHandle]/r/[id]/` for a Recording and `src/app/[atHandle]/t/[id]/` for a Toot: the
+// shared page, its link image, audio and Report, which anyone with the link reaches, and which
+// find the item only through a live share.
 
 const notFound = () => apiError(404, 'not_found')
 
@@ -55,9 +55,12 @@ export function newShareId(): string {
 /** Each kind's links: `r` for a Recording, `t` for a Toot. */
 const LINK_SEGMENT: Record<Kind, string> = { recordings: 'r', toots: 't' }
 
-/** A shared item's page: `/u/<handle>/r/<id>/` for a Recording, or `/u/<handle>/t/<id>/`. */
+/**
+ * A shared item's page, under its owner's (#382): `/@<handle>/r/<id>/` for a Recording, or
+ * `/@<handle>/t/<id>/`.
+ */
 export function sharePath(kind: Kind, handle: string, shareId: string): string {
-  return `/u/${handle}/${LINK_SEGMENT[kind]}/${shareId}/`
+  return `${profilePath(handle)}${LINK_SEGMENT[kind]}/${shareId}/`
 }
 
 /**
@@ -202,7 +205,7 @@ export type SharedRecording = {
 }
 
 /**
- * The Recording shared at `/u/<handle>/r/<shareId>/`, or null: not shared, stopped, taken down,
+ * The Recording shared at `/@<handle>/r/<shareId>/`, or null: not shared, stopped, taken down,
  * deleted, or the account deleted all look the same.
  */
 export async function findSharedRecording(
@@ -229,7 +232,7 @@ export type SharedToot = {
 }
 
 /**
- * The saved Toot shared at `/u/<handle>/t/<shareId>/`, or null, as `findSharedRecording`: not
+ * The saved Toot shared at `/@<handle>/t/<shareId>/`, or null, as `findSharedRecording`: not
  * shared, stopped, taken down, never saved, deleted, or the account deleted all look the same.
  */
 export async function findSharedToot(
@@ -326,7 +329,7 @@ async function cutWav(
 type SharedWav = { body: BodyInit; size: number; etag: string }
 
 /**
- * `GET /u/<handle>/r/<id>/audio/` and `GET /u/<handle>/t/<id>/audio/`: a shared item's audio, for
+ * `GET /@<handle>/r/<id>/audio/` and `GET /@<handle>/t/<id>/audio/`: a shared item's audio, for
  * anyone with the link. A Recording's is the part its page plays (`sharedPart`) as a WAV of its
  * own, and the rest of the take is never served. A Toot's is its saved WAV, whole and as stored.
  * Every request checks the share in D1 first, so a link that stopped working never plays, then the
@@ -458,7 +461,7 @@ export const itemReportsKey = (share: { userId: string; kind: Kind; itemId: stri
   `share_report_item|${share.userId}|${share.kind}|${share.itemId}`
 
 /**
- * `POST /u/<handle>/r/<id>/report/` and `POST /u/<handle>/t/<id>/report/`: anyone's report of a
+ * `POST /@<handle>/r/<id>/report/` and `POST /@<handle>/t/<id>/report/`: anyone's report of a
  * shared Recording or Toot, from its page. It keeps a row in `share_reports` naming the share and
  * the item, never the reporter, and logs `share_reported` with the link's id and kind, for Farty
  * to check (docs/agents/web.md). 204 once kept; 403

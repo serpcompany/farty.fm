@@ -17,7 +17,7 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true
 const page = vi.hoisted(() => {
   type State = { account: { status: string; id?: string }; stepOpen: boolean; path: string }
   const listeners = new Set<() => void>()
-  let state: State = { account: { status: 'signedOut' }, stepOpen: false, path: '/u/maya/' }
+  let state: State = { account: { status: 'signedOut' }, stepOpen: false, path: '/@maya/' }
   return {
     get: () => state,
     set(next: Partial<State>) {
@@ -81,17 +81,17 @@ let asked: unknown[]
 async function render() {
   const { AccountStep } = await import('./account-step')
   const { GetFartyFlow, useStartGetFarty } = await import('./get-farty')
-  // As `u/layout.tsx`: the flow runs only on shared and profile pages.
+  // As `[atHandle]/layout.tsx`: the flow runs only on shared and profile pages.
   function SharedPages({ children }: { children: ReactNode }) {
     const { path } = useSyncExternalStore(page.subscribe, page.get)
-    return path.startsWith('/u/') ? children : null
+    return path.startsWith('/@') ? children : null
   }
   // Each page's Get Farty offers whoever's page it is.
   function GetFarty() {
     const start = useStartGetFarty()
     const { path } = useSyncExternalStore(page.subscribe, page.get)
     return (
-      <button type="button" onClick={() => start(path.split('/')[2])}>
+      <button type="button" onClick={() => start(path.split('/')[1].slice(1))}>
         Get Farty
       </button>
     )
@@ -147,7 +147,7 @@ async function sessionRead(account: { status: string }) {
 beforeEach(() => {
   vi.resetModules()
   sessionStorage.clear()
-  page.set({ account: { status: 'signedOut' }, stepOpen: false, path: '/u/maya/' })
+  page.set({ account: { status: 'signedOut' }, stepOpen: false, path: '/@maya/' })
   // The step's draft holds the email, as typing it would.
   sessionStorage.setItem(
     'pedos.accountStep.draft',
@@ -234,7 +234,7 @@ describe('Get Farty on a phone', () => {
         add: true,
         stage: 'friend',
         outcome: null,
-        page: '/u/maya/'
+        page: '/@maya/'
       })
     )
     page.set({ account: { status: 'checking' } })
@@ -268,7 +268,7 @@ describe('Get Farty on a phone', () => {
     expect(kept()).toBeNull()
     expect(offer()).toBeNull()
     await signIn()
-    await goTo('/u/sam/')
+    await goTo('/@sam/')
     await act(async () => {})
     expect(asked).toEqual([])
     expect(heading()).toBeNull()
@@ -279,7 +279,7 @@ describe('Get Farty on a phone', () => {
     await tap('Get Farty')
     await tap('Not now')
     await tap('Done')
-    await goTo('/u/sam/')
+    await goTo('/@sam/')
     await tap('Get Farty')
     expect(offer()?.closest('label')?.textContent).toBe('Add @sam as a friend')
     await signIn()
@@ -308,7 +308,7 @@ describe('Get Farty on a phone', () => {
         add: true,
         stage: 'friend',
         outcome: null,
-        page: '/u/maya/'
+        page: '/@maya/'
       })
     )
     page.set({ account: { status: 'unreachable' } })

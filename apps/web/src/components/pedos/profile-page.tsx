@@ -13,13 +13,14 @@ import {
 import { play, stopPlayback } from '@/lib/audio/player'
 import { actOnFriend, type FriendAction, type FriendState, readFriendState } from '@/lib/friends'
 import { useGetFarty } from '@/lib/get-farty'
+import { profilePath } from '@/lib/handle'
 import { formattedTootDate } from '@/lib/toot'
 import { useAccount } from './account-provider'
 import { FriendsUnreachable, RemoveFriendDialog, refusalMessage, useFriendRequest } from './friends'
 import { useStartGetFarty } from './get-farty'
 import { Report, SharedTopBar } from './shared-recording-page'
 
-// A profile page, `/u/<handle>/` (#319, ADR 0021): what anyone sees, signed in or not, in any
+// A profile page, `/@<handle>/` (#319, ADR 0021): what anyone sees, signed in or not, in any
 // browser. The Handle, the friend control, and the Recordings and Toots they've shared (#346),
 // newest first, each playing in place and opening its own page. No counts and no feed.
 
@@ -149,7 +150,7 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
 
         {!own && (
           <div className="mt-7 flex justify-center">
-            <Report title={`Report @${handle}?`} action={`/u/${handle}/report/`} />
+            <Report title={`Report @${handle}?`} action={`${profilePath(handle)}report/`} />
           </div>
         )}
       </div>

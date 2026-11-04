@@ -5,7 +5,7 @@ import type { RecordingRow, TootRow } from './library'
 import { handles, profileReports, recordings, shares, toots } from './schema'
 import { takenDownRecordings, tootsPlayingTakenDown } from './sharing'
 
-// Profile pages in D1 (#319, ADR 0021): `/u/<handle>/` lists what its user shares, and nothing
+// Profile pages in D1 (#319, ADR 0021): `/@<handle>/` lists what its user shares, and nothing
 // else. A share that was stopped, taken down, or whose Recording, Toot or account was deleted
 // isn't listed, the same as its own link doesn't work, and neither is a Toot that plays a
 // Recording Farty took down (#346).

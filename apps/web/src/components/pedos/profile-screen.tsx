@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
+import { profilePath } from '@/lib/handle'
 import { setSharing, useSharing } from '@/lib/telemetry/sharing'
 import { useAccount } from './account-provider'
 import { FriendsSection } from './friends'
@@ -366,7 +367,7 @@ function AccountSection() {
           <li>
             {/* The user's own profile page (#319), which lists only what they've shared. */}
             <Link
-              href={`/u/${handle}/`}
+              href={profilePath(handle)}
               className="flex min-h-11 items-center justify-between gap-4 px-4 py-2.5 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset"
             >
               <span className="shrink-0">Your page</span>

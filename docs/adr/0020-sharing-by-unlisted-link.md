@@ -15,29 +15,30 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
    - `PUT /api/handle/` claims it in one statement, so two people can't both get one. A Handle can't be changed yet; links carry it, so a change would break them.
    - Profile shows it, under Email.
 3. **A link is a random id, not the Recording's.**
-   - `/u/<handle>/r/<share id>/`, where the share id is 12 random characters of lowercase Crockford base 32 (60 bits, `newShareId()`). It can't be guessed from another link and says nothing of the Recording's own id.
+   - `/@<handle>/r/<share id>/`, where the share id is 12 random characters of lowercase Crockford base 32 (60 bits, `newShareId()`). It can't be guessed from another link and says nothing of the Recording's own id.
+   - Links were `/u/<handle>/…` until #382 (2026-11-04), when the owner moved them under `/@<handle>/`. Each old path answers one 308 to its new one, query included (`next.config.ts`), so a link already sent keeps working. A Handle never holds `@` or `/`, so a path names one Handle only.
    - Stop sharing deletes the share, and sharing again makes a new id, so a link that was stopped never works again.
 4. **Unlisted: anyone with the link, and nothing else.**
-   - The page, its image and its audio need no account. Nothing lists a link: there's no profile page until #319 (which lists a user's shares on it, ADR 0021), every shared page is `noindex, nofollow` with no canonical, and the sitemaps leave `/u/` out.
+   - The page, its image and its audio need no account. Nothing lists a link: there's no profile page until #319 (which lists a user's shares on it, ADR 0021), every shared page is `noindex, nofollow` with no canonical, and the sitemaps leave `/@<handle>/` out.
    - It shows the Handle, the Recording's name, its note (a Placed Pitch counts), its length and the waveform of the part it plays, which is what its row plays: its Trim (ADR 0019), or else the whole take. Nothing else of the account: no email, no other Recordings.
    - Nothing is public until the user shares. A Recording that was never shared, or whose share stopped, answers the same 404 as one that never existed.
 5. **Each request checks D1.**
-   - The page, `opengraph-image` and `audio/` each look up the share, its owner's Handle and the live Recording (`sharedRecording()` in `src/db/sharing.ts`). A share stopped or taken down, a Recording deleted (its tombstone) and an account deleted (`on delete cascade`) all fail the lookup, at once and alike.
-   - So nothing that could outlive the link is kept anywhere between: the page and its image are `private, no-cache`, and the service worker never handles `/u/` (`public/sw.js`).
+   - The page, its link image (`image/`) and `audio/` each look up the share, its owner's Handle and the live Recording (`sharedRecording()` in `src/db/sharing.ts`). A share stopped or taken down, a Recording deleted (its tombstone) and an account deleted (`on delete cascade`) all fail the lookup, at once and alike.
+   - So nothing that could outlive the link is kept anywhere between: the page and its image are `private, no-cache`, and the service worker never handles `/@<handle>/…`, nor the old `/u/` paths that redirect there (`public/sw.js`).
 6. **Audio through the Worker, never a public bucket.**
-   - `GET /u/<handle>/r/<id>/audio/` checks the share, then serves only the part the page plays, its Trim or else the whole take, as a WAV of its own: a plain cut of its frames, read from R2 as a byte range under a fresh header. Audio trimmed off is never served. The cut comes from this data center's Workers cache, keyed by its R2 key and the Trim, or from R2 into it. R2 keys are written once (`media.ts`), and a changed Trim is a new key, so the copy is never stale.
+   - `GET /@<handle>/r/<id>/audio/` checks the share, then serves only the part the page plays, its Trim or else the whole take, as a WAV of its own: a plain cut of its frames, read from R2 as a byte range under a fresh header. Audio trimmed off is never served. The cut comes from this data center's Workers cache, keyed by its R2 key and the Trim, or from R2 into it. R2 keys are written once (`media.ts`), and a changed Trim is a new key, so the copy is never stale.
    - The browser gets `private, no-cache` with an ETag, so each play revalidates against D1 (a 304 when nothing changed), and a link stopped or taken down never plays again.
    - The page fetches it only on Play and plays it with the app's player, from where its row would start, at its own pitch and speed (ADR 0004, ADR 0012).
 7. **Link previews: a title and an image drawn per request.**
    - `og:title` is "Recording 3 by @maya", `og:description` "A G3 fart on Farty. Tap to play.", with `summary_large_image` for X.
-   - `opengraph-image.tsx` draws a 1200 by 630 PNG with `next/og`: Farty's pink and icon, the note, the name, "A fart by @maya" and the waveform's bars. It reads D1 like the page, so a stopped link's image is gone too, and Next's default (`public, max-age=0, must-revalidate` in Next 16.3) is replaced by `private, no-cache`. The bundled font has no ♯, and a missing glyph makes `next/og` fetch one from Google Fonts on the request, so the image spells a sharp `#`.
+   - The page's `image/` route draws a 1200 by 630 PNG with `next/og`: Farty's pink and icon, the note, the name, "A fart by @maya" and the waveform's bars. It was an `opengraph-image.tsx` until #382, but Next escapes the `@` in that file's URL, so the page now names the route in its Open Graph tags itself (`src/server/link-preview.tsx`). It reads D1 like the page, so a stopped link's image is gone too, and it answers `private, no-cache`. The bundled font has no ♯, and a missing glyph makes `next/og` fetch one from Google Fonts on the request, so the image spells a sharp `#`.
 8. **Share, then the share sheet.**
    - On a Recording's row, Share puts the link on the phone's share sheet (`navigator.share`), or copies it where there's none. A row that is shared says "Shared", and its button opens Share link and Stop sharing.
    - The record flow offers the same Share at the top of Result, the step after its review's Save, once the take is saved (#320). The review before Save has none: the take isn't a Recording yet.
    - When the browser has spent the tap's activation on the requests before the sheet (a `NotAllowedError`), a "Your link is ready" dialog offers the sheet on a fresh tap.
    - Stop sharing asks first: "The link stops working for everyone who has it. Sharing it again makes a new link." Deleting a shared Recording, or the account, says its links stop working too.
 9. **Report, on every shared page, reaches Farty in D1.**
-   - Report asks first, then `POST /u/<handle>/r/<id>/report/`, from Farty's own origin only. Each report is a `share_reports` row (the share, its owner, the item, when) and a `share_reported` log line. Nothing about the person who reported is kept.
+   - Report asks first, then `POST /@<handle>/r/<id>/report/`, from Farty's own origin only. Each report is a `share_reports` row (the share, its owner, the item, when) and a `share_reported` log line. Nothing about the person who reported is kept.
    - A reporter keeps at most 10 an hour, a Recording 5 a day whichever link it's shared under, and the site 300 an hour (`REPORT_LIMITS`, counted in `rate_limit`), so one client can't spend the site's and a script can't fill D1. The reporter's row is keyed by an HMAC of their `cf-connecting-ip`, never the address. A report spends a slot of each only when all three have one, and past any of them it answers 429, which the page says.
    - The owner takes a link down by setting its share's `taken_down_at` in the D1 console (`docs/agents/web.md`, Reports and take-downs). A share taken down stays: Stop sharing and deleting the Recording leave it, and sharing that Recording again answers 403 `taken_down`.
 10. **The shared page is option A, the Player.**
@@ -50,7 +51,7 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
 A saved Toot shares the same way, through the same Handle, `shares` rows (`kind` `toots`), checks and Report. Only what differs:
 
 - **Saved Toots only.** A Toot shares once it is in the account, which it reaches only once paid for (ADR 0010). Song Creator's unpaid preview has no Share, and a Toot that was never saved, or is still in the outbox, answers 404 like a Recording. Share sits in a saved Toot's header and in each Toots row's ⋯ menu, not on the row itself.
-- **The link is `/u/<handle>/t/<share id>/`.** A Recording's id under `t/`, or a Toot's under `r/`, answers 404.
+- **The link is `/@<handle>/t/<share id>/`.** A Recording's id under `t/`, or a Toot's under `r/`, answers 404.
 - **The page shows the Toot's title, the Song it plays, its length and the waveform of its saved audio.** A Sound Pad Toot's Song line says "Sound Pad". The catalog names no composer, so the page doesn't either.
 - **The audio is the saved WAV as stored**, the whole file, from the Workers cache by its R2 key or from R2 into it, with the same `private, no-cache` and ETag. Nothing is rendered for the link.
 - **The waveform is drawn on the server** from that WAV (60 bars, `sharedTootLevels`), after the D1 check, and cached by its R2 key, since a Toot's row keeps no bars of its own.

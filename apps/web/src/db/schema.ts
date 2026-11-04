@@ -300,7 +300,7 @@ export const tootPayments = sqliteTable(
 // deleting the item or deleting the account takes the link down.
 
 /**
- * A user's Handle: the name in their links, `farty.fm/u/<handle>/…`, picked the first time they
+ * A user's Handle: the name in their links, `farty.fm/@<handle>/…`, picked the first time they
  * share. Lowercase, unique and checked against a block list (`src/lib/handle.ts`).
  */
 export const handles = sqliteTable('handles', {
@@ -313,7 +313,7 @@ export const handles = sqliteTable('handles', {
 
 /**
  * A shared item: one row while its owner shares it, keyed by a random id that is the link's
- * (`/u/<handle>/r/<id>/`). Stop sharing and deleting the item delete the row, so sharing again
+ * (`/@<handle>/r/<id>/`). Stop sharing and deleting the item delete the row, so sharing again
  * makes a new link. `taken_down_at` is set by Farty after a report (docs/agents/web.md), and keeps
  * the row, so the item can't be shared again.
  */
@@ -402,7 +402,7 @@ export const friends = sqliteTable(
 )
 
 /**
- * A report of a profile page, `/u/<handle>/`, from its Report, for Farty to check, such as for a
+ * A report of a profile page, `/@<handle>/`, from its Report, for Farty to check, such as for a
  * bad Handle. It names the user reported, never who reported them. Deleting that account deletes
  * it.
  */

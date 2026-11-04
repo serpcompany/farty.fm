@@ -51,7 +51,7 @@ vi.mock('@/lib/sharing', async importOriginal => ({
   readShares: async () => ({
     handle: 'alice',
     links: new Map(),
-    tootLinks: new Map([[SHARED, 'https://farty.test/u/alice/t/abcdefghjkmn/']])
+    tootLinks: new Map([[SHARED, 'https://farty.test/@alice/t/abcdefghjkmn/']])
   })
 }))
 vi.mock('next/navigation', () => ({

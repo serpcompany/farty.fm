@@ -175,7 +175,7 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     const shared = await page.evaluate(() => window.__shared[0])
     expect(shared.title).toBe(`Recording 1 by @${handle}`)
     link = new URL(shared.url ?? '').pathname
-    expect(link).toMatch(new RegExp(`^/u/${handle}/r/[0-9a-z]{12}/$`))
+    expect(link).toMatch(new RegExp(`^/@${handle}/r/[0-9a-z]{12}/$`))
     await expect(page.getByTestId('recording-shared')).toHaveText('Shared')
   })
 
@@ -223,10 +223,13 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
       other.locator(`meta[property="${property}"], meta[name="${property}"]`).first()
     await expect(meta('robots')).toHaveAttribute('content', /noindex/)
     await expect(meta('og:title')).toHaveAttribute('content', `Recording 1 by @${handle}`)
+    // The share URL, at `/@`: no canonical, as it's unlisted.
+    expect(new URL((await meta('og:url').getAttribute('content')) ?? '').pathname).toBe(link)
+    await expect(other.locator('link[rel="canonical"]')).toHaveCount(0)
     await expect(meta('twitter:card')).toHaveAttribute('content', 'summary_large_image')
     const image = await meta('og:image').getAttribute('content')
     imagePath = new URL(image ?? '').pathname + new URL(image ?? '').search
-    expect(imagePath).toContain(link)
+    expect(imagePath).toBe(`${link}image/`)
     const picture = await other.request.get(imagePath)
     expect(picture.status()).toBe(200)
     expect(picture.headers()['content-type']).toBe('image/png')
@@ -262,7 +265,7 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
   })
 
   await test.step('a link nobody shared is gone too', async () => {
-    await gone(`/u/${handle}/r/000000000000/`)
+    await gone(`/@${handle}/r/000000000000/`)
   })
 
   await test.step('shared again, the new link is gone once the Recording is deleted', async () => {
@@ -270,7 +273,7 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     // This page's own share sheet, since it loaded /recordings/: the new link only.
     await expect.poll(() => page.evaluate(() => window.__shared.length)).toBe(1)
     const again = new URL((await page.evaluate(() => window.__shared[0].url)) ?? '').pathname
-    expect(again).toMatch(new RegExp(`^/u/${handle}/r/[0-9a-z]{12}/$`))
+    expect(again).toMatch(new RegExp(`^/@${handle}/r/[0-9a-z]{12}/$`))
     expect(again).not.toBe(link)
     expect((await other.goto(again))?.status()).toBe(200)
     expect((await other.request.get(imageOf(again))).status()).toBe(200)
@@ -352,7 +355,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect.poll(shareSheet).toHaveLength(1)
     expect(await page.evaluate(() => window.__shared[0].title)).toBe(`${title} by @${handle}`)
     link = new URL((await shareSheet())[0]).pathname
-    expect(link).toMatch(new RegExp(`^/u/${handle}/t/[0-9a-z]{12}/$`))
+    expect(link).toMatch(new RegExp(`^/@${handle}/t/[0-9a-z]{12}/$`))
   })
 
   await test.step("the Toot's screen says it's shared, and its header's Share offers the same link", async () => {
@@ -409,6 +412,9 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
       other.locator(`meta[property="${property}"], meta[name="${property}"]`).first()
     await expect(meta('robots')).toHaveAttribute('content', /noindex/)
     await expect(meta('og:title')).toHaveAttribute('content', `${title} by @${handle}`)
+    // The share URL, at `/@`: no canonical, as it's unlisted.
+    expect(new URL((await meta('og:url').getAttribute('content')) ?? '').pathname).toBe(link)
+    await expect(other.locator('link[rel="canonical"]')).toHaveCount(0)
     await expect(meta('og:description')).toHaveAttribute(
       'content',
       `${twinkle}, played on farts. Tap to play.`
@@ -416,7 +422,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(meta('twitter:card')).toHaveAttribute('content', 'summary_large_image')
     const image = new URL((await meta('og:image').getAttribute('content')) ?? '')
     imagePath = image.pathname + image.search
-    expect(imagePath).toContain(link)
+    expect(imagePath).toBe(`${link}image/`)
     const picture = await other.request.get(imagePath)
     expect(picture.status()).toBe(200)
     expect(picture.headers()['content-type']).toBe('image/png')
@@ -461,10 +467,10 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     const tabSheet = () => tab.evaluate(() => window.__shared.map(shared => shared.url ?? ''))
     await expect.poll(tabSheet).toHaveLength(1)
     const recordingLink = new URL((await tabSheet())[0]).pathname
-    expect(recordingLink).toMatch(new RegExp(`^/u/${handle}/r/[0-9a-z]{12}/$`))
+    expect(recordingLink).toMatch(new RegExp(`^/@${handle}/r/[0-9a-z]{12}/$`))
     await tab.close()
 
-    const response = await other.goto(`/u/${handle}/`)
+    const response = await other.goto(`/@${handle}/`)
     expect(response?.status()).toBe(200)
     const rows = other.getByTestId('profile-shared-item')
     await expect(rows).toHaveCount(2)
@@ -510,7 +516,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expectGone(other, link, imageOf(link))
     await shot(other, 'toot-link-gone')
     // Its page lists only the Recording now.
-    await other.goto(`/u/${handle}/`)
+    await other.goto(`/@${handle}/`)
     await expect(other.getByTestId('profile-shared-item')).toHaveCount(1)
     await expect(other.locator(`a[href="${link}"]`)).toHaveCount(0)
   })
@@ -520,7 +526,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await page.getByRole('button', { name: `Share ${title}` }).click()
     await expect.poll(shareSheet).toHaveLength(before + 1)
     const again = new URL((await shareSheet())[before]).pathname
-    expect(again).toMatch(new RegExp(`^/u/${handle}/t/[0-9a-z]{12}/$`))
+    expect(again).toMatch(new RegExp(`^/@${handle}/t/[0-9a-z]{12}/$`))
     expect(again).not.toBe(link)
     expect((await other.goto(again))?.status()).toBe(200)
     expect((await other.request.get(imageOf(again))).status()).toBe(200)
@@ -595,7 +601,7 @@ test("a guest records, reviews and saves, then shares from Result once they've m
     await expect.poll(() => page.evaluate(() => window.__shared.length)).toBe(1)
     const shared = await page.evaluate(() => window.__shared[0])
     expect(shared.title).toBe(`Morning toot by @${handle}`)
-    expect(new URL(shared.url ?? '').pathname).toMatch(new RegExp(`^/u/${handle}/r/[0-9a-z]{12}/$`))
+    expect(new URL(shared.url ?? '').pathname).toMatch(new RegExp(`^/@${handle}/r/[0-9a-z]{12}/$`))
     await expect(page.getByTestId('result-note')).toHaveText('G3')
   })
 

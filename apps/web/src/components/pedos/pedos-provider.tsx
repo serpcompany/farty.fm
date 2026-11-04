@@ -26,6 +26,7 @@ import { loadSongs } from '@/lib/catalog/load-songs'
 import type { Song, SongSummary } from '@/lib/catalog/song'
 import type { FartChoices } from '@/lib/engine/fart-choices'
 import { loadFavorites } from '@/lib/favorite-store'
+import { isHandlePage } from '@/lib/handle'
 import { onLibraryChanged, recordingsAfter } from '@/lib/library-sync'
 import type { Performance } from '@/lib/performance'
 import { nearestNote } from '@/lib/pitch'
@@ -363,7 +364,7 @@ type DraftSession = {
 export function PedosProvider({ children }: { children: ReactNode }) {
   // A shared Recording's public page (ADR 0020) reads no Song, and mostly people without the app
   // open it, so it neither names nor fetches the catalog.
-  const wantsSongs = !usePathname()?.startsWith('/u/')
+  const wantsSongs = !isHandlePage(usePathname() ?? '')
   // Every app page's head names the catalog, so it downloads beside the scripts, and the service
   // worker keeps it with the page's other files (public/sw.js).
   if (wantsSongs) preload(catalogPath, { as: 'fetch', crossOrigin: 'anonymous' })

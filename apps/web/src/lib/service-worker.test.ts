@@ -458,8 +458,16 @@ describe('the service worker', () => {
       expect(await worker.request(path), path).toBeUndefined()
     }
     expect(await worker.request('/', { mode: 'navigate', method: 'POST' })).toBeUndefined()
-    // A shared Recording's page: a stopped link never opens from a copy (ADR 0020).
-    expect(await worker.request('/u/maya/r/8k2fq3m9x1ab/', { mode: 'navigate' })).toBeUndefined()
+    // A shared Recording's page and a profile page: a stopped link never opens from a copy (ADR
+    // 0020), nor does an old `/u/` link's redirect to one (#382).
+    for (const path of [
+      '/@maya/r/8k2fq3m9x1ab/',
+      '/%40maya/t/8k2fq3m9x1ab/',
+      '/@maya/',
+      '/u/maya/r/8k2fq3m9x1ab/'
+    ]) {
+      expect(await worker.request(path, { mode: 'navigate' }), path).toBeUndefined()
+    }
     expect(worker.kept()).toEqual([])
   })
 

@@ -56,6 +56,47 @@ test('a made-up URL answers 404 with one noindex tag and a link home', async ({
   await expect(page.getByRole('link', { name: 'Back to Farty' })).toHaveAttribute('href', '/')
 })
 
+test('an old /u/ link answers one 308 to its /@ path, query kept, and a path with no @ is no page (#382)', async ({
+  page,
+  request
+}) => {
+  const location = async (path: string) => {
+    const response = await request.get(path, { maxRedirects: 0 })
+    expect(response.status(), path).toBe(308)
+    const to = new URL(response.headers().location ?? '', 'http://farty.test')
+    return decodeURIComponent(to.pathname) + to.search
+  }
+  for (const [from, to] of [
+    ['/u/nobody/', '/@nobody/'],
+    ['/u/nobody/report/', '/@nobody/report/'],
+    ['/u/nobody/r/AAAAAAAAAAAA/?from=messages', '/@nobody/r/AAAAAAAAAAAA/?from=messages'],
+    ['/u/nobody/t/AAAAAAAAAAAA/', '/@nobody/t/AAAAAAAAAAAA/'],
+    ['/u/nobody/t/AAAAAAAAAAAA/audio/', '/@nobody/t/AAAAAAAAAAAA/audio/'],
+    // A shared page's old link image is its `image/` now. Next writes a query key with no value
+    // back with an `=`, which the image ignores, as it ignored the old one's.
+    ['/u/nobody/r/AAAAAAAAAAAA/opengraph-image/?a1b2', '/@nobody/r/AAAAAAAAAAAA/image/?a1b2=']
+  ]) {
+    expect(await location(from), from).toBe(to)
+  }
+  // The old link image's own URL had no trailing slash: Next adds it first.
+  const image = await request.get('/u/nobody/t/AAAAAAAAAAAA/opengraph-image?a1b2')
+  expect(new URL(image.url()).pathname + new URL(image.url()).search).toBe(
+    '/@nobody/t/AAAAAAAAAAAA/image/?a1b2='
+  )
+  expect(image.status()).toBe(404)
+
+  // A Handle no one has is the shared page's 404; a path with no `@` is the site's.
+  for (const path of ['/@nobody/', '/@nobody/r/AAAAAAAAAAAA/', '/%40nobody/t/AAAAAAAAAAAA/']) {
+    expect((await request.get(path, { maxRedirects: 0 })).status(), path).toBe(404)
+  }
+  for (const path of ['/nobody/', '/nobody/r/AAAAAAAAAAAA/', '/u/']) {
+    expect((await request.get(path, { maxRedirects: 0 })).status(), path).toBe(404)
+    await page.goto(path)
+    await expect(page.getByText('Page not found'), path).toBeVisible()
+    await expect(page.locator('meta[name="robots"]')).toHaveCount(1)
+  }
+})
+
 test('Welcome, or from 768px the lander, shows on a first visit but never covers the privacy, support or 404 page', async ({
   page,
   viewport

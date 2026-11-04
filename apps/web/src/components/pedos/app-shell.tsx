@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useRef } from 'react'
 import { desktop, wide } from '@/lib/desktop'
+import { isHandlePage } from '@/lib/handle'
 import { type Tab, tabOf, tabs } from '@/lib/tabs'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
@@ -61,7 +62,7 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
   // On a touch tablet, `/` is the lander until Farty is opened in this browser (`lander.tsx`).
   const atLander = pathname === '/'
   // A shared link's page (ADR 0020) has its own top bar, with Get Farty, and no tabs.
-  const sharedPage = pathname.startsWith('/u/')
+  const sharedPage = isHandlePage(pathname)
   useTrackPages()
 
   // On a touch tablet, any other tab's URL, such as a Song's link, opens the app and counts as

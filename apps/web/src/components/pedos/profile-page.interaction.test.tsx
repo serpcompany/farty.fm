@@ -92,7 +92,7 @@ describe('A shared Toot’s row (#346)', () => {
             {
               kind: 'toots',
               shareId: 'tttttttttttt',
-              path: '/u/alice/t/tttttttttttt/',
+              path: '/@alice/t/tttttttttttt/',
               name: 'Twinkle for Mum',
               detail: 'Sound Pad',
               sharedAt: now
@@ -100,7 +100,7 @@ describe('A shared Toot’s row (#346)', () => {
             {
               kind: 'recordings',
               shareId: 'rrrrrrrrrrrr',
-              path: '/u/alice/r/rrrrrrrrrrrr/',
+              path: '/@alice/r/rrrrrrrrrrrr/',
               name: 'Recording 1',
               detail: 'E3',
               sharedAt: now
@@ -116,14 +116,14 @@ describe('A shared Toot’s row (#346)', () => {
     ])
     // Next's Link drops the trailing slash here, outside a build with `trailingSlash`.
     expect(rows.map(row => row.querySelector('a')?.getAttribute('href'))).toEqual([
-      '/u/alice/t/tttttttttttt',
-      '/u/alice/r/rrrrrrrrrrrr'
+      '/@alice/t/tttttttttttt',
+      '/@alice/r/rrrrrrrrrrrr'
     ])
 
     await act(async () => rows[0].querySelector('button')?.click())
     const [key, load] = vi.mocked(play).mock.calls.at(-1) ?? []
     expect(key).toBe('shared:tttttttttttt')
     await load?.()
-    expect(fetched).toContain('/u/alice/t/tttttttttttt/audio/')
+    expect(fetched).toContain('/@alice/t/tttttttttttt/audio/')
   })
 })
