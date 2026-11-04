@@ -770,6 +770,11 @@ class WriteCatalog(unittest.TestCase):
                                         [{"id": "c", "run": "before"}, {"id": "b", "run": "before"}, {"id": "a", "run": "before"}])
         self.assertEqual(rows, [{"id": "a", "run": "before"}, {"id": "b", "run": "this"}, {"id": "c", "run": "before"}])
 
+    def test_a_row_kept_from_before_adr_0012_gives_its_in50c(self):
+        self.assertEqual(import_pdmx.in50c_fart({"within_50c_of_fart_pct": 91.2}), "91.2%")
+        self.assertEqual(import_pdmx.in50c_fart({"within_50c_pct": 64.0}), "64.0% in50c")
+        self.assertEqual(import_pdmx.in50c_fart(None), "")
+
     def test_an_entry_that_imports_differently_changes_nothing(self):
         title, r, src = self.pick("twinkle")
         r["notes"] = r["notes"][:-1]

@@ -16,106 +16,154 @@
   "import_args": {
     "bpm": 120,
     "max_beats": 32,
-    "start_beat": 8
+    "track": [
+      0,
+      1
+    ]
   },
   "import_report": {
     "catalog_id": "old-macdonald",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 16,
+    "note_count": 24,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-old-macdonald.mid",
     "tempo_changes_ignored": 0,
-    "track_used": 0,
+    "track_used": [
+      0,
+      1
+    ],
     "tracks_with_notes": [
       0,
       1
     ]
   },
-  "length_beats": 30.958333333333332,
+  "length_beats": 30.854166666666668,
   "notes": [
     {
       "dur": 1.0,
-      "pitch": 64,
+      "pitch": 60,
       "start": 0.0
     },
     {
       "dur": 1.0,
-      "pitch": 64,
+      "pitch": 60,
       "start": 1.0
     },
     {
       "dur": 1.0,
-      "pitch": 62,
+      "pitch": 60,
       "start": 2.0
     },
     {
       "dur": 1.0,
-      "pitch": 62,
+      "pitch": 55,
       "start": 3.0
     },
     {
-      "dur": 2.8541666666666665,
-      "pitch": 60,
+      "dur": 1.0,
+      "pitch": 57,
       "start": 4.0
     },
     {
       "dur": 1.0,
-      "pitch": 64,
-      "start": 16.0
+      "pitch": 57,
+      "start": 5.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 55,
+      "start": 6.0
     },
     {
       "dur": 1.0,
       "pitch": 64,
-      "start": 17.0
+      "start": 8.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 9.0
     },
     {
       "dur": 1.0,
       "pitch": 62,
-      "start": 18.0
+      "start": 10.0
     },
     {
       "dur": 1.0,
       "pitch": 62,
-      "start": 19.0
+      "start": 11.0
     },
     {
       "dur": 2.8541666666666665,
       "pitch": 60,
+      "start": 12.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 16.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 17.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 18.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
       "start": 20.0
     },
     {
       "dur": 1.0,
-      "pitch": 60,
+      "pitch": 57,
+      "start": 21.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 55,
+      "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
       "start": 24.0
     },
     {
       "dur": 1.0,
-      "pitch": 60,
+      "pitch": 64,
       "start": 25.0
     },
     {
-      "dur": 0.9583333333333334,
-      "pitch": 60,
+      "dur": 1.0,
+      "pitch": 62,
       "start": 26.0
     },
     {
       "dur": 1.0,
+      "pitch": 62,
+      "start": 27.0
+    },
+    {
+      "dur": 2.8541666666666665,
       "pitch": 60,
       "start": 28.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 60,
-      "start": 29.0
-    },
-    {
-      "dur": 0.9583333333333334,
-      "pitch": 60,
-      "start": 30.0
     }
   ],
   "pitches": [
+    55,
+    57,
     60,
     62,
     64

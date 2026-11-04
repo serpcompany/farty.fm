@@ -471,6 +471,16 @@ def report_songs(titles, songs, earlier):
     return [rows[t.id] for t in titles if t.id in rows]
 
 
+def in50c_fart(metrics):
+    """The report's in50cFart cell. A row kept from a run before ADR 0012 (--only) has none: its bar
+    was in50c, notes within 50 cents of the tune's note, so the cell says so."""
+    if not metrics:
+        return ""
+    if "within_50c_of_fart_pct" in metrics:
+        return f"{metrics['within_50c_of_fart_pct']}%"
+    return f"{metrics['within_50c_pct']}% in50c"
+
+
 def write_report(path, run, songs):
     lean = [{**s, "tried": [{k: v for k, v in r.items() if k != "notes"} for r in s["tried"]]} for s in songs]
     path.with_name(path.name + ".json").write_text(json.dumps({**run, "songs": lean}, indent=1, ensure_ascii=False) + "\n")
@@ -492,7 +502,8 @@ def write_report(path, run, songs):
         f"`{run['dataset']['mid.tar.gz']['md5']}`, both equal to Zenodo's; downloaded {run['dataset']['mid.tar.gz']['downloaded']}.",
         f"- Picking: {run['picking']}",
         f"- Gates: {run['gates']}",
-        *([f"- Only {', '.join(f'`{i}`' for i in run['only'])} imported again; the other titles' rows are from the run before."]
+        *([f"- Only {', '.join(f'`{i}`' for i in run['only'])} imported again; the other titles' rows are from the run before"
+           " (a row from before ADR 0012 gives its in50c, the bar then)."]
           if run.get("only") else []),
         f"- Render bar: in50cFart >= {BAR['within_50c_of_fart_pct']}%, onTime >= {BAR['onsets_on_time_pct']}%, "
         f"re-attacks <= {BAR['notes_with_retrigger']}, with the full Fixture Library ({run['library']}).",
@@ -515,7 +526,7 @@ def write_report(path, run, songs):
         lines.append(table_row(
             s["title"], s["result"], f"[{r['score_id']}]({r['url']})", r["match"], r["license"], r["rating"], r["n_views"],
             rep.get("note_count", ""), r.get("range_semitones", ""), dropped, r.get("pitch_coverage", ""),
-            f"{m['within_50c_of_fart_pct']}%" if m else "", f"{m['onsets_on_time_pct']}%" if m else "",
+            in50c_fart(m), f"{m['onsets_on_time_pct']}%" if m else "",
             m.get("notes_with_retrigger", ""), "" if s["result"] == "pass" else s["reason"],
         ))
     lines += [

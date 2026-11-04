@@ -391,11 +391,14 @@
    "n_ratings": "0",
    "n_views": "93"
   },
-  "retrieved": "2026-10-21",
+  "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "start_beat": 8,
-   "max_beats": 32
+   "max_beats": 32,
+   "track": [
+    0,
+    1
+   ]
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -1428,26 +1431,25 @@
   "composer_died": 1880,
   "composer_source": "https://en.wikipedia.org/wiki/Orpheus_in_the_Underworld",
   "file": "midi/pdmx-can-can.mid",
-  "sha256": "636ba993f94a80a44ea4a0e452118678f2a6129fb05b6c7f92752fa60d094f79",
+  "sha256": "81bad1b32bdf00d71cf3c7652884f12b987ccfae68685dfe539b437ee6e784d7",
   "source": {
    "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
    "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/14/25/QmWiYmyGdR57srpmX1LC6NQMGmvqrAhCZzxmkxQ43rKSkJ.mid",
-   "musescore_score_id": "5983155",
-   "musescore_url": "https://musescore.com/score/5983155",
-   "score_title": "Can-Can - Offenbach",
-   "composer": "Offenbach",
+   "dataset_path": "./mid/1/57/QmbZXPGEUdTSXBqe53jb8yeT8TnKAJSUp5NCSAc8czDZUm.mid",
+   "musescore_score_id": "5942150",
+   "musescore_url": "https://musescore.com/score/5942150",
+   "score_title": "Can can",
+   "composer": "Jacques Offenbach",
    "license": "cc-zero",
    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
    "pdmx_license_conflict": "False",
-   "rating": "4.14",
-   "n_ratings": "4",
-   "n_views": "325"
+   "rating": "0.0",
+   "n_ratings": "0",
+   "n_views": "359"
   },
-  "retrieved": "2026-10-21",
+  "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "start_beat": 8,
    "max_beats": 32
   },
   "import": {
@@ -2961,7 +2963,11 @@
   "render": {
    "bpm": 120,
    "max_beats": 29,
-   "beats_per_bar": 4
+   "beats_per_bar": 4,
+   "track": [
+    0,
+    1
+   ]
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -7480,39 +7486,6 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
-  "id": "illumina-oculos-meos",
-  "title": "Illumina oculos meos",
-  "composer": "Unknown",
-  "composer_source": "https://thesession.org/tunes/search?q=Illumina%20oculos%20meos",
-  "file": "midi/pdmx-illumina-oculos-meos.mid",
-  "sha256": "154a049effd4e720ba87864e2a7662082e48b0bb47957dce8f0c94f0367d45c2",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/5/41/QmfR8bgc4HEVo4yChmeVHXqVsvMR8mWvJTfU2g23u91Uor.mid",
-   "musescore_score_id": "5792453",
-   "musescore_url": "https://musescore.com/score/5792453",
-   "score_title": "Illumina oculos meos - Giovanni Pierluigi da Palestrina",
-   "composer": "Illumina oculos meos - Palestrina",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "88"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 96,
-   "start_beat": 4,
    "max_beats": 32
   },
   "import": {
@@ -28783,25 +28756,25 @@
   "composer_died": 1750,
   "composer_source": "https://en.wikipedia.org/wiki/Lute_Suite_in_E_minor,_BWV_996",
   "file": "midi/pdmx-bourree-in-e-minor.mid",
-  "sha256": "fb9b0d91911c9372c76cff8e4ca8ae1a18166993b26fb2604971608dbc269d09",
+  "sha256": "cf3587d3a6a9fdbbf6053ace1ab4c3e590d7a3e0285e935643260854cbafdb47",
   "source": {
    "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
    "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/2/47/QmcU1cMYcWQE3zNa6UjnxH7WMm9Z9NYmBTwrNhRPEKigHA.mid",
-   "musescore_score_id": "1717176",
-   "musescore_url": "https://musescore.com/score/1717176",
-   "score_title": "Bourrée in E Minor",
-   "composer": "J. S. Bach",
+   "dataset_path": "./mid/17/20/QmZF3hUNQtx7CtDqrDyuaE9ho6ZC5NQyxC3g4DZkMKtj9P.mid",
+   "musescore_score_id": "1747271",
+   "musescore_url": "https://musescore.com/score/1747271",
+   "score_title": "Bourrée in E minor (Lute suite)(v2)",
+   "composer": "BWV 996",
    "license": "cc-zero",
    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
    "pdmx_license_conflict": "False",
    "rating": "0.0",
    "n_ratings": "0",
-   "n_views": "761"
+   "n_views": "687"
   },
   "retrieved": "2026-10-25",
   "render": {
-   "bpm": 132,
+   "bpm": 120,
    "max_beats": 32,
    "beats_per_bar": 4
   },
@@ -30357,39 +30330,6 @@
    "bpm": 120,
    "max_beats": 31,
    "beats_per_bar": 3
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-05.txt"
-  }
- },
- {
-  "id": "though-philomela-lost-her-love",
-  "title": "Though Philomela lost her love",
-  "composer": "Thomas Morley",
-  "composer_died": 1602,
-  "composer_source": "https://en.wikipedia.org/wiki/Thomas_Morley",
-  "file": "midi/pdmx-though-philomela-lost-her-love.mid",
-  "sha256": "c7ce47f1d5ddab63383da934959c96503cd4b61c912b380097728e23920aaa44",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/16/34/QmYNFWfBDfEffLR2qtB1cSMkwf75wPUNYRiig8SFcm8vxM.mid",
-   "musescore_score_id": "5787358",
-   "musescore_url": "https://musescore.com/score/5787358",
-   "score_title": "Though Philomela lost her love - Thomas Morley",
-   "composer": "Though Philomela lost her love - Morley",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "98"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 140,
-   "max_beats": 30
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -32392,21 +32332,21 @@
   "composer": "Traditional (Bohemian)",
   "composer_source": "https://de.wikipedia.org/wiki/Summ,_summ,_summ",
   "file": "midi/pdmx-summ-summ-summ.mid",
-  "sha256": "bffc83a58bbf7ebe47161ddb05483356d0120b2b69b9b3c23b2347d906b9c010",
+  "sha256": "a2983b994b56d07157e51429ca9d11744820d6935555c3bdb06651909fd6c2e4",
   "source": {
    "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
    "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/8/12/QmQBRoAgiE5aDPe55CuGWpsBsDHmhCuRSzoeoJWzM2wagk.mid",
-   "musescore_score_id": "5908191",
-   "musescore_url": "https://musescore.com/score/5908191",
-   "score_title": "Summ Summ Summ",
-   "composer": "Deutsches Kinderlied",
+   "dataset_path": "./mid/11/18/QmTEoBbRhPbubPMUi7vrvFB9idThvsd2h6wam27zhj4SmY.mid",
+   "musescore_score_id": "6122328",
+   "musescore_url": "https://musescore.com/score/6122328",
+   "score_title": "ãããããã",
+   "composer": "Composer",
    "license": "cc-zero",
    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
    "pdmx_license_conflict": "False",
    "rating": "0.0",
    "n_ratings": "0",
-   "n_views": "139"
+   "n_views": "183"
   },
   "retrieved": "2026-10-25",
   "render": {

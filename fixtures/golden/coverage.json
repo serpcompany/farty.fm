@@ -523,27 +523,37 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 42
+            },
+            {
               "seconds": 1.5,
-              "target_midi": 38
+              "target_midi": 45
             },
             {
               "seconds": 0.5,
-              "target_midi": 42
+              "target_midi": 47
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 49
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 6.610358975910562,
+          "plan_cost": 5.478364943985557,
           "recording_for_pitch": {
+            "55": "022",
+            "57": null,
             "60": null,
-            "62": "022",
+            "62": null,
             "64": null
           },
           "song": "old-macdonald",
-          "transpose": -22,
+          "transpose": -15,
           "unlocked": false
         },
         {
@@ -1932,41 +1942,51 @@
           "missing": [
             {
               "seconds": 0.5,
+              "target_midi": 29
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 31
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 33
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 34
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 36
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 38
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 41
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 43
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 45
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 47
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 48
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 6
+            "total": 8
           },
-          "plan_cost": 1.6525897439776405,
+          "plan_cost": 3.1890270993827015,
           "recording_for_pitch": {
-            "59": "022",
             "60": null,
             "62": null,
             "64": null,
-            "66": null,
-            "67": null
+            "65": null,
+            "67": null,
+            "69": null,
+            "71": "022",
+            "72": null
           },
           "song": "can-can",
-          "transpose": -19,
+          "transpose": -31,
           "unlocked": false
         },
         {
@@ -4017,37 +4037,47 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 41
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 43
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 45
+              "seconds": 0.3,
+              "target_midi": 28
             },
             {
               "seconds": 0.3,
-              "target_midi": 48
+              "target_midi": 30
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 32
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 33
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 35
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 37
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 5
+            "total": 7
           },
           "plan_cost": 3.1890270993827015,
           "recording_for_pitch": {
-            "59": "022",
+            "55": null,
+            "57": null,
+            "59": null,
             "60": null,
             "62": null,
             "64": null,
-            "67": null
+            "67": "022"
           },
           "song": "grand-old-flag",
-          "transpose": -19,
+          "transpose": -27,
           "unlocked": false
         },
         {
@@ -6211,6 +6241,14 @@
         {
           "missing": [
             {
+              "seconds": 1.0,
+              "target_midi": 19
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 21
+            },
+            {
               "seconds": 1.5,
               "target_midi": 24
             },
@@ -6226,10 +6264,12 @@
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 0,
-            "total": 3
+            "total": 5
           },
           "plan_cost": 0.0,
           "recording_for_pitch": {
+            "55": null,
+            "57": null,
             "60": null,
             "62": null,
             "64": null
@@ -7660,45 +7700,47 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 23
+              "target_midi": 34
             },
             {
               "seconds": 0.5,
-              "target_midi": 24
+              "target_midi": 36
             },
             {
-              "seconds": 1.0,
-              "target_midi": 26
+              "seconds": 0.3,
+              "target_midi": 38
             },
             {
-              "seconds": 0.5,
-              "target_midi": 28
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 30
+              "seconds": 0.3,
+              "target_midi": 39
             },
             {
               "seconds": 0.5,
-              "target_midi": 31
+              "target_midi": 41
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 43
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 0,
-            "total": 6
+            "covered": 2,
+            "total": 8
           },
-          "plan_cost": 0.0,
+          "plan_cost": 3.651875258723252,
           "recording_for_pitch": {
-            "59": null,
             "60": null,
             "62": null,
             "64": null,
-            "66": null,
-            "67": null
+            "65": null,
+            "67": null,
+            "69": null,
+            "71": "102",
+            "72": "096"
           },
           "song": "can-can",
-          "transpose": -36,
+          "transpose": -26,
           "unlocked": false
         },
         {
@@ -9729,33 +9771,43 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 43
+              "seconds": 1.5,
+              "target_midi": 49
             },
             {
-              "seconds": 1.0,
-              "target_midi": 45
+              "seconds": 0.5,
+              "target_midi": 50
             },
             {
               "seconds": 0.8,
-              "target_midi": 47
+              "target_midi": 52
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 54
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 57
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 2,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 8.035724494568123,
+          "plan_cost": 16.224294249334733,
           "recording_for_pitch": {
-            "59": "102",
+            "55": "102",
+            "57": "096",
+            "59": null,
             "60": null,
             "62": null,
             "64": null,
-            "67": "096"
+            "67": null
           },
           "song": "grand-old-flag",
-          "transpose": -17,
+          "transpose": -10,
           "unlocked": false
         },
         {
@@ -11891,27 +11943,37 @@
         {
           "missing": [
             {
-              "seconds": 1.5,
+              "seconds": 1.0,
               "target_midi": 39
             },
             {
+              "seconds": 1.5,
+              "target_midi": 44
+            },
+            {
               "seconds": 0.5,
-              "target_midi": 43
+              "target_midi": 46
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 48
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 3
+            "total": 5
           },
           "plan_cost": 5.462362216629314,
           "recording_for_pitch": {
+            "55": null,
+            "57": "095",
             "60": null,
-            "62": "095",
+            "62": null,
             "64": null
           },
           "song": "old-macdonald",
-          "transpose": -21,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -13240,41 +13302,43 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 42
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 44
+              "target_midi": 32
             },
             {
               "seconds": 0.5,
-              "target_midi": 46
+              "target_midi": 34
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 36
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 37
             },
             {
               "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 49
+              "target_midi": 39
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 1,
-            "total": 6
+            "covered": 3,
+            "total": 8
           },
-          "plan_cost": 1.3655905541573286,
+          "plan_cost": 14.120319549086243,
           "recording_for_pitch": {
-            "59": "095",
             "60": null,
             "62": null,
             "64": null,
-            "66": null,
-            "67": null
+            "65": null,
+            "67": null,
+            "69": "095",
+            "71": "016",
+            "72": "104"
           },
           "song": "can-can",
-          "transpose": -18,
+          "transpose": -28,
           "unlocked": false
         },
         {
@@ -15173,29 +15237,39 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 39
+              "seconds": 0.3,
+              "target_midi": 36
             },
             {
-              "seconds": 1.0,
-              "target_midi": 41
+              "seconds": 1.5,
+              "target_midi": 40
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 43
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 45
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 3,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 25.17574462437028,
+          "plan_cost": 50.31020301296033,
           "recording_for_pitch": {
-            "59": "016",
-            "60": null,
+            "55": null,
+            "57": "016",
+            "59": null,
+            "60": "095",
             "62": null,
-            "64": "095",
+            "64": null,
             "67": "104"
           },
           "song": "grand-old-flag",
-          "transpose": -21,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -17183,23 +17257,33 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 49
+            },
+            {
               "seconds": 1.5,
-              "target_midi": 42
+              "target_midi": 52
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 54
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
             "covered": 2,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 63.375661997671486,
+          "plan_cost": 67.51865564560777,
           "recording_for_pitch": {
+            "55": "069",
+            "57": null,
             "60": null,
-            "62": "069",
+            "62": null,
             "64": "094"
           },
           "song": "old-macdonald",
-          "transpose": -18,
+          "transpose": -8,
           "unlocked": false
         },
         {
@@ -18432,37 +18516,43 @@
           "missing": [
             {
               "seconds": 0.5,
+              "target_midi": 33
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 35
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 37
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 38
             },
             {
               "seconds": 0.5,
-              "target_midi": 39
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 41
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 43
+              "target_midi": 40
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 6
+            "covered": 3,
+            "total": 8
           },
-          "plan_cost": 16.000917324615166,
+          "plan_cost": 92.02031661913169,
           "recording_for_pitch": {
-            "59": null,
             "60": null,
             "62": null,
             "64": null,
-            "66": "069",
-            "67": "094"
+            "65": null,
+            "67": null,
+            "69": "016",
+            "71": "069",
+            "72": "094"
           },
           "song": "can-can",
-          "transpose": -21,
+          "transpose": -27,
           "unlocked": false
         },
         {
@@ -20249,6 +20339,14 @@
         {
           "missing": [
             {
+              "seconds": 0.3,
+              "target_midi": 37
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 41
+            },
+            {
               "seconds": 0.5,
               "target_midi": 42
             },
@@ -20260,11 +20358,13 @@
           "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 120.99526694410704,
+          "plan_cost": 142.46879740399515,
           "recording_for_pitch": {
-            "59": "016",
+            "55": null,
+            "57": "016",
+            "59": null,
             "60": null,
             "62": "069",
             "64": null,
@@ -22203,27 +22303,37 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 53
+            },
+            {
               "seconds": 1.5,
-              "target_midi": 49
+              "target_midi": 56
             },
             {
               "seconds": 0.5,
-              "target_midi": 53
+              "target_midi": 58
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 60
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 21.799534000843174,
+          "plan_cost": 16.42966476170371,
           "recording_for_pitch": {
+            "55": "032",
+            "57": null,
             "60": null,
-            "62": "032",
+            "62": null,
             "64": null
           },
           "song": "old-macdonald",
-          "transpose": -11,
+          "transpose": -4,
           "unlocked": false
         },
         {
@@ -23544,41 +23654,43 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 52
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 54
+              "target_midi": 42
             },
             {
               "seconds": 0.5,
-              "target_midi": 56
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 46
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 47
             },
             {
               "seconds": 0.5,
-              "target_midi": 58
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 59
+              "target_midi": 49
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 1,
-            "total": 6
+            "covered": 3,
+            "total": 8
           },
-          "plan_cost": 5.4498835002107935,
+          "plan_cost": 33.833212592256146,
           "recording_for_pitch": {
-            "59": "032",
             "60": null,
             "62": null,
             "64": null,
-            "66": null,
-            "67": null
+            "65": null,
+            "67": null,
+            "69": "098",
+            "71": "032",
+            "72": "086"
           },
           "song": "can-can",
-          "transpose": -8,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -25477,29 +25589,39 @@
         {
           "missing": [
             {
+              "seconds": 0.3,
+              "target_midi": 43
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 45
+            },
+            {
               "seconds": 0.5,
-              "target_midi": 49
+              "target_midi": 46
             },
             {
               "seconds": 0.8,
-              "target_midi": 53
+              "target_midi": 48
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
             "covered": 3,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 42.89080573374456,
+          "plan_cost": 91.3639128210448,
           "recording_for_pitch": {
-            "59": "098",
+            "55": "098",
+            "57": null,
+            "59": null,
             "60": null,
-            "62": "032",
-            "64": null,
+            "62": null,
+            "64": "032",
             "67": "086"
           },
           "song": "grand-old-flag",
-          "transpose": -11,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -27583,6 +27705,14 @@
         {
           "missing": [
             {
+              "seconds": 1.0,
+              "target_midi": 19
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 21
+            },
+            {
               "seconds": 1.5,
               "target_midi": 24
             },
@@ -27598,10 +27728,12 @@
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 0,
-            "total": 3
+            "total": 5
           },
           "plan_cost": 0.0,
           "recording_for_pitch": {
+            "55": null,
+            "57": null,
             "60": null,
             "62": null,
             "64": null
@@ -29052,45 +29184,47 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 23
+              "target_midi": 34
             },
             {
               "seconds": 0.5,
-              "target_midi": 24
+              "target_midi": 36
             },
             {
-              "seconds": 1.0,
-              "target_midi": 26
+              "seconds": 0.3,
+              "target_midi": 38
             },
             {
-              "seconds": 0.5,
-              "target_midi": 28
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 30
+              "seconds": 0.3,
+              "target_midi": 39
             },
             {
               "seconds": 0.5,
-              "target_midi": 31
+              "target_midi": 41
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 43
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 0,
-            "total": 6
+            "covered": 2,
+            "total": 8
           },
-          "plan_cost": 0.0,
+          "plan_cost": 0.9977968851641448,
           "recording_for_pitch": {
-            "59": null,
             "60": null,
             "62": null,
             "64": null,
-            "66": null,
-            "67": null
+            "65": null,
+            "67": null,
+            "69": null,
+            "71": "102",
+            "72": "104"
           },
           "song": "can-can",
-          "transpose": -36,
+          "transpose": -26,
           "unlocked": false
         },
         {
@@ -31161,33 +31295,43 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 37
+              "seconds": 1.5,
+              "target_midi": 49
             },
             {
-              "seconds": 1.0,
-              "target_midi": 39
+              "seconds": 0.5,
+              "target_midi": 50
             },
             {
               "seconds": 0.8,
-              "target_midi": 41
+              "target_midi": 52
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 54
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 57
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
             "covered": 2,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 4.447874172249682,
+          "plan_cost": 3.364292953257681,
           "recording_for_pitch": {
-            "59": "104",
+            "55": "102",
+            "57": "104",
+            "59": null,
             "60": null,
             "62": null,
             "64": null,
-            "67": "102"
+            "67": null
           },
           "song": "grand-old-flag",
-          "transpose": -23,
+          "transpose": -10,
           "unlocked": false
         },
         {
@@ -33367,27 +33511,37 @@
         {
           "missing": [
             {
-              "seconds": 1.5,
+              "seconds": 1.0,
               "target_midi": 56
             },
             {
+              "seconds": 1.5,
+              "target_midi": 61
+            },
+            {
               "seconds": 0.5,
-              "target_midi": 60
+              "target_midi": 63
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 65
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 3
+            "total": 5
           },
           "plan_cost": 1.1118672800148959,
           "recording_for_pitch": {
+            "55": null,
+            "57": "094",
             "60": null,
-            "62": "094",
+            "62": null,
             "64": null
           },
           "song": "old-macdonald",
-          "transpose": -4,
+          "transpose": 1,
           "unlocked": false
         },
         {
@@ -34740,41 +34894,47 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 59
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 61
+              "target_midi": 32
             },
             {
               "seconds": 0.5,
-              "target_midi": 63
+              "target_midi": 34
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 36
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 37
             },
             {
               "seconds": 0.5,
-              "target_midi": 65
+              "target_midi": 39
             },
             {
-              "seconds": 0.5,
-              "target_midi": 66
+              "seconds": 0.3,
+              "target_midi": 41
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 1,
-            "total": 6
+            "covered": 2,
+            "total": 8
           },
-          "plan_cost": 0.27796682000372397,
+          "plan_cost": 11.20363136095176,
           "recording_for_pitch": {
-            "59": "094",
             "60": null,
             "62": null,
             "64": null,
-            "66": null,
-            "67": null
+            "65": null,
+            "67": null,
+            "69": null,
+            "71": "016",
+            "72": "094"
           },
           "song": "can-can",
-          "transpose": -1,
+          "transpose": -28,
           "unlocked": false
         },
         {
@@ -36741,33 +36901,43 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 40
+              "seconds": 0.3,
+              "target_midi": 37
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
+              "target_midi": 41
+            },
+            {
+              "seconds": 0.5,
               "target_midi": 42
             },
             {
               "seconds": 0.8,
               "target_midi": 44
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 46
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
             "covered": 2,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 8.108865929010456,
+          "plan_cost": 29.521826528449004,
           "recording_for_pitch": {
-            "59": "016",
+            "55": null,
+            "57": "016",
+            "59": null,
             "60": null,
             "62": null,
             "64": null,
             "67": "094"
           },
           "song": "grand-old-flag",
-          "transpose": -20,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -38827,27 +38997,37 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 53
+            },
+            {
               "seconds": 1.5,
-              "target_midi": 49
+              "target_midi": 56
             },
             {
               "seconds": 0.5,
-              "target_midi": 53
+              "target_midi": 58
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 60
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 21.799534000843174,
+          "plan_cost": 16.42966476170371,
           "recording_for_pitch": {
+            "55": "032",
+            "57": null,
             "60": null,
-            "62": "032",
+            "62": null,
             "64": null
           },
           "song": "old-macdonald",
-          "transpose": -11,
+          "transpose": -4,
           "unlocked": false
         },
         {
@@ -40148,41 +40328,43 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 52
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 54
+              "target_midi": 36
             },
             {
               "seconds": 0.5,
-              "target_midi": 56
+              "target_midi": 38
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 40
             },
             {
               "seconds": 0.5,
-              "target_midi": 58
+              "target_midi": 43
             },
             {
-              "seconds": 0.5,
-              "target_midi": 59
+              "seconds": 0.3,
+              "target_midi": 45
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 1,
-            "total": 6
+            "covered": 3,
+            "total": 8
           },
-          "plan_cost": 5.4498835002107935,
+          "plan_cost": 72.45620329416742,
           "recording_for_pitch": {
-            "59": "032",
             "60": null,
             "62": null,
             "64": null,
-            "66": null,
-            "67": null
+            "65": "098",
+            "67": null,
+            "69": null,
+            "71": "096",
+            "72": "032"
           },
           "song": "can-can",
-          "transpose": -8,
+          "transpose": -24,
           "unlocked": false
         },
         {
@@ -42053,29 +42235,39 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 46
+              "seconds": 1.5,
+              "target_midi": 40
             },
             {
-              "seconds": 1.0,
-              "target_midi": 48
+              "seconds": 0.5,
+              "target_midi": 41
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 43
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 45
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 54.873530013254125,
+          "plan_cost": 82.28925188440348,
           "recording_for_pitch": {
-            "59": "096",
+            "55": "096",
+            "57": "098",
+            "59": null,
             "60": null,
             "62": null,
-            "64": "032",
-            "67": "098"
+            "64": null,
+            "67": "032"
           },
           "song": "grand-old-flag",
-          "transpose": -14,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -44095,27 +44287,37 @@
         {
           "missing": [
             {
-              "seconds": 1.5,
+              "seconds": 1.0,
               "target_midi": 65
             },
             {
+              "seconds": 1.5,
+              "target_midi": 70
+            },
+            {
               "seconds": 0.5,
-              "target_midi": 69
+              "target_midi": 72
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 74
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 3
+            "total": 5
           },
           "plan_cost": 3.0672318819959834,
           "recording_for_pitch": {
+            "55": null,
+            "57": "059",
             "60": null,
-            "62": "059",
+            "62": null,
             "64": null
           },
           "song": "old-macdonald",
-          "transpose": 5,
+          "transpose": 10,
           "unlocked": false
         },
         {
@@ -45508,41 +45710,51 @@
           "missing": [
             {
               "seconds": 0.5,
+              "target_midi": 56
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 58
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 60
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 61
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 63
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 65
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 68
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 70
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 72
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 74
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 75
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 6
+            "total": 8
           },
-          "plan_cost": 0.7668079704989959,
+          "plan_cost": 1.1709813943807919,
           "recording_for_pitch": {
-            "59": "059",
             "60": null,
             "62": null,
             "64": null,
-            "66": null,
-            "67": null
+            "65": null,
+            "67": null,
+            "69": null,
+            "71": "059",
+            "72": null
           },
           "song": "can-can",
-          "transpose": 8,
+          "transpose": -4,
           "unlocked": false
         },
         {
@@ -47613,37 +47825,47 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 68
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 70
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 72
+              "seconds": 0.3,
+              "target_midi": 55
             },
             {
               "seconds": 0.3,
-              "target_midi": 75
+              "target_midi": 57
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 59
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 60
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 62
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 64
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 5
+            "total": 7
           },
           "plan_cost": 1.1709813943807919,
           "recording_for_pitch": {
-            "59": "059",
+            "55": null,
+            "57": null,
+            "59": null,
             "60": null,
             "62": null,
             "64": null,
-            "67": null
+            "67": "059"
           },
           "song": "grand-old-flag",
-          "transpose": 8,
+          "transpose": 0,
           "unlocked": false
         },
         {
@@ -49740,22 +49962,32 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 42
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 51
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 53
             }
           ],
           "octave_moves": 2,
           "pitch_coverage": {
             "covered": 2,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 381.3376197673371,
+          "plan_cost": 258.44937369038354,
           "recording_for_pitch": {
+            "55": "080",
+            "57": "097",
             "60": null,
-            "62": "080",
-            "64": "097"
+            "62": null,
+            "64": null
           },
           "song": "old-macdonald",
-          "transpose": -18,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -50984,37 +51216,43 @@
           "missing": [
             {
               "seconds": 0.5,
+              "target_midi": 34
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 36
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 37
             },
             {
               "seconds": 0.5,
-              "target_midi": 38
+              "target_midi": 39
             },
             {
-              "seconds": 1.0,
-              "target_midi": 40
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 42
+              "seconds": 0.3,
+              "target_midi": 41
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 6
+            "covered": 3,
+            "total": 8
           },
-          "plan_cost": 96.83794692270128,
+          "plan_cost": 685.7173801751474,
           "recording_for_pitch": {
-            "59": null,
-            "60": null,
+            "60": "080",
             "62": null,
             "64": null,
-            "66": "080",
-            "67": "097"
+            "65": null,
+            "67": null,
+            "69": null,
+            "71": "019",
+            "72": "097"
           },
           "song": "can-can",
-          "transpose": -22,
+          "transpose": -28,
           "unlocked": false
         },
         {
@@ -52797,29 +53035,39 @@
         {
           "missing": [
             {
+              "seconds": 1.5,
+              "target_midi": 48
+            },
+            {
               "seconds": 0.5,
-              "target_midi": 42
+              "target_midi": 49
             },
             {
               "seconds": 0.8,
-              "target_midi": 46
+              "target_midi": 51
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 53
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 474.6853106232434,
+          "plan_cost": 931.6281690512222,
           "recording_for_pitch": {
-            "59": "019",
+            "55": "019",
+            "57": "080",
+            "59": null,
             "60": null,
-            "62": "080",
+            "62": null,
             "64": null,
             "67": "097"
           },
           "song": "grand-old-flag",
-          "transpose": -18,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -54706,23 +54954,33 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 49
+            },
+            {
               "seconds": 1.5,
-              "target_midi": 43
+              "target_midi": 52
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 54
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
             "covered": 2,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 54.60324901369644,
+          "plan_cost": 39.900994891682174,
           "recording_for_pitch": {
+            "55": "002",
+            "57": null,
             "60": null,
-            "62": "002",
+            "62": null,
             "64": "097"
           },
           "song": "old-macdonald",
-          "transpose": -17,
+          "transpose": -8,
           "unlocked": false
         },
         {
@@ -55931,37 +56189,39 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 49
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 51
+              "target_midi": 34
             },
             {
               "seconds": 0.5,
-              "target_midi": 53
+              "target_midi": 36
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 38
             },
             {
               "seconds": 0.5,
-              "target_midi": 55
+              "target_midi": 41
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 6
+            "covered": 4,
+            "total": 8
           },
-          "plan_cost": 11.611032029111946,
+          "plan_cost": 72.68353485733978,
           "recording_for_pitch": {
-            "59": "002",
             "60": null,
             "62": null,
             "64": null,
-            "66": null,
-            "67": "097"
+            "65": "098",
+            "67": null,
+            "69": "016",
+            "71": "002",
+            "72": "097"
           },
           "song": "can-can",
-          "transpose": -11,
+          "transpose": -26,
           "unlocked": false
         },
         {
@@ -57668,25 +57928,35 @@
         {
           "missing": [
             {
+              "seconds": 1.5,
+              "target_midi": 41
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 42
+            },
+            {
               "seconds": 0.8,
-              "target_midi": 48
+              "target_midi": 44
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 195.74161340670264,
+          "plan_cost": 91.43686774180796,
           "recording_for_pitch": {
-            "59": "016",
-            "60": "097",
-            "62": "002",
-            "64": null,
-            "67": "098"
+            "55": "098",
+            "57": "016",
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": "002",
+            "67": "097"
           },
           "song": "grand-old-flag",
-          "transpose": -16,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -59530,22 +59800,32 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 54
+              "target_midi": 53
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 56
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 60
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 2,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 66.30312380647342,
+          "plan_cost": 17.541532041718604,
           "recording_for_pitch": {
-            "60": "032",
-            "62": null,
-            "64": "094"
+            "55": "032",
+            "57": null,
+            "60": null,
+            "62": "094",
+            "64": null
           },
           "song": "old-macdonald",
-          "transpose": -8,
+          "transpose": -4,
           "unlocked": false
         },
         {
@@ -60754,37 +61034,39 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 52
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 54
+              "target_midi": 36
             },
             {
               "seconds": 0.5,
-              "target_midi": 56
+              "target_midi": 38
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 40
             },
             {
               "seconds": 0.5,
-              "target_midi": 59
+              "target_midi": 43
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 6
+            "covered": 4,
+            "total": 8
           },
-          "plan_cost": 5.727850320214517,
+          "plan_cost": 74.1962348935275,
           "recording_for_pitch": {
-            "59": "032",
             "60": null,
             "62": null,
             "64": null,
-            "66": "094",
-            "67": null
+            "65": "098",
+            "67": null,
+            "69": "102",
+            "71": "094",
+            "72": "032"
           },
           "song": "can-can",
-          "transpose": -8,
+          "transpose": -24,
           "unlocked": false
         },
         {
@@ -62499,25 +62781,35 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 48
+              "seconds": 0.5,
+              "target_midi": 52
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 54
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 56
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 116.27637788220157,
+          "plan_cost": 82.86112135519967,
           "recording_for_pitch": {
-            "59": "102",
-            "60": "094",
+            "55": "102",
+            "57": "098",
+            "59": "032",
+            "60": null,
             "62": null,
-            "64": "032",
-            "67": "098"
+            "64": null,
+            "67": "094"
           },
           "song": "grand-old-flag",
-          "transpose": -14,
+          "transpose": -8,
           "unlocked": false
         },
         {
@@ -64305,21 +64597,28 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 0,
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 48
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 91.36554390314538,
+          "plan_cost": 71.95199633339733,
           "recording_for_pitch": {
-            "60": "002",
-            "62": "032",
+            "55": "002",
+            "57": null,
+            "60": "032",
+            "62": "095",
             "64": "090"
           },
           "song": "old-macdonald",
-          "transpose": -11,
-          "unlocked": true
+          "transpose": -9,
+          "unlocked": false
         },
         {
           "missing": [
@@ -65379,29 +65678,39 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 47
+              "target_midi": 43
             },
             {
-              "seconds": 1.0,
-              "target_midi": 49
+              "seconds": 0.3,
+              "target_midi": 45
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 48
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 50
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
             "covered": 4,
-            "total": 6
+            "total": 8
           },
-          "plan_cost": 21.1227824504277,
+          "plan_cost": 43.447236062491235,
           "recording_for_pitch": {
-            "59": "002",
-            "60": null,
+            "60": "095",
             "62": null,
-            "64": "032",
-            "66": "095",
-            "67": "090"
+            "64": null,
+            "65": "002",
+            "67": null,
+            "69": null,
+            "71": "032",
+            "72": "090"
           },
           "song": "can-can",
-          "transpose": -13,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -66934,25 +67243,35 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
+              "seconds": 0.3,
               "target_midi": 44
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 47
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 49
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
             "covered": 4,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 60.44439710236573,
+          "plan_cost": 63.71636427139545,
           "recording_for_pitch": {
-            "59": "090",
-            "60": "095",
+            "55": "095",
+            "57": null,
+            "59": "002",
+            "60": null,
             "62": null,
-            "64": "002",
-            "67": "032"
+            "64": "032",
+            "67": "090"
           },
           "song": "grand-old-flag",
-          "transpose": -18,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -68521,13 +68840,15 @@
         },
         {
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 69.79981424845413,
+          "plan_cost": 144.7382880929508,
           "recording_for_pitch": {
+            "55": "022",
+            "57": "097",
             "60": "002",
             "62": "017",
             "64": "101"
@@ -69438,25 +69759,31 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 43
+              "target_midi": 40
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 42
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 38.30189905527007,
+          "plan_cost": 115.90184536938347,
           "recording_for_pitch": {
-            "59": "101",
             "60": "017",
-            "62": "022",
+            "62": null,
             "64": null,
-            "66": "002",
-            "67": "097"
+            "65": "022",
+            "67": "002",
+            "69": "096",
+            "71": "097",
+            "72": "101"
           },
           "song": "can-can",
-          "transpose": -21,
+          "transpose": -22,
           "unlocked": false
         },
         {
@@ -70733,23 +71060,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 1,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 50
+            }
+          ],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 101.25254401234702,
+          "plan_cost": 183.0109918034264,
           "recording_for_pitch": {
-            "59": "101",
-            "60": "017",
-            "62": "022",
-            "64": "002",
-            "67": "096"
+            "55": "002",
+            "57": "096",
+            "59": null,
+            "60": "101",
+            "62": "017",
+            "64": "022",
+            "67": "097"
           },
           "song": "grand-old-flag",
-          "transpose": -20,
-          "unlocked": true
+          "transpose": -9,
+          "unlocked": false
         },
         {
           "missing": [
@@ -72165,21 +72499,32 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 52
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 54
+            }
+          ],
           "octave_moves": 2,
           "pitch_coverage": {
             "covered": 3,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 131.70212351833968,
+          "plan_cost": 76.78651091462308,
           "recording_for_pitch": {
-            "60": "002",
-            "62": "017",
+            "55": "002",
+            "57": "017",
+            "60": null,
+            "62": null,
             "64": "059"
           },
           "song": "old-macdonald",
-          "transpose": -11,
-          "unlocked": true
+          "transpose": -8,
+          "unlocked": false
         },
         {
           "missing": [
@@ -73243,33 +73588,35 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 47
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 49
+              "target_midi": 42
             },
             {
               "seconds": 0.5,
-              "target_midi": 51
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 49
             }
           ],
           "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 21.565159077095544,
+          "plan_cost": 67.19572235776967,
           "recording_for_pitch": {
-            "59": "002",
             "60": null,
             "62": null,
-            "64": null,
-            "66": "017",
-            "67": "059"
+            "64": "002",
+            "65": "096",
+            "67": null,
+            "69": "017",
+            "71": "059",
+            "72": "086"
           },
           "song": "can-can",
-          "transpose": -13,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -74791,25 +75138,31 @@
         {
           "missing": [
             {
+              "seconds": 0.3,
+              "target_midi": 44
+            },
+            {
               "seconds": 0.5,
-              "target_midi": 46
+              "target_midi": 49
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 5
+            "covered": 5,
+            "total": 7
           },
-          "plan_cost": 62.06936999449472,
+          "plan_cost": 107.21179060763093,
           "recording_for_pitch": {
-            "59": "096",
+            "55": null,
+            "57": "096",
+            "59": "002",
             "60": null,
-            "62": "002",
-            "64": "017",
+            "62": "017",
+            "64": "059",
             "67": "086"
           },
           "song": "grand-old-flag",
-          "transpose": -14,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -76376,21 +76729,28 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 1,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 44
+            }
+          ],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 95.79120482294266,
+          "plan_cost": 225.86033357210948,
           "recording_for_pitch": {
-            "60": "032",
-            "62": "022",
-            "64": "013"
+            "55": "022",
+            "57": "009",
+            "60": null,
+            "62": "013",
+            "64": "032"
           },
           "song": "old-macdonald",
-          "transpose": -9,
-          "unlocked": true
+          "transpose": -16,
+          "unlocked": false
         },
         {
           "missing": [
@@ -77378,29 +77738,35 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 46
+              "target_midi": 34
             },
             {
-              "seconds": 1.0,
-              "target_midi": 48
+              "seconds": 0.3,
+              "target_midi": 36
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 37
             }
           ],
           "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 60.416422275615226,
+          "plan_cost": 391.7223110702581,
           "recording_for_pitch": {
-            "59": "009",
-            "60": null,
+            "60": "009",
             "62": null,
-            "64": "032",
-            "66": "022",
-            "67": "013"
+            "64": null,
+            "65": null,
+            "67": "022",
+            "69": "032",
+            "71": "016",
+            "72": "013"
           },
           "song": "can-can",
-          "transpose": -14,
+          "transpose": -28,
           "unlocked": false
         },
         {
@@ -78813,15 +79179,26 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 0.3,
+              "target_midi": 36
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 40
+            }
+          ],
           "octave_moves": 2,
           "pitch_coverage": {
             "covered": 5,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 451.6775405270201,
+          "plan_cost": 474.39792644328696,
           "recording_for_pitch": {
-            "59": "016",
+            "55": null,
+            "57": "016",
+            "59": null,
             "60": "022",
             "62": "013",
             "64": "009",
@@ -78829,7 +79206,7 @@
           },
           "song": "grand-old-flag",
           "transpose": -19,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -80358,21 +80735,32 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 3,
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 35
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 38
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 486.65088879510324,
+          "plan_cost": 246.908489627721,
           "recording_for_pitch": {
-            "60": "084",
-            "62": "080",
-            "64": "017"
+            "55": "080",
+            "57": null,
+            "60": null,
+            "62": "017",
+            "64": "084"
           },
           "song": "old-macdonald",
-          "transpose": -16,
-          "unlocked": true
+          "transpose": -22,
+          "unlocked": false
         },
         {
           "missing": [
@@ -81452,33 +81840,35 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 35
+              "target_midi": 34
             },
             {
-              "seconds": 1.0,
+              "seconds": 0.3,
+              "target_midi": 36
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 37
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 41
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 98.14274014425986,
+          "plan_cost": 726.9528090426933,
           "recording_for_pitch": {
-            "59": "080",
-            "60": null,
+            "60": "080",
             "62": null,
-            "64": "017",
-            "66": null,
-            "67": "084"
+            "64": null,
+            "65": null,
+            "67": "017",
+            "69": "019",
+            "71": "084",
+            "72": "104"
           },
           "song": "can-can",
-          "transpose": -25,
+          "transpose": -28,
           "unlocked": false
         },
         {
@@ -83007,25 +83397,31 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 36
+              "seconds": 0.5,
+              "target_midi": 47
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 49
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 5
+            "covered": 5,
+            "total": 7
           },
-          "plan_cost": 1340.1975462249936,
+          "plan_cost": 370.5714193252482,
           "recording_for_pitch": {
-            "59": "104",
-            "60": "080",
+            "55": "019",
+            "57": "104",
+            "59": "080",
+            "60": null,
             "62": null,
             "64": "017",
-            "67": "019"
+            "67": "084"
           },
           "song": "grand-old-flag",
-          "transpose": -26,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -84657,21 +85053,32 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 2,
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 49
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 246.46713382460825,
+          "plan_cost": 133.5843961760405,
           "recording_for_pitch": {
-            "60": "032",
-            "62": "009",
-            "64": "002"
+            "55": "009",
+            "57": null,
+            "60": "002",
+            "62": null,
+            "64": "032"
           },
           "song": "old-macdonald",
-          "transpose": -20,
-          "unlocked": true
+          "transpose": -13,
+          "unlocked": false
         },
         {
           "missing": [
@@ -85725,30 +86132,32 @@
               "target_midi": 43
             },
             {
-              "seconds": 1.0,
-              "target_midi": 45
+              "seconds": 0.5,
+              "target_midi": 48
             },
             {
-              "seconds": 0.5,
-              "target_midi": 49
+              "seconds": 0.3,
+              "target_midi": 53
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 35.82339339516772,
+          "plan_cost": 330.26550081895317,
           "recording_for_pitch": {
-            "59": "009",
-            "60": null,
+            "60": "009",
             "62": null,
-            "64": "002",
-            "66": null,
-            "67": "032"
+            "64": "019",
+            "65": "002",
+            "67": null,
+            "69": "096",
+            "71": "032",
+            "72": null
           },
           "song": "can-can",
-          "transpose": -17,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -87251,23 +87660,34 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 4,
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 48
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 52
+            }
+          ],
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 5,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 452.49412821621945,
+          "plan_cost": 551.6559629150133,
           "recording_for_pitch": {
-            "59": "096",
-            "60": "002",
+            "55": "009",
+            "57": "096",
+            "59": "002",
+            "60": null,
             "62": "032",
-            "64": "009",
+            "64": null,
             "67": "019"
           },
           "song": "grand-old-flag",
-          "transpose": -24,
-          "unlocked": true
+          "transpose": -12,
+          "unlocked": false
         },
         {
           "missing": [
@@ -88882,21 +89302,28 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 0,
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 48
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 66.72506842897877,
+          "plan_cost": 304.4795899164053,
           "recording_for_pitch": {
+            "55": "080",
+            "57": null,
             "60": "032",
             "62": "101",
             "64": "013"
           },
           "song": "old-macdonald",
           "transpose": -9,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -89931,29 +90358,39 @@
           "missing": [
             {
               "seconds": 0.5,
+              "target_midi": 45
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 47
             },
             {
-              "seconds": 1.0,
-              "target_midi": 49
+              "seconds": 0.3,
+              "target_midi": 48
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 50
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
-            "total": 6
+            "total": 8
           },
-          "plan_cost": 108.3594085436881,
+          "plan_cost": 795.7703081806617,
           "recording_for_pitch": {
-            "59": "080",
-            "60": null,
+            "60": "080",
             "62": null,
-            "64": "032",
-            "66": "101",
-            "67": "013"
+            "64": null,
+            "65": null,
+            "67": null,
+            "69": "032",
+            "71": "101",
+            "72": "013"
           },
           "song": "can-can",
-          "transpose": -13,
+          "transpose": -17,
           "unlocked": false
         },
         {
@@ -91482,25 +91919,35 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 44
+              "seconds": 0.3,
+              "target_midi": 48
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 53
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 55
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 377.27893483085677,
+          "plan_cost": 1232.2509961235048,
           "recording_for_pitch": {
-            "59": "080",
-            "60": null,
-            "62": "013",
-            "64": "032",
-            "67": "101"
+            "55": "080",
+            "57": null,
+            "59": "032",
+            "60": "101",
+            "62": null,
+            "64": null,
+            "67": "013"
           },
           "song": "grand-old-flag",
-          "transpose": -16,
+          "transpose": -9,
           "unlocked": false
         },
         {
@@ -93076,21 +93523,28 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 54
+            }
+          ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 67.91506208896453,
+          "plan_cost": 115.00708403100965,
           "recording_for_pitch": {
-            "60": "002",
-            "62": "094",
-            "64": "032"
+            "55": "002",
+            "57": "017",
+            "60": "032",
+            "62": null,
+            "64": "094"
           },
           "song": "old-macdonald",
-          "transpose": -14,
-          "unlocked": true
+          "transpose": -8,
+          "unlocked": false
         },
         {
           "missing": [
@@ -94094,29 +94548,35 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 42
+              "target_midi": 48
             },
             {
-              "seconds": 1.0,
-              "target_midi": 44
+              "seconds": 0.5,
+              "target_midi": 53
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 55
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 24.69310267501905,
+          "plan_cost": 174.06943602449,
           "recording_for_pitch": {
-            "59": "017",
-            "60": null,
+            "60": "002",
             "62": null,
-            "64": "002",
-            "66": "094",
-            "67": "032"
+            "64": "017",
+            "65": "032",
+            "67": null,
+            "69": null,
+            "71": "094",
+            "72": "103"
           },
           "song": "can-can",
-          "transpose": -18,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -95525,23 +95985,34 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 50
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 54
+            }
+          ],
           "octave_moves": 2,
           "pitch_coverage": {
             "covered": 5,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 147.9000852899561,
+          "plan_cost": 124.34435936115787,
           "recording_for_pitch": {
-            "59": "103",
-            "60": "002",
-            "62": "032",
-            "64": "017",
-            "67": "094"
+            "55": "002",
+            "57": "094",
+            "59": "032",
+            "60": null,
+            "62": "017",
+            "64": null,
+            "67": "103"
           },
           "song": "grand-old-flag",
-          "transpose": -11,
-          "unlocked": true
+          "transpose": -10,
+          "unlocked": false
         },
         {
           "missing": [
@@ -97065,21 +97536,28 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 2,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 50
+            }
+          ],
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 656.9493051371579,
+          "plan_cost": 289.0616351564587,
           "recording_for_pitch": {
-            "60": "080",
+            "55": "080",
+            "57": "091",
+            "60": null,
             "62": "095",
-            "64": "091"
+            "64": "090"
           },
           "song": "old-macdonald",
-          "transpose": -19,
-          "unlocked": true
+          "transpose": -10,
+          "unlocked": false
         },
         {
           "missing": [
@@ -98088,30 +98566,32 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 48
+              "seconds": 0.5,
+              "target_midi": 35
             },
             {
-              "seconds": 0.5,
-              "target_midi": 50
+              "seconds": 0.3,
+              "target_midi": 37
             }
           ],
           "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 109.41695549367587,
+          "plan_cost": 763.628092227952,
           "recording_for_pitch": {
-            "59": "080",
-            "60": "091",
+            "60": "080",
             "62": null,
             "64": null,
-            "66": "095",
-            "67": "090"
+            "65": "098",
+            "67": "095",
+            "69": "090",
+            "71": "086",
+            "72": "091"
           },
           "song": "can-can",
-          "transpose": -14,
+          "transpose": -27,
           "unlocked": false
         },
         {
@@ -99510,23 +99990,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 4,
+          "missing": [
+            {
+              "seconds": 0.8,
+              "target_midi": 50
+            }
+          ],
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 524.8931840302489,
+          "plan_cost": 526.7072062332431,
           "recording_for_pitch": {
-            "59": "090",
-            "60": "095",
-            "62": "080",
-            "64": "091",
-            "67": "098"
+            "55": "098",
+            "57": "095",
+            "59": "080",
+            "60": "090",
+            "62": "091",
+            "64": null,
+            "67": "086"
           },
           "song": "grand-old-flag",
-          "transpose": -18,
-          "unlocked": true
+          "transpose": -14,
+          "unlocked": false
         },
         {
           "missing": [
@@ -100997,19 +101484,21 @@
         },
         {
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 671.8139393141277,
+          "plan_cost": 686.3985218211193,
           "recording_for_pitch": {
+            "55": "022",
+            "57": "090",
             "60": "080",
-            "62": "022",
-            "64": "069"
+            "62": "069",
+            "64": "094"
           },
           "song": "old-macdonald",
-          "transpose": -19,
+          "transpose": -16,
           "unlocked": true
         },
         {
@@ -101831,24 +102320,31 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 3,
+          "missing": [
+            {
+              "seconds": 0.3,
+              "target_midi": 48
+            }
+          ],
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 7,
+            "total": 8
           },
-          "plan_cost": 82.42884471835764,
+          "plan_cost": 1820.3345215786042,
           "recording_for_pitch": {
-            "59": "022",
-            "60": "090",
-            "62": "059",
-            "64": "094",
-            "66": "069",
-            "67": "097"
+            "60": "080",
+            "62": "069",
+            "64": null,
+            "65": "094",
+            "67": "022",
+            "69": "090",
+            "71": "059",
+            "72": "097"
           },
           "song": "can-can",
-          "transpose": -7,
-          "unlocked": true
+          "transpose": -16,
+          "unlocked": false
         },
         {
           "missing": [],
@@ -103004,23 +103500,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 3,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 53
+            }
+          ],
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 200.79505285706256,
+          "plan_cost": 266.9251568952479,
           "recording_for_pitch": {
-            "59": "022",
+            "55": "094",
+            "57": "022",
+            "59": null,
             "60": "090",
             "62": "069",
             "64": "059",
-            "67": "094"
+            "67": "097"
           },
           "song": "grand-old-flag",
           "transpose": -6,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -104295,13 +104798,15 @@
         },
         {
           "missing": [],
-          "octave_moves": 0,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 83.19003778529365,
+          "plan_cost": 162.4175924428269,
           "recording_for_pitch": {
+            "55": "013",
+            "57": "094",
             "60": "002",
             "62": "101",
             "64": "090"
@@ -105146,22 +105651,24 @@
         },
         {
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 39.39580258445581,
+          "plan_cost": 357.25276734542774,
           "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "013",
-            "64": "094",
-            "66": "002",
-            "67": "097"
+            "60": "002",
+            "62": "017",
+            "64": "101",
+            "65": "098",
+            "67": "090",
+            "69": "094",
+            "71": "013",
+            "72": "097"
           },
           "song": "can-can",
-          "transpose": -6,
+          "transpose": -13,
           "unlocked": true
         },
         {
@@ -106324,21 +106831,23 @@
         },
         {
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 136.26314137828496,
+          "plan_cost": 411.6630544602886,
           "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "013",
-            "64": "002",
-            "67": "094"
+            "55": "090",
+            "57": "094",
+            "59": "002",
+            "60": "101",
+            "62": "017",
+            "64": "013",
+            "67": "097"
           },
           "song": "grand-old-flag",
-          "transpose": -6,
+          "transpose": -10,
           "unlocked": true
         },
         {
@@ -107656,21 +108165,28 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 1,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 50
+            }
+          ],
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 138.93189901537926,
+          "plan_cost": 61.73893605988546,
           "recording_for_pitch": {
-            "60": "084",
-            "62": "069",
-            "64": "002"
+            "55": "069",
+            "57": "002",
+            "60": null,
+            "62": "101",
+            "64": "084"
           },
           "song": "old-macdonald",
-          "transpose": -17,
-          "unlocked": true
+          "transpose": -10,
+          "unlocked": false
         },
         {
           "missing": [
@@ -108632,30 +109148,28 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
+              "seconds": 0.3,
               "target_midi": 49
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 51
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 6
+            "covered": 7,
+            "total": 8
           },
-          "plan_cost": 19.92496058599772,
+          "plan_cost": 334.2414768228778,
           "recording_for_pitch": {
-            "59": "069",
-            "60": "002",
-            "62": null,
+            "60": "069",
+            "62": "002",
             "64": null,
-            "66": "101",
-            "67": "084"
+            "65": "098",
+            "67": "101",
+            "69": "086",
+            "71": "084",
+            "72": "103"
           },
           "song": "can-can",
-          "transpose": -13,
+          "transpose": -15,
           "unlocked": false
         },
         {
@@ -109995,23 +110509,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 0.8,
+              "target_midi": 52
+            }
+          ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 69.60508135113803,
+          "plan_cost": 540.3756214809597,
           "recording_for_pitch": {
-            "59": "086",
+            "55": "086",
+            "57": "069",
+            "59": "002",
             "60": "101",
-            "62": "084",
-            "64": "002",
+            "62": null,
+            "64": "084",
             "67": "103"
           },
           "song": "grand-old-flag",
-          "transpose": -6,
-          "unlocked": true
+          "transpose": -10,
+          "unlocked": false
         },
         {
           "missing": [
@@ -111444,13 +111965,15 @@
         },
         {
           "missing": [],
-          "octave_moves": 0,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 61.528773054414714,
+          "plan_cost": 351.062492063539,
           "recording_for_pitch": {
+            "55": "080",
+            "57": "017",
             "60": "032",
             "62": "090",
             "64": "084"
@@ -112313,25 +112836,27 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 47
+              "target_midi": 39
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 6
+            "covered": 7,
+            "total": 8
           },
-          "plan_cost": 144.26141609481175,
+          "plan_cost": 546.8869820298651,
           "recording_for_pitch": {
-            "59": "080",
-            "60": null,
-            "62": "032",
-            "64": "017",
-            "66": "090",
-            "67": "084"
+            "60": "017",
+            "62": null,
+            "64": "016",
+            "65": "090",
+            "67": "084",
+            "69": "080",
+            "71": "104",
+            "72": "032"
           },
           "song": "can-can",
-          "transpose": -13,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -113541,21 +114066,23 @@
         },
         {
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 166.70046564502013,
+          "plan_cost": 575.6899777752851,
           "recording_for_pitch": {
-            "59": "104",
-            "60": "017",
+            "55": "016",
+            "57": "104",
+            "59": "080",
+            "60": "084",
             "62": "032",
-            "64": "084",
+            "64": "017",
             "67": "090"
           },
           "song": "grand-old-flag",
-          "transpose": -10,
+          "transpose": -13,
           "unlocked": true
         },
         {
@@ -114929,21 +115456,28 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 62
+            }
+          ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 59.25655634250969,
+          "plan_cost": 51.86021701358885,
           "recording_for_pitch": {
-            "60": "084",
-            "62": "059",
-            "64": "094"
+            "55": "084",
+            "57": "094",
+            "60": null,
+            "62": "101",
+            "64": "059"
           },
           "song": "old-macdonald",
-          "transpose": -5,
-          "unlocked": true
+          "transpose": 2,
+          "unlocked": false
         },
         {
           "missing": [
@@ -115914,30 +116448,28 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 61
-            },
-            {
               "seconds": 0.5,
-              "target_midi": 63
+              "target_midi": 48
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 6
+            "covered": 7,
+            "total": 8
           },
-          "plan_cost": 14.29948568354031,
+          "plan_cost": 172.52515073292943,
           "recording_for_pitch": {
-            "59": "084",
             "60": "094",
             "62": null,
-            "64": null,
-            "66": "101",
-            "67": "059"
+            "64": "096",
+            "65": "098",
+            "67": "101",
+            "69": "019",
+            "71": "059",
+            "72": "084"
           },
           "song": "can-can",
-          "transpose": -1,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -117284,15 +117816,22 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 50
+            }
+          ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 115.87225734124704,
+          "plan_cost": 137.02050108676457,
           "recording_for_pitch": {
-            "59": "096",
+            "55": "019",
+            "57": "096",
+            "59": null,
             "60": "101",
             "62": "059",
             "64": "084",
@@ -117300,7 +117839,7 @@
           },
           "song": "grand-old-flag",
           "transpose": -9,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -118828,22 +119367,24 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 53
+              "target_midi": 47
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 19.659955806705035,
+          "plan_cost": 205.71869247349812,
           "recording_for_pitch": {
+            "55": "009",
+            "57": "091",
             "60": null,
-            "62": "101",
-            "64": "091"
+            "62": "097",
+            "64": "101"
           },
           "song": "old-macdonald",
-          "transpose": -7,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -119872,29 +120413,27 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 43
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 45
+              "target_midi": 47
             }
           ],
           "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 6
+            "covered": 7,
+            "total": 8
           },
-          "plan_cost": 60.04503625043403,
+          "plan_cost": 418.8506255142512,
           "recording_for_pitch": {
-            "59": "009",
-            "60": null,
+            "60": "009",
             "62": null,
-            "64": "091",
-            "66": "097",
-            "67": "101"
+            "64": "104",
+            "65": "103",
+            "67": "101",
+            "69": "016",
+            "71": "091",
+            "72": "097"
           },
           "song": "can-can",
-          "transpose": -17,
+          "transpose": -15,
           "unlocked": false
         },
         {
@@ -121310,23 +121849,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 3,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 40
+            }
+          ],
+          "octave_moves": 5,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 282.8647889736702,
+          "plan_cost": 338.6310403526148,
           "recording_for_pitch": {
-            "59": "016",
+            "55": "104",
+            "57": "016",
+            "59": null,
             "60": "101",
             "62": "009",
             "64": "091",
-            "67": "104"
+            "67": "103"
           },
           "song": "grand-old-flag",
           "transpose": -19,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -122810,19 +123356,21 @@
         },
         {
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 76.42064280372041,
+          "plan_cost": 157.6906150312676,
           "recording_for_pitch": {
+            "55": "022",
+            "57": "095",
             "60": "084",
             "62": "059",
             "64": "097"
           },
           "song": "old-macdonald",
-          "transpose": -5,
+          "transpose": -4,
           "unlocked": true
         },
         {
@@ -123677,29 +124225,26 @@
           "unlocked": false
         },
         {
-          "missing": [
-            {
-              "seconds": 1.0,
-              "target_midi": 54
-            }
-          ],
-          "octave_moves": 3,
+          "missing": [],
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 43.449394194391594,
+          "plan_cost": 297.214592093216,
           "recording_for_pitch": {
-            "59": "022",
-            "60": "095",
-            "62": null,
-            "64": "084",
-            "66": "059",
-            "67": "097"
+            "60": "022",
+            "62": "095",
+            "64": "102",
+            "65": "084",
+            "67": "097",
+            "69": "096",
+            "71": "016",
+            "72": "059"
           },
           "song": "can-can",
-          "transpose": -8,
-          "unlocked": false
+          "transpose": -19,
+          "unlocked": true
         },
         {
           "missing": [],
@@ -124895,21 +125440,23 @@
         },
         {
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 5,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 82.45706287093077,
+          "plan_cost": 324.57284013570273,
           "recording_for_pitch": {
-            "59": "016",
-            "60": "095",
+            "55": "102",
+            "57": "096",
+            "59": "084",
+            "60": "097",
             "62": "022",
-            "64": "084",
-            "67": "102"
+            "64": "095",
+            "67": "059"
           },
           "song": "grand-old-flag",
-          "transpose": -20,
+          "transpose": -12,
           "unlocked": true
         },
         {
@@ -126232,21 +126779,28 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 48
+            }
+          ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 77.97532036630585,
+          "plan_cost": 100.55452352625326,
           "recording_for_pitch": {
-            "60": "002",
+            "55": "002",
+            "57": null,
+            "60": "032",
             "62": "017",
-            "64": "032"
+            "64": "084"
           },
           "song": "old-macdonald",
-          "transpose": -13,
-          "unlocked": true
+          "transpose": -9,
+          "unlocked": false
         },
         {
           "missing": [
@@ -127199,29 +127753,31 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 47
+              "target_midi": 48
             },
             {
-              "seconds": 1.0,
-              "target_midi": 49
+              "seconds": 0.5,
+              "target_midi": 53
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 28.86790061983543,
+          "plan_cost": 180.12534953009668,
           "recording_for_pitch": {
-            "59": "002",
-            "60": null,
+            "60": "002",
             "62": null,
-            "64": "032",
-            "66": "017",
-            "67": "084"
+            "64": "017",
+            "65": "032",
+            "67": null,
+            "69": "086",
+            "71": "084",
+            "72": "103"
           },
           "song": "can-can",
-          "transpose": -13,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -128566,23 +129122,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 1,
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 50
+            }
+          ],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 170.33846510644256,
+          "plan_cost": 150.272428746634,
           "recording_for_pitch": {
-            "59": "002",
-            "60": "017",
-            "62": "032",
+            "55": "086",
+            "57": "002",
+            "59": "032",
+            "60": null,
+            "62": "017",
             "64": "084",
-            "67": "086"
+            "67": "103"
           },
           "song": "grand-old-flag",
           "transpose": -10,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -130009,22 +130572,24 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 55
+              "target_midi": 47
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 6.518705174363816,
+          "plan_cost": 161.56550168195756,
           "recording_for_pitch": {
+            "55": "069",
+            "57": "091",
             "60": null,
-            "62": "091",
-            "64": "094"
+            "62": "094",
+            "64": "017"
           },
           "song": "old-macdonald",
-          "transpose": -5,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -130975,26 +131540,32 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 43
+              "seconds": 0.3,
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 52
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 75.99951422338484,
+          "plan_cost": 1361.4206539598995,
           "recording_for_pitch": {
-            "59": "009",
-            "60": "017",
-            "62": null,
-            "64": "069",
-            "66": "091",
-            "67": "094"
+            "60": "009",
+            "62": "069",
+            "64": null,
+            "65": "017",
+            "67": null,
+            "69": "086",
+            "71": "091",
+            "72": "094"
           },
           "song": "can-can",
-          "transpose": -19,
+          "transpose": -15,
           "unlocked": false
         },
         {
@@ -132321,23 +132892,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 3,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 46
+            }
+          ],
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 301.303220063517,
+          "plan_cost": 963.5091117732826,
           "recording_for_pitch": {
-            "59": "009",
-            "60": "017",
-            "62": "069",
-            "64": "091",
-            "67": "094"
+            "55": "009",
+            "57": "094",
+            "59": null,
+            "60": "069",
+            "62": "091",
+            "64": "017",
+            "67": "086"
           },
           "song": "grand-old-flag",
-          "transpose": -19,
-          "unlocked": true
+          "transpose": -13,
+          "unlocked": false
         },
         {
           "missing": [
@@ -133824,21 +134402,32 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 3,
+          "missing": [
+            {
+              "seconds": 1.0,
+              "target_midi": 50
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 55
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 189.5298514747139,
+          "plan_cost": 43.03949831419234,
           "recording_for_pitch": {
-            "60": "084",
-            "62": "094",
-            "64": "022"
+            "55": null,
+            "57": "022",
+            "60": null,
+            "62": "084",
+            "64": "094"
           },
           "song": "old-macdonald",
-          "transpose": -14,
-          "unlocked": true
+          "transpose": -5,
+          "unlocked": false
         },
         {
           "missing": [
@@ -134942,33 +135531,39 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 52
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 54
+              "target_midi": 47
             },
             {
               "seconds": 0.5,
-              "target_midi": 59
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 51
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 54
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 4,
+            "total": 8
           },
-          "plan_cost": 12.701504028483628,
+          "plan_cost": 55.904013378321615,
           "recording_for_pitch": {
-            "59": "022",
             "60": null,
             "62": null,
-            "64": "084",
-            "66": "094",
-            "67": null
+            "64": null,
+            "65": "022",
+            "67": null,
+            "69": "084",
+            "71": "094",
+            "72": "103"
           },
           "song": "can-can",
-          "transpose": -8,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -136570,25 +137165,35 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 51
+              "seconds": 0.8,
+              "target_midi": 62
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 64
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 67
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 69.93742091016713,
+          "plan_cost": 133.48720286732282,
           "recording_for_pitch": {
-            "59": "103",
-            "60": null,
-            "62": "022",
-            "64": "084",
-            "67": "094"
+            "55": "022",
+            "57": "103",
+            "59": "084",
+            "60": "094",
+            "62": null,
+            "64": null,
+            "67": null
           },
           "song": "grand-old-flag",
-          "transpose": -9,
+          "transpose": 0,
           "unlocked": false
         },
         {
@@ -138341,6 +138946,14 @@
         {
           "missing": [
             {
+              "seconds": 1.0,
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 51
+            },
+            {
               "seconds": 1.5,
               "target_midi": 54
             }
@@ -138348,10 +138961,12 @@
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 2,
-            "total": 3
+            "total": 5
           },
           "plan_cost": 3.836062720694934,
           "recording_for_pitch": {
+            "55": null,
+            "57": null,
             "60": null,
             "62": "090",
             "64": "094"
@@ -139610,37 +140225,39 @@
           "missing": [
             {
               "seconds": 0.5,
+              "target_midi": 45
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 47
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 50
             },
             {
               "seconds": 0.5,
-              "target_midi": 51
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 53
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 57
+              "target_midi": 52
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 6
+            "covered": 4,
+            "total": 8
           },
-          "plan_cost": 0.49273192890085993,
+          "plan_cost": 23.508646681786622,
           "recording_for_pitch": {
-            "59": null,
             "60": null,
             "62": null,
-            "64": "090",
-            "66": null,
-            "67": "094"
+            "64": "104",
+            "65": null,
+            "67": null,
+            "69": "090",
+            "71": "094",
+            "72": "103"
           },
           "song": "can-can",
-          "transpose": -9,
+          "transpose": -15,
           "unlocked": false
         },
         {
@@ -141383,29 +142000,35 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 61
+              "seconds": 1.5,
+              "target_midi": 52
             },
             {
               "seconds": 0.8,
-              "target_midi": 63
+              "target_midi": 55
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 57
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 5
+            "covered": 4,
+            "total": 7
           },
-          "plan_cost": 14.012021121911918,
+          "plan_cost": 91.54796048610338,
           "recording_for_pitch": {
-            "59": "103",
-            "60": "094",
+            "55": "104",
+            "57": "103",
+            "59": null,
+            "60": "090",
             "62": null,
             "64": null,
-            "67": "090"
+            "67": "094"
           },
           "song": "grand-old-flag",
-          "transpose": -1,
+          "transpose": -7,
           "unlocked": false
         },
         {
@@ -143231,21 +143854,32 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 55
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 59
+            }
+          ],
           "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 111.20548763537889,
+          "plan_cost": 88.57983364844586,
           "recording_for_pitch": {
-            "60": "032",
-            "62": "017",
-            "64": "013"
+            "55": "032",
+            "57": "017",
+            "60": null,
+            "62": "013",
+            "64": null
           },
           "song": "old-macdonald",
-          "transpose": -9,
-          "unlocked": true
+          "transpose": -5,
+          "unlocked": false
         },
         {
           "missing": [
@@ -144348,34 +144982,40 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 53
+              "seconds": 0.5,
+              "target_midi": 43
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 45
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 46
             },
             {
               "seconds": 0.5,
-              "target_midi": 55
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 58
+              "target_midi": 48
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 4,
+            "total": 8
           },
-          "plan_cost": 27.10073106635066,
+          "plan_cost": 142.9310798008487,
           "recording_for_pitch": {
-            "59": "017",
-            "60": "032",
+            "60": "017",
             "62": null,
             "64": null,
-            "66": "013",
-            "67": null
+            "65": null,
+            "67": null,
+            "69": "103",
+            "71": "032",
+            "72": "013"
           },
           "song": "can-can",
-          "transpose": -9,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -145981,25 +146621,35 @@
         {
           "missing": [
             {
+              "seconds": 0.3,
+              "target_midi": 48
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 53
+            },
+            {
               "seconds": 0.8,
-              "target_midi": 56
+              "target_midi": 57
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 214.43933786587388,
+          "plan_cost": 167.61090994551125,
           "recording_for_pitch": {
-            "59": "017",
-            "60": "032",
+            "55": null,
+            "57": "017",
+            "59": "032",
+            "60": null,
             "62": "013",
             "64": null,
             "67": "103"
           },
           "song": "grand-old-flag",
-          "transpose": -8,
+          "transpose": -7,
           "unlocked": false
         },
         {
@@ -147740,23 +148390,29 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 47
+            },
+            {
               "seconds": 1.5,
-              "target_midi": 51
+              "target_midi": 50
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 3,
+            "total": 5
           },
-          "plan_cost": 3.443227466098681,
+          "plan_cost": 42.161931534572865,
           "recording_for_pitch": {
+            "55": "069",
+            "57": null,
             "60": null,
             "62": "101",
             "64": "090"
           },
           "song": "old-macdonald",
-          "transpose": -9,
+          "transpose": -10,
           "unlocked": false
         },
         {
@@ -148901,10 +149557,14 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 47
+              "target_midi": 46
             },
             {
-              "seconds": 1.0,
+              "seconds": 0.3,
+              "target_midi": 48
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 49
             },
             {
@@ -148912,22 +149572,24 @@
               "target_midi": 51
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 4,
+            "total": 8
           },
-          "plan_cost": 13.37363793323035,
+          "plan_cost": 219.18168487736187,
           "recording_for_pitch": {
-            "59": "069",
-            "60": null,
+            "60": "069",
             "62": null,
             "64": null,
-            "66": "101",
-            "67": "090"
+            "65": null,
+            "67": null,
+            "69": "098",
+            "71": "101",
+            "72": "090"
           },
           "song": "can-can",
-          "transpose": -13,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -150554,25 +151216,35 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 53
+              "seconds": 1.5,
+              "target_midi": 43
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 48
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 312.7633096667153,
+          "plan_cost": 185.45661668729613,
           "recording_for_pitch": {
-            "59": "098",
-            "60": "101",
-            "62": null,
-            "64": "069",
-            "67": "090"
+            "55": "098",
+            "57": "090",
+            "59": null,
+            "60": null,
+            "62": "069",
+            "64": null,
+            "67": "101"
           },
           "song": "grand-old-flag",
-          "transpose": -9,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -152326,21 +152998,32 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 3,
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 46
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 49
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 269.0011376173243,
+          "plan_cost": 171.24719996942136,
           "recording_for_pitch": {
-            "60": "032",
-            "62": "009",
+            "55": "009",
+            "57": null,
+            "60": null,
+            "62": "032",
             "64": "013"
           },
           "song": "old-macdonald",
-          "transpose": -21,
-          "unlocked": true
+          "transpose": -11,
+          "unlocked": false
         },
         {
           "missing": [
@@ -153488,33 +154171,43 @@
           "missing": [
             {
               "seconds": 0.5,
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 46
             },
             {
-              "seconds": 1.0,
-              "target_midi": 48
+              "seconds": 0.3,
+              "target_midi": 47
             },
             {
               "seconds": 0.5,
-              "target_midi": 50
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 51
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 6
+            "total": 8
           },
-          "plan_cost": 47.15755683178848,
+          "plan_cost": 352.47941818604795,
           "recording_for_pitch": {
-            "59": "009",
-            "60": null,
+            "60": "009",
             "62": null,
             "64": null,
-            "66": "032",
-            "67": "013"
+            "65": null,
+            "67": null,
+            "69": null,
+            "71": "032",
+            "72": "013"
           },
           "song": "can-can",
-          "transpose": -14,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -155205,22 +155898,32 @@
         {
           "missing": [
             {
+              "seconds": 0.3,
+              "target_midi": 41
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 45
+            },
+            {
               "seconds": 0.5,
               "target_midi": 46
             },
             {
-              "seconds": 1.0,
+              "seconds": 0.8,
               "target_midi": 48
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 195.5357497433877,
+          "plan_cost": 518.4060342006976,
           "recording_for_pitch": {
-            "59": "009",
+            "55": null,
+            "57": "009",
+            "59": null,
             "60": null,
             "62": null,
             "64": "032",
@@ -156976,22 +157679,24 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 54
+              "target_midi": 45
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 21.84807537169228,
+          "plan_cost": 260.59503089110524,
           "recording_for_pitch": {
+            "55": "009",
+            "57": "090",
             "60": null,
-            "62": "090",
+            "62": "069",
             "64": "097"
           },
           "song": "old-macdonald",
-          "transpose": -6,
+          "transpose": -15,
           "unlocked": false
         },
         {
@@ -158063,30 +158768,40 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 41
+              "seconds": 0.3,
+              "target_midi": 48
             },
             {
-              "seconds": 1.0,
-              "target_midi": 43
+              "seconds": 0.3,
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 51
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 53
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
-            "total": 6
+            "total": 8
           },
-          "plan_cost": 72.34753084620623,
+          "plan_cost": 1274.493670010955,
           "recording_for_pitch": {
-            "59": "009",
-            "60": null,
-            "62": null,
-            "64": "090",
-            "66": "069",
-            "67": "097"
+            "60": "009",
+            "62": "069",
+            "64": null,
+            "65": null,
+            "67": null,
+            "69": null,
+            "71": "090",
+            "72": "097"
           },
           "song": "can-can",
-          "transpose": -19,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -159660,25 +160375,35 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 46
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 51
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 4,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 283.72786073171915,
+          "plan_cost": 919.0780016411173,
           "recording_for_pitch": {
-            "59": "009",
-            "60": "090",
-            "62": "069",
+            "55": "009",
+            "57": "097",
+            "59": null,
+            "60": "069",
+            "62": null,
             "64": null,
-            "67": "097"
+            "67": "090"
           },
           "song": "grand-old-flag",
-          "transpose": -18,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -161411,27 +162136,37 @@
         {
           "missing": [
             {
-              "seconds": 1.5,
+              "seconds": 1.0,
               "target_midi": 39
             },
             {
+              "seconds": 1.5,
+              "target_midi": 44
+            },
+            {
               "seconds": 0.5,
-              "target_midi": 43
+              "target_midi": 46
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 48
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 1,
-            "total": 3
+            "total": 5
           },
           "plan_cost": 5.462362216629314,
           "recording_for_pitch": {
+            "55": null,
+            "57": "095",
             "60": null,
-            "62": "095",
+            "62": null,
             "64": null
           },
           "song": "old-macdonald",
-          "transpose": -21,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -162760,41 +163495,43 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 42
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 44
+              "target_midi": 31
             },
             {
               "seconds": 0.5,
-              "target_midi": 46
+              "target_midi": 33
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 35
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 36
             },
             {
               "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 49
+              "target_midi": 38
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 1,
-            "total": 6
+            "covered": 3,
+            "total": 8
           },
-          "plan_cost": 1.3655905541573286,
+          "plan_cost": 11.64446971269938,
           "recording_for_pitch": {
-            "59": "095",
             "60": null,
             "62": null,
             "64": null,
-            "66": null,
-            "67": null
+            "65": null,
+            "67": null,
+            "69": "095",
+            "71": "016",
+            "72": "019"
           },
           "song": "can-can",
-          "transpose": -18,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -164677,29 +165414,39 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 39
+              "seconds": 1.5,
+              "target_midi": 45
             },
             {
-              "seconds": 1.0,
-              "target_midi": 41
+              "seconds": 0.5,
+              "target_midi": 46
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 48
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 50
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 27.31117964236563,
+          "plan_cost": 26.590054227454402,
           "recording_for_pitch": {
-            "59": "016",
+            "55": "095",
+            "57": "019",
+            "59": null,
             "60": null,
             "62": null,
-            "64": "095",
-            "67": "019"
+            "64": null,
+            "67": "016"
           },
           "song": "grand-old-flag",
-          "transpose": -21,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -166716,6 +167463,14 @@
         {
           "missing": [
             {
+              "seconds": 1.0,
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 51
+            },
+            {
               "seconds": 1.5,
               "target_midi": 54
             }
@@ -166723,10 +167478,12 @@
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 2,
-            "total": 3
+            "total": 5
           },
           "plan_cost": 2.9029286012417717,
           "recording_for_pitch": {
+            "55": null,
+            "57": null,
             "60": null,
             "62": "090",
             "64": "091"
@@ -167981,37 +168738,43 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 50
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 46
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 48
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 49
             },
             {
               "seconds": 0.5,
               "target_midi": 51
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 53
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 57
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 6
+            "covered": 3,
+            "total": 8
           },
-          "plan_cost": 0.2594483990375693,
+          "plan_cost": 14.185220918603537,
           "recording_for_pitch": {
-            "59": null,
             "60": null,
             "62": null,
-            "64": "090",
-            "66": null,
-            "67": "091"
+            "64": null,
+            "65": null,
+            "67": null,
+            "69": "090",
+            "71": "016",
+            "72": "091"
           },
           "song": "can-can",
-          "transpose": -9,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -169790,7 +170553,15 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
+              "seconds": 0.3,
+              "target_midi": 50
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 54
+            },
+            {
+              "seconds": 0.8,
               "target_midi": 57
             },
             {
@@ -169801,11 +170572,13 @@
           "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 11.772214268276954,
+          "plan_cost": 39.68423080569877,
           "recording_for_pitch": {
-            "59": "016",
+            "55": null,
+            "57": "016",
+            "59": null,
             "60": "090",
             "62": null,
             "64": "091",
@@ -171656,23 +172429,29 @@
         {
           "missing": [
             {
+              "seconds": 1.0,
+              "target_midi": 47
+            },
+            {
               "seconds": 1.5,
-              "target_midi": 37
+              "target_midi": 52
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 3,
+            "total": 5
           },
-          "plan_cost": 15.813135938211465,
+          "plan_cost": 105.18261283044436,
           "recording_for_pitch": {
+            "55": null,
+            "57": "017",
             "60": null,
-            "62": "017",
-            "64": "095"
+            "62": "095",
+            "64": "059"
           },
           "song": "old-macdonald",
-          "transpose": -23,
+          "transpose": -8,
           "unlocked": false
         },
         {
@@ -172784,34 +173563,40 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 49
+              "seconds": 0.3,
+              "target_midi": 45
             },
             {
-              "seconds": 1.0,
-              "target_midi": 51
+              "seconds": 0.3,
+              "target_midi": 46
             },
             {
               "seconds": 0.5,
-              "target_midi": 53
+              "target_midi": 48
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 52
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 4,
+            "total": 8
           },
-          "plan_cost": 30.52003541355871,
+          "plan_cost": 123.59517682150145,
           "recording_for_pitch": {
-            "59": "017",
-            "60": null,
-            "62": null,
+            "60": "017",
+            "62": "095",
             "64": null,
-            "66": "095",
-            "67": "059"
+            "65": null,
+            "67": null,
+            "69": "096",
+            "71": null,
+            "72": "059"
           },
           "song": "can-can",
-          "transpose": -11,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -174414,25 +175199,35 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 52
+              "seconds": 1.5,
+              "target_midi": 47
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 48
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 50
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 4,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 146.15864790966452,
+          "plan_cost": 89.44357515835,
           "recording_for_pitch": {
-            "59": "096",
-            "60": "017",
+            "55": "095",
+            "57": "096",
+            "59": null,
+            "60": null,
             "62": null,
-            "64": "095",
+            "64": "017",
             "67": "059"
           },
           "song": "grand-old-flag",
-          "transpose": -10,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -176142,21 +176937,32 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 56
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 60
+            }
+          ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 3,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 92.23114874709509,
+          "plan_cost": 38.567241941020356,
           "recording_for_pitch": {
-            "60": "032",
-            "62": "101",
-            "64": "097"
+            "55": "032",
+            "57": "101",
+            "60": null,
+            "62": "097",
+            "64": null
           },
           "song": "old-macdonald",
-          "transpose": -8,
-          "unlocked": true
+          "transpose": -4,
+          "unlocked": false
         },
         {
           "missing": [
@@ -177291,7 +178097,11 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
+              "seconds": 0.5,
+              "target_midi": 52
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 55
             },
             {
@@ -177299,26 +178109,28 @@
               "target_midi": 57
             },
             {
-              "seconds": 0.5,
-              "target_midi": 60
+              "seconds": 0.3,
+              "target_midi": 59
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 4,
+            "total": 8
           },
-          "plan_cost": 12.882264632794374,
+          "plan_cost": 85.61104520079829,
           "recording_for_pitch": {
-            "59": "032",
-            "60": "101",
+            "60": "032",
             "62": null,
-            "64": null,
-            "66": "097",
-            "67": null
+            "64": "101",
+            "65": null,
+            "67": null,
+            "69": null,
+            "71": "097",
+            "72": "103"
           },
           "song": "can-can",
-          "transpose": -7,
+          "transpose": -10,
           "unlocked": false
         },
         {
@@ -178936,25 +179748,35 @@
         {
           "missing": [
             {
+              "seconds": 0.3,
+              "target_midi": 47
+            },
+            {
               "seconds": 0.8,
-              "target_midi": 55
+              "target_midi": 54
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 56
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 106.67949861013336,
+          "plan_cost": 95.54479037499563,
           "recording_for_pitch": {
-            "59": "103",
+            "55": null,
+            "57": "103",
+            "59": "032",
             "60": "101",
-            "62": "032",
+            "62": null,
             "64": null,
             "67": "097"
           },
           "song": "grand-old-flag",
-          "transpose": -9,
+          "transpose": -8,
           "unlocked": false
         },
         {
@@ -180682,21 +181504,32 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 48
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 51
+            }
+          ],
           "octave_moves": 0,
           "pitch_coverage": {
             "covered": 3,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 112.37257345832968,
+          "plan_cost": 34.7832383238122,
           "recording_for_pitch": {
-            "60": "002",
+            "55": "002",
+            "57": null,
+            "60": null,
             "62": "101",
             "64": "013"
           },
           "song": "old-macdonald",
-          "transpose": -11,
-          "unlocked": true
+          "transpose": -9,
+          "unlocked": false
         },
         {
           "missing": [
@@ -181784,33 +182617,35 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 50
+              "target_midi": 41
             },
             {
               "seconds": 0.5,
-              "target_midi": 52
+              "target_midi": 43
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 48
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 10.120177413245981,
+          "plan_cost": 112.08480805781564,
           "recording_for_pitch": {
-            "59": "002",
             "60": null,
             "62": null,
-            "64": null,
-            "66": "101",
-            "67": "013"
+            "64": "102",
+            "65": "002",
+            "67": null,
+            "69": "101",
+            "71": "016",
+            "72": "013"
           },
           "song": "can-can",
-          "transpose": -12,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -183337,23 +184172,34 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 2,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 49
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 5,
-            "total": 5
+            "total": 7
           },
-          "plan_cost": 246.88105127709957,
+          "plan_cost": 391.3023156372953,
           "recording_for_pitch": {
-            "59": "016",
-            "60": "101",
-            "62": "013",
-            "64": "002",
-            "67": "102"
+            "55": "016",
+            "57": "102",
+            "59": null,
+            "60": "013",
+            "62": "002",
+            "64": null,
+            "67": "101"
           },
           "song": "grand-old-flag",
-          "transpose": -20,
-          "unlocked": true
+          "transpose": -15,
+          "unlocked": false
         },
         {
           "missing": [
@@ -185032,22 +185878,28 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 54
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 51
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 3,
+            "total": 5
           },
-          "plan_cost": 46.81911911379747,
+          "plan_cost": 299.5185797839606,
           "recording_for_pitch": {
+            "55": "080",
+            "57": "097",
             "60": null,
-            "62": "059",
-            "64": "097"
+            "62": null,
+            "64": "059"
           },
           "song": "old-macdonald",
-          "transpose": -6,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -186151,34 +187003,32 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 48
+              "seconds": 0.5,
+              "target_midi": 46
             },
             {
               "seconds": 0.5,
-              "target_midi": 50
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 52
+              "target_midi": 51
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 117.99526956145785,
+          "plan_cost": 807.6522289399569,
           "recording_for_pitch": {
-            "59": "080",
-            "60": "097",
+            "60": "080",
             "62": null,
-            "64": null,
-            "66": null,
-            "67": "059"
+            "64": "104",
+            "65": "098",
+            "67": null,
+            "69": "016",
+            "71": "059",
+            "72": "097"
           },
           "song": "can-can",
-          "transpose": -14,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -187738,24 +188588,30 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 48
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 51
             }
           ],
           "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 5
+            "covered": 5,
+            "total": 7
           },
-          "plan_cost": 666.4240524637873,
+          "plan_cost": 491.8385518705795,
           "recording_for_pitch": {
-            "59": "016",
+            "55": "016",
+            "57": "104",
+            "59": "080",
             "60": "097",
-            "62": "080",
+            "62": null,
             "64": null,
-            "67": "098"
+            "67": "059"
           },
           "song": "grand-old-flag",
-          "transpose": -16,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -189445,17 +190301,23 @@
         {
           "missing": [
             {
+              "seconds": 1.0,
+              "target_midi": 48
+            },
+            {
               "seconds": 1.5,
               "target_midi": 53
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 3,
+            "total": 5
           },
-          "plan_cost": 21.69200167987408,
+          "plan_cost": 57.942790349055386,
           "recording_for_pitch": {
+            "55": null,
+            "57": "017",
             "60": null,
             "62": "101",
             "64": "094"
@@ -190609,34 +191471,36 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 55
+              "seconds": 0.5,
+              "target_midi": 40
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 42
             },
             {
               "seconds": 0.5,
-              "target_midi": 57
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 60
+              "target_midi": 45
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 11.824141756730501,
+          "plan_cost": 80.74305023785811,
           "recording_for_pitch": {
-            "59": "017",
-            "60": "101",
+            "60": "017",
             "62": null,
             "64": null,
-            "66": "094",
-            "67": null
+            "65": "016",
+            "67": null,
+            "69": "102",
+            "71": "094",
+            "72": "101"
           },
           "song": "can-can",
-          "transpose": -7,
+          "transpose": -22,
           "unlocked": false
         },
         {
@@ -192214,18 +193078,24 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
+              "target_midi": 45
+            },
+            {
+              "seconds": 0.8,
               "target_midi": 48
             }
           ],
           "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 5
+            "covered": 5,
+            "total": 7
           },
-          "plan_cost": 103.91953668380866,
+          "plan_cost": 139.59006391404222,
           "recording_for_pitch": {
-            "59": "102",
+            "55": "016",
+            "57": "102",
+            "59": null,
             "60": "094",
             "62": null,
             "64": "017",
@@ -193975,27 +194845,33 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 46
+            },
+            {
               "seconds": 1.5,
-              "target_midi": 65
+              "target_midi": 49
             },
             {
               "seconds": 0.5,
-              "target_midi": 69
+              "target_midi": 51
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 1,
-            "total": 3
+            "covered": 2,
+            "total": 5
           },
-          "plan_cost": 3.0672318819959834,
+          "plan_cost": 256.39469985294835,
           "recording_for_pitch": {
+            "55": "080",
+            "57": null,
             "60": null,
-            "62": "059",
-            "64": null
+            "62": null,
+            "64": "059"
           },
           "song": "old-macdonald",
-          "transpose": 5,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -195180,37 +196056,35 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 46
+              "target_midi": 43
             },
             {
-              "seconds": 1.0,
+              "seconds": 0.5,
               "target_midi": 48
             },
             {
-              "seconds": 0.5,
-              "target_midi": 50
-            },
-            {
-              "seconds": 0.5,
+              "seconds": 0.3,
               "target_midi": 52
             }
           ],
           "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 96.43332959595172,
+          "plan_cost": 748.5957568518797,
           "recording_for_pitch": {
-            "59": "080",
-            "60": null,
+            "60": "080",
             "62": null,
-            "64": null,
-            "66": null,
-            "67": "059"
+            "64": "019",
+            "65": "104",
+            "67": null,
+            "69": "096",
+            "71": null,
+            "72": "059"
           },
           "song": "can-can",
-          "transpose": -14,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -196885,29 +197759,35 @@
         {
           "missing": [
             {
+              "seconds": 1.5,
+              "target_midi": 49
+            },
+            {
               "seconds": 0.5,
-              "target_midi": 42
+              "target_midi": 50
             },
             {
               "seconds": 0.8,
-              "target_midi": 46
+              "target_midi": 52
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 5
+            "covered": 4,
+            "total": 7
           },
-          "plan_cost": 461.9450732447994,
+          "plan_cost": 42.61724699742388,
           "recording_for_pitch": {
-            "59": "019",
+            "55": "019",
+            "57": "104",
+            "59": null,
             "60": null,
-            "62": "080",
-            "64": null,
-            "67": "104"
+            "62": null,
+            "64": "059",
+            "67": "096"
           },
           "song": "grand-old-flag",
-          "transpose": -18,
+          "transpose": -10,
           "unlocked": false
         },
         {
@@ -198706,23 +199586,29 @@
         {
           "missing": [
             {
+              "seconds": 1.0,
+              "target_midi": 48
+            },
+            {
               "seconds": 1.5,
-              "target_midi": 51
+              "target_midi": 53
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 3,
+            "total": 5
           },
-          "plan_cost": 14.014000420879382,
+          "plan_cost": 72.46117598736794,
           "recording_for_pitch": {
+            "55": null,
+            "57": "095",
             "60": null,
             "62": "101",
             "64": "084"
           },
           "song": "old-macdonald",
-          "transpose": -9,
+          "transpose": -7,
           "unlocked": false
         },
         {
@@ -199827,33 +200713,35 @@
           "missing": [
             {
               "seconds": 0.5,
+              "target_midi": 45
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 47
+            },
+            {
+              "seconds": 0.3,
               "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 49
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 51
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 13.873392071192956,
+          "plan_cost": 100.8421143939749,
           "recording_for_pitch": {
-            "59": null,
-            "60": null,
+            "60": "095",
             "62": null,
-            "64": "101",
-            "66": "095",
-            "67": "084"
+            "64": null,
+            "65": null,
+            "67": "101",
+            "69": "098",
+            "71": "086",
+            "72": "084"
           },
           "song": "can-can",
-          "transpose": -11,
+          "transpose": -17,
           "unlocked": false
         },
         {
@@ -201403,20 +202291,26 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 53
+              "seconds": 0.3,
+              "target_midi": 46
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 50
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 5
+            "covered": 5,
+            "total": 7
           },
-          "plan_cost": 64.53569857961307,
+          "plan_cost": 151.37874945600194,
           "recording_for_pitch": {
-            "59": "095",
+            "55": null,
+            "57": "098",
+            "59": null,
             "60": "101",
-            "62": null,
+            "62": "095",
             "64": "084",
             "67": "086"
           },
@@ -203129,21 +204023,32 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 51
+            }
+          ],
           "octave_moves": 2,
           "pitch_coverage": {
             "covered": 3,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 690.871625244836,
+          "plan_cost": 261.46307093868796,
           "recording_for_pitch": {
-            "60": "080",
-            "62": "097",
+            "55": "080",
+            "57": "097",
+            "60": null,
+            "62": null,
             "64": "101"
           },
           "song": "old-macdonald",
-          "transpose": -14,
-          "unlocked": true
+          "transpose": -11,
+          "unlocked": false
         },
         {
           "missing": [
@@ -204267,33 +205172,35 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 43
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 45
-            },
-            {
-              "seconds": 0.5,
               "target_midi": 47
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 50
             }
           ],
           "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 105.55602358313988,
+          "plan_cost": 745.7831606122901,
           "recording_for_pitch": {
-            "59": "080",
-            "60": null,
+            "60": "080",
             "62": null,
             "64": null,
-            "66": "097",
-            "67": "101"
+            "65": null,
+            "67": "101",
+            "69": "086",
+            "71": "019",
+            "72": "097"
           },
           "song": "can-can",
-          "transpose": -17,
+          "transpose": -15,
           "unlocked": false
         },
         {
@@ -205856,23 +206763,29 @@
             {
               "seconds": 0.8,
               "target_midi": 48
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 50
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 5
+            "covered": 5,
+            "total": 7
           },
-          "plan_cost": 654.3426181026203,
+          "plan_cost": 467.85431783328363,
           "recording_for_pitch": {
-            "59": "019",
+            "55": "101",
+            "57": "019",
+            "59": "080",
             "60": "097",
-            "62": "080",
+            "62": null,
             "64": null,
-            "67": "101"
+            "67": "086"
           },
           "song": "grand-old-flag",
-          "transpose": -16,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -207507,13 +208420,15 @@
         },
         {
           "missing": [],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 61.528773054414714,
+          "plan_cost": 152.2957487848596,
           "recording_for_pitch": {
+            "55": "069",
+            "57": "017",
             "60": "032",
             "62": "090",
             "64": "084"
@@ -208401,26 +209316,32 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 50
+              "seconds": 0.5,
+              "target_midi": 46
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 51
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 56.71370010208541,
+          "plan_cost": 293.4001102052144,
           "recording_for_pitch": {
-            "59": "069",
-            "60": "017",
+            "60": "069",
             "62": null,
-            "64": "032",
-            "66": "090",
-            "67": "084"
+            "64": "104",
+            "65": "017",
+            "67": null,
+            "69": "032",
+            "71": "090",
+            "72": "084"
           },
           "song": "can-can",
-          "transpose": -12,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -209692,23 +210613,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 50
+            }
+          ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 166.70046564502013,
+          "plan_cost": 509.0201774186517,
           "recording_for_pitch": {
-            "59": "104",
-            "60": "017",
-            "62": "032",
+            "55": "104",
+            "57": "069",
+            "59": "032",
+            "60": null,
+            "62": "017",
             "64": "084",
             "67": "090"
           },
           "song": "grand-old-flag",
           "transpose": -10,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -211084,21 +212012,28 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 48
+            }
+          ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 93.17373339730366,
+          "plan_cost": 132.16151160605068,
           "recording_for_pitch": {
+            "55": "069",
+            "57": null,
             "60": "032",
             "62": "095",
             "64": "013"
           },
           "song": "old-macdonald",
           "transpose": -9,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -212067,26 +213002,28 @@
               "target_midi": 47
             },
             {
-              "seconds": 1.0,
-              "target_midi": 49
+              "seconds": 0.5,
+              "target_midi": 52
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 37.861614733343714,
+          "plan_cost": 402.17374888634987,
           "recording_for_pitch": {
-            "59": "069",
-            "60": null,
+            "60": "069",
             "62": null,
-            "64": "032",
-            "66": "095",
-            "67": "013"
+            "64": "096",
+            "65": "032",
+            "67": null,
+            "69": "095",
+            "71": "013",
+            "72": "103"
           },
           "song": "can-can",
-          "transpose": -13,
+          "transpose": -15,
           "unlocked": false
         },
         {
@@ -213431,23 +214368,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 51
+            }
+          ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 248.9680451709676,
+          "plan_cost": 666.9597885025156,
           "recording_for_pitch": {
-            "59": "096",
-            "60": "032",
+            "55": "069",
+            "57": "096",
+            "59": "032",
+            "60": null,
             "62": "013",
             "64": "095",
             "67": "103"
           },
           "song": "grand-old-flag",
           "transpose": -9,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -214931,21 +215875,32 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 3,
+          "missing": [
+            {
+              "seconds": 1.0,
+              "target_midi": 37
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 42
+            }
+          ],
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 3,
-            "total": 3
+            "total": 5
           },
-          "plan_cost": 651.6526843599506,
+          "plan_cost": 373.6763808379219,
           "recording_for_pitch": {
-            "60": "080",
-            "62": "094",
-            "64": "017"
+            "55": null,
+            "57": "017",
+            "60": null,
+            "62": "080",
+            "64": "094"
           },
           "song": "old-macdonald",
-          "transpose": -16,
-          "unlocked": true
+          "transpose": -18,
+          "unlocked": false
         },
         {
           "missing": [
@@ -216045,33 +217000,35 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 39
+              "target_midi": 35
             },
             {
-              "seconds": 1.0,
-              "target_midi": 41
+              "seconds": 0.3,
+              "target_midi": 37
             },
             {
-              "seconds": 0.5,
-              "target_midi": 43
+              "seconds": 0.3,
+              "target_midi": 42
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 95.5066920598565,
+          "plan_cost": 780.9364451175526,
           "recording_for_pitch": {
-            "59": "017",
-            "60": null,
+            "60": "080",
             "62": null,
             "64": null,
-            "66": "080",
-            "67": "094"
+            "65": "098",
+            "67": "017",
+            "69": null,
+            "71": "094",
+            "72": "104"
           },
           "song": "can-can",
-          "transpose": -21,
+          "transpose": -27,
           "unlocked": false
         },
         {
@@ -217613,25 +218570,31 @@
         {
           "missing": [
             {
+              "seconds": 1.5,
+              "target_midi": 39
+            },
+            {
               "seconds": 0.8,
-              "target_midi": 43
+              "target_midi": 44
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 5
+            "covered": 5,
+            "total": 7
           },
-          "plan_cost": 520.8064157736175,
+          "plan_cost": 573.0845295495923,
           "recording_for_pitch": {
-            "59": "098",
+            "55": "104",
+            "57": "098",
+            "59": null,
             "60": "017",
             "62": "080",
             "64": null,
-            "67": "104"
+            "67": "094"
           },
           "song": "grand-old-flag",
-          "transpose": -21,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -219224,19 +220187,21 @@
         },
         {
           "missing": [],
-          "octave_moves": 0,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 597.2462615144284,
+          "plan_cost": 740.8205857505318,
           "recording_for_pitch": {
+            "55": "022",
+            "57": "017",
             "60": "080",
-            "62": "017",
-            "64": "022"
+            "62": "009",
+            "64": "094"
           },
           "song": "old-macdonald",
-          "transpose": -26,
+          "transpose": -17,
           "unlocked": true
         },
         {
@@ -220122,26 +221087,32 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 41
+              "seconds": 0.3,
+              "target_midi": 36
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 37
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 154.14613745049726,
+          "plan_cost": 2804.6314853996582,
           "recording_for_pitch": {
-            "59": "017",
-            "60": "022",
-            "62": null,
-            "64": "009",
-            "66": "080",
-            "67": "094"
+            "60": "009",
+            "62": "080",
+            "64": null,
+            "65": null,
+            "67": "017",
+            "69": "098",
+            "71": "022",
+            "72": "094"
           },
           "song": "can-can",
-          "transpose": -21,
+          "transpose": -28,
           "unlocked": false
         },
         {
@@ -221430,23 +222401,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 1,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 38
+            }
+          ],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 923.7184714876566,
+          "plan_cost": 1379.2435480531697,
           "recording_for_pitch": {
-            "59": "022",
-            "60": "009",
-            "62": "080",
-            "64": "017",
-            "67": "098"
+            "55": "080",
+            "57": "098",
+            "59": null,
+            "60": "017",
+            "62": "009",
+            "64": "022",
+            "67": "094"
           },
           "song": "grand-old-flag",
-          "transpose": -28,
-          "unlocked": true
+          "transpose": -21,
+          "unlocked": false
         },
         {
           "missing": [

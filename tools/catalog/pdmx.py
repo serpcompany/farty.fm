@@ -364,9 +364,9 @@ def part_staves(tracks, track):
 
 def moved_tune_problems(notes, staff_notes, start_beat=0.0):
     """The tune moving to another staff of its part, so the Song falls silent where the score plays
-    on (#380): Old MacDonald's score gives "had a farm" to the left hand. The melody fails when it
-    rests MOVED_TUNE_REST beats or more between two notes while another staff of its part plays a
-    line in the tune's register: the notes melody.py's skyline would take from that staff in the
+    on (#380): Old MacDonald's score gives "Old MacDonald had a farm" to the left hand. The melody
+    fails when it rests MOVED_TUNE_REST beats or more between two notes while another staff of its
+    part plays a line in the tune's register: the notes melody.py's skyline would take from that staff in the
     rest, which the melody spans at most MAX_RANGE with. A bass line well below the tune is its
     accompaniment, and a rest while another part plays, a voice's over its piano, is the score's.
 
