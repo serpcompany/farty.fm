@@ -223,6 +223,9 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
       other.locator(`meta[property="${property}"], meta[name="${property}"]`).first()
     await expect(meta('robots')).toHaveAttribute('content', /noindex/)
     await expect(meta('og:title')).toHaveAttribute('content', `Recording 1 by @${handle}`)
+    // The share URL, at `/@`: no canonical, as it's unlisted.
+    expect(new URL((await meta('og:url').getAttribute('content')) ?? '').pathname).toBe(link)
+    await expect(other.locator('link[rel="canonical"]')).toHaveCount(0)
     await expect(meta('twitter:card')).toHaveAttribute('content', 'summary_large_image')
     const image = await meta('og:image').getAttribute('content')
     imagePath = new URL(image ?? '').pathname + new URL(image ?? '').search
@@ -409,6 +412,9 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
       other.locator(`meta[property="${property}"], meta[name="${property}"]`).first()
     await expect(meta('robots')).toHaveAttribute('content', /noindex/)
     await expect(meta('og:title')).toHaveAttribute('content', `${title} by @${handle}`)
+    // The share URL, at `/@`: no canonical, as it's unlisted.
+    expect(new URL((await meta('og:url').getAttribute('content')) ?? '').pathname).toBe(link)
+    await expect(other.locator('link[rel="canonical"]')).toHaveCount(0)
     await expect(meta('og:description')).toHaveAttribute(
       'content',
       `${twinkle}, played on farts. Tap to play.`

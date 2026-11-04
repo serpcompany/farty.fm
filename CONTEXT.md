@@ -117,7 +117,7 @@ _Avoid_: Sequence, pattern, loop, beat, track
 ## Sharing
 
 **Handle**:
-The name a user's links carry, as in `farty.fm/u/<handle>/r/<id>`. The user picks it the first time they share: 3 to 20 lowercase letters, numbers or `_`, unique, and not on Farty's block list. It is the only thing about the user a Shared Recording shows. Only a user with an account has one (ADR 0020).
+The name a user's links carry, as in `farty.fm/@<handle>/r/<id>`. The user picks it the first time they share: 3 to 20 lowercase letters, numbers or `_`, unique, and not on Farty's block list. It is the only thing about the user a Shared Recording shows. Only a user with an account has one (ADR 0020).
 _Avoid_: Username, display name, screen name
 
 **Shared Recording**:
@@ -129,7 +129,7 @@ Another user, found by their Handle, who has accepted a friend request from the 
 _Avoid_: Follower, contact, connection
 
 **Profile Page**:
-A user's page, `farty.fm/u/<handle>`, which anyone can open: their Handle, Add friend, and what they share now, newest first. No counts and no feed. Not Profile, the tab that is the user's own account and settings (ADR 0021).
+A user's page, `farty.fm/@<handle>`, which anyone can open: their Handle, Add friend, and what they share now, newest first. No counts and no feed. Not Profile, the tab that is the user's own account and settings (ADR 0021).
 _Avoid_: Profile (for this page), wall, timeline
 
 ## Testing

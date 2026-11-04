@@ -71,6 +71,9 @@ test('a friend request sent from a profile page is accepted in Profile, then rem
     // reaches the server.
     await expect(samPage.getByRole('button', { name: 'Add friend' })).toBeVisible()
     await expect(samPage.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/)
+    // Unlisted, so no link preview and no canonical: nothing names a path, `/u/` or `/@`.
+    await expect(samPage.locator('meta[property="og:url"]')).toHaveCount(0)
+    await expect(samPage.locator('link[rel="canonical"]')).toHaveCount(0)
   })
 
   await test.step('sam signs in, picks a Handle and sends a request from the page', async () => {
@@ -100,6 +103,24 @@ test('a friend request sent from a profile page is accepted in Profile, then rem
 
     await samPage.reload()
     await expect(samPage.getByRole('button', { name: 'Friends' })).toBeVisible()
+  })
+
+  await test.step('maya taps sam in Friends, sees his page, and Back brings her back', async () => {
+    // Set on this document only: a full page load would lose it.
+    await page.evaluate(() => Object.assign(window, { __noReload: true }))
+    await page
+      .getByTestId('friend')
+      .getByRole('link', { name: `@${sam}` })
+      .click()
+    await expect(page).toHaveURL(new RegExp(`/@${sam}/$`))
+    await expect(page.getByRole('heading', { name: `@${sam}` })).toBeVisible()
+    await expect(page.getByText('Nothing shared yet.')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Friends' })).toBeVisible()
+    expect(await page.evaluate(() => '__noReload' in window)).toBe(true)
+
+    await page.goBack()
+    await expect(page).toHaveURL(/\/profile\/$/)
+    await expect(page.getByTestId('friend')).toHaveText(`@${sam}`)
   })
 
   await test.step('maya removes sam, after asking', async () => {
