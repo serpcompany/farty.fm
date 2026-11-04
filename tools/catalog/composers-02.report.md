@@ -8,7 +8,7 @@ tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py report --batch t
 
 **145 of 149 Songs looked up**: 58 named, 58 traditional and 29 unknown. 4 removed as under copyright, 0 not looked up.
 
-PDMX names another composer for 12 of them (PDMX column): its name is the score's uploader's, so each was checked against the source.
+PDMX names another composer for 11 of them (PDMX column): its name is the score's uploader's, so each was checked against the source.
 
 ## Removed as under copyright
 
@@ -158,7 +158,7 @@ PDMX names another composer for 12 of them (PDMX column): its name is the score'
 | Come Thou Fount (`come-thou-fount`) | Traditional (American) |  | 1813 | [en.wikipedia.org/wiki/Come,_Thou_Fount_of_Every_Blessing](https://en.wikipedia.org/wiki/Come,_Thou_Fount_of_Every_Blessing) | Robert Robinson | the tune Nettleton, an American folk tune, first printed in Wyeth's Repository of Sacred Music, 1813; words Robert Robinson, 1758 |
 | Away in a Manger (`away-in-a-manger`) | Unknown |  |  | [en.wikipedia.org/wiki/Away_in_a_Manger](https://en.wikipedia.org/wiki/Away_in_a_Manger) | William J. Kirkpatrick | the Song's tune is not identified (Wikipedia lists the Mueller, Cradle Song and Spilman tunes with different authors); PDMX names 'Anon./William J Kirkpatrick' |
 | Cantique de Jean Racine Op. 11 (`cantique-de-jean-racine-op-11`) | Gabriel Fauré | 1924 |  | [en.wikipedia.org/wiki/Cantique_de_Jean_Racine](https://en.wikipedia.org/wiki/Cantique_de_Jean_Racine) |  | composed 1864-65 |
-| Summ Summ Summ (`summ-summ-summ`) | Traditional (Bohemian) |  |  | [de.wikipedia.org/wiki/Summ,_summ,_summ](https://de.wikipedia.org/wiki/Summ,_summ,_summ) | Traditional (German) | German Wikipedia: the melody follows a Bohemian folk tune first written down in 1825; Carl Reinecke composed an alternative melody in 1875 |
+| Summ Summ Summ (`summ-summ-summ`) | Traditional (Bohemian) |  |  | [de.wikipedia.org/wiki/Summ,_summ,_summ](https://de.wikipedia.org/wiki/Summ,_summ,_summ) |  | German Wikipedia: the melody follows a Bohemian folk tune first written down in 1825; Carl Reinecke composed an alternative melody in 1875 |
 | Swing Low, Sweet Chariot (`swing-low`) | Wallace Willis and Minerva Willis |  | 1873 | [en.wikipedia.org/wiki/Swing_Low,_Sweet_Chariot](https://en.wikipedia.org/wiki/Swing_Low,_Sweet_Chariot) |  | Wikipedia credits the Choctaw freedmen Wallace Willis and his daughter Minerva Willis, probably composed in the late 1860s; no death years given, but first published in The Jubilee Singers, 1873 |
 | Flow My Tears (`flow-my-tears`) | John Dowland | 1626 | 1600 | [en.wikipedia.org/wiki/Flow,_my_tears](https://en.wikipedia.org/wiki/Flow,_my_tears) | John Dowland | song from The Second Booke of Songs or Ayres, 1600, reworked from his Lachrimae pavane |
 | I skovens dybe stille ro (`i-skovens-dybe-stille-ro`) | Traditional (Danish) |  |  | [da.wikipedia.org/wiki/I_skovens_dybe,_stille_ro](https://da.wikipedia.org/wiki/I_skovens_dybe,_stille_ro) |  | Danish Wikipedia: a Danish folk melody, possibly from Langeland; the composer is not known; Fritz Andersen wrote the words |

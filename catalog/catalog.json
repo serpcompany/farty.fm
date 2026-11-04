@@ -28250,40 +28250,6 @@
   }
  },
  {
-  "id": "moments-musicaux-opus-94-no-3-in-f-minor",
-  "title": "Moments Musicaux Opus 94 No. 3 in F minor",
-  "composer": "Franz Schubert",
-  "composer_died": 1828,
-  "composer_source": "https://en.wikipedia.org/wiki/Six_moments_musicaux_(Schubert)",
-  "file": "midi/pdmx-moments-musicaux-opus-94-no-3-in-f-minor.mid",
-  "sha256": "0a6b742f93322582dd0486883d1837487ef06d0b3b9279bb49be9e1244902627",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/15/14/QmXCc8eWVXCUitG3Ku1VBn62siWgGZ2Tn8YhK14GBy8wT3.mid",
-   "musescore_score_id": "221661",
-   "musescore_url": "https://musescore.com/score/221661",
-   "score_title": "Moment Musicaux No.3 in F Minor",
-   "composer": "Franz Schubert",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "1670"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "start_beat": 4,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-05.txt"
-  }
- },
- {
   "id": "ave-maria-bach-gounod",
   "title": "Ave Maria Bach-Gounod",
   "composer": "Charles Gounod",

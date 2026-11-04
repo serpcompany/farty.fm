@@ -18,8 +18,8 @@ The rules and thresholds are in pdmx.py. The gates, in order:
            catalog copy are byte for byte the archive's file
   sanity   the excerpt's note count and range, the share of notes the importer drops, no first
            bar that is a pickup padded with silence, and no rest of 2 beats or more while another
-           staff of the melody's part plays the tune: such a melody is read again from all the
-           part's staves as one part (#380), and passes only if that reading passes
+           staff of the score plays the tune: such a melody is read again from its staff and those
+           as one (#380), and passes only if that reading passes
   render   unlocked with the full Fixture Library, and the renderer's bar on the reference render
            (ADR 0012, evaluate.BAR): in50cFart >= 94% (notes within 50 cents of their fart's
            own pitch), onTime >= 95%, no re-attacks
@@ -69,7 +69,7 @@ import soundfile as sf  # noqa: E402
 import pdmx  # noqa: E402
 from engine import SR, load_library, melody_fit, plan, render  # noqa: E402
 from evaluate import BAR, evaluate  # noqa: E402
-from melody import load_catalog, load_midi  # noqa: E402
+from melody import DRUM_CHANNEL, PERCUSSION_PROGRAMS, load_catalog, load_midi  # noqa: E402
 
 RECORD = "https://zenodo.org/api/records/15571083"
 DOI = "10.5281/zenodo.15571083"
@@ -219,6 +219,29 @@ def score_tracks(path):
     return out
 
 
+def track_programs(path):
+    """Each track's General MIDI programs in a MIDI file, {track: {program}}."""
+    return {ti: {m.program for m in track if m.type == "program_change"}
+            for ti, track in enumerate(mido.MidiFile(path).tracks)}
+
+
+def tune_moves(path, melody, start_beat=0.0):
+    """Where `melody`, read from the MIDI file at `path` from `start_beat`, rests while another staff
+    of the score plays the tune (pdmx.moved_tune_problems, #380); a percussion staff plays none.
+    Returns the problems, and the staves to read the melody from as one when there are any: its own
+    and those that carry the tune."""
+    tracks, programs = score_tracks(path), track_programs(path)
+    used = melody.report["track_used"]
+    used = [used] if isinstance(used, int) else list(used)
+    parts = {t: (part, pdmx.sung(part[0], programs[t])) for t, (part, _) in tracks.items()}
+    drums = {t for t, ((_, channels), _) in tracks.items()
+             if channels == {DRUM_CHANNEL} or (programs[t] and programs[t] <= PERCUSSION_PROGRAMS)}
+    staves = {t: (where, other_part, tracks[t][1]) for t, (where, other_part) in pdmx.tune_staves(parts, used[0]).items()
+              if t not in used and t not in drums}
+    moved = pdmx.moved_tune_problems([(n.start, n.dur, n.pitch) for n in melody.notes], staves, start_beat)
+    return [p for _, p in moved], sorted(set(used) | {t for t, _ in moved})
+
+
 def excerpt(midi, tempos, meters, track=None):
     """The score's melody read from `track` (melody.py's own pick when None), its render options,
     and the whole track's melody they were chosen from."""
@@ -266,12 +289,8 @@ def gate(title, match, row, midi, member_sha256, archive, library):
         tempos, meters = score_meta(midi)
         whole, options = excerpt(midi, tempos, meters)
         melody = load_midi(midi, title=title.title, **options)
-        tracks = score_tracks(midi)
-        staves = pdmx.part_staves({t: part for t, (part, _) in tracks.items()}, melody.report["track_used"])
-        moved = pdmx.moved_tune_problems([(n.start, n.dur, n.pitch) for n in melody.notes],
-                                         [n for t in staves if t != melody.report["track_used"] for n in tracks[t][1]],
-                                         options.get("start_beat", 0))
-        if moved:  # the tune moves between the part's staves: read them as one part (#380)
+        moved, staves = tune_moves(midi, melody, options.get("start_beat", 0))
+        if moved:  # the tune moves to other staves: read them and the melody's as one (#380)
             whole, options = excerpt(midi, tempos, meters, track=staves)
             melody = load_midi(midi, title=title.title, **options)
             result["moved_tune"] = moved
@@ -291,8 +310,8 @@ def gate(title, match, row, midi, member_sha256, archive, library):
     sanity = pdmx.sanity_problems(
         pitches, report["chord_tones_dropped"], report["inner_voice_onsets_dropped"], len(whole.notes)
     ) + padded
-    if moved and sanity:  # read as one part, the staves aren't one clean line either
-        sanity = moved + [f"read from tracks {', '.join(map(str, staves))} as one part, {p}" for p in sanity]
+    if moved and sanity:  # read as one, the staves aren't one clean line either
+        sanity = moved + [f"read from tracks {', '.join(map(str, staves))} as one, {p}" for p in sanity]
     if failed("sanity", sanity):
         return result
 
@@ -635,8 +654,8 @@ def main():
         "gates": (f"license; hash; sanity: {pdmx.MIN_NOTES}-{pdmx.MAX_NOTES} notes, range <= {pdmx.MAX_RANGE} semitones, "
                   f"at most {pdmx.MAX_DROPPED_SHARE:.0%} of the track's notes dropped, no first bar that is a pickup "
                   f"padded with silence ({pdmx.PADDED_PICKUP_REST} beat or more, and at least as long as the bar's notes), "
-                  f"no rest of {pdmx.MOVED_TUNE_REST} beats or more while another staff of the melody's part plays the tune "
-                  "(then the part's staves are read as one part); render with excerpt "
+                  f"no rest of {pdmx.MOVED_TUNE_REST} beats or more while another staff of the score plays the tune "
+                  "(then the staves that carry it are read as one); render with excerpt "
                   f"from the first note to the end of the whole bars that fit in {pdmx.EXCERPT_BEATS} beats from its bar, "
                   f"and the score's tempo within {pdmx.MIN_BPM}-{pdmx.MAX_BPM} bpm"),
         "bar": BAR,

@@ -62,7 +62,7 @@ export type Render = {
   max_beats?: number
   beats_per_bar?: number
   start_beat?: number
-  /** The score's tracks the tune is read from: the staves of one part when it moves between them (#380). */
+  /** The score's tracks the tune is read from: the staves it moves between, when it does (#380). */
   track?: number | number[]
 }
 

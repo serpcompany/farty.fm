@@ -1,7 +1,7 @@
 """Deterministic MIDI -> monophonic melody plan importer.
 
 Every melody comes from a checked-in source MIDI file. The importer never invents notes:
-it selects one track (never a percussion part), or the staves of one part read as one (#380), keeps the
+it selects one track (never a percussion part), or the staves the tune moves between read as one (#380), keeps the
 highest note at each onset ("skyline"), clips overlaps, and reports everything it discarded so nothing is
 silently dropped. It also reads where the score's bars start (`bar_lines`) from its time signatures, for the
 downbeat accent.
@@ -111,8 +111,8 @@ def load_midi(path, track=None, title=None, bpm=None, max_beats=None, start_beat
     if track is None:  # default: the pitched track with the highest mean pitch (usually the tune)
         candidates = [t for t in events if t not in percussion] or list(events)
         track = max(candidates, key=lambda t: sum(p for _, _, p in events[t]) / len(events[t]))
-    # `track` may name several tracks: the staves of one instrument the tune moves between (#380),
-    # read as one part, so the skyline below takes the tune from whichever staff carries it.
+    # `track` may name several tracks: the staves the tune moves between, of one part or of several
+    # (#380), read as one, so the skyline below takes the tune from whichever staff carries it.
     raw = sorted(n for t in ([track] if isinstance(track, int) else track) for n in events[t])
 
     # Sustain-aware skyline: a new melody note starts only when the highest *sounding*
