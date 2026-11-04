@@ -12,7 +12,7 @@ import {
 } from './fake-microphone'
 import {
   fixtureRecordings,
-  songsTheLastRecordingUnlocks,
+  songsTheLastStoredTakeUnlocks,
   songsTheLastTakeUnlocks,
   songsUnlockedBy
 } from './golden'
@@ -158,7 +158,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   // The reward is worked out from the app's own analysis of the takes, which can differ from the
   // reference's by a 5 ms step, enough to unlock one more Song (#378).
   await expect(page.getByTestId('unlock-reward')).toBeVisible()
-  const third = songsTheLastRecordingUnlocks(await storedRecordings(page))
+  const third = songsTheLastStoredTakeUnlocks(await storedRecordings(page), journey.slice(0, 3))
   expect(third.map(s => s.title)).toContain('Hot Cross Buns')
   expect(third.map(s => s.title)).not.toContain('Mary Had a Little Lamb')
   await expectUnlockReward(page, third)
@@ -167,7 +167,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await tab(page, 'Record').click()
   await recordAndSave(page, '002')
   await expect(page.getByTestId('unlock-reward')).toBeVisible()
-  const fourth = songsTheLastRecordingUnlocks(await storedRecordings(page))
+  const fourth = songsTheLastStoredTakeUnlocks(await storedRecordings(page), journey)
   expect(fourth.length).toBeGreaterThan(4)
 
   // More than 4 show 3, then See all, which lists the rest and moves focus to the 4th.

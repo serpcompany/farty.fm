@@ -10,7 +10,7 @@ import {
   storedRecordings,
   waitForOpenMicrophone
 } from './fake-microphone'
-import { songsTheLastRecordingUnlocks } from './golden'
+import { songsTheLastStoredTakeUnlocks } from './golden'
 import { skipWelcome } from './record'
 import { onPhone } from './screens'
 import { expectUnlockReward } from './unlock-reward'
@@ -268,7 +268,12 @@ test.describe('with microphone permission granted', () => {
     // reward lists, the most viewed (#363).
     await recordAndSave('002')
     await expect(page.getByTestId('unlock-reward')).toBeVisible()
-    const fourth = songsTheLastRecordingUnlocks(await storedRecordings(page))
+    const fourth = songsTheLastStoredTakeUnlocks(await storedRecordings(page), [
+      '095',
+      '017',
+      '022',
+      '002'
+    ])
     await expectUnlockReward(page, fourth)
     await page.getByRole('button', { name: 'Try it', exact: true }).click()
     await expect(page).toHaveURL(new RegExp(`/compose/${fourth[0].id}/$`))

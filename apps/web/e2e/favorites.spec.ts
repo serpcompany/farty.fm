@@ -10,7 +10,7 @@ import {
 } from './fake-microphone'
 import {
   fixtureRecordings,
-  songsTheLastRecordingUnlocks,
+  songsTheLastStoredTakeUnlocks,
   songsTheLastTakeUnlocks,
   songsUnlockedBy
 } from './golden'
@@ -97,7 +97,9 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
   // The reward lists the Favorite first. Its heart takes it off, and the row stays where it is.
   // From the app's own analysis of the takes, which can differ from the reference's (#378).
   await expect(page.getByTestId('unlock-reward')).toBeVisible()
-  const fourth = songsTheLastRecordingUnlocks(await storedRecordings(page), [leastViewed.id])
+  const fourth = songsTheLastStoredTakeUnlocks(await storedRecordings(page), journey, [
+    leastViewed.id
+  ])
   expect(fourth[0].id).toBe(leastViewed.id)
   await expectUnlockReward(page, fourth)
   const reward = page.getByTestId('unlock-reward')

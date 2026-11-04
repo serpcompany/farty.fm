@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { expect } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { coverageChanges, coverageOf, orderUnlocked } from '../src/lib/pitch-coverage'
 import type { Recording } from '../src/lib/recordings'
@@ -55,6 +56,27 @@ export function songsTheLastRecordingUnlocks(
  */
 export function songsTheLastTakeUnlocks(ids: readonly string[], favorites: readonly string[] = []) {
   return songsTheLastRecordingUnlocks(fixtureRecordings(ids), favorites)
+}
+
+/**
+ * The Songs the last of the `stored` Recordings unlocks, takes of fixtures `ids`, checked against
+ * the reference's analysis of them: every Song it predicts that an earlier take hasn't already
+ * unlocked, and at most one more (#378).
+ */
+export function songsTheLastStoredTakeUnlocks(
+  stored: readonly Recording[],
+  ids: readonly string[],
+  favorites: readonly string[] = []
+) {
+  const unlocked = songsTheLastRecordingUnlocks(stored, favorites)
+  const predicted = songsTheLastTakeUnlocks(ids, favorites)
+  const before = new Set(songsUnlockedBy(stored.slice(0, -1)).map(s => s.id))
+  expect(stored).toHaveLength(ids.length)
+  expect(unlocked.map(s => s.id)).toEqual(
+    expect.arrayContaining(predicted.filter(s => !before.has(s.id)).map(s => s.id))
+  )
+  expect(unlocked.length).toBeLessThanOrEqual(predicted.length + 1)
+  return unlocked
 }
 
 /** The Songs the whole Fixture Library unlocks, in the catalog's order. */
