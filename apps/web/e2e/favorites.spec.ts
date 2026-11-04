@@ -90,8 +90,14 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
   )
   await expect(page.getByRole('button', { name: 'Show all Songs' })).toHaveCount(0)
   await expect(page.getByTestId('song-row')).toHaveCount(0)
-  await filter.click()
+  // With Ready on too it still says how to add one, and Show all Songs turns both off.
+  const ready = page.getByRole('button', { name: 'Ready', exact: true })
+  await ready.click()
+  await expect(page.getByTestId('no-songs')).toContainText('No Favorites yet')
+  await page.getByRole('button', { name: 'Show all Songs' }).click()
   await expect(filter).toHaveAttribute('aria-pressed', 'false')
+  await expect(ready).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByTestId('no-songs')).toHaveCount(0)
 
   // The Unlocked Song's heart, on its row.
   await expectTappable(heart(page, MARY))
@@ -129,7 +135,6 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
   await page.getByRole('button', { name: 'Clear search' }).click()
 
   // Ready and Favorites together: the Ready Favorite Songs, only Mary.
-  const ready = page.getByRole('button', { name: 'Ready', exact: true })
   await ready.click()
   await filter.click()
   await expect(page.getByTestId('song-row')).toHaveCount(1)
@@ -168,6 +173,21 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
   await expect(page.getByTestId('song-row')).toHaveCount(1)
   await expect(page.getByRole('heading', { name: /^Unlocked/ })).toHaveCount(0)
   await expect.poll(() => accountFavorites(page)).toEqual(['twinkle'])
+
+  // Twinkle, the one Favorite left, is locked: Ready leaves nothing, and Show all Songs turns both
+  // filters off.
+  await ready.click()
+  await expect(page.getByTestId('song-row')).toHaveCount(0)
+  await expect(page.getByTestId('no-songs')).toContainText('No Ready Favorites')
+  await expect(page.getByTestId('no-songs')).toContainText(
+    'None of your Favorites is unlocked yet.'
+  )
+  await page.getByRole('button', { name: 'Show all Songs' }).click()
+  await expect(filter).toHaveAttribute('aria-pressed', 'false')
+  await expect(ready).toHaveAttribute('aria-pressed', 'false')
+  await expect(
+    page.getByRole('heading', { name: `Unlocked · ${unlocked}`, exact: true })
+  ).toBeVisible()
 })
 
 /** A control a thumb can hit: at least 44 by 44 CSS pixels, as the iPhone's controls. */

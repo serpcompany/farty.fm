@@ -50,7 +50,9 @@ const noFavorites: ReadonlySet<string> = new Set()
 /**
  * Compose: the Song Catalog with each Song's Pitch Coverage. Search it by title or composer, sort
  * it, and show only the Ready or Favorite Songs (#356). Open an Unlocked Song in Song Creator, or a
- * locked Song to see which notes it still needs. Matches the iPhone app's `ComposeTab`.
+ * locked Song to see which notes it still needs. It began as a port of the iPhone app's
+ * `ComposeTab`, which still lists Favorites first and has no composer, Ready filter, Most popular or
+ * Fewest notes: the web screen is the newer one, so port from here to the iPhone, not back.
  */
 export function ComposeScreen() {
   const pedos = usePedos()
@@ -93,7 +95,7 @@ export function ComposeScreen() {
       <h1 className="pt-4 pb-1 text-3xl font-bold tracking-tight">Compose</h1>
 
       {/* Search and the chips stay in reach while the list scrolls. */}
-      <div className="sticky top-[env(safe-area-inset-top)] z-10 -mx-4 flex flex-col gap-1 bg-background/95 px-4 pt-1.5 pb-1 backdrop-blur md:top-16">
+      <div className="sticky top-[env(safe-area-inset-top)] z-10 -mx-4 flex flex-col gap-1 bg-background/95 px-4 pt-1.5 pb-1 backdrop-blur md:top-[calc(4rem+1px)]">
         <div className="relative">
           <Search
             className="pointer-events-none absolute top-3.5 left-3 size-4 text-muted-foreground"
