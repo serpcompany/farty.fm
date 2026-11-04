@@ -32,7 +32,7 @@ Measured on `scenarios/review-melodic.json`, with `069` (G♯2 +43 c) placed on 
    - Recording Analysis listens from 45 to 900 Hz (F♯1 to A5, `pyin.ts`). C2 to B4 are the three whole octaves inside that, so every key is a note an analyzed fart could also land on.
    - The 24 Melodic golden Recordings fall between D♯2 and G4: 12 in octave 2, 11 in octave 3 and 1 in octave 4. So the picker opens on octave 3, or on the octave of the fart's current note.
 3. **The piano sounds only in the picker.**
-   - Tapping a key plays a short piano-like note to compare with the fart (`playPianoNote` in `piano-keys.tsx`). It is built with Web Audio from six decaying partials under a closing low-pass filter.
+   - Tapping a key plays a short piano-like note to compare with the fart (`playPianoNote` in `piano-keys.tsx`). It is built in code from the decaying partials of a struck string (`pianoNote`), and since #362 it is voiced for a phone's speaker: partials below about 250 Hz are turned down, so a low key keeps its pitch and level in the partials a phone plays.
    - The note never reaches a Song, a Toot or a render. The renderer and Song Creator don't import it, so Songs stay fart-only (ADR 0004).
 4. **A Placed Recording is a Melodic Recording at its Placed Pitch.**
    - This holds for Pitch Coverage, Auto-map, the Recordings tab's count, Song Creator and a Toot's note captions (`songPitch()` in `recordings.ts`).

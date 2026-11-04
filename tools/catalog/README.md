@@ -27,6 +27,8 @@ The first run downloads `PDMX.csv` (225 MB) and `mid.tar.gz` (214 MB) into `~/.c
 | `test_composers.py` | Unit tests for the composer rules, and every batch against the catalog |
 | `composers-NN.json` | A batch of composer lookups: one record per Song, most viewed first |
 | `composers-NN.report.md` | The batch's report, written by `apply`: every Song's composer and source, the Unknowns and the removals |
+| `song_reports.py` | Lists an export of D1's `song_reports` per Song, worst first, against the catalog's notes now ([`docs/agents/web.md`](../../docs/agents/web.md#reports-and-take-downs)) |
+| `test_song_reports.py` | Unit tests for the list |
 
 ## Ranking
 
