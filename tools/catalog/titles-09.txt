@@ -4,6 +4,7 @@
 # Review of its import (#324) pulled 8 titles, now in excluded-titles.txt: Indian Princess; Mrs Kenny's Barn Dance; The Indian River Hornpipe; Hunting Song; Lament For The Death Of The Rev. Archie Beaton; and, after the voice and title check, Let Heaven And Earth Rejoice And Sing; Little Annie Rooney. GHW.053; Smith's -- Reel.
 # The review of PR #343 pulled 8 more, now in excluded-titles.txt: Sir Archibald Grant of Monymusk's Reel; Highland Skip; The Perthshire Hunt; Scan Tester's No 1; Scan Testers No 2; French Broad; The Anvil; Duntroon.
 # It also added The Duchess of Buccleuch, which had been left out as a spelling of Duchess of Buccleugh, and fixed these titles by hand: Muss i denn, When Sick Is It Tea You Want?, A Virgin Most Pure, Peacock's Tune, Adson's Saraband, La Fougère, My Love Is Lost to Me, The Sun from the East, Come Up Stairs with Me, Johnny the Jumper.
+# The composer lookups (#357) pulled 2 titles as under copyright, now in excluded-titles.txt: Perth, The Gathering.
 # id | catalog title
 christ-is-born-in-bethlehem | Christ is Born in Bethlehem
 christian-walk-carefully-danger-is-near | Christian walk carefully danger is near
@@ -47,7 +48,6 @@ brolum | Brolum
 coffee-house | The Coffee House
 elevation | Elevation
 fain-i-would | Fain I Would
-gathering | The Gathering
 graies-inne-maske | Graies Inne Maske
 grants-rant | Grant's Rant
 i-was-wrecked-on-a-rocky-and-desolate-shore | I was wrecked on a rocky and desolate shore
@@ -178,7 +178,6 @@ my-dearie | My Dearie
 niel-gows-recovery | Niel Gow's Recovery
 old-as-the-hills | Old as the Hills
 old-batchelor | Old Batchelor
-perth | Perth
 pinagay-branle | Pinagay Branle
 there-is-a-land-of-pleasure | There is a land of pleasure
 thorn-bush | Thorn Bush

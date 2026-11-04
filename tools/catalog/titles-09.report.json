@@ -14,7 +14,7 @@
   }
  },
  "library": "38 Recordings, 26 Melodic",
- "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 3 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 4 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
  "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
@@ -4820,79 +4820,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4561948"
-  },
-  {
-   "id": "gathering",
-   "title": "The Gathering",
-   "matched": 13,
-   "eligible": 12,
-   "rejected": {
-    "PDMX flags a license conflict": 1
-   },
-   "tried": [
-    {
-     "score_id": "4677123",
-     "url": "https://musescore.com/score/4677123",
-     "score_title": "The Gathering",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "3",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/0/20/QmaFdHVwRpPBZfuc9m9RKy9x6Dbdn4ANCTu7G5dBdBeLwm.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "4fd9f45f5c5cb327d49d5bfb5b57fe1980a5ed6f77bd15916a006d1c226d1236",
-     "render": {
-      "bpm": 120,
-      "max_beats": 30,
-      "beats_per_bar": 3
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 2,
-      "note_count": 63
-     },
-     "track_notes": 101,
-     "range_semitones": 17,
-     "distinct_pitches": 11,
-     "pitch_coverage": "11 of 11",
-     "metrics": {
-      "notes": 63,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 1,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 2,
-      "within_50c_any_octave_pct": 2,
-      "median_abs_cents": 177.6,
-      "contour_pct": 79,
-      "distinct_recordings": 11,
-      "on_pitch_pct": 2,
-      "sounding_pct": 93,
-      "notes_mostly_silent": 0,
-      "transpose": -20,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.47
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4677123"
   },
   {
    "id": "graies-inne-maske",
@@ -18044,118 +17971,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4703244"
-  },
-  {
-   "id": "perth",
-   "title": "Perth",
-   "matched": 2,
-   "eligible": 2,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "5782386",
-     "url": "https://musescore.com/score/5782386",
-     "score_title": "Perth",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "16",
-     "license": "publicdomain",
-     "n_tracks": "2",
-     "dataset_path": "./mid/10/25/QmSiKVA5cCEFJ3vt8XEzoMifMcuR7g6S9LcfQmcFUuYAnR.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": [
-       "the importer dropped 43 chord tones and inner-voice onsets, 47% of the track's notes (at most 10%)"
-      ]
-     },
-     "passed": false,
-     "sha256": "d6b85191ba7ac1a7d669b7f5d888e843f28e374251379c7a968a369bb52fec17",
-     "render": {
-      "bpm": 115,
-      "max_beats": 30
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0,
-       1,
-       2
-      ],
-      "chord_tones_dropped": 43,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 24
-     },
-     "track_notes": 48,
-     "range_semitones": 12,
-     "distinct_pitches": 7
-    },
-    {
-     "score_id": "4953164",
-     "url": "https://musescore.com/score/4953164",
-     "score_title": "Perth",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "1",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/5/43/QmfStZAB2bQvqSqDKE7gJ1somz7twzLDGA9BXZHKqpzc4S.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "aa38929e1ecbf66fafc42a9ca895eb6b86c7aeaad6453ce66c47ca81154aca61",
-     "render": {
-      "bpm": 120,
-      "start_beat": 4,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 55
-     },
-     "track_notes": 107,
-     "range_semitones": 16,
-     "distinct_pitches": 8,
-     "pitch_coverage": "8 of 8",
-     "metrics": {
-      "notes": 55,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 36,
-      "within_50c_any_octave_pct": 36,
-      "median_abs_cents": 107.6,
-      "contour_pct": 63,
-      "distinct_recordings": 8,
-      "on_pitch_pct": 23,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -19,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.97
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4953164"
   },
   {
    "id": "pinagay-branle",

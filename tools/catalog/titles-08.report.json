@@ -14,7 +14,7 @@
   }
  },
  "library": "38 Recordings, 26 Melodic",
- "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 3 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 4 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
  "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
@@ -378,77 +378,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4686536"
-  },
-  {
-   "id": "anada-pa-gael",
-   "title": "Añada Pa Gael",
-   "matched": 2,
-   "eligible": 2,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4659480",
-     "url": "https://musescore.com/score/4659480",
-     "score_title": "Añada Pa Gael",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "33",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/10/46/QmSueiXA2e2yytYaXVjfM7PUiQTXTcyhkK8AiCo9G9EDY2.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "a0472c8e9e89e3c579ef0b1e9aff5c359cd0b1968e4fb13e08dad97176efcab2",
-     "render": {
-      "bpm": 120,
-      "max_beats": 31,
-      "beats_per_bar": 3
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 27
-     },
-     "track_notes": 197,
-     "range_semitones": 12,
-     "distinct_pitches": 6,
-     "pitch_coverage": "6 of 6",
-     "metrics": {
-      "notes": 27,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 3,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 11,
-      "within_50c_any_octave_pct": 11,
-      "median_abs_cents": 167.4,
-      "contour_pct": 91,
-      "distinct_recordings": 6,
-      "on_pitch_pct": 16,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -20,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.57
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4659480"
   },
   {
    "id": "farewell-to-whisky",
@@ -6278,77 +6207,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4974545"
-  },
-  {
-   "id": "up-in-the-air",
-   "title": "Up In The Air",
-   "matched": 7,
-   "eligible": 7,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4708430",
-     "url": "https://musescore.com/score/4708430",
-     "score_title": "Up in the Air",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "6",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/16/30/QmYLHi67KXhvUfrR5qmdd31MwLsgQS5fJd6sEMR3S7iw3x.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "025191564df855d38533f868b6f101dbef23e9efd888be79c2f75f1ecfa93dcf",
-     "render": {
-      "bpm": 120,
-      "max_beats": 30,
-      "beats_per_bar": 3
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 50
-     },
-     "track_notes": 152,
-     "range_semitones": 14,
-     "distinct_pitches": 8,
-     "pitch_coverage": "8 of 8",
-     "metrics": {
-      "notes": 50,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 5,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 2,
-      "within_50c_any_octave_pct": 2,
-      "median_abs_cents": 222.6,
-      "contour_pct": 74,
-      "distinct_recordings": 8,
-      "on_pitch_pct": 8,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -16,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.93
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4708430"
   },
   {
    "id": "aurora-lucis",

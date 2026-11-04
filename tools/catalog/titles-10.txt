@@ -3,6 +3,7 @@
 # the one the ranking counted scores by.
 # Review of its import (#324, PR #343) pulled 13 titles, now in excluded-titles.txt: The Pride of Rathmore; The Rivals; Killarney; St. Lawrence; Chimes; The Primrose; The Sloe; Sky Lark; The Prince Of Wales; The Fairy; The Marquis of Huntly; Of A' the Airts the Wind Can Blaw; Balvenie Castle.
 # The review of PR #343 also fixed these titles by hand: Mr. Morison of Bognie, Whimbleton House, The Banks of Allan, Garthland's Strathspey, Miss McPherson Grant of Ballindalloch, Tros y Garreg.
+# The composer lookups (#357) pulled 1 title as under copyright, now in excluded-titles.txt: The Polygon.
 # id | catalog title
 miss-grant-of-grant | Miss Grant of Grant
 miss-wharton-duff | Miss Wharton Duff
@@ -30,7 +31,6 @@ miss-bennets-jig | Miss Bennet's Jig
 miss-graham-of-inchbrakies-strathspey | Miss Graham of Inchbrakies Strathspey
 mr-morison-of-bognie | Mr. Morison of Bognie
 old-wife-behind-the-fire | Old Wife Behind the Fire
-polygon | The Polygon
 what-a-beau-my-granny-was | What a Beau My Granny Was
 whimbleton-house | Whimbleton House
 witches | The Witches

@@ -7,9 +7,10 @@ import {
   getUserMediaMs,
   microphone,
   savedTake,
+  storedRecordings,
   waitForOpenMicrophone
 } from './fake-microphone'
-import { songsTheLastTakeUnlocks } from './golden'
+import { songsTheLastStoredTakeUnlocks } from './golden'
 import { skipWelcome } from './record'
 import { onPhone } from './screens'
 import { expectUnlockReward } from './unlock-reward'
@@ -265,8 +266,14 @@ test.describe('with microphone permission granted', () => {
     // Try it: on to Song Creator, which plays the Toot in "playback". 002 unlocks Mary and more
     // Songs, as many as the catalog has (`golden.ts`), and Try it opens the first the Result's
     // reward lists, the most viewed (#363).
-    const fourth = songsTheLastTakeUnlocks(['095', '017', '022', '002'])
     await recordAndSave('002')
+    await expect(page.getByTestId('unlock-reward')).toBeVisible()
+    const fourth = songsTheLastStoredTakeUnlocks(await storedRecordings(page), [
+      '095',
+      '017',
+      '022',
+      '002'
+    ])
     await expectUnlockReward(page, fourth)
     await page.getByRole('button', { name: 'Try it', exact: true }).click()
     await expect(page).toHaveURL(new RegExp(`/compose/${fourth[0].id}/$`))

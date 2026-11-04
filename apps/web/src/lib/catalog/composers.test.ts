@@ -59,17 +59,24 @@ const fields = (e: Pick<CatalogEntry, 'composer' | 'composer_died' | 'composer_s
 const done = sources.catalog.filter(e => e.composer !== undefined && e.composer_source)
 const open = lookups.filter(l => !isDone(l) && l.remove === undefined)
 
+/** The copyright limits (ADR 0003), which tools/catalog/composers.py reads too. */
+const limits = JSON.parse(readFileSync(`${tools}/copyright.json`, 'utf8')) as {
+  first_copyright_year: number
+  last_free_death: number
+}
+
 /** What keeps a looked-up Song out of the catalog, by tools/catalog/composers.py's rules (ADR 0003):
- * an author who died after 1955 (the composer, or a lyricist whose words were written with the
- * music), a first publication in 1931 or later, or a named composer with no death year unless the
- * tune was published before 1931 and a note says why the year is missing. */
+ * an author who died after `last_free_death` (the composer, or a lyricist whose words were written
+ * with the music), a first publication in `first_copyright_year` or later, or a named composer with
+ * no death year unless the tune was published before then and a note says why the year is missing. */
 function underCopyright(l: Lookup): boolean {
   const named = l.composer !== 'Unknown' && !l.composer?.startsWith('Traditional')
-  const oldWithNote = l.published !== undefined && l.published < 1931 && !!l.note?.trim()
+  const oldWithNote =
+    l.published !== undefined && l.published < limits.first_copyright_year && !!l.note?.trim()
   return (
-    (l.composer_died ?? 0) > 1955 ||
-    (l.lyricist_died ?? 0) > 1955 ||
-    (l.published ?? 0) >= 1931 ||
+    (l.composer_died ?? 0) > limits.last_free_death ||
+    (l.lyricist_died ?? 0) > limits.last_free_death ||
+    (l.published ?? 0) >= limits.first_copyright_year ||
     (named && l.composer_died === undefined && !oldWithNote)
   )
 }

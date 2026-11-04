@@ -7,9 +7,15 @@ import {
   fartAndRecord,
   fixtureWavs,
   getUserMediaMs,
+  storedRecordings,
   waitForOpenMicrophone
 } from './fake-microphone'
-import { fixtureRecordings, songsTheLastTakeUnlocks, songsUnlockedBy } from './golden'
+import {
+  fixtureRecordings,
+  songsTheLastStoredTakeUnlocks,
+  songsTheLastTakeUnlocks,
+  songsUnlockedBy
+} from './golden'
 import { skipWelcome } from './record'
 import { expectUnlockReward, shownSongs } from './unlock-reward'
 
@@ -25,11 +31,13 @@ const journey = ['095', '017', '022', '002']
 /** The Songs the journey's first `takes` takes unlock. */
 const unlockedAt = (takes: number) => songsUnlockedBy(fixtureRecordings(journey.slice(0, takes)))
 
-/** A Song's notes, tempo and length in whole seconds, from the catalog (#356). */
+/** A Song's composer (#357), notes, tempo and length in whole seconds, from the catalog (#356). */
 function facts(id: string) {
   const song = songs.find(s => s.id === id)
   if (!song) throw new Error(`No Song ${id}`)
+  if (!song.composer) throw new Error(`Song ${id} has no composer`)
   return {
+    composer: song.composer,
     notes: song.pitches.length,
     bpm: song.bpm,
     seconds: Math.round((song.lengthBeats * 60) / song.bpm)
@@ -113,13 +121,13 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await tab(page, 'Compose').click()
   await expect(page.getByText('No Melodic Recordings yet')).toHaveCount(0)
   await expect(locked(songs.length)).toBeVisible()
-  // A locked row: its title, no composer (#357 hasn't looked Mary up), and its facts, Pitch Coverage
-  // first (#356).
+  // A locked row: its title, its composer (#357), and its facts, Pitch Coverage first (#356).
   const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true })
-  const { notes, bpm, seconds } = facts('mary')
+  const { composer, notes, bpm, seconds } = facts('mary')
+  await expect(mary).toContainText(composer)
   await expect(mary).toContainText(`1 of ${notes} notes · ${bpm} BPM · ${seconds} s`)
   await expect(mary).toHaveAccessibleDescription(
-    `Locked. 1 of ${notes} notes covered, ${bpm} BPM, ${seconds} seconds`
+    `Locked. ${composer}. 1 of ${notes} notes covered, ${bpm} BPM, ${seconds} seconds`
   )
 
   // The locked Song's sheet names the notes it needs, and how long a fart each needs (ADR 0011).
@@ -139,21 +147,30 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
 
   // Three more takes: the third unlocks Hot Cross Buns, and the fourth Mary and more Songs.
   expect(unlockedAt(2)).toEqual([])
-  const third = songsTheLastTakeUnlocks(journey.slice(0, 3))
-  expect(third.map(s => s.title)).toContain('Hot Cross Buns')
-  expect(third.map(s => s.title)).not.toContain('Mary Had a Little Lamb')
-  const fourth = songsTheLastTakeUnlocks(journey)
-  expect(fourth.length).toBeGreaterThan(4)
+  // What holds whichever side of a Song's edge a take's measured length lands on (#378).
+  const thirdByReference = songsTheLastTakeUnlocks(journey.slice(0, 3)).map(s => s.title)
+  expect(thirdByReference).toContain('Hot Cross Buns')
+  expect(thirdByReference).not.toContain('Mary Had a Little Lamb')
+  expect(songsTheLastTakeUnlocks(journey).length).toBeGreaterThan(4)
   await recordAndSave(page, '017')
   await expect(page.getByTestId('unlock-reward')).toHaveCount(0)
   await page.getByRole('button', { name: 'Record another' }).click()
   // The Result's reward lists the Songs the take unlocked, most viewed first (#363).
   await recordAndSave(page, '022')
+  // The reward is worked out from the app's own analysis of the takes, which can differ from the
+  // reference's by a 5 ms step, enough to unlock one more Song (#378).
+  await expect(page.getByTestId('unlock-reward')).toBeVisible()
+  const third = songsTheLastStoredTakeUnlocks(await storedRecordings(page), journey.slice(0, 3))
+  expect(third.map(s => s.title)).toContain('Hot Cross Buns')
+  expect(third.map(s => s.title)).not.toContain('Mary Had a Little Lamb')
   await expectUnlockReward(page, third)
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page).toHaveURL(/\/recordings\/$/)
   await tab(page, 'Record').click()
   await recordAndSave(page, '002')
+  await expect(page.getByTestId('unlock-reward')).toBeVisible()
+  const fourth = songsTheLastStoredTakeUnlocks(await storedRecordings(page), journey)
+  expect(fourth.length).toBeGreaterThan(4)
 
   // More than 4 show 3, then See all, which lists the rest and moves focus to the 4th.
   await expectUnlockReward(page, fourth)
@@ -210,7 +227,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
     .getByRole('link')
   await expect(unlocked).toHaveAccessibleName('Mary Had a Little Lamb')
   await expect(unlocked).toHaveAccessibleDescription(
-    `${notes} notes, ${bpm} BPM, ${seconds} seconds`
+    `${composer}. ${notes} notes, ${bpm} BPM, ${seconds} seconds`
   )
   await expectTappable(unlocked)
   await unlocked.click()
