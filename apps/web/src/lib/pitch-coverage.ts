@@ -1,5 +1,5 @@
 import { searchKey } from '@/lib/catalog/search-key'
-import type { Song, SongSummary } from '@/lib/catalog/song'
+import type { KindChoice, Song, SongSummary } from '@/lib/catalog/song'
 import {
   type Arrangement,
   type AutoMapRecording,
@@ -235,16 +235,19 @@ const closestToUnlocking = (a: SongRow, b: SongRow) => {
 
 const orders: Record<SongOrder, (a: SongRow, b: SongRow) => number> = {
   closestToUnlocking,
-  mostPopular: (a, b) => b.song.views - a.song.views || (b.song.rating ?? 0) - (a.song.rating ?? 0),
+  mostPopular: (a, b) =>
+    b.song.fame - a.song.fame ||
+    b.song.views - a.song.views ||
+    (b.song.rating ?? 0) - (a.song.rating ?? 0),
   fewestNotes: (a, b) => a.song.pitches.length - b.song.pitches.length,
   alphabetical: (a, b) => titles.compare(a.song.title, b.song.title)
 }
 
 /**
  * `rows`, given in catalog order, sorted by `order`. Closest to unlocking puts the highest Pitch
- * Coverage first and, among equals, Songs with fewer notes. Most popular puts the scores viewed
- * most on MuseScore first and, among equals, the best rated. Fewest notes puts the Songs with the
- * fewest distinct notes first. Ties keep catalog order.
+ * Coverage first and, among equals, Songs with fewer notes. Most popular puts the best known Songs
+ * first (`fame`, #384) and, among equals, the scores viewed most on MuseScore, then the best rated.
+ * Fewest notes puts the Songs with the fewest distinct notes first. Ties keep catalog order.
  */
 export function sortRows(rows: readonly SongRow[], order: SongOrder): SongRow[] {
   // Array sort is stable, so ties keep catalog order.
@@ -253,13 +256,21 @@ export function sortRows(rows: readonly SongRow[], order: SongOrder): SongRow[] 
 
 const searchKeys = new WeakMap<SongSummary, readonly string[]>()
 
-/** A Song's title, other names and composer as search compares them, worked out once a Song. */
+/**
+ * A Song's title, other names, composer, kind and origin as search compares them, worked out once a
+ * Song. The kind and origin let "hymn" find the Hymns and "Irish" the Irish Songs (#384). Every
+ * Song is a Song, so the kind Songs isn't searched: "song" finds the titles with the word only.
+ */
 function namesOf(song: SongSummary): readonly string[] {
   let keys = searchKeys.get(song)
   if (!keys) {
-    keys = [song.title, ...(song.aliases ?? []), ...(song.composer ? [song.composer] : [])].map(
-      searchKey
-    )
+    keys = [
+      song.title,
+      ...(song.aliases ?? []),
+      ...(song.composer ? [song.composer] : []),
+      ...(song.kind === 'Songs' ? [] : [song.kind]),
+      ...(song.origin ? [song.origin] : [])
+    ].map(searchKey)
     searchKeys.set(song, keys)
   }
   return keys
@@ -269,27 +280,38 @@ function namesOf(song: SongSummary): readonly string[] {
 export type SongListing = { unlocked: SongRow[]; locked: SongRow[] }
 
 /**
- * Compose's filters, both on at once when both are given: `ready`, only the Unlocked Songs, and
- * `favorites`, only the Songs whose ids it holds.
+ * Compose's filters, all on at once when all are given: `ready`, only the Unlocked Songs,
+ * `favorites`, only the Songs whose ids it holds, and `kind`, only the Songs a Kind chip shows
+ * (#384).
  */
-export type SongFilters = { ready?: boolean; favorites?: ReadonlySet<string> | null }
+export type SongFilters = {
+  ready?: boolean
+  favorites?: ReadonlySet<string> | null
+  kind?: KindChoice | null
+}
+
+/** Whether a Kind chip's choice shows `song`: Well known shows the Well known Songs of every kind. */
+function isOfKind(song: SongSummary, kind: KindChoice): boolean {
+  return kind === 'Well known' ? song.wellKnown === true : song.kind === kind
+}
 
 /**
- * The rows, already sorted, that pass `filters` and whose title, another name or composer contains
- * `query` anywhere, ignoring case, accents and punctuation (`searchKey`): "londonderry" finds
- * Danny Boy, and "mozart" every Song by Mozart. A query with no letters or digits matches every
- * Song.
+ * The rows, already sorted, that pass `filters` and whose title, another name, composer, kind or
+ * origin contains `query` anywhere, ignoring case, accents and punctuation (`searchKey`):
+ * "londonderry" finds Danny Boy, "mozart" every Song by Mozart, and "irish" every Irish Song. A
+ * query with no letters or digits matches every Song.
  */
 export function songListing(
   sorted: readonly SongRow[],
   query: string,
-  { ready = false, favorites = null }: SongFilters = {}
+  { ready = false, favorites = null, kind = null }: SongFilters = {}
 ): SongListing {
   const q = searchKey(query)
   const rows = sorted.filter(
     r =>
       (!ready || r.coverage.unlocked) &&
       (favorites === null || favorites.has(r.song.id)) &&
+      (kind === null || isOfKind(r.song, kind)) &&
       (q === '' || namesOf(r.song).some(name => name.includes(q)))
   )
   return {

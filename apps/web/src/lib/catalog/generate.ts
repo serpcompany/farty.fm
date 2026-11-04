@@ -8,6 +8,9 @@
  *   which Compose sorts by (#356);
  * - its composer when one is known (`tools/catalog/composers.py`, #357), which Compose shows and
  *   searches by (#356);
+ * - its kind, origin, fame and Well known (`tools/catalog/tag.py`, #383): Compose's chips filter by
+ *   kind and Well known, its search finds kind and origin words, and Most popular sorts by fame
+ *   (#384);
  * - the other names its titles file lists (`tools/catalog/titles-*.txt`), which Compose's search
  *   finds it by too;
  * - every Song in the catalog but `notShipped`, the iPhone app's 12 first (`shippedIds`).
@@ -34,7 +37,7 @@ import { createHash } from 'node:crypto'
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { searchKey } from './search-key'
-import type { Song, SongNotes, SongSummary } from './song'
+import { type Song, type SongKind, type SongNotes, type SongSummary, songKinds } from './song'
 
 /** An entry of `catalog/catalog.json`: the cited score and how the reference engine imports it. */
 export type CatalogEntry = {
@@ -49,6 +52,14 @@ export type CatalogEntry = {
   composer_died?: number
   /** The page that names the composer. */
   composer_source?: string
+  /** What kind of Song it is, one of `songKinds` (#383). */
+  kind: string
+  /** Where the tune is from, or null when no source says (#383). */
+  origin: string | null
+  /** Its pageviews and PDMX views, on a log scale and added (#383). */
+  fame: number
+  /** Whether it's one of the Well known Songs (#383). */
+  well_known: boolean
   file: string
   sha256: string
   source: Record<string, string>
@@ -225,6 +236,25 @@ function composerOf(entry: CatalogEntry): string | undefined {
   return composer
 }
 
+/** The tags `tools/catalog/tag.py` gave the Song (#383), as the index holds them. */
+function tagsOf(entry: CatalogEntry): Pick<SongSummary, 'kind' | 'origin' | 'fame' | 'wellKnown'> {
+  const problem = (what: string) => new Error(`Song ${entry.id}: ${what}; run tools/catalog/tag.py`)
+  const { kind, origin, fame, well_known } = entry
+  if (!songKinds.includes(kind as SongKind))
+    throw problem(`its kind ${kind} isn't one of the seven`)
+  if (origin !== null && (typeof origin !== 'string' || origin.trim() !== origin || origin === ''))
+    throw problem("its origin isn't a name or null")
+  if (typeof fame !== 'number' || !Number.isFinite(fame) || fame < 0)
+    throw problem('it has no fame')
+  if (typeof well_known !== 'boolean') throw problem("its well_known isn't true or false")
+  return {
+    kind: kind as SongKind,
+    ...(origin !== null && { origin }),
+    fame,
+    ...(well_known && { wellKnown: true })
+  }
+}
+
 /**
  * The line each Song shows under its title, from its source and license. CC0 is a public domain
  * dedication, so a CC0 score's line is a public domain score's.
@@ -285,7 +315,7 @@ function song(entry: CatalogEntry, golden: GoldenSong, names: readonly string[])
   const aliases = aliasesOf(entry.title, names)
   const source = sourceLine(entry)
   const composer = composerOf(entry)
-  // Most popular sorts by the score's MuseScore views, then its rating (#356).
+  // Most popular's ties go to the score's MuseScore views, then its rating (#356, #384).
   const views = Number(entry.source.n_views)
   if (!Number.isInteger(views) || views < 0) throw problem('its source has no PDMX n_views')
   const rating = Number(entry.source.rating ?? 0)
@@ -296,6 +326,7 @@ function song(entry: CatalogEntry, golden: GoldenSong, names: readonly string[])
     ...(aliases.length > 0 && { aliases }),
     source,
     ...(composer !== undefined && { composer }),
+    ...tagsOf(entry),
     views,
     ...(rating > 0 && { rating }),
     lengthBeats: golden.length_beats,
@@ -372,7 +403,7 @@ export function renderCatalog(
         " * The Song Catalog's index, in the app's order, for routes and the server. The browser",
         ' * fetches it instead (`load-songs.ts`), so it stays out of the JavaScript (#322).',
         ' */',
-        'export const songIndex: readonly SongSummary[] = index',
+        'export const songIndex = index as readonly SongSummary[]',
         ''
       ].join('\n')
     },

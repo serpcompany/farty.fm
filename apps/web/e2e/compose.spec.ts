@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
 import { searchKey } from '../src/lib/catalog/search-key'
+import { kindChoices, type SongKind } from '../src/lib/catalog/song'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { type SongOrder, songRows, sortRows } from '../src/lib/pitch-coverage'
 import {
@@ -44,13 +45,20 @@ function facts(id: string) {
   }
 }
 
-/** The ids of the Songs whose title, other names or composer has `query`, from the catalog. */
+/**
+ * The ids of the Songs whose title, other names, composer, kind or origin (#384) has `query`, from
+ * the catalog. Every Song is a Song, so the kind Songs is no search word.
+ */
 const searchFinds = (query: string) =>
   songs
     .filter(song =>
-      [song.title, ...(song.aliases ?? []), song.composer ?? ''].some(name =>
-        searchKey(name).includes(searchKey(query))
-      )
+      [
+        song.title,
+        ...(song.aliases ?? []),
+        song.composer ?? '',
+        song.kind === 'Songs' ? '' : song.kind,
+        song.origin ?? ''
+      ].some(name => searchKey(name).includes(searchKey(query)))
     )
     .map(song => song.id)
 
@@ -283,7 +291,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(page.getByText('No Results for “zzz”')).toBeVisible()
   await search.fill('')
 
-  // Sort: the chip names the order. Most popular puts the most viewed score first (#356).
+  // Sort: the chip names the order. Most popular puts the best-known Song first (#356, #384).
   const sort = (label: string) => page.getByRole('button', { name: `Sort: ${label}` })
   await expectTappable(sort('Closest to unlocking'))
   await expectTappable(page.getByRole('button', { name: 'Favorites', exact: true }))
@@ -307,9 +315,9 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await page.getByRole('menuitemradio', { name: 'Most popular' }).click()
   await expect(sort('Most popular')).toBeVisible()
   const [popularUnlocked, popularLocked] = firsts('mostPopular')
-  const views = (id: string) => songs.find(s => s.id === id)?.views ?? 0
-  expect(views(popularLocked)).toBe(
-    Math.max(...rows.filter(r => !r.coverage.unlocked).map(r => r.song.views))
+  const fame = (id: string) => songs.find(s => s.id === id)?.fame ?? 0
+  expect(fame(popularLocked)).toBe(
+    Math.max(...rows.filter(r => !r.coverage.unlocked).map(r => r.song.fame))
   )
   await expect(firstUnlocked).toHaveAttribute('data-song', popularUnlocked)
   await expect(firstLocked).toHaveAttribute('data-song', popularLocked)
@@ -318,6 +326,82 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await sort('Most popular').click()
   await page.getByRole('menuitemradio', { name: 'A–Z' }).click()
   await expect(firstLocked).toHaveAttribute('data-song', firsts('alphabetical')[1])
+})
+
+// The Kind chips (#384): one kind at a time, or the Well known Songs of every kind, with search
+// and the Ready filter. A second tap shows every Song, and Compose keeps the choice.
+test('a Kind chip shows one kind of Song, with search and Ready, and stays chosen', async ({
+  page
+}) => {
+  await page.goto('/compose/')
+  const row = page.getByTestId('kind-chips')
+  const chip = (name: string) => row.getByRole('button', { name, exact: true })
+  const rows = page.getByTestId('song-row')
+  const kindCount = page.getByTestId('kind-count')
+  const ofKind = (kind: SongKind) => songs.filter(s => s.kind === kind)
+  await expect(page.getByRole('heading', { name: `Locked · ${songs.length}` })).toBeVisible()
+  await expect(row.getByRole('button')).toHaveText([...kindChoices])
+  for (const choice of kindChoices) await expectTappable(chip(choice))
+  await expect(row.getByRole('button', { pressed: true })).toHaveCount(0)
+  await expect(kindCount).toHaveCount(0)
+
+  // Well known holds Songs of every kind.
+  const wellKnown = songs.filter(s => s.wellKnown)
+  expect(new Set(wellKnown.map(s => s.kind)).size).toBeGreaterThan(4)
+  await chip('Well known').click()
+  await expect(chip('Well known')).toHaveAttribute('aria-pressed', 'true')
+  await expect(kindCount).toHaveText(`Well known · ${wellKnown.length}`)
+  await expect(rows).toHaveCount(wellKnown.length)
+  await expect(page.getByText('Sound Pad')).toHaveCount(0)
+
+  // One kind at a time: Christmas takes Well known's place, and a second tap shows every Song.
+  await chip('Christmas').click()
+  await expect(row.getByRole('button', { pressed: true })).toHaveText(['Christmas'])
+  await expect(kindCount).toHaveText(`Christmas · ${ofKind('Christmas').length}`)
+  await expect(rows).toHaveCount(ofKind('Christmas').length)
+  await chip('Christmas').click()
+  await expect(row.getByRole('button', { pressed: true })).toHaveCount(0)
+  await expect(kindCount).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: `Locked · ${songs.length}` })).toBeVisible()
+  await expect(page.getByText('Sound Pad')).toBeVisible()
+
+  // Search finds a Song by where it's from, and by its kind's name.
+  const search = page.getByRole('searchbox', { name: 'Search Songs or composers' })
+  const irish = searchFinds('Irish')
+  const irishByName = songs.filter(s =>
+    [s.title, s.composer ?? ''].some(name => /irish/i.test(name))
+  )
+  expect(irish.length).toBeGreaterThan(irishByName.length)
+  await search.fill('Irish')
+  await expect(rows).toHaveCount(irish.length)
+  expect(searchFinds('christmas')).toEqual(
+    expect.arrayContaining(ofKind('Christmas').map(s => s.id))
+  )
+  await search.fill('christmas')
+  await expect(rows).toHaveCount(searchFinds('christmas').length)
+
+  // The chip and search together, then Ready too: no Song is Unlocked yet.
+  await search.fill('Irish')
+  await chip('Fiddle tunes').click()
+  const irishTunes = ofKind('Fiddle tunes').filter(s => irish.includes(s.id))
+  await expect(kindCount).toHaveText(`Fiddle tunes · ${irishTunes.length}`)
+  await expect(rows).toHaveCount(irishTunes.length)
+  await page.getByRole('button', { name: 'Ready', exact: true }).click()
+  await expect(page.getByText('No Ready Songs in Fiddle tunes match “Irish”')).toBeVisible()
+  await expect(kindCount).toHaveCount(0)
+  await page.getByRole('button', { name: 'Search all Songs' }).click()
+  await expect(row.getByRole('button', { pressed: true })).toHaveCount(0)
+  await expect(search).toHaveValue('Irish')
+  await expect(rows).toHaveCount(irish.length)
+
+  // The choice stays across a reload, and the chip scrolls into sight.
+  await search.fill('')
+  await chip('Fiddle tunes').click()
+  await page.reload()
+  await expect(chip('Fiddle tunes')).toHaveAttribute('aria-pressed', 'true')
+  await expect(chip('Fiddle tunes')).toBeInViewport()
+  await expect(kindCount).toHaveText(`Fiddle tunes · ${ofKind('Fiddle tunes').length}`)
+  await expect(rows).toHaveCount(ofKind('Fiddle tunes').length)
 })
 
 // The browser fetches the Song Catalog as data (#322). With no service worker to answer for it, a
@@ -360,9 +444,12 @@ test.describe('a Song Catalog that does not load', () => {
   })
 })
 
-/** A control a thumb can hit: at least 44 by 44 CSS pixels, as the iPhone's controls. */
+/**
+ * A control a thumb can hit: at least 44 by 44 CSS pixels, as the iPhone's controls, less 0.01 px
+ * of the layout's float rounding.
+ */
 async function expectTappable(control: Locator) {
   const box = await control.boundingBox()
-  expect(box?.width ?? 0).toBeGreaterThanOrEqual(44)
-  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
+  expect(box?.width ?? 0).toBeGreaterThanOrEqual(43.99)
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(43.99)
 }
