@@ -20,7 +20,7 @@ import {
   sameFartChoices,
   swapFart
 } from '@/lib/engine/fart-choices'
-import { noteName } from '@/lib/pitch'
+import { nearestNote, noteName } from '@/lib/pitch'
 
 // Song Creator's fart sheet (#360): for one of a Song's pitches, every fart of the user's that can
 // play it, how the Arrangement uses each, and what each change says once it's made. The changes
@@ -29,9 +29,9 @@ import { noteName } from '@/lib/pitch'
 /** A fart that can play the sheet's pitch. */
 export type FartRow = {
   id: string
-  /** The fart's own note: its Recording Pitch, or the note it was placed on (ADR 0015). */
+  /** The fart's own note: its Recording Pitch's nearest, or the note it was placed on (ADR 0015). */
   note: number
-  /** The note it would play minus its own, in semitones: above 0 when the fart is lower. */
+  /** The note it would play minus its own, in whole semitones: above 0 when the fart is lower. */
   shift: number
   /** The Arrangement picks it for this pitch when the user has swapped nothing in. */
   isFartysPick: boolean
@@ -97,10 +97,12 @@ export function fartSheet(
     .map(r => {
       const other = playing.get(r.id)
       const plays = other && other.songPitch !== songPitch ? other : null
+      // A measured Recording Pitch falls between notes: the sheet names its nearest.
+      const own = nearestNote(r.recordingPitchMidi as number)
       return {
         id: r.id,
-        note: r.recordingPitchMidi as number,
-        shift: note - (r.recordingPitchMidi as number),
+        note: own,
+        shift: note - own,
         isFartysPick: fartysPick?.recordingId === r.id,
         isYourPick: r.id === inUseId && choices?.preferred[songPitch] === r.id,
         playsPitch: plays?.songPitch ?? null,

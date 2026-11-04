@@ -54,6 +54,19 @@ describe('the fart sheet', () => {
     }
   })
 
+  it('names each fart’s nearest note, and how many whole semitones it is from the pitch', () => {
+    const pitchOf = new Map(recordings.map(r => [r.id, r.recordingPitchMidi as number]))
+    // The golden library's Recording Pitches are measured, so most fall between two notes.
+    expect([...pitchOf.values()].some(p => p !== null && !Number.isInteger(p))).toBe(true)
+    for (const pitch of song.pitches) {
+      const sheet = fartSheet(song, recordings, null, pitch)
+      for (const row of rowsOf(sheet)) {
+        expect(row.note).toBe(Math.floor((pitchOf.get(row.id) as number) + 0.5))
+        expect(row.shift).toBe(sheet.note - row.note)
+      }
+    }
+  })
+
   it('puts the closest farts first, an octave away after any within 3 semitones', () => {
     const away = (shift: number) => (Math.abs(shift) <= 3 ? Math.abs(shift) : 10)
     for (const pitch of song.pitches) {
