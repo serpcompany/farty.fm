@@ -194,7 +194,7 @@ export async function liveShares(
 export type SharedRecordingRow = { share: ShareRow; handle: string; recording: RecordingRow }
 
 /**
- * The Recording shared at `/u/<handle>/r/<shareId>/`: only while it's shared under that Handle,
+ * The Recording shared at `/@<handle>/r/<shareId>/`: only while it's shared under that Handle,
  * not taken down, and not deleted. Anything else is not found, the same way.
  */
 export async function sharedRecording(
@@ -226,7 +226,7 @@ export async function sharedRecording(
 export type SharedTootRow = { share: ShareRow; handle: string; toot: TootRow }
 
 /**
- * The saved Toot shared at `/u/<handle>/t/<shareId>/`, as `sharedRecording` finds a Recording: only
+ * The saved Toot shared at `/@<handle>/t/<shareId>/`, as `sharedRecording` finds a Recording: only
  * while it's shared under that Handle, not taken down, and not deleted, and while no Recording it
  * plays is taken down. A Toot is in `toots` only once it's saved, so an unsaved one is never found.
  */

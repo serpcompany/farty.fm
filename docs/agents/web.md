@@ -150,18 +150,18 @@ A shared Recording's or Toot's page has Report (#316, #317, ADR 0020). Each repo
 ```sql
 -- Newest reports first, with the link to open for each.
 SELECT r.created_at, r.kind, r.item_id, r.share_id,
-  '/u/' || h.handle || CASE r.kind WHEN 'toots' THEN '/t/' ELSE '/r/' END || r.share_id || '/' AS link
+  '/@' || h.handle || CASE r.kind WHEN 'toots' THEN '/t/' ELSE '/r/' END || r.share_id || '/' AS link
   FROM share_reports r JOIN handles h ON h.user_id = r.user_id
   ORDER BY r.created_at DESC LIMIT 20;
 -- Take one down: its page, image, audio and Report answer 404 from the next request.
 UPDATE shares SET taken_down_at = unixepoch() * 1000 WHERE id = '<share_id>';
 ```
 
-The link to open is `/u/<handle>/r/<share_id>/` for a `recordings` report and `/u/<handle>/t/<share_id>/` for a `toots` one.
+The link to open is `/@<handle>/r/<share_id>/` for a `recordings` report and `/@<handle>/t/<share_id>/` for a `toots` one.
 
 **What a take-down covers.** The item behind that one share. A link taken down stays down: its row is kept, so the owner can't share that Recording or Toot again (403 `taken_down`), and neither Stop sharing nor deleting it removes it. Taking down a Recording also takes down every Toot that plays it (in its Arrangement or its Sound Pad Performance): those Toots' links answer 404 at once, they drop out of the owner's shares, and sharing one again answers 403 `taken_down`, so no Toot carries the Recording's audio back out. Taking down a Toot covers only that Toot, not the Recordings it plays. To put a link back, set `taken_down_at` to `NULL`; the Toots that play a Recording come back with it. Deleting the account removes it, with the reports.
 
-A profile page, `/u/<handle>/`, has Report too (#319, ADR 0021): a `profile_reports` row (the user and when) and a `profile_reported` log line with the Handle. It spends the same reporter and site slots as a link's Report, and a page gets 5 a day. A page lists only live shares, so taking down each of its shares empties it. There's no way yet to take a Handle away.
+A profile page, `/@<handle>/`, has Report too (#319, ADR 0021): a `profile_reports` row (the user and when) and a `profile_reported` log line with the Handle. It spends the same reporter and site slots as a link's Report, and a page gets 5 a day. A page lists only live shares, so taking down each of its shares empties it. There's no way yet to take a Handle away.
 
 ```sql
 -- Newest profile reports first, and what each page lists.

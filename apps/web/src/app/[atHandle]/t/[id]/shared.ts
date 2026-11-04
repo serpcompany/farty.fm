@@ -26,7 +26,7 @@ export type SharedTootView = {
 }
 
 /**
- * The saved Toot shared at `/u/<handle>/t/<id>/`, or null when that link doesn't work: never
+ * The saved Toot shared at `/@<handle>/t/<id>/`, or null when that link doesn't work: never
  * shared, stopped, taken down, never saved, or its Toot or account deleted. Once per request.
  */
 export const sharedTootView = cache(

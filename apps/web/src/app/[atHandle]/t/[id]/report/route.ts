@@ -1,26 +1,27 @@
+import { linkParams } from '@/app/[atHandle]/link-params'
 import { authSecret } from '@/server/auth'
 import { requestStores } from '@/server/library'
-import { reportProfile } from '@/server/profiles'
 import { apiError } from '@/server/require-user'
+import { reportShare } from '@/server/sharing'
 
-// Public, outside `src/app/api/`: anyone on a profile page can report it (ADR 0021).
+// Public, outside `src/app/api/`: anyone on a shared Toot's page can report it (ADR 0020).
 export const dynamic = 'force-dynamic'
 
-/** Reports the profile page for Farty to check. */
+/** Reports the shared Toot for Farty to check, within the same limits as a Recording's. */
 export async function POST(
   request: Request,
-  { params }: RouteContext<'/u/[handle]/report'>
+  { params }: RouteContext<'/[atHandle]/t/[id]/report'>
 ): Promise<Response> {
-  const { handle } = await params
+  const { handle, id } = await linkParams(params)
   let response: Response
   try {
     // The reporter's limit is keyed by an HMAC under sign-in's secret: none here, no reports.
     const secret = authSecret()
     response = secret
-      ? await reportProfile(requestStores(), request, handle, secret)
+      ? await reportShare('toots', requestStores(), request, handle, id, secret)
       : apiError(503, 'unavailable')
   } catch {
-    console.error('POST profile report failed')
+    console.error('POST share report failed')
     response = Response.json({ error: 'server_error' }, { status: 500 })
   }
   response.headers.set('Cache-Control', 'private, no-store')

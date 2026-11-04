@@ -10,7 +10,7 @@ import { type Stores, toRecording } from './library'
 import { apiError } from './require-user'
 import { REPORT_LIMITS, SITE_REPORTS_KEY, sharePath, tootSongTitle } from './sharing'
 
-// Profile pages (#319, ADR 0021): `/u/<handle>/`, public, which lists only what its user shares,
+// Profile pages (#319, ADR 0021): `/@<handle>/`, public, which lists only what its user shares,
 // Recordings and Toots (#346) together, newest first, each linking to its own shared page, with
 // Add friend and Report. No counts and no feed.
 
@@ -18,7 +18,7 @@ import { REPORT_LIMITS, SITE_REPORTS_KEY, sharePath, tootSongTitle } from './sha
 export type ProfileItem = {
   kind: Kind
   shareId: string
-  /** Its shared page, `/u/<handle>/r/<id>/` or `/u/<handle>/t/<id>/`, which its audio is under. */
+  /** Its shared page, `/@<handle>/r/<id>/` or `/@<handle>/t/<id>/`, which its audio is under. */
   path: string
   /** "Recording 8", or a Toot's title. */
   name: string
@@ -40,7 +40,7 @@ function linkHandle(handle: string): string | null {
   return /^[a-z0-9_]{3,20}$/.test(lower) ? lower : null
 }
 
-/** The user at `/u/<handle>/`, or null when no one has that Handle, or their account is gone. */
+/** The user at `/@<handle>/`, or null when no one has that Handle, or their account is gone. */
 async function profileOwner(db: Database, handle: string) {
   const lower = linkHandle(handle)
   return lower === null ? null : profileUser(db, lower)
@@ -56,7 +56,7 @@ function itemText(row: ProfileShareRow): { name: string; detail: string | null }
   return { name: recordingName(recording), detail: pitch === null ? null : noteName(pitch) }
 }
 
-/** The page at `/u/<handle>/`: the Handle and the Recordings and Toots shared under it that work. */
+/** The page at `/@<handle>/`: the Handle and the Recordings and Toots shared under it that work. */
 export async function findProfile(db: Database, handle: string): Promise<Profile | null> {
   const owner = await profileOwner(db, handle)
   if (!owner) return null
@@ -77,7 +77,7 @@ export async function findProfile(db: Database, handle: string): Promise<Profile
 export const profileReportsKey = (userId: string) => `profile_report|${userId}`
 
 /**
- * `POST /u/<handle>/report/`: anyone's report of a profile page, such as for its Handle. It keeps
+ * `POST /@<handle>/report/`: anyone's report of a profile page, such as for its Handle. It keeps
  * a row in `profile_reports` naming the user, never the reporter, and logs `profile_reported`
  * with the Handle, for Farty to check (docs/agents/web.md). 204 once kept; 403 from another site,
  * 404 when no one has the Handle, 429 `too_many_reports` past `REPORT_LIMITS`: the reporter's

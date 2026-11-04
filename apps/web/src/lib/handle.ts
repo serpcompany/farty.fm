@@ -1,9 +1,37 @@
-// A Handle (ADR 0020): the name in a user's links, `farty.fm/u/<handle>/…`. 3 to 20 lowercase
-// letters, digits or _, picked the first time they share, unique, and never one on the block list.
-// The account step's handle field and the server (`src/server/sharing.ts`) check it the same way.
+// A Handle (ADR 0020): the name in a user's links, `farty.fm/@<handle>/…` (#382). 3 to 20
+// lowercase letters, digits or _, picked the first time they share, unique, and never one on the
+// block list. The account step's handle field and the server (`src/server/sharing.ts`) check it
+// the same way. So a Handle never holds `@` or `/`, and a page's path names one Handle only.
 
 export const HANDLE_MIN = 3
 export const HANDLE_MAX = 20
+
+/** A user's page: `/@<handle>/`. Their shared Recordings and Toots are under it (#382). */
+export function profilePath(handle: string): string {
+  return `/@${handle}/`
+}
+
+/**
+ * The Handle a path's first segment names, `@maya` for `maya`, or null when it doesn't start with
+ * `@`: `/maya/` is no one's page. Whether it has a Handle's shape is checked where it's looked up.
+ */
+export function segmentHandle(segment: string): string | null {
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(segment)
+  } catch {
+    return null
+  }
+  return decoded.startsWith('@') ? decoded.slice(1) : null
+}
+
+/**
+ * Whether `pathname` is a profile page or a shared link's page under one, which have no tabs. Its
+ * `@` may come escaped, as `%40`.
+ */
+export function isHandlePage(pathname: string): boolean {
+  return /^\/(?:@|%40)/i.test(pathname)
+}
 
 /** Why a Handle can't be used. `taken` comes from the server. */
 export type HandleProblem = 'chars' | 'short' | 'long' | 'blocked' | 'taken'

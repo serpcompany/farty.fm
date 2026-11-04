@@ -24,9 +24,9 @@ import {
   wav
 } from '@/test-support/library-api'
 
-import * as reportRoute from './[handle]/report/route'
+import * as reportRoute from './report/route'
 
-// Profile pages (#319, ADR 0021) in workerd, with a real D1 and R2: `/u/<handle>/` lists only the
+// Profile pages (#319, ADR 0021) in workerd, with a real D1 and R2: `/@<handle>/` lists only the
 // Recordings and Toots (#346) its user shares right now, newest first, and its Report keeps a row
 // for Farty.
 
@@ -113,13 +113,21 @@ async function savedToot(
 const names = async (handle: string) =>
   (await findProfile(testDb(), handle))?.items.map(item => item.name) ?? null
 
-/** A report from the profile page, by the reporter at `ip`. */
-const report = (handle: string, origin: string | null = ORIGIN, ip = '203.0.113.1') => {
+/**
+ * A report from the profile page, by the reporter at `ip`. `segment` is the path's first segment,
+ * `@<handle>` as the page's link has it.
+ */
+const report = (
+  handle: string,
+  origin: string | null = ORIGIN,
+  ip = '203.0.113.1',
+  segment = `@${handle}`
+) => {
   const headers = new Headers({ 'cf-connecting-ip': ip })
   if (origin !== null) headers.set('origin', origin)
   return reportRoute.POST(
-    new Request(`${ORIGIN}/u/${handle}/report/`, { method: 'POST', headers }),
-    params({ handle })
+    new Request(`${ORIGIN}/${segment}/report/`, { method: 'POST', headers }),
+    params({ atHandle: segment })
   )
 }
 
@@ -138,7 +146,7 @@ describe('A profile page', () => {
     expect(newest.kind).toBe('recordings')
     expect(newest.detail).toBe('E3')
     expect(newest.shareId).not.toBe(R3)
-    expect(newest.path).toBe(`/u/alice/r/${newest.shareId}/`)
+    expect(newest.path).toBe(`/@alice/r/${newest.shareId}/`)
     expect(newest.sharedAt).toBe(Date.UTC(2026, 10, 1, 9, 2))
   })
 
@@ -191,7 +199,7 @@ describe('A profile page', () => {
     expect(items[4].shareId > items[5].shareId).toBe(true)
     for (const item of items) {
       const segment = item.kind === 'toots' ? 't' : 'r'
-      expect(item.path).toBe(`/u/alice/${segment}/${item.shareId}/`)
+      expect(item.path).toBe(`/@alice/${segment}/${item.shareId}/`)
       // A Toot's row has a Recording's fields and no more: never its Arrangement or Performance.
       expect(Object.keys(item).sort()).toEqual(ITEM_KEYS)
     }
@@ -347,6 +355,9 @@ describe('Reporting a profile page', () => {
     expect((await report('alice', 'https://evil.example')).status).toBe(403)
     expect((await report('alice', null)).status).toBe(403)
     expect((await report('bob')).status).toBe(404)
+    // A path with no `@` is no one's page (#382).
+    expect((await report('alice', ORIGIN, '203.0.113.1', 'alice')).status).toBe(404)
+    expect((await report('alice', ORIGIN, '203.0.113.1', 'u')).status).toBe(404)
     expect(await testDb().select().from(profileReports)).toEqual([])
   })
 

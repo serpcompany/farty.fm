@@ -374,7 +374,7 @@ it("reports a Song Catalog that didn't load, and loads it once the browser is ba
 })
 
 it("doesn't fetch the Song Catalog on a shared Recording's public page", async () => {
-  page.pathname = '/u/maya/r/8k2fq3m9x1ab/'
+  page.pathname = '/@maya/r/8k2fq3m9x1ab/'
   const pedos = await mount()
   expect(page.loadSongs).not.toHaveBeenCalled()
   expect(pedos().songs).toBeNull()
