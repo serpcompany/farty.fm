@@ -62,8 +62,9 @@
 /* The Result's reward when a save unlocks Songs (#363, design B, "Locks open"): each element rests
    on its last frame, so with reduced motion (the `motion-safe:` variant) nothing moves and the same
    things show. Only opacity, transform and a row's background move, so nothing shifts the layout.
-   A row's animations start `--d` after it shows. */
-@theme {
+   A row's animations start `--d` after it shows: `inline`, so each utility holds its value and
+   reads the row's own `--d`, which `:root`, where a theme variable is set, doesn't have. */
+@theme inline {
   --animate-unlock-badge: unlock-pop 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-unlock-badge-spark: unlock-spark 520ms cubic-bezier(0.1, 0.7, 0.3, 1) 120ms;
   --animate-unlock-label: unlock-fade 200ms ease-out 60ms both;
