@@ -66,7 +66,7 @@ export interface PedosDB extends DBSchema {
   /**
    * Each changed Song's Fart Choices (#360), by Song id: the farts the user swapped in or left
    * out (`fart-choice-store.ts`). A Song with none here is automatic. Synced with the account; a
-   * guest's last the visit, as their Toots do. Since version 9.
+   * guest's last only the visit, as their Toots do. Since version 9.
    */
   fartChoices: { key: string; value: FartChoices }
 }
