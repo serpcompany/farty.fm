@@ -58,7 +58,7 @@ export function FartSheetView({
           ) : group === 'leftOut' ? (
             <Button
               variant="outline"
-              size="sm"
+              className="h-11 px-3"
               onClick={() => onChange({ kind: 'useAgain', id: fart.id })}
             >
               Use again
@@ -66,7 +66,7 @@ export function FartSheetView({
           ) : (
             <Button
               variant="outline"
-              size="sm"
+              className="h-11 px-3"
               onClick={() => onChange({ kind: 'swap', songPitch: shown.songPitch, id: fart.id })}
             >
               Swap

@@ -793,7 +793,7 @@ export function TootLayout(
               {changes && (
                 <Button
                   variant="outline"
-                  size="sm"
+                  className="h-11 shrink-0 px-4 text-base"
                   onClick={() => changes.onChangeFart(melody.notes[selectedNote].pitch)}
                 >
                   Change fart
@@ -1038,21 +1038,24 @@ function PlaysBadge({ plays, onChangeFart }: { plays: string; onChangeFart?: () 
       </span>
     )
   }
+  // A thumb's 44 points around the pill.
   return (
     <button
       type="button"
       aria-label={`Change the fart for ${plays}`}
-      className={cn(
-        pill,
-        'flex h-9 items-center gap-0.5 bg-background pr-2 outline-none ring-1 ring-border focus-visible:ring-3 focus-visible:ring-ring/50'
-      )}
+      className="-my-1 flex h-11 shrink-0 items-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       onClick={onChangeFart}
     >
-      plays {plays}
-      <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
+      <span
+        className={cn(pill, 'flex h-9 items-center gap-0.5 bg-background pr-2 ring-1 ring-border')}
+      >
+        plays {plays}
+        <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
+      </span>
     </button>
   )
 }
+
 /**
  * 16 loudness bars of what the Recording plays, as the iPhone's Song Creator rows show it: the
  * whole take, or its Trim (ADR 0019).
