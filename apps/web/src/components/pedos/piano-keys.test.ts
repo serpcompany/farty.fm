@@ -4,7 +4,7 @@ import { ANALYSIS_SAMPLE_RATE } from '@/lib/analysis/resample'
 import { noteName } from '@/lib/pitch'
 import { HIGHEST_PLACED_PITCH, LOWEST_PLACED_PITCH } from '@/lib/recordings'
 import { analysisAudio, goldenRecordings } from '@/test-support/golden'
-import { octaveOf, pianoNote } from './piano-keys'
+import { octaveOf, pianoBuffer, pianoNote, strikePianoNote } from './piano-keys'
 
 // The review's piano note, rendered offline and heard as a phone's speaker plays it (#362): a
 // fourth-order Butterworth high-pass at 300 Hz, below which an iPhone's speaker plays hardly
@@ -92,4 +92,16 @@ test('every key reads as its own note through a phone speaker', () => {
     expect(estimateMidi, noteName(midi)).not.toBeNull()
     expect(Math.abs((estimateMidi as number) - midi), noteName(midi)).toBeLessThan(PITCH_SEMITONES)
   }
+})
+
+test('the piano takes only the live AudioContext, so no offline render can strike it', () => {
+  // Checked by the type check (`pnpm typecheck`): if an OfflineAudioContext typed here, the
+  // expect-errors below would fail it. The piano goes straight to the speakers (ADR 0015 rule 3).
+  const intoARender = (offline: OfflineAudioContext) => {
+    // @ts-expect-error An OfflineAudioContext is not the live AudioContext.
+    strikePianoNote(offline, offline.destination, 60, 0)
+    // @ts-expect-error An OfflineAudioContext is not the live AudioContext.
+    pianoBuffer(offline, 60)
+  }
+  expect(intoARender).toBeTypeOf('function')
 })

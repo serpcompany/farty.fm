@@ -3,16 +3,21 @@
 import { useEffect, useState } from 'react'
 import type { SongOrder } from '@/lib/pitch-coverage'
 
-/** Compose's sort menu, in its order. */
+/**
+ * Compose's sort menu, in its order (#356). An order this browser kept that isn't here, such as
+ * the old Favorites first, reads as the first.
+ */
 export const songOrders: { value: SongOrder; label: string }[] = [
   { value: 'closestToUnlocking', label: 'Closest to unlocking' },
-  { value: 'alphabetical', label: 'A–Z' },
-  { value: 'favoritesFirst', label: 'Favorites first' }
+  { value: 'mostPopular', label: 'Most popular' },
+  { value: 'fewestNotes', label: 'Fewest notes' },
+  { value: 'alphabetical', label: 'A–Z' }
 ]
 
-// The order and the Favorites filter this browser chose last (#313).
+// The order and the filters this browser chose last (#313, #356).
 const orderKey = 'pedos.composeOrder'
 const onlyFavoritesKey = 'pedos.composeFavorites'
+const onlyReadyKey = 'pedos.composeReady'
 
 function readChoice(key: string): string | null {
   try {
@@ -35,12 +40,15 @@ export type ComposeChoices = {
   chooseOrder: (order: SongOrder) => void
   onlyFavorites: boolean
   chooseOnlyFavorites: (only: boolean) => void
+  onlyReady: boolean
+  chooseOnlyReady: (only: boolean) => void
 }
 
-/** Compose's sort and Favorites filter, as this browser chose them last (#313). */
+/** Compose's sort and its Ready and Favorites filters, as this browser chose them last. */
 export function useComposeChoices(): ComposeChoices {
   const [order, setOrder] = useState<SongOrder>('closestToUnlocking')
   const [onlyFavorites, setOnlyFavorites] = useState(false)
+  const [onlyReady, setOnlyReady] = useState(false)
 
   // Read after the first render, which the server rendered without them.
   useEffect(() => {
@@ -48,6 +56,7 @@ export function useComposeChoices(): ComposeChoices {
     const known = songOrders.find(o => o.value === kept)
     if (known) setOrder(known.value)
     setOnlyFavorites(readChoice(onlyFavoritesKey) === 'true')
+    setOnlyReady(readChoice(onlyReadyKey) === 'true')
   }, [])
 
   return {
@@ -60,6 +69,11 @@ export function useComposeChoices(): ComposeChoices {
     chooseOnlyFavorites: only => {
       setOnlyFavorites(only)
       keepChoice(onlyFavoritesKey, String(only))
+    },
+    onlyReady,
+    chooseOnlyReady: only => {
+      setOnlyReady(only)
+      keepChoice(onlyReadyKey, String(only))
     }
   }
 }

@@ -231,4 +231,39 @@ describe('the generator', () => {
   test('refuses a source it has no line for', () => {
     expect(() => renderCatalog(sources, ['ode-mutopia'])).toThrow(/no line for/)
   })
+
+  const twinkle = sources.catalog.find(e => e.id === 'twinkle') as CatalogEntry
+  const withSource = (source: Record<string, string>) => ({
+    ...sources,
+    catalog: [{ ...twinkle, source }]
+  })
+
+  // #356 shows a Song's composer under its title and searches by it. #357's lookup is its only
+  // source: the name a PDMX score gives (`source.composer`) is often a lyricist, a page or "NA".
+  test('shows #357’s composer, never the one the score names', () => {
+    const entries = new Map(sources.catalog.map(e => [e.id, e]))
+    const scoreOnly = songs.filter(s => {
+      const entry = entries.get(s.id) as CatalogEntry
+      return entry.composer === undefined && (entry.source.composer ?? '').trim() !== ''
+    })
+    expect(scoreOnly.length).toBeGreaterThan(0)
+    expect(scoreOnly.filter(s => 'composer' in s)).toEqual([])
+    // Its score says "Composed by Eward Elgar Arranged by Alien".
+    expect(songs.find(s => s.id === 'salut-damour')?.composer).toBe('Edward Elgar')
+  })
+
+  test('carries each score’s MuseScore views and rating, and the melody’s length', () => {
+    const [star, mary] = catalogSongs(sources, ['twinkle', 'mary'])
+    expect(star).toMatchObject({ views: 4171, rating: 4.59, lengthBeats: 32 })
+    // Mary's score has no ratings, so no rating.
+    expect(mary).toMatchObject({ views: 51, lengthBeats: 16 })
+    expect('rating' in mary).toBe(false)
+    expect(songs.filter(s => s.lengthBeats !== s.length_beats)).toEqual([])
+  })
+
+  test('refuses a Song whose score has no MuseScore views', () => {
+    const { n_views, ...source } = twinkle.source
+    expect(n_views).toBe('4171')
+    expect(() => catalogSongs(withSource(source), ['twinkle'])).toThrow(/n_views/)
+  })
 })

@@ -18,6 +18,12 @@ export type SongSummary = {
   aliases?: readonly string[]
   /** The source and license line, for example "Public domain score · PDMX". */
   source: string
+  /** How many times the score was viewed on MuseScore (PDMX's `n_views`): Most popular's order. */
+  views: number
+  /** The score's MuseScore rating out of 5, when it has one: it breaks Most popular's ties. */
+  rating?: number
+  /** How long the melody is, in beats: `SongNotes.length_beats`, for the Song's length. */
+  lengthBeats: number
   /** Tempo in beats per minute. */
   bpm: number
   /** The Song's distinct pitches as MIDI note numbers in the score's key, lowest first. */
