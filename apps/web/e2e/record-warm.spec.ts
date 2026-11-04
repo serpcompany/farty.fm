@@ -14,8 +14,14 @@ import { skipWelcome } from './record'
 import { onPhone } from './screens'
 
 // The microphone stays open from the first time Record shows to the end of the launch (#206), so a
-// tap captures at once and a take keeps the 300 ms before it (#148, #149). The fake microphone is
-// in `fake-microphone.ts`.
+// tap captures at once and a take keeps the 300 ms before it (#148, #149). A grant the browser
+// remembers is let go off Record instead, so sounds play in "playback", and opens again as Record
+// shows (#369). The fake microphone is in `fake-microphone.ts`.
+
+/** The session types the app set, with each repeat of the one before left out. */
+function sessionChanges(sessions: string[]): string[] {
+  return sessions.filter((type, i) => type !== sessions[i - 1])
+}
 
 /** The time from each Record click to the first capture batch after it, in ms. */
 function clickToFirstBatch(clicks: number[], batches: number[]): number[] {
@@ -78,6 +84,7 @@ const hiddenListeningMs = 1500
 /** Longer than a shown page waits for its muted microphone to unmute (`recorder.ts`). */
 const unmuteWaitMs = 2000
 
+// The browser remembers this grant, as Safari does with its Microphone setting at Allow.
 test.describe('with microphone permission granted', () => {
   test.use({ permissions: ['microphone'] })
   // Audio timing doesn't depend on the screen size; phone size is how people record.
@@ -88,7 +95,7 @@ test.describe('with microphone permission granted', () => {
     await page.addInitScript(skipWelcome)
   })
 
-  test('a tap captures at once, keeps the fart from before it, and the mic opens once per launch', async ({
+  test('a tap captures at once, keeps the fart from before it, and the mic opens each time Record shows', async ({
     page
   }) => {
     await page.goto('/')
@@ -102,29 +109,37 @@ test.describe('with microphone permission granted', () => {
     await expect(page.getByTestId('record-status')).toHaveText("Didn't catch that. Try again.")
     expect((await microphone(page)).live).toBe(1)
 
-    // Take 2: a fart that starts as the person presses Record. Review keeps the microphone open,
-    // and plays the take in its session: switching to playback would mute it on iPhone.
+    // Take 2: a fart that starts as the person presses Record. Review covers Record, so the
+    // microphone is let go and the take plays in "playback", louder on iPhone (#369).
     await fartAndRecord(page)
     await page.getByTestId('review-play').click()
     await expect(page.getByRole('button', { name: 'Stop' })).toBeVisible()
     const onReview = await microphone(page)
-    expect(onReview.live).toBe(1)
-    expect(onReview.sessions).toEqual(['play-and-record'])
+    expect(onReview.live).toBe(0)
+    expect(onReview.nodes - onReview.closed).toBe(0)
+    expect(sessionChanges(onReview.sessions)).toEqual(['play-and-record', 'playback'])
     await page.getByRole('button', { name: 'Discard' }).click()
 
-    // Back on Record, the same microphone takes the next one. 0.3 dB up, 090 peaks above the
-    // level `atFullLevel` turns a take up to (#279), so the take is saved at the fart's own level.
+    // Back on Record, it opens again without a tap, and takes the next one. 0.3 dB up, 090 peaks
+    // above the level `atFullLevel` turns a take up to (#279), so the take is saved at the fart's
+    // own level.
+    await waitForOpenMicrophone(page)
     await fartAndRecord(page, '090', { gainDb: 0.3 })
     await page.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByTestId('result-note')).toHaveText('G3')
 
     const mic = await microphone(page)
-    expect(mic.calls).toBe(1)
-    expect(mic.live).toBe(1)
-    // One capture processor for the launch, still running.
-    expect(mic.nodes).toBe(1)
-    expect(mic.closed).toBe(0)
-    expect(mic.sessions).toEqual(['play-and-record'])
+    // Opened as Record first showed and again after Discard, and let go under each Review.
+    expect(mic.calls).toBe(2)
+    expect(mic.live).toBe(0)
+    expect(mic.nodes).toBe(2)
+    expect(mic.closed).toBe(2)
+    expect(sessionChanges(mic.sessions)).toEqual([
+      'play-and-record',
+      'playback',
+      'play-and-record',
+      'playback'
+    ])
     const timings = clickToFirstBatch(mic.clicks, mic.batches)
     console.log(`click → first capture batch (ms): ${timings.map(t => t.toFixed(1)).join(', ')}`)
     expect(timings).toHaveLength(3)
@@ -146,8 +161,8 @@ test.describe('with microphone permission granted', () => {
   })
 
   // Chromium keeps a hidden page's microphone listening, where iPhone Safari mutes it. The browser
-  // remembers the grant here, so the page shown again opens it at once.
-  test('a browser that would listen while the page is hidden closes the microphone, and stays open on the other tabs', async ({
+  // remembers the grant here, so the page shown again on Record opens it at once.
+  test('a browser that would listen while the page is hidden closes the microphone, and the other tabs let it go', async ({
     page
   }) => {
     await page.goto('/')
@@ -164,17 +179,16 @@ test.describe('with microphone permission granted', () => {
       .getByRole('link', { name: 'Toots' })
       .click()
     await expect(page).toHaveURL(/\/toots\/$/)
-    // Longer than it takes the page to let the microphone go, had it tried.
-    await page.waitForTimeout(500)
-    const left = await microphone(page)
-    expect(left.live).toBe(1)
-    expect(left.calls).toBe(2)
-    expect(left.nodes - left.closed).toBe(1)
-    expect(left.sessions.at(-1)).toBe('play-and-record')
-    // Hidden and shown again on Toots, it opens again there.
-    await setVisibility(page, 'hidden')
+    // Off Record, the microphone is let go, so sounds play in "playback" (#369).
     await expect.poll(async () => (await microphone(page)).live).toBe(0)
+    const left = await microphone(page)
+    expect(left.calls).toBe(2)
+    expect(left.nodes - left.closed).toBe(0)
+    expect(left.sessions.at(-1)).toBe('playback')
+    // Hidden and shown again, Farty comes back on Record (`app-shell.tsx`), which opens it again.
+    await setVisibility(page, 'hidden')
     await setVisibility(page, 'visible')
+    await expect(page.getByTestId('record-button')).toBeVisible()
     await waitForOpenMicrophone(page)
     const back = await microphone(page)
     expect(back.calls).toBe(3)
@@ -195,38 +209,49 @@ test.describe('with microphone permission granted', () => {
     expect((await microphone(page)).calls).toBe(1)
   })
 
-  test('the microphone stays open from Result to every screen after it', async ({ page }) => {
+  test('the microphone is let go from Result to every screen after it, and opens again on Record', async ({
+    page
+  }) => {
     test.setTimeout(120_000)
     const tabs = page.getByRole('navigation', { name: 'Tabs' })
+    let opens = 1
     const recordAndSave = async (id: string) => {
       await fartAndRecord(page, id)
       await page.getByRole('button', { name: 'Save' }).click()
       await expect(page.getByTestId('result-note')).toBeVisible()
     }
-    /** The microphone opened once and is still open, in its session. */
-    const stillOpen = async () => {
-      // Longer than it takes the page to let the microphone go or open it again, had it tried.
-      await page.waitForTimeout(500)
+    /** The microphone is shut, and sounds play in "playback" (#369). */
+    const letGo = async () => {
+      await expect.poll(async () => (await microphone(page)).live).toBe(0)
       const mic = await microphone(page)
-      expect(mic.calls).toBe(1)
-      expect(mic.live).toBe(1)
-      expect(mic.nodes - mic.closed).toBe(1)
-      expect(mic.sessions).toEqual(['play-and-record'])
+      expect(mic.calls).toBe(opens)
+      expect(mic.nodes - mic.closed).toBe(0)
+      expect(mic.sessions.at(-1)).toBe('playback')
+    }
+    /** Record shows again, and opens the microphone without a tap. */
+    const openAgain = async () => {
+      await expect(page.getByTestId('record-button')).toBeEnabled()
+      await waitForOpenMicrophone(page)
+      opens += 1
+      const mic = await microphone(page)
+      expect(mic.calls).toBe(opens)
+      expect(mic.sessions.at(-1)).toBe('play-and-record')
     }
 
     await page.goto('/')
     await waitForOpenMicrophone(page)
 
     await recordAndSave('095')
+    await letGo()
     await page.getByRole('button', { name: 'Record another', exact: true }).click()
-    await expect(page.getByTestId('record-button')).toBeEnabled()
-    await stillOpen()
+    await openAgain()
 
     await recordAndSave('017')
     await page.getByRole('button', { name: 'Done', exact: true }).click()
     await expect(page).toHaveURL(/\/recordings\/$/)
-    await stillOpen()
+    await letGo()
     await tabs.getByRole('link', { name: 'Record', exact: true }).click()
+    await openAgain()
 
     // 022 unlocks Hot Cross Buns (#229), so Result offers Done, not Record another.
     await recordAndSave('022')
@@ -234,10 +259,10 @@ test.describe('with microphone permission granted', () => {
     await page.getByRole('button', { name: 'Done', exact: true }).click()
     await expect(page).toHaveURL(/\/recordings\/$/)
     await tabs.getByRole('link', { name: 'Record', exact: true }).click()
+    await openAgain()
 
-    // Try it: on to Song Creator, which plays the Toot in the microphone's session. 002 unlocks
-    // Mary and more Songs, as many as the catalog has (`golden.ts`), and Try it opens the first,
-    // Mary.
+    // Try it: on to Song Creator, which plays the Toot in "playback". 002 unlocks Mary and more
+    // Songs, as many as the catalog has (`golden.ts`), and Try it opens the first, Mary.
     const takes = (ids: string[]) => songsUnlockedBy(fixtureRecordings(ids)).length
     const fourth = takes(['095', '017', '022', '002']) - takes(['095', '017', '022'])
     await recordAndSave('002')
@@ -246,7 +271,7 @@ test.describe('with microphone permission granted', () => {
     await expect(page).toHaveURL(/\/compose\/mary\/$/)
     // The Toot is playing, so its sound has chosen its session.
     await expect(page.getByTestId('song-creator-play')).toHaveAccessibleName('Stop')
-    await stillOpen()
+    await letGo()
   })
 
   test('after an interruption mutes the microphone, the next tap opens it afresh', async ({
@@ -286,7 +311,8 @@ test.describe('with microphone permission granted', () => {
     await expect(page.getByTestId('result-note')).toHaveText('G3')
     const mic = await microphone(page)
     expect(mic.calls).toBe(1)
-    expect(mic.closed).toBe(0)
+    // Its processor closed only as Review covered Record (#369).
+    expect(mic.closed).toBe(1)
     const [ms] = clickToFirstBatch(mic.clicks, mic.batches)
     expect(ms).toBeLessThan(100)
   })
@@ -385,6 +411,36 @@ test.describe("with the page's own microphone grant, as on iPhone", () => {
     await waitForOpenMicrophone(page)
     expect((await microphone(page)).calls).toBe(1)
   }
+
+  // Letting this grant go off Record would make iPhone ask again (#222), so it stays open, unlike
+  // a grant the browser remembers (#369).
+  test('the microphone stays open from Result to the other tabs: no new getUserMedia', async ({
+    page
+  }) => {
+    const stillOpen = async () => {
+      // Longer than it takes the page to let the microphone go, had it tried.
+      await page.waitForTimeout(500)
+      const mic = await microphone(page)
+      expect(mic.calls).toBe(1)
+      expect(mic.live).toBe(1)
+      expect(mic.nodes - mic.closed).toBe(1)
+      expect(mic.sessions.at(-1)).toBe('play-and-record')
+    }
+    await page.goto('/')
+    await firstTap(page)
+    await fartAndRecord(page, '095')
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByTestId('result-note')).toBeVisible()
+    await stillOpen()
+    await page.getByRole('button', { name: 'Record another', exact: true }).click()
+    await expect(page.getByTestId('record-button')).toBeEnabled()
+    await page
+      .getByRole('navigation', { name: 'Tabs' })
+      .getByRole('link', { name: 'Toots' })
+      .click()
+    await expect(page).toHaveURL(/\/toots\/$/)
+    await stillOpen()
+  })
 
   test('hidden and shown again, the page keeps its microphone: no new getUserMedia', async ({
     page
