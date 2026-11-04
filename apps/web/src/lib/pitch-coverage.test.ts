@@ -22,6 +22,7 @@ import {
   fartSeconds,
   formattedFartLength,
   missingNotes,
+  orderUnlocked,
   type SongFilters,
   type SongOrder,
   type SongRow,
@@ -350,7 +351,7 @@ describe('Placed Recordings (ADR 0015)', () => {
   it('shows no unlock for a Noise-like save until it is placed', () => {
     expect(coverageChanges(songs, small, with065).unlocked).toEqual([])
     const placed = coverageChanges(iPhone, small, place(with065, '065', C2))
-    expect(placed.unlocked.map(s => s.id)).toEqual([
+    expect(placed.unlocked.map(u => u.song.id)).toEqual([
       'jingle',
       'row',
       'ode',
@@ -707,7 +708,7 @@ describe('Compose’s listing', () => {
 describe('what a save changed', () => {
   it('lists the unlocks, then the improvements closest first', () => {
     const changes = coverageChanges(iPhone, takes(8), takes(9))
-    expect(changes.unlocked.map(s => s.id)).toEqual([
+    expect(changes.unlocked.map(u => u.song.id)).toEqual([
       'mary',
       'jingle',
       'saints',
@@ -715,6 +716,12 @@ describe('what a save changed', () => {
       'ode',
       'merryxmas'
     ])
+    // Each with the Pitch Coverage it had before, which the Result's reward starts from (#363).
+    for (const { song: unlocked, before } of changes.unlocked) {
+      const was = coverageOf(unlocked, takes(8))
+      expect([before.covered, before.total], unlocked.id).toEqual([was.covered, was.total])
+      expect([was.unlocked, before.unlocked], unlocked.id).toEqual([false, false])
+    }
     expect(changes.improved.every(r => !r.coverage.unlocked)).toBe(true)
     const fractions = changes.improved.map(r => coverageFraction(r.coverage))
     expect(fractions).toEqual([...fractions].sort((a, b) => b - a))
@@ -735,6 +742,59 @@ describe('what a save changed', () => {
   it('has no Song closest to unlocking once every Song is unlocked', () => {
     expect(coverageChanges(iPhone, without002, without002).closest?.song.id).toBe('amazing')
     expect(coverageChanges(iPhone, all, all).closest).toBeNull()
+  })
+})
+
+describe('the order of the Songs a save unlocked (#363)', () => {
+  /** An unlock of a Song like Mary's, with its own id, views and rating. */
+  const unlock = (id: string, views: number, rating?: number) => ({
+    song: { ...song('mary'), id, views, ...(rating === undefined ? {} : { rating }) }
+  })
+  const ids = (unlocked: { song: SongSummary }[]) => unlocked.map(u => u.song.id)
+
+  it('puts Favorites first, then the most viewed, then the best rated, then catalog order', () => {
+    const unlocked = [
+      unlock('few', 5),
+      unlock('rated', 900, 4.1),
+      unlock('best', 900, 4.8),
+      unlock('unrated', 900),
+      unlock('unrated-later', 900),
+      unlock('favorite', 0),
+      unlock('favorite-later', 0)
+    ]
+    expect(ids(orderUnlocked(unlocked, new Set(['favorite', 'favorite-later'])))).toEqual([
+      'favorite',
+      'favorite-later',
+      'best',
+      'rated',
+      'unrated',
+      'unrated-later',
+      'few'
+    ])
+    // A Favorite with no views still comes before the most viewed Song.
+    expect(ids(orderUnlocked(unlocked, new Set(['few'])))[0]).toBe('few')
+  })
+
+  it("orders a real save's unlocks, and leaves the list it's given alone", () => {
+    const { unlocked } = coverageChanges(iPhone, takes(8), takes(9))
+    const catalogOrder = ids(unlocked)
+    expect(ids(orderUnlocked(unlocked, new Set()))).toEqual([
+      'ode',
+      'row',
+      'saints',
+      'jingle',
+      'merryxmas',
+      'mary'
+    ])
+    expect(ids(orderUnlocked(unlocked, new Set(['mary', 'not-unlocked'])))).toEqual([
+      'mary',
+      'ode',
+      'row',
+      'saints',
+      'jingle',
+      'merryxmas'
+    ])
+    expect(ids(unlocked)).toEqual(catalogOrder)
   })
 })
 

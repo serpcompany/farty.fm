@@ -1,7 +1,7 @@
 'use client'
 
 import { Dialog } from '@base-ui/react/dialog'
-import { AudioWaveform, CircleAlert, CircleHelp, LockOpen } from 'lucide-react'
+import { AudioWaveform, CircleAlert, CircleHelp } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useState, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/
 import { Progress as CoverageBar } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
 import { startAudioInTap } from '@/lib/audio/context'
+import type { SongSummary } from '@/lib/catalog/song'
 import { noteName, pitchClass } from '@/lib/pitch'
 import {
   type CoverageChanges,
@@ -24,6 +25,7 @@ import { PitchStrip } from './pitch-strip'
 import { useTake } from './recording-replay'
 import { ShareRecordingButton } from './share-recording'
 import { TakeReview, useTakeReview } from './take-review'
+import { UnlockReward } from './unlock-reward'
 import { LiveWaveform } from './waveform'
 
 /**
@@ -539,9 +541,13 @@ function Result({
             Couldn't save the trim, so it's kept whole. Trim it again from the Recordings tab.
           </p>
         )}
-        <Progress changes={changes} hasMelodicRecordings={pedos.melodicRecordings.length > 0} />
+        <Progress
+          changes={changes}
+          hasMelodicRecordings={pedos.melodicRecordings.length > 0}
+          onOpen={song => go(`/compose/${song.id}/`)}
+        />
       </div>
-      {/* After an unlock, Try it opens the first Song unlocked in Song Creator. */}
+      {/* After an unlock, Try it opens the reward's first Song in Song Creator. */}
       {changes.unlocked.length > 0 ? (
         <FlowButtons
           secondary={
@@ -555,7 +561,7 @@ function Result({
               onClick={() => {
                 // Song Creator plays the Toot once it's made: the tap starts the sound it needs.
                 startAudioInTap()
-                go(`/compose/${changes.unlocked[0].id}/`)
+                go(`/compose/${changes.unlocked[0].song.id}/`)
               }}
             >
               Try it
@@ -580,13 +586,18 @@ function Result({
   )
 }
 
-/** Unlocks, then Pitch Coverage that went up, or else the Song closest to unlocking. */
+/**
+ * The Songs a save unlocked, as a reward (#363), then Pitch Coverage that went up, or else the Song
+ * closest to unlocking. A row opens its Song in Song Creator, as Try it does.
+ */
 function Progress({
   changes,
-  hasMelodicRecordings
+  hasMelodicRecordings,
+  onOpen
 }: {
   changes: CoverageChanges
   hasMelodicRecordings: boolean
+  onOpen: (song: SongSummary) => void
 }) {
   const { unlocked, improved, closest } = changes
   const showsClosest =
@@ -594,52 +605,42 @@ function Progress({
   if (unlocked.length === 0 && improved.length === 0 && !showsClosest) return null
   return (
     <div className="flex w-full flex-col gap-3 text-left" data-testid="result-progress">
-      {unlocked.length > 2 ? (
-        <Box>
-          <Unlocked>You unlocked {unlocked.length} Songs</Unlocked>
-          <p className="pt-1 text-muted-foreground">{unlocked.map(s => s.title).join(' · ')}</p>
-        </Box>
-      ) : (
-        unlocked.map(song => (
-          <Box key={song.id}>
-            <Unlocked>You unlocked {song.title}</Unlocked>
-          </Box>
-        ))
-      )}
+      {unlocked.length > 0 && <UnlockReward unlocked={unlocked} onOpen={onOpen} />}
+      {improved.length > 0 && <CoverageLabel>Closer to unlocking</CoverageLabel>}
       {improved.slice(0, 2).map(row => (
         <CoverageCard key={row.song.id} row={row} />
       ))}
-      {showsClosest && closest && <CoverageCard row={closest} />}
+      {showsClosest && closest && (
+        <>
+          <CoverageLabel>Closest to unlocking</CoverageLabel>
+          <CoverageCard row={closest} />
+        </>
+      )}
     </div>
   )
 }
 
-function Box({ children }: { children: ReactNode }) {
-  return (
-    <div className="rounded-xl bg-muted/60 p-4" data-testid="result-card">
-      {children}
-    </div>
-  )
+function CoverageLabel({ children }: { children: ReactNode }) {
+  return <p className="px-1 pt-1 text-sm text-muted-foreground">{children}</p>
 }
 
-function Unlocked({ children }: { children: ReactNode }) {
-  return (
-    <p className="flex items-center gap-2 font-semibold">
-      <LockOpen className="size-4 shrink-0" aria-hidden />
-      <span>{children}</span>
-    </p>
-  )
-}
-
-/** A Song's Pitch Coverage: its title, a bar, and "3 of 4 notes covered". */
+/**
+ * A Song's Pitch Coverage, styled as the reward's list: its title, its composer when known, a bar,
+ * and "3 of 4 notes covered".
+ */
 function CoverageCard({ row }: { row: SongRow }) {
+  const { song, coverage } = row
   return (
-    <Box>
-      <div className="flex flex-col gap-1.5">
-        <p className="font-semibold">{row.song.title}</p>
-        <CoverageBar value={coverageFraction(row.coverage) * 100} aria-hidden />
-        <p className="text-sm text-muted-foreground">{coverageSummary(row.coverage)}</p>
-      </div>
-    </Box>
+    <div
+      className="flex flex-col rounded-xl bg-muted/60 px-4 pt-3 pb-3.5"
+      data-testid="result-card"
+    >
+      <p className="truncate">{song.title}</p>
+      {song.composer !== undefined && (
+        <p className="truncate text-sm text-muted-foreground">{song.composer}</p>
+      )}
+      <CoverageBar className="mt-2 mb-1.5" value={coverageFraction(coverage) * 100} aria-hidden />
+      <p className="text-sm text-muted-foreground tabular-nums">{coverageSummary(coverage)}</p>
+    </div>
   )
 }

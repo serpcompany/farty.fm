@@ -299,12 +299,18 @@ export function songListing(
 }
 
 /**
+ * A Song that just became an Unlocked Song, with its Pitch Coverage from before the save: the
+ * locked row the Result's reward opens (#363).
+ */
+export type Unlock = { song: SongSummary; before: CoverageCount }
+
+/**
  * How the Song Catalog's Pitch Coverage changed when a Recording was added: what the Result screen
- * shows. As the iPhone app's `CoverageChanges`.
+ * shows. As the iPhone app's `CoverageChanges`, with each unlock's coverage from before.
  */
 export type CoverageChanges = {
-  /** Songs that just became Unlocked Songs, in catalog order. */
-  unlocked: SongSummary[]
+  /** Songs that just became Unlocked Songs, in catalog order (`orderUnlocked` orders them). */
+  unlocked: Unlock[]
   /** Songs still locked that gained a covered pitch, closest to unlocking first. */
   improved: SongRow[]
   /** The locked Song closest to unlocking, if any Song is still locked. */
@@ -323,12 +329,33 @@ export function coverageChanges(
     coverageFraction(b.coverage) - coverageFraction(a.coverage)
   const locked = now.filter(r => !r.coverage.unlocked)
   return {
-    unlocked: now
-      .filter((r, i) => r.coverage.unlocked && !old[i].coverage.unlocked)
-      .map(r => r.song),
+    unlocked: now.flatMap((r, i) =>
+      r.coverage.unlocked && !old[i].coverage.unlocked
+        ? [{ song: r.song, before: old[i].coverage }]
+        : []
+    ),
     improved: now
       .filter((r, i) => !r.coverage.unlocked && r.coverage.covered > old[i].coverage.covered)
       .sort(closestFirst),
     closest: locked.sort(closestFirst)[0] ?? null
   }
+}
+
+/**
+ * The Songs a save unlocked, best first, as the Result shows them and Try it opens the first (#363):
+ * the Favorite Songs, then the scores viewed most on MuseScore, then the best rated, then `unlocked`'s
+ * own order, which `coverageChanges` gives in catalog order.
+ */
+export function orderUnlocked<T extends { song: SongSummary }>(
+  unlocked: readonly T[],
+  favorites: ReadonlySet<string>
+): T[] {
+  const favorite = (u: T) => (favorites.has(u.song.id) ? 1 : 0)
+  // Array sort is stable, so ties keep the order given.
+  return [...unlocked].sort(
+    (a, b) =>
+      favorite(b) - favorite(a) ||
+      b.song.views - a.song.views ||
+      (b.song.rating ?? 0) - (a.song.rating ?? 0)
+  )
 }

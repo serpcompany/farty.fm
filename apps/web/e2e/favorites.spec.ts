@@ -7,18 +7,22 @@ import {
   getUserMediaMs,
   waitForOpenMicrophone
 } from './fake-microphone'
-import { fixtureRecordings, songsUnlockedBy } from './golden'
+import { fixtureRecordings, songsTheLastTakeUnlocks, songsUnlockedBy } from './golden'
 import { skipWelcome } from './record'
 import { onPhone } from './screens'
+import { expectUnlockReward } from './unlock-reward'
 
 // Favorite Songs (#313) on Compose, signed in so they're kept with the account: a heart on an
-// Unlocked Song's row and on a locked Song's sheet, the Favorites filter with search inside it
-// and with the Ready filter (#356), the filters and the order kept over a reload, and the heart in
-// Song Creator.
+// Unlocked Song's row and on a locked Song's sheet, a Favorite first in the Result's reward
+// (#363), the Favorites filter with search inside it and with the Ready filter (#356), the
+// filters and the order kept over a reload, and the heart in Song Creator.
 //
 // Mary Had a Little Lamb unlocks with fixtures 095, 017, 022 and 002, with more Songs, and Hot
 // Cross Buns at the third (`compose.spec.ts`), so the count follows the catalog (`golden.ts`).
-const unlocked = songsUnlockedBy(fixtureRecordings(['095', '017', '022', '002'])).length
+const journey = ['095', '017', '022', '002']
+const unlocked = songsUnlockedBy(fixtureRecordings(journey)).length
+/** The Song the reward lists last after 002 when nothing is a Favorite. */
+const leastViewed = songsTheLastTakeUnlocks(journey).at(-1)
 
 test.use({ permissions: ['microphone'] })
 
@@ -59,8 +63,9 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
 
   // Four takes unlock Mary and more Songs; the third unlocks Hot Cross Buns, and a Result
   // that unlocks offers Done, not Record another (`compose.spec.ts`).
+  if (!leastViewed) throw new Error('002 unlocks no Song')
   await tab(page, 'Record').click()
-  for (const id of ['095', '017', '022', '002']) {
+  for (const id of journey) {
     await waitForOpenMicrophone(page)
     await fartAndRecord(page, id)
     await page.getByRole('button', { name: 'Save' }).click()
@@ -68,12 +73,30 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
     if (id === '017' || id === '095') {
       await page.getByRole('button', { name: 'Record another' }).click()
     } else if (id === '022') {
-      await expect(page.getByTestId('result-progress')).toContainText('You unlocked Hot Cross Buns')
+      await expect(page.getByTestId('unlock-reward')).toContainText('Hot Cross Buns')
       await page.getByRole('button', { name: 'Done' }).click()
+      // The Song 002 unlocks that the reward would list last, made a Favorite on its sheet.
+      await tab(page, 'Compose').click()
+      await page
+        .locator(`[data-song="${leastViewed.id}"]`)
+        .getByRole('button', { name: leastViewed.title, exact: true })
+        .click()
+      const sheet = page.getByRole('dialog', { name: leastViewed.title })
+      await heart(sheet, leastViewed.title).click()
+      await expect(heart(sheet, leastViewed.title)).toHaveAttribute('aria-pressed', 'true')
+      await sheet.getByRole('button', { name: 'Close' }).click()
       await tab(page, 'Record').click()
     }
   }
-  await expect(page.getByTestId('result-progress')).toContainText(`${MARY} · `)
+  // The reward lists the Favorite first. Its heart takes it off, and the row stays where it is.
+  const fourth = songsTheLastTakeUnlocks(journey, [leastViewed.id])
+  expect(fourth[0].id).toBe(leastViewed.id)
+  await expectUnlockReward(page, fourth)
+  const reward = page.getByTestId('unlock-reward')
+  await expect(heart(reward, leastViewed.title)).toHaveAttribute('aria-pressed', 'true')
+  await heart(reward, leastViewed.title).click()
+  await expect(heart(reward, leastViewed.title)).toHaveAttribute('aria-pressed', 'false')
+  await expect(reward.getByTestId('song-row').first()).toHaveAttribute('data-song', leastViewed.id)
   await page.getByRole('button', { name: 'Done' }).click()
   await tab(page, 'Compose').click()
   await expect(

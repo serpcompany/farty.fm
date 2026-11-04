@@ -7,14 +7,13 @@ import {
   CircleCheck,
   Heart,
   LayoutGrid,
-  Lock,
   Music2,
   Search,
   X
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { memo, type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -37,13 +36,14 @@ import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { startAudioInTap } from '@/lib/audio/context'
 import type { SongSummary } from '@/lib/catalog/song'
-import { type CoverageCount, type SongRow, songListing, sortRows } from '@/lib/pitch-coverage'
+import { songListing, sortRows } from '@/lib/pitch-coverage'
 import { cn } from '@/lib/utils'
 import { songOrders, useComposeChoices } from './compose-choices'
-import { FavoriteButton, useFavorites } from './favorite-button'
+import { useFavorites } from './favorite-button'
 import { LockedSongSheet } from './locked-song-sheet'
 import { usePedos } from './pedos-provider'
 import { ReportSongSheet } from './report-song-sheet'
+import { LockedSongRow, songList, UnlockedSongRow } from './song-row'
 
 const noFavorites: ReadonlySet<string> = new Set()
 
@@ -346,7 +346,7 @@ function Section({
       <h2 id={id} className="px-4 pb-1.5 text-xs font-normal text-muted-foreground">
         {title}
       </h2>
-      <ul className="divide-y overflow-hidden rounded-xl bg-muted/60">{children}</ul>
+      <ul className={songList}>{children}</ul>
     </section>
   )
 }
@@ -369,114 +369,3 @@ function SoundPadRow() {
     </Link>
   )
 }
-
-// A row off the screen skips its layout and paint, and keeps the room it last took, or a row's
-// before it's first on screen: 84 px with a composer line, 64 without. With 1,000 Songs, laying
-// out every row was most of the time Compose took to open, search and scroll (#323).
-const songRow = 'flex items-center [content-visibility:auto]'
-const rowHeight = (song: SongSummary) =>
-  song.composer === undefined
-    ? '[contain-intrinsic-size:auto_64px]'
-    : '[contain-intrinsic-size:auto_84px]'
-const rowTarget =
-  'flex min-w-0 flex-1 items-center gap-3 py-2.5 pr-1 pl-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset active:bg-muted'
-
-/** How long a Song plays, in whole seconds, at its own tempo. */
-const seconds = (song: SongSummary) => Math.round((song.lengthBeats * 60) / song.bpm)
-
-/**
- * A Song's three lines: its title, its composer when known, and its facts. A locked Song's facts
- * start with its Pitch Coverage: "3 of 4 notes · 84 BPM · 11 s". Shown, not read: a screen reader
- * reads `songDescription` instead.
- */
-function SongLines({ song, coverage }: { song: SongSummary; coverage?: CoverageCount }) {
-  const notes = song.pitches.length
-  return (
-    <span className="flex min-w-0 flex-1 flex-col" aria-hidden>
-      <span className="truncate">{song.title}</span>
-      {song.composer !== undefined && (
-        <span className="truncate text-sm text-muted-foreground">{song.composer}</span>
-      )}
-      <span className="truncate text-sm text-muted-foreground tabular-nums">
-        {coverage ? (
-          <span className="text-foreground">
-            {coverage.covered} of {notes} notes
-          </span>
-        ) : (
-          `${notes} notes`
-        )}
-        {` · ${song.bpm} BPM · ${seconds(song)} s`}
-      </span>
-    </span>
-  )
-}
-
-/** What a screen reader reads after a Song row's title. */
-function songDescription(song: SongSummary, coverage?: CoverageCount): string {
-  const notes = song.pitches.length
-  const covered = coverage ? `${coverage.covered} of ${notes} notes covered` : `${notes} notes`
-  return [
-    coverage && 'Locked',
-    song.composer,
-    `${covered}, ${song.bpm} BPM, ${seconds(song)} seconds`
-  ]
-    .filter(Boolean)
-    .join('. ')
-}
-
-/** An Unlocked Song: its three lines and a chevron. It opens in Song Creator. */
-const UnlockedSongRow = memo(function UnlockedSongRow({ song }: { song: SongSummary }) {
-  const descriptionId = useId()
-  return (
-    <li data-testid="song-row" data-song={song.id} className={cn(songRow, rowHeight(song))}>
-      <Link
-        href={`/compose/${song.id}/`}
-        // Song Creator plays the Toot once it's made: the tap starts the sound it needs.
-        onClick={startAudioInTap}
-        className={rowTarget}
-        aria-label={song.title}
-        aria-describedby={descriptionId}
-      >
-        <SongLines song={song} />
-        <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-        <span id={descriptionId} className="sr-only">
-          {songDescription(song)}
-        </span>
-      </Link>
-      <FavoriteButton song={song} className="mr-1" />
-    </li>
-  )
-})
-
-/**
- * A locked Song: its three lines, its facts starting with its Pitch Coverage, and a lock. It opens
- * the locked-Song sheet, which shows the notes it still needs.
- */
-const LockedSongRow = memo(function LockedSongRow({
-  row,
-  onOpen
-}: {
-  row: SongRow
-  onOpen: (song: SongSummary) => void
-}) {
-  const { song, coverage } = row
-  const descriptionId = useId()
-  return (
-    <li data-testid="song-row" data-song={song.id} className={cn(songRow, rowHeight(song))}>
-      <button
-        type="button"
-        className={rowTarget}
-        aria-label={song.title}
-        aria-describedby={descriptionId}
-        onClick={() => onOpen(song)}
-      >
-        <SongLines song={song} coverage={coverage} />
-        <Lock className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-        <span id={descriptionId} className="sr-only">
-          {songDescription(song, coverage)}
-        </span>
-      </button>
-      <FavoriteButton song={song} className="mr-1" />
-    </li>
-  )
-})
