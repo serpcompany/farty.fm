@@ -9,8 +9,9 @@ import {
   getUserMediaMs,
   waitForOpenMicrophone
 } from './fake-microphone'
-import { fixtureRecordings, songsUnlockedBy } from './golden'
+import { fixtureRecordings, songsTheLastTakeUnlocks, songsUnlockedBy } from './golden'
 import { skipWelcome } from './record'
+import { expectUnlockReward, shownSongs } from './unlock-reward'
 
 // Compose and the Result screen, with Recordings made through the fake microphone in
 // `fake-microphone.ts`, which plays each fart as the person presses Record, all on one page.
@@ -104,7 +105,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await recordAndSave(page, '095')
   await expect(page.getByTestId('result-note')).toHaveText('F2')
   await expect(page.getByTestId('pitch-strip')).toHaveAccessibleName('Notes collected: F. New: F')
-  await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
+  await expect(page.getByTestId('unlock-reward')).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Record another' })).toBeVisible()
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page).toHaveURL(/\/recordings\/$/)
@@ -138,26 +139,35 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
 
   // Three more takes: the third unlocks Hot Cross Buns, and the fourth Mary and more Songs.
   expect(unlockedAt(2)).toEqual([])
-  const third = unlockedAt(3).map(s => s.title)
-  expect(third).toContain('Hot Cross Buns')
-  expect(third).not.toContain('Mary Had a Little Lamb')
-  const fourth = unlockedAt(4).length - third.length
-  expect(fourth).toBeGreaterThan(2)
+  const third = songsTheLastTakeUnlocks(journey.slice(0, 3))
+  expect(third.map(s => s.title)).toContain('Hot Cross Buns')
+  expect(third.map(s => s.title)).not.toContain('Mary Had a Little Lamb')
+  const fourth = songsTheLastTakeUnlocks(journey)
+  expect(fourth.length).toBeGreaterThan(4)
   await recordAndSave(page, '017')
-  await expect(page.getByTestId('result-progress')).not.toContainText('You unlocked')
+  await expect(page.getByTestId('unlock-reward')).toHaveCount(0)
   await page.getByRole('button', { name: 'Record another' }).click()
+  // The Result's reward lists the Songs the take unlocked, most viewed first (#363).
   await recordAndSave(page, '022')
-  for (const title of third)
-    await expect(page.getByTestId('result-progress')).toContainText(`You unlocked ${title}`)
+  await expectUnlockReward(page, third)
   await page.getByRole('button', { name: 'Done' }).click()
   await expect(page).toHaveURL(/\/recordings\/$/)
   await tab(page, 'Record').click()
   await recordAndSave(page, '002')
 
-  // More than 2 unlocks are counted, then listed in the catalog's order, where Mary comes first.
-  await expect(page.getByTestId('result-progress')).toContainText(`You unlocked ${fourth} Songs`)
-  await expect(page.getByTestId('result-progress')).toContainText('Mary Had a Little Lamb · ')
-  // After an unlock, Try it opens the Song in Song Creator, and Done goes to Recordings.
+  // More than 4 show 3, then See all, which lists the rest and moves focus to the 4th.
+  await expectUnlockReward(page, fourth)
+  const reward = page.getByTestId('unlock-reward')
+  await expectTappable(reward.getByRole('button', { name: `See all ${fourth.length} Songs` }))
+  await reward.getByRole('button', { name: `See all ${fourth.length} Songs` }).click()
+  expect(await shownSongs(page)).toEqual(fourth.map(s => s.id))
+  await expect(reward.getByRole('button', { name: /^See all/ })).toHaveCount(0)
+  await expect(reward.getByTestId('song-row').nth(3).getByRole('link')).toBeFocused()
+  await expect(reward.getByTestId('song-row').nth(3).getByRole('link')).toHaveAccessibleName(
+    fourth[3].title
+  )
+  // After an unlock, Try it opens the reward's first Song in Song Creator, and Done goes to
+  // Recordings.
   await expect(page.getByRole('button', { name: 'Record another' })).toHaveCount(0)
   await expectTappable(page.getByRole('button', { name: 'Done' }))
   await expectTappable(page.getByRole('button', { name: 'Try it' }))
@@ -180,9 +190,8 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   expect(
     await page.evaluate(() => (window as unknown as { resumesInTaps: number }).resumesInTaps)
   ).toBe(1)
-  await expect(page).toHaveURL(/\/compose\/mary\/$/)
-  await expect(page.getByRole('heading', { name: 'Mary Had a Little Lamb' })).toBeVisible()
-  await expect(page.getByTestId('recording-used')).toHaveCount(4)
+  await expect(page).toHaveURL(new RegExp(`/compose/${fourth[0].id}/$`))
+  await expect(page.getByRole('heading', { name: fourth[0].title })).toBeVisible()
 
   // Back returns to Compose, where the Unlocked Song opens Song Creator too.
   await page.getByRole('link', { name: 'Back to Compose' }).click()
@@ -206,6 +215,8 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expectTappable(unlocked)
   await unlocked.click()
   await expect(page).toHaveURL(/\/compose\/mary\/$/)
+  await expect(page.getByRole('heading', { name: 'Mary Had a Little Lamb' })).toBeVisible()
+  await expect(page.getByTestId('recording-used')).toHaveCount(4)
   await page.getByRole('link', { name: 'Back to Compose' }).click()
 
   await tab(page, 'Recordings').click()
