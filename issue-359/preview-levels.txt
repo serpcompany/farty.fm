@@ -1,0 +1,21 @@
+farts oct 1: n=2 median -11.3
+farts oct 2: n=12 median -19.7
+farts oct 3: n=11 median -13.3
+farts oct 4: n=1 median -14.2
+mary E3(52) oct3 -16.0 dB vs farts -13.3 (-2.7) peak 0.620 pitch 2.6 c
+mary F♯3(54) oct3 -16.1 dB vs farts -13.3 (-2.8) peak 0.599 pitch 2.6 c
+mary G♯3(56) oct3 -16.2 dB vs farts -13.3 (-2.9) peak 0.575 pitch 2.6 c
+mary B3(59) oct3 -16.2 dB vs farts -13.3 (-3.0) peak 0.537 pitch 2.6 c
+mary: 4 notes, 0 fail, worst level 3.0 dB, worst pitch 2.6 c
+waltz-in-a-minor-chopin G1(31) oct1 -15.7 dB vs farts -11.3 (-4.5) peak 0.541 pitch 12.6 c
+waltz-in-a-minor-chopin C2(36) oct2 -16.1 dB vs farts -19.7 (+3.6) peak 0.594 pitch 12.6 c
+waltz-in-a-minor-chopin D2(38) oct2 -15.9 dB vs farts -19.7 (+3.7) peak 0.610 pitch 12.6 c
+waltz-in-a-minor-chopin D♯2(39) oct2 -15.8 dB vs farts -19.7 (+3.9) peak 0.617 pitch 12.6 c
+waltz-in-a-minor-chopin F2(41) oct2 -16.1 dB vs farts -19.7 (+3.6) peak 0.628 pitch 12.6 c
+waltz-in-a-minor-chopin F♯2(42) oct2 -16.1 dB vs farts -19.7 (+3.6) peak 0.634 pitch 2.6 c
+waltz-in-a-minor-chopin G2(43) oct2 -15.8 dB vs farts -19.7 (+3.9) peak 0.638 pitch 2.6 c
+waltz-in-a-minor-chopin G♯2(44) oct2 -15.9 dB vs farts -19.7 (+3.8) peak 0.640 pitch 2.6 c
+waltz-in-a-minor-chopin A♯2(46) oct2 -15.8 dB vs farts -19.7 (+3.9) peak 0.642 pitch 2.6 c
+waltz-in-a-minor-chopin C3(48) oct3 -16.0 dB vs farts -13.3 (-2.8) peak 0.643 pitch 2.6 c
+waltz-in-a-minor-chopin: 10 notes, 0 fail, worst level 4.5 dB, worst pitch 12.6 c
+build at 48k: 47.71 ms a note

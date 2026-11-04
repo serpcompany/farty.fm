@@ -2,10 +2,10 @@
   "song": "mary",
   "transposition": -20,
   "notes": 26,
-  "onsets_detected": 27,
+  "onsets_detected": 26,
   "onsets_on_time_pct": 100,
-  "median_onset_ms": 16.1,
-  "max_onset_ms": 20.0,
+  "median_onset_ms": 13.4,
+  "max_onset_ms": 17.0,
   "pitch_read": 26,
   "within_50c_pct": 100,
   "median_abs_cents": 2.6,
@@ -13,19 +13,19 @@
     {
       "index": 25,
       "midi": 52,
-      "dbfs": -27.4
+      "dbfs": -20.2
+    },
+    {
+      "index": 12,
+      "midi": 59,
+      "dbfs": -17.8
     },
     {
       "index": 6,
       "midi": 56,
-      "dbfs": -24.2
-    },
-    {
-      "index": 9,
-      "midi": 54,
-      "dbfs": -24.2
+      "dbfs": -17.7
     }
   ],
-  "loudest_note_dbfs": -21.1
+  "loudest_note_dbfs": -16.0
 }
 PASS

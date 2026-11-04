@@ -1,0 +1,31 @@
+{
+  "song": "waltz-in-a-minor-chopin",
+  "transposition": -33,
+  "notes": 41,
+  "onsets_detected": 40,
+  "onsets_on_time_pct": 98,
+  "median_onset_ms": 17.7,
+  "max_onset_ms": 106.2,
+  "pitch_read": 41,
+  "within_50c_pct": 100,
+  "median_abs_cents": 12.6,
+  "quietest_notes_dbfs": [
+    {
+      "index": 18,
+      "midi": 43,
+      "dbfs": -19.2
+    },
+    {
+      "index": 7,
+      "midi": 44,
+      "dbfs": -19.2
+    },
+    {
+      "index": 40,
+      "midi": 44,
+      "dbfs": -19.2
+    }
+  ],
+  "loudest_note_dbfs": -14.1
+}
+PASS
