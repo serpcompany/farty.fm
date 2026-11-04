@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { keepMicrophoneOpen } from '@/lib/audio/recorder'
+import { keepMicrophoneOpen, leaveRecord } from '@/lib/audio/recorder'
 import { desktop } from '@/lib/desktop'
 import { type RecordProblem, usePedos } from './pedos-provider'
 import { RecordButton } from './record-button'
@@ -31,14 +31,18 @@ const problems: Record<
 /**
  * The Record tab: one big red button. Matches the iPhone app's `RecordTab`. A tap opens the
  * Recording screen over it (`record-flow.tsx`). Once the tab shows, the
- * microphone stays open for the rest of the launch (`keepMicrophoneOpen`). A computer shows the
- * product page instead (`lander.tsx`), so there the microphone stays shut, and widening a narrow
- * window into the product page lets it go (#199).
+ * microphone stays open for the rest of the launch (`keepMicrophoneOpen`), except that a grant
+ * the browser remembers is let go while another tab, Review or Result shows (`leaveRecord`). A
+ * computer shows the product page instead (`lander.tsx`), so there the microphone stays shut, and
+ * widening a narrow window into the product page lets it go (#199).
  */
 export function RecordScreen() {
   const pedos = usePedos()
   const alert = pedos.problem && pedos.problem !== 'nothingHeard' ? pedos.problem : null
+  // Review, Result or a Recording's review covers the button.
+  const covered = pedos.flow !== null || pedos.reviewOpen
   useEffect(() => {
+    if (covered) return
     // A window narrowed out of the product page shows Record again.
     const computer = window.matchMedia(desktop)
     const follow = () => {
@@ -46,8 +50,11 @@ export function RecordScreen() {
     }
     follow()
     computer.addEventListener('change', follow)
-    return () => computer.removeEventListener('change', follow)
-  }, [])
+    return () => {
+      computer.removeEventListener('change', follow)
+      leaveRecord()
+    }
+  }, [covered])
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-7">

@@ -22,6 +22,7 @@ sufficient: the final judge is still a human listening.
 """
 import librosa
 import numpy as np
+from scipy.signal import lfilter
 
 SR = 44100
 HOP = 256
@@ -266,3 +267,40 @@ def bar_problems(metrics, bar=BAR):
     if metrics["notes_with_retrigger"] > bar["notes_with_retrigger"]:
         problems.append(f"{metrics['notes_with_retrigger']} notes re-attack")
     return problems
+
+
+def peak_dbfs(y):
+    """The loudest sample, in dB below full scale. Phone media peaks near -1 dBFS (#369)."""
+    return float(20 * np.log10(np.max(np.abs(y))))
+
+
+def loudness(y, sr):
+    """Integrated loudness in LUFS (ITU-R BS.1770-4) of mono audio, measured as one channel:
+    K-weighting (a +4 dB shelf above about 1.5 kHz, then a high-pass at about 38 Hz), the mean
+    square of 400 ms blocks every 100 ms, then the -70 LUFS absolute gate and the -10 LU relative
+    gate. Phone media plays at about -14 LUFS (#369). The web's tests measure with the same
+    function (`apps/web/src/test-support/loudness.ts`)."""
+    y = np.asarray(y, dtype=np.float64)
+    # The shelf: +4 dB, Q 1/sqrt(2), at 1500 Hz.
+    gain, w = 10 ** (4 / 40), 2 * np.pi * 1500 / sr
+    c, root = np.cos(w), 2 * np.sqrt(gain) * np.sin(w) / np.sqrt(2)
+    y = lfilter(
+        [gain * (gain + 1 + (gain - 1) * c + root), -2 * gain * (gain - 1 + (gain + 1) * c),
+         gain * (gain + 1 + (gain - 1) * c - root)],
+        [gain + 1 - (gain - 1) * c + root, 2 * (gain - 1 - (gain + 1) * c), gain + 1 - (gain - 1) * c - root], y)
+    # The high-pass, at the frequency and Q its 48 kHz coefficients come from, with the standard's
+    # numerator [1, -2, 1] over a normalized denominator, so its passband gain is the standard's
+    # +0.043 dB, which -0.691 counts on.
+    w = 2 * np.pi * 38.13547087602444 / sr
+    c, alpha = np.cos(w), np.sin(w) / (2 * 0.5003270373238773)
+    y = lfilter([1, -2, 1], [1, -2 * c / (1 + alpha), (1 - alpha) / (1 + alpha)], y)
+    block, step = round(0.4 * sr), round(0.1 * sr)
+    y = np.concatenate([y, np.zeros(max(0, block - len(y)))])
+    squares = np.array([np.mean(y[i:i + block] ** 2) for i in range(0, len(y) - block + 1, step)])
+    with np.errstate(divide="ignore"):
+        lufs = -0.691 + 10 * np.log10(squares)
+    audible = squares[lufs > -70]
+    if len(audible) == 0:
+        return float("-inf")
+    gate = -0.691 + 10 * np.log10(audible.mean()) - 10
+    return float(-0.691 + 10 * np.log10(audible[-0.691 + 10 * np.log10(audible) > gate].mean()))

@@ -38,7 +38,8 @@ vi.mock('@/lib/audio/recorder', async importOriginal => {
     MicrophoneDeniedError: real.MicrophoneDeniedError,
     MicrophoneReleasedError: real.MicrophoneReleasedError,
     startTake: page.startTake,
-    keepMicrophoneOpen: () => undefined
+    keepMicrophoneOpen: () => undefined,
+    leaveRecord: () => undefined
   }
 })
 vi.mock('@/lib/analysis/client', () => ({
