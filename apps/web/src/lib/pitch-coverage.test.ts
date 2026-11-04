@@ -598,8 +598,8 @@ describe('Compose’s listing', () => {
     })
 
     it('finds no Song by the name its score gives but #357 doesn’t', () => {
-      // Red River Valley's score names "Joe Buchanan's Scottish Tome", which #357 hasn't looked up.
-      expect(song('red-river-valley').composer).toBeUndefined()
+      // Red River Valley's score names "Joe Buchanan's Scottish Tome"; #357 calls it a folk song.
+      expect(song('red-river-valley').composer).toBe('Traditional')
       expect(ids(every(listing(all, 'buchanan')))).toEqual([])
     })
   })

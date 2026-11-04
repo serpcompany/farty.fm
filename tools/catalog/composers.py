@@ -38,11 +38,13 @@ UNKNOWN = "Unknown"
 TRADITIONAL = re.compile(r"Traditional(?: \([A-Z][a-z]+(?: [A-Z][a-z]+)*\))?")
 # A person's name: letters, spaces and . ' - , only.
 NAME = re.compile(r"[^\W\d_][^\W\d_.'’ ,-]*(?:[.'’ ,-]+[^\W\d_]+)*\.?")
-# A Song first published in 1931 or later, or by an author who died after 1955, may still be under
-# copyright (ADR 0003, excluded-titles.txt): the composer, or a lyricist whose words were written with
-# the music (`lyricist_died`).
-LAST_FREE_DEATH = 1955
-FIRST_COPYRIGHT_YEAR = 1931
+# A Song first published in FIRST_COPYRIGHT_YEAR or later, or by an author who died after
+# LAST_FREE_DEATH, may still be under copyright (ADR 0003, excluded-titles.txt): the composer, or a
+# lyricist whose words were written with the music (`lyricist_died`). The years are in copyright.json,
+# which apps/web/src/lib/catalog/composers.test.ts reads too.
+_LIMITS = json.loads((HERE / "copyright.json").read_text(encoding="utf-8"))
+LAST_FREE_DEATH = _LIMITS["last_free_death"]
+FIRST_COPYRIGHT_YEAR = _LIMITS["first_copyright_year"]
 
 # Where a composer may come from. A MuseScore page counts only as the Song's own score.
 SOURCES = ("wikipedia.org", "imslp.org", "thesession.org", "tunearch.org", "mutopiaproject.org")
@@ -82,8 +84,11 @@ ALIASES = {
     "chopin": "Frédéric Chopin",
     "frederic chopin": "Frédéric Chopin",
     "frederic francois chopin": "Frédéric Chopin",
+    "donald dow": "Daniel Dow",
     "e grieg": "Edvard Grieg",
     "edvard hagerup grieg": "Edvard Grieg",
+    "edwin p christy": "E. P. Christy",
+    "edwin pearce christy": "E. P. Christy",
     "eward elgar": "Edward Elgar",
     "euphemia allen": "Euphemia Allan",
     "felix powel": "Felix Powell",

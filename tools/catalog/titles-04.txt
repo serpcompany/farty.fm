@@ -5,6 +5,7 @@
 # The whole-catalog check (#344) pulled Hänschen Klein, the same tune as Lightly Row (titles-01.txt), and
 # gave 6 titles back the accents the ranking dropped. The composer lookups (#357, composers-01.json)
 # pulled 2 titles as under copyright, now in excluded-titles.txt: Mairi's Wedding, Just A Closer Walk With Thee.
+# Later batches of the lookups (composers-03.json, composers-04.json) pulled 2 more: Tumbalalaika, Mo Ghile Mear.
 # id | catalog title
 maple-leaf-rag | Maple Leaf Rag
 piano-sonata-no-16-in-c-major-k-545 | Piano Sonata No.16 in C major K.545
@@ -49,7 +50,6 @@ apres-un-reve | Après un rêve
 battle-cry-of-freedom | Battle Cry of Freedom
 gnossienne-no-1 | Gnossienne No. 1
 wilhelmus | Wilhelmus
-mo-ghile-mear | Mo Ghile Mear
 blue-bells-of-scotland | Blue Bells of Scotland
 tourdion | Tourdion
 pini-di-roma | Pini Di Roma
@@ -94,7 +94,6 @@ deilig-er-jorden | Deilig er jorden
 british-grenadiers | British Grenadiers
 come-thou-fount | Come Thou Fount
 salvation-is-created | Salvation is Created
-tumbalalaika | Tumbalalaika
 kesh | The Kesh
 die-wacht-am-rhein | Die Wacht am Rhein
 salut-damour | Salut d'Amour

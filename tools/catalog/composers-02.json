@@ -4,1056 +4,1719 @@
   "title": "Sarabande de Haendel",
   "views": 610,
   "pdmx": "G.F. HAENDEL",
-  "score": "https://musescore.com/score/5836164"
+  "score": "https://musescore.com/score/5836164",
+  "composer": "George Frideric Handel",
+  "composer_died": 1759,
+  "composer_source": "https://en.wikipedia.org/wiki/Keyboard_suite_in_D_minor_(HWV_437)",
+  "published": 1733,
+  "note": "Sarabande of the Keyboard suite in D minor, HWV 437"
  },
  {
   "id": "einigkeit-und-recht-und-freiheit",
   "title": "Einigkeit und Recht und Freiheit",
   "views": 603,
   "pdmx": "Joseph Haydn",
-  "score": "https://musescore.com/score/5650154"
+  "score": "https://musescore.com/score/5650154",
+  "composer": "Joseph Haydn",
+  "composer_died": 1809,
+  "composer_source": "https://en.wikipedia.org/wiki/Deutschlandlied",
+  "note": "tune from Haydn's 1797 anthem Gott erhalte Franz den Kaiser; Hoffmann von Fallersleben wrote the words in 1841 to the existing tune"
  },
  {
   "id": "flowers-of-the-forest",
   "title": "The Flowers of the Forest",
   "views": 594,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4298081"
+  "score": "https://musescore.com/score/4298081",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Flowers_of_the_Forest",
+  "note": "Scottish folk tune recorded c. 1615-1625 in the Skene manuscript"
  },
  {
   "id": "la-donna",
   "title": "La donna è mobile",
   "views": 566,
   "pdmx": "Giuseppe Verdi",
-  "score": "https://musescore.com/score/5855728"
+  "score": "https://musescore.com/score/5855728",
+  "composer": "Giuseppe Verdi",
+  "composer_died": 1901,
+  "composer_source": "https://en.wikipedia.org/wiki/La_donna_%C3%A8_mobile",
+  "note": "aria from Rigoletto (1851)"
  },
  {
   "id": "gnossienne-no-1",
   "title": "Gnossienne No. 1",
   "views": 554,
   "pdmx": "Erik Satie(18661925)",
-  "score": "https://musescore.com/score/6113833"
+  "score": "https://musescore.com/score/6113833",
+  "composer": "Erik Satie",
+  "composer_died": 1925,
+  "composer_source": "https://en.wikipedia.org/wiki/Gnossiennes"
  },
  {
   "id": "silvery-moon",
   "title": "By the Light of the Silvery Moon",
   "views": 536,
   "pdmx": "Gus Edwards & Edward Madden 1909",
-  "score": "https://musescore.com/score/1300741"
+  "score": "https://musescore.com/score/1300741",
+  "composer": "Gus Edwards",
+  "composer_died": 1945,
+  "lyricist_died": 1952,
+  "composer_source": "https://en.wikipedia.org/wiki/By_the_Light_of_the_Silvery_Moon_(song)",
+  "published": 1909,
+  "note": "words Edward Madden, written with the music; he died in 1952 (https://en.wikipedia.org/wiki/Edward_Madden_(lyricist))"
  },
  {
   "id": "12th-street-rag",
   "title": "12th Street Rag",
   "views": 527,
   "pdmx": "Euday L. Bowman - 1914",
-  "score": "https://musescore.com/score/1280746"
+  "score": "https://musescore.com/score/1280746",
+  "composer": "Euday L. Bowman",
+  "composer_died": 1949,
+  "composer_source": "https://en.wikipedia.org/wiki/Twelfth_Street_Rag",
+  "published": 1914,
+  "note": "Wikipedia: written 1898, published 1914"
  },
  {
   "id": "loch-lomond",
   "title": "Loch Lomond",
   "views": 527,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5995327"
+  "score": "https://musescore.com/score/5995327",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Bonnie_Banks_o%27_Loch_Lomond",
+  "note": "Wikipedia: the composer is unknown; Lady John Scott only transcribed the melody"
  },
  {
   "id": "turkey-in-the-straw",
   "title": "Turkey in the Straw",
   "views": 518,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/554051"
+  "score": "https://musescore.com/score/554051",
+  "composer": "Traditional (American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Turkey_in_the_Straw",
+  "published": 1834,
+  "note": "American folk song; first published as Zip Coon around 1834, with several people claiming authorship"
  },
  {
   "id": "twelve-days",
   "title": "The Twelve Days of Christmas",
   "views": 516,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5851745"
+  "score": "https://musescore.com/score/5851745",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Twelve_Days_of_Christmas_(song)",
+  "note": "the standard melody is Frederic Austin's 1909 arrangement of a traditional song (Wikipedia: 'Traditional with additions by Frederic Austin'); it does not say he composed it"
  },
  {
   "id": "what-wondrous-love-is-this",
   "title": "What Wondrous Love Is This",
   "views": 516,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5669097"
+  "score": "https://musescore.com/score/5669097",
+  "composer": "Traditional (American)",
+  "composer_source": "https://en.wikipedia.org/wiki/What_Wondrous_Love_Is_This",
+  "note": "American Southern folk hymn; melody derived from an English ballad"
  },
  {
   "id": "rocky-road-to-dublin",
   "title": "Rocky Road to Dublin",
   "views": 515,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4709666"
+  "score": "https://musescore.com/score/4709666",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Rocky_Road_to_Dublin",
+  "published": 1841,
+  "note": "tune published without words in 1841 and may derive from Cam Ye o'er frae France; words D. K. Gavan"
  },
  {
   "id": "breathe-on-me-breath-of-god",
   "title": "Breathe on Me Breath of God",
   "views": 513,
   "pdmx": "Robert Jackson 1888",
-  "score": "https://musescore.com/score/2989"
+  "score": "https://musescore.com/score/2989",
+  "composer": "Robert Jackson",
+  "composer_died": 1914,
+  "composer_source": "https://en.wikipedia.org/wiki/Breathe_on_Me,_Breath_of_God",
+  "note": "Wikipedia lists \"Trentham\" by Robert Jackson among the hymn's tunes; the Song's score credits Robert Jackson (1888), and the tune was not compared note by note. Death year from his IMSLP category page, imslp.org/wiki/Category:Jackson,_Robert (1840 to 12 July 1914)"
  },
  {
   "id": "blue-bells-of-scotland",
   "title": "Blue Bells of Scotland",
   "views": 503,
   "pdmx": "Traditional Scottish",
-  "score": "https://musescore.com/score/2858361"
+  "score": "https://musescore.com/score/2858361",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Bluebells_of_Scotland",
+  "published": 1801,
+  "note": "Wikipedia: a Scottish folksong (Roud 13849), first published in 1801; Dorothea Jordan wrote the words"
  },
  {
   "id": "deck-the-halls",
   "title": "Deck the Halls",
   "views": 499,
   "pdmx": "trad.",
-  "score": "https://musescore.com/score/4814906"
+  "score": "https://musescore.com/score/4814906",
+  "composer": "Traditional (Welsh)",
+  "composer_source": "https://en.wikipedia.org/wiki/Deck_the_Halls",
+  "note": "Welsh winter carol Nos Galan, 16th century; English words Thomas Oliphant 1862"
  },
  {
   "id": "aloha-oe",
   "title": "Aloha Oe",
   "views": 492,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/1444871"
+  "score": "https://musescore.com/score/1444871",
+  "composer": "Liliʻuokalani",
+  "composer_died": 1917,
+  "composer_source": "https://en.wikipedia.org/wiki/Aloha_%CA%BBOe",
+  "note": "Wikipedia: written c. 1878 by Queen Liliʻuokalani, then princess; she noted 'Composed at Maunawili 1878'"
  },
  {
   "id": "angels-we-have-heard",
   "title": "Angels We Have Heard on High",
   "views": 490,
   "pdmx": "French Carol",
-  "score": "https://musescore.com/score/2627566"
+  "score": "https://musescore.com/score/2627566",
+  "composer": "Traditional (French)",
+  "composer_source": "https://en.wikipedia.org/wiki/Angels_We_Have_Heard_on_High",
+  "note": "hymn tune Gloria from a traditional French carol, arranged by Edward Shippen Barnes"
  },
  {
   "id": "inno-di-mameli",
   "title": "Inno di Mameli",
   "views": 489,
   "pdmx": "words: Goffredo Mameli 1847music: Michele Novaro 1847",
-  "score": "https://musescore.com/score/4674880"
+  "score": "https://musescore.com/score/4674880",
+  "composer": "Michele Novaro",
+  "composer_died": 1885,
+  "composer_source": "https://en.wikipedia.org/wiki/Il_Canto_degli_Italiani",
+  "note": "Goffredo Mameli wrote the words in 1847, Novaro then set them to music"
  },
  {
   "id": "lascia-chio-pianga",
   "title": "Lascia ch'io pianga",
   "views": 486,
   "pdmx": "Händel",
-  "score": "https://musescore.com/score/80106"
+  "score": "https://musescore.com/score/80106",
+  "composer": "George Frideric Handel",
+  "composer_died": 1759,
+  "composer_source": "https://en.wikipedia.org/wiki/Lascia_ch%27io_pianga",
+  "note": "melody from a sarabande in Almira (1705)"
  },
  {
   "id": "cabar-feidh",
   "title": "Cabar Feidh",
   "views": 468,
   "pdmx": "Traditional",
-  "score": "https://musescore.com/score/6006914"
+  "score": "https://musescore.com/score/6006914",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Cabar%20Feidh",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Cabar%20Feidh",
+   "https://en.wikipedia.org/w/index.php?search=Cabar%20Feidh"
+  ],
+  "note": "The Session's title search lists only Rakish Paddy and The Cup Of Tea, which don't follow the Song's melody; Wikipedia and Wikidata searches find only the shinty club and the clan badge, no page for the tune"
  },
  {
   "id": "skye-boat-song",
   "title": "The Skye Boat Song",
   "views": 465,
   "pdmx": "Traditional Scottish",
-  "score": "https://musescore.com/score/2858336"
+  "score": "https://musescore.com/score/2858336",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Skye_Boat_Song",
+  "published": 1884,
+  "note": "late 19th-century adaptation of a Gaelic song attributed to William Ross; first published 1884 with words by Harold Boulton"
  },
  {
   "id": "mrs-mcleod-of-raasay",
   "title": "Mrs McLeod of Raasay",
   "views": 459,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/164586"
+  "score": "https://musescore.com/score/164586",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://thesession.org/tunes/75",
+  "note": "The Session's \"Miss McLeod's\" (aliases include Mrs MacLeod Of Raasay) follows the Song's melody and lists no composer; a comment calls it Scottish in origin and says a 4-part setting is credited to Niel Gow but not whether he wrote the tune"
  },
  {
   "id": "when-you-wore-a-tulip",
   "title": "When You Wore a Tulip",
   "views": 441,
   "pdmx": "Percy Wenrich & Jack Mahoney - 1914",
-  "score": "https://musescore.com/score/1430276"
+  "score": "https://musescore.com/score/1430276",
+  "composer": "Percy Wenrich",
+  "composer_died": 1952,
+  "composer_source": "https://en.wikipedia.org/wiki/Percy_Wenrich",
+  "published": 1914,
+  "note": "words Jack Mahoney (Wikipedia gives no death year for him), published 1914 by Leo Feist"
  },
  {
   "id": "over-in-the-glory-land",
   "title": "Over in the Glory Land",
   "views": 438,
   "pdmx": "James Acuff and Emmett Dean",
-  "score": "https://musescore.com/score/1351046"
+  "score": "https://musescore.com/score/1351046",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Over%20in%20the%20Glory%20Land",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Over%20in%20the%20Glory%20Land",
+   "https://en.wikipedia.org/w/index.php?search=Over%20in%20the%20Glory%20Land"
+  ],
+  "note": "The Session's title search finds no tune of this name; Wikidata has a lyrics item (Q128485408) with no author; the Song's score credits James Acuff and Emmett Dean, but no allowed page confirms it"
  },
  {
   "id": "parting-glass",
   "title": "The Parting Glass",
   "views": 438,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5275690"
+  "score": "https://musescore.com/score/5275690",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Parting_Glass",
+  "note": "Scottish traditional song; a closely resembling fiddle tune was printed in 1782"
  },
  {
   "id": "la-marche-des-rois",
   "title": "La Marche des rois",
   "views": 428,
   "pdmx": "Traditonnel Noël: les petits chanteurs à la croix de bois",
-  "score": "https://musescore.com/score/5888779"
+  "score": "https://musescore.com/score/5888779",
+  "composer": "Traditional (French)",
+  "composer_source": "https://en.wikipedia.org/wiki/The_March_of_the_Kings",
+  "note": "Wikipedia: a popular Christmas carol of Provencal origin; the attributions to Nicolas Saboly and Lully have no documents behind them"
  },
  {
   "id": "las-mananitas",
   "title": "Las Mañanitas",
   "views": 428,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/3842746"
+  "score": "https://musescore.com/score/3842746",
+  "composer": "Alfonso Esparza Oteo",
+  "composer_died": 1950,
+  "composer_source": "https://en.wikipedia.org/wiki/Las_Ma%C3%B1anitas",
+  "note": "Wikipedia says it was written by Esparza Oteo; his own article, which gives the death year, does not mention the song"
  },
  {
   "id": "blow-the-man-down",
   "title": "Blow the Man Down",
   "views": 427,
   "pdmx": "1860s English Sea Shanty",
-  "score": "https://musescore.com/score/5962395"
+  "score": "https://musescore.com/score/5962395",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/Blow_the_Man_Down",
+  "note": "sea shanty known by the 1860s"
  },
  {
   "id": "sankt-martin-ritt-durch-schnee-und-wind",
   "title": "Sankt Martin ritt durch Schnee und Wind",
   "views": 420,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/64272"
+  "score": "https://musescore.com/score/64272",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Sankt%20Martin%20ritt%20durch%20Schnee%20und%20Wind",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Sankt%20Martin%20ritt%20durch%20Schnee%20und%20Wind",
+   "https://en.wikipedia.org/w/index.php?search=Sankt%20Martin%20ritt%20durch%20Schnee%20und%20Wind"
+  ],
+  "note": "German children's song; The Session's title search finds no tune whose settings follow the Song's melody; Wikipedia and Wikidata searches for the title find no page that names who wrote it; German Wikipedia's search lists only articles that mention the song"
  },
  {
   "id": "cooleys-reel",
   "title": "Cooley's Reel",
   "views": 419,
   "pdmx": "Trad.",
-  "score": "https://musescore.com/score/5048540"
+  "score": "https://musescore.com/score/5048540",
+  "composer": "Traditional",
+  "composer_source": "https://thesession.org/tunes/1",
+  "note": "The Session lists no composer; the Song matches its settings (27 equal melodic steps in a row)"
  },
  {
   "id": "walenki",
   "title": "Walenki",
   "views": 412,
   "pdmx": "Russland",
-  "score": "https://musescore.com/score/5786673"
+  "score": "https://musescore.com/score/5786673",
+  "composer": "Traditional (Russian)",
+  "composer_source": "https://en.wikipedia.org/wiki/Valenki_(song)",
+  "note": "Wikipedia: a traditional Russian-language song; Nastya Polyakova is credited as author on a 1913 record, which the page calls only a credit"
  },
  {
   "id": "last-post",
   "title": "Last Post",
   "views": 405,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5935333"
+  "score": "https://musescore.com/score/5935333",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Last_Post",
+  "checked": [
+   "https://en.wikipedia.org/wiki/Last_Post"
+  ],
+  "note": "Wikipedia: no definite composer; James Hyde's 1799 edition has the first known score, likely combining existing calls"
  },
  {
   "id": "michael-row",
   "title": "Michael, Row the Boat Ashore",
   "views": 405,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5652448"
+  "score": "https://musescore.com/score/5652448",
+  "composer": "Traditional (African American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Michael,_Row_the_Boat_Ashore",
+  "published": 1867,
+  "note": "spiritual first published in Slave Songs of the United States"
  },
  {
   "id": "scarborough-fair",
   "title": "Scarborough Fair",
   "views": 397,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5020455"
+  "score": "https://musescore.com/score/5020455",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/Scarborough_Fair_(ballad)",
+  "note": "traditional Northern English ballad"
  },
  {
   "id": "go-down-moses",
   "title": "Go Down, Moses",
   "views": 391,
   "pdmx": "Negro Spiritual Traditionnel",
-  "score": "https://musescore.com/score/6225258"
+  "score": "https://musescore.com/score/6225258",
+  "composer": "Traditional (African American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Go_Down_Moses",
+  "published": 1862,
+  "note": "spiritual"
  },
  {
   "id": "apres-un-reve",
   "title": "Après un rêve",
   "views": 370,
   "pdmx": "Gabriel Fauré",
-  "score": "https://musescore.com/score/5875760"
+  "score": "https://musescore.com/score/5875760",
+  "composer": "Gabriel Fauré",
+  "composer_died": 1924,
+  "composer_source": "https://en.wikipedia.org/wiki/Apr%C3%A8s_un_r%C3%AAve",
+  "published": 1878
  },
  {
   "id": "die-wacht-am-rhein",
   "title": "Die Wacht am Rhein",
   "views": 362,
   "pdmx": "Karl Wilhelm",
-  "score": "https://musescore.com/score/5373338"
+  "score": "https://musescore.com/score/5373338",
+  "composer": "Karl Wilhelm",
+  "composer_died": 1873,
+  "composer_source": "https://en.wikipedia.org/wiki/Karl_Wilhelm_(conductor)",
+  "note": "Wilhelm set Max Schneckenburger's 1840 poem to music in Krefeld in 1854"
  },
  {
   "id": "o-sacred-head-now-wounded",
   "title": "O Sacred Head Now Wounded",
   "views": 359,
   "pdmx": "Hans Leo Hassler",
-  "score": "https://musescore.com/score/461931"
+  "score": "https://musescore.com/score/461931",
+  "composer": "Hans Leo Hassler",
+  "composer_died": 1612,
+  "composer_source": "https://en.wikipedia.org/wiki/O_Sacred_Head,_Now_Wounded",
+  "published": 1601,
+  "note": "the Passion Chorale, first a secular love song; harmonized by Bach"
  },
  {
   "id": "jupiter",
   "title": "Jupiter",
   "views": 358,
   "pdmx": "Gustav Holst",
-  "score": "https://musescore.com/score/4936279"
+  "score": "https://musescore.com/score/4936279",
+  "composer": "Gustav Holst",
+  "composer_died": 1934,
+  "composer_source": "https://en.wikipedia.org/wiki/Jupiter,_the_Bringer_of_Jollity"
  },
  {
   "id": "ye-jacobites-by-name",
   "title": "Ye Jacobites by Name",
   "views": 349,
   "pdmx": "Based on Eddie Reader's recording as I hear it in B minor",
-  "score": "https://musescore.com/score/5199950"
+  "score": "https://musescore.com/score/5199950",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Ye_Jacobites_by_Name",
+  "note": "Wikipedia: a traditional Scottish folk song (Roud 5517); Burns rewrote the words c. 1791 to a tune taken from \"My Love's in Germany\" by Hector Macneill"
  },
  {
   "id": "good-king-wenceslas",
   "title": "Good King Wenceslas",
   "views": 346,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/46163"
+  "score": "https://musescore.com/score/46163",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Good_King_Wenceslas",
+  "published": 1582,
+  "checked": [
+   "https://en.wikipedia.org/wiki/Good_King_Wenceslas"
+  ],
+  "note": "Wikipedia: the tune Tempus adest floridum has no named composer; first published in Piae Cantiones 1582"
  },
  {
   "id": "tarantella-siciliana",
   "title": "Tarantella Siciliana",
   "views": 334,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4666297"
+  "score": "https://musescore.com/score/4666297",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Tarantella%20Siciliana",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Tarantella%20Siciliana",
+   "https://en.wikipedia.org/w/index.php?search=Tarantella%20Siciliana"
+  ],
+  "note": "The Session's tarantellas don't follow the Song's melody; Wikipedia mentions the Tarantella Siciliana only as a dance, with no tune or composer"
  },
  {
   "id": "can-can",
   "title": "Can-Can",
   "views": 325,
   "pdmx": "Offenbach",
-  "score": "https://musescore.com/score/5983155"
+  "score": "https://musescore.com/score/5983155",
+  "composer": "Jacques Offenbach",
+  "composer_died": 1880,
+  "composer_source": "https://en.wikipedia.org/wiki/Orpheus_in_the_Underworld",
+  "published": 1858,
+  "note": "Galop infernal from Orpheus in the Underworld"
  },
  {
   "id": "leave-her-johnny",
   "title": "Leave Her Johnny",
   "views": 318,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4612397"
+  "score": "https://musescore.com/score/4612397",
+  "composer": "Traditional",
+  "composer_source": "https://en.wikipedia.org/wiki/Sea_shanty",
+  "note": "Wikipedia: \"Leave Her, Johnny\" is a sea shanty, a genre of traditional folk song; no page names who wrote it"
  },
  {
   "id": "polovtsian-dances",
   "title": "Polovtsian Dances",
   "views": 311,
   "pdmx": "A.Borodine",
-  "score": "https://musescore.com/score/5912041"
+  "score": "https://musescore.com/score/5912041",
+  "composer": "Alexander Borodin",
+  "composer_died": 1887,
+  "composer_source": "https://en.wikipedia.org/wiki/Polovtsian_Dances"
  },
  {
   "id": "silent-night",
   "title": "Silent Night",
   "views": 305,
   "pdmx": "Traditional Song",
-  "score": "https://musescore.com/score/6407850"
+  "score": "https://musescore.com/score/6407850",
+  "composer": "Franz Xaver Gruber",
+  "composer_died": 1863,
+  "composer_source": "https://en.wikipedia.org/wiki/Silent_Night",
+  "published": 1833,
+  "note": "words Joseph Mohr 1816; Gruber composed the music in 1818"
  },
  {
   "id": "jig-of-slurs",
   "title": "The Jig Of Slurs",
   "views": 304,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5044046"
+  "score": "https://musescore.com/score/5044046",
+  "composer": "G. S. McLennan",
+  "composer_died": 1929,
+  "composer_source": "https://thesession.org/tunes/35",
+  "note": "The Session credits G.S. MacLennan; death year from the English Wikipedia article G. S. McLennan; the Song matches The Session setting (24 equal melodic steps in a row)"
  },
  {
   "id": "thomas-campion-never-weather-beaten-sail",
   "title": "Never Weather-Beaten Sail",
   "views": 304,
   "pdmx": "THOMAS CAMPION (ca 1566-1619)",
-  "score": "https://musescore.com/score/5187101"
+  "score": "https://musescore.com/score/5187101",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Never%20Weather-Beaten%20Sail",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Never%20Weather-Beaten%20Sail",
+   "https://en.wikipedia.org/w/index.php?search=Never%20Weather-Beaten%20Sail"
+  ],
+  "note": "Wikipedia has Thomas Campion's poem set by Parry (Songs of Farewell), Charles Wood and Simon Jackson, and the Song's score credits Campion, but no allowed page says which setting this score is, so it stays Unknown for the owner to check; The Session's title search finds no tune whose settings follow the Song's melody; Wikipedia and Wikidata searches for the title find no page that names who wrote it"
  },
  {
   "id": "chapeloise",
   "title": "Chapeloise",
   "views": 302,
   "pdmx": "traditional",
-  "score": "https://musescore.com/score/49011"
+  "score": "https://musescore.com/score/49011",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Chapeloise",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Chapeloise",
+   "https://en.wikipedia.org/w/index.php?search=Chapeloise"
+  ],
+  "note": "The Session has no tune of this name; Wikipedia and Wikidata searches find only football club pages"
  },
  {
   "id": "lightly-row",
   "title": "Lightly Row",
   "views": 296,
   "pdmx": "UnKnown",
-  "score": "https://musescore.com/score/2959006"
+  "score": "https://musescore.com/score/2959006",
+  "composer": "Traditional (German)",
+  "composer_source": "https://en.wikipedia.org/wiki/H%C3%A4nschen_klein",
+  "note": "the tune of the German children's song Haenschen klein; Wikipedia does not name who composed it (it mentions Franz Wiedemann as credited)"
  },
  {
   "id": "morpeth-rant",
   "title": "Morpeth Rant",
   "views": 294,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/126259"
+  "score": "https://musescore.com/score/126259",
+  "composer": "William Shield",
+  "composer_died": 1829,
+  "composer_source": "https://thesession.org/tunes/1310",
+  "note": "The Session credits William Shield; death year from his English Wikipedia article; the Song matches The Session setting 26066 (26 equal melodic steps in a row)"
  },
  {
   "id": "flee-as-a-bird",
   "title": "Flee As A Bird",
   "views": 293,
   "pdmx": "M. S. B. DANA",
-  "score": "https://musescore.com/score/5411325"
+  "score": "https://musescore.com/score/5411325",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Flee%20As%20A%20Bird",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Flee%20As%20A%20Bird",
+   "https://en.wikipedia.org/w/index.php?search=Flee%20As%20A%20Bird"
+  ],
+  "note": "The Session's 'Flee As A Bird' (5678) is a hornpipe that doesn't follow the Song's melody; Wikidata has a tune item (Q60994577) with no composer, and a hymn tune item (Q127051421) with none"
  },
  {
   "id": "simple-gifts",
   "title": "Simple Gifts",
   "views": 289,
   "pdmx": "Traditional",
-  "score": "https://musescore.com/score/4875683"
+  "score": "https://musescore.com/score/4875683",
+  "composer": "Joseph Brackett",
+  "composer_died": 1882,
+  "composer_source": "https://en.wikipedia.org/wiki/Simple_Gifts",
+  "note": "Shaker song of 1848, words and tune by Brackett"
  },
  {
   "id": "sakura",
   "title": "Sakura",
   "views": 287,
   "pdmx": "Japanese Folk Song",
-  "score": "https://musescore.com/score/5962393"
+  "score": "https://musescore.com/score/5962393",
+  "composer": "Traditional (Japanese)",
+  "composer_source": "https://en.wikipedia.org/wiki/Sakura_Sakura",
+  "published": 1888,
+  "note": "Edo-period melody; first published in the 1888 Sokyokushu"
  },
  {
   "id": "studentsangen",
   "title": "Studentsången",
   "views": 281,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/1249076"
+  "score": "https://musescore.com/score/1249076",
+  "composer": "Prince Gustaf, Duke of Uppland",
+  "composer_died": 1852,
+  "composer_source": "https://sv.wikipedia.org/wiki/Studentsången",
+  "note": "Swedish Wikipedia: words by Herman Satherberg (no lyricist_died: the words were written to Gustaf's existing melody); death year from the English article"
  },
  {
   "id": "an-die-musik-d-547",
   "title": "An die Musik D.547",
   "views": 277,
   "pdmx": "Franz Schubert (1797 - 1828)",
-  "score": "https://musescore.com/score/6171788"
+  "score": "https://musescore.com/score/6171788",
+  "composer": "Franz Schubert",
+  "composer_died": 1828,
+  "composer_source": "https://en.wikipedia.org/wiki/An_die_Musik",
+  "published": 1827,
+  "note": "composed March 1817; words Franz von Schober"
  },
  {
   "id": "aura-lee",
   "title": "Aura Lee",
   "views": 272,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/92227"
+  "score": "https://musescore.com/score/92227",
+  "composer": "George R. Poulton",
+  "composer_died": 1867,
+  "composer_source": "https://en.wikipedia.org/wiki/Aura_Lee",
+  "published": 1861,
+  "note": "words W. W. Fosdick, written with the music; Wikipedia gives no death year for him, but the song was published in 1861"
  },
  {
   "id": "a-la-claire-fontaine",
   "title": "À la claire fontaine",
   "views": 271,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/1939076"
+  "score": "https://musescore.com/score/1939076",
+  "composer": "Traditional (French)",
+  "composer_source": "https://en.wikipedia.org/wiki/%C3%80_la_claire_fontaine"
  },
  {
   "id": "ah-poor-bird",
   "title": "Ah Poor Bird",
   "views": 266,
   "pdmx": "Round",
-  "score": "https://musescore.com/score/5362668"
+  "score": "https://musescore.com/score/5362668",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Ah%20Poor%20Bird",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Ah%20Poor%20Bird",
+   "https://en.wikipedia.org/w/index.php?search=Ah%20Poor%20Bird"
+  ],
+  "note": "A round; The Session's title search finds no tune whose settings follow the Song's melody; Wikipedia and Wikidata searches for the title find no page that names who wrote it"
  },
  {
   "id": "marche-slave",
   "title": "Marche Slave",
   "views": 256,
   "pdmx": "Tchaikovsky",
-  "score": "https://musescore.com/score/5892277"
+  "score": "https://musescore.com/score/5892277",
+  "composer": "Pyotr Ilyich Tchaikovsky",
+  "composer_died": 1893,
+  "composer_source": "https://en.wikipedia.org/wiki/Marche_slave",
+  "published": 1876
  },
  {
   "id": "radetzky",
   "title": "Radetzky March",
   "views": 255,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5924516"
+  "score": "https://musescore.com/score/5924516",
+  "composer": "Johann Strauss I",
+  "composer_died": 1849,
+  "composer_source": "https://en.wikipedia.org/wiki/Radetzky_March",
+  "note": "first performed 1848"
  },
  {
   "id": "befiehl-du-deine-wege",
   "title": "Befiehl du deine Wege",
   "views": 251,
   "pdmx": "Bartholomäus Gesius / Georg Philipp Telemann",
-  "score": "https://musescore.com/score/5922521"
+  "score": "https://musescore.com/score/5922521",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Befiehl_du_deine_Wege",
+  "checked": [
+   "https://en.wikipedia.org/wiki/Befiehl_du_deine_Wege"
+  ],
+  "note": "Wikipedia credits Bartholomaeus Gesius only with publishing a tune in 1603 and names the words' author, Paul Gerhardt; it does not say who composed the tune the Song plays"
  },
  {
   "id": "amarilli-mia-bella",
   "title": "Amarilli mia Bella",
   "views": 244,
   "pdmx": "Giulio Caccini",
-  "score": "https://musescore.com/score/5783020"
+  "score": "https://musescore.com/score/5783020",
+  "composer": "Giulio Caccini",
+  "composer_died": 1618,
+  "composer_source": "https://en.wikipedia.org/wiki/Amarilli,_mia_bella",
+  "published": 1602,
+  "note": "from Le nuove musiche, 1602; the author of the text is uncertain"
  },
  {
   "id": "toyland",
   "title": "Toyland",
   "views": 243,
   "pdmx": "by Victor Herbert",
-  "score": "https://musescore.com/score/2977156"
+  "score": "https://musescore.com/score/2977156",
+  "composer": "Victor Herbert",
+  "composer_died": 1924,
+  "composer_source": "https://en.wikipedia.org/wiki/Babes_in_Toyland_(operetta)",
+  "published": 1903,
+  "note": "song from the operetta Babes in Toyland, 1903"
  },
  {
   "id": "road-to-the-isles",
   "title": "Road to the Isles",
   "views": 234,
   "pdmx": "Pipe Major John McLellan",
-  "score": "https://musescore.com/score/5636003"
+  "score": "https://musescore.com/score/5636003",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Road_to_the_Isles",
+  "note": "Wikipedia calls it a traditional Scottish song and names no composer"
  },
  {
   "id": "du-gamla-du-fria",
   "title": "Du Gamla Du Fria",
   "views": 231,
   "pdmx": "anon.",
-  "score": "https://musescore.com/score/4885490"
+  "score": "https://musescore.com/score/4885490",
+  "composer": "Traditional (Swedish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Du_gamla,_Du_fria",
+  "note": "based on a Swedish folk tune; Richard Dybeck wrote the words in 1844"
  },
  {
   "id": "itsy-bitsy",
   "title": "The Itsy Bitsy Spider",
   "views": 229,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4551278"
+  "score": "https://musescore.com/score/4551278",
+  "composer": "Traditional",
+  "composer_source": "https://en.wikipedia.org/wiki/Itsy_Bitsy_Spider",
+  "published": 1910,
+  "note": "Wikipedia: the exact origin is unknown; first published in 1910 as the Spider Song"
  },
  {
   "id": "washington-post",
   "title": "The Washington Post",
   "views": 225,
   "pdmx": "J.P.Sousa",
-  "score": "https://musescore.com/score/5105169"
+  "score": "https://musescore.com/score/5105169",
+  "composer": "John Philip Sousa",
+  "composer_died": 1932,
+  "composer_source": "https://en.wikipedia.org/wiki/The_Washington_Post_(march)",
+  "note": "composed 1889"
  },
  {
   "id": "dawning-of-the-day",
   "title": "The Dawning Of The Day",
   "views": 219,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/6051679"
+  "score": "https://musescore.com/score/6051679",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=The%20Dawning%20Of%20The%20Day",
+  "checked": [
+   "https://thesession.org/tunes/search?q=The%20Dawning%20Of%20The%20Day",
+   "https://en.wikipedia.org/w/index.php?search=The%20Dawning%20Of%20The%20Day"
+  ],
+  "note": "Wikipedia says the air Fáinne Geal an Lae is credited to the harper Thomas Connellan (died 1698) and that Patrick Kavanagh's tune for On Raglan Road is similar but not the same; The Session's setting by Thomas O'Connellan (21371) doesn't follow the Song's melody, so no page says who wrote this one"
  },
  {
   "id": "it-is-well-with-my-soul",
   "title": "It Is Well With My Soul",
   "views": 218,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5162038"
+  "score": "https://musescore.com/score/5162038",
+  "composer": "Philip Bliss",
+  "composer_died": 1876,
+  "composer_source": "https://en.wikipedia.org/wiki/It_Is_Well_with_My_Soul",
+  "published": 1876,
+  "note": "Bliss set Horatio Spafford's 1873 words to his tune Ville du Havre"
  },
  {
   "id": "quen-a-omagen-da-virgen",
   "title": "Quen a omagen da Virgen",
   "views": 214,
   "pdmx": "Alfonso X El Sabio (1221-1284)",
-  "score": "https://musescore.com/score/5373129"
+  "score": "https://musescore.com/score/5373129",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Quen%20a%20omagen%20da%20Virgen",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Quen%20a%20omagen%20da%20Virgen",
+   "https://en.wikipedia.org/w/index.php?search=Quen%20a%20omagen%20da%20Virgen"
+  ],
+  "note": "Probably one of the Cantigas de Santa Maria, which the score credits to Alfonso X, but no Wikipedia page lists a cantiga of this title or numbers it; Galician, Spanish and English Wikipedia and Wikidata searches find nothing"
  },
  {
   "id": "johnny-comes-marching",
   "title": "When Johnny Comes Marching Home",
   "views": 213,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/3959221"
+  "score": "https://musescore.com/score/3959221",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/When_Johnny_Comes_Marching_Home",
+  "checked": [
+   "https://en.wikipedia.org/wiki/When_Johnny_Comes_Marching_Home"
+  ],
+  "note": "Wikipedia: Patrick Gilmore wrote the words in 1863 but said he did not compose the tune, a waif he heard; it had appeared as 'arranged (not composed)' by J. Durnal"
  },
  {
   "id": "my-bonnie",
   "title": "My Bonnie Lies over the Ocean",
   "views": 208,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4920746"
+  "score": "https://musescore.com/score/4920746",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/My_Bonnie_Lies_over_the_Ocean",
+  "published": 1881,
+  "note": "Wikipedia labels it a Traditional Scottish folk song but says its origin is uncertain; first sheet music 1881"
  },
  {
   "id": "kesh",
   "title": "The Kesh",
   "views": 202,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5487665"
+  "score": "https://musescore.com/score/5487665",
+  "composer": "Traditional",
+  "composer_source": "https://thesession.org/tunes/55",
+  "note": "The Session lists no composer; the Song matches its settings (16 equal melodic steps in a row)"
  },
  {
   "id": "manchester-hornpipe",
   "title": "Manchester Hornpipe",
   "views": 199,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/3659196"
+  "score": "https://musescore.com/score/3659196",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Manchester%20Hornpipe",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Manchester%20Hornpipe",
+   "https://en.wikipedia.org/w/index.php?search=Manchester%20Hornpipe"
+  ],
+  "note": "The Session's 'The Manchester' reel and 'Manchester Gallop' don't follow the Song's melody; Wikipedia and Wikidata have no page for the tune"
  },
  {
   "id": "doxology",
   "title": "Old Hundredth",
   "views": 195,
   "pdmx": "OLD HUNDREDTH L.M. Thomas Ken1551",
-  "score": "https://musescore.com/score/2884091"
+  "score": "https://musescore.com/score/2884091",
+  "composer": "Louis Bourgeois",
+  "composer_died": 1559,
+  "composer_source": "https://en.wikipedia.org/wiki/Old_100th",
+  "note": "Wikipedia: the tune is usually attributed to Louis Bourgeois; Genevan Psalter, 1551"
  },
  {
   "id": "si-bheag-si-mhor",
   "title": "Sí Bheag Sí Mhór",
   "views": 193,
   "pdmx": "Turlough O'Carolan 1691",
-  "score": "https://musescore.com/score/4570245"
+  "score": "https://musescore.com/score/4570245",
+  "composer": "Turlough O'Carolan",
+  "composer_died": 1738,
+  "composer_source": "https://en.wikipedia.org/wiki/S%C3%AD_Bheag,_S%C3%AD_Mh%C3%B3r",
+  "note": "Wikipedia: usually attributed to O'Carolan, though it also calls it a traditional Irish folk tune"
  },
  {
   "id": "ay-linda-amiga",
   "title": "Ay Linda Amiga",
   "views": 185,
   "pdmx": "TraditionnelRenaissance Espagnole",
-  "score": "https://musescore.com/score/6300334"
+  "score": "https://musescore.com/score/6300334",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Ay%20Linda%20Amiga",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Ay%20Linda%20Amiga",
+   "https://en.wikipedia.org/w/index.php?search=Ay%20Linda%20Amiga"
+  ],
+  "note": "Wikipedia and Wikidata searches for the title (English and Spanish) find no page for the song; The Session has no tune of this name"
  },
  {
   "id": "sloop-john-b",
   "title": "Sloop John B",
   "views": 185,
   "pdmx": "anon.",
-  "score": "https://musescore.com/score/4596515"
+  "score": "https://musescore.com/score/4596515",
+  "composer": "Traditional (Bahamian)",
+  "composer_source": "https://en.wikipedia.org/wiki/Sloop_John_B",
+  "published": 1916,
+  "note": "Bahamian folk song; first transcribed in Harper's Monthly, December 1916"
  },
  {
   "id": "una-furtiva-lagrima",
   "title": "Una Furtiva Lagrima",
   "views": 184,
   "pdmx": "Gaetano Donizetti(1797 - 1848)",
-  "score": "https://musescore.com/score/5789826"
+  "score": "https://musescore.com/score/5789826",
+  "composer": "Gaetano Donizetti",
+  "composer_died": 1848,
+  "composer_source": "https://en.wikipedia.org/wiki/Una_furtiva_lagrima",
+  "note": "aria from L'elisir d'amore"
  },
  {
   "id": "durme-durme",
   "title": "Durme Durme",
   "views": 179,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5903928"
+  "score": "https://musescore.com/score/5903928",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Durme%20Durme",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Durme%20Durme",
+   "https://en.wikipedia.org/w/index.php?search=Durme%20Durme"
+  ],
+  "note": "A Sephardic lullaby; Wikipedia only quotes its words as an example of Judaeo-Spanish, with no composer or tradition for the tune; The Session has no tune of this name"
  },
  {
   "id": "tipperary",
   "title": "It's a Long Way to Tipperary",
   "views": 178,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5102811"
+  "score": "https://musescore.com/score/5102811",
+  "composer": "Jack Judge and Harry Williams",
+  "composer_died": 1938,
+  "lyricist_died": 1938,
+  "composer_source": "https://en.wikipedia.org/wiki/It%27s_a_Long_Way_to_Tipperary",
+  "published": 1912,
+  "note": "Wikipedia: authorship long disputed between Judge and Williams, who co-wrote an earlier version in 1909; words by the same two, written with the music; Williams died in 1924"
  },
  {
   "id": "sumer-is-icumen-in",
   "title": "Sumer is icumen in",
   "views": 177,
   "pdmx": "W. de Wycombe / John of Fornsete -c 1226",
-  "score": "https://musescore.com/score/6109757"
+  "score": "https://musescore.com/score/6109757",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Sumer_Is_Icumen_In",
+  "checked": [
+   "https://en.wikipedia.org/wiki/Sumer_Is_Icumen_In"
+  ],
+  "note": "Wikipedia: the composer is unknown (W. de Wycombe or John of Fornsete are only speculation); mid-13th-century rota"
  },
  {
   "id": "tico-tico-no-fuba",
   "title": "Tico Tico no Fuba",
   "views": 174,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5978726"
+  "score": "https://musescore.com/score/5978726",
+  "composer": "Zequinha de Abreu",
+  "composer_died": 1935,
+  "composer_source": "https://en.wikipedia.org/wiki/Tico-Tico_no_Fub%C3%A1",
+  "note": "choro composed in 1917 as Tico-Tico no Farelo; first recorded 1931"
  },
  {
   "id": "swan",
   "title": "The Swan",
   "views": 173,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/6146732"
+  "score": "https://musescore.com/score/6146732",
+  "composer": "Camille Saint-Saëns",
+  "composer_died": 1921,
+  "composer_source": "https://en.wikipedia.org/wiki/Le_cygne",
+  "note": "The Swan, 13th movement of The Carnival of the Animals"
  },
  {
   "id": "salvation-is-created",
   "title": "Salvation is Created",
   "views": 172,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5108826"
+  "score": "https://musescore.com/score/5108826",
+  "composer": "Pavel Chesnokov",
+  "composer_died": 1944,
+  "composer_source": "https://en.wikipedia.org/wiki/Pavel_Chesnokov",
+  "note": "composed 1912"
  },
  {
   "id": "my-lagan-love",
   "title": "My Lagan Love",
   "views": 171,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4963063"
+  "score": "https://musescore.com/score/4963063",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://en.wikipedia.org/wiki/My_Lagan_Love",
+  "note": "traditional Irish air first collected in 1903 in Donegal; Joseph Campbell wrote the English words"
  },
  {
   "id": "farmer-in-the-dell",
   "title": "The Farmer in the Dell",
   "views": 168,
   "pdmx": "Traditional",
-  "score": "https://musescore.com/score/6404872"
+  "score": "https://musescore.com/score/6404872",
+  "composer": "Traditional",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Farmer_in_the_Dell",
+  "published": 1826,
+  "note": "probably German in origin; the rhyme was first recorded in Germany in 1826"
  },
  {
   "id": "quand-jetais-chez-mon-pere",
   "title": "Quand j'étais chez mon père",
   "views": 167,
   "pdmx": "Traditionnel",
-  "score": "https://musescore.com/score/1513711"
+  "score": "https://musescore.com/score/1513711",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Quand%20j%27%C3%A9tais%20chez%20mon%20p%C3%A8re",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Quand%20j%27%C3%A9tais%20chez%20mon%20p%C3%A8re",
+   "https://en.wikipedia.org/w/index.php?search=Quand%20j%27%C3%A9tais%20chez%20mon%20p%C3%A8re"
+  ],
+  "note": "French song; Wikipedia only lists it as a track on albums, with no composer; The Session has no tune of this name"
  },
  {
   "id": "ved-rondane",
   "title": "Ved Rondane",
   "views": 158,
   "pdmx": "E.Grieg",
-  "score": "https://musescore.com/score/5839185"
+  "score": "https://musescore.com/score/5839185",
+  "composer": "Edvard Grieg",
+  "composer_died": 1907,
+  "composer_source": "https://en.wikipedia.org/wiki/Høvringen",
+  "note": "Wikipedia: Vinje's poem Ved Rondane was set to music by Grieg"
  },
  {
   "id": "battle-hymn",
   "title": "Battle Hymn of the Republic",
   "views": 156,
   "pdmx": "William Steffe",
-  "score": "https://musescore.com/score/5372482"
+  "score": "https://musescore.com/score/5372482",
+  "composer": "William Steffe",
+  "composer_source": "https://en.wikipedia.org/wiki/Battle_Hymn_of_the_Republic",
+  "published": 1862,
+  "note": "Wikipedia's infobox credits Steffe with the music (1856), from an older camp-meeting folk hymn; no death year given on the page, but the tune was published long before 1931"
  },
  {
   "id": "au-clair",
   "title": "Au Clair de la Lune",
   "views": 155,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/6049723"
+  "score": "https://musescore.com/score/6049723",
+  "composer": "Traditional (French)",
+  "composer_source": "https://en.wikipedia.org/wiki/Au_clair_de_la_lune",
+  "published": 1820,
+  "note": "French folk song of the 18th century; first published 1820"
  },
  {
   "id": "farewell-to-whiskey",
   "title": "Farewell to Whiskey",
   "views": 154,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5148331"
+  "score": "https://musescore.com/score/5148331",
+  "composer": "Niel Gow",
+  "composer_died": 1807,
+  "composer_source": "https://thesession.org/tunes/1529",
+  "note": "The Session credits Niel Gow; death year from his English Wikipedia article; the Song matches The Session settings (21 equal melodic steps in a row)"
  },
  {
   "id": "all-through-the-night",
   "title": "All Through the Night",
   "views": 153,
   "pdmx": "English Words by AP Graves",
-  "score": "https://musescore.com/score/2547421"
+  "score": "https://musescore.com/score/2547421",
+  "composer": "Traditional (Welsh)",
+  "composer_source": "https://en.wikipedia.org/wiki/All_Through_the_Night_(folk_song)",
+  "published": 1784,
+  "note": "Welsh folk song Ar Hyd y Nos, first recorded in Edward Jones's Musical and Poetical Relics of the Welsh Bards, 1784"
  },
  {
   "id": "nobody-knows",
   "title": "Nobody Knows the Trouble I've Seen",
   "views": 152,
   "pdmx": "anon.",
-  "score": "https://musescore.com/score/5052301"
+  "score": "https://musescore.com/score/5052301",
+  "composer": "Traditional (African American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Nobody_Knows_the_Trouble_I%27ve_Seen",
+  "published": 1866,
+  "note": "spiritual, first published in 1866"
  },
  {
   "id": "teddy-bears-picnic",
   "title": "The Teddy Bears' Picnic",
   "views": 147,
   "pdmx": "John W. Bratton (c.1907)",
-  "score": "https://musescore.com/score/4859461"
+  "score": "https://musescore.com/score/4859461",
+  "composer": "John Walter Bratton",
+  "composer_died": 1947,
+  "composer_source": "https://en.wikipedia.org/wiki/The_Teddy_Bears%27_Picnic",
+  "note": "melody 1907; Jimmy Kennedy's words came in 1932"
  },
  {
   "id": "cumberland-gap",
   "title": "Cumberland Gap",
   "views": 144,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5111727"
+  "score": "https://musescore.com/score/5111727",
+  "composer": "Traditional (American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Cumberland_Gap_(song)",
+  "note": "Appalachian folk song, likely from the later 19th century"
  },
  {
   "id": "o-ce-veste-minunata",
   "title": "O Ce Veste Minunata",
   "views": 142,
   "pdmx": "aranjament Ionut Boncea",
-  "score": "https://musescore.com/score/5894554"
+  "score": "https://musescore.com/score/5894554",
+  "composer": "Traditional (Romanian)",
+  "composer_source": "https://ro.wikipedia.org/wiki/O,_ce_veste_minunată!",
+  "note": "Romanian Wikipedia: a carol whose melody is from the Romanian folk heritage, collected by Dumitru Kiriac-Georgescu"
  },
  {
   "id": "come-thou-fount",
   "title": "Come Thou Fount",
   "views": 140,
   "pdmx": "Robert Robinson 1735-1790",
-  "score": "https://musescore.com/score/6322886"
+  "score": "https://musescore.com/score/6322886",
+  "composer": "Traditional (American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Come,_Thou_Fount_of_Every_Blessing",
+  "published": 1813,
+  "note": "the tune Nettleton, an American folk tune, first printed in Wyeth's Repository of Sacred Music, 1813; words Robert Robinson, 1758"
  },
  {
   "id": "away-in-a-manger",
   "title": "Away in a Manger",
   "views": 139,
   "pdmx": "Music: Anon./William J Kirkpatrick Arranged by Todd McCabe and April Moriarty",
-  "score": "https://musescore.com/score/5864870"
+  "score": "https://musescore.com/score/5864870",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Away_in_a_Manger",
+  "checked": [
+   "https://en.wikipedia.org/wiki/Away_in_a_Manger"
+  ],
+  "note": "the Song's tune is not identified (Wikipedia lists the Mueller, Cradle Song and Spilman tunes with different authors); PDMX names 'Anon./William J Kirkpatrick'"
  },
  {
   "id": "cantique-de-jean-racine-op-11",
   "title": "Cantique de Jean Racine Op. 11",
   "views": 139,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5783339"
+  "score": "https://musescore.com/score/5783339",
+  "composer": "Gabriel Fauré",
+  "composer_died": 1924,
+  "composer_source": "https://en.wikipedia.org/wiki/Cantique_de_Jean_Racine",
+  "note": "composed 1864-65"
  },
  {
   "id": "summ-summ-summ",
   "title": "Summ Summ Summ",
   "views": 139,
   "pdmx": "Deutsches Kinderlied",
-  "score": "https://musescore.com/score/5908191"
+  "score": "https://musescore.com/score/5908191",
+  "composer": "Traditional (Bohemian)",
+  "composer_source": "https://de.wikipedia.org/wiki/Summ,_summ,_summ",
+  "note": "German Wikipedia: the melody follows a Bohemian folk tune first written down in 1825; Carl Reinecke composed an alternative melody in 1875"
  },
  {
   "id": "swing-low",
   "title": "Swing Low, Sweet Chariot",
   "views": 136,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5614569"
+  "score": "https://musescore.com/score/5614569",
+  "composer": "Wallace Willis and Minerva Willis",
+  "composer_source": "https://en.wikipedia.org/wiki/Swing_Low,_Sweet_Chariot",
+  "published": 1873,
+  "note": "Wikipedia credits the Choctaw freedmen Wallace Willis and his daughter Minerva Willis, probably composed in the late 1860s; no death years given, but first published in The Jubilee Singers, 1873"
  },
  {
   "id": "flow-my-tears",
   "title": "Flow My Tears",
   "views": 134,
   "pdmx": "John Dowland",
-  "score": "https://musescore.com/score/5966221"
+  "score": "https://musescore.com/score/5966221",
+  "composer": "John Dowland",
+  "composer_died": 1626,
+  "composer_source": "https://en.wikipedia.org/wiki/Flow,_my_tears",
+  "published": 1600,
+  "note": "song from The Second Booke of Songs or Ayres, 1600, reworked from his Lachrimae pavane"
  },
  {
   "id": "i-skovens-dybe-stille-ro",
   "title": "I skovens dybe stille ro",
   "views": 131,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4875220"
+  "score": "https://musescore.com/score/4875220",
+  "composer": "Traditional (Danish)",
+  "composer_source": "https://da.wikipedia.org/wiki/I_skovens_dybe,_stille_ro",
+  "note": "Danish Wikipedia: a Danish folk melody, possibly from Langeland; the composer is not known; Fritz Andersen wrote the words"
  },
  {
   "id": "lord-lovats-lament",
   "title": "Lord Lovat's Lament",
   "views": 131,
   "pdmx": "David FraserJames Stewart Robertson",
-  "score": "https://musescore.com/score/5924775"
+  "score": "https://musescore.com/score/5924775",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Lord%20Lovat%27s%20Lament",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Lord%20Lovat%27s%20Lament",
+   "https://en.wikipedia.org/w/index.php?search=Lord%20Lovat%27s%20Lament"
+  ],
+  "note": "Wikipedia's page says it was reportedly composed by Ewen MacGregor or by his pupil David Fraser, so it names no single writer; The Session's march (3872) lists no composer and follows the Song's melody"
  },
  {
   "id": "santiana",
   "title": "Santiana",
   "views": 128,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4599844"
+  "score": "https://musescore.com/score/4599844",
+  "composer": "Traditional",
+  "composer_source": "https://en.wikipedia.org/wiki/Santianna",
+  "note": "sea shanty with no single author, from at least the 1850s"
  },
  {
   "id": "toss-the-feathers",
   "title": "Toss the Feathers",
   "views": 127,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4927483"
+  "score": "https://musescore.com/score/4927483",
+  "composer": "Traditional",
+  "composer_source": "https://thesession.org/tunes/113",
+  "note": "The Session lists no composer; the Song matches its setting 12702 (51 equal melodic steps in a row)"
  },
  {
   "id": "carrickfergus",
   "title": "Carrickfergus",
   "views": 122,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4976804"
+  "score": "https://musescore.com/score/4976804",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Carrickfergus_(song)",
+  "note": "traditional Irish melody traced to the Irish-language song Do Bhi Bean Uasal"
  },
  {
   "id": "planxty-irwin",
   "title": "Planxty Irwin",
   "views": 117,
   "pdmx": "Turlough O'Carolan (1713)",
-  "score": "https://musescore.com/score/5056468"
+  "score": "https://musescore.com/score/5056468",
+  "composer": "Turlough O'Carolan",
+  "composer_died": 1738,
+  "composer_source": "https://en.wikipedia.org/wiki/Turlough_O%27Carolan",
+  "note": "Wikipedia lists Planxty John Irwin among his 214 compositions identified by Donal O'Sullivan"
  },
  {
   "id": "grand-old-flag",
   "title": "You're a Grand Old Flag",
   "views": 116,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5829394"
+  "score": "https://musescore.com/score/5829394",
+  "composer": "George M. Cohan",
+  "composer_died": 1942,
+  "lyricist_died": 1942,
+  "composer_source": "https://en.wikipedia.org/wiki/You%27re_a_Grand_Old_Flag",
+  "published": 1906,
+  "note": "words and music by Cohan, for George Washington, Jr."
  },
  {
   "id": "drunken-sailor",
   "title": "Drunken Sailor",
   "views": 114,
   "pdmx": "anon.",
-  "score": "https://musescore.com/score/4843498"
+  "score": "https://musescore.com/score/4843498",
+  "composer": "Traditional",
+  "composer_source": "https://en.wikipedia.org/wiki/Drunken_Sailor",
+  "note": "sea shanty; Wikipedia says its authorship and origin are unknown; at least the 1830s"
  },
  {
   "id": "bonnie-blue-flag",
   "title": "Bonnie Blue Flag",
   "views": 112,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5016547"
+  "score": "https://musescore.com/score/5016547",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Bonnie_Blue_Flag",
+  "checked": [
+   "https://en.wikipedia.org/wiki/The_Bonnie_Blue_Flag"
+  ],
+  "note": "Wikipedia: words by Harry McCarthy, 1861, to the tune of The Irish Jaunting Car, whose composer it does not name"
  },
  {
   "id": "what-a-friend",
   "title": "What a Friend We Have in Jesus",
   "views": 112,
   "pdmx": "Words Charles C. Converse 1868 Lyrics Joseph M. Scriven 1855",
-  "score": "https://musescore.com/score/4592394"
+  "score": "https://musescore.com/score/4592394",
+  "composer": "Charles Crozat Converse",
+  "composer_died": 1918,
+  "composer_source": "https://en.wikipedia.org/wiki/What_a_Friend_We_Have_in_Jesus",
+  "note": "Converse wrote the tune in 1868 for Joseph Scriven's 1855 words"
  },
  {
   "id": "ill-tell-me-ma",
   "title": "I'll Tell Me Ma",
   "views": 108,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5151762"
+  "score": "https://musescore.com/score/5151762",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://en.wikipedia.org/wiki/I%27ll_Tell_Me_Ma",
+  "note": "traditional children's song, especially from Ulster; earliest source cited 1894"
  },
  {
   "id": "let-me-call-you-sweetheart",
   "title": "Let Me Call You Sweetheart",
   "views": 108,
   "pdmx": "music: Leo Friedman [1910]",
-  "score": "https://musescore.com/score/4668126"
+  "score": "https://musescore.com/score/4668126",
+  "composer": "Leo Friedman",
+  "composer_source": "https://en.wikipedia.org/wiki/Let_Me_Call_You_Sweetheart",
+  "published": 1910,
+  "note": "Wikipedia gives no death year; published in 1910; words Beth Slater Whitson"
  },
  {
   "id": "pavane-op-50",
   "title": "Pavane Op. 50",
   "views": 105,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5970212"
+  "score": "https://musescore.com/score/5970212",
+  "composer": "Gabriel Fauré",
+  "composer_died": 1924,
+  "composer_source": "https://en.wikipedia.org/wiki/Pavane_(Faur%C3%A9)",
+  "note": "composed 1887"
  },
  {
   "id": "dargason",
   "title": "Dargason",
   "views": 103,
   "pdmx": "Traditionnel",
-  "score": "https://musescore.com/score/1611721"
+  "score": "https://musescore.com/score/1611721",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/Dargason",
+  "note": "Wikipedia: a seventeenth-century English tune"
  },
  {
   "id": "noel-nouvelet",
   "title": "Noël nouvelet",
   "views": 103,
   "pdmx": "XV ème siècle",
-  "score": "https://musescore.com/score/5888833"
+  "score": "https://musescore.com/score/5888833",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Christmas_in_France",
+  "checked": [
+   "https://en.wikipedia.org/wiki/Christmas_in_France"
+  ],
+  "note": "Wikipedia names no composer; the carol dates from the 15th century"
  },
  {
   "id": "bobby-shaftoe",
   "title": "Bobby Shaftoe",
   "views": 101,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5919737"
+  "score": "https://musescore.com/score/5919737",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/Bobby_Shafto",
+  "note": "North East English folk song and nursery rhyme"
  },
  {
   "id": "come-back-to-sorrento",
   "title": "Come Back To Sorrento",
   "views": 100,
   "pdmx": "Ernesto De Curtis 1902",
-  "score": "https://musescore.com/score/4954761"
+  "score": "https://musescore.com/score/4954761",
+  "composer": "Ernesto De Curtis",
+  "composer_source": "https://en.wikipedia.org/wiki/Torna_a_Surriento",
+  "published": 1894,
+  "note": "Wikipedia gives no death years; published in 1894 (words by his brother Giambattista De Curtis)"
  },
  {
   "id": "billy-in-the-lowground",
   "title": "Billy in the Lowground",
   "views": 99,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4909362"
+  "score": "https://musescore.com/score/4909362",
+  "composer": "Traditional",
+  "composer_source": "https://thesession.org/tunes/5135",
+  "note": "The Session lists no composer; the Song matches its settings (31 equal melodic steps in a row)"
  },
  {
   "id": "roddy-mccorley",
   "title": "Roddy McCorley",
   "views": 98,
   "pdmx": "Traditional Irish",
-  "score": "https://musescore.com/score/6054736"
+  "score": "https://musescore.com/score/6054736",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Roddy_McCorley",
+  "checked": [
+   "https://en.wikipedia.org/wiki/Roddy_McCorley"
+  ],
+  "note": "Wikipedia names only Ethna Carbery as author of the words; it names no composer of the melody"
  },
  {
   "id": "though-philomela-lost-her-love",
   "title": "Though Philomela lost her love",
   "views": 98,
   "pdmx": "Though Philomela lost her love - Morley",
-  "score": "https://musescore.com/score/5787358"
+  "score": "https://musescore.com/score/5787358",
+  "composer": "Thomas Morley",
+  "composer_died": 1602,
+  "composer_source": "https://en.wikipedia.org/wiki/Thomas_Morley",
+  "note": "madrigal"
  },
  {
   "id": "marching-through-georgia",
   "title": "Marching Through Georgia",
   "views": 96,
   "pdmx": "1865 Henry C. Work",
-  "score": "https://musescore.com/score/4934328"
+  "score": "https://musescore.com/score/4934328",
+  "composer": "Henry Clay Work",
+  "composer_died": 1884,
+  "lyricist_died": 1884,
+  "composer_source": "https://en.wikipedia.org/wiki/Marching_Through_Georgia",
+  "published": 1865,
+  "note": "words and music by Work"
  },
  {
   "id": "old-macdonald",
   "title": "Old MacDonald Had a Farm",
   "views": 93,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/6236004"
+  "score": "https://musescore.com/score/6236004",
+  "composer": "Traditional",
+  "composer_source": "https://en.wikipedia.org/wiki/Old_MacDonald_Had_a_Farm",
+  "note": "Wikipedia: no known author; a folk song in Great Britain, Ireland and North America for hundreds of years"
  },
  {
   "id": "sometimes-i-feel-like-a-motherless-child",
   "title": "Sometimes I feel like a motherless child",
   "views": 91,
   "pdmx": "anon.",
-  "score": "https://musescore.com/score/4822735"
+  "score": "https://musescore.com/score/4822735",
+  "composer": "Traditional (African American)",
+  "composer_source": "https://en.wikipedia.org/wiki/Sometimes_I_Feel_Like_a_Motherless_Child",
+  "note": "traditional spiritual from the era of slavery"
  },
  {
   "id": "wild-rover",
   "title": "The Wild Rover",
   "views": 91,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5919827"
+  "score": "https://musescore.com/score/5919827",
+  "composer": "Traditional",
+  "composer_source": "https://en.wikipedia.org/wiki/The_Wild_Rover",
+  "note": "traditional folk song; Wikipedia does not settle whether English, Scottish or Irish"
  },
  {
   "id": "79ths-farewell-to-gibraltar",
   "title": "79th's Farewell to Gibraltar",
   "views": 89,
   "pdmx": "Unknown",
-  "score": "https://musescore.com/score/4557588"
+  "score": "https://musescore.com/score/4557588",
+  "composer": "John MacDonald",
+  "composer_source": "https://en.wikipedia.org/wiki/Somewhere_Far_Beyond",
+  "published": 1848,
+  "note": "Wikipedia (Somewhere Far Beyond): written by Pipe Major John MacDonald of the 79th Regiment of Foot; The Session (5318) agrees, naming Pipe Major J MacDonald. No allowed page gives his death year or a publication year, so published is 1848, when the regiment left Gibraltar (en.wikipedia.org/wiki/Queen%27s_Own_Cameron_Highlanders: Gibraltar 1841 to 1848), the latest the farewell march could date from; the owner should confirm"
  },
  {
   "id": "american-patrol",
   "title": "American Patrol",
   "views": 89,
   "pdmx": "F. W. Meacham 1885",
-  "score": "https://musescore.com/score/4886417"
+  "score": "https://musescore.com/score/4886417",
+  "composer": "F. W. Meacham",
+  "composer_source": "https://en.wikipedia.org/wiki/American_Patrol",
+  "published": 1891,
+  "note": "Wikipedia gives no death year (composed 1885, published 1891 by Carl Fischer)"
  },
  {
   "id": "drowsy-maggie",
   "title": "Drowsy Maggie",
   "views": 89,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4702723"
+  "score": "https://musescore.com/score/4702723",
+  "composer": "Traditional",
+  "composer_source": "https://thesession.org/tunes/27",
+  "note": "The Session lists no composer; the Song matches its settings (72 equal melodic steps in a row)"
  },
  {
   "id": "lily-of-the-valley",
   "title": "Lily Of The Valley",
   "views": 89,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4993276"
+  "score": "https://musescore.com/score/4993276",
+  "composer": "Peadar Ó Riada",
+  "composer_source": "https://thesession.org/tunes/11807",
+  "published": 2012,
+  "remove": "composer is living: The Session credits Peadar Ó Riada, and Wikipedia gives his birth as 1954 with no death",
+  "note": "The Session's Lily Of The Valley (11807) follows the Song's melody; published is the year it was first posted there. Wikipedia (Peadar Ó Riada): born 1954, living in Cúil Aodha"
  },
  {
   "id": "ragtime-annie",
   "title": "Ragtime Annie",
   "views": 89,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5007625"
+  "score": "https://musescore.com/score/5007625",
+  "composer": "Traditional",
+  "composer_source": "https://thesession.org/tunes/3954",
+  "note": "The Session lists no composer; the Song matches its setting 30391 (110 equal melodic steps in a row)"
  },
  {
   "id": "did-you-ever-see-a-lassie",
   "title": "Did You Ever See a Lassie",
   "views": 88,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4964516"
+  "score": "https://musescore.com/score/4964516",
+  "composer": "Traditional",
+  "composer_source": "https://en.wikipedia.org/wiki/Did_You_Ever_See_a_Lassie%3F",
+  "published": 1909,
+  "note": "children's song sung to the tune of Oh du lieber Augustin; first collected in the United States in the 1890s, first in print in 1909"
  },
  {
   "id": "dies-irae",
   "title": "Dies Irae",
   "views": 88,
   "pdmx": "W. A. Mozart",
-  "score": "https://musescore.com/score/5872774"
+  "score": "https://musescore.com/score/5872774",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Dies_irae",
+  "checked": [
+   "https://en.wikipedia.org/wiki/Dies_irae"
+  ],
+  "note": "Wikipedia names no composer of the plainchant melody; PDMX names Mozart"
  },
  {
   "id": "gaudete-gaudete-christus-est-natus",
   "title": "Gaudete! Gaudete! Christus est natus",
   "views": 88,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5715791"
+  "score": "https://musescore.com/score/5715791",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Gaudete",
+  "published": 1582,
+  "checked": [
+   "https://en.wikipedia.org/wiki/Gaudete"
+  ],
+  "note": "Wikipedia: no composer named for the melody; first published in Piae Cantiones 1582"
  },
  {
   "id": "illumina-oculos-meos",
   "title": "Illumina oculos meos",
   "views": 88,
   "pdmx": "Illumina oculos meos - Palestrina",
-  "score": "https://musescore.com/score/5792453"
+  "score": "https://musescore.com/score/5792453",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Illumina%20oculos%20meos",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Illumina%20oculos%20meos",
+   "https://en.wikipedia.org/w/index.php?search=Illumina%20oculos%20meos"
+  ],
+  "note": "The score credits Palestrina, but Wikipedia's lists of compositions give an Illumina oculos meos for Palestrina and another for Andreas de Silva (Wikidata Q116268169), and no allowed page says which one this is"
  },
  {
   "id": "den-fromme-helena",
   "title": "Den Fromme Helena",
   "views": 87,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/84635"
+  "score": "https://musescore.com/score/84635",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Den%20Fromme%20Helena",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Den%20Fromme%20Helena",
+   "https://en.wikipedia.org/w/index.php?search=Den%20Fromme%20Helena"
+  ],
+  "note": "Wikipedia and Wikidata searches find only Wilhelm Busch's German 'Die fromme Helene' film and book pages, nothing on a tune; The Session has no tune of this name"
  },
  {
   "id": "strike-the-bell",
   "title": "Strike The Bell",
   "views": 87,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4724701"
+  "score": "https://musescore.com/score/4724701",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=Strike%20The%20Bell",
+  "checked": [
+   "https://thesession.org/tunes/search?q=Strike%20The%20Bell",
+   "https://en.wikipedia.org/w/index.php?search=Strike%20The%20Bell"
+  ],
+  "note": "The Session's title search lists no tune of this name (its 'Click Go The Shears' shares a short phrase but not the tune); Wikipedia and Wikidata find no page for it"
  },
  {
   "id": "as-i-roved-out",
   "title": "As I Roved Out",
   "views": 84,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5119784"
+  "score": "https://musescore.com/score/5119784",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/Seventeen_Come_Sunday",
+  "note": "Wikipedia: \"Seventeen Come Sunday\", also known as \"As I Roved Out\", is an English folk song (Roud 277); the Song was matched by title, and The Session's two tunes of this name do not follow its melody"
  },
  {
   "id": "die-forelle",
   "title": "Die Forelle",
   "views": 83,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5889623"
+  "score": "https://musescore.com/score/5889623",
+  "composer": "Franz Schubert",
+  "composer_died": 1828,
+  "composer_source": "https://en.wikipedia.org/wiki/Die_Forelle",
+  "published": 1820
  },
  {
   "id": "my-country-tis",
   "title": "My Country, 'Tis of Thee",
   "views": 81,
   "pdmx": "Unknown",
-  "score": "https://musescore.com/score/6253932"
+  "score": "https://musescore.com/score/6253932",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/America_(My_Country,_%27Tis_of_Thee)",
+  "checked": [
+   "https://en.wikipedia.org/wiki/America_(My_Country,_%27Tis_of_Thee)"
+  ],
+  "note": "Wikipedia: composer unknown, tune derived from God Save the King"
  },
  {
   "id": "old-french-song",
   "title": "Old French Song",
   "views": 80,
   "pdmx": "Unknown & Tchaikovsky",
-  "score": "https://musescore.com/score/5617247"
+  "score": "https://musescore.com/score/5617247",
+  "composer": "Pyotr Ilyich Tchaikovsky",
+  "composer_died": 1893,
+  "published": 1878,
+  "composer_source": "https://en.wikipedia.org/wiki/List_of_compositions_by_Pyotr_Ilyich_Tchaikovsky",
+  "note": "Wikipedia: \"Old French Song\" is a piece of his Album pour enfants, Op. 39 (1878); the score credits Tchaikovsky. His death year is from his English Wikipedia article"
  },
  {
   "id": "himno-nacional-de-bolivia",
   "title": "Himno Nacional de Bolivia",
   "views": 78,
   "pdmx": "Leopoldo Benedetta Vincenti",
-  "score": "https://musescore.com/score/6066211"
+  "score": "https://musescore.com/score/6066211",
+  "composer": "Leopoldo Benedetto Vincenti",
+  "composer_died": 1914,
+  "composer_source": "https://en.wikipedia.org/wiki/Himno_Nacional_de_Bolivia",
+  "published": 1845,
+  "note": "first performed 18 November 1845 in La Paz; death year from Spanish Wikipedia (the English article gives none); words by Jose Ignacio de Sanjines"
  },
  {
   "id": "lindisfarne",
   "title": "Lindisfarne",
   "views": 78,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4882067"
+  "score": "https://musescore.com/score/4882067",
+  "composer": "Matt Seattle",
+  "composer_source": "https://thesession.org/tunes/18058",
+  "published": 2019,
+  "remove": "composer is living: The Session credits Matt Seattle, and a comment there calls him a current member of the site",
+  "note": "The Session's Lindisfarne (18058) follows the Song's melody; published is the year it was first posted there. No page gives a birth or death year"
  },
  {
   "id": "smash-the-windows",
   "title": "Smash the Windows",
   "views": 75,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4858654"
+  "score": "https://musescore.com/score/4858654",
+  "composer": "Traditional",
+  "composer_source": "https://thesession.org/tunes/101",
+  "note": "The Session lists no composer; the Song matches its settings (36 equal melodic steps in a row)"
  },
  {
   "id": "bucks-of-oranmore",
   "title": "The Bucks Of Oranmore",
   "views": 74,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4928790"
+  "score": "https://musescore.com/score/4928790",
+  "composer": "Traditional",
+  "composer_source": "https://thesession.org/tunes/2",
+  "note": "The Session lists no composer; the Song is identical to its setting 22356 note for note"
  },
  {
   "id": "green-hills-of-tyrol",
   "title": "Green Hills of Tyrol",
   "views": 74,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4950621"
+  "score": "https://musescore.com/score/4950621",
+  "composer": "Gioachino Rossini",
+  "composer_died": 1868,
+  "published": 1829,
+  "composer_source": "https://en.wikipedia.org/wiki/A_Scottish_Soldier",
+  "note": "Wikipedia: the tune of \"The Green Hills of Tyrol\" was transcribed by John MacLeod during the Crimean War from a chorus in the third act of Rossini's 1829 opera Guillaume Tell; The Session's waltz (3598) follows the Song's melody. Death year from his English Wikipedia article"
  },
  {
   "id": "trumpet-voluntary",
   "title": "Trumpet Voluntary",
   "views": 74,
   "pdmx": "Jeremiah Clarke",
-  "score": "https://musescore.com/score/5977928"
+  "score": "https://musescore.com/score/5977928",
+  "composer": "Jeremiah Clarke",
+  "composer_died": 1707,
+  "composer_source": "https://en.wikipedia.org/wiki/Prince_of_Denmark%27s_March",
+  "published": 1700,
+  "note": "long wrongly credited to Henry Purcell"
  },
  {
   "id": "bonnie-at-morn",
   "title": "Bonnie at Morn",
   "views": 72,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4699126"
+  "score": "https://musescore.com/score/4699126",
+  "composer": "Traditional",
+  "composer_source": "https://thesession.org/tunes/6388",
+  "note": "The Session lists no composer; the Song matches its setting 52371 (26 equal melodic steps in a row)"
  },
  {
   "id": "braes-o-balquhidder",
   "title": "The Braes o' Balquhidder",
   "views": 72,
   "pdmx": "Words written by Robert Tannahill 1774-1810.",
-  "score": "https://musescore.com/score/4976135"
+  "score": "https://musescore.com/score/4976135",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Wild_Mountain_Thyme",
+  "note": "Wikipedia: Robert Tannahill's \"The Braes of Balquhither\" was most likely based on a traditional air; Tannahill wrote the words, which were set to an existing tune"
  }
 ]

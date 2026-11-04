@@ -74,11 +74,11 @@ describe('the Song Catalog in the app', () => {
     ])
   })
 
-  // #350: every Song in catalog/ then, but the second Ode to Joy (#229). #357 pulled 2 Songs as
+  // #350: every Song in catalog/ then, but the second Ode to Joy (#229). #357 pulled 12 Songs as
   // under copyright.
   test('then every other Song in the catalog, in its order, but ode-mutopia', () => {
     const ids = songs.map(s => s.id)
-    expect(ids).toHaveLength(1006)
+    expect(ids).toHaveLength(996)
     const first = ids.slice(0, 12)
     const catalogOrder = sources.catalog
       .map(e => e.id)
@@ -242,12 +242,19 @@ describe('the generator', () => {
   // source: the name a PDMX score gives (`source.composer`) is often a lyricist, a page or "NA".
   test('shows #357’s composer, never the one the score names', () => {
     const entries = new Map(sources.catalog.map(e => [e.id, e]))
+    // Songs whose score names someone, but #357 found no page that does.
     const scoreOnly = songs.filter(s => {
       const entry = entries.get(s.id) as CatalogEntry
-      return entry.composer === undefined && (entry.source.composer ?? '').trim() !== ''
+      return entry.composer === 'Unknown' && (entry.source.composer ?? '').trim() !== ''
     })
     expect(scoreOnly.length).toBeGreaterThan(0)
     expect(scoreOnly.filter(s => 'composer' in s)).toEqual([])
+    // And a Song not looked up yet, as every Song was before #357.
+    const salut = sources.catalog.find(e => e.id === 'salut-damour') as CatalogEntry
+    const { composer: _, composer_died: _died, composer_source: _source, ...unlooked } = salut
+    const [notLookedUp] = catalogSongs({ ...sources, catalog: [unlooked] }, ['salut-damour'])
+    expect(unlooked.source.composer).toMatch(/Elgar/)
+    expect('composer' in notLookedUp).toBe(false)
     // Its score says "Composed by Eward Elgar Arranged by Alien".
     expect(songs.find(s => s.id === 'salut-damour')?.composer).toBe('Edward Elgar')
   })
