@@ -23,9 +23,10 @@ import { useSongNotes } from './use-song-notes'
 
 /**
  * What a locked Song still needs: its Pitch Coverage, the missing notes with their octave, and the
- * pitch strip with the needed pitch classes marked. A locked Song can't be played by farts, but
- * its melody plays on piano (#359), in the key the needed notes are named in. Matches the iPhone
- * app's `LockedSongSheet`, with the piano added.
+ * pitch strip with the needed pitch classes marked, under the Song's title and its composer when
+ * #357 has one (#356). A locked Song can't be played by farts, but its melody plays on piano
+ * (#359), in the key the needed notes are named in. It began as a port of the iPhone app's
+ * `LockedSongSheet`, which shows no composer and has no piano.
  */
 export function LockedSongSheet({
   song,
@@ -65,6 +66,9 @@ export function LockedSongSheet({
       >
         <SheetHeader className="items-center px-12 pt-4 pb-2">
           <SheetTitle className="text-center font-semibold">{shown?.title}</SheetTitle>
+          {shown?.composer !== undefined && (
+            <p className="text-center text-sm text-muted-foreground">{shown.composer}</p>
+          )}
         </SheetHeader>
         {coverage && (
           <Body
