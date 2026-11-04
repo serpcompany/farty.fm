@@ -3,7 +3,8 @@
 # the one the ranking counted scores by. Review of its import (#325) pulled 5 titles, now in
 # excluded-titles.txt: El Condor Pasa, Misirlou, Lavender's Blue, Dido's Lament, Indian National Anthem.
 # The whole-catalog check (#344) pulled Hänschen Klein, the same tune as Lightly Row (titles-01.txt), and
-# gave 6 titles back the accents the ranking dropped.
+# gave 6 titles back the accents the ranking dropped. The composer lookups (#357, composers-01.json)
+# pulled 2 titles as under copyright, now in excluded-titles.txt: Mairi's Wedding, Just A Closer Walk With Thee.
 # id | catalog title
 maple-leaf-rag | Maple Leaf Rag
 piano-sonata-no-16-in-c-major-k-545 | Piano Sonata No.16 in C major K.545
@@ -96,7 +97,6 @@ salvation-is-created | Salvation is Created
 tumbalalaika | Tumbalalaika
 kesh | The Kesh
 die-wacht-am-rhein | Die Wacht am Rhein
-just-a-closer-walk-with-thee | Just A Closer Walk With Thee
 salut-damour | Salut d'Amour
 it-was-a-lover-and-his-lass | It was a lover and his lass
 rocky-road-to-dublin | Rocky Road to Dublin
@@ -135,7 +135,6 @@ marching-through-georgia | Marching Through Georgia
 himno-nacional-de-bolivia | Himno Nacional de Bolivia
 now-is-the-month-of-maying | Now is the Month of Maying
 si-bheag-si-mhor | Sí Bheag Sí Mhór
-mairis-wedding | Mairi's Wedding
 soul-of-my-saviour | Soul of My Saviour
 bonnie-blue-flag | Bonnie Blue Flag
 es-wird-scho-glei-dumpa | Es wird scho glei dumpa

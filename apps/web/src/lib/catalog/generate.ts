@@ -4,8 +4,10 @@
  *
  * - each Song's melody from `fixtures/golden/songs/<id>.json`, so nothing parses MIDI here;
  * - its title and source line from `catalog/catalog.json`, checked against the golden copy, so
- *   the notes come from the cited score, and its composer, MuseScore views and rating from there
- *   too, which Compose shows, searches and sorts by (#356);
+ *   the notes come from the cited score, and its MuseScore views and rating from there too,
+ *   which Compose sorts by (#356);
+ * - its composer when one is known (`tools/catalog/composers.py`, #357), which Compose shows and
+ *   searches by (#356);
  * - the other names its titles file lists (`tools/catalog/titles-*.txt`), which Compose's search
  *   finds it by too;
  * - every Song in the catalog but `notShipped`, the iPhone app's 12 first (`shippedIds`).
@@ -38,6 +40,15 @@ import type { Song, SongNotes, SongSummary } from './song'
 export type CatalogEntry = {
   id: string
   title: string
+  /**
+   * Who wrote the tune, "Traditional (Irish)" for a folk tune, or "Unknown" when the lookup found
+   * nobody: written by `tools/catalog/composers.py` from a cited page (#357).
+   */
+  composer?: string
+  /** The year the last of the composers died. */
+  composer_died?: number
+  /** The page that names the composer. */
+  composer_source?: string
   file: string
   sha256: string
   source: Record<string, string>
@@ -198,6 +209,20 @@ function aliasesOf(title: string, names: readonly string[]): string[] {
   return aliases
 }
 
+/** PDMX's placeholders for no composer, which the catalog never holds: it has "Unknown". */
+const noComposer = /^(na|n\/a|none|composer|anon\.?|anonymous)$/i
+
+/** The composer the index shows: none when it isn't known. */
+function composerOf(entry: CatalogEntry): string | undefined {
+  const { composer } = entry
+  if (composer === undefined || composer === 'Unknown') return undefined
+  if (typeof composer !== 'string' || composer.trim() !== composer || composer === '')
+    throw new Error(`Song ${entry.id}: its composer isn't a name`)
+  if (noComposer.test(composer))
+    throw new Error(`Song ${entry.id}: its composer ${composer} names nobody; write Unknown`)
+  return composer
+}
+
 /**
  * The line each Song shows under its title, from its source and license. CC0 is a public domain
  * dedication, so a CC0 score's line is a public domain score's.
@@ -207,29 +232,6 @@ function sourceLine(entry: CatalogEntry): string {
   if (dataset.startsWith('PDMX') && (license === 'publicdomain' || license === 'cc-zero'))
     return 'Public domain score · PDMX'
   throw new Error(`Song ${entry.id} has a source this script has no line for; add one here`)
-}
-
-/**
- * What a score says when it names no composer: PDMX's "NA", MuseScore's "Composer" placeholder,
- * "anon." and "Unknown". Compared trimmed, in lower case and without a closing full stop.
- */
-const unknownComposers: readonly string[] = [
-  '',
-  'na',
-  'n/a',
-  'composer',
-  'anon',
-  'anonymous',
-  'unknown'
-]
-
-/**
- * The Song's composer, as its score names them, or none when the score doesn't, so Compose never
- * shows "NA". The names stay as PDMX spells them; #357 spells each composer one way.
- */
-export function composerOf(entry: CatalogEntry): string | undefined {
-  const name = (entry.source.composer ?? '').trim()
-  return unknownComposers.includes(name.toLowerCase().replace(/\.$/, '')) ? undefined : name
 }
 
 /** The first 16 hex digits of the SHA-256 of `text`: what names each data file by its content. */

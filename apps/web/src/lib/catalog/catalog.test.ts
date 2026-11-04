@@ -74,10 +74,11 @@ describe('the Song Catalog in the app', () => {
     ])
   })
 
-  // #350: every Song in catalog/ then, but the second Ode to Joy (#229).
+  // #350: every Song in catalog/ then, but the second Ode to Joy (#229). #357 pulled 2 Songs as
+  // under copyright.
   test('then every other Song in the catalog, in its order, but ode-mutopia', () => {
     const ids = songs.map(s => s.id)
-    expect(ids).toHaveLength(1008)
+    expect(ids).toHaveLength(1006)
     const first = ids.slice(0, 12)
     const catalogOrder = sources.catalog
       .map(e => e.id)
@@ -231,36 +232,24 @@ describe('the generator', () => {
     expect(() => renderCatalog(sources, ['ode-mutopia'])).toThrow(/no line for/)
   })
 
-  // #356: Compose shows, searches and sorts by these. A score that names no composer says so in
-  // one of a few ways, and Compose shows nothing for it, never "NA".
   const twinkle = sources.catalog.find(e => e.id === 'twinkle') as CatalogEntry
   const withSource = (source: Record<string, string>) => ({
     ...sources,
     catalog: [{ ...twinkle, source }]
   })
 
-  test.each([
-    ['NA', undefined],
-    ['anon.', undefined],
-    ['Composer', undefined],
-    ['UnKnown', undefined],
-    [' ', undefined],
-    ['W. A. Mozart', 'W. A. Mozart'],
-    [' Trad. ', 'Trad.']
-  ])('reads a score’s composer %j as %j', (composer, expected) => {
-    const [song] = catalogSongs(withSource({ ...twinkle.source, composer }), ['twinkle'])
-    expect(song.composer).toBe(expected)
-    expect('composer' in song).toBe(expected !== undefined)
-  })
-
-  test('gives no Song a composer its score doesn’t name', () => {
-    const named = songs.filter(s => s.composer !== undefined)
-    expect(named.length).toBeGreaterThan(200)
-    expect(
-      named.filter(s =>
-        /^(na|n\/a|composer|anon\.?|anonymous|unknown|)$/i.test(s.composer?.trim() ?? '')
-      )
-    ).toEqual([])
+  // #356 shows a Song's composer under its title and searches by it. #357's lookup is its only
+  // source: the name a PDMX score gives (`source.composer`) is often a lyricist, a page or "NA".
+  test('shows #357’s composer, never the one the score names', () => {
+    const entries = new Map(sources.catalog.map(e => [e.id, e]))
+    const scoreOnly = songs.filter(s => {
+      const entry = entries.get(s.id) as CatalogEntry
+      return entry.composer === undefined && (entry.source.composer ?? '').trim() !== ''
+    })
+    expect(scoreOnly.length).toBeGreaterThan(0)
+    expect(scoreOnly.filter(s => 'composer' in s)).toEqual([])
+    // Its score says "Composed by Eward Elgar Arranged by Alien".
+    expect(songs.find(s => s.id === 'salut-damour')?.composer).toBe('Edward Elgar')
   })
 
   test('carries each score’s MuseScore views and rating, and the melody’s length', () => {

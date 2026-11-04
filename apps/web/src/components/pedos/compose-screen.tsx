@@ -43,6 +43,7 @@ import { songOrders, useComposeChoices } from './compose-choices'
 import { FavoriteButton, useFavorites } from './favorite-button'
 import { LockedSongSheet } from './locked-song-sheet'
 import { usePedos } from './pedos-provider'
+import { ReportSongSheet } from './report-song-sheet'
 
 const noFavorites: ReadonlySet<string> = new Set()
 
@@ -59,6 +60,8 @@ export function ComposeScreen() {
   const { order, chooseOrder, onlyFavorites, chooseOnlyFavorites, onlyReady, chooseOnlyReady } =
     useComposeChoices()
   const [lockedSong, setLockedSong] = useState<SongSummary | null>(null)
+  /** The Song a locked sheet's Report a problem opened the report sheet for (#358). */
+  const [reportedSong, setReportedSong] = useState<SongSummary | null>(null)
   const favorites = useFavorites()
 
   // The page comes back on the Record tab, so the sheet doesn't stay open.
@@ -240,7 +243,12 @@ export function ComposeScreen() {
           setLockedSong(null)
           router.push('/')
         }}
+        onReport={() => {
+          setReportedSong(lockedSong)
+          setLockedSong(null)
+        }}
       />
+      <ReportSongSheet song={reportedSong} onClose={() => setReportedSong(null)} />
     </div>
   )
 }

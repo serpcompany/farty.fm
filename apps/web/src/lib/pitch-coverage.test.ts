@@ -582,21 +582,24 @@ describe('Compose’s listing', () => {
           .sort()
       expect(found('mozart')).toEqual(named('mozart'))
       expect(found('mozart')).toEqual(
-        expect.arrayContaining(['dies-irae', 'eine-kleine', 'komm-lieber-mai'])
+        expect.arrayContaining([
+          'eine-kleine',
+          'komm-lieber-mai',
+          'clarinet-concerto-in-a-major-k-622'
+        ])
       )
       expect(song('ode').title).not.toMatch(/beethoven/i)
       expect(found('BEETHOVEN')).toContain('ode')
+      expect(found('chopin')).toEqual(named('chopin'))
+      expect(found('chopin')).toContain('nocturne-op-9-no-2')
+      expect(found('frederic')).toEqual(found('Frédéric'))
       expect(found("o'carolan")).toEqual(found('ocarolan'))
-      expect(found('carolan')).toEqual(named('carolan'))
-      expect(found('carolan').length).toBeGreaterThan(10)
     })
 
-    it('finds no Song by a composer its score doesn’t name', () => {
-      // Twinkle's score says "NA", and the index leaves it out.
-      expect(song('twinkle').composer).toBeUndefined()
-      const na = ids(every(listing(all, 'NA')))
-      expect(na.length).toBeGreaterThan(0)
-      expect(na).not.toContain('twinkle')
+    it('finds no Song by the name its score gives but #357 doesn’t', () => {
+      // Red River Valley's score names "Joe Buchanan's Scottish Tome", which #357 hasn't looked up.
+      expect(song('red-river-valley').composer).toBeUndefined()
+      expect(ids(every(listing(all, 'buchanan')))).toEqual([])
     })
   })
 
@@ -617,12 +620,13 @@ describe('Compose’s listing', () => {
     expect(locked.map(r => missingNotes(coverageOf(r.song, without002)))).toEqual(['E3 (3.0 s)'])
   })
 
-  it('locks 40 more of the catalog’s Songs without 002, Amazing Grace among them', () => {
-    // `e2e/fixture-library.spec.ts` deletes 002 and expects Compose to lock these more.
+  it('locks 39 more of the catalog’s Songs without 002, Amazing Grace among them', () => {
+    // `e2e/fixture-library.spec.ts` deletes 002 and expects Compose to lock these more. 40 until
+    // #357 pulled one of them as under copyright.
     const ids = (rows: { song: SongSummary }[]) => rows.map(r => r.song.id)
     const withAll = new Set(ids(listing(all).locked))
     const lockedNow = ids(listing(without002).locked).filter(id => !withAll.has(id))
-    expect(lockedNow).toHaveLength(40)
+    expect(lockedNow).toHaveLength(39)
     expect(lockedNow).toContain('amazing')
     expect(listing(without002).unlocked.every(r => !withAll.has(r.song.id))).toBe(true)
   })

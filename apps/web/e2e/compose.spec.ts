@@ -112,7 +112,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await tab(page, 'Compose').click()
   await expect(page.getByText('No Melodic Recordings yet')).toHaveCount(0)
   await expect(locked(songs.length)).toBeVisible()
-  // A locked row: its title, no composer (Mary's score names none), and its facts, Pitch Coverage
+  // A locked row: its title, no composer (#357 hasn't looked Mary up), and its facts, Pitch Coverage
   // first (#356).
   const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true })
   const { notes, bpm, seconds } = facts('mary')

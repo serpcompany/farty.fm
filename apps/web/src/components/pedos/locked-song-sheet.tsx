@@ -16,6 +16,7 @@ import {
 import { FavoriteButton } from './favorite-button'
 import { usePedos } from './pedos-provider'
 import { PitchStrip } from './pitch-strip'
+import { ReportSongButton } from './report-song-sheet'
 
 /**
  * What a locked Song still needs: its Pitch Coverage, the missing notes with their octave, and the
@@ -25,13 +26,16 @@ import { PitchStrip } from './pitch-strip'
 export function LockedSongSheet({
   song,
   onClose,
-  onRecord
+  onRecord,
+  onReport
 }: {
   /** The Song shown, or null when the sheet is closed. */
   song: SongSummary | null
   onClose: () => void
   /** Record: closes the sheet and switches to the Record tab. */
   onRecord: () => void
+  /** Report a problem (#358): closes the sheet and opens the report sheet for its Song. */
+  onReport: () => void
 }) {
   const pedos = usePedos()
   // The last Song shown stays while the sheet slides away.
@@ -54,7 +58,7 @@ export function LockedSongSheet({
             <p className="text-center text-sm text-muted-foreground">{shown.composer}</p>
           )}
         </SheetHeader>
-        {coverage && <Body coverage={coverage} onRecord={onRecord} />}
+        {coverage && <Body coverage={coverage} onRecord={onRecord} onReport={onReport} />}
         {/* A locked Song can be a Favorite Song too (#313). */}
         {shown && <FavoriteButton song={shown} className="absolute top-1.5 left-1.5" />}
         <SheetClose
@@ -70,7 +74,15 @@ export function LockedSongSheet({
   )
 }
 
-function Body({ coverage, onRecord }: { coverage: Coverage; onRecord: () => void }) {
+function Body({
+  coverage,
+  onRecord,
+  onReport
+}: {
+  coverage: Coverage
+  onRecord: () => void
+  onReport: () => void
+}) {
   const pedos = usePedos()
   const needed = new Set(coverage.missing.map(m => pitchClass(m.midi)))
   return (
@@ -90,6 +102,7 @@ function Body({ coverage, onRecord }: { coverage: Coverage; onRecord: () => void
       <Button size="lg" className="h-12 w-full text-base" onClick={onRecord}>
         Record
       </Button>
+      <ReportSongButton className="-mt-2 self-center" onClick={onReport} />
     </div>
   )
 }

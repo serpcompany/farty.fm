@@ -8,12 +8,16 @@
 export type SongSummary = {
   id: string
   title: string
+  /**
+   * Who wrote the tune, as a cited page names them (#357): "Frédéric Chopin", several joined by
+   * " and ", or "Traditional (Irish)" for a folk tune. Absent when it isn't known yet, or the
+   * lookup found nobody.
+   */
+  composer?: string
   /** Other names the Song goes by, which search finds it by too: "Londonderry Air". */
   aliases?: readonly string[]
   /** The source and license line, for example "Public domain score · PDMX". */
   source: string
-  /** Who wrote the tune, as the score names them: "W. A. Mozart". Absent when it isn't known. */
-  composer?: string
   /** How many times the score was viewed on MuseScore (PDMX's `n_views`): Most popular's order. */
   views: number
   /** The score's MuseScore rating out of 5, when it has one: it breaks Most popular's ties. */
