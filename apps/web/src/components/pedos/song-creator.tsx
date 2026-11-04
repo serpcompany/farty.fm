@@ -64,6 +64,7 @@ import { FavoriteButton } from './favorite-button'
 import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
+import { ReportSong } from './report-song-sheet'
 import { changeFartChoices, useFartChoices } from './use-fart-choices'
 import { useSongNotes } from './use-song-notes'
 import { Waveform } from './waveform'
@@ -292,7 +293,10 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
         song && unmade && <TootLayout toot={null} unmade={unmade} song={song} changes={changes} />
       )}
       {view === 'ready' && phase.kind === 'ready' && (
-        <SaveToToots draft={phase.draft} back={phase.back} />
+        <>
+          <ReportSong song={phase.draft.song} />
+          <SaveToToots draft={phase.draft} back={phase.back} />
+        </>
       )}
       {isGap && arrangement && (
         <LockCard
