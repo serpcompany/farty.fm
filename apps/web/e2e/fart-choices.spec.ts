@@ -1,7 +1,10 @@
 import { mkdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { pianoNote } from '../src/components/pedos/piano-keys'
+import { pianoSchedule } from '../src/components/pedos/piano-preview'
 import { songs } from '../src/lib/catalog/songs.generated'
+import { noteName } from '../src/lib/pitch'
 import { newEmail, signInByApi } from './account'
 import { songsTheFixtureLibraryUnlocks } from './golden'
 import { payToSave } from './pay'
@@ -15,6 +18,8 @@ import { payToSave } from './pay'
 
 /** Every start of an `AudioBufferSourceNode`, as the page's init script records it. */
 type Start = { duration: number; peak: number; args: number[] }
+/** A start also holds the buffer's rate and first samples, to tell a piano note by. */
+type HeardStart = Start & { rate: number; head: number[] }
 
 declare global {
   interface Window {
@@ -107,6 +112,12 @@ test('swaps a note’s fart, plays it, saves it, and the saved Toot plays that f
     expect(swappedIn).not.toBe('')
     expect(swappedIn).not.toBe(before)
     await expectTappable(swap.getByRole('button', { name: 'Swap' }))
+    // "Hear <note> on piano" plays that note on piano, the key a tapped key plays, once.
+    const hear = sheet.getByRole('button', { name: `Hear ${note} on piano` })
+    await expectTappable(hear)
+    await page.evaluate(() => (window.__starts = []))
+    await hear.click()
+    expect(isPianoNote(await lastStart(page), midiOf(note))).toBe(true)
     // Tapping a fart plays it alone, raw.
     await page.evaluate(() => (window.__starts = []))
     await swap.getByRole('button').first().click()
@@ -256,6 +267,14 @@ test('swaps a note’s fart, plays it, saves it, and the saved Toot plays that f
     await page.evaluate(() => (window.__starts = []))
     await play.click()
     await expect(state).toHaveText('Playing')
+    // The first note is struck at the Song's first pitch in the key the farts would play it in:
+    // the left-out pitch is Mary's first, so that key is the gap note's less that pitch.
+    await expect.poll(() => page.evaluate(() => window.__starts.length)).toBeGreaterThan(0)
+    const first = await page.evaluate(() => window.__starts[0])
+    const transposition = midiOf(gapNote) - mary.pitches[0]
+    const expected = pianoSchedule(mary, transposition)[0].midi
+    expect(isPianoNote(first, expected)).toBe(true)
+    expect(isPianoNote(first, expected + 1)).toBe(false)
     if (out) await page.screenshot({ path: join(out, 'gap-piano.png') })
     const marySeconds = Math.max(...mary.notes.map(n => n.start + n.dur)) * (60 / mary.bpm)
     await expect(state).toHaveText('Ready', { timeout: (marySeconds + 5) * 1000 })
@@ -287,7 +306,14 @@ async function listenToThePage(page: Page) {
       let peak = 0
       for (const sample of this.buffer?.getChannelData(0) ?? [])
         peak = Math.max(peak, Math.abs(sample))
-      window.__starts.push({ duration: this.buffer?.duration ?? 0, peak, args: args as number[] })
+      const heard: HeardStart = {
+        duration: this.buffer?.duration ?? 0,
+        peak,
+        args: args as number[],
+        rate: this.buffer?.sampleRate ?? 0,
+        head: Array.from(this.buffer?.getChannelData(0).subarray(0, 256) ?? [])
+      }
+      window.__starts.push(heard)
       return start.apply(this, args)
     }
   })
@@ -368,4 +394,17 @@ async function expectTappable(control: Locator) {
   const box = await control.boundingBox()
   expect(box?.width ?? 0).toBeGreaterThanOrEqual(44)
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
+}
+
+/** The MIDI note a name such as C♯3 stands for. */
+function midiOf(name: string): number {
+  for (let midi = 0; midi < 128; midi++) if (noteName(midi) === name) return midi
+  throw new Error(`${name} is not a note`)
+}
+
+/** Whether a started buffer is `pianoNote(midi)`: its first samples are. */
+function isPianoNote(heard: Start, midi: number): boolean {
+  const start = heard as HeardStart
+  const samples = pianoNote(midi, start.rate)
+  return start.head.length > 0 && start.head.every((s, i) => Math.abs(s - samples[i]) < 1e-6)
 }

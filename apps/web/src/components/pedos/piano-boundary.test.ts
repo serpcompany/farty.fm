@@ -188,6 +188,8 @@ describe('the piano stays out of every render, Toot, share and saved file', () =
     // provider; the locked sheet only plays the piano.
     expect(entries.has('src/components/pedos/song-creator.tsx')).toBe(false)
     expect(entries.has('src/components/pedos/locked-song-sheet.tsx')).toBe(false)
+    // The fart sheet plays a pitch on piano (#373) and changes farts through its parent.
+    expect(entries.has('src/components/pedos/fart-sheet.tsx')).toBe(false)
   })
 
   test("the Toot made again after a change to a Song's farts is checked too (#360)", () => {
@@ -221,6 +223,9 @@ describe('the piano stays out of every render, Toot, share and saved file', () =
   test('the walk finds the piano where it is imported', () => {
     const songCreator = join(SRC, 'components/pedos/song-creator.tsx')
     expect(chainToPiano(songCreator)?.at(-1)).toMatch(/piano-(keys|preview)/)
+    // The fart sheet's "Hear … on piano" (#373) reaches it through the preview's player.
+    const fartSheet = join(SRC, 'components/pedos/fart-sheet.tsx')
+    expect(chainToPiano(fartSheet)?.at(-1)).toMatch(/piano-(keys|preview)/)
   })
 
   test('nothing makes a tone with an oscillator: the piano is samples built in code', () => {
