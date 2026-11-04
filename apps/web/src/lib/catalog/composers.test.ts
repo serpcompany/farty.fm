@@ -9,10 +9,13 @@ type Lookup = {
   id: string
   composer?: string
   composer_died?: number
+  /** The year the last author died whose words were written with the music. */
+  lyricist_died?: number
   composer_source?: string
   published?: number
   checked?: string[]
   remove?: string
+  note?: string
 }
 
 /** The pages a composer may come from, and the Song's own MuseScore score (tools/catalog/README.md). */
@@ -56,6 +59,21 @@ const fields = (e: Pick<CatalogEntry, 'composer' | 'composer_died' | 'composer_s
 const done = sources.catalog.filter(e => e.composer !== undefined && e.composer_source)
 const open = lookups.filter(l => !isDone(l) && l.remove === undefined)
 
+/** What keeps a looked-up Song out of the catalog, by tools/catalog/composers.py's rules (ADR 0003):
+ * an author who died after 1955 (the composer, or a lyricist whose words were written with the
+ * music), a first publication in 1931 or later, or a named composer with no death year unless the
+ * tune was published before 1931 and a note says why the year is missing. */
+function underCopyright(l: Lookup): boolean {
+  const named = l.composer !== 'Unknown' && !l.composer?.startsWith('Traditional')
+  const oldWithNote = l.published !== undefined && l.published < 1931 && !!l.note?.trim()
+  return (
+    (l.composer_died ?? 0) > 1955 ||
+    (l.lyricist_died ?? 0) > 1955 ||
+    (l.published ?? 0) >= 1931 ||
+    (named && l.composer_died === undefined && !oldWithNote)
+  )
+}
+
 // The count of Songs with a composer can't go down: every Song is in one batch file, a looked-up
 // Song carries its batch's answer, and no Song has a composer its batch doesn't give it, so
 // losing one means deleting the answer from both its batch file and the catalog.
@@ -97,19 +115,39 @@ describe(`the Songs' composers: ${done.length} of ${sources.catalog.length} look
     expect(missing.map(e => e.id)).toEqual([])
   })
 
-  // The rules CI can see; tools/catalog/composers.py check has the rest (each name's spelling).
+  // The copyright and source rules; CI also runs tools/catalog/composers.py check, which has the rest
+  // (each name's one spelling, a removal's reason, unknown keys).
   test('no Song kept is under copyright, and each answer cites a source', () => {
     const broken = lookups
       .filter(isDone)
       .filter(
         l =>
-          (l.composer_died ?? 0) > 1955 ||
-          (l.published ?? 0) >= 1931 ||
+          underCopyright(l) ||
           !isSource(l.composer_source, l.id) ||
           (l.composer === 'Unknown' &&
             !(l.checked?.length && l.checked.every(url => isSource(url, l.id))))
       )
     expect(broken.map(l => `${l.batch}: ${l.id}`)).toEqual([])
+  })
+
+  test.each<[string, Lookup, boolean]>([
+    ['a composer who died in 1940', { id: 'x', composer: 'A B', composer_died: 1940 }, false],
+    ['a composer who died in 1956', { id: 'x', composer: 'A B', composer_died: 1956 }, true],
+    [
+      'a lyricist who died in 1970',
+      { id: 'x', composer: 'A B', composer_died: 1940, published: 1925, lyricist_died: 1970 },
+      true
+    ],
+    ['a named composer with no death year', { id: 'x', composer: 'A B' }, true],
+    ['no death year, published 1925, no note', { id: 'x', composer: 'A B', published: 1925 }, true],
+    [
+      'no death year, published 1925, with a note',
+      { id: 'x', composer: 'A B', published: 1925, note: 'no source gives the year' },
+      false
+    ],
+    ['a folk tune', { id: 'x', composer: 'Traditional (Irish)' }, false]
+  ])('%s: under copyright %s', (_, lookup, expected) => {
+    expect(underCopyright(lookup)).toBe(expected)
   })
 
   test('counts the looked-up Songs in the catalog', () => {

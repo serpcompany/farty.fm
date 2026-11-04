@@ -247,9 +247,10 @@
   "score": "https://musescore.com/score/784796",
   "composer": "Felix Powell",
   "composer_died": 1942,
+  "lyricist_died": 1951,
   "composer_source": "https://en.wikipedia.org/wiki/Pack_Up_Your_Troubles_in_Your_Old_Kit-Bag",
   "published": 1915,
-  "note": "words George Asaf"
+  "note": "words George Asaf, written with the music in 1915; he died in 1951 (https://en.wikipedia.org/wiki/George_Asaf)"
  },
  {
   "id": "minuet-in-g",
@@ -390,9 +391,10 @@
   "score": "https://musescore.com/score/5901706",
   "composer": "Christina Macpherson",
   "composer_died": 1936,
+  "lyricist_died": 1941,
   "composer_source": "https://en.wikipedia.org/wiki/Waltzing_Matilda",
   "published": 1903,
-  "note": "words Banjo Paterson (died 1941)"
+  "note": "words Banjo Paterson, written to her tune in 1895; he died in 1941 (https://en.wikipedia.org/wiki/Banjo_Paterson)"
  },
  {
   "id": "uti-var-hage",
@@ -503,7 +505,7 @@
   "composer_died": 1949,
   "composer_source": "https://en.wikipedia.org/wiki/Chopsticks_(waltz)",
   "published": 1877,
-  "note": "the article spells her Allan (PDMX: Allen); she died in 1949 (Wikidata Q576854)"
+  "note": "the article spells her Allan (PDMX: Allen); she died in 1949 (https://imslp.org/wiki/Category:Allan,_Euphemia)"
  },
  {
   "id": "down-by-the-riverside",
@@ -793,9 +795,10 @@
   "score": "https://musescore.com/score/217561",
   "composer": "Thomas Arne",
   "composer_died": 1778,
+  "lyricist_died": 1748,
   "composer_source": "https://en.wikipedia.org/wiki/Rule,_Britannia!",
   "published": 1740,
-  "note": "words James Thomson (died 1748)"
+  "note": "words James Thomson, written with the music for the masque Alfred; he died in 1748"
  },
  {
   "id": "la-fille-aux-cheveux-de-lin",

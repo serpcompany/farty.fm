@@ -79,8 +79,10 @@ A re-imported Song keeps its composer. A new Song is in no composer batch, so `c
 Every Song names its composer, with the page that says so (#357). The fields sit after `title` in `catalog/catalog.json`:
 
 - `composer`: one name ("Frédéric Chopin"), several joined by ` and `, "Traditional (Irish)" for a folk tune, or "Unknown". The app's Compose index (`SongSummary.composer`) carries it, and leaves it out for "Unknown" and for a Song not looked up yet.
-- `composer_died`: the year the last of them died, when the source gives it. Only for a named composer.
+- `composer_died`: the year the last of them died. Only for a named composer, and needed for one unless the tune was first published before 1931 (step 4).
 - `composer_source`: the page that says who wrote it.
+
+The batch record also holds what the lookup found but the catalog doesn't keep: `lyricist_died`, `published`, `checked` and `note`.
 
 `source.composer` stays as PDMX gave it. PDMX's name is the uploader's, and often wrong: "NA" for most Songs, a lyricist, an arranger or a collection. Never copy it without checking.
 
@@ -88,31 +90,46 @@ The lookups are in batch files, `composers-01.json` and on, about 150 Songs each
 
 ### Look up a batch
 
-One agent, one batch, one PR from `staging`. For each record of `composers-NN.json` whose `composer` isn't set yet:
+Batches run in parallel, so a worker touches only its own batch: one agent fills `composers-NN.json` and writes its report, on its own branch from `staging`, and never runs `apply`, imports, regenerates or edits `catalog/catalog.json`, the titles files or `composers.py`. One integration PR then brings every batch into the catalog at once ([below](#bring-the-batches-in)). For each record of `composers-NN.json` whose `composer` isn't set yet:
 
 1. Find who wrote the melody the Song plays: not the words, the arrangement or the uploader. Start from the record's `title` and `score` (its MuseScore page, to tell which piece of that name it is), and treat `pdmx` as a hint only.
 2. Use only these sources: Wikipedia (any language), IMSLP, The Session, the Traditional Tune Archive (tunearch.org), the Mutopia Project, or the Song's own MuseScore score (its `score`). Prefer the tune's own page; the composer's page counts when it names the work. Never guess.
 3. Write `composer` the catalog's way:
    - A person: their English Wikipedia article's title, without its bracketed disambiguation ("Antonín Dvořák", "Turlough O'Carolan", "George Frideric Handel"). With no English article, the source's spelling. No dates, "arr." or "attrib.".
    - Several: joined by ` and ` ("Peadar Kearney and Patrick Heeney").
+   - Name a person only when the source says they wrote the tune, even with "attributed" or "probably"; put that doubt in `note`. A person named only as printer, publisher, collector or adapter isn't a credit, and neither is one the source can't tell from an adapter ("not making it clear whether he was the composer or adapter"): write `Traditional` for a folk tune, else `Unknown`.
    - A folk tune nobody is credited with: `Traditional (<tradition>)`, the tradition as the source gives it, one capitalized adjective or two ("Traditional (Irish)", "Traditional (African American)" for a spiritual), or `Traditional` when it doesn't say.
-   - A tune the source credits to someone with doubt: the person it credits, the doubt in `note`. When the source says nobody knows, or you find nothing: `Unknown`, with `checked`, the list of page URLs you read.
-   - `composers.py check` refuses another spelling of a name it knows (`ALIASES`). When it's a new name and PDMX spells it another way, add the spelling to `ALIASES`.
-4. Add `composer_died` (an integer) when the source, or the composer's own article, gives it; for several composers, the last of their deaths. Add `published`, the year the tune was first published, when the source gives it. Add `composer_source`, and a short `note` for anything a reader would ask (the words' author, another attribution).
-5. **Under copyright**: when `composer_died` is after 1955, or `published` is 1931 or later ([ADR 0003](../../docs/adr/0003-songs-come-from-cited-scores.md)), the Song leaves the catalog. Keep its record with `remove`, the reason in words ("first published in 1931 or later: Morris first published it in 1940"), and the years that show it. Then pull it the way [Ranking](#ranking) pulls a title: add it to `excluded-titles.txt` with the reason, delete its line from its titles file (its entry's `import.titles`), note that in the file's header, and import that file again. Compare the catalog before and after: when the import changes any other Song (titles-01 would, #344), restore the catalog, leave the record without `remove`, and list the Song in the PR for the owner. A Song added by hand (no `import`) also goes to the PR, not out of the catalog.
-6. Check, then write the batch into the catalog and its report:
+   - `Unknown`: the tune isn't a folk tune and no source you read names who wrote it, whether it says nobody knows or says nothing. Add `checked`, the list of page URLs you read.
+   - `composers.py check` refuses another spelling of a name it knows (`ALIASES`). When it's a new name and PDMX spells it another way, list both spellings in your hand-back for the integration PR to add to `ALIASES`.
+4. Add `composer_source`, and `published`, the year the tune was first published, when the source gives it. For a named composer, add `composer_died` (an integer), from the source or the composer's own article; for several composers, the last of their deaths. When neither gives it, look at the composer's IMSLP category page (`imslp.org/wiki/Category:<Surname>,_<Given>`), which lists dates. With no death year anywhere, `check` passes the record only with a `published` before 1931 and a `note` that says why the year is missing; else the Song is a removal (step 5). When the words were written with the music (a song written by its composer and lyricist together, not words set to an older tune or written to it later), add `lyricist_died`, the year the last of those lyricists died, from the source or the lyricist's own article, and name the lyricist and the page in `note`. Add a short `note` for anything else a reader would ask (the words' author, another attribution).
+5. **Under copyright**: when `composer_died` or `lyricist_died` is after 1955, or `published` is 1931 or later ([ADR 0003](../../docs/adr/0003-songs-come-from-cited-scores.md), `excluded-titles.txt`), the Song leaves the catalog. Mark its record with `remove`, the reason in words ("first published in 1931 or later: Morris first published it in 1940"), and the years that show it, and list it in your hand-back. Don't pull it yourself: the integration PR does. A Song added by hand (no `import` in its catalog entry) is listed for the owner instead, without `remove`.
+6. Check the batch and write its report:
 
    ```sh
    tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py check --batch tools/catalog/composers-NN.json
-   tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py apply --batch tools/catalog/composers-NN.json
+   tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py report --batch tools/catalog/composers-NN.json
+   ```
+
+   `report` refuses while `check --batch` lists a problem. Both print the batch's counts (named, traditional, unknown, to remove, open).
+7. Commit only `composers-NN.json` and `composers-NN.report.md`, push the branch and hand back its name, the counts, the Songs to remove, the Unknowns and any new spellings. Don't open a PR: `composers.test.ts` fails a branch whose lookups aren't in the catalog yet.
+
+### Bring the batches in
+
+One PR, after every worker has handed back:
+
+1. Merge each worker's branch. They touch only their own batch files, so they merge cleanly. Add the new spellings to `ALIASES`.
+2. Pull every Song marked `remove` the way [Ranking](#ranking) pulls a title: add it to `excluded-titles.txt` with the reason, delete its line from its titles file (its entry's `import.titles`) and note that in the file's header. Then import each titles file that lost a line once. Compare the catalog before and after: when an import changes any other Song (titles-01 would, #344), restore the catalog, take `remove` off those records, and list the Songs in the PR for the owner.
+3. Apply each batch. `apply` refuses while one of the batch's removals is still in the catalog. Then check them all:
+
+   ```sh
+   for b in tools/catalog/composers-0[2-7].json; do tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py apply --batch "$b" || break; done
    tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py check
    ```
 
-   `apply` refuses while `check --batch` lists a problem. Both print how many Songs have their composer, for the PR.
-7. When a Song was removed, run `tools/melody-lab/export_golden.py` (from `tools/melody-lab`, with its venv) and lower the shipped Songs' count in `apps/web/src/lib/catalog/catalog.test.ts`. Always run the generator, from `apps/web`: `pnpm exec tsx src/lib/catalog/generate.ts`. Then the unit tests above and `pnpm check`.
-8. Open the PR with `Part of #357`, a line `No issue: one batch of #357's composer lookups` (the issue-link check needs it), the count `check` printed, the removed Songs and the Unknowns. The PR that leaves no record open starts with `Closes #357` instead.
+4. Run `tools/melody-lab/export_golden.py` (from `tools/melody-lab`, with its venv) and the generator once, from `apps/web`: `pnpm exec tsx src/lib/catalog/generate.ts`. Set the shipped Songs' count in `apps/web/src/lib/catalog/catalog.test.ts`, and the locked Songs' count in `apps/web/src/lib/pitch-coverage.test.ts` when a removed Song changes it. Then the unit tests above and `pnpm check`.
+5. Open the PR with `Closes #357` when no record is left open, else `Part of #357` and a line `No issue: <why>` (the issue-link check needs one). Give the count `check` printed, the removed Songs, the Unknowns and the Songs left for the owner.
 
-Batches run in parallel and touch the same files. After rebasing on `staging`, take `staging`'s `catalog/catalog.json` on a conflict and run `apply --batch` again, then always run the generator again: its output's file name is a hash of every Song, so two batches never merge cleanly there.
+CI runs `composers.py check` and these unit tests whenever anything under `catalog/` or `tools/catalog/` changes.
 
 ### New batches
 

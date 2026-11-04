@@ -3,14 +3,17 @@ lookups that give each Song in catalog/catalog.json its composer, the year the l
 and the page that says so.
 
     tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py check --batch tools/catalog/composers-02.json
+    tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py report --batch tools/catalog/composers-02.json
     tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py apply --batch tools/catalog/composers-02.json
+    tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py check
     tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py plan
 
-`check` lists what's wrong with a batch's lookups and every batch's place in the catalog. `apply`
-writes a batch's lookups into the catalog, where each Song gets `composer`, `composer_died` and
-`composer_source` after its title, and writes the batch's report. `plan` puts the catalog's Songs
-that are in no batch yet into new batch files, most viewed on MuseScore first (PDMX's `n_views`).
-tools/catalog/README.md has the lookup procedure.
+`check --batch` lists what's wrong with one batch's lookups, and never reads whether they're in the
+catalog yet. `report` writes the batch's report. `apply` writes a batch's lookups into the catalog,
+where each Song gets `composer`, `composer_died` and `composer_source` after its title, and writes
+the report too. `check` lists what's wrong with every batch and with every batch's place in the
+catalog. `plan` puts the catalog's Songs that are in no batch yet into new batch files, most viewed
+on MuseScore first (PDMX's `n_views`). tools/catalog/README.md has the lookup procedure.
 """
 import argparse
 import csv
@@ -35,8 +38,9 @@ UNKNOWN = "Unknown"
 TRADITIONAL = re.compile(r"Traditional(?: \([A-Z][a-z]+(?: [A-Z][a-z]+)*\))?")
 # A person's name: letters, spaces and . ' - , only.
 NAME = re.compile(r"[^\W\d_][^\W\d_.'’ ,-]*(?:[.'’ ,-]+[^\W\d_]+)*\.?")
-# The composer of a Song first published in 1931 or later, or by an author who died after 1955,
-# may still hold its copyright (ADR 0003, excluded-titles.txt).
+# A Song first published in 1931 or later, or by an author who died after 1955, may still be under
+# copyright (ADR 0003, excluded-titles.txt): the composer, or a lyricist whose words were written with
+# the music (`lyricist_died`).
 LAST_FREE_DEATH = 1955
 FIRST_COPYRIGHT_YEAR = 1931
 
@@ -45,7 +49,8 @@ SOURCES = ("wikipedia.org", "imslp.org", "thesession.org", "tunearch.org", "muto
 
 # What a batch file's record holds. `plan` writes the first five; the lookup adds the rest.
 SKELETON_KEYS = ("id", "title", "views", "pdmx", "score")
-LOOKUP_KEYS = ("composer", "composer_died", "composer_source", "published", "checked", "remove", "note")
+LOOKUP_KEYS = ("composer", "composer_died", "lyricist_died", "composer_source", "published", "checked", "remove",
+               "note")
 
 # PDMX composer names (pdmx.normalize'd) that name nobody. A tradition on its own ('American',
 # TRADITIONS below) names nobody either.
@@ -279,12 +284,11 @@ def record_problems(record, entry):
     if "remove" in record:
         if not isinstance(record["remove"], str) or not record["remove"].strip():
             problems.append("remove: why the Song is under copyright")
-        if not (record.get("composer_died", 0) > LAST_FREE_DEATH or record.get("published", 0) >= FIRST_COPYRIGHT_YEAR):
-            problems.append(f"remove: give composer_died after {LAST_FREE_DEATH} or published in "
-                            f"{FIRST_COPYRIGHT_YEAR} or later")
+        if not (max(record.get("composer_died", 0), record.get("lyricist_died", 0)) > LAST_FREE_DEATH
+                or record.get("published", 0) >= FIRST_COPYRIGHT_YEAR):
+            problems.append(f"remove: give composer_died or lyricist_died after {LAST_FREE_DEATH}, or published "
+                            f"in {FIRST_COPYRIGHT_YEAR} or later")
         problems += source_problems(record.get("composer_source"), entry, "composer_source")
-        if entry is not None:
-            problems.append("still in the catalog: remove it the README's way first")
         return [f"{sid}: {p}" for p in problems]
     if entry is None:
         return [f"{sid}: not in the catalog, and no `remove` says why"]
@@ -295,15 +299,22 @@ def record_problems(record, entry):
     problems += name_problems(composer)
     problems += source_problems(record.get("composer_source"), entry, "composer_source")
     named = composer != UNKNOWN and not TRADITIONAL.fullmatch(composer or "")
-    for field in ("composer_died", "published"):
+    for field in ("composer_died", "lyricist_died", "published"):
         year = record.get(field)
         if year is not None and not (isinstance(year, int) and not isinstance(year, bool) and 500 <= year <= 2100):
             problems.append(f"{field}: a year")
     died, published = record.get("composer_died"), record.get("published")
     if died is not None and not named:
         problems.append("composer_died: only for a named composer")
-    if isinstance(died, int) and died > LAST_FREE_DEATH:
-        problems.append(f"died {died}, after {LAST_FREE_DEATH}: under copyright, so remove the Song")
+    # A living composer has no death year, so a named one needs it, or a first publication before
+    # 1931 and a note saying why the year is missing.
+    old = isinstance(published, int) and published < FIRST_COPYRIGHT_YEAR
+    if named and died is None and not (old and isinstance(record.get("note"), str) and record["note"].strip()):
+        problems.append(f"composer_died: the year the composer died, or `published` before {FIRST_COPYRIGHT_YEAR} "
+                        "with a `note` saying why the death year is missing")
+    for field, year in (("died", died), ("lyricist died", record.get("lyricist_died"))):
+        if isinstance(year, int) and year > LAST_FREE_DEATH:
+            problems.append(f"{field} {year}, after {LAST_FREE_DEATH}: under copyright, so remove the Song")
     if isinstance(published, int) and published >= FIRST_COPYRIGHT_YEAR:
         problems.append(f"first published {published}: under copyright, so remove the Song")
     if composer == UNKNOWN:
@@ -414,10 +425,10 @@ def report(batch_name, records):
         f"Generated by `{TOOL}`; don't edit by hand. Command:",
         "",
         "```sh",
-        f"tools/melody-lab/.venv/bin/python -I {TOOL} apply --batch tools/catalog/{batch_name}",
+        f"tools/melody-lab/.venv/bin/python -I {TOOL} report --batch tools/catalog/{batch_name}",
         "```",
         "",
-        f"**{len(done)} of {len(records)} Songs have their composer** in `catalog/catalog.json`: "
+        f"**{len(done)} of {len(records)} Songs looked up**: "
         f"{len(done) - len(unknown) - len(folk)} named, {len(folk)} traditional and {len(unknown)} unknown. "
         f"{len(removed)} removed as under copyright, {len(records) - len(done) - len(removed)} not looked up.",
         "",
@@ -456,12 +467,29 @@ def batch_problems(catalog, batch_path):
     return records, problems
 
 
+def removals_left(catalog, records):
+    """The batch's Songs to remove that are still in the catalog: `apply` waits until they're gone."""
+    ids = {e["id"] for e in catalog}
+    return [f"{r['id']}: still in the catalog: remove it the README's way first" for r in records
+            if "remove" in r and r["id"] in ids]
+
+
+def batch_counts(records):
+    """How a batch's lookups stand, for the worker's hand-back."""
+    done = [r for r in records if is_done(r)]
+    unknown = sum(1 for r in done if r["composer"] == UNKNOWN)
+    folk = sum(1 for r in done if TRADITIONAL.fullmatch(r["composer"]))
+    removed = sum(1 for r in records if "remove" in r)
+    return (f"{len(done)} of {len(records)} looked up: {len(done) - unknown - folk} named, {folk} traditional, "
+            f"{unknown} unknown; {removed} to remove, {len(records) - len(done) - removed} open")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
-    for name in ("check", "apply"):
+    for name in ("check", "report", "apply"):
         p = sub.add_parser(name)
-        p.add_argument("--batch", type=Path, required=name == "apply", help="a tools/catalog/composers-NN.json")
+        p.add_argument("--batch", type=Path, required=name != "check", help="a tools/catalog/composers-NN.json")
     p = sub.add_parser("plan")
     p.add_argument("--size", type=int, default=150)
     p.add_argument("--batches", type=int, help="write this many batches of --size, not all")
@@ -481,19 +509,25 @@ def main():
             print(f"{path.relative_to(ROOT)}: {len(records)} Songs")
         return 0
 
-    paths = [args.batch] if args.batch else [HERE / name for name in read_batches()]
-    problems = []
-    for path in paths:
-        records, found = batch_problems(catalog, path)
-        problems += found
-    if args.command == "apply":
+    if args.batch:
+        # One batch: its own lookups, whether or not they're in the catalog yet.
+        records, problems = batch_problems(catalog, args.batch)
+        if args.command == "apply":
+            problems += removals_left(catalog, records)
         if problems:
             print("\n".join(problems), file=sys.stderr)
             return 1
-        catalog = apply(catalog, records)
-        write_json(CATALOG, catalog)
-        args.batch.with_suffix(".report.md").write_text(report(args.batch.name, records), encoding="utf-8")
-    problems += catalog_problems(catalog, read_batches())
+        if args.command == "apply":
+            catalog = apply(catalog, records)
+            write_json(CATALOG, catalog)
+        if args.command in ("report", "apply"):
+            args.batch.with_suffix(".report.md").write_text(report(args.batch.name, records), encoding="utf-8")
+        print(f"{args.batch.name}: {batch_counts(records)}")
+        if args.command != "apply":
+            return 0
+    else:
+        problems = [p for path in (HERE / name for name in read_batches()) for p in batch_problems(catalog, path)[1]]
+        problems += catalog_problems(catalog, read_batches())
     done = sum(1 for e in catalog if "composer" in e and "composer_source" in e)
     print(f"{done} of {len(catalog)} Songs have their composer")
     if problems:

@@ -119,13 +119,33 @@ class RecordProblems(unittest.TestCase):
         self.assertIn("first published 1931", self.problems({**DONE, "published": 1931})[0])
         self.assertEqual(self.problems({**DONE, "composer_died": 1955, "published": 1930}), [])
 
+    def test_a_lyricist_who_wrote_with_the_music_counts(self):
+        # excluded-titles.txt: an author who died after 1955 is the composer, or a lyricist whose words
+        # were written with the music.
+        song = {**DONE, "composer_died": 1940, "published": 1925, "note": "words by a lyricist, with the music"}
+        self.assertEqual(self.problems({**song, "lyricist_died": 1941}), [])
+        self.assertEqual(self.problems({**song, "lyricist_died": 1970}),
+                         ["nocturne: lyricist died 1970, after 1955: under copyright, so remove the Song"])
+        self.assertEqual(self.problems({**song, "lyricist_died": "1970"}), ["nocturne: lyricist_died: a year"])
+
+    def test_a_named_composer_needs_a_death_year_or_an_old_publication(self):
+        living = {k: v for k, v in DONE.items() if k != "composer_died"}
+        self.assertIn("composer_died: the year the composer died", self.problems(living)[0])
+        self.assertIn("composer_died: the year the composer died", self.problems({**living, "published": 1925})[0])
+        self.assertIn("composer_died: the year the composer died",
+                      self.problems({**living, "published": 1925, "note": " "})[0])
+        self.assertEqual(self.problems({**living, "published": 1925, "note": "no source gives the year"}), [])
+        unknown = {**living, "composer": "Unknown", "checked": [W + "Tourdion"]}
+        self.assertEqual(self.problems(unknown), [])
+
     def test_a_removal(self):
         removal = {**DONE, "composer_died": 1960, "remove": "died 1960"}
         self.assertEqual(self.problems(removal, None), [])
         self.assertEqual(self.problems({k: v for k, v in removal.items() if k not in ("composer", "composer_died")}
                                        | {"published": 1940}, None), [])
-        self.assertIn("still in the catalog", self.problems(removal)[0])
-        self.assertIn("composer_died after 1955", self.problems({**DONE, "remove": "x"}, None)[0])
+        self.assertEqual(self.problems(removal), [])  # a worker marks it; the integration PR removes it
+        self.assertEqual(self.problems({**DONE, "lyricist_died": 1970, "remove": "lyricist died 1970"}, None), [])
+        self.assertIn("composer_died or lyricist_died after 1955", self.problems({**DONE, "remove": "x"}, None)[0])
         self.assertIn("why", self.problems({**removal, "remove": " "}, None)[0])
 
     def test_a_song_gone_from_the_catalog_needs_a_removal(self):
@@ -146,6 +166,13 @@ class RecordProblems(unittest.TestCase):
 
 
 class Apply(unittest.TestCase):
+    def test_waits_for_a_removal(self):
+        removal = {**DONE, "composer_died": 1960, "remove": "died 1960"}
+        self.assertEqual(composers.removals_left([ENTRY], [removal]),
+                         ["nocturne: still in the catalog: remove it the README's way first"])
+        self.assertEqual(composers.removals_left([], [removal]), [])
+        self.assertEqual(composers.removals_left([ENTRY], [DONE]), [])
+
     def test_puts_the_fields_after_the_title(self):
         applied = composers.apply([ENTRY, {"id": "other", "title": "Other"}], [DONE])
         self.assertEqual(list(applied[0]), ["id", "title", "composer", "composer_died", "composer_source", "file",
