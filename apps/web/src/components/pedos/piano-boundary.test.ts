@@ -38,8 +38,8 @@ const MAKES_OR_SAVES: Record<string, string[]> = {
  * What makes, saves or serves audio: everything in `src/lib/` (the renderer and its worker,
  * Toots, Recordings, their stores and sync, the Sound Pad), the server, every route (the library's
  * and shares' audio among them), the scripts that render Songs, and every other module that calls
- * a function in `MAKES_OR_SAVES` or makes an `OfflineAudioContext` (the provider that makes and
- * saves Toots among them). Found by reading the source, so a new one is checked without a list.
+ * a function in `MAKES_OR_SAVES` or constructs an `OfflineAudioContext` (the provider that makes
+ * and saves Toots among them). Found by reading the source, so a new one is checked without a list.
  */
 const ENTRIES = unique([
   ...files('src/lib'),
@@ -58,7 +58,7 @@ function unique(paths: string[]): string[] {
 /** Whether `file` calls a function that makes or saves audio, or makes an offline context. */
 function makesOrSaves(file: string): boolean {
   const source = readFileSync(file, 'utf8')
-  if (/\bOfflineAudioContext\b/.test(source)) return true
+  if (/\bnew\s+OfflineAudioContext\b/.test(source)) return true
   return importClauses(file).some(({ module, clause }) => {
     const names = MAKES_OR_SAVES[relative(APP, module)]
     if (!names || /^type\b/.test(clause)) return false
