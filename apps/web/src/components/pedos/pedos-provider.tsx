@@ -24,6 +24,7 @@ import {
 import { catalogPath } from '@/lib/catalog/catalog-path.generated'
 import { loadSongs } from '@/lib/catalog/load-songs'
 import type { Song, SongSummary } from '@/lib/catalog/song'
+import type { FartChoices } from '@/lib/engine/fart-choices'
 import { loadFavorites } from '@/lib/favorite-store'
 import { onLibraryChanged, recordingsAfter } from '@/lib/library-sync'
 import type { Performance } from '@/lib/performance'
@@ -293,9 +294,10 @@ type Pedos = {
   toot(id: string): Toot | undefined
   /**
    * Makes the Toot of an Unlocked Song in the render worker: Song Creator. Throws a `TootError`.
-   * `id` is a new one unless given, as when Checkout comes back for the Toot it paid for.
+   * `id` is a new one unless given, as when Checkout comes back for the Toot it paid for. The
+   * Song is arranged with its Fart Choices, `choices`, when it has any (#360).
    */
-  makeToot(song: Song, id?: string): Promise<SongTootDraft>
+  makeToot(song: Song, id?: string, choices?: FartChoices | null): Promise<SongTootDraft>
   /**
    * Makes the Toot of a Sound Pad Performance in the render worker (ADR 0017). Throws a
    * `TootError`. `id` is a new one unless given, as `makeToot`'s.
@@ -308,8 +310,10 @@ type Pedos = {
    * draft's audio, a saved one from the store. A saved Toot whose audio is gone is marked
    * `isAudioMissing`; one whose audio couldn't be read this time is `tootPlayFailed`. A saved
    * Toot's note is found in its audio by its Song's notes (`loadSong`), which its screen gives.
+   * The whole Toot plays from `from` seconds when given: Song Creator carrying on from the piano
+   * where it was (#359).
    */
-  toggleTootPlayback(toot: TootDraft | Toot, note?: number, notes?: Song): void
+  toggleTootPlayback(toot: TootDraft | Toot, note?: number, notes?: Song, from?: number): void
   /** The saved Toot whose audio couldn't be read on its last play, until the next play. */
   tootPlayFailed: string | null
   /** Gives a Toot a new title, trimmed. An empty title changes nothing. */
@@ -929,7 +933,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   )
 
   const makeToot = useCallback(
-    (song: Song, id?: string) => renderToot(song, recordings ?? [], store.loadAudio, undefined, id),
+    (song: Song, id?: string, choices: FartChoices | null = null) =>
+      renderToot(song, recordings ?? [], store.loadAudio, undefined, id, choices),
     [recordings]
   )
 
@@ -974,7 +979,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const toggleTootPlayback = useCallback(
-    (toot: TootDraft | Toot, note?: number, notes?: Song) => {
+    (toot: TootDraft | Toot, note?: number, notes?: Song, from?: number) => {
       const key = tootPlayback(toot.id, note)
       setTootPlayFailed(null)
       if (nowPlaying === key) {
@@ -992,7 +997,13 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       tootPlays.current += 1
       const thisPlay = tootPlays.current
       // A note plays as written, from the Toot's own audio: `Song.seconds(of:)` on the iPhone.
-      const segment = written && { start: written.start, end: written.start + written.length }
+      const segment = written
+        ? { start: written.start, end: written.start + written.length }
+        : from
+          ? { start: from, end: Number.POSITIVE_INFINITY }
+          : null
+      // The playhead's 0 is the Toot's start, before `from`.
+      const startedBefore = written ? 0 : (from ?? 0) * 1000
       // The whole Toot and its notes share one decode. Decoding takes the buffer it's given, so a
       // draft's gets a copy, and the draft keeps its audio to save.
       const audio =
@@ -1011,7 +1022,9 @@ export function PedosProvider({ children }: { children: ReactNode }) {
                 throw error
               })
       void play(`toot-${toot.id}`, audio, segment, ended).then(() => {
-        if (thisPlay === tootPlays.current) setPlaybackStart({ key, at: performance.now() })
+        if (thisPlay === tootPlays.current) {
+          setPlaybackStart({ key, at: performance.now() - startedBefore })
+        }
       })
     },
     [nowPlaying, markAudioMissing]

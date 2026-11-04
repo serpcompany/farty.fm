@@ -8,7 +8,7 @@ Regenerate after any change to the lab, the Fixture Library or the catalog, and 
 cd tools/melody-lab && .venv/bin/python export_golden.py
 ```
 
-The script deletes and rewrites `index.json`, `recordings/`, `songs/`, `arrangements/` and `coverage.json`. It uses the same calls as `run_all.py` (`load_library`, `load_catalog`, `melody_fit`, `plan`, `render`, `evaluate`) and prints the same summary line per Song and library. Running it twice gives byte-identical files (keys sorted, floats rounded or written exactly). Other library versions may change low-order digits, which is why the tests below use tolerances. `requirements.txt` pins them, including soxr, which decides the decoded samples of the 48 kHz MP3s. `index.json` records the versions used.
+The script deletes and rewrites `index.json`, `recordings/`, `songs/`, `arrangements/`, `coverage.json` and `choices.json`. It uses the same calls as `run_all.py` (`load_library`, `load_catalog`, `melody_fit`, `plan`, `render`, `evaluate`) and prints the same summary line per Song and library. Running it twice gives byte-identical files (keys sorted, floats rounded or written exactly). Other library versions may change low-order digits, which is why the tests below use tolerances. `requirements.txt` pins them, including soxr, which decides the decoded samples of the 48 kHz MP3s. `index.json` records the versions used.
 
 Rendered audio is not exported (too large). Swift renders are judged by running the same checks on their own output.
 
@@ -22,6 +22,7 @@ Rendered audio is not exported (too large). Swift renders are judged by running 
 | `arrangements/full/<song>.json` | Pitch Coverage, transposition, Arrangement and `evaluate.py` metrics using the whole Fixture Library (38 Recordings, 26 of them Melodic). 124 of the 129 Songs unlock. `silent-night`, `joy-to-the-world`, `away-in-a-manger` and `daisy-bell` each need one fart of 2 to 3.5 s, and `taps` two of 5 s. All 13 Songs before #229 unlock since Songs play every burst of a fart (ADR 0016). Before, 9 did: `jingle`, `row`, `auld` and `amazing` were each short of a fart as long as its longest note on some pitch (ADR 0011). |
 | `arrangements/small/<song>.json` | The same using only `002 009 016 022 069 090` (`build.py`'s `SMALL_LIBRARY`, a plausible new user's first six). All six are Melodic since the second pitch window found `009` (#282), and `016` and `022` are a tie group. 28 Songs unlock, of 3 to 6 notes, 23 of them with `009`, `mary` and `saints` among them. The other 101 are locked at 1 to 6 notes covered, with Pitch Coverage, the partial Arrangement and `missing`, but nothing to render. Most of the six are short: `016` lasts 0.31 s and `069` 1.08 s. |
 | `coverage.json` | Pitch Coverage and Arrangement of every Song on 50 fixed random subsets of the Fixture Library: 10 each of 3, 6 and 9 Recordings, and of 4 and 6 Melodic Recordings. They are drawn from the Fixture Library without the owner's farts, so adding those changed none (#295). |
+| `choices.json` | Fart Choices (#360): a user's swaps and left-out farts on every arranged Song, on both libraries, replayed change by change, with the Fart Choices and Arrangement after each |
 
 Songs: `songs/` has every catalog Song, and the web app ships them all but `ode-mutopia`, an SATB score of Ode to Joy that exercises the skyline importer (#350). `arrangements/`, `coverage.json` and `index.json`'s `songs` cover only the 129 that `export_golden.py`'s `arranged_catalog()` picks: every hand-entered catalog entry (the ones without `import`) and the first three PDMX batches (`titles-01.txt` to `titles-03.txt`), the Songs the app shipped before #350, which the web app's Auto-map, renderer and Pitch Coverage tests check against. Every later PDMX import passed [`tools/catalog/import_pdmx.py`](../../tools/catalog/import_pdmx.py)'s render gate on the reference engine, and `run_all.py` renders it too. Arranging all 1,009 would take this export from about 3 minutes to about 25, and those web tests about 8 times as long.
 
@@ -87,6 +88,23 @@ The Recording Pitch is the energy-weighted median, the same way, of the contour'
 
 `subsets[]`: each has `recordings` (the subset's ids) and `songs[]`, one per catalog Song: `song`, `unlocked`, `pitch_coverage`, `transpose`, `octave_moves`, `plan_cost`, `recording_for_pitch` (Song pitch as a string, to a Recording id or `null`) and `missing` (as in the arrangements). It's what a port's Pitch Coverage test compares with on every subset. Arrangements aren't rendered here.
 
+## `choices.json`
+
+`cases[]`: each has `case`, `song`, `library` and `states[]`, the Song after each of its changes. The Song before the first is Auto-map's Arrangement, which `arrangements/` holds. A state has the `step` that made it, the Song's `choices` after it (`transposition`, `preferred`, Song pitch as a string to the Recording the user picked, and `excluded`, the Recordings left out, sorted; `null` once nothing is changed), and the Arrangement's fields as in `coverage.json`. A step is `swap` (`song_pitch`, `recording`), `leave_out` or `use_again` (`recording`), `reset` (`song_pitch`), `reset_all`, or `set` (`choices`, set as they are). The engine's `arrange()` gives the Arrangement, and `swap()`, `leave_out()`, `use_again()` and `reset()` the Fart Choices.
+
+`export_golden.py`'s `choice_cases()` picks each case's pitch and Recording by a fixed rule, lowest first, and a Song gets only the cases it allows:
+
+| Case | Steps |
+| --- | --- |
+| `swap` | Swap in a Recording that plays nothing, for the lowest pitch one can play; then, when another Recording can play that pitch, swap it in for the same pitch, which replaces the first pick |
+| `swap_taken` | Swap in a Recording another pitch plays, which that pitch loses |
+| `use_again` | Leave out the lowest covered pitch's Recording, then use it again |
+| `leave_out_every` | Leave out each Recording that can play the covered pitch fewest can, until it has none and the Song locks, then reset it |
+| `reset`, `reset_all` | A swap and a left-out Recording, then reset each pitch, or reset everything |
+| `stale` | A swap kept beside picks `arrange()` drops: a Recording that is gone, one too far from its pitch, one left out, a Noise-like one, a pitch the Song doesn't have, and the swapped Recording again for a higher pitch |
+
+A port replays each case's steps from no change and checks, after each, that its Fart Choices are identical and its Arrangement matches ("When an Arrangement matches", with `recording_for_pitch`). `golden_cost.py` also checks that every state holds its Fart Choices' transposition and plays no Recording left out.
+
 ## Tolerances for port tests
 
 Test each stage on the golden outputs of the stage before it, so that one port's small differences don't fail the next port's test.
@@ -98,7 +116,7 @@ Test each stage on the golden outputs of the stage before it, so that one port's
 | Audition (#36) | the golden first burst, `pitch_contour` and `pitch_estimate_midi` | The same `shortest_note_s`, and so the same Melodic set (`melodic`, `recording_pitch_midi`): 26 Melodic, `002 009 013 016 017 019 022 032 059 069 080 084 086 090 091 094 095 096 097 098 099 100 101 102 103 104` |
 | Settle time (#92) | the golden first burst, `pitch_contour` and `recording_pitch_midi` | `settle_s` within 2 frames (11.6 ms) |
 | Song import (#38) | the catalog MIDI | Same note count and pitches; `start` and `dur` within 1e-6 beats; the same `bpm`, `beats_per_bar` and `bar_lines` |
-| Auto-map (#40) and Pitch Coverage (#43) | the golden `recording_pitch_midi`, `shortest_note_s`, `settle_s`, `melodic`, gesture length and Song `notes` | The Arrangement matches (next section), for both libraries and every `coverage.json` subset |
+| Auto-map (#40) and Pitch Coverage (#43) | the golden `recording_pitch_midi`, `shortest_note_s`, `settle_s`, `melodic`, gesture length and Song `notes` | The Arrangement matches (next section), for both libraries, every `coverage.json` subset and every `choices.json` state |
 | Renderer (#41) | a golden Arrangement | The same checks as `evaluate.py`, no worse than the golden metrics (see "Metrics" below) |
 
 ### When an Arrangement matches
@@ -158,3 +176,7 @@ The reference planner follows the unlock rule in [ADR 0004](../../docs/adr/0004-
   - 30 × the seconds of silence the Recording leaves in that pitch's notes (#205): `30 × Σ max(0, (dur × 60 / bpm − 0.025) − gesture length)`, summed over the notes first and then multiplied. A long note prefers a long Recording.
 
 What changed from the planner before #43: no Recording is reused (the reuse penalty of 2 is gone), no shift goes beyond 3 semitones except with an Octave Move (the old shift cost allowed up to 12), the too-short cost grows with how far short a note falls and counts the Recording's own length, and ties are broken by the rule above. #92 added the settle cost, #205 the silence cost, and ADR 0011 (#221) the length rule, which decides whether a Recording may cover a pitch at all. ADR 0012 (#226) made every length the Recording's own, since farts now play unshifted. `golden_cost.py` must change with any cost term; the export fails until they agree. `recordings/` and `songs/` don't depend on the planner.
+
+### Fart Choices (#360)
+
+A Song the user changed is arranged by `arrange()` at the transposition its Fart Choices hold, the one it had at the first change. Auto-map's Arrangement at that transposition is the base. Each picked Recording plays its pitch, lowest pitch first, unless it is gone, Noise-like, left out, already picked for a lower pitch, or can't play the pitch there. Every other pitch keeps its base Recording unless that one is left out or picked. The pitches left without one are arranged together by `melody_fit()` on just their notes and the Recordings nobody plays or left out, ranked as above, and one no Recording can play stays uncovered, which locks the Song. From an unchanged Unlocked Song a swap moves only its pitch, and the pitch that played the swapped-in Recording, and leaving a fart out moves only the pitch it played. After earlier changes, a pitch an earlier change moved can move again, since the pitches left over are arranged together.

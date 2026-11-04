@@ -217,27 +217,68 @@ function soundingSeconds(durations: readonly number[], spb: number): number[] {
   return durations.map(dur => Math.max(0, dur * spb - GAP_SECONDS))
 }
 
-/** `arrange` of a Song as `songPitches` reads it, to the last bit. */
+/** What Auto-map reads of one pitch's notes. */
+export interface PitchNotes {
+  /** Their summed written length in beats. */
+  weight: number
+  /** How long each sounds, in seconds: its written length less the gap. */
+  noteSeconds: number[]
+  /** The longest of `noteSeconds`. */
+  longest: number
+}
+
+/** What Auto-map reads of each of a Song's distinct pitches, in `pitches`' order: `song_pitches()`. */
+export function pitchNotes(song: SongPitches): PitchNotes[] {
+  const spb = secondsPerBeat(song)
+  return song.durations.map(durations => {
+    const noteSeconds = soundingSeconds(durations, spb)
+    return { weight: pythonSum(durations), noteSeconds, longest: Math.max(...noteSeconds) }
+  })
+}
+
+/**
+ * Whether a pitch sounding at `targetMidi` may be played by Melodic Recording `r`, and what that
+ * costs: the reference's `pitch_cell()`. Null when the unlock rule doesn't allow it, too far from
+ * the note (`moveCost`) or too short for its longest note (`fills`).
+ */
+export function pitchCell(
+  r: AutoMapRecording,
+  targetMidi: number,
+  notes: PitchNotes
+): { octaveMove: boolean; cost: number } | null {
+  const move = moveCost(targetMidi - (r.recordingPitchMidi as number))
+  if (move === null || !fills(r.gestureSeconds, notes.longest)) return null
+  return {
+    octaveMove: move.octaveMove,
+    cost:
+      notes.weight * move.cost +
+      tooShortCost(notes.noteSeconds, r.gestureSeconds, r.shortestNoteSeconds as number) +
+      (r.settleSeconds === null
+        ? 0
+        : unsettledCost(notes.noteSeconds, r.gestureSeconds, r.settleSeconds)) +
+      silentCost(notes.noteSeconds, r.gestureSeconds)
+  }
+}
+
+/**
+ * `arrange` of a Song as `songPitches` reads it, to the last bit. With `transposition`, only that
+ * one is tried, as the reference's `melody_fit(transpose=)`: a Song the user changed holds the
+ * transposition it had (`fart-choices.ts`, #360).
+ */
 export function arrangePitches(
   song: SongPitches,
-  recordings: readonly AutoMapRecording[]
+  recordings: readonly AutoMapRecording[],
+  transposition?: number
 ): Arrangement {
   const melodic = recordings.filter(isMelodic).sort((a, b) => compareIds(a.id, b.id))
   const { pitches } = song
-  const spb = secondsPerBeat(song)
-  const weight: number[] = []
-  const noteSeconds: number[][] = []
-  const longest: number[] = []
-  for (const durations of song.durations) {
-    weight.push(pythonSum(durations))
-    noteSeconds.push(soundingSeconds(durations, spb))
-    longest.push(Math.max(...noteSeconds[noteSeconds.length - 1]))
-  }
+  const notes = pitchNotes(song)
+  const longest = notes.map(n => n.longest)
 
+  const lowest = transposition ?? LOWEST_TRANSPOSITION
+  const highest = transposition ?? HIGHEST_TRANSPOSITION
   const tables: Table[] = []
-  for (let t = LOWEST_TRANSPOSITION; t <= HIGHEST_TRANSPOSITION; t++) {
-    tables.push(new Table(pitches, melodic, t, weight, noteSeconds, longest))
-  }
+  for (let t = lowest; t <= highest; t++) tables.push(new Table(pitches, melodic, t, notes))
   const best = tables.map(table => table.solve([]).key)
   let top = best[0]
   for (const k of best) {
@@ -262,7 +303,7 @@ export function arrangePitches(
   if (winner === null) throw new Error('Auto-map found no optimal transposition')
   const { index, choice } = winner
   const table = tables[index]
-  const t = LOWEST_TRANSPOSITION + index
+  const t = lowest + index
   const key = table.key(choice)
   const picked: PitchChoice[] = pitches.map((p, i) => {
     const j = choice[i]
@@ -367,7 +408,7 @@ export function choiceForSongPitch(arrangement: Arrangement, pitch: number): Pit
   return arrangement.pitches.find(c => c.songPitch === pitch) ?? null
 }
 
-function isMelodic(r: AutoMapRecording): boolean {
+export function isMelodic(r: AutoMapRecording): boolean {
   return r.recordingPitchMidi !== null && r.shortestNoteSeconds !== null
 }
 
@@ -521,9 +562,7 @@ class Table {
     pitches: readonly number[],
     recordings: readonly AutoMapRecording[],
     t: number,
-    weight: readonly number[],
-    noteSeconds: readonly number[][],
-    longest: readonly number[]
+    notes: readonly PitchNotes[]
   ) {
     this.rows = pitches.length
     this.columns = recordings.length
@@ -533,19 +572,12 @@ class Table {
     this.cost = new Float64Array(size)
     pitches.forEach((p, i) => {
       recordings.forEach((r, j) => {
-        const shift = p + t - (r.recordingPitchMidi as number)
-        const move = moveCost(shift)
-        if (move === null || !fills(r.gestureSeconds, longest[i])) return
+        const move = pitchCell(r, p + t, notes[i])
+        if (move === null) return
         const cell = i * this.columns + j
         this.allowed[cell] = 1
         this.isOctaveMove[cell] = move.octaveMove ? 1 : 0
-        this.cost[cell] =
-          weight[i] * move.cost +
-          tooShortCost(noteSeconds[i], r.gestureSeconds, r.shortestNoteSeconds as number) +
-          (r.settleSeconds === null
-            ? 0
-            : unsettledCost(noteSeconds[i], r.gestureSeconds, r.settleSeconds)) +
-          silentCost(noteSeconds[i], r.gestureSeconds)
+        this.cost[cell] = move.cost
       })
     })
   }

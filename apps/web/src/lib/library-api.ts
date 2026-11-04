@@ -1,3 +1,4 @@
+import type { FartChoices } from './engine/fart-choices'
 import type { Kind } from './outbox'
 import type { Recording, Trim } from './recordings'
 import type { Toot } from './toot'
@@ -108,8 +109,28 @@ export async function setFavorite(songId: string, on: boolean, accountId: string
 }
 
 /**
+ * Keeps a Song's Fart Choices on the account (#360), or with null makes the Song automatic there
+ * again.
+ */
+export async function setFartChoices(
+  songId: string,
+  choices: FartChoices | null,
+  accountId: string
+): Promise<Answer> {
+  const path = `/api/fart-choices/${encodeURIComponent(songId)}/`
+  if (choices === null) return answer(await send(path, accountId, { method: 'DELETE' }))
+  return answer(
+    await send(path, accountId, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(choices)
+    })
+  )
+}
+
+/**
  * What `GET /api/library/` answers: the changes since `since`, or the whole library (`full`). A
- * Worker from before #313 sends no Favorite Songs.
+ * Worker from before #313 sends no Favorite Songs, and one from before #360 no Fart Choices.
  */
 export type LibraryChanges = {
   cursor: number
@@ -118,7 +139,9 @@ export type LibraryChanges = {
   toots: (Toot & { audioBytes?: number })[]
   /** The Favorite Songs marked since, by Song id. */
   favorites?: string[]
-  deleted: { recordings: string[]; toots: string[]; favorites?: string[] }
+  /** The Songs whose Fart Choices changed since, with them. */
+  fartChoices?: { songId: string; choices: FartChoices }[]
+  deleted: { recordings: string[]; toots: string[]; favorites?: string[]; fartChoices?: string[] }
 }
 
 export async function getLibrary(

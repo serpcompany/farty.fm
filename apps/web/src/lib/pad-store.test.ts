@@ -143,6 +143,8 @@ describe('version 5', () => {
     expect([...database.objectStoreNames].sort()).toEqual([
       'audio',
       'downloads',
+      // Since version 9 (#360).
+      'fartChoices',
       // Since version 7 (#313).
       'favorites',
       'meta',

@@ -56,7 +56,9 @@ function standInTake() {
 
 const mic = vi.hoisted(() => ({
   startTake: vi.fn(),
-  reportError: vi.fn()
+  reportError: vi.fn(),
+  /** Record's button shows, or stops showing (`recorder.ts`), in order. */
+  record: [] as ('shows' | 'leaves')[]
 }))
 
 vi.mock('@/lib/audio/recorder', async importOriginal => {
@@ -65,7 +67,12 @@ vi.mock('@/lib/audio/recorder', async importOriginal => {
     MicrophoneDeniedError: real.MicrophoneDeniedError,
     MicrophoneReleasedError: real.MicrophoneReleasedError,
     startTake: mic.startTake,
-    keepMicrophoneOpen: () => undefined
+    keepMicrophoneOpen: () => {
+      mic.record.push('shows')
+    },
+    leaveRecord: () => {
+      mic.record.push('leaves')
+    }
   }
 })
 vi.mock('@/lib/analysis/client', () => ({ analyze: () => new Promise(() => {}) }))
@@ -135,6 +142,7 @@ let root: Root | null = null
 let starting: { resolve: (take: Take) => void; interrupt: () => void } | null = null
 
 beforeEach(() => {
+  mic.record = []
   vi.useFakeTimers({
     toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date']
   })
@@ -363,6 +371,31 @@ describe('Record’s states (#281, #314)', () => {
     await act(async () => stand.finish())
     expect(byTestId('record-status')?.textContent).toBe('')
     expect(byTestId('review-play')).not.toBeNull()
+  })
+
+  it('leaves Record while the take’s review covers it, and shows it again after Discard (#369)', async () => {
+    // A phone: never the computer's product page.
+    vi.spyOn(window, 'matchMedia').mockReturnValue({
+      matches: false,
+      addEventListener() {},
+      removeEventListener() {}
+    } as unknown as MediaQueryList)
+    await open()
+    expect(mic.record).toEqual(['shows'])
+    // Getting the mic ready and the take itself are still Record.
+    const stand = await startRecording()
+    await sendFor(stand, 800, () => fart(batchFrames))
+    expect(mic.record).toEqual(['shows'])
+
+    await act(async () => byTestId('stop-button')?.click())
+    await act(async () => stand.finish())
+    expect(byTestId('review-play')).not.toBeNull()
+    expect(mic.record).toEqual(['shows', 'leaves'])
+
+    const discard = [...document.querySelectorAll('button')].find(b => b.textContent === 'Discard')
+    await act(async () => discard?.click())
+    expect(byTestId('review-play')).toBeNull()
+    expect(mic.record).toEqual(['shows', 'leaves', 'shows'])
   })
 
   it('dims Stop and holds the timer and waveform while the take finishes after Stop', async () => {

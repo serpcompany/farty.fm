@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:test'
 
 import * as accountRoute from '@/app/api/account/route'
+import * as fartChoicesRoute from '@/app/api/fart-choices/[id]/route'
 import * as favoriteRoute from '@/app/api/favorites/[id]/route'
 import * as libraryRoute from '@/app/api/library/route'
 import * as recordingAudioRoute from '@/app/api/recordings/[id]/audio/route'
@@ -222,7 +223,27 @@ export const api = {
 
   /** Takes a Favorite Song off. */
   unfavorite: (songId: string, as: As) =>
-    favoriteRoute.DELETE(request(`/api/favorites/${songId}/`, 'DELETE', as), params({ id: songId }))
+    favoriteRoute.DELETE(
+      request(`/api/favorites/${songId}/`, 'DELETE', as),
+      params({ id: songId })
+    ),
+
+  /** Keeps a Song's Fart Choices (#360): `choices` as JSON, unless `body` is another. */
+  setFartChoices: (songId: string, choices: unknown, as: As, body?: string) =>
+    fartChoicesRoute.PUT(
+      request(`/api/fart-choices/${songId}/`, 'PUT', as, {
+        headers: { 'content-type': 'application/json' },
+        body: body ?? JSON.stringify(choices)
+      }),
+      params({ id: songId })
+    ),
+
+  /** Makes a Song automatic again. */
+  clearFartChoices: (songId: string, as: As) =>
+    fartChoicesRoute.DELETE(
+      request(`/api/fart-choices/${songId}/`, 'DELETE', as),
+      params({ id: songId })
+    )
 }
 
 /** Every key in the bucket, sorted. */

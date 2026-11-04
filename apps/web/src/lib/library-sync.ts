@@ -6,6 +6,8 @@ import {
   libraryOwnerEmail,
   setLibraryOwner
 } from './account'
+import { type FartChoices, parseFartChoices, sameFartChoices } from './engine/fart-choices'
+import { fartChoicesChanged } from './fart-choice-store'
 import { favoritesChanged } from './favorite-store'
 import * as api from './library-api'
 import {
@@ -29,7 +31,7 @@ type Database = IDBPDatabase<PedosDB>
 // the last one (`GET /api/library/?since=`) brings what other browsers did, deletes included. A
 // Recording's or Toot's WAV moves as it is, in both directions: nothing re-renders it (ADR 0004).
 // Everything that sends or applies runs under one Web Lock, so the tabs of a browser take turns.
-// Favorite Songs (#313) sync the same way, by Song id, with no audio.
+// Favorite Songs (#313) and Fart Choices (#360) sync the same way, by Song id, with no audio.
 
 /** What a sync changed in this browser's library, for the screens showing it. */
 export type LibraryChange =
@@ -201,6 +203,9 @@ export async function leftByAnAccount(): Promise<boolean> {
   return (await withDb(database => database.get('meta', 'cursor'))) !== undefined
 }
 
+/** Whether `entry` sends a fart, a Recording or Toot, and not a Favorite Song or Fart Choices. */
+const isFart = (entry: OutboxEntry) => entry.kind === 'recordings' || entry.kind === 'toots'
+
 /**
  * How many farts (Recordings and Toots) on this device haven't uploaded to the account its library
  * is, which signing in as `email` would clear (`claimLibrary`): none for a guest's library, or for
@@ -217,7 +222,7 @@ export async function unsavedBeforeSignIn(email: string): Promise<number> {
   }
   if (ownerEmail !== null && ownerEmail === email.trim().toLowerCase()) return 0
   const queued = await withDb(database => database.getAll('outbox'))
-  return queued.filter(entry => entry.op === 'put' && entry.kind !== 'favorites').length
+  return queued.filter(entry => entry.op === 'put' && isFart(entry)).length
 }
 
 /**
@@ -265,6 +270,8 @@ type Taken =
   | { entry: OutboxEntry; kind: Kind; op: 'delete' }
   /** A Favorite Song marked (`on`), or taken off. */
   | { entry: OutboxEntry; op: 'favorite'; on: boolean }
+  /** A Song's Fart Choices as they are here now, or null when it's automatic again. */
+  | { entry: OutboxEntry; op: 'fartChoices'; choices: FartChoices | null }
 
 /**
  * The oldest entry to send, marked sent in the same transaction that reads what it sends. A
@@ -277,7 +284,7 @@ function takeNext(skip: Set<string>): Promise<Taken | null> {
 
 async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken | null> {
   const tx = database.transaction(
-    ['outbox', 'recordings', 'audio', 'toots', 'tootAudio'],
+    ['outbox', 'recordings', 'audio', 'toots', 'tootAudio', 'fartChoices'],
     'readwrite'
   )
   const outbox = tx.objectStore('outbox')
@@ -292,6 +299,13 @@ async function takeNextIn(database: Database, skip: Set<string>): Promise<Taken 
       if (queued.op !== 'put' && queued.op !== 'delete') continue
       await Promise.all([outbox.put(entry), tx.done])
       return { entry, op: 'favorite', on: queued.op === 'put' }
+    }
+    if (kind === 'fartChoices') {
+      // Sent as they are here now: none is a delete, whatever was queued.
+      if (queued.op !== 'put' && queued.op !== 'delete') continue
+      const choices = (await tx.objectStore('fartChoices').get(queued.id)) ?? null
+      await Promise.all([outbox.put(entry), tx.done])
+      return { entry, op: 'fartChoices', choices }
     }
     if (queued.op === 'put') {
       const [item, wav] = await Promise.all([
@@ -366,7 +380,7 @@ async function settleIn(
   const unchanged = now?.version === sent.version
   if (!now) {
     // A sign-out or the account's delete cleared it meanwhile.
-  } else if (sent.kind === 'favorites') {
+  } else if (sent.kind === 'favorites' || sent.kind === 'fartChoices') {
     // A tap during the request is sent next.
     if (unchanged) await tx.store.delete(sent.key)
   } else if (now.op === 'delete') {
@@ -408,6 +422,14 @@ async function send(taken: Taken, accountId: string): Promise<Sent> {
     if (stops(answer)) return 'stop'
     // Kept; or refused, at the limit or for a Song id the account doesn't take, which no retry
     // changes. The heart stays here until a full read drops what the account doesn't list.
+    await settle(entry)
+    return 'next'
+  }
+  if (taken.op === 'fartChoices') {
+    const answer = await api.setFartChoices(entry.id, taken.choices, accountId)
+    if (stops(answer)) return 'stop'
+    // Kept; or refused, at the limit or for a Song id the account doesn't take, which no retry
+    // changes. They stay here until a full read drops what the account doesn't list.
     await settle(entry)
     return 'next'
   }
@@ -479,8 +501,11 @@ async function pull(accountId: string): Promise<boolean> {
   const since = (await withDb(database => database.get('meta', 'cursor'))) ?? 0
   const answer = await api.getLibrary(since, accountId)
   if (!('cursor' in answer) || owner() !== accountId) return false
-  const { favoritesMoved, ...change } = await withDb(database => apply(database, answer))
+  const { favoritesMoved, fartChoicesMoved, ...change } = await withDb(database =>
+    apply(database, answer)
+  )
   if (favoritesMoved) favoritesChanged()
+  if (fartChoicesMoved) fartChoicesChanged()
   const changed =
     change.recordings.length +
     change.toots.length +
@@ -494,11 +519,21 @@ async function pull(accountId: string): Promise<boolean> {
 
 /**
  * Applies what the account read (`pull`), in one transaction. What it changed here, and whether the
- * Favorite Songs changed.
+ * Favorite Songs and Fart Choices changed.
  */
 async function apply(database: Database, answer: api.LibraryChanges) {
   const tx = database.transaction(
-    ['recordings', 'audio', 'toots', 'tootAudio', 'downloads', 'outbox', 'meta', 'favorites'],
+    [
+      'recordings',
+      'audio',
+      'toots',
+      'tootAudio',
+      'downloads',
+      'outbox',
+      'meta',
+      'favorites',
+      'fartChoices'
+    ],
     'readwrite'
   )
   const recordings = tx.objectStore('recordings')
@@ -593,6 +628,7 @@ async function apply(database: Database, answer: api.LibraryChanges) {
     }
   }
   const favoritesMoved = await applyFavorites(tx.objectStore('favorites'), answer, pending)
+  const fartChoicesMoved = await applyFartChoices(tx.objectStore('fartChoices'), answer, pending)
   const listed = new Set(answer.recordings.map(r => r.id))
   const waits = (r: Recording) =>
     pending.get(itemKey('recordings', r.id)) === 'put' && !listed.has(r.id)
@@ -601,7 +637,7 @@ async function apply(database: Database, answer: api.LibraryChanges) {
     change.recordings.push(renumbered)
   }
   await Promise.all([tx.objectStore('meta').put(answer.cursor, 'cursor'), tx.done])
-  return { ...change, favoritesMoved }
+  return { ...change, favoritesMoved, fartChoicesMoved }
 }
 
 /**
@@ -632,6 +668,42 @@ async function applyFavorites(
     for (const songId of await favorites.getAllKeys()) {
       if (listed.has(songId) || sending(songId)) continue
       await favorites.delete(songId)
+      moved = true
+    }
+  }
+  return moved
+}
+
+/**
+ * Applies the account's Fart Choices (#360) in `apply`'s transaction, as `applyFavorites` applies
+ * Favorite Songs: those changed or made automatic in another browser, and, in a `full` read, those
+ * it no longer has. A Song this browser is still sending keeps its own, and Choices this build
+ * can't read are skipped. True if any changed here.
+ */
+async function applyFartChoices(
+  store: IDBPObjectStore<PedosDB, StoreNames<PedosDB>[], 'fartChoices', 'readwrite'>,
+  answer: api.LibraryChanges,
+  pending: Map<string, string>
+): Promise<boolean> {
+  const sending = (songId: string) => pending.has(itemKey('fartChoices', songId))
+  let moved = false
+  for (const { songId, choices: sent } of answer.fartChoices ?? []) {
+    const choices = parseFartChoices(sent)
+    if (sending(songId) || choices === null) continue
+    if (sameFartChoices((await store.get(songId)) ?? null, choices)) continue
+    await store.put(choices, songId)
+    moved = true
+  }
+  for (const songId of answer.deleted.fartChoices ?? []) {
+    if (sending(songId) || (await store.getKey(songId)) === undefined) continue
+    await store.delete(songId)
+    moved = true
+  }
+  if (answer.full && answer.fartChoices) {
+    const listed = new Set(answer.fartChoices.map(c => c.songId))
+    for (const songId of await store.getAllKeys()) {
+      if (listed.has(songId) || sending(songId)) continue
+      await store.delete(songId)
       moved = true
     }
   }
@@ -754,13 +826,13 @@ export function startSync(accountId: string, email: string, ready: Promise<void>
 /**
  * Before signing out: reads the account's changes and sends what's left in the outbox, after any
  * sync already running. The number of farts' entries still waiting: none means every Recording
- * and Toot this browser made is on the account. A Favorite Song still waiting isn't a fart, and
- * isn't counted.
+ * and Toot this browser made is on the account. A Favorite Song or Fart Choices still waiting
+ * aren't a fart, and aren't counted.
  */
 export async function uploadBeforeSignOut(accountId: string): Promise<number> {
   return withSyncLock(async () => {
     if (owner() === accountId) await pullThenDrain(accountId)
     const waiting = await withDb(database => database.getAll('outbox'))
-    return waiting.filter(entry => entry.kind !== 'favorites').length
+    return waiting.filter(isFart).length
   })
 }

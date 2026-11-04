@@ -1,6 +1,7 @@
 import type { Song } from '@/lib/catalog/song'
 import type { Arrangement } from '@/lib/engine/auto-map'
 import { renderInWorker, renderPerformanceInWorker } from '@/lib/engine/client'
+import type { FartChoices } from '@/lib/engine/fart-choices'
 import type { PerformanceRecording, RenderedPerformance } from '@/lib/engine/render-performance'
 import type { RecordingToRender, RenderedSong } from '@/lib/engine/render-song'
 import type { Song as EngineSong } from '@/lib/engine/song'
@@ -45,9 +46,10 @@ export function tootArrangement(arrangement: Arrangement): TootArrangement {
 
 /**
  * Makes the Toot of `song`: the Arrangement Auto-map chooses on `recordings` (the one Compose
- * shows), rendered from each Recording it uses as the app stores it, a 16-bit WAV
- * (`loadAudio`), with the Recording's stored analysis and its Trim (`trimOf`, ADR 0019): the
- * fart between the handles, and its lead-in between them too. The Toot's audio is the render as a mono 16-bit WAV.
+ * shows), changed by the Song's Fart Choices when it has any (#360), rendered from each Recording
+ * it uses as the app stores it, a 16-bit WAV (`loadAudio`), with the Recording's stored analysis
+ * and its Trim (`trimOf`, ADR 0019): the fart between the handles, and its lead-in between them
+ * too. The Toot's audio is the render as a mono 16-bit WAV.
  *
  * Throws a `TootError`: `locked` when the Song isn't unlocked, `couldNotMake` when a Recording's
  * audio or analysis is missing or the render fails. `id` is a new one unless given: the return
@@ -58,9 +60,10 @@ export async function makeToot(
   recordings: readonly Recording[],
   loadAudio: (id: string) => Promise<ArrayBuffer>,
   render: Render = renderInWorker,
-  id: string = crypto.randomUUID()
+  id: string = crypto.randomUUID(),
+  choices: FartChoices | null = null
 ): Promise<SongTootDraft> {
-  const arrangement = arrangementOf(song, recordings)
+  const arrangement = arrangementOf(song, recordings, choices)
   if (!arrangement.unlocked) throw new TootError('locked')
   let rendered: RenderedSong
   try {

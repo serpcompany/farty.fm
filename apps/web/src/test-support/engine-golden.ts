@@ -97,6 +97,35 @@ export const coverageSubsets = readJson<{
   subsets: { recordings: string[]; songs: GoldenCoverage[] }[]
 }>(`${GOLDEN_DIR}/coverage.json`).subsets
 
+/** Fart Choices as `choices.json` writes them, with each pitch a string key (#360). */
+export interface GoldenChoices {
+  transposition: number
+  preferred: Record<string, string>
+  excluded: string[]
+}
+
+/** A change in a `choices.json` case. */
+export type GoldenChoiceStep =
+  | { op: 'swap'; song_pitch: number; recording: string }
+  | { op: 'leave_out' | 'use_again'; recording: string }
+  | { op: 'reset'; song_pitch: number }
+  | { op: 'reset_all' }
+  | { op: 'set'; choices: GoldenChoices }
+
+/**
+ * A Song's Fart Choices and Arrangement after one of a case's changes. The Song before the first is
+ * Auto-map's Arrangement, which `arrangements/` holds.
+ */
+export interface GoldenChoiceState extends Omit<GoldenCoverage, 'song'> {
+  step: GoldenChoiceStep
+  choices: GoldenChoices | null
+}
+
+/** `choices.json`: each case's changes to one Song on one library, replayed from no change. */
+export const choiceCases = readJson<{
+  cases: { case: string; song: string; library: Library; states: GoldenChoiceState[] }[]
+}>(`${GOLDEN_DIR}/choices.json`).cases
+
 const byId = new Map(goldenRecordings.map(r => [r.id, r]))
 
 export function goldenRecording(id: string): GoldenRecording {

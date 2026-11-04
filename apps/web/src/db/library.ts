@@ -1,14 +1,14 @@
 import { and, count, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm'
-
+import type { FartChoices } from '../lib/engine/fart-choices'
 import type { Performance } from '../lib/performance'
 import type { Analysis, RecordingTrim } from '../lib/recordings'
 import type { TootArrangement } from '../lib/toot'
 import type { Database } from './database'
-import { favoriteSongs, recordings, toots, user, verification } from './schema'
+import { fartChoices, favoriteSongs, recordings, toots, user, verification } from './schema'
 
-// A user's library in D1: their Recordings, Toots and Favorite Songs, and their tombstones. Every
-// query here takes the session's user id and filters on it, so one user never reads or changes
-// another's rows.
+// A user's library in D1: their Recordings, Toots, Favorite Songs and Fart Choices, and their
+// tombstones. Every query here takes the session's user id and filters on it, so one user never
+// reads or changes another's rows.
 
 /** A user's Recordings or their Toots, by the name of their table and their prefix in R2. */
 export type Kind = 'recordings' | 'toots'
@@ -242,6 +242,15 @@ export async function purgeTombstones(db: Database, userId: string): Promise<voi
           isNotNull(favoriteSongs.deletedAt),
           lt(favoriteSongs.updatedAt, horizon)
         )
+      ),
+    db
+      .delete(fartChoices)
+      .where(
+        and(
+          eq(fartChoices.userId, userId),
+          isNotNull(fartChoices.deletedAt),
+          lt(fartChoices.updatedAt, horizon)
+        )
       )
   ])
 }
@@ -298,6 +307,66 @@ export async function unfavoriteSong(db: Database, userId: string, songId: strin
         eq(favoriteSongs.userId, userId),
         eq(favoriteSongs.songId, songId),
         isNull(favoriteSongs.deletedAt)
+      )
+    )
+}
+
+/**
+ * Keeps `choices` as the Song's Fart Choices (#360), over any it had, unless the user already has
+ * `limit` Songs with Choices and this isn't one. The write and the read of what came of it run in
+ * one batch, as `favoriteSong`'s do: `kept` once they are the Song's, `limit` when they aren't.
+ */
+export async function keepFartChoices(
+  db: Database,
+  userId: string,
+  songId: string,
+  choices: FartChoices,
+  limit: number
+): Promise<'kept' | 'limit'> {
+  const json = JSON.stringify(choices)
+  const [, live] = await db.batch([
+    db
+      .insert(fartChoices)
+      .select(
+        sql`select ${userId}, ${songId}, ${json}, ${d1Now}, ${d1Now}, null
+          where (select count(*) from ${fartChoices}
+            where ${fartChoices.userId} = ${userId} and ${fartChoices.deletedAt} is null
+              and ${fartChoices.songId} != ${songId})
+            < ${limit}`
+      )
+      .onConflictDoUpdate({
+        target: [fartChoices.userId, fartChoices.songId],
+        set: { choices: sql`excluded.choices`, deletedAt: null, updatedAt: d1Now }
+      }),
+    db
+      .select({ songId: fartChoices.songId })
+      .from(fartChoices)
+      .where(
+        and(
+          eq(fartChoices.userId, userId),
+          eq(fartChoices.songId, songId),
+          isNull(fartChoices.deletedAt),
+          eq(fartChoices.choices, sql`${json}`)
+        )
+      )
+  ])
+  return live.length === 1 ? 'kept' : 'limit'
+}
+
+/** Makes the Song automatic again: its Fart Choices go, leaving a tombstone. Nothing when it is. */
+export async function clearFartChoices(
+  db: Database,
+  userId: string,
+  songId: string
+): Promise<void> {
+  await db
+    .update(fartChoices)
+    .set({ choices: null, deletedAt: d1Now, updatedAt: d1Now })
+    .where(
+      and(
+        eq(fartChoices.userId, userId),
+        eq(fartChoices.songId, songId),
+        isNull(fartChoices.deletedAt)
       )
     )
 }
@@ -369,6 +438,11 @@ export async function placeRecording(
 export type RecordingRow = typeof recordings.$inferSelect
 export type TootRow = typeof toots.$inferSelect
 export type FavoriteSongRow = { songId: string; deletedAt: Date | null }
+export type FartChoicesRow = {
+  songId: string
+  choices: FartChoices | null
+  deletedAt: Date | null
+}
 
 /**
  * The user's rows changed at or after `since` (epoch milliseconds), tombstones included, and the
@@ -383,9 +457,10 @@ export async function libraryChanges(
   recordings: RecordingRow[]
   toots: TootRow[]
   favoriteSongs: FavoriteSongRow[]
+  fartChoices: FartChoicesRow[]
 }> {
   const after = new Date(since)
-  const [clock, recordingRows, tootRows, favoriteRows] = await db.batch([
+  const [clock, recordingRows, tootRows, favoriteRows, choiceRows] = await db.batch([
     db.select({ now: d1Now }).from(user).where(eq(user.id, userId)),
     db
       .select()
@@ -398,14 +473,23 @@ export async function libraryChanges(
     db
       .select({ songId: favoriteSongs.songId, deletedAt: favoriteSongs.deletedAt })
       .from(favoriteSongs)
-      .where(and(eq(favoriteSongs.userId, userId), gte(favoriteSongs.updatedAt, after)))
+      .where(and(eq(favoriteSongs.userId, userId), gte(favoriteSongs.updatedAt, after))),
+    db
+      .select({
+        songId: fartChoices.songId,
+        choices: fartChoices.choices,
+        deletedAt: fartChoices.deletedAt
+      })
+      .from(fartChoices)
+      .where(and(eq(fartChoices.userId, userId), gte(fartChoices.updatedAt, after)))
   ])
   if (clock.length === 0) throw new Error('The signed-in user has no row')
   return {
     cursor: Number(clock[0].now),
     recordings: recordingRows,
     toots: tootRows,
-    favoriteSongs: favoriteRows
+    favoriteSongs: favoriteRows,
+    fartChoices: choiceRows
   }
 }
 
@@ -426,7 +510,7 @@ export async function setMarketingEmail(
 /**
  * Deletes the user's row and any sign-in code still waiting for their email, in one batch. The
  * foreign keys' `on delete cascade` deletes their sessions, sign-in methods, Recordings, Toots
- * and Favorite Songs with the row. A code's row names the email (`sign-in-otp-<lowercased email>`), not the user.
+ * Favorite Songs and Fart Choices with the row. A code's row names the email (`sign-in-otp-<lowercased email>`), not the user.
  */
 export async function deleteUser(db: Database, userId: string): Promise<void> {
   const email = sql`(select ${user.email} from ${user} where ${user.id} = ${userId})`

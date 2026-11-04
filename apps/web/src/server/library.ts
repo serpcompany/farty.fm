@@ -1,6 +1,7 @@
 import { getDb } from '@/db'
 import type { Database } from '@/db/database'
 import {
+  clearFartChoices,
   deleteUser,
   favoriteSong,
   insertPaidToot,
@@ -8,6 +9,7 @@ import {
   insertToot,
   itemStatus,
   type Kind,
+  keepFartChoices,
   libraryChanges,
   placeRecording,
   purgeTombstones,
@@ -22,6 +24,7 @@ import {
 } from '@/db/library'
 import { tootPayment } from '@/db/payments'
 import { removeShare } from '@/db/sharing'
+import { parseFartChoices } from '@/lib/engine/fart-choices'
 import type { Performance } from '@/lib/performance'
 import type { Recording, RecordingTrim } from '@/lib/recordings'
 import type { Toot, TootArrangement } from '@/lib/toot'
@@ -67,6 +70,16 @@ export const LIMITS: Record<Kind, { maxAudioBytes: number; maxItems: number }> =
  * (#312), so only a client gone wrong reaches it. A row is about 150 bytes.
  */
 export const FAVORITE_SONGS_LIMIT = 5000
+
+/**
+ * How many Songs one user can keep Fart Choices for (#360): past the catalog's 1,000+ Songs
+ * (#312), so only a client gone wrong reaches it. A row is at most `FART_CHOICES_MAX_BYTES`, and
+ * most are under 200 bytes.
+ */
+export const FART_CHOICES_LIMIT = 2000
+
+/** A Song's Fart Choices as JSON: every MIDI pitch picked and an account's Recordings left out. */
+const FART_CHOICES_MAX_BYTES = 32 * 1024
 
 /** A Recording, as the browser keeps it, with its audio's size. */
 export type LibraryRecording = Recording & { audioBytes: number }
@@ -151,9 +164,10 @@ export function wrongLibrary(user: SessionUser, request: Request): Response | nu
 
 /**
  * `GET /api/library/?since=`: what changed since the `cursor` an earlier answer gave (everything
- * without `since`), with the ids of Recordings and Toots deleted since, and the Favorite Songs
- * marked and taken off since (#313), by Song id. `full` says the answer lists every live
- * Recording, Toot and Favorite Song: `since` is older than the tombstones are kept, so a browser
+ * without `since`), with the ids of Recordings and Toots deleted since, the Favorite Songs
+ * marked and taken off since (#313), by Song id, and the Songs whose Fart Choices changed or went
+ * since (#360). `full` says the answer lists every live Recording, Toot, Favorite Song and Song
+ * with Fart Choices: `since` is older than the tombstones are kept, so a browser
  * drops what it holds from the account that isn't listed. 409 when `LIBRARY_HEADER` names another
  * account (`wrong_account`), as for every library route.
  */
@@ -176,10 +190,14 @@ export async function getLibrary({ db }: Stores, user: SessionUser, request: Req
     recordings: live(changes.recordings).map(toRecording),
     toots: live(changes.toots).map(toToot),
     favorites: live(changes.favoriteSongs).map(f => f.songId),
+    fartChoices: live(changes.fartChoices).flatMap(c =>
+      c.choices ? [{ songId: c.songId, choices: c.choices }] : []
+    ),
     deleted: {
       recordings: deleted(changes.recordings),
       toots: deleted(changes.toots),
-      favorites: changes.favoriteSongs.filter(f => f.deletedAt).map(f => f.songId)
+      favorites: changes.favoriteSongs.filter(f => f.deletedAt).map(f => f.songId),
+      fartChoices: changes.fartChoices.filter(c => c.deletedAt).map(c => c.songId)
     }
   })
 }
@@ -222,6 +240,49 @@ export async function deleteFavorite(
   const wrong = wrongLibrary(user, request)
   if (wrong) return wrong
   await unfavoriteSong(db, user.id, songId)
+  await purgeTombstones(db, user.id)
+  return new Response(null, { status: 204 })
+}
+
+/**
+ * `PUT /api/fart-choices/{songId}/` with a Song's `FartChoices` (#360): keeps them over any the
+ * Song had. 200 once kept, 400 for Choices that aren't any (`parseFartChoices`), 409 at the limit,
+ * or when `LIBRARY_HEADER` names another account (`wrong_account`). The Song and the Recordings
+ * named aren't checked: the browser drops a pick it can't play, and a Recording deleted since.
+ */
+export async function putFartChoices(
+  { db }: Stores,
+  user: SessionUser,
+  songId: string,
+  request: Request
+): Promise<Response> {
+  if (!isSongId(songId)) return notFound()
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
+  const body = await readJson(request, FART_CHOICES_MAX_BYTES)
+  if (body instanceof Response) return body
+  const choices = parseFartChoices(body.json)
+  if (choices === null) return apiError(400, 'invalid_request')
+  const kept = await keepFartChoices(db, user.id, songId, choices, FART_CHOICES_LIMIT)
+  if (kept === 'limit') return apiError(409, 'limit_reached')
+  return Response.json({ songId, choices })
+}
+
+/**
+ * `DELETE /api/fart-choices/{songId}/`: makes the Song automatic again, leaving a tombstone so
+ * other browsers drop its Fart Choices too. 204 whether or not it had any, as a Favorite Song's
+ * delete is, and it purges old tombstones.
+ */
+export async function deleteFartChoices(
+  { db }: Stores,
+  user: SessionUser,
+  songId: string,
+  request: Request
+): Promise<Response> {
+  if (!isSongId(songId)) return notFound()
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
+  await clearFartChoices(db, user.id, songId)
   await purgeTombstones(db, user.id)
   return new Response(null, { status: 204 })
 }
