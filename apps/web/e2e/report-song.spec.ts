@@ -172,4 +172,74 @@ test.describe('in Song Creator', () => {
     // Song Creator is as it was.
     await expect(page.getByTestId('song-creator-state')).toBeVisible()
   })
+
+  test('keeps Report a problem while the Toot is made again after a change, and in a Song a leave-out locks', async ({
+    page
+  }) => {
+    test.setTimeout(240_000)
+    const twinkle = songsTheFixtureLibraryUnlocks.find(s => s.id === 'twinkle')
+    const mary = songsTheFixtureLibraryUnlocks.find(s => s.id === 'mary')
+    if (!twinkle || !mary) throw new Error('the Fixture Library unlocks Twinkle and Mary')
+    await page.goto('/profile/')
+    const library = page.getByTestId('fixture-library')
+    await library.getByRole('button', { name: 'Load the Fixture Library' }).click()
+    await expect(library.getByRole('button', { name: 'Fixture Library loaded' })).toBeDisabled({
+      timeout: 90_000
+    })
+    const state = page.getByTestId('song-creator-state')
+    const sheet = page.getByTestId('fart-sheet')
+    const report = page.getByRole('button', { name: 'Report a problem' })
+    /** Marks the Report button, so a check after a change finds the same one, never one made again. */
+    const mark = () => report.evaluate(button => button.setAttribute('data-kept', ''))
+    const kept = page.locator('button[data-kept]', { hasText: 'Report a problem' })
+
+    // A swap: the Toot is made again, and Report stays the whole time.
+    await page.goto('/compose/twinkle/')
+    await expect(state).toHaveText(/Playing|Ready/, { timeout: 60_000 })
+    await mark()
+    await tapNote(page.getByTestId('note-view'), page.getByTestId('note 1'))
+    await page.getByRole('button', { name: 'Change fart' }).click()
+    const swap = sheet
+      .getByTestId('fart-option')
+      .filter({ has: page.getByRole('button', { name: 'Swap' }) })
+      .first()
+    await swap.getByRole('button', { name: 'Swap' }).click()
+    await expect(state).toHaveText('Ready', { timeout: 60_000 })
+    await expect(page.getByTestId('fart-change')).toHaveText(/ now uses Recording \d+\./)
+    await expect(kept).toBeVisible()
+    await expect(report).toHaveCount(1)
+
+    // Mary's first row: its only fart left out locks the Song. Report stays, beside the lock card.
+    await page.goto('/compose/mary/')
+    const pill = page
+      .getByTestId('recording-used')
+      .first()
+      .getByRole('button', { name: /^Change the fart for / })
+    await expect(pill).toBeVisible({ timeout: 60_000 })
+    await mark()
+    await pill.click()
+    await expect(sheet.getByTestId('only-fart')).toBeVisible()
+    await sheet.getByRole('button', { name: "Don't use this fart in this Song" }).click()
+    await expect(page.getByTestId('lock-card')).toBeVisible({ timeout: 60_000 })
+    await expect(state).toHaveText('Locked')
+    await expect(kept).toBeVisible()
+
+    await report.click()
+    const reporting = page.getByRole('dialog', { name: 'Report a problem' })
+    await expect(reporting).toContainText(mary.title)
+    await reporting.getByRole('button', { name: 'Close' }).click()
+    await expect(reporting).toBeHidden()
+    await page.getByTestId('lock-card').getByRole('button', { name: 'Reset to automatic' }).click()
+    await expect(state).toHaveText('Ready', { timeout: 60_000 })
+  })
 })
+
+/** Taps the note view where `note` is drawn. The view picks the nearest note. */
+async function tapNote(noteView: Locator, note: Locator) {
+  const view = await noteView.boundingBox()
+  const box = await note.boundingBox()
+  if (!view || !box) throw new Error('The note view is not on screen')
+  await noteView.click({
+    position: { x: box.x - view.x + box.width / 2, y: box.y - view.y + box.height / 2 }
+  })
+}

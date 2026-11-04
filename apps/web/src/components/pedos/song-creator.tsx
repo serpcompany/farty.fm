@@ -292,11 +292,16 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
       ) : (
         song && unmade && <TootLayout toot={null} unmade={unmade} song={song} changes={changes} />
       )}
+      {/* Report a problem (#358) whenever the notes show: at Ready, while the Toot is made again
+          after a change, and in a Song a leave-out locks. One element in one place, so a report
+          sheet opened while the Toot is made stays open. */}
+      {view === 'ready' && phase.kind === 'ready' ? (
+        <ReportSong song={phase.draft.song} />
+      ) : (
+        song && unmade && <ReportSong song={song} />
+      )}
       {view === 'ready' && phase.kind === 'ready' && (
-        <>
-          <ReportSong song={phase.draft.song} />
-          <SaveToToots draft={phase.draft} back={phase.back} />
-        </>
+        <SaveToToots draft={phase.draft} back={phase.back} />
       )}
       {isGap && arrangement && (
         <LockCard
