@@ -271,11 +271,6 @@ export async function reporterLimitKey(secret: string, client: string): Promise<
   return `share-reporter|${await keyedHash(secret, 'share-reporter-limit', client)}`
 }
 
-/** A reporter's row for Song reports an hour (`reportSong` in `src/server/song-reports.ts`). */
-export async function songReporterLimitKey(secret: string, client: string): Promise<string> {
-  return `song-reporter|${await keyedHash(secret, 'song-reporter-limit', client)}`
-}
-
 /** The site's one row for code emails. */
 export const SITE_CODES_KEY = 'site|send-code'
 

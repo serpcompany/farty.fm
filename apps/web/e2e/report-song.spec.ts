@@ -13,7 +13,12 @@ import { skipWelcome } from './record'
 // Each test reports a Song picked at random, from its own client address (`ownClient`), so reruns
 // against one local D1 stay under a Song's 5 reports a day and a reporter's 10 an hour.
 
-const pick = <T>(list: readonly T[]): T => list[randomInt(list.length)]
+/** A Song at random, recorded on the test's report so a failure can be replayed with it. */
+function pick<T extends { id: string }>(list: readonly T[]): T {
+  const song = list[randomInt(list.length)]
+  test.info().annotations.push({ type: 'song', description: song.id })
+  return song
+}
 const shipped = new Set(songIndex.map(song => song.id))
 
 test.beforeEach(async ({ page, context }) => {

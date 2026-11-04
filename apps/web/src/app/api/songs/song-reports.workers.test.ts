@@ -8,6 +8,13 @@ import { ORIGIN, signUp, testDb } from '@/test-support/library-api'
 
 import * as reportRoute from './[id]/report/route'
 
+// Sign-in's secret, which keys a reporter's limit, as it is here unless a test takes it away.
+const secret = vi.hoisted(() => ({ missing: false }))
+vi.mock('@/server/auth', async original => {
+  const auth = await original<typeof import('@/server/auth')>()
+  return { ...auth, authSecret: () => (secret.missing ? null : auth.authSecret()) }
+})
+
 // Report a problem with a Song (#358) in workerd, with a real D1: anyone's report, guests' too,
 // kept as a `song_reports` row with nothing about who sent it, from this site only, and within
 // share Reports' limits (`REPORT_LIMITS`, ADR 0020) in rows of its own.
@@ -60,6 +67,7 @@ const limitKeys = async () =>
 
 afterEach(() => {
   vi.restoreAllMocks()
+  secret.missing = false
 })
 
 describe("Reporting a Song that's wrong", () => {
@@ -159,6 +167,15 @@ describe("Reporting a Song that's wrong", () => {
       expect(response.status).toBe(403)
       expect(await response.json()).toEqual({ error: 'cross_origin' })
     }
+    expect(await kept()).toEqual([])
+    expect(await limitKeys()).toEqual([])
+  })
+
+  it("answers 503 without sign-in's secret, and keeps and spends nothing", async () => {
+    secret.missing = true
+    const response = await report(twinkle.id, aReport(twinkle, 'Bar 3'))
+    expect(response.status).toBe(503)
+    expect(await response.json()).toEqual({ error: 'unavailable' })
     expect(await kept()).toEqual([])
     expect(await limitKeys()).toEqual([])
   })

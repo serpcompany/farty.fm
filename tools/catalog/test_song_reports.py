@@ -2,6 +2,7 @@
 
     tools/melody-lab/.venv/bin/python -I -m unittest discover -s tools/catalog -t tools/catalog
 """
+import csv
 import json
 import sys
 import tempfile
@@ -73,6 +74,23 @@ class ReadRowsTest(unittest.TestCase):
                 [read] = song_reports.read_rows(path)
                 self.assertEqual((read["song_id"], read["note"]), ("twinkle", "Bar 3, maybe"), path.name)
                 self.assertEqual(int(read["created_at"]), 1_793_700_000_000, path.name)
+
+    def test_a_csv_note_keeps_its_line_breaks_and_its_row(self):
+        notes = ["line one\nline two", "bar 3\u2028bar 4\x0cend", "plain"]
+        with tempfile.TemporaryDirectory() as tmp:
+            table = Path(tmp, "rows.csv")
+            with table.open("w", encoding="utf-8", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(["id", "song_id", "song_version", "reason", "note", "created_at"])
+                for i, note in enumerate(notes):
+                    writer.writerow([f"x{i}", "twinkle", NOW, "wrong_notes", note, 1_793_700_000_000 + i])
+            self.assertIn("\u2028", table.read_text(encoding="utf-8"))
+            rows = song_reports.read_rows(table)
+            self.assertEqual([r["note"] for r in rows], notes)
+            self.assertTrue(all(r["created_at"] for r in rows))
+            text = song_reports.report(song_reports.by_song(rows, SONGS))
+        self.assertIn("3 on its notes now (3 wrong_notes)", text)
+        self.assertIn("line one line two", text)
 
 
 class CatalogSongsTest(unittest.TestCase):

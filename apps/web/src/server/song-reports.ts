@@ -3,7 +3,7 @@ import { songIndex } from '@/lib/catalog/song-index.generated'
 import { servedOrigin } from '@/lib/site'
 import { isSongReportReason, SONG_REPORT_NOTE_MAX, type SongReportReason } from '@/lib/song-report'
 
-import { consumeSlots, requestClient, songReporterLimitKey } from './auth-config'
+import { consumeSlots, keyedHash, requestClient } from './auth-config'
 import type { Stores } from './library'
 import { readJson } from './library-input'
 import { apiError } from './require-user'
@@ -16,6 +16,11 @@ import { REPORT_LIMITS } from './sharing'
 
 /** The site's one row for Song reports. */
 export const SITE_SONG_REPORTS_KEY = 'song_report'
+
+/** A reporter's row for Song reports an hour: an HMAC of their client address, as every key is. */
+async function songReporterLimitKey(secret: string, client: string): Promise<string> {
+  return `song-reporter|${await keyedHash(secret, 'song-reporter-limit', client)}`
+}
 
 /** A Song's row for its reports a day, whichever of its notes they're about. */
 export const songReportsKey = (songId: string) => `song_report_song|${songId}`

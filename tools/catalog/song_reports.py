@@ -16,6 +16,7 @@ import argparse
 import collections
 import csv
 import datetime
+import io
 import json
 import re
 import sys
@@ -34,7 +35,9 @@ def read_rows(path):
     """The `song_reports` rows in an export: wrangler's --json output, a JSON list, or a CSV."""
     text = path.read_text(encoding="utf-8-sig")
     if path.suffix.lower() == ".csv":
-        return list(csv.DictReader(text.splitlines()))
+        # Rows break only where CSV says: a quoted note keeps its line breaks, and an unquoted
+        # U+2028 or form feed, which str.splitlines() would split on, stays in its row.
+        return list(csv.DictReader(io.StringIO(text, newline="")))
     data = json.loads(text)
     if isinstance(data, dict):
         data = [data]

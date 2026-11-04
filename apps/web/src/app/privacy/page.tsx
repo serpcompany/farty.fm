@@ -70,10 +70,11 @@ export default function PrivacyPage() {
       <h2>Reporting a Song</h2>
       <p>
         Anyone can report a Song that&apos;s wrong, from Song Creator or a locked Song&apos;s sheet,
-        with or without an account. Farty keeps the Song and which version of its notes it had, the
-        reason you picked, your note if you wrote one, and when, and nothing about who sent it. To
-        limit how many reports one device can send, it keeps a scrambled code made from your IP
-        address for an hour, never the address itself.
+        with or without an account. A report holds the Song, which version of its notes it had, the
+        reason you picked, your note if you wrote one, and when, and no account or contact details.
+        Farty keeps it to fix the catalog by until it&apos;s dealt with. To limit how many reports
+        one device can send, it keeps a scrambled code made from your IP address for an hour, never
+        the address itself.
       </p>
 
       <h2>The account step</h2>

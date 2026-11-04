@@ -188,8 +188,8 @@ SELECT datetime(created_at / 1000, 'unixepoch') AS at, song_version, reason, not
 To list them against the catalog, which tells the reports on a Song's notes now from those on older notes, the owner exports the rows from their own terminal and an agent runs `tools/catalog/song_reports.py` on the file:
 
 ```sh
-cd apps/web && pnpm exec wrangler d1 execute pedos-production --remote --env production --json \
-  --command "SELECT * FROM song_reports" > ../../tmp/song-reports.json && cd ../..
+mkdir -p tmp && pnpm --dir apps/web exec wrangler d1 execute pedos-production --remote \
+  --env production --json --command "SELECT * FROM song_reports" > tmp/song-reports.json
 python3 -I tools/catalog/song_reports.py tmp/song-reports.json
 ```
 
