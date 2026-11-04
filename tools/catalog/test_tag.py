@@ -142,7 +142,7 @@ class Origin(unittest.TestCase):
     def test_the_first_source_that_answers(self):
         s = song(page("English folk songs", country=["Kingdom of Ireland"]))
         self.assertEqual(self.origin(s, entry(composer="Traditional (Shetland)")),
-                         ("Scottish", "composer: Traditional (Shetland)"))
+                         ("Scottish", "composer batch: Traditional (Shetland)"))
         self.assertEqual(self.origin(s), ("Irish", "Wikidata country of origin: Kingdom of Ireland"))
         self.assertEqual(self.origin(song(page("English folk songs"))),
                          ("English", "Wikipedia category: English folk songs"))
@@ -231,28 +231,49 @@ class Fame(unittest.TestCase):
 
 
 class HandSet(unittest.TestCase):
-    def test_hand_set_wins_over_the_batch_and_the_rules(self):
+    def test_hand_set_wins_over_the_rules(self):
         s = song(page("Irish folk songs", title="Tune", views=200_000))
-        got = tag.tag(entry(), s, PEOPLE, {"tune"}, None, {"kind": "Kids"})
-        self.assertEqual((got["kind"], got["sources"]["kind"]),
-                         ("Kids", "composer batch: the lookup (the rules said 'Songs')"))
-        got = tag.tag(entry(), s, PEOPLE, {"tune"}, {"well_known": False, "kind": "Hymns", "why": "wrong page"},
-                      {"kind": "Kids"})
-        self.assertEqual((got["kind"], got["well_known"]), ("Hymns", False))
-        self.assertEqual(got["sources"]["well_known"], "hand-set: wrong page (the rules said True)")
+        got = tag.tag(entry(), s, PEOPLE, {"tune"})
+        self.assertEqual((got["kind"], got["origin"], got["well_known"]), ("Songs", "Irish", True))
+        got = tag.tag(entry(), s, PEOPLE, {"tune"}, {"well_known": False, "kind": "Hymns", "origin": "Welsh",
+                                                     "why": "wrong page", "source": W + "Hymn"})
+        self.assertEqual((got["kind"], got["origin"], got["well_known"]), ("Hymns", "Welsh", False))
+        self.assertEqual(got["sources"]["well_known"], f"hand-set: wrong page, {W}Hymn (the rules said True)")
+
+    def test_a_batch_guess_never_beats_the_rules(self):
+        # tag.py guess writes the rules' kind and origin into a record before the lookup; the
+        # lookup's composer then settles it, and check fails the stale record.
+        s = song(page("English folk songs", title="Tune"))
+        record = tag.guess([{"id": "x", "title": "Tune"}], {"x": tag.tag(entry(), s, PEOPLE, {"tune"})})[0]
+        self.assertEqual((record["kind"], record["origin"]), ("Songs", "English"))
+        record["composer"] = "Traditional (Irish)"
+        got = tag.tag(entry(composer="Traditional (Irish)"), s, PEOPLE, {"tune"})
+        self.assertEqual((got["origin"], got["sources"]["origin"]), ("Irish", "composer batch: Traditional (Irish)"))
+        problems = tag.batch_problems({"composers-99.json": [record]}, {"x": got})
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("composers-99.json's origin 'English' isn't its tag 'Irish'", problems[0])
+        self.assertEqual(tag.batch_problems({"composers-99.json": [{**record, "origin": "Irish"}]}, {"x": got}), [])
 
     def test_hand_problems(self):
         good = {"title": "Tune", "well_known": False, "found_by": "known miss", "why": "its page is a book"}
         self.assertEqual(tag.hand_problems({"x": good}, {"x"}), [])
         for change, says in (({"kind": "Carols"}, "kind: one of"), ({"why": " "}, "why"),
                              ({"found_by": "a hunch"}, "found_by"), ({"fame": 3}, "can't set 'fame'"),
-                             ({"origin": "Irish-ish"}, "origin"), ({"well_known": "yes"}, "true or false")):
+                             ({"origin": "Irish-ish", "source": W + "Tune"}, "origin"), ({"well_known": "yes"}, "true or false")):
             with self.subTest(change=change):
                 problems = tag.hand_problems({"x": {**good, **change}}, {"x"})
                 self.assertEqual(len(problems), 1, problems)
                 self.assertIn(says, problems[0])
         self.assertIn("not in the catalog", tag.hand_problems({"y": good}, {"x"})[0])
-        self.assertEqual(tag.hand_problems({"x": {**good, "origin": None}}, {"x"}), [])
+        # An origin needs the page that supports it; a kind may have one.
+        cited = {**good, "origin": None, "source": W + "Tune"}
+        self.assertEqual(tag.hand_problems({"x": cited}, {"x"}), [])
+        self.assertEqual(tag.hand_problems({"x": {**good, "kind": "Songs"}}, {"x"}), [])
+        for values in ({**good, "origin": "Irish"}, {**cited, "source": "Wikipedia"}, {**good, "source": ""}):
+            with self.subTest(values=values):
+                problems = tag.hand_problems({"x": values}, {"x"})
+                self.assertEqual(len(problems), 1, problems)
+                self.assertIn("source: the https:// page", problems[0])
 
 
 class WithTags(unittest.TestCase):
@@ -289,6 +310,15 @@ class Check(unittest.TestCase):
     def test_a_missing_field_or_a_hand_edit_fails(self):
         self.assertIn("no fame", self.problems(fame="-")[0])
         self.assertIn("aren't apply's", self.problems(well_known=True)[0])
+
+    def test_signals_fetched_with_another_lookup_fail(self):
+        signals = {"songs": [{**song(), "composer": "Unknown", "composer_source": W + "Tune"}]}
+        self.assertEqual(tag.signal_problems([entry()], signals), [])
+        for change in ({"composer_source": W + "Other"}, {"composer": "Traditional (Irish)"}):
+            with self.subTest(change=change):
+                problems = tag.signal_problems([{**entry(), **change}], signals)
+                self.assertEqual(len(problems), 1, problems)
+                self.assertIn("run tag.py fetch, then apply", problems[0])
 
 
 class Guess(unittest.TestCase):
@@ -413,6 +443,8 @@ class Repository(unittest.TestCase):
 
     def test_the_hand_set_values_and_the_batches_values(self):
         self.assertEqual(tag.hand_problems(self.hand, {e["id"] for e in self.catalog}), [])
+        self.assertEqual(tag.batch_problems(tag.composers.read_batches(tag.HERE), self.tags), [])
+        self.assertEqual(tag.signal_problems(self.catalog, self.signals), [])
         self.assertEqual([p for r in self.batches.values()
                           for p in tag.value_problems({k: r[k] for k in ("kind", "origin") if k in r})], [])
 
@@ -433,6 +465,23 @@ class Repository(unittest.TestCase):
                           ("schiarazula-marazula", "Fiddle tunes")):
             with self.subTest(sid=sid):
                 self.assertEqual(self.tags[sid]["kind"], kind)
+
+    def test_the_lookups_tradition_beats_a_guess_made_before_it(self):
+        # The review's case (#387): Danny Boy guessed before its lookup, from its title page alone, is
+        # British. The lookup's Traditional (Irish) makes it Irish, and the stale guess fails check.
+        e = next(x for x in self.catalog if x["id"] == "danny-boy")
+        s = next(x for x in self.signals["songs"] if x["id"] == "danny-boy")
+        names = tag.song_names(self.catalog)["danny-boy"]
+        before = tag.tag({k: v for k, v in e.items() if k != "composer"}, s, self.signals["composers"], names)
+        record = tag.guess([{"id": "danny-boy", "title": e["title"]}], {"danny-boy": before})[0]
+        self.assertEqual((record["kind"], record["origin"]), ("Songs", "British"))
+        record["composer"] = "Traditional (Irish)"
+        after = tag.tag({**e, "composer": "Traditional (Irish)"}, s, self.signals["composers"], names)
+        self.assertEqual((after["origin"], after["sources"]["origin"]),
+                         ("Irish", "composer batch: Traditional (Irish)"))
+        problems = tag.batch_problems({"composers-08.json": [record]}, {"danny-boy": after})
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("origin 'British' isn't its tag 'Irish'", problems[0])
 
     def test_the_report_is_applys(self):
         self.assertEqual(tag.REPORT.read_text(encoding="utf-8"), tag.report(self.catalog, self.tags, self.hand))

@@ -16,7 +16,8 @@
   "kind": "Christmas",
   "origin": "English",
   "found_by": "fallback kind",
-  "why": "an English Christmas carol"
+  "why": "an English Christmas carol",
+  "source": "https://mainlynorfolk.info/peter.bellamy/songs/avirginmostpure.html"
  },
  "ade-zur-guten-nacht": {
   "title": "Ade zur guten Nacht",
@@ -29,7 +30,8 @@
   "kind": "Songs",
   "origin": "Scottish",
   "found_by": "fallback kind",
-  "why": "Burns's song Sweet Afton"
+  "why": "Burns's song Sweet Afton",
+  "source": "https://en.wikipedia.org/wiki/Sweet_Afton"
  },
  "ah-poor-bird": {
   "title": "Ah Poor Bird",
@@ -54,7 +56,8 @@
   "kind": "Songs",
   "origin": "Irish",
   "found_by": "fallback kind",
-  "why": "an Irish-language song by Tomás Rua Ó Súilleabháin"
+  "why": "an Irish-language song by Tomás Rua Ó Súilleabháin",
+  "source": "https://en.wikipedia.org/wiki/Tom%C3%A1s_Rua_%C3%93_S%C3%BAilleabh%C3%A1in"
  },
  "arkansas-traveler": {
   "title": "Arkansas Traveler",
@@ -79,7 +82,8 @@
   "kind": "Songs",
   "origin": "Spanish",
   "found_by": "fallback kind",
-  "why": "a Spanish Renaissance song"
+  "why": "a Spanish Renaissance song",
+  "source": "https://www.musicanet.org/bdd/en/score/17452-ay-linda-amiga-anonyme"
  },
  "behold-the-great-creator-makes": {
   "title": "Behold The Great Creator Makes",
@@ -98,7 +102,8 @@
   "kind": "Songs",
   "origin": "English",
   "found_by": "fallback kind",
-  "why": "a Northumbrian folk song"
+  "why": "a Northumbrian folk song",
+  "source": "https://en.wikipedia.org/wiki/Blow_the_Wind_Southerly"
  },
  "bobby-shaftoe": {
   "title": "Bobby Shaftoe",
@@ -147,7 +152,8 @@
   "kind": "Songs",
   "origin": "English",
   "found_by": "fallback kind",
-  "why": "an English folk ballad"
+  "why": "an English folk ballad",
+  "source": "https://www.mainlynorfolk.info/peter.bellamy/songs/thedarkeyedsailor.html"
  },
  "dormi-iesu-dulcissime": {
   "title": "Dormi Iesu dulcissime",
@@ -160,7 +166,8 @@
   "kind": "Kids",
   "origin": "Jewish",
   "found_by": "fallback kind",
-  "why": "a Sephardic lullaby in Ladino"
+  "why": "a Sephardic lullaby in Ladino",
+  "source": "https://www.kveller.com/article/top-ten-jewish-lullabies/"
  },
  "ecce-tempus": {
   "title": "Ecce Tempus",
@@ -179,13 +186,15 @@
   "kind": "Hymns",
   "origin": "German",
   "found_by": "fallback kind",
-  "why": "a hymn tune from a 1784 Württemberg hymnal"
+  "why": "a hymn tune from a 1784 Württemberg hymnal",
+  "source": "https://hymnary.org/tune/ellacombe"
  },
  "es-wird-scho-glei-dumpa": {
   "title": "Es wird scho glei dumpa",
   "origin": "Austrian",
   "found_by": "hand check",
-  "why": "an Austrian Advent song: its page is the German one, with no country"
+  "why": "an Austrian Advent song: its page is the German one, with no country",
+  "source": "https://de.wikipedia.org/wiki/Es_wird_scho_glei_dumpa"
  },
  "fie-nay-prithee-john": {
   "title": "Fie nay prithee John",
@@ -204,14 +213,16 @@
   "kind": "Songs",
   "origin": "Irish",
   "found_by": "fallback kind",
-  "why": "an Irish song"
+  "why": "an Irish song",
+  "source": "https://www.irish-folk-songs.com/for-ireland-ill-not-tell-her-name-lyrics-and-chords.html"
  },
  "from-thee-eliza-i-must-go": {
   "title": "From Thee Eliza I Must Go",
   "kind": "Songs",
   "origin": "Scottish",
   "found_by": "fallback kind",
-  "why": "a song of Burns's"
+  "why": "a song of Burns's",
+  "source": "https://www.rbwf.org.uk/poems/from-thee-eliza-song"
  },
  "gaudete-gaudete-christus-est-natus": {
   "title": "Gaudete! Gaudete! Christus est natus",
@@ -272,7 +283,8 @@
   "kind": "Songs",
   "origin": "Welsh",
   "found_by": "fallback kind",
-  "why": "a Welsh folk song"
+  "why": "a Welsh folk song",
+  "source": "https://tunearch.org/wiki/Annotation:Hob_y_deri_danno_(2)"
  },
  "how-great-our-joy": {
   "title": "How Great Our Joy",
@@ -285,7 +297,8 @@
   "kind": "Kids",
   "origin": "French",
   "found_by": "fallback kind",
-  "why": "a French children's song"
+  "why": "a French children's song",
+  "source": "https://frenchmoments.eu/?p=58077"
  },
  "illumina-oculos-meos": {
   "title": "Illumina oculos meos",
@@ -334,14 +347,16 @@
   "kind": "Songs",
   "origin": "Swiss",
   "found_by": "hand check",
-  "why": "Nägeli's song Freut euch des Lebens"
+  "why": "Nägeli's song Freut euch des Lebens",
+  "source": "https://de.wikipedia.org/wiki/Freut_euch_des_Lebens_(Lied)"
  },
  "long-time-ago": {
   "title": "Long Time Ago",
   "kind": "Songs",
   "origin": "American",
   "found_by": "fallback kind",
-  "why": "an American song of the 1830s, which Copland set in Old American Songs"
+  "why": "an American song of the 1830s, which Copland set in Old American Songs",
+  "source": "https://dlg.usg.edu/record/valdosta_1107_1112"
  },
  "lord-save-me-for-thy-glorious-name": {
   "title": "Lord save me for thy glorious Name",
@@ -353,7 +368,8 @@
   "title": "MacPherson's Lament",
   "origin": "Scottish",
   "found_by": "hand check",
-  "why": "the Scottish outlaw's tune: the composer's page is the poet of the same name, a British MP"
+  "why": "the Scottish outlaw's tune: the composer's page is the poet of the same name, a British MP",
+  "source": "https://en.wikipedia.org/wiki/Jamie_Macpherson"
  },
  "march-in-d-major": {
   "title": "March in D Major",
@@ -408,14 +424,16 @@
   "kind": "Songs",
   "origin": "French",
   "found_by": "fallback kind",
-  "why": "a French folk song"
+  "why": "a French folk song",
+  "source": "https://boosey.com/cr/music/Benjamin-Britten-French-Folk-Songs/5787"
  },
  "quen-a-omagen-da-virgen": {
   "title": "Quen a omagen da Virgen",
   "kind": "Hymns",
   "origin": "Spanish",
   "found_by": "fallback kind",
-  "why": "one of Alfonso X's Cantigas de Santa Maria, songs to the Virgin"
+  "why": "one of Alfonso X's Cantigas de Santa Maria, songs to the Virgin",
+  "source": "https://en.wikipedia.org/wiki/Cantigas_de_Santa_Mar%C3%ADa"
  },
  "qui-vult-venire-post-me": {
   "title": "Qui vult venire post me",
@@ -446,7 +464,8 @@
   "kind": "Songs",
   "origin": "Irish",
   "found_by": "fallback kind",
-  "why": "an Irish ballad about the rebel of 1798"
+  "why": "an Irish ballad about the rebel of 1798",
+  "source": "https://en.wikipedia.org/wiki/Roddy_McCorley"
  },
  "rule-britannia": {
   "title": "Rule, Britannia!",
@@ -471,7 +490,8 @@
   "kind": "Kids",
   "origin": "German",
   "found_by": "fallback kind",
-  "why": "a German children's song for St Martin's lantern walks"
+  "why": "a German children's song for St Martin's lantern walks",
+  "source": "https://de.wikipedia.org/wiki/Martinssingen"
  },
  "santa-lucia": {
   "title": "Santa Lucia",
@@ -495,9 +515,8 @@
  "sellengers-round": {
   "title": "Sellenger's Round",
   "kind": "Fiddle tunes",
-  "origin": "English",
   "found_by": "hand check",
-  "why": "an English country dance tune of Elizabeth I's time: its page is a 1953 set of variations on it, and the composer record's Irish comes from St Leger, its namesake"
+  "why": "an English country dance tune of Elizabeth I's time: its page is a 1953 set of variations on it"
  },
  "shepherd-of-souls": {
   "title": "Shepherd of Souls",
@@ -565,7 +584,8 @@
   "kind": "Classical",
   "origin": "English",
   "found_by": "fallback kind",
-  "why": "Thomas Campion's sacred lute song (1613)"
+  "why": "Thomas Campion's sacred lute song (1613)",
+  "source": "https://imslp.org/wiki/2_Bookes_of_Ayres_(Campion,_Thomas)"
  },
  "three-blind-mice": {
   "title": "Three Blind Mice",
@@ -578,7 +598,8 @@
   "kind": "Songs",
   "origin": "Finnish",
   "found_by": "fallback kind",
-  "why": "a Finnish folk song"
+  "why": "a Finnish folk song",
+  "source": "https://imslp.org/wiki/Tuonne_taakse_mets%C3%A4maan_(Kuula,_Toivo)"
  },
  "twenty-ninth-of-may": {
   "title": "The Twenty-Ninth of May",
@@ -602,7 +623,8 @@
   "title": "What a Friend We Have in Jesus",
   "origin": "American",
   "found_by": "hand check",
-  "why": "Converse, an American, wrote the tune; the Canadian category is the words' author's"
+  "why": "Converse, an American, wrote the tune; the Canadian category is the words' author's",
+  "source": "https://en.wikipedia.org/wiki/Charles_Crozat_Converse"
  },
  "when-you-wore-a-tulip": {
   "title": "When You Wore a Tulip",
@@ -615,7 +637,8 @@
   "kind": "Songs",
   "origin": "English",
   "found_by": "fallback kind",
-  "why": "Ariel's song from The Tempest"
+  "why": "Ariel's song from The Tempest",
+  "source": "https://www.english.cam.ac.uk/research/stormtossed/2020/05/06/where-the-bee-sucks-cowslips-and-music-5-1-88-103-stormtossed/"
  },
  "whistling-rufus": {
   "title": "Whistling Rufus",
@@ -627,6 +650,7 @@
   "title": "The Wild Rover",
   "origin": null,
   "found_by": "hand check",
-  "why": "a folk song of disputed origin, sung in Ireland, Scotland and England: Wikidata's United States is wrong"
+  "why": "a folk song of disputed origin, sung in Ireland, Scotland and England: Wikidata's United States is wrong",
+  "source": "https://en.wikipedia.org/wiki/The_Wild_Rover"
  }
 }

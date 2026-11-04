@@ -12,11 +12,13 @@ PDMX say about the tune.
 page (categories and citizenship), the tune's type on The Session when the composer lookup cites
 it, and the views of every PDMX score with the Song's title. It asks at most once a second, and
 caches every answer in --cache, so running it again asks nothing. `apply` reads only
-tag-signals.json, the composer batches and tag-hand.json: it gives each Song its four fields by the
+tag-signals.json, the catalog's composers and tag-hand.json: it gives each Song its four fields by the
 rules below, a hand-set value winning, and writes tags.report.md, which gives each tag's source.
-`check` fails when a Song's fields aren't apply's, or its kind isn't one of KINDS. `guess` writes the
-rules' kind and origin into a composer batch's records that have neither, as the lookup's first
-guess. tools/catalog/README.md has when to run each.
+`check` fails when a Song's fields aren't apply's, its kind isn't one of KINDS, its signals were
+fetched with another composer or composer_source, or a composer batch's kind or origin isn't the
+Song's tag. `guess` writes the rules' kind and origin into a composer batch's records that have
+neither, as the lookup's first guess: only a starting point, which never beats the rules. Only
+tag-hand.json does. tools/catalog/README.md has when to run each.
 """
 import argparse
 import csv
@@ -51,6 +53,8 @@ KINDS = ("Christmas", "Kids", "Hymns", "Anthems", "Classical", "Songs", "Fiddle 
 TAG_FIELDS = ("kind", "origin", "fame", "well_known")
 # Who may set a tag by hand in tag-hand.json, and why: each record says which review found it.
 HAND_FIELDS = ("kind", "origin", "well_known")
+# A hand-set value's `source`: the page that supports it. Needed for an origin, optional for the rest.
+HAND_SOURCE_NEEDED = ("origin",)
 FOUND_BY = ("known miss", "fallback kind", "signals disagree", "near miss", "hand check")
 
 # Well known: both signals agree, or one is very strong (#381's rule).
@@ -520,7 +524,9 @@ def fetch_signals(catalog, fetch, csv_path, log=print):
                     persons[person] = found
                     break
         # Only the cited tune: the lookup's checked list holds the tunes it looked at and turned down.
-        songs.append({"id": e["id"], "title": e["title"],
+        # What the signals were fetched with: check fails when the lookup has changed either since.
+        songs.append({"id": e["id"], "title": e["title"], "composer": e.get("composer"),
+                      "composer_source": e.get("composer_source"),
                       "session": session_type(fetch, [e.get("composer_source")], names[e["id"]]), "page": page})
     claims = wikidata_claims(fetch, list(items) + [p["item"] for p in persons.values() if p and p["item"]],
                              ("P31", "P136", "P495", "P27"))
@@ -699,7 +705,7 @@ def origin_of(song, entry, people):
     m = re.fullmatch(r"Traditional \((.+)\)", entry.get("composer") or "")
     if m:
         tradition = m.group(1)
-        return DEMONYMS.get(tradition, tradition), f"composer: {entry['composer']}"
+        return DEMONYMS.get(tradition, tradition), f"composer batch: {entry['composer']}"
     page = tune_page(song)
     if page:
         countries = [COUNTRIES[c] for c in page["country"] if c in COUNTRIES]
@@ -755,8 +761,9 @@ def disagree(views, pdmx_views):
     return well_known(views, pdmx_views) and not (views >= WELL_KNOWN_BOTH[0] and pdmx_views >= WELL_KNOWN_BOTH[1])
 
 
-def tag(entry, song, people, names, hand=None, batch=None):
-    """The Song's four fields and each one's source."""
+def tag(entry, song, people, names, hand=None):
+    """The Song's four fields and each one's source: the rules', or a hand-set value's. A composer
+    batch's kind and origin, tag.py guess's first guess, never count (batch_problems checks them)."""
     kind, kind_source, fallback = kind_of(song, entry, people)
     origin, origin_source = origin_of(song, entry, people)
     fame, views, pdmx_views = fame_of(song, names)
@@ -765,19 +772,17 @@ def tag(entry, song, people, names, hand=None, batch=None):
     out = {"kind": kind, "origin": origin, "fame": fame, "well_known": known,
            "sources": {"kind": kind_source, "origin": origin_source, "well_known": known_source},
            "fallback": fallback, "disagree": disagree(views, pdmx_views), "pageviews": views, "pdmx_views": pdmx_views}
-    for source, values in (("composer batch", batch or {}), ("hand-set", hand or {})):
-        for field in ("kind", "origin", "well_known"):
-            if field in values and not (source == "composer batch" and field == "well_known"):
-                if values[field] != out[field]:
-                    why = values.get('why', 'the lookup')
-                    out["sources"][field] = f"{source}: {why} (the rules said {out[field]!r})"
-                else:
-                    out["sources"][field] = f"{source}: {values.get('why', 'the lookup')}"
-                out[field] = values[field]
+    hand = hand or {}
+    for field in HAND_FIELDS:
+        if field in hand:
+            cited = f", {hand['source']}" if hand.get("source") else ""
+            said = "" if hand[field] == out[field] else f" (the rules said {out[field]!r})"
+            out["sources"][field] = f"hand-set: {hand.get('why')}{cited}{said}"
+            out[field] = hand[field]
     return out
 
 
-def tags(catalog, signals, hand, batches):
+def tags(catalog, signals, hand):
     """Every Song's tags, by id."""
     songs = {s["id"]: s for s in signals["songs"]}
     names = song_names(catalog)
@@ -786,8 +791,7 @@ def tags(catalog, signals, hand, batches):
         song = songs.get(e["id"])
         if song is None:
             continue
-        out[e["id"]] = tag(e, song, signals["composers"], names[e["id"]], hand.get(e["id"]),
-                           {k: v for k, v in batches.get(e["id"], {}).items() if k in ("kind", "origin")})
+        out[e["id"]] = tag(e, song, signals["composers"], names[e["id"]], hand.get(e["id"]))
     return out
 
 
@@ -826,13 +830,13 @@ def guess(records, all_tags):
 
 def hand_problems(hand, catalog_ids):
     """What's wrong with tag-hand.json: a Song not in the catalog, a field it can't set, a value outside
-    the kinds, or no reason."""
+    the kinds, no reason, or no page for a value that needs one."""
     problems = []
     for sid, values in hand.items():
         if sid not in catalog_ids:
             problems.append(f"{sid}: in {HAND.name} but not in the catalog")
         for k in values:
-            if k not in HAND_FIELDS + ("title", "why", "found_by"):
+            if k not in HAND_FIELDS + ("title", "why", "found_by", "source"):
                 problems.append(f"{sid}: {HAND.name} can't set {k!r}")
         if not any(k in values for k in HAND_FIELDS):
             problems.append(f"{sid}: sets none of {', '.join(HAND_FIELDS)}")
@@ -840,6 +844,11 @@ def hand_problems(hand, catalog_ids):
             problems.append(f"{sid}: why: a one-line reason")
         if values.get("found_by") not in FOUND_BY:
             problems.append(f"{sid}: found_by: one of {', '.join(FOUND_BY)}")
+        if "source" in values or any(k in values for k in HAND_SOURCE_NEEDED):
+            if not re.fullmatch(r"https://\S+", str(values.get("source"))):
+                problems.append(f"{sid}: source: the https:// page that supports the value"
+                                + (f" (needed for {', '.join(k for k in HAND_SOURCE_NEEDED if k in values)})"
+                                   if any(k in values for k in HAND_SOURCE_NEEDED) else ""))
         problems += [f"{sid}: {p}" for p in value_problems(values)]
     return problems
 
@@ -852,6 +861,37 @@ def value_problems(values):
         problems.append(f"origin: null or one of tag.py's DEMONYMS origins, not {values['origin']!r}")
     if "well_known" in values and not isinstance(values["well_known"], bool):
         problems.append("well_known: true or false")
+    return problems
+
+
+def batch_problems(batch_files, all_tags):
+    """A composer batch record whose kind or origin isn't the Song's tag. The record's guess came
+    before the lookup, and the lookup's composer may settle it otherwise (a Traditional (Irish)
+    composer makes the tune Irish): correct the record, or, when the rules are wrong, hand-set the
+    value in tag-hand.json with the page that says so."""
+    problems = []
+    for name, records in batch_files.items():
+        for r in records:
+            t = all_tags.get(r["id"])
+            for field in ("kind", "origin"):
+                if t and field in r and r[field] != t[field]:
+                    problems.append(f"{r['id']}: {name}'s {field} {r[field]!r} isn't its tag {t[field]!r} "
+                                    f"({t['sources'][field]}): correct the record, or hand-set it in {HAND.name} "
+                                    "with a source")
+    return problems
+
+
+def signal_problems(catalog, signals):
+    """A Song whose signals were fetched with another composer or composer_source than it has now:
+    the lookup changed after fetch, so the tune's page, its pageviews and its Session type may be
+    another's."""
+    songs = {s["id"]: s for s in signals["songs"]}
+    problems = []
+    for e in catalog:
+        s = songs.get(e["id"])
+        if s and any(s.get(k) != e.get(k) for k in ("composer", "composer_source")):
+            problems.append(f"{e['id']}: {SIGNALS.name} was fetched with another composer or composer_source: "
+                            "run tag.py fetch, then apply")
     return problems
 
 
@@ -891,8 +931,8 @@ def report(catalog, all_tags, hand):
     lines = [
         "# Song tags",
         "",
-        f"Generated by `{TOOL}` from `tag-signals.json`, the composer batches and `tag-hand.json`; don't edit by "
-        "hand. Command:",
+        f"Generated by `{TOOL}` from `tag-signals.json`, the catalog's composers and `tag-hand.json`; don't edit "
+        "by hand. Command:",
         "",
         "```sh",
         f"python3 -I {TOOL} apply",
@@ -943,7 +983,7 @@ def load():
     signals = read_json(SIGNALS, {"songs": [], "composers": {}})
     hand = read_json(HAND, {})
     batches = batch_records()
-    return catalog, signals, hand, batches, tags(catalog, signals, hand, batches)
+    return catalog, signals, hand, batches, tags(catalog, signals, hand)
 
 
 def main():
@@ -982,7 +1022,8 @@ def main():
         catalog = apply(catalog, all_tags)
         write_json(CATALOG, catalog)
         REPORT.write_text(report(catalog, all_tags, hand), encoding="utf-8")
-    problems += catalog_problems(catalog, all_tags)
+    problems += catalog_problems(catalog, all_tags) + signal_problems(catalog, signals)
+    problems += batch_problems(composers.read_batches(HERE), all_tags)
     if args.command == "check" and (not REPORT.exists() or REPORT.read_text(encoding="utf-8") != report(
             catalog, all_tags, hand)):
         problems.append(f"{REPORT.name} isn't apply's: run tag.py apply")
