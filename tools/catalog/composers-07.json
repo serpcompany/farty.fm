@@ -4,1063 +4,2000 @@
   "title": "Blair Athole",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4553667"
+  "score": "https://musescore.com/score/4553667",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=blair%20athole",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Blair%20Athole",
+   "https://thesession.org/tunes/search?q=blair%20athole",
+   "https://thesession.org/tunes/5874"
+  ],
+  "note": "The Session tune Blair Athol (reel) matches the melody at 1.0 but names no composer; a commenter asks who wrote it; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Blair Athole (shipwreck off the Scottish coast), none this tune"
  },
  {
   "id": "bouzer-castle",
   "title": "Bouzer Castle",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4580290"
+  "score": "https://musescore.com/score/4580290",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=bouzer%20castle",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Bouzer%20Castle",
+   "https://thesession.org/tunes/search?q=bouzer%20castle"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "bridge-of-banff",
   "title": "Bridge of Banff",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4874208"
+  "score": "https://musescore.com/score/4874208",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=bridge%20of%20banff",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Bridge%20of%20Banff",
+   "https://thesession.org/tunes/search?q=bridge%20of%20banff"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Banff Bridge (bridge in Banff, Aberdeenshire, Scotland); Bridge of Banff Lodge, Bridge Street, Banff, Duff House (architectural structure in Aberdeenshire, Scotland), none this tune"
  },
  {
   "id": "buff-and-blue",
   "title": "Buff and Blue",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4879182"
+  "score": "https://musescore.com/score/4879182",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=buff%20and%20blue",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Buff%20and%20Blue",
+   "https://thesession.org/tunes/search?q=buff%20and%20blue"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "burns-irish-hornpipe",
   "title": "Burns' Irish Hornpipe",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4673733"
+  "score": "https://musescore.com/score/4673733",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=burns%27%20irish%20hornpipe",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Burns%27%20Irish%20Hornpipe",
+   "https://thesession.org/tunes/search?q=burns%27%20irish%20hornpipe"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "champion-hornpipe",
   "title": "Champion Hornpipe",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4673100"
+  "score": "https://musescore.com/score/4673100",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=champion%20hornpipe",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Champion%20Hornpipe",
+   "https://thesession.org/tunes/search?q=champion%20hornpipe"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "christians-awake-salute-the-happy-morn",
   "title": "Christians Awake Salute The Happy Morn",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5730216"
+  "score": "https://musescore.com/score/5730216",
+  "composer": "John Wainwright",
+  "composer_died": 1768,
+  "composer_source": "https://en.wikipedia.org/wiki/Christians,_awake,_salute_the_happy_morn",
+  "published": 1766,
+  "note": "Wikipedia: the hymn is usually sung to the tune \"Yorkshire\" by John Wainwright, printed with Byrom's text in 1766; Wainwright 1723-1768 (https://en.wikipedia.org/wiki/John_Wainwright_(composer)); the words are John Byrom's older poem, not written with the music"
  },
  {
   "id": "connachtmans-rambles",
   "title": "The Connachtman's Rambles",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4672230"
+  "score": "https://musescore.com/score/4672230",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://thesession.org/tunes/19",
+  "note": "The Session lists it as The Connaughtman's Rambles (jig, Irish-language alias Bean Ag Baint Duileasc); melody agrees at 0.92"
  },
  {
   "id": "corgarff-castle",
   "title": "Corgarff Castle",
   "views": 3,
   "pdmx": "Alexander Walker",
-  "score": "https://musescore.com/score/4947101"
+  "score": "https://musescore.com/score/4947101",
+  "composer": "James Scott Skinner",
+  "composer_died": 1927,
+  "composer_source": "https://thesession.org/tunes/18217",
+  "note": "The Session credits him; melody agrees with the Session setting at 0.83 of its first 24 contour steps; dates: James Scott Skinner 1843-1927 (https://en.wikipedia.org/wiki/James_Scott_Skinner)"
  },
  {
   "id": "cottey-house",
   "title": "Cottey House",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5165522"
+  "score": "https://musescore.com/score/5165522",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=cottey%20house",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Cottey%20House",
+   "https://thesession.org/tunes/search?q=cottey%20house"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "cupids-garden",
   "title": "Cupid's Garden",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4669988"
+  "score": "https://musescore.com/score/4669988",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=cupid%27s%20garden",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Cupid%27s%20Garden",
+   "https://thesession.org/tunes/search?q=cupid%27s%20garden"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Cuper's Gardens (no description), none this tune"
  },
  {
   "id": "devonshire-house",
   "title": "Devonshire House",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5031384"
+  "score": "https://musescore.com/score/5031384",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=devonshire%20house",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Devonshire%20House",
+   "https://thesession.org/tunes/search?q=devonshire%20house"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Devonshire House (house in London demolished in 1924); Devonshire House (building in London constructed in 1926), none this tune"
  },
  {
   "id": "dumbarton-drums",
   "title": "Dumbarton Drums",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4663725"
+  "score": "https://musescore.com/score/4663725",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://en.wikipedia.org/wiki/Dumbarton's_Drums",
+  "note": "Wikipedia: a traditional Scottish song; The Session's https://thesession.org/tunes/21096 says the march dates from the 17th century"
  },
  {
   "id": "egans-polka",
   "title": "Egan's Polka",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4557607"
+  "score": "https://musescore.com/score/4557607",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://thesession.org/tunes/39",
+  "note": "The Session: comments know it as the Kerry Polka"
  },
  {
   "id": "fox",
   "title": "Fox",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5006829"
+  "score": "https://musescore.com/score/5006829",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=fox",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Fox",
+   "https://thesession.org/tunes/search?q=fox"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Fox Broadcasting Company (American commercial broadcast television network); Fox (family name), none this tune"
  },
  {
   "id": "garoun",
   "title": "Garoun",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4713022"
+  "score": "https://musescore.com/score/4713022",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=garoun",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Garoun",
+   "https://thesession.org/tunes/search?q=garoun"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Garoun (journal); Garoun Agatsarski (no description), none this tune"
  },
  {
   "id": "gathering",
   "title": "The Gathering",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4677123"
+  "score": "https://musescore.com/score/4677123",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=gathering",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Gathering",
+   "https://thesession.org/tunes/search?q=gathering",
+   "https://thesession.org/tunes/12730"
+  ],
+  "note": "The Session tune matches at 1.0; the submitter calls it one of their own works but the page names no composer; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: The Gathering (Dutch rock band); The Gathering (album by Testament), none this tune"
  },
  {
   "id": "general-macdonald",
   "title": "General MacDonald",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4841890"
+  "score": "https://musescore.com/score/4841890",
+  "composer": "Niel Gow",
+  "composer_died": 1807,
+  "composer_source": "https://thesession.org/tunes/7621",
+  "published": 1809,
+  "note": "The Session credits him; a comment says Gow's Fifth Collection (1809) attributes it to Niel Gow; dates: Niel Gow 1727-1807 (https://en.wikipedia.org/wiki/Niel_Gow)"
  },
  {
   "id": "glise-de-sherbrooke",
   "title": "Glise de Sherbrooke",
   "views": 3,
   "pdmx": "R-23French Canadian",
-  "score": "https://musescore.com/score/4553937"
+  "score": "https://musescore.com/score/4553937",
+  "composer": "Traditional (French Canadian)",
+  "composer_source": "https://thesession.org/tunes/3489",
+  "note": "The Session lists it as La Grande Chaine; a comment says it is from Quebec"
  },
  {
   "id": "goddesses",
   "title": "Goddesses",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4977915"
+  "score": "https://musescore.com/score/4977915",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=goddesses",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Goddesses",
+   "https://thesession.org/tunes/search?q=goddesses",
+   "https://thesession.org/tunes/14732"
+  ],
+  "note": "The Session reel matches at 0.88 with no composer field; the poster does not know the origin; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Goddesses (book by Linda Nagata); deities in relation to mortals (narrative motif documented in Thompson's Motif-Ind), none this tune"
  },
  {
   "id": "good-comrade",
   "title": "Good Comrade",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4607624"
+  "score": "https://musescore.com/score/4607624",
+  "composer": "Friedrich Silcher",
+  "composer_died": 1860,
+  "composer_source": "https://en.wikipedia.org/wiki/Ich_hatt'_einen_Kameraden",
+  "note": "Wikipedia: Silcher set Uhland's 1809 poem in 1825, based on a Swiss folk tune; he died in 1860 (https://en.wikipedia.org/wiki/Friedrich_Silcher); the words were not written with the music"
  },
  {
   "id": "grant-lodge",
   "title": "Grant Lodge",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4930095"
+  "score": "https://musescore.com/score/4930095",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=grant%20lodge",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Grant%20Lodge",
+   "https://thesession.org/tunes/search?q=grant%20lodge"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Grant Lodge, Lodge Lane, North College Street, Elgin (architectural structure in Moray, Scotland, UK); Grant Lodge, Blairdaff (architectural structure in Aberdeenshire, Scotland), none this tune"
  },
  {
   "id": "hob-y-deri-danno",
   "title": "Hob y Deri Danno",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4855640"
+  "score": "https://musescore.com/score/4855640",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=hob%20y%20deri%20danno",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Hob%20y%20Deri%20Danno",
+   "https://thesession.org/tunes/search?q=hob%20y%20deri%20danno"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "house-of-achluncart",
   "title": "The House of Achluncart",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4718223"
+  "score": "https://musescore.com/score/4718223",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=house%20of%20achluncart",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20House%20of%20Achluncart",
+   "https://thesession.org/tunes/search?q=house%20of%20achluncart"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "john-cheap-the-chapman",
   "title": "John Cheap The Chapman",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5068557"
+  "score": "https://musescore.com/score/5068557",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=john%20cheap%20the%20chapman",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=John%20Cheap%20The%20Chapman",
+   "https://thesession.org/tunes/search?q=john%20cheap%20the%20chapman",
+   "https://thesession.org/tunes/9669"
+  ],
+  "note": "The Session tune matches at 1.0 with no composer field; comments cite Nathaniel Gow's second collection; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "johnny-the-jumper",
   "title": "Johnny the Jumper",
   "views": 3,
   "pdmx": "anon.",
-  "score": "https://musescore.com/score/4679729"
+  "score": "https://musescore.com/score/4679729",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=johnny%20the%20jumper",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Johnny%20the%20Jumper",
+   "https://thesession.org/tunes/search?q=johnny%20the%20jumper",
+   "https://thesession.org/tunes/2637"
+  ],
+  "note": "The Session's closest tune, Welcome Home Grainne, has another title, so not used; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "la-mourisque",
   "title": "La Mourisque",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4944834"
+  "score": "https://musescore.com/score/4944834",
+  "composer": "Tielman Susato",
+  "composer_source": "https://imslp.org/wiki/La_mourisque_(Susato,_Tielman)",
+  "published": 1551,
+  "note": "IMSLP: first published 1551 in Susato's Danserye (no. 6); no death year in Wikipedia (https://en.wikipedia.org/wiki/Tielman_Susato says \"after 1570\") or in IMSLP, so published before 1931 is the basis; The Session's Morris Off (https://thesession.org/tunes/6595) is the same tune, comments call it Susato's La Mourisque"
  },
  {
   "id": "lady-day",
   "title": "Lady Day",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4595415"
+  "score": "https://musescore.com/score/4595415",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=lady%20day",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Lady%20Day",
+   "https://thesession.org/tunes/search?q=lady%20day"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Billie Holiday (American jazz singer (1915–1959)); Feast of the Annunciation (Christian feast celebrating Christ's Incarnation), none this tune"
  },
  {
   "id": "loch-earn",
   "title": "Loch Earn",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4702344"
+  "score": "https://musescore.com/score/4702344",
+  "composer": "Nathaniel Gow",
+  "composer_died": 1831,
+  "composer_source": "https://thesession.org/tunes/4961",
+  "published": 1788,
+  "note": "The Session credits him; a comment says it is from his second collection of 1788, early on credited to Niel Gow in error; dates: Nathaniel Gow 1763-1831 (https://en.wikipedia.org/wiki/Nathaniel_Gow)"
  },
  {
   "id": "lord-of-carnarvons-jig",
   "title": "Lord of Carnarvon's Jig",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5002862"
+  "score": "https://musescore.com/score/5002862",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=lord%20of%20carnarvon%27s%20jig",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Lord%20of%20Carnarvon%27s%20Jig",
+   "https://thesession.org/tunes/search?q=lord%20of%20carnarvon%27s%20jig"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "lovers-luck",
   "title": "The Lover's Luck",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4807971"
+  "score": "https://musescore.com/score/4807971",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=lover%27s%20luck",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Lover%27s%20Luck",
+   "https://thesession.org/tunes/search?q=lover%27s%20luck"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "lull-me-beyond-thee",
   "title": "Lull Me Beyond Thee",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4573299"
+  "score": "https://musescore.com/score/4573299",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=lull%20me%20beyond%20thee",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Lull%20Me%20Beyond%20Thee",
+   "https://thesession.org/tunes/search?q=lull%20me%20beyond%20thee"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "maid-in-the-meadow",
   "title": "Maid in the Meadow",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4959164"
+  "score": "https://musescore.com/score/4959164",
+  "composer": "Walker Jackson",
+  "composer_source": "https://thesession.org/tunes/942",
+  "published": 1774,
+  "note": "The Session credits him; a comment says it is in Jackson's Celebrated Irish Tunes, 1774, as Cossey's Jig; no death year in Wikipedia or IMSLP, so published before 1931 is the basis"
  },
  {
   "id": "major-molle",
   "title": "Major Molle",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4926682"
+  "score": "https://musescore.com/score/4926682",
+  "composer": "William Gow",
+  "composer_source": "https://thesession.org/tunes/3306",
+  "published": 1809,
+  "note": "The Session's composer field says William Gow; its comments say the tune was first published in Nathaniel Gow's Fifth Collection (1809) and disagree on whether Andrew Gow or Nathaniel wrote it. No dated source for this William Gow, so published before 1931 is the basis"
  },
  {
   "id": "meillionen",
   "title": "Meillionen",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4811364"
+  "score": "https://musescore.com/score/4811364",
+  "composer": "Traditional (Welsh)",
+  "composer_source": "https://thesession.org/tunes/6376",
+  "note": "The Session: the Clover of Meirionnydd, a Welsh country dance tune from the 18th century"
  },
  {
   "id": "merry-conclusion",
   "title": "The Merry Conclusion",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4608914"
+  "score": "https://musescore.com/score/4608914",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=merry%20conclusion",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Merry%20Conclusion",
+   "https://thesession.org/tunes/search?q=merry%20conclusion"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "merry-lads-of-ayr",
   "title": "The Merry Lads of Ayr",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4559966"
+  "score": "https://musescore.com/score/4559966",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=merry%20lads%20of%20ayr",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Merry%20Lads%20of%20Ayr",
+   "https://thesession.org/tunes/search?q=merry%20lads%20of%20ayr"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "millers-rant",
   "title": "The Miller's Rant",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5099292"
+  "score": "https://musescore.com/score/5099292",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=miller%27s%20rant",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Miller%27s%20Rant",
+   "https://thesession.org/tunes/search?q=miller%27s%20rant"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "millisons-jig",
   "title": "Millison's Jig",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4706578"
+  "score": "https://musescore.com/score/4706578",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=millison%27s%20jig",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Millison%27s%20Jig",
+   "https://thesession.org/tunes/search?q=millison%27s%20jig"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "miss-campbell-of-saddells",
   "title": "Miss Campbell Of Saddell's",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4931290"
+  "score": "https://musescore.com/score/4931290",
+  "composer": "Robert Mackintosh",
+  "composer_died": 1807,
+  "composer_source": "https://en.wikipedia.org/wiki/Robert_Mackintosh",
+  "note": "Wikipedia lists \"Miss Campbell of Saddell, a pastoral\" among his works (3rd collection); The Session's tune https://thesession.org/tunes/18221 (comment: composed by Robert Mackintosh) matches the melody at 1.0; Mackintosh c1745-1807"
  },
  {
   "id": "miss-mcpherson-grant-of-ballindalloch",
   "title": "Miss McPherson Grant of Ballindalloch",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5094409"
+  "score": "https://musescore.com/score/5094409",
+  "composer": "William Marshall",
+  "composer_died": 1833,
+  "composer_source": "https://thesession.org/tunes/12783",
+  "published": 1822,
+  "note": "The Session credits him; a comment says it is in his 1822 collection; melody agrees with the Session setting at 0.83; dates: William Marshall 1748-1833 (https://en.wikipedia.org/wiki/William_Marshall_(Scottish_composer))"
  },
  {
   "id": "my-lady-winwoods-maggot",
   "title": "My Lady Winwood's Maggot",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4914377"
+  "score": "https://musescore.com/score/4914377",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=my%20lady%20winwood%27s%20maggot",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=My%20Lady%20Winwood%27s%20Maggot",
+   "https://thesession.org/tunes/search?q=my%20lady%20winwood%27s%20maggot"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "my-mothers-coming-in",
   "title": "My Mother's Coming In",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4547009"
+  "score": "https://musescore.com/score/4547009",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=my%20mother%27s%20coming%20in",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=My%20Mother%27s%20Coming%20In",
+   "https://thesession.org/tunes/search?q=my%20mother%27s%20coming%20in"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "oer-the-hills-and-far-away",
   "title": "O'er the Hills and far away",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5164767"
+  "score": "https://musescore.com/score/5164767",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/Over_the_Hills_and_Far_Away_(traditional_song)",
+  "note": "Wikipedia: a traditional English song from at least the late 17th century; The Session's https://thesession.org/tunes/7502 agrees at 0.88"
  },
  {
   "id": "old-batchelor",
   "title": "Old Batchelor",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4703244"
+  "score": "https://musescore.com/score/4703244",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=old%20batchelor",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Old%20Batchelor",
+   "https://thesession.org/tunes/search?q=old%20batchelor"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Old Batchelor Hospital (historic hospital building in the Northern Territo), none this tune"
  },
  {
   "id": "old-nolls-jig",
   "title": "Old Noll's Jig",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4836153"
+  "score": "https://musescore.com/score/4836153",
+  "composer": "Traditional (English)",
+  "composer_source": "https://thesession.org/tunes/13900",
+  "note": "The Session: a comment says it was published in Playford's Dancing Master, 1702 supplement",
+  "published": 1702
  },
  {
   "id": "open-the-door-to-three",
   "title": "Open the Door to Three",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4857751"
+  "score": "https://musescore.com/score/4857751",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=open%20the%20door%20to%20three",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Open%20the%20Door%20to%20Three",
+   "https://thesession.org/tunes/search?q=open%20the%20door%20to%20three",
+   "https://thesession.org/tunes/11678"
+  ],
+  "note": "The Session slip jig Open The Door For Three matches at 0.83 with no composer field; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "pear-tree",
   "title": "The Pear Tree",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4684919"
+  "score": "https://musescore.com/score/4684919",
+  "composer": "James Hill",
+  "composer_died": 1853,
+  "composer_source": "https://imslp.org/wiki/The_Pear_Tree_(Hill,_James)",
+  "published": 1881,
+  "note": "IMSLP: first published 1881 in Kohler's Violin Repository, Book One; The Session's https://thesession.org/tunes/5754 (melody matches at 1.0) has comments crediting him; dates: James Hill 1811-1853 (https://imslp.org/wiki/Category:Hill,_James, which links https://en.wikipedia.org/wiki/James_Hill_(folk_musician))"
  },
  {
   "id": "pennan-den",
   "title": "Pennan Den",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4953419"
+  "score": "https://musescore.com/score/4953419",
+  "composer": "James Watt",
+  "composer_died": 1909,
+  "composer_source": "https://thesession.org/tunes/14883",
+  "note": "The Session credits him and a comment gives his dates as 1832-1909 (a fiddler and teacher at Pennan, not the engineer); melody agrees at 0.96"
  },
  {
   "id": "pipers-despair",
   "title": "The Piper's Despair",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4896642"
+  "score": "https://musescore.com/score/4896642",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://thesession.org/tunes/336",
+  "note": "The Session lists it as The Piper's Despair (reel, Irish-language aliases Cra Croi An Phiobaire); melody agrees at 1.0"
  },
  {
   "id": "quayside",
   "title": "The Quayside",
   "views": 3,
   "pdmx": "Joe Buchanan's Scottish Tome - Page 024.1",
-  "score": "https://musescore.com/score/4592802"
+  "score": "https://musescore.com/score/4592802",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=quayside",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Quayside",
+   "https://thesession.org/tunes/search?q=quayside"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: The Quayside (building in China); 35, Close (Grade II* listed pub in Newcastle upon Tyne, Tyne ), none this tune"
  },
  {
   "id": "review",
   "title": "The Review",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4699031"
+  "score": "https://musescore.com/score/4699031",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=review",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Review",
+   "https://thesession.org/tunes/search?q=review"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: The Review of gastroenterology (journal); The Alliance Review (newspaper published in Alliance), none this tune"
  },
  {
   "id": "rocking-the-baby",
   "title": "Rocking the Baby",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4690138"
+  "score": "https://musescore.com/score/4690138",
+  "composer": "Traditional (Scottish)",
+  "composer_source": "https://thesession.org/tunes/1088",
+  "note": "The Session lists it as Dancing The Baby, alias Rocking The Baby; comments say it is Scottish in origin"
  },
  {
   "id": "royal-albert",
   "title": "Royal Albert",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4938537"
+  "score": "https://musescore.com/score/4938537",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=royal%20albert",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Royal%20Albert",
+   "https://thesession.org/tunes/search?q=royal%20albert",
+   "https://thesession.org/tunes/15976"
+  ],
+  "note": "The Session's closest tune, Princess Charlotte's Favourite (0.83), has another title, so not used; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Royal Albert (Docklands Light Railway station); Royal Albert Hall (concert hall in South Kensington, London, England,), none this tune"
  },
  {
   "id": "see-me-dance-the-polka",
   "title": "See Me Dance the Polka",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4591701"
+  "score": "https://musescore.com/score/4591701",
+  "composer": "George Grossmith",
+  "composer_died": 1912,
+  "lyricist_died": 1912,
+  "composer_source": "https://en.wikipedia.org/wiki/George_Grossmith",
+  "published": 1886,
+  "note": "Wikipedia: his comic song written in 1886; he wrote words and music, so the lyricist is Grossmith too"
  },
  {
   "id": "shakins-o-the-pocky",
   "title": "The Shakin's o' the Pocky",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4964944"
+  "score": "https://musescore.com/score/4964944",
+  "composer": "Peter Milne and James Scott Skinner",
+  "composer_died": 1927,
+  "composer_source": "https://thesession.org/tunes/1705",
+  "note": "The Session credits both; Milne 1824-1908 per a comment at https://thesession.org/tunes/1002; James Scott Skinner 1843-1927 (https://en.wikipedia.org/wiki/James_Scott_Skinner)"
  },
  {
   "id": "shave-the-donkey",
   "title": "Shave The Donkey",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4930426"
+  "score": "https://musescore.com/score/4930426",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=shave%20the%20donkey",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Shave%20The%20Donkey",
+   "https://thesession.org/tunes/search?q=shave%20the%20donkey"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "tame-her-when-da-snaw-comes",
   "title": "Tame Her When Da Snaw Comes",
   "views": 3,
   "pdmx": "R-102Shetland",
-  "score": "https://musescore.com/score/4924372"
+  "score": "https://musescore.com/score/4924372",
+  "composer": "Traditional (Shetland)",
+  "composer_source": "https://thesession.org/tunes/1120",
+  "note": "The Session: a comment calls it a Shetland reel"
  },
  {
   "id": "teviot-bridge",
   "title": "Teviot Bridge",
   "views": 3,
   "pdmx": "Gow's Repository 1817",
-  "score": "https://musescore.com/score/4577268"
+  "score": "https://musescore.com/score/4577268",
+  "composer": "Alexander Givan",
+  "composer_source": "https://thesession.org/tunes/5467",
+  "published": 1884,
+  "note": "The Session credits him; the earliest print its page names is the Athole Collection (1884); no death year in Wikipedia or IMSLP, so published before 1931 is the basis; melody agrees at 0.83"
  },
  {
   "id": "this-day-a-child-is-born",
   "title": "This Day A Child Is Born",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5730314"
+  "score": "https://musescore.com/score/5730314",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=this%20day%20a%20child%20is%20born",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=This%20Day%20A%20Child%20Is%20Born",
+   "https://thesession.org/tunes/search?q=this%20day%20a%20child%20is%20born"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "tipsy-parson",
   "title": "The Tipsy Parson",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4723994"
+  "score": "https://musescore.com/score/4723994",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=tipsy%20parson",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Tipsy%20Parson",
+   "https://thesession.org/tunes/search?q=tipsy%20parson"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "way-to-norwich",
   "title": "The Way to Norwich",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4558895"
+  "score": "https://musescore.com/score/4558895",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=way%20to%20norwich",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Way%20to%20Norwich",
+   "https://thesession.org/tunes/search?q=way%20to%20norwich",
+   "https://thesession.org/tunes/10135"
+  ],
+  "note": "The Session's Norwich (David Kaynor, 1985) agrees only at 0.75, a different tune; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "welsh",
   "title": "The Welsh",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5088105"
+  "score": "https://musescore.com/score/5088105",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=welsh",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Welsh",
+   "https://thesession.org/tunes/search?q=welsh"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Welsh National Opera (theatre company); The Welsh History Review (academic journal), none this tune"
  },
  {
   "id": "whimbleton-house",
   "title": "Whimbleton House",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4966894"
+  "score": "https://musescore.com/score/4966894",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=whimbleton%20house",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Whimbleton%20House",
+   "https://thesession.org/tunes/search?q=whimbleton%20house"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "witches",
   "title": "The Witches",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5145297"
+  "score": "https://musescore.com/score/5145297",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=witches",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Witches",
+   "https://thesession.org/tunes/search?q=witches"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: The Witches (1983 children's book by Roald Dahl); The Witches (2012 paperback edition published by Puffin), none this tune"
  },
  {
   "id": "wren",
   "title": "The Wren",
   "views": 3,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4932391"
+  "score": "https://musescore.com/score/4932391",
+  "composer": "Traditional (Breton)",
+  "composer_source": "https://thesession.org/tunes/2828",
+  "note": "The Session lists it as The Wren, aliases An Dro and Dans En Dro, a Breton dance"
  },
  {
   "id": "alewife-and-her-barrel",
   "title": "The Alewife and her Barrel",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5048185"
+  "score": "https://musescore.com/score/5048185",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=alewife%20and%20her%20barrel",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Alewife%20and%20her%20Barrel",
+   "https://thesession.org/tunes/search?q=alewife%20and%20her%20barrel"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "all-round-my-hat",
   "title": "All Round My Hat",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5027907"
+  "score": "https://musescore.com/score/5027907",
+  "composer": "Traditional (English)",
+  "composer_source": "https://en.wikipedia.org/wiki/All_Around_My_Hat_(song)",
+  "note": "Wikipedia: a song of 19th-century English origin; The Session's https://thesession.org/tunes/24322 is a reel setting"
  },
  {
   "id": "arthurs-seat",
   "title": "Arthur's Seat",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4958260"
+  "score": "https://musescore.com/score/4958260",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=arthur%27s%20seat",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Arthur%27s%20Seat",
+   "https://thesession.org/tunes/search?q=arthur%27s%20seat",
+   "https://thesession.org/tunes/12340"
+  ],
+  "note": "The Session tune matches at 1.0 but names no composer; comments disagree: one says J. Scott Skinner wrote it, one doubts Skinner attributions, one says it is in the Athole Collection (1884); searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Arthur's Seat (mountain in Edinburgh, Scotland, UK); Arthur's Seat (hill in Belize), none this tune"
  },
  {
   "id": "banks-of-forth",
   "title": "The Banks Of Forth",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4920423"
+  "score": "https://musescore.com/score/4920423",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=banks%20of%20forth",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Banks%20Of%20Forth",
+   "https://thesession.org/tunes/search?q=banks%20of%20forth",
+   "https://thesession.org/tunes/10442"
+  ],
+  "note": "The Session tune matches at 1.0; no composer field, a comment quotes J. Murray Neil naming James Oswald, which is not used as a credit; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "bartlett-house",
   "title": "Bartlett House",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4706599"
+  "score": "https://musescore.com/score/4706599",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=bartlett%20house",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Bartlett%20House",
+   "https://thesession.org/tunes/search?q=bartlett%20house"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: John J. and Lenora Bartlett House (historic house in Kearney, Nebraska, USA); Bartlett House (historic railroad hotel in Ghent, New York State), none this tune"
  },
  {
   "id": "breeches-mary",
   "title": "Breeches Mary",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4672133"
+  "score": "https://musescore.com/score/4672133",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://thesession.org/tunes/3744",
+  "note": "The Session: a tune from O'Neill's collection, alias Maire An Briste"
  },
  {
   "id": "bridge-of-perth",
   "title": "The Bridge of Perth",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4945000"
+  "score": "https://musescore.com/score/4945000",
+  "composer": "Daniel Dow",
+  "composer_died": 1783,
+  "composer_source": "https://thesession.org/tunes/10298",
+  "note": "The Session lists it as The Brig O' Perth (alias The Bridge Of Perth) and spells him Donald Dow; Wikipedia says Daniel Dow is credited as both Daniel and Donald; dates: Daniel Dow 1732-1783 (https://en.wikipedia.org/wiki/Daniel_Dow)"
  },
  {
   "id": "brightest-and-best",
   "title": "Brightest and best",
   "views": 2,
   "pdmx": "J P Harding 1892",
-  "score": "https://musescore.com/score/5146859"
+  "score": "https://musescore.com/score/5146859",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Brightest_and_Best",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Brightest%20and%20best",
+   "https://thesession.org/tunes/search?q=brightest%20and%20best",
+   "https://en.wikipedia.org/wiki/Brightest_and_Best"
+  ],
+  "note": "Wikipedia: the hymn can be sung to many tunes, so it does not say which one this score plays; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Brightest and Best (English Christian hymn text by Reginald Heber); BRIGHTEST AND BEST (hymn tune), none this tune"
  },
  {
   "id": "buffoon",
   "title": "The Buffoon",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4960928"
+  "score": "https://musescore.com/score/4960928",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=buffoon",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Buffoon",
+   "https://thesession.org/tunes/search?q=buffoon"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: The Buffoon (painting by Mane-Katz); Portrait of Sebastián de Morra (portrait by Diego Velázquez), none this tune"
  },
  {
   "id": "ca-the-wethers-to-the-hill",
   "title": "Ca' the Wethers to the Hill",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4859496"
+  "score": "https://musescore.com/score/4859496",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=ca%27%20the%20wethers%20to%20the%20hill",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Ca%27%20the%20Wethers%20to%20the%20Hill",
+   "https://thesession.org/tunes/search?q=ca%27%20the%20wethers%20to%20the%20hill"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "captain-white",
   "title": "Captain White",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4796738"
+  "score": "https://musescore.com/score/4796738",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=captain%20white",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Captain%20White",
+   "https://thesession.org/tunes/search?q=captain%20white",
+   "https://thesession.org/tunes/2134"
+  ],
+  "note": "The Session jig Captain White's matches at 0.88 with no composer field; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: White (English cricketer who played for Surrey); White Benson (Peerage person ID=706946), none this tune"
  },
  {
   "id": "careys-minuet",
   "title": "Carey's Minuet",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4605535"
+  "score": "https://musescore.com/score/4605535",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=carey%27s%20minuet",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Carey%27s%20Minuet",
+   "https://thesession.org/tunes/search?q=carey%27s%20minuet"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "come-up-stairs-with-me",
   "title": "Come Up Stairs with Me",
   "views": 2,
   "pdmx": "anon.",
-  "score": "https://musescore.com/score/4853006"
+  "score": "https://musescore.com/score/4853006",
+  "composer": "Traditional (Irish)",
+  "composer_source": "https://thesession.org/tunes/5975",
+  "note": "The Session: a comment gives O'Neill's Music of Ireland (1903) as the source"
  },
  {
   "id": "conor-oreilly",
   "title": "Conor O'Reilly",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4984515"
+  "score": "https://musescore.com/score/4984515",
+  "composer": "Turlough O'Carolan",
+  "composer_died": 1738,
+  "composer_source": "https://thesession.org/tunes/15904",
+  "note": "The Session credits him; dates: Turlough O'Carolan 1670-1738 (https://en.wikipedia.org/wiki/Turlough_O%27Carolan)"
  },
  {
   "id": "dance-the-polygon",
   "title": "Dance the Polygon",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4978444"
+  "score": "https://musescore.com/score/4978444",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=dance%20the%20polygon",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Dance%20the%20Polygon",
+   "https://thesession.org/tunes/search?q=dance%20the%20polygon",
+   "https://thesession.org/tunes/12031"
+  ],
+  "note": "The Session's The Polygon (comment: composed by Chris Legge) agrees only at 0.79, so not used; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "duchess-of-atholls-slipper",
   "title": "The Duchess Of Atholl's Slipper",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4698442"
+  "score": "https://musescore.com/score/4698442",
+  "composer": "Niel Gow",
+  "composer_died": 1807,
+  "composer_source": "https://thesession.org/tunes/18243",
+  "note": "The Session credits him; dates: Niel Gow 1727-1807 (https://en.wikipedia.org/wiki/Niel_Gow)"
  },
  {
   "id": "duchess-of-buccleuch",
   "title": "The Duchess of Buccleuch",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5025550"
+  "score": "https://musescore.com/score/5025550",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=duchess%20of%20buccleuch",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Duchess%20of%20Buccleuch",
+   "https://thesession.org/tunes/search?q=duchess%20of%20buccleuch",
+   "https://thesession.org/tunes/17055"
+  ],
+  "note": "The Session tune matches at 1.0 with no composer field; a comment says it was published in Niel Gow's 4th Collection (1800), not used as a credit; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "duke-of-gloucesters-march",
   "title": "The Duke of Gloucester's March",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4691623"
+  "score": "https://musescore.com/score/4691623",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=duke%20of%20gloucester%27s%20march",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Duke%20of%20Gloucester%27s%20March",
+   "https://thesession.org/tunes/search?q=duke%20of%20gloucester%27s%20march"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "fain-i-would",
   "title": "Fain I Would",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4561948"
+  "score": "https://musescore.com/score/4561948",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=fain%20i%20would",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Fain%20I%20Would",
+   "https://thesession.org/tunes/search?q=fain%20i%20would"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "fanny-dillon",
   "title": "Fanny Dillon",
   "views": 2,
   "pdmx": "Carolan",
-  "score": "https://musescore.com/score/4684328"
+  "score": "https://musescore.com/score/4684328",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=fanny%20dillon",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Fanny%20Dillon",
+   "https://thesession.org/tunes/search?q=fanny%20dillon",
+   "https://thesession.org/tunes/12540"
+  ],
+  "note": "The Session waltz matches at 0.83 with no composer field; a comment links the name to a tune of Carolan's, but Wikipedia's Carolan article doesn't list it; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Fanny Dillon (daughter of Arthur Dillon (1785-1836)); Frances Mary Dillon (person (ca. 1832-1916)), none this tune"
  },
  {
   "id": "french-ambassador",
   "title": "The French Ambassador",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4575279"
+  "score": "https://musescore.com/score/4575279",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=french%20ambassador",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20French%20Ambassador",
+   "https://thesession.org/tunes/search?q=french%20ambassador"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: The French Ambassador (Vanity Fair caricature of The Baron Chaudron de Co), none this tune"
  },
  {
   "id": "general-gathering-1745",
   "title": "The General Gathering 1745",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4833342"
+  "score": "https://musescore.com/score/4833342",
+  "composer": "Simon Fraser",
+  "composer_died": 1852,
+  "composer_source": "https://thesession.org/tunes/18251",
+  "note": "The Session credits him; dates: Simon Fraser 1772/3-1852 (https://en.wikipedia.org/wiki/Simon_Fraser_(musician)), a fiddler, composer and collector"
  },
  {
   "id": "graies-inne-maske",
   "title": "Graies Inne Maske",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4651658"
+  "score": "https://musescore.com/score/4651658",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=graies%20inne%20maske",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Graies%20Inne%20Maske",
+   "https://thesession.org/tunes/search?q=graies%20inne%20maske"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "grants-rant",
   "title": "Grant's Rant",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4703428"
+  "score": "https://musescore.com/score/4703428",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=grant%27s%20rant",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Grant%27s%20Rant",
+   "https://thesession.org/tunes/search?q=grant%27s%20rant",
+   "https://thesession.org/tunes/14585"
+  ],
+  "note": "The Session tune matches at 1.0 with no composer field; a comment says it is in Thompson's Compleat Collection of 200 Country Dances; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "haggis",
   "title": "The Haggis",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4698578"
+  "score": "https://musescore.com/score/4698578",
+  "composer": "Simon Fraser",
+  "composer_died": 1852,
+  "composer_source": "https://thesession.org/tunes/4535",
+  "note": "The Session credits him; melody agrees at 0.88; dates: Simon Fraser 1772/3-1852 (https://en.wikipedia.org/wiki/Simon_Fraser_(musician)), a fiddler, composer and collector"
  },
  {
   "id": "hop-pickers-feast",
   "title": "The Hop Picker's Feast",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4903403"
+  "score": "https://musescore.com/score/4903403",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=hop%20picker%27s%20feast",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Hop%20Picker%27s%20Feast",
+   "https://thesession.org/tunes/search?q=hop%20picker%27s%20feast"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "john-of-paris",
   "title": "John Of Paris",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4692071"
+  "score": "https://musescore.com/score/4692071",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=john%20of%20paris",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=John%20Of%20Paris",
+   "https://thesession.org/tunes/search?q=john%20of%20paris",
+   "https://thesession.org/tunes/12686"
+  ],
+  "note": "The Session tune matches at 0.96 with no composer field; its comments cite the Joshua Gibbons manuscript; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: John of Paris (French philosopher); John of Paris on Royal and Papal Power (journal article; published in History in 1974), none this tune"
  },
  {
   "id": "kildrummy-castle",
   "title": "Kildrummy Castle",
   "views": 2,
   "pdmx": "J. Scott Skinner",
-  "score": "https://musescore.com/score/4602522"
+  "score": "https://musescore.com/score/4602522",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=kildrummy%20castle",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Kildrummy%20Castle",
+   "https://thesession.org/tunes/search?q=kildrummy%20castle"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Kildrummy Castle (former castle in Aberdeenshire, Scotland, UK); designed landscape at Kildrummy Castle (designed landscape in Aberdeenshire, Scotland, UK), none this tune"
  },
  {
   "id": "killiechassie",
   "title": "Killiechassie",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4991320"
+  "score": "https://musescore.com/score/4991320",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=killiechassie",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Killiechassie",
+   "https://thesession.org/tunes/search?q=killiechassie",
+   "https://thesession.org/tunes/10403"
+  ],
+  "note": "The Session's The Smith Of Chilliechassie credits Duncan McKercher but the title differs and the melody agrees only at 0.83, so not used; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Killiechassie House (building in Perth and Kinross, Scotland, UK); Dovecot, Killiechassie (architectural structure in Perth and Kinross, Scot), none this tune"
  },
  {
   "id": "la-fougere",
   "title": "La Fougère",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4699767"
+  "score": "https://musescore.com/score/4699767",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=la%20foug%C3%A8re",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=La%20Foug%C3%A8re",
+   "https://thesession.org/tunes/search?q=la%20foug%C3%A8re"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Saint-Just (commune in Ain, France); La Fougère (campground in Gaspésie National Park, Quebec, Cana), none this tune"
  },
  {
   "id": "lady-ann-hope",
   "title": "Lady Ann Hope",
   "views": 2,
   "pdmx": "Kerr's First",
-  "score": "https://musescore.com/score/4666379"
+  "score": "https://musescore.com/score/4666379",
+  "composer": "John Pringle",
+  "composer_died": 1830,
+  "composer_source": "https://thesession.org/tunes/203",
+  "note": "The Session's composer field says John Pringle, first printed 1800-1801 in his own collection; other attributions exist: a comment says William Marshall wrote Lady Ann Hope and Wikipedia lists \"Lady Ann Hope's Favourite\" under Niel Gow; Pringle died 1830 per https://imslp.org/wiki/Category:Pringle,_John"
  },
  {
   "id": "little-peggys-love",
   "title": "Little Peggy's Love",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4918472"
+  "score": "https://musescore.com/score/4918472",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=little%20peggy%27s%20love",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Little%20Peggy%27s%20Love",
+   "https://thesession.org/tunes/search?q=little%20peggy%27s%20love"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "london",
   "title": "London",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4662868"
+  "score": "https://musescore.com/score/4662868",
+  "composer": "Traditional (English)",
+  "composer_source": "https://thesession.org/tunes/15011",
+  "note": "The Session lists it as The London; a comment says it is in Daniel Wright's Complete Collection of Celebrated Country Dances (1730)",
+  "published": 1730
  },
  {
   "id": "major-graham-of-inchbrakie",
   "title": "Major Graham Of Inchbrakie",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4682729"
+  "score": "https://musescore.com/score/4682729",
+  "composer": "Niel Gow",
+  "composer_died": 1807,
+  "composer_source": "https://en.wikipedia.org/wiki/Niel_Gow",
+  "note": "Wikipedia lists Major Graham of Inchbrakie among his compositions; The Session's https://thesession.org/tunes/3883 credits him too; dates: Niel Gow 1727-1807 (https://en.wikipedia.org/wiki/Niel_Gow)"
  },
  {
   "id": "marchioness-of-huntly",
   "title": "Marchioness of Huntly",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4692143"
+  "score": "https://musescore.com/score/4692143",
+  "composer": "William Marshall",
+  "composer_died": 1833,
+  "composer_source": "https://en.wikipedia.org/wiki/William_Marshall_(Scottish_composer)",
+  "note": "Wikipedia names the strathspey The Marchioness of Huntly among his best-known compositions; dates: William Marshall 1748-1833 (https://en.wikipedia.org/wiki/William_Marshall_(Scottish_composer))"
  },
  {
   "id": "miss-admiral-gordons-strathspey",
   "title": "Miss Admiral Gordon's Strathspey",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4912029"
+  "score": "https://musescore.com/score/4912029",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=miss%20admiral%20gordon%27s%20strathspey",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Miss%20Admiral%20Gordon%27s%20Strathspey",
+   "https://thesession.org/tunes/search?q=miss%20admiral%20gordon%27s%20strathspey",
+   "https://thesession.org/tunes/9092"
+  ],
+  "note": "The Session tune matches at 0.92 with no composer field; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "miss-andy-campbells-scotch-measure",
   "title": "Miss Andy Campbell's Scotch Measure",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4687838"
+  "score": "https://musescore.com/score/4687838",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=miss%20andy%20campbell%27s%20scotch%20measure",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Miss%20Andy%20Campbell%27s%20Scotch%20Measure",
+   "https://thesession.org/tunes/search?q=miss%20andy%20campbell%27s%20scotch%20measure"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "miss-campbells-reel",
   "title": "Miss Campbell's Reel",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4690486"
+  "score": "https://musescore.com/score/4690486",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=miss%20campbell%27s%20reel",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Miss%20Campbell%27s%20Reel",
+   "https://thesession.org/tunes/search?q=miss%20campbell%27s%20reel",
+   "https://thesession.org/tunes/18595"
+  ],
+  "note": "The Session's Miss Campbell's (from the Donnellan collection) agrees at 0.83 with no composer field; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "miss-gordon-of-liverpool",
   "title": "Miss Gordon Of Liverpool",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4716202"
+  "score": "https://musescore.com/score/4716202",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=miss%20gordon%20of%20liverpool",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Miss%20Gordon%20Of%20Liverpool",
+   "https://thesession.org/tunes/search?q=miss%20gordon%20of%20liverpool",
+   "https://thesession.org/tunes/4777"
+  ],
+  "note": "The Session tune matches at 0.88 with no composer field; a comment guesses it is William Marshall's, not used as a credit; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "miss-grant-of-grant",
   "title": "Miss Grant of Grant",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5146929"
+  "score": "https://musescore.com/score/5146929",
+  "composer": "Daniel Dow",
+  "composer_died": 1783,
+  "composer_source": "https://thesession.org/tunes/18630",
+  "note": "The Session credits him; dates: Daniel Dow 1732-1783 (https://en.wikipedia.org/wiki/Daniel_Dow)"
  },
  {
   "id": "miss-johnstone",
   "title": "Miss Johnstone",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4564092"
+  "score": "https://musescore.com/score/4564092",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=miss%20johnstone",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Miss%20Johnstone",
+   "https://thesession.org/tunes/search?q=miss%20johnstone",
+   "https://thesession.org/tunes/5794"
+  ],
+  "note": "The Session slip jig agrees only at 0.83 with no composer field; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "miss-murray-of-lintrose",
   "title": "Miss Murray of Lintrose",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4560513"
+  "score": "https://musescore.com/score/4560513",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=miss%20murray%20of%20lintrose",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Miss%20Murray%20of%20Lintrose",
+   "https://thesession.org/tunes/search?q=miss%20murray%20of%20lintrose",
+   "https://thesession.org/tunes/11477"
+  ],
+  "note": "The Session tune matches at 0.88 with no composer field; a comment says it is attributed to John Bowie, not used as a credit; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "miss-stewart",
   "title": "Miss Stewart",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4562695"
+  "score": "https://musescore.com/score/4562695",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=miss%20stewart",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Miss%20Stewart",
+   "https://thesession.org/tunes/search?q=miss%20stewart",
+   "https://thesession.org/tunes/7979"
+  ],
+  "note": "The Session strathspey matches at 0.83 with no composer field; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "my-love-is-lost-to-me",
   "title": "My Love Is Lost to Me",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4878906"
+  "score": "https://musescore.com/score/4878906",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=my%20love%20is%20lost%20to%20me",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=My%20Love%20Is%20Lost%20to%20Me",
+   "https://thesession.org/tunes/search?q=my%20love%20is%20lost%20to%20me",
+   "https://thesession.org/tunes/18923"
+  ],
+  "note": "The Session's O, Were I On Parnassus Hill (alias My Love Is Lost To Me) matches at 1.0; the page gives Burns's 1788 words and no composer for the music; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "my-tochers-the-jewel",
   "title": "My Tocher's The Jewel",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4943560"
+  "score": "https://musescore.com/score/4943560",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=my%20tocher%27s%20the%20jewel",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=My%20Tocher%27s%20The%20Jewel",
+   "https://thesession.org/tunes/search?q=my%20tocher%27s%20the%20jewel",
+   "https://thesession.org/tunes/3264"
+  ],
+  "note": "The Session tune matches at 0.92 with no composer field; a comment says Gow published it as Lord Elcho's Favourite, and Burns wrote the song words; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "newfoundland",
   "title": "Newfoundland",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5145161"
+  "score": "https://musescore.com/score/5145161",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=newfoundland",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Newfoundland",
+   "https://thesession.org/tunes/search?q=newfoundland",
+   "https://thesession.org/tunes/3193"
+  ],
+  "note": "The Session reel matches at 1.0 with no composer field; the poster asks about its origin; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Newfoundland and Labrador (province of Canada); Newfoundland (island portion of Newfoundland and Labrador, Canad), none this tune"
  },
  {
   "id": "old-as-the-hills",
   "title": "Old as the Hills",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4562454"
+  "score": "https://musescore.com/score/4562454",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=old%20as%20the%20hills",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Old%20as%20the%20Hills",
+   "https://thesession.org/tunes/search?q=old%20as%20the%20hills"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "old-wife-behind-the-fire",
   "title": "Old Wife Behind the Fire",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4605975"
+  "score": "https://musescore.com/score/4605975",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=old%20wife%20behind%20the%20fire",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Old%20Wife%20Behind%20the%20Fire",
+   "https://thesession.org/tunes/search?q=old%20wife%20behind%20the%20fire"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "red-and-all-red",
   "title": "Red and all Red",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4868971"
+  "score": "https://musescore.com/score/4868971",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=red%20and%20all%20red",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Red%20and%20all%20Red",
+   "https://thesession.org/tunes/search?q=red%20and%20all%20red"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "redesdale-hornpipe",
   "title": "Redesdale Hornpipe",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5085383"
+  "score": "https://musescore.com/score/5085383",
+  "composer": "James Hill",
+  "composer_died": 1853,
+  "composer_source": "https://thesession.org/tunes/3545",
+  "note": "The Session credits him; dates: James Hill 1811-1853 (https://imslp.org/wiki/Category:Hill,_James, which links https://en.wikipedia.org/wiki/James_Hill_(folk_musician))"
  },
  {
   "id": "something-new",
   "title": "Something New",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4853684"
+  "score": "https://musescore.com/score/4853684",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=something%20new",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Something%20New",
+   "https://thesession.org/tunes/search?q=something%20new"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Something New (1964 US studio album by The Beatles); Something New (2006 film by Sanaa Hamri), none this tune"
  },
  {
   "id": "standchen-serenade",
   "title": "Ständchen Serenade",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4685175"
+  "score": "https://musescore.com/score/4685175",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Jonny_Heykens",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=St%C3%A4ndchen%20Serenade",
+   "https://thesession.org/tunes/search?q=st%C3%A4ndchen%20serenade",
+   "https://thesession.org/tunes/10628",
+   "https://en.wikipedia.org/wiki/Jonny_Heykens",
+   "https://imslp.org/wiki/Serenade,_Op.21_(Heykens,_Jonny)"
+  ],
+  "note": "The Session tune of that name matches at 1.0 but names no composer; IMSLP has Heykens's Serenade Op.21 (https://imslp.org/wiki/Serenade,_Op.21_(Heykens,_Jonny), 1920) and Wikipedia has Jonny Heykens (1884-1945), but no source ties this score to that piece; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "strathbogie-toast",
   "title": "Strathbogie Toast",
   "views": 2,
   "pdmx": "Wm. Marshall",
-  "score": "https://musescore.com/score/4704635"
+  "score": "https://musescore.com/score/4704635",
+  "composer": "William Marshall",
+  "composer_died": 1833,
+  "composer_source": "https://thesession.org/tunes/7635",
+  "note": "The Session lists it as The Bobers Of Brechin, alias The Strathbogie Toast, and credits him; melody agrees at 0.88; dates: William Marshall 1748-1833 (https://en.wikipedia.org/wiki/William_Marshall_(Scottish_composer))"
  },
  {
   "id": "tekeli",
   "title": "Tekeli",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5150558"
+  "score": "https://musescore.com/score/5150558",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=tekeli",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Tekeli",
+   "https://thesession.org/tunes/search?q=tekeli"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Tekeli (village in Şemdinli, Hakkâri, southeastern Turkey); Tekeli (village in Çemişgezek, Tunceli, eastern Turkey), none this tune"
  },
  {
   "id": "top-and-bottom",
   "title": "Top and Bottom",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4970858"
+  "score": "https://musescore.com/score/4970858",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=top%20and%20bottom",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Top%20and%20Bottom",
+   "https://thesession.org/tunes/search?q=top%20and%20bottom"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: gay sex roles (sexual roles); Top and Bottom Brass (album by Clark Terry), none this tune"
  },
  {
   "id": "twll-yn-ei-boch",
   "title": "Twll yn ei boch",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4590425"
+  "score": "https://musescore.com/score/4590425",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=twll%20yn%20ei%20boch",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Twll%20yn%20ei%20boch",
+   "https://thesession.org/tunes/search?q=twll%20yn%20ei%20boch"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "vallafield",
   "title": "Vallafield",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4647909"
+  "score": "https://musescore.com/score/4647909",
+  "composer": "Traditional (Shetland)",
+  "composer_source": "https://thesession.org/tunes/8987",
+  "note": "The Session: a comment prints it as \"Traditional\", a trowie tune from Unst, Shetland"
  },
  {
   "id": "what-a-beau-my-granny-was",
   "title": "What a Beau My Granny Was",
   "views": 2,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4548799"
+  "score": "https://musescore.com/score/4548799",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=what%20a%20beau%20my%20granny%20was",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=What%20a%20Beau%20My%20Granny%20Was",
+   "https://thesession.org/tunes/search?q=what%20a%20beau%20my%20granny%20was"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "when-the-tide-comes-in",
   "title": "When the Tide Comes In",
   "views": 2,
   "pdmx": "James Hill (?) (1811-1853) Northumberland",
-  "score": "https://musescore.com/score/5139473"
+  "score": "https://musescore.com/score/5139473",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=when%20the%20tide%20comes%20in",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=When%20the%20Tide%20Comes%20In",
+   "https://thesession.org/tunes/search?q=when%20the%20tide%20comes%20in"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: When the Sea Rises (2004 film by Yolande Moreau, Gilles Porte), none this tune"
  },
  {
   "id": "aurora-lucis",
   "title": "Aurora Lucis",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/5777172"
+  "score": "https://musescore.com/score/5777172",
+  "composer": "Unknown",
+  "composer_source": "https://en.wikipedia.org/wiki/Aurora_lucis_rutilat",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Aurora%20Lucis",
+   "https://thesession.org/tunes/search?q=aurora%20lucis",
+   "https://thesession.org/tunes/20907",
+   "https://en.wikipedia.org/wiki/Aurora_lucis_rutilat"
+  ],
+  "note": "The Session's Aurora (slip jig by Stephen Carolan) agrees only at 0.79, so not used; Wikipedia: an Easter hymn whose melody is found in the Vesperale Romanum in the Phrygian mode, with no composer named; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Aurora lucis rutilat (Latin Christian hymn text); The day draws on with golden light (Latin Christian hymn text, as translated into Engl), none this tune"
  },
  {
   "id": "balquhidder-lasses",
   "title": "Balquhidder Lasses",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4842862"
+  "score": "https://musescore.com/score/4842862",
+  "composer": "Traditional (English)",
+  "composer_source": "https://thesession.org/tunes/6637",
+  "note": "The Session: a comment quotes an English country or morris dance tune from northwest England, collected by Alfred Moffat"
  },
  {
   "id": "big-john-mcneil",
   "title": "Big John McNeil",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4869890"
+  "score": "https://musescore.com/score/4869890",
+  "composer": "Peter Milne",
+  "composer_died": 1908,
+  "composer_source": "https://thesession.org/tunes/1002",
+  "note": "The Session credits him; a comment gives his dates as 1824-1908 and says he wrote it as John McNeill's Reel"
  },
  {
   "id": "bishop-of-bangors-jig",
   "title": "The Bishop of Bangor's Jig",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4951319"
+  "score": "https://musescore.com/score/4951319",
+  "composer": "Traditional (Welsh)",
+  "composer_source": "https://thesession.org/tunes/6021",
+  "note": "The Session: alias Jig Esgob Bangor; comments place it in Bangor, Gwynedd"
  },
  {
   "id": "black-heath",
   "title": "Black-Heath",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4667504"
+  "score": "https://musescore.com/score/4667504",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=black-heath",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Black-Heath",
+   "https://thesession.org/tunes/search?q=black-heath"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Black Heath (Virginia, USA), none this tune"
  },
  {
   "id": "cadgers-in-the-canongate",
   "title": "Cadgers in the Canongate",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4599435"
+  "score": "https://musescore.com/score/4599435",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=cadgers%20in%20the%20canongate",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Cadgers%20in%20the%20Canongate",
+   "https://thesession.org/tunes/search?q=cadgers%20in%20the%20canongate",
+   "https://thesession.org/tunes/16916"
+  ],
+  "note": "The Session tune matches at 0.92 with no composer field; a comment says Bremner printed it in 1751; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "christmas-day-ida-moarnin",
   "title": "Christmas Day Ida Moarnin'",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4891131"
+  "score": "https://musescore.com/score/4891131",
+  "composer": "Traditional (Shetland)",
+  "composer_source": "https://thesession.org/tunes/773",
+  "note": "The Session's composer field says Fredamann Stickle, a Shetland fiddler of the 19th century by a comment, with no dates anywhere, so not used as a credit"
  },
  {
   "id": "confesse",
   "title": "Confesse",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4973050"
+  "score": "https://musescore.com/score/4973050",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=confesse",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Confesse",
+   "https://thesession.org/tunes/search?q=confesse"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: confessional (small, enclosed booth used for confession); Confessed abuse versus witnessed accidents in infants: comparison of clinical, radiological, and ophthalmological data in corroborated cases (scientific article), none this tune"
  },
  {
   "id": "counsellor-dillon",
   "title": "Counsellor Dillon",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4949662"
+  "score": "https://musescore.com/score/4949662",
+  "composer": "Turlough O'Carolan",
+  "composer_died": 1738,
+  "composer_source": "https://thesession.org/tunes/12552",
+  "note": "The Session credits him; dates: Turlough O'Carolan 1670-1738 (https://en.wikipedia.org/wiki/Turlough_O%27Carolan)"
  },
  {
   "id": "earl-of-angus-and-arran",
   "title": "Earl of Angus and Arran",
   "views": 1,
   "pdmx": "Wm. Marshall",
-  "score": "https://musescore.com/score/4582749"
+  "score": "https://musescore.com/score/4582749",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=earl%20of%20angus%20and%20arran",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Earl%20of%20Angus%20and%20Arran",
+   "https://thesession.org/tunes/search?q=earl%20of%20angus%20and%20arran"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "earl-of-home",
   "title": "Earl of Home",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4574130"
+  "score": "https://musescore.com/score/4574130",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=earl%20of%20home",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Earl%20of%20Home",
+   "https://thesession.org/tunes/search?q=earl%20of%20home"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Earl of Home (title in the Peerage of Scotland), none this tune"
  },
  {
   "id": "garthlands-strathspey",
   "title": "Garthland's Strathspey",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4937495"
+  "score": "https://musescore.com/score/4937495",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=garthland%27s%20strathspey",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Garthland%27s%20Strathspey",
+   "https://thesession.org/tunes/search?q=garthland%27s%20strathspey"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "hatton-of-buchrombs-reel",
   "title": "Hatton of Buchromb's Reel",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4574899"
+  "score": "https://musescore.com/score/4574899",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=hatton%20of%20buchromb%27s%20reel",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Hatton%20of%20Buchromb%27s%20Reel",
+   "https://thesession.org/tunes/search?q=hatton%20of%20buchromb%27s%20reel"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "kinrara",
   "title": "Kinrara",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4567243"
+  "score": "https://musescore.com/score/4567243",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=kinrara",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Kinrara",
+   "https://thesession.org/tunes/search?q=kinrara",
+   "https://thesession.org/tunes/14860"
+  ],
+  "note": "The Session tune matches at 0.96; the page says it comes from Simon Fraser's collection, and a collector is not a credit; searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Kinrara Crater (volcano in Australia); Kinrara National Park (national park in Australia), none this tune"
  },
  {
   "id": "knives-and-forks",
   "title": "Knives and Forks",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4668087"
+  "score": "https://musescore.com/score/4668087",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=knives%20and%20forks",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Knives%20and%20Forks",
+   "https://thesession.org/tunes/search?q=knives%20and%20forks"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Knives and Forks (painting by Alexander Fraser (1940–2020), Museum o), none this tune"
  },
  {
   "id": "lady-bairds-reel",
   "title": "Lady Baird's Reel",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4597595"
+  "score": "https://musescore.com/score/4597595",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=lady%20baird%27s%20reel",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Lady%20Baird%27s%20Reel",
+   "https://thesession.org/tunes/search?q=lady%20baird%27s%20reel"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "major-shanly",
   "title": "Major Shanly",
   "views": 1,
   "pdmx": "Carolan",
-  "score": "https://musescore.com/score/4950351"
+  "score": "https://musescore.com/score/4950351",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=major%20shanly",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Major%20Shanly",
+   "https://thesession.org/tunes/search?q=major%20shanly"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "mr-morison-of-bognie",
   "title": "Mr. Morison of Bognie",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4552463"
+  "score": "https://musescore.com/score/4552463",
+  "composer": "William Marshall",
+  "composer_died": 1833,
+  "composer_source": "https://thesession.org/tunes/18218",
+  "note": "The Session credits him; dates: William Marshall 1748-1833 (https://en.wikipedia.org/wiki/William_Marshall_(Scottish_composer))"
  },
  {
   "id": "my-dearie",
   "title": "My Dearie",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4606150"
+  "score": "https://musescore.com/score/4606150",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=my%20dearie",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=My%20Dearie",
+   "https://thesession.org/tunes/search?q=my%20dearie"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "pas-du-loup",
   "title": "Pas du Loup",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4715335"
+  "score": "https://musescore.com/score/4715335",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=pas%20du%20loup",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Pas%20du%20Loup",
+   "https://thesession.org/tunes/search?q=pas%20du%20loup"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: pas du Loup (no description); pas du Loup (no description), none this tune"
  },
  {
   "id": "perth",
   "title": "Perth",
   "views": 1,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4953164"
+  "score": "https://musescore.com/score/4953164",
+  "composer": "Michael McGoldrick",
+  "composer_source": "https://thesession.org/tunes/17447",
+  "published": 2010,
+  "remove": "composer is living: Michael McGoldrick, born 1971, wrote it; first published 2010 or earlier on his album Aurora, which is 1931 or later",
+  "note": "The Session credits him (comment: his composition from his album Aurora, track 3b); born 1971 per https://en.wikipedia.org/wiki/Michael_McGoldrick; Aurora is dated 2010 in https://en.wikipedia.org/wiki/Heidi_Talbot"
  },
  {
   "id": "when-laura-smiles",
   "title": "When Laura Smiles",
   "views": 1,
   "pdmx": "Tune is: by Philip Rosseter 1601",
-  "score": "https://musescore.com/score/4692404"
+  "score": "https://musescore.com/score/4692404",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=when%20laura%20smiles",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=When%20Laura%20Smiles",
+   "https://thesession.org/tunes/search?q=when%20laura%20smiles"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "athole-brose",
   "title": "Athole Brose",
   "views": 0,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4869084"
+  "score": "https://musescore.com/score/4869084",
+  "composer": "Abraham Mackintosh",
+  "composer_died": 1807,
+  "composer_source": "https://thesession.org/tunes/1919",
+  "note": "The Session credits him (melody agrees at 0.96); Mackintosh 1769-1807 per https://imslp.org/wiki/Category:Mackintosh,_Abraham"
  },
  {
   "id": "banks-of-garry",
   "title": "The Banks of Garry",
   "views": 0,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4934919"
+  "score": "https://musescore.com/score/4934919",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=banks%20of%20garry",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=The%20Banks%20of%20Garry",
+   "https://thesession.org/tunes/search?q=banks%20of%20garry"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  },
  {
   "id": "mrs-adie",
   "title": "Mrs. Adie",
   "views": 0,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4566018"
+  "score": "https://musescore.com/score/4566018",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=mrs.%20adie",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Mrs.%20Adie",
+   "https://thesession.org/tunes/search?q=mrs.%20adie"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: Mrs. Adiel Sherwood Jr. (Emma Heriot, 1806–1883) (painting by J. P. Sherwood), none this tune"
  },
  {
   "id": "ode-mutopia",
   "title": "Ode to Joy (Mutopia SATB)",
   "views": 0,
   "pdmx": null,
-  "score": "https://www.mutopiaproject.org/ftp/BeethovenLv/ode/ode.mid"
+  "score": "https://www.mutopiaproject.org/ftp/BeethovenLv/ode/ode.mid",
+  "composer": "Ludwig van Beethoven",
+  "composer_died": 1827,
+  "composer_source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=528",
+  "published": 1826,
+  "note": "Mutopia: Ode to Joy by L. V. Beethoven (1770-1827); the Ninth Symphony was first printed in 1826 (https://en.wikipedia.org/wiki/Symphony_No._9_(Beethoven))"
  },
  {
   "id": "susie-brodie",
   "title": "Susie Brodie",
   "views": 0,
   "pdmx": "NA",
-  "score": "https://musescore.com/score/4954708"
+  "score": "https://musescore.com/score/4954708",
+  "composer": "Unknown",
+  "composer_source": "https://thesession.org/tunes/search?q=susie%20brodie",
+  "checked": [
+   "https://en.wikipedia.org/w/index.php?search=Susie%20Brodie",
+   "https://thesession.org/tunes/search?q=susie%20brodie"
+  ],
+  "note": "searched Wikipedia and The Session for the title and found no source naming the composer; Wikidata: no item for the title"
  }
 ]
