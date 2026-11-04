@@ -9,9 +9,10 @@ import {
   savedTake,
   waitForOpenMicrophone
 } from './fake-microphone'
-import { fixtureRecordings, songsUnlockedBy } from './golden'
+import { songsTheLastTakeUnlocks } from './golden'
 import { skipWelcome } from './record'
 import { onPhone } from './screens'
+import { expectUnlockReward } from './unlock-reward'
 
 // The microphone stays open from the first time Record shows to the end of the launch (#206), so a
 // tap captures at once and a take keeps the 300 ms before it (#148, #149). The fake microphone is
@@ -230,20 +231,19 @@ test.describe('with microphone permission granted', () => {
 
     // 022 unlocks Hot Cross Buns (#229), so Result offers Done, not Record another.
     await recordAndSave('022')
-    await expect(page.getByTestId('result-progress')).toContainText('You unlocked Hot Cross Buns')
+    await expect(page.getByTestId('unlock-reward')).toContainText('Hot Cross Buns')
     await page.getByRole('button', { name: 'Done', exact: true }).click()
     await expect(page).toHaveURL(/\/recordings\/$/)
     await tabs.getByRole('link', { name: 'Record', exact: true }).click()
 
     // Try it: on to Song Creator, which plays the Toot in the microphone's session. 002 unlocks
-    // Mary and more Songs, as many as the catalog has (`golden.ts`), and Try it opens the first,
-    // Mary.
-    const takes = (ids: string[]) => songsUnlockedBy(fixtureRecordings(ids)).length
-    const fourth = takes(['095', '017', '022', '002']) - takes(['095', '017', '022'])
+    // Mary and more Songs, as many as the catalog has (`golden.ts`), and Try it opens the first
+    // the Result's reward lists, the most viewed (#363).
+    const fourth = songsTheLastTakeUnlocks(['095', '017', '022', '002'])
     await recordAndSave('002')
-    await expect(page.getByTestId('result-progress')).toContainText(`You unlocked ${fourth} Songs`)
+    await expectUnlockReward(page, fourth)
     await page.getByRole('button', { name: 'Try it', exact: true }).click()
-    await expect(page).toHaveURL(/\/compose\/mary\/$/)
+    await expect(page).toHaveURL(new RegExp(`/compose/${fourth[0].id}/$`))
     // The Toot is playing, so its sound has chosen its session.
     await expect(page.getByTestId('song-creator-play')).toHaveAccessibleName('Stop')
     await stillOpen()

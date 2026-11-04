@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { songs } from '../src/lib/catalog/songs.generated'
-import { coverageOf } from '../src/lib/pitch-coverage'
+import { coverageOf, orderUnlocked } from '../src/lib/pitch-coverage'
 import type { Recording } from '../src/lib/recordings'
 import type { GoldenIndex, GoldenRecording } from '../src/test-support/golden'
 import { goldenAnalysisRecording } from '../src/test-support/golden-analysis'
@@ -32,6 +32,19 @@ export const fixtureLibrary = fixtureRecordings(index.recordings)
 /** The Songs these Recordings unlock, in the catalog's order. */
 export const songsUnlockedBy = (recordings: Recording[]) =>
   songs.filter(song => coverageOf(song, recordings).unlocked)
+
+/**
+ * The Songs the last of these takes unlocks, in the order the Result's reward lists them (#363):
+ * `favorites` first, then the most viewed.
+ */
+export function songsTheLastTakeUnlocks(ids: readonly string[], favorites: readonly string[] = []) {
+  const before = new Set(songsUnlockedBy(fixtureRecordings(ids.slice(0, -1))).map(s => s.id))
+  const newly = songsUnlockedBy(fixtureRecordings(ids)).filter(s => !before.has(s.id))
+  return orderUnlocked(
+    newly.map(song => ({ song })),
+    new Set(favorites)
+  ).map(u => u.song)
+}
 
 /** The Songs the whole Fixture Library unlocks, in the catalog's order. */
 export const songsTheFixtureLibraryUnlocks = songsUnlockedBy(fixtureLibrary)

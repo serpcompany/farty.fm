@@ -24,6 +24,7 @@ import {
 import { catalogPath } from '@/lib/catalog/catalog-path.generated'
 import { loadSongs } from '@/lib/catalog/load-songs'
 import type { Song, SongSummary } from '@/lib/catalog/song'
+import { loadFavorites } from '@/lib/favorite-store'
 import { onLibraryChanged, recordingsAfter } from '@/lib/library-sync'
 import type { Performance } from '@/lib/performance'
 import { nearestNote } from '@/lib/pitch'
@@ -34,6 +35,7 @@ import {
   coverageChanges,
   coverageKey,
   coverageOf,
+  orderUnlocked,
   type SongRow,
   songRows
 } from '@/lib/pitch-coverage'
@@ -461,15 +463,21 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   /**
    * The Result screen after analysis, with what the Recording changed in the Song Catalog's Pitch
    * Coverage: the iPhone app's `analyze()` compares the Recordings before and after it. It waits
-   * for the catalog, should it still be loading; without one, nothing changed.
+   * for the catalog, should it still be loading; without one, nothing changed. The Songs it
+   * unlocked come best first, Favorites first, in an order fixed now, so a heart tapped on the
+   * Result doesn't move a row and Try it opens the first (#363).
    */
   const resultOf = useCallback(async (analyzed: Recording, trimFailed = false): Promise<Flow> => {
-    const catalog = await loadSongs().catch(() => [])
+    const [catalog, favorites] = await Promise.all([
+      loadSongs().catch(() => []),
+      loadFavorites().catch(() => [])
+    ])
     const others = (latest.current ?? []).filter(r => r.id !== analyzed.id)
+    const changes = coverageChanges(catalog, others, [...others, analyzed])
     return {
       kind: 'result',
       id: analyzed.id,
-      changes: coverageChanges(catalog, others, [...others, analyzed]),
+      changes: { ...changes, unlocked: orderUnlocked(changes.unlocked, new Set(favorites)) },
       ...(trimFailed ? { trimFailed } : {})
     }
   }, [])

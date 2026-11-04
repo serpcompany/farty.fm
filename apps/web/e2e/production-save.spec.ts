@@ -70,8 +70,8 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
       await tab(page, 'Record').click()
     } else await page.getByRole('button', { name: 'Record another' }).click()
   }
-  await expect(page.getByTestId('result-progress')).toContainText(
-    `You unlocked ${unlockedAt(4) - unlockedAt(3)} Songs`
+  await expect(page.getByTestId('unlock-reward')).toContainText(
+    `${unlockedAt(4) - unlockedAt(3)} Songs unlocked`
   )
   await page.getByRole('button', { name: 'Done' }).click()
 
