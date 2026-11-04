@@ -42,6 +42,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       web: ${{ steps.paths.outputs.web }}
+      catalog: ${{ steps.paths.outputs.catalog }}
       e2e: ${{ steps.receipt.outputs.run }}
       tree: ${{ steps.receipt.outputs.tree }}
     steps:
@@ -50,12 +51,16 @@ jobs:
           fetch-depth: 2
       # A PR's run tests its merge commit, whose first parent is the base branch, so this diff is
       # what the PR changes. A push always checks, and an error in the diff checks too. The Song
-      # Catalog's generator reads the titles files for each Song's other names (#323).
+      # Catalog's generator reads the titles files for each Song's other names (#323), and the
+      # catalog tests read the composer lookups' batch files (#357).
       - id: paths
         run: |
+          if [ "$GITHUB_EVENT_NAME" != pull_request ] || ! git diff --quiet HEAD^1 HEAD -- catalog tools/catalog; then
+            echo "catalog=true" >> "$GITHUB_OUTPUT"
+          fi
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
             echo "web=true" >> "$GITHUB_OUTPUT"
-          elif git diff --quiet HEAD^1 HEAD -- apps/web fixtures catalog 'tools/catalog/titles-*.txt' .github/workflows/web.yml; then
+          elif git diff --quiet HEAD^1 HEAD -- apps/web fixtures catalog 'tools/catalog/titles-*.txt' 'tools/catalog/composers-*.json' .github/workflows/web.yml; then
             echo "web=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Nothing the web app builds from changed, so its checks skip their steps."
           else
@@ -138,6 +143,25 @@ jobs:
       - name: Build for Production, with no Fixture Library
         if: env.WEB == 'true' && github.event_name == 'pull_request'
         run: pnpm build:production
+
+  # The composer lookups' own checks (#357): each name's one spelling, the copyright rule, a removal's
+  # reason, every batch's place in the catalog, and their unit tests. Standard library only, so no
+  # setup; it takes seconds. It skips its steps when nothing under catalog/ or tools/catalog/ changed.
+  catalog:
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CATALOG: ${{ needs.changes.outputs.catalog }}
+    steps:
+      - if: env.CATALOG == 'true'
+        uses: actions/checkout@v7
+      - name: Check every composer batch
+        if: env.CATALOG == 'true'
+        run: python3 -I tools/catalog/composers.py check
+      - name: Test the composer lookups
+        if: env.CATALOG == 'true'
+        run: python3 -I tools/catalog/test_composers.py
 
   # The journeys, split by Playwright's --shard into parallel jobs, each on its own runner with its
   # own build, local database and preview. Locally, `pnpm test:e2e` still runs them all. A shard

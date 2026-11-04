@@ -16,6 +16,9 @@ LICENSES = {
 }
 MAX_TRACKS = 2
 
+# The fields composers.py gives a Song's catalog entry (#357), which importing its batch again keeps.
+COMPOSER_FIELDS = ("composer", "composer_died", "composer_source")
+
 # Scores whose bar lines are off the tune: most are written without the Song's pickup, one in the
 # wrong meter, so the renderers' accent on a bar line (+1.5 dB) falls on the wrong notes (#232).
 # A gate can't tell a missing pickup from the score's own rhythm, so these were found by reading
@@ -395,11 +398,27 @@ def batch_of(entry):
     return entry.get("import", {}).get("titles")
 
 
+def with_composer(entry, fields):
+    """The entry with its composer fields (COMPOSER_FIELDS) set to `fields`, placed after its title."""
+    out = {}
+    for key, value in entry.items():
+        if key in COMPOSER_FIELDS:
+            continue
+        out[key] = value
+        if key == "title":
+            out.update(fields)
+    return out
+
+
 def merge_catalog(catalog, titles_file, entries):
     """The catalog with this titles file's earlier entries replaced by `entries`, where the first of them
-    was (at the end for a new batch), so importing a batch again doesn't reorder the app's Songs.
+    was (at the end for a new batch), so importing a batch again doesn't reorder the app's Songs. A
+    Song imported again keeps the composer its earlier entry had (composers.py, #357).
 
     Entries from elsewhere (other batches, or added by hand) are kept as they are, in order."""
+    earlier = {e["id"]: e for e in catalog if batch_of(e) == titles_file}
+    entries = [with_composer(e, {k: earlier[e["id"]][k] for k in COMPOSER_FIELDS if k in earlier[e["id"]]})
+               if e["id"] in earlier else e for e in entries]
     first = next((i for i, e in enumerate(catalog) if batch_of(e) == titles_file), len(catalog))
     kept = [e for e in catalog if batch_of(e) != titles_file]
     clash = {e["id"] for e in kept} & {e["id"] for e in entries}

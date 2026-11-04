@@ -793,3 +793,7 @@ The Fairy | the pick is a "Misc tunes" score with no composer; several tunes sha
 Balvenie Castle | unsure which voice: the pick has two treble parts, and the importer takes the one of mostly repeated notes, which may be the second
 # Pulled from titles-04.txt after the whole-catalog same-tune check (#344)
 Hänschen Klein | the same tune as Lightly Row (batch 01), its English name (flag_picks.py: the same 10 opening changes of pitch)
+
+# Pulled from titles-04.txt after the composer lookups of batch 01 (#357, composers-01.json)
+Mairi's Wedding | under copyright: John Roderick Bannerman, 1934
+Just A Closer Walk With Thee | under copyright: first published by Kenneth Morris, 1940
