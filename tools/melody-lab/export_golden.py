@@ -265,14 +265,19 @@ def choice_cases(m, sources):
     cases = []
     swap = next(((p, r) for p in pitches for r in players[p] if r not in playing), None)
     if swap:  # a Recording nobody plays: no other pitch moves
-        cases.append(("swap", [{"op": "swap", "song_pitch": swap[0], "recording": swap[1]}]))
+        steps = [{"op": "swap", "song_pitch": swap[0], "recording": swap[1]}]
+        # Then the user changes their mind: a second fart for the same pitch replaces the first.
+        again = next((r for r in players[swap[0]] if r not in (swap[1], auto.recording_for_pitch[swap[0]])), None)
+        if again is not None:
+            steps.append({"op": "swap", "song_pitch": swap[0], "recording": again})
+        cases.append(("swap", steps))
     taken = next(((p, r) for p in pitches for r in players[p] if playing.get(r, p) != p), None)
     if taken:  # a Recording another pitch plays: that pitch is arranged again
         cases.append(("swap_taken", [{"op": "swap", "song_pitch": taken[0], "recording": taken[1]}]))
     covered = [p for p in pitches if auto.recording_for_pitch[p] is not None]
     if covered:
+        # A fart left out, then used again (its first state is the leave-out on its own).
         r = auto.recording_for_pitch[covered[0]]
-        cases.append(("leave_out", [{"op": "leave_out", "recording": r}]))
         cases.append(("use_again", [{"op": "leave_out", "recording": r}, {"op": "use_again", "recording": r}]))
         # The covered pitch fewest Recordings can play, lowest on a tie: leave out each of them in
         # turn until it has no fart and the Song locks, then reset it.
@@ -353,12 +358,15 @@ def choice_states(m, sources, steps):
 
 
 def choices_cases_json(catalog, libraries):
-    """Every arranged Song's choice cases (choice_cases()) on each library, replayed step by step."""
+    """Every arranged Song's choice cases (choice_cases()) on each library, replayed step by step.
+    Each case keeps the states after its steps only: the one before is Auto-map's Arrangement,
+    which arrangements/ already holds."""
     out = []
     for name, sources in libraries.items():
         for c, m in catalog:
             for case, steps in choice_cases(m, sources):
-                out.append({"case": case, "song": c["id"], "library": name, "states": choice_states(m, sources, steps)})
+                states = choice_states(m, sources, steps)[1:]
+                out.append({"case": case, "song": c["id"], "library": name, "states": states})
     return {"cases": out}
 
 

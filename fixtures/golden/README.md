@@ -90,15 +90,15 @@ The Recording Pitch is the energy-weighted median, the same way, of the contour'
 
 ## `choices.json`
 
-`cases[]`: each has `case`, `song`, `library` and `states[]`, the Song before its first change and after each. A state has the `step` that made it (`null` first), the Song's `choices` after it (`transposition`, `preferred`, Song pitch as a string to the Recording the user picked, and `excluded`, the Recordings left out, sorted; `null` once nothing is changed), and the Arrangement's fields as in `coverage.json`. A step is `swap` (`song_pitch`, `recording`), `leave_out` or `use_again` (`recording`), `reset` (`song_pitch`), `reset_all`, or `set` (`choices`, set as they are). The engine's `arrange()` gives the Arrangement, and `swap()`, `leave_out()`, `use_again()` and `reset()` the Fart Choices.
+`cases[]`: each has `case`, `song`, `library` and `states[]`, the Song after each of its changes. The Song before the first is Auto-map's Arrangement, which `arrangements/` holds. A state has the `step` that made it, the Song's `choices` after it (`transposition`, `preferred`, Song pitch as a string to the Recording the user picked, and `excluded`, the Recordings left out, sorted; `null` once nothing is changed), and the Arrangement's fields as in `coverage.json`. A step is `swap` (`song_pitch`, `recording`), `leave_out` or `use_again` (`recording`), `reset` (`song_pitch`), `reset_all`, or `set` (`choices`, set as they are). The engine's `arrange()` gives the Arrangement, and `swap()`, `leave_out()`, `use_again()` and `reset()` the Fart Choices.
 
 `export_golden.py`'s `choice_cases()` picks each case's pitch and Recording by a fixed rule, lowest first, and a Song gets only the cases it allows:
 
 | Case | Steps |
 | --- | --- |
-| `swap` | Swap in a Recording that plays nothing, for the lowest pitch one can play |
+| `swap` | Swap in a Recording that plays nothing, for the lowest pitch one can play; then, when another Recording can play that pitch, swap it in for the same pitch, which replaces the first pick |
 | `swap_taken` | Swap in a Recording another pitch plays, which that pitch loses |
-| `leave_out`, `use_again` | Leave out the lowest covered pitch's Recording, then use it again |
+| `use_again` | Leave out the lowest covered pitch's Recording, then use it again |
 | `leave_out_every` | Leave out each Recording that can play the covered pitch fewest can, until it has none and the Song locks, then reset it |
 | `reset`, `reset_all` | A swap and a left-out Recording, then reset each pitch, or reset everything |
 | `stale` | A swap kept beside picks `arrange()` drops: a Recording that is gone, one too far from its pitch, one left out, a Noise-like one, a pitch the Song doesn't have, and the swapped Recording again for a higher pitch |

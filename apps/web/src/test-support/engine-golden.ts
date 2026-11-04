@@ -112,9 +112,12 @@ export type GoldenChoiceStep =
   | { op: 'reset_all' }
   | { op: 'set'; choices: GoldenChoices }
 
-/** A Song's Fart Choices and Arrangement before a case's first change (`step` null), or after one. */
+/**
+ * A Song's Fart Choices and Arrangement after one of a case's changes. The Song before the first is
+ * Auto-map's Arrangement, which `arrangements/` holds.
+ */
 export interface GoldenChoiceState extends Omit<GoldenCoverage, 'song'> {
-  step: GoldenChoiceStep | null
+  step: GoldenChoiceStep
   choices: GoldenChoices | null
 }
 

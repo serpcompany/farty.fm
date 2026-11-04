@@ -120,9 +120,12 @@ export function canPlay(
   return pitchCell(recording, pitch + transposition, pitchNotes(song)[i]) !== null
 }
 
-/** `id` plays `pitch`: picked for it, taken from any other pitch it was picked for, and no longer left out. */
+/**
+ * `id` plays `pitch`: picked for it in place of the pitch's earlier pick, taken from any other
+ * pitch it was picked for, and no longer left out.
+ */
 export function swapFart(choices: FartChoices, pitch: number, id: string): FartChoices | null {
-  const preferred = picks(choices).filter(([, r]) => r !== id)
+  const preferred = picks(choices).filter(([p, r]) => p !== pitch && r !== id)
   return settled(
     choices.transposition,
     [...preferred, [pitch, id]],

@@ -39,7 +39,7 @@ def rfp(state):
 class FartChoices_(unittest.TestCase):
     def test_every_case_is_made(self):
         made = {case for _, _, case, _, _ in CASES}
-        self.assertEqual(made, {"swap", "swap_taken", "leave_out", "use_again", "leave_out_every", "reset", "reset_all", "stale"})
+        self.assertEqual(made, {"swap", "swap_taken", "use_again", "leave_out_every", "reset", "reset_all", "stale"})
         self.assertGreater(len(CASES), 800)
 
     def test_no_change_at_farty_transposition_is_farty_arrangement(self):
@@ -69,6 +69,23 @@ class FartChoices_(unittest.TestCase):
                 self.assertLessEqual(moved, {p, took}, (name, sid, case))
             n += 1
         self.assertGreater(n, 150)
+
+    def test_a_second_swap_for_a_pitch_replaces_the_first(self):
+        n = 0
+        for name, sid, case, steps, states in CASES:
+            if case != "swap" or len(steps) < 2:
+                continue
+            p, first, second = steps[0]["song_pitch"], steps[0]["recording"], steps[1]["recording"]
+            self.assertEqual(steps[1]["song_pitch"], p)
+            self.assertEqual(states[2]["choices"]["preferred"], {p: second}, (name, sid))
+            after = rfp(states[2])
+            self.assertEqual(after[p], second, (name, sid))
+            # The first is free again, and nobody played it before: unless the second was taken
+            # from another pitch, which is then arranged again, it plays nothing.
+            if second not in rfp(states[0]).values():
+                self.assertNotIn(first, after.values(), (name, sid))
+            n += 1
+        self.assertGreater(n, 100)
 
     def test_a_fart_left_out_plays_nothing_and_moves_only_the_pitches_without_their_own(self):
         n = first = 0
