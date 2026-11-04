@@ -288,10 +288,12 @@ def loudness(y, sr):
         [gain * (gain + 1 + (gain - 1) * c + root), -2 * gain * (gain - 1 + (gain + 1) * c),
          gain * (gain + 1 + (gain - 1) * c - root)],
         [gain + 1 - (gain - 1) * c + root, 2 * (gain - 1 - (gain + 1) * c), gain + 1 - (gain - 1) * c - root], y)
-    # The high-pass: Q 0.5, at 38 Hz.
-    w = 2 * np.pi * 38 / sr
-    c, alpha = np.cos(w), np.sin(w)
-    y = lfilter([(1 + c) / 2, -(1 + c), (1 + c) / 2], [1 + alpha, -2 * c, 1 - alpha], y)
+    # The high-pass, at the frequency and Q its 48 kHz coefficients come from, with the standard's
+    # numerator [1, -2, 1] over a normalized denominator, so its passband gain is the standard's
+    # +0.043 dB, which -0.691 counts on.
+    w = 2 * np.pi * 38.13547087602444 / sr
+    c, alpha = np.cos(w), np.sin(w) / (2 * 0.5003270373238773)
+    y = lfilter([1, -2, 1], [1, -2 * c / (1 + alpha), (1 - alpha) / (1 + alpha)], y)
     block, step = round(0.4 * sr), round(0.1 * sr)
     y = np.concatenate([y, np.zeros(max(0, block - len(y)))])
     squares = np.array([np.mean(y[i:i + block] ** 2) for i in range(0, len(y) - block + 1, step)])

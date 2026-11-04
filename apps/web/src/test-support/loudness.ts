@@ -53,16 +53,17 @@ function highShelf(rate: number): Coefficients {
   }
 }
 
-/** BS.1770's second stage, a high-pass at about 38 Hz. */
+/**
+ * BS.1770's second stage, a high-pass at about 38 Hz, at the frequency and Q its 48 kHz
+ * coefficients come from. Its numerator is the standard's [1, -2, 1] over a normalized
+ * denominator, so its passband gain is the standard's +0.043 dB, which -0.691 counts on.
+ */
 function highPass(rate: number): Coefficients {
-  const w = (2 * Math.PI * 38) / rate
-  const alpha = Math.sin(w) / (2 * 0.5)
+  const w = (2 * Math.PI * 38.13547087602444) / rate
+  const alpha = Math.sin(w) / (2 * 0.5003270373238773)
   const c = Math.cos(w)
   const a0 = 1 + alpha
-  return {
-    b: [(1 + c) / 2 / a0, -(1 + c) / a0, (1 + c) / 2 / a0],
-    a: [(-2 * c) / a0, (1 - alpha) / a0]
-  }
+  return { b: [1, -2, 1], a: [(-2 * c) / a0, (1 - alpha) / a0] }
 }
 
 function biquad(x: ArrayLike<number>, { b, a }: Coefficients): Float64Array {

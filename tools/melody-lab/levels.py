@@ -35,6 +35,9 @@ def summary(label, rows):
 
 def main():
     renders = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / "out/web"
+    if not any(renders.glob("*.wav")):
+        sys.exit(f"No renders in {renders}. Make them first, from apps/web:\n"
+                 "    corepack pnpm@10.17.0 exec tsx scripts/render-songs.ts")
     rows = []
     for path in sorted(renders.glob("*.wav")):
         y, sr = sf.read(path)

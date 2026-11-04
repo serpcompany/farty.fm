@@ -155,7 +155,21 @@ const world = {
 /** The page: `document` and `window`, as far as the recorder uses them. */
 class FakePage extends EventTarget {
   visibilityState: DocumentVisibilityState = 'visible'
+  referrer = ''
 }
+
+/** The tab's `sessionStorage`, which a reload keeps. */
+class FakeStorage {
+  items = new Map<string, string>()
+  getItem(key: string) {
+    return this.items.get(key) ?? null
+  }
+  setItem(key: string, value: string) {
+    this.items.set(key, value)
+  }
+}
+
+let tab = new FakeStorage()
 
 let page = new FakePage()
 let pageWindow = new EventTarget()
@@ -198,11 +212,8 @@ async function recorder() {
   return import('./recorder')
 }
 
-beforeEach(() => {
-  vi.useFakeTimers()
-  world.contexts = []
-  world.streams = []
-  world.breakNext = null
+/** A fresh page in the same tab, which keeps its `sessionStorage`. */
+function newPage() {
   page = new FakePage()
   pageWindow = Object.assign(new EventTarget(), {
     // A phone: never the computer's product page.
@@ -210,6 +221,30 @@ beforeEach(() => {
   })
   vi.stubGlobal('document', page)
   vi.stubGlobal('window', pageWindow)
+}
+
+/**
+ * The page reloads itself, as after a deploy (`stale-build.ts`) or a sign-in in another tab
+ * (`account-provider.tsx`). WebKit keeps the page's own grant through it, so the next page hears
+ * granted before it asks.
+ */
+async function reload() {
+  newPage()
+  vi.spyOn(performance, 'getEntriesByType').mockReturnValue([
+    { type: 'reload' } as PerformanceNavigationTiming
+  ])
+  allowSite()
+  return recorder()
+}
+
+beforeEach(() => {
+  vi.useFakeTimers()
+  world.contexts = []
+  world.streams = []
+  world.breakNext = null
+  tab = new FakeStorage()
+  vi.stubGlobal('sessionStorage', tab)
+  newPage()
   vi.stubGlobal('AudioContext', FakeContext)
   vi.stubGlobal('AudioWorkletNode', FakeNode)
   vi.stubGlobal('navigator', {
@@ -234,6 +269,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers()
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 type StartTake = (
@@ -396,6 +432,65 @@ describe('the microphone off Record (#369)', () => {
     leaveRecord()
     expect(world.streams[0].track.readyState).toBe('ended')
     expect(session()).toBe('playback')
+  })
+
+  it('keeps a page’s own grant open after the page reloads itself, though the browser says granted', async () => {
+    const first = await recorder()
+    first.keepMicrophoneOpen()
+    ;(await tap(first.startTake)).take?.cancel()
+    expect(tab.getItem('pedos.microphone-grant')).toBe('page')
+
+    const { keepMicrophoneOpen, leaveRecord } = await reload()
+    keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(100)
+    expect(world.streams).toHaveLength(2)
+    leaveRecord()
+    await vi.advanceTimersByTimeAsync(2 * 60_000)
+    expect(world.streams[1].track.readyState).toBe('live')
+    expect(session()).toBe('play-and-record')
+  })
+
+  it('still lets a grant the browser remembers go after the page reloads itself', async () => {
+    allowSite()
+    const first = await recorder()
+    first.keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(100)
+    expect(tab.getItem('pedos.microphone-grant')).toBe('browser')
+
+    const { keepMicrophoneOpen, leaveRecord } = await reload()
+    keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(100)
+    leaveRecord()
+    expect(world.streams.at(-1)?.track.readyState).toBe('ended')
+    expect(session()).toBe('playback')
+  })
+
+  it('keeps the microphone open after a reload the tab kept nothing from, as by an older build', async () => {
+    const { keepMicrophoneOpen, leaveRecord } = await reload()
+    keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(100)
+    leaveRecord()
+    expect(world.streams[0].track.readyState).toBe('live')
+    expect(session()).toBe('play-and-record')
+  })
+
+  it('keeps the microphone open, and still opens it without a tap, when sessionStorage throws', async () => {
+    vi.stubGlobal('sessionStorage', {
+      getItem() {
+        throw new Error('SecurityError')
+      },
+      setItem() {
+        throw new Error('SecurityError')
+      }
+    })
+    allowSite()
+    const { keepMicrophoneOpen, leaveRecord } = await recorder()
+    keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(100)
+    expect(world.streams).toHaveLength(1)
+    leaveRecord()
+    expect(world.streams[0].track.readyState).toBe('live')
+    expect(session()).toBe('play-and-record')
   })
 })
 

@@ -9,8 +9,9 @@ const sine = (amplitude: number, hz: number, rate: number, seconds = 3) =>
 
 describe('loudness (ITU-R BS.1770-4)', () => {
   it('reads a full-scale 997 Hz sine in one channel at -3.01 LUFS, as the standard says', () => {
-    expect(loudness(sine(1, 997, 48_000), 48_000)).toBeCloseTo(-3.01, 1)
-    expect(loudness(sine(1, 997, 44_100), 44_100)).toBeCloseTo(-3.01, 1)
+    // Within 0.02 LU: without the high-pass's +0.043 dB passband gain it read 0.04 low.
+    expect(Math.abs(loudness(sine(1, 997, 48_000), 48_000) + 3.01)).toBeLessThan(0.02)
+    expect(Math.abs(loudness(sine(1, 997, 44_100), 44_100) + 3.01)).toBeLessThan(0.02)
   })
 
   it('follows gain dB for dB, and gates out silence', () => {
