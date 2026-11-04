@@ -27,7 +27,7 @@ export type SharedView = {
 }
 
 /**
- * The shared Recording at `/u/<handle>/r/<id>/`, or null when that link doesn't work: never
+ * The shared Recording at `/@<handle>/r/<id>/`, or null when that link doesn't work: never
  * shared, stopped, taken down, or its Recording or account deleted. Once per request.
  */
 export const sharedView = cache(async (handle: string, id: string): Promise<SharedView | null> => {

@@ -15,6 +15,7 @@ import {
   turnstileSiteKey
 } from '@/lib/account'
 import { leaveGetFarty, offerFriend, signedInAtAccountStep, useGetFarty } from '@/lib/get-farty'
+import { isHandlePage } from '@/lib/handle'
 import { unsavedBeforeSignIn } from '@/lib/library-sync'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
@@ -45,7 +46,7 @@ export function AccountStep() {
   useEffect(() => leaveGetFarty(pathname), [pathname])
   // A shared page (ADR 0020) has no app top bar to leave room for, so the step covers it all.
   // Mounted afresh each time it opens, so it starts at the email, or where a reload left it.
-  return stepOpen ? <Step underTopBar={!pathname.startsWith('/u/')} /> : null
+  return stepOpen ? <Step underTopBar={!isHandlePage(pathname)} /> : null
 }
 
 function Step({ underTopBar }: { underTopBar: boolean }) {

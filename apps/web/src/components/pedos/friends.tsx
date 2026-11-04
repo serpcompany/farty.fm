@@ -30,7 +30,7 @@ import {
   readFriends,
   requestFriend
 } from '@/lib/friends'
-import { HANDLE_MAX, normalizeHandle } from '@/lib/handle'
+import { HANDLE_MAX, normalizeHandle, profilePath } from '@/lib/handle'
 import { readHandle } from '@/lib/sharing'
 import { cn } from '@/lib/utils'
 import { HandleDialog, rememberHandle } from './share-recording'
@@ -302,7 +302,7 @@ export function FriendsSection({ accountId }: { accountId: string }) {
         <ul className={list}>
           {friends.friends.map(handle => (
             <li key={handle} className="flex items-center" data-testid="friend">
-              <Link href={`/u/${handle}/`} className={rowLink}>
+              <Link href={profilePath(handle)} className={rowLink}>
                 <span className="truncate">@{handle}</span>
                 <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
               </Link>
@@ -518,7 +518,7 @@ function AddFriendDialog({
               className={cn('text-sm', problem ? 'text-destructive' : 'text-muted-foreground')}
             >
               {problem ??
-                `Their handle is on their page: ${typeof window === 'undefined' ? 'farty.fm' : window.location.host}/u/handle`}
+                `Their handle is on their page: ${typeof window === 'undefined' ? 'farty.fm' : window.location.host}/@handle`}
             </p>
           </div>
           <AlertDialogFooter>

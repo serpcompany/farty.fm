@@ -1,3 +1,4 @@
+import { linkParams } from '@/app/[atHandle]/link-params'
 import { requestStores } from '@/server/library'
 import { sharedAudio } from '@/server/sharing'
 
@@ -7,9 +8,9 @@ export const dynamic = 'force-dynamic'
 /** The shared Toot's saved WAV, as stored, while its link works. */
 export async function GET(
   request: Request,
-  { params }: RouteContext<'/u/[handle]/t/[id]/audio'>
+  { params }: RouteContext<'/[atHandle]/t/[id]/audio'>
 ): Promise<Response> {
-  const { handle, id } = await params
+  const { handle, id } = await linkParams(params)
   try {
     return await sharedAudio('toots', requestStores(), request, handle, id)
   } catch {

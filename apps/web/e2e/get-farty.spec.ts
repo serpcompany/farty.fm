@@ -248,7 +248,7 @@ test("signed out, a profile page's Add friend is Get Farty, and the request reac
   })
 
   await test.step("Add friend on maya's page opens the account step, offering maya, ticked", async () => {
-    await samPage.goto(`/u/${maya}/`)
+    await samPage.goto(`/@${maya}/`)
     await samPage.getByRole('button', { name: 'Add friend' }).click()
     const step = samPage.getByRole('dialog', { name: 'Make a free account' })
     await expect(step).toBeVisible()

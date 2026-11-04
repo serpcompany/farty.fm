@@ -20,8 +20,11 @@ export async function pageOrigin(): Promise<string | null> {
   return siteOrigin() ?? (host ? `http://${host}` : null)
 }
 
-/** What a shared page's metadata says of its item, or null when its link doesn't work. */
-export type LinkPreview = { title: string; description: string; path: string }
+/**
+ * What a shared page's metadata says of its item, or null when its link doesn't work. `path` is
+ * the page's own, `/@<handle>/r/<id>/`, with its link image under it at `image/`.
+ */
+export type LinkPreview = { title: string; description: string; path: string; imageAlt: string }
 
 /** A shared page's metadata: unlisted, and with its Open Graph and Twitter tags while it works. */
 export async function linkPreviewMetadata(preview: LinkPreview | null): Promise<Metadata> {
@@ -31,15 +34,25 @@ export async function linkPreviewMetadata(preview: LinkPreview | null): Promise<
     alternates: { canonical: null }
   }
   if (!preview) return { ...unlisted, title: 'Link not found · Farty' }
-  const { title, description, path } = preview
+  const { title, description, path, imageAlt } = preview
   // Link previews need the image's absolute URL.
   const origin = await pageOrigin()
+  // The image is a route of its own, not an `opengraph-image` file, whose URL Next would build
+  // with the Handle's `@` escaped (#382).
+  const image = { url: `${path}image/`, ...LINK_IMAGE_SIZE, alt: imageAlt, type: 'image/png' }
   return {
     ...unlisted,
     ...(origin ? { metadataBase: new URL(origin) } : {}),
     title: `${title} · Farty`,
     description,
-    openGraph: { title, description, url: path, siteName: 'Farty', type: 'website' },
+    openGraph: {
+      title,
+      description,
+      url: path,
+      siteName: 'Farty',
+      type: 'website',
+      images: [image]
+    },
     twitter: { card: 'summary_large_image', title, description }
   }
 }

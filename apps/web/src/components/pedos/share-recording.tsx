@@ -507,7 +507,7 @@ export function HandleDialog({
               Your links start
               {/* On a line of its own, so the text doesn't jump as the handle grows. */}
               <span className="block break-all font-medium text-foreground">
-                {typeof window === 'undefined' ? 'farty.fm' : window.location.host}/u/
+                {typeof window === 'undefined' ? 'farty.fm' : window.location.host}/@
                 {handle || '…'}
               </span>
             </AlertDialogDescription>

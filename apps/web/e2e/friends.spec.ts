@@ -60,7 +60,7 @@ test('a friend request sent from a profile page is accepted in Profile, then rem
   const samPage = await other.newPage()
 
   await test.step("signed out, maya's page has Add friend and nothing shared", async () => {
-    const response = await samPage.goto(`/u/${maya}/`)
+    const response = await samPage.goto(`/@${maya}/`)
     expect(response?.status()).toBe(200)
     const cache = response?.headers()['cache-control'] ?? ''
     expect(cache).toContain('private')
@@ -95,7 +95,7 @@ test('a friend request sent from a profile page is accepted in Profile, then rem
     await expect(page.getByRole('heading', { name: 'Friend requests' })).toHaveCount(0)
     await expect(page.getByRole('link', { name: 'Your page' })).toHaveAttribute(
       'href',
-      `/u/${maya}/`
+      `/@${maya}/`
     )
 
     await samPage.reload()

@@ -93,8 +93,10 @@ function handles(request) {
   // offline, so the worker neither precaches them from `/`'s markup nor keeps them. Phones never
   // download them.
   if (url.pathname.startsWith('/lander/')) return false
-  // Shared links (ADR 0020): once a link is stopped or taken down, no copy of its page opens.
-  if (url.pathname.startsWith('/u/')) return false
+  // Shared links and profile pages (ADR 0020, ADR 0021), at `/@<handle>/…` (#382): once a link is
+  // stopped or taken down, no copy of its page opens. Their old `/u/<handle>/…` paths only
+  // redirect to them, and no redirect is kept either.
+  if (/^\/(?:@|%40|u\/)/i.test(url.pathname)) return false
   if (request.mode === 'navigate') return true
   if (catalogFile.test(url.pathname) || notesFile.test(url.pathname)) return true
   return url.pathname !== '/sw.js' && shellFile.test(url.pathname)
