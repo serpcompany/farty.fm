@@ -3,10 +3,11 @@ import { resolve } from 'node:path'
 import { expect, test } from '@playwright/test'
 
 // A browser that used Farty before Toots has version 1 of the `pedos` database: Recordings and
-// their audio only. The app upgrades it to version 8, which adds the Toots (version 2) and the
+// their audio only. The app upgrades it to version 9, which adds the Toots (version 2) and the
 // sync's outbox (version 3), shuts code from before #268 out of the outbox (version 4), adds the
 // Sound Pad's Pads (version 5) and the Favorite Songs (version 7), lets a Recording carry its name
-// (version 8, #314), keeps every Recording, and queues each one to upload.
+// (version 8, #314), adds Fart Choices (version 9, #360), keeps every Recording, and queues each
+// one to upload.
 
 test('upgrades a database from before Toots and keeps its Recordings', async ({ page }) => {
   const wav = readFileSync(
@@ -79,10 +80,11 @@ test('upgrades a database from before Toots and keeps its Recordings', async ({ 
     return result
   })
   expect(stored).toEqual({
-    version: 8,
+    version: 9,
     stores: [
       'audio',
       'downloads',
+      'fartChoices',
       'favorites',
       'meta',
       'outbox',
