@@ -31,7 +31,7 @@ This replaces rule 3, and the #314 update's rule 3:
 - **Rule 3.** The piano plays the review's note, and a Song's melody as a preview: Song Creator's Piano choice and a locked Song's "Play on piano" (`piano-preview.ts`).
   - Each note is the review key's note, the partials of a struck string voiced for a phone's speaker since #362 (`pianoNote` in `piano-keys.tsx`), in the key the farts play the Song in, at the Song's tempo. `strikePianoNote` starts it ahead of time. It is held for its length less the renderer's 0.025 s gap, then let go over 80 ms.
   - Each note is built once per AudioContext and kept, the 16 used last, since building one takes a few milliseconds on the main thread (`pianoBuffer`).
-  - It goes straight to the speakers. It never reaches a Toot, a render, a share or a saved file. Nothing in `src/lib/`, `src/server/`, a route or `scripts/` imports the piano's code, even through another module, and nothing makes a tone with an oscillator (`piano-boundary.test.ts`).
+  - It goes straight to the speakers. It never reaches a Toot, a render, a share or a saved file. Nothing in `src/lib/`, `src/server/`, a route or `scripts/` imports the piano's code, even through another module, nor does any other module that makes or saves Toots or Recordings (the provider, the Sound Pad's take, sync and sharing among them, found by the functions they call). The piano's functions take only the live `AudioContext`, so no offline render can be handed one, and nothing makes a tone with an oscillator (`piano-boundary.test.ts`).
   - Song Creator now imports it, but the Toot is still rendered from Recordings only, and fart rendering is unchanged (ADR 0004, ADR 0012).
 
 1. **Place it, or leave it out.**
