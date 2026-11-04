@@ -11,7 +11,13 @@ in the WAV). The checks are evaluate.py's, against the notes instead of a fart:
   (`within_50c_pct`, `median_abs_cents`);
 - level: each note's loudness over the same window, in dBFS, quietest first.
 
-    .venv/bin/python -I evaluate_piano.py <dir>/piano-mary.wav
+The journey also records Farts mode on the same Song, the Toot as the speakers got it, as
+`farts-<song>.wav`. When it is there, this also measures the step a listener hears on switching
+Piano to Farts: each mode's integrated loudness (ITU-R BS.1770-4, LUFS, gated) and its sample
+peak, with the step Farts minus Piano. A step of more than
+LEVEL_STEP_DB either way fails.
+
+    .venv/bin/python -I evaluate_piano.py <dir>/piano-mary.wav [<dir>/piano-<song>.wav ...]
 """
 import json
 import sys
@@ -21,7 +27,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import librosa  # noqa: E402
 import numpy as np  # noqa: E402
+import soundfile  # noqa: E402
+from scipy.signal import lfilter  # noqa: E402
 from evaluate import BAR, HOP, PYIN, SR, median_midi, note_window  # noqa: E402
+
+#: The most Farts may be louder or quieter than Piano, in LU, before switching modes jumps.
+LEVEL_STEP_DB = 4.5
 
 
 def evaluate_piano(audio, notes, zero):
@@ -60,16 +71,65 @@ def evaluate_piano(audio, notes, zero):
     }
 
 
-def main(wav):
-    wav = Path(wav)
-    plan = json.loads(wav.with_suffix(".json").read_text())
-    audio, _ = librosa.load(wav, sr=SR, mono=True)
-    metrics = evaluate_piano(audio, plan["notes"], plan["zero"])
-    print(json.dumps({"song": plan["song"], "transposition": plan["transposition"], **metrics}, indent=2))
-    on_time = metrics["onsets_on_time_pct"] >= BAR["onsets_on_time_pct"]
-    print("PASS" if on_time else f"FAIL onTime {metrics['onsets_on_time_pct']}% < {BAR['onsets_on_time_pct']}%")
-    return 0 if on_time else 1
+#: BS.1770-4's K-weighting at 48 kHz, its two stages as (b, a): the high shelf, then the high pass.
+K_WEIGHTING_48K = (
+    ([1.53512485958697, -2.69169618940638, 1.19839281085285], [1.0, -1.69065929318241, 0.73248077421585]),
+    ([1.0, -2.0, 1.0], [1.0, -1.99004745483398, 0.99007225036621]),
+)
+
+
+def integrated_lufs(audio, rate):
+    """BS.1770-4 integrated loudness of mono `audio`: K-weighted at 48 kHz, 400 ms blocks, gated."""
+    if rate != 48000:
+        audio = librosa.resample(audio, orig_sr=rate, target_sr=48000)
+        rate = 48000
+    for b, a in K_WEIGHTING_48K:
+        audio = lfilter(b, a, audio)
+    block, step = int(0.4 * rate), int(0.1 * rate)
+    powers = np.array([np.mean(audio[i:i + block] ** 2) for i in range(0, len(audio) - block + 1, step)])
+    gated = powers[-0.691 + 10 * np.log10(powers + 1e-20) > -70]
+    relative = -0.691 + 10 * np.log10(np.mean(gated)) - 10
+    gated = gated[-0.691 + 10 * np.log10(gated) > relative]
+    return float(-0.691 + 10 * np.log10(np.mean(gated)))
+
+
+def level(path):
+    """A WAV's integrated loudness (LUFS) and sample peak (dBFS)."""
+    audio, rate = soundfile.read(path, dtype="float64", always_2d=True)
+    audio = audio.mean(axis=1)
+    return {"lufs": round(integrated_lufs(audio, rate), 1),
+            "peak_dbfs": round(float(20 * np.log10(np.max(np.abs(audio)) + 1e-12)), 1)}
+
+
+def level_step(piano_wav, farts_wav):
+    """What a listener hears on switching Piano to Farts on the same Song."""
+    piano, farts = level(piano_wav), level(farts_wav)
+    return {"piano": piano, "farts": farts,
+            "step_lufs_db": round(farts["lufs"] - piano["lufs"], 1),
+            "step_peak_db": round(farts["peak_dbfs"] - piano["peak_dbfs"], 1)}
+
+
+def main(wavs):
+    failed = 0
+    for wav in map(Path, wavs):
+        plan = json.loads(wav.with_suffix(".json").read_text())
+        audio, _ = librosa.load(wav, sr=SR, mono=True)
+        metrics = evaluate_piano(audio, plan["notes"], plan["zero"])
+        farts = wav.with_name(wav.name.replace("piano-", "farts-", 1))
+        step = level_step(wav, farts) if farts.exists() else None
+        report = {"song": plan["song"], "transposition": plan["transposition"], **metrics}
+        if step:
+            report["piano_to_farts"] = step
+        print(json.dumps(report, indent=2))
+        problems = []
+        if metrics["onsets_on_time_pct"] < BAR["onsets_on_time_pct"]:
+            problems.append(f"onTime {metrics['onsets_on_time_pct']}% < {BAR['onsets_on_time_pct']}%")
+        if step and abs(step["step_lufs_db"]) > LEVEL_STEP_DB:
+            problems.append(f"Piano to Farts steps {step['step_lufs_db']} LU, more than {LEVEL_STEP_DB}")
+        print(f"{plan['song']}: " + ("PASS" if not problems else "FAIL " + "; ".join(problems)))
+        failed += bool(problems)
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1]))
+    sys.exit(main(sys.argv[1:]))
