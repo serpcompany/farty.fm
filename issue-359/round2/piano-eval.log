@@ -1,0 +1,86 @@
+{
+  "song": "mary",
+  "transposition": -20,
+  "notes": 26,
+  "onsets_detected": 28,
+  "onsets_on_time_pct": 100,
+  "median_onset_ms": 13.4,
+  "max_onset_ms": 17.0,
+  "pitch_read": 26,
+  "within_50c_pct": 100,
+  "median_abs_cents": 2.6,
+  "quietest_notes_dbfs": [
+    {
+      "index": 25,
+      "midi": 52,
+      "dbfs": -20.2
+    },
+    {
+      "index": 12,
+      "midi": 59,
+      "dbfs": -17.8
+    },
+    {
+      "index": 6,
+      "midi": 56,
+      "dbfs": -17.7
+    }
+  ],
+  "loudest_note_dbfs": -16.0,
+  "piano_to_farts": {
+    "piano": {
+      "lufs": -17.3,
+      "peak_dbfs": -2.8
+    },
+    "farts": {
+      "lufs": -14.7,
+      "peak_dbfs": -1.0
+    },
+    "step_lufs_db": 2.6,
+    "step_peak_db": 1.8
+  }
+}
+mary: PASS
+{
+  "song": "waltz-in-a-minor-chopin",
+  "transposition": -33,
+  "notes": 41,
+  "onsets_detected": 39,
+  "onsets_on_time_pct": 98,
+  "median_onset_ms": 17.7,
+  "max_onset_ms": 106.2,
+  "pitch_read": 41,
+  "within_50c_pct": 100,
+  "median_abs_cents": 12.6,
+  "quietest_notes_dbfs": [
+    {
+      "index": 7,
+      "midi": 44,
+      "dbfs": -19.2
+    },
+    {
+      "index": 40,
+      "midi": 44,
+      "dbfs": -19.2
+    },
+    {
+      "index": 25,
+      "midi": 44,
+      "dbfs": -19.1
+    }
+  ],
+  "loudest_note_dbfs": -14.1,
+  "piano_to_farts": {
+    "piano": {
+      "lufs": -17.6,
+      "peak_dbfs": -2.1
+    },
+    "farts": {
+      "lufs": -17.9,
+      "peak_dbfs": -1.0
+    },
+    "step_lufs_db": -0.3,
+    "step_peak_db": 1.1
+  }
+}
+waltz-in-a-minor-chopin: PASS
