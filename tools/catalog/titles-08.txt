@@ -4,11 +4,12 @@
 # excluded-titles.txt: Helena.
 # The second review (#324, PR #341) pulled 18 more, now in excluded-titles.txt: Si Beag Si Mhor, The Fair Maid of the Inn, Caller Herring, Charleston, From Night 'till Morn, Ohio, Calver Lodge, Woodland Revels, Jack Frost, The Dresden, Princess, Union, Long Odds, Mary Walker, Frank Gilruth, Will You Come Home With Me, Over the Border, Tell me where is fancy bred.
 # It also named these by hand, with their accents or the name people know: The Minstrel Boy, Frenet Ha', Barbu Lăutarul.
+# The composer lookups (#357) pulled 1 title as under copyright, now in excluded-titles.txt: Añada Pa Gael.
+# The review of PR #377 (#357) pulled 1 more as under copyright, now in excluded-titles.txt: Up In The Air.
 # id | catalog title
 lull-me-beyond-thee | Lull Me Beyond Thee
 miss-barbara-cunningham | Miss Barbara Cunningham
 minstrel-boy | The Minstrel Boy | Moreen
-anada-pa-gael | Añada Pa Gael
 farewell-to-whisky | Farewell to Whisky
 lord-moira | Lord Moira
 millisons-jig | Millison's Jig
@@ -70,7 +71,6 @@ gorhoffedd-gwyr-harlech | Gorhoffedd Gwyr Harlech
 meillionen | Meillionen
 pennan-den | Pennan Den
 softly-good-tummas | Softly Good Tummas
-up-in-the-air | Up In The Air
 aurora-lucis | Aurora Lucis
 dribbles-of-brandy | Dribbles of Brandy
 getting-upstairs | Getting Upstairs

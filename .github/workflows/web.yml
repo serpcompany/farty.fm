@@ -52,7 +52,7 @@ jobs:
       # A PR's run tests its merge commit, whose first parent is the base branch, so this diff is
       # what the PR changes. A push always checks, and an error in the diff checks too. The Song
       # Catalog's generator reads the titles files for each Song's other names (#323), and the
-      # catalog tests read the composer lookups' batch files (#357).
+      # catalog tests read the composer lookups' batch files and their copyright limits (#357).
       - id: paths
         run: |
           if [ "$GITHUB_EVENT_NAME" != pull_request ] || ! git diff --quiet HEAD^1 HEAD -- catalog tools/catalog; then
@@ -60,7 +60,7 @@ jobs:
           fi
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
             echo "web=true" >> "$GITHUB_OUTPUT"
-          elif git diff --quiet HEAD^1 HEAD -- apps/web fixtures catalog 'tools/catalog/titles-*.txt' 'tools/catalog/composers-*.json' .github/workflows/web.yml; then
+          elif git diff --quiet HEAD^1 HEAD -- apps/web fixtures catalog 'tools/catalog/titles-*.txt' 'tools/catalog/composers-*.json' tools/catalog/copyright.json .github/workflows/web.yml; then
             echo "web=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Nothing the web app builds from changed, so its checks skip their steps."
           else

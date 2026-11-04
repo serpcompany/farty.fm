@@ -14,7 +14,7 @@
   }
  },
  "library": "38 Recordings, 26 Melodic",
- "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 3 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 4 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
  "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
@@ -6417,76 +6417,6 @@
    "result": "fail",
    "reason": "none of the 2 best scores passed; the best: sanity: the importer dropped 57 chord tones and inner-voice onsets, 79% of the track's notes (at most 10%)",
    "picked": null
-  },
-  {
-   "id": "la-gueussinette",
-   "title": "La Gueussinette",
-   "matched": 6,
-   "eligible": 6,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "4869004",
-     "url": "https://musescore.com/score/4869004",
-     "score_title": "La Gueussinette",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "10",
-     "license": "publicdomain",
-     "n_tracks": "1",
-     "dataset_path": "./mid/2/40/Qmcr9Hk7tifhGHYaP1VCRvuEXNCTz1aUEMcGn4vUThMecd.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "d6dd23a3f712437f264c4956a664fe3bb188c8395b9d6e09ebe08f52b643e7f8",
-     "render": {
-      "bpm": 120,
-      "max_beats": 30
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 38
-     },
-     "track_notes": 270,
-     "range_semitones": 13,
-     "distinct_pitches": 8,
-     "pitch_coverage": "8 of 8",
-     "metrics": {
-      "notes": 38,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 2,
-      "pitch_readable_pct": 95,
-      "within_50c_pct": 13,
-      "within_50c_any_octave_pct": 13,
-      "median_abs_cents": 172.6,
-      "contour_pct": 72,
-      "distinct_recordings": 8,
-      "on_pitch_pct": 11,
-      "sounding_pct": 94,
-      "notes_mostly_silent": 0,
-      "transpose": -18,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.17
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "4869004"
   },
   {
    "id": "ma-chere-amie",

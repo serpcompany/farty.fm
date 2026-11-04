@@ -5,6 +5,7 @@
 # puerorum, The Chicago, Indian Queen. Its second review pulled 6 more: Kings Of Orient, On Christmas
 # Night, Crown Him With Many Crowns, Ida Sweet As Apple Cider, I Like The Flowers, Wildwood Flower arr.
 # for Voice and Tenor Viol; and gave 7 Songs their proper title, keeping the ranking's as an alias.
+# The review of PR #377 (#357) pulled 1 more as under copyright, now in excluded-titles.txt: Cooley's Reel.
 # id | catalog title
 moments-musicaux-opus-94-no-3-in-f-minor | Moments Musicaux Opus 94 No. 3 in F minor
 ave-maria-bach-gounod | Ave Maria Bach-Gounod
@@ -115,7 +116,6 @@ cantique-de-jean-racine-op-11 | Cantique de Jean Racine Op. 11
 wer-ein-liebchen-hat-gefunden | Wer ein liebchen hat gefunden
 una-furtiva-lagrima | Una Furtiva Lagrima
 theres-a-wideness-in-gods-mercy | There's a Wideness in God's Mercy
-cooleys-reel | Cooley's Reel
 breathe-on-me-breath-of-god | Breathe on Me Breath of God
 sumer-is-icumen-in | Sumer is icumen in
 black-and-white-rag | Black and White Rag

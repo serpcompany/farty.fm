@@ -1,0 +1,5 @@
+{
+  "about": "A Song may still be under copyright when it was first published in first_copyright_year or later, or an author died after last_free_death: the composer, or a lyricist whose words were written with the music (ADR 0003, excluded-titles.txt). Read by tools/catalog/composers.py and apps/web/src/lib/catalog/composers.test.ts.",
+  "first_copyright_year": 1931,
+  "last_free_death": 1955
+}

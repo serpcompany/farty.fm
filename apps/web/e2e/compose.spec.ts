@@ -31,11 +31,13 @@ const journey = ['095', '017', '022', '002']
 /** The Songs the journey's first `takes` takes unlock. */
 const unlockedAt = (takes: number) => songsUnlockedBy(fixtureRecordings(journey.slice(0, takes)))
 
-/** A Song's notes, tempo and length in whole seconds, from the catalog (#356). */
+/** A Song's composer (#357), notes, tempo and length in whole seconds, from the catalog (#356). */
 function facts(id: string) {
   const song = songs.find(s => s.id === id)
   if (!song) throw new Error(`No Song ${id}`)
+  if (!song.composer) throw new Error(`Song ${id} has no composer`)
   return {
+    composer: song.composer,
     notes: song.pitches.length,
     bpm: song.bpm,
     seconds: Math.round((song.lengthBeats * 60) / song.bpm)
@@ -119,13 +121,13 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await tab(page, 'Compose').click()
   await expect(page.getByText('No Melodic Recordings yet')).toHaveCount(0)
   await expect(locked(songs.length)).toBeVisible()
-  // A locked row: its title, no composer (#357 hasn't looked Mary up), and its facts, Pitch Coverage
-  // first (#356).
+  // A locked row: its title, its composer (#357), and its facts, Pitch Coverage first (#356).
   const mary = page.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true })
-  const { notes, bpm, seconds } = facts('mary')
+  const { composer, notes, bpm, seconds } = facts('mary')
+  await expect(mary).toContainText(composer)
   await expect(mary).toContainText(`1 of ${notes} notes · ${bpm} BPM · ${seconds} s`)
   await expect(mary).toHaveAccessibleDescription(
-    `Locked. 1 of ${notes} notes covered, ${bpm} BPM, ${seconds} seconds`
+    `Locked. ${composer}. 1 of ${notes} notes covered, ${bpm} BPM, ${seconds} seconds`
   )
 
   // The locked Song's sheet names the notes it needs, and how long a fart each needs (ADR 0011).
@@ -225,7 +227,7 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
     .getByRole('link')
   await expect(unlocked).toHaveAccessibleName('Mary Had a Little Lamb')
   await expect(unlocked).toHaveAccessibleDescription(
-    `${notes} notes, ${bpm} BPM, ${seconds} seconds`
+    `${composer}. ${notes} notes, ${bpm} BPM, ${seconds} seconds`
   )
   await expectTappable(unlocked)
   await unlocked.click()

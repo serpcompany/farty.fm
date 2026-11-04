@@ -5,6 +5,7 @@
 # The second review (#324, PR #341) pulled 14 more, now in excluded-titles.txt: The Alphabet, Monymusk, La Morisque, The Gallowglass, Gloucestershire Wassail, The Banks Of Lough Gowna, Dixie, The Happy Clown, The Tennessee, Aunt Mary's (Canadian) Jig, Gasp\'e Reel, Dont vient cela, See see the shepherds' Queen, Steal Away.
 # It also named these by hand, with their accents or the name people know: Màiri Bhàn Òg, Helan går, Old Folks at Home.
 # PR #343 pulled Huldrevise (decided on PR #341: credited to "Urskoug" alone, undatable), now in excluded-titles.txt.
+# The composer lookups (#357) pulled 1 title as under copyright, now in excluded-titles.txt: La Gueussinette.
 # id | catalog title
 after-the-ball | After the Ball
 bold-fenian-men | Bold Fenian Men
@@ -75,7 +76,6 @@ il-etait-une-dame-tartine | Il était une dame tartine
 killiecrankie | Killiecrankie
 balmoral-castle | Balmoral Castle
 bude-zima-bude-mraz | Bude zima bude mráz
-la-gueussinette | La Gueussinette
 ma-chere-amie | Ma chère amie
 bag-of-spuds | The Bag Of Spuds
 bellamira | Bellamira
