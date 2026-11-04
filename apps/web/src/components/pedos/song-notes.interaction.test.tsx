@@ -59,6 +59,11 @@ vi.mock('./pedos-provider', () => ({
   })
 }))
 vi.mock('./favorite-button', () => ({ FavoriteButton: () => null }))
+// No Song has Fart Choices (#360): every Toot is automatic.
+vi.mock('./use-fart-choices', () => ({
+  useFartChoices: () => new Map(),
+  changeFartChoices: vi.fn()
+}))
 vi.mock('./share-recording', () => ({ ShareButton: () => null, useShares: () => null }))
 vi.mock('./toots-screen', () => ({
   TootMenu: () => null,

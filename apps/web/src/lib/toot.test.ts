@@ -53,6 +53,11 @@ describe('noteCaption', () => {
     expect(noteCaption(song, arrangement, note, undefined)).toMatch(/ · Recording deleted · /)
   })
 
+  it('says no fart plays a note its Song has none for (#360)', () => {
+    const gap: TootArrangement = { transposition: -2, recordingForPitch: {} }
+    expect(noteCaption(song, gap, note, undefined)).toMatch(/^[A-G]♯?\d · No fart · \d+\.\d s$/)
+  })
+
   it('leaves out the Recording Pitch of a Recording without one', () => {
     expect(noteCaption(song, arrangement, note, recording(null))).toMatch(
       /^[A-G]♯?\d · Recording 21 · \d+\.\d s$/

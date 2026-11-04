@@ -82,8 +82,15 @@ let root: Root | null = null
 let container: HTMLDivElement
 
 async function render(back: CheckoutReturn | null = null) {
-  const { Ready } = await import('./song-creator')
-  await act(async () => root?.render(<Ready draft={draft} back={back} />))
+  const { SaveToToots, TootLayout } = await import('./song-creator')
+  await act(async () =>
+    root?.render(
+      <>
+        <TootLayout toot={draft} song={draft.song} />
+        <SaveToToots draft={draft} back={back} />
+      </>
+    )
+  )
 }
 
 /** The server answers the checkout with `body`, at `status`. */

@@ -3,13 +3,14 @@ import type { Song, SongSummary } from '@/lib/catalog/song'
 import {
   type Arrangement,
   type AutoMapRecording,
-  arrange,
   arrangePitches,
   autoMapRecording,
   coveredCount,
   type MissingNote,
-  placedAutoMapRecording
+  placedAutoMapRecording,
+  songPitches
 } from '@/lib/engine/auto-map'
+import { arrangeChoices, type FartChoices } from '@/lib/engine/fart-choices'
 import type { Song as EngineSong } from '@/lib/engine/song'
 import { noteName, pitchClass } from '@/lib/pitch'
 import {
@@ -62,7 +63,7 @@ export type Coverage = CoverageCount & {
  * the other analyzed ones with a Recording Pitch, each at its Trim's length (ADR 0019). None the
  * user left out with "No note" (`isLeftOut`, #314).
  */
-function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[] {
+export function autoMapRecordings(recordings: readonly Recording[]): AutoMapRecording[] {
   return recordings.flatMap(r => {
     if (r.analysis.state !== 'analyzed' || isLeftOut(r)) return []
     const { analysis } = r.analysis
@@ -111,11 +112,16 @@ export function engineSong(song: Song): EngineSong {
 }
 
 /**
- * The Arrangement Auto-map chooses for `song` with the Melodic ones among `recordings`: the one
- * `coverageOf` reads, and the one Song Creator renders.
+ * The Arrangement Song Creator renders for `song` with the Melodic ones among `recordings`: the
+ * one Auto-map chooses, which `coverageOf` reads, changed by the user's Fart Choices for the Song
+ * when it has any (#360).
  */
-export function arrangementOf(song: Song, recordings: readonly Recording[]): Arrangement {
-  return arrange(engineSong(song), autoMapRecordings(recordings))
+export function arrangementOf(
+  song: Song,
+  recordings: readonly Recording[],
+  choices: FartChoices | null = null
+): Arrangement {
+  return arrangeChoices(songPitches(engineSong(song)), autoMapRecordings(recordings), choices)
 }
 
 /**
@@ -143,12 +149,14 @@ export function coverageOf(song: SongSummary, recordings: readonly Recording[]):
 }
 
 /** Covered pitches as a fraction, for the Pitch Coverage bar. */
-export function coverageFraction(coverage: CoverageCount): number {
+export function coverageFraction(coverage: Pick<CoverageCount, 'covered' | 'total'>): number {
   return coverage.total === 0 ? 0 : coverage.covered / coverage.total
 }
 
 /** "3 of 4 notes covered", or "All 4 notes covered" when unlocked. */
-export function coverageSummary(coverage: CoverageCount): string {
+export function coverageSummary(
+  coverage: Pick<CoverageCount, 'covered' | 'total' | 'unlocked'>
+): string {
   return coverage.unlocked
     ? `All ${coverage.total} notes covered`
     : `${coverage.covered} of ${coverage.total} notes covered`
@@ -161,7 +169,7 @@ const andList = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' }
  * (1.2 s)", or with a `limit` of 3, "D3 (0.5 s), F3 (1.2 s), A3 (0.4 s), and 2 more". Null when
  * nothing is missing.
  */
-export function missingNotes(coverage: Coverage, limit?: number): string | null {
+export function missingNotes(coverage: Pick<Coverage, 'missing'>, limit?: number): string | null {
   const names = coverage.missing.map(m => `${noteName(m.midi)} (${m.seconds.toFixed(1)} s)`)
   if (names.length === 0) return null
   if (limit === undefined || names.length <= limit) return andList.format(names)

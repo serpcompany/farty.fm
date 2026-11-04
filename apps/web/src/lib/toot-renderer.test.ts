@@ -4,12 +4,15 @@ import { goldenArrangement, songIds } from '../test-support/engine-golden'
 import { bridgedWorker, WorkerScope } from '../test-support/fake-worker'
 import { analyzeToAnalysis } from './analysis/port'
 import { songs } from './catalog/songs.generated'
+import { songPitches } from './engine/auto-map'
 import { renderInWorker, renderPerformanceInWorker } from './engine/client'
+import { noChoices, swapFart } from './engine/fart-choices'
 import { type RenderedPerformance, renderPerformance } from './engine/render-performance'
 import { type RenderedSong, renderFromRecordings } from './engine/render-song'
+import { fartSheet } from './fart-sheet'
 import { fixtureRecordingId } from './fixture-library'
 import type { Performance } from './performance'
-import { arrangementOf, engineSong } from './pitch-coverage'
+import { arrangementOf, autoMapRecordings, engineSong } from './pitch-coverage'
 import type { Recording } from './recordings'
 import { makePadToot, makeToot, TootError } from './toot-renderer'
 import { decodeWav, encodeWav } from './wav'
@@ -116,6 +119,51 @@ describe('makeToot', () => {
     const tooLong = await makeToot(amazing, without002, loadAudio).catch(e => e)
     expect(tooLong).toBeInstanceOf(TootError)
     expect(tooLong.reason).toBe('locked')
+  })
+
+  it('plays the farts the user chose, and is locked once a note has none (#360)', async () => {
+    const song = songs.find(s => s.id === 'twinkle') as (typeof songs)[number]
+    const pitches = songPitches(engineSong(song))
+    const pitch = pitches.pitches[0]
+    const sheet = fartSheet(pitches, autoMapRecordings(recordings), null, pitch)
+    const swapIn = (sheet.free[0] ?? sheet.others[0]).id
+    const choices = swapFart(
+      noChoices(arrangementOf(song, recordings).transposition),
+      pitch,
+      swapIn
+    )
+    let fromWorker: RenderedSong | undefined
+    const draft = await makeToot(
+      song,
+      recordings,
+      loadAudio,
+      async (...args) => {
+        fromWorker = await renderInWorker(...args)
+        return fromWorker
+      },
+      'swapped',
+      choices
+    )
+    expect(draft.arrangement.recordingForPitch[pitch]).toBe(swapIn)
+    const arrangement = arrangementOf(song, recordings, choices)
+    const inputs = recordings
+      .filter(r => arrangement.pitches.some(c => c.recordingId === r.id))
+      .map(r => ({
+        id: r.id,
+        audio: decodeWav(wavs.get(r.id) as ArrayBuffer),
+        analysis: r.analysis.state === 'analyzed' ? r.analysis.analysis : (null as never)
+      }))
+    const engine = renderFromRecordings(engineSong(song), arrangement, inputs)
+    expect(sameBytes(fromWorker?.samples, engine.samples)).toBe(true)
+
+    const everyFart = [sheet.inUse, ...sheet.free, ...sheet.others].flatMap(r => (r ? [r.id] : []))
+    const locked = await makeToot(song, recordings, loadAudio, undefined, 'locked', {
+      transposition: arrangement.transposition,
+      preferred: {},
+      excluded: everyFart.sort()
+    }).catch(e => e)
+    expect(locked).toBeInstanceOf(TootError)
+    expect(locked.reason).toBe('locked')
   })
 
   it("can't be made when a Recording's audio is gone", async () => {
