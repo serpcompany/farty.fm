@@ -428,7 +428,7 @@
    "https://thesession.org/tunes/14787",
    "https://en.wikipedia.org/w/index.php?search=Glencoe%20tune"
   ],
-  "note": "Compared by interval with every setting of The Session's 'The Glencoe' march (6235, credited to Dan R. MacDonald) and 'Glencoe Hall' jig (14787): the Song opens with a rising arpeggio the settings don't have, so it is a different tune and not a removal; The Session's other Glencoe tunes (8090, 9345, 14648, 17109, 21480) don't match either, and Wikipedia and Wikidata have no page for a tune of this name"
+  "note": "Compared by interval with every setting of The Session's 'The Glencoe' march (6235, credited to Dan R. MacDonald) and 'Glencoe Hall' jig (14787): the Song opens with a rising arpeggio the settings don't have, so it is a different tune and not a removal; The Session's other Glencoe tunes (8090, 9345, 14648, 17109, 21480) don't match either, and Wikipedia and Wikidata have no page for a tune of this name; compared by eye, The Session's tunes 6235 and 14787 (naming Dan R. MacDonald, in 6235's composer field) differs from the Song's melody"
  },
  {
   "id": "grimstock",
@@ -502,7 +502,7 @@
    "https://thesession.org/tunes/search?q=Life%20Let%20Us%20Cherish",
    "https://thesession.org/tunes/25698"
   ],
-  "note": "searched English Wikipedia, Wikidata and The Session (its Session page names no composer): a Session comment says the melody is by Hans Georg Nägeli (the German song Freut euch des Lebens, words by Usteri), but no allowed page confirms it"
+  "note": "Compared by eye: The Session's tune 25698 follows the Song's melody and has no composer field; a comment says the melody is by Hans Georg Nägeli (1773 to 1836, Wikipedia). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "long-time-ago",
@@ -535,14 +535,16 @@
   "views": 10,
   "pdmx": "NA",
   "score": "https://musescore.com/score/4860466",
-  "composer": "Unknown",
+  "composer": "Simon Fraser",
   "composer_source": "https://thesession.org/tunes/13049",
+  "note": "Compared by eye: The Session's tune 13049 follows the Song's melody and its composer field names Simon Fraser; Wikipedia's Simon Fraser (musician) is Captain Simon Fraser of Knockie (1772 or 1773 to 1852), the Scottish fiddler and composer. Doubt: The Session doesn't say which Simon Fraser",
+  "composer_died": 1852,
   "checked": [
    "https://en.wikipedia.org/w/index.php?search=%22The%20Nuptial%20Knot%22",
    "https://thesession.org/tunes/search?q=The%20Nuptial%20Knot",
-   "https://thesession.org/tunes/13049"
-  ],
-  "note": "searched English Wikipedia, Wikidata and The Session (its Session page names no composer): The Session credits Simon Fraser but does not say which Simon Fraser, and no death year or first-publication date could be tied to the tune"
+   "https://thesession.org/tunes/13049",
+   "https://en.wikipedia.org/wiki/Simon_Fraser_(musician)"
+  ]
  },
  {
   "id": "off-to-california",
@@ -839,7 +841,7 @@
    "https://thesession.org/tunes/search?q=The%20Fife%20Hunt",
    "https://thesession.org/tunes/3707"
   ],
-  "note": "searched English Wikipedia, Wikidata and The Session (its Session page names no composer): a Session comment says William Gow composed it, but gives no source; Wikipedia has no page"
+  "note": "Compared by eye: The Session's tune 3707 follows the Song's melody and has no composer field; a comment says William Gow, a son of Niel Gow, composed it; Wikipedia's Niel Gow says William died in 1791. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "frenet-ha",
@@ -1161,7 +1163,7 @@
    "https://thesession.org/tunes/search?q=Glenburnie%20Rant",
    "https://thesession.org/tunes/9846"
   ],
-  "note": "searched English Wikipedia, Wikidata and The Session (its Session page names no composer): a Session comment says online resources call it a very old Scottish reel composed by Niel Gow, another source calls it an Irish rant: no source named"
+  "note": "Compared by eye: The Session's tune 9846 follows the Song's melody and has no composer field; a comment credits Niel Gow and another refutes it; it is in Gow's fifth collection (1809). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "grandfathers-clock",
@@ -1299,7 +1301,7 @@
    "https://thesession.org/tunes/search?q=Major%20Malley%27s%20March",
    "https://thesession.org/tunes/11791"
   ],
-  "note": "searched English Wikipedia, Wikidata and The Session (its Session page names no composer): no page names who wrote it"
+  "note": "Compared by eye: The Session's tune 11791 follows the Song's melody and has no composer field; a comment's ABC of the reel version credits Andrew Gow, who died in 1794 (Wikipedia's Niel Gow). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "paddy-orafferty",
@@ -1389,7 +1391,10 @@
   "score": "https://musescore.com/score/4604749",
   "composer": "Traditional (Irish)",
   "composer_source": "https://thesession.org/tunes/14219",
-  "note": "a Session comment calls it a traditional Irish song, first heard as sung by the Clancy Brothers"
+  "note": "a Session comment calls it a traditional Irish song, first heard as sung by the Clancy Brothers",
+  "checked": [
+   "https://thesession.org/tunes/14219"
+  ]
  },
  {
   "id": "young-damons-flight",
@@ -1444,7 +1449,7 @@
    "https://thesession.org/tunes/search?q=Admiral%20Nelson",
    "https://thesession.org/tunes/14595"
   ],
-  "note": "searched English Wikipedia, Wikidata and The Session (its Session page names no composer): no page names who wrote it"
+  "note": "Compared by eye: The Session's tune 14595 follows the Song's melody and has no composer field; a comment names Niel Gow (1727 to 1807, Wikipedia). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "althea",
@@ -2090,7 +2095,7 @@
    "https://thesession.org/tunes/search?q=The%20Curly%20Headed%20Ploughboy",
    "https://thesession.org/tunes/8948"
   ],
-  "note": "searched English Wikipedia, Wikidata and The Session (its Session page names no composer): Session comments conflict: one says Jimmy Shand Snr composed it, another says it is a traditional English tune"
+  "note": "Compared by eye: The Session's tune 8948 follows the Song's melody and has no composer field; a comment credited Jimmy Shand Snr from a CD listing, then withdrew it ('The listing on the CD is wrong'), and others call it a traditional English tune that the BBC used in the 1950s because it was free of royalties; no dates found for Shand Snr, so left for the owner. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "da-auld-stoers-back-again",

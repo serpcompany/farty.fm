@@ -238,7 +238,10 @@
   "score": "https://musescore.com/score/164586",
   "composer": "Traditional (Scottish)",
   "composer_source": "https://thesession.org/tunes/75",
-  "note": "The Session's \"Miss McLeod's\" (aliases include Mrs MacLeod Of Raasay) follows the Song's melody and lists no composer; a comment calls it Scottish in origin and says a 4-part setting is credited to Niel Gow but not whether he wrote the tune"
+  "note": "Compared by eye: The Session's tune 75 follows the Song's melody and has no composer field; a setting's ABC credits Niel Gow (1727 to 1807, Wikipedia) and a comment names Sir Alexander MacDonald of Sleat (c. 1745 to 1795, Wikipedia), and a comment says the tune is probably older; a Session comment calls it Scottish in origin. Named only in a comment and under the limits, so kept as Traditional (Scottish)",
+  "checked": [
+   "https://thesession.org/tunes/75"
+  ]
  },
  {
   "id": "when-you-wore-a-tulip",
@@ -327,9 +330,16 @@
   "views": 419,
   "pdmx": "Trad.",
   "score": "https://musescore.com/score/5048540",
-  "composer": "Traditional",
+  "composer": "Michael Gorman",
   "composer_source": "https://thesession.org/tunes/1",
-  "note": "The Session lists no composer; the Song matches its settings (27 equal melodic steps in a row)"
+  "note": "Compared by eye: the Song is The Session's Cooley's (tune 1), which has no composer field. Its comments name Michael Gorman (a 2025 comment cites Topic's It Was Mighty notes), Joe Mills (from a 1970s interview) and others, and a 2021 comment counts six claims. Wikipedia gives Gorman 1895 to 1970 and Cooley 1924 to 1973. Pulled under this PR's rule: a popular reel, left for the owner",
+  "composer_died": 1970,
+  "remove": "composer died after 1955: Session comments (tune 1) credit Michael Gorman, who died in 1970 (Wikipedia), or Joe Mills, and the reel is named for Joe Cooley (died 1973); nothing shows it published before 1931",
+  "checked": [
+   "https://thesession.org/tunes/1",
+   "https://en.wikipedia.org/wiki/Michael_Gorman_(musician)",
+   "https://en.wikipedia.org/wiki/Joe_Cooley"
+  ]
  },
  {
   "id": "walenki",
@@ -839,7 +849,10 @@
   "score": "https://musescore.com/score/5487665",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/55",
-  "note": "The Session lists no composer; the Song matches its settings (16 equal melodic steps in a row)"
+  "note": "The Session lists no composer; the Song matches its settings (16 equal melodic steps in a row)",
+  "checked": [
+   "https://thesession.org/tunes/55"
+  ]
  },
  {
   "id": "manchester-hornpipe",
@@ -962,7 +975,12 @@
   "composer": "Zequinha de Abreu",
   "composer_died": 1935,
   "composer_source": "https://en.wikipedia.org/wiki/Tico-Tico_no_Fub%C3%A1",
-  "note": "choro composed in 1917 as Tico-Tico no Farelo; first recorded 1931"
+  "note": "choro composed in 1917 as Tico-Tico no Farelo; English and Portuguese Wikipedia give 1931 for its present name and first recording, and neither names an earlier publication",
+  "published": 1931,
+  "remove": "first published 1931: Wikipedia says it was written in 1917 as Tico-Tico no Farelo and given its present name and first recorded in 1931, and nothing shows a publication before 1931",
+  "checked": [
+   "https://pt.wikipedia.org/wiki/Tico-Tico_no_Fub%C3%A1"
+  ]
  },
  {
   "id": "swan",
@@ -1228,7 +1246,10 @@
   "score": "https://musescore.com/score/4927483",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/113",
-  "note": "The Session lists no composer; the Song matches its setting 12702 (51 equal melodic steps in a row)"
+  "note": "The Session lists no composer; the Song matches its setting 12702 (51 equal melodic steps in a row)",
+  "checked": [
+   "https://thesession.org/tunes/113"
+  ]
  },
  {
   "id": "carrickfergus",
@@ -1382,7 +1403,10 @@
   "score": "https://musescore.com/score/4909362",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/5135",
-  "note": "The Session lists no composer; the Song matches its settings (31 equal melodic steps in a row)"
+  "note": "The Session lists no composer; the Song matches its settings (31 equal melodic steps in a row)",
+  "checked": [
+   "https://thesession.org/tunes/5135"
+  ]
  },
  {
   "id": "roddy-mccorley",
@@ -1481,7 +1505,10 @@
   "score": "https://musescore.com/score/4702723",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/27",
-  "note": "The Session lists no composer; the Song matches its settings (72 equal melodic steps in a row)"
+  "note": "The Session lists no composer; the Song matches its settings (72 equal melodic steps in a row)",
+  "checked": [
+   "https://thesession.org/tunes/27"
+  ]
  },
  {
   "id": "lily-of-the-valley",
@@ -1503,7 +1530,10 @@
   "score": "https://musescore.com/score/5007625",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/3954",
-  "note": "The Session lists no composer; the Song matches its setting 30391 (110 equal melodic steps in a row)"
+  "note": "The Session lists no composer; the Song matches its setting 30391 (110 equal melodic steps in a row)",
+  "checked": [
+   "https://thesession.org/tunes/3954"
+  ]
  },
  {
   "id": "did-you-ever-see-a-lassie",
@@ -1663,7 +1693,10 @@
   "score": "https://musescore.com/score/4858654",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/101",
-  "note": "The Session lists no composer; the Song matches its settings (36 equal melodic steps in a row)"
+  "note": "The Session lists no composer; the Song matches its settings (36 equal melodic steps in a row)",
+  "checked": [
+   "https://thesession.org/tunes/101"
+  ]
  },
  {
   "id": "bucks-of-oranmore",
@@ -1673,7 +1706,10 @@
   "score": "https://musescore.com/score/4928790",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/2",
-  "note": "The Session lists no composer; the Song is identical to its setting 22356 note for note"
+  "note": "The Session lists no composer; the Song is identical to its setting 22356 note for note",
+  "checked": [
+   "https://thesession.org/tunes/2"
+  ]
  },
  {
   "id": "green-hills-of-tyrol",
@@ -1707,7 +1743,10 @@
   "score": "https://musescore.com/score/4699126",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/6388",
-  "note": "The Session lists no composer; the Song matches its setting 52371 (26 equal melodic steps in a row)"
+  "note": "The Session lists no composer; the Song matches its setting 52371 (26 equal melodic steps in a row)",
+  "checked": [
+   "https://thesession.org/tunes/6388"
+  ]
  },
  {
   "id": "braes-o-balquhidder",

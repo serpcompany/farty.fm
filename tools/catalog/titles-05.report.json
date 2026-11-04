@@ -14,7 +14,7 @@
   }
  },
  "library": "38 Recordings, 26 Melodic",
- "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 3 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 4 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
  "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
@@ -8900,76 +8900,6 @@
    "result": "pass",
    "reason": null,
    "picked": "4574212"
-  },
-  {
-   "id": "cooleys-reel",
-   "title": "Cooley's Reel",
-   "matched": 15,
-   "eligible": 15,
-   "rejected": {},
-   "tried": [
-    {
-     "score_id": "5048540",
-     "url": "https://musescore.com/score/5048540",
-     "score_title": "Cooley's Reel",
-     "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "419",
-     "license": "cc-zero",
-     "n_tracks": "1",
-     "dataset_path": "./mid/15/16/QmXDANer37tfh1kcDXUL431vzEsH9EWMv3Bm2DaSAw3nVM.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "a8f9fee2a8ab718151bb113ae0901c8f24ef5fdd0d0b3381df2b5a3bda0c1d1c",
-     "render": {
-      "bpm": 120,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 3,
-      "note_count": 59
-     },
-     "track_notes": 249,
-     "range_semitones": 19,
-     "distinct_pitches": 11,
-     "pitch_coverage": "11 of 11",
-     "metrics": {
-      "notes": 59,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 22,
-      "within_50c_any_octave_pct": 22,
-      "median_abs_cents": 172.6,
-      "contour_pct": 93,
-      "distinct_recordings": 11,
-      "on_pitch_pct": 15,
-      "sounding_pct": 93,
-      "notes_mostly_silent": 0,
-      "transpose": -8,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.43
-     }
-    }
-   ],
-   "result": "pass",
-   "reason": null,
-   "picked": "5048540"
   },
   {
    "id": "breathe-on-me-breath-of-god",

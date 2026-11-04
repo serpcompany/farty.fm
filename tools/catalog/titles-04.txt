@@ -6,12 +6,12 @@
 # gave 6 titles back the accents the ranking dropped. The composer lookups (#357, composers-01.json)
 # pulled 2 titles as under copyright, now in excluded-titles.txt: Mairi's Wedding, Just A Closer Walk With Thee.
 # Later batches of the lookups (composers-03.json, composers-04.json) pulled 2 more: Tumbalalaika, Mo Ghile Mear.
+# The review of PR #377 (#357) pulled 1 more as under copyright, now in excluded-titles.txt: Tico Tico no Fuba.
 # id | catalog title
 maple-leaf-rag | Maple Leaf Rag
 piano-sonata-no-16-in-c-major-k-545 | Piano Sonata No.16 in C major K.545
 goldberg-variations | Goldberg Variations
 symphony-no-7-op-92 | Symphony No. 7 Op. 92
-tico-tico-no-fuba | Tico Tico no Fuba
 danse-macabre | Danse Macabre
 cello-suite-no-1 | Cello Suite No 1
 la-cumparsita | La cumparsita

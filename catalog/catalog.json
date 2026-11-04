@@ -4195,39 +4195,6 @@
   }
  },
  {
-  "id": "tico-tico-no-fuba",
-  "title": "Tico Tico no Fuba",
-  "composer": "Zequinha de Abreu",
-  "composer_died": 1935,
-  "composer_source": "https://en.wikipedia.org/wiki/Tico-Tico_no_Fub%C3%A1",
-  "file": "midi/pdmx-tico-tico-no-fuba.mid",
-  "sha256": "f2c2a749fbc806c2d5cabc929fb10abd460df124626cd748f5134ce6a3d51e65",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/6/51/QmNWicCLAwn7m7uAYF2V22m8Vi18QvbWe9ZWwyLjLpBnYy.mid",
-   "musescore_score_id": "5978726",
-   "musescore_url": "https://musescore.com/score/5978726",
-   "score_title": "tico tico by Bernard",
-   "composer": "NA",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "174"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 135,
-   "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-04.txt"
-  }
- },
- {
   "id": "la-cumparsita",
   "title": "La cumparsita",
   "composer": "Gerardo Matos Rodríguez",
@@ -8335,38 +8302,6 @@
   "render": {
    "bpm": 120,
    "max_beats": 31
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-06.txt"
-  }
- },
- {
-  "id": "chinquapin-hunting",
-  "title": "Chinquapin Hunting",
-  "composer": "Unknown",
-  "composer_source": "https://thesession.org/tunes/15454",
-  "file": "midi/pdmx-chinquapin-hunting.mid",
-  "sha256": "f683542869fbd02747eda5985f4eeadec45a8f0c6e199c265f2302d66865b40c",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/13/6/QmV74GDjUMK5H4V9Xg5YACQsuy1ben5jjxApcJEwvhvWrm.mid",
-   "musescore_score_id": "4807539",
-   "musescore_url": "https://musescore.com/score/4807539",
-   "score_title": "Chinquapin Hunting",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "41"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -12502,7 +12437,7 @@
  {
   "id": "leslies-march",
   "title": "Leslie's March",
-  "composer": "Unknown",
+  "composer": "Traditional (Scottish)",
   "composer_source": "https://thesession.org/tunes/987",
   "file": "midi/pdmx-leslies-march.mid",
   "sha256": "45d38dddfbb2bf20ac5492ccb75c17345b6ebfe3ffca54ccdccef70a8b2339d3",
@@ -12701,7 +12636,7 @@
  {
   "id": "christmas-day-ida-moarnin",
   "title": "Christmas Day Ida Moarnin'",
-  "composer": "Traditional (Shetland)",
+  "composer": "Unknown",
   "composer_source": "https://thesession.org/tunes/773",
   "file": "midi/pdmx-christmas-day-ida-moarnin.mid",
   "sha256": "8815ec1c794d9d30e0eac7a2afcafe495cfe794c89bb2729d37ed0e343f4a875",
@@ -13480,39 +13415,6 @@
    "bpm": 120,
    "max_beats": 29,
    "beats_per_bar": 4
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-08.txt"
-  }
- },
- {
-  "id": "up-in-the-air",
-  "title": "Up In The Air",
-  "composer": "Unknown",
-  "composer_source": "https://thesession.org/tunes/894",
-  "file": "midi/pdmx-up-in-the-air.mid",
-  "sha256": "025191564df855d38533f868b6f101dbef23e9efd888be79c2f75f1ecfa93dcf",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/16/30/QmYLHi67KXhvUfrR5qmdd31MwLsgQS5fJd6sEMR3S7iw3x.mid",
-   "musescore_score_id": "4708430",
-   "musescore_url": "https://musescore.com/score/4708430",
-   "score_title": "Up in the Air",
-   "composer": "NA",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "6"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 30,
-   "beats_per_bar": 3
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -15961,7 +15863,7 @@
  {
   "id": "miss-stewart",
   "title": "Miss Stewart",
-  "composer": "Traditional",
+  "composer": "Unknown",
   "composer_source": "https://thesession.org/tunes/7979",
   "file": "midi/pdmx-miss-stewart.mid",
   "sha256": "86779df43cedfd735230e7c4ba1d151bf868924c13f85b9f63fc62d2af0ab2ae",
@@ -18729,8 +18631,9 @@
  {
   "id": "killiecrankie",
   "title": "Killiecrankie",
-  "composer": "Traditional (Scottish)",
-  "composer_source": "https://thesession.org/tunes/5961",
+  "composer": "Thomas Connellan",
+  "composer_died": 1698,
+  "composer_source": "https://thesession.org/tunes/2937",
   "file": "midi/pdmx-killiecrankie.mid",
   "sha256": "66dd843293c928720ba887d4fde115e6184366416c539498b284bc24b8aa1fa5",
   "source": {
@@ -25214,7 +25117,8 @@
  {
   "id": "nuptial-knot",
   "title": "The Nuptial Knot",
-  "composer": "Unknown",
+  "composer": "Simon Fraser",
+  "composer_died": 1852,
   "composer_source": "https://thesession.org/tunes/13049",
   "file": "midi/pdmx-nuptial-knot.mid",
   "sha256": "6cf94b8e5567d0362ab05629db1c53b500c640ea52f1a88ecc6fa26ed072aeb8",
@@ -30956,38 +30860,6 @@
    "bpm": 120,
    "max_beats": 32,
    "beats_per_bar": 6
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-05.txt"
-  }
- },
- {
-  "id": "cooleys-reel",
-  "title": "Cooley's Reel",
-  "composer": "Traditional",
-  "composer_source": "https://thesession.org/tunes/1",
-  "file": "midi/pdmx-cooleys-reel.mid",
-  "sha256": "a8f9fee2a8ab718151bb113ae0901c8f24ef5fdd0d0b3381df2b5a3bda0c1d1c",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/15/16/QmXDANer37tfh1kcDXUL431vzEsH9EWMv3Bm2DaSAw3nVM.mid",
-   "musescore_score_id": "5048540",
-   "musescore_url": "https://musescore.com/score/5048540",
-   "score_title": "Cooley's Reel",
-   "composer": "Trad.",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "419"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 32
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",

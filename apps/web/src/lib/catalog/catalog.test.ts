@@ -74,11 +74,11 @@ describe('the Song Catalog in the app', () => {
     ])
   })
 
-  // #350: every Song in catalog/ then, but the second Ode to Joy (#229). #357 pulled 12 Songs as
+  // #350: every Song in catalog/ then, but the second Ode to Joy (#229). #357 pulled 16 Songs as
   // under copyright.
   test('then every other Song in the catalog, in its order, but ode-mutopia', () => {
     const ids = songs.map(s => s.id)
-    expect(ids).toHaveLength(996)
+    expect(ids).toHaveLength(992)
     const first = ids.slice(0, 12)
     const catalogOrder = sources.catalog
       .map(e => e.id)

@@ -8,6 +8,7 @@
 # and whose other scores fail the sanity gate), added 3 titles excluded by mistake (79th's Farewell to
 # Gibraltar, Off to California, Road to the Isles), and gave 4 Songs their proper title.
 # The composer lookups (#357) pulled 3 titles as under copyright, now in excluded-titles.txt: Lily Of The Valley, Lindisfarne, Me Zo Ganet E Kreiz Ar Mor.
+# The review of PR #377 (#357) pulled 1 more as under copyright, now in excluded-titles.txt: Chinquapin Hunting.
 # id | catalog title
 befiehl-du-deine-wege | Befiehl du deine Wege
 infant-holy-infant-lowly | Infant Holy Infant Lowly
@@ -61,7 +62,6 @@ bucks-of-oranmore | The Bucks Of Oranmore
 bonnie-lass-o-bon-accord | The Bonnie Lass O' Bon Accord
 dry-hands | Dry Hands
 duke-of-yorks-march | Duke of York's March
-chinquapin-hunting | Chinquapin Hunting
 gay-gordons | The Gay Gordons
 christ-whose-glory-fills-the-skies | Christ whose glory fills the skies
 hen-wlad-fy-nhadau | Hen Wlad Fy Nhadau

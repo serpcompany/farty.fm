@@ -92,7 +92,7 @@
    "https://thesession.org/tunes/10707",
    "https://thesession.org/tunes/1794"
   ],
-  "note": "The Session lists a march of this name (tune 3486) with no composer; its jig 'The Hen's March' is credited to Donald MacLeod, but the Song is in 4/4, so it is probably not that tune; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists a march of this name (tune 3486) with no composer; its jig 'The Hen's March' is credited to Donald MacLeod, but the Song is in 4/4, so it is probably not that tune; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tunes 1794 and 10707 (naming Donald MacLeod, in their composer fields) differs from the Song's melody"
  },
  {
   "id": "lady-heriet-georgina-hamilton",
@@ -128,15 +128,16 @@
   "views": 6,
   "pdmx": "NA",
   "score": "https://musescore.com/score/4706587",
-  "composer": "Unknown",
+  "composer": "Traditional (Scottish)",
   "composer_source": "https://thesession.org/tunes/987",
+  "note": "Compared by eye: the Song is The Session's Leslie's March (tune 987). Its comments trace it to Watts's Musical Miscellany vol. 6 (1731) as Lesly's March and to Oswald's Curious Collection (ca. 1743), where no authorship is listed, reject William Reeve (born 1757; Oscar and Malvina, 1791) and the old attribution to David Rizzio, and call it Scottish. Its composer field says Maggie Mar, which nothing on the page explains; published 1731 puts any writer under the limits",
+  "published": 1731,
   "checked": [
    "https://thesession.org/tunes/search?q=Leslie%27s%20March",
    "https://en.wikipedia.org/w/index.php?search=%22Leslie%27s%20March%22",
    "https://thesession.org/tunes/987",
    "https://thesession.org/tunes/2897"
-  ],
-  "note": "The Session's tune of this name (987) is a jig credited to Maggie Mar; this Song is in 3/4, so it is probably another tune; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  ]
  },
  {
   "id": "lord-elcho",
@@ -195,7 +196,7 @@
    "https://thesession.org/tunes/10347",
    "https://thesession.org/tunes/9750"
   ],
-  "note": "The Session lists 'The Marquis Of Huntly' (reel, no composer given), 'The Marquis Of Huntly's' (barndance, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'The Marquis Of Huntly' (reel, no composer given), 'The Marquis Of Huntly's' (barndance, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 10347 (naming Peter Milne or William Marshall, in comments) differs from the Song's melody"
  },
  {
   "id": "marquis-of-huntlys-strathspey",
@@ -211,7 +212,7 @@
    "https://thesession.org/tunes/10347",
    "https://thesession.org/tunes/9750"
   ],
-  "note": "PDMX names William Marshall, but no source confirms it; The Session lists 'The Marquis Of Huntly' (reel, no composer given), 'The Marquis Of Huntly's' (barndance, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "PDMX names William Marshall, but no source confirms it; The Session lists 'The Marquis Of Huntly' (reel, no composer given), 'The Marquis Of Huntly's' (barndance, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 10347 (naming Peter Milne or William Marshall, in comments) differs from the Song's melody"
  },
  {
   "id": "master-john-romily",
@@ -251,7 +252,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22Miss%20Bennet%27s%20Jig%22",
    "https://thesession.org/tunes/1176"
   ],
-  "note": "The Session lists 'Miss Bennet's' (jig, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Compared by eye: The Session's tune 1176 follows the Song's melody and has no composer field; a comment says a tune database credits William Campbell, 18th century. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "morgan-rattler",
@@ -370,7 +371,7 @@
    "https://thesession.org/tunes/11221",
    "https://thesession.org/tunes/4279"
   ],
-  "note": "The Session lists 'The Slip Reel' (three-two, no composer given), 'Emma's Slip' (slip jig, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'The Slip Reel' (three-two, no composer given), 'Emma's Slip' (slip jig, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 4279 (naming Shannon Heaton (2000), in a comment) differs from the Song's melody"
  },
  {
   "id": "source-of-spey",
@@ -413,14 +414,17 @@
   "views": 6,
   "pdmx": "NA",
   "score": "https://musescore.com/score/4708430",
-  "composer": "Unknown",
+  "composer": "Kevin Burke and Mícheál Ó Domhnaill",
   "composer_source": "https://thesession.org/tunes/894",
   "checked": [
    "https://thesession.org/tunes/search?q=Up%20In%20The%20Air",
    "https://en.wikipedia.org/w/index.php?search=%22Up%20In%20The%20Air%22",
-   "https://thesession.org/tunes/894"
+   "https://thesession.org/tunes/894",
+   "https://en.wikipedia.org/wiki/Kevin_Burke_(musician)"
   ],
-  "note": "The Session lists 'Up In The Air' (jig, credited to Kevin Burke, Mícheál Ó Domhnaill), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Compared by eye: the Song is The Session's Up In The Air (tune 894), whose composer field names Kevin Burke and Mícheál Ó Domhnaill; a comment by Burke says 'It's a tune Mícheál and I wrote' in Portland in 1982, and Wikipedia's Kevin Burke (musician) gives his birth as 1950 and calls him living",
+  "published": 1982,
+  "remove": "composer is living: The Session (tune 894) credits Kevin Burke and Mícheál Ó Domhnaill, who wrote it in 1982, and Wikipedia gives Burke's birth as 1950 with no death"
  },
  {
   "id": "weavers-march",
@@ -464,7 +468,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22Yester%20House%22",
    "https://thesession.org/tunes/7672"
   ],
-  "note": "The Session lists 'Yester House' (strathspey, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Compared by eye: The Session's tune 7672 follows the Song's melody and has no composer field; a comment names Niel Gow (1727 to 1807, Wikipedia) and dates it to 1792. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "abergenny",
@@ -489,7 +493,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22Adson%27s%20Saraband%22",
    "https://thesession.org/tunes/17297"
   ],
-  "note": "Wikipedia's page on John Adson (died 1640) doesn't name this piece; PDMX names John Playford (1657), who printed it; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Wikipedia's page on John Adson (died 1640) doesn't name this piece; PDMX names John Playford (1657), who printed it; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 17297 (naming William Lawes (1602 to 1645), in a comment) differs from the Song's melody"
  },
  {
   "id": "aiken-drum",
@@ -609,7 +613,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22Captain%20Byng%22",
    "https://thesession.org/tunes/1400"
   ],
-  "note": "The Session lists 'Captain Byng' (reel, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Compared by eye: The Session's tune 1400 follows the Song's melody and has no composer field; a comment names Nathaniel Gow (1763 to 1831, Wikipedia). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "come-dance-and-sing",
@@ -777,7 +781,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22Greig%27s%20Pipes%22",
    "https://thesession.org/tunes/605"
   ],
-  "note": "The Session lists 'Greig's Pipes' (reel, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Compared by eye: The Session's tune 605 follows the Song's melody and has no composer field; a comment names Joshua Campbell and his collection of 1779. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "happy-captive",
@@ -1035,7 +1039,7 @@
    "https://thesession.org/tunes/1268",
    "https://thesession.org/tunes/17072"
   ],
-  "note": "The Session lists 'Glory' (reel, no composer given), 'The Glory' (jig, credited to Juan Almaraz), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'Glory' (reel, no composer given), 'The Glory' (jig, credited to Juan Almaraz), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 17072 (naming Juan Almaraz, in its composer field) differs from the Song's melody"
  },
  {
   "id": "pease-strae",
@@ -1218,9 +1222,10 @@
   "checked": [
    "https://thesession.org/tunes/search?q=Apple%20Tree",
    "https://en.wikipedia.org/w/index.php?search=%22Apple%20Tree%22",
-   "https://thesession.org/tunes/3385"
+   "https://thesession.org/tunes/3385",
+   "https://en.wikipedia.org/wiki/Thomas_Bulch"
   ],
-  "note": "The Session lists 'The Apple Tree' (reel, credited to Carl Volti), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Compared by eye: the Song is The Session's The Apple Tree (tune 3385), whose composer field names Carl Volti; a comment by Nigel Gatherer says Volti (born Archibald Milligan) composed it in the 19th century, and Gatherer's biography of him gives his birth as 1848 in Glasgow and lists the tune in Kerr's Merry Melodies book 2. Wikipedia (Thomas Bulch) confirms the pseudonym but gives no dates, and no death year was found on Wikipedia, Wikidata or The Session, so not credited; left for the owner"
  },
  {
   "id": "ball",
@@ -1236,7 +1241,7 @@
    "https://thesession.org/tunes/10550",
    "https://thesession.org/tunes/9057"
   ],
-  "note": "The Session lists 'Gaffo's Ball' (reel, no composer given), 'Phil The Fluter's Ball' (hornpipe, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'Gaffo's Ball' (reel, no composer given), 'Phil The Fluter's Ball' (hornpipe, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 10550 (naming Sharon Shannon, in a comment) differs from the Song's melody"
  },
  {
   "id": "banks-of-allan",
@@ -1308,7 +1313,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22Bunker%20Hill%22",
    "https://thesession.org/tunes/207"
   ],
-  "note": "The Session lists 'Bunker Hill' (reel, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'Bunker Hill' (reel, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 207 (naming Sean Ryan, in a comment) differs from the Song's melody"
  },
  {
   "id": "captain-lanoes-quick-march",
@@ -1384,7 +1389,7 @@
    "https://thesession.org/tunes/23154",
    "https://thesession.org/tunes/13084"
   ],
-  "note": "The Session lists 'Dublin Bay' (march, credited to Joanne O'Connor), 'Sweet Dublin Bay' (waltz, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'Dublin Bay' (march, credited to Joanne O'Connor), 'Sweet Dublin Bay' (waltz, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 23154 (naming Joanne O'Connor, in its composer field) differs from the Song's melody"
  },
  {
   "id": "duchess-of-gordon",
@@ -1400,7 +1405,7 @@
    "https://thesession.org/tunes/26448",
    "https://thesession.org/tunes/18145"
   ],
-  "note": "The Session lists 'The Duchess Of Gordon' (waltz, no composer given), 'The Duchess Of Gordon's New' (strathspey, credited to Robert Mackintosh), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'The Duchess Of Gordon' (waltz, no composer given), 'The Duchess Of Gordon's New' (strathspey, credited to Robert Mackintosh), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 18145 (naming Robert Mackintosh, in its composer field) differs from the Song's melody"
  },
  {
   "id": "duke-of-gordons-birthday",
@@ -1429,7 +1434,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22Dunkeld%20Hermitage%22",
    "https://thesession.org/tunes/13014"
   ],
-  "note": "The Session lists 'Dunkeld Hermitage' (reel, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Compared by eye: The Session's tune 13014 follows the Song's melody and has no composer field; a comment names Niel Gow (1727 to 1807, Wikipedia) and dates it to 1784. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "dunkeld-house",
@@ -1732,7 +1737,7 @@
    "https://thesession.org/tunes/3770",
    "https://thesession.org/tunes/746"
   ],
-  "note": "The Session lists 'The Miller O' Hirn' (strathspey, credited to James Scott Skinner), 'The Miller Of Droghan' (reel, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'The Miller O' Hirn' (strathspey, credited to James Scott Skinner), 'The Miller Of Droghan' (reel, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 3770 (naming James Scott Skinner, in its composer field) differs from the Song's melody"
  },
  {
   "id": "miller-of-drone",
@@ -1747,7 +1752,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22The%20Miller%20of%20Drone%22",
    "https://thesession.org/tunes/3626"
   ],
-  "note": "The Session lists 'The Miller Of Drone' (strathspey, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Compared by eye: The Session's tune 3626 follows the Song's melody and has no composer field; comments name Nathaniel Gow (1763 to 1831, Wikipedia), Isaac Cooper or Scott Skinner (died 1927, Wikipedia). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "money-in-both-pockets",
@@ -1763,7 +1768,7 @@
    "https://thesession.org/tunes/5186",
    "https://thesession.org/tunes/4745"
   ],
-  "note": "The Session lists 'Money In Both Pockets' (reel, no composer given), 'Money In Both Pockets' (jig, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'Money In Both Pockets' (reel, no composer given), 'Money In Both Pockets' (jig, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 5186 (naming McGreevy, in a comment) differs from the Song's melody"
  },
  {
   "id": "mount-hills",
@@ -1793,7 +1798,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22Mrs.%20Oswald%20of%20Auchincruive%22",
    "https://thesession.org/tunes/18643"
   ],
-  "note": "The Session lists 'Mrs Oswald Of Auchincruive's Favourite' (jig, credited to Robert Mackintosh), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'Mrs Oswald Of Auchincruive's Favourite' (jig, credited to Robert Mackintosh), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 18643 (naming Robert Mackintosh, in its composer field) differs from the Song's melody"
  },
  {
   "id": "nameless-lassie",
@@ -1895,7 +1900,7 @@
    "https://thesession.org/tunes/24909",
    "https://thesession.org/tunes/3573"
   ],
-  "note": "The Session lists 'Sea Shepherd' (jig, credited to Sharon Shannon), 'Shepherd's Hey' (reel, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "The Session lists 'Sea Shepherd' (jig, credited to Sharon Shannon), 'Shepherd's Hey' (reel, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 24909 (naming Sharon Shannon, in its composer field) differs from the Song's melody"
  },
  {
   "id": "sun-assembly",
@@ -1910,7 +1915,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22Sun%20Assembly%22",
    "https://thesession.org/tunes/25970"
   ],
-  "note": "The Session lists 'Sun Assembly' (polka, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Compared by eye: The Session's tune 25970 follows the Song's melody and has no composer field; a comment names Handel (1685 to 1759, Wikipedia), printed by Thompson in 1757. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "up-with-aily",
@@ -2018,7 +2023,7 @@
    "https://thesession.org/tunes/666",
    "https://thesession.org/tunes/11786"
   ],
-  "note": "PDMX names John Roberts 1806-1879, but no source confirms it; The Session lists 'Alexander's' (hornpipe, no composer given), 'Alexander MacAskill Of Bernera, Harris' (jig, credited to John MacAskill), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "PDMX names John Roberts 1806-1879, but no source confirms it; The Session lists 'Alexander's' (hornpipe, no composer given), 'Alexander MacAskill Of Bernera, Harris' (jig, credited to John MacAskill), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it; compared by eye, The Session's tune 11786 (naming John MacAskill, in its composer field) differs from the Song's melody"
  },
  {
   "id": "amorous-goddess",
@@ -2061,7 +2066,7 @@
    "https://en.wikipedia.org/w/index.php?search=%22Bellingham%20Boat%22",
    "https://thesession.org/tunes/6609"
   ],
-  "note": "The Session lists 'Bellingham Boat' (jig, no composer given), which this Song isn't shown to be; Wikipedia (title and exact-phrase search) and Wikidata search found no page or item for a tune of this name that names who wrote it"
+  "note": "Compared by eye: The Session's tune 6609 follows the Song's melody and has no composer field; a comment names Robert Whinham (1814 to 1893, Wikipedia). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "black-dance",

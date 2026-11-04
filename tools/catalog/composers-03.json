@@ -27,7 +27,10 @@
   "score": "https://musescore.com/score/5331156",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/9989",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/9989"
+  ]
  },
  {
   "id": "mountains-of-mourne",
@@ -70,7 +73,10 @@
   "score": "https://musescore.com/score/5051126",
   "composer": "Traditional (Scottish)",
   "composer_source": "https://thesession.org/tunes/75",
-  "note": "The Session: Scottish in origin; one comment mentions a setting credited to Niel Gow but says it is probably older"
+  "note": "Compared by eye: The Session's tune 75 follows the Song's melody and has no composer field; a setting's ABC credits Niel Gow (1727 to 1807, Wikipedia) and a comment names Sir Alexander MacDonald of Sleat (c. 1745 to 1795, Wikipedia), and a comment says the tune is probably older; a Session comment calls it Scottish in origin. Named only in a comment and under the limits, so kept as Traditional (Scottish)",
+  "checked": [
+   "https://thesession.org/tunes/75"
+  ]
  },
  {
   "id": "arrival-of-the-queen-of-sheba",
@@ -181,7 +187,10 @@
   "score": "https://musescore.com/score/4598043",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/83",
-  "note": "The Session names no composer for it"
+  "note": "Compared by eye: The Session's tune 83 follows the Song's melody and has no composer field; comments say one or two old manuscripts attribute it to James Hill (c. 1811 to 1853) without proof. Named only in a comment and under the limits, so kept as Traditional",
+  "checked": [
+   "https://thesession.org/tunes/83"
+  ]
  },
  {
   "id": "rio-grande",
@@ -337,7 +346,10 @@
   "score": "https://musescore.com/score/4807507",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/846",
-  "note": "The Session names no composer for it; a comment there says it was printed in O'Neill's Music of Ireland as \"Farewell to Erin\" (another reel, tune 4403, is called Farewell to Ireland)"
+  "note": "The Session names no composer for it; a comment there says it was printed in O'Neill's Music of Ireland as \"Farewell to Erin\" (another reel, tune 4403, is called Farewell to Ireland)",
+  "checked": [
+   "https://thesession.org/tunes/846"
+  ]
  },
  {
   "id": "home-on-the-range",
@@ -369,7 +381,10 @@
   "score": "https://musescore.com/score/4947466",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/14877",
-  "note": "The Session names no composer; it appears in O'Neill's Dance Music of Ireland (1907)"
+  "note": "The Session names no composer; it appears in O'Neill's Dance Music of Ireland (1907)",
+  "checked": [
+   "https://thesession.org/tunes/14877"
+  ]
  },
  {
   "id": "il-est-ne-le-divin-enfant",
@@ -448,7 +463,10 @@
   "score": "https://musescore.com/score/5036290",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/9",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/9"
+  ]
  },
  {
   "id": "we-three-kings",
@@ -493,7 +511,10 @@
   "score": "https://musescore.com/score/4722342",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/49",
-  "note": "The Session names no composer for this hornpipe"
+  "note": "The Session names no composer for this hornpipe",
+  "checked": [
+   "https://thesession.org/tunes/49"
+  ]
  },
  {
   "id": "dormi-iesu-dulcissime",
@@ -616,7 +637,10 @@
   "score": "https://musescore.com/score/4913003",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/12",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/12"
+  ]
  },
  {
   "id": "drunken-piper",
@@ -626,7 +650,10 @@
   "score": "https://musescore.com/score/4570241",
   "composer": "Traditional (Scottish)",
   "composer_source": "https://thesession.org/tunes/2123",
-  "note": "The Session: a comment calls it a Scottish tune from the Highland bagpipe repertoire"
+  "note": "Compared by eye: The Session's tune 2123 follows the Song's melody and has no composer field; comments name Alexander MacLeod (1829 to 1903) and date it 1880; a comment calls it a Scottish tune from the Highland bagpipe repertoire. Named only in a comment and under the limits, so kept as Traditional (Scottish)",
+  "checked": [
+   "https://thesession.org/tunes/2123"
+  ]
  },
  {
   "id": "god-is-working-his-purpose-out",
@@ -721,7 +748,10 @@
   "score": "https://musescore.com/score/4572429",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/7482",
-  "note": "The Session names no composer; a comment quoting the Fiddler's Companion calls it an English country dance tune from Playford's Dancing Master, dated to 1698, and says the melody \"may appear\" in Purcell's Abdelazar suite, which is not a credit (en.wikipedia.org/wiki/Abdelazer lists no such movement). PDMX's \"after Purcell\" is not confirmed"
+  "note": "Compared by eye: The Session's tune 7482 follows the Song's melody and has no composer field; comments name Henry Purcell (1659 to 1695, Wikipedia) and date it to Playford's Dancing Master, 1698. Named only in a comment and under the limits, so kept as Traditional",
+  "checked": [
+   "https://thesession.org/tunes/7482"
+  ]
  },
  {
   "id": "rakes-of-kildare",
@@ -731,7 +761,10 @@
   "score": "https://musescore.com/score/4557695",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/84",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/84"
+  ]
  },
  {
   "id": "an-alarch",
@@ -749,13 +782,16 @@
   "views": 41,
   "pdmx": "NA",
   "score": "https://musescore.com/score/4807539",
-  "composer": "Unknown",
+  "composer": "Bruce Molsky",
   "composer_source": "https://thesession.org/tunes/15454",
   "checked": [
    "https://thesession.org/tunes/15454",
-   "https://en.wikipedia.org/w/index.php?search=Chinquapin+Hunting"
+   "https://en.wikipedia.org/w/index.php?search=Chinquapin+Hunting",
+   "https://en.wikipedia.org/wiki/Bruce_Molsky"
   ],
-  "note": "The Session (tune 15454) has no composer field; one comment calls it an old-time reel composed by Bruce Molsky, another believes it traditional, and neither cites a source. No Wikipedia page for the tune, no Wikidata item"
+  "note": "Compared by eye: the Song is The Session's tune 15454, which has no composer field. One comment says Bruce Molsky composed it; the next believes it traditional and links Slippery Hill, which has a recording by the Virginia fiddler Norman Edmonds. Pulled under this PR's rule, for the owner",
+  "published": 2016,
+  "remove": "composer is living: a Session comment (tune 15454) says Bruce Molsky composed it, and Wikipedia gives his birth as 1955 with no death; 2016 is The Session's listing, the earliest date found"
  },
  {
   "id": "ellacombe",
@@ -803,7 +839,10 @@
   "score": "https://musescore.com/score/4572798",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/54",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/54"
+  ]
  },
  {
   "id": "morgan-megan",
@@ -824,7 +863,10 @@
   "score": "https://musescore.com/score/4691130",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/17725",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/17725"
+  ]
  },
  {
   "id": "planxty-fanny-power",
@@ -1000,7 +1042,10 @@
   "score": "https://musescore.com/score/4813119",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/307",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/307"
+  ]
  },
  {
   "id": "tailor-and-the-mouse",
@@ -1052,7 +1097,10 @@
   "score": "https://musescore.com/score/4574574",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/1262",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/1262"
+  ]
  },
  {
   "id": "jolly-old-st-nicholas",
@@ -1076,7 +1124,10 @@
   "score": "https://musescore.com/score/5145751",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/475",
-  "note": "The Session names no composer for this hornpipe"
+  "note": "The Session names no composer for this hornpipe",
+  "checked": [
+   "https://thesession.org/tunes/475"
+  ]
  },
  {
   "id": "blackbird",
@@ -1086,7 +1137,10 @@
   "score": "https://musescore.com/score/4719574",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/1104",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/1104"
+  ]
  },
  {
   "id": "blarney-pilgrim",
@@ -1096,7 +1150,10 @@
   "score": "https://musescore.com/score/4975253",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/5",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/5"
+  ]
  },
  {
   "id": "hostis-herodes-impie",
@@ -1177,7 +1234,10 @@
   "score": "https://musescore.com/score/4583538",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/249",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/249"
+  ]
  },
  {
   "id": "sailors-hornpipe",
@@ -1257,7 +1317,10 @@
   "score": "https://musescore.com/score/5010722",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/582",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/582"
+  ]
  },
  {
   "id": "hickory-dickory-dock",
@@ -1278,7 +1341,10 @@
   "score": "https://musescore.com/score/4696542",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/6508",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/6508"
+  ]
  },
  {
   "id": "bacca-pipes-jig",
@@ -1329,7 +1395,10 @@
   "score": "https://musescore.com/score/4902778",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/1408",
-  "note": "The Session names no composer for it"
+  "note": "Compared by eye: The Session's tune 1408 follows the Song's melody and has no composer field; a comment reports local lore crediting Tommy Edmondson (died 2001), but says he was only recorded playing it and that it is in older collections; another says he learned it from Jimmy Shand, it is in John Moore's manuscripts (written down 1837 to 1840) and in O'Neill's, and a 2025 comment names James Oswald (1710 to 1769) without a source. Kept Traditional; the Edmondson lore is left for the owner. Named only in a comment and under the limits, so kept as Traditional",
+  "checked": [
+   "https://thesession.org/tunes/1408"
+  ]
  },
  {
   "id": "bring-a-torch-jeanette-isabella",
@@ -1471,7 +1540,10 @@
   "score": "https://musescore.com/score/4855210",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/10730",
-  "note": "The Session: a comment says nobody knows its name or derivation"
+  "note": "The Session: a comment says nobody knows its name or derivation",
+  "checked": [
+   "https://thesession.org/tunes/10730"
+  ]
  },
  {
   "id": "glenlivet",
@@ -1481,7 +1553,10 @@
   "score": "https://musescore.com/score/5112413",
   "composer": "Traditional (Scottish)",
   "composer_source": "https://thesession.org/tunes/2299",
-  "note": "The Session: a comment says it is originally Scottish; this is the Glenlivet setting under The Green Linnet"
+  "note": "The Session: a comment says it is originally Scottish; this is the Glenlivet setting under The Green Linnet",
+  "checked": [
+   "https://thesession.org/tunes/2299"
+  ]
  },
  {
   "id": "good-night-ladies",
@@ -1512,7 +1587,10 @@
   "score": "https://musescore.com/score/4698317",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/10333",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/10333"
+  ]
  },
  {
   "id": "deil-amang-the-tailors",
@@ -1522,7 +1600,10 @@
   "score": "https://musescore.com/score/5087056",
   "composer": "Traditional (English)",
   "composer_source": "https://thesession.org/tunes/10315",
-  "note": "The Session: a comment says the Fiddler's Companion calls it an English tune"
+  "note": "The Session: a comment says the Fiddler's Companion calls it an English tune",
+  "checked": [
+   "https://thesession.org/tunes/10315"
+  ]
  },
  {
   "id": "highland-mary",
@@ -1563,7 +1644,10 @@
   "score": "https://musescore.com/score/5025319",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/86",
-  "note": "The Session names no composer for it"
+  "note": "Compared by eye: The Session's tune 86 follows the Song's melody and has no composer field; a comment credits Joseph Lowe, but another answers that Cabar Feidh is in the David Young manuscript of 1734 and the Athole Collection lists no composers; Michael Coleman added parts. Named only in a comment and under the limits, so kept as Traditional",
+  "checked": [
+   "https://thesession.org/tunes/86"
+  ]
  },
  {
   "id": "alexanders-hornpipe",
@@ -1573,7 +1657,10 @@
   "score": "https://musescore.com/score/4574369",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/666",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/666"
+  ]
  },
  {
   "id": "black-rogue",
@@ -1583,7 +1670,10 @@
   "score": "https://musescore.com/score/4570275",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/1076",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/1076"
+  ]
  },
  {
   "id": "boys-of-bluehill",
@@ -1593,7 +1683,10 @@
   "score": "https://musescore.com/score/4962331",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/651",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/651"
+  ]
  },
  {
   "id": "castle-of-dromore",
@@ -1603,7 +1696,10 @@
   "score": "https://musescore.com/score/5103896",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/7327",
-  "note": "The Session names no composer for the tune; Harold Boulton wrote the English words later"
+  "note": "The Session names no composer for the tune; Harold Boulton wrote the English words later",
+  "checked": [
+   "https://thesession.org/tunes/7327"
+  ]
  },
  {
   "id": "hard-times-come-again-no-more",
@@ -1659,7 +1755,10 @@
   "score": "https://musescore.com/score/4689933",
   "composer": "Traditional",
   "composer_source": "https://thesession.org/tunes/238",
-  "note": "The Session names no composer for it"
+  "note": "The Session names no composer for it",
+  "checked": [
+   "https://thesession.org/tunes/238"
+  ]
  },
  {
   "id": "coilsfield-house",

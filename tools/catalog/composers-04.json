@@ -33,7 +33,7 @@
    "https://thesession.org/tunes/842",
    "https://en.wikipedia.org/w/index.php?search=The%20Hills%20Of%20Glenorchy"
   ],
-  "note": "The Session's page for the tune (tune 842; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "Compared by eye: The Session's tune 842 follows the Song's melody and has no composer field; a comment says O'Neill's 1850 Melodies (1903) attributes it to Carey, and another guesses James S. Kerr, a 19th-century Glasgow publisher. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "horses-bransle",
@@ -47,7 +47,7 @@
    "https://thesession.org/tunes/3593",
    "https://en.wikipedia.org/w/index.php?search=Horse%27s%20Bransle"
   ],
-  "note": "The Session's page for the tune (tune 3593; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "Compared by eye: The Session's tune 3593 follows the Song's melody and has no composer field; a comment says a dance book lists Thoinot Arbeau (1520 to 1595, Wikipedia), whose Orchésographie printed it. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "ma-chere-amie",
@@ -115,7 +115,7 @@
    "https://thesession.org/tunes/14498",
    "https://en.wikipedia.org/w/index.php?search=The%20Banks%20of%20Spey"
   ],
-  "note": "The Session's page for the tune (tune 14498; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "Compared by eye: The Session's tune 14498 follows the Song's melody and has no composer field; a comment cites it in Randy Miller's William Marshall's Scottish Melodies; Marshall lived 1748 to 1833 (Wikipedia). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "barbu-lautarul",
@@ -143,7 +143,7 @@
    "https://thesession.org/tunes/3056",
    "https://en.wikipedia.org/w/index.php?search=Bonaparte%20Crossing%20The%20Alps"
   ],
-  "note": "The Session's page for a tune of this name lists no composer but its setting does not clearly follow the Song's melody; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "The Session's page for a tune of this name lists no composer but its setting does not clearly follow the Song's melody; Wikipedia and Wikidata searches for the title find no page naming one; compared by eye, The Session's tune 3056 (naming Mace Bell, in a comment) differs from the Song's melody"
  },
  {
   "id": "brian-olynn",
@@ -192,7 +192,10 @@
   "score": "https://musescore.com/score/4970575",
   "composer": "Traditional (English)",
   "composer_source": "https://thesession.org/tunes/3333",
-  "note": "The Session's \"Hunting The Squirrel\" (aliases include Hunt The Squirrel) follows the Song's melody and lists no composer; a comment calls it English and from Playford's Dancing Master"
+  "note": "The Session's \"Hunting The Squirrel\" (aliases include Hunt The Squirrel) follows the Song's melody and lists no composer; a comment calls it English and from Playford's Dancing Master",
+  "checked": [
+   "https://thesession.org/tunes/3333"
+  ]
  },
  {
   "id": "marines-hymn",
@@ -228,7 +231,7 @@
    "https://thesession.org/tunes/8465",
    "https://en.wikipedia.org/w/index.php?search=Miss%20Gordon%20of%20Gight"
   ],
-  "note": "The Session credits Isaac Cooper (tune 8465, from his 1783 collection) but its setting does not follow the Song's melody, so the credit is not applied; no Wikipedia page names a composer for this tune"
+  "note": "The Session credits Isaac Cooper (tune 8465, from his 1783 collection) but its setting does not follow the Song's melody, so the credit is not applied; no Wikipedia page names a composer for this tune; compared by eye, The Session's tune 8465 (naming Isaac Cooper, in its composer field) differs from the Song's melody"
  },
  {
   "id": "see-the-conquring-hero-comes",
@@ -276,7 +279,7 @@
    "https://en.wikipedia.org/w/index.php?search=Fisher%27s%20Hornpipe",
    "https://en.wikipedia.org/wiki/Hornpipe"
   ],
-  "note": "Wikipedia (Hornpipe) says hornpipes such as Fishar's were named after the dancers who performed them and names no composer; The Session's page (tune 872) lists none; tunearch.org refused requests"
+  "note": "Compared by eye: The Session's tune 872 follows the Song's melody and has no composer field; comments name a Fisher, or the oboist J. C. Fischer (c. 1733 to 1800, Wikipedia). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "in-the-bleak-midwinter",
@@ -291,7 +294,7 @@
    "https://en.wikipedia.org/w/index.php?search=In%20the%20Bleak%20Midwinter",
    "https://en.wikipedia.org/wiki/In_the_Bleak_Midwinter"
   ],
-  "note": "Wikipedia: two famous settings of Rossetti's poem, Holst's Cranham (1906) and Darke's anthem (1909, Darke died 1976); the Song's score names neither and its melody could not be tied to one from these pages; The Session's Midwinter (tune 2532, Dave Richardson) is a different waltz"
+  "note": "Wikipedia: two famous settings of Rossetti's poem, Holst's Cranham (1906) and Darke's anthem (1909, Darke died 1976); the Song's score names neither and its melody could not be tied to one from these pages; The Session's Midwinter (tune 2532, Dave Richardson) is a different waltz; compared by eye, The Session's tune 2532 (naming Dave Richardson, in its composer field) differs from the Song's melody"
  },
  {
   "id": "mulberry-bush",
@@ -460,7 +463,7 @@
    "https://en.wikipedia.org/w/index.php?search=Princess%20Royal",
    "https://en.wikipedia.org/wiki/Turlough_O'Carolan"
   ],
-  "note": "Wikipedia (Turlough O'Carolan) and Session comments (tune 905) attribute The Princess Royal to O'Carolan, but a Session comment disputes it and neither Session tune (905, 22383) follows the Song's melody, so the credit cannot be tied to this score"
+  "note": "Compared by eye: The Session's tune 905 follows the Song's melody and has no composer field; Wikipedia and comments attribute it to Turlough O'Carolan (1670 to 1738), and a comment disputes it; tune 22383 (Donald MacLeod, 'possibly') is a different melody. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "seven-stars",
@@ -476,7 +479,7 @@
    "https://thesession.org/tunes/19258",
    "https://en.wikipedia.org/w/index.php?search=Seven%20Stars"
   ],
-  "note": "The Session's The Moon And The Seven Stars (tune 1857) follows the Song's melody and names no composer; its The Seven Stars (tune 19258, Addie Harper) does not; a Session comment calls it an English tune"
+  "note": "The Session's The Moon And The Seven Stars (tune 1857) follows the Song's melody and names no composer; its The Seven Stars (tune 19258, Addie Harper) does not; a Session comment calls it an English tune; compared by eye, The Session's tune 19258 (naming Addie Harper, in its composer field) differs from the Song's melody"
  },
  {
   "id": "sur-le-pont",
@@ -597,7 +600,7 @@
    "https://thesession.org/tunes/142",
    "https://en.wikipedia.org/w/index.php?search=The%20Boyne%20Hunt"
   ],
-  "note": "The Session's page for a tune of this name lists no composer but its setting does not clearly follow the Song's melody; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "Compared by eye: The Session's tune 142 follows the Song's melody and has no composer field; a comment says the original tune, The Perthshire Hunt, was composed by Magdalene Stirling (1765 to 1846). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "brolum",
@@ -665,7 +668,7 @@
    "https://thesession.org/tunes/22531",
    "https://en.wikipedia.org/w/index.php?search=St.%20Kilda%20Wedding"
   ],
-  "note": "The Session's page for the tune (tune 1606; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one; a Session comment calls it a traditional Scottish reel"
+  "note": "The Session's page for the tune (tune 1606; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one; a Session comment calls it a traditional Scottish reel; compared by eye, The Session's tune 22531 (naming Kim McKee, in a comment) differs from the Song's melody"
  },
  {
   "id": "blackthorn-stick",
@@ -975,16 +978,18 @@
   "views": 16,
   "pdmx": "NA",
   "score": "https://musescore.com/score/4837139",
-  "composer": "Traditional (Scottish)",
-  "composer_source": "https://thesession.org/tunes/5961",
+  "composer": "Thomas Connellan",
+  "composer_source": "https://thesession.org/tunes/2937",
   "checked": [
    "https://thesession.org/tunes/2937",
    "https://thesession.org/tunes/5961",
    "https://thesession.org/tunes/8937",
    "https://thesession.org/tunes/19542",
-   "https://en.wikipedia.org/w/index.php?search=Killiecrankie"
+   "https://en.wikipedia.org/w/index.php?search=Killiecrankie",
+   "https://en.wikipedia.org/wiki/Thomas_Connellan"
   ],
-  "note": "The Session's Planxty Davis (tune 2937, also called Killiecrankie) is credited to Thomas Connellan but does not follow the Song's melody; The Session's Battle Of Killiecrankie (tune 5961) does and names no composer; a Session comment calls it a Scottish air and slow march, dated 1692 by John Glen"
+  "note": "Compared by eye: The Session's Planxty Davis (tune 2937, also called Killiecrankie) follows the Song's melody and its composer field names Thomas Connellan; Wikipedia gives him c. 1625 to 1698, and comments say he composed it in 1689 and that it is in the 1694 Atkinson manuscript and Playford (1701). Doubt: The Session's Battle Of Killiecrankie (tune 5961) is the same air with no composer, and a comment there calls it a Scottish air dated 1692 by John Glen",
+  "composer_died": 1698
  },
  {
   "id": "mary-had-a-baby",
@@ -1012,7 +1017,7 @@
    "https://thesession.org/tunes/1556",
    "https://en.wikipedia.org/w/index.php?search=Miss%20Sarah%20Drummond%20Of%20Perth"
   ],
-  "note": "The Session's page for the tune (tune 1556; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "Compared by eye: The Session's tune 1556 follows the Song's melody and has no composer field; comments debate whether Niel Gow (1727 to 1807, Wikipedia) wrote it; they date it to MacDonald's collection of 1789 and Gow's of 1792. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "natus-est-nobis",
@@ -1066,7 +1071,7 @@
    "https://thesession.org/tunes/1286",
    "https://en.wikipedia.org/w/index.php?search=Rob%20Roy%20MacGregor"
   ],
-  "note": "The Session's page for the tune (tune 5729; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "The Session's page for the tune (tune 5729; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one; compared by eye, The Session's tune 1286 (naming Shaw and McKerron, in a comment) differs from the Song's melody"
  },
  {
   "id": "sad-is-my-fate",
@@ -1240,7 +1245,7 @@
    "https://thesession.org/tunes/14181",
    "https://en.wikipedia.org/w/index.php?search=My%20Darling%20Asleep"
   ],
-  "note": "The Session's page for the tune (tune 76; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "The Session's page for the tune (tune 76; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one; compared by eye, The Session's tune 14181 (naming Johnny Cunningham, in its composer field) differs from the Song's melody"
  },
  {
   "id": "off-she-goes",
@@ -1256,7 +1261,7 @@
    "https://thesession.org/tunes/20282",
    "https://en.wikipedia.org/w/index.php?search=Off%20She%20Goes"
   ],
-  "note": "The Session's page for the tune (tune 1133; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "Compared by eye: The Session's tune 1133 follows the Song's melody and has no composer field; a comment quotes Bayard: Moffat credits Piper Jackson, c. 1760, which Bayard doubts, the Macfarren claim is impossible, and it is in manuscripts of 1823 to 1826. Named only in a comment and under the limits, so kept as Traditional"
  },
  {
   "id": "oranges-and-lemons",
@@ -1295,7 +1300,7 @@
    "https://thesession.org/tunes/1191",
    "https://en.wikipedia.org/w/index.php?search=Speed%20the%20Plough"
   ],
-  "note": "The Session's page for the tune (tune 1191; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "Compared by eye: The Session's tune 1191 follows the Song's melody and has no composer field; comments say John Moorhead composed it, c. 1800. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "twenty-ninth-of-may",
@@ -1489,7 +1494,7 @@
    "https://thesession.org/tunes/1115",
    "https://en.wikipedia.org/w/index.php?search=The%20Smith%27s%20A%20Gallant%20Fireman"
   ],
-  "note": "The Session's page for the tune (tune 4862; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one; a Session comment gives another Scottish title for it"
+  "note": "Compared by eye: The Session's tune 4862 follows the Song's melody and has no composer field; a comment cites Scott Skinner's The Scottish Violinist; Skinner died in 1927 (Wikipedia). Named only in a comment and under the limits, so kept as Traditional (Scottish)"
  },
  {
   "id": "sweet-jenny-jones",
@@ -1638,7 +1643,7 @@
    "https://thesession.org/tunes/419",
    "https://en.wikipedia.org/w/index.php?search=President%20Garfield%27s%20Hornpipe"
   ],
-  "note": "The Session's page for the tune (tune 419; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "Compared by eye: The Session's tune 419 follows the Song's melody and has no composer field; a comment says Ryan's credits Harry Carleton, an American fiddler; Wikipedia dates Ryan's Mammoth Collection to 1883. Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "providence",
@@ -1654,7 +1659,7 @@
    "https://thesession.org/tunes/23807",
    "https://en.wikipedia.org/w/index.php?search=Providence"
   ],
-  "note": "The Session's page for the tune (tune 8312; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "The Session's page for the tune (tune 8312; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one; compared by eye, The Session's tune 23807 (naming Alejo Parra, in its composer field) differs from the Song's melody"
  },
  {
   "id": "reveillez-vous-picards",
@@ -1765,7 +1770,7 @@
    "https://thesession.org/tunes/13730",
    "https://en.wikipedia.org/w/index.php?search=The%20Wild%20Geese"
   ],
-  "note": "The Session's Flight Of The Wild Geese (tune 600, Ed Reavy) does not follow the Song's melody; The Session's The Wild Geese (tune 13730) does and names no composer"
+  "note": "The Session's Flight Of The Wild Geese (tune 600, Ed Reavy) does not follow the Song's melody; The Session's The Wild Geese (tune 13730) does and names no composer; compared by eye, The Session's tune 600 (naming Ed Reavy, in its composer field) differs from the Song's melody"
  },
  {
   "id": "yellow-haired-laddie",
@@ -1793,7 +1798,7 @@
    "https://thesession.org/tunes/6970",
    "https://en.wikipedia.org/w/index.php?search=The%2072nd%20Highlanders%27%20Farewell%20To%20Aberdeen"
   ],
-  "note": "The Session's page for the tune (tune 6970; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "Compared by eye: The Session's tune 6970 follows the Song's melody and has no composer field; comments credit William MacKay, Pipe Major John MacDonald or N. Mathieson, and find it in Uilleam Ross's 19th-century collection and Logan's Tutor (c. 1900). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "all-in-a-garden-green",
@@ -1903,7 +1908,7 @@
    "https://thesession.org/tunes/1149",
    "https://en.wikipedia.org/w/index.php?search=Maggie%20Brown%27s%20Favourite"
   ],
-  "note": "The Session's page for the tune (tune 1149; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "Compared by eye: The Session's tune 1149 follows the Song's melody and has no composer field; comments say Nathaniel Gow (1763 to 1831, Wikipedia) claimed it, and others name O'Carolan (1670 to 1738). Named only in a comment and under the limits, so kept as Unknown"
  },
  {
   "id": "marquis-of-huntlys-highland-fling",
@@ -1918,7 +1923,7 @@
    "https://thesession.org/tunes/10347",
    "https://en.wikipedia.org/w/index.php?search=The%20Marquis%20of%20Huntly%27s%20Highland%20Fling"
   ],
-  "note": "The Session's page for the tune (tune 9750; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one"
+  "note": "The Session's page for the tune (tune 9750; its setting follows the Song's melody) lists no composer; Wikipedia and Wikidata searches for the title find no page naming one; compared by eye, The Session's tune 10347 (naming Peter Milne or William Marshall, in comments) differs from the Song's melody"
  },
  {
   "id": "mr-oconnor",
