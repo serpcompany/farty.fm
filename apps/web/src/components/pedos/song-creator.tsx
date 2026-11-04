@@ -1,11 +1,21 @@
 'use client'
 
-import { Check, ChevronLeft, CircleAlert, Play, Square, Trash2 } from 'lucide-react'
+import {
+  AudioLines,
+  Check,
+  ChevronLeft,
+  CircleAlert,
+  Piano,
+  Play,
+  Square,
+  Trash2
+} from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { libraryOwner } from '@/lib/account'
 import type { Song, SongSummary } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
@@ -39,8 +49,10 @@ import { useAccount } from './account-provider'
 import { FavoriteButton } from './favorite-button'
 import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
+import { pianoSchedule } from './piano-preview'
 import { previousPage } from './previous-page'
 import { ReportSong } from './report-song-sheet'
+import { usePianoPreview } from './use-piano-preview'
 import { useSongNotes } from './use-song-notes'
 import { Waveform } from './waveform'
 
@@ -262,7 +274,7 @@ function heldByAnAccount(): boolean {
 export function Ready({ draft, back }: { draft: SongTootDraft; back: CheckoutReturn | null }) {
   return (
     <>
-      <TootLayout toot={draft} song={draft.song} />
+      <TootLayout toot={draft} song={draft.song} pianoPreview />
       <ReportSong song={draft.song} />
       <SaveToToots draft={draft} back={back} />
     </>
@@ -472,28 +484,58 @@ type Focus = { pitch: number } | { note: number } | null
  *
  * Play needs only the Toot's audio, so a saved Toot's screen shows it before its Song's notes load
  * (#323): `song` is then the Song without them, and `notesFallback` stands in for the note view.
+ *
+ * With `pianoPreview` (Song Creator, #359), Play plays on Piano or Farts: Piano plays the Song's
+ * notes in the key the farts play them in, and a note tapped plays on it too. Switching while the
+ * Song plays carries on from the same spot in the other. Farts is picked each time it opens.
  */
 export function TootLayout({
   toot,
   song,
   notesFallback,
   isAudioMissing = false,
+  pianoPreview = false,
   children
 }: {
   toot: SongTootDraft | SongToot
   song: Song | SongSummary
   notesFallback?: ReactNode
   isAudioMissing?: boolean
+  pianoPreview?: boolean
   children?: ReactNode
 }) {
   const pedos = usePedos()
+  const piano = usePianoPreview()
   const { arrangement } = toot
   const [focus, setFocus] = useState<Focus>(null)
+  const [playsOn, setPlaysOn] = useState<'piano' | 'farts'>('farts')
+  const onPiano = pianoPreview && playsOn === 'piano'
   /** The Song with its notes, once they've loaded. */
   const melody = 'notes' in song ? song : null
+  const pianoNotes = useMemo(
+    () => (melody ? pianoSchedule(melody, arrangement.transposition) : null),
+    [melody, arrangement.transposition]
+  )
   const isPlaying = pedos.nowPlaying === tootPlayback(toot.id)
-  const playingNote =
+  const isPianoPlaying = piano.playing?.target === 'song'
+  const fartNote =
     melody?.notes.findIndex((_, i) => pedos.nowPlaying === tootPlayback(toot.id, i)) ?? -1
+  const pianoNote = typeof piano.playing?.target === 'number' ? piano.playing.target : -1
+  const playingNote = fartNote === -1 ? pianoNote : fartNote
+  const shownPlaying = onPiano ? isPianoPlaying : isPlaying
+
+  /** Piano or Farts; the Song playing carries on from where it is in the other. */
+  const playOn = (next: 'piano' | 'farts') => {
+    if (next === playsOn) return
+    setPlaysOn(next)
+    if (next === 'piano' && isPlaying && pianoNotes) {
+      piano.play('song', pianoNotes, pedos.playbackPosition() ?? 0)
+    } else if (next === 'farts' && isPianoPlaying) {
+      const from = piano.position() ?? 0
+      piano.stop()
+      pedos.toggleTootPlayback(toot, undefined, undefined, from)
+    }
+  }
   const selectedNote = melody && focus && 'note' in focus ? focus.note : null
   const highlightedPitch =
     focus === null
@@ -511,44 +553,83 @@ export function TootLayout({
       <div className="flex items-center gap-4">
         <button
           type="button"
-          aria-label={isAudioMissing ? 'Audio missing' : isPlaying ? 'Stop' : 'Play'}
+          aria-label={
+            isAudioMissing
+              ? 'Audio missing'
+              : shownPlaying
+                ? 'Stop'
+                : onPiano
+                  ? 'Play on piano'
+                  : 'Play'
+          }
           data-testid="song-creator-play"
           disabled={isAudioMissing}
           className={cn(
             'flex size-14 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
             isAudioMissing
               ? 'bg-muted text-muted-foreground'
-              : isPlaying
+              : shownPlaying
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-primary/10 text-primary'
           )}
           onClick={() => {
             setFocus(null)
-            pedos.toggleTootPlayback(toot)
+            if (!onPiano) pedos.toggleTootPlayback(toot)
+            else if (isPianoPlaying) piano.stop()
+            else if (pianoNotes) piano.play('song', pianoNotes)
           }}
         >
           {isAudioMissing ? (
             <CircleAlert className="size-6" />
-          ) : isPlaying ? (
+          ) : shownPlaying ? (
             <Square className="size-5 fill-current" />
           ) : (
             <Play className="size-6 fill-current" />
           )}
         </button>
-        <div className="min-w-0">
-          <p className="font-semibold" data-testid="song-creator-state">
-            {isAudioMissing
-              ? 'Audio missing'
-              : isPlaying
-                ? 'Playing'
-                : pedos.tootPlayFailed === toot.id
-                  ? "Couldn't play"
-                  : 'Ready'}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {song.pitches.length} of your Recordings, one per note
-          </p>
-          {children}
+        <div className="flex min-w-0 flex-col gap-1.5">
+          {pianoPreview && (
+            <ToggleGroup
+              variant="outline"
+              size="sm"
+              spacing={0}
+              aria-label="Play on"
+              value={[playsOn]}
+              onValueChange={([next]) => {
+                if (next === 'piano' || next === 'farts') playOn(next)
+              }}
+            >
+              <ToggleGroupItem value="piano" className="h-11 px-3 text-sm">
+                <Piano />
+                Piano
+              </ToggleGroupItem>
+              <ToggleGroupItem value="farts" className="h-11 px-3 text-sm">
+                <AudioLines />
+                Farts
+              </ToggleGroupItem>
+            </ToggleGroup>
+          )}
+          <div>
+            <p className="font-semibold" data-testid="song-creator-state">
+              {onPiano
+                ? isPianoPlaying
+                  ? 'Playing'
+                  : 'Ready'
+                : isAudioMissing
+                  ? 'Audio missing'
+                  : isPlaying
+                    ? 'Playing'
+                    : pedos.tootPlayFailed === toot.id
+                      ? "Couldn't play"
+                      : 'Ready'}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {onPiano
+                ? "The Song's notes on piano"
+                : `${song.pitches.length} of your Recordings, one per note`}
+            </p>
+            {children}
+          </div>
         </div>
       </div>
 
@@ -561,11 +642,23 @@ export function TootLayout({
               const recording = recordingFor(note.pitch)
               return recording ? recordingName(recording) : 'Recording deleted'
             }}
-            startedAt={isPlaying ? pedos.playbackStartedAt : null}
+            startedAt={
+              isPlaying
+                ? pedos.playbackStartedAt
+                : isPianoPlaying
+                  ? (piano.playing?.startedAt ?? null)
+                  : null
+            }
             highlightedPitch={highlightedPitch}
             selectedNote={selectedNote}
             playingNote={playingNote === -1 ? null : playingNote}
             onTapNote={index => {
+              if (onPiano && pianoNotes) {
+                setFocus({ note: index })
+                if (pianoNote === index) piano.stop()
+                else piano.play(index, [{ ...pianoNotes[index], start: 0 }])
+                return
+              }
               if (isAudioMissing) return
               setFocus({ note: index })
               pedos.toggleTootPlayback(toot, index, melody)
