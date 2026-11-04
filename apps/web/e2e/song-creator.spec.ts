@@ -137,7 +137,8 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       if (out) await page.screenshot({ path: join(out, `${song.id}.png`) })
 
       // Tapping a Recording plays it alone and highlights the notes it plays.
-      await used.first().getByRole('button').click()
+      // Its play button, before its "plays E3" pill (#360).
+      await used.first().getByRole('button').first().click()
       const alone = await lastStart(page)
       expect(alone.duration).toBeLessThan(whole.duration)
       const lowest = song.notes.filter(n => n.pitch === song.pitches[0]).length

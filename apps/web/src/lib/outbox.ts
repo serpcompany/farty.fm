@@ -1,18 +1,20 @@
-// The outbox: what this browser still has to send to the account, one entry per Recording, Toot
-// or Favorite Song, kept in IndexedDB beside them (`recording-store.ts`) and written in the same
-// transaction as the change it records. `library-sync.ts` sends it. Every save, rename, place,
-// delete and favorite joins it, a guest's too, so signing in sends what a guest kept: their
-// Recordings, this visit's Toots and their Favorite Songs (#313). A guest's new visit clears the
-// Toots' entries with the Toots (`visit.ts`).
+// The outbox: what this browser still has to send to the account, one entry per Recording, Toot,
+// Favorite Song or Song's Fart Choices, kept in IndexedDB beside them (`recording-store.ts`) and
+// written in the same transaction as the change it records. `library-sync.ts` sends it. Every
+// save, rename, place, delete, favorite and fart change joins it, a guest's too, so signing in
+// sends what a guest kept: their Recordings, this visit's Toots and Fart Choices, and their
+// Favorite Songs (#313). A guest's new visit clears the Toots' and Fart Choices' entries with
+// them (`visit.ts`).
 
 /** A user's Recordings or their Toots, by the name of their store and their route. */
 export type Kind = 'recordings' | 'toots'
 
 /**
- * What an outbox entry is for: a Recording, a Toot, or a Favorite Song (#313), whose `put` marks
- * the Song a favorite on the account and whose `delete` takes it off.
+ * What an outbox entry is for: a Recording, a Toot, a Favorite Song (#313), whose `put` marks the
+ * Song a favorite on the account and whose `delete` takes it off, or a Song's Fart Choices (#360),
+ * whose `put` sends them as they are here then and whose `delete` makes the Song automatic again.
  */
-export type OutboxKind = Kind | 'favorites'
+export type OutboxKind = Kind | 'favorites' | 'fartChoices'
 
 /**
  * What the server still needs: the item itself, a Toot's new title, a Recording's Placed Pitch
@@ -67,7 +69,8 @@ export const itemKey = (kind: OutboxKind, id: string) => `${kind}:${id}`
  * no request has carried. A Favorite Song's last op wins, and is sent once an earlier one may have
  * reached the account: that one may be on its way, and may not arrive. A tap that undoes one no
  * request carried leaves nothing to send, so a guest's heart on and off again never takes the Song
- * off an account that marked it elsewhere.
+ * off an account that marked it elsewhere. A Song's Fart Choices send their last op, always: the
+ * account may hold the Song's from another browser.
  */
 export function mergeOutbox(
   queued: OutboxEntry | undefined,
@@ -92,6 +95,7 @@ export function mergeOutbox(
     if (queued && queued.op !== op && !reached) return null
     return reached ? { ...fresh(op), reached } : fresh(op)
   }
+  if (kind === 'fartChoices') return queued?.op === op && !queued.sent ? queued : fresh(op)
   if (!queued) return op === 'place' ? { ...fresh(op), fields: unionFields([], fields) } : fresh(op)
   if (queued.op === 'delete') return queued
   if (op === 'delete') return queued.op === 'put' && !queued.sent ? null : fresh('delete')

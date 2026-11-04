@@ -2,9 +2,12 @@
 
 import {
   AudioLines,
+  Ban,
   Check,
   ChevronLeft,
+  ChevronRight,
   CircleAlert,
+  Lock,
   Piano,
   Play,
   Square,
@@ -14,12 +17,24 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { libraryOwner } from '@/lib/account'
 import type { Song, SongSummary } from '@/lib/catalog/song'
+import { type Arrangement, type MissingNote, songPitches } from '@/lib/engine/auto-map'
+import { arrangeChoices, type FartChoices, sameFartChoices } from '@/lib/engine/fart-choices'
+import { changedChoices, changeLine, type FartChange, fartSheet } from '@/lib/fart-sheet'
 import { noteName } from '@/lib/pitch'
-import { formattedFartLength } from '@/lib/pitch-coverage'
+import {
+  autoMapRecordings,
+  coverageFraction,
+  coverageSummary,
+  engineSong,
+  formattedFartLength,
+  missingNotes
+} from '@/lib/pitch-coverage'
 import { TOOT_PRICE_LABEL } from '@/lib/pricing'
 import * as store from '@/lib/recording-store'
 import { playedPart, type Recording, recordingName, songPitch } from '@/lib/recordings'
@@ -30,6 +45,7 @@ import {
   type SongToot,
   type SongTootDraft,
   soundingPitch,
+  type TootArrangement,
   type TootDraft
 } from '@/lib/toot'
 import {
@@ -41,23 +57,26 @@ import {
   startCheckout,
   waitUntilPaid
 } from '@/lib/toot-payment'
-import { TootError } from '@/lib/toot-renderer'
+import { TootError, tootArrangement } from '@/lib/toot-renderer'
 import { cn } from '@/lib/utils'
 import { decodeWav } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 import { useAccount } from './account-provider'
+import { FartSheetView } from './fart-sheet'
 import { FavoriteButton } from './favorite-button'
 import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
-import { pianoSchedule } from './piano-preview'
+import { pianoSchedule, stopPiano } from './piano-preview'
 import { previousPage } from './previous-page'
 import { ReportSong } from './report-song-sheet'
+import { changeFartChoices, useFartChoices } from './use-fart-choices'
 import { usePianoPreview } from './use-piano-preview'
 import { useSongNotes } from './use-song-notes'
 import { Waveform } from './waveform'
 
 type Phase =
-  | { kind: 'making' }
+  /** `again`: after a change to the Song's farts, the Toot shows while it's made again. */
+  | { kind: 'making'; again?: boolean }
   | { kind: 'ready'; draft: SongTootDraft; back: CheckoutReturn | null }
   | { kind: 'locked' }
   | { kind: 'failed' }
@@ -67,7 +86,9 @@ export type SongHeading = Pick<Song, 'id' | 'title' | 'source'>
 
 /**
  * Song Creator: hear an Unlocked Song played by your Recordings, and keep it as a Toot. It's not
- * an editor: nothing here changes the Arrangement (ADR 0005). As the iPhone app's
+ * an editor: no note of the Song changes (ADR 0005). The user can only swap the fart that plays a
+ * pitch, or leave a fart out of the Song, in the fart sheet (#360), kept as the Song's Fart
+ * Choices; a fart left out with no other to play its pitch locks the Song. As the iPhone app's
  * `SongCreatorView`.
  *
  * The Song comes from the Song Catalog the browser fetches (`usePedos().songs`), and its notes
@@ -84,7 +105,16 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
   const [phase, setPhase] = useState<Phase>({ kind: 'making' })
   /** Bumped by Try again, to make the Toot again. */
   const [attempt, setAttempt] = useState(0)
-  const loaded = pedos.recordings !== null && song !== null
+  /** Every changed Song's Fart Choices; null while they're read. */
+  const allChoices = useFartChoices()
+  const choices = allChoices?.get(id) ?? null
+  /** The Song's Fart Choices as they're kept: the Toot is made again when they change. */
+  const choicesKey = JSON.stringify(choices)
+  /** What the last change to the Song's farts did, until the next one. */
+  const [changed, setChanged] = useState<string | null>(null)
+  /** The Song pitch whose fart sheet is open. */
+  const [sheetPitch, setSheetPitch] = useState<number | null>(null)
+  const loaded = pedos.recordings !== null && song !== null && allChoices !== null
   // The catalog or the Song's notes didn't load, or the catalog has no Song of this id.
   const view =
     (summary === undefined && pedos.songsFailed) || notes.failed
@@ -93,28 +123,47 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
         ? 'missing'
         : phase.kind
 
+  // The Arrangement as Auto-map reads the Song, with its Fart Choices: what the fart sheet lists
+  // and a gap shows. The render makes the same one (`makeToot`).
+  const pitches = useMemo(() => (song ? songPitches(engineSong(song)) : null), [song])
+  const melodic = useMemo(() => autoMapRecordings(pedos.recordings ?? []), [pedos.recordings])
+  const arrangement = useMemo(
+    () => (pitches ? arrangeChoices(pitches, melodic, choices) : null),
+    [pitches, melodic, choices]
+  )
+  const sheet = useMemo(
+    () =>
+      pitches && sheetPitch !== null ? fartSheet(pitches, melodic, choices, sheetPitch) : null,
+    [pitches, melodic, choices, sheetPitch]
+  )
+
   // Back from Checkout, the same Toot is made again, with the id it was paid for (ADR 0010).
   const make = useEffectEvent(async (song: Song) => {
     const back = readCheckoutReturn()
-    return { draft: await pedos.makeToot(song, back?.tootId), back }
+    return { draft: await pedos.makeToot(song, back?.tootId, choices), back }
   })
   const playOnce = useEffectEvent((draft: TootDraft) => {
     // A page opened from a link or a reload can't start sound before a tap.
     if (navigator.userActivation?.hasBeenActive ?? true) pedos.toggleTootPlayback(draft)
   })
+  /** The first Toot made here has played once; one made again after a change waits for a tap. */
+  const playedOnce = useRef(false)
 
-  // Makes the Toot once the Recordings and the Song have loaded, then plays it once. Leaving the
-  // screen before it's made drops it; coming back makes it again.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` is what Try again changes.
+  // Makes the Toot once the Recordings, the Song and its Fart Choices have loaded, then plays it
+  // once, and again whenever the Fart Choices change. Leaving the screen before it's made drops
+  // it; coming back makes it again.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` is what Try again changes, and `choicesKey` what a change to the Song's farts does.
   useEffect(() => {
     if (!loaded || !song) return
     let left = false
+    setPhase(current => (current.kind === 'making' ? current : { kind: 'making', again: true }))
     make(song).then(
       ({ draft, back }) => {
         if (left) return
         setPhase({ kind: 'ready', draft, back })
         // Back from Checkout, the Toot was heard already: it waits for a tap.
-        if (!back) playOnce(draft)
+        if (!back && !playedOnce.current) playOnce(draft)
+        playedOnce.current = true
       },
       error => {
         const locked = error instanceof TootError && error.reason === 'locked'
@@ -131,7 +180,7 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
     return () => {
       left = true
     }
-  }, [loaded, attempt])
+  }, [loaded, attempt, choicesKey])
 
   const { stopPlayback, forgetToot } = pedos
   useEffect(() => stopPlayback, [stopPlayback])
@@ -139,6 +188,46 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
   useEffect(() => {
     if (draftId) return () => forgetToot(draftId)
   }, [draftId, forgetToot])
+
+  /** Opens the fart sheet for a Song pitch, stopping what plays. */
+  const changeFart = (songPitch: number) => {
+    stopPlayback()
+    stopPiano()
+    setSheetPitch(songPitch)
+  }
+  /** Makes a change from the fart sheet or the lock card: kept, said, and the Toot made again. */
+  const change = (fartChange: FartChange) => {
+    setSheetPitch(null)
+    if (!pitches || !arrangement) return
+    const next = changedChoices(fartChange, pitches, melodic, choices)
+    if (sameFartChoices(next, choices)) return
+    const named = (recordingId: string) => {
+      const recording = pedos.recording(recordingId)
+      return recording ? recordingName(recording) : 'A deleted Recording'
+    }
+    stopPlayback()
+    // The piano too: Reset to automatic can move the Song to another key.
+    stopPiano()
+    setChanged(changeLine(fartChange, arrangement, arrangeChoices(pitches, melodic, next), named))
+    setPhase({ kind: 'making', again: true })
+    void changeFartChoices(id, next)
+  }
+  const changes: FartChanging | undefined =
+    arrangement && song
+      ? { onChangeFart: changeFart, picks: picksOf(arrangement, choices), line: changed }
+      : undefined
+  // A Song a fart left out locks (#360): it shows its notes and the lock card, where a Song
+  // locked for want of farts shows only that it's locked.
+  const isGap = view === 'locked' && choices !== null && arrangement !== null
+  // The Arrangement the Toot is made from while it's made again after a change, or a gap's.
+  const unmade =
+    arrangement && (isGap || (view === 'making' && phase.kind === 'making' && phase.again))
+      ? {
+          kind: isGap ? ('locked' as const) : ('making' as const),
+          arrangement: tootArrangement(arrangement),
+          missing: arrangement.missingNotes
+        }
+      : null
 
   return (
     <div className="flex flex-1 flex-col">
@@ -165,7 +254,7 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
         {shown && <FavoriteButton song={shown} />}
       </header>
 
-      {view === 'making' && (
+      {view === 'making' && !unmade && (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted-foreground">
           <Spinner className="size-6" />
           <p>Making your Toot…</p>
@@ -176,7 +265,7 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
           Couldn't find this Song.
         </p>
       )}
-      {view === 'locked' && (
+      {view === 'locked' && !isGap && (
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
           This Song is locked. Record the notes it needs to unlock it.
         </p>
@@ -204,9 +293,83 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
           </Button>
         </div>
       )}
-      {view === 'ready' && phase.kind === 'ready' && (
-        <Ready draft={phase.draft} back={phase.back} />
+      {/* One TootLayout while the Toot is made again after a change, so the selected note and
+          the change line stay. */}
+      {view === 'ready' && phase.kind === 'ready' ? (
+        <TootLayout toot={phase.draft} song={phase.draft.song} changes={changes} pianoPreview />
+      ) : (
+        song &&
+        unmade && (
+          <TootLayout toot={null} unmade={unmade} song={song} changes={changes} pianoPreview />
+        )
       )}
+      {/* Report a problem (#358) whenever the notes show: at Ready, while the Toot is made again
+          after a change, and in a Song a leave-out locks. One element in one place, so a report
+          sheet opened while the Toot is made stays open. */}
+      {view === 'ready' && phase.kind === 'ready' ? (
+        <ReportSong song={phase.draft.song} />
+      ) : (
+        song && unmade && <ReportSong song={song} />
+      )}
+      {view === 'ready' && phase.kind === 'ready' && (
+        <SaveToToots draft={phase.draft} back={phase.back} />
+      )}
+      {isGap && arrangement && (
+        <LockCard
+          arrangement={arrangement}
+          onReset={() => change({ kind: 'resetAll' })}
+          onRecord={() => router.push('/')}
+        />
+      )}
+      <FartSheetView sheet={sheet} onClose={() => setSheetPitch(null)} onChange={change} />
+    </div>
+  )
+}
+
+/** The Song pitches whose fart is the one the user swapped in. */
+function picksOf(arrangement: Arrangement, choices: FartChoices | null): ReadonlySet<number> {
+  return new Set(
+    arrangement.pitches
+      .filter(c => c.recordingId !== null && choices?.preferred[c.songPitch] === c.recordingId)
+      .map(c => c.songPitch)
+  )
+}
+
+/**
+ * In place of Save, for a Song a fart left out locks (#360): its Pitch Coverage, the notes it
+ * needs, Reset to automatic (every change undone) and Record. The locked Song sheet's pieces, in
+ * its order.
+ */
+function LockCard({
+  arrangement,
+  onReset,
+  onRecord
+}: {
+  arrangement: Arrangement
+  onReset: () => void
+  onRecord: () => void
+}) {
+  const missing = missingNotes({ missing: arrangement.missingNotes })
+  return (
+    <div className="sticky bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] mt-auto md:bottom-0 bg-linear-to-t from-background from-70% to-transparent px-4 pt-5 pb-3">
+      <Card size="sm" className="gap-3 px-4" data-testid="lock-card">
+        <div className="flex flex-col gap-1.5">
+          <Progress value={coverageFraction(arrangement) * 100} aria-hidden />
+          <p className="flex items-center gap-2 text-muted-foreground">
+            <Lock className="size-4" aria-hidden />
+            {coverageSummary(arrangement)}
+          </p>
+        </div>
+        {missing && <p className="text-base">Needs a fart near {missing}.</p>}
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" className="h-11 text-base" onClick={onReset}>
+            Reset to automatic
+          </Button>
+          <Button className="h-11 text-base" onClick={onRecord}>
+            Record
+          </Button>
+        </div>
+      </Card>
     </div>
   )
 }
@@ -265,20 +428,6 @@ function heldByAnAccount(): boolean {
   } catch {
     return false
   }
-}
-
-/**
- * The made Toot of a Song, with Report a problem at its end (#358) and Save to Toots pinned above
- * the tabs.
- */
-export function Ready({ draft, back }: { draft: SongTootDraft; back: CheckoutReturn | null }) {
-  return (
-    <>
-      <TootLayout toot={draft} song={draft.song} pianoPreview />
-      <ReportSong song={draft.song} />
-      <SaveToToots draft={draft} back={back} />
-    </>
-  )
 }
 
 /**
@@ -474,13 +623,40 @@ export function SaveToToots({
 type Focus = { pitch: number } | { note: number } | null
 
 /**
+ * A Song's Toot before it's made, or when it can't be: what Song Creator shows while it makes the
+ * Toot again after a change to its farts, or when a fart left out locks the Song (#360).
+ */
+export type UnmadeToot = {
+  kind: 'making' | 'locked'
+  arrangement: TootArrangement
+  /** The notes no fart plays, with how long a fart each needs. */
+  missing: readonly MissingNote[]
+}
+
+/** Song Creator's way into the fart sheet (#360). A saved Toot's screen has none. */
+export type FartChanging = {
+  /** Opens the fart sheet for a Song pitch. */
+  onChangeFart: (songPitch: number) => void
+  /** The Song pitches whose fart the user swapped in. */
+  picks: ReadonlySet<number>
+  /** What the last change did, until the next one. */
+  line: string | null
+}
+
+const andList = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' })
+
+/**
  * What Song Creator and a Toot's screen share: Play, the note view, and the Recordings used. Tap a
  * Recording to hear it alone and see which notes it plays; tap a note to hear just that note as
  * rendered, with what it is and how far its Recording moved. As the iPhone app's `TootLayout`.
  *
  * `toot` is the made Toot (Song Creator) or a saved one (its screen, with no Save). When its audio
  * is missing, Play and the notes can't play, and the Recordings still can. `children` are more
- * lines under "N of your Recordings, one per note".
+ * lines under "N of your Recordings, one per note". With no `toot`, `unmade` is what shows in its
+ * place, and no farts play but the Recordings.
+ *
+ * `changes`, in Song Creator only, opens the fart sheet from a selected note's caption and from
+ * each Recording's "plays C♯3" (#360), and shows what the last change did.
  *
  * Play needs only the Toot's audio, so a saved Toot's screen shows it before its Song's notes load
  * (#323): `song` is then the Song without them, and `notesFallback` stands in for the note view.
@@ -488,43 +664,62 @@ type Focus = { pitch: number } | { note: number } | null
  * With `pianoPreview` (Song Creator, #359), Play plays on Piano or Farts: Piano plays the Song's
  * notes in the key the farts play them in, and a note tapped plays on it too. Switching while the
  * Song plays carries on from the same spot in the other. Farts is picked each time it opens.
+ * Piano plays every note of the Song, one a leave-out left with no fart too, and while the Toot is
+ * made again or locked (#360): it needs only the Song and its key, which a swap or leave-out holds.
  */
-export function TootLayout({
-  toot,
-  song,
-  notesFallback,
-  isAudioMissing = false,
-  pianoPreview = false,
-  children
-}: {
-  toot: SongTootDraft | SongToot
-  song: Song | SongSummary
-  notesFallback?: ReactNode
-  isAudioMissing?: boolean
-  pianoPreview?: boolean
-  children?: ReactNode
-}) {
+export function TootLayout(
+  props: {
+    song: Song | SongSummary
+    notesFallback?: ReactNode
+    isAudioMissing?: boolean
+    pianoPreview?: boolean
+    changes?: FartChanging
+    children?: ReactNode
+  } & ({ toot: SongTootDraft | SongToot; unmade?: undefined } | { toot: null; unmade: UnmadeToot })
+) {
+  const {
+    toot,
+    song,
+    notesFallback,
+    isAudioMissing = false,
+    pianoPreview = false,
+    changes,
+    children
+  } = props
   const pedos = usePedos()
   const piano = usePianoPreview()
-  const { arrangement } = toot
+  const arrangement = props.toot === null ? props.unmade.arrangement : props.toot.arrangement
+  const unmade = props.toot === null ? props.unmade : null
   const [focus, setFocus] = useState<Focus>(null)
   const [playsOn, setPlaysOn] = useState<'piano' | 'farts'>('farts')
   const onPiano = pianoPreview && playsOn === 'piano'
   /** The Song with its notes, once they've loaded. */
   const melody = 'notes' in song ? song : null
+  // Every note of the Song, in the key the farts play it in: a note a leave-out left with no fart
+  // too, so Piano still plays the whole Song while Farts is locked (#360's Option A).
   const pianoNotes = useMemo(
     () => (melody ? pianoSchedule(melody, arrangement.transposition) : null),
     [melody, arrangement.transposition]
   )
-  const isPlaying = pedos.nowPlaying === tootPlayback(toot.id)
+  /** The farts can play: the Toot is made, and its audio is there. */
+  const canPlay = toot !== null && !isAudioMissing
+  const isPlaying = toot !== null && pedos.nowPlaying === tootPlayback(toot.id)
   const isPianoPlaying = piano.playing?.target === 'song'
   const fartNote =
-    melody?.notes.findIndex((_, i) => pedos.nowPlaying === tootPlayback(toot.id, i)) ?? -1
+    toot === null
+      ? -1
+      : (melody?.notes.findIndex((_, i) => pedos.nowPlaying === tootPlayback(toot.id, i)) ?? -1)
   const pianoNote = typeof piano.playing?.target === 'number' ? piano.playing.target : -1
   const playingNote = fartNote === -1 ? pianoNote : fartNote
   const shownPlaying = onPiano ? isPianoPlaying : isPlaying
+  /** Why Play can't play the farts, on Farts: the Song locked or being made again, or no audio. */
+  const fartsBlocked = onPiano ? null : (unmade?.kind ?? (isAudioMissing ? 'missing' : null))
+  const canPress = onPiano ? pianoNotes !== null : canPlay
 
-  /** Piano or Farts; the Song playing carries on from where it is in the other. */
+  /**
+   * Piano or Farts; the Song playing carries on from where it is in the other. Before the Toot is
+   * made again, or while a leave-out locks it, the piano only stops.
+   */
   const playOn = (next: 'piano' | 'farts') => {
     if (next === playsOn) return
     setPlaysOn(next)
@@ -533,7 +728,7 @@ export function TootLayout({
     } else if (next === 'farts' && isPianoPlaying) {
       const from = piano.position() ?? 0
       piano.stop()
-      pedos.toggleTootPlayback(toot, undefined, undefined, from)
+      if (canPlay) pedos.toggleTootPlayback(toot, undefined, undefined, from)
     }
   }
   const selectedNote = melody && focus && 'note' in focus ? focus.note : null
@@ -547,90 +742,122 @@ export function TootLayout({
     const id = arrangement.recordingForPitch[pitch]
     return id === undefined ? undefined : pedos.recording(id)
   }
+  const sounding = (pitch: number) => noteName(soundingPitch(arrangement, pitch))
+  const gaps = song.pitches.filter(p => arrangement.recordingForPitch[p] === undefined)
 
   return (
     <div className="flex flex-col gap-6 px-4">
-      <div className="flex items-center gap-4">
-        <button
-          type="button"
-          aria-label={
-            isAudioMissing
-              ? 'Audio missing'
-              : shownPlaying
-                ? 'Stop'
-                : onPiano
-                  ? 'Play on piano'
-                  : 'Play'
-          }
-          data-testid="song-creator-play"
-          disabled={isAudioMissing}
-          className={cn(
-            'flex size-14 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-            isAudioMissing
-              ? 'bg-muted text-muted-foreground'
-              : shownPlaying
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-primary/10 text-primary'
-          )}
-          onClick={() => {
-            setFocus(null)
-            if (!onPiano) pedos.toggleTootPlayback(toot)
-            else if (isPianoPlaying) piano.stop()
-            else if (pianoNotes) piano.play('song', pianoNotes)
-          }}
-        >
-          {isAudioMissing ? (
-            <CircleAlert className="size-6" />
-          ) : shownPlaying ? (
-            <Square className="size-5 fill-current" />
-          ) : (
-            <Play className="size-6 fill-current" />
-          )}
-        </button>
-        <div className="flex min-w-0 flex-col gap-1.5">
-          {pianoPreview && (
-            <ToggleGroup
-              variant="outline"
-              size="sm"
-              spacing={0}
-              aria-label="Play on"
-              value={[playsOn]}
-              onValueChange={([next]) => {
-                if (next === 'piano' || next === 'farts') playOn(next)
-              }}
-            >
-              <ToggleGroupItem value="piano" className="h-11 px-3 text-sm">
-                <Piano />
-                Piano
-              </ToggleGroupItem>
-              <ToggleGroupItem value="farts" className="h-11 px-3 text-sm">
-                <AudioLines />
-                Farts
-              </ToggleGroupItem>
-            </ToggleGroup>
-          )}
-          <div>
-            <p className="font-semibold" data-testid="song-creator-state">
-              {onPiano
-                ? isPianoPlaying
-                  ? 'Playing'
-                  : 'Ready'
-                : isAudioMissing
-                  ? 'Audio missing'
-                  : isPlaying
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            aria-label={
+              fartsBlocked === 'locked'
+                ? 'Locked'
+                : fartsBlocked === 'making'
+                  ? 'Making your Toot'
+                  : fartsBlocked === 'missing'
+                    ? 'Audio missing'
+                    : shownPlaying
+                      ? 'Stop'
+                      : onPiano
+                        ? 'Play on piano'
+                        : 'Play'
+            }
+            data-testid="song-creator-play"
+            disabled={!canPress}
+            className={cn(
+              'flex size-14 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+              !canPress
+                ? 'bg-muted text-muted-foreground'
+                : shownPlaying
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-primary/10 text-primary'
+            )}
+            onClick={() => {
+              setFocus(null)
+              if (!onPiano) {
+                if (toot !== null) pedos.toggleTootPlayback(toot)
+              } else if (isPianoPlaying) piano.stop()
+              else if (pianoNotes) piano.play('song', pianoNotes)
+            }}
+          >
+            {fartsBlocked === 'locked' ? (
+              <Lock className="size-6" />
+            ) : fartsBlocked === 'making' ? (
+              <Spinner className="size-6" />
+            ) : fartsBlocked === 'missing' ? (
+              <CircleAlert className="size-6" />
+            ) : shownPlaying ? (
+              <Square className="size-5 fill-current" />
+            ) : (
+              <Play className="size-6 fill-current" />
+            )}
+          </button>
+          <div className="flex min-w-0 flex-col gap-1.5">
+            {pianoPreview && (
+              <ToggleGroup
+                variant="outline"
+                size="sm"
+                spacing={0}
+                aria-label="Play on"
+                value={[playsOn]}
+                onValueChange={([next]) => {
+                  if (next === 'piano' || next === 'farts') playOn(next)
+                }}
+              >
+                <ToggleGroupItem value="piano" className="h-11 px-3 text-sm">
+                  <Piano />
+                  Piano
+                </ToggleGroupItem>
+                <ToggleGroupItem value="farts" className="h-11 px-3 text-sm">
+                  <AudioLines />
+                  Farts
+                </ToggleGroupItem>
+              </ToggleGroup>
+            )}
+            <div>
+              <p className="font-semibold" data-testid="song-creator-state">
+                {onPiano
+                  ? isPianoPlaying
                     ? 'Playing'
-                    : pedos.tootPlayFailed === toot.id
-                      ? "Couldn't play"
-                      : 'Ready'}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {onPiano
-                ? "The Song's notes on piano"
-                : `${song.pitches.length} of your Recordings, one per note`}
-            </p>
-            {children}
+                    : 'Ready'
+                  : fartsBlocked === 'locked'
+                    ? 'Locked'
+                    : fartsBlocked === 'making'
+                      ? 'Making your Toot…'
+                      : fartsBlocked === 'missing'
+                        ? 'Audio missing'
+                        : isPlaying
+                          ? 'Playing'
+                          : pedos.tootPlayFailed === toot?.id
+                            ? "Couldn't play"
+                            : 'Ready'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {onPiano
+                  ? "The Song's notes on piano"
+                  : fartsBlocked === 'locked' && gaps.length > 0
+                    ? `${andList.format(gaps.map(sounding))} ${gaps.length === 1 ? 'has' : 'have'} no fart, so farts can't play`
+                    : `${song.pitches.length} of your Recordings, one per note`}
+              </p>
+              {children}
+            </div>
           </div>
         </div>
+        {changes && (
+          <output className="block">
+            {changes.line && (
+              <p
+                className="flex items-start gap-2 rounded-xl bg-brand/13 px-3 py-2.5 text-sm"
+                data-testid="fart-change"
+              >
+                <Check className="mt-0.5 size-4 shrink-0 text-brand-strong" aria-hidden />
+                {changes.line}
+              </p>
+            )}
+          </output>
+        )}
       </div>
 
       {melody ? (
@@ -639,6 +866,7 @@ export function TootLayout({
             song={melody}
             arrangement={arrangement}
             recordingName={note => {
+              if (arrangement.recordingForPitch[note.pitch] === undefined) return 'No fart'
               const recording = recordingFor(note.pitch)
               return recording ? recordingName(recording) : 'Recording deleted'
             }}
@@ -661,18 +889,30 @@ export function TootLayout({
               }
               if (isAudioMissing) return
               setFocus({ note: index })
-              pedos.toggleTootPlayback(toot, index, melody)
+              // Before the Toot is made again, or while it's locked, a tap only picks the note.
+              if (toot !== null) pedos.toggleTootPlayback(toot, index, melody)
             }}
           />
           {selectedNote !== null && (
-            <p className="px-4 text-sm text-muted-foreground" data-testid="note-caption">
-              {noteCaption(
-                melody,
-                arrangement,
-                melody.notes[selectedNote],
-                recordingFor(melody.notes[selectedNote].pitch)
+            <div className="flex min-h-8 items-center justify-between gap-3 px-4">
+              <p className="text-sm text-muted-foreground" data-testid="note-caption">
+                {noteCaption(
+                  melody,
+                  arrangement,
+                  melody.notes[selectedNote],
+                  recordingFor(melody.notes[selectedNote].pitch)
+                )}
+              </p>
+              {changes && (
+                <Button
+                  variant="outline"
+                  className="h-11 shrink-0 px-4 text-base"
+                  onClick={() => changes.onChangeFart(melody.notes[selectedNote].pitch)}
+                >
+                  Change fart
+                </Button>
               )}
-            </p>
+            </div>
           )}
         </div>
       ) : (
@@ -686,15 +926,36 @@ export function TootLayout({
         <ul className="divide-y overflow-hidden rounded-xl bg-muted/60">
           {song.pitches.map((pitch, index) => {
             const recording = recordingFor(pitch)
-            const plays = noteName(soundingPitch(arrangement, pitch))
+            const plays = sounding(pitch)
             const isHighlighted = highlightedPitch === pitch
+            const badge = (
+              <PlaysBadge
+                key="plays"
+                plays={plays}
+                onChangeFart={changes && (() => changes.onChangeFart(pitch))}
+              />
+            )
+            if (arrangement.recordingForPitch[pitch] === undefined) {
+              const needed = unmade?.missing.find(m => m.midi === soundingPitch(arrangement, pitch))
+              return (
+                <NoFartRow
+                  key={pitch}
+                  color={pitchColor(index)}
+                  needs={needed ? `${plays} (${needed.seconds.toFixed(1)} s)` : plays}
+                  isHighlighted={isHighlighted}
+                  badge={badge}
+                />
+              )
+            }
             return recording ? (
               <RecordingUsedRow
                 key={pitch}
                 recording={recording}
                 color={pitchColor(index)}
                 plays={plays}
+                isYourPick={changes?.picks.has(pitch) ?? false}
                 isHighlighted={isHighlighted}
+                badge={badge}
                 onTap={() => {
                   const stopping = pedos.nowPlaying === recording.id
                   setFocus(stopping ? null : { pitch })
@@ -705,8 +966,8 @@ export function TootLayout({
               <DeletedRecordingRow
                 key={pitch}
                 color={pitchColor(index)}
-                plays={plays}
                 isHighlighted={isHighlighted}
+                badge={badge}
               />
             )
           })}
@@ -718,20 +979,24 @@ export function TootLayout({
 
 /**
  * A Recording the Toot uses: the color of its notes, play, its name, its waveform and its fart's
- * length, and the note it plays in the Song. As the iPhone app's `RecordingRow` in Song Creator,
- * which shows the whole take's length.
+ * length, "Your pick" when the user swapped it in (#360), and the note it plays in the Song. As
+ * the iPhone app's `RecordingRow` in Song Creator, which shows the whole take's length.
  */
 function RecordingUsedRow({
   recording,
   color,
   plays,
+  isYourPick,
   isHighlighted,
+  badge,
   onTap
 }: {
   recording: Recording
   color: string
   plays: string
+  isYourPick: boolean
   isHighlighted: boolean
+  badge: ReactNode
   onTap: () => void
 }) {
   const pedos = usePedos()
@@ -756,6 +1021,7 @@ function RecordingUsedRow({
           name,
           `plays ${plays}`,
           length,
+          isYourPick && 'your pick',
           isHighlighted && 'highlighted',
           pitch === null ? 'noise-like' : noteName(pitch)
         ]
@@ -792,9 +1058,10 @@ function RecordingUsedRow({
             />
             <span className="text-sm text-muted-foreground">{length}</span>
           </span>
+          {isYourPick && <span className="text-sm font-semibold text-brand-strong">Your pick</span>}
         </span>
       </button>
-      <PlaysBadge plays={plays} />
+      {badge}
     </li>
   )
 }
@@ -802,12 +1069,12 @@ function RecordingUsedRow({
 /** A Recording the Toot used that has since been deleted: the note it played, and no play button. */
 function DeletedRecordingRow({
   color,
-  plays,
-  isHighlighted
+  isHighlighted,
+  badge
 }: {
   color: string
-  plays: string
   isHighlighted: boolean
+  badge: ReactNode
 }) {
   return (
     <li
@@ -826,20 +1093,79 @@ function DeletedRecordingRow({
         <Trash2 className="size-4" aria-hidden />
       </span>
       <span className="min-w-0 flex-1 text-muted-foreground">Recording deleted</span>
-      <PlaysBadge plays={plays} />
+      {badge}
     </li>
   )
 }
 
-/** "plays F3": the note a Recording plays in the Song. */
-function PlaysBadge({ plays }: { plays: string }) {
+/**
+ * A pitch no fart plays, as when the user left its fart out of the Song (#360): "No fart", and
+ * what it needs: "Needs a fart near F♯3 (0.6 s)".
+ */
+function NoFartRow({
+  color,
+  needs,
+  isHighlighted,
+  badge
+}: {
+  color: string
+  needs: string
+  isHighlighted: boolean
+  badge: ReactNode
+}) {
   return (
-    <span
-      aria-hidden
-      className="shrink-0 rounded-full bg-muted px-3 py-1 text-sm font-semibold tabular-nums"
+    <li
+      className={cn(
+        'flex min-h-15 items-center gap-3 py-2 pr-4 pl-4',
+        isHighlighted && 'bg-primary/10'
+      )}
+      data-testid="recording-used"
     >
-      plays {plays}
-    </span>
+      <span
+        aria-hidden
+        className="size-2.5 shrink-0 rounded-full border border-dashed"
+        style={{ borderColor: color }}
+      />
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        <Ban className="size-4" aria-hidden />
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span>No fart</span>
+        <span className="text-sm text-muted-foreground">Needs a fart near {needs}</span>
+      </span>
+      {badge}
+    </li>
+  )
+}
+
+/**
+ * "plays F3": the note a Recording plays in the Song. In Song Creator it opens the fart sheet for
+ * that pitch (#360).
+ */
+function PlaysBadge({ plays, onChangeFart }: { plays: string; onChangeFart?: () => void }) {
+  const pill = 'shrink-0 rounded-full bg-muted px-3 py-1 text-sm font-semibold tabular-nums'
+  if (!onChangeFart) {
+    return (
+      <span aria-hidden className={pill}>
+        plays {plays}
+      </span>
+    )
+  }
+  // A thumb's 44 points around the pill.
+  return (
+    <button
+      type="button"
+      aria-label={`Change the fart for ${plays}`}
+      className="-my-1 flex h-11 shrink-0 items-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      onClick={onChangeFart}
+    >
+      <span
+        className={cn(pill, 'flex h-9 items-center gap-0.5 bg-background pr-2 ring-1 ring-border')}
+      >
+        plays {plays}
+        <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
+      </span>
+    </button>
   )
 }
 

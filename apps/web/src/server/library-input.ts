@@ -94,9 +94,12 @@ export async function readUpload(
 }
 
 /** A small `application/json` body, or the response that refuses it. */
-export async function readJson(request: Request): Promise<{ json: unknown } | Response> {
+export async function readJson(
+  request: Request,
+  maxBytes = JSON_MAX_BYTES
+): Promise<{ json: unknown } | Response> {
   if (mediaType(request) !== 'application/json') return apiError(415, 'unsupported_media_type')
-  const body = await readCapped(request, JSON_MAX_BYTES)
+  const body = await readCapped(request, maxBytes)
   if (body === null) return apiError(413, 'too_large')
   try {
     return { json: JSON.parse(new TextDecoder().decode(body)) }

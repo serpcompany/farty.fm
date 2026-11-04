@@ -28,7 +28,9 @@ const MAKES_OR_SAVES: Record<string, string[]> = {
   'src/lib/recording-store.ts': ['saveRecording'],
   'src/lib/audio/recorder.ts': ['startTake'],
   'src/lib/wav.ts': ['encodeWav'],
-  'src/lib/library-api.ts': ['putItem'],
+  'src/lib/library-api.ts': ['putItem', 'setFartChoices'],
+  // A Song's Fart Choices (#360): what its Toot is made again from after a swap or leave-out.
+  'src/lib/fart-choice-store.ts': ['setFartChoices'],
   'src/lib/library-sync.ts': ['startSync', 'syncOnce', 'uploadBeforeSignOut', 'claimLibrary'],
   'src/lib/sharing.ts': ['shareItem'],
   'src/lib/pad-take.ts': ['keepTake', 'keepForCheckout']
@@ -186,6 +188,29 @@ describe('the piano stays out of every render, Toot, share and saved file', () =
     // provider; the locked sheet only plays the piano.
     expect(entries.has('src/components/pedos/song-creator.tsx')).toBe(false)
     expect(entries.has('src/components/pedos/locked-song-sheet.tsx')).toBe(false)
+  })
+
+  test("the Toot made again after a change to a Song's farts is checked too (#360)", () => {
+    const entries = new Set(ENTRIES.map(file => relative(APP, file)))
+    // Song Creator makes the Toot again through the provider, which arranges it with the Song's
+    // Fart Choices in `src/lib/`, and keeps the choices through `use-fart-choices`.
+    for (const module of [
+      'src/components/pedos/pedos-provider.tsx',
+      'src/lib/toot-renderer.ts',
+      'src/lib/engine/fart-choices.ts',
+      'src/lib/fart-sheet.ts',
+      'src/lib/fart-choice-store.ts',
+      'src/components/pedos/use-fart-choices.ts'
+    ]) {
+      expect(entries.has(module), module).toBe(true)
+      expect(chainToPiano(join(APP, module)), module).toBeNull()
+    }
+    // Song Creator only asks the provider for the Toot: it renders nothing itself.
+    const songCreator = join(SRC, 'components/pedos/song-creator.tsx')
+    expect(readFileSync(songCreator, 'utf8')).toMatch(
+      /pedos\.makeToot\(song, back\?\.tootId, choices\)/
+    )
+    expect(makesOrSaves(songCreator)).toBe(false)
   })
 
   test('no module that makes, saves or serves audio imports the piano', () => {

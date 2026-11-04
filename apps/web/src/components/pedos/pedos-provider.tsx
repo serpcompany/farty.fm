@@ -24,6 +24,7 @@ import {
 import { catalogPath } from '@/lib/catalog/catalog-path.generated'
 import { loadSongs } from '@/lib/catalog/load-songs'
 import type { Song, SongSummary } from '@/lib/catalog/song'
+import type { FartChoices } from '@/lib/engine/fart-choices'
 import { onLibraryChanged, recordingsAfter } from '@/lib/library-sync'
 import type { Performance } from '@/lib/performance'
 import { nearestNote } from '@/lib/pitch'
@@ -291,9 +292,10 @@ type Pedos = {
   toot(id: string): Toot | undefined
   /**
    * Makes the Toot of an Unlocked Song in the render worker: Song Creator. Throws a `TootError`.
-   * `id` is a new one unless given, as when Checkout comes back for the Toot it paid for.
+   * `id` is a new one unless given, as when Checkout comes back for the Toot it paid for. The
+   * Song is arranged with its Fart Choices, `choices`, when it has any (#360).
    */
-  makeToot(song: Song, id?: string): Promise<SongTootDraft>
+  makeToot(song: Song, id?: string, choices?: FartChoices | null): Promise<SongTootDraft>
   /**
    * Makes the Toot of a Sound Pad Performance in the render worker (ADR 0017). Throws a
    * `TootError`. `id` is a new one unless given, as `makeToot`'s.
@@ -923,7 +925,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   )
 
   const makeToot = useCallback(
-    (song: Song, id?: string) => renderToot(song, recordings ?? [], store.loadAudio, undefined, id),
+    (song: Song, id?: string, choices: FartChoices | null = null) =>
+      renderToot(song, recordings ?? [], store.loadAudio, undefined, id, choices),
     [recordings]
   )
 

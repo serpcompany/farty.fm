@@ -76,6 +76,10 @@ _Avoid_: Liked song, starred song, saved song
 Which Recording plays each note of a melody. Each Recording plays raw, at its own pitch and speed (ADR 0012), so a Toot sounds near the melody, not on it.
 _Avoid_: Mapping, mix, assignment
 
+**Fart Choices**:
+The changes a user makes to one Song's Arrangement in Song Creator: a fart swapped in to play one of its pitches, and farts left out of the Song (#360). Auto-map, called Farty's pick in the app, still arranges every pitch they don't settle, so leaving out a pitch's only fart locks the Song. Kept per Song with the account. The Song's notes never change (ADR 0005).
+_Avoid_: Overrides, manual mapping, custom arrangement
+
 **Octave Move**:
 A Melodic Recording covering a note about an octave from its Recording Pitch: 12 semitones up or down, give or take 3. It plays raw, so it sounds an octave from the note (ADR 0012). Used only where a Song can't be covered without it.
 _Avoid_: Octave folding, octave jump

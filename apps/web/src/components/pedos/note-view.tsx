@@ -38,8 +38,9 @@ const padding = 12
 
 /**
  * A read-only view of a Song's notes over time, each colored by the Recording that plays it, with
- * a playhead while it plays. Tapping picks the nearest note; each note is also its own button for
- * a screen reader or a keyboard. As the iPhone app's `NoteView`.
+ * a playhead while it plays. A note no Recording plays is drawn hollow, dashed (#360). Tapping
+ * picks the nearest note; each note is also its own button for a screen reader or a keyboard. As
+ * the iPhone app's `NoteView`.
  */
 export function NoteView({
   song,
@@ -130,17 +131,23 @@ export function NoteView({
           ))}
           {song.notes.map((note, index) => {
             const r = layout.rect(note)
+            const color = pitchColor(colorIndex(note))
+            // A note no fart plays, as when its fart was left out of the Song (#360): hollow.
+            const isGap = arrangement.recordingForPitch[note.pitch] === undefined
             return (
               // Notes never reorder, so the index is a stable key.
               // biome-ignore lint/suspicious/noArrayIndexKey: a Song's notes are fixed
-              <g key={index} data-note={index + 1}>
+              <g key={index} data-note={index + 1} data-gap={isGap || undefined}>
                 <rect
-                  x={r.x}
-                  y={r.y}
-                  width={r.width}
-                  height={r.height}
+                  x={isGap ? r.x + 0.75 : r.x}
+                  y={isGap ? r.y + 0.75 : r.y}
+                  width={isGap ? Math.max(1, r.width - 1.5) : r.width}
+                  height={isGap ? Math.max(1, r.height - 1.5) : r.height}
                   rx={r.height / 2}
-                  fill={pitchColor(colorIndex(note))}
+                  fill={isGap ? 'none' : color}
+                  stroke={isGap ? color : undefined}
+                  strokeWidth={isGap ? 1.5 : undefined}
+                  strokeDasharray={isGap ? '3 2' : undefined}
                   opacity={opacity(note)}
                 />
                 {index === selectedNote && (
