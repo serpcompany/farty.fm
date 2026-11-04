@@ -17,6 +17,7 @@ import { FavoriteButton } from './favorite-button'
 import { usePedos } from './pedos-provider'
 import { pianoSchedule } from './piano-preview'
 import { PitchStrip } from './pitch-strip'
+import { ReportSongButton } from './report-song-sheet'
 import { type PianoPlaying, usePianoPreview } from './use-piano-preview'
 import { useSongNotes } from './use-song-notes'
 
@@ -29,13 +30,16 @@ import { useSongNotes } from './use-song-notes'
 export function LockedSongSheet({
   song,
   onClose,
-  onRecord
+  onRecord,
+  onReport
 }: {
   /** The Song shown, or null when the sheet is closed. */
   song: SongSummary | null
   onClose: () => void
   /** Record: closes the sheet and switches to the Record tab. */
   onRecord: () => void
+  /** Report a problem (#358): closes the sheet and opens the report sheet for its Song. */
+  onReport: () => void
 }) {
   const pedos = usePedos()
   // The last Song shown stays while the sheet slides away.
@@ -66,6 +70,7 @@ export function LockedSongSheet({
           <Body
             coverage={coverage}
             onRecord={onRecord}
+            onReport={onReport}
             pianoPlaying={piano.playing}
             onPiano={
               melody &&
@@ -95,11 +100,13 @@ export function LockedSongSheet({
 function Body({
   coverage,
   onRecord,
+  onReport,
   pianoPlaying,
   onPiano
 }: {
   coverage: Coverage
   onRecord: () => void
+  onReport: () => void
   pianoPlaying: PianoPlaying | null
   /** Plays or stops the melody on piano; null until the Song's notes load. */
   onPiano: (() => void) | null
@@ -145,6 +152,7 @@ function Body({
           Record
         </Button>
       </div>
+      <ReportSongButton className="-mt-2 self-center" onClick={onReport} />
     </div>
   )
 }

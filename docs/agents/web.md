@@ -170,6 +170,31 @@ SELECT r.created_at, h.handle, r.user_id FROM profile_reports r
 SELECT id, kind, item_id FROM shares WHERE user_id = '<user_id>' AND taken_down_at IS NULL;
 ```
 
+**A Song that's wrong.** Song Creator's end and a locked Song's sheet have Report a problem (#358): a reason (`wrong_notes`, `wrong_sound`, `wrong_title` or `other`, `SONG_REPORT_REASONS` in `src/lib/song-report.ts`) and an optional note of up to 500 characters, from anyone, guests too. Each is a row in D1's `song_reports` (the Song's id, `song_version`, the reason, the note and when; nothing about who sent it) and a `song_reported` log line with the Song, version and reason, never the note. `song_version` is the 16 hex digits in the name of the notes file the reporter heard (`public/catalog/notes/<id>-<version>.json`), so reports from before a fix show as about older notes. Nobody is emailed. The limits are `REPORT_LIMITS` in rows of their own, so Song reports never spend a link's or page's Report slots: a reporter gets 10 an hour, a Song 5 a day and the site 300 an hour (`src/server/song-reports.ts`).
+
+**The owner reads them** in the same Console, worst first:
+
+```sql
+-- Songs with the most reports first, with each reason's count and the newest report.
+SELECT song_id, COUNT(*) AS reports, SUM(reason = 'wrong_notes') AS wrong_notes,
+  SUM(reason = 'wrong_sound') AS wrong_sound, SUM(reason = 'wrong_title') AS wrong_title,
+  SUM(reason = 'other') AS other, datetime(MAX(created_at) / 1000, 'unixepoch') AS newest
+  FROM song_reports GROUP BY song_id ORDER BY reports DESC, newest DESC LIMIT 50;
+-- One Song's reports and notes, newest first.
+SELECT datetime(created_at / 1000, 'unixepoch') AS at, song_version, reason, note
+  FROM song_reports WHERE song_id = '<id>' ORDER BY created_at DESC;
+```
+
+To list them against the catalog, which tells the reports on a Song's notes now from those on older notes, the owner exports the rows from their own terminal and an agent runs `tools/catalog/song_reports.py` on the file:
+
+```sh
+mkdir -p tmp && pnpm --dir apps/web exec wrangler d1 execute pedos-production --remote \
+  --env production --json --command "SELECT * FROM song_reports" > tmp/song-reports.json
+python3 -I tools/catalog/song_reports.py tmp/song-reports.json
+```
+
+It takes a CSV of the same columns too. A Song is fixed through `catalog/` like any other (ADR 0003); nothing marks its reports done, and the next export shows them as about older notes.
+
 ## Gotchas learned in slice 1
 
 - `apps/web` isn't `"type": "module"`, so Playwright compiles `e2e/` as CommonJS. Use `__dirname`, not `import.meta`.

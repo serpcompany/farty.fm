@@ -51,6 +51,7 @@ import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { pianoSchedule } from './piano-preview'
 import { previousPage } from './previous-page'
+import { ReportSong } from './report-song-sheet'
 import { usePianoPreview } from './use-piano-preview'
 import { useSongNotes } from './use-song-notes'
 import { Waveform } from './waveform'
@@ -266,11 +267,15 @@ function heldByAnAccount(): boolean {
   }
 }
 
-/** The made Toot of a Song, with Save to Toots pinned above the tabs. */
+/**
+ * The made Toot of a Song, with Report a problem at its end (#358) and Save to Toots pinned above
+ * the tabs.
+ */
 export function Ready({ draft, back }: { draft: SongTootDraft; back: CheckoutReturn | null }) {
   return (
     <>
       <TootLayout toot={draft} song={draft.song} pianoPreview />
+      <ReportSong song={draft.song} />
       <SaveToToots draft={draft} back={back} />
     </>
   )
