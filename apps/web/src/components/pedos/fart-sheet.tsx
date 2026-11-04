@@ -1,7 +1,7 @@
 'use client'
 
-import { Ban, Check, Play, RotateCcw, Square, XIcon } from 'lucide-react'
-import { type ReactNode, useState } from 'react'
+import { Ban, Check, Piano, Play, RotateCcw, Square, XIcon } from 'lucide-react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Item, ItemActions, ItemGroup } from '@/components/ui/item'
@@ -20,6 +20,10 @@ import { formattedFartLength } from '@/lib/pitch-coverage'
 import { formattedLength, type Recording, recordingName } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
 import { usePedos } from './pedos-provider'
+import { usePianoPreview } from './use-piano-preview'
+
+/** How long the pitch's piano note is held, in seconds, before it's let go. */
+const PIANO_NOTE_SECONDS = 2
 
 /**
  * Song Creator's fart sheet (#360): every fart of the user's that can play one of the Song's
@@ -41,6 +45,13 @@ export function FartSheetView({
   const [shown, setShown] = useState(sheet)
   if (sheet !== null && sheet !== shown) setShown(sheet)
   const note = shown ? noteName(shown.note) : ''
+  // The pitch on piano, as one player with Farty's (#373): playing a fart stops it, and so does
+  // closing the sheet, which every pick, leave-out and reset does too.
+  const piano = usePianoPreview()
+  const stopPiano = piano.stop
+  useEffect(() => {
+    if (sheet === null) stopPiano()
+  }, [sheet, stopPiano])
   const row = (fart: FartRow, group: 'use' | 'other' | 'leftOut') => {
     const recording = pedos.recording(fart.id)
     if (!recording || !shown) return null
@@ -84,6 +95,7 @@ export function FartSheetView({
       onOpenChange={open => {
         if (open) return
         pedos.stopPlayback()
+        stopPiano()
         onClose()
       }}
     >
@@ -98,6 +110,19 @@ export function FartSheetView({
           <SheetDescription>
             {shown?.noteCount === 1 ? '1 note' : `${shown?.noteCount ?? 0} notes`} in this Song
           </SheetDescription>
+          {shown && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 px-3"
+              onClick={() =>
+                piano.play(0, [{ midi: shown.note, start: 0, seconds: PIANO_NOTE_SECONDS }])
+              }
+            >
+              <Piano aria-hidden />
+              Hear {note} on piano
+            </Button>
+          )}
         </SheetHeader>
         <SheetClose
           render={
