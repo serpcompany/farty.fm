@@ -1,0 +1,632 @@
+{
+ "12th-street-rag": {
+  "title": "12th Street Rag",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "a ragtime hit, popular music like Black and White Rag, not concert music"
+ },
+ "a-la-claire-fontaine": {
+  "title": "À la claire fontaine",
+  "well_known": true,
+  "found_by": "known miss",
+  "why": "#381: the best-known French and French Canadian folk song"
+ },
+ "a-virgin-most-pure": {
+  "title": "A Virgin Most Pure",
+  "kind": "Christmas",
+  "origin": "English",
+  "found_by": "fallback kind",
+  "why": "an English Christmas carol"
+ },
+ "ade-zur-guten-nacht": {
+  "title": "Ade zur guten Nacht",
+  "kind": "Songs",
+  "found_by": "fallback kind",
+  "why": "a German folk song of farewell, not a dance tune"
+ },
+ "afton-water": {
+  "title": "Afton Water",
+  "kind": "Songs",
+  "origin": "Scottish",
+  "found_by": "fallback kind",
+  "why": "Burns's song Sweet Afton"
+ },
+ "ah-poor-bird": {
+  "title": "Ah Poor Bird",
+  "kind": "Songs",
+  "found_by": "fallback kind",
+  "why": "an English round, sung, not danced"
+ },
+ "all-through-the-night": {
+  "title": "All Through the Night",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "a Welsh folk song and lullaby, sung at Christmas only in some words"
+ },
+ "american-patrol": {
+  "title": "American Patrol",
+  "kind": "Anthems",
+  "found_by": "hand check",
+  "why": "a march on American patriotic tunes"
+ },
+ "amhran-na-leabhar": {
+  "title": "Amhrán na Leabhar",
+  "kind": "Songs",
+  "origin": "Irish",
+  "found_by": "fallback kind",
+  "why": "an Irish-language song by Tomás Rua Ó Súilleabháin"
+ },
+ "arkansas-traveler": {
+  "title": "Arkansas Traveler",
+  "kind": "Fiddle tunes",
+  "found_by": "hand check",
+  "why": "a fiddle tune first; the comic dialogue and words came later"
+ },
+ "aurea-luce": {
+  "title": "Aurea luce",
+  "kind": "Hymns",
+  "found_by": "fallback kind",
+  "why": "the Latin office hymn for Saints Peter and Paul"
+ },
+ "aux-marches-du-palais": {
+  "title": "Aux marches du palais",
+  "kind": "Songs",
+  "found_by": "fallback kind",
+  "why": "a French folk song"
+ },
+ "ay-linda-amiga": {
+  "title": "Ay Linda Amiga",
+  "kind": "Songs",
+  "origin": "Spanish",
+  "found_by": "fallback kind",
+  "why": "a Spanish Renaissance song"
+ },
+ "behold-the-great-creator-makes": {
+  "title": "Behold The Great Creator Makes",
+  "kind": "Christmas",
+  "found_by": "fallback kind",
+  "why": "Thomas Pestel's Christmas hymn"
+ },
+ "belle-qui-tiens-ma-vie": {
+  "title": "Belle qui tiens ma vie",
+  "kind": "Classical",
+  "found_by": "fallback kind",
+  "why": "a pavane from Arbeau's Orchésographie (1589), Renaissance concert repertoire"
+ },
+ "blaw-the-wind-southerly": {
+  "title": "Blaw the Wind Southerly",
+  "kind": "Songs",
+  "origin": "English",
+  "found_by": "fallback kind",
+  "why": "a Northumbrian folk song"
+ },
+ "bobby-shaftoe": {
+  "title": "Bobby Shaftoe",
+  "kind": "Kids",
+  "found_by": "fallback kind",
+  "why": "an English nursery rhyme"
+ },
+ "brian-borus-march": {
+  "title": "Brian Boru's March",
+  "kind": "Fiddle tunes",
+  "found_by": "hand check",
+  "why": "an Irish harp and pipe tune, not a song"
+ },
+ "caller-herrin": {
+  "title": "Caller Herrin'",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "a Scottish song: Lady Nairne's words to Nathaniel Gow's tune"
+ },
+ "chopsticks": {
+  "title": "Chopsticks",
+  "kind": "Kids",
+  "found_by": "known miss",
+  "why": "#381: a piece children play on the piano, not concert music"
+ },
+ "christe-redemptor-omnium": {
+  "title": "Christe Redemptor Omnium",
+  "kind": "Christmas",
+  "found_by": "fallback kind",
+  "why": "the Latin office hymn of Christmas"
+ },
+ "come-back-to-sorrento": {
+  "title": "Come Back To Sorrento",
+  "well_known": true,
+  "found_by": "hand check",
+  "why": "its own page goes by the Italian name, Torna a Surriento (20,921 pageviews); 1,228 PDMX views"
+ },
+ "dargason": {
+  "title": "Dargason",
+  "kind": "Fiddle tunes",
+  "found_by": "fallback kind",
+  "why": "an English country dance tune"
+ },
+ "dark-eyed-sailor": {
+  "title": "The Dark-Eyed Sailor",
+  "kind": "Songs",
+  "origin": "English",
+  "found_by": "fallback kind",
+  "why": "an English folk ballad"
+ },
+ "dormi-iesu-dulcissime": {
+  "title": "Dormi Iesu dulcissime",
+  "kind": "Christmas",
+  "found_by": "fallback kind",
+  "why": "a Latin cradle song to the Christ child"
+ },
+ "durme-durme": {
+  "title": "Durme Durme",
+  "kind": "Kids",
+  "origin": "Jewish",
+  "found_by": "fallback kind",
+  "why": "a Sephardic lullaby in Ladino"
+ },
+ "ecce-tempus": {
+  "title": "Ecce Tempus",
+  "kind": "Hymns",
+  "found_by": "fallback kind",
+  "why": "Ecce tempus idoneum, a Lenten song from Piae Cantiones (1582)"
+ },
+ "eileen-aroon": {
+  "title": "Eileen Aroon",
+  "kind": "Songs",
+  "found_by": "fallback kind",
+  "why": "an Irish song (Eibhlín a Rúin)"
+ },
+ "ellacombe": {
+  "title": "Ellacombe",
+  "kind": "Hymns",
+  "origin": "German",
+  "found_by": "fallback kind",
+  "why": "a hymn tune from a 1784 Württemberg hymnal"
+ },
+ "es-wird-scho-glei-dumpa": {
+  "title": "Es wird scho glei dumpa",
+  "origin": "Austrian",
+  "found_by": "hand check",
+  "why": "an Austrian Advent song: its page is the German one, with no country"
+ },
+ "fie-nay-prithee-john": {
+  "title": "Fie nay prithee John",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "a catch, a round to sing, not a fiddle tune"
+ },
+ "fill-evry-glass": {
+  "title": "Fill ev'ry glass",
+  "kind": "Songs",
+  "found_by": "fallback kind",
+  "why": "a drinking song, one of The Beggar's Opera's airs"
+ },
+ "for-ireland-i-wont-say-her-name": {
+  "title": "For Ireland I Won't Say Her Name",
+  "kind": "Songs",
+  "origin": "Irish",
+  "found_by": "fallback kind",
+  "why": "an Irish song"
+ },
+ "from-thee-eliza-i-must-go": {
+  "title": "From Thee Eliza I Must Go",
+  "kind": "Songs",
+  "origin": "Scottish",
+  "found_by": "fallback kind",
+  "why": "a song of Burns's"
+ },
+ "gaudete-gaudete-christus-est-natus": {
+  "title": "Gaudete! Gaudete! Christus est natus",
+  "well_known": true,
+  "found_by": "hand check",
+  "why": "its own page, Gaudete, has 47,992 pageviews, which the name test misses; 3,399 PDMX views"
+ },
+ "god-of-mercy-and-compassion": {
+  "title": "God of Mercy and Compassion",
+  "well_known": false,
+  "found_by": "signals disagree",
+  "why": "PDMX views from 2 uploads, and no page or anything else says it's widely known"
+ },
+ "good-comrade": {
+  "title": "Good Comrade",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "a German soldiers' song (Ich hatt' einen Kameraden), not concert music"
+ },
+ "green-hills-of-tyrol": {
+  "title": "Green Hills of Tyrol",
+  "kind": "Fiddle tunes",
+  "found_by": "hand check",
+  "why": "a bagpipe retreat march, from a tune in Rossini's William Tell"
+ },
+ "hector-the-hero": {
+  "title": "Hector The Hero",
+  "kind": "Fiddle tunes",
+  "found_by": "hand check",
+  "why": "James Scott Skinner's slow air for fiddle; the words came later"
+ },
+ "helan-gar": {
+  "title": "Helan går",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "a Swedish drinking song"
+ },
+ "hen-wlad-fy-nhadau": {
+  "title": "Hen Wlad Fy Nhadau",
+  "well_known": true,
+  "found_by": "near miss",
+  "why": "Wales's national anthem: one PDMX view short of the bar"
+ },
+ "her-kommer-jesus-dine-sma": {
+  "title": "Her kommer Jesus dine små",
+  "kind": "Christmas",
+  "found_by": "known miss",
+  "why": "#381: a Danish Christmas hymn"
+ },
+ "hickory-dickory-dock": {
+  "title": "Hickory Dickory Dock",
+  "well_known": true,
+  "found_by": "near miss",
+  "why": "a nursery rhyme known across the English-speaking world"
+ },
+ "hob-y-deri-danno": {
+  "title": "Hob y Deri Danno",
+  "kind": "Songs",
+  "origin": "Welsh",
+  "found_by": "fallback kind",
+  "why": "a Welsh folk song"
+ },
+ "how-great-our-joy": {
+  "title": "How Great Our Joy",
+  "kind": "Christmas",
+  "found_by": "fallback kind",
+  "why": "a carol of the shepherds at Bethlehem"
+ },
+ "il-etait-une-dame-tartine": {
+  "title": "Il était une dame tartine",
+  "kind": "Kids",
+  "origin": "French",
+  "found_by": "fallback kind",
+  "why": "a French children's song"
+ },
+ "illumina-oculos-meos": {
+  "title": "Illumina oculos meos",
+  "kind": "Hymns",
+  "found_by": "fallback kind",
+  "why": "a setting of a Latin psalm verse, not a dance tune"
+ },
+ "in-those-twelve-days": {
+  "title": "In Those Twelve Days",
+  "kind": "Christmas",
+  "found_by": "fallback kind",
+  "why": "an English carol of the twelve days of Christmas"
+ },
+ "jolly-old-st-nicholas": {
+  "title": "Jolly Old Saint Nicholas",
+  "well_known": true,
+  "found_by": "near miss",
+  "why": "an American Christmas song most children learn"
+ },
+ "jupiter": {
+  "title": "Jupiter",
+  "well_known": true,
+  "found_by": "near miss",
+  "why": "Holst's Jupiter, the tune of I Vow to Thee, My Country: the views are The Planets' page"
+ },
+ "kimer-i-klokker": {
+  "title": "Kimer, I klokker",
+  "kind": "Christmas",
+  "found_by": "hand check",
+  "why": "a Danish Christmas hymn"
+ },
+ "la-gazza-ladra": {
+  "title": "La gazza ladra: Solemn March",
+  "well_known": false,
+  "found_by": "hand check",
+  "why": "the views are the opera's page, and this march from it isn't the famous overture"
+ },
+ "leave-her-johnny": {
+  "title": "Leave Her Johnny",
+  "well_known": false,
+  "found_by": "known miss",
+  "why": "#381: the views were the general Sea shanty page's"
+ },
+ "life-let-us-cherish": {
+  "title": "Life Let Us Cherish",
+  "kind": "Songs",
+  "origin": "Swiss",
+  "found_by": "hand check",
+  "why": "Nägeli's song Freut euch des Lebens"
+ },
+ "long-time-ago": {
+  "title": "Long Time Ago",
+  "kind": "Songs",
+  "origin": "American",
+  "found_by": "fallback kind",
+  "why": "an American song of the 1830s, which Copland set in Old American Songs"
+ },
+ "lord-save-me-for-thy-glorious-name": {
+  "title": "Lord save me for thy glorious Name",
+  "kind": "Hymns",
+  "found_by": "fallback kind",
+  "why": "a psalm setting, not a dance tune"
+ },
+ "macphersons-lament": {
+  "title": "MacPherson's Lament",
+  "origin": "Scottish",
+  "found_by": "hand check",
+  "why": "the Scottish outlaw's tune: the composer's page is the poet of the same name, a British MP"
+ },
+ "march-in-d-major": {
+  "title": "March in D Major",
+  "well_known": false,
+  "found_by": "known miss",
+  "why": "#381: the views were the Anna Magdalena notebook's, not this march's"
+ },
+ "mary-had-a-baby": {
+  "title": "Mary Had A Baby",
+  "kind": "Christmas",
+  "found_by": "hand check",
+  "why": "an African American spiritual about the Nativity, not a kids' song"
+ },
+ "mulberry-bush": {
+  "title": "Here We Go Round the Mulberry Bush",
+  "well_known": true,
+  "found_by": "near miss",
+  "why": "a nursery rhyme and singing game known across the English-speaking world"
+ },
+ "natus-est-nobis": {
+  "title": "Natus est nobis",
+  "kind": "Christmas",
+  "found_by": "fallback kind",
+  "why": "a Latin Christmas song"
+ },
+ "new-world-largo": {
+  "title": "Largo from the New World Symphony",
+  "well_known": true,
+  "found_by": "hand check",
+  "why": "the Largo of Dvořák's New World Symphony, the tune of Goin' Home: the views are the symphony's page"
+ },
+ "oer-the-hills-and-far-away": {
+  "title": "O'er the Hills and far away",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "an English folk song, though it's also a march"
+ },
+ "oh-dear-what-can-the-matter-be": {
+  "title": "Oh Dear, What Can the Matter Be",
+  "well_known": true,
+  "found_by": "known miss",
+  "why": "#381: a nursery rhyme known across the English-speaking world"
+ },
+ "old-macdonald": {
+  "title": "Old MacDonald Had a Farm",
+  "well_known": true,
+  "found_by": "near miss",
+  "why": "a nursery song known across the English-speaking world"
+ },
+ "quand-jetais-chez-mon-pere": {
+  "title": "Quand j'étais chez mon père",
+  "kind": "Songs",
+  "origin": "French",
+  "found_by": "fallback kind",
+  "why": "a French folk song"
+ },
+ "quen-a-omagen-da-virgen": {
+  "title": "Quen a omagen da Virgen",
+  "kind": "Hymns",
+  "origin": "Spanish",
+  "found_by": "fallback kind",
+  "why": "one of Alfonso X's Cantigas de Santa Maria, songs to the Virgin"
+ },
+ "qui-vult-venire-post-me": {
+  "title": "Qui vult venire post me",
+  "kind": "Hymns",
+  "found_by": "fallback kind",
+  "why": "a Latin motet on the Gospel verse, not a dance tune"
+ },
+ "red-river-valley": {
+  "title": "Red River Valley",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "a North American folk song: Wikidata's genre calls it a spiritual"
+ },
+ "reveillez-vous-picards": {
+  "title": "Reveillez Vous Picards",
+  "kind": "Songs",
+  "found_by": "fallback kind",
+  "why": "a French song of the 15th-century wars, not a dance tune"
+ },
+ "rights-of-man": {
+  "title": "The Rights of Man",
+  "well_known": false,
+  "found_by": "known miss",
+  "why": "#381: the views were Thomas Paine's book's, not the hornpipe's"
+ },
+ "roddy-mccorley": {
+  "title": "Roddy McCorley",
+  "kind": "Songs",
+  "origin": "Irish",
+  "found_by": "fallback kind",
+  "why": "an Irish ballad about the rebel of 1798"
+ },
+ "rule-britannia": {
+  "title": "Rule, Britannia!",
+  "kind": "Anthems",
+  "found_by": "hand check",
+  "why": "Britain's best-known patriotic song, though Arne wrote it for a masque"
+ },
+ "sailors-hornpipe": {
+  "title": "The Sailor's Hornpipe",
+  "kind": "Fiddle tunes",
+  "found_by": "hand check",
+  "why": "a hornpipe, the dance tune, though sailors sang to it"
+ },
+ "sakura": {
+  "title": "Sakura",
+  "well_known": true,
+  "found_by": "hand check",
+  "why": "its own page, Sakura Sakura, has 38,973 pageviews, which the name test misses; 434 PDMX views"
+ },
+ "sankt-martin-ritt-durch-schnee-und-wind": {
+  "title": "Sankt Martin ritt durch Schnee und Wind",
+  "kind": "Kids",
+  "origin": "German",
+  "found_by": "fallback kind",
+  "why": "a German children's song for St Martin's lantern walks"
+ },
+ "santa-lucia": {
+  "title": "Santa Lucia",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "a Neapolitan song: Wikipedia files it under carols for Sweden's Lucia Day"
+ },
+ "schiarazula-marazula": {
+  "title": "Schiarazula Marazula",
+  "kind": "Fiddle tunes",
+  "well_known": false,
+  "found_by": "known miss",
+  "why": "#381: a Renaissance dance tune, not the modern song on its cited page; PDMX views from 2 uploads"
+ },
+ "see-me-dance-the-polka": {
+  "title": "See Me Dance the Polka",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "Grossmith's comic song, not a polka for dancing"
+ },
+ "sellengers-round": {
+  "title": "Sellenger's Round",
+  "kind": "Fiddle tunes",
+  "origin": "English",
+  "found_by": "hand check",
+  "why": "an English country dance tune of Elizabeth I's time: its page is a 1953 set of variations on it, and the composer record's Irish comes from St Leger, its namesake"
+ },
+ "shepherd-of-souls": {
+  "title": "Shepherd of Souls",
+  "kind": "Hymns",
+  "found_by": "fallback kind",
+  "why": "a communion hymn: its shepherd isn't Christmas's"
+ },
+ "si-hei-lwli-mabi": {
+  "title": "Si hei lwli mabi",
+  "kind": "Kids",
+  "found_by": "fallback kind",
+  "why": "a Welsh lullaby"
+ },
+ "snow-lay-on-the-ground": {
+  "title": "The Snow Lay On The Ground",
+  "kind": "Christmas",
+  "found_by": "fallback kind",
+  "why": "a Christmas carol"
+ },
+ "strike-the-bell": {
+  "title": "Strike The Bell",
+  "kind": "Songs",
+  "found_by": "fallback kind",
+  "why": "a sea shanty"
+ },
+ "studentsangen": {
+  "title": "Studentsången",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "a Swedish student song for men's choir, not concert music"
+ },
+ "summ-summ-summ": {
+  "title": "Summ Summ Summ",
+  "kind": "Kids",
+  "found_by": "fallback kind",
+  "why": "a German children's song about a bee"
+ },
+ "sur-le-pont": {
+  "title": "Sur le Pont d'Avignon",
+  "kind": "Kids",
+  "well_known": true,
+  "found_by": "hand check",
+  "why": "a French children's song and singing game, known well beyond France; few PDMX uploads"
+ },
+ "theres-a-wideness-in-gods-mercy": {
+  "title": "There's a Wideness in God's Mercy",
+  "kind": "Hymns",
+  "found_by": "hand check",
+  "why": "a hymn: its cited page is Stainer's Crucifixion, the oratorio it's sung in"
+ },
+ "this-day-a-child-is-born": {
+  "title": "This Day A Child Is Born",
+  "kind": "Christmas",
+  "found_by": "fallback kind",
+  "why": "a Nativity carol"
+ },
+ "this-old-man": {
+  "title": "This Old Man",
+  "well_known": true,
+  "found_by": "near miss",
+  "why": "a counting song known across the English-speaking world"
+ },
+ "thomas-campion-never-weather-beaten-sail": {
+  "title": "Never Weather-Beaten Sail",
+  "kind": "Classical",
+  "origin": "English",
+  "found_by": "fallback kind",
+  "why": "Thomas Campion's sacred lute song (1613)"
+ },
+ "three-blind-mice": {
+  "title": "Three Blind Mice",
+  "well_known": true,
+  "found_by": "near miss",
+  "why": "a nursery rhyme and round known across the English-speaking world"
+ },
+ "tuonne-taakse-metsamaan": {
+  "title": "Tuonne taakse metsämaan",
+  "kind": "Songs",
+  "origin": "Finnish",
+  "found_by": "fallback kind",
+  "why": "a Finnish folk song"
+ },
+ "twenty-ninth-of-may": {
+  "title": "The Twenty-Ninth of May",
+  "kind": "Fiddle tunes",
+  "found_by": "hand check",
+  "why": "the English country dance tune: its cited page is All Things Bright and Beautiful's, a hymn sung to it"
+ },
+ "up-on-the-housetop": {
+  "title": "Up on the Housetop",
+  "well_known": true,
+  "found_by": "near miss",
+  "why": "an American Christmas song most children learn"
+ },
+ "uti-var-hage": {
+  "title": "Uti vår hage",
+  "well_known": false,
+  "found_by": "known miss",
+  "why": "#381: PDMX views from a few Swedish uploaders, and nothing else says it's widely known"
+ },
+ "what-a-friend": {
+  "title": "What a Friend We Have in Jesus",
+  "origin": "American",
+  "found_by": "hand check",
+  "why": "Converse, an American, wrote the tune; the Canadian category is the words' author's"
+ },
+ "when-you-wore-a-tulip": {
+  "title": "When You Wore a Tulip",
+  "kind": "Songs",
+  "found_by": "hand check",
+  "why": "a 1914 popular song, not concert music"
+ },
+ "where-the-bee-sucks": {
+  "title": "Where the bee sucks",
+  "kind": "Songs",
+  "origin": "English",
+  "found_by": "fallback kind",
+  "why": "Ariel's song from The Tempest"
+ },
+ "whistling-rufus": {
+  "title": "Whistling Rufus",
+  "kind": "Fiddle tunes",
+  "found_by": "hand check",
+  "why": "a cakewalk played as a fiddle tune"
+ },
+ "wild-rover": {
+  "title": "The Wild Rover",
+  "origin": null,
+  "found_by": "hand check",
+  "why": "a folk song of disputed origin, sung in Ireland, Scotland and England: Wikidata's United States is wrong"
+ }
+}

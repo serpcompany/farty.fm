@@ -113,6 +113,8 @@ class RecordProblems(unittest.TestCase):
         skeleton = {k: DONE[k] for k in composers.SKELETON_KEYS}
         self.assertEqual(self.problems(skeleton), [])
         self.assertEqual(self.problems({**skeleton, "note": "x"}), ["nocturne: note without a composer"])
+        # tag.py guess writes the kind and origin before the lookup (#383).
+        self.assertEqual(self.problems({**skeleton, "kind": "Classical", "origin": "Polish"}), [])
 
     def test_under_copyright_is_removed_not_kept(self):
         self.assertIn("after 1955", self.problems({**DONE, "composer_died": 1956})[0])
