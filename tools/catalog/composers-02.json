@@ -481,9 +481,9 @@
  {
   "id": "can-can",
   "title": "Can-Can",
-  "views": 325,
-  "pdmx": "Offenbach",
-  "score": "https://musescore.com/score/5983155",
+  "views": 359,
+  "pdmx": "Jacques Offenbach",
+  "score": "https://musescore.com/score/5942150",
   "composer": "Jacques Offenbach",
   "composer_died": 1880,
   "composer_source": "https://en.wikipedia.org/wiki/Orpheus_in_the_Underworld",
@@ -1174,9 +1174,9 @@
  {
   "id": "summ-summ-summ",
   "title": "Summ Summ Summ",
-  "views": 139,
-  "pdmx": "Deutsches Kinderlied",
-  "score": "https://musescore.com/score/5908191",
+  "views": 183,
+  "pdmx": "Composer",
+  "score": "https://musescore.com/score/6122328",
   "composer": "Traditional (Bohemian)",
   "composer_source": "https://de.wikipedia.org/wiki/Summ,_summ,_summ",
   "note": "German Wikipedia: the melody follows a Bohemian folk tune first written down in 1825; Carl Reinecke composed an alternative melody in 1875"
@@ -1422,17 +1422,6 @@
   "note": "Wikipedia names only Ethna Carbery as author of the words; it names no composer of the melody"
  },
  {
-  "id": "though-philomela-lost-her-love",
-  "title": "Though Philomela lost her love",
-  "views": 98,
-  "pdmx": "Though Philomela lost her love - Morley",
-  "score": "https://musescore.com/score/5787358",
-  "composer": "Thomas Morley",
-  "composer_died": 1602,
-  "composer_source": "https://en.wikipedia.org/wiki/Thomas_Morley",
-  "note": "madrigal"
- },
- {
   "id": "marching-through-georgia",
   "title": "Marching Through Georgia",
   "views": 96,
@@ -1572,20 +1561,6 @@
    "https://en.wikipedia.org/wiki/Gaudete"
   ],
   "note": "Wikipedia: no composer named for the melody; first published in Piae Cantiones 1582"
- },
- {
-  "id": "illumina-oculos-meos",
-  "title": "Illumina oculos meos",
-  "views": 88,
-  "pdmx": "Illumina oculos meos - Palestrina",
-  "score": "https://musescore.com/score/5792453",
-  "composer": "Unknown",
-  "composer_source": "https://thesession.org/tunes/search?q=Illumina%20oculos%20meos",
-  "checked": [
-   "https://thesession.org/tunes/search?q=Illumina%20oculos%20meos",
-   "https://en.wikipedia.org/w/index.php?search=Illumina%20oculos%20meos"
-  ],
-  "note": "The score credits Palestrina, but Wikipedia's lists of compositions give an Illumina oculos meos for Palestrina and another for Andreas de Silva (Wikidata Q116268169), and no allowed page says which one this is"
  },
  {
   "id": "den-fromme-helena",

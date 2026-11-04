@@ -62,6 +62,8 @@ export type Render = {
   max_beats?: number
   beats_per_bar?: number
   start_beat?: number
+  /** The score's tracks the tune is read from: the staves it moves between, when it does (#380). */
+  track?: number | number[]
 }
 
 /** `fixtures/golden/songs/<id>.json`: the reference engine's import of a catalog score. */
@@ -257,8 +259,9 @@ function song(entry: CatalogEntry, golden: GoldenSong, names: readonly string[])
     throw problem("the golden copy wasn't imported from the cited score")
   if (golden.bpm !== entry.render.bpm) throw problem('the golden copy has another tempo')
   // A golden copy left over from an older entry, or edited by hand (#350).
-  const renderKeys = ['bpm', 'max_beats', 'beats_per_bar', 'start_beat'] as const
-  if (renderKeys.some(key => golden.import_args?.[key] !== entry.render[key]))
+  const renderKeys = ['bpm', 'max_beats', 'beats_per_bar', 'start_beat', 'track'] as const
+  const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
+  if (renderKeys.some(key => !same(golden.import_args?.[key], entry.render[key])))
     throw problem("the golden copy wasn't imported with the catalog's render arguments")
   const { max_beats, beats_per_bar } = entry.render
   if (beats_per_bar !== undefined && golden.beats_per_bar !== beats_per_bar)

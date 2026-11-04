@@ -529,16 +529,6 @@
   "published": 1811
  },
  {
-  "id": "moments-musicaux-opus-94-no-3-in-f-minor",
-  "title": "Moments Musicaux Opus 94 No. 3 in F minor",
-  "views": 1670,
-  "pdmx": "Franz Schubert",
-  "score": "https://musescore.com/score/221661",
-  "composer": "Franz Schubert",
-  "composer_died": 1828,
-  "composer_source": "https://en.wikipedia.org/wiki/Six_moments_musicaux_(Schubert)"
- },
- {
   "id": "es-wird-scho-glei-dumpa",
   "title": "Es wird scho glei dumpa",
   "views": 1550,
@@ -942,9 +932,9 @@
  {
   "id": "bourree-in-e-minor",
   "title": "Bourrée in E Minor",
-  "views": 761,
-  "pdmx": "J. S. Bach",
-  "score": "https://musescore.com/score/1717176",
+  "views": 687,
+  "pdmx": "BWV 996",
+  "score": "https://musescore.com/score/1747271",
   "composer": "Johann Sebastian Bach",
   "composer_died": 1750,
   "composer_source": "https://en.wikipedia.org/wiki/Lute_Suite_in_E_minor,_BWV_996"

@@ -75,10 +75,10 @@ describe('the Song Catalog in the app', () => {
   })
 
   // #350: every Song in catalog/ then, but the second Ode to Joy (#229). #357 pulled 16 Songs as
-  // under copyright.
+  // under copyright, and #380 2 whose only scores lose the tune when read as one part.
   test('then every other Song in the catalog, in its order, but ode-mutopia', () => {
     const ids = songs.map(s => s.id)
-    expect(ids).toHaveLength(992)
+    expect(ids).toHaveLength(989)
     const first = ids.slice(0, 12)
     const catalogOrder = sources.catalog
       .map(e => e.id)
@@ -151,6 +151,11 @@ describe('the generator', () => {
     [
       'its render arguments',
       (g: GoldenSong) => ({ ...g, import_args: { ...g.import_args, max_beats: 99 } }),
+      /render arguments/
+    ],
+    [
+      'the tracks it reads',
+      (g: GoldenSong) => ({ ...g, import_args: { ...g.import_args, track: [0, 1] } }),
       /render arguments/
     ],
     ['its meter', (g: GoldenSong) => ({ ...g, beats_per_bar: 3 }), /another meter/],

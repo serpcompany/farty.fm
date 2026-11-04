@@ -7058,26 +7058,28 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "60": "002"
+              "55": "022"
             },
             "transposition": -4
           },
           "missing": [],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 130.02562990595888,
+          "plan_cost": 72.08837767402957,
           "recording_for_pitch": {
-            "60": "002",
+            "55": "022",
+            "57": "101",
+            "60": "084",
             "62": "091",
             "64": "094"
           },
           "step": {
             "op": "swap",
-            "recording": "002",
-            "song_pitch": 60
+            "recording": "022",
+            "song_pitch": 55
           },
           "transpose": -4,
           "unlocked": true
@@ -7093,26 +7095,28 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "62": "084"
+              "57": "032"
             },
             "transposition": -4
           },
           "missing": [],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 147.78515200093608,
+          "plan_cost": 103.40620247326184,
           "recording_for_pitch": {
-            "60": "002",
-            "62": "084",
+            "55": "022",
+            "57": "032",
+            "60": "084",
+            "62": "091",
             "64": "094"
           },
           "step": {
             "op": "swap",
-            "recording": "084",
-            "song_pitch": 62
+            "recording": "032",
+            "song_pitch": 57
           },
           "transpose": -4,
           "unlocked": true
@@ -7127,7 +7131,7 @@
         {
           "choices": {
             "excluded": [
-              "084"
+              "032"
             ],
             "preferred": {},
             "transposition": -4
@@ -7135,18 +7139,20 @@
           "missing": [],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 130.02562990595888,
+          "plan_cost": 72.08837767402957,
           "recording_for_pitch": {
-            "60": "002",
+            "55": "022",
+            "57": "101",
+            "60": "084",
             "62": "091",
             "64": "094"
           },
           "step": {
             "op": "leave_out",
-            "recording": "084"
+            "recording": "032"
           },
           "transpose": -4,
           "unlocked": true
@@ -7156,18 +7162,20 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 19.70865678662289,
+          "plan_cost": 38.99539921996796,
           "recording_for_pitch": {
+            "55": "032",
+            "57": "101",
             "60": "084",
             "62": "091",
             "64": "094"
           },
           "step": {
             "op": "use_again",
-            "recording": "084"
+            "recording": "032"
           },
           "transpose": -4,
           "unlocked": true
@@ -7182,7 +7190,7 @@
         {
           "choices": {
             "excluded": [
-              "002"
+              "022"
             ],
             "preferred": {},
             "transposition": -4
@@ -7190,18 +7198,20 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 19.70865678662289,
+          "plan_cost": 38.99539921996796,
           "recording_for_pitch": {
+            "55": "032",
+            "57": "101",
             "60": "084",
             "62": "091",
             "64": "094"
           },
           "step": {
             "op": "leave_out",
-            "recording": "002"
+            "recording": "022"
           },
           "transpose": -4,
           "unlocked": true
@@ -7209,32 +7219,34 @@
         {
           "choices": {
             "excluded": [
-              "002",
-              "084"
+              "022",
+              "032"
             ],
             "preferred": {},
             "transposition": -4
           },
           "missing": [
             {
-              "seconds": 1.5,
-              "target_midi": 56
+              "seconds": 1.0,
+              "target_midi": 51
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 8.078239409109573,
+          "plan_cost": 22.56573445826425,
           "recording_for_pitch": {
-            "60": null,
+            "55": null,
+            "57": "101",
+            "60": "084",
             "62": "091",
             "64": "094"
           },
           "step": {
             "op": "leave_out",
-            "recording": "084"
+            "recording": "032"
           },
           "transpose": -4,
           "unlocked": false
@@ -7244,18 +7256,20 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 19.70865678662289,
+          "plan_cost": 38.99539921996796,
           "recording_for_pitch": {
+            "55": "032",
+            "57": "101",
             "60": "084",
             "62": "091",
             "64": "094"
           },
           "step": {
             "op": "reset",
-            "song_pitch": 60
+            "song_pitch": 55
           },
           "transpose": -4,
           "unlocked": true
@@ -7271,26 +7285,28 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "60": "002"
+              "55": "022"
             },
             "transposition": -4
           },
           "missing": [],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 130.02562990595888,
+          "plan_cost": 72.08837767402957,
           "recording_for_pitch": {
-            "60": "002",
+            "55": "022",
+            "57": "101",
+            "60": "084",
             "62": "091",
             "64": "094"
           },
           "step": {
             "op": "swap",
-            "recording": "002",
-            "song_pitch": 60
+            "recording": "022",
+            "song_pitch": 55
           },
           "transpose": -4,
           "unlocked": true
@@ -7298,28 +7314,30 @@
         {
           "choices": {
             "excluded": [
-              "091"
+              "101"
             ],
             "preferred": {
-              "60": "002"
+              "55": "022"
             },
             "transposition": -4
           },
           "missing": [],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 147.78515200093608,
+          "plan_cost": 82.35854662484694,
           "recording_for_pitch": {
-            "60": "002",
-            "62": "084",
+            "55": "022",
+            "57": "090",
+            "60": "084",
+            "62": "091",
             "64": "094"
           },
           "step": {
             "op": "leave_out",
-            "recording": "091"
+            "recording": "101"
           },
           "transpose": -4,
           "unlocked": true
@@ -7327,7 +7345,7 @@
         {
           "choices": {
             "excluded": [
-              "091"
+              "101"
             ],
             "preferred": {},
             "transposition": -4
@@ -7335,18 +7353,20 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 38.0114707430893,
+          "plan_cost": 49.26556817078533,
           "recording_for_pitch": {
+            "55": "032",
+            "57": "090",
             "60": "084",
-            "62": "090",
+            "62": "091",
             "64": "094"
           },
           "step": {
             "op": "reset",
-            "song_pitch": 60
+            "song_pitch": 55
           },
           "transpose": -4,
           "unlocked": true
@@ -7356,18 +7376,20 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 19.70865678662289,
+          "plan_cost": 38.99539921996796,
           "recording_for_pitch": {
+            "55": "032",
+            "57": "101",
             "60": "084",
             "62": "091",
             "64": "094"
           },
           "step": {
             "op": "reset",
-            "song_pitch": 62
+            "song_pitch": 57
           },
           "transpose": -4,
           "unlocked": true
@@ -7383,26 +7405,28 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "60": "002"
+              "55": "022"
             },
             "transposition": -4
           },
           "missing": [],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 130.02562990595888,
+          "plan_cost": 72.08837767402957,
           "recording_for_pitch": {
-            "60": "002",
+            "55": "022",
+            "57": "101",
+            "60": "084",
             "62": "091",
             "64": "094"
           },
           "step": {
             "op": "swap",
-            "recording": "002",
-            "song_pitch": 60
+            "recording": "022",
+            "song_pitch": 55
           },
           "transpose": -4,
           "unlocked": true
@@ -7410,28 +7434,30 @@
         {
           "choices": {
             "excluded": [
-              "091"
+              "101"
             ],
             "preferred": {
-              "60": "002"
+              "55": "022"
             },
             "transposition": -4
           },
           "missing": [],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 147.78515200093608,
+          "plan_cost": 82.35854662484694,
           "recording_for_pitch": {
-            "60": "002",
-            "62": "084",
+            "55": "022",
+            "57": "090",
+            "60": "084",
+            "62": "091",
             "64": "094"
           },
           "step": {
             "op": "leave_out",
-            "recording": "091"
+            "recording": "101"
           },
           "transpose": -4,
           "unlocked": true
@@ -7441,17 +7467,75 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 19.70865678662289,
+          "plan_cost": 38.99539921996796,
           "recording_for_pitch": {
+            "55": "032",
+            "57": "101",
             "60": "084",
             "62": "091",
             "64": "094"
           },
           "step": {
             "op": "reset_all"
+          },
+          "transpose": -4,
+          "unlocked": true
+        }
+      ]
+    },
+    {
+      "case": "stale",
+      "library": "full",
+      "song": "old-macdonald",
+      "states": [
+        {
+          "choices": {
+            "excluded": [
+              "091"
+            ],
+            "preferred": {
+              "55": "022",
+              "57": "999",
+              "60": "009",
+              "62": "091",
+              "64": "018",
+              "65": "002"
+            },
+            "transposition": -4
+          },
+          "missing": [],
+          "octave_moves": 1,
+          "pitch_coverage": {
+            "covered": 5,
+            "total": 5
+          },
+          "plan_cost": 90.39119163049598,
+          "recording_for_pitch": {
+            "55": "022",
+            "57": "101",
+            "60": "084",
+            "62": "090",
+            "64": "094"
+          },
+          "step": {
+            "choices": {
+              "excluded": [
+                "091"
+              ],
+              "preferred": {
+                "55": "022",
+                "57": "999",
+                "60": "009",
+                "62": "091",
+                "64": "018",
+                "65": "002"
+              },
+              "transposition": -4
+            },
+            "op": "set"
           },
           "transpose": -4,
           "unlocked": true
@@ -25114,62 +25198,66 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "013"
+              "60": "017"
             },
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 28.80065579749565,
+          "plan_cost": 101.68753993640004,
           "recording_for_pitch": {
-            "59": "013",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "017",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "swap",
-            "recording": "013",
-            "song_pitch": 59
+            "recording": "017",
+            "song_pitch": 60
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         },
         {
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "017"
+              "60": "032"
             },
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 30.057584443132335,
+          "plan_cost": 155.44941919505186,
           "recording_for_pitch": {
-            "59": "017",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "032",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "swap",
-            "recording": "017",
-            "song_pitch": 59
+            "recording": "032",
+            "song_pitch": 60
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         }
       ]
@@ -25183,31 +25271,33 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "090"
+              "60": "095"
             },
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 22.483139514658284,
+          "plan_cost": 113.52792338033844,
           "recording_for_pitch": {
-            "59": "090",
-            "60": "101",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "095",
+            "62": "022",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "swap",
-            "recording": "090",
-            "song_pitch": 59
+            "recording": "095",
+            "song_pitch": 60
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         }
       ]
@@ -25220,31 +25310,33 @@
         {
           "choices": {
             "excluded": [
-              "101"
+              "022"
             ],
             "preferred": {},
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 26.76693584134037,
+          "plan_cost": 101.68753993640004,
           "recording_for_pitch": {
-            "59": "032",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "017",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "leave_out",
-            "recording": "101"
+            "recording": "022"
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         },
         {
@@ -25252,23 +25344,25 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 18.937479641532303,
+          "plan_cost": 100.56527709426852,
           "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "022",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "use_again",
-            "recording": "101"
+            "recording": "022"
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         }
       ]
@@ -25281,166 +25375,186 @@
         {
           "choices": {
             "excluded": [
-              "002"
+              "017"
             ],
             "preferred": {},
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 18.937479641532303,
+          "plan_cost": 100.56527709426852,
           "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "022",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "leave_out",
-            "recording": "002"
+            "recording": "017"
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         },
         {
           "choices": {
             "excluded": [
-              "002",
-              "013"
+              "017",
+              "022"
             ],
             "preferred": {},
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 18.937479641532303,
+          "plan_cost": 155.44941919505186,
           "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "032",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "leave_out",
-            "recording": "013"
+            "recording": "022"
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         },
         {
           "choices": {
             "excluded": [
-              "002",
-              "013",
-              "059"
+              "017",
+              "022",
+              "032"
             ],
             "preferred": {},
-            "transposition": -6
-          },
-          "missing": [],
-          "octave_moves": 0,
-          "pitch_coverage": {
-            "covered": 6,
-            "total": 6
-          },
-          "plan_cost": 18.937479641532303,
-          "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
-          },
-          "step": {
-            "op": "leave_out",
-            "recording": "059"
-          },
-          "transpose": -6,
-          "unlocked": true
-        },
-        {
-          "choices": {
-            "excluded": [
-              "002",
-              "013",
-              "059",
-              "069"
-            ],
-            "preferred": {},
-            "transposition": -6
-          },
-          "missing": [],
-          "octave_moves": 0,
-          "pitch_coverage": {
-            "covered": 6,
-            "total": 6
-          },
-          "plan_cost": 18.937479641532303,
-          "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
-          },
-          "step": {
-            "op": "leave_out",
-            "recording": "069"
-          },
-          "transpose": -6,
-          "unlocked": true
-        },
-        {
-          "choices": {
-            "excluded": [
-              "002",
-              "013",
-              "059",
-              "069",
-              "084"
-            ],
-            "preferred": {},
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 56
+              "seconds": 0.5,
+              "target_midi": 39
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 6
+            "covered": 7,
+            "total": 8
           },
-          "plan_cost": 13.823478823775734,
+          "plan_cost": 80.87329869310942,
           "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": null,
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": null,
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "leave_out",
-            "recording": "084"
+            "recording": "032"
           },
-          "transpose": -6,
+          "transpose": -21,
+          "unlocked": false
+        },
+        {
+          "choices": {
+            "excluded": [
+              "017",
+              "022",
+              "032",
+              "095"
+            ],
+            "preferred": {},
+            "transposition": -21
+          },
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 39
+            }
+          ],
+          "octave_moves": 1,
+          "pitch_coverage": {
+            "covered": 7,
+            "total": 8
+          },
+          "plan_cost": 136.79973637540178,
+          "recording_for_pitch": {
+            "60": null,
+            "62": "090",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
+          },
+          "step": {
+            "op": "leave_out",
+            "recording": "095"
+          },
+          "transpose": -21,
+          "unlocked": false
+        },
+        {
+          "choices": {
+            "excluded": [
+              "017",
+              "022",
+              "032",
+              "095",
+              "101"
+            ],
+            "preferred": {},
+            "transposition": -21
+          },
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 39
+            }
+          ],
+          "octave_moves": 2,
+          "pitch_coverage": {
+            "covered": 7,
+            "total": 8
+          },
+          "plan_cost": 141.80674838274086,
+          "recording_for_pitch": {
+            "60": null,
+            "62": "090",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "016"
+          },
+          "step": {
+            "op": "leave_out",
+            "recording": "101"
+          },
+          "transpose": -21,
           "unlocked": false
         },
         {
@@ -25448,23 +25562,25 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 18.937479641532303,
+          "plan_cost": 100.56527709426852,
           "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "022",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "reset",
-            "song_pitch": 62
+            "song_pitch": 60
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         }
       ]
@@ -25478,63 +25594,67 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "013"
+              "60": "017"
             },
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 28.80065579749565,
+          "plan_cost": 101.68753993640004,
           "recording_for_pitch": {
-            "59": "013",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "017",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "swap",
-            "recording": "013",
-            "song_pitch": 59
+            "recording": "017",
+            "song_pitch": 60
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         },
         {
           "choices": {
             "excluded": [
-              "090"
+              "095"
             ],
             "preferred": {
-              "59": "013"
+              "60": "017"
             },
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 29.77877343291729,
+          "plan_cost": 112.95668295528527,
           "recording_for_pitch": {
-            "59": "013",
-            "60": "101",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "017",
+            "62": "022",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "leave_out",
-            "recording": "090"
+            "recording": "095"
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         },
         {
@@ -25542,47 +25662,51 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 18.937479641532303,
+          "plan_cost": 100.56527709426852,
           "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
-          },
-          "step": {
-            "op": "reset",
-            "song_pitch": 59
-          },
-          "transpose": -6,
-          "unlocked": true
-        },
-        {
-          "choices": null,
-          "missing": [],
-          "octave_moves": 0,
-          "pitch_coverage": {
-            "covered": 6,
-            "total": 6
-          },
-          "plan_cost": 18.937479641532303,
-          "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "022",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "reset",
             "song_pitch": 60
           },
-          "transpose": -6,
+          "transpose": -21,
+          "unlocked": true
+        },
+        {
+          "choices": null,
+          "missing": [],
+          "octave_moves": 0,
+          "pitch_coverage": {
+            "covered": 8,
+            "total": 8
+          },
+          "plan_cost": 100.56527709426852,
+          "recording_for_pitch": {
+            "60": "022",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
+          },
+          "step": {
+            "op": "reset",
+            "song_pitch": 62
+          },
+          "transpose": -21,
           "unlocked": true
         }
       ]
@@ -25596,63 +25720,67 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "013"
+              "60": "017"
             },
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 28.80065579749565,
+          "plan_cost": 101.68753993640004,
           "recording_for_pitch": {
-            "59": "013",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "017",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "swap",
-            "recording": "013",
-            "song_pitch": 59
+            "recording": "017",
+            "song_pitch": 60
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         },
         {
           "choices": {
             "excluded": [
-              "090"
+              "095"
             ],
             "preferred": {
-              "59": "013"
+              "60": "017"
             },
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 29.77877343291729,
+          "plan_cost": 112.95668295528527,
           "recording_for_pitch": {
-            "59": "013",
-            "60": "101",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "017",
+            "62": "022",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "leave_out",
-            "recording": "090"
+            "recording": "095"
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         },
         {
@@ -25660,22 +25788,24 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 18.937479641532303,
+          "plan_cost": 100.56527709426852,
           "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "66": "094",
-            "67": "097"
+            "60": "022",
+            "62": "095",
+            "64": "019",
+            "65": "102",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "op": "reset_all"
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         }
       ]
@@ -25688,53 +25818,55 @@
         {
           "choices": {
             "excluded": [
-              "091"
+              "102"
             ],
             "preferred": {
-              "59": "013",
-              "60": "999",
-              "62": "009",
-              "64": "091",
-              "66": "018",
-              "67": "013",
-              "68": "002"
+              "60": "017",
+              "62": "999",
+              "64": "002",
+              "65": "102",
+              "67": "018",
+              "69": "017",
+              "73": "002"
             },
-            "transposition": -6
+            "transposition": -21
           },
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 6,
-            "total": 6
+            "covered": 8,
+            "total": 8
           },
-          "plan_cost": 43.71142860969867,
+          "plan_cost": 639.6770695435756,
           "recording_for_pitch": {
-            "59": "013",
-            "60": "090",
-            "62": "084",
-            "64": "002",
-            "66": "094",
-            "67": "097"
+            "60": "017",
+            "62": "095",
+            "64": "019",
+            "65": "069",
+            "67": "002",
+            "69": "104",
+            "71": "096",
+            "72": "101"
           },
           "step": {
             "choices": {
               "excluded": [
-                "091"
+                "102"
               ],
               "preferred": {
-                "59": "013",
-                "60": "999",
-                "62": "009",
-                "64": "091",
-                "66": "018",
-                "67": "013",
-                "68": "002"
+                "60": "017",
+                "62": "999",
+                "64": "002",
+                "65": "102",
+                "67": "018",
+                "69": "017",
+                "73": "002"
               },
-              "transposition": -6
+              "transposition": -21
             },
             "op": "set"
           },
-          "transpose": -6,
+          "transpose": -21,
           "unlocked": true
         }
       ]
@@ -51714,19 +51846,21 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "013"
+              "55": "002"
             },
             "transposition": -6
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 98.58551560453132,
+          "plan_cost": 101.51539444224333,
           "recording_for_pitch": {
-            "59": "013",
+            "55": "002",
+            "57": "101",
+            "59": "032",
             "60": "090",
             "62": "084",
             "64": "091",
@@ -51734,8 +51868,8 @@
           },
           "step": {
             "op": "swap",
-            "recording": "013",
-            "song_pitch": 59
+            "recording": "002",
+            "song_pitch": 55
           },
           "transpose": -6,
           "unlocked": true
@@ -51744,19 +51878,21 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "016"
+              "55": "017"
             },
             "transposition": -6
           },
           "missing": [],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 33.230995877992456,
+          "plan_cost": 129.40810137442978,
           "recording_for_pitch": {
-            "59": "016",
+            "55": "017",
+            "57": "101",
+            "59": "032",
             "60": "090",
             "62": "084",
             "64": "091",
@@ -51764,8 +51900,8 @@
           },
           "step": {
             "op": "swap",
-            "recording": "016",
-            "song_pitch": 59
+            "recording": "017",
+            "song_pitch": 55
           },
           "transpose": -6,
           "unlocked": true
@@ -51781,31 +51917,38 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "090"
+              "55": "032"
             },
             "transposition": -6
           },
-          "missing": [],
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 53
+            }
+          ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 36.34122958346891,
+          "plan_cost": 116.2734820486116,
           "recording_for_pitch": {
-            "59": "090",
-            "60": "101",
+            "55": "032",
+            "57": "101",
+            "59": null,
+            "60": "090",
             "62": "084",
             "64": "091",
             "67": "094"
           },
           "step": {
             "op": "swap",
-            "recording": "090",
-            "song_pitch": 59
+            "recording": "032",
+            "song_pitch": 55
           },
           "transpose": -6,
-          "unlocked": true
+          "unlocked": false
         }
       ]
     },
@@ -51817,7 +51960,7 @@
         {
           "choices": {
             "excluded": [
-              "101"
+              "104"
             ],
             "preferred": {},
             "transposition": -6
@@ -51825,12 +51968,14 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 29.23353777636305,
+          "plan_cost": 97.4467428253016,
           "recording_for_pitch": {
-            "59": "086",
+            "55": "096",
+            "57": "101",
+            "59": "032",
             "60": "090",
             "62": "084",
             "64": "091",
@@ -51838,7 +51983,7 @@
           },
           "step": {
             "op": "leave_out",
-            "recording": "101"
+            "recording": "104"
           },
           "transpose": -6,
           "unlocked": true
@@ -51848,12 +51993,14 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 27.384364730671095,
+          "plan_cost": 82.6069724307941,
           "recording_for_pitch": {
-            "59": "101",
+            "55": "104",
+            "57": "101",
+            "59": "032",
             "60": "090",
             "62": "084",
             "64": "091",
@@ -51861,7 +52008,7 @@
           },
           "step": {
             "op": "use_again",
-            "recording": "101"
+            "recording": "104"
           },
           "transpose": -6,
           "unlocked": true
@@ -51876,159 +52023,35 @@
         {
           "choices": {
             "excluded": [
-              "002"
-            ],
-            "preferred": {},
-            "transposition": -6
-          },
-          "missing": [],
-          "octave_moves": 0,
-          "pitch_coverage": {
-            "covered": 5,
-            "total": 5
-          },
-          "plan_cost": 27.384364730671095,
-          "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "67": "094"
-          },
-          "step": {
-            "op": "leave_out",
-            "recording": "002"
-          },
-          "transpose": -6,
-          "unlocked": true
-        },
-        {
-          "choices": {
-            "excluded": [
-              "002",
-              "013"
-            ],
-            "preferred": {},
-            "transposition": -6
-          },
-          "missing": [],
-          "octave_moves": 0,
-          "pitch_coverage": {
-            "covered": 5,
-            "total": 5
-          },
-          "plan_cost": 27.384364730671095,
-          "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "67": "094"
-          },
-          "step": {
-            "op": "leave_out",
-            "recording": "013"
-          },
-          "transpose": -6,
-          "unlocked": true
-        },
-        {
-          "choices": {
-            "excluded": [
-              "002",
-              "013",
-              "059"
-            ],
-            "preferred": {},
-            "transposition": -6
-          },
-          "missing": [],
-          "octave_moves": 0,
-          "pitch_coverage": {
-            "covered": 5,
-            "total": 5
-          },
-          "plan_cost": 27.384364730671095,
-          "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "67": "094"
-          },
-          "step": {
-            "op": "leave_out",
-            "recording": "059"
-          },
-          "transpose": -6,
-          "unlocked": true
-        },
-        {
-          "choices": {
-            "excluded": [
-              "002",
-              "013",
-              "059",
-              "069"
-            ],
-            "preferred": {},
-            "transposition": -6
-          },
-          "missing": [],
-          "octave_moves": 0,
-          "pitch_coverage": {
-            "covered": 5,
-            "total": 5
-          },
-          "plan_cost": 27.384364730671095,
-          "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "67": "094"
-          },
-          "step": {
-            "op": "leave_out",
-            "recording": "069"
-          },
-          "transpose": -6,
-          "unlocked": true
-        },
-        {
-          "choices": {
-            "excluded": [
-              "002",
-              "013",
-              "059",
-              "069",
-              "084"
+              "032"
             ],
             "preferred": {},
             "transposition": -6
           },
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 56
+              "seconds": 1.5,
+              "target_midi": 53
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 17.783050365826238,
+          "plan_cost": 49.72075895841023,
           "recording_for_pitch": {
-            "59": "101",
+            "55": "104",
+            "57": "101",
+            "59": null,
             "60": "090",
-            "62": null,
+            "62": "084",
             "64": "091",
             "67": "094"
           },
           "step": {
             "op": "leave_out",
-            "recording": "084"
+            "recording": "032"
           },
           "transpose": -6,
           "unlocked": false
@@ -52038,12 +52061,14 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 27.384364730671095,
+          "plan_cost": 82.6069724307941,
           "recording_for_pitch": {
-            "59": "101",
+            "55": "104",
+            "57": "101",
+            "59": "032",
             "60": "090",
             "62": "084",
             "64": "091",
@@ -52051,7 +52076,7 @@
           },
           "step": {
             "op": "reset",
-            "song_pitch": 62
+            "song_pitch": 59
           },
           "transpose": -6,
           "unlocked": true
@@ -52067,19 +52092,21 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "013"
+              "55": "002"
             },
             "transposition": -6
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 98.58551560453132,
+          "plan_cost": 101.51539444224333,
           "recording_for_pitch": {
-            "59": "013",
+            "55": "002",
+            "57": "101",
+            "59": "032",
             "60": "090",
             "62": "084",
             "64": "091",
@@ -52087,8 +52114,8 @@
           },
           "step": {
             "op": "swap",
-            "recording": "013",
-            "song_pitch": 59
+            "recording": "002",
+            "song_pitch": 55
           },
           "transpose": -6,
           "unlocked": true
@@ -52096,30 +52123,63 @@
         {
           "choices": {
             "excluded": [
-              "090"
+              "101"
             ],
             "preferred": {
-              "59": "013"
+              "55": "002"
             },
             "transposition": -6
           },
           "missing": [],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 107.4399754521739,
+          "plan_cost": 120.6620613723738,
           "recording_for_pitch": {
-            "59": "013",
-            "60": "101",
+            "55": "002",
+            "57": "095",
+            "59": "032",
+            "60": "090",
             "62": "084",
             "64": "091",
             "67": "094"
           },
           "step": {
             "op": "leave_out",
-            "recording": "090"
+            "recording": "101"
+          },
+          "transpose": -6,
+          "unlocked": true
+        },
+        {
+          "choices": {
+            "excluded": [
+              "101"
+            ],
+            "preferred": {},
+            "transposition": -6
+          },
+          "missing": [],
+          "octave_moves": 1,
+          "pitch_coverage": {
+            "covered": 7,
+            "total": 7
+          },
+          "plan_cost": 101.7536393609246,
+          "recording_for_pitch": {
+            "55": "104",
+            "57": "095",
+            "59": "032",
+            "60": "090",
+            "62": "084",
+            "64": "091",
+            "67": "094"
+          },
+          "step": {
+            "op": "reset",
+            "song_pitch": 55
           },
           "transpose": -6,
           "unlocked": true
@@ -52129,12 +52189,14 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 27.384364730671095,
+          "plan_cost": 82.6069724307941,
           "recording_for_pitch": {
-            "59": "101",
+            "55": "104",
+            "57": "101",
+            "59": "032",
             "60": "090",
             "62": "084",
             "64": "091",
@@ -52142,30 +52204,7 @@
           },
           "step": {
             "op": "reset",
-            "song_pitch": 59
-          },
-          "transpose": -6,
-          "unlocked": true
-        },
-        {
-          "choices": null,
-          "missing": [],
-          "octave_moves": 0,
-          "pitch_coverage": {
-            "covered": 5,
-            "total": 5
-          },
-          "plan_cost": 27.384364730671095,
-          "recording_for_pitch": {
-            "59": "101",
-            "60": "090",
-            "62": "084",
-            "64": "091",
-            "67": "094"
-          },
-          "step": {
-            "op": "reset",
-            "song_pitch": 60
+            "song_pitch": 57
           },
           "transpose": -6,
           "unlocked": true
@@ -52181,19 +52220,21 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "013"
+              "55": "002"
             },
             "transposition": -6
           },
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 98.58551560453132,
+          "plan_cost": 101.51539444224333,
           "recording_for_pitch": {
-            "59": "013",
+            "55": "002",
+            "57": "101",
+            "59": "032",
             "60": "090",
             "62": "084",
             "64": "091",
@@ -52201,8 +52242,8 @@
           },
           "step": {
             "op": "swap",
-            "recording": "013",
-            "song_pitch": 59
+            "recording": "002",
+            "song_pitch": 55
           },
           "transpose": -6,
           "unlocked": true
@@ -52210,30 +52251,32 @@
         {
           "choices": {
             "excluded": [
-              "090"
+              "101"
             ],
             "preferred": {
-              "59": "013"
+              "55": "002"
             },
             "transposition": -6
           },
           "missing": [],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 107.4399754521739,
+          "plan_cost": 120.6620613723738,
           "recording_for_pitch": {
-            "59": "013",
-            "60": "101",
+            "55": "002",
+            "57": "095",
+            "59": "032",
+            "60": "090",
             "62": "084",
             "64": "091",
             "67": "094"
           },
           "step": {
             "op": "leave_out",
-            "recording": "090"
+            "recording": "101"
           },
           "transpose": -6,
           "unlocked": true
@@ -52243,12 +52286,14 @@
           "missing": [],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 27.384364730671095,
+          "plan_cost": 82.6069724307941,
           "recording_for_pitch": {
-            "59": "101",
+            "55": "104",
+            "57": "101",
+            "59": "032",
             "60": "090",
             "62": "084",
             "64": "091",
@@ -52270,43 +52315,47 @@
         {
           "choices": {
             "excluded": [
-              "091"
+              "090"
             ],
             "preferred": {
-              "59": "013",
-              "60": "999",
-              "62": "009",
-              "64": "091",
-              "67": "018",
+              "55": "002",
+              "57": "999",
+              "59": "002",
+              "60": "090",
+              "62": "018",
+              "64": "002",
               "68": "002"
             },
             "transposition": -6
           },
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 7,
+            "total": 7
           },
-          "plan_cost": 125.82603916829171,
+          "plan_cost": 377.11663852588066,
           "recording_for_pitch": {
-            "59": "013",
-            "60": "090",
+            "55": "002",
+            "57": "101",
+            "59": "032",
+            "60": "013",
             "62": "084",
-            "64": "002",
+            "64": "091",
             "67": "094"
           },
           "step": {
             "choices": {
               "excluded": [
-                "091"
+                "090"
               ],
               "preferred": {
-                "59": "013",
-                "60": "999",
-                "62": "009",
-                "64": "091",
-                "67": "018",
+                "55": "002",
+                "57": "999",
+                "59": "002",
+                "60": "090",
+                "62": "018",
+                "64": "002",
                 "68": "002"
               },
               "transposition": -6
@@ -76643,31 +76692,33 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "64": "022"
+              "55": "002"
             },
             "transposition": -11
           },
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 51
+              "seconds": 1.5,
+              "target_midi": 49
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 88.36197734544874,
+          "plan_cost": 120.61424593733162,
           "recording_for_pitch": {
-            "60": "002",
-            "62": null,
-            "64": "022"
+            "55": "002",
+            "57": "069",
+            "60": null,
+            "62": "022",
+            "64": "090"
           },
           "step": {
             "op": "swap",
-            "recording": "022",
-            "song_pitch": 64
+            "recording": "002",
+            "song_pitch": 55
           },
           "transpose": -11,
           "unlocked": false
@@ -76682,31 +76733,33 @@
         {
           "choices": {
             "excluded": [
-              "002"
+              "009"
             ],
             "preferred": {},
             "transposition": -11
           },
           "missing": [
             {
-              "seconds": 1.5,
-              "target_midi": 49
+              "seconds": 1.0,
+              "target_midi": 44
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 49.25707735621886,
+          "plan_cost": 150.822688298392,
           "recording_for_pitch": {
-            "60": null,
+            "55": null,
+            "57": "069",
+            "60": "002",
             "62": "022",
             "64": "090"
           },
           "step": {
             "op": "leave_out",
-            "recording": "002"
+            "recording": "009"
           },
           "transpose": -11,
           "unlocked": false
@@ -76714,20 +76767,22 @@
         {
           "choices": null,
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 105.53922105939928,
+          "plan_cost": 257.80395239481237,
           "recording_for_pitch": {
+            "55": "009",
+            "57": "069",
             "60": "002",
             "62": "022",
             "64": "090"
           },
           "step": {
             "op": "use_again",
-            "recording": "002"
+            "recording": "009"
           },
           "transpose": -11,
           "unlocked": true
@@ -76753,13 +76808,15 @@
               "target_midi": 49
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 2,
-            "total": 3
+            "covered": 4,
+            "total": 5
           },
-          "plan_cost": 49.25707735621886,
+          "plan_cost": 201.28977513882884,
           "recording_for_pitch": {
+            "55": "009",
+            "57": "069",
             "60": null,
             "62": "022",
             "64": "090"
@@ -76774,13 +76831,15 @@
         {
           "choices": null,
           "missing": [],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 3
+            "covered": 5,
+            "total": 5
           },
-          "plan_cost": 105.53922105939928,
+          "plan_cost": 257.80395239481237,
           "recording_for_pitch": {
+            "55": "009",
+            "57": "069",
             "60": "002",
             "62": "022",
             "64": "090"
@@ -85027,36 +85086,42 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "022"
+              "60": "002"
             },
-            "transposition": -19
+            "transposition": -27
           },
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 43
+              "seconds": 0.5,
+              "target_midi": 35
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 37
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 90.76322620439296,
+          "plan_cost": 283.6679178751299,
           "recording_for_pitch": {
-            "59": "022",
-            "60": "009",
+            "60": "002",
             "62": null,
-            "64": "090",
-            "66": "069",
-            "67": "002"
+            "64": null,
+            "65": "016",
+            "67": "022",
+            "69": "090",
+            "71": "069",
+            "72": "009"
           },
           "step": {
             "op": "swap",
-            "recording": "022",
-            "song_pitch": 59
+            "recording": "002",
+            "song_pitch": 60
           },
-          "transpose": -19,
+          "transpose": -27,
           "unlocked": false
         }
       ]
@@ -85072,66 +85137,78 @@
               "009"
             ],
             "preferred": {},
-            "transposition": -19
+            "transposition": -27
           },
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 40
+              "target_midi": 33
             },
             {
-              "seconds": 1.0,
-              "target_midi": 43
+              "seconds": 0.5,
+              "target_midi": 35
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 37
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 37.38067006322448,
+          "plan_cost": 155.59151007635452,
           "recording_for_pitch": {
-            "59": null,
-            "60": "022",
+            "60": null,
             "62": null,
-            "64": "090",
-            "66": "069",
-            "67": "002"
+            "64": null,
+            "65": "016",
+            "67": "022",
+            "69": "090",
+            "71": "069",
+            "72": "002"
           },
           "step": {
             "op": "leave_out",
             "recording": "009"
           },
-          "transpose": -19,
+          "transpose": -27,
           "unlocked": false
         },
         {
           "choices": null,
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 43
+              "seconds": 0.5,
+              "target_midi": 35
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 37
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 67.39515229950369,
+          "plan_cost": 411.0491631544072,
           "recording_for_pitch": {
-            "59": "009",
-            "60": "022",
+            "60": "009",
             "62": null,
-            "64": "090",
-            "66": "069",
-            "67": "002"
+            "64": null,
+            "65": "016",
+            "67": "022",
+            "69": "090",
+            "71": "069",
+            "72": "002"
           },
           "step": {
             "op": "use_again",
             "recording": "009"
           },
-          "transpose": -19,
+          "transpose": -27,
           "unlocked": false
         }
       ]
@@ -85144,69 +85221,131 @@
         {
           "choices": {
             "excluded": [
-              "002"
+              "016"
             ],
             "preferred": {},
-            "transposition": -19
+            "transposition": -27
           },
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 43
+              "seconds": 0.5,
+              "target_midi": 35
             },
             {
-              "seconds": 0.5,
-              "target_midi": 48
+              "seconds": 0.3,
+              "target_midi": 37
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 38
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 6
+            "covered": 5,
+            "total": 8
           },
-          "plan_cost": 64.19817286112851,
+          "plan_cost": 369.73782948235635,
           "recording_for_pitch": {
-            "59": "009",
-            "60": "022",
+            "60": "009",
             "62": null,
-            "64": "090",
-            "66": "069",
-            "67": null
+            "64": null,
+            "65": null,
+            "67": "022",
+            "69": "090",
+            "71": "069",
+            "72": "002"
           },
           "step": {
             "op": "leave_out",
-            "recording": "002"
+            "recording": "016"
           },
-          "transpose": -19,
+          "transpose": -27,
+          "unlocked": false
+        },
+        {
+          "choices": {
+            "excluded": [
+              "016",
+              "022"
+            ],
+            "preferred": {},
+            "transposition": -27
+          },
+          "missing": [
+            {
+              "seconds": 0.5,
+              "target_midi": 35
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 37
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 38
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 40
+            }
+          ],
+          "octave_moves": 1,
+          "pitch_coverage": {
+            "covered": 4,
+            "total": 8
+          },
+          "plan_cost": 343.9933079101496,
+          "recording_for_pitch": {
+            "60": "009",
+            "62": null,
+            "64": null,
+            "65": null,
+            "67": null,
+            "69": "090",
+            "71": "069",
+            "72": "002"
+          },
+          "step": {
+            "op": "leave_out",
+            "recording": "022"
+          },
+          "transpose": -27,
           "unlocked": false
         },
         {
           "choices": null,
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 43
+              "seconds": 0.5,
+              "target_midi": 35
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 37
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 6
+            "covered": 6,
+            "total": 8
           },
-          "plan_cost": 67.39515229950369,
+          "plan_cost": 411.0491631544072,
           "recording_for_pitch": {
-            "59": "009",
-            "60": "022",
+            "60": "009",
             "62": null,
-            "64": "090",
-            "66": "069",
-            "67": "002"
+            "64": null,
+            "65": "016",
+            "67": "022",
+            "69": "090",
+            "71": "069",
+            "72": "002"
           },
           "step": {
             "op": "reset",
-            "song_pitch": 67
+            "song_pitch": 65
           },
-          "transpose": -19,
+          "transpose": -27,
           "unlocked": false
         }
       ]
@@ -97466,35 +97605,37 @@
           "choices": {
             "excluded": [],
             "preferred": {
-              "59": "022"
+              "55": "009"
             },
-            "transposition": -20
+            "transposition": -14
           },
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 40
+              "seconds": 0.8,
+              "target_midi": 48
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 286.62753456307007,
+          "plan_cost": 912.7877026571944,
           "recording_for_pitch": {
-            "59": "022",
-            "60": null,
-            "62": "009",
-            "64": "002",
-            "67": "069"
+            "55": "009",
+            "57": "016",
+            "59": "002",
+            "60": "069",
+            "62": null,
+            "64": "022",
+            "67": "090"
           },
           "step": {
             "op": "swap",
-            "recording": "022",
-            "song_pitch": 59
+            "recording": "009",
+            "song_pitch": 55
           },
-          "transpose": -20,
+          "transpose": -14,
           "unlocked": false
         }
       ]
@@ -97510,56 +97651,69 @@
               "016"
             ],
             "preferred": {},
-            "transposition": -20
+            "transposition": -14
           },
           "missing": [
             {
               "seconds": 0.3,
-              "target_midi": 39
+              "target_midi": 41
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 48
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
-            "total": 5
+            "covered": 5,
+            "total": 7
           },
-          "plan_cost": 307.4466157580696,
+          "plan_cost": 795.376921722311,
           "recording_for_pitch": {
-            "59": null,
-            "60": "022",
-            "62": "009",
-            "64": "002",
-            "67": "069"
+            "55": null,
+            "57": "009",
+            "59": "002",
+            "60": "069",
+            "62": null,
+            "64": "022",
+            "67": "090"
           },
           "step": {
             "op": "leave_out",
             "recording": "016"
           },
-          "transpose": -20,
+          "transpose": -14,
           "unlocked": false
         },
         {
           "choices": null,
-          "missing": [],
-          "octave_moves": 1,
+          "missing": [
+            {
+              "seconds": 0.8,
+              "target_midi": 48
+            }
+          ],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 312.3379973644795,
+          "plan_cost": 821.8051782246491,
           "recording_for_pitch": {
-            "59": "016",
-            "60": "022",
-            "62": "009",
-            "64": "002",
-            "67": "069"
+            "55": "016",
+            "57": "009",
+            "59": "002",
+            "60": "069",
+            "62": null,
+            "64": "022",
+            "67": "090"
           },
           "step": {
             "op": "use_again",
             "recording": "016"
           },
-          "transpose": -20,
-          "unlocked": true
+          "transpose": -14,
+          "unlocked": false
         }
       ]
     },
@@ -97571,98 +97725,72 @@
         {
           "choices": {
             "excluded": [
-              "016"
+              "002"
             ],
             "preferred": {},
-            "transposition": -20
+            "transposition": -14
           },
           "missing": [
             {
-              "seconds": 0.3,
-              "target_midi": 39
-            }
-          ],
-          "octave_moves": 1,
-          "pitch_coverage": {
-            "covered": 4,
-            "total": 5
-          },
-          "plan_cost": 307.4466157580696,
-          "recording_for_pitch": {
-            "59": null,
-            "60": "022",
-            "62": "009",
-            "64": "002",
-            "67": "069"
-          },
-          "step": {
-            "op": "leave_out",
-            "recording": "016"
-          },
-          "transpose": -20,
-          "unlocked": false
-        },
-        {
-          "choices": {
-            "excluded": [
-              "016",
-              "022"
-            ],
-            "preferred": {},
-            "transposition": -20
-          },
-          "missing": [
-            {
-              "seconds": 0.3,
-              "target_midi": 39
+              "seconds": 1.5,
+              "target_midi": 45
             },
             {
-              "seconds": 0.5,
-              "target_midi": 40
+              "seconds": 0.8,
+              "target_midi": 48
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
-            "total": 5
+            "covered": 5,
+            "total": 7
           },
-          "plan_cost": 282.76815094103904,
+          "plan_cost": 809.9472858090287,
           "recording_for_pitch": {
+            "55": "016",
+            "57": "009",
             "59": null,
-            "60": null,
-            "62": "009",
-            "64": "002",
-            "67": "069"
+            "60": "069",
+            "62": null,
+            "64": "022",
+            "67": "090"
           },
           "step": {
             "op": "leave_out",
-            "recording": "022"
+            "recording": "002"
           },
-          "transpose": -20,
+          "transpose": -14,
           "unlocked": false
         },
         {
           "choices": null,
-          "missing": [],
-          "octave_moves": 1,
+          "missing": [
+            {
+              "seconds": 0.8,
+              "target_midi": 48
+            }
+          ],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 5,
-            "total": 5
+            "covered": 6,
+            "total": 7
           },
-          "plan_cost": 312.3379973644795,
+          "plan_cost": 821.8051782246491,
           "recording_for_pitch": {
-            "59": "016",
-            "60": "022",
-            "62": "009",
-            "64": "002",
-            "67": "069"
+            "55": "016",
+            "57": "009",
+            "59": "002",
+            "60": "069",
+            "62": null,
+            "64": "022",
+            "67": "090"
           },
           "step": {
             "op": "reset",
             "song_pitch": 59
           },
-          "transpose": -20,
-          "unlocked": true
+          "transpose": -14,
+          "unlocked": false
         }
       ]
     },

@@ -15,7 +15,7 @@
  },
  "library": "38 Recordings, 26 Melodic",
  "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 4 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
- "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
+ "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes), no rest of 2 beats or more while another staff of the melody's part plays the tune (then the part's staves are read as one part); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
   "onsets_on_time_pct": 95,
@@ -1113,57 +1113,48 @@
      "gates": {
       "license": "pass",
       "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
+      "sanity": [
+       "the tune moves to another staff of its part: the melody rests 2 beats from beat 26 while that staff plays",
+       "read from tracks 0, 1 as one part, the importer dropped 41 chord tones and inner-voice onsets, 35% of the track's notes (at most 10%)"
+      ]
      },
-     "passed": true,
+     "passed": false,
      "sha256": "154a049effd4e720ba87864e2a7662082e48b0bb47957dce8f0c94f0367d45c2",
+     "moved_tune": [
+      "the tune moves to another staff of its part: the melody rests 2 beats from beat 26 while that staff plays"
+     ],
      "render": {
       "bpm": 96,
-      "start_beat": 4,
-      "max_beats": 32
+      "max_beats": 32,
+      "track": [
+       0,
+       1
+      ]
      },
      "import_report": {
-      "track_used": 1,
+      "track_used": [
+       0,
+       1
+      ],
       "tracks_with_notes": [
        0,
        1,
        2
       ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
+      "chord_tones_dropped": 33,
+      "inner_voice_onsets_dropped": 8,
       "overlaps_clipped": 0,
       "tempo_changes_ignored": 7,
-      "note_count": 33
+      "note_count": 41
      },
-     "track_notes": 60,
-     "range_semitones": 15,
-     "distinct_pitches": 9,
-     "pitch_coverage": "9 of 9",
-     "metrics": {
-      "notes": 33,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 3,
-      "pitch_readable_pct": 97,
-      "within_50c_pct": 6,
-      "within_50c_any_octave_pct": 6,
-      "median_abs_cents": 280.0,
-      "contour_pct": 63,
-      "distinct_recordings": 9,
-      "on_pitch_pct": 14,
-      "sounding_pct": 97,
-      "notes_mostly_silent": 0,
-      "transpose": -16,
-      "octave_moves": 1,
-      "max_abs_shift_semitones": 13.43
-     }
+     "track_notes": 77,
+     "range_semitones": 12,
+     "distinct_pitches": 8
     }
    ],
-   "result": "pass",
-   "reason": null,
-   "picked": "5792453"
+   "result": "fail",
+   "reason": "none of the 1 best scores passed; the best: sanity: the tune moves to another staff of its part: the melody rests 2 beats from beat 26 while that staff plays; read from tracks 0, 1 as one part, the importer dropped 41 chord tones and inner-voice onsets, 35% of the track's notes (at most 10%)",
+   "picked": null
   },
   {
    "id": "black-nag",

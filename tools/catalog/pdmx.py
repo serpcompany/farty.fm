@@ -55,6 +55,17 @@ MIN_NOTES, MAX_NOTES = 8, 64
 MAX_RANGE = 19  # semitones, an octave and a fifth
 MAX_DROPPED_SHARE = 0.10  # chord tones and inner-voice onsets the importer drops, of the track's notes
 PADDED_PICKUP_REST = 1  # beats of silence after a first bar's notes that make it a padded pickup
+MOVED_TUNE_REST = 2  # beats: a rest this long while another staff of the score plays the tune (#380)
+# A part that is a voice, so another part's line while it rests is its accompaniment's (#380): General
+# MIDI's Choir Aahs, Voice Oohs and Synth Voice, or a voice's name. PDMX often gives a voice another
+# program (Una furtiva lagrima's "Vocals" is a piano's 0, Erlkönig's "Voice" an oboe's 68). "Bass"
+# alone isn't a voice's name here: it names a bass guitar as often as a voice.
+VOICE_PROGRAMS = frozenset({52, 53, 54})
+VOICE_NAMES = frozenset({
+    "voice", "voices", "vocal", "vocals", "voce", "voz", "voix", "stimme", "singstimme", "gesang", "canto",
+    "soprano", "sopran", "mezzo", "mezzo soprano", "alto", "contralto", "tenor", "tenore", "baritone",
+    "bariton", "s", "a", "t", "choir", "chorus", "choir aahs", "voice oohs",
+})
 GRID = 1 / 48  # beats: the grid note times are compared on
 
 
@@ -351,6 +362,93 @@ def padded_pickup_problems(meters, notes, first_onset):
         return []
     beats = "beat" if _number(rest) == 1 else "beats"
     return [f"the first bar is a pickup padded with silence: every track rests {_number(rest)} {beats} after its notes"]
+
+
+def part_staves(tracks, track):
+    """The tracks of `track`'s part, in order. PDMX's MIDI writes each staff of a part as a track of
+    its own, with the part's name and channel, so a piano's two staves are two tracks named "Piano"
+    on one channel. Another part, a voice over its piano or a second violin, has a channel of its
+    own. `tracks` is {track: (name, channels)}, of the tracks with notes."""
+    return sorted(t for t, part in tracks.items() if part == tracks[track])
+
+
+def sung(name, programs):
+    """Whether a part named `name`, with these General MIDI `programs`, is a voice (VOICE_NAMES)."""
+    return bool(VOICE_PROGRAMS & set(programs)) or " ".join(re.findall(r"[a-z]+", normalize(name))) in VOICE_NAMES
+
+
+def tune_staves(tracks, track):
+    """The staves the tune can move to from `track`'s, as {staff: (where it moves, whether it's
+    another part)}: the other staves of its part (part_staves), and every staff of the score's other
+    parts but an instrument's under a sung melody, since a voice resting while its piano plays is the
+    score's rest (Danny Boy's voice over its piano's intro). `tracks` is {track: ((name, channels),
+    sung)}, of the tracks with notes."""
+    part, voice = tracks[track]
+    own = part_staves({t: p for t, (p, _) in tracks.items()}, track)
+    out = {}
+    for t, (p, v) in sorted(tracks.items()):
+        if t in own and t != track:
+            out[t] = ("another staff of its part", False)
+        elif t not in own and (v or not voice):
+            out[t] = (f"another part ({p[0] or f'track {t}'})", True)
+    return out
+
+
+def moved_tune_problems(notes, staves, start_beat=0.0):
+    """The tune moving to another staff of the score, so the Song falls silent where the score plays
+    on (#380): Old MacDonald's score gives "Old MacDonald had a farm" to the piano's left hand, and
+    Moments Musicaux's first violin rests while the second plays the tune. The melody fails when it
+    rests MOVED_TUNE_REST beats or more between two notes while one of `staves` plays the tune in
+    the rest (tune_line). A rest at the excerpt's start, an opening, isn't checked.
+
+    `notes` is the melody's excerpt as (start, dur, pitch) from `start_beat` of the score, and
+    `staves` is {staff: (where it moves, whether it's another part, its notes as (start, end, pitch)
+    in the score's beats)}. Returns [(staff, problem)], in the melody's order."""
+    pitches = [p for _, _, p in notes]
+    problems = []
+    for (s0, d0, _), (s1, _, _) in zip(notes, notes[1:]):
+        rest = _grid(s1 - s0 - d0)
+        if rest < MOVED_TUNE_REST:
+            continue
+        for staff, (where, other_part, staff_notes) in staves.items():
+            if tune_line(staff_notes, start_beat + s0 + d0, start_beat + s1, pitches, other_part):
+                problems.append((staff, f"the tune moves to {where}: the melody rests {_number(round(rest, 2))} beats"
+                                        f" from beat {_number(round(s0 + d0, 2))} while that staff plays"))
+    return problems
+
+
+def tune_line(staff_notes, start, end, pitches, other_part=False):
+    """The line a staff plays from `start` to before `end` (staff_line), when it's the tune and not
+    its accompaniment: in the tune's register, so the melody's `pitches` and it span at most
+    MAX_RANGE (a bass under the tune is its accompaniment). [] when the staff plays no tune there.
+
+    Another part's line is the tune only with two pitches or more, not a chord at every onset: a
+    part that sounds one pitch in the rest (Radetzky's guitar, one F4) or only chords (Erlkönig's
+    piano) accompanies. The other hand of the melody's own instrument answers it even with one
+    note (Summ, summ, summ's left hand).
+
+    The rule's blind spot: a tune that really moves to another part but is one repeated pitch there,
+    or moves in parallel chords, passes as accompaniment. Today the rule lets through only Radetzky
+    (the guitar's F4) and Aus tiefer Not schrei ich zu dir (the bass's C3), and both accompany."""
+    line = staff_line(staff_notes, start, end)
+    if not line or max(pitches + line) - min(pitches + line) > MAX_RANGE:
+        return []
+    onsets = [s for s, _, _ in staff_notes if start - EPS <= s < end - EPS]
+    if other_part and (len(set(line)) < 2 or all(onsets.count(s) > 1 for s in set(onsets))):
+        return []
+    return line
+
+
+def staff_line(staff_notes, start, end):
+    """The pitches melody.py's sustain-aware skyline takes from `staff_notes` ((start, end, pitch))
+    at its onsets from `start` to before `end`: at each onset the highest sounding note, if it starts
+    there."""
+    line = []
+    for onset in sorted({s for s, _, _ in staff_notes if start - EPS <= s < end - EPS}):
+        pitch, begun = max((p, s) for s, e, p in staff_notes if s <= onset < e)
+        if begun == onset:
+            line.append(pitch)
+    return line
 
 
 def _grid(beats):
