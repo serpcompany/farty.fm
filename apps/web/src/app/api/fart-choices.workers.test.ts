@@ -101,6 +101,41 @@ describe('PUT /api/fart-choices/{songId}/', () => {
     expect(await rows()).toEqual([])
   })
 
+  describe('a large body', () => {
+    // The most Choices `parseFartChoices` takes, with Recording ids as long as a browser's UUIDs:
+    // over the 16 KB other JSON bodies may be, so they need the route's own 32 KB.
+    const uuid = (i: number) => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`
+    const largest: FartChoices = {
+      transposition: 0,
+      preferred: Object.fromEntries(Array.from({ length: 128 }, (_, p) => [p, uuid(p)])),
+      excluded: Array.from({ length: 300 }, (_, i) => uuid(1000 + i))
+    }
+    const json = JSON.stringify(largest)
+    const KB = 1024
+
+    it('keeps the largest Choices, over 16 KB, and a body of 32 KB', async () => {
+      const a = await signUp('A')
+      expect(json.length).toBeGreaterThan(16 * KB)
+      expect(json.length).toBeLessThan(32 * KB)
+
+      const kept = await api.setFartChoices('twinkle', null, a, json)
+      expect(kept.status).toBe(200)
+      expect(await kept.json()).toEqual({ songId: 'twinkle', choices: largest })
+      const full = json.padEnd(32 * KB, ' ')
+      expect((await api.setFartChoices('mary', null, a, full)).status).toBe(200)
+      expect(await rows()).toEqual([`${a.id} mary live`, `${a.id} twinkle live`])
+    })
+
+    it('refuses a body over 32 KB (413)', async () => {
+      const a = await signUp('A')
+      const over = await api.setFartChoices('twinkle', null, a, json.padEnd(32 * KB + 1, ' '))
+
+      expect(over.status).toBe(413)
+      expect(await over.json()).toEqual({ error: 'too_large' })
+      expect(await rows()).toEqual([])
+    })
+  })
+
   it('stops at the limit (409), and still changes a Song that has Choices', async () => {
     const a = await signUp('A')
     await env.DB.prepare(
