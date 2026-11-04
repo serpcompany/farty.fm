@@ -425,7 +425,11 @@ def tune_line(staff_notes, start, end, pitches, other_part=False):
     Another part's line is the tune only with two pitches or more, not a chord at every onset: a
     part that sounds one pitch in the rest (Radetzky's guitar, one F4) or only chords (Erlkönig's
     piano) accompanies. The other hand of the melody's own instrument answers it even with one
-    note (Summ, summ, summ's left hand)."""
+    note (Summ, summ, summ's left hand).
+
+    The rule's blind spot: a tune that really moves to another part but is one repeated pitch there,
+    or moves in parallel chords, passes as accompaniment. Today the rule lets through only Radetzky
+    (the guitar's F4) and Aus tiefer Not schrei ich zu dir (the bass's C3), and both accompany."""
     line = staff_line(staff_notes, start, end)
     if not line or max(pitches + line) - min(pitches + line) > MAX_RANGE:
         return []
