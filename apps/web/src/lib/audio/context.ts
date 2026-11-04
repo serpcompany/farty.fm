@@ -115,8 +115,9 @@ export function setPlaybackSession(): void {
  * Safari's Audio Session API (iOS 16.4+). "playback" makes Web Audio play with the ring/silent
  * switch on, which Safari otherwise mutes; "play-and-record" is needed while the mic is open. The
  * mic stays open from the first time Record shows to the end of the launch (`keepMicrophoneOpen`),
- * so from then on every sound plays in "play-and-record". Other browsers don't have it and need
- * neither.
+ * so from then on sounds play in "play-and-record", which iPhone plays quieter (#369), except
+ * off Record where the browser remembers the grant (`leaveRecord`). Other browsers don't have it
+ * and need neither.
  */
 function setAudioSession(type: AudioSessionType): void {
   const session = (navigator as Navigator & { audioSession?: { type: AudioSessionType } })

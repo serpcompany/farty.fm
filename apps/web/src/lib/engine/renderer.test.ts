@@ -16,6 +16,7 @@ import {
   leadInBody,
   row
 } from '@/test-support/golden'
+import { loudness } from '@/test-support/loudness'
 import { arrange, placedAutoMapRecording } from './auto-map'
 import { renderFromRecordings, renderSong } from './render-song'
 import { leadInStart, renderSource } from './render-source'
@@ -77,7 +78,7 @@ beforeAll(async () => {
 })
 
 describe('the renderer places every note as the reference does', () => {
-  const lines: string[] = [row('song', 'notes', 'max |Δgain|', 'render ms')]
+  const lines: string[] = [row('song', 'notes', 'max |Δgain|', 'LUFS', 'render ms')]
   let worstGain = 0
 
   for (const id of songIds) {
@@ -124,8 +125,13 @@ describe('the renderer places every note as the reference does', () => {
         else peak = Math.max(peak, Math.abs(s))
       }
       expect(notFinite, id).toBe(0)
+      // Peaks at -1 dBFS, the ceiling phone media plays to, so plain gain can't make it louder.
       expect(peak).toBeCloseTo(0.89, 6)
-      lines.push(row(id, song.notes.length, songGain.toFixed(3), ms.toFixed(0)))
+      // And plays about as loud as phone media, -14 LUFS (#369): -12.3 to -17.5 on these Songs.
+      const lufs = loudness(rendered.samples, SR)
+      expect(lufs, id).toBeGreaterThan(-18)
+      expect(lufs, id).toBeLessThan(-11)
+      lines.push(row(id, song.notes.length, songGain.toFixed(3), lufs.toFixed(2), ms.toFixed(0)))
     })
   }
 

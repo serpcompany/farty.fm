@@ -99,6 +99,10 @@ let capturing: Capturing | null = null
 let takes = 0
 /** The microphone stays open for the rest of the launch (`keepMicrophoneOpen`). */
 let keeping = false
+/** Record's button shows (`keepMicrophoneOpen`), not another tab or a step over it (`leaveRecord`). */
+let onRecord = false
+/** A tap on Record is opening the microphone for its take (`startTake`). */
+let startingTake = false
 
 /** A take that hasn't sent its first batch by now, with the microphone open, didn't start. */
 export const firstBatchTimeoutMs = 3000
@@ -425,6 +429,7 @@ export async function startTake(
 ): Promise<Take> {
   // Before the first await, so it counts as part of the tap.
   startContext()
+  startingTake = true
   try {
     return await startOnce(onInterrupted)
   } catch (error) {
@@ -432,7 +437,9 @@ export async function startTake(
     // `capture` let go of the stream and the context, so this opens both afresh.
     onRetry?.(error)
     startContext()
-    return startOnce(onInterrupted)
+    return await startOnce(onInterrupted)
+  } finally {
+    startingTake = false
   }
 }
 
@@ -554,9 +561,10 @@ async function capture(
 }
 
 /**
- * Keeps the microphone open for the rest of the launch, from the first time the Record screen
- * shows: through Review, Result and the other tabs, so every tap on Record captures at once with
- * its pre-roll. Sounds meanwhile play in the microphone's session (`setPlaybackSession`).
+ * Record's button shows. Keeps the microphone open for the rest of the launch, from the first time
+ * it shows: through Review, Result and the other tabs, so every tap on Record captures at once
+ * with its pre-roll. Sounds meanwhile play in the microphone's session (`setPlaybackSession`).
+ * Only a grant the browser remembers is let go off Record (`leaveRecord`).
  *
  * It opens without a tap only while that can't make the browser ask (`mayOpenWithoutTap`);
  * otherwise the next tap opens it. Hiding the page keeps the stream, which iPhone Safari mutes
@@ -566,6 +574,7 @@ async function capture(
  */
 export function keepMicrophoneOpen(): void {
   if (window.matchMedia(desktop).matches) return
+  onRecord = true
   if (!keeping) {
     keeping = true
     computer = window.matchMedia(desktop)
@@ -574,6 +583,20 @@ export function keepMicrophoneOpen(): void {
     window.addEventListener('pagehide', releaseMicrophone)
   }
   void openIfAllowed()
+}
+
+/**
+ * Record's button stopped showing: another tab shows, or Review, Result or a Recording's review
+ * covers it. While the microphone is open, iPhone plays every sound in a voice-chat session,
+ * which plays quieter (#369). So a microphone whose grant the browser remembers (`remembered`,
+ * such as Safari's per-site Microphone setting at Allow) is let go, and sounds play in
+ * "playback", until Record shows again and opens it without asking. Any other grant stays open,
+ * since letting it go would make the browser ask again (#222). A take keeps its microphone.
+ */
+export function leaveRecord(): void {
+  onRecord = false
+  if (!keeping || !remembered || startingTake || capturing) return
+  releaseMicrophone()
 }
 
 let computer: MediaQueryList | null = null
@@ -663,7 +686,9 @@ async function openIfAllowed(): Promise<void> {
     loadCaptureProcessor(audioContext()).catch(() => {})
     return
   }
-  if (keeping && document.visibilityState === 'visible') openMicrophone().catch(() => {})
+  // A grant the browser remembers opens only on Record (`leaveRecord`).
+  if (!keeping || document.visibilityState !== 'visible' || (remembered && !onRecord)) return
+  openMicrophone().catch(() => {})
 }
 
 /**

@@ -222,7 +222,8 @@ beforeEach(() => {
         return stream
       })
     },
-    permissions: { query: async () => ({ state: 'prompt' }) }
+    permissions: { query: async () => ({ state: 'prompt' }) },
+    audioSession: { type: 'auto' }
   })
   // The audio thread: a quantum about every 3 ms.
   setInterval(() => {
@@ -307,6 +308,94 @@ describe('the first tap on Record after opening the app', () => {
     expect(second.take).not.toBeNull()
     expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledOnce()
     expect(world.contexts).toHaveLength(1)
+  })
+})
+
+/** Safari's per-site Microphone setting at Allow: the browser says granted before the page asks. */
+function allowSite() {
+  const permissions = navigator.permissions as unknown as {
+    query: () => Promise<{ state: string }>
+  }
+  permissions.query = async () => ({ state: 'granted' })
+}
+
+/** Safari's audio session (`navigator.audioSession.type`, `context.ts`). */
+const session = () => (navigator as unknown as { audioSession: { type: string } }).audioSession.type
+
+describe('the microphone off Record (#369)', () => {
+  it('lets a grant the browser remembers go, so sounds play in "playback", and opens it on Record', async () => {
+    allowSite()
+    const { startTake, keepMicrophoneOpen, leaveRecord } = await recorder()
+    keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(100)
+    expect(world.streams).toHaveLength(1)
+    expect(session()).toBe('play-and-record')
+
+    leaveRecord()
+    expect(world.streams[0].track.readyState).toBe('ended')
+    expect(session()).toBe('playback')
+    // Coming back to the app on another tab doesn't open it.
+    hide()
+    await vi.advanceTimersByTimeAsync(5000)
+    show()
+    await vi.advanceTimersByTimeAsync(3000)
+    expect(world.streams).toHaveLength(1)
+    expect(session()).toBe('playback')
+
+    // Record shows again: open without a tap, so the first tap captures at once.
+    keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(100)
+    expect(world.streams).toHaveLength(2)
+    expect(session()).toBe('play-and-record')
+    const back = await tap(startTake, 500)
+    expect(back.error).toBeNull()
+    expect(back.take).not.toBeNull()
+    expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps a grant of the page’s own open, so the browser doesn’t ask again (#222)', async () => {
+    const { startTake, keepMicrophoneOpen, leaveRecord } = await recorder()
+    keepMicrophoneOpen()
+    const first = await tap(startTake)
+    first.take?.cancel()
+
+    leaveRecord()
+    await vi.advanceTimersByTimeAsync(2 * 60_000)
+    expect(world.streams[0].track.readyState).toBe('live')
+    expect(session()).toBe('play-and-record')
+
+    keepMicrophoneOpen()
+    const back = await tap(startTake, 500)
+    expect(back.take).not.toBeNull()
+    expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledOnce()
+  })
+
+  it('never takes the microphone from a take, starting or recording', async () => {
+    allowSite()
+    const { startTake, keepMicrophoneOpen, leaveRecord } = await recorder()
+    keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(100)
+    let lost = false
+    let take: Take | null = null
+    startTake(() => {
+      lost = true
+    }).then(started => {
+      take = started
+    })
+    leaveRecord()
+    await vi.advanceTimersByTimeAsync(500)
+    expect(take).not.toBeNull()
+    leaveRecord()
+    await vi.advanceTimersByTimeAsync(500)
+    const audio = await (take as Take | null)?.stop()
+    expect(lost).toBe(false)
+    expect(audio?.samples.length).toBeGreaterThan(sampleRate / 2)
+    expect(world.streams[0].track.readyState).toBe('live')
+
+    // Once the take is done, Review covers Record: the microphone goes.
+    leaveRecord()
+    expect(world.streams[0].track.readyState).toBe('ended')
+    expect(session()).toBe('playback')
   })
 })
 
