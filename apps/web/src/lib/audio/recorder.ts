@@ -90,6 +90,18 @@ let granted = false
  */
 let remembered = false
 /**
+ * `remembered`, and this tab learned it before any grant, so off Record the microphone may be let
+ * go without the browser asking again (`leaveRecord`). A reload keeps a page's own grant in
+ * WebKit, whose next page then hears granted before it asks, so what the tab learned is kept in
+ * `sessionStorage`, which a reload keeps too (`tabGrantKey`).
+ */
+let mayLetGo = false
+/**
+ * Where this tab's microphone grant came from: "browser" when the browser said granted before any
+ * page in the tab was granted it, "page" once a page in the tab was granted it otherwise.
+ */
+const tabGrantKey = 'pedos.microphone-grant'
+/**
  * When capture last stopped, by `Date.now()`, or null while it runs. iPhone Safari keeps a page's
  * grant for 24 hours while capture runs. Once it stops, a `getUserMedia` call outside a tap asks
  * again after 1 minute, and any call asks again after 10 (#222). A muted track counts as stopped.
@@ -99,6 +111,10 @@ let capturing: Capturing | null = null
 let takes = 0
 /** The microphone stays open for the rest of the launch (`keepMicrophoneOpen`). */
 let keeping = false
+/** Record's button shows (`keepMicrophoneOpen`), not another tab or a step over it (`leaveRecord`). */
+let onRecord = false
+/** A tap on Record is opening the microphone for its take (`startTake`). */
+let startingTake = false
 
 /** A take that hasn't sent its first batch by now, with the microphone open, didn't start. */
 export const firstBatchTimeoutMs = 3000
@@ -157,10 +173,50 @@ async function mayOpenWithoutTap(): Promise<boolean> {
     const allowed = await permissionGranted()
     // iPhone Safari also says granted while the page's own grant lasts, so only an answer from
     // before this page was granted the microphone counts as the browser's.
-    if (allowed && !granted) remembered = true
+    if (allowed && !granted) {
+      remembered = true
+      mayLetGo = browserGrantInTab()
+    }
   }
   if (remembered) return true
   return granted && (captureStoppedAt === null || Date.now() - captureStoppedAt <= openWithoutTapMs)
+}
+
+/**
+ * Whether the browser's granted answer is its own grant, by what this tab learned before: on its
+ * first page, an answer before any grant is, and the tab keeps that. A page reached from this site
+ * with nothing kept, such as a reload by a build from before #369, may hold a page's own grant, so
+ * it isn't. Without `sessionStorage` it isn't either, and the microphone stays open, as before.
+ */
+function browserGrantInTab(): boolean {
+  try {
+    const kept = sessionStorage.getItem(tabGrantKey)
+    if (kept !== null) return kept === 'browser'
+    if (cameFromThisSite()) return false
+    sessionStorage.setItem(tabGrantKey, 'browser')
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** This page is a reload, a step back or forward, or a link from a page of this site. */
+function cameFromThisSite(): boolean {
+  const [entry] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[]
+  if (entry && entry.type !== 'navigate') return true
+  if (!document.referrer) return false
+  return new URL(document.referrer).origin === location.origin
+}
+
+/** This page was granted the microphone: unless it's the browser's grant, the tab keeps that. */
+function pageGranted(): void {
+  granted = true
+  if (mayLetGo) return
+  try {
+    sessionStorage.setItem(tabGrantKey, 'page')
+  } catch {
+    // Without it, a later page in the tab keeps the microphone open (`browserGrantInTab`).
+  }
 }
 
 function captureStarted(): void {
@@ -238,7 +294,7 @@ async function connect(openedIn: number, kept?: Microphone): Promise<Microphone>
       }
       throw error
     }
-    granted = true
+    pageGranted()
     captureStarted()
   }
   // An interruption is heard from the moment the stream opens. One that comes while the capture
@@ -425,6 +481,7 @@ export async function startTake(
 ): Promise<Take> {
   // Before the first await, so it counts as part of the tap.
   startContext()
+  startingTake = true
   try {
     return await startOnce(onInterrupted)
   } catch (error) {
@@ -432,7 +489,9 @@ export async function startTake(
     // `capture` let go of the stream and the context, so this opens both afresh.
     onRetry?.(error)
     startContext()
-    return startOnce(onInterrupted)
+    return await startOnce(onInterrupted)
+  } finally {
+    startingTake = false
   }
 }
 
@@ -554,9 +613,10 @@ async function capture(
 }
 
 /**
- * Keeps the microphone open for the rest of the launch, from the first time the Record screen
- * shows: through Review, Result and the other tabs, so every tap on Record captures at once with
- * its pre-roll. Sounds meanwhile play in the microphone's session (`setPlaybackSession`).
+ * Record's button shows. Keeps the microphone open for the rest of the launch, from the first time
+ * it shows: through Review, Result and the other tabs, so every tap on Record captures at once
+ * with its pre-roll. Sounds meanwhile play in the microphone's session (`setPlaybackSession`).
+ * Only a grant the browser remembers is let go off Record (`leaveRecord`).
  *
  * It opens without a tap only while that can't make the browser ask (`mayOpenWithoutTap`);
  * otherwise the next tap opens it. Hiding the page keeps the stream, which iPhone Safari mutes
@@ -566,6 +626,7 @@ async function capture(
  */
 export function keepMicrophoneOpen(): void {
   if (window.matchMedia(desktop).matches) return
+  onRecord = true
   if (!keeping) {
     keeping = true
     computer = window.matchMedia(desktop)
@@ -574,6 +635,20 @@ export function keepMicrophoneOpen(): void {
     window.addEventListener('pagehide', releaseMicrophone)
   }
   void openIfAllowed()
+}
+
+/**
+ * Record's button stopped showing: another tab shows, or Review, Result or a Recording's review
+ * covers it. While the microphone is open, iPhone plays every sound in a voice-chat session,
+ * which plays quieter (#369). So a microphone whose grant the browser remembers (`mayLetGo`,
+ * such as Safari's per-site Microphone setting at Allow) is let go, and sounds play in
+ * "playback", until Record shows again and opens it without asking. Any other grant stays open,
+ * since letting it go would make the browser ask again (#222). A take keeps its microphone.
+ */
+export function leaveRecord(): void {
+  onRecord = false
+  if (!keeping || !mayLetGo || startingTake || capturing) return
+  releaseMicrophone()
 }
 
 let computer: MediaQueryList | null = null
@@ -663,7 +738,9 @@ async function openIfAllowed(): Promise<void> {
     loadCaptureProcessor(audioContext()).catch(() => {})
     return
   }
-  if (keeping && document.visibilityState === 'visible') openMicrophone().catch(() => {})
+  // A grant the browser remembers opens only on Record (`leaveRecord`).
+  if (!keeping || document.visibilityState !== 'visible' || (mayLetGo && !onRecord)) return
+  openMicrophone().catch(() => {})
 }
 
 /**
@@ -686,6 +763,6 @@ export async function askForMicrophone(): Promise<void> {
     throw error
   }
   for (const track of stream.getTracks()) track.stop()
-  granted = true
+  pageGranted()
   captureStoppedAt = Date.now()
 }

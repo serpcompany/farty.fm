@@ -13,8 +13,8 @@ in the WAV). The checks are evaluate.py's, against the notes instead of a fart:
 
 The journey also records Farts mode on the same Song, the Toot as the speakers got it, as
 `farts-<song>.wav`. When it is there, this also measures the step a listener hears on switching
-Piano to Farts: each mode's integrated loudness (ITU-R BS.1770-4, LUFS, gated) and its sample
-peak, with the step Farts minus Piano. A step of more than
+Piano to Farts: each mode's integrated loudness (evaluate.py's `loudness()`, ITU-R BS.1770-4,
+LUFS, gated) and its sample peak, with the step Farts minus Piano. A step of more than
 LEVEL_STEP_DB either way fails.
 
     .venv/bin/python -I evaluate_piano.py <dir>/piano-mary.wav [<dir>/piano-<song>.wav ...]
@@ -28,8 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import librosa  # noqa: E402
 import numpy as np  # noqa: E402
 import soundfile  # noqa: E402
-from scipy.signal import lfilter  # noqa: E402
-from evaluate import BAR, HOP, PYIN, SR, median_midi, note_window  # noqa: E402
+from evaluate import BAR, HOP, PYIN, SR, loudness, median_midi, note_window  # noqa: E402
 
 #: The most Farts may be louder or quieter than Piano, in LU, before switching modes jumps.
 LEVEL_STEP_DB = 4.5
@@ -71,33 +70,11 @@ def evaluate_piano(audio, notes, zero):
     }
 
 
-#: BS.1770-4's K-weighting at 48 kHz, its two stages as (b, a): the high shelf, then the high pass.
-K_WEIGHTING_48K = (
-    ([1.53512485958697, -2.69169618940638, 1.19839281085285], [1.0, -1.69065929318241, 0.73248077421585]),
-    ([1.0, -2.0, 1.0], [1.0, -1.99004745483398, 0.99007225036621]),
-)
-
-
-def integrated_lufs(audio, rate):
-    """BS.1770-4 integrated loudness of mono `audio`: K-weighted at 48 kHz, 400 ms blocks, gated."""
-    if rate != 48000:
-        audio = librosa.resample(audio, orig_sr=rate, target_sr=48000)
-        rate = 48000
-    for b, a in K_WEIGHTING_48K:
-        audio = lfilter(b, a, audio)
-    block, step = int(0.4 * rate), int(0.1 * rate)
-    powers = np.array([np.mean(audio[i:i + block] ** 2) for i in range(0, len(audio) - block + 1, step)])
-    gated = powers[-0.691 + 10 * np.log10(powers + 1e-20) > -70]
-    relative = -0.691 + 10 * np.log10(np.mean(gated)) - 10
-    gated = gated[-0.691 + 10 * np.log10(gated) > relative]
-    return float(-0.691 + 10 * np.log10(np.mean(gated)))
-
-
 def level(path):
     """A WAV's integrated loudness (LUFS) and sample peak (dBFS)."""
     audio, rate = soundfile.read(path, dtype="float64", always_2d=True)
     audio = audio.mean(axis=1)
-    return {"lufs": round(integrated_lufs(audio, rate), 1),
+    return {"lufs": round(loudness(audio, rate), 1),
             "peak_dbfs": round(float(20 * np.log10(np.max(np.abs(audio)) + 1e-12)), 1)}
 
 
