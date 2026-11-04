@@ -1,12 +1,14 @@
 'use client'
 
 import {
+  AudioLines,
   Ban,
   Check,
   ChevronLeft,
   ChevronRight,
   CircleAlert,
   Lock,
+  Piano,
   Play,
   Square,
   Trash2
@@ -18,6 +20,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { libraryOwner } from '@/lib/account'
 import type { Song, SongSummary } from '@/lib/catalog/song'
 import { type Arrangement, type MissingNote, songPitches } from '@/lib/engine/auto-map'
@@ -63,9 +66,11 @@ import { FartSheetView } from './fart-sheet'
 import { FavoriteButton } from './favorite-button'
 import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
+import { pianoSchedule, stopPiano } from './piano-preview'
 import { previousPage } from './previous-page'
 import { ReportSong } from './report-song-sheet'
 import { changeFartChoices, useFartChoices } from './use-fart-choices'
+import { usePianoPreview } from './use-piano-preview'
 import { useSongNotes } from './use-song-notes'
 import { Waveform } from './waveform'
 
@@ -187,6 +192,7 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
   /** Opens the fart sheet for a Song pitch, stopping what plays. */
   const changeFart = (songPitch: number) => {
     stopPlayback()
+    stopPiano()
     setSheetPitch(songPitch)
   }
   /** Makes a change from the fart sheet or the lock card: kept, said, and the Toot made again. */
@@ -200,6 +206,8 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
       return recording ? recordingName(recording) : 'A deleted Recording'
     }
     stopPlayback()
+    // The piano too: Reset to automatic can move the Song to another key.
+    stopPiano()
     setChanged(changeLine(fartChange, arrangement, arrangeChoices(pitches, melodic, next), named))
     setPhase({ kind: 'making', again: true })
     void changeFartChoices(id, next)
@@ -288,9 +296,12 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
       {/* One TootLayout while the Toot is made again after a change, so the selected note and
           the change line stay. */}
       {view === 'ready' && phase.kind === 'ready' ? (
-        <TootLayout toot={phase.draft} song={phase.draft.song} changes={changes} />
+        <TootLayout toot={phase.draft} song={phase.draft.song} changes={changes} pianoPreview />
       ) : (
-        song && unmade && <TootLayout toot={null} unmade={unmade} song={song} changes={changes} />
+        song &&
+        unmade && (
+          <TootLayout toot={null} unmade={unmade} song={song} changes={changes} pianoPreview />
+        )
       )}
       {/* Report a problem (#358) whenever the notes show: at Ready, while the Toot is made again
           after a change, and in a Song a leave-out locks. One element in one place, so a report
@@ -642,36 +653,84 @@ const andList = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' }
  * `toot` is the made Toot (Song Creator) or a saved one (its screen, with no Save). When its audio
  * is missing, Play and the notes can't play, and the Recordings still can. `children` are more
  * lines under "N of your Recordings, one per note". With no `toot`, `unmade` is what shows in its
- * place, and nothing plays but the Recordings.
+ * place, and no farts play but the Recordings.
  *
  * `changes`, in Song Creator only, opens the fart sheet from a selected note's caption and from
  * each Recording's "plays C♯3" (#360), and shows what the last change did.
  *
  * Play needs only the Toot's audio, so a saved Toot's screen shows it before its Song's notes load
  * (#323): `song` is then the Song without them, and `notesFallback` stands in for the note view.
+ *
+ * With `pianoPreview` (Song Creator, #359), Play plays on Piano or Farts: Piano plays the Song's
+ * notes in the key the farts play them in, and a note tapped plays on it too. Switching while the
+ * Song plays carries on from the same spot in the other. Farts is picked each time it opens.
+ * Piano plays every note of the Song, one a leave-out left with no fart too, and while the Toot is
+ * made again or locked (#360): it needs only the Song and its key, which a swap or leave-out holds.
  */
 export function TootLayout(
   props: {
     song: Song | SongSummary
     notesFallback?: ReactNode
     isAudioMissing?: boolean
+    pianoPreview?: boolean
     changes?: FartChanging
     children?: ReactNode
   } & ({ toot: SongTootDraft | SongToot; unmade?: undefined } | { toot: null; unmade: UnmadeToot })
 ) {
-  const { toot, song, notesFallback, isAudioMissing = false, changes, children } = props
+  const {
+    toot,
+    song,
+    notesFallback,
+    isAudioMissing = false,
+    pianoPreview = false,
+    changes,
+    children
+  } = props
   const pedos = usePedos()
+  const piano = usePianoPreview()
   const arrangement = props.toot === null ? props.unmade.arrangement : props.toot.arrangement
   const unmade = props.toot === null ? props.unmade : null
   const [focus, setFocus] = useState<Focus>(null)
+  const [playsOn, setPlaysOn] = useState<'piano' | 'farts'>('farts')
+  const onPiano = pianoPreview && playsOn === 'piano'
   /** The Song with its notes, once they've loaded. */
   const melody = 'notes' in song ? song : null
+  // Every note of the Song, in the key the farts play it in: a note a leave-out left with no fart
+  // too, so Piano still plays the whole Song while Farts is locked (#360's Option A).
+  const pianoNotes = useMemo(
+    () => (melody ? pianoSchedule(melody, arrangement.transposition) : null),
+    [melody, arrangement.transposition]
+  )
+  /** The farts can play: the Toot is made, and its audio is there. */
   const canPlay = toot !== null && !isAudioMissing
   const isPlaying = toot !== null && pedos.nowPlaying === tootPlayback(toot.id)
-  const playingNote =
+  const isPianoPlaying = piano.playing?.target === 'song'
+  const fartNote =
     toot === null
       ? -1
       : (melody?.notes.findIndex((_, i) => pedos.nowPlaying === tootPlayback(toot.id, i)) ?? -1)
+  const pianoNote = typeof piano.playing?.target === 'number' ? piano.playing.target : -1
+  const playingNote = fartNote === -1 ? pianoNote : fartNote
+  const shownPlaying = onPiano ? isPianoPlaying : isPlaying
+  /** Why Play can't play the farts, on Farts: the Song locked or being made again, or no audio. */
+  const fartsBlocked = onPiano ? null : (unmade?.kind ?? (isAudioMissing ? 'missing' : null))
+  const canPress = onPiano ? pianoNotes !== null : canPlay
+
+  /**
+   * Piano or Farts; the Song playing carries on from where it is in the other. Before the Toot is
+   * made again, or while a leave-out locks it, the piano only stops.
+   */
+  const playOn = (next: 'piano' | 'farts') => {
+    if (next === playsOn) return
+    setPlaysOn(next)
+    if (next === 'piano' && isPlaying && pianoNotes) {
+      piano.play('song', pianoNotes, pedos.playbackPosition() ?? 0)
+    } else if (next === 'farts' && isPianoPlaying) {
+      const from = piano.position() ?? 0
+      piano.stop()
+      if (canPlay) pedos.toggleTootPlayback(toot, undefined, undefined, from)
+    }
+  }
   const selectedNote = melody && focus && 'note' in focus ? focus.note : null
   const highlightedPitch =
     focus === null
@@ -693,64 +752,97 @@ export function TootLayout(
           <button
             type="button"
             aria-label={
-              unmade?.kind === 'locked'
+              fartsBlocked === 'locked'
                 ? 'Locked'
-                : unmade
+                : fartsBlocked === 'making'
                   ? 'Making your Toot'
-                  : isAudioMissing
+                  : fartsBlocked === 'missing'
                     ? 'Audio missing'
-                    : isPlaying
+                    : shownPlaying
                       ? 'Stop'
-                      : 'Play'
+                      : onPiano
+                        ? 'Play on piano'
+                        : 'Play'
             }
             data-testid="song-creator-play"
-            disabled={!canPlay}
+            disabled={!canPress}
             className={cn(
               'flex size-14 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-              !canPlay
+              !canPress
                 ? 'bg-muted text-muted-foreground'
-                : isPlaying
+                : shownPlaying
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-primary/10 text-primary'
             )}
             onClick={() => {
-              if (toot === null) return
               setFocus(null)
-              pedos.toggleTootPlayback(toot)
+              if (!onPiano) {
+                if (toot !== null) pedos.toggleTootPlayback(toot)
+              } else if (isPianoPlaying) piano.stop()
+              else if (pianoNotes) piano.play('song', pianoNotes)
             }}
           >
-            {unmade?.kind === 'locked' ? (
+            {fartsBlocked === 'locked' ? (
               <Lock className="size-6" />
-            ) : unmade ? (
+            ) : fartsBlocked === 'making' ? (
               <Spinner className="size-6" />
-            ) : isAudioMissing ? (
+            ) : fartsBlocked === 'missing' ? (
               <CircleAlert className="size-6" />
-            ) : isPlaying ? (
+            ) : shownPlaying ? (
               <Square className="size-5 fill-current" />
             ) : (
               <Play className="size-6 fill-current" />
             )}
           </button>
-          <div className="min-w-0">
-            <p className="font-semibold" data-testid="song-creator-state">
-              {unmade?.kind === 'locked'
-                ? 'Locked'
-                : unmade
-                  ? 'Making your Toot…'
-                  : isAudioMissing
-                    ? 'Audio missing'
-                    : isPlaying
-                      ? 'Playing'
-                      : pedos.tootPlayFailed === toot?.id
-                        ? "Couldn't play"
-                        : 'Ready'}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {unmade?.kind === 'locked' && gaps.length > 0
-                ? `${andList.format(gaps.map(sounding))} ${gaps.length === 1 ? 'has' : 'have'} no fart, so farts can't play`
-                : `${song.pitches.length} of your Recordings, one per note`}
-            </p>
-            {children}
+          <div className="flex min-w-0 flex-col gap-1.5">
+            {pianoPreview && (
+              <ToggleGroup
+                variant="outline"
+                size="sm"
+                spacing={0}
+                aria-label="Play on"
+                value={[playsOn]}
+                onValueChange={([next]) => {
+                  if (next === 'piano' || next === 'farts') playOn(next)
+                }}
+              >
+                <ToggleGroupItem value="piano" className="h-11 px-3 text-sm">
+                  <Piano />
+                  Piano
+                </ToggleGroupItem>
+                <ToggleGroupItem value="farts" className="h-11 px-3 text-sm">
+                  <AudioLines />
+                  Farts
+                </ToggleGroupItem>
+              </ToggleGroup>
+            )}
+            <div>
+              <p className="font-semibold" data-testid="song-creator-state">
+                {onPiano
+                  ? isPianoPlaying
+                    ? 'Playing'
+                    : 'Ready'
+                  : fartsBlocked === 'locked'
+                    ? 'Locked'
+                    : fartsBlocked === 'making'
+                      ? 'Making your Toot…'
+                      : fartsBlocked === 'missing'
+                        ? 'Audio missing'
+                        : isPlaying
+                          ? 'Playing'
+                          : pedos.tootPlayFailed === toot?.id
+                            ? "Couldn't play"
+                            : 'Ready'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {onPiano
+                  ? "The Song's notes on piano"
+                  : fartsBlocked === 'locked' && gaps.length > 0
+                    ? `${andList.format(gaps.map(sounding))} ${gaps.length === 1 ? 'has' : 'have'} no fart, so farts can't play`
+                    : `${song.pitches.length} of your Recordings, one per note`}
+              </p>
+              {children}
+            </div>
           </div>
         </div>
         {changes && (
@@ -778,11 +870,23 @@ export function TootLayout(
               const recording = recordingFor(note.pitch)
               return recording ? recordingName(recording) : 'Recording deleted'
             }}
-            startedAt={isPlaying ? pedos.playbackStartedAt : null}
+            startedAt={
+              isPlaying
+                ? pedos.playbackStartedAt
+                : isPianoPlaying
+                  ? (piano.playing?.startedAt ?? null)
+                  : null
+            }
             highlightedPitch={highlightedPitch}
             selectedNote={selectedNote}
             playingNote={playingNote === -1 ? null : playingNote}
             onTapNote={index => {
+              if (onPiano && pianoNotes) {
+                setFocus({ note: index })
+                if (pianoNote === index) piano.stop()
+                else piano.play(index, [{ ...pianoNotes[index], start: 0 }])
+                return
+              }
               if (isAudioMissing) return
               setFocus({ note: index })
               // Before the Toot is made again, or while it's locked, a tap only picks the note.
