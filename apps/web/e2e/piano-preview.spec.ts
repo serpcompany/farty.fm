@@ -12,9 +12,12 @@ import { fixtureLibrary, songsTheFixtureLibraryUnlocks } from './golden'
 // through an AudioWorklet between its sounds and the destination. A piano note is told from a fart
 // by its samples: they are `pianoNote`'s.
 //
-// With E2E_EVIDENCE_DIR set, the test also writes what the speakers got while Song Creator played
-// the Song on piano, as a WAV with its notes, for `tools/melody-lab/evaluate_piano.py`, and
-// screenshots.
+// The Song is Mary Had a Little Lamb, or the one E2E_PIANO_SONG names by id, such as
+// `waltz-in-a-minor-chopin`, whose Toot reaches octaves 1 to 3. With E2E_EVIDENCE_DIR set, the
+// test also writes what the speakers got while Song Creator played the Song on piano
+// (`piano-<song>.wav`, with its notes in `piano-<song>.json`) and then the whole Toot in Farts mode
+// (`farts-<song>.wav`), for `tools/melody-lab/evaluate_piano.py`, and screenshots named after the
+// Song.
 
 /**
  * A buffer started: `start`'s arguments, the AudioContext's clock then, and the buffer's rate,
@@ -33,11 +36,12 @@ declare global {
 
 const evidence = process.env.E2E_EVIDENCE_DIR ? resolve(process.env.E2E_EVIDENCE_DIR) : null
 
-const found = songs.find(s => s.id === 'mary')
-if (!found) throw new Error('Mary Had a Little Lamb is in the catalog')
-const mary = found
-const beat = 60 / mary.bpm
-const marySeconds = Math.max(...mary.notes.map(n => (n.start + n.dur) * beat))
+const songId = process.env.E2E_PIANO_SONG ?? 'mary'
+const found = songs.find(s => s.id === songId)
+if (!found) throw new Error(`${songId} is in the catalog`)
+const song = found
+const beat = 60 / song.bpm
+const songSeconds = Math.max(...song.notes.map(n => (n.start + n.dur) * beat))
 
 test.use({ serviceWorkers: 'block' })
 
@@ -53,14 +57,18 @@ test('Song Creator plays a Song on piano, then with farts, from the same spot', 
   test.setTimeout(240_000)
   const out = evidence && join(evidence, testInfo.project.name)
   if (out) mkdirSync(out, { recursive: true })
-  expect(songsTheFixtureLibraryUnlocks).toContain(mary)
-  const { transposition } = arrangementOf(mary, fixtureLibrary)
+  expect(songsTheFixtureLibraryUnlocks).toContain(song)
+  const { transposition } = arrangementOf(song, fixtureLibrary)
 
   await listenToTheSpeakers(page)
   await page.goto('/profile/')
   await loadTheFixtureLibrary(page)
-  await page.getByTestId('unlocked-songs').locator('[data-song="mary"]').getByRole('link').click()
-  await expect(page).toHaveURL(/\/compose\/mary\/$/)
+  await page
+    .getByTestId('unlocked-songs')
+    .locator(`[data-song="${song.id}"]`)
+    .getByRole('link')
+    .click()
+  await expect(page).toHaveURL(`/compose/${song.id}/`)
   const state = page.getByTestId('song-creator-state')
   const play = page.getByTestId('song-creator-play')
   const playOn = page.getByRole('group', { name: 'Play on' })
@@ -72,7 +80,7 @@ test('Song Creator plays a Song on piano, then with farts, from the same spot', 
   await expect(farts).toHaveAttribute('aria-pressed', 'true')
   await expect(piano).toHaveAttribute('aria-pressed', 'false')
   await expect(
-    page.getByText(`${mary.pitches.length} of your Recordings, one per note`)
+    page.getByText(`${song.pitches.length} of your Recordings, one per note`)
   ).toBeVisible()
   for (const control of [piano, farts, play]) await expectTappable(control)
   await play.click()
@@ -88,16 +96,36 @@ test('Song Creator plays a Song on piano, then with farts, from the same spot', 
   await expect(state).toHaveText('Playing')
   await expect(play).toHaveAccessibleName('Stop')
   await expect(page.getByTestId('playhead')).toHaveCount(1)
-  if (out) await page.screenshot({ path: join(out, 'song-creator-piano.png') })
+  if (out) await page.screenshot({ path: join(out, `song-creator-piano-${song.id}.png`) })
   // It ends by itself once the last note has rung.
-  await expect(state).toHaveText('Ready', { timeout: (marySeconds + 5) * 1000 })
+  await expect(state).toHaveText('Ready', { timeout: (songSeconds + 5) * 1000 })
   const whole = await notesStruck(page)
-  expect(whole.map(n => n.midi)).toEqual(mary.notes.map(n => n.pitch + transposition))
+  expect(whole.map(n => n.midi)).toEqual(song.notes.map(n => n.pitch + transposition))
   whole.forEach((n, i) => {
-    expect(n.at - whole[0].at).toBeCloseTo(mary.notes[i].start * beat, 4)
+    expect(n.at - whole[0].at).toBeCloseTo(song.notes[i].start * beat, 4)
   })
   expect(await fartsStarted(page)).toEqual([])
-  if (out) await saveTheSpeakers(page, out, whole[0].at, transposition)
+  if (out) {
+    await saveTheSpeakers(page, join(out, `piano-${song.id}`), whole[0].at, songSeconds + 1)
+    saveTheNotes(join(out, `piano-${song.id}.json`), transposition)
+    // Then the whole Toot in Farts mode on the same page, for the step a listener hears on switching.
+    await farts.click()
+    await expect(play).toHaveAccessibleName('Play')
+    await forget(page)
+    await play.click()
+    await expect(state).toHaveText('Playing')
+    await expect(state).toHaveText('Ready', { timeout: (songSeconds + 10) * 1000 })
+    const [toot] = await page.evaluate(() => window.__bufferStarts)
+    const tootSeconds = toot.length / toot.rate
+    await saveTheSpeakers(
+      page,
+      join(out, `farts-${song.id}`),
+      Math.max(toot.args[0] ?? 0, toot.now),
+      tootSeconds
+    )
+    await piano.click()
+    await expect(play).toHaveAccessibleName('Play on piano')
+  }
 
   // Switched to Farts while it plays, the Toot carries on from where the piano was, and the piano
   // stops.
@@ -121,19 +149,19 @@ test('Song Creator plays a Song on piano, then with farts, from the same spot', 
   await forget(page)
   await piano.click()
   await expect(state).toHaveText('Playing')
-  await expect(state).toHaveText('Ready', { timeout: (marySeconds + 5) * 1000 })
+  await expect(state).toHaveText('Ready', { timeout: (songSeconds + 5) * 1000 })
   const rest = await notesStruck(page)
   expect(rest.length).toBeGreaterThan(0)
-  expect(rest.length).toBeLessThan(mary.notes.length - 4)
+  expect(rest.length).toBeLessThan(song.notes.length - 4)
   expect(rest.map(n => n.midi)).toEqual(
-    mary.notes.slice(mary.notes.length - rest.length).map(n => n.pitch + transposition)
+    song.notes.slice(song.notes.length - rest.length).map(n => n.pitch + transposition)
   )
 
   // A note tapped plays on piano too.
   await forget(page)
   await tapNote(page.getByTestId('note-view'), page.getByTestId('note 3'))
   await expect.poll(async () => (await notesStruck(page)).length).toBe(1)
-  expect((await notesStruck(page))[0].midi).toBe(mary.notes[2].pitch + transposition)
+  expect((await notesStruck(page))[0].midi).toBe(song.notes[2].pitch + transposition)
   expect(await fartsStarted(page)).toEqual([])
 
   // Leaving Song Creator stops it.
@@ -154,8 +182,8 @@ test('a locked Song plays on piano from its sheet, and closing the sheet stops i
   // Before any Recording, every Song is locked.
   await listenToTheSpeakers(page)
   await page.goto('/compose/')
-  await page.getByRole('button', { name: mary.title, exact: true }).click()
-  const sheet = page.getByRole('dialog', { name: mary.title })
+  await page.getByRole('button', { name: song.title, exact: true }).click()
+  const sheet = page.getByRole('dialog', { name: song.title })
   const piano = sheet.getByTestId('locked-song-piano')
   const record = sheet.getByRole('button', { name: 'Record', exact: true })
   await expect(piano).toHaveText('Play on piano')
@@ -169,8 +197,8 @@ test('a locked Song plays on piano from its sheet, and closing the sheet stops i
   await expect(piano).toHaveText('Stop')
   await expect.poll(async () => (await notesStruck(page)).length).toBeGreaterThan(2)
   const first = await notesStruck(page)
-  expect(first.map(n => n.midi)).toEqual(mary.notes.slice(0, first.length).map(n => n.pitch))
-  if (out) await page.screenshot({ path: join(out, 'locked-song-piano.png') })
+  expect(first.map(n => n.midi)).toEqual(song.notes.slice(0, first.length).map(n => n.pitch))
+  if (out) await page.screenshot({ path: join(out, `locked-song-piano-${song.id}.png`) })
   await piano.click()
   await expect(piano).toHaveText('Play on piano')
   await expectSilenceFromNow(page)
@@ -331,13 +359,12 @@ async function expectSilenceFromNow(page: Page) {
 }
 
 /**
- * Writes what the speakers got while the piano played the Song from `zero` (on the AudioContext's
- * clock), as a 16-bit WAV at the context's rate, and the Song's notes as written, in the key it was
- * played in, for `evaluate_piano.py`.
+ * Writes what the speakers got from 0.5 s before `zero` (on the AudioContext's clock) to `seconds`
+ * after it, as a 16-bit WAV at the context's rate, `<name>.wav`.
  */
-async function saveTheSpeakers(page: Page, out: string, zero: number, transposition: number) {
+async function saveTheSpeakers(page: Page, name: string, zero: number, seconds: number) {
   const from = zero - 0.5
-  const to = zero + marySeconds + 1
+  const to = zero + seconds
   const { sampleRate, pcm } = await page.evaluate(
     ({ from, to }) => {
       const speakers = window.__speakers
@@ -374,17 +401,24 @@ async function saveTheSpeakers(page: Page, out: string, zero: number, transposit
   header.writeUInt16LE(16, 34)
   header.write('data', 36, 'ascii')
   header.writeUInt32LE(data.length, 40)
-  writeFileSync(join(out, 'piano-mary.wav'), Buffer.concat([header, data]))
+  writeFileSync(`${name}.wav`, Buffer.concat([header, data]))
+}
+
+/**
+ * Writes the Song's notes as written, in the key the piano played them in, and where their 0 is
+ * in `saveTheSpeakers`' WAV, for `evaluate_piano.py`.
+ */
+function saveTheNotes(path: string, transposition: number) {
   writeFileSync(
-    join(out, 'piano-mary.json'),
+    path,
     `${JSON.stringify(
       {
-        song: mary.id,
-        bpm: mary.bpm,
+        song: song.id,
+        bpm: song.bpm,
         transposition,
-        // Where the Song's 0 is in the WAV, in seconds.
-        zero: zero - from,
-        notes: mary.notes.map(n => ({
+        // Where the Song's 0 is in the WAV, in seconds: `saveTheSpeakers` starts 0.5 s before it.
+        zero: 0.5,
+        notes: song.notes.map(n => ({
           midi: n.pitch + transposition,
           start: n.start * beat,
           seconds: Math.max(0.06, n.dur * beat - 0.025)
