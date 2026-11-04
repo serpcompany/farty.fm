@@ -247,6 +247,24 @@ test('swaps a note’s fart, plays it, saves it, and the saved Toot plays that f
     await expectTappable(lock.getByRole('button', { name: 'Record' }))
     if (out) await page.screenshot({ path: join(out, 'gap-lock-card.png') })
 
+    // Piano still plays the whole Song, the left-out pitch's notes too (#359, #360's Option A).
+    const playOn = page.getByRole('group', { name: 'Play on' })
+    await playOn.getByRole('button', { name: 'Piano' }).click()
+    await expect(state).toHaveText('Ready')
+    await expect(play).toHaveAccessibleName('Play on piano')
+    await expect(play).toBeEnabled()
+    await page.evaluate(() => (window.__starts = []))
+    await play.click()
+    await expect(state).toHaveText('Playing')
+    if (out) await page.screenshot({ path: join(out, 'gap-piano.png') })
+    const marySeconds = Math.max(...mary.notes.map(n => n.start + n.dur)) * (60 / mary.bpm)
+    await expect(state).toHaveText('Ready', { timeout: (marySeconds + 5) * 1000 })
+    // One piano note struck per note of the Song, and no fart.
+    expect(await page.evaluate(() => window.__starts.length)).toBe(mary.notes.length)
+    await playOn.getByRole('button', { name: 'Farts' }).click()
+    await expect(state).toHaveText('Locked')
+    await expect(play).toBeDisabled()
+
     await reset.click()
     await expect(changed).toHaveText("Every note is back to Farty's pick.")
     await expect(state).toHaveText('Ready', { timeout: 60_000 })
