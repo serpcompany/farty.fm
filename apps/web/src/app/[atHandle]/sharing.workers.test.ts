@@ -7,7 +7,7 @@ import * as sharesRoute from '@/app/api/share/route'
 import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
 import type { Kind } from '@/db/library'
 import { markTootPaid, startTootPayment } from '@/db/payments'
-import { rateLimit, shareReports, shares } from '@/db/schema'
+import { handles, rateLimit, shareReports, shares } from '@/db/schema'
 import { TOOT_PRICE } from '@/lib/pricing'
 import { encodeWav } from '@/lib/wav'
 import {
@@ -35,10 +35,12 @@ import {
   wav
 } from '@/test-support/library-api'
 
-import * as audioRoute from './[handle]/r/[id]/audio/route'
-import * as reportRoute from './[handle]/r/[id]/report/route'
-import * as tootAudioRoute from './[handle]/t/[id]/audio/route'
-import * as tootReportRoute from './[handle]/t/[id]/report/route'
+import * as audioRoute from './r/[id]/audio/route'
+import * as imageRoute from './r/[id]/image/route'
+import * as reportRoute from './r/[id]/report/route'
+import * as tootAudioRoute from './t/[id]/audio/route'
+import * as tootImageRoute from './t/[id]/image/route'
+import * as tootReportRoute from './t/[id]/report/route'
 
 // Sharing (ADR 0020) in workerd, with a real D1 and R2: Handles, sharing and stopping sharing a
 // Recording or a saved Toot, its public audio and Report, and that a link works only while its
@@ -68,8 +70,8 @@ const json = (body: unknown) => ({
 const shareRoutes = { recordings: shareRecordingRoute, toots: shareTootRoute }
 /** Each kind of link's public routes, by its segment: `r` for a Recording, `t` for a Toot. */
 const linkRoutes = {
-  r: { audio: audioRoute, report: reportRoute },
-  t: { audio: tootAudioRoute, report: tootReportRoute }
+  r: { audio: audioRoute, image: imageRoute, report: reportRoute },
+  t: { audio: tootAudioRoute, image: tootImageRoute, report: tootReportRoute }
 }
 
 const share = {
@@ -88,21 +90,26 @@ const share = {
     shareRoutes[kind].DELETE(request(`/api/share/${kind}/${id}/`, 'DELETE', as), params({ id })),
   /** The shared item's audio, as anyone with the link fetches it: no cookie. */
   audio: (url: string, init: RequestInit = {}) => {
-    const { segment, handle, id } = linkParts(url)
+    const { segment, atHandle, id } = linkParts(url)
     return linkRoutes[segment].audio.GET(
       new Request(`${url}audio/`, { ...init, method: 'GET' }),
-      params({ handle, id })
+      params({ atHandle, id })
     )
+  },
+  /** The shared item's link image, as a link preview fetches it. */
+  image: (url: string) => {
+    const { segment, atHandle, id } = linkParts(url)
+    return linkRoutes[segment].image.GET(new Request(`${url}image/`), params({ atHandle, id }))
   },
   /** A report from the page, by the reporter at `ip`, or with no `cf-connecting-ip` when null. */
   report: (url: string, origin: string | null = ORIGIN, ip: string | null = '203.0.113.1') => {
-    const { segment, handle, id } = linkParts(url)
+    const { segment, atHandle, id } = linkParts(url)
     const headers = new Headers()
     if (ip !== null) headers.set('cf-connecting-ip', ip)
     if (origin !== null) headers.set('origin', origin)
     return linkRoutes[segment].report.POST(
       new Request(`${url}report/`, { method: 'POST', headers }),
-      params({ handle, id })
+      params({ atHandle, id })
     )
   }
 }
@@ -125,10 +132,24 @@ async function slotsLike(pattern: string): Promise<number[]> {
   return rows.map(row => row.count)
 }
 
-function linkParts(url: string): { segment: 'r' | 't'; handle: string; id: string } {
-  const match = new URL(url).pathname.match(/^\/u\/([^/]+)\/(r|t)\/([^/]+)\/$/)
+/**
+ * A link's parts: its kind's segment, its first segment (`@alice`, #382), the Handle that names,
+ * and its id. Any first segment, so a test can try one with no `@`, or with it escaped.
+ */
+function linkParts(url: string): {
+  segment: 'r' | 't'
+  atHandle: string
+  handle: string
+  id: string
+} {
+  const match = new URL(url).pathname.match(/^\/([^/]+)\/(r|t)\/([^/]+)\/$/)
   if (!match) throw new Error(`Not a share link: ${url}`)
-  return { segment: match[2] as 'r' | 't', handle: match[1], id: match[3] }
+  return {
+    segment: match[2] as 'r' | 't',
+    atHandle: match[1],
+    handle: decodeURIComponent(match[1]).replace(/^@/, ''),
+    id: match[3]
+  }
 }
 
 async function upload(id: string, cookie: string) {
@@ -242,6 +263,16 @@ describe('Handles', () => {
     )
   })
 
+  it("can't hold an @ or a /, so a link's path names one Handle only (#382)", async () => {
+    const alice = await signUp('alice')
+    for (const handle of ['ali@ce', 'alice@', '@@alice', 'ali/ce', 'alice/', 'ali%40ce']) {
+      const refused = await share.pick(handle, alice)
+      expect(refused.status, handle).toBe(400)
+      expect(await refused.json()).toEqual({ error: 'handle_unusable', problem: 'chars' })
+    }
+    expect(await testDb().select().from(handles)).toEqual([])
+  })
+
   it('is refused from another site, and to someone signed out', async () => {
     const alice = await signUp('alice')
     expect((await share.pick('alice', { ...alice, origin: 'https://evil.example' })).status).toBe(
@@ -267,7 +298,7 @@ describe('Sharing a Recording', () => {
 
   it('makes a link anyone can play, and the same link again', async () => {
     const alice = await sharer('alice')
-    expect(alice.url).toMatch(new RegExp(`^${ORIGIN}/u/alice/r/[0-9a-hjkmnp-tv-z]{12}/$`))
+    expect(alice.url).toMatch(new RegExp(`^${ORIGIN}/@alice/r/[0-9a-hjkmnp-tv-z]{12}/$`))
     // The link names a share of its own, never the Recording's id.
     expect(alice.url).not.toContain(R1)
 
@@ -407,7 +438,7 @@ describe('Sharing a Recording', () => {
     })
 
     it('keys the cached copy by the R2 key and the Trim', () => {
-      const request = new Request(`${ORIGIN}/u/alice/r/x/audio/`)
+      const request = new Request(`${ORIGIN}/@alice/r/x/audio/`)
       const key = (from: number, to: number) =>
         sharedAudioCacheKey(request, 'users/a/recordings/r.wav', {
           startSeconds: from,
@@ -429,7 +460,19 @@ describe('Sharing a Recording', () => {
     expect(await findSharedRecording(testDb(), 'ALICE', id)).not.toBeNull()
     await sharer('bob')
     expect(await findSharedRecording(testDb(), 'bob', id)).toBeNull()
-    expect((await share.audio(alice.url.replace('/u/alice/', '/u/bob/'))).status).toBe(404)
+    expect((await share.audio(alice.url.replace('/@alice/', '/@bob/'))).status).toBe(404)
+  })
+
+  it("opens only under its owner's @Handle, its @ escaped or not (#382)", async () => {
+    const alice = await sharer('alice')
+    expect((await share.audio(alice.url.replace('/@alice/', '/%40alice/'))).status).toBe(200)
+    for (const first of ['alice', 'u', '@', '%40']) {
+      const url = alice.url.replace('/@alice/', `/${first}/`)
+      expect((await share.audio(url)).status, url).toBe(404)
+      expect((await share.image(url)).status, url).toBe(404)
+      expect((await share.report(url)).status, url).toBe(404)
+    }
+    expect(await testDb().select().from(shareReports)).toEqual([])
   })
 
   it("can't be shared or stopped by anyone but its owner", async () => {
@@ -496,7 +539,7 @@ describe('Sharing a Recording', () => {
     await share.pick('alice', alice)
     await upload(R1, alice.cookie)
     for (const id of ['000000000000', 'abc', R1]) {
-      expect((await share.audio(`${ORIGIN}/u/alice/r/${id}/`)).status).toBe(404)
+      expect((await share.audio(`${ORIGIN}/@alice/r/${id}/`)).status).toBe(404)
     }
   })
 })
@@ -650,7 +693,7 @@ describe('Sharing a saved Toot', () => {
 
   it('makes a link anyone can play: the saved WAV, whole and as stored', async () => {
     const alice = await tootSharer('alice')
-    expect(alice.url).toMatch(new RegExp(`^${ORIGIN}/u/alice/t/[0-9a-hjkmnp-tv-z]{12}/$`))
+    expect(alice.url).toMatch(new RegExp(`^${ORIGIN}/@alice/t/[0-9a-hjkmnp-tv-z]{12}/$`))
     // The link names a share of its own, never the Toot's id.
     expect(alice.url).not.toContain(T1)
 
@@ -693,7 +736,7 @@ describe('Sharing a saved Toot', () => {
     const alice = await tootSharer('alice')
     await upload(R1, alice.cookie)
     const recording = (await (await share.put(R1, alice)).json()) as { url: string }
-    expect(recording.url).toMatch(new RegExp(`^${ORIGIN}/u/alice/r/`))
+    expect(recording.url).toMatch(new RegExp(`^${ORIGIN}/@alice/r/`))
 
     const { shares: listed } = (await (await share.list(alice)).json()) as { shares: unknown[] }
     expect(listed).toHaveLength(2)
@@ -737,7 +780,19 @@ describe('Sharing a saved Toot', () => {
     expect(await findSharedToot(testDb(), 'ALICE', id)).not.toBeNull()
     await tootSharer('bob')
     expect(await findSharedToot(testDb(), 'bob', id)).toBeNull()
-    expect((await share.audio(alice.url.replace('/u/alice/', '/u/bob/'))).status).toBe(404)
+    expect((await share.audio(alice.url.replace('/@alice/', '/@bob/'))).status).toBe(404)
+  })
+
+  it("opens only under its owner's @Handle (#382)", async () => {
+    const alice = await tootSharer('alice')
+    expect((await share.audio(alice.url.replace('/@alice/', '/%40alice/'))).status).toBe(200)
+    for (const first of ['alice', 'u', '@']) {
+      const url = alice.url.replace('/@alice/', `/${first}/`)
+      expect((await share.audio(url)).status, url).toBe(404)
+      expect((await share.image(url)).status, url).toBe(404)
+      expect((await share.report(url)).status, url).toBe(404)
+    }
+    expect(await testDb().select().from(shareReports)).toEqual([])
   })
 
   it('shares a Sound Pad Toot too', async () => {
@@ -873,7 +928,7 @@ describe('Sharing a saved Toot', () => {
     await share.pick('alice', alice)
     await saveToot(T1, alice)
     for (const id of ['000000000000', 'abc', T1]) {
-      expect((await share.audio(`${ORIGIN}/u/alice/t/${id}/`)).status).toBe(404)
+      expect((await share.audio(`${ORIGIN}/@alice/t/${id}/`)).status).toBe(404)
     }
   })
 

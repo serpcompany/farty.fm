@@ -1,10 +1,40 @@
 import { describe, expect, it } from 'vitest'
 
-import { handleMessage, handleProblem, normalizeHandle, suggestHandle } from './handle'
+import {
+  handleMessage,
+  handleProblem,
+  isHandlePage,
+  normalizeHandle,
+  profilePath,
+  segmentHandle,
+  suggestHandle
+} from './handle'
 
 describe('Handles', () => {
   it('are typed with or without the @, in any case', () => {
     expect(normalizeHandle('  @Maya_K ')).toBe('maya_k')
+  })
+
+  it("can't hold an @ or a /, so a page's path names one Handle (#382)", () => {
+    for (const handle of ['ma@ya', 'maya@', '@maya', 'ma/ya', 'maya/', 'ma%40ya', 'ma%2fya']) {
+      expect(handleProblem(handle), handle).toBe('chars')
+    }
+    // Typed with two, the second stays.
+    expect(handleProblem(normalizeHandle('@@maya'))).toBe('chars')
+  })
+
+  it('name their page /@<handle>/, and a path names one only after its @ (#382)', () => {
+    expect(profilePath('maya')).toBe('/@maya/')
+    expect(segmentHandle('@maya')).toBe('maya')
+    expect(segmentHandle('%40maya')).toBe('maya')
+    expect(segmentHandle('maya')).toBeNull()
+    expect(segmentHandle('u')).toBeNull()
+    expect(segmentHandle('%E0%A4%A')).toBeNull()
+    expect(isHandlePage('/@maya/')).toBe(true)
+    expect(isHandlePage('/@maya/t/abcdefghjkmn/')).toBe(true)
+    expect(isHandlePage('/%40maya/')).toBe(true)
+    expect(isHandlePage('/maya/')).toBe(false)
+    expect(isHandlePage('/recordings/')).toBe(false)
   })
 
   it('are 3 to 20 letters, digits or _', () => {

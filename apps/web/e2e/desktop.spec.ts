@@ -127,7 +127,7 @@ test("a shared page's Get Farty shows the QR code, not the account step (#318)",
   page
 }) => {
   // A link that no longer works has Get Farty too, with no account needed to show it.
-  await page.goto('/u/nobody/r/AAAAAAAAAAAA/')
+  await page.goto('/@nobody/r/AAAAAAAAAAAA/')
   await expect(page.getByRole('heading', { name: "This link doesn't work any more" })).toBeVisible()
   const getFarty = page.getByRole('button', { name: 'Get Farty' })
   await expect(getFarty).toHaveCount(2)

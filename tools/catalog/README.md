@@ -27,6 +27,11 @@ The first run downloads `PDMX.csv` (225 MB) and `mid.tar.gz` (214 MB) into `~/.c
 | `test_composers.py` | Unit tests for the composer rules, and every batch against the catalog |
 | `composers-NN.json` | A batch of composer lookups: one record per Song, most viewed first |
 | `composers-NN.report.md` | The batch's report, written by `apply`: every Song's composer and source, the Unknowns and the removals |
+| `tag.py` | Each Song's kind, origin, fame and Well known ([Tags](#tags)): `fetch`, `apply`, `check` and `guess` |
+| `test_tag.py` | Unit tests for the tag rules, and every Song's tags against the catalog |
+| `tag-signals.json` | What `fetch` found for each Song: its tune's page, categories, pageviews, The Session's type, PDMX views |
+| `tag-hand.json` | Tags set by hand, which win over the rules, each with its reason |
+| `tags.report.md` | Written by `apply`: the counts, and every Song's tags with the source of each |
 | `song_reports.py` | Lists an export of D1's `song_reports` per Song, worst first, against the catalog's notes now ([`docs/agents/web.md`](../../docs/agents/web.md#reports-and-take-downs)) |
 | `test_song_reports.py` | Unit tests for the list |
 
@@ -78,6 +83,8 @@ Imported Songs are in the catalog, so the melody lab renders them (`run_all.py`,
 
 A re-imported Song keeps its composer. A new Song is in no composer batch, so `composers.test.ts` fails until it's in one: run `composers.py plan` (below) and look the new batch up, in the import's PR or its own.
 
+A re-imported Song loses its tags, and a new Song has none, so `tag.py check` fails until `tag.py fetch` and `tag.py apply` have run ([Tags](#tags)). Re-running `apply` alone puts back the tags of a Song already in `tag-signals.json`, which is how to settle a conflict in `catalog/catalog.json`.
+
 ## Composers
 
 Every Song names its composer, with the page that says so (#357). The fields sit after `title` in `catalog/catalog.json`:
@@ -86,7 +93,7 @@ Every Song names its composer, with the page that says so (#357). The fields sit
 - `composer_died`: the year the last of them died. Only for a named composer, and needed for one unless the tune was first published before 1931 (step 4).
 - `composer_source`: the page that says who wrote it.
 
-The batch record also holds what the lookup found but the catalog doesn't keep: `lyricist_died`, `published`, `checked` and `note`.
+The batch record also holds what the lookup found but the catalog doesn't keep: `lyricist_died`, `published`, `checked` and `note`. It can hold the Song's `kind` and `origin` too: `tag.py guess`'s first guess, which the lookup confirms. They never beat `tag.py`'s rules, and `tag.py check` fails a record whose value isn't the Song's tag ([Tags](#tags)).
 
 `source.composer` stays as PDMX gave it. PDMX's name is the uploader's, and often wrong: "NA" for most Songs, a lyricist, an arranger or a collection. Never copy it without checking.
 
@@ -105,6 +112,7 @@ Batches run in parallel, so a worker touches only its own batch: one agent fills
    - A folk tune nobody is credited with: `Traditional (<tradition>)`, the tradition as the source gives it, one capitalized adjective or two ("Traditional (Irish)", "Traditional (African American)" for a spiritual), or `Traditional` when it doesn't say.
    - `Unknown`: the tune isn't a folk tune and no source you read names who wrote it, whether it says nobody knows or says nothing. Add `checked`, the list of page URLs you read.
    - `composers.py check` refuses another spelling of a name it knows (`ALIASES`). When it's a new name and PDMX spells it another way, list both spellings in your hand-back for the integration PR to add to `ALIASES`.
+   - Confirm or correct the record's `kind` and `origin`, `tag.py guess`'s first guess, from the pages you read for the composer: `kind` one of Christmas, Kids, Hymns, Anthems, Classical, Songs or Fiddle tunes, and `origin` where the tune is from, as one of `tag.py`'s `DEMONYMS` origins ("Irish", "African American"), or `null` when no page says ([Tags](#tags)). A `Traditional (<tradition>)` composer gives the origin, so an origin that disagrees with it is wrong. Name the page behind a corrected value in `note`: the integration PR moves a correction the rules don't reach into `tag-hand.json` with it.
 4. Add `composer_source`, and `published`, the year the tune was first published, when the source gives it. For a named composer, add `composer_died` (an integer), from the source or the composer's own article; for several composers, the last of their deaths. When neither gives it, look at the composer's IMSLP category page (`imslp.org/wiki/Category:<Surname>,_<Given>`), which lists dates. With no death year anywhere, `check` passes the record only with a `published` before 1931 and a `note` that says why the year is missing; else the Song is a removal (step 5). When the words were written with the music (a song written by its composer and lyricist together, not words set to an older tune or written to it later), add `lyricist_died`, the year the last of those lyricists died, from the source or the lyricist's own article, and name the lyricist and the page in `note`. Add a short `note` for anything else a reader would ask (the words' author, another attribution).
 5. **Under copyright**: when `composer_died` or `lyricist_died` is after 1955, or `published` is 1931 or later ([ADR 0003](../../docs/adr/0003-songs-come-from-cited-scores.md), `excluded-titles.txt`; `composers.py` and `composers.test.ts` read the two years from `copyright.json`), the Song leaves the catalog. Mark its record with `remove`, the reason in words ("first published in 1931 or later: Morris first published it in 1940"), and the years that show it, and list it in your hand-back. Don't pull it yourself: the integration PR does. A Song added by hand (no `import` in its catalog entry) keeps `remove` too: say in your hand-back that it was added by hand, for the owner, since it has no titles file to pull it from.
 6. Check the batch and write its report:
@@ -114,7 +122,7 @@ Batches run in parallel, so a worker touches only its own batch: one agent fills
    tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py report --batch tools/catalog/composers-NN.json
    ```
 
-   `report` refuses while `check --batch` lists a problem. Both print the batch's counts (named, traditional, unknown, to remove, open).
+   `report` refuses while `check --batch` lists a problem. Both print the batch's counts (named, traditional, unknown, to remove, open). `python3 -I tools/catalog/tag.py check` lists a `kind` or `origin` it doesn't know.
 7. Commit only `composers-NN.json` and `composers-NN.report.md`, push the branch and hand back its name, the counts, the Songs to remove, the Unknowns and any new spellings. Don't open a PR: `composers.test.ts` fails a branch whose lookups aren't in the catalog yet.
 
 ### Bring the batches in
@@ -130,10 +138,10 @@ One PR, after every worker has handed back:
    tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py check
    ```
 
-4. Run `tools/melody-lab/export_golden.py` (from `tools/melody-lab`, with its venv) and the generator once, from `apps/web`: `pnpm exec tsx src/lib/catalog/generate.ts`. Set the shipped Songs' count in `apps/web/src/lib/catalog/catalog.test.ts`, and the locked Songs' count in `apps/web/src/lib/pitch-coverage.test.ts` when a removed Song changes it. Then the unit tests above and `pnpm check`.
+4. Run `tools/melody-lab/export_golden.py` (from `tools/melody-lab`, with its venv) and the generator once, from `apps/web`: `pnpm exec tsx src/lib/catalog/generate.ts`. Set the shipped Songs' count in `apps/web/src/lib/catalog/catalog.test.ts`, and the locked Songs' count in `apps/web/src/lib/pitch-coverage.test.ts` when a removed Song changes it. Then tag the new Songs from what the lookups found ([Tags](#tags)): `tag.py fetch` again, since a Song's tune page, pageviews and Session type come from its `composer_source`, then `tag.py apply`. `tag.py check` lists each batch record whose `kind` or `origin` isn't the Song's tag: correct the record when the rules are right (often the lookup's `Traditional (<tradition>)` settles it), or hand-set the value in `tag-hand.json`, with the page from the record's `note` as its `source`. Then the unit tests above and `pnpm check`.
 5. Open the PR with `Closes #357` when no record is left open, else `Part of #357` and a line `No issue: <why>` (the issue-link check needs one). Give the count `check` printed, the removed Songs, the Unknowns and the Songs left for the owner.
 
-CI runs `composers.py check` and these unit tests whenever anything under `catalog/` or `tools/catalog/` changes.
+CI runs `composers.py check`, `tag.py check` and their unit tests whenever anything under `catalog/` or `tools/catalog/` changes.
 
 ### New batches
 
@@ -142,3 +150,35 @@ CI runs `composers.py check` and these unit tests whenever anything under `catal
 ```sh
 tools/melody-lab/.venv/bin/python -I tools/catalog/composers.py plan
 ```
+
+Then give each new record its first guess at the Song's kind and origin, before the batches go to the workers, and commit `tag-signals.json` with the batches:
+
+```sh
+python3 -I tools/catalog/tag.py fetch
+python3 -I tools/catalog/tag.py guess --batch tools/catalog/composers-08.json
+```
+
+The guess comes before the lookup, from the title alone, so it's only a starting point: the integration PR fetches again after the lookups ([step 4](#bring-the-batches-in)).
+
+## Tags
+
+Every Song has a kind, an origin and a fame (#383, from #381's research). The fields sit after the composer fields in `catalog/catalog.json`:
+
+- `kind`: one of Christmas, Kids, Hymns, Anthems, Classical, Songs or Fiddle tunes (`tag.KINDS`).
+- `origin`: where the tune is from, as today's demonym ("Irish", "Czech" for Bohemia) or a tradition ("African American"), or `null` when no source says.
+- `fame`: `log10(1 + pageviews) + log10(1 + PDMX views)`, for sorting. Pageviews are 12 months' views of the tune's own English Wikipedia page by people, not bots; PDMX views are summed over every score with one of the Song's names, as the import matches them.
+- `well_known`: `true` when pageviews ≥ 20,000 and PDMX views ≥ 200, or pageviews ≥ 150,000, or PDMX views ≥ 5,000.
+
+```sh
+python3 -I tools/catalog/tag.py fetch
+python3 -I tools/catalog/tag.py apply
+python3 -I tools/catalog/tag.py check
+python3 -I tools/catalog/test_tag.py
+```
+
+`fetch` writes `tag-signals.json`, what Wikipedia, Wikidata, The Session and `PDMX.csv` say about each Song, at one request a second, about 2,400 the first time (about 45 minutes). It caches every answer in `~/.cache/pedos/tags/`, beside PDMX's, so it outlives a worktree and a second run asks nothing. `apply` needs no network: it tags every Song from `tag-signals.json`, the composer batches and `tag-hand.json`, writes the four fields and `tags.report.md`, which gives each tag's source. `check` fails when a Song has no kind or one outside the seven, its fields aren't `apply`'s, its signals were fetched with another `composer` or `composer_source` than it has now (each Song's signals record both), or a composer batch record's `kind` or `origin` isn't the Song's tag. It reads only files, so CI never fetches.
+
+- **The tune's page** is the composer lookup's `composer_source` when it's a Wikipedia article and not the composer's own (another language's article is swapped for its English one through Wikidata). When that page has none of the Song's names ("Notebook for Anna Magdalena Bach"), the English article with the Song's title takes its place if it's about a tune. With no cited article, it's the English article with the Song's title, kept only when its categories call it a song or tune and not a book, film, opera, day, building, whole genre ("Barcarolle"), person, or a song from 1930 on (another song with the old name). Its pageviews count only when the page is the tune's own: it has a song or tune category (a cited "Calvary" is the hill), no redirect led to a section of a longer page ("Sea shanty"), and its title is one of the Song's names, or close to one (spelled another way, "Whiskey in the Jar", or with words around a name of two words or more, "Clarinet Concerto (Mozart)", but not a set it's one of, "Gnossiennes"), or the Song's title leads to it, or it was found by the title.
+- **Kind**: each signal gives a kind points once, its best: the page's categories, the page's Wikidata genre, The Session's tune type for the tune the lookup cites (2), PDMX's bulk list (Misc Christmas, Misc Children, Misc Praise Songs: 2), a word in the title (1), and the composer's categories (1: fiddlers, pipers, harpers and traditional-music composers are Fiddle tunes, not Classical). A category counts for the first rule in `CATEGORY_KINDS` it matches, and a rule gives 1 to 3 points by how sure it is: "Christmas carols" 2, "Christmas onstage" 1; "nursery rhymes" 2, "children's songs" 1 (folk songs are sung by children too); "marches" 3, so a year's compositions doesn't make Sousa Classical; "patriotic songs" 1; state songs and Civil War songs aren't anthems. A national anthem settles Anthems, and then a carol category settles Christmas. The most points win; a tie goes to the more specific kind (`TIE_ORDER`). With no points, a **fallback**: Fiddle tunes for a Song in PDMX's Misc tunes or Misc Traditional, Songs for another traditional tune, Fiddle tunes for an Unknown composer, Classical for a named one.
+- **Origin**, the first that answers: the composer batch's `Traditional (<tradition>)` (the Song's `composer`), the tune's Wikidata country of origin, the tune's categories ("Irish folk songs", not "English-language songs" or "Songs about Scotland"), the composer's categories ("Scottish fiddlers"), the composer's Wikidata citizenship. Categories must agree: a tune that's American, English and Irish folk song alike has no origin from them, and a composer who's an Austrian composer as often as a German one takes the citizenship that's one of the two. `COUNTRIES` maps old states to today's demonyms.
+- **Hand-set values** win over everything, and nothing else does: `tag-hand.json` holds, by Song id, the `kind`, `origin` or `well_known` to set, `source`, the page that supports it (needed for an `origin`, optional otherwise; the report prints it), `found_by` (the review that found it: `known miss`, `fallback kind`, `signals disagree`, `near miss` for a Song left out with one signal close to the bar, or `hand check` for one found by reading the tags, such as the 30-Song check) and `why`, one line. A composer batch record's `kind` and `origin` are only `guess`'s starting point and never count. Review the Songs whose kind is a fallback and the Well known Songs whose signals disagree (`tags.report.md` counts them) whenever `fetch` adds Songs.

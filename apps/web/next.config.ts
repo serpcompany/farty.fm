@@ -24,6 +24,20 @@ const nextConfig: NextConfig = {
     PEDOS_RELEASE: sha ? `${version}+${sha.slice(0, 7)}` : version,
     PEDOS_ENVIRONMENT: siteEnv()
   },
+  // Profile pages and shared links moved from `/u/<handle>/…` to `/@<handle>/…` (#382, ADR 0020,
+  // ADR 0021). Links already sent keep working: each old path answers one 308 to its new one,
+  // query included. The sources end in `/` because Next adds the trailing slash first. A shared
+  // page's old link image, `opengraph-image`, is its `image/` now.
+  async redirects() {
+    return [
+      {
+        source: '/u/:handle/:kind(r|t)/:id/opengraph-image/',
+        destination: '/@:handle/:kind/:id/image/',
+        permanent: true
+      },
+      { source: '/u/:handle/:rest*/', destination: '/@:handle/:rest*/', permanent: true }
+    ]
+  },
   // Staging's noindex isn't here: the Staging gate (worker.ts) adds it after the cache, and only
   // to responses whose request didn't pass the password check.
   async headers() {

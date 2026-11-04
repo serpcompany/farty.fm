@@ -2,4 +2,4 @@
 // and tools/catalog/titles-*.txt. Do not edit by hand: run it again instead.
 
 /** Where the browser fetches the Song Catalog's index: 989 Songs, named by their content. */
-export const catalogPath = '/catalog/songs-c0ecdd80b5967b0c.json'
+export const catalogPath = '/catalog/songs-116714c9f8e12d91.json'

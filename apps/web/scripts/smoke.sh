@@ -250,6 +250,9 @@ eventually "the sitemap index lists the pages sitemap on $canonical" \
   sitemap_lists /sitemap-index.xml "$canonical/sitemap-pages.xml"
 eventually "the pages sitemap lists the public pages on $canonical" \
   sitemap_lists /sitemap-pages.xml "$canonical" "$canonical/privacy/" "$canonical/support/"
+eventually 'an old /u/ link gets a 308 to its /@ path, query kept (#382)' \
+  redirects "$base/u/nobody/r/AAAAAAAAAAAA/?from=smoke" '/@nobody/r/AAAAAAAAAAAA/?from=smoke' \
+  "${smoke[@]}"
 
 if [[ "$env" == production ]]; then
   eventually 'Production is indexable' serves "$base/" indexable "${smoke[@]}"

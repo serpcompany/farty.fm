@@ -41,9 +41,8 @@ export default function PrivacyPage() {
           Recordings and Toots.
         </li>
         <li>
-          What you share is listed on your page, farty.fm/u/your handle, which anyone can open.
-          Search engines are asked not to index links or pages, but anyone you send one to can pass
-          it on.
+          What you share is listed on your page, farty.fm/@yourhandle, which anyone can open. Search
+          engines are asked not to index links or pages, but anyone you send one to can pass it on.
         </li>
         <li>
           You pick your handle the first time you share or add a friend. It shows on every link you
