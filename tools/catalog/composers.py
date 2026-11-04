@@ -53,6 +53,9 @@ SOURCES = ("wikipedia.org", "imslp.org", "thesession.org", "tunearch.org", "muto
 SKELETON_KEYS = ("id", "title", "views", "pdmx", "score")
 LOOKUP_KEYS = ("composer", "composer_died", "lyricist_died", "composer_source", "published", "checked", "remove",
                "note")
+# The Song's kind and origin (#383): `tag.py guess` writes its first guess, the lookup confirms or
+# corrects it, and `tag.py check` checks the values. They may come before the composer.
+TAG_KEYS = ("kind", "origin")
 
 # PDMX composer names (pdmx.normalize'd) that name nobody. A tradition on its own ('American',
 # TRADITIONS below) names nobody either.
@@ -285,7 +288,7 @@ def is_done(record):
 def record_problems(record, entry):
     """What's wrong with one lookup, given the Song's catalog entry (None once it's removed)."""
     sid = record.get("id")
-    problems = [f"unknown key {k!r}" for k in record if k not in SKELETON_KEYS + LOOKUP_KEYS]
+    problems = [f"unknown key {k!r}" for k in record if k not in SKELETON_KEYS + LOOKUP_KEYS + TAG_KEYS]
     if "remove" in record:
         if not isinstance(record["remove"], str) or not record["remove"].strip():
             problems.append("remove: why the Song is under copyright")
