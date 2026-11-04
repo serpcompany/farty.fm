@@ -16,8 +16,10 @@ The rules and thresholds are in pdmx.py. The gates, in order:
   license  public domain or CC0, with the URL PDMX records, and no PDMX license conflict
   hash     the MIDI archive matches Zenodo's md5, and the extracted file the gates import and the
            catalog copy are byte for byte the archive's file
-  sanity   the excerpt's note count and range, the share of notes the importer drops, and no
-           first bar that is a pickup padded with silence
+  sanity   the excerpt's note count and range, the share of notes the importer drops, no first
+           bar that is a pickup padded with silence, and no rest of 2 beats or more while another
+           staff of the melody's part plays the tune: such a melody is read again from all the
+           part's staves as one part (#380), and passes only if that reading passes
   render   unlocked with the full Fixture Library, and the renderer's bar on the reference render
            (ADR 0012, evaluate.BAR): in50cFart >= 94% (notes within 50 cents of their fart's
            own pitch), onTime >= 95%, no re-attacks
@@ -27,6 +29,10 @@ judged. If one doesn't, the run stops with ReimportMismatch and leaves catalog/ 
 
 Running it again with the same titles file replaces that file's earlier entries, so a run is
 repeatable. Entries from anywhere else are never changed, and a title already in the catalog fails.
+
+--only ID,ID imports just those titles of the file again, and keeps its other Songs and their
+report rows as they are: the importer has changed since the first batches, so running one again
+whole picks other scores for some of its Songs (#344), and #380 fixes only the Songs it names.
 
 The dataset (doi:10.5281/zenodo.15571083) goes to a cache outside the repository (--cache,
 default ~/.cache/pedos/pdmx): PDMX.csv (225 MB) and mid.tar.gz (214 MB), checked against
@@ -189,6 +195,40 @@ def score_notes(path):
     return sorted(notes)
 
 
+def score_tracks(path):
+    """Each track with notes in a MIDI file, as melody.py counts them: {track: ((name, channels),
+    [(start, end, pitch)])}, in quarter-note beats. (name, channels) is the part the track is a
+    staff of (pdmx.part_staves)."""
+    mid = mido.MidiFile(path)
+    out = {}
+    for ti, track in enumerate(mid.tracks):
+        tick, sounding, notes, name, channels = 0, {}, [], "", set()
+        for msg in track:
+            tick += msg.time
+            if msg.type == "track_name" and not name:
+                name = msg.name.rstrip("\x00").strip()
+            elif msg.type == "note_on" and msg.velocity > 0:
+                sounding.setdefault((msg.channel, msg.note), []).append(tick)
+                channels.add(msg.channel)
+            elif msg.type in ("note_on", "note_off") and sounding.get((msg.channel, msg.note)):
+                start = sounding[(msg.channel, msg.note)].pop(0)
+                if tick > start:  # zero-length notes carry no sound, as in melody.py
+                    notes.append((start / mid.ticks_per_beat, tick / mid.ticks_per_beat, msg.note))
+        if notes:
+            out[ti] = ((name, frozenset(channels)), sorted(notes))
+    return out
+
+
+def excerpt(midi, tempos, meters, track=None):
+    """The score's melody read from `track` (melody.py's own pick when None), its render options,
+    and the whole track's melody they were chosen from."""
+    whole = load_midi(midi, track=track)
+    options = pdmx.render_options(tempos, meters, first_onset=whole.notes[0].start)
+    if track is not None:
+        options["track"] = track
+    return whole, options
+
+
 def gate(title, match, row, midi, member_sha256, archive, library):
     """Run every gate on one PDMX score, stopping at the first that fails. `midi` is the extracted
     file and `member_sha256` the archive file's sha256 (extract); the hash gate checks one against
@@ -223,10 +263,18 @@ def gate(title, match, row, midi, member_sha256, archive, library):
         return result
 
     try:
-        whole = load_midi(midi)
         tempos, meters = score_meta(midi)
-        options = pdmx.render_options(tempos, meters, first_onset=whole.notes[0].start)
+        whole, options = excerpt(midi, tempos, meters)
         melody = load_midi(midi, title=title.title, **options)
+        tracks = score_tracks(midi)
+        staves = pdmx.part_staves({t: part for t, (part, _) in tracks.items()}, melody.report["track_used"])
+        moved = pdmx.moved_tune_problems([(n.start, n.dur, n.pitch) for n in melody.notes],
+                                         [n for t in staves if t != melody.report["track_used"] for n in tracks[t][1]],
+                                         options.get("start_beat", 0))
+        if moved:  # the tune moves between the part's staves: read them as one part (#380)
+            whole, options = excerpt(midi, tempos, meters, track=staves)
+            melody = load_midi(midi, title=title.title, **options)
+            result["moved_tune"] = moved
         padded = pdmx.padded_pickup_problems(meters, score_notes(midi), whole.notes[0].start)
     except Exception as e:  # a MIDI file the importer can't read fails sanity
         failed("sanity", [f"the MIDI file doesn't import: {type(e).__name__}: {e}"])
@@ -243,6 +291,8 @@ def gate(title, match, row, midi, member_sha256, archive, library):
     sanity = pdmx.sanity_problems(
         pitches, report["chord_tones_dropped"], report["inner_voice_onsets_dropped"], len(whole.notes)
     ) + padded
+    if moved and sanity:  # read as one part, the staves aren't one clean line either
+        sanity = moved + [f"read from tracks {', '.join(map(str, staves))} as one part, {p}" for p in sanity]
     if failed("sanity", sanity):
         return result
 
@@ -364,10 +414,11 @@ class ReimportMismatch(Exception):
     """A passing Song's catalog entry imports to a different melody from the one its gates judged."""
 
 
-def write_catalog(path, catalog, titles_file, picks, archive):
+def write_catalog(path, catalog, titles_file, picks, archive, keep=(), order=()):
     """Replace this titles file's entries in the catalog at `path` (catalog.json) with the picks,
     and copy each picked score into midi/ next to it. A pick whose copy isn't byte for byte the
-    archive's file is dropped and fails the hash gate.
+    archive's file is dropped and fails the hash gate. `keep` is the file's entries to keep as they
+    are (--only), placed among the picks in the titles file's `order` of ids.
 
     The copies and entries are staged first, and nothing in the catalog changes until every entry
     imports, through the catalog's own loader, to exactly the melody its gates judged. If one
@@ -397,7 +448,8 @@ def write_catalog(path, catalog, titles_file, picks, archive):
             if [[n.start, n.dur, n.pitch] for n in imported[title.id].notes] != r["notes"]:
                 raise ReimportMismatch(f"{title.id}: the catalog entry imports differently from what was gated; "
                                        "the catalog is unchanged")
-        merged = pdmx.merge_catalog(catalog, titles_file, entries)
+        batch = sorted(entries + list(keep), key=lambda e: order.index(e["id"])) if keep else entries
+        merged = pdmx.merge_catalog(catalog, titles_file, batch)
         old = {e["file"] for e in catalog if pdmx.batch_of(e) == titles_file}
         (staging / path.name).write_text(json.dumps(merged, indent=1, ensure_ascii=False))  # the file's own format
         for entry in entries:
@@ -410,6 +462,13 @@ def write_catalog(path, catalog, titles_file, picks, archive):
 
 def table_row(*cells):
     return "| " + " | ".join(str(c).replace("|", "\\|") for c in cells) + " |"
+
+
+def report_songs(titles, songs, earlier):
+    """The report's rows in the titles file's order: this run's, and for the titles it didn't import
+    again (--only), the rows the report had (`earlier`)."""
+    rows = {s["id"]: s for s in earlier} | {s["id"]: s for s in songs}
+    return [rows[t.id] for t in titles if t.id in rows]
 
 
 def write_report(path, run, songs):
@@ -433,6 +492,8 @@ def write_report(path, run, songs):
         f"`{run['dataset']['mid.tar.gz']['md5']}`, both equal to Zenodo's; downloaded {run['dataset']['mid.tar.gz']['downloaded']}.",
         f"- Picking: {run['picking']}",
         f"- Gates: {run['gates']}",
+        *([f"- Only {', '.join(f'`{i}`' for i in run['only'])} imported again; the other titles' rows are from the run before."]
+          if run.get("only") else []),
         f"- Render bar: in50cFart >= {BAR['within_50c_of_fart_pct']}%, onTime >= {BAR['onsets_on_time_pct']}%, "
         f"re-attacks <= {BAR['notes_with_retrigger']}, with the full Fixture Library ({run['library']}).",
         "",
@@ -472,7 +533,9 @@ def write_report(path, run, songs):
                      + f". {s['result'].upper()}" + ("" if s["result"] == "pass" else f": {s['reason']}"))
         for r in s["tried"]:
             lines.append(f"  - [{r['score_id']}]({r['url']}) {r['score_title']!r}: "
-                         + ("pass" if r["passed"] else first_problem(r)))
+                         + ("pass" if r["passed"] else first_problem(r))
+                         + (f" (read from tracks {', '.join(map(str, r['render']['track']))} as one part: the tune moves"
+                            " between them)" if r["passed"] and "track" in r.get("render", {}) else ""))
     path.with_name(path.name + ".md").write_text("\n".join(lines) + "\n")
 
 
@@ -506,12 +569,20 @@ def main():
     parser.add_argument("--tries", type=int, default=5, help="scores to try per title, best first")
     parser.add_argument("--listen", type=Path, help="also render a sample of the passing Songs to WAV here")
     parser.add_argument("--listen-count", type=int, default=3)
+    parser.add_argument("--only", help="import just these ids of the titles file again (comma separated), and keep "
+                                       "its other Songs and their report rows as they are")
     args = parser.parse_args()
 
     titles_file = rel(args.titles)
-    titles = pdmx.read_titles(args.titles.read_text())
+    every_title = pdmx.read_titles(args.titles.read_text())
+    only = args.only.split(",") if args.only else []
+    unknown = sorted(set(only) - {t.id for t in every_title})
+    if unknown:
+        parser.error(f"--only: not in {titles_file}: {', '.join(unknown)}")
+    titles = [t for t in every_title if not only or t.id in only]
     catalog = json.loads(CATALOG.read_text())
-    others = [e for e in catalog if pdmx.batch_of(e) != titles_file]
+    keep = [e for e in catalog if pdmx.batch_of(e) == titles_file and only and e["id"] not in only]
+    others = [e for e in catalog if pdmx.batch_of(e) != titles_file] + keep
     dataset = fetch_dataset(args.cache)
     archive = dataset["mid.tar.gz"]
 
@@ -528,7 +599,7 @@ def main():
         return gate(title, match, row, midi_dir / row["mid"], member_sha256[row["mid"]], archive, library)
 
     songs, picks = pick_scores(titles, found, others, args.tries, try_score, midi_dir)
-    write_catalog(CATALOG, catalog, titles_file, picks, archive)
+    write_catalog(CATALOG, catalog, titles_file, picks, archive, keep, [t.id for t in every_title])
     for title, r, _ in picks:
         song = next(s for s in songs if s["id"] == title.id)
         song["tried"][-1] = {k: v for k, v in r.items() if k != "row"}
@@ -536,9 +607,14 @@ def main():
             song.update(result="pass", picked=r["score_id"], reason=None)
         else:
             song["reason"] = first_problem(r)
+    report = args.titles.with_name(args.titles.stem + ".report")
+    if only:
+        songs = report_songs(every_title, songs, json.loads(report.with_name(report.name + ".json").read_text())["songs"])
     run = {
         "titles": titles_file,
-        "command": f"tools/melody-lab/.venv/bin/python -I {TOOL} --titles {titles_file} --tries {args.tries}",
+        "command": f"tools/melody-lab/.venv/bin/python -I {TOOL} --titles {titles_file} --tries {args.tries}"
+                   + (f" --only {','.join(t.id for t in titles)}" if only else ""),
+        **({"only": [t.id for t in titles]} if only else {}),
         "dataset": {name: {k: v for k, v in d.items() if k != "path"} for name, d in dataset.items()},
         "library": f"{len(library)} Recordings, {sum(s.pitched for s in library)} Melodic",
         "picking": (f"title matches one of the Song's names (MATCHES order: {', '.join(pdmx.MATCHES)}); "
@@ -547,12 +623,13 @@ def main():
                     f"then the highest rating, the most views; up to {args.tries} scores tried per title, best first"),
         "gates": (f"license; hash; sanity: {pdmx.MIN_NOTES}-{pdmx.MAX_NOTES} notes, range <= {pdmx.MAX_RANGE} semitones, "
                   f"at most {pdmx.MAX_DROPPED_SHARE:.0%} of the track's notes dropped, no first bar that is a pickup "
-                  f"padded with silence ({pdmx.PADDED_PICKUP_REST} beat or more, and at least as long as the bar's notes); render with excerpt "
+                  f"padded with silence ({pdmx.PADDED_PICKUP_REST} beat or more, and at least as long as the bar's notes), "
+                  f"no rest of {pdmx.MOVED_TUNE_REST} beats or more while another staff of the melody's part plays the tune "
+                  "(then the part's staves are read as one part); render with excerpt "
                   f"from the first note to the end of the whole bars that fit in {pdmx.EXCERPT_BEATS} beats from its bar, "
                   f"and the score's tempo within {pdmx.MIN_BPM}-{pdmx.MAX_BPM} bpm"),
         "bar": BAR,
     }
-    report = args.titles.with_name(args.titles.stem + ".report")
     write_report(report, run, songs)
     passed = sum(s["result"] == "pass" for s in songs)
     print(f"{passed} of {len(songs)} titles pass; report: {rel(report)}.md")

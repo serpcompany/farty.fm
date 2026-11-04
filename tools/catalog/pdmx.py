@@ -55,6 +55,7 @@ MIN_NOTES, MAX_NOTES = 8, 64
 MAX_RANGE = 19  # semitones, an octave and a fifth
 MAX_DROPPED_SHARE = 0.10  # chord tones and inner-voice onsets the importer drops, of the track's notes
 PADDED_PICKUP_REST = 1  # beats of silence after a first bar's notes that make it a padded pickup
+MOVED_TUNE_REST = 2  # beats: a rest this long while another staff of the melody's part plays the tune (#380)
 GRID = 1 / 48  # beats: the grid note times are compared on
 
 
@@ -351,6 +352,47 @@ def padded_pickup_problems(meters, notes, first_onset):
         return []
     beats = "beat" if _number(rest) == 1 else "beats"
     return [f"the first bar is a pickup padded with silence: every track rests {_number(rest)} {beats} after its notes"]
+
+
+def part_staves(tracks, track):
+    """The tracks of `track`'s part, in order. PDMX's MIDI writes each staff of a part as a track of
+    its own, with the part's name and channel, so a piano's two staves are two tracks named "Piano"
+    on one channel. Another part, a voice over its piano or a second violin, has a channel of its
+    own. `tracks` is {track: (name, channels)}, of the tracks with notes."""
+    return sorted(t for t, part in tracks.items() if part == tracks[track])
+
+
+def moved_tune_problems(notes, staff_notes, start_beat=0.0):
+    """The tune moving to another staff of its part, so the Song falls silent where the score plays
+    on (#380): Old MacDonald's score gives "had a farm" to the left hand. The melody fails when it
+    rests MOVED_TUNE_REST beats or more between two notes while another staff of its part plays a
+    line in the tune's register: the notes melody.py's skyline would take from that staff in the
+    rest, which the melody spans at most MAX_RANGE with. A bass line well below the tune is its
+    accompaniment, and a rest while another part plays, a voice's over its piano, is the score's.
+
+    `notes` is the melody's excerpt as (start, dur, pitch) from `start_beat` of the score, and
+    `staff_notes` the other staves' notes as (start, end, pitch) in the score's beats."""
+    pitches = [p for _, _, p in notes]
+    problems = []
+    for (s0, d0, _), (s1, _, _) in zip(notes, notes[1:]):
+        rest = _grid(s1 - s0 - d0)
+        line = staff_line(staff_notes, start_beat + s0 + d0, start_beat + s1)
+        if rest >= MOVED_TUNE_REST and line and max(pitches + line) - min(pitches + line) <= MAX_RANGE:
+            problems.append(f"the tune moves to another staff of its part: the melody rests {_number(round(rest, 2))} beats"
+                            f" from beat {_number(round(s0 + d0, 2))} while that staff plays")
+    return problems
+
+
+def staff_line(staff_notes, start, end):
+    """The pitches melody.py's sustain-aware skyline takes from `staff_notes` ((start, end, pitch))
+    at its onsets from `start` to before `end`: at each onset the highest sounding note, if it starts
+    there."""
+    line = []
+    for onset in sorted({s for s, _, _ in staff_notes if start - EPS <= s < end - EPS}):
+        pitch, begun = max((p, s) for s, e, p in staff_notes if s <= onset < e)
+        if begun == onset:
+            line.append(pitch)
+    return line
 
 
 def _grid(beats):

@@ -153,6 +153,11 @@ describe('the generator', () => {
       (g: GoldenSong) => ({ ...g, import_args: { ...g.import_args, max_beats: 99 } }),
       /render arguments/
     ],
+    [
+      'the tracks it reads',
+      (g: GoldenSong) => ({ ...g, import_args: { ...g.import_args, track: [0, 1] } }),
+      /render arguments/
+    ],
     ['its meter', (g: GoldenSong) => ({ ...g, beats_per_bar: 3 }), /another meter/],
     [
       'a note past its end',
