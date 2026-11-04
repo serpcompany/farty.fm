@@ -7776,17 +7776,6 @@
    "pdmx_list": "Misc tunes"
   },
   {
-   "id": "illumina-oculos-meos",
-   "title": "Illumina oculos meos",
-   "composer": "Unknown",
-   "composer_source": "https://thesession.org/tunes/search?q=Illumina%20oculos%20meos",
-   "session": null,
-   "page": null,
-   "pdmx_views": 267,
-   "pdmx_scores": 4,
-   "pdmx_list": null
-  },
-  {
    "id": "black-nag",
    "title": "The Black Nag",
    "composer": "Traditional",
@@ -18368,40 +18357,6 @@
    "pdmx_list": "Misc tunes"
   },
   {
-   "id": "moments-musicaux-opus-94-no-3-in-f-minor",
-   "title": "Moments Musicaux Opus 94 No. 3 in F minor",
-   "composer": "Franz Schubert",
-   "composer_source": "https://en.wikipedia.org/wiki/Six_moments_musicaux_(Schubert)",
-   "session": null,
-   "page": {
-    "url": "https://en.wikipedia.org/wiki/Six_moments_musicaux_%28Schubert%29",
-    "title": "Six moments musicaux (Schubert)",
-    "from": "composer_source",
-    "redirected": false,
-    "fragment": null,
-    "categories": [
-     "1823 compositions",
-     "Classical composition stubs",
-     "Compositions for solo piano",
-     "Compositions in A-flat major",
-     "Compositions in C-sharp minor",
-     "Compositions in C major",
-     "Compositions in F minor",
-     "Piano music by Franz Schubert"
-    ],
-    "instance_of": [
-     "musical work/composition"
-    ],
-    "genre": [],
-    "country": [],
-    "pageviews": 8567,
-    "title_page": null
-   },
-   "pdmx_views": 1738,
-   "pdmx_scores": 2,
-   "pdmx_list": null
-  },
-  {
    "id": "ave-maria-bach-gounod",
    "title": "Ave Maria Bach-Gounod",
    "composer": "Charles Gounod",
@@ -20124,17 +20079,6 @@
    "pdmx_views": 686,
    "pdmx_scores": 11,
    "pdmx_list": "Misc tunes"
-  },
-  {
-   "id": "though-philomela-lost-her-love",
-   "title": "Though Philomela lost her love",
-   "composer": "Thomas Morley",
-   "composer_source": "https://en.wikipedia.org/wiki/Thomas_Morley",
-   "session": null,
-   "page": null,
-   "pdmx_views": 683,
-   "pdmx_scores": 2,
-   "pdmx_list": null
   },
   {
    "id": "caro-mio-ben",

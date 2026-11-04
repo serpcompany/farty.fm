@@ -5,9 +5,7 @@
     8.0,
     12.0,
     16.0,
-    20.0,
-    24.0,
-    28.0
+    20.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -21,140 +19,185 @@
     "catalog_id": "summ-summ-summ",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 23,
+    "note_count": 32,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-summ-summ-summ.mid",
-    "tempo_changes_ignored": 1,
+    "tempo_changes_ignored": 0,
     "track_used": 0,
     "tracks_with_notes": [
-      0,
-      1
+      0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 23.895833333333332,
   "notes": [
     {
-      "dur": 2.0,
-      "pitch": 67,
+      "dur": 1.0,
+      "pitch": 79,
       "start": 0.0
     },
     {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 1.0
+    },
+    {
       "dur": 2.0,
-      "pitch": 65,
+      "pitch": 76,
       "start": 2.0
     },
     {
-      "dur": 4.0,
-      "pitch": 64,
+      "dur": 0.5,
+      "pitch": 74,
       "start": 4.0
     },
     {
-      "dur": 1.0,
-      "pitch": 62,
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 4.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 5.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 5.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 6.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
       "start": 8.0
     },
     {
-      "dur": 1.0,
-      "pitch": 64,
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 8.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
       "start": 9.0
     },
     {
-      "dur": 1.0,
-      "pitch": 65,
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 9.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
       "start": 10.0
     },
     {
-      "dur": 0.9583333333333334,
-      "pitch": 62,
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
       "start": 11.0
     },
     {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 11.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 12.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 13.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 14.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 14.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 15.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 15.5
+    },
+    {
       "dur": 1.0,
-      "pitch": 64,
+      "pitch": 79,
       "start": 16.0
     },
     {
       "dur": 1.0,
-      "pitch": 65,
+      "pitch": 77,
       "start": 17.0
     },
     {
-      "dur": 1.0,
-      "pitch": 67,
+      "dur": 2.0,
+      "pitch": 76,
       "start": 18.0
     },
     {
-      "dur": 1.0,
-      "pitch": 64,
-      "start": 19.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
+      "dur": 0.5,
+      "pitch": 74,
       "start": 20.0
     },
     {
-      "dur": 1.0,
-      "pitch": 64,
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 20.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
       "start": 21.0
     },
     {
-      "dur": 1.0,
-      "pitch": 65,
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 21.5
+    },
+    {
+      "dur": 1.8958333333333333,
+      "pitch": 72,
       "start": 22.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
-      "start": 23.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 64,
-      "start": 24.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 65,
-      "start": 25.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 67,
-      "start": 26.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 64,
-      "start": 27.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
-      "start": 28.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 64,
-      "start": 29.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 65,
-      "start": 30.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
-      "start": 31.0
     }
   ],
   "pitches": [
-    62,
-    64,
-    65,
-    67
+    72,
+    74,
+    76,
+    77,
+    79
   ],
-  "sha256": "bffc83a58bbf7ebe47161ddb05483356d0120b2b69b9b3c23b2347d906b9c010",
+  "sha256": "a2983b994b56d07157e51429ca9d11744820d6935555c3bdb06651909fd6c2e4",
   "title": "Summ Summ Summ"
 }

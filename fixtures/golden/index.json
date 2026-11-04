@@ -303,7 +303,7 @@
     },
     {
       "id": "old-macdonald",
-      "notes": 16,
+      "notes": 24,
       "title": "Old MacDonald Had a Farm",
       "transpose": {
         "full": -4,
@@ -719,11 +719,11 @@
     },
     {
       "id": "can-can",
-      "notes": 11,
+      "notes": 52,
       "title": "Can-Can",
       "transpose": {
-        "full": -6,
-        "small": -19
+        "full": -21,
+        "small": -27
       },
       "unlocked": {
         "full": true,
@@ -1317,15 +1317,15 @@
     },
     {
       "id": "grand-old-flag",
-      "notes": 23,
+      "notes": 36,
       "title": "You're a Grand Old Flag",
       "transpose": {
         "full": -6,
-        "small": -20
+        "small": -14
       },
       "unlocked": {
         "full": true,
-        "small": true
+        "small": false
       }
     },
     {

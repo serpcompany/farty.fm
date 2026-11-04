@@ -392,8 +392,9 @@ async function readPedos(page: Page, store: string, key: string | null): Promise
 /** A control a thumb can hit: at least 44 by 44 CSS pixels, as the iPhone's controls. */
 async function expectTappable(control: Locator) {
   const box = await control.boundingBox()
-  expect(box?.width ?? 0).toBeGreaterThanOrEqual(44)
-  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
+  // A 44 px control at a fractional position measures up to one float step short (44 - 2^-14).
+  expect(box?.width ?? 0).toBeGreaterThanOrEqual(44 - 0.01)
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44 - 0.01)
 }
 
 /** The MIDI note a name such as C♯3 stands for. */

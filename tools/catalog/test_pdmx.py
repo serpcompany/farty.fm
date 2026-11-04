@@ -437,6 +437,147 @@ class MelodyTrack(unittest.TestCase):
         self.assertEqual([n.pitch for n in m.notes[:5]], [64, 69, 67, 65, 64])  # E4 A4 G4 F4 E4
 
 
+def score(test, *tracks):
+    """A MIDI file of one track per (name, channel, notes), each note (start, dur, pitch) in beats, as
+    PDMX writes a score: a part's staves are tracks with its name and channel, and only the first sets
+    the program."""
+    import mido
+    mid, programmed = mido.MidiFile(ticks_per_beat=480), set()
+    for name, channel, notes in tracks:
+        trk = mido.MidiTrack([mido.MetaMessage("track_name", name=name)])
+        if channel not in programmed:
+            trk.append(mido.Message("program_change", channel=channel, program=0))
+            programmed.add(channel)
+        msgs = sorted([(round(s * 480), 1, p) for s, _, p in notes] + [(round((s + d) * 480), 0, p) for s, d, p in notes])
+        tick = 0
+        for t, on, p in msgs:
+            trk.append(mido.Message("note_on" if on else "note_off", channel=channel, note=p, velocity=80, time=t - tick))
+            tick = t
+        mid.tracks.append(trk)
+    path = temp_dir(test) / "score.mid"
+    mid.save(path)
+    return path
+
+
+def line(start, pitches, dur=1.0):
+    """Notes of one length, one after another from `start`."""
+    return [(start + i * dur, dur, p) for i, p in enumerate(pitches)]
+
+
+# A piano score like Old MacDonald's (#380): the right hand plays a phrase and rests while the left hand,
+# under it a held bass, answers with the tune's next phrase in its register.
+RIGHT_HAND = line(0, [72, 72, 72, 67, 69, 69]) + [(6, 2, 67)] + line(12, [76, 76, 74, 74]) + [(16, 4, 72), (24, 4, 72)]
+LEFT_HAND = [(0, 8, 48)] + line(8, [64, 64, 62, 62]) + [(12, 8, 48)] + line(20, [64, 64, 62, 62])
+
+
+class MovedTune(unittest.TestCase):
+    """The tune moving to another staff of the score, which left Songs silent where the score plays on (#380)."""
+
+    def test_a_parts_staves_share_its_name_and_channel(self):
+        tracks = {0: ("Piano", {0}), 1: ("Piano", {0}), 2: ("Voice", {1}), 3: ("Piano", {2}), 5: ("Piano", {0})}
+        self.assertEqual(pdmx.part_staves(tracks, 1), [0, 1, 5])
+        self.assertEqual(pdmx.part_staves(tracks, 2), [2])
+        self.assertEqual(pdmx.part_staves(tracks, 3), [3])  # a second piano
+
+    def test_a_voice_is_named_or_programmed_as_one(self):
+        self.assertTrue(pdmx.sung("Voice", {68}))  # Erlkönig's voice has an oboe's program
+        self.assertTrue(pdmx.sung("Soprano 2", {0}))
+        self.assertTrue(pdmx.sung("S.", set()))
+        self.assertTrue(pdmx.sung("Part_1", {53}))  # Voice Oohs
+        self.assertFalse(pdmx.sung("Alto Saxophone", {65}))
+        self.assertFalse(pdmx.sung("Bass", {33}))
+        self.assertTrue(pdmx.sung("Bass", {52}))
+        self.assertFalse(pdmx.sung("Piano", {0}))
+
+    def test_the_tune_can_move_to_another_staff_or_part(self):
+        piano, voice, violin2 = (("Piano", {0}), False), (("Voice", {1}), True), (("Violin", {3}), False)
+        self.assertEqual(pdmx.tune_staves({0: piano, 1: piano, 2: violin2}, 0),
+                         {1: ("another staff of its part", False), 2: ("another part (Violin)", True)})
+        # A voice resting while its piano plays is the score's rest; another voice can carry the tune.
+        self.assertEqual(pdmx.tune_staves({0: voice, 1: piano, 2: piano}, 0), {})
+        self.assertEqual(pdmx.tune_staves({0: voice, 1: (("Alto", {2}), True)}, 0), {1: ("another part (Alto)", True)})
+        self.assertEqual(pdmx.tune_staves({0: piano, 1: piano, 2: voice}, 0),
+                         {1: ("another staff of its part", False), 2: ("another part (Voice)", True)})
+        self.assertEqual(pdmx.tune_staves({0: ((" ", {0}), False), 4: (("", {2}), False)}, 0), {4: ("another part (track 4)", True)})
+
+    def moved(self, melody, staff_notes, start_beat=0.0, other_part=False):
+        where = "another part (Violin)" if other_part else "another staff of its part"
+        return [p for _, p in pdmx.moved_tune_problems(melody, {1: (where, other_part, staff_notes)}, start_beat)]
+
+    def test_a_rest_while_another_staff_plays_the_tune_fails(self):
+        melody = [(0, 1, 72), (1, 1, 67), (4, 1, 72)]
+        self.assertEqual(self.moved(melody, [(2, 3, 64), (3, 4, 62)]),
+                         ["the tune moves to another staff of its part: the melody rests 2 beats from beat 2 while that staff plays"])
+        # The excerpt starts at the score's beat 8.
+        self.assertEqual(len(self.moved(melody, [(10, 11, 64), (11, 12, 62)], start_beat=8)), 1)
+        self.assertEqual(self.moved(melody, [(2, 3, 64), (3, 4, 62)], start_beat=8), [])
+
+    def test_each_staff_that_plays_the_tune_is_named(self):
+        melody = [(0, 1, 72), (4, 1, 72)]
+        tune = [(1, 2, 64), (2, 3, 62)]
+        staves = {1: ("another staff of its part", False, [(1, 4, 40)]), 3: ("another part (Violin)", True, tune),
+                  4: ("another part (Flute)", True, tune)}
+        self.assertEqual(pdmx.moved_tune_problems(melody, staves), [
+            (3, "the tune moves to another part (Violin): the melody rests 3 beats from beat 1 while that staff plays"),
+            (4, "the tune moves to another part (Flute): the melody rests 3 beats from beat 1 while that staff plays"),
+        ])
+
+    def test_a_shorter_rest_passes(self):
+        self.assertEqual(self.moved([(0, 1, 72), (2.75, 1, 72)], [(1, 2.75, 64)]), [])
+        self.assertEqual(len(self.moved([(0, 1, 72), (3, 1, 72)], [(1, 3, 64)])), 1)
+
+    def test_a_rest_the_other_staff_is_silent_for_passes(self):
+        self.assertEqual(self.moved([(0, 1, 72), (4, 1, 72)], [(0, 1, 48), (4, 5, 48)]), [])
+
+    def test_a_bass_under_the_tune_is_its_accompaniment(self):
+        melody = [(0, 1, 72), (1, 1, 79), (4, 1, 72)]
+        self.assertEqual(self.moved(melody, [(2, 3, 59)]), [])  # 79 - 59: range 20
+        self.assertEqual(len(self.moved(melody, [(2, 3, 60)])), 1)
+
+    def test_another_parts_repeated_note_or_chords_are_its_accompaniment(self):
+        melody = [(0, 1, 72), (4, 1, 72)]
+        vamp = [(1, 2, 65), (2, 3, 65), (3, 4, 65)]  # Radetzky's guitar: one F4
+        self.assertEqual(self.moved(melody, vamp, other_part=True), [])
+        self.assertEqual(self.moved(melody, [(1, 2, 65)], other_part=True), [])
+        chords = [(s, s + 1, p) for s in (1, 2, 3) for p in (s + 60, s + 64)]
+        self.assertEqual(self.moved(melody, chords, other_part=True), [])
+        self.assertEqual(len(self.moved(melody, chords + [(3.5, 4, 67)], other_part=True)), 1)  # one onset isn't a chord
+        # The other hand of the melody's own instrument answers it even with one note (Summ, summ, summ).
+        self.assertEqual(len(self.moved(melody, [(1, 2, 65)])), 1)
+        self.assertEqual(len(self.moved(melody, chords)), 1)
+
+    def test_the_staffs_line_is_its_skyline(self):
+        # An inner voice under a held note starts no melody note, as in melody.py.
+        self.assertEqual(pdmx.staff_line([(0, 4, 72), (1, 2, 40), (2, 3, 64)], 0, 4), [72])
+        self.assertEqual(pdmx.staff_line([(0, 4, 72), (1, 2, 40)], 1, 4), [])
+        self.assertEqual(pdmx.staff_line([(1, 2, 40), (1, 2, 52), (2, 3, 64)], 0, 4), [52, 64])
+        self.assertEqual(pdmx.staff_line([(1, 2, 52), (4, 5, 64)], 0, 4), [52])  # before `end`
+
+    def test_score_tracks_reads_each_staff_and_its_part(self):
+        tracks = import_pdmx.score_tracks(score(self, ("Piano", 0, RIGHT_HAND), ("Piano", 0, LEFT_HAND),
+                                                ("Voice", 1, line(0, [60, 62]))))
+        self.assertEqual({t: part for t, (part, _) in tracks.items()},
+                         {0: ("Piano", frozenset({0})), 1: ("Piano", frozenset({0})), 2: ("Voice", frozenset({1}))})
+        self.assertEqual(tracks[1][1][:3], [(0.0, 8.0, 48), (8.0, 9.0, 64), (9.0, 10.0, 64)])
+
+    def test_load_midi_reads_a_parts_staves_as_one(self):
+        path = score(self, ("Piano", 0, RIGHT_HAND), ("Piano", 0, LEFT_HAND))
+        self.assertEqual([n.pitch for n in load_midi(path).notes], [72, 72, 72, 67, 69, 69, 67, 76, 76, 74, 74, 72, 72])
+        both = load_midi(path, track=[0, 1])
+        self.assertEqual(both.report["track_used"], [0, 1])
+        self.assertEqual([(n.start, n.pitch) for n in both.notes[6:12]],
+                         [(6.0, 67), (8.0, 64), (9.0, 64), (10.0, 62), (11.0, 62), (12.0, 76)])
+        self.assertEqual(len(both.notes), 21)
+        self.assertEqual(both.report["chord_tones_dropped"], 2)  # the bass under the right hand
+
+    def test_no_catalog_song_rests_while_another_staff_plays_the_tune(self):
+        for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
+            path = ROOT / "catalog" / entry["file"]
+            with self.subTest(song=entry["id"]):
+                moved, _ = import_pdmx.tune_moves(path, load_midi(path, **entry["render"]), entry["render"].get("start_beat", 0))
+                self.assertEqual(moved, [])
+
+
 class Extract(unittest.TestCase):
     def test_a_cached_file_cut_short_is_read_again_from_the_archive(self):
         tmp, data = temp_dir(self), SCORE.read_bytes()
@@ -524,6 +665,56 @@ class Gate(unittest.TestCase):
         self.assertEqual(r["gates"], dict.fromkeys(import_pdmx.GATES, "pass"))
         self.assertTrue(r["passed"])
         self.assertEqual(r["sha256"], sha256(data))
+
+    on_bar = {"within_50c_of_fart_pct": 100, "onsets_on_time_pct": 100, "notes_with_retrigger": 0}
+
+    def test_a_tune_that_moves_between_staves_is_read_from_both(self):
+        path = score(self, ("Piano", 0, RIGHT_HAND), ("Piano", 0, LEFT_HAND))
+        r, rendered = self.gate(path, sha256(path.read_bytes()), metrics=self.on_bar)
+        self.assertTrue(r["passed"] and rendered)
+        self.assertEqual(r["moved_tune"], [
+            "the tune moves to another staff of its part: the melody rests 4 beats from beat 8 while that staff plays",
+            "the tune moves to another staff of its part: the melody rests 4 beats from beat 20 while that staff plays",
+        ])
+        self.assertEqual(r["render"]["track"], [0, 1])
+        self.assertEqual(r["notes"], [[n.start, n.dur, n.pitch] for n in load_midi(path, **r["render"]).notes])
+        self.assertEqual(len(r["notes"]), 21)
+
+    def test_another_parts_line_leaves_the_melody_alone(self):
+        path = score(self, ("Voice", 0, RIGHT_HAND), ("Piano", 1, LEFT_HAND))
+        r, _ = self.gate(path, sha256(path.read_bytes()), metrics=self.on_bar)
+        self.assertTrue(r["passed"])
+        self.assertNotIn("moved_tune", r)
+        self.assertNotIn("track", r["render"])
+        self.assertEqual(len(r["notes"]), 13)
+
+    def test_a_tune_that_moves_to_another_part_is_read_from_both(self):
+        # Moments Musicaux's duet: the first violin rests while the second plays the tune.
+        path = score(self, ("Violin", 0, RIGHT_HAND), ("Violin", 1, [n for n in LEFT_HAND if n[2] != 48]))
+        r, _ = self.gate(path, sha256(path.read_bytes()), metrics=self.on_bar)
+        self.assertTrue(r["passed"])
+        self.assertEqual(r["moved_tune"][0],
+                         "the tune moves to another part (Violin): the melody rests 4 beats from beat 8 while that staff plays")
+        self.assertEqual(r["render"]["track"], [0, 1])
+        self.assertEqual(len(r["notes"]), 21)
+
+    def test_a_voice_that_rests_while_another_voice_sings_the_tune_is_read_from_both(self):
+        path = score(self, ("Soprano", 0, RIGHT_HAND), ("Alto", 1, [n for n in LEFT_HAND if n[2] != 48]),
+                     ("Piano", 2, line(8, [60, 62, 64, 65])))
+        r, _ = self.gate(path, sha256(path.read_bytes()), metrics=self.on_bar)
+        self.assertEqual(len(r["moved_tune"]), 2)
+        self.assertEqual(r["render"]["track"], [0, 1])
+
+    def test_staves_that_arent_one_line_fail_the_sanity_gate(self):
+        chords = [(s, 1, p) for s in range(8, 11) for p in (52, 55, 60, 64)] + [(11, 1, 62)]  # the tune as chords
+        path = score(self, ("Piano", 0, RIGHT_HAND), ("Piano", 0, [(0, 8, 48)] + chords + [(12, 8, 48)]))
+        r, rendered = self.gate(path, sha256(path.read_bytes()), metrics=self.on_bar)
+        self.assertFalse(r["passed"] or rendered)
+        self.assertEqual(r["gates"]["sanity"], [
+            "the tune moves to another staff of its part: the melody rests 4 beats from beat 8 while that staff plays",
+            "read from tracks 0, 1 as one, the importer dropped 11 chord tones and inner-voice onsets, 39% of the"
+            " track's notes (at most 10%)",
+        ])
 
 
 class PickScores(unittest.TestCase):
@@ -621,6 +812,27 @@ class WriteCatalog(unittest.TestCase):
         written = json.loads(files["catalog/catalog.json"])
         self.assertEqual([e["id"] for e in written], ["mary", "twinkle"])
         self.assertEqual(files["catalog/catalog.json"].decode(), json.dumps(written, indent=1, ensure_ascii=False))
+
+    def test_only_keeps_the_batchs_other_songs(self):
+        """--only: the batch's Songs it didn't import again stay as they were, in the titles file's order."""
+        gone = self.catalog[1]
+        entries = import_pdmx.write_catalog(self.path, self.catalog, self.batch, [self.pick("twinkle")], ARCHIVE,
+                                            keep=[gone], order=["twinkle", "gone"])
+        self.assertEqual([e["id"] for e in entries], ["twinkle"])
+        files = self.files()
+        self.assertEqual(json.loads(files["catalog/catalog.json"])[1:], [entries[0], gone])
+        self.assertEqual(files["catalog/midi/pdmx-gone.mid"], b"gone")
+
+    def test_only_keeps_the_report_rows_of_the_titles_it_didnt_import(self):
+        ts = titles("a | A\nb | B\nc | C")
+        rows = import_pdmx.report_songs(ts, [{"id": "b", "run": "this"}],
+                                        [{"id": "c", "run": "before"}, {"id": "b", "run": "before"}, {"id": "a", "run": "before"}])
+        self.assertEqual(rows, [{"id": "a", "run": "before"}, {"id": "b", "run": "this"}, {"id": "c", "run": "before"}])
+
+    def test_a_row_kept_from_before_adr_0012_gives_its_in50c(self):
+        self.assertEqual(import_pdmx.in50c_fart({"within_50c_of_fart_pct": 91.2}), "91.2%")
+        self.assertEqual(import_pdmx.in50c_fart({"within_50c_pct": 64.0}), "64.0% in50c")
+        self.assertEqual(import_pdmx.in50c_fart(None), "")
 
     def test_an_entry_that_imports_differently_changes_nothing(self):
         title, r, src = self.pick("twinkle")

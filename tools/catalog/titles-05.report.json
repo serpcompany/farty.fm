@@ -1,6 +1,9 @@
 {
  "titles": "tools/catalog/titles-05.txt",
- "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-05.txt --tries 5",
+ "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-05.txt --tries 5 --only moments-musicaux-opus-94-no-3-in-f-minor",
+ "only": [
+  "moments-musicaux-opus-94-no-3-in-f-minor"
+ ],
  "dataset": {
   "PDMX.csv": {
    "md5": "30392ccf38bb63ce70e7afae70f9c88c",
@@ -15,7 +18,7 @@
  },
  "library": "38 Recordings, 26 Melodic",
  "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 4 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
- "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
+ "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes), no rest of 2 beats or more while another staff of the score plays the tune (then the staves that carry it are read as one); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
   "onsets_on_time_pct": 95,
@@ -85,56 +88,47 @@
      "gates": {
       "license": "pass",
       "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
+      "sanity": [
+       "the tune moves to another part (Violin): the melody rests 4 beats from beat 4 while that staff plays",
+       "read from tracks 0, 1 as one, the importer dropped 148 chord tones and inner-voice onsets, 42% of the track's notes (at most 10%)"
+      ]
      },
-     "passed": true,
+     "passed": false,
      "sha256": "0a6b742f93322582dd0486883d1837487ef06d0b3b9279bb49be9e1244902627",
+     "moved_tune": [
+      "the tune moves to another part (Violin): the melody rests 4 beats from beat 4 while that staff plays"
+     ],
      "render": {
       "bpm": 120,
-      "start_beat": 4,
-      "max_beats": 32
+      "max_beats": 32,
+      "track": [
+       0,
+       1
+      ]
      },
      "import_report": {
-      "track_used": 0,
+      "track_used": [
+       0,
+       1
+      ],
       "tracks_with_notes": [
        0,
        1
       ],
-      "chord_tones_dropped": 5,
+      "chord_tones_dropped": 148,
       "inner_voice_onsets_dropped": 0,
       "overlaps_clipped": 0,
       "tempo_changes_ignored": 0,
-      "note_count": 22
+      "note_count": 32
      },
-     "track_notes": 168,
-     "range_semitones": 14,
-     "distinct_pitches": 8,
-     "pitch_coverage": "8 of 8",
-     "metrics": {
-      "notes": 22,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 32,
-      "within_50c_any_octave_pct": 32,
-      "median_abs_cents": 72.4,
-      "contour_pct": 71,
-      "distinct_recordings": 8,
-      "on_pitch_pct": 22,
-      "sounding_pct": 96,
-      "notes_mostly_silent": 0,
-      "transpose": -31,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 1.93
-     }
+     "track_notes": 202,
+     "range_semitones": 15,
+     "distinct_pitches": 9
     }
    ],
-   "result": "pass",
-   "reason": null,
-   "picked": "221661"
+   "result": "fail",
+   "reason": "none of the 2 best scores passed; the best: sanity: 82 notes (between 8 and 64); the importer dropped 220 chord tones and inner-voice onsets, 39% of the track's notes (at most 10%)",
+   "picked": null
   },
   {
    "id": "ave-maria-bach-gounod",
@@ -1698,13 +1692,65 @@
      "gates": {
       "license": "pass",
       "hash": "pass",
+      "sanity": [
+       "the tune moves to another staff of its part: the melody rests 6 beats from beat 10 while that staff plays",
+       "read from tracks 0, 1 as one part, the importer dropped 210 chord tones and inner-voice onsets, 44% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "fb9b0d91911c9372c76cff8e4ca8ae1a18166993b26fb2604971608dbc269d09",
+     "moved_tune": [
+      "the tune moves to another staff of its part: the melody rests 6 beats from beat 10 while that staff plays"
+     ],
+     "render": {
+      "bpm": 132,
+      "max_beats": 32,
+      "beats_per_bar": 4,
+      "track": [
+       0,
+       1
+      ]
+     },
+     "import_report": {
+      "track_used": [
+       0,
+       1
+      ],
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 176,
+      "inner_voice_onsets_dropped": 34,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 45
+     },
+     "track_notes": 262,
+     "range_semitones": 15,
+     "distinct_pitches": 12
+    },
+    {
+     "score_id": "1747271",
+     "url": "https://musescore.com/score/1747271",
+     "score_title": "Bourrée in E minor (Lute suite)(v2)",
+     "match": "title head",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "687",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/17/20/QmZF3hUNQtx7CtDqrDyuaE9ho6ZC5NQyxC3g4DZkMKtj9P.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
       "sanity": "pass",
       "render": "pass"
      },
      "passed": true,
-     "sha256": "fb9b0d91911c9372c76cff8e4ca8ae1a18166993b26fb2604971608dbc269d09",
+     "sha256": "cf3587d3a6a9fdbbf6053ace1ab4c3e590d7a3e0285e935643260854cbafdb47",
      "render": {
-      "bpm": 132,
+      "bpm": 120,
       "max_beats": 32,
       "beats_per_bar": 4
      },
@@ -1718,36 +1764,36 @@
       "inner_voice_onsets_dropped": 0,
       "overlaps_clipped": 0,
       "tempo_changes_ignored": 1,
-      "note_count": 30
+      "note_count": 45
      },
-     "track_notes": 164,
-     "range_semitones": 8,
-     "distinct_pitches": 8,
-     "pitch_coverage": "8 of 8",
+     "track_notes": 258,
+     "range_semitones": 15,
+     "distinct_pitches": 12,
+     "pitch_coverage": "12 of 12",
      "metrics": {
-      "notes": 30,
+      "notes": 45,
       "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
-      "notes_with_second_burst": 2,
+      "notes_with_second_burst": 3,
       "pitch_readable_pct": 100,
-      "within_50c_pct": 0,
-      "within_50c_any_octave_pct": 0,
-      "median_abs_cents": 107.6,
-      "contour_pct": 66,
-      "distinct_recordings": 8,
-      "on_pitch_pct": 6,
-      "sounding_pct": 94,
+      "within_50c_pct": 4,
+      "within_50c_any_octave_pct": 4,
+      "median_abs_cents": 112.6,
+      "contour_pct": 81,
+      "distinct_recordings": 12,
+      "on_pitch_pct": 16,
+      "sounding_pct": 96,
       "notes_mostly_silent": 0,
-      "transpose": -7,
+      "transpose": -19,
       "octave_moves": 0,
-      "max_abs_shift_semitones": 1.83
+      "max_abs_shift_semitones": 2.97
      }
     }
    ],
    "result": "pass",
    "reason": null,
-   "picked": "1717176"
+   "picked": "1747271"
   },
   {
    "id": "ut-queant-laxis",
@@ -7299,56 +7345,48 @@
      "gates": {
       "license": "pass",
       "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
+      "sanity": [
+       "the tune moves to another staff of its part: the melody rests 3 beats from beat 21 while that staff plays",
+       "read from tracks 0, 1 as one part, the importer dropped 174 chord tones and inner-voice onsets, 51% of the track's notes (at most 10%)"
+      ]
      },
-     "passed": true,
+     "passed": false,
      "sha256": "c7ce47f1d5ddab63383da934959c96503cd4b61c912b380097728e23920aaa44",
+     "moved_tune": [
+      "the tune moves to another staff of its part: the melody rests 3 beats from beat 21 while that staff plays"
+     ],
      "render": {
       "bpm": 140,
-      "max_beats": 30
+      "max_beats": 30,
+      "track": [
+       0,
+       1
+      ]
      },
      "import_report": {
-      "track_used": 0,
+      "track_used": [
+       0,
+       1
+      ],
       "tracks_with_notes": [
        0,
        1,
        2
       ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
+      "chord_tones_dropped": 148,
+      "inner_voice_onsets_dropped": 26,
       "overlaps_clipped": 0,
       "tempo_changes_ignored": 0,
-      "note_count": 17
+      "note_count": 18
      },
-     "track_notes": 156,
+     "track_notes": 168,
      "range_semitones": 7,
-     "distinct_pitches": 5,
-     "pitch_coverage": "5 of 5",
-     "metrics": {
-      "notes": 17,
-      "within_50c_of_fart_pct": 100,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "notes_with_second_burst": 1,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 29,
-      "within_50c_any_octave_pct": 29,
-      "median_abs_cents": 137.4,
-      "contour_pct": 100,
-      "distinct_recordings": 5,
-      "on_pitch_pct": 21,
-      "sounding_pct": 98,
-      "notes_mostly_silent": 0,
-      "transpose": -28,
-      "octave_moves": 0,
-      "max_abs_shift_semitones": 2.83
-     }
+     "distinct_pitches": 5
     }
    ],
-   "result": "pass",
-   "reason": null,
-   "picked": "5787358"
+   "result": "fail",
+   "reason": "none of the 1 best scores passed; the best: sanity: the tune moves to another staff of its part: the melody rests 3 beats from beat 21 while that staff plays; read from tracks 0, 1 as one part, the importer dropped 174 chord tones and inner-voice onsets, 51% of the track's notes (at most 10%)",
+   "picked": null
   },
   {
    "id": "caro-mio-ben",
@@ -14525,11 +14563,62 @@
      "gates": {
       "license": "pass",
       "hash": "pass",
+      "sanity": [
+       "the tune moves to another staff of its part: the melody rests 4.04 beats from beat 11.96 while that staff plays",
+       "read from tracks 0, 1 as one part, the importer dropped 16 chord tones and inner-voice onsets, 33% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "bffc83a58bbf7ebe47161ddb05483356d0120b2b69b9b3c23b2347d906b9c010",
+     "moved_tune": [
+      "the tune moves to another staff of its part: the melody rests 4.04 beats from beat 11.96 while that staff plays"
+     ],
+     "render": {
+      "bpm": 120,
+      "max_beats": 32,
+      "track": [
+       0,
+       1
+      ]
+     },
+     "import_report": {
+      "track_used": [
+       0,
+       1
+      ],
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 16,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 24
+     },
+     "track_notes": 32,
+     "range_semitones": 7,
+     "distinct_pitches": 5
+    },
+    {
+     "score_id": "6122328",
+     "url": "https://musescore.com/score/6122328",
+     "score_title": "ãããããã",
+     "match": "song name",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "183",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/11/18/QmTEoBbRhPbubPMUi7vrvFB9idThvsd2h6wam27zhj4SmY.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
       "sanity": "pass",
       "render": "pass"
      },
      "passed": true,
-     "sha256": "bffc83a58bbf7ebe47161ddb05483356d0120b2b69b9b3c23b2347d906b9c010",
+     "sha256": "a2983b994b56d07157e51429ca9d11744820d6935555c3bdb06651909fd6c2e4",
      "render": {
       "bpm": 120,
       "max_beats": 32
@@ -14537,43 +14626,42 @@
      "import_report": {
       "track_used": 0,
       "tracks_with_notes": [
-       0,
-       1
+       0
       ],
       "chord_tones_dropped": 0,
       "inner_voice_onsets_dropped": 0,
       "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 23
+      "tempo_changes_ignored": 0,
+      "note_count": 32
      },
-     "track_notes": 30,
-     "range_semitones": 5,
-     "distinct_pitches": 4,
-     "pitch_coverage": "4 of 4",
+     "track_notes": 32,
+     "range_semitones": 7,
+     "distinct_pitches": 5,
+     "pitch_coverage": "5 of 5",
      "metrics": {
-      "notes": 23,
+      "notes": 32,
       "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
-      "notes_with_second_burst": 0,
+      "notes_with_second_burst": 4,
       "pitch_readable_pct": 100,
-      "within_50c_pct": 0,
-      "within_50c_any_octave_pct": 0,
-      "median_abs_cents": 217.4,
-      "contour_pct": 73,
-      "distinct_recordings": 4,
-      "on_pitch_pct": 4,
-      "sounding_pct": 98,
+      "within_50c_pct": 6,
+      "within_50c_any_octave_pct": 6,
+      "median_abs_cents": 117.6,
+      "contour_pct": 81,
+      "distinct_recordings": 5,
+      "on_pitch_pct": 16,
+      "sounding_pct": 93,
       "notes_mostly_silent": 0,
-      "transpose": -19,
+      "transpose": -20,
       "octave_moves": 0,
-      "max_abs_shift_semitones": 2.83
+      "max_abs_shift_semitones": 1.23
      }
     }
    ],
    "result": "pass",
    "reason": null,
-   "picked": "5908191"
+   "picked": "6122328"
   },
   {
    "id": "charlie-is-my-darling",

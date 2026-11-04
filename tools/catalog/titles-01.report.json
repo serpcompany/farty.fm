@@ -1,23 +1,27 @@
 {
  "titles": "tools/catalog/titles-01.txt",
- "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-01.txt --tries 5",
+ "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-01.txt --tries 5 --only old-macdonald,can-can",
+ "only": [
+  "old-macdonald",
+  "can-can"
+ ],
  "dataset": {
   "PDMX.csv": {
    "md5": "30392ccf38bb63ce70e7afae70f9c88c",
    "published_md5": "30392ccf38bb63ce70e7afae70f9c88c",
-   "downloaded": "2026-10-21"
+   "downloaded": "2026-10-25"
   },
   "mid.tar.gz": {
    "md5": "d920a21b2fcd99a56d9c381b39debbb2",
    "published_md5": "d920a21b2fcd99a56d9c381b39debbb2",
-   "downloaded": "2026-10-21"
+   "downloaded": "2026-10-25"
   }
  },
- "library": "23 Recordings, 9 Melodic",
- "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; then the highest rating, the most views; up to 5 scores tried per title, best first",
- "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped; render with excerpt <= 32 beats of whole bars and the score's tempo within 72-144 bpm",
+ "library": "38 Recordings, 26 Melodic",
+ "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 4 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
+ "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes), no rest of 2 beats or more while another staff of the melody's part plays the tune (then the part's staves are read as one part); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
  "bar": {
-  "within_50c_pct": 94,
+  "within_50c_of_fart_pct": 94,
   "onsets_on_time_pct": 95,
   "notes_with_retrigger": 0
  },
@@ -248,13 +252,22 @@
      },
      "passed": true,
      "sha256": "4e3da94bb35a4eda0975b7d7d82708236c8dcbd8177c8a2d0b3e2926fbf4e756",
+     "moved_tune": [
+      "the tune moves to another staff of its part: the melody rests 9.15 beats from beat 6.85 while that staff plays"
+     ],
      "render": {
       "bpm": 120,
-      "start_beat": 8,
-      "max_beats": 32
+      "max_beats": 32,
+      "track": [
+       0,
+       1
+      ]
      },
      "import_report": {
-      "track_used": 0,
+      "track_used": [
+       0,
+       1
+      ],
       "tracks_with_notes": [
        0,
        1
@@ -263,24 +276,30 @@
       "inner_voice_onsets_dropped": 0,
       "overlaps_clipped": 0,
       "tempo_changes_ignored": 0,
-      "note_count": 16
+      "note_count": 24
      },
-     "track_notes": 33,
-     "range_semitones": 4,
-     "distinct_pitches": 3,
-     "pitch_coverage": "3 of 3",
+     "track_notes": 54,
+     "range_semitones": 9,
+     "distinct_pitches": 5,
+     "pitch_coverage": "5 of 5",
      "metrics": {
-      "notes": 16,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 100,
-      "within_50c_any_octave_pct": 100,
-      "median_abs_cents": 17.6,
+      "notes": 24,
+      "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
-      "distinct_recordings": 3,
-      "transpose": -5,
+      "notes_with_second_burst": 6,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 71,
+      "within_50c_any_octave_pct": 71,
+      "median_abs_cents": 19.9,
+      "contour_pct": 83,
+      "distinct_recordings": 5,
+      "on_pitch_pct": 45,
+      "sounding_pct": 94,
+      "notes_mostly_silent": 0,
+      "transpose": -4,
       "octave_moves": 0,
-      "max_abs_shift_semitones": 1.17
+      "max_abs_shift_semitones": 1.57
      }
     }
    ],
@@ -3835,11 +3854,9 @@
       "license": "pass",
       "hash": "pass",
       "sanity": "pass",
-      "render": [
-       "in50c 75% < 94%"
-      ]
+      "render": "pass"
      },
-     "passed": false,
+     "passed": true,
      "sha256": "81bad1b32bdf00d71cf3c7652884f12b987ccfae68685dfe539b437ee6e784d7",
      "render": {
       "bpm": 120,
@@ -3862,76 +3879,28 @@
      "pitch_coverage": "8 of 8",
      "metrics": {
       "notes": 52,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 75,
-      "within_50c_any_octave_pct": 75,
-      "median_abs_cents": 7.4,
+      "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
+      "notes_with_second_burst": 0,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 38,
+      "within_50c_any_octave_pct": 38,
+      "median_abs_cents": 72.4,
+      "contour_pct": 92,
       "distinct_recordings": 8,
-      "transpose": -16,
-      "octave_moves": 3,
-      "max_abs_shift_semitones": 10.97
-     }
-    },
-    {
-     "score_id": "5983155",
-     "url": "https://musescore.com/score/5983155",
-     "score_title": "Can-Can - Offenbach",
-     "match": "title head",
-     "rating": "4.14",
-     "n_ratings": "4",
-     "n_views": "325",
-     "license": "cc-zero",
-     "n_tracks": "1",
-     "dataset_path": "./mid/14/25/QmWiYmyGdR57srpmX1LC6NQMGmvqrAhCZzxmkxQ43rKSkJ.mid",
-     "gates": {
-      "license": "pass",
-      "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
-     },
-     "passed": true,
-     "sha256": "636ba993f94a80a44ea4a0e452118678f2a6129fb05b6c7f92752fa60d094f79",
-     "render": {
-      "bpm": 120,
-      "start_beat": 8,
-      "max_beats": 32
-     },
-     "import_report": {
-      "track_used": 0,
-      "tracks_with_notes": [
-       0,
-       1
-      ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 0,
-      "overlaps_clipped": 0,
-      "tempo_changes_ignored": 0,
-      "note_count": 11
-     },
-     "track_notes": 17,
-     "range_semitones": 8,
-     "distinct_pitches": 6,
-     "pitch_coverage": "6 of 6",
-     "metrics": {
-      "notes": 11,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 100,
-      "within_50c_any_octave_pct": 100,
-      "median_abs_cents": 2.6,
-      "onsets_on_time_pct": 100,
-      "notes_with_retrigger": 0,
-      "distinct_recordings": 6,
-      "transpose": -6,
-      "octave_moves": 1,
-      "max_abs_shift_semitones": 12.77
+      "on_pitch_pct": 35,
+      "sounding_pct": 94,
+      "notes_mostly_silent": 0,
+      "transpose": -21,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.97
      }
     }
    ],
    "result": "pass",
    "reason": null,
-   "picked": "5983155"
+   "picked": "5942150"
   }
  ]
 }
