@@ -1,0 +1,57 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Compose categories mockup</title><style>
+:root { --bg:#fff; --fg:#252525; --muted:#f7f7f7; --mfg:#8e8e8e; --border:#ebebeb; --primary:#343434; --pfg:#fbfbfb; }
+* { box-sizing:border-box; }
+body { margin:0; width:390px; background:var(--bg); color:var(--fg);
+  font:16px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; }
+.wrap { padding:0 16px 24px; }
+h1 { font-size:30px; font-weight:700; letter-spacing:-.02em; margin:0; padding:16px 0 4px; }
+.search { height:44px; border-radius:10px; background:#f3f3f3; color:var(--mfg); display:flex; align-items:center;
+  padding-left:36px; position:relative; font-size:16px; }
+.search:before { content:"⌕"; position:absolute; left:12px; top:9px; font-size:18px; }
+.chips { display:flex; gap:8px; height:44px; align-items:center; white-space:nowrap; }
+.scroll { overflow:hidden; margin-right:-16px; }
+.chip { display:inline-flex; align-items:center; height:34px; padding:0 12px; border:1px solid var(--border);
+  border-radius:999px; font-size:14px; flex-shrink:0; }
+.chip.on { background:var(--primary); color:var(--pfg); border-color:var(--primary); }
+.new { outline:2px dashed #e5a50a; outline-offset:2px; border-radius:6px; }
+.label { font-size:12px; color:var(--mfg); padding:12px 16px 6px; }
+ul { list-style:none; margin:0; padding:0; border-radius:14px; background:var(--muted); overflow:hidden; }
+.row { display:flex; align-items:center; gap:8px; padding:10px 4px 10px 16px; border-top:1px solid var(--border); }
+.row:first-child { border-top:0; }
+.lines { display:flex; flex-direction:column; flex:1; min-width:0; }
+.lines span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.c, .f { font-size:14px; color:var(--mfg); }
+.heart { width:44px; text-align:center; color:var(--mfg); font-size:20px; }
+.chev { color:var(--mfg); width:16px; }
+.note { font-size:12px; color:#9a6700; margin:4px 0 0; }
+</style></head><body><div class="wrap">
+<h1>Compose</h1>
+<div class="search">Search Songs or composers</div>
+<div class="chips"><span class="chip">⇅ Most popular ⌄</span><span class="chip">Ready</span><span class="chip">♡</span></div>
+<div class="new"><div class="scroll"><div class="chips"><span class="chip on">Well known</span><span class="chip">Christmas</span><span class="chip">Kids</span><span class="chip">Hymns</span><span class="chip">Anthems</span><span class="chip">Classical</span><span class="chip">Songs</span><span class="chip">Fiddle tunes</span></div></div></div>
+<p class="note">New: one row of Kind chips, one choice at a time, scrolls sideways. Tap the chosen chip again for all Songs.</p>
+<div class="label">Well known · 218</div>
+<ul><li class="row"><div class="lines"><span class="t">Happy Birthday</span>
+<span class="c">Mildred J. Hill and Patty Hill</span>
+<span class="f">8 notes · 120 BPM · 12 s</span></div>
+<span class="heart">♡</span><span class="chev">›</span></li><li class="row"><div class="lines"><span class="t">Dance of the Sugar Plum Fairy</span>
+<span class="c">Pyotr Ilyich Tchaikovsky</span>
+<span class="f">8 notes · 110 BPM · 16 s</span></div>
+<span class="heart">♡</span><span class="chev">›</span></li><li class="row"><div class="lines"><span class="t">Amazing Grace</span>
+<span class="c">Traditional (American)</span>
+<span class="f">6 notes · 100 BPM · 14 s</span></div>
+<span class="heart">♡</span><span class="chev">›</span></li><li class="row"><div class="lines"><span class="t">The Star-Spangled Banner</span>
+<span class="c">John Stafford Smith</span>
+<span class="f">9 notes · 120 BPM · 16 s</span></div>
+<span class="heart">♡</span><span class="chev">›</span></li><li class="row"><div class="lines"><span class="t">Auld Lang Syne</span>
+<span class="c">Traditional (Scottish)</span>
+<span class="f">7 notes · 100 BPM · 19 s</span></div>
+<span class="heart">♡</span><span class="chev">›</span></li><li class="row"><div class="lines"><span class="t">In the Hall of the Mountain King</span>
+<span class="c">Edvard Grieg</span>
+<span class="f">9 notes · 120 BPM · 16 s</span></div>
+<span class="heart">♡</span><span class="chev">›</span></li><li class="row"><div class="lines"><span class="t">Twinkle, Twinkle, Little Star</span>
+<span class="c">Traditional (French)</span>
+<span class="f">6 notes · 110 BPM · 17 s</span></div>
+<span class="heart">♡</span><span class="chev">›</span></li></ul>
+</div></body></html>
