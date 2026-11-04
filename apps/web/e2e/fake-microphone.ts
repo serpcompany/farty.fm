@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { expect, type Page } from '@playwright/test'
+import type { Recording } from '../src/lib/recordings'
 
 // A microphone a spec controls: it plays a fart as the person presses Record, so the fart starts
 // with the tap, after the app's microphone is open, as a person's does. Chromium's own fake
@@ -265,5 +266,23 @@ export function savedTake(page: Page): Promise<{ samples: number[]; sampleRate: 
     const length = wav.getUint32(at + 4, true) / 2
     const samples = Array.from({ length }, (_, i) => wav.getInt16(at + 8 + 2 * i, true) / 0x8000)
     return { samples, sampleRate }
+  })
+}
+
+/** Every saved Recording as the app stored it (with its own analysis), oldest first. */
+export function storedRecordings(page: Page): Promise<Recording[]> {
+  return page.evaluate(async () => {
+    const database = await new Promise<IDBDatabase>((done, fail) => {
+      const request = indexedDB.open('pedos')
+      request.onsuccess = () => done(request.result)
+      request.onerror = () => fail(request.error)
+    })
+    const all = await new Promise<Recording[]>((done, fail) => {
+      const request = database.transaction('recordings').objectStore('recordings').getAll()
+      request.onsuccess = () => done(request.result)
+      request.onerror = () => fail(request.error)
+    })
+    database.close()
+    return all.sort((a, b) => a.number - b.number)
   })
 }
