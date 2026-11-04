@@ -41,7 +41,7 @@ const SHORTEST_HELD_SECONDS = 0.03
 
 /** The piano playing, or null. */
 let current: {
-  context: BaseAudioContext
+  context: AudioContext
   /** Stops what's scheduled, and reports the end unless `report` is false. Once. */
   end: (report?: boolean) => void
   /** Where it is in the notes, in seconds; null until its first note is scheduled. */
@@ -171,8 +171,8 @@ export function pianoPosition(): number | null {
  * The output's latency, which the clock runs ahead of the speaker by, where the browser reports
  * it, as `playbackPosition` takes it off.
  */
-function outputLatency(context: BaseAudioContext): number {
-  const reported = 'outputLatency' in context ? Number(context.outputLatency) : 0
+function outputLatency(context: AudioContext): number {
+  const reported = Number(context.outputLatency ?? 0)
   return Number.isFinite(reported) && reported > 0 ? reported : 0
 }
 

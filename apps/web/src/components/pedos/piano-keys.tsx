@@ -193,10 +193,14 @@ const MOST_BUILT = 16
  * few ms on the main thread, so the melody pays it once per note (#359). A context's sample rate
  * never changes, and a context replaced after a hide (`audioContext()`) takes its notes with it.
  */
-const built = new WeakMap<BaseAudioContext, Map<number, AudioBuffer>>()
+const built = new WeakMap<AudioContext, Map<number, AudioBuffer>>()
 
-/** `pianoNote(midi, context.sampleRate)` as an AudioBuffer on `context`, built once. */
-export function pianoBuffer(context: BaseAudioContext, midi: number): AudioBuffer {
+/**
+ * `pianoNote(midi, context.sampleRate)` as an AudioBuffer on `context`, built once. Only the live
+ * `AudioContext` takes one, as `strikePianoNote` does: an `OfflineAudioContext` doesn't type, so
+ * the piano can't be struck into a render (ADR 0015 rule 3).
+ */
+export function pianoBuffer(context: AudioContext, midi: number): AudioBuffer {
   let notes = built.get(context)
   if (!notes) {
     notes = new Map()
@@ -221,7 +225,7 @@ export function pianoBuffer(context: BaseAudioContext, midi: number): AudioBuffe
  * Song's melody on piano (`piano-preview.ts`, #359) strikes it ahead of time.
  */
 export function strikePianoNote(
-  context: BaseAudioContext,
+  context: AudioContext,
   output: AudioNode,
   midi: number,
   t: number
