@@ -11,7 +11,7 @@ Agents run every `gh` command, and every `git` command that reaches GitHub, as s
 
 ## 1. Start the app
 
-Use your own port so parallel agents don't collide. The examples use 4109.
+Use your own port so parallel agents don't collide: `lsof -nP -iTCP:<port> -sTCP:LISTEN` must print nothing before you start. The examples use 4109.
 
 - **Inner loop:** `pnpm dev` (http://localhost:3000, no gate). `pnpm test:e2e` starts its own `next dev` on `E2E_PORT` (default 3100).
 - **Tap-through, on the local Workers build behind the Staging gate:**
@@ -35,7 +35,15 @@ Write a throwaway spec, `e2e/shot.spec.ts` (delete it before committing), that d
 
 ## 5. Clean up
 
-Stop the preview: `pkill -f 'preview --env staging --port 4109'`. Leave `tmp/agent/` for the PR; `.dev.vars` and `tmp/` are git-ignored.
+Stop only your own preview, from `apps/web`. The port's listener is `workerd`, and its parent stops the whole chain; stopping `workerd` alone leaves the rest running. The folder check leaves another session's server alone.
+
+```sh
+for p in $(lsof -nP -t -iTCP:4109 -sTCP:LISTEN); do
+  if [ "$(lsof -a -p $p -d cwd -Fn | sed -n 's/^n//p')" = "$(pwd -P)" ]; then kill $(ps -o ppid= -p $p); fi
+done
+```
+
+It's stopped when `lsof -nP -iTCP:4109 -sTCP:LISTEN` prints nothing. Leave `tmp/agent/` for the PR; `.dev.vars` and `tmp/` are git-ignored.
 
 ## Finish
 
