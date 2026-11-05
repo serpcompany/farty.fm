@@ -31,7 +31,8 @@ const [anthem, irishTune] = catalog.slice(12)
 
 const page = vi.hoisted(() => ({
   unlocked: new Set<string>(),
-  favorites: new Set<string>() as ReadonlySet<string> | null
+  favorites: new Set<string>() as ReadonlySet<string> | null,
+  fartChoices: new Map() as ReadonlyMap<string, unknown> | null
 }))
 
 vi.mock('./pedos-provider', () => ({
@@ -58,6 +59,7 @@ vi.mock('./favorite-button', () => ({
   useFavorites: () => page.favorites,
   FavoriteButton: () => null
 }))
+vi.mock('./use-fart-choices', () => ({ useFartChoices: () => page.fartChoices }))
 vi.mock('./locked-song-sheet', () => ({ LockedSongSheet: () => null }))
 vi.mock('./report-song-sheet', () => ({ ReportSongSheet: () => null }))
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: () => {} }) }))
@@ -73,6 +75,7 @@ beforeEach(() => {
   localStorage.clear()
   page.unlocked = new Set(['twinkle', 'mary', 'jingle', 'saints'])
   page.favorites = new Set()
+  page.fartChoices = new Map()
   const container = document.createElement('div')
   document.body.appendChild(container)
   root = createRoot(container)
@@ -155,6 +158,13 @@ it('shows Kind, Show and Sort in one row, nothing filled, and every Song', async
   expect(clearButtons()).toEqual([])
   expect(shown()).toHaveLength(catalog.length)
   expect(document.body.textContent).toContain('Sound Pad')
+})
+
+it('shows no Song until the Fart Choices are read, which can lock one (#372)', async () => {
+  page.fartChoices = null
+  await show()
+  expect(shown()).toEqual([])
+  expect(document.querySelector('[data-slot="spinner"], [role="status"]')).not.toBeNull()
 })
 
 it('chooses several kinds in a menu that stays open, and its top row turns them all off', async () => {

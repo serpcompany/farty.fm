@@ -7,9 +7,9 @@ import { onLibraryChanged } from '@/lib/library-sync'
 import { reportError } from '@/lib/telemetry/errors'
 import { openVisit } from '@/lib/visit'
 
-// The Fart Choices (#360) for Song Creator, as `favorite-button.tsx` holds the Favorite Songs:
-// read once the visit has opened the library, again on each change (a change here, another tab's,
-// a sync's, a sign-out's), and changed on screen at once.
+// The Fart Choices (#360) for Song Creator and Pitch Coverage (#372), as `favorite-button.tsx`
+// holds the Favorite Songs: read once the visit has opened the library, again on each change (a
+// change here, another tab's, a sync's, a sign-out's), and changed on screen at once.
 
 /** Every changed Song's Fart Choices, by Song id, or null until they're read. */
 type AllChoices = ReadonlyMap<string, FartChoices> | null
