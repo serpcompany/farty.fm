@@ -272,8 +272,8 @@ class HeldNote(unittest.TestCase):
         self.assertEqual(held(CADENCE[:27] + [(29.0, 3.0)])["max_beats"], 29)  # of 2 beats
 
     def test_rule_britannia_stops_before_the_rest_its_left_hand_fills(self):
-        # The left hand plays the tune up to the held note, so taking it in alone would silence the
-        # 3 beats before it (#380). The Song keeps its bar-line excerpt (#394).
+        # The left hand plays on to the E4 that repeats the refrain, so taking it in alone would silence the
+        # 3 beats before it (#380). The Song keeps its bar-line excerpt and ends on the refrain's cadence (#394, #396).
         path = ROOT / "catalog/midi/pdmx-rule-britannia.mid"
         whole = load_midi(path)
         self.assertEqual([(n.start, n.dur) for n in whole.notes if 28 <= n.start < 35], [(28.0, 1.0), (32.0, 3.0)])
@@ -638,9 +638,17 @@ class MovedTune(unittest.TestCase):
             (4, "the tune moves to another part (Flute): the melody rests 3 beats from beat 1 while that staff plays"),
         ])
 
-    def test_a_shorter_rest_passes(self):
-        self.assertEqual(self.moved([(0, 1, 72), (2.75, 1, 72)], [(1, 2.75, 64)]), [])
-        self.assertEqual(len(self.moved([(0, 1, 72), (3, 1, 72)], [(1, 3, 64)])), 1)
+    def test_a_rest_of_a_beat_loses_the_other_hands_notes(self):
+        # Jesus Loves Me's right hand rested a beat six times while its left played the tune (#396).
+        self.assertEqual(self.moved([(0, 1, 72), (2, 1, 72)], [(1, 2, 64)]),
+                         ["the tune moves to another staff of its part: the melody rests 1 beat from beat 1 while that staff plays"])
+        self.assertEqual(self.moved([(0, 1, 72), (1.75, 1, 72)], [(1, 1.75, 64)]), [])
+
+    def test_another_part_fills_a_rest_under_two_beats(self):
+        # The melody's breath while that part accompanies or answers it (The Swan's baritone sax, #396).
+        answer = [(1, 2, 64), (2, 3, 62)]
+        self.assertEqual(self.moved([(0, 1, 72), (2.75, 1, 72)], answer, other_part=True), [])
+        self.assertEqual(len(self.moved([(0, 1, 72), (3, 1, 72)], answer, other_part=True)), 1)
 
     def test_a_rest_the_other_staff_is_silent_for_passes(self):
         self.assertEqual(self.moved([(0, 1, 72), (4, 1, 72)], [(0, 1, 48), (4, 5, 48)]), [])
@@ -685,6 +693,12 @@ class MovedTune(unittest.TestCase):
                          [(6.0, 67), (8.0, 64), (9.0, 64), (10.0, 62), (11.0, 62), (12.0, 76)])
         self.assertEqual(len(both.notes), 21)
         self.assertEqual(both.report["chord_tones_dropped"], 2)  # the bass under the right hand
+
+    def test_korobeiniki_picks_the_score_of_the_tune_people_know(self):
+        # That score's whole title is an alias, so it ranks with the plain titles and its rating wins (#396).
+        titles = pdmx.read_titles((ROOT / "tools/catalog/titles-02.txt").read_text())
+        names = next(t.names for t in titles if t.id == "korobeiniki")
+        self.assertEqual(pdmx.match_kind({"title": "Korobeiniki/Korobushka (Tetris Theme)"}, names), "title")
 
     def test_no_catalog_song_rests_while_another_staff_plays_the_tune(self):
         for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):

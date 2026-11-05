@@ -17,9 +17,10 @@ The rules and thresholds are in pdmx.py. The gates, in order:
   hash     the MIDI archive matches Zenodo's md5, and the extracted file the gates import and the
            catalog copy are byte for byte the archive's file
   sanity   the excerpt's note count and range, the share of notes the importer drops, no first
-           bar that is a pickup padded with silence, and no rest of 2 beats or more while another
-           staff of the score plays the tune: such a melody is read again from its staff and those
-           as one (#380), and passes only if that reading passes
+           bar that is a pickup padded with silence, and no rest of 1 beat or more while another
+           staff of its part plays the tune, or of 2 beats or more while another part does: such
+           a melody is read again from its staff and those as one (#380, #396), and passes only
+           if that reading passes
   render   unlocked with the full Fixture Library, and the renderer's bar on the reference render
            (ADR 0012, evaluate.BAR): in50cFart >= 94% (notes within 50 cents of their fart's
            own pitch), onTime >= 95%, no re-attacks. An excerpt that would take in the held note its
@@ -660,11 +661,12 @@ def main():
         "gates": (f"license; hash; sanity: {pdmx.MIN_NOTES}-{pdmx.MAX_NOTES} notes, range <= {pdmx.MAX_RANGE} semitones, "
                   f"at most {pdmx.MAX_DROPPED_SHARE:.0%} of the track's notes dropped, no first bar that is a pickup "
                   f"padded with silence ({pdmx.PADDED_PICKUP_REST} beat or more, and at least as long as the bar's notes), "
-                  f"no rest of {pdmx.MOVED_TUNE_REST} beats or more while another staff of the score plays the tune "
+                  f"no rest of {pdmx.MOVED_TUNE_REST} beat or more while another staff of its part plays the tune, or of "
+                  f"{pdmx.OTHER_PART_REST} beats or more while another part does "
                   "(then the staves that carry it are read as one); render with excerpt "
                   f"from the first note to the end of the whole bars that fit in {pdmx.EXCERPT_BEATS} beats from its bar, "
                   f"or of the held note ({pdmx.HELD_NOTE_BEATS} beats or more) on that closing bar line, when it ends within "
-                  f"{pdmx.EXCERPT_BEATS + pdmx.HELD_OVERRUN_BEATS} beats of the excerpt's start, no rest of {pdmx.MOVED_TUNE_REST} beats or more "
+                  f"{pdmx.EXCERPT_BEATS + pdmx.HELD_OVERRUN_BEATS} beats of the excerpt's start, no rest of {pdmx.HELD_NOTE_REST} beats or more "
                   "comes before it, and the full Fixture Library has a fart that lasts it, "
                   f"and the score's tempo within {pdmx.MIN_BPM}-{pdmx.MAX_BPM} bpm"),
         "bar": BAR,

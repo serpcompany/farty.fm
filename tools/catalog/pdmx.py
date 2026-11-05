@@ -50,6 +50,7 @@ NOT_THE_MELODY = {
 EXCERPT_BEATS = 32  # the whole bars that fit in 32 quarter-note beats: 8 bars of 4/4, 10 of 3/4
 HELD_NOTE_BEATS = 2  # a note this long on the excerpt's closing bar line ends its phrase: the excerpt keeps it (#389)
 HELD_OVERRUN_BEATS = 4  # how far past EXCERPT_BEATS that note may run to finish: the furthest any Song's needs (#394)
+HELD_NOTE_REST = 2  # beats: a rest this long before that note leaves it out, or the Song falls silent just before it ends (#394)
 MIN_BPM, MAX_BPM = 72, 144  # the score's own tempo, kept inside this range
 
 # Melody sanity: a clean single-line melody with nothing important dropped.
@@ -57,7 +58,8 @@ MIN_NOTES, MAX_NOTES = 8, 64
 MAX_RANGE = 19  # semitones, an octave and a fifth
 MAX_DROPPED_SHARE = 0.10  # chord tones and inner-voice onsets the importer drops, of the track's notes
 PADDED_PICKUP_REST = 1  # beats of silence after a first bar's notes that make it a padded pickup
-MOVED_TUNE_REST = 2  # beats: a rest this long while another staff of the score plays the tune (#380)
+MOVED_TUNE_REST = 1  # beats: a rest this long while another staff of the melody's part plays the tune (#380, #396)
+OTHER_PART_REST = 2  # beats: the same while another part plays it; a shorter one is a breath that part fills (#396)
 # A part that is a voice, so another part's line while it rests is its accompaniment's (#380): General
 # MIDI's Choir Aahs, Voice Oohs and Synth Voice, or a voice's name. PDMX often gives a voice another
 # program (Una furtiva lagrima's "Vocals" is a piano's 0, Erlkönig's "Voice" an oboe's 68). "Bass"
@@ -289,9 +291,9 @@ def held_note_end(notes, start, end):
     its phrase does (#389), or at `end`. Grand Old Flag's excerpt stopped on "the home of the free and
     the", and "brave" starts on its closing bar line. The note may run up to HELD_OVERRUN_BEATS past
     EXCERPT_BEATS from `start` to finish (#394), and the excerpt takes in only that note: none other
-    starts before its end. It must follow on from the melody: after a rest of MOVED_TUNE_REST beats or
-    more, the Song would fall silent just before its last note, where moved_tune_problems looks for
-    the tune on another staff, as Rule, Britannia!'s left hand plays it up to its held note.
+    starts before its end. It must follow on from the melody: after a rest of HELD_NOTE_REST beats or
+    more, the Song would fall silent just before its last note, as Rule, Britannia!'s would where its
+    left hand plays on to the E4 that repeats its refrain.
 
     `notes` is the melody's [(start, dur)] in beats, as melody.py reads them: a note's slot runs to
     the next onset unless a rest follows, and load_midi keeps each note that starts in the excerpt
@@ -302,7 +304,7 @@ def held_note_end(notes, start, end):
     held_end = held[0] + held[1]
     heard_until = max((s + d for s, d in notes if s < end - EPS), default=end)
     if (held_end > start + EXCERPT_BEATS + HELD_OVERRUN_BEATS + EPS
-            or end - heard_until > MOVED_TUNE_REST - EPS
+            or end - heard_until > HELD_NOTE_REST - EPS
             or any(end + EPS < s < held_end - EPS for s, _ in notes)):
         return end
     return held_end
@@ -434,8 +436,11 @@ def moved_tune_problems(notes, staves, start_beat=0.0):
     """The tune moving to another staff of the score, so the Song falls silent where the score plays
     on (#380): Old MacDonald's score gives "Old MacDonald had a farm" to the piano's left hand, and
     Moments Musicaux's first violin rests while the second plays the tune. The melody fails when it
-    rests MOVED_TUNE_REST beats or more between two notes while one of `staves` plays the tune in
-    the rest (tune_line). A rest at the excerpt's start, an opening, isn't checked.
+    rests between two notes while one of `staves` plays the tune in the rest (tune_line): for
+    MOVED_TUNE_REST beats or more on another staff of its part, so a hand's rest loses the other
+    hand's notes (#396), or OTHER_PART_REST beats or more on another part, since a shorter rest there
+    is the melody's breath under that part's accompaniment or answer (The Swan's baritone sax, The
+    Parting Glass's violin). A rest at the excerpt's start, an opening, isn't checked.
 
     `notes` is the melody's excerpt as (start, dur, pitch) from `start_beat` of the score, and
     `staves` is {staff: (where it moves, whether it's another part, its notes as (start, end, pitch)
@@ -444,12 +449,13 @@ def moved_tune_problems(notes, staves, start_beat=0.0):
     problems = []
     for (s0, d0, _), (s1, _, _) in zip(notes, notes[1:]):
         rest = _grid(s1 - s0 - d0)
-        if rest < MOVED_TUNE_REST:
-            continue
         for staff, (where, other_part, staff_notes) in staves.items():
-            if tune_line(staff_notes, start_beat + s0 + d0, start_beat + s1, pitches, other_part):
-                problems.append((staff, f"the tune moves to {where}: the melody rests {_number(round(rest, 2))} beats"
-                                        f" from beat {_number(round(s0 + d0, 2))} while that staff plays"))
+            if (rest >= (OTHER_PART_REST if other_part else MOVED_TUNE_REST)
+                    and tune_line(staff_notes, start_beat + s0 + d0, start_beat + s1, pitches, other_part)):
+                length = _number(round(rest, 2))
+                problems.append((staff, f"the tune moves to {where}: the melody rests {length}"
+                                        f" {'beat' if length == 1 else 'beats'} from beat"
+                                        f" {_number(round(s0 + d0, 2))} while that staff plays"))
     return problems
 
 

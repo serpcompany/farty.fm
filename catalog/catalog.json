@@ -2975,21 +2975,21 @@
   "fame": 9.161,
   "well_known": true,
   "file": "midi/pdmx-korobeiniki.mid",
-  "sha256": "89e63db277e70e4f19f0ea9d94207e0859edffce7aceab2d7c0288b659169455",
+  "sha256": "859da5eecadd2a0cb8943cff1cd73963d62245b0161ce793cf746b8925481680",
   "source": {
    "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
    "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/7/28/QmPkw4BV4NU157nux2iiUpk4hFZ1ziWNPqM4ZcfHDTUHMH.mid",
-   "musescore_score_id": "3104746",
-   "musescore_url": "https://musescore.com/score/3104746",
-   "score_title": "Korobushka",
-   "composer": "Russisches Volkslied",
+   "dataset_path": "./mid/15/23/QmXhmr9xVWqtRU45Q2m7GgGLwihtQMMf4HPm5GMwYLqbc8.mid",
+   "musescore_score_id": "103168",
+   "musescore_url": "https://musescore.com/score/103168",
+   "score_title": "Korobeiniki/Korobushka (Tetris Theme)",
+   "composer": "NA",
    "license": "publicdomain",
    "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
    "pdmx_license_conflict": "False",
-   "rating": "0.0",
-   "n_ratings": "0",
-   "n_views": "790"
+   "rating": "4.78",
+   "n_ratings": "15",
+   "n_views": "9395"
   },
   "retrieved": "2026-10-25",
   "render": {
@@ -3793,27 +3793,26 @@
   "fame": 8.632,
   "well_known": true,
   "file": "midi/pdmx-jesus-loves-me.mid",
-  "sha256": "942ac64163ee4a9c4113b816fbb6d3882f3f35a033b242adf02c1aa3a30028b5",
+  "sha256": "4aeb2d088684aa251758a50e30fe82bf2fc1461fabbd52f762c89ccc91660bdb",
   "source": {
    "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
    "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/2/19/Qmcf9T4BXSEw1rmbV8p93euuGJVuXBhCgnyYS1SdKf4iLo.mid",
-   "musescore_score_id": "126188",
-   "musescore_url": "https://musescore.com/score/126188",
-   "score_title": "Jesus Loves Me",
-   "composer": "William B Bradbury",
-   "license": "publicdomain",
-   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+   "dataset_path": "./mid/4/46/Qmeu2ruGvFDrhfhVQ96C7T2KoLk1rReE7fSWeZfZMoimgA.mid",
+   "musescore_score_id": "48861",
+   "musescore_url": "https://musescore.com/score/48861",
+   "score_title": "Jesus Loves Me - Violin part",
+   "composer": "William B. Bradbury",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
    "pdmx_license_conflict": "False",
    "rating": "4.89",
    "n_ratings": "7",
-   "n_views": "2115"
+   "n_views": "8628"
   },
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "start_beat": 8,
-   "max_beats": 34
+   "max_beats": 32
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -11003,27 +11002,27 @@
   "fame": 2.127,
   "well_known": false,
   "file": "midi/pdmx-female-saylor.mid",
-  "sha256": "a5dd47b263a063f90d0563788e228e9c8ef9f9a796d32e1189a397c00f2f4887",
+  "sha256": "5a8045b53d529228af5d8c7054da3facbfc1044cb37884b8bed71099ec9ba750",
   "source": {
    "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
    "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/15/43/QmXS7P38hVpN1RmJECgctPBNbZ5AEVbMwCbJCeQYJDvF6i.mid",
-   "musescore_score_id": "6155999",
-   "musescore_url": "https://musescore.com/score/6155999",
-   "score_title": "Female Saylor",
-   "composer": "Recueil de Contradances 1706",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "dataset_path": "./mid/15/35/QmXocwCRyZNvhtPe3sr1HNsT5JtieZhydfgwtiQBqXyo4q.mid",
+   "musescore_score_id": "4585722",
+   "musescore_url": "https://musescore.com/score/4585722",
+   "score_title": "The Female Saylor",
+   "composer": "NA",
+   "license": "publicdomain",
+   "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
    "pdmx_license_conflict": "False",
    "rating": "0.0",
    "n_ratings": "0",
-   "n_views": "31"
+   "n_views": "7"
   },
   "retrieved": "2026-10-25",
   "render": {
-   "bpm": 72,
-   "start_beat": 2.5,
-   "max_beats": 29.5
+   "bpm": 120,
+   "max_beats": 30,
+   "beats_per_bar": 3
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -36352,43 +36351,6 @@
   "render": {
    "bpm": 90,
    "max_beats": 32
-  },
-  "import": {
-   "tool": "tools/catalog/import_pdmx.py",
-   "titles": "tools/catalog/titles-05.txt"
-  }
- },
- {
-  "id": "marche-slave",
-  "title": "Marche Slave",
-  "composer": "Pyotr Ilyich Tchaikovsky",
-  "composer_died": 1893,
-  "composer_source": "https://en.wikipedia.org/wiki/Marche_slave",
-  "kind": "Anthems",
-  "origin": "Russian",
-  "fame": 6.7,
-  "well_known": false,
-  "file": "midi/pdmx-marche-slave.mid",
-  "sha256": "e7c48b06d54dee8cc584551c63e7adfc40d74c861e23779e7cd85d0d9515d2e5",
-  "source": {
-   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
-   "dataset_doi": "10.5281/zenodo.15571083",
-   "dataset_path": "./mid/16/42/QmYsmm3T5NE7Cbttb7wRfEN3hX1KqK7K3roGNcBhfUoPJY.mid",
-   "musescore_score_id": "5892277",
-   "musescore_url": "https://musescore.com/score/5892277",
-   "score_title": "Marche Slave",
-   "composer": "Tchaikovsky",
-   "license": "cc-zero",
-   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-   "pdmx_license_conflict": "False",
-   "rating": "4.72",
-   "n_ratings": "8",
-   "n_views": "256"
-  },
-  "retrieved": "2026-10-25",
-  "render": {
-   "bpm": 120,
-   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
