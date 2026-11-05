@@ -8,6 +8,7 @@ import {
   type TootPaymentRow,
   tootPayment
 } from '@/db/payments'
+import { countStep } from '@/db/step-counts'
 import { songIndex } from '@/lib/catalog/song-index.generated'
 import { TOOT_PRICE } from '@/lib/pricing'
 import { servedOrigin } from '@/lib/site'
@@ -161,6 +162,7 @@ export async function startCheckout(
       ? payment.checkoutSessionId
       : `dev_${crypto.randomUUID()}`
     await startTootPayment(db, user.id, id, song?.id ?? null, sessionId, TOOT_PRICE)
+    await countStep(db, 'checkout-started')
     const url = new URL('/dev/checkout/', servedOrigin(request))
     url.searchParams.set('toot', id)
     if (song) url.searchParams.set('song', song.id)
@@ -193,6 +195,7 @@ export async function startCheckout(
     })
     if (!session.url) throw new StripeError(502)
     await startTootPayment(db, user.id, id, song?.id ?? null, session.id, TOOT_PRICE)
+    await countStep(db, 'checkout-started')
     return Response.json({ url: session.url })
   } catch (error) {
     return stripeFailed(error)

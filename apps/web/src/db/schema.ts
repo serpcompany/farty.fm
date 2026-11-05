@@ -445,3 +445,19 @@ export const songReports = sqliteTable(
     index('song_reports_song_id_idx').on(table.songId)
   ]
 )
+
+/**
+ * How many times each step of the funnel was counted on a day, in UTC (#405). Nothing here is about
+ * a person, an account, a session or a device, so it stays after an account is deleted.
+ */
+export const stepCounts = sqliteTable(
+  'step_counts',
+  {
+    /** `YYYY-MM-DD`. */
+    day: text('day').notNull(),
+    /** A name from `lib/telemetry/step-names.ts`. */
+    step: text('step').notNull(),
+    count: integer('count').notNull()
+  },
+  table => [primaryKey({ columns: [table.day, table.step] })]
+)

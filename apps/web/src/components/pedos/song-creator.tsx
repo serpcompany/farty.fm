@@ -40,6 +40,7 @@ import * as store from '@/lib/recording-store'
 import { playedPart, type Recording, recordingName, songPitch } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
+import { reachStep } from '@/lib/telemetry/steps'
 import {
   noteCaption,
   type SongToot,
@@ -513,6 +514,7 @@ export function SaveToToots({
   const keepAfterSignIn = useEffectEvent(keep)
 
   const tapSave = () => {
+    reachStep('save-tapped')
     if (accountId) keep(accountId)
     else if (account.status === 'signedOut' || account.status === 'expired') {
       setSavesAfterSignIn(true)
@@ -777,7 +779,10 @@ export function TootLayout(
             onClick={() => {
               setFocus(null)
               if (!onPiano) {
-                if (toot !== null) pedos.toggleTootPlayback(toot)
+                if (toot !== null) {
+                  reachStep('song-heard')
+                  pedos.toggleTootPlayback(toot)
+                }
               } else if (isPianoPlaying) piano.stop()
               else if (pianoNotes) piano.play('song', pianoNotes)
             }}
