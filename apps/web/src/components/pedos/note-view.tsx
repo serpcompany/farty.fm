@@ -203,11 +203,13 @@ export function NoteView({
 }
 
 /** Where notes sit in the view: time across, pitch up. As the iPhone's `NoteView.Layout`. */
-class Layout {
+export class Layout {
   readonly beats: number
   private readonly low: number
   private readonly high: number
   private readonly noteHeight: number
+  /** Every distinct note start, ascending: where the next note after one begins. */
+  private readonly starts: readonly number[]
 
   constructor(
     song: Song,
@@ -218,6 +220,7 @@ class Layout {
     this.low = (song.pitches[0] ?? 60) - 1
     this.high = (song.pitches[song.pitches.length - 1] ?? 60) + 1
     this.noteHeight = Math.min(10, height / Math.max(this.high - this.low, 1))
+    this.starts = [...new Set(song.notes.map(note => note.start))].sort((a, b) => a - b)
   }
 
   x(beat: number): number {
@@ -231,12 +234,23 @@ class Layout {
     return bars
   }
 
+  /**
+   * Where a note is drawn. Notes that touch in time draw as one line: a note keeps a 2 px gap only
+   * when it lasts a beat or more and a rest follows it. A note shorter than that stays at least as
+   * wide as it is tall, but never runs past the next note's start.
+   */
   rect(note: SongNote) {
     const x = this.x(note.start)
+    const end = this.x(note.start + note.dur)
+    const next = this.starts.find(start => start > note.start)
+    const nextX = next === undefined ? Number.POSITIVE_INFINITY : this.x(next)
+    const touches = next !== undefined && Math.abs(end - nextX) < 1e-6
+    const inset = note.dur < 1 || touches ? 0 : 2
+    const width = Math.min(Math.max(end - x - inset, this.noteHeight), nextX - x)
     return {
       x,
       y: ((this.height - this.noteHeight) * (this.high - note.pitch)) / (this.high - this.low),
-      width: Math.max(4, this.x(note.start + note.dur) - x - 2),
+      width,
       height: this.noteHeight
     }
   }
