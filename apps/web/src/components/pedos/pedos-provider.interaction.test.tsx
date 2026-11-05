@@ -2,7 +2,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { RescanResult } from '@/lib/analysis-upgrade'
-import type { SongSummary } from '@/lib/catalog/song'
+import type { Song, SongSummary } from '@/lib/catalog/song'
 import type { Recording } from '@/lib/recordings'
 import { encodeWav } from '@/lib/wav'
 
@@ -48,7 +48,10 @@ vi.mock('@/lib/recording-store', () => ({
   placeRecording: page.placeRecording,
   onWaitingForOtherTabs: () => () => {}
 }))
-vi.mock('@/lib/toot-store', () => ({ loadToots: async () => [] }))
+vi.mock('@/lib/toot-store', () => ({
+  loadToots: async () => [],
+  saveToot: async () => undefined
+}))
 vi.mock('next/navigation', () => ({ usePathname: () => page.pathname }))
 vi.mock('@/lib/catalog/load-songs', async () => {
   // The index, as the app fetches it: the Songs with their notes are a thousand files to import,
@@ -130,6 +133,47 @@ async function mount(): Promise<() => Pedos> {
 
 /** The segment the player was last asked for. */
 const lastSegment = () => page.play.mock.calls.at(-1)?.[2] as unknown
+
+it("plays a saved Toot's note where it was rendered, whatever its Song's notes are now (#254)", async () => {
+  const pedos = await mount()
+  const song = (fields: Partial<Song>) => ({ id: 'mary', title: 'Mary', ...fields }) as Song
+  /** The Song as the Toot was made from it, at 2 beats a second. */
+  const before = song({
+    bpm: 120,
+    bar_lines: [0],
+    length_beats: 4,
+    notes: [
+      { start: 0, dur: 1, pitch: 60 },
+      { start: 2, dur: 2, pitch: 62 }
+    ]
+  })
+  /** The Song in the catalog now, re-imported at 1 beat a second, with its notes elsewhere. */
+  const after = song({
+    bpm: 60,
+    notes: [
+      { start: 1, dur: 3, pitch: 60 },
+      { start: 5, dur: 1, pitch: 62 }
+    ]
+  })
+  await act(() =>
+    pedos().saveToot({
+      id: 'made',
+      song: before,
+      arrangement: { transposition: 0, recordingForPitch: {} },
+      seconds: 2,
+      wav: new ArrayBuffer(0)
+    })
+  )
+  const toot = pedos().toots?.[0]
+  if (toot?.songId !== 'mary') throw new Error('Not saved')
+  act(() => pedos().toggleTootPlayback(toot, 1, after))
+  expect(lastSegment()).toEqual({ start: 1, end: 2 })
+
+  // One saved before #254 has only the Song's notes now, as it always has.
+  const { score: _, ...old } = toot
+  act(() => pedos().toggleTootPlayback({ ...old, id: 'old' }, 1, after))
+  expect(lastSegment()).toEqual({ start: 5, end: 6 })
+})
 
 /** Recording 18 as Noise-like. */
 const noiseLike: Recording = {

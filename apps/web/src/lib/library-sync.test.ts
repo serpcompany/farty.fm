@@ -1280,6 +1280,19 @@ describe('reading the account', () => {
     expect(await (await page.store.db()).count('downloads')).toBe(0)
   })
 
+  it("brings another browser's Toot with the score it was rendered from (#254)", async () => {
+    const score = {
+      bpm: 120,
+      bar_lines: [0, 4],
+      length_beats: 4,
+      notes: [{ pitch: 60, start: 0, dur: 1 }]
+    }
+    const made = { ...toot(), score }
+    account.add('toots', made, wav(6))
+    await page.sync.syncOnce('user-a')
+    expect(await page.toots.loadToots()).toEqual([made])
+  })
+
   it('deletes what another browser deleted, reading only what changed since', async () => {
     const recording = theirs()
     account.add('recordings', recording, wav(5))

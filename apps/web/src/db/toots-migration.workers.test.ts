@@ -45,7 +45,7 @@ describe('migration 0005_toot_performance', () => {
     await before0005()
     const was = await rows()
     await applyD1Migrations(DB, TEST_MIGRATIONS)
-    expect(await rows()).toEqual(was.map(row => ({ ...row, performance: null })))
+    expect(await rows()).toEqual(was.map(row => ({ ...row, performance: null, score: null })))
     const index = await DB.prepare(
       "select name from sqlite_master where type = 'index' and tbl_name = 'toots'"
     ).all()

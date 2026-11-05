@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "227801ef-e09b-4581-8ecb-fc72c43c55d3",
+  "id": "7697cf06-e8ba-4832-8438-5d040ad72661",
   "prevId": "7e8981ea-7580-4ce2-a6ec-6d8f2b39c18d",
   "tables": {
     "account": {
@@ -443,86 +443,6 @@
           "value": "user_id <> friend_id"
         }
       }
-    },
-    "full_access": {
-      "name": "full_access",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "checkout_session_id": {
-          "name": "checkout_session_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "payment_intent": {
-          "name": "payment_intent",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "amount": {
-          "name": "amount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "currency": {
-          "name": "currency",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "paid_at": {
-          "name": "paid_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "refunded_at": {
-          "name": "refunded_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "full_access_user_id_user_id_fk": {
-          "name": "full_access_user_id_user_id_fk",
-          "tableFrom": "full_access",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
     },
     "handles": {
       "name": "handles",
@@ -1266,13 +1186,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "refunded_at": {
-          "name": "refunded_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {},
@@ -1357,6 +1270,13 @@
         },
         "performance": {
           "name": "performance",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "score": {
+          "name": "score",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

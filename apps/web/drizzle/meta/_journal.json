@@ -103,8 +103,15 @@
     {
       "idx": 14,
       "version": "6",
-      "when": 1793907614073,
-      "tag": "0014_full_access",
+      "when": 1793910653332,
+      "tag": "0014_toot_score",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1793915328256,
+      "tag": "0015_full_access",
       "breakpoints": true
     }
   ]
