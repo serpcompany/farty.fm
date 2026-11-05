@@ -64,14 +64,36 @@ test('a new phone counts open, the microphone and its first Recording, each once
   await expect(page.getByTestId('result-note')).toBeVisible()
   await expect.poll(() => [...sent]).toEqual(['open', 'mic-allowed', 'first-recording'])
 
-  // A new visit keeps what's been counted, though a guest's farts go.
+  // A new visit, in a new tab, keeps what's been counted, though a guest's farts go.
+  const nextVisit = await page.context().newPage()
+  await page.close()
+  await nextVisit.addInitScript(fakeMicrophone, { wavs: fixtureWavs(), delayMs: getUserMediaMs })
+  const sentNext = stepsFrom(nextVisit)
+  await nextVisit.goto('/')
+  await waitForOpenMicrophone(nextVisit)
+  await fartAndRecord(nextVisit, '095')
+  await nextVisit.getByRole('button', { name: 'Save' }).click()
+  await expect(nextVisit.getByTestId('result-note')).toBeVisible()
+  await aMoment(nextVisit)
+  expect(sentNext).toEqual([])
+})
+
+test('a reload while a step is on its way doesn’t send it again', async ({ page }) => {
+  const sent = stepsFrom(page)
+  // Held, so the reload cuts it off.
+  await page.route('**/api/steps/', async route => {
+    await new Promise(resolve => setTimeout(resolve, 1_000))
+    await route.continue().catch(() => {})
+  })
+  const allow = page.getByRole('button', { name: 'Allow microphone' })
+  await page.goto('/')
+  await expect(allow).toBeVisible()
+  await expect.poll(() => [...sent]).toEqual(['open'])
+
   await page.reload()
-  await waitForOpenMicrophone(page)
-  await fartAndRecord(page, '095')
-  await page.getByRole('button', { name: 'Save' }).click()
-  await expect(page.getByTestId('result-note')).toBeVisible()
-  await aMoment(page)
-  expect(sent).toEqual(['open', 'mic-allowed', 'first-recording'])
+  await expect(allow).toBeVisible()
+  await page.waitForTimeout(1_500)
+  expect(sent).toEqual(['open'])
 })
 
 test('hearing a Song, tapping Save and signing in count, once each', async ({ page }, testInfo) => {
@@ -108,8 +130,10 @@ test('hearing a Song, tapping Save and signing in count, once each', async ({ pa
 
   const play = page.getByTestId('song-creator-play')
   await expect(play).toBeEnabled({ timeout: 60_000 })
-  await play.click()
+  // The Toot plays by itself once it's made: heard, with no tap on Play.
   await expect.poll(() => [...sent]).toContain('song-heard')
+  await expect(play).toHaveAccessibleName('Stop')
+  await play.click()
   await play.click()
 
   // A guest's Save opens the account step, and has still been tapped.
@@ -124,8 +148,9 @@ test('hearing a Song, tapping Save and signing in count, once each', async ({ pa
   await step.getByRole('button', { name: 'Sign in' }).click()
   await expect.poll(() => [...sent]).toContain('account')
   await aMoment(page)
-  expect(sent.filter(step => step === 'song-heard')).toHaveLength(1)
-  expect(sent.filter(step => step === 'save-tapped')).toHaveLength(1)
+  for (const once of ['song-heard', 'save-tapped', 'account']) {
+    expect(sent.filter(step => step === once)).toHaveLength(1)
+  }
 })
 
 test('a browser from before the counts counts nothing', async ({ page }) => {

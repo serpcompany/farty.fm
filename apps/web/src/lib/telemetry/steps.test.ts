@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { memoryStorage } from '../test-storage'
 import { sharingKey } from './sharing'
-import { flushSteps, reachStep, STEPS_PATH, stepsKey } from './steps'
+import { flushSteps, installStepCounting, reachStep, STEPS_PATH, stepsKey } from './steps'
 
 // The funnel's steps from the browser (#405), in Node with the browser's globals stubbed: each
 // counts once, only for a new visitor, only while sharing is on, and nothing but its name goes.
@@ -130,6 +130,44 @@ describe('a step that can’t be sent', () => {
     await flushSteps()
     expect(sentSteps()).toEqual(['open', 'open'])
     expect(JSON.parse(localStorage.getItem(stepsKey) ?? '')).toEqual({ open: 'sent' })
+  })
+
+  it('isn’t sent again by the next page, once a page has left its send behind', async () => {
+    let answer = (_: Response) => {}
+    fetchMock.mockReturnValue(
+      new Promise(resolve => {
+        answer = resolve
+      })
+    )
+    reachStep('open')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    vi.resetModules()
+    const nextPage = await import('./steps')
+    await nextPage.flushSteps()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    answer(new Response(null, { status: 204 }))
+    await settle()
+  })
+
+  it('isn’t sent again when the page going cuts its send off', async () => {
+    const page = new EventTarget()
+    vi.stubGlobal('window', page)
+    installStepCounting()
+    let cutOff = (_: Error) => {}
+    fetchMock.mockReturnValue(
+      new Promise((_, reject) => {
+        cutOff = reject
+      })
+    )
+    reachStep('open')
+    page.dispatchEvent(new Event('pagehide'))
+    cutOff(new TypeError('Failed to fetch'))
+    await settle()
+    page.dispatchEvent(new Event('pageshow'))
+    expect(JSON.parse(localStorage.getItem(stepsKey) ?? '')).toEqual({ open: 'sent' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
   it('never sends again what the route refused for good', async () => {

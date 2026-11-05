@@ -23,6 +23,8 @@ type Reached = Partial<Record<BrowserStep, 'waiting' | 'sent'>>
 
 let flushing = false
 let flushAgain = false
+/** The page is going, so a send that fails now was cut off, and `keepalive` still finishes it. */
+let leaving = false
 
 function readReached(): Reached {
   const stored: unknown = JSON.parse(localStorage.getItem(stepsKey) ?? '{}')
@@ -94,8 +96,13 @@ export async function flushSteps(): Promise<void> {
       }
       if (navigator.onLine === false) return
       for (const step of waiting(readReached())) {
-        if ((await send(step)) === 'failed') return
+        // Noted before it goes: `keepalive` finishes a send the page leaves behind, so the next
+        // page mustn't send it again.
         writeReached({ ...readReached(), [step]: 'sent' })
+        if ((await send(step)) === 'failed') {
+          if (!leaving) writeReached({ ...readReached(), [step]: 'waiting' })
+          return
+        }
       }
     } while (flushAgain)
   } catch {
@@ -109,6 +116,12 @@ export async function flushSteps(): Promise<void> {
 export function installStepCounting(): void {
   try {
     window.addEventListener('online', () => void flushSteps())
+    window.addEventListener('pagehide', () => {
+      leaving = true
+    })
+    window.addEventListener('pageshow', () => {
+      leaving = false
+    })
     void flushSteps()
   } catch {
     // Counting never breaks Farty.

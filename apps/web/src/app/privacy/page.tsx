@@ -122,8 +122,9 @@ export default function PrivacyPage() {
         first time: opening Farty, allowing the microphone, saving a first Recording, signing in,
         playing a Song and tapping Save. Your browser keeps a note of which steps it has counted, so
         it counts each one once, and sends only the step&apos;s name, without cookies. Farty adds
-        one to that step&apos;s count for the day and keeps nothing else: no account, IP address or
-        ID that could tell one person from another. It keeps those totals with no end date.
+        one to that step&apos;s count for the day. The count holds nothing else: no account, IP
+        address or ID that could tell one person from another. It keeps those totals with no end
+        date. Like every request, the send itself is in Cloudflare&apos;s request log, below.
       </p>
       <p>
         The same switch and Global Privacy Control stop these counts from your browser. Farty&apos;s
@@ -146,10 +147,11 @@ export default function PrivacyPage() {
         <li>It doesn&apos;t sell your data.</li>
       </ul>
       <p>
-        Farty runs on Cloudflare. Like any website, it logs every request, error reports included:
-        Cloudflare&apos;s request log keeps your IP address, browser and rough location, with the
-        time and the page, for up to 7 days. Farty reads it only to run the site and fix problems,
-        and briefly uses your IP address to limit how many error reports one device can send.
+        Farty runs on Cloudflare. Like any website, it logs every request, error reports and usage
+        counts included: Cloudflare&apos;s request log keeps your IP address, browser and rough
+        location, with the time and the page, for up to 7 days. Farty reads it only to run the site
+        and fix problems, and briefly uses your IP address to limit how many error reports and usage
+        counts one device can send.
       </p>
 
       <h2>Deleting your data</h2>
