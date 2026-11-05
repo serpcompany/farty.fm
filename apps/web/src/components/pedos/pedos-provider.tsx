@@ -58,6 +58,7 @@ import {
 import { holdReload } from '@/lib/stale-build'
 import type { ReviewChange } from '@/lib/take-review'
 import { reportError } from '@/lib/telemetry/errors'
+import { reachStep } from '@/lib/telemetry/steps'
 import {
   noteSeconds,
   PAD_TOOT_TITLE,
@@ -668,6 +669,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
       }, hintAfterMs)
       setCapture({ kind: 'recording', startedAt: current.startedAt, hearsNothing: false })
       buzz()
+      // Someone who said Not now at Welcome allows it here.
+      reachStep('mic-allowed')
     } catch (error) {
       // Something failed after the take started: it stops capturing, rather than running on to
       // its 30 s limit behind the idle screen.
@@ -789,6 +792,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         return
       }
       setIsSaving(false)
+      reachStep('first-recording')
       setRecordings(list => [...(list ?? []), saved])
       setFlow({ kind: 'analyzing', id: saved.id })
       letGoOfDraft()
