@@ -3330,7 +3330,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 29,
+   "max_beats": 32,
    "beats_per_bar": 4,
    "track": [
     0,
