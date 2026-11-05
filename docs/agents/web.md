@@ -87,13 +87,13 @@ cp .dev.vars.example .dev.vars
 pnpm build:staging
 pnpm db:migrate:local
 # The smoke test, on the preview with --env staging:
-pnpm exec opennextjs-cloudflare preview --env staging --port 4109
-bash scripts/smoke.sh http://localhost:4109 staging   # in another shell
+pnpm exec opennextjs-cloudflare preview --env staging --port <port>
+bash scripts/smoke.sh http://localhost:<port> staging   # in another shell
 # The journeys and the tap-through, on a preview with no --env, as CI's e2e runs them:
-E2E_SERVER=preview E2E_PORT=4110 pnpm test:e2e
+E2E_SERVER=preview E2E_PORT=<port> pnpm test:e2e
 ```
 
-Run e2e and the tap-through on the preview with no `--env`. With `--env staging`, the preview has no `BETTER_AUTH_SECRET` and the branded origin, so sign-in answers 503 locally. Give each parallel agent its own ports. Production's paid save (`e2e/production-save.spec.ts`) runs only against a Production build, locally, by hand: CI's e2e shards build Staging, where the spec skips. Run it after any change to payments or saving: `pnpm build:production`, then `E2E_SERVER=preview E2E_SITE_ENV=production pnpm test:e2e production-save`. With no `--env` and no Stripe key, its Save goes to the dev checkout. After the merge, CI redeploys Staging from `staging`'s tip, and the same smoke test runs there.
+Run e2e and the tap-through on the preview with no `--env`. With `--env staging`, the preview has no `BETTER_AUTH_SECRET` and the branded origin, so sign-in answers 503 locally. Check a port is free before using it, and stop the smoke test's preview first: Playwright reuses whatever answers on `E2E_PORT`. Production's paid save (`e2e/production-save.spec.ts`) runs only against a Production build, locally, by hand: CI's e2e shards build Staging, where the spec skips. Run it after any change to payments or saving: `pnpm build:production`, then `E2E_SERVER=preview E2E_SITE_ENV=production pnpm test:e2e production-save`. With no `--env` and no Stripe key, its Save goes to the dev checkout. After the merge, CI redeploys Staging from `staging`'s tip, and the same smoke test runs there.
 
 ## Exceptions to SERP's standards
 
