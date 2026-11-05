@@ -424,6 +424,7 @@ describe('Compose’s listing', () => {
     }
     expect(song('danny-boy').aliases).toContain('Londonderry Air')
     expect(found('londonderry')).toEqual(['danny-boy'])
+    expect(found('tetris')).toEqual(['korobeiniki'])
     expect(found('ROW ROW')).toContain('row')
     expect(found('little twinkle')).toEqual([])
     expect(found('twinkle, twinkle')).toEqual(['twinkle'])

@@ -59,7 +59,7 @@ MAX_RANGE = 19  # semitones, an octave and a fifth
 MAX_DROPPED_SHARE = 0.10  # chord tones and inner-voice onsets the importer drops, of the track's notes
 PADDED_PICKUP_REST = 1  # beats of silence after a first bar's notes that make it a padded pickup
 MOVED_TUNE_REST = 1  # beats: a rest this long while another staff of the melody's part plays the tune (#380, #396)
-OTHER_PART_REST = 2  # beats: the same while another part plays it; a shorter one is a breath that part fills (#396)
+OTHER_PART_REST = 2  # beats: the same while another part plays it; a shorter one is a breath that part fills, and a hand's chords in one accompany (#396)
 # A part that is a voice, so another part's line while it rests is its accompaniment's (#380): General
 # MIDI's Choir Aahs, Voice Oohs and Synth Voice, or a voice's name. PDMX often gives a voice another
 # program (Una furtiva lagrima's "Vocals" is a piano's 0, Erlkönig's "Voice" an oboe's 68). "Bass"
@@ -439,7 +439,7 @@ def moved_tune_problems(notes, staves, start_beat=0.0):
     rests between two notes while one of `staves` plays the tune in the rest (tune_line): for
     MOVED_TUNE_REST beats or more on another staff of its part, so a hand's rest loses the other
     hand's notes (#396), or OTHER_PART_REST beats or more on another part, since a shorter rest there
-    is the melody's breath under that part's accompaniment or answer (The Swan's baritone sax, The
+    is the melody's breath while that part accompanies or answers it (The Swan's baritone sax, The
     Parting Glass's violin). A rest at the excerpt's start, an opening, isn't checked.
 
     `notes` is the melody's excerpt as (start, dur, pitch) from `start_beat` of the score, and
@@ -467,7 +467,8 @@ def tune_line(staff_notes, start, end, pitches, other_part=False):
     Another part's line is the tune only with two pitches or more, not a chord at every onset: a
     part that sounds one pitch in the rest (Radetzky's guitar, one F4) or only chords (Erlkönig's
     piano) accompanies. The other hand of the melody's own instrument answers it even with one
-    note (Summ, summ, summ's left hand).
+    note (Summ, summ, summ's left hand), but only chords in a rest under OTHER_PART_REST beats
+    accompany there too (Marche Slave's left hand, #396).
 
     The rule's blind spot: a tune that really moves to another part but is one repeated pitch there,
     or moves in parallel chords, passes as accompaniment. Today the rule lets through only Radetzky
@@ -476,7 +477,8 @@ def tune_line(staff_notes, start, end, pitches, other_part=False):
     if not line or max(pitches + line) - min(pitches + line) > MAX_RANGE:
         return []
     onsets = [s for s, _, _ in staff_notes if start - EPS <= s < end - EPS]
-    if other_part and (len(set(line)) < 2 or all(onsets.count(s) > 1 for s in set(onsets))):
+    chords = all(onsets.count(s) > 1 for s in set(onsets))
+    if (other_part and (len(set(line)) < 2 or chords)) or (chords and _grid(end - start) < OTHER_PART_REST):
         return []
     return line
 

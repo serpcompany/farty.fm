@@ -677,6 +677,17 @@
   "note": "A round; The Session's title search finds no tune whose settings follow the Song's melody; Wikipedia and Wikidata searches for the title find no page that names who wrote it"
  },
  {
+  "id": "marche-slave",
+  "title": "Marche Slave",
+  "views": 256,
+  "pdmx": "Tchaikovsky",
+  "score": "https://musescore.com/score/5892277",
+  "composer": "Pyotr Ilyich Tchaikovsky",
+  "composer_died": 1893,
+  "composer_source": "https://en.wikipedia.org/wiki/Marche_slave",
+  "published": 1876
+ },
+ {
   "id": "radetzky",
   "title": "Radetzky March",
   "views": 255,

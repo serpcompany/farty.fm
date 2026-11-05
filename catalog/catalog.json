@@ -36358,6 +36358,43 @@
   }
  },
  {
+  "id": "marche-slave",
+  "title": "Marche Slave",
+  "composer": "Pyotr Ilyich Tchaikovsky",
+  "composer_died": 1893,
+  "composer_source": "https://en.wikipedia.org/wiki/Marche_slave",
+  "kind": "Anthems",
+  "origin": "Russian",
+  "fame": 6.7,
+  "well_known": false,
+  "file": "midi/pdmx-marche-slave.mid",
+  "sha256": "e7c48b06d54dee8cc584551c63e7adfc40d74c861e23779e7cd85d0d9515d2e5",
+  "source": {
+   "dataset": "PDMX: A Large-Scale Public Domain MusicXML Dataset (Long et al., ICASSP 2025)",
+   "dataset_doi": "10.5281/zenodo.15571083",
+   "dataset_path": "./mid/16/42/QmYsmm3T5NE7Cbttb7wRfEN3hX1KqK7K3roGNcBhfUoPJY.mid",
+   "musescore_score_id": "5892277",
+   "musescore_url": "https://musescore.com/score/5892277",
+   "score_title": "Marche Slave",
+   "composer": "Tchaikovsky",
+   "license": "cc-zero",
+   "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "pdmx_license_conflict": "False",
+   "rating": "4.72",
+   "n_ratings": "8",
+   "n_views": "256"
+  },
+  "retrieved": "2026-10-25",
+  "render": {
+   "bpm": 120,
+   "max_beats": 34
+  },
+  "import": {
+   "tool": "tools/catalog/import_pdmx.py",
+   "titles": "tools/catalog/titles-05.txt"
+  }
+ },
+ {
   "id": "drowsy-maggie",
   "title": "Drowsy Maggie",
   "composer": "Traditional",

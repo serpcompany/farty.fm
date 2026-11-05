@@ -21600,6 +21600,43 @@
    "pdmx_list": null
   },
   {
+   "id": "marche-slave",
+   "title": "Marche Slave",
+   "composer": "Pyotr Ilyich Tchaikovsky",
+   "composer_source": "https://en.wikipedia.org/wiki/Marche_slave",
+   "session": null,
+   "page": {
+    "url": "https://en.wikipedia.org/wiki/Marche_slave",
+    "title": "Marche slave",
+    "from": "composer_source",
+    "redirected": false,
+    "fragment": null,
+    "categories": [
+     "1876 compositions",
+     "1876 in the Russian Empire",
+     "19th century in Serbia",
+     "Compositions in B-flat minor",
+     "Compositions using folk songs",
+     "God Save the Tsar!",
+     "Music and politics",
+     "Orchestral compositions by Pyotr Ilyich Tchaikovsky",
+     "Orchestral marches",
+     "Pan-Slavism",
+     "Russia–Serbia relations"
+    ],
+    "instance_of": [
+     "programme music",
+     "musical work/composition"
+    ],
+    "genre": [],
+    "country": [],
+    "pageviews": 15798
+   },
+   "pdmx_views": 316,
+   "pdmx_scores": 2,
+   "pdmx_list": null
+  },
+  {
    "id": "drowsy-maggie",
    "title": "Drowsy Maggie",
    "composer": "Traditional",

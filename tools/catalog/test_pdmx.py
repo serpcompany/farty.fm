@@ -644,6 +644,13 @@ class MovedTune(unittest.TestCase):
                          ["the tune moves to another staff of its part: the melody rests 1 beat from beat 1 while that staff plays"])
         self.assertEqual(self.moved([(0, 1, 72), (1.75, 1, 72)], [(1, 1.75, 64)]), [])
 
+    def test_a_hands_chords_in_a_rest_under_two_beats_accompany(self):
+        # Marche Slave's left hand plays only its off-beat chord in the right hand's rest (#396).
+        chord = [(1.5, 2, 52), (1.5, 2, 45)]
+        self.assertEqual(self.moved([(0, 1, 60), (2.25, 1, 60)], chord), [])
+        self.assertEqual(len(self.moved([(0, 1, 60), (2.25, 1, 60)], chord + [(2, 2.25, 55)])), 1)  # one onset isn't a chord
+        self.assertEqual(len(self.moved([(0, 1, 60), (3, 1, 60)], chord)), 1)  # 2 beats: its chords can carry the tune
+
     def test_another_part_fills_a_rest_under_two_beats(self):
         # The melody's breath while that part accompanies or answers it (The Swan's baritone sax, #396).
         answer = [(1, 2, 64), (2, 3, 62)]
@@ -696,9 +703,11 @@ class MovedTune(unittest.TestCase):
 
     def test_korobeiniki_picks_the_score_of_the_tune_people_know(self):
         # That score's whole title is an alias, so it ranks with the plain titles and its rating wins (#396).
-        titles = pdmx.read_titles((ROOT / "tools/catalog/titles-02.txt").read_text())
-        names = next(t.names for t in titles if t.id == "korobeiniki")
-        self.assertEqual(pdmx.match_kind({"title": "Korobeiniki/Korobushka (Tetris Theme)"}, names), "title")
+        korobeiniki = next(t for t in titles((ROOT / "tools/catalog/titles-02.txt").read_text()) if t.id == "korobeiniki")
+        rows = [row("Korobeiniki", "585906", views="476"), row("Korobushka", "3104746", views="790"),
+                row("Korobeiniki/Korobushka (Tetris Theme)", "103168", rating="4.78", views="9395")]
+        [found] = pdmx.find_candidates(rows, [korobeiniki])
+        self.assertEqual([pdmx.score_id(r) for _, r in found.eligible], ["103168", "3104746", "585906"])
 
     def test_no_catalog_song_rests_while_another_staff_plays_the_tune(self):
         for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
