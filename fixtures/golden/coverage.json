@@ -3608,7 +3608,19 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 28
+            },
+            {
               "seconds": 0.8,
+              "target_midi": 30
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 31
+            },
+            {
+              "seconds": 0.5,
               "target_midi": 33
             },
             {
@@ -3616,24 +3628,12 @@
               "target_midi": 35
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.3,
               "target_midi": 36
             },
             {
-              "seconds": 0.5,
-              "target_midi": 38
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 40
-            },
-            {
               "seconds": 0.3,
-              "target_midi": 43
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 45
+              "target_midi": 38
             }
           ],
           "octave_moves": 0,
@@ -3641,19 +3641,19 @@
             "covered": 1,
             "total": 8
           },
-          "plan_cost": 5.163689580893427,
+          "plan_cost": 1.6525897439776405,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "022",
-            "79": null,
-            "81": null
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": null,
+            "67": null,
+            "69": "022"
           },
           "song": "korobeiniki",
-          "transpose": -36,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -4600,24 +4600,24 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 42
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 44
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 47
+              "target_midi": 28
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 30
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 32
             },
             {
               "seconds": 0.5,
-              "target_midi": 49
+              "target_midi": 35
             },
             {
-              "seconds": 0.5,
-              "target_midi": 52
+              "seconds": 0.3,
+              "target_midi": 37
             }
           ],
           "octave_moves": 0,
@@ -4625,17 +4625,17 @@
             "covered": 1,
             "total": 6
           },
-          "plan_cost": 1.6525897439776405,
+          "plan_cost": 6.081541991692199,
           "recording_for_pitch": {
-            "60": "022",
+            "60": null,
             "62": null,
             "64": null,
             "67": null,
             "69": null,
-            "72": null
+            "72": "022"
           },
           "song": "jesus-loves-me",
-          "transpose": -20,
+          "transpose": -32,
           "unlocked": false
         },
         {
@@ -9351,16 +9351,12 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 35
-            },
-            {
-              "seconds": 0.8,
+              "seconds": 0.5,
               "target_midi": 37
             },
             {
-              "seconds": 0.5,
-              "target_midi": 38
+              "seconds": 0.8,
+              "target_midi": 39
             },
             {
               "seconds": 0.5,
@@ -9372,31 +9368,31 @@
             },
             {
               "seconds": 0.8,
-              "target_midi": 43
+              "target_midi": 44
             },
             {
               "seconds": 0.5,
-              "target_midi": 47
+              "target_midi": 49
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 1,
+            "covered": 2,
             "total": 8
           },
-          "plan_cost": 1.1046288291415773,
+          "plan_cost": 3.6867103815235778,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": null,
-            "79": "102",
-            "81": null
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "102",
+            "67": "096",
+            "69": null
           },
           "song": "korobeiniki",
-          "transpose": -34,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -10339,46 +10335,38 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 24
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 26
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 28
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 31
+              "target_midi": 40
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 42
             },
             {
               "seconds": 0.5,
-              "target_midi": 33
+              "target_midi": 47
             },
             {
-              "seconds": 0.5,
-              "target_midi": 36
+              "seconds": 0.8,
+              "target_midi": 52
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 0,
+            "covered": 2,
             "total": 6
           },
-          "plan_cost": 0.0,
+          "plan_cost": 46.39682000825423,
           "recording_for_pitch": {
             "60": null,
             "62": null,
-            "64": null,
+            "64": "102",
             "67": null,
-            "69": null,
+            "69": "096",
             "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -36,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -14858,12 +14846,16 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 34
+            },
+            {
               "seconds": 0.8,
               "target_midi": 36
             },
             {
-              "seconds": 0.8,
-              "target_midi": 38
+              "seconds": 0.5,
+              "target_midi": 37
             },
             {
               "seconds": 0.5,
@@ -14871,35 +14863,27 @@
             },
             {
               "seconds": 0.5,
-              "target_midi": 43
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 44
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 48
+              "target_midi": 46
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 3,
             "total": 8
           },
-          "plan_cost": 10.291214203472496,
+          "plan_cost": 20.768325101352943,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": "095",
-            "76": null,
-            "77": null,
-            "79": "104",
-            "81": null
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": "095",
+            "65": "016",
+            "67": "104",
+            "69": null
           },
           "song": "korobeiniki",
-          "transpose": -33,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -15762,42 +15746,34 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 43
+              "seconds": 1.0,
+              "target_midi": 38
             },
             {
               "seconds": 0.5,
               "target_midi": 45
             },
             {
-              "seconds": 1.0,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 50
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 53
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 1,
+            "covered": 3,
             "total": 6
           },
-          "plan_cost": 1.3655905541573286,
+          "plan_cost": 75.90819121101698,
           "recording_for_pitch": {
-            "60": "095",
-            "62": null,
-            "64": null,
+            "60": null,
+            "62": "095",
+            "64": "016",
             "67": null,
-            "69": null,
+            "69": "104",
             "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -19,
+          "transpose": -22,
           "unlocked": false
         },
         {
@@ -19989,24 +19965,24 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 46
-            },
-            {
               "seconds": 0.5,
-              "target_midi": 47
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 49
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 51
+              "target_midi": 34
             },
             {
               "seconds": 0.8,
-              "target_midi": 52
+              "target_midi": 36
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 37
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 39
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 41
             }
           ],
           "octave_moves": 1,
@@ -20014,19 +19990,19 @@
             "covered": 3,
             "total": 8
           },
-          "plan_cost": 64.96644676224663,
+          "plan_cost": 26.574100555585865,
           "recording_for_pitch": {
-            "69": "069",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": null,
-            "79": "016",
-            "81": "094"
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "016",
+            "67": "094",
+            "69": "069"
           },
           "song": "korobeiniki",
-          "transpose": -25,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -20837,38 +20813,34 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 47
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 49
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 52
+              "target_midi": 35
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 37
             },
             {
               "seconds": 0.5,
-              "target_midi": 54
+              "target_midi": 42
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 3,
             "total": 6
           },
-          "plan_cost": 11.425669621293652,
+          "plan_cost": 208.07033499006718,
           "recording_for_pitch": {
-            "60": "069",
+            "60": null,
             "62": null,
-            "64": null,
+            "64": "016",
             "67": null,
-            "69": null,
-            "72": "094"
+            "69": "094",
+            "72": "069"
           },
           "song": "jesus-loves-me",
-          "transpose": -15,
+          "transpose": -25,
           "unlocked": false
         },
         {
@@ -25228,48 +25200,44 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 43
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 45
-            },
-            {
               "seconds": 0.5,
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.8,
               "target_midi": 46
             },
             {
               "seconds": 0.5,
-              "target_midi": 48
+              "target_midi": 47
             },
             {
               "seconds": 0.5,
-              "target_midi": 50
+              "target_midi": 49
             },
             {
               "seconds": 0.5,
-              "target_midi": 55
+              "target_midi": 56
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 3,
             "total": 8
           },
-          "plan_cost": 21.83476975039283,
+          "plan_cost": 53.14172909347552,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "032",
-            "79": "086",
-            "81": null
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": "032",
+            "65": "098",
+            "67": "086",
+            "69": null
           },
           "song": "korobeiniki",
-          "transpose": -26,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -26136,42 +26104,34 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 53
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 55
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 58
+              "target_midi": 36
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 38
             },
             {
               "seconds": 0.5,
-              "target_midi": 60
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 63
+              "target_midi": 43
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 1,
+            "covered": 3,
             "total": 6
           },
-          "plan_cost": 5.4498835002107935,
+          "plan_cost": 160.48466242876452,
           "recording_for_pitch": {
-            "60": "032",
+            "60": null,
             "62": null,
-            "64": null,
+            "64": "098",
             "67": null,
-            "69": null,
-            "72": null
+            "69": "086",
+            "72": "032"
           },
           "song": "jesus-loves-me",
-          "transpose": -9,
+          "transpose": -24,
           "unlocked": false
         },
         {
@@ -30903,7 +30863,7 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 0.5,
               "target_midi": 37
             },
             {
@@ -30919,12 +30879,8 @@
               "target_midi": 42
             },
             {
-              "seconds": 0.5,
-              "target_midi": 44
-            },
-            {
               "seconds": 0.8,
-              "target_midi": 45
+              "target_midi": 44
             },
             {
               "seconds": 0.5,
@@ -30933,22 +30889,22 @@
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 1,
+            "covered": 2,
             "total": 8
           },
-          "plan_cost": 0.020162586333179335,
+          "plan_cost": 1.114710122308167,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": null,
-            "79": "104",
-            "81": null
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "102",
+            "67": "104",
+            "69": null
           },
           "song": "korobeiniki",
-          "transpose": -32,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -31895,46 +31851,38 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 24
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 26
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 28
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 31
+              "target_midi": 40
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 42
             },
             {
               "seconds": 0.5,
-              "target_midi": 33
+              "target_midi": 47
             },
             {
-              "seconds": 0.5,
-              "target_midi": 36
+              "seconds": 0.8,
+              "target_midi": 52
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 0,
+            "covered": 2,
             "total": 6
           },
-          "plan_cost": 0.0,
+          "plan_cost": 24.137164416492993,
           "recording_for_pitch": {
             "60": null,
             "62": null,
-            "64": null,
+            "64": "102",
             "67": null,
-            "69": null,
+            "69": "104",
             "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -36,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -36534,28 +36482,28 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 44
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 46
-            },
-            {
               "seconds": 0.5,
+              "target_midi": 45
+            },
+            {
+              "seconds": 0.8,
               "target_midi": 47
             },
             {
               "seconds": 0.5,
-              "target_midi": 49
+              "target_midi": 48
             },
             {
               "seconds": 0.5,
-              "target_midi": 51
+              "target_midi": 50
             },
             {
               "seconds": 0.8,
               "target_midi": 52
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 53
             }
           ],
           "octave_moves": 1,
@@ -36563,19 +36511,19 @@
             "covered": 2,
             "total": 8
           },
-          "plan_cost": 20.200472320487975,
+          "plan_cost": 11.01712029118446,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": null,
-            "79": "016",
-            "81": "094"
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": null,
+            "67": "016",
+            "69": "094"
           },
           "song": "korobeiniki",
-          "transpose": -25,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -37470,42 +37418,38 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 60
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 62
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 65
+              "target_midi": 37
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 39
             },
             {
               "seconds": 0.5,
-              "target_midi": 67
+              "target_midi": 44
             },
             {
-              "seconds": 0.5,
-              "target_midi": 70
+              "seconds": 0.8,
+              "target_midi": 49
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 1,
+            "covered": 2,
             "total": 6
           },
-          "plan_cost": 0.27796682000372397,
+          "plan_cost": 81.10736369469302,
           "recording_for_pitch": {
-            "60": "094",
+            "60": null,
             "62": null,
-            "64": null,
+            "64": "016",
             "67": null,
-            "69": null,
+            "69": "094",
             "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -2,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -41889,48 +41833,44 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 38
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 40
-            },
-            {
               "seconds": 0.5,
+              "target_midi": 39
+            },
+            {
+              "seconds": 0.8,
               "target_midi": 41
             },
             {
               "seconds": 0.5,
-              "target_midi": 43
+              "target_midi": 42
             },
             {
               "seconds": 0.5,
-              "target_midi": 45
+              "target_midi": 44
             },
             {
               "seconds": 0.8,
               "target_midi": 46
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 3,
             "total": 8
           },
-          "plan_cost": 12.249212808524417,
+          "plan_cost": 20.84265312303493,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": null,
-            "79": "096",
-            "81": "032"
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "096",
+            "67": "098",
+            "69": "032"
           },
           "song": "korobeiniki",
-          "transpose": -31,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -42789,42 +42729,34 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 53
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 55
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 58
+              "target_midi": 37
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 39
             },
             {
               "seconds": 0.5,
-              "target_midi": 60
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 63
+              "target_midi": 44
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 1,
+            "covered": 3,
             "total": 6
           },
-          "plan_cost": 5.4498835002107935,
+          "plan_cost": 151.8020329639171,
           "recording_for_pitch": {
-            "60": "032",
+            "60": null,
             "62": null,
-            "64": null,
+            "64": "098",
             "67": null,
-            "69": null,
-            "72": null
+            "69": "096",
+            "72": "032"
           },
           "song": "jesus-loves-me",
-          "transpose": -9,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -47444,7 +47376,7 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 0.5,
               "target_midi": 55
             },
             {
@@ -47460,11 +47392,11 @@
               "target_midi": 60
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 62
             },
             {
-              "seconds": 0.8,
+              "seconds": 0.3,
               "target_midi": 63
             },
             {
@@ -47479,17 +47411,17 @@
           },
           "plan_cost": 0.7668079704989959,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": null,
-            "79": null,
-            "81": "059"
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": null,
+            "67": null,
+            "69": "059"
           },
           "song": "korobeiniki",
-          "transpose": -14,
+          "transpose": -2,
           "unlocked": false
         },
         {
@@ -48436,24 +48368,24 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 69
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 71
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 74
+              "target_midi": 55
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 57
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 59
             },
             {
               "seconds": 0.5,
-              "target_midi": 76
+              "target_midi": 62
             },
             {
-              "seconds": 0.5,
-              "target_midi": 79
+              "seconds": 0.3,
+              "target_midi": 64
             }
           ],
           "octave_moves": 0,
@@ -48461,17 +48393,17 @@
             "covered": 1,
             "total": 6
           },
-          "plan_cost": 0.7668079704989959,
+          "plan_cost": 2.675014831416747,
           "recording_for_pitch": {
-            "60": "059",
+            "60": null,
             "62": null,
             "64": null,
             "67": null,
             "69": null,
-            "72": null
+            "72": "059"
           },
           "song": "jesus-loves-me",
-          "transpose": 7,
+          "transpose": -5,
           "unlocked": false
         },
         {
@@ -52720,23 +52652,23 @@
           "missing": [
             {
               "seconds": 0.8,
+              "target_midi": 34
+            },
+            {
+              "seconds": 0.5,
               "target_midi": 35
             },
             {
               "seconds": 0.5,
-              "target_midi": 36
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 38
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 40
+              "target_midi": 37
             },
             {
               "seconds": 0.8,
-              "target_midi": 41
+              "target_midi": 39
+            },
+            {
+              "seconds": 0.3,
+              "target_midi": 40
             }
           ],
           "octave_moves": 1,
@@ -52744,19 +52676,19 @@
             "covered": 3,
             "total": 8
           },
-          "plan_cost": 350.9591911013873,
+          "plan_cost": 586.8253034162141,
           "recording_for_pitch": {
-            "69": "080",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": null,
-            "79": "019",
-            "81": "097"
+            "57": "080",
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": null,
+            "67": "019",
+            "69": "097"
           },
           "song": "korobeiniki",
-          "transpose": -36,
+          "transpose": -25,
           "unlocked": false
         },
         {
@@ -53571,38 +53503,34 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 35
+              "seconds": 0.8,
+              "target_midi": 43
             },
             {
-              "seconds": 0.5,
-              "target_midi": 37
+              "seconds": 0.3,
+              "target_midi": 50
             },
             {
-              "seconds": 1.0,
-              "target_midi": 40
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 42
+              "seconds": 0.8,
+              "target_midi": 53
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 3,
             "total": 6
           },
-          "plan_cost": 92.45054003617751,
+          "plan_cost": 874.7874893128205,
           "recording_for_pitch": {
             "60": "080",
             "62": null,
-            "64": null,
-            "67": null,
+            "64": "019",
+            "67": "097",
             "69": null,
-            "72": "097"
+            "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -27,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -57633,7 +57561,7 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 0.5,
               "target_midi": 44
             },
             {
@@ -57645,32 +57573,28 @@
               "target_midi": 49
             },
             {
-              "seconds": 0.5,
-              "target_midi": 51
-            },
-            {
               "seconds": 0.8,
-              "target_midi": 52
+              "target_midi": 51
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 8
           },
-          "plan_cost": 32.709297922892276,
+          "plan_cost": 47.4943889583712,
           "recording_for_pitch": {
-            "69": null,
-            "71": "002",
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": null,
-            "79": "016",
-            "81": "097"
+            "57": null,
+            "59": "002",
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "098",
+            "67": "016",
+            "69": "097"
           },
           "song": "korobeiniki",
-          "transpose": -25,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -58449,38 +58373,34 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 50
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 53
+              "target_midi": 34
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 36
             },
             {
               "seconds": 0.5,
-              "target_midi": 55
+              "target_midi": 41
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 3,
             "total": 6
           },
-          "plan_cost": 6.281039678994999,
+          "plan_cost": 139.54133969087422,
           "recording_for_pitch": {
-            "60": "002",
+            "60": null,
             "62": null,
-            "64": null,
+            "64": "098",
             "67": null,
-            "69": null,
-            "72": "097"
+            "69": "016",
+            "72": "002"
           },
           "song": "jesus-loves-me",
-          "transpose": -14,
+          "transpose": -26,
           "unlocked": false
         },
         {
@@ -62491,44 +62411,40 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 45
+              "seconds": 0.5,
+              "target_midi": 44
             },
             {
               "seconds": 0.8,
+              "target_midi": 46
+            },
+            {
+              "seconds": 0.5,
               "target_midi": 47
             },
             {
               "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 50
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 52
+              "target_midi": 49
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 8
           },
-          "plan_cost": 32.4882831952208,
+          "plan_cost": 60.5457913295961,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "032",
-            "79": "102",
-            "81": "094"
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": "032",
+            "65": "098",
+            "67": "102",
+            "69": "094"
           },
           "song": "korobeiniki",
-          "transpose": -24,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -63307,38 +63223,30 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 52
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 54
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 57
+              "target_midi": 37
             },
             {
-              "seconds": 0.5,
-              "target_midi": 62
+              "seconds": 0.8,
+              "target_midi": 39
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 4,
             "total": 6
           },
-          "plan_cost": 7.867725304797814,
+          "plan_cost": 236.94858912879627,
           "recording_for_pitch": {
-            "60": "032",
+            "60": null,
             "62": null,
-            "64": null,
-            "67": null,
-            "69": "094",
-            "72": null
+            "64": "098",
+            "67": "094",
+            "69": "102",
+            "72": "032"
           },
           "song": "jesus-loves-me",
-          "transpose": -10,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -66999,11 +66907,11 @@
             },
             {
               "seconds": 0.5,
-              "target_midi": 48
+              "target_midi": 46
             },
             {
-              "seconds": 0.3,
-              "target_midi": 51
+              "seconds": 0.8,
+              "target_midi": 48
             }
           ],
           "octave_moves": 0,
@@ -67011,19 +66919,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 39.54702953780265,
+          "plan_cost": 33.47877828571677,
           "recording_for_pitch": {
-            "69": "095",
-            "71": null,
-            "72": null,
-            "74": "002",
-            "76": null,
-            "77": "032",
-            "79": null,
-            "81": "090"
+            "57": "095",
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "002",
+            "67": "032",
+            "69": "090"
           },
           "song": "korobeiniki",
-          "transpose": -28,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -67718,30 +67626,30 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 44
+              "seconds": 1.0,
+              "target_midi": 39
             },
             {
-              "seconds": 1.0,
-              "target_midi": 49
+              "seconds": 0.5,
+              "target_midi": 46
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 33.317459292798794,
+          "plan_cost": 100.84421993241828,
           "recording_for_pitch": {
-            "60": "095",
-            "62": null,
-            "64": "002",
+            "60": null,
+            "62": "095",
+            "64": "090",
             "67": null,
-            "69": "032",
-            "72": "090"
+            "69": "002",
+            "72": "032"
           },
           "song": "jesus-loves-me",
-          "transpose": -18,
+          "transpose": -21,
           "unlocked": false
         },
         {
@@ -70887,7 +70795,7 @@
             },
             {
               "seconds": 0.5,
-              "target_midi": 46
+              "target_midi": 44
             }
           ],
           "octave_moves": 1,
@@ -70895,19 +70803,19 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 109.91760133268663,
+          "plan_cost": 63.621175814918594,
           "recording_for_pitch": {
-            "69": "017",
-            "71": "022",
-            "72": null,
-            "74": "097",
-            "76": null,
-            "77": "002",
-            "79": "096",
-            "81": "101"
+            "57": "017",
+            "59": "022",
+            "60": null,
+            "62": null,
+            "64": "002",
+            "65": "096",
+            "67": "097",
+            "69": "101"
           },
           "song": "korobeiniki",
-          "transpose": -30,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -71485,29 +71393,24 @@
           "unlocked": false
         },
         {
-          "missing": [
-            {
-              "seconds": 0.5,
-              "target_midi": 43
-            }
-          ],
-          "octave_moves": 1,
+          "missing": [],
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 6
           },
-          "plan_cost": 74.41636140527882,
+          "plan_cost": 405.5723960620894,
           "recording_for_pitch": {
-            "60": "017",
+            "60": "002",
             "62": "022",
-            "64": null,
-            "67": "002",
-            "69": "097",
-            "72": "101"
+            "64": "101",
+            "67": "097",
+            "69": "096",
+            "72": "017"
           },
           "song": "jesus-loves-me",
-          "transpose": -21,
-          "unlocked": false
+          "transpose": -23,
+          "unlocked": true
         },
         {
           "missing": [
@@ -74914,40 +74817,36 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 44
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 47
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 49
-            },
-            {
               "seconds": 0.5,
               "target_midi": 51
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 53
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 60
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 40.96594767464808,
+          "plan_cost": 117.35930077068966,
           "recording_for_pitch": {
-            "69": null,
-            "71": "002",
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "017",
-            "79": "086",
-            "81": "059"
+            "57": "002",
+            "59": "017",
+            "60": null,
+            "62": null,
+            "64": "059",
+            "65": "086",
+            "67": "096",
+            "69": null
           },
           "song": "korobeiniki",
-          "transpose": -25,
+          "transpose": -9,
           "unlocked": false
         },
         {
@@ -75643,33 +75542,25 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 43
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 50
+              "target_midi": 53
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 30.764940601672528,
+          "plan_cost": 176.43170004331196,
           "recording_for_pitch": {
-            "60": "017",
-            "62": null,
-            "64": "002",
+            "60": "002",
+            "62": "017",
+            "64": "096",
             "67": null,
-            "69": null,
+            "69": "086",
             "72": "059"
           },
           "song": "jesus-loves-me",
-          "transpose": -19,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -78988,15 +78879,15 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 35
+              "target_midi": 33
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 34
             },
             {
               "seconds": 0.5,
               "target_midi": 36
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 38
             }
           ],
           "octave_moves": 2,
@@ -79004,19 +78895,19 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 185.6365745368097,
+          "plan_cost": 249.50015235436206,
           "recording_for_pitch": {
-            "69": "009",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": "022",
-            "77": "032",
-            "79": "016",
-            "81": "013"
+            "57": "009",
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": "022",
+            "65": "016",
+            "67": "032",
+            "69": "013"
           },
           "song": "korobeiniki",
-          "transpose": -36,
+          "transpose": -26,
           "unlocked": false
         },
         {
@@ -79661,30 +79552,26 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 45
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 48
+              "seconds": 0.8,
+              "target_midi": 35
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 80.53097074955372,
+          "plan_cost": 656.0866979662568,
           "recording_for_pitch": {
             "60": "009",
-            "62": "022",
-            "64": null,
-            "67": null,
-            "69": "032",
+            "62": null,
+            "64": "032",
+            "67": "022",
+            "69": "016",
             "72": "013"
           },
           "song": "jesus-loves-me",
-          "transpose": -19,
+          "transpose": -27,
           "unlocked": false
         },
         {
@@ -83198,39 +83085,35 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 35
-            },
-            {
-              "seconds": 0.5,
               "target_midi": 36
             },
             {
               "seconds": 0.5,
-              "target_midi": 38
+              "target_midi": 37
             },
             {
-              "seconds": 0.5,
-              "target_midi": 40
+              "seconds": 0.8,
+              "target_midi": 41
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 360.96700815408775,
+          "plan_cost": 628.5864645398583,
           "recording_for_pitch": {
-            "69": "080",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "017",
-            "79": "019",
-            "81": "084"
+            "57": "080",
+            "59": null,
+            "60": null,
+            "62": "017",
+            "64": null,
+            "65": "019",
+            "67": "104",
+            "69": "084"
           },
           "song": "korobeiniki",
-          "transpose": -36,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -83925,34 +83808,26 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 32
-            },
-            {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 34
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 37
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 100.47208786886634,
+          "plan_cost": 775.8870599540957,
           "recording_for_pitch": {
             "60": "080",
             "62": null,
-            "64": null,
-            "67": null,
-            "69": "017",
+            "64": "104",
+            "67": "017",
+            "69": "019",
             "72": "084"
           },
           "song": "jesus-loves-me",
-          "transpose": -30,
+          "transpose": -28,
           "unlocked": false
         },
         {
@@ -87468,40 +87343,36 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 35
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 36
-            },
-            {
               "seconds": 0.5,
               "target_midi": 38
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 40
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 41
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 152.53616387863102,
+          "plan_cost": 299.96134300462097,
           "recording_for_pitch": {
-            "69": "009",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "032",
-            "79": "019",
-            "81": "002"
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": "009",
+            "64": "002",
+            "65": "019",
+            "67": "096",
+            "69": "032"
           },
           "song": "korobeiniki",
-          "transpose": -36,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -88192,34 +88063,26 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 43
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 50
+              "seconds": 0.8,
+              "target_midi": 42
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 51.09193208564878,
+          "plan_cost": 412.8782522684885,
           "recording_for_pitch": {
             "60": "009",
             "62": null,
-            "64": "002",
-            "67": null,
-            "69": null,
+            "64": "019",
+            "67": "002",
+            "69": "096",
             "72": "032"
           },
           "song": "jesus-loves-me",
-          "transpose": -19,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -91738,7 +91601,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 50
             }
           ],
@@ -91747,19 +91610,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 384.2280400765213,
+          "plan_cost": 627.3635874377219,
           "recording_for_pitch": {
-            "69": "080",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "032",
-            "79": "101",
-            "81": "013"
+            "57": "080",
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "101",
+            "67": "032",
+            "69": "013"
           },
           "song": "korobeiniki",
-          "transpose": -26,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -92454,12 +92317,12 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 46
+              "seconds": 0.3,
+              "target_midi": 50
             },
             {
-              "seconds": 0.5,
-              "target_midi": 48
+              "seconds": 0.3,
+              "target_midi": 55
             }
           ],
           "octave_moves": 1,
@@ -92467,17 +92330,17 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 137.2649533819207,
+          "plan_cost": 842.4913436934219,
           "recording_for_pitch": {
             "60": "080",
-            "62": null,
+            "62": "032",
             "64": null,
-            "67": "032",
-            "69": "101",
+            "67": "101",
+            "69": null,
             "72": "013"
           },
           "song": "jesus-loves-me",
-          "transpose": -16,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -95824,11 +95687,11 @@
               "target_midi": 50
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 54
             },
             {
-              "seconds": 0.8,
+              "seconds": 0.3,
               "target_midi": 55
             }
           ],
@@ -95837,19 +95700,19 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 109.18164488960285,
+          "plan_cost": 121.50732636832525,
           "recording_for_pitch": {
-            "69": "002",
-            "71": "032",
-            "72": null,
-            "74": "017",
-            "76": null,
-            "77": null,
-            "79": "103",
-            "81": "094"
+            "57": "002",
+            "59": "017",
+            "60": null,
+            "62": "032",
+            "64": null,
+            "65": null,
+            "67": "103",
+            "69": "094"
           },
           "song": "korobeiniki",
-          "transpose": -22,
+          "transpose": -10,
           "unlocked": false
         },
         {
@@ -96504,30 +96367,26 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 41
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 43
+              "seconds": 0.8,
+              "target_midi": 61
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 53.542769726740836,
+          "plan_cost": 288.0445453910446,
           "recording_for_pitch": {
-            "60": "017",
-            "62": null,
-            "64": null,
-            "67": "002",
-            "69": "094",
-            "72": "032"
+            "60": "002",
+            "62": "032",
+            "64": "017",
+            "67": "094",
+            "69": "103",
+            "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -21,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -99851,36 +99710,32 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 0.5,
               "target_midi": 48
             },
             {
-              "seconds": 0.5,
-              "target_midi": 49
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 51
+              "seconds": 0.8,
+              "target_midi": 50
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 8
           },
-          "plan_cost": 426.1870580153717,
+          "plan_cost": 744.0629640398572,
           "recording_for_pitch": {
-            "69": "080",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": "090",
-            "77": "095",
-            "79": "086",
-            "81": "091"
+            "57": "095",
+            "59": "080",
+            "60": "091",
+            "62": null,
+            "64": null,
+            "65": "098",
+            "67": "086",
+            "69": "090"
           },
           "song": "korobeiniki",
-          "transpose": -23,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -100532,28 +100387,24 @@
             {
               "seconds": 1.0,
               "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 50
             }
           ],
           "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 140.79603782102703,
+          "plan_cost": 191.67782338638824,
           "recording_for_pitch": {
-            "60": "080",
+            "60": null,
             "62": "095",
-            "64": "091",
-            "67": null,
-            "69": null,
-            "72": "090"
+            "64": "098",
+            "67": "090",
+            "69": "086",
+            "72": "091"
           },
           "song": "jesus-loves-me",
-          "transpose": -19,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -103433,7 +103284,7 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 52
+              "target_midi": 50
             }
           ],
           "octave_moves": 4,
@@ -103441,19 +103292,19 @@
             "covered": 7,
             "total": 8
           },
-          "plan_cost": 674.2139298043645,
+          "plan_cost": 987.7581919821893,
           "recording_for_pitch": {
-            "69": "080",
-            "71": "069",
-            "72": "094",
-            "74": "022",
-            "76": null,
-            "77": "059",
-            "79": "090",
-            "81": "097"
+            "57": "080",
+            "59": "069",
+            "60": "094",
+            "62": null,
+            "64": "022",
+            "65": "090",
+            "67": "059",
+            "69": "097"
           },
           "song": "korobeiniki",
-          "transpose": -24,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -103995,22 +103846,22 @@
         },
         {
           "missing": [],
-          "octave_moves": 3,
+          "octave_moves": 4,
           "pitch_coverage": {
             "covered": 6,
             "total": 6
           },
-          "plan_cost": 207.9477575387238,
+          "plan_cost": 1174.5559420804495,
           "recording_for_pitch": {
-            "60": "069",
-            "62": "094",
-            "64": "022",
-            "67": "059",
+            "60": "080",
+            "62": "069",
+            "64": "094",
+            "67": "022",
             "69": "090",
-            "72": "097"
+            "72": "059"
           },
           "song": "jesus-loves-me",
-          "transpose": -13,
+          "transpose": -16,
           "unlocked": true
         },
         {
@@ -106785,24 +106636,24 @@
         },
         {
           "missing": [],
-          "octave_moves": 5,
+          "octave_moves": 4,
           "pitch_coverage": {
             "covered": 8,
             "total": 8
           },
-          "plan_cost": 256.8352157893622,
+          "plan_cost": 256.46247452556673,
           "recording_for_pitch": {
-            "69": "013",
-            "71": "002",
-            "72": "094",
-            "74": "097",
-            "76": "101",
-            "77": "017",
-            "79": "098",
-            "81": "090"
+            "57": "097",
+            "59": "002",
+            "60": "094",
+            "62": "101",
+            "64": "017",
+            "65": "098",
+            "67": "090",
+            "69": "013"
           },
           "song": "korobeiniki",
-          "transpose": -26,
+          "transpose": -12,
           "unlocked": true
         },
         {
@@ -107347,22 +107198,22 @@
         },
         {
           "missing": [],
-          "octave_moves": 0,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 6,
             "total": 6
           },
-          "plan_cost": 89.2225187311082,
+          "plan_cost": 291.8135060227714,
           "recording_for_pitch": {
             "60": "002",
-            "62": "101",
-            "64": "090",
-            "67": "013",
-            "69": "094",
-            "72": "097"
+            "62": "017",
+            "64": "098",
+            "67": "101",
+            "69": "090",
+            "72": "013"
           },
           "song": "jesus-loves-me",
-          "transpose": -11,
+          "transpose": -14,
           "unlocked": true
         },
         {
@@ -110445,35 +110296,31 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
               "target_midi": 50
             },
             {
               "seconds": 0.8,
-              "target_midi": 53
+              "target_midi": 54
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 8
           },
-          "plan_cost": 70.98722206088007,
+          "plan_cost": 200.00292952587697,
           "recording_for_pitch": {
-            "69": "069",
-            "71": "002",
-            "72": null,
-            "74": null,
-            "76": "101",
-            "77": null,
-            "79": "086",
-            "81": "084"
+            "57": "069",
+            "59": "002",
+            "60": null,
+            "62": "101",
+            "64": null,
+            "65": "086",
+            "67": "103",
+            "69": "084"
           },
           "song": "korobeiniki",
-          "transpose": -24,
+          "transpose": -10,
           "unlocked": false
         },
         {
@@ -111091,33 +110938,24 @@
           "unlocked": false
         },
         {
-          "missing": [
-            {
-              "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 51
-            }
-          ],
-          "octave_moves": 0,
+          "missing": [],
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 6,
             "total": 6
           },
-          "plan_cost": 18.79497222604719,
+          "plan_cost": 430.7404881761952,
           "recording_for_pitch": {
             "60": "069",
             "62": "002",
-            "64": null,
-            "67": null,
-            "69": "101",
+            "64": "103",
+            "67": "101",
+            "69": "086",
             "72": "084"
           },
           "song": "jesus-loves-me",
-          "transpose": -16,
-          "unlocked": false
+          "transpose": -15,
+          "unlocked": true
         },
         {
           "missing": [
@@ -114026,32 +113864,28 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 37
-            },
-            {
               "seconds": 0.5,
-              "target_midi": 40
+              "target_midi": 44
             }
           ],
           "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 6,
+            "covered": 7,
             "total": 8
           },
-          "plan_cost": 313.18026045891554,
+          "plan_cost": 819.8609351249473,
           "recording_for_pitch": {
-            "69": null,
-            "71": "017",
-            "72": null,
-            "74": "090",
-            "76": "084",
-            "77": "080",
-            "79": "104",
-            "81": "032"
+            "57": "017",
+            "59": "080",
+            "60": null,
+            "62": "084",
+            "64": "032",
+            "65": "104",
+            "67": "016",
+            "69": "090"
           },
           "song": "korobeiniki",
-          "transpose": -32,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -114598,29 +114432,24 @@
           "unlocked": false
         },
         {
-          "missing": [
-            {
-              "seconds": 1.0,
-              "target_midi": 53
-            }
-          ],
-          "octave_moves": 2,
+          "missing": [],
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 6
           },
-          "plan_cost": 162.7605642668944,
+          "plan_cost": 956.4182867801616,
           "recording_for_pitch": {
             "60": "080",
-            "62": "017",
-            "64": "032",
-            "67": null,
+            "62": "032",
+            "64": "016",
+            "67": "017",
             "69": "090",
             "72": "084"
           },
           "song": "jesus-loves-me",
-          "transpose": -14,
-          "unlocked": false
+          "transpose": -26,
+          "unlocked": true
         },
         {
           "missing": [
@@ -117757,36 +117586,32 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 50
-            },
-            {
               "seconds": 0.5,
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.8,
               "target_midi": 51
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 8
           },
-          "plan_cost": 51.98588207833124,
+          "plan_cost": 90.15084730717773,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": "101",
-            "76": "084",
-            "77": "059",
-            "79": "019",
-            "81": "094"
+            "57": null,
+            "59": null,
+            "60": "101",
+            "62": "059",
+            "64": "084",
+            "65": "019",
+            "67": "096",
+            "69": "094"
           },
           "song": "korobeiniki",
-          "transpose": -21,
+          "transpose": -8,
           "unlocked": false
         },
         {
@@ -118412,29 +118237,25 @@
           "missing": [
             {
               "seconds": 1.0,
-              "target_midi": 61
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 63
+              "target_midi": 53
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 10.573160013322205,
+          "plan_cost": 170.6137827252844,
           "recording_for_pitch": {
-            "60": "101",
+            "60": null,
             "62": "084",
-            "64": "094",
-            "67": null,
-            "69": null,
+            "64": "019",
+            "67": "094",
+            "69": "101",
             "72": "059"
           },
           "song": "jesus-loves-me",
-          "transpose": -6,
+          "transpose": -7,
           "unlocked": false
         },
         {
@@ -121799,36 +121620,32 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 47
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 49
+              "seconds": 0.8,
+              "target_midi": 43
             },
             {
               "seconds": 0.8,
-              "target_midi": 52
+              "target_midi": 48
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 8
           },
-          "plan_cost": 209.31191853135545,
+          "plan_cost": 355.6784859564018,
           "recording_for_pitch": {
-            "69": "009",
-            "71": "091",
-            "72": null,
-            "74": null,
-            "76": "101",
-            "77": null,
-            "79": "016",
-            "81": "097"
+            "57": "009",
+            "59": null,
+            "60": "091",
+            "62": "097",
+            "64": null,
+            "65": "104",
+            "67": "016",
+            "69": "101"
           },
           "song": "korobeiniki",
-          "transpose": -25,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -122482,27 +122299,23 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 51
+              "seconds": 0.8,
+              "target_midi": 46
             }
           ],
           "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 57.351504161216795,
+          "plan_cost": 428.19097461084743,
           "recording_for_pitch": {
             "60": "009",
-            "62": "091",
-            "64": null,
-            "67": null,
-            "69": "101",
-            "72": "097"
+            "62": null,
+            "64": "104",
+            "67": "101",
+            "69": "016",
+            "72": "091"
           },
           "song": "jesus-loves-me",
           "transpose": -16,
@@ -125442,31 +125255,27 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 49
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 52
+              "target_midi": 48
             }
           ],
           "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 6,
+            "covered": 7,
             "total": 8
           },
-          "plan_cost": 124.63610379011551,
+          "plan_cost": 199.46897961099225,
           "recording_for_pitch": {
-            "69": null,
-            "71": "022",
-            "72": null,
-            "74": "095",
-            "76": "084",
-            "77": "059",
-            "79": "102",
-            "81": "097"
+            "57": "022",
+            "59": "095",
+            "60": "084",
+            "62": "097",
+            "64": null,
+            "65": "096",
+            "67": "016",
+            "69": "059"
           },
           "song": "korobeiniki",
-          "transpose": -20,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -126021,29 +125830,24 @@
           "unlocked": false
         },
         {
-          "missing": [
-            {
-              "seconds": 0.5,
-              "target_midi": 62
-            }
-          ],
-          "octave_moves": 3,
+          "missing": [],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 6
           },
-          "plan_cost": 121.45634479099377,
+          "plan_cost": 312.9683960808976,
           "recording_for_pitch": {
             "60": "022",
             "62": "095",
-            "64": "059",
-            "67": "084",
-            "69": "097",
-            "72": null
+            "64": "102",
+            "67": "097",
+            "69": "096",
+            "72": "059"
           },
           "song": "jesus-loves-me",
-          "transpose": -10,
-          "unlocked": false
+          "transpose": -19,
+          "unlocked": true
         },
         {
           "missing": [
@@ -129122,36 +128926,32 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 50
+            },
+            {
               "seconds": 0.8,
-              "target_midi": 44
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 47
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 49
+              "target_midi": 54
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 8
           },
-          "plan_cost": 73.90643959003015,
+          "plan_cost": 130.7268502079279,
           "recording_for_pitch": {
-            "69": null,
-            "71": "002",
-            "72": null,
-            "74": null,
-            "76": "032",
-            "77": "017",
-            "79": "086",
-            "81": "084"
+            "57": "002",
+            "59": "017",
+            "60": null,
+            "62": "032",
+            "64": null,
+            "65": "086",
+            "67": "103",
+            "69": "084"
           },
           "song": "korobeiniki",
-          "transpose": -25,
+          "transpose": -10,
           "unlocked": false
         },
         {
@@ -129755,33 +129555,24 @@
           "unlocked": false
         },
         {
-          "missing": [
-            {
-              "seconds": 1.0,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 50
-            }
-          ],
-          "octave_moves": 1,
+          "missing": [],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 6,
             "total": 6
           },
-          "plan_cost": 55.330746969593655,
+          "plan_cost": 253.79189593030756,
           "recording_for_pitch": {
-            "60": "017",
-            "62": "084",
-            "64": "002",
-            "67": null,
-            "69": null,
+            "60": "002",
+            "62": "017",
+            "64": "086",
+            "67": "084",
+            "69": "103",
             "72": "032"
           },
           "song": "jesus-loves-me",
-          "transpose": -19,
-          "unlocked": false
+          "transpose": -11,
+          "unlocked": true
         },
         {
           "missing": [
@@ -132913,7 +132704,7 @@
               "target_midi": 49
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 51
             }
           ],
@@ -132922,19 +132713,19 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 376.4018991120058,
+          "plan_cost": 538.6732444948566,
           "recording_for_pitch": {
-            "69": "009",
-            "71": "069",
-            "72": "094",
-            "74": null,
-            "76": null,
-            "77": "017",
-            "79": "086",
-            "81": "091"
+            "57": "009",
+            "59": "069",
+            "60": "094",
+            "62": null,
+            "64": null,
+            "65": "017",
+            "67": "086",
+            "69": "091"
           },
           "song": "korobeiniki",
-          "transpose": -25,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -133548,29 +133339,24 @@
           "unlocked": false
         },
         {
-          "missing": [
-            {
-              "seconds": 1.0,
-              "target_midi": 51
-            }
-          ],
+          "missing": [],
           "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 6
           },
-          "plan_cost": 152.04648537042755,
+          "plan_cost": 836.0297378078674,
           "recording_for_pitch": {
             "60": "009",
             "62": "069",
             "64": "094",
-            "67": null,
-            "69": "017",
+            "67": "017",
+            "69": "086",
             "72": "091"
           },
           "song": "jesus-loves-me",
           "transpose": -16,
-          "unlocked": false
+          "unlocked": true
         },
         {
           "missing": [
@@ -137148,20 +136934,20 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 48
+              "seconds": 0.5,
+              "target_midi": 47
             },
             {
               "seconds": 0.8,
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.5,
               "target_midi": 50
             },
             {
               "seconds": 0.5,
-              "target_midi": 51
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 55
+              "target_midi": 52
             }
           ],
           "octave_moves": 1,
@@ -137169,19 +136955,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 55.198812341514035,
+          "plan_cost": 52.23927177171469,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": "022",
-            "76": null,
-            "77": "084",
-            "79": "103",
-            "81": "094"
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": "084",
+            "65": "022",
+            "67": "103",
+            "69": "094"
           },
           "song": "korobeiniki",
-          "transpose": -21,
+          "transpose": -10,
           "unlocked": false
         },
         {
@@ -137908,34 +137694,30 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
-              "target_midi": 61
+              "seconds": 0.3,
+              "target_midi": 56
             },
             {
-              "seconds": 0.5,
-              "target_midi": 63
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 66
+              "seconds": 0.8,
+              "target_midi": 64
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 6
           },
-          "plan_cost": 16.16773725287039,
+          "plan_cost": 126.6082453315255,
           "recording_for_pitch": {
             "60": "022",
             "62": "084",
-            "64": "094",
-            "67": null,
-            "69": null,
+            "64": null,
+            "67": "094",
+            "69": "103",
             "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -6,
+          "transpose": -8,
           "unlocked": false
         },
         {
@@ -141964,44 +141746,40 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 48
+              "seconds": 0.5,
+              "target_midi": 52
             },
             {
               "seconds": 0.8,
-              "target_midi": 50
+              "target_midi": 54
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 59
             },
             {
               "seconds": 0.5,
-              "target_midi": 51
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 53
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 56
+              "target_midi": 64
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 8
           },
-          "plan_cost": 14.403889486673158,
+          "plan_cost": 23.741226513200406,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": "090",
-            "77": null,
-            "79": "103",
-            "81": "094"
+            "57": null,
+            "59": null,
+            "60": "090",
+            "62": "094",
+            "64": null,
+            "65": "104",
+            "67": "103",
+            "69": null
           },
           "song": "korobeiniki",
-          "transpose": -21,
+          "transpose": -5,
           "unlocked": false
         },
         {
@@ -142796,38 +142574,34 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 46
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 50
-            },
-            {
               "seconds": 1.0,
+              "target_midi": 51
+            },
+            {
+              "seconds": 0.8,
               "target_midi": 53
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 63
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 3,
             "total": 6
           },
-          "plan_cost": 0.7074970377979959,
+          "plan_cost": 53.06757610454767,
           "recording_for_pitch": {
             "60": null,
             "62": null,
-            "64": null,
-            "67": null,
-            "69": "090",
-            "72": "094"
+            "64": "090",
+            "67": "094",
+            "69": "103",
+            "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -14,
+          "transpose": -9,
           "unlocked": false
         },
         {
@@ -146618,20 +146392,20 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 52
+              "seconds": 0.8,
+              "target_midi": 43
             },
             {
               "seconds": 0.5,
-              "target_midi": 54
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 46
             },
             {
               "seconds": 0.8,
-              "target_midi": 57
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 61
+              "target_midi": 48
             }
           ],
           "octave_moves": 1,
@@ -146639,19 +146413,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 128.69733332960473,
+          "plan_cost": 76.93014820900675,
           "recording_for_pitch": {
-            "69": "032",
-            "71": "017",
-            "72": null,
-            "74": null,
-            "76": "013",
-            "77": null,
-            "79": "103",
-            "81": null
+            "57": "017",
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "103",
+            "67": "032",
+            "69": "013"
           },
           "song": "korobeiniki",
-          "transpose": -20,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -147386,34 +147160,30 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 43
+              "seconds": 0.3,
+              "target_midi": 53
             },
             {
-              "seconds": 0.5,
-              "target_midi": 45
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 48
+              "seconds": 0.8,
+              "target_midi": 61
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 6
           },
-          "plan_cost": 41.00153247769076,
+          "plan_cost": 818.8622650686306,
           "recording_for_pitch": {
-            "60": "017",
-            "62": null,
+            "60": "032",
+            "62": "017",
             "64": null,
-            "67": null,
-            "69": "032",
-            "72": "013"
+            "67": "013",
+            "69": "103",
+            "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -19,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -151227,15 +150997,15 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 45
-            },
-            {
-              "seconds": 0.5,
               "target_midi": 46
             },
             {
               "seconds": 0.5,
-              "target_midi": 48
+              "target_midi": 47
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 49
             },
             {
               "seconds": 0.8,
@@ -151247,19 +151017,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 114.91846629279921,
+          "plan_cost": 148.3569977562145,
           "recording_for_pitch": {
-            "69": "069",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": "101",
-            "77": null,
-            "79": "098",
-            "81": "090"
+            "57": "069",
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "098",
+            "67": "101",
+            "69": "090"
           },
           "song": "korobeiniki",
-          "transpose": -26,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -152002,34 +151772,30 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 46
-            },
-            {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 48
             },
             {
-              "seconds": 1.0,
-              "target_midi": 51
+              "seconds": 0.8,
+              "target_midi": 58
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 6
           },
-          "plan_cost": 13.260694787888568,
+          "plan_cost": 387.82524026474493,
           "recording_for_pitch": {
             "60": "069",
             "62": null,
-            "64": null,
-            "67": null,
-            "69": "101",
-            "72": "090"
+            "64": "098",
+            "67": "101",
+            "69": "090",
+            "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -16,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -155909,12 +155675,12 @@
               "target_midi": 48
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 50
             },
             {
               "seconds": 0.3,
-              "target_midi": 53
+              "target_midi": 51
             }
           ],
           "octave_moves": 1,
@@ -155922,19 +155688,19 @@
             "covered": 3,
             "total": 8
           },
-          "plan_cost": 150.0439660298659,
+          "plan_cost": 232.36679311412902,
           "recording_for_pitch": {
-            "69": "009",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "032",
-            "79": null,
-            "81": "013"
+            "57": "009",
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": null,
+            "67": "032",
+            "69": "013"
           },
           "song": "korobeiniki",
-          "transpose": -26,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -156713,15 +156479,15 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 44
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.3,
               "target_midi": 46
             },
             {
-              "seconds": 1.0,
+              "seconds": 0.5,
               "target_midi": 49
             }
           ],
@@ -156730,7 +156496,7 @@
             "covered": 3,
             "total": 6
           },
-          "plan_cost": 56.51433238635606,
+          "plan_cost": 482.82774358591286,
           "recording_for_pitch": {
             "60": "009",
             "62": null,
@@ -160427,11 +160193,11 @@
               "target_midi": 49
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 51
             },
             {
-              "seconds": 0.8,
+              "seconds": 0.3,
               "target_midi": 52
             }
           ],
@@ -160440,19 +160206,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 321.51236847071704,
+          "plan_cost": 486.03270738684296,
           "recording_for_pitch": {
-            "69": "009",
-            "71": "069",
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": null,
-            "79": "090",
-            "81": "097"
+            "57": "009",
+            "59": "069",
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": null,
+            "67": "090",
+            "69": "097"
           },
           "song": "korobeiniki",
-          "transpose": -25,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -161152,29 +160918,29 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 49
+              "target_midi": 51
             },
             {
-              "seconds": 1.0,
-              "target_midi": 52
+              "seconds": 0.8,
+              "target_midi": 56
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 81.85891993428474,
+          "plan_cost": 795.7426914976797,
           "recording_for_pitch": {
             "60": "009",
             "62": "069",
-            "64": null,
+            "64": "097",
             "67": null,
             "69": "090",
-            "72": "097"
+            "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -15,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -165403,48 +165169,44 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 31
+            },
+            {
               "seconds": 0.8,
               "target_midi": 33
             },
             {
-              "seconds": 0.8,
-              "target_midi": 35
+              "seconds": 0.5,
+              "target_midi": 34
             },
             {
               "seconds": 0.5,
               "target_midi": 36
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 38
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 40
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 45
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 3,
             "total": 8
           },
-          "plan_cost": 4.977623212496717,
+          "plan_cost": 16.839418628896816,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "095",
-            "79": "019",
-            "81": null
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "016",
+            "67": "019",
+            "69": "095"
           },
           "song": "korobeiniki",
-          "transpose": -36,
+          "transpose": -26,
           "unlocked": false
         },
         {
@@ -166307,42 +166069,34 @@
         {
           "missing": [
             {
+              "seconds": 1.0,
+              "target_midi": 36
+            },
+            {
               "seconds": 0.5,
               "target_midi": 43
             },
             {
-              "seconds": 0.5,
-              "target_midi": 45
-            },
-            {
-              "seconds": 1.0,
+              "seconds": 0.8,
               "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 50
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 53
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 1,
+            "covered": 3,
             "total": 6
           },
-          "plan_cost": 1.3655905541573286,
+          "plan_cost": 91.0559820973971,
           "recording_for_pitch": {
-            "60": "095",
-            "62": null,
-            "64": null,
+            "60": null,
+            "62": "095",
+            "64": "016",
             "67": null,
-            "69": null,
+            "69": "019",
             "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -19,
+          "transpose": -24,
           "unlocked": false
         },
         {
@@ -170563,44 +170317,44 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 41
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 43
-            },
-            {
               "seconds": 0.5,
-              "target_midi": 44
+              "target_midi": 45
             },
             {
-              "seconds": 0.5,
-              "target_midi": 46
+              "seconds": 0.8,
+              "target_midi": 47
             },
             {
               "seconds": 0.5,
               "target_midi": 48
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 50
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 52
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
             "total": 8
           },
-          "plan_cost": 40.84864666074318,
+          "plan_cost": 13.830075372672644,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "091",
-            "79": "016",
-            "81": "090"
+            "57": null,
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "090",
+            "67": "016",
+            "69": "091"
           },
           "song": "korobeiniki",
-          "transpose": -28,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -171423,38 +171177,34 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 46
-            },
-            {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 48
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 50
             },
             {
-              "seconds": 1.0,
-              "target_midi": 53
+              "seconds": 0.8,
+              "target_midi": 60
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 3,
             "total": 6
           },
-          "plan_cost": 0.47421350793470524,
+          "plan_cost": 93.1560022446044,
           "recording_for_pitch": {
             "60": null,
             "62": null,
-            "64": null,
-            "67": null,
-            "69": "090",
-            "72": "091"
+            "64": "016",
+            "67": "090",
+            "69": "091",
+            "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -14,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -175258,40 +175008,40 @@
         {
           "missing": [
             {
+              "seconds": 0.5,
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 46
+            },
+            {
               "seconds": 0.8,
               "target_midi": 48
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.3,
               "target_midi": 51
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 55
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 60
             }
           ],
-          "octave_moves": 4,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 99.81827933028198,
+          "plan_cost": 77.92327769852297,
           "recording_for_pitch": {
-            "69": null,
-            "71": "017",
-            "72": null,
-            "74": "095",
-            "76": null,
-            "77": "059",
-            "79": "096",
-            "81": null
+            "57": "017",
+            "59": "095",
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "096",
+            "67": null,
+            "69": "059"
           },
           "song": "korobeiniki",
-          "transpose": -21,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -176022,30 +175772,26 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 45
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 48
+              "target_midi": 41
             },
             {
               "seconds": 0.5,
-              "target_midi": 50
+              "target_midi": 48
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 6
           },
-          "plan_cost": 30.095109349384202,
+          "plan_cost": 178.7844000810984,
           "recording_for_pitch": {
-            "60": "017",
+            "60": null,
             "62": "095",
-            "64": null,
+            "64": "096",
             "67": null,
-            "69": null,
+            "69": "017",
             "72": "059"
           },
           "song": "jesus-loves-me",
@@ -179816,7 +179562,7 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 0.5,
               "target_midi": 48
             },
             {
@@ -179824,11 +179570,11 @@
               "target_midi": 51
             },
             {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 55
             },
             {
-              "seconds": 0.8,
+              "seconds": 0.3,
               "target_midi": 56
             }
           ],
@@ -179837,19 +179583,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 55.99544245951627,
+          "plan_cost": 64.11640213166537,
           "recording_for_pitch": {
-            "69": null,
-            "71": "032",
-            "72": null,
-            "74": "101",
-            "76": null,
-            "77": null,
-            "79": "103",
-            "81": "097"
+            "57": null,
+            "59": "032",
+            "60": null,
+            "62": "101",
+            "64": null,
+            "65": null,
+            "67": "103",
+            "69": "097"
           },
           "song": "korobeiniki",
-          "transpose": -21,
+          "transpose": -9,
           "unlocked": false
         },
         {
@@ -180588,34 +180334,30 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 51
+              "seconds": 0.8,
+              "target_midi": 53
             },
             {
-              "seconds": 1.0,
-              "target_midi": 56
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 58
+              "seconds": 0.8,
+              "target_midi": 63
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 6
           },
-          "plan_cost": 19.90278013717071,
+          "plan_cost": 242.37637744294096,
           "recording_for_pitch": {
             "60": "032",
             "62": null,
             "64": "101",
-            "67": null,
-            "69": null,
-            "72": "097"
+            "67": "097",
+            "69": "103",
+            "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -11,
+          "transpose": -9,
           "unlocked": false
         },
         {
@@ -184276,32 +184018,28 @@
               "target_midi": 49
             },
             {
-              "seconds": 0.5,
-              "target_midi": 51
-            },
-            {
               "seconds": 0.8,
-              "target_midi": 54
+              "target_midi": 53
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 29.34620500613857,
+          "plan_cost": 58.99712556972277,
           "recording_for_pitch": {
-            "69": "002",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": "101",
-            "77": null,
-            "79": "102",
-            "81": "013"
+            "57": "002",
+            "59": null,
+            "60": null,
+            "62": "101",
+            "64": null,
+            "65": "016",
+            "67": "102",
+            "69": "013"
           },
           "song": "korobeiniki",
-          "transpose": -23,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -185004,34 +184742,26 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 44
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 51
+              "target_midi": 43
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 13.452630987736296,
+          "plan_cost": 260.72313171850203,
           "recording_for_pitch": {
             "60": null,
             "62": "002",
-            "64": null,
-            "67": null,
-            "69": "101",
+            "64": "102",
+            "67": "101",
+            "69": "016",
             "72": "013"
           },
           "song": "jesus-loves-me",
-          "transpose": -16,
+          "transpose": -17,
           "unlocked": false
         },
         {
@@ -188683,39 +188413,35 @@
           "missing": [
             {
               "seconds": 0.8,
+              "target_midi": 43
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 44
+            },
+            {
+              "seconds": 0.8,
               "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 49
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 51
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 53
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 415.04562452773825,
+          "plan_cost": 709.7368447288828,
           "recording_for_pitch": {
-            "69": "080",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": "059",
-            "79": "104",
-            "81": "097"
+            "57": "080",
+            "59": null,
+            "60": null,
+            "62": "097",
+            "64": null,
+            "65": "104",
+            "67": "016",
+            "69": "059"
           },
           "song": "korobeiniki",
-          "transpose": -23,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -189418,34 +189144,26 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 50
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 53
+              "seconds": 0.8,
+              "target_midi": 44
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 120.22102033872206,
+          "plan_cost": 971.0407751741019,
           "recording_for_pitch": {
             "60": "080",
             "62": null,
-            "64": null,
-            "67": null,
-            "69": "059",
-            "72": "097"
+            "64": "104",
+            "67": "097",
+            "69": "016",
+            "72": "059"
           },
           "song": "jesus-loves-me",
-          "transpose": -14,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -193175,40 +192893,36 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 45
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 47
+              "seconds": 0.5,
+              "target_midi": 35
             },
             {
               "seconds": 0.5,
-              "target_midi": 48
+              "target_midi": 38
             },
             {
-              "seconds": 0.5,
-              "target_midi": 50
+              "seconds": 0.8,
+              "target_midi": 42
             }
           ],
           "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 48.19162154779381,
+          "plan_cost": 88.69516686483298,
           "recording_for_pitch": {
-            "69": null,
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": "101",
-            "77": "017",
-            "79": "102",
-            "81": "094"
+            "57": null,
+            "59": "017",
+            "60": null,
+            "62": "101",
+            "64": null,
+            "65": "016",
+            "67": "102",
+            "69": "094"
           },
           "song": "korobeiniki",
-          "transpose": -24,
+          "transpose": -22,
           "unlocked": false
         },
         {
@@ -193939,34 +193653,30 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 51
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 56
+              "target_midi": 37
             },
             {
-              "seconds": 0.5,
-              "target_midi": 61
+              "seconds": 0.8,
+              "target_midi": 49
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 6
           },
-          "plan_cost": 15.5906106411711,
+          "plan_cost": 188.64265950988016,
           "recording_for_pitch": {
-            "60": "017",
-            "62": null,
-            "64": "101",
-            "67": null,
-            "69": "094",
+            "60": null,
+            "62": "017",
+            "64": "016",
+            "67": "094",
+            "69": "102",
             "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -11,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -197846,43 +197556,39 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 45
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 46
-            },
-            {
-              "seconds": 0.5,
               "target_midi": 48
             },
             {
               "seconds": 0.5,
-              "target_midi": 50
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 51
             },
             {
               "seconds": 0.8,
-              "target_midi": 51
+              "target_midi": 53
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 8
           },
-          "plan_cost": 377.0521908708003,
+          "plan_cost": 649.9063376259767,
           "recording_for_pitch": {
-            "69": "080",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": null,
-            "77": null,
-            "79": "019",
-            "81": "059"
+            "57": "080",
+            "59": null,
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "019",
+            "67": "104",
+            "69": "059"
           },
           "song": "korobeiniki",
-          "transpose": -26,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -198665,38 +198371,30 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 45
+              "seconds": 0.8,
+              "target_midi": 43
             },
             {
               "seconds": 0.5,
-              "target_midi": 47
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 50
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 52
+              "target_midi": 48
             }
           ],
           "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 4,
             "total": 6
           },
-          "plan_cost": 90.95287426299079,
+          "plan_cost": 758.4783029309732,
           "recording_for_pitch": {
             "60": "080",
             "62": null,
-            "64": null,
+            "64": "104",
             "67": null,
-            "69": null,
+            "69": "096",
             "72": "059"
           },
           "song": "jesus-loves-me",
-          "transpose": -17,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -202419,10 +202117,6 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 45
-            },
-            {
               "seconds": 0.5,
               "target_midi": 46
             },
@@ -202432,27 +202126,27 @@
             },
             {
               "seconds": 0.8,
-              "target_midi": 51
+              "target_midi": 50
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 74.28195943386092,
+          "plan_cost": 94.80546566442,
           "recording_for_pitch": {
-            "69": "095",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": "101",
-            "77": null,
-            "79": "086",
-            "81": "084"
+            "57": "095",
+            "59": "084",
+            "60": null,
+            "62": null,
+            "64": null,
+            "65": "098",
+            "67": "086",
+            "69": "101"
           },
           "song": "korobeiniki",
-          "transpose": -26,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -203163,34 +202857,30 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 45
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 47
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 50
+              "target_midi": 49
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 61
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 6
           },
-          "plan_cost": 13.898408698300322,
+          "plan_cost": 125.28428964282287,
           "recording_for_pitch": {
-            "60": "095",
-            "62": null,
-            "64": null,
-            "67": null,
-            "69": "101",
-            "72": "084"
+            "60": null,
+            "62": "095",
+            "64": "101",
+            "67": "084",
+            "69": "086",
+            "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -17,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -206900,39 +206590,35 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 47
-            },
-            {
-              "seconds": 0.5,
               "target_midi": 48
             },
             {
               "seconds": 0.5,
-              "target_midi": 50
+              "target_midi": 49
             },
             {
               "seconds": 0.8,
               "target_midi": 53
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 390.83340700281576,
+          "plan_cost": 657.4890229055596,
           "recording_for_pitch": {
-            "69": "080",
-            "71": null,
-            "72": null,
-            "74": null,
-            "76": "101",
-            "77": null,
-            "79": "086",
-            "81": "097"
+            "57": "080",
+            "59": null,
+            "60": null,
+            "62": "101",
+            "64": null,
+            "65": "086",
+            "67": "019",
+            "69": "097"
           },
           "song": "korobeiniki",
-          "transpose": -24,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -207647,34 +207333,30 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 46
+              "seconds": 0.8,
+              "target_midi": 47
             },
             {
-              "seconds": 0.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 51
+              "seconds": 0.8,
+              "target_midi": 57
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 4,
             "total": 6
           },
-          "plan_cost": 95.9811847981224,
+          "plan_cost": 877.6320635017162,
           "recording_for_pitch": {
             "60": "080",
             "62": null,
-            "64": null,
-            "67": null,
-            "69": "101",
-            "72": "097"
+            "64": "097",
+            "67": "101",
+            "69": "086",
+            "72": null
           },
           "song": "jesus-loves-me",
-          "transpose": -16,
+          "transpose": -15,
           "unlocked": false
         },
         {
@@ -210826,32 +210508,32 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 40
+              "seconds": 0.5,
+              "target_midi": 44
             },
             {
-              "seconds": 0.5,
-              "target_midi": 41
+              "seconds": 0.8,
+              "target_midi": 48
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 136.79128458719816,
+          "plan_cost": 298.005223459688,
           "recording_for_pitch": {
-            "69": "017",
-            "71": null,
-            "72": null,
-            "74": "090",
-            "76": "069",
-            "77": "084",
-            "79": "104",
-            "81": "032"
+            "57": "017",
+            "59": "084",
+            "60": null,
+            "62": "069",
+            "64": null,
+            "65": "104",
+            "67": "032",
+            "69": "090"
           },
           "song": "korobeiniki",
-          "transpose": -31,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -211416,29 +211098,24 @@
           "unlocked": false
         },
         {
-          "missing": [
-            {
-              "seconds": 1.0,
-              "target_midi": 54
-            }
-          ],
-          "octave_moves": 1,
+          "missing": [],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 6
           },
-          "plan_cost": 82.36619564377011,
+          "plan_cost": 507.1733191810541,
           "recording_for_pitch": {
             "60": "069",
-            "62": "017",
-            "64": "032",
-            "67": null,
-            "69": "090",
+            "62": "032",
+            "64": "017",
+            "67": "090",
+            "69": "104",
             "72": "084"
           },
           "song": "jesus-loves-me",
           "transpose": -13,
-          "unlocked": false
+          "unlocked": true
         },
         {
           "missing": [
@@ -214575,36 +214252,32 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 0.5,
               "target_midi": 38
             },
             {
               "seconds": 0.5,
               "target_midi": 41
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 43
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 8
           },
-          "plan_cost": 182.18373246842768,
+          "plan_cost": 286.4019804505144,
           "recording_for_pitch": {
-            "69": null,
-            "71": "095",
-            "72": null,
-            "74": null,
-            "76": "069",
-            "77": "013",
-            "79": "096",
-            "81": "032"
+            "57": null,
+            "59": "095",
+            "60": null,
+            "62": "013",
+            "64": "069",
+            "65": "096",
+            "67": "103",
+            "69": "032"
           },
           "song": "korobeiniki",
-          "transpose": -31,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -215215,33 +214888,24 @@
           "unlocked": false
         },
         {
-          "missing": [
-            {
-              "seconds": 0.5,
-              "target_midi": 46
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 49
-            }
-          ],
-          "octave_moves": 0,
+          "missing": [],
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 6,
             "total": 6
           },
-          "plan_cost": 61.4910004074421,
+          "plan_cost": 940.5677543425601,
           "recording_for_pitch": {
-            "60": "095",
+            "60": "013",
             "62": "069",
-            "64": null,
-            "67": null,
-            "69": "032",
-            "72": "013"
+            "64": "096",
+            "67": "032",
+            "69": "103",
+            "72": "095"
           },
           "song": "jesus-loves-me",
-          "transpose": -18,
-          "unlocked": false
+          "transpose": -19,
+          "unlocked": true
         },
         {
           "missing": [
@@ -218742,39 +218406,35 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 36
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 37
-            },
-            {
-              "seconds": 0.5,
               "target_midi": 41
             },
             {
-              "seconds": 0.8,
+              "seconds": 0.5,
               "target_midi": 42
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 51
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 379.0114577236093,
+          "plan_cost": 548.1861518968634,
           "recording_for_pitch": {
-            "69": "080",
-            "71": null,
-            "72": null,
-            "74": "017",
-            "76": null,
-            "77": null,
-            "79": "104",
-            "81": "094"
+            "57": "017",
+            "59": null,
+            "60": null,
+            "62": "094",
+            "64": "080",
+            "65": "104",
+            "67": "098",
+            "69": null
           },
           "song": "korobeiniki",
-          "transpose": -35,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -219485,34 +219145,26 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 36
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 41
-            },
-            {
-              "seconds": 0.5,
+              "seconds": 0.8,
               "target_midi": 43
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 4,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 5,
             "total": 6
           },
-          "plan_cost": 103.96427113045338,
+          "plan_cost": 887.1875857908318,
           "recording_for_pitch": {
             "60": "080",
             "62": null,
-            "64": "017",
-            "67": null,
-            "69": null,
-            "72": "094"
+            "64": "104",
+            "67": "094",
+            "69": "098",
+            "72": "017"
           },
           "song": "jesus-loves-me",
-          "transpose": -26,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -222652,31 +222304,31 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 41
+              "target_midi": 35
             },
             {
               "seconds": 0.5,
-              "target_midi": 50
+              "target_midi": 37
             }
           ],
-          "octave_moves": 4,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 553.6989161830427,
+          "plan_cost": 873.4934387921035,
           "recording_for_pitch": {
-            "69": "017",
-            "71": "022",
-            "72": null,
-            "74": "009",
-            "76": "094",
-            "77": "080",
-            "79": "098",
-            "81": null
+            "57": "009",
+            "59": "080",
+            "60": null,
+            "62": null,
+            "64": "017",
+            "65": "098",
+            "67": "022",
+            "69": "094"
           },
           "song": "korobeiniki",
-          "transpose": -31,
+          "transpose": -25,
           "unlocked": false
         },
         {
@@ -223249,29 +222901,24 @@
           "unlocked": false
         },
         {
-          "missing": [
-            {
-              "seconds": 1.0,
-              "target_midi": 39
-            }
-          ],
-          "octave_moves": 1,
+          "missing": [],
+          "octave_moves": 5,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 6,
             "total": 6
           },
-          "plan_cost": 321.49045079096294,
+          "plan_cost": 1895.1499641955127,
           "recording_for_pitch": {
-            "60": "009",
-            "62": "080",
-            "64": "017",
-            "67": null,
-            "69": "022",
-            "72": "094"
+            "60": "080",
+            "62": "022",
+            "64": "009",
+            "67": "094",
+            "69": "098",
+            "72": "017"
           },
           "song": "jesus-loves-me",
-          "transpose": -28,
-          "unlocked": false
+          "transpose": -19,
+          "unlocked": true
         },
         {
           "missing": [

@@ -1,47 +1,44 @@
 {
   "bar_lines": [
-    1.5,
-    5.5,
-    9.5,
-    13.5,
-    17.5,
-    21.5,
-    25.5
+    0.0,
+    3.0,
+    6.0,
+    9.0,
+    12.0,
+    15.0,
+    18.0,
+    21.0,
+    24.0,
+    27.0
   ],
-  "beats_per_bar": 4,
-  "bpm": 72,
+  "beats_per_bar": 3,
+  "bpm": 120,
   "file": "midi/pdmx-female-saylor.mid",
   "id": "female-saylor",
   "import_args": {
-    "bpm": 72,
-    "max_beats": 29.5,
-    "start_beat": 2.5
+    "beats_per_bar": 3,
+    "bpm": 120,
+    "max_beats": 30
   },
   "import_report": {
     "catalog_id": "female-saylor",
     "chord_tones_dropped": 0,
-    "inner_voice_onsets_dropped": 9,
-    "note_count": 40,
-    "overlaps_clipped": 2,
+    "inner_voice_onsets_dropped": 0,
+    "note_count": 31,
+    "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-female-saylor.mid",
-    "tempo_changes_ignored": 0,
+    "tempo_changes_ignored": 2,
     "track_used": 0,
     "tracks_with_notes": [
-      0,
-      1
+      0
     ]
   },
-  "length_beats": 29.5,
+  "length_beats": 30.0,
   "notes": [
     {
-      "dur": 0.5,
-      "pitch": 79,
+      "dur": 1.0,
+      "pitch": 62,
       "start": 0.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 78,
-      "start": 0.5
     },
     {
       "dur": 0.5,
@@ -54,201 +51,154 @@
       "start": 1.5
     },
     {
-      "dur": 1.0,
+      "dur": 0.5,
       "pitch": 67,
       "start": 2.5
     },
     {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 3.5
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 3.0
     },
     {
-      "dur": 0.5,
-      "pitch": 66,
-      "start": 4.0
-    },
-    {
-      "dur": 0.5,
+      "dur": 1.5,
       "pitch": 67,
       "start": 4.5
     },
     {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 5.0
-    },
-    {
-      "dur": 2.5,
-      "pitch": 76,
-      "start": 5.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 8.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 72,
-      "start": 8.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 64,
-      "start": 9.0
-    },
-    {
-      "dur": 0.9583333333333334,
-      "pitch": 64,
-      "start": 9.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
-      "start": 11.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 72,
-      "start": 12.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 71,
-      "start": 13.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 72,
-      "start": 16.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 16.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 17.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
-      "start": 17.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 60,
-      "start": 18.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 60,
-      "start": 19.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 20.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 60,
-      "start": 20.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 21.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 71,
-      "start": 21.5
-    },
-    {
       "dur": 1.0,
       "pitch": 69,
-      "start": 22.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 23.5
+      "start": 6.0
     },
     {
       "dur": 0.5,
       "pitch": 67,
+      "start": 7.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 7.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 8.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 9.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 10.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 10.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 11.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 12.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 13.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 13.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 14.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 15.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 16.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 18.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 19.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 20.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 62,
+      "start": 21.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
       "start": 24.0
     },
     {
       "dur": 0.5,
-      "pitch": 66,
-      "start": 24.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 64,
+      "pitch": 69,
       "start": 25.0
     },
     {
-      "dur": 0.5,
-      "pitch": 63,
+      "dur": 1.0,
+      "pitch": 69,
       "start": 25.5
     },
     {
       "dur": 0.5,
-      "pitch": 64,
-      "start": 26.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 66,
+      "pitch": 67,
       "start": 26.5
     },
     {
-      "dur": 0.5,
-      "pitch": 60,
+      "dur": 1.5,
+      "pitch": 65,
       "start": 27.0
     },
     {
-      "dur": 0.5,
-      "pitch": 63,
-      "start": 27.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 72,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
+      "dur": 1.5,
+      "pitch": 67,
       "start": 28.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 78,
-      "start": 29.0
     }
   ],
   "pitches": [
-    60,
+    61,
     62,
-    63,
     64,
-    66,
+    65,
     67,
-    69,
-    71,
-    72,
-    74,
-    76,
-    78,
-    79
+    69
   ],
-  "sha256": "a5dd47b263a063f90d0563788e228e9c8ef9f9a796d32e1189a397c00f2f4887",
+  "sha256": "5a8045b53d529228af5d8c7054da3facbfc1044cb37884b8bed71099ec9ba750",
   "title": "The Female Saylor"
 }

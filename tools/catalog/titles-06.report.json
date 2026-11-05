@@ -1,6 +1,9 @@
 {
  "titles": "tools/catalog/titles-06.txt",
- "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-06.txt --tries 5",
+ "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-06.txt --tries 5 --only female-saylor",
+ "only": [
+  "female-saylor"
+ ],
  "dataset": {
   "PDMX.csv": {
    "md5": "30392ccf38bb63ce70e7afae70f9c88c",
@@ -15,7 +18,7 @@
  },
  "library": "38 Recordings, 26 Melodic",
  "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 4 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
- "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes), no rest of 2 beats or more while another staff of the melody's part plays the tune (then the part's staves are read as one part); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
+ "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes), no rest of 1 beat or more while another staff of its part plays the tune, or of 2 beats or more while another part does (then the staves that carry it are read as one); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, or of the held note (2 beats or more) on that closing bar line, when it ends within 36 beats of the excerpt's start, no rest of 2 beats or more comes before it, and the full Fixture Library has a fart that lasts it, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
   "onsets_on_time_pct": 95,
@@ -10020,56 +10023,109 @@
      "gates": {
       "license": "pass",
       "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
+      "sanity": [
+       "the tune moves to another staff of its part: the melody rests 1.04 beats from beat 10.46 while that staff plays",
+       "the tune moves to another staff of its part: the melody rests 1.5 beats from beat 14.5 while that staff plays",
+       "read from tracks 0, 1 as one, the importer dropped 214 chord tones and inner-voice onsets, 48% of the track's notes (at most 10%)"
+      ]
      },
-     "passed": true,
+     "passed": false,
      "sha256": "a5dd47b263a063f90d0563788e228e9c8ef9f9a796d32e1189a397c00f2f4887",
+     "moved_tune": [
+      "the tune moves to another staff of its part: the melody rests 1.04 beats from beat 10.46 while that staff plays",
+      "the tune moves to another staff of its part: the melody rests 1.5 beats from beat 14.5 while that staff plays"
+     ],
      "render": {
       "bpm": 72,
       "start_beat": 2.5,
-      "max_beats": 29.5
+      "max_beats": 31.5,
+      "track": [
+       0,
+       1
+      ]
      },
      "import_report": {
-      "track_used": 0,
+      "track_used": [
+       0,
+       1
+      ],
       "tracks_with_notes": [
        0,
        1
       ],
-      "chord_tones_dropped": 0,
-      "inner_voice_onsets_dropped": 9,
-      "overlaps_clipped": 2,
+      "chord_tones_dropped": 82,
+      "inner_voice_onsets_dropped": 132,
+      "overlaps_clipped": 29,
       "tempo_changes_ignored": 0,
-      "note_count": 40
+      "note_count": 33
      },
-     "track_notes": 207,
-     "range_semitones": 19,
-     "distinct_pitches": 13,
-     "pitch_coverage": "13 of 13",
+     "track_notes": 228,
+     "range_semitones": 17,
+     "distinct_pitches": 12
+    },
+    {
+     "score_id": "4585722",
+     "url": "https://musescore.com/score/4585722",
+     "score_title": "The Female Saylor",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "7",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/15/35/QmXocwCRyZNvhtPe3sr1HNsT5JtieZhydfgwtiQBqXyo4q.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "5a8045b53d529228af5d8c7054da3facbfc1044cb37884b8bed71099ec9ba750",
+     "render": {
+      "bpm": 120,
+      "max_beats": 30,
+      "beats_per_bar": 3
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
+      "chord_tones_dropped": 0,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 2,
+      "note_count": 31
+     },
+     "track_notes": 103,
+     "range_semitones": 8,
+     "distinct_pitches": 6,
+     "pitch_coverage": "6 of 6",
      "metrics": {
-      "notes": 40,
+      "notes": 31,
       "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
-      "notes_with_second_burst": 2,
+      "notes_with_second_burst": 7,
       "pitch_readable_pct": 100,
-      "within_50c_pct": 18,
-      "within_50c_any_octave_pct": 30,
-      "median_abs_cents": 227.5,
-      "contour_pct": 68,
-      "distinct_recordings": 13,
-      "on_pitch_pct": 13,
-      "sounding_pct": 97,
+      "within_50c_pct": 0,
+      "within_50c_any_octave_pct": 0,
+      "median_abs_cents": 112.6,
+      "contour_pct": 65,
+      "distinct_recordings": 6,
+      "on_pitch_pct": 10,
+      "sounding_pct": 95,
       "notes_mostly_silent": 0,
-      "transpose": -18,
-      "octave_moves": 4,
-      "max_abs_shift_semitones": 14.47
+      "transpose": -10,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 1.93
      }
     }
    ],
    "result": "pass",
    "reason": null,
-   "picked": "6155999"
+   "picked": "4585722"
   },
   {
    "id": "miss-lyall",

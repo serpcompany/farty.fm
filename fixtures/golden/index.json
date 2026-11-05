@@ -1200,11 +1200,11 @@
     },
     {
       "id": "korobeiniki",
-      "notes": 35,
+      "notes": 37,
       "title": "Korobeiniki",
       "transpose": {
-        "full": -20,
-        "small": -28
+        "full": -8,
+        "small": -25
       },
       "unlocked": {
         "full": true,
@@ -1486,15 +1486,15 @@
     },
     {
       "id": "jesus-loves-me",
-      "notes": 24,
+      "notes": 49,
       "title": "Jesus Loves Me",
       "transpose": {
-        "full": -11,
-        "small": -19
+        "full": -21,
+        "small": -18
       },
       "unlocked": {
         "full": true,
-        "small": false
+        "small": true
       }
     },
     {

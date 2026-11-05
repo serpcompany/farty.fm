@@ -1,8 +1,9 @@
 {
  "titles": "tools/catalog/titles-02.txt",
- "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-02.txt --tries 5 --only grand-old-flag",
+ "command": "tools/melody-lab/.venv/bin/python -I tools/catalog/import_pdmx.py --titles tools/catalog/titles-02.txt --tries 5 --only korobeiniki,jesus-loves-me",
  "only": [
-  "grand-old-flag"
+  "korobeiniki",
+  "jesus-loves-me"
  ],
  "dataset": {
   "PDMX.csv": {
@@ -18,7 +19,7 @@
  },
  "library": "38 Recordings, 26 Melodic",
  "picking": "title matches one of the Song's names (MATCHES order: title, title head, song name); license publicdomain or cc-zero with no PDMX license conflict; at most 2 tracks; not one of the 6 scores whose bar lines are off the tune (pdmx.MISBARRED_SCORES), or of the 4 that aren't the tune's melody (pdmx.NOT_THE_MELODY); then the highest rating, the most views; up to 5 scores tried per title, best first",
- "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes), no rest of 2 beats or more while another staff of the melody's part plays the tune (then the part's staves are read as one part); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, and the score's tempo within 72-144 bpm",
+ "gates": "license; hash; sanity: 8-64 notes, range <= 19 semitones, at most 10% of the track's notes dropped, no first bar that is a pickup padded with silence (1 beat or more, and at least as long as the bar's notes), no rest of 1 beat or more while another staff of its part plays the tune, or of 2 beats or more while another part does (then the staves that carry it are read as one); render with excerpt from the first note to the end of the whole bars that fit in 32 beats from its bar, or of the held note (2 beats or more) on that closing bar line, when it ends within 36 beats of the excerpt's start, no rest of 2 beats or more comes before it, and the full Fixture Library has a fart that lasts it, and the score's tempo within 72-144 bpm",
  "bar": {
   "within_50c_of_fart_pct": 94,
   "onsets_on_time_pct": 95,
@@ -3821,16 +3822,16 @@
    },
    "tried": [
     {
-     "score_id": "3104746",
-     "url": "https://musescore.com/score/3104746",
-     "score_title": "Korobushka",
+     "score_id": "103168",
+     "url": "https://musescore.com/score/103168",
+     "score_title": "Korobeiniki/Korobushka (Tetris Theme)",
      "match": "title",
-     "rating": "0.0",
-     "n_ratings": "0",
-     "n_views": "790",
+     "rating": "4.78",
+     "n_ratings": "15",
+     "n_views": "9395",
      "license": "publicdomain",
      "n_tracks": "1",
-     "dataset_path": "./mid/7/28/QmPkw4BV4NU157nux2iiUpk4hFZ1ziWNPqM4ZcfHDTUHMH.mid",
+     "dataset_path": "./mid/15/23/QmXhmr9xVWqtRU45Q2m7GgGLwihtQMMf4HPm5GMwYLqbc8.mid",
      "gates": {
       "license": "pass",
       "hash": "pass",
@@ -3838,7 +3839,7 @@
       "render": "pass"
      },
      "passed": true,
-     "sha256": "89e63db277e70e4f19f0ea9d94207e0859edffce7aceab2d7c0288b659169455",
+     "sha256": "859da5eecadd2a0cb8943cff1cd73963d62245b0161ce793cf746b8925481680",
      "render": {
       "bpm": 120,
       "max_beats": 32
@@ -3846,37 +3847,42 @@
      "import_report": {
       "track_used": 0,
       "tracks_with_notes": [
-       0,
-       1
+       0
       ],
       "chord_tones_dropped": 0,
       "inner_voice_onsets_dropped": 0,
       "overlaps_clipped": 0,
-      "tempo_changes_ignored": 1,
-      "note_count": 35
+      "tempo_changes_ignored": 2,
+      "note_count": 37
      },
-     "track_notes": 52,
+     "track_notes": 143,
      "range_semitones": 12,
      "distinct_pitches": 8,
      "pitch_coverage": "8 of 8",
      "metrics": {
-      "notes": 35,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 97,
-      "within_50c_any_octave_pct": 97,
-      "median_abs_cents": 2.6,
+      "notes": 37,
+      "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
+      "notes_with_second_burst": 1,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 22,
+      "within_50c_any_octave_pct": 22,
+      "median_abs_cents": 77.6,
+      "contour_pct": 94,
       "distinct_recordings": 8,
-      "transpose": -21,
-      "octave_moves": 2,
-      "max_abs_shift_semitones": 9.97
+      "on_pitch_pct": 19,
+      "sounding_pct": 95,
+      "notes_mostly_silent": 0,
+      "transpose": -8,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 2.57
      }
     }
    ],
    "result": "pass",
    "reason": null,
-   "picked": "3104746"
+   "picked": "103168"
   },
   {
    "id": "kalinka",
@@ -6530,15 +6536,77 @@
      "gates": {
       "license": "pass",
       "hash": "pass",
-      "sanity": "pass",
-      "render": "pass"
+      "sanity": [
+       "the tune moves to another staff of its part: the melody rests 1 beat from beat 1 while that staff plays",
+       "the tune moves to another staff of its part: the melody rests 1 beat from beat 9 while that staff plays",
+       "the tune moves to another staff of its part: the melody rests 1 beat from beat 17 while that staff plays",
+       "the tune moves to another staff of its part: the melody rests 1 beat from beat 25 while that staff plays",
+       "the tune moves to another staff of its part: the melody rests 1 beat from beat 27 while that staff plays",
+       "the tune moves to another staff of its part: the melody rests 1 beat from beat 31 while that staff plays",
+       "read from tracks 0, 1 as one, range 24 semitones (at most 19)",
+       "read from tracks 0, 1 as one, the importer dropped 112 chord tones and inner-voice onsets, 60% of the track's notes (at most 10%)"
+      ]
      },
-     "passed": true,
+     "passed": false,
      "sha256": "942ac64163ee4a9c4113b816fbb6d3882f3f35a033b242adf02c1aa3a30028b5",
+     "moved_tune": [
+      "the tune moves to another staff of its part: the melody rests 1 beat from beat 1 while that staff plays",
+      "the tune moves to another staff of its part: the melody rests 1 beat from beat 9 while that staff plays",
+      "the tune moves to another staff of its part: the melody rests 1 beat from beat 17 while that staff plays",
+      "the tune moves to another staff of its part: the melody rests 1 beat from beat 25 while that staff plays",
+      "the tune moves to another staff of its part: the melody rests 1 beat from beat 27 while that staff plays",
+      "the tune moves to another staff of its part: the melody rests 1 beat from beat 31 while that staff plays"
+     ],
      "render": {
       "bpm": 120,
-      "start_beat": 8,
-      "max_beats": 32
+      "max_beats": 32,
+      "track": [
+       0,
+       1
+      ]
+     },
+     "import_report": {
+      "track_used": [
+       0,
+       1
+      ],
+      "tracks_with_notes": [
+       0,
+       1
+      ],
+      "chord_tones_dropped": 45,
+      "inner_voice_onsets_dropped": 67,
+      "overlaps_clipped": 3,
+      "tempo_changes_ignored": 0,
+      "note_count": 37
+     },
+     "track_notes": 74,
+     "range_semitones": 24,
+     "distinct_pitches": 8
+    },
+    {
+     "score_id": "116332",
+     "url": "https://musescore.com/score/116332",
+     "score_title": "Jesus Loves Me",
+     "match": "title",
+     "rating": "0.0",
+     "n_ratings": "0",
+     "n_views": "517",
+     "license": "publicdomain",
+     "n_tracks": "1",
+     "dataset_path": "./mid/16/42/QmYsqBX8gCWYPwWJhyv4kf4NfFdwcTRESCNrKnPAXRinVY.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": [
+       "the importer dropped 90 chord tones and inner-voice onsets, 48% of the track's notes (at most 10%)"
+      ]
+     },
+     "passed": false,
+     "sha256": "6d983649a81d6b35f891c999977ada4b09a5bc12d945f9d335c7e3de3faae38b",
+     "render": {
+      "bpm": 120,
+      "max_beats": 34
      },
      "import_report": {
       "track_used": 0,
@@ -6546,34 +6614,78 @@
        0,
        1
       ],
+      "chord_tones_dropped": 90,
+      "inner_voice_onsets_dropped": 0,
+      "overlaps_clipped": 0,
+      "tempo_changes_ignored": 1,
+      "note_count": 29
+     },
+     "track_notes": 98,
+     "range_semitones": 12,
+     "distinct_pitches": 6
+    },
+    {
+     "score_id": "48861",
+     "url": "https://musescore.com/score/48861",
+     "score_title": "Jesus Loves Me - Violin part",
+     "match": "title head",
+     "rating": "4.89",
+     "n_ratings": "7",
+     "n_views": "8628",
+     "license": "cc-zero",
+     "n_tracks": "1",
+     "dataset_path": "./mid/4/46/Qmeu2ruGvFDrhfhVQ96C7T2KoLk1rReE7fSWeZfZMoimgA.mid",
+     "gates": {
+      "license": "pass",
+      "hash": "pass",
+      "sanity": "pass",
+      "render": "pass"
+     },
+     "passed": true,
+     "sha256": "4aeb2d088684aa251758a50e30fe82bf2fc1461fabbd52f762c89ccc91660bdb",
+     "render": {
+      "bpm": 120,
+      "max_beats": 32
+     },
+     "import_report": {
+      "track_used": 0,
+      "tracks_with_notes": [
+       0
+      ],
       "chord_tones_dropped": 0,
       "inner_voice_onsets_dropped": 0,
       "overlaps_clipped": 0,
       "tempo_changes_ignored": 0,
-      "note_count": 23
+      "note_count": 49
      },
-     "track_notes": 46,
+     "track_notes": 49,
      "range_semitones": 12,
      "distinct_pitches": 6,
      "pitch_coverage": "6 of 6",
      "metrics": {
-      "notes": 23,
-      "pitch_readable_pct": 100,
-      "within_50c_pct": 100,
-      "within_50c_any_octave_pct": 100,
-      "median_abs_cents": 2.6,
+      "notes": 49,
+      "within_50c_of_fart_pct": 100,
       "onsets_on_time_pct": 100,
       "notes_with_retrigger": 0,
+      "notes_with_second_burst": 0,
+      "pitch_readable_pct": 100,
+      "within_50c_pct": 24,
+      "within_50c_any_octave_pct": 24,
+      "median_abs_cents": 122.6,
+      "contour_pct": 87,
       "distinct_recordings": 6,
-      "transpose": -7,
-      "octave_moves": 1,
-      "max_abs_shift_semitones": 13.77
+      "on_pitch_pct": 26,
+      "sounding_pct": 94,
+      "notes_mostly_silent": 0,
+      "transpose": -21,
+      "octave_moves": 0,
+      "max_abs_shift_semitones": 1.33
      }
     }
    ],
    "result": "pass",
    "reason": null,
-   "picked": "126188"
+   "picked": "48861"
   },
   {
    "id": "doxology",
