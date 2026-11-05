@@ -494,6 +494,90 @@ describe('the microphone off Record (#369)', () => {
   })
 })
 
+describe('whether the browser remembers the grant (#374)', () => {
+  /** The next `getUserMedia` opens `ms` after the tap, as on an iPhone. */
+  function slowMicrophone(ms: number) {
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockImplementationOnce(async () => {
+      await new Promise(resolve => setTimeout(resolve, ms))
+      return new FakeStream() as unknown as MediaStream
+    })
+  }
+
+  it('knows nothing until the microphone opens', async () => {
+    const { microphoneGrantMemory } = await recorder()
+    expect(microphoneGrantMemory()).toBe('unknown')
+  })
+
+  it('finds it forgotten when the browser said prompt before the grant', async () => {
+    const { startTake, keepMicrophoneOpen, microphoneGrantMemory } = await recorder()
+    keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(microphoneGrantMemory()).toBe('unknown')
+
+    const { take } = await tap(startTake)
+    take?.cancel()
+    expect(microphoneGrantMemory()).toBe('forgotten')
+  })
+
+  it('finds it forgotten when Welcome asked and the browser said prompt', async () => {
+    const { askForMicrophone, microphoneGrantMemory } = await recorder()
+    await askForMicrophone()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(microphoneGrantMemory()).toBe('forgotten')
+  })
+
+  it('finds it remembered when the browser said granted before the page had it', async () => {
+    allowSite()
+    const { startTake, keepMicrophoneOpen, microphoneGrantMemory } = await recorder()
+    keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(microphoneGrantMemory()).toBe('remembered')
+
+    const { take } = await tap(startTake)
+    take?.cancel()
+    expect(microphoneGrantMemory()).toBe('remembered')
+  })
+
+  it('finds it remembered when Welcome asked and the browser already said granted', async () => {
+    allowSite()
+    slowMicrophone(200)
+    const { askForMicrophone, microphoneGrantMemory } = await recorder()
+    const asked = askForMicrophone()
+    await vi.advanceTimersByTimeAsync(200)
+    await asked
+    expect(microphoneGrantMemory()).toBe('remembered')
+  })
+
+  it('doesn’t count an answer that comes after Welcome’s grant', async () => {
+    const permissions = navigator.permissions as unknown as {
+      query: () => Promise<{ state: string }>
+    }
+    permissions.query = () =>
+      new Promise(resolve => setTimeout(() => resolve({ state: 'granted' }), 300))
+    slowMicrophone(200)
+    const { askForMicrophone, microphoneGrantMemory } = await recorder()
+    const asked = askForMicrophone()
+    await vi.advanceTimersByTimeAsync(300)
+    await asked
+    expect(microphoneGrantMemory()).toBe('forgotten')
+  })
+
+  it('doesn’t call a reload’s granted answer forgotten or remembered', async () => {
+    const first = await recorder()
+    first.keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(0)
+    const { take } = await tap(first.startTake)
+    take?.cancel()
+
+    const { startTake, keepMicrophoneOpen, microphoneGrantMemory } = await reload()
+    keepMicrophoneOpen()
+    await vi.advanceTimersByTimeAsync(0)
+    const again = await tap(startTake)
+    again.take?.cancel()
+    expect(microphoneGrantMemory()).toBe('unknown')
+  })
+})
+
 describe('a take whose context’s clock stands still', () => {
   it('tries once more by itself, on a fresh stream and context, and records', async () => {
     const { startTake } = await recorder()

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { installGuideFor, installRouteFor } from './install'
+import { installGuideFor, installRouteFor, safariAllowRouteFor } from './install'
 
 const userAgents = {
   iPhoneSafari:
@@ -152,5 +152,34 @@ describe('installGuideFor', () => {
     expect(guide(userAgents.iPhoneSafari, { standalone: true })).toBe('installed')
     expect(guide(userAgents.androidChrome, { canPrompt: true, standalone: true })).toBe('installed')
     expect(guide(userAgents.windowsChrome, { standalone: true })).toBe('installed')
+  })
+})
+
+describe('safariAllowRouteFor', () => {
+  const route = (userAgent: string, standalone = false) =>
+    safariAllowRouteFor({ userAgent, standalone })
+
+  it('is the Page Menu in Safari on an iPhone', () => {
+    expect(route(userAgents.iPhoneSafari)).toBe('page-menu')
+  })
+
+  it('is Settings on an iPhone’s Home Screen, whatever the user agent says', () => {
+    expect(route(userAgents.iPhoneSafari, true)).toBe('settings')
+    // A Home Screen app's user agent leaves out "Safari/".
+    expect(route(userAgents.iPhoneSafari.replace(/ Safari\/\S+/, ''), true)).toBe('settings')
+  })
+
+  it('is null in other iPhone browsers, which have settings of their own', () => {
+    expect(route(userAgents.iPhoneChrome)).toBeNull()
+    expect(route(userAgents.iPhoneInstagram)).toBeNull()
+    expect(route(userAgents.iPhoneGoogleApp)).toBeNull()
+    expect(route(userAgents.iPhoneSafari.replace('Mobile/', 'OPT/6.0 Mobile/'))).toBeNull()
+    expect(route(userAgents.iPhoneSafari.replace('Safari/', 'Ddg/18.6 Safari/'))).toBeNull()
+  })
+
+  it('is null away from an iPhone', () => {
+    expect(route(userAgents.iPadSafari)).toBeNull()
+    expect(route(userAgents.androidChrome)).toBeNull()
+    expect(route(userAgents.androidChrome, true)).toBeNull()
   })
 })
