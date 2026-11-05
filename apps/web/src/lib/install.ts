@@ -105,12 +105,50 @@ export function currentInstallGuide(): InstallGuide | null {
     userAgent: navigator.userAgent,
     maxTouchPoints: navigator.maxTouchPoints,
     // Chrome's appinstalled counts too: Farty is on the Home Screen, though this tab isn't it.
-    standalone:
-      installed ||
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (navigator as Navigator & { standalone?: boolean }).standalone === true,
+    standalone: installed || runsFromHomeScreen(),
     canPrompt: deferredPrompt !== null
   })
+}
+
+function runsFromHomeScreen(): boolean {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  )
+}
+
+/**
+ * Where to set the microphone to Allow so an iPhone remembers it (#374):
+ * - `page-menu`: Safari's own setting for the site, from its Page Menu.
+ * - `settings`: on the Home Screen, Settings' setting for all of Safari, since the site's own
+ *   doesn't carry over to a Home Screen app.
+ */
+export type SafariAllowRoute = 'page-menu' | 'settings'
+
+/**
+ * The route on an iPhone, or null elsewhere. Other iPhone browsers have settings of their own, and
+ * in-app browsers built on SFSafariViewController can't be told apart from Safari.
+ */
+export function safariAllowRouteFor({
+  userAgent,
+  standalone
+}: {
+  userAgent: string
+  standalone: boolean
+}): SafariAllowRoute | null {
+  if (!/iPhone/.test(userAgent)) return null
+  if (standalone) return 'settings'
+  const safari =
+    /Safari\//.test(userAgent) &&
+    !/CriOS|FxiOS|EdgiOS|OPT\/|OPiOS|Ddg\//.test(userAgent) &&
+    !inAppBrowser.test(userAgent)
+  return safari ? 'page-menu' : null
+}
+
+/** `safariAllowRouteFor` this browser, or null on the server. */
+export function currentSafariAllowRoute(): SafariAllowRoute | null {
+  if (typeof window === 'undefined') return null
+  return safariAllowRouteFor({ userAgent: navigator.userAgent, standalone: runsFromHomeScreen() })
 }
 
 /** How this browser can install Farty now, or null when it's installed or can't be. */
