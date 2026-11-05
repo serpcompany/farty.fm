@@ -79,7 +79,7 @@ describe('Auto-map matches the golden Arrangements', () => {
     }
   }
 
-  it('unlocks all but 5 Songs on the full library, and the 13 from before #229, 2 of those on the small one', () => {
+  it('unlocks all but 4 Songs on the full library, and the 13 from before #229, 2 of those on the small one', () => {
     const locked = (library: Library, ids: readonly string[] = songIds) =>
       ids.filter(id => !arrange(goldenSong(id), inputs(libraries[library])).unlocked)
     // Every burst plays (ADR 0016), so the long notes jingle, row, amazing and auld need have
@@ -107,7 +107,6 @@ describe('Auto-map matches the golden Arrangements', () => {
       'silent-night',
       'joy-to-the-world',
       'away-in-a-manger',
-      'daisy-bell',
       'taps'
     ])
   })
@@ -520,13 +519,12 @@ describe('Placed Recordings (ADR 0015)', () => {
   })
 
   // The same Arrangements as `tools/melody-lab/test_placed.py`.
-  it('covers a note nothing else does: 065 on C2 unlocks 2 Songs the small library leaves locked', () => {
+  it('covers a note nothing else does: 065 on C2 unlocks row, which the small library leaves locked', () => {
     const placed = [
       ...inputs(libraries.small),
       placedAutoMapRecording('065', storedAnalysis('065'), C2)
     ]
     const expected = {
-      jingle: { covered: 5, total: 5, octaveMoves: 2, cost: 260.0875, plays: 67 },
       row: { covered: 6, total: 6, octaveMoves: 2, cost: 821.0865, plays: 67 }
     }
     for (const [id, e] of Object.entries(expected)) {

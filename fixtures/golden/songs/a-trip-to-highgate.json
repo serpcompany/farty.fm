@@ -7,9 +7,7 @@
     12.5,
     15.5,
     18.5,
-    21.5,
-    24.5,
-    27.5
+    21.5
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 30.5
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "a-trip-to-highgate",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 45,
+    "note_count": 36,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-a-trip-to-highgate.mid",
     "tempo_changes_ignored": 1,
@@ -33,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.5,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.5,
@@ -214,51 +212,6 @@
       "dur": 2.5,
       "pitch": 74,
       "start": 21.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 24.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 67,
-      "start": 24.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 25.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 71,
-      "start": 26.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 27.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 74,
-      "start": 27.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 79,
-      "start": 28.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 79,
-      "start": 29.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 30.0
     }
   ],
   "pitches": [

@@ -9,7 +9,13 @@
     18.0,
     21.0,
     24.0,
-    27.0
+    27.0,
+    30.0,
+    33.0,
+    36.0,
+    39.0,
+    42.0,
+    45.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -17,13 +23,13 @@
   "id": "careys-minuet",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 48
   },
   "import_report": {
     "catalog_id": "careys-minuet",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 31,
+    "note_count": 50,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-careys-minuet.mid",
     "tempo_changes_ignored": 1,
@@ -32,7 +38,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 48.0,
   "notes": [
     {
       "dur": 1.0,
@@ -188,18 +194,115 @@
       "dur": 1.0,
       "pitch": 70,
       "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 75,
+      "start": 30.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 31.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 72,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 36.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 37.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 38.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 38.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 41.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 75,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 44.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 45.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 45.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 46.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 46.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 47.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 47.5
     }
   ],
   "pitches": [
     62,
     63,
     65,
+    67,
     69,
     70,
     72,
     74,
     75,
-    77
+    77,
+    79
   ],
   "sha256": "806d921355455429c0d209f48b57b65aa246070b56cb08e456eff7fb38dfde33",
   "title": "Carey's Minuet"

@@ -15,13 +15,13 @@
   "id": "la-mourisque",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 31
   },
   "import_report": {
     "catalog_id": "la-mourisque",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 28,
+    "note_count": 27,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-la-mourisque.mid",
     "tempo_changes_ignored": 2,
@@ -30,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 0.5,
@@ -166,11 +166,6 @@
       "dur": 3.0,
       "pitch": 67,
       "start": 28.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 31.0
     }
   ],
   "pitches": [

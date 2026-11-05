@@ -11,13 +11,13 @@
   "id": "up-with-aily",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 36
   },
   "import_report": {
     "catalog_id": "up-with-aily",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 21,
+    "note_count": 27,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-up-with-aily.mid",
     "tempo_changes_ignored": 1,
@@ -26,7 +26,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 36.0,
   "notes": [
     {
       "dur": 2.0,
@@ -132,9 +132,40 @@
       "dur": 3.0,
       "pitch": 72,
       "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 32.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 35.0
     }
   ],
   "pitches": [
+    60,
     62,
     64,
     66,

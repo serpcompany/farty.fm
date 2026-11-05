@@ -6,7 +6,8 @@
     12.25,
     16.25,
     20.25,
-    24.25
+    24.25,
+    28.25
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -14,14 +15,14 @@
   "id": "la-marche-des-rois",
   "import_args": {
     "bpm": 120,
-    "max_beats": 28.25,
+    "max_beats": 32,
     "start_beat": 3.75
   },
   "import_report": {
     "catalog_id": "la-marche-des-rois",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 39,
+    "note_count": 42,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-la-marche-des-rois.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 28.25,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.25,
@@ -226,6 +227,21 @@
       "dur": 0.5,
       "pitch": 70,
       "start": 27.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 28.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 29.25
+    },
+    {
+      "dur": 1.75,
+      "pitch": 67,
+      "start": 30.25
     }
   ],
   "pitches": [

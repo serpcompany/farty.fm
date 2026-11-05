@@ -7,9 +7,7 @@
     15.0,
     19.0,
     23.0,
-    25.0,
-    29.0,
-    32.0
+    25.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -18,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 34
+    "max_beats": 28
   },
   "import_report": {
     "catalog_id": "wilhelmus",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 37,
+    "note_count": 32,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-wilhelmus.mid",
     "tempo_changes_ignored": 0,
@@ -34,7 +32,7 @@
       1
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 28.0,
   "notes": [
     {
       "dur": 1.0,
@@ -195,31 +193,6 @@
       "dur": 3.0,
       "pitch": 67,
       "start": 25.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 72,
-      "start": 28.5
-    },
-    {
-      "dur": 2.0,
-      "pitch": 74,
-      "start": 29.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 76,
-      "start": 31.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 74,
-      "start": 32.0
     }
   ],
   "pitches": [
@@ -227,9 +200,7 @@
     67,
     69,
     71,
-    72,
-    74,
-    76
+    72
   ],
   "sha256": "17affd4a893d274c026cb7d848331c2a11b954659e1cc5da9fdfff372f4d386b",
   "title": "Wilhelmus"

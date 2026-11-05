@@ -7,8 +7,7 @@
     13.0,
     16.0,
     19.0,
-    22.0,
-    25.0
+    22.0
   ],
   "beats_per_bar": 3,
   "bpm": 72,
@@ -16,14 +15,14 @@
   "id": "vedro-con-mio-diletto",
   "import_args": {
     "bpm": 72,
-    "max_beats": 28,
+    "max_beats": 23.5,
     "start_beat": 20
   },
   "import_report": {
     "catalog_id": "vedro-con-mio-diletto",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 46,
+    "note_count": 33,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-vedro-con-mio-diletto.mid",
     "tempo_changes_ignored": 1,
@@ -34,7 +33,7 @@
       2
     ]
   },
-  "length_beats": 28.0,
+  "length_beats": 23.5,
   "notes": [
     {
       "dur": 1.0,
@@ -200,75 +199,9 @@
       "dur": 1.5,
       "pitch": 71,
       "start": 22.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 69,
-      "start": 23.5
-    },
-    {
-      "dur": 0.25,
-      "pitch": 67,
-      "start": 23.75
-    },
-    {
-      "dur": 0.25,
-      "pitch": 66,
-      "start": 24.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 64,
-      "start": 24.25
-    },
-    {
-      "dur": 0.25,
-      "pitch": 67,
-      "start": 24.5
-    },
-    {
-      "dur": 0.25,
-      "pitch": 71,
-      "start": 24.75
-    },
-    {
-      "dur": 1.5,
-      "pitch": 69,
-      "start": 25.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 67,
-      "start": 26.5
-    },
-    {
-      "dur": 0.25,
-      "pitch": 66,
-      "start": 26.75
-    },
-    {
-      "dur": 0.25,
-      "pitch": 64,
-      "start": 27.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 62,
-      "start": 27.25
-    },
-    {
-      "dur": 0.25,
-      "pitch": 66,
-      "start": 27.5
-    },
-    {
-      "dur": 0.25,
-      "pitch": 69,
-      "start": 27.75
     }
   ],
   "pitches": [
-    62,
     64,
     66,
     67,

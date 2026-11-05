@@ -9,7 +9,12 @@
     18.0,
     21.0,
     24.0,
-    27.0
+    27.0,
+    30.0,
+    33.0,
+    36.0,
+    39.0,
+    42.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +23,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 45
   },
   "import_report": {
     "catalog_id": "johnny-comes-marching",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 38,
+    "note_count": 57,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-johnny-comes-marching.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +38,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 45.0,
   "notes": [
     {
       "dur": 0.5,
@@ -224,6 +229,101 @@
       "dur": 0.5,
       "pitch": 96,
       "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 96,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 95,
+      "start": 30.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 93,
+      "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 95,
+      "start": 31.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 95,
+      "start": 32.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 95,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 96,
+      "start": 33.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 98,
+      "start": 34.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 100,
+      "start": 34.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 98,
+      "start": 36.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 96,
+      "start": 37.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 95,
+      "start": 39.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 88,
+      "start": 40.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 88,
+      "start": 41.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 93,
+      "start": 41.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 93,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 93,
+      "start": 42.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 91,
+      "start": 43.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 93,
+      "start": 44.0
     }
   ],
   "pitches": [

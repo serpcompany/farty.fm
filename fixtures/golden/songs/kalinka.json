@@ -15,8 +15,7 @@
     25.0,
     27.0,
     29.0,
-    31.0,
-    32.0
+    31.0
   ],
   "beats_per_bar": 2,
   "bpm": 120,
@@ -25,13 +24,13 @@
   "import_args": {
     "beats_per_bar": 2,
     "bpm": 120,
-    "max_beats": 34
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "kalinka",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 49,
+    "note_count": 48,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-kalinka.mid",
     "tempo_changes_ignored": 1,
@@ -40,7 +39,7 @@
       0
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 1.0,
@@ -281,11 +280,6 @@
       "dur": 1.0,
       "pitch": 64,
       "start": 31.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 76,
-      "start": 32.0
     }
   ],
   "pitches": [
@@ -293,8 +287,7 @@
     66,
     67,
     69,
-    71,
-    76
+    71
   ],
   "sha256": "5c49467ae1c980b7cbda4aa4d2a7e49e5d543c783dba8ea8f9f276a0d56f6eee",
   "title": "Kalinka"

@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -14,14 +15,14 @@
   "id": "manchester-hornpipe",
   "import_args": {
     "bpm": 120,
-    "max_beats": 29,
+    "max_beats": 32,
     "start_beat": 3
   },
   "import_report": {
     "catalog_id": "manchester-hornpipe",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 56,
+    "note_count": 59,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-manchester-hornpipe.mid",
     "tempo_changes_ignored": 0,
@@ -31,7 +32,7 @@
       1
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.3333333333333333,
@@ -312,6 +313,21 @@
       "dur": 0.25,
       "pitch": 73,
       "start": 28.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 31.0
     }
   ],
   "pitches": [

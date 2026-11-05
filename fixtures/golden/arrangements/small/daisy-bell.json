@@ -5,19 +5,15 @@
   "missing": [
     {
       "seconds": 2.0,
-      "target_midi": 40
+      "target_midi": 41
     },
     {
       "seconds": 1.5,
-      "target_midi": 45
+      "target_midi": 50
     },
     {
       "seconds": 1.5,
-      "target_midi": 49
-    },
-    {
-      "seconds": 1.5,
-      "target_midi": 52
+      "target_midi": 53
     }
   ],
   "notes": null,
@@ -28,65 +24,58 @@
       "recording": null,
       "shift_semitones": null,
       "song_pitch": 69,
-      "target_midi": 40
+      "target_midi": 41
     },
     {
       "octave_move": false,
       "recording": "022",
-      "shift_semitones": 1.6740794063398141,
+      "shift_semitones": 2.674079406339814,
       "song_pitch": 71,
-      "target_midi": 42
+      "target_midi": 43
     },
     {
       "octave_move": false,
       "recording": "069",
-      "shift_semitones": -0.4259205936601731,
+      "shift_semitones": 0.5740794063398269,
       "song_pitch": 73,
-      "target_midi": 44
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 74,
       "target_midi": 45
     },
     {
       "octave_move": false,
       "recording": "002",
-      "shift_semitones": 0.5740794063398198,
-      "song_pitch": 76,
-      "target_midi": 47
+      "shift_semitones": -0.4259205936601802,
+      "song_pitch": 74,
+      "target_midi": 46
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
       "song_pitch": 78,
-      "target_midi": 49
+      "target_midi": 50
     },
     {
       "octave_move": true,
       "recording": "016",
-      "shift_semitones": 9.674079406339814,
+      "shift_semitones": 10.674079406339814,
       "song_pitch": 79,
-      "target_midi": 50
+      "target_midi": 51
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
       "song_pitch": 81,
-      "target_midi": 52
+      "target_midi": 53
     }
   ],
   "pitch_coverage": {
     "covered": 4,
-    "total": 8
+    "total": 7
   },
-  "plan_cost": 28.84510007657908,
+  "plan_cost": 37.14136953331774,
   "render_settings": null,
   "song": "daisy-bell",
-  "transpose": -29,
+  "transpose": -28,
   "unlocked": false
 }

@@ -7,9 +7,7 @@
     12.0,
     15.0,
     18.0,
-    21.0,
-    24.0,
-    28.0
+    21.0
   ],
   "beats_per_bar": 3,
   "bpm": 138,
@@ -18,14 +16,14 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 138,
-    "max_beats": 31,
+    "max_beats": 24,
     "start_beat": 4
   },
   "import_report": {
     "catalog_id": "wives-victory",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 31,
+    "note_count": 30,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-wives-victory.mid",
     "tempo_changes_ignored": 1,
@@ -35,7 +33,7 @@
       1
     ]
   },
-  "length_beats": 28.5,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.5,
@@ -186,11 +184,6 @@
       "dur": 0.5,
       "pitch": 70,
       "start": 23.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 28.0
     }
   ],
   "pitches": [

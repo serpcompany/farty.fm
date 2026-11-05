@@ -4,6 +4,10 @@
   "metrics": null,
   "missing": [
     {
+      "seconds": 1.5,
+      "target_midi": 41
+    },
+    {
       "seconds": 3.0,
       "target_midi": 43
     }
@@ -11,6 +15,13 @@
   "notes": null,
   "octave_moves": 0,
   "per_pitch": [
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 69,
+      "target_midi": 41
+    },
     {
       "octave_move": false,
       "recording": "022",
@@ -42,7 +53,7 @@
   ],
   "pitch_coverage": {
     "covered": 3,
-    "total": 4
+    "total": 5
   },
   "plan_cost": 135.32538486411684,
   "render_settings": null,

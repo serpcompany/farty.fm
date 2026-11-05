@@ -7,9 +7,7 @@
     12.0,
     15.0,
     18.0,
-    21.0,
-    24.0,
-    27.0
+    21.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -17,13 +15,13 @@
   "id": "mr-oconnor",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 23
   },
   "import_report": {
     "catalog_id": "mr-oconnor",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 42,
+    "note_count": 32,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-mr-oconnor.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 23.0,
   "notes": [
     {
       "dur": 1.0,
@@ -193,56 +191,6 @@
       "dur": 1.0,
       "pitch": 66,
       "start": 22.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 64,
-      "start": 23.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 23.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 64,
-      "start": 24.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 67,
-      "start": 25.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 76,
-      "start": 26.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 27.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 27.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 78,
-      "start": 28.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 79,
-      "start": 29.0
     }
   ],
   "pitches": [
@@ -253,10 +201,7 @@
     69,
     71,
     72,
-    74,
-    76,
-    78,
-    79
+    76
   ],
   "sha256": "825c64d7bf1cc76efebe0c121c8e3cedf8d7de9118e7968418a13e741b63470a",
   "title": "Mr. O'Connor"

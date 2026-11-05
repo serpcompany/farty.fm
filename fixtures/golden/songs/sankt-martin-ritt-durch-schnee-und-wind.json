@@ -6,7 +6,10 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0,
+    33.0,
+    37.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +18,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 29
+    "max_beats": 40
   },
   "import_report": {
     "catalog_id": "sankt-martin-ritt-durch-schnee-und-wind",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 32,
+    "note_count": 46,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-sankt-martin-ritt-durch-schnee-und-wind.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +33,7 @@
       0
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 40.0,
   "notes": [
     {
       "dur": 1.0,
@@ -191,10 +194,81 @@
       "dur": 0.5,
       "pitch": 68,
       "start": 28.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 32.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 32.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 75,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 35.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 36.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 37.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 38.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 38.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 39.0
     }
   ],
   "pitches": [
     63,
+    67,
     68,
     70,
     72,

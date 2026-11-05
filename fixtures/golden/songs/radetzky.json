@@ -7,8 +7,7 @@
     16.0,
     20.0,
     24.0,
-    28.0,
-    32.0
+    28.0
   ],
   "beats_per_bar": 4,
   "bpm": 144,
@@ -16,13 +15,13 @@
   "id": "radetzky",
   "import_args": {
     "bpm": 144,
-    "max_beats": 34
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "radetzky",
     "chord_tones_dropped": 3,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 26,
+    "note_count": 25,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-radetzky.mid",
     "tempo_changes_ignored": 2,
@@ -33,7 +32,7 @@
       2
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.5,
@@ -159,11 +158,6 @@
       "dur": 2.0,
       "pitch": 81,
       "start": 30.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 74,
-      "start": 32.0
     }
   ],
   "pitches": [

@@ -7,7 +7,10 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0,
+    36.0,
+    40.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +18,13 @@
   "id": "kimer-i-klokker",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 44
   },
   "import_report": {
     "catalog_id": "kimer-i-klokker",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 36,
+    "note_count": 49,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-kimer-i-klokker.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +33,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 44.0,
   "notes": [
     {
       "dur": 1.0,
@@ -211,6 +214,71 @@
       "dur": 0.5,
       "pitch": 71,
       "start": 31.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 32.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 32.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 33.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 36.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 37.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 38.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 39.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 39.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 40.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 42.0
     }
   ],
   "pitches": [
@@ -219,6 +287,7 @@
     64,
     66,
     67,
+    68,
     69,
     71,
     73,

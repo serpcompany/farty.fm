@@ -5,14 +5,6 @@
   "missing": [
     {
       "seconds": 1.0,
-      "target_midi": 44
-    },
-    {
-      "seconds": 1.0,
-      "target_midi": 48
-    },
-    {
-      "seconds": 1.0,
       "target_midi": 49
     },
     {
@@ -38,9 +30,9 @@
       "target_midi": 43
     },
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": -0.4259205936601731,
       "song_pitch": 69,
       "target_midi": 44
     },
@@ -50,20 +42,6 @@
       "shift_semitones": -0.4259205936601802,
       "song_pitch": 71,
       "target_midi": 46
-    },
-    {
-      "octave_move": false,
-      "recording": "069",
-      "shift_semitones": 2.574079406339827,
-      "song_pitch": 72,
-      "target_midi": 47
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 73,
-      "target_midi": 48
     },
     {
       "octave_move": null,
@@ -89,9 +67,9 @@
   ],
   "pitch_coverage": {
     "covered": 5,
-    "total": 9
+    "total": 7
   },
-  "plan_cost": 45.65231858431258,
+  "plan_cost": 56.447244970139344,
   "render_settings": null,
   "song": "let-me-call-you-sweetheart",
   "transpose": -25,

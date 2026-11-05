@@ -6,7 +6,8 @@
     12.5,
     16.5,
     20.5,
-    24.5
+    24.5,
+    28.5
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 28.5
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "bloomsbury-market",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 46,
+    "note_count": 51,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-bloomsbury-market.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 28.5,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.5,
@@ -261,6 +262,31 @@
       "dur": 0.5,
       "pitch": 76,
       "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 30.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 30.5
     }
   ],
   "pitches": [

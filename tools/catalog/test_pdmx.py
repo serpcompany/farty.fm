@@ -23,6 +23,7 @@ sys.path[:0] = [str(HERE), str(ROOT / "tools/melody-lab")]
 
 import import_pdmx  # noqa: E402
 import pdmx  # noqa: E402
+import recut  # noqa: E402
 from evaluate import BAR  # noqa: E402
 from melody import load_midi  # noqa: E402
 
@@ -309,28 +310,339 @@ class HeldNote(unittest.TestCase):
         notes = load_midi(path, **entry["render"]).notes
         self.assertEqual((notes[-1].start, notes[-1].dur), (32.0, 4.0))
 
-    def test_every_imported_song_ends_on_its_held_note(self):
-        # An imported Song's excerpt ends on its closing bar line, or takes in the held note that
-        # starts there, unless the full Fixture Library has no fart that lasts it (import_pdmx.excerpt).
-        # A hand-entered Song's excerpt is chosen by hand. The closing bar line is the rule's, from the
-        # Song's own start: a Song of the first batches starts on its first bar line, not its first note.
-        # None runs past the held note's limit (#394).
-        from engine import load_library, melody_fit
-        library = load_library()
+
+C, D, E, G = 60, 62, 64, 67
+FOUR_FOUR = ((0.0, 4, 4),)
+
+
+def played(*runs, at=0.0):
+    """A melody as [(start, dur, pitch)], from runs of (pitch, how many notes, each note's beats).
+    A pitch of None is a rest."""
+    notes = []
+    for pitch, count, dur in runs:
+        for _ in range(count):
+            if pitch is not None:
+                notes.append((at, dur, pitch))
+            at += dur
+    return notes
+
+
+def strain(notes, meters):
+    return import_pdmx.bar_lines(list(meters), notes[-1][0] + notes[-1][1] + 1), pdmx.score_marks(list(meters))
+
+
+def cuts(notes, meters=FOUR_FOUR, key="C", start=0.0, stops_at=30):
+    """Where the rule would move an excerpt that stops at `stops_at`: (end, kind), best first."""
+    lines, marks = strain(notes, meters)
+    return [(e.end, e.kind) for e in pdmx.strain_cuts(notes, lines, marks, key, start, stops_at)]
+
+
+class StrainEnds(unittest.TestCase):
+    """Where an excerpt ends (#402), on melodies written to show each rule. All D but the note that
+    shows it, on a tune that ends on C in C major, so D is never the tonic."""
+
+    def test_the_tunes_last_note_ends_it(self):
+        self.assertEqual(cuts(played((D, 46, 1), (C, 1, 2))), [(48.0, "tune")])
+
+    def test_the_whole_tune_up_to_64_beats(self):
+        self.assertEqual(cuts(played((D, 62, 1), (C, 1, 2))), [(64.0, "tune")])
+        self.assertEqual(cuts(played((D, 63, 1), (C, 1, 2))), [])
+
+    def test_a_repeat_on_the_tonic(self):
+        # The Female Saylor: PDMX writes 6/8 again at 24, where its strain repeats, and D is its tonic.
+        notes = played((G, 21, 1), (D, 1, 3), (G, 29, 1), (D, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 6, 8), (24.0, 6, 8)), key="F"), [(24.0, "repeat"), (54.0, "tune")])
+
+    def test_a_repeat_marked_in_the_rest_after_its_note(self):
+        # Uti Var Hage: the note stops at 53, and the score's mark is in the rest before the next note.
+        notes = played((D, 50, 1), (C, 1, 3), (None, 1, 2), (D, 4, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 3, 4), (54.0, 3, 4))), [(53.0, "repeat"), (60.0, "tune")])
+
+    def test_a_repeat_off_the_tonic_is_a_half_close(self):
+        notes = played((G, 21, 1), (E, 1, 3), (G, 29, 1), (D, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 6, 8), (24.0, 6, 8)), key="F"), [(54.0, "tune"), (24.0, "half")])
+
+    def test_the_marks_of_a_repeat(self):
+        # The time signature written again, or a bar split in two before the next meter.
+        self.assertEqual(pdmx.score_marks([(0.0, 3, 4), (24.0, 3, 4)]), [24.0])
+        self.assertEqual(pdmx.score_marks([(0.0, 4, 4), (28.0, 3, 4), (31.0, 1, 4), (32.0, 4, 4)]), [31.0])
+        # A pickup bar, a change of meter and two whole bars of 2/4 aren't.
+        self.assertEqual(pdmx.score_marks([(0.0, 1, 4), (1.0, 3, 4)]), [])
+        self.assertEqual(pdmx.score_marks([(0.0, 3, 4), (24.0, 4, 4)]), [])
+        self.assertEqual(pdmx.score_marks([(0.0, 4, 4), (28.0, 2, 4), (32.0, 4, 4)]), [])
+
+    def test_a_held_tonic_closes_4_bars_or_more(self):
+        notes = played((D, 22, 1), (C, 1, 2), (D, 25, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 6, 4),)), [(24.0, "close"), (50.0, "tune")])
+        # 7 bars isn't a phrase.
+        self.assertEqual(cuts(played((D, 26, 1), (C, 1, 2), (D, 50, 1), (C, 1, 1))), [])
+
+    def test_a_tonic_that_is_not_held_closes_8_bars_or_more(self):
+        self.assertEqual(cuts(played((D, 31, 1), (C, 1, 1), (D, 50, 1), (C, 1, 1))), [(32.0, "close")])
+        self.assertEqual(cuts(played((D, 23, 1), (C, 1, 1), (D, 50, 1), (C, 1, 1))), [])
+
+    def test_a_held_note_off_the_tonic_on_8_bars_is_a_half_close(self):
+        self.assertEqual(cuts(played((D, 30, 1), (G, 1, 2), (D, 50, 1), (C, 1, 1))), [(32.0, "half")])
+
+    def test_a_rest_ends_a_phrase(self):
+        # Swing Low: the held note reaches bar 8, and the excerpt stops with it, not at the next note.
+        notes = played((D, 28, 1), (C, 1, 3), (None, 1, 9), (D, 20, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, stops_at=45), [(31.0, "close"), (61.0, "tune")])
+        self.assertEqual(cuts(notes, stops_at=32), [])
+
+    def test_a_pickup_shifts_the_phrase(self):
+        # A beat's pickup, as PDMX writes it: the held C ends where the next phrase's pickup starts,
+        # a beat before the bar line.
+        notes = played((D, 30, 1), (C, 1, 2), (D, 29, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 1, 4), (1.0, 4, 4))), [(32.0, "close"), (62.0, "tune")])
+
+    def test_a_run_across_a_bar_line_in_a_pickup_tune_is_no_phrase_end(self):
+        notes = played((D, 32, 1), (C, 1, 1), (D, 30, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 1, 4), (1.0, 4, 4))), [(64.0, "tune")])
+
+    def test_a_held_note_with_a_pickup_after_it_in_its_bar(self):
+        # No pickup at the start, but one after the close: the held note ends in its bar's second half.
+        notes = played((D, 29, 1), (C, 1, 2), (D, 1, 1), (D, 50, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, stops_at=32), [(31.0, "close")])
+
+    def test_a_tag_after_the_last_long_rest_is_not_the_tune(self):
+        # Happy Birthday: 4 notes after a rest of 3 beats. Its last "you" ends the tune, and is its tonic.
+        notes = played((D, 22, 1), (C, 1, 3), (None, 1, 3), (D, 3, 1), (G, 1, 2))
+        self.assertEqual(cuts(notes, stops_at=20), [(25.0, "tune")])
+        self.assertEqual(cuts(notes, stops_at=25), [])
+        # 5 notes are the tune's.
+        notes = played((D, 22, 1), (C, 1, 3), (None, 1, 3), (D, 4, 1), (G, 1, 2))
+        self.assertEqual(cuts(notes, stops_at=20)[0], (34.0, "tune"))
+
+    def test_the_first_notes_after_a_long_rest_are_no_end(self):
+        # Hickory Dickory Dock: a lone note lands on the tonic at the 8th bar line, starting a phrase.
+        notes = played((D, 18, 1), (D, 1, 3), (None, 1, 2), (C, 1, 1), (D, 40, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 3, 4),), stops_at=30), [])
+        # A rest of a beat is a breath, so the note after it can end a phrase.
+        notes = played((D, 18, 1), (D, 1, 4), (None, 1, 1), (C, 1, 1), (D, 40, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 3, 4),), stops_at=30)[0], (24.0, "close"))
+
+    def test_an_excerpt_is_at_least_20_beats(self):
+        self.assertEqual(cuts(played((D, 14, 1), (C, 1, 2), (D, 60, 1), (C, 1, 1))), [])
+
+    def test_a_close_ends_within_52_beats(self):
+        self.assertEqual(cuts(played((D, 62, 1), (C, 1, 2), (D, 20, 1), (C, 1, 1))), [])
+
+    def test_an_excerpt_is_at_most_64_notes(self):
+        self.assertEqual(cuts(played((D, 64, 0.5), (C, 1, 2), (D, 4, 1), (C, 1, 1))), [])
+
+    def test_the_nearest_to_32_beats_then_the_longer(self):
+        notes = played((D, 22, 1), (C, 1, 2), (D, 21, 1), (C, 1, 3))
+        self.assertEqual(cuts(notes, ((0.0, 3, 4),)), [(24.0, "close"), (48.0, "tune")])
+        notes = played((D, 22, 1), (C, 1, 2), (D, 15, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 3, 4),)), [(40.0, "tune"), (24.0, "close")])
+
+    def test_a_repeat_comes_first_in_its_tier(self):
+        notes = played((D, 30, 1), (C, 1, 2), (D, 3, 1), (C, 1, 1), (D, 12, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 4, 4), (36.0, 4, 4)), stops_at=34),
+                         [(36.0, "repeat"), (32.0, "close"), (49.0, "tune")])
+
+    def test_a_better_tier_comes_first(self):
+        # A half close is nearer to 32 beats than the tune's end, and still comes after it.
+        notes = played((D, 30, 1), (G, 1, 2), (D, 25, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, stops_at=30), [(58.0, "tune"), (32.0, "half")])
+
+    def test_a_song_on_a_close_stays(self):
+        notes = played((D, 30, 1), (C, 1, 2), (D, 15, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, stops_at=32), [])
+        self.assertEqual(cuts(notes, stops_at=30), [(32.0, "close"), (48.0, "tune")])
+
+    def test_a_song_on_a_half_close_moves_only_for_a_close(self):
+        notes = played((D, 30, 1), (G, 1, 2), (D, 15, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, stops_at=32), [(48.0, "tune")])
+        notes = played((D, 30, 1), (G, 1, 2), (D, 15, 1), (D, 1, 1), (D, 40, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, stops_at=32), [])
+
+    def test_a_song_a_note_past_its_repeat_moves_back_to_it(self):
+        # Nobody Knows stopped on the pickup after its repeat.
+        notes = played((D, 29, 1), (C, 1, 2), (C, 1, 1), (D, 16, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 4, 4), (31.0, 4, 4)), stops_at=32)[0], (31.0, "repeat"))
+
+    def test_a_song_on_a_close_moves_to_a_repeat_within_2_beats(self):
+        notes = played((D, 22, 1), (C, 1, 2), (D, 1, 1), (C, 1, 1), (D, 20, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 3, 4), (26.0, 3, 4)), stops_at=24), [(26.0, "repeat")])
+        notes = played((D, 22, 1), (C, 1, 2), (D, 2, 1), (C, 1, 1), (D, 20, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 3, 4), (27.0, 3, 4)), stops_at=24), [])
+
+    def test_an_end_counts_from_the_excerpts_start(self):
+        notes = played((D, 30, 1), (C, 1, 2), (D, 29, 1), (C, 1, 1), at=4.0)
+        self.assertEqual(cuts(notes, start=4.0), [(32.0, "close"), (62.0, "tune")])
+
+    def test_a_whole_tune_stays(self):
+        self.assertEqual(cuts(played((D, 46, 1), (C, 1, 2)), stops_at=float("inf")), [])
+
+    def test_the_tonic(self):
+        # The tune's last note, when it's the key signature's major or relative minor tonic.
+        self.assertEqual(pdmx.tonics(65, "F"), {5})
+        self.assertEqual(pdmx.tonics(62, "F"), {2})
+        self.assertEqual(pdmx.tonics(62, "Dm"), {2})
+        self.assertEqual(pdmx.tonics(58, "Bb"), {10})
+        # Otherwise it may be the top of a last chord, so the signature's major tonic counts too.
+        self.assertEqual(pdmx.tonics(62, "C"), {2, 0})
+        self.assertEqual(pdmx.tonics(62, "Am"), {2, 0})
+        self.assertEqual(pdmx.tonics(62, None), {2})
+
+
+# The Songs the rule would move further, where each of the ends it tries fails a gate (recut.py).
+STRAIN_ENDS_FAIL_A_GATE = {
+    "away-in-a-manger", "bouzer-castle", "cupids-garden", "deil-take-the-warr", "duke-of-gordons-birthday",
+    "farewell-to-whisky", "johnny-in-the-nether-mains", "lord-save-me-for-thy-glorious-name", "silent-night", "sloop-john-b",
+    "swan", "taps", "what-wondrous-love-is-this", "witches",
+    # These moved to a later choice, and the better end they passed over still fails.
+    "for-ireland-i-wont-say-her-name", "hector-the-hero", "itsy-bitsy", "my-bonnie", "plaisir-damour",
+    # Its whole tune locks with the small library.
+    "hickory-dickory-dock",
+}
+
+
+class EverySong(unittest.TestCase):
+    """The catalog as recut.py leaves it (#402)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.songs = []
         for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
+            r, path = entry["render"], ROOT / "catalog" / entry["file"]
+            start = r.get("start_beat", 0)
+            whole = load_midi(path, track=r.get("track"))
+            notes = [(n.start, n.dur, n.pitch) for n in whole.notes if n.start >= start - pdmx.EPS]
+            _, meters = import_pdmx.score_meta(path)
+            strain = (notes, import_pdmx.bar_lines(meters, notes[-1][0] + notes[-1][1] + 1), pdmx.score_marks(meters),
+                      import_pdmx.score_key(path), start)
+            cls.songs.append((entry, path, whole, strain))
+
+    def test_no_song_stops_short_of_a_better_end_unless_a_gate_stops_it(self):
+        stopped = {e["id"] for e, _, _, strain in self.songs
+                   if pdmx.strain_cuts(*strain, e["render"].get("max_beats", float("inf")))}
+        self.assertEqual(stopped, STRAIN_ENDS_FAIL_A_GATE)
+
+    def test_happy_birthday_ends_on_its_last_you(self):
+        # Its score plays 4 more notes after a rest of 3 beats, and they aren't the tune's end or its tonic.
+        entry, _, whole, strain = next(song for song in self.songs if song[0]["id"] == "birthday")
+        self.assertEqual(entry["render"]["max_beats"], 28)
+        self.assertEqual(len(whole.notes), 29)
+        self.assertEqual(strain[0][24][0:1] + strain[0][24][2:], (24.0, 58))  # A#3
+        self.assertEqual([(e.end, e.kind) for e in pdmx.strain_ends(*strain)][-1], (25.0, "tune"))
+
+    def test_an_imported_song_ends_on_a_strain_or_where_its_bar_lines_stop_it(self):
+        # Where its bar lines stop it: on the closing bar line, or the held note that starts there.
+        # A Song of the first batches starts on its first bar line, not its first note.
+        for entry, path, whole, strain in self.songs:
             if "import" not in entry:
                 continue
-            r, path = entry["render"], ROOT / "catalog" / entry["file"]
-            whole = load_midi(path, track=r.get("track"))
+            r, start = entry["render"], entry["render"].get("start_beat", 0)
             bars = pdmx.render_options(*import_pdmx.score_meta(path), whole.notes[0].start)
-            close, start = bars.get("start_beat", 0) + bars["max_beats"], r.get("start_beat", 0)
-            shorter = pdmx.excerpt_beats(start, close)
-            longer = pdmx.excerpt_beats(start, pdmx.held_note_end([(n.start, n.dur) for n in whole.notes], start, close))
+            close = bars.get("start_beat", 0) + bars["max_beats"]
+            held = pdmx.held_note_end([(n.start, n.dur) for n in whole.notes], start, close)
+            ends = {pdmx.excerpt_beats(0, e.end) for e in pdmx.strain_ends(*strain)}
             with self.subTest(song=entry["id"]):
-                if longer != shorter and not melody_fit(load_midi(path, **{**r, "max_beats": longer}), library).unlocked:
-                    longer = shorter
-                self.assertEqual(r["max_beats"], longer)
-                self.assertLessEqual(r["max_beats"], pdmx.EXCERPT_BEATS + pdmx.HELD_OVERRUN_BEATS)
+                self.assertIn(r["max_beats"], {pdmx.excerpt_beats(start, close), pdmx.excerpt_beats(start, held)} | ends)
+
+
+def female_saylor():
+    return next(e for e in json.loads((ROOT / "catalog/catalog.json").read_text()) if e["id"] == "female-saylor")
+
+
+class StrainOptions(unittest.TestCase):
+    """Which of the rule's ends an excerpt moves to (#402): the first that passes the gates."""
+
+    options = {"bpm": 120, "max_beats": 32}
+    ends = [pdmx.StrainEnd(0, float(end), "close") for end in (24, 28, 36, 40, 48)]
+
+    def moved(self, ends, problems, unlocked=True):
+        fit = mock.Mock(return_value=SimpleNamespace(unlocked=unlocked))
+        with mock.patch.object(pdmx, "strain_cuts", return_value=ends), mock.patch.object(import_pdmx, "melody_fit", fit), \
+                mock.patch.object(import_pdmx, "strain_end_problems", side_effect=problems) as gates:
+            return import_pdmx.strain_options(SCORE, "Twinkle", self.options, library=[]), gates
+
+    def test_it_stays_when_the_rule_has_no_end(self):
+        self.assertEqual(self.moved([], [])[0], self.options)
+
+    def test_the_first_end_that_passes_the_gates(self):
+        self.assertEqual(self.moved(self.ends, [[]])[0]["max_beats"], 24)
+        self.assertEqual(self.moved(self.ends, [["no"], ["no"], []])[0], {"bpm": 120, "max_beats": 36})
+
+    def test_it_stays_when_the_first_4_ends_fail(self):
+        kept, gates = self.moved(self.ends, [["no"]] * 5)
+        self.assertEqual(kept, self.options)
+        self.assertEqual(gates.call_count, pdmx.STRAIN_TRIES)
+
+    def test_only_a_song_unlocked_with_the_small_library_must_stay_so(self):
+        self.assertEqual(self.moved(self.ends, [[]], unlocked=True)[1].call_args.args[-1], [])
+        self.assertIsNone(self.moved(self.ends, [[]], unlocked=False)[1].call_args.args[-1])
+
+
+class StrainEndProblems(unittest.TestCase):
+    """The gates an end must pass, on a real score with a stub fit and renderer."""
+
+    melody = load_midi(SCORE, max_beats=32)
+    on_bar = {"within_50c_of_fart_pct": 100, "onsets_on_time_pct": 100, "notes_with_retrigger": 0, "per_note": []}
+
+    def problems(self, unlocked=lambda library: True, small=None, melody=None, metrics=on_bar):
+        fit = lambda melody, library: SimpleNamespace(unlocked=unlocked(library))  # noqa: E731
+        stubs = {"melody_fit": fit, "plan": mock.Mock(return_value=(0, [])), "render": mock.Mock(return_value=(None, [])),
+                 "evaluate": mock.Mock(return_value=dict(metrics))}
+        with mock.patch.multiple(import_pdmx, **stubs):
+            return import_pdmx.strain_end_problems(SCORE, melody or self.melody, len(self.melody.notes), 0, ["full"], small)
+
+    def test_an_end_that_passes(self):
+        self.assertEqual(self.problems(), [])
+
+    def test_locked_with_the_full_library(self):
+        self.assertEqual(self.problems(lambda library: library != ["full"]), ["locked with the full Fixture Library"])
+
+    def test_newly_locked_with_the_small_library(self):
+        unlocked = lambda library: library != ["small"]  # noqa: E731
+        self.assertEqual(self.problems(unlocked, small=["small"]), ["locked with the small library"])
+        self.assertEqual(self.problems(unlocked), [])
+
+    def test_too_few_notes(self):
+        few = load_midi(SCORE, max_beats=4)
+        self.assertEqual(self.problems(melody=few)[0], f"{len(few.notes)} notes (between 8 and 64)")
+
+    def test_under_the_renderers_bar(self):
+        self.assertEqual(self.problems(metrics={**self.on_bar, "within_50c_of_fart_pct": 93}), ["in50cFart 93% < 94%"])
+
+
+class Recut(unittest.TestCase):
+    """recut.py on The Female Saylor, the Song #402 is about: it stopped two bars into its repeat."""
+
+    @classmethod
+    def setUpClass(cls):
+        from engine import load_library
+        cls.library = load_library()
+        cls.entry = female_saylor()
+        cls.before = {**cls.entry, "render": {**cls.entry["render"], "max_beats": 30}}
+
+    def test_it_ends_on_its_repeat_changing_only_max_beats(self):
+        cut = recut.recut(self.before, ROOT / "catalog", self.library)
+        self.assertEqual(cut, {**self.before, "render": {**self.before["render"], "max_beats": 24}})
+        notes = load_midi(ROOT / "catalog" / cut["file"], **cut["render"]).notes
+        self.assertEqual((len(notes), notes[-1].pitch), (25, 62))  # D4, its tonic, where the strain repeats
+
+    def test_a_second_run_changes_nothing(self):
+        cut = recut.recut(self.before, ROOT / "catalog", self.library)
+        self.assertEqual(recut.recut(cut, ROOT / "catalog", self.library), cut)
+
+    def test_a_cut_that_changes_the_notes_stops_the_run(self):
+        options = {**self.before["render"], "start_beat": 6}
+        with mock.patch.object(import_pdmx, "strain_options", return_value=options), self.assertRaisesRegex(ValueError, "female-saylor"):
+            recut.recut(self.before, ROOT / "catalog", self.library)
+
+    def test_only_the_end_may_move(self):
+        note = lambda start, dur, pitch: SimpleNamespace(start=start, dur=dur, pitch=pitch)  # noqa: E731
+        tune = [note(0, 1, 60), note(1, 1, 62), note(2, 2, 64)]
+        self.assertTrue(recut.only_the_end_moves(tune, tune[:2]))
+        self.assertTrue(recut.only_the_end_moves(tune, tune))
+        self.assertTrue(recut.only_the_end_moves(tune, [*tune[:2], note(2, 3, 64)]))  # the last shared note's length
+        self.assertFalse(recut.only_the_end_moves(tune, [note(0, 2, 60), *tune[1:2]]))
+        self.assertFalse(recut.only_the_end_moves(tune, [tune[0], note(1, 1, 64)]))
+        self.assertFalse(recut.only_the_end_moves(tune, [tune[0], note(1.5, 1, 62)]))
 
 
 class Gates(unittest.TestCase):
@@ -825,6 +1137,19 @@ class Gate(unittest.TestCase):
         self.assertEqual(r["render"]["max_beats"], 29)
         self.assertEqual(r["gates"]["render"], ["locked with the full Fixture Library: 1 of 1 notes covered, needs D4 (1.5 s)"])
 
+    def test_an_excerpt_moves_to_the_end_of_its_strain(self):
+        data = (ROOT / "catalog" / female_saylor()["file"]).read_bytes()
+        r, _ = self.gate(self.file(data), sha256(data), metrics=self.on_bar)
+        self.assertTrue(r["passed"])
+        self.assertEqual((r["render"]["max_beats"], len(r["notes"]), r["notes"][-1][2]), (24, 25, 62))
+        # Where that end fails a gate, it takes the next.
+        r, _ = self.gate(self.file(data), sha256(data), metrics=self.on_bar, unlocked=lambda m: len(m.notes) != 25)
+        self.assertEqual((r["render"]["max_beats"], len(r["notes"])), (48, 50))
+        # Where they all do, it stays where its bar lines stop it.
+        r, _ = self.gate(self.file(data), sha256(data), metrics=self.on_bar, unlocked=lambda m: len(m.notes) == 31)
+        self.assertTrue(r["passed"])
+        self.assertEqual((r["render"]["max_beats"], len(r["notes"])), (30, 31))
+
     def test_a_tune_that_moves_between_staves_is_read_from_both(self):
         path = score(self, ("Piano", 0, RIGHT_HAND), ("Piano", 0, LEFT_HAND))
         r, rendered = self.gate(path, sha256(path.read_bytes()), metrics=self.on_bar)
@@ -843,7 +1168,7 @@ class Gate(unittest.TestCase):
         self.assertTrue(r["passed"])
         self.assertNotIn("moved_tune", r)
         self.assertNotIn("track", r["render"])
-        self.assertEqual(len(r["notes"]), 13)
+        self.assertEqual(len(r["notes"]), 12)  # its 13th comes after a long rest, so it isn't the tune's
 
     def test_a_tune_that_moves_to_another_part_is_read_from_both(self):
         # Moments Musicaux's duet: the first violin rests while the second plays the tune.

@@ -15,14 +15,14 @@
   "id": "o-canada",
   "import_args": {
     "bpm": 112,
-    "max_beats": 32,
+    "max_beats": 31,
     "start_beat": 4
   },
   "import_report": {
     "catalog_id": "o-canada",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 22,
+    "note_count": 20,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-o-canada.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +33,7 @@
       2
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 2.0,
@@ -134,16 +134,6 @@
       "dur": 3.0,
       "pitch": 74,
       "start": 28.0
-    },
-    {
-      "dur": 0.75,
-      "pitch": 69,
-      "start": 31.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 71,
-      "start": 31.75
     }
   ],
   "pitches": [

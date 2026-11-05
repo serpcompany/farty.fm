@@ -14,7 +14,8 @@
     22.5,
     24.5,
     26.5,
-    28.5
+    28.5,
+    30.5
   ],
   "beats_per_bar": 2,
   "bpm": 120,
@@ -23,13 +24,13 @@
   "import_args": {
     "beats_per_bar": 2,
     "bpm": 120,
-    "max_beats": 30.5
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "reveillez-vous-picards",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 52,
+    "note_count": 55,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-reveillez-vous-picards.mid",
     "tempo_changes_ignored": 0,
@@ -38,7 +39,7 @@
       0
     ]
   },
-  "length_beats": 30.5,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.5,
@@ -299,6 +300,21 @@
       "dur": 0.5,
       "pitch": 71,
       "start": 30.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 67,
+      "start": 30.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 66,
+      "start": 31.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 31.5
     }
   ],
   "pitches": [

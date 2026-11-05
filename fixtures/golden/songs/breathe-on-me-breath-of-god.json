@@ -9,7 +9,10 @@
     18.0,
     21.0,
     24.0,
-    27.0
+    27.0,
+    30.0,
+    33.0,
+    36.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -17,13 +20,13 @@
   "id": "breathe-on-me-breath-of-god",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 39
   },
   "import_report": {
     "catalog_id": "breathe-on-me-breath-of-god",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 21,
+    "note_count": 27,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-breathe-on-me-breath-of-god.mid",
     "tempo_changes_ignored": 0,
@@ -34,7 +37,7 @@
       2
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 39.0,
   "notes": [
     {
       "dur": 1.0,
@@ -140,9 +143,40 @@
       "dur": 1.0,
       "pitch": 67,
       "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 32.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 35.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 65,
+      "start": 36.0
     }
   ],
   "pitches": [
+    64,
     65,
     67,
     69,

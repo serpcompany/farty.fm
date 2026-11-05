@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 31
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "der-mond-ist-aufgegangen",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 26,
+    "note_count": 27,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-der-mond-ist-aufgegangen.mid",
     "tempo_changes_ignored": 12,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 1.0,
@@ -162,6 +162,11 @@
       "dur": 2.0,
       "pitch": 64,
       "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 31.0
     }
   ],
   "pitches": [

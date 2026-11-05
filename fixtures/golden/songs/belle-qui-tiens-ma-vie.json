@@ -7,8 +7,7 @@
     16.0,
     20.0,
     24.0,
-    28.0,
-    32.0
+    28.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -16,13 +15,13 @@
   "id": "belle-qui-tiens-ma-vie",
   "import_args": {
     "bpm": 120,
-    "max_beats": 34
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "belle-qui-tiens-ma-vie",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 27,
+    "note_count": 26,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-belle-qui-tiens-ma-vie.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 2.0,
@@ -162,11 +161,6 @@
       "dur": 2.0,
       "pitch": 62,
       "start": 30.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 62,
-      "start": 32.0
     }
   ],
   "pitches": [

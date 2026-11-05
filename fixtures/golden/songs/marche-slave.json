@@ -8,7 +8,13 @@
     20.0,
     24.0,
     28.0,
-    32.0
+    32.0,
+    36.0,
+    40.0,
+    44.0,
+    48.0,
+    52.0,
+    56.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -16,13 +22,13 @@
   "id": "marche-slave",
   "import_args": {
     "bpm": 120,
-    "max_beats": 34
+    "max_beats": 59.979166
   },
   "import_report": {
     "catalog_id": "marche-slave",
     "chord_tones_dropped": 3,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 31,
+    "note_count": 59,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-marche-slave.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +38,7 @@
       1
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 59.979166666666664,
   "notes": [
     {
       "dur": 2.0,
@@ -188,6 +194,146 @@
       "dur": 2.0,
       "pitch": 64,
       "start": 32.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 34.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 35.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 35.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 57,
+      "start": 36.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 39.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 39.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 41.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 42.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 43.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 43.5
+    },
+    {
+      "dur": 2.8541666666666665,
+      "pitch": 57,
+      "start": 44.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 48.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 49.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 50.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 51.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 52.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 56,
+      "start": 52.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 53.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 53.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 54.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 55.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 56.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 56.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 63,
+      "start": 57.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 58.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 59.0
+    },
+    {
+      "dur": 0.4791666666666667,
+      "pitch": 57,
+      "start": 59.5
     }
   ],
   "pitches": [

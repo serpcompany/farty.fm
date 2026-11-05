@@ -9,7 +9,9 @@
     19.5,
     22.5,
     25.5,
-    28.5
+    28.5,
+    31.5,
+    34.5
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -17,13 +19,13 @@
   "id": "il-etait-une-dame-tartine",
   "import_args": {
     "bpm": 120,
-    "max_beats": 31.5
+    "max_beats": 35.458333
   },
   "import_report": {
     "catalog_id": "il-etait-une-dame-tartine",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 48,
+    "note_count": 54,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-il-etait-une-dame-tartine.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +34,7 @@
       0
     ]
   },
-  "length_beats": 31.5,
+  "length_beats": 35.458333333333336,
   "notes": [
     {
       "dur": 1.0,
@@ -273,9 +275,40 @@
       "dur": 0.5,
       "pitch": 62,
       "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 31.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 32.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 33.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 34.0
+    },
+    {
+      "dur": 0.9583333333333334,
+      "pitch": 60,
+      "start": 34.5
     }
   ],
   "pitches": [
+    59,
     60,
     62,
     64,

@@ -7,7 +7,8 @@
     17.0,
     18.0,
     23.0,
-    27.0
+    27.0,
+    31.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -16,13 +17,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 31
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "glenburnie-rant",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 47,
+    "note_count": 52,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-glenburnie-rant.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +32,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 1.0,
@@ -267,6 +268,31 @@
       "dur": 1.0,
       "pitch": 71,
       "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 78,
+      "start": 31.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 32.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 32.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 33.0
     }
   ],
   "pitches": [

@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 29
+    "max_beats": 28.5
   },
   "import_report": {
     "catalog_id": "brandlings",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 61,
+    "note_count": 60,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-brandlings.mid",
     "tempo_changes_ignored": 3,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 28.5,
   "notes": [
     {
       "dur": 0.5,
@@ -332,11 +332,6 @@
       "dur": 0.5,
       "pitch": 81,
       "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 78,
-      "start": 28.5
     }
   ],
   "pitches": [

@@ -7,9 +7,7 @@
     14.0,
     18.0,
     22.0,
-    26.0,
-    28.0,
-    32.0
+    26.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -17,13 +15,13 @@
   "id": "childgrove",
   "import_args": {
     "bpm": 120,
-    "max_beats": 34
+    "max_beats": 28
   },
   "import_report": {
     "catalog_id": "childgrove",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 36,
+    "note_count": 31,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-childgrove.mid",
     "tempo_changes_ignored": 2,
@@ -32,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 28.0,
   "notes": [
     {
       "dur": 1.0,
@@ -188,31 +186,6 @@
       "dur": 2.0,
       "pitch": 69,
       "start": 26.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 64,
-      "start": 28.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 29.0
-    },
-    {
-      "dur": 1.5,
-      "pitch": 69,
-      "start": 30.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 31.5
-    },
-    {
-      "dur": 2.0,
-      "pitch": 72,
-      "start": 32.0
     }
   ],
   "pitches": [

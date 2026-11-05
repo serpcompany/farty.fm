@@ -3,8 +3,7 @@
     0.0,
     6.0,
     12.0,
-    18.0,
-    24.0
+    18.0
   ],
   "beats_per_bar": 6,
   "bpm": 120,
@@ -13,13 +12,13 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "london",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 44,
+    "note_count": 32,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-london.mid",
     "tempo_changes_ignored": 0,
@@ -28,7 +27,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 1.0,
@@ -189,66 +188,6 @@
       "dur": 1.0,
       "pitch": 62,
       "start": 23.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 24.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 24.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 25.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 66,
-      "start": 25.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 26.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 26.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 27.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 64,
-      "start": 27.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 66,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 28.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 66,
-      "start": 29.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 29.5
     }
   ],
   "pitches": [

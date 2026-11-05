@@ -7,9 +7,7 @@
     12.5,
     15.5,
     18.5,
-    21.5,
-    24.0,
-    27.0
+    21.5
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "bacca-pipes-jig",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 40,
+    "note_count": 33,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-bacca-pipes-jig.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.5,
@@ -199,41 +197,6 @@
       "dur": 1.0,
       "pitch": 71,
       "start": 23.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 81,
-      "start": 24.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 80,
-      "start": 25.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 81,
-      "start": 25.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 78,
-      "start": 26.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 76,
-      "start": 27.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 73,
-      "start": 28.0
-    },
-    {
-      "dur": 1.5,
-      "pitch": 69,
-      "start": 28.5
     }
   ],
   "pitches": [
@@ -242,9 +205,7 @@
     73,
     74,
     76,
-    78,
-    80,
-    81
+    78
   ],
   "sha256": "fc402d31c8aa01244671b5ae38294f438ec7e5a124d6d145077daea17f557b85",
   "title": "Bacca Pipes Jig"

@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 104,
-    "max_beats": 29.5
+    "max_beats": 28.5
   },
   "import_report": {
     "catalog_id": "review",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 63,
+    "note_count": 61,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-review.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 29.5,
+  "length_beats": 28.5,
   "notes": [
     {
       "dur": 1.0,
@@ -337,16 +337,6 @@
       "dur": 0.5,
       "pitch": 67,
       "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 28.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 29.0
     }
   ],
   "pitches": [

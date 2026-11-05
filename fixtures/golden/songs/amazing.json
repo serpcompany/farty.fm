@@ -7,7 +7,15 @@
     13.0,
     16.0,
     19.0,
-    22.0
+    22.0,
+    25.0,
+    28.0,
+    31.0,
+    34.0,
+    37.0,
+    40.0,
+    43.0,
+    46.0
   ],
   "beats_per_bar": 3,
   "bpm": 100,
@@ -16,13 +24,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 100,
-    "max_beats": 24
+    "max_beats": 49
   },
   "import_report": {
     "catalog_id": "amazing",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 16,
+    "note_count": 36,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-amazing.mid",
     "tempo_changes_ignored": 0,
@@ -31,7 +39,7 @@
       0
     ]
   },
-  "length_beats": 24.0,
+  "length_beats": 49.0,
   "notes": [
     {
       "dur": 1.0,
@@ -112,6 +120,106 @@
       "dur": 5.0,
       "pitch": 74,
       "start": 19.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 24.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 27.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 30.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 64,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 32.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 33.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 36.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 39.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 39.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 42.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 43.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 46.0
     }
   ],
   "pitches": [

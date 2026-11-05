@@ -10,7 +10,10 @@
     21.0,
     24.0,
     27.0,
-    30.0
+    30.0,
+    33.0,
+    36.0,
+    39.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +21,13 @@
   "id": "shepherd-of-souls",
   "import_args": {
     "bpm": 120,
-    "max_beats": 33
+    "max_beats": 42
   },
   "import_report": {
     "catalog_id": "shepherd-of-souls",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 22,
+    "note_count": 28,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-shepherd-of-souls.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +36,7 @@
       0
     ]
   },
-  "length_beats": 33.0,
+  "length_beats": 42.0,
   "notes": [
     {
       "dur": 1.0,
@@ -144,6 +147,36 @@
       "dur": 3.0,
       "pitch": 62,
       "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 35.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 36.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 38.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 39.0
     }
   ],
   "pitches": [

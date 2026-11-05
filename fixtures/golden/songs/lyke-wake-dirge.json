@@ -15,12 +15,7 @@
     18.5,
     20.0,
     21.5,
-    23.0,
-    24.5,
-    26.0,
-    27.5,
-    29.0,
-    30.5
+    23.0
   ],
   "beats_per_bar": 1,
   "bpm": 120,
@@ -28,13 +23,13 @@
   "id": "lyke-wake-dirge",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "lyke-wake-dirge",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 59,
+    "note_count": 44,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-lyke-wake-dirge.mid",
     "tempo_changes_ignored": 2,
@@ -43,7 +38,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.5,
@@ -264,81 +259,6 @@
       "dur": 2.0,
       "pitch": 69,
       "start": 22.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 24.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 24.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 25.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 73,
-      "start": 26.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 27.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 81,
-      "start": 27.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 28.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 74,
-      "start": 28.5
-    },
-    {
-      "dur": 0.25,
-      "pitch": 73,
-      "start": 28.75
-    },
-    {
-      "dur": 1.0,
-      "pitch": 74,
-      "start": 29.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 73,
-      "start": 30.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 74,
-      "start": 30.25
-    },
-    {
-      "dur": 1.0,
-      "pitch": 76,
-      "start": 30.5
-    },
-    {
-      "dur": 0.25,
-      "pitch": 78,
-      "start": 31.5
-    },
-    {
-      "dur": 0.25,
-      "pitch": 76,
-      "start": 31.75
     }
   ],
   "pitches": [

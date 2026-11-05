@@ -7,10 +7,7 @@
     13.0,
     16.0,
     19.0,
-    22.0,
-    25.0,
-    28.0,
-    31.0
+    22.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -19,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 33
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "castle-of-dromore",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 23,
+    "note_count": 16,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-castle-of-dromore.mid",
     "tempo_changes_ignored": 0,
@@ -34,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 33.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.5,
@@ -115,46 +112,9 @@
       "dur": 5.0,
       "pitch": 69,
       "start": 19.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 24.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 73,
-      "start": 24.5
-    },
-    {
-      "dur": 2.0,
-      "pitch": 74,
-      "start": 25.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
-      "start": 27.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 62,
-      "start": 28.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 66,
-      "start": 30.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 64,
-      "start": 31.0
     }
   ],
   "pitches": [
-    62,
-    64,
     66,
     67,
     69,

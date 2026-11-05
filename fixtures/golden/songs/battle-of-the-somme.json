@@ -6,7 +6,8 @@
     14.0,
     18.5,
     23.0,
-    27.5
+    27.5,
+    32.0
   ],
   "beats_per_bar": 1,
   "bpm": 120,
@@ -14,13 +15,13 @@
   "id": "battle-of-the-somme",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 36
   },
   "import_report": {
     "catalog_id": "battle-of-the-somme",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 40,
+    "note_count": 44,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-battle-of-the-somme.mid",
     "tempo_changes_ignored": 1,
@@ -29,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 36.0,
   "notes": [
     {
       "dur": 0.5,
@@ -230,6 +231,26 @@
       "dur": 1.5,
       "pitch": 78,
       "start": 30.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 32.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 78,
+      "start": 32.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 33.0
+    },
+    {
+      "dur": 2.5,
+      "pitch": 74,
+      "start": 33.5
     }
   ],
   "pitches": [

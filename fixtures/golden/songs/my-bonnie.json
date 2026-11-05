@@ -8,8 +8,7 @@
     15.0,
     18.0,
     21.0,
-    24.0,
-    27.0
+    24.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -17,13 +16,13 @@
   "id": "my-bonnie",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 26
   },
   "import_report": {
     "catalog_id": "my-bonnie",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 21,
+    "note_count": 17,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-my-bonnie.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 26.0,
   "notes": [
     {
       "dur": 1.0,
@@ -118,26 +117,6 @@
       "dur": 5.0,
       "pitch": 74,
       "start": 21.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 67,
-      "start": 26.0
-    },
-    {
-      "dur": 1.5,
-      "pitch": 76,
-      "start": 27.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 28.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 72,
-      "start": 29.0
     }
   ],
   "pitches": [
